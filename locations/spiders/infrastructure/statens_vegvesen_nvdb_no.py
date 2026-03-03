@@ -1,14 +1,13 @@
+import csv
 import re
 from typing import Iterable
 
 import scrapy
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import MonitoringTypes, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.licenses import Licenses
-
-NVDB_PAGE_SIZE = 10000
 
 # NVDB vegobjekttype ID -> OSM category mapping. (https://datakatalogen.atlas.vegvesen.no/)
 # Each entry: {type_id: (label, category_dict, name_attr_key_or_None)}
@@ -50,14 +49,14 @@ OBJECT_TYPE_MAP = {
     996: ("Flaggstang", {"man_made": "flagpole"}, None),
 }
 
-# Regex to parse WKT POINT geometries: "POINT (x y)" or "POINT Z (x y z)"
+# Regex to parse WKT POINT geometries: "POINT (x y)" or "POINT Z(x y z)"
 WKT_POINT_RE = re.compile(r"POINT\s*Z?\s*\(\s*([-\d.]+)\s+([-\d.]+)")
 
 
 def _parse_wkt_point(wkt: str) -> tuple[float, float] | None:
     """Parse NVDB WKT POINT geometry string. Returns (lat, lon) or None.
 
-    NVDB API with srid=4326 returns coordinates in EPSG:4326 standard
+    NVDB export with srid=4326 returns coordinates in EPSG:4326
     axis order: (latitude, longitude).
     """
     if not wkt:
@@ -93,36 +92,43 @@ def _parse_wkt_linestring_midpoint(wkt: str) -> tuple[float, float] | None:
     return None
 
 
-def _get_prop(egenskaper: list[dict], name: str) -> str | None:
-    """Find a property value by its Norwegian name from egenskaper list."""
-    for e in egenskaper:
-        if e.get("navn") == name:
-            v = e.get("verdi")
-            # Skip geometry values embedded as properties
-            if isinstance(v, str) and (v.startswith("POINT") or v.startswith("LINESTRING") or v.startswith("POLYGON")):
-                return None
-            return str(v) if v is not None else None
-    return None
+# Regex to extract property name from CSV column header: "EGS.<NAME>.<ID>"
+_EGS_COL_RE = re.compile(r"^EGS\.(.+)\.(\d+)$")
+# Regex to strip unit annotations like (M), (STK), (KR), (M2)
+_UNIT_SUFFIX_RE = re.compile(r"\s*\([^)]*\)\s*$")
+# Regex to detect numeric values with comma decimal separator
+_COMMA_DECIMAL_RE = re.compile(r"^-?\d+,\d+$")
 
 
-def _get_props_dict(egenskaper: list[dict]) -> dict[str, str]:
-    """Convert egenskaper list to a simple name:value dict, skipping geometry."""
-    result = {}
-    for e in egenskaper:
-        name = e.get("navn", "")
-        v = e.get("verdi")
-        if v is None:
-            continue
-        v_str = str(v)
-        if v_str.startswith("POINT") or v_str.startswith("LINESTRING") or v_str.startswith("POLYGON"):
-            continue
-        result[name] = v_str
-    return result
+def _normalize_egs_column(header: str) -> str | None:
+    """Normalize a CSV EGS column header to a property name matching NVDB conventions.
+
+    Examples:
+        "EGS.LENGDE (M).1317" -> "Lengde"
+        "EGS.NAVN BOMSTASJON.1078" -> "Navn bomstasjon"
+        "EGS.TYPE.1156" -> "Type"
+        "EGS.NSR_STOPPLACE_ID.10727" -> "Nsr_stopplace_id"
+    """
+    m = _EGS_COL_RE.match(header)
+    if not m:
+        return None
+    name = m.group(1)
+    # Strip unit annotations in parentheses at end of name
+    name = _UNIT_SUFFIX_RE.sub("", name)
+    # Capitalize: first character upper, rest lower (matches NVDB JSON property naming)
+    return name.capitalize() if name else None
+
+
+def _normalize_csv_value(val: str) -> str:
+    """Replace Norwegian comma decimal separator with dot in numeric values."""
+    if _COMMA_DECIMAL_RE.match(val):
+        return val.replace(",", ".")
+    return val
 
 
 class StatensVegvesenNvdbNOSpider(scrapy.Spider):
     """
-    Spider for the Norwegian National Road Database (NVDB) API v4,
+    Spider for the Norwegian National Road Database (NVDB) CSV export service,
     operated by Statens vegvesen (Norwegian Public Roads Administration).
 
     Extracts road infrastructure objects from NVDB and maps them to
@@ -130,96 +136,92 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
     tunnels, weather stations, traffic signals, rest areas, pedestrian
     crossings, fire hydrants, trees, and more.
 
-    API documentation: https://nvdb-docs.atlas.vegvesen.no/category/nvdb-api-les-v4/
+    Export API documentation: https://nvdb-docs.atlas.vegvesen.no/eksport/
     """
 
     name = "statens_vegvesen_nvdb_no"
-    allowed_domains = ["nvdbapiles.atlas.vegvesen.no"]
+    allowed_domains = ["nvdb-eksport.atlas.vegvesen.no"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 600}
     dataset_attributes = Licenses.NO_NLODv2.value | {
         "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Statens vegvesen"
     }
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    def start_requests(self) -> Iterable[scrapy.Request]:
         for type_id in OBJECT_TYPE_MAP:
-            yield JsonRequest(
-                url=f"https://nvdbapiles.atlas.vegvesen.no/vegobjekter/api/v4/vegobjekter/{type_id}?inkluder=egenskaper,geometri,lokasjon&srid=4326&antall={NVDB_PAGE_SIZE}",
-                headers={"X-Client": "alltheplaces", "Accept": "application/json"},
+            yield scrapy.Request(
+                url=f"https://nvdb-eksport.atlas.vegvesen.no/vegobjekter/{type_id}.csv?inkluder=alle&srid=4326",
+                headers={"X-Client": "alltheplaces", "Accept": "text/csv"},
                 cb_kwargs={"type_id": type_id},
             )
 
-    def parse(self, response: Response, type_id: int) -> Iterable[Feature | JsonRequest]:
-        data = response.json()
+    def parse(self, response: Response, type_id: int) -> Iterable[Feature]:
         label, category, name_attr = OBJECT_TYPE_MAP[type_id]
 
-        for obj in data.get("objekter", []):
-            item = self._parse_object(obj, type_id, label, category, name_attr)
-            if item is not None:
-                yield item
+        reader = csv.reader(response.text.splitlines(), delimiter=";")
+        headers = next(reader, None)
+        if not headers:
+            return
 
-        # Follow pagination
-        metadata = data.get("metadata", {})
-        neste = metadata.get("neste")
-        if neste and metadata.get("returnert", 0) > 0:
-            next_url = neste.get("href")
-            if next_url:
-                yield JsonRequest(
-                    url=next_url,
-                    headers={"X-Client": "alltheplaces", "Accept": "application/json"},
-                    cb_kwargs={"type_id": type_id},
-                )
+        # Build column index maps
+        col_map: dict[str, int] = {}
+        egs_map: dict[int, str] = {}
+        for i, h in enumerate(headers):
+            col_map[h] = i
+            if h.startswith("EGS."):
+                name = _normalize_egs_column(h)
+                if name:
+                    egs_map[i] = name
 
-    def _parse_object(
-        self, obj: dict, type_id: int, label: str, category: dict, name_attr: str | None
-    ) -> Feature | None:
-        obj_id = obj.get("id")
-        if not obj_id:
-            return None
+        obj_id_idx = col_map.get("OBJ.VEGOBJEKT-ID")
+        geo_idx = col_map.get("GEO.GEOMETRI")
 
-        # Extract coordinates from geometry
-        geom = obj.get("geometri", {})
-        wkt = geom.get("wkt", "")
-        coords = _parse_wkt_point(wkt) or _parse_wkt_linestring_midpoint(wkt)
+        if obj_id_idx is None or geo_idx is None:
+            return
 
-        # Fall back to lokasjon geometry
-        if not coords:
-            lok_geom = obj.get("lokasjon", {}).get("geometri", {})
-            lok_wkt = lok_geom.get("wkt", "")
-            coords = _parse_wkt_point(lok_wkt) or _parse_wkt_linestring_midpoint(lok_wkt)
+        for row in reader:
+            if len(row) <= max(obj_id_idx, geo_idx):
+                continue
 
-        if not coords:
-            return None
+            obj_id = row[obj_id_idx].strip()
+            if not obj_id:
+                continue
 
-        egenskaper = obj.get("egenskaper", [])
-        props = _get_props_dict(egenskaper)
+            # Parse geometry from GEO.GEOMETRI column (EPSG:4326 WKT)
+            wkt = row[geo_idx].strip()
+            coords = _parse_wkt_point(wkt) or _parse_wkt_linestring_midpoint(wkt)
+            if not coords:
+                continue
 
-        item = Feature()
-        item["ref"] = f"NVDB:{type_id}:{obj_id}"
-        item["lat"] = coords[0]
-        item["lon"] = coords[1]
+            # Build property dict from EGS columns
+            props: dict[str, str] = {}
+            for idx, name in egs_map.items():
+                if idx < len(row):
+                    val = row[idx].strip()
+                    if val and not val.startswith(("POINT", "LINESTRING", "POLYGON")):
+                        props[name] = _normalize_csv_value(val)
 
-        # Extract name
-        if name_attr:
-            name = _get_prop(egenskaper, name_attr)
-            if name:
-                item["name"] = name
+            item = Feature()
+            item["ref"] = f"NVDB:{type_id}:{obj_id}"
+            item["lat"] = coords[0]
+            item["lon"] = coords[1]
 
-        # Apply OSM category tags
-        apply_category(category, item)
+            # Extract name
+            if name_attr:
+                name = props.get(name_attr)
+                if name:
+                    item["name"] = name
 
-        # Apply common property mappings
-        self._apply_common_props(item, props)
+            # Apply OSM category tags
+            apply_category(category, item)
 
-        # Apply type-specific extras
-        if not self._apply_type_extras(item, type_id, props, egenskaper):
-            return None
+            # Apply common property mappings
+            self._apply_common_props(item, props)
 
-        # Extract address info from lokasjon
-        lokasjon = obj.get("lokasjon", {})
-        adresser = lokasjon.get("adresser", [])
-        if adresser:
-            item["street"] = adresser[0].get("navn")
+            # Apply type-specific extras
+            if not self._apply_type_extras(item, type_id, props):
+                continue
 
-        return item
+            yield item
 
     def _apply_common_props(self, item: Feature, props: dict) -> None:
         """Apply common NVDB property mappings shared across many object types.
@@ -249,7 +251,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             else:
                 item["extras"]["material"] = material_type.lower()
 
-    def _apply_type_extras(self, item: Feature, type_id: int, props: dict, egenskaper: list[dict]) -> bool:
+    def _apply_type_extras(self, item: Feature, type_id: int, props: dict) -> bool:
         """Apply type-specific OSM tags based on the object type and its properties.
         Returns True if the item should be kept, False to skip it.
         """
@@ -288,9 +290,9 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         }.get(type_id)
         if handler is None:
             return True
-        return handler(item, props, egenskaper)
+        return handler(item, props)
 
-    def _extras_ferist(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_ferist(self, item: Feature, props: dict) -> bool:
         """Type 22: Ferist (Cattle grid)."""
         if cattle_grid_type := props.get("Type"):
             if cattle_grid_type == "Elektrisk":
@@ -329,7 +331,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         "Granitt": "granite",
     }
 
-    def _extras_vegbom(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_vegbom(self, item: Feature, props: dict) -> bool:
         """Type 23: Vegbom (Road barrier)."""
         self._apply_material(item, props)
         bom_type = props.get("Type", "")
@@ -346,7 +348,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             return False
         return True
 
-    def _extras_strosandkasse(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_strosandkasse(self, item: Feature, props: dict) -> bool:
         """Type 29: Strøsandkasse (Grit bin)."""
         if volume := props.get("Volum"):
             item["extras"]["capacity"] = f"{volume} l"
@@ -357,7 +359,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         "Tørrklosett": "dry_toilet",
     }
 
-    def _extras_toalettanlegg(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_toalettanlegg(self, item: Feature, props: dict) -> bool:
         """Type 243: Toalettanlegg (Toilets)."""
         if toilet_type := props.get("Type"):
             if disposal := self._TOILET_DISPOSAL_MAP.get(toilet_type):
@@ -370,7 +372,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["wheelchair"] = "no"
         return True
 
-    def _extras_sykkelparkering(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_sykkelparkering(self, item: Feature, props: dict) -> bool:
         """Type 451: Sykkelparkering (Bicycle parking)."""
         if props.get("Sykkelstativ") == "Ja":
             item["extras"]["bicycle_parking"] = "stands"
@@ -382,7 +384,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["capacity"] = capacity
         return True
 
-    def _extras_leskur(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_leskur(self, item: Feature, props: dict) -> bool:
         """Type 25: Leskur (Public transport shelter)."""
         self._apply_material(item, props)
         if props.get("Innvendig belysning") == "Ja":
@@ -393,7 +395,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["wheelchair"] = "yes"
         return True
 
-    def _extras_motorvegkryss(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_motorvegkryss(self, item: Feature, props: dict) -> bool:
         """Type 37: Vegkryss (Road junction — filtered to motorway junctions only)."""
         if "Planskilt kryss" not in props.get("Type", ""):
             return False
@@ -401,7 +403,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["ref"] = str(ref)
         return True
 
-    def _extras_rasteplass(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_rasteplass(self, item: Feature, props: dict) -> bool:
         """Type 39: Rasteplass (Rest area)."""
         if cap_small := props.get("Antall oppstillingspl. små kjt."):
             item["extras"]["capacity:car"] = cap_small
@@ -411,13 +413,13 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["surface"] = "paved"
         return True
 
-    def _extras_snuplass(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_snuplass(self, item: Feature, props: dict) -> bool:
         """Type 40: Snuplass (Turning point)."""
         if "trafikkøy" in props.get("Utforming", "").lower():
             item["extras"]["highway"] = "turning_loop"
         return True
 
-    def _extras_bomstasjon(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_bomstasjon(self, item: Feature, props: dict) -> bool:
         """Type 45: Bomstasjon (Toll booth)."""
         if operator_name := props.get("Navn bompengeanlegg"):
             item["extras"]["toll:operator"] = operator_name
@@ -432,7 +434,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
                 item["extras"]["toll:automatic"] = "yes"
         return True
 
-    def _extras_moteplass(self, _item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_moteplass(self, _item: Feature, props: dict) -> bool:
         """Type 47: Trafikklomme (Traffic bay — filtered to passing places only)."""
         return props.get("Bruksområde", "") == "Møteplass"
 
@@ -442,7 +444,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         "rullebru": "retractable",
     }
 
-    def _extras_bru(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_bru(self, item: Feature, props: dict) -> bool:
         """Type 60: Bru (Bridge)."""
         if length := props.get("Lengde"):
             item["extras"]["length"] = f"{length} m"
@@ -470,20 +472,20 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         else:
             item["extras"]["bridge:structure"] = bridge_type
 
-    def _extras_ferjekai(self, item: Feature, _props: dict, egenskaper: list[dict]) -> bool:
+    def _extras_ferjekai(self, item: Feature, props: dict) -> bool:
         """Type 64: Ferjekai (Ferry terminal)."""
         if name := item.get("name"):
             item["name"] = name.replace("Fk", "").replace("Kai", "").replace("  ", " ").strip()
-        if nsr_id := _get_prop(egenskaper, "NSR_Stopplace_ID"):
+        if nsr_id := props.get("Nsr_stopplace_id"):
             item["extras"]["ref:nsrq"] = nsr_id
         return True
 
-    def _extras_skredsikring(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_skredsikring(self, item: Feature, _props: dict) -> bool:
         """Type 66: Skredoverbygg (Avalanche protector)."""
         item["extras"]["layer"] = "-1"
         return True
 
-    def _extras_tunnellop(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_tunnellop(self, item: Feature, props: dict) -> bool:
         """Type 67: Tunnelløp (Tunnel)."""
         if length := props.get("Lengde"):
             item["extras"]["tunnel:length"] = f"{length} m"
@@ -495,14 +497,14 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["start_date"] = year
         return True
 
-    def _extras_signalanlegg(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_signalanlegg(self, item: Feature, props: dict) -> bool:
         """Type 89: Signalanlegg (Traffic signals)."""
         if props.get("Bruksområde", "") == "Gangfelt":
             item["extras"]["highway"] = "crossing"
             item["extras"]["crossing"] = "traffic_signals"
         return True
 
-    def _extras_jernbanekryssing(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_jernbanekryssing(self, item: Feature, props: dict) -> bool:
         """Type 100: Jernbanekryssing (Railway crossing)."""
         crossing_type = props.get("Type", "")
         if "I plan" in crossing_type:
@@ -527,7 +529,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         "Rumlefelt": "rumble_strip",
     }
 
-    def _extras_fartsdemper(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_fartsdemper(self, item: Feature, props: dict) -> bool:
         """Type 103: Fartsdemper (Speed bump/hump)."""
         bump_type = props.get("Type", "")
         if osm_type := self._TRAFFIC_CALMING_MAP.get(bump_type):
@@ -541,19 +543,19 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["traffic_calming"] = osm_type
         return True
 
-    def _extras_vaerstasjon(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_vaerstasjon(self, item: Feature, props: dict) -> bool:
         """Type 153: Værstasjon (Weather station)."""
         apply_yes_no(MonitoringTypes.WEATHER, item, True)
         if station_nr := props.get("Målestasjonsnummer"):
             item["extras"]["ref:station"] = station_nr
         return True
 
-    def _extras_kamera(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_kamera(self, item: Feature, _props: dict) -> bool:
         """Type 163: Kamera (Camera)."""
         item["extras"]["surveillance:purpose"] = "traffic"
         return True
 
-    def _extras_gangfelt(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_gangfelt(self, item: Feature, props: dict) -> bool:
         """Type 174: Gangfelt (Pedestrian crossing)."""
         if props.get("Lysregulert") == "Ja":
             item["extras"]["crossing"] = "traffic_signals"
@@ -572,12 +574,12 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["lit"] = "yes"
         return True
 
-    def _extras_nodtelefon(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_nodtelefon(self, item: Feature, _props: dict) -> bool:
         """Type 180: Nødtelefon (Emergency phone)."""
         item["extras"]["amenity"] = "telephone"
         return True
 
-    def _extras_traer(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_traer(self, item: Feature, props: dict) -> bool:
         """Type 199: Trær (Trees)."""
         tree_type = props.get("Type/gruppering", "")
         if "Allé" in tree_type:
@@ -594,7 +596,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
                 item["extras"]["tree_count"] = count
         return True
 
-    def _extras_hydrant(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_hydrant(self, item: Feature, props: dict) -> bool:
         """Type 209: Hydrant."""
         if flow_rate := props.get("Kapasitet"):
             item["extras"]["flow_rate"] = f"{flow_rate} l/s"
@@ -605,7 +607,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         "Mobiltelefon": "mobile_phone",
     }
 
-    def _extras_antenne(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_antenne(self, item: Feature, props: dict) -> bool:
         """Type 470: Antenne (Antenna)."""
         if antenna_type := props.get("Type"):
             if osm_type := self._ANTENNA_TYPE_MAP.get(antenna_type):
@@ -620,7 +622,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
         "CO-apparat": "co2",
     }
 
-    def _extras_brannslokningsapparat(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_brannslokningsapparat(self, item: Feature, props: dict) -> bool:
         """Type 213: Brannslokningsapparat (Fire extinguisher)."""
         if extinguisher_type := props.get("Type"):
             if osm_type := self._FIRE_EXTINGUISHER_TYPE_MAP.get(extinguisher_type):
@@ -633,13 +635,13 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["indoor"] = "yes"
         return True
 
-    def _extras_flaggstang(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_flaggstang(self, item: Feature, props: dict) -> bool:
         """Type 996: Flaggstang (Flagpole)."""
         if height := props.get("Høyde"):
             item["extras"]["height"] = f"{height} m"
         return True
 
-    def _extras_sperring(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_sperring(self, item: Feature, props: dict) -> bool:
         """Type 607: Vegsperring (Road barrier/blocker)."""
         bom_type = props.get("Type", "")
         if bom_type in self._BARRIER_TYPE_MAP:
@@ -649,7 +651,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             return False
         return True
 
-    def _extras_dognhvileplass(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_dognhvileplass(self, item: Feature, props: dict) -> bool:
         """Type 809: Døgnhvileplass (24h truck rest area)."""
         if cap_large := props.get("Antall oppstillingsplasser vogntog"):
             item["extras"]["capacity:hgv"] = cap_large
@@ -657,13 +659,13 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
             item["extras"]["capacity:hgv:charging"] = cap_charge
         return True
 
-    def _extras_kuldeport(self, item: Feature, _props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_kuldeport(self, item: Feature, _props: dict) -> bool:
         """Type 854: Kuldeport (Cold gate)."""
         item["extras"]["access"] = "yes"
         item["extras"]["note"] = "Kuldeport"
         return True
 
-    def _extras_trapp(self, item: Feature, props: dict, _egenskaper: list[dict]) -> bool:
+    def _extras_trapp(self, item: Feature, props: dict) -> bool:
         """Type 875: Trapp (Stairs)."""
         if steps := props.get("Antall trinn"):
             item["extras"]["step_count"] = steps
