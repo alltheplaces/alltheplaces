@@ -13,6 +13,7 @@ class FergusonPlarresBakehouseAUSpider(Spider):
     item_attributes = {"brand": "Ferguson Plarre's Bakehouse", "brand_wikidata": "Q5444249"}
     allowed_domains = ["www.fergusonplarre.com.au"]
     start_urls = ["https://www.fergusonplarre.com.au/rest/e/get/locations"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         query = {"sort": [{"position": {"order": "asc"}}], "size": 100, "query": {"term": {"status": 1}}}
