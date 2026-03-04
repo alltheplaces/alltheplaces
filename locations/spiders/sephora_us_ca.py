@@ -1,6 +1,6 @@
-import chompjs
 from typing import Any
 
+import chompjs
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
