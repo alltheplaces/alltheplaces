@@ -24,13 +24,14 @@ class IpirangaBRSpider(Spider):
                 continue
             item = Feature()
             item["ref"] = station["id"]
-            name = station.get("nome")
-            if name:
-                item["name"] = name.strip()
+            item["name"] = station.get("nome")
             item["street_address"] = station.get("rua")
             item["city"] = station.get("cidade")
             item["state"] = station.get("estado")
             item["postcode"] = station.get("cep")
+            neighborhood = station.get("bairro")
+            if neighborhood:
+                item["extras"]["addr:suburb"] = neighborhood
             item["phone"] = station.get("telefoneFormated")
             item["lat"] = station.get("latitude")
             item["lon"] = station.get("longitude")
