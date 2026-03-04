@@ -21,4 +21,5 @@ class FiveAsecSpider(SitemapSpider):
         item["addr_full"] = response.xpath('string(//a[@class="address"]/span)').get().strip()
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
+        item["phone"] = response.xpath('//a[@class="store-phone"]/@href').get()
         yield item
