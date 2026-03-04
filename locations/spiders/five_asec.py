@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import CLOSED_FR, DAYS_FR, OpeningHours
 from locations.items import Feature
 
 
@@ -22,4 +23,11 @@ class FiveAsecSpider(SitemapSpider):
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
         item["phone"] = response.xpath('//a[@class="store-phone"]/@href').get()
+        item["opening_hours"] = self.parse_opening_hours(response)
         yield item
+
+    def parse_opening_hours(self, response: Response) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for rule in response.xpath('//*[@class="store-opening-hours"]//li/text()').getall():
+            opening_hours.add_ranges_from_string(rule, days=DAYS_FR, closed=CLOSED_FR)
+        return opening_hours
