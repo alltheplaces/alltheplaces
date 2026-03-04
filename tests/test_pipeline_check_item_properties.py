@@ -36,10 +36,18 @@ def test_country_field_check():
     assert spider.crawler.stats.get_value("atp/field/country/invalid")
 
 
-def test_non_point_geometry_preserved():
-    """Non-Point geometry types (LineString, Polygon, etc.) should be
-    preserved by the pipeline without requiring lat/lon."""
+def test_geometry_preservation():
     spider, pipeline = get_objects()
+
+    # Point geometry should survive the pipeline
+    item = Feature()
+    item["geometry"] = {"type": "Point", "coordinates": [6.796508, 61.75317]}
+    pipeline.process_item(item)
+    assert item.get("geometry") is not None
+    assert item["geometry"]["type"] == "Point"
+    assert item["geometry"]["coordinates"] == [6.796508, 61.75317]
+    assert item.get("lat") is None
+    assert item.get("lon") is None
 
     # LineString geometry should survive the pipeline
     item = Feature()
@@ -77,9 +85,20 @@ def test_non_point_geometry_preserved():
     assert item.get("geometry") is not None
     assert item["geometry"]["type"] == "Polygon"
 
+
+def test_invalid_geometry():
+    spider, pipeline = get_objects()
+
     # Invalid geometry type should be rejected
     item = Feature()
     item["geometry"] = {"type": "InvalidType", "coordinates": []}
+    pipeline.process_item(item)
+    assert item.get("geometry") is None
+    assert spider.crawler.stats.get_value("atp/field/geometry/invalid")
+
+    # Missing geometry type should be rejected
+    item = Feature()
+    item["geometry"] = {"coordinates": []}
     pipeline.process_item(item)
     assert item.get("geometry") is None
     assert spider.crawler.stats.get_value("atp/field/geometry/invalid")
