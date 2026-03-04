@@ -53,44 +53,70 @@ OBJECT_TYPE_MAP = {
 
 # Regex to parse WKT POINT geometries: "POINT (x y)" or "POINT Z(x y z)"
 WKT_POINT_RE = re.compile(r"POINT\s*Z?\s*\(\s*([-\d.]+)\s+([-\d.]+)")
+# Regex to extract parenthesised coordinate lists from WKT
+_WKT_COORD_LIST_RE = re.compile(r"\(\s*([^()]+?)\s*\)")
 
 
-def _parse_wkt_point(wkt: str) -> tuple[float, float] | None:
-    """Parse NVDB WKT POINT geometry string. Returns (lat, lon) or None.
+def _parse_wkt_coords(coord_str: str) -> list[list[float]]:
+    """Parse a comma-separated WKT coordinate string to GeoJSON coordinates.
+
+    Swaps EPSG:4326 (lat, lon) axis order to GeoJSON [lon, lat].
+    Drops the Z coordinate if present.
+    """
+    coords: list[list[float]] = []
+    for pair in coord_str.split(","):
+        parts = pair.strip().split()
+        if len(parts) >= 2:
+            try:
+                lat = float(parts[0])
+                lon = float(parts[1])
+                coords.append([lon, lat])
+            except ValueError:
+                continue
+    return coords
+
+
+def _wkt_to_geojson(wkt: str) -> dict | None:
+    """Convert a WKT geometry string to a GeoJSON geometry dict.
 
     NVDB export with srid=4326 returns coordinates in EPSG:4326
-    axis order: (latitude, longitude).
+    axis order (latitude, longitude), which are swapped to GeoJSON
+    [longitude, latitude] order per RFC 7946.
+
+    Supported types: POINT, LINESTRING, MULTILINESTRING (with optional Z).
     """
     if not wkt:
         return None
-    m = WKT_POINT_RE.search(wkt)
-    if m:
-        return float(m.group(1)), float(m.group(2))
-    return None
+    wkt = wkt.strip()
 
-
-# Regex to parse WKT LINESTRING geometries for midpoint extraction
-WKT_LINESTRING_RE = re.compile(r"(?:LINESTRING|MULTILINESTRING)\s*Z?\s*\(?\(\s*(.*?)\)", re.DOTALL)
-
-
-def _parse_wkt_linestring_midpoint(wkt: str) -> tuple[float, float] | None:
-    """Extract the midpoint of a WKT LINESTRING for point representation."""
-    if not wkt:
+    if wkt.startswith("POINT"):
+        m = WKT_POINT_RE.search(wkt)
+        if m:
+            lat, lon = float(m.group(1)), float(m.group(2))
+            return {"type": "Point", "coordinates": [lon, lat]}
         return None
-    m = WKT_LINESTRING_RE.search(wkt)
-    if not m:
-        return None
-    coords_str = m.group(1)
-    pairs = coords_str.split(",")
-    if not pairs:
-        return None
-    mid = pairs[len(pairs) // 2].strip()
-    parts = mid.split()
-    if len(parts) >= 2:
-        try:
-            return float(parts[0]), float(parts[1])
-        except ValueError:
+
+    if wkt.startswith("LINESTRING"):
+        ring_match = _WKT_COORD_LIST_RE.search(wkt)
+        if not ring_match:
             return None
+        coords = _parse_wkt_coords(ring_match.group(1))
+        if len(coords) >= 2:
+            return {"type": "LineString", "coordinates": coords}
+        return None
+
+    if wkt.startswith("MULTILINESTRING"):
+        lines: list[list[list[float]]] = []
+        for ring_match in _WKT_COORD_LIST_RE.finditer(wkt):
+            coords = _parse_wkt_coords(ring_match.group(1))
+            if len(coords) >= 2:
+                lines.append(coords)
+        if len(lines) == 1:
+            return {"type": "LineString", "coordinates": lines[0]}
+        if lines:
+            return {"type": "MultiLineString", "coordinates": lines}
+        return None
+
     return None
 
 
@@ -190,8 +216,8 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
 
             # Parse geometry from GEO.GEOMETRI column (EPSG:4326 WKT)
             wkt = row[geo_idx].strip()
-            coords = _parse_wkt_point(wkt) or _parse_wkt_linestring_midpoint(wkt)
-            if not coords:
+            geojson = _wkt_to_geojson(wkt)
+            if not geojson:
                 continue
 
             # Build property dict from EGS columns
@@ -204,8 +230,11 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
 
             item = Feature()
             item["ref"] = f"NVDB:{type_id}:{obj_id}"
-            item["lat"] = coords[0]
-            item["lon"] = coords[1]
+            if geojson["type"] == "Point":
+                item["lat"] = geojson["coordinates"][1]
+                item["lon"] = geojson["coordinates"][0]
+            else:
+                item["geometry"] = geojson
 
             # Extract name
             if name_attr:
