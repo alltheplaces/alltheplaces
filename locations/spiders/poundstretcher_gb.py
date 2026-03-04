@@ -19,7 +19,7 @@ class PoundstretcherGBSpider(ShopAppsSpider):
         item["branch"] = item.pop("name").removeprefix("Poundstretcher ")
         item["website"] = location["website"].replace("pound-stretcher-store.myshopify.com", "poundstretcher.co.uk")
 
-        if item["branch"].endswith(" Bargain Buys"):
+        if "Bargain Buys" in item["branch"]:
             item["branch"] = item["branch"].removesuffix(" Bargain Buys")
             item.update(BARGAIN_BUYS)
 
