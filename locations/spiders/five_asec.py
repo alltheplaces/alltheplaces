@@ -16,7 +16,8 @@ class FiveAsecSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["ref"] = item["website"] = response.url
+        item["ref"] = response.xpath("//@data-store-id").get()
+        item["website"] = response.url
         item["addr_full"] = response.xpath('string(//a[@class="address"]/span)').get().strip()
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
