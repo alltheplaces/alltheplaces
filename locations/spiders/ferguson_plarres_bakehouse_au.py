@@ -23,6 +23,7 @@ class FergusonPlarresBakehouseAUSpider(Spider):
     def parse(self, response):
         for location in response.json()["hits"]:
             item = DictParser.parse(location["_source"])
+            item["branch"] = item.pop("name").removesuffix(" Bakery")
             item["addr_full"] = re.sub(r"\s*-\s*This store is located on.*", "", item["addr_full"])
             item["website"] = "https://www.fergusonplarre.com.au/" + location["_source"]["url_key"]
             item["opening_hours"] = OpeningHours()
