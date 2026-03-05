@@ -1,12 +1,17 @@
-import scrapy
+from typing import Iterable
+from urllib.parse import urljoin
+
+from scrapy.http import TextResponse
 
 from locations.categories import Extras, apply_yes_no
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 
 
-class NandosZASpider(scrapy.Spider):
+class NandosZASpider(JSONBlobSpider):
     name = "nandos_za"
     item_attributes = NANDOS_SHARED_ATTRIBUTES
     allowed_domains = ["api.locationbank.net"]
@@ -14,34 +19,32 @@ class NandosZASpider(scrapy.Spider):
         "https://api.locationbank.net/storelocator/StoreLocatorAPI?clientId=67b9c5e4-6ddf-4856-b3c0-cf27cfe53255"
     ]
     web_root = "https://store.nandos.co.za/details/"
+    locations_key = "locations"
 
-    def parse(self, response):
-        data = response.json()
-        for i in data["locations"]:
-            i["phone"] = i.pop("primaryPhone")
-            if i["additionalPhone1"]:
-                i["phone"] += "; " + i.pop("additionalPhone1")
-            i["province"] = i.pop("administrativeArea")
-            i["website"] = self.web_root + i.pop("storeLocatorDetailsShortURL")
-            if i["addressLine2"]:
-                i["addressLine1"] += ", " + i.pop("addressLine2")
-            item = DictParser.parse(i)
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["phone"] = item["phone"] = "; ".join(
+            filter(None, [feature.get("primaryPhone"), feature.get("additionalPhone1")])
+        )
+        item["state"] = feature.get("administrativeArea")
+        item["website"] = urljoin(self.web_root, feature.get("storeLocatorDetailsShortURL"))
+        item["street_address"] = merge_address_lines([feature.get("addressLine1"), feature.get("addressLine2")])
+        item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+        item["opening_hours"] = self.parse_opening_hours(feature.get("regularHours", []))
 
-            item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+        apply_yes_no(Extras.BACKUP_GENERATOR, item, "Generator" in feature["slAttributes"])
+        apply_yes_no(Extras.DELIVERY, item, "Delivery" in feature["slAttributes"])
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in feature["slAttributes"])
+        apply_yes_no(Extras.HALAL, item, "Halaal" in feature["slAttributes"])
+        apply_yes_no(Extras.KOSHER, item, "Kosher" in feature["slAttributes"])
+        apply_yes_no(Extras.TAKEAWAY, item, "Collect" in feature["slAttributes"])
+        apply_yes_no(Extras.WIFI, item, "WiFi" in feature["slAttributes"])
+        # Unhandled: "Alcohol License", "Dine In"
 
-            oh = OpeningHours()
-            for x in i["regularHours"]:
-                if day := sanitise_day(x["openDay"]):
-                    oh.add_range(day, x["openTime"], x["closeTime"])
-            item["opening_hours"] = oh
+        yield item
 
-            apply_yes_no(Extras.BACKUP_GENERATOR, item, "Generator" in i["slAttributes"])
-            apply_yes_no(Extras.DELIVERY, item, "Delivery" in i["slAttributes"])
-            apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in i["slAttributes"])
-            apply_yes_no(Extras.HALAL, item, "Halaal" in i["slAttributes"])
-            apply_yes_no(Extras.KOSHER, item, "Kosher" in i["slAttributes"])
-            apply_yes_no(Extras.TAKEAWAY, item, "Collect" in i["slAttributes"])
-            apply_yes_no(Extras.WIFI, item, "WiFi" in i["slAttributes"])
-            # Unhandled: "Alcohol License", "Dine In"
-
-            yield item
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for rule in rules:
+            if day := sanitise_day(rule["openDay"]):
+                opening_hours.add_range(day, rule["openTime"], rule["closeTime"])
+        return opening_hours
