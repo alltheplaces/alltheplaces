@@ -3,6 +3,7 @@ from typing import Any
 import scrapy
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -25,4 +26,7 @@ class EnergieFitnessGBIESpider(scrapy.Spider):
                 ]
             )
             item["website"] = response.urljoin(location["urlPath"])
+
+            apply_category(Categories.GYM, item)
+
             yield item
