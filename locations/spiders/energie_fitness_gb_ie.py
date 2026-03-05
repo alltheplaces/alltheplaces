@@ -14,8 +14,7 @@ class EnergieFitnessGBIESpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["items"]:
-            location.update(location["customProperties"]["locationDetails"].pop("contactDetails"))
-            item = DictParser.parse(location)
+            item = DictParser.parse(location["customProperties"]["locationDetails"]["contactDetails"])
             item["branch"] = item.pop("name").replace("Energie Fitness ", "")
             item["website"] = "https://www.energiefitness.com" + location["urlPath"]
             yield item
