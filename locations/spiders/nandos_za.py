@@ -2,7 +2,7 @@ import scrapy
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 
 
@@ -31,7 +31,8 @@ class NandosZASpider(scrapy.Spider):
 
             oh = OpeningHours()
             for x in i["regularHours"]:
-                oh.add_range(x["openDay"], x["openTime"], x["closeTime"])
+                if day := sanitise_day(x["openDay"]):
+                    oh.add_range(day, x["openTime"], x["closeTime"])
             item["opening_hours"] = oh
 
             apply_yes_no(Extras.BACKUP_GENERATOR, item, "Generator" in i["slAttributes"])
