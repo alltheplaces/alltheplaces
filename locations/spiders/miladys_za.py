@@ -1,7 +1,7 @@
 from typing import Any
 
-from scrapy.http import Request, Response
-from scrapy.spiders import Spider, SitemapSpider
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.hours import DAYS, OpeningHours
@@ -34,16 +34,18 @@ class MiladysZASpider(SitemapSpider):
         item["phone"] = response.xpath('.//div[contains(@class,"phone-number")]/div/text()').get()
         extract_google_position(item, response)
 
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(
-            response.xpath('string(.//div[@class="shop-opening-times"])').get()
-        )
-        # Some places have no opening hours (for some days) so mysteriously return the current time for open and close
-        for day in DAYS:
-            if day in item["opening_hours"].days_closed:
-                continue
-            for h in sorted(item["opening_hours"].day_hours[day]):
-                if h[0] == h[1]:
-                    item["opening_hours"].day_hours[day].remove(h)
+        item["opening_hours"] = self.parse_opening_hours(response)
 
         yield item
+
+    def parse_opening_hours(self, response: Response) -> OpeningHours:
+        opening_hours = OpeningHours()
+        opening_hours.add_ranges_from_string(response.xpath('string(.//div[@class="shop-opening-times"])').get())
+        # Some places have no opening hours (for some days) so mysteriously return the current time for open and close
+        for day in DAYS:
+            if day in opening_hours.days_closed:
+                continue
+            for h in sorted(opening_hours.day_hours[day]):
+                if h[0] == h[1]:
+                    opening_hours.day_hours[day].remove(h)
+        return opening_hours
