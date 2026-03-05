@@ -1,6 +1,7 @@
+import json
 from typing import Iterable
 
-from scrapy.http import Response
+from scrapy.http import Response, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -27,7 +28,9 @@ class ToyotaAUSpider(JSONBlobSpider, PlaywrightSpider):
         "https://www.toyota.com.au/main/api/v1/toyotaforms/info/dealersbystate/WA?dealerOptIn=false",
     ]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS | {"USER_AGENT": BROWSER_DEFAULT}
-    locations_key = "results"
+
+    def extract_json(self, response: TextResponse) -> list[dict]:
+        return json.loads(response.xpath("//pre/text()").get())["results"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["lat"] = feature["refY"]
