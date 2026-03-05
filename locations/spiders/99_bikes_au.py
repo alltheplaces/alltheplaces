@@ -10,5 +10,6 @@ class NinetynineBikesAUSpider(StockistSpider):
     key = "map_r3mjnyvq"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("99 Bikes ").removesuffix(" ⚡")
         item["website"] = location["custom_fields"][0]["value"]
         yield item
