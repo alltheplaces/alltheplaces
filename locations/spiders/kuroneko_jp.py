@@ -37,9 +37,9 @@ class KuronekoJPSpider(Spider):
         for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
             yield self.make_request(lat, lon, radius_m)
         for city in city_locations("JP", 50000):
-            yield self.make_request(city['latitude'], city['longitude'], 5500)
+            yield self.make_request(city["latitude"], city["longitude"], 5500)
         for city in city_locations("JP"):
-            yield self.make_request(city['latitude'], city['longitude'], 10000)
+            yield self.make_request(city["latitude"], city["longitude"], 10000)
 
     def parse(self, response, lat, lon, offset):
         # response is an EUC-encoded JS file that looks like
@@ -59,13 +59,13 @@ class KuronekoJPSpider(Spider):
         if rec_count >= hit_count:
             yield self.make_request(lat, lon, offset + rec_count)
         for row in reader:
-            if row[3] == "001": #skip FamilyMart
+            if row[3] == "001":  # skip FamilyMart
                 continue
             item = Feature()
             item["ref"] = row[0]
             item["website"] = f"https://www.e-map.ne.jp/p/{MAP_ID}/dtl/{row[0]}/"
             item["lat"] = row[1]
-            item["lon"] = row[2]            
+            item["lon"] = row[2]
             if row[3] == "YTC":
                 apply_category(Categories.POST_OFFICE, item)
                 item["branch"] = row[6]
@@ -80,14 +80,13 @@ class KuronekoJPSpider(Spider):
                         item["name"] = None
                     except:
                         item["branch"] = row[6]
-                        pass
                 else:
                     item["name"] = row[6]
                 apply_category(Categories.POST_PARTNER, item)
                 item["extras"]["post_office:service_provider"] = "ヤマト運輸"
 
             item["brand"], item["brand_wikidata"] = BRANDS.get(row[3], (None, None))
-                        
+
             item["addr_full"] = row[7]
             item["phone"] = row[16]
 
