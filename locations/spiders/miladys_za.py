@@ -1,5 +1,7 @@
-from scrapy.http import Request
-from scrapy.spiders import Spider
+from typing import Any
+
+from scrapy.http import Request, Response
+from scrapy.spiders import Spider, SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.hours import DAYS, OpeningHours
@@ -7,24 +9,20 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class MiladysZASpider(Spider):
+class MiladysZASpider(SitemapSpider):
     name = "miladys_za"
     allowed_domains = ["www.miladys.com"]
-    start_urls = ["https://www.miladys.com/storelocator"]
+    sitemap_urls = ["https://www.miladys.com/media/sitemap.xml"]
+    sitemap_rules = [(r"/miladys-[-\w]+-\d+$", "parse")]
     item_attributes = {
         "brand": "Miladys",
         "brand_wikidata": "Q116619751",
     }
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
-    def parse(self, response):
-        for url in response.xpath('.//a[@class="store-info hidden-xs"]/@href').getall():
-            yield Request(url=url, callback=self.parse_store)
-        for url in response.xpath('.//a[@class="action  next"]/@href').getall():
-            yield Request(url=url, callback=self.parse)
-
-    def parse_store(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["ref"] = response.url
+        item["ref"] = response.url.rsplit("-", 1)[-1]
         item["website"] = response.url
         item["branch"] = (
             response.xpath('.//h1[@class="page-title"]/span/text()')
