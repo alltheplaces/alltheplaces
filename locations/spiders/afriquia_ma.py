@@ -8,7 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class AfriquiaMaSpider(Spider):
+class AfriquiaMASpider(Spider):
     name = "afriquia_ma"
     item_attributes = {"brand": "Afriquia افريقيا", "brand_wikidata": "Q56300032"}
     start_urls = ["https://www.afriquia.ma/reseau/stations-services"]
