@@ -11,7 +11,6 @@ from locations.pipelines.address_clean_up import clean_address
 
 class MiladysZASpider(SitemapSpider):
     name = "miladys_za"
-    allowed_domains = ["www.miladys.com"]
     sitemap_urls = ["https://www.miladys.com/media/sitemap.xml"]
     sitemap_rules = [(r"/miladys-[-\w]+-\d+$", "parse")]
     item_attributes = {
@@ -26,11 +25,14 @@ class MiladysZASpider(SitemapSpider):
         item["website"] = response.url
         item["branch"] = (
             response.xpath('.//h1[@class="page-title"]/span/text()')
-            .get()
+            .get("")
             .replace(self.item_attributes["brand"], "")
             .strip()
         )
-        item["addr_full"] = clean_address(response.xpath('.//div[@class="address-line"]/text()').get())
+        address = response.xpath('.//div[@class="address-line"]')
+        if not address:  # Not a valid location page
+            return
+        item["addr_full"] = clean_address(address.xpath("./text()").get())
         item["phone"] = response.xpath('.//div[contains(@class,"phone-number")]/div/text()').get()
         extract_google_position(item, response)
 
