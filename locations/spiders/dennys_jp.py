@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_yes_no
 from locations.dict_parser import DictParser
@@ -11,8 +11,13 @@ class DennysJPSpider(Spider):
     name = "dennys_jp"
     item_attributes = {"brand": "デニーズ", "brand_wikidata": "Q11320661", "extras": Categories.RESTAURANT.value}
 
-    start_urls = ["https://shop.dennys.co.jp/api/point/xn/"]
-    allowed_domains = ["shop.dennys.co.jp"]
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for points in [
+            "w",
+            "x",
+            "z",
+        ]:
+            yield JsonRequest(url=f"https://shop.dennys.co.jp/api/point/{points}/")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["items"]:

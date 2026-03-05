@@ -4,17 +4,19 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
+
+# https://sheffield-city-council-open-data-sheffieldcc.hub.arcgis.com/datasets/7b2df397e9994ca5984bad0b679ce6d9_14/explore
 
 
 class SheffieldCityCouncilStreetTreesGBSpider(ArcGISFeatureServerSpider):
     name = "sheffield_city_council_street_trees_gb"
-    dataset_attributes = {
-        "source": "api",
-        "api": "arcgis",
-        "license": "INSPIRE End User Licence",
-        "license:website": "https://www.ordnancesurvey.co.uk/documents/licensing/inspire-end-user-licence.pdf",
-    }
+    dataset_attributes = (
+        ArcGISFeatureServerSpider.dataset_attributes
+        | Licenses.GB_INSPIRE.value
+        | {"attribution:name": "SCC Environmental data released under the European Directive INSPIRE."}
+    )
     item_attributes = {
         "operator": "Sheffield City Council",
         "operator_wikidata": "Q7492609",
