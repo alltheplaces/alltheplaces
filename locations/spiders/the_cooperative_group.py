@@ -20,6 +20,7 @@ class TheCooperativeGroupSpider(SitemapSpider, StructuredDataSpider):
     ]
     wanted_types = ["ConvenienceStore", "LocalBusiness"]
     drop_attributes = {"image"}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 500}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if ld_data["@type"] == "ConvenienceStore":
