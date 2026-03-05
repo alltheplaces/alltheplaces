@@ -24,6 +24,7 @@ class TacoBuenoSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["storeCode"]
             item["street_address"] = ", ".join(location["addressLines"])
+            item["website"] = item["website"].replace("\t", "")
             oh = OpeningHours()
             oh.add_ranges_from_string(",".join(location["formattedBusinessHours"]))
             item["opening_hours"] = oh
