@@ -83,8 +83,8 @@ COUNTRIES = {
 }
 
 
-class SephoraEUSpider(StructuredDataSpider):
-    name = "sephora_eu"
+class SephoraEuropeSpider(StructuredDataSpider):
+    name = "sephora_europe"
     item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
