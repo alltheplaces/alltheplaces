@@ -13,9 +13,9 @@ class AllbirdsSpider(Spider):
     start_urls = ["https://www.allbirds.com/pages/stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(
-            response.xpath("//*[@id='store-locator-data-template--16112999661648__store_locator_pdFFMK']/text()").get()
-        )["stores"]:
+        for location in json.loads(response.xpath('//script[contains(@id, "store-locator-data")]/text()').get())[
+            "stores"
+        ]:
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["ref"] = location["handle"]
