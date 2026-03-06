@@ -5,6 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -50,4 +51,23 @@ class SonicDriveinUSSpider(Spider):
                     )
                     if "CLOSED" in location.get("status", "").upper():
                         set_closed(item)
+
+                    service_types = ["DELIVERY", "DRIVE_THROUGH", "PICKUP"]
+                    for service in location.get("services", []):
+                        if service["type"].upper() == "STORE":
+                            item["opening_hours"] = self.parse_opening_hours(service.get("hours", []))
+                        elif service["type"].upper() in service_types and service.get("hours"):
+                            item["extras"][f"opening_hours:{service['type'].lower()}"] = self.parse_opening_hours(
+                                service["hours"]
+                            ).as_opening_hours()
                     yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            if rule.get("isTwentyFourHourService"):
+                open_time, close_time = ("00:00", "23:59")
+            else:
+                open_time, close_time = rule.get("startTime"), rule.get("endTime")
+            oh.add_range(rule["dayOfWeek"], open_time, close_time)
+        return oh
