@@ -4,6 +4,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import set_closed
@@ -60,6 +61,10 @@ class SonicDriveinUSSpider(Spider):
                             item["extras"][f"opening_hours:{service['type'].lower()}"] = self.parse_opening_hours(
                                 service["hours"]
                             ).as_opening_hours()
+
+                    apply_yes_no(Extras.OUTDOOR_SEATING, item, "Patio" in location["amenities"])
+                    apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-Thru" in location["amenities"])
+                    apply_yes_no(Extras.DELIVERY, item, "Delivery" in location["amenities"])
                     yield item
 
     def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
