@@ -16,7 +16,6 @@ class YvesRocherSpider(CrawlSpider):
     item_attributes = {"brand": "Yves Rocher", "brand_wikidata": "Q28496595"}
     start_urls = ["https://www.yves-rocher.es/encuentra-tu-tienda/SL"]
     rules = [Rule(LinkExtractor(allow=r"https://www.yves.+?/.+?/SL", tags="link"), callback="parse")]
-    requires_proxy = True
 
     def parse(self, response, **kwargs):
         data = json.loads(
