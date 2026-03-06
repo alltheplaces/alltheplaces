@@ -17,6 +17,7 @@ class AllbirdsSpider(Spider):
             response.xpath("//*[@id='store-locator-data-template--16112999661648__store_locator_pdFFMK']/text()").get()
         )["stores"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["ref"] = location["handle"]
             item["postcode"] = location["zipPostalCode"]
             item["state"] = location["stateProvince"]
