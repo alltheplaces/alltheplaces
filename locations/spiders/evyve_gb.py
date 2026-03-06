@@ -19,12 +19,11 @@ class EvyveGBSpider(Spider):
         for location in json.loads(
             re.search(
                 r"propertyLocations = JSON\.parse\('(\[.+])'",
-                response.xpath('//script[contains(text(), propertyLocations")]/text()').get(),
+                response.xpath('//script[contains(text(), "propertyLocations")]/text()').get(),
             ).group(1)
         ):
             if location["visibility"] != "public":
                 continue
-                # availableChargePointCount
             item = DictParser.parse(location)
             item["street_address"] = merge_address_lines(
                 [
