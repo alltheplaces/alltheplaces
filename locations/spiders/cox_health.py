@@ -27,6 +27,8 @@ class CoxHealthSpider(scrapy.Spider):
             item["street"] = None
             address = location.get("address") or {}
             item["street_address"] = ", ".join(filter(None, [address.get("street"), address.get("street2")]))
+            item["lat"] = address.get("latitude")
+            item["lon"] = address.get("longitude")
             item["phone"] = location.get("kyruus_phone")
             item["website"] = response.urljoin(location["uri"]) if location.get("uri") else None
 
