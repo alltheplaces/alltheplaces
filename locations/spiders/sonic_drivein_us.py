@@ -36,6 +36,7 @@ class SonicDriveinUSSpider(Spider):
             for city in region["cities"]:
                 for location in city.get("locations", []):
                     location.update(location.pop("contactDetails", {}))
+                    location.update(location.pop("geoDetails", {}))
                     item = DictParser.parse(location)
                     item["state"] = location["address"]["stateProvinceCode"]
                     item["street_address"] = merge_address_lines(
