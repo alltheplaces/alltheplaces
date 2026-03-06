@@ -15,8 +15,7 @@ class SonicDriveinUSSpider(Spider):
     name = "sonic_drivein_us"
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     item_attributes = {"brand": "Sonic", "brand_wikidata": "Q7561808"}
-    session_id = uuid.uuid4().hex
-    headers = {"x-channel": "WEBOA", "x-session-id": session_id}
+    headers = {"x-channel": "WEBOA", "x-session-id": uuid.uuid4().hex}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
