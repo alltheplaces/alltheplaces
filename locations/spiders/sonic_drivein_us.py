@@ -5,6 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.items import set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -47,4 +48,6 @@ class SonicDriveinUSSpider(Spider):
                             " ", "-"
                         ).lower()
                     )
+                    if "CLOSED" in location.get("status", "").upper():
+                        set_closed(item)
                     yield item
