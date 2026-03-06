@@ -4,6 +4,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -19,7 +20,11 @@ class AllbirdsSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["ref"] = location["handle"]
+            item["state"] = location.get("stateProvince")
             item["postcode"] = location["zipPostalCode"]
-            item["state"] = location["stateProvince"]
+            item["country"] = location["countryRegion"]
             item["website"] = "https://www.allbirds.com/pages/stores/" + item["ref"]
+
+            apply_category(Categories.SHOP_SHOES, item)
+
             yield item
