@@ -28,6 +28,7 @@ class UnderArmourSpider(scrapy.Spider):
 
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
+            item["street"] = None
             item["street_address"] = merge_address_lines(
                 [store["address"].get("street"), store["address"].get("street2")]
             )
