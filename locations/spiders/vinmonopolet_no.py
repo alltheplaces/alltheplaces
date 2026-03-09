@@ -25,7 +25,6 @@ class VinmonopoletNOSpider(Spider):
             item["branch"] = location.get("displayName")
             item["addr_full"] = location["address"].get("formattedAddress")
             item["website"] = "https://www.vinmonopolet.no/butikk/" + item["ref"]
-            item["phone"] = location["address"].get("phone")
 
             item["opening_hours"] = OpeningHours()
             for day_hours in location.get("openingTimes"):
