@@ -14,19 +14,18 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class ArbysUSSpider(Spider):
     name = "arbys_us"
     item_attributes = {"brand": "Arby's", "brand_wikidata": "Q630866"}
-    headers = {"x-channel": "WEBOA", "x-session-id": uuid.uuid4().hex}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.arbys.com/arb/digital-exp-api/v1/locations/regions?countryCode=US",
-            headers=self.headers,
+            headers={"x-channel": "WEBOA", "x-session-id": uuid.uuid4().hex},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for region in response.json()["locations"][0]["regions"]:
             yield JsonRequest(
                 url=f'https://api.arbys.com/arb/digital-exp-api/v1/locations/regions?countryCode=US&regionCode={region["code"]}',
-                headers=self.headers,
+                headers={"x-channel": "WEBOA", "x-session-id": uuid.uuid4().hex},
                 callback=self.parse_locations,
             )
 
@@ -70,8 +69,7 @@ class ArbysUSSpider(Spider):
         oh = OpeningHours()
         for rule in rules:
             if rule.get("isTwentyFourHourService"):
-                open_time, close_time = ("00:00", "23:59")
+                oh.add_range(rule["dayOfWeek"], "00:00", "23:59")
             else:
-                open_time, close_time = rule.get("startTime"), rule.get("endTime")
-            oh.add_range(rule["dayOfWeek"], open_time, close_time)
+                oh.add_range(rule["dayOfWeek"], rule.get("startTime"), rule.get("endTime"))
         return oh
