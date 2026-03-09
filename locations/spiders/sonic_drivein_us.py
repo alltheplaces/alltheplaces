@@ -19,7 +19,7 @@ class SonicDriveinUSSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
-            url=f"https://api-idp.sonicdrivein.com/snc/digital-exp-api/v1/locations/regions?countryCode=US",
+            url="https://api-idp.sonicdrivein.com/snc/digital-exp-api/v1/locations/regions?countryCode=US",
             headers=self.headers,
         )
 
