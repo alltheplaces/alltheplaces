@@ -1,8 +1,10 @@
 import json
 import re
 from datetime import datetime
+from typing import Any
 
-import scrapy
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -12,16 +14,14 @@ from locations.pipelines.address_clean_up import clean_address
 DAY_MAPPING = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
-class BjsWholesaleSpider(scrapy.Spider):
+class BjsWholesaleSpider(SitemapSpider):
     name = "bjs_wholesale"
     item_attributes = {"brand": "BJ's Wholesale Club", "brand_wikidata": "Q4835754"}
     allowed_domains = ["bjs.com"]
-    start_urls = [
-        "https://api.bjs.com/digital/live/apis/v1.0/clublocatorpage/statetowns/10201",
-    ]
-    headers = {"Content-Type": "application/json"}
+    sitemap_urls = ["https://www.bjs.com/bjs_ancillary_sitemap.xml"]
+    sitemap_rules = [(r"/cl/[-\w]+/\d+", "parse_store")]
 
-    def parse_hours(self, hours):
+    def parse_hours(self, hours: list):
         opening_hours = OpeningHours()
 
         if hours:
@@ -55,9 +55,21 @@ class BjsWholesaleSpider(scrapy.Spider):
                         )
         return opening_hours.as_opening_hours()
 
-    def parse_store(self, response):
-        data = response.json()["Stores"]["PhysicalStore"][0]
-
+    def parse_store(self, response: Response) -> Any:
+        data = {}
+        json_blob = json.loads(
+            response.xpath('//script[@id="bjs-universal-app-state"]/text()')
+            .get("")
+            .replace("&q;", '"')
+            .replace("&s;", "'")
+            .replace("&a;", "&")
+            .replace("&l;", "<")
+            .replace("&g;", ">")
+        )
+        for key in json_blob:
+            if "club/search" in key:
+                data = json_blob[key]["Stores"]["PhysicalStore"][0]
+                break
         properties = {
             "branch": data["Description"][0]["displayStoreName"],
             "ref": data["storeName"],
@@ -79,24 +91,3 @@ class BjsWholesaleSpider(scrapy.Spider):
         apply_category(Categories.SHOP_WHOLESALE, properties)
 
         yield Feature(**properties)
-
-    def parse(self, response):
-        data = response.json()
-
-        for state in data["clubLocatorStateTownList"]:
-            for town in state["Towns"]:
-                code, _ = town.split("|")
-                payload = {
-                    "Town": code,
-                    "latitude": "",
-                    "longitude": "",
-                    "radius": "",
-                    "zipCode": "",
-                }
-                yield scrapy.FormRequest(
-                    "https://api.bjs.com/digital/live/api/v1.0/club/search/10201",
-                    method="POST",
-                    body=json.dumps(payload),
-                    headers=self.headers,
-                    callback=self.parse_store,
-                )
