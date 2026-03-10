@@ -125,7 +125,7 @@ class CostaCoffeeGGGBIMJESpider(Spider):
 
             if item["name"]:
                 item["branch"] = item.pop("name")
-                            
+
             if location["siteType"] == "Global Express":
                 item["brand"] = "Costa Express"
                 item["brand_wikidata"] = "Q113556385"
