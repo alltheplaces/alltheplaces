@@ -57,7 +57,7 @@ class Coffee1GBSpider(scrapy.Spider):
 
         for row in response.css(".timetable-row"):
             day = row.css(".timetable-day::text").get().replace(" ", "")
-            time = row.css(".timetable-time::text").get().replace(" ", "").replace("::", ":").upper().replace("PM", "")
+            time = row.css(".timetable-time::text").get().replace(" ", "").replace("::", ":").upper()
             open_time, _, close_time = time.partition("-")
             time_format = "%I:%M%p" if "AM" in open_time else "%H:%M"
             if "-" not in day:
