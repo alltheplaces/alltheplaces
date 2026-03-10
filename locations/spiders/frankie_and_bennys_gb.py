@@ -15,7 +15,7 @@ class FrankieAndBennysGBSpider(CrawlSpider):
     name = "frankie_and_bennys_gb"
     item_attributes = {"brand": "Frankie & Benny's", "brand_wikidata": "Q5490892"}
     start_urls = ["https://www.frankieandbennys.com/restaurants"]
-    rules = [Rule(LinkExtractor(allow=r"/restaurants/[-\w]+"), callback="parse_sd")]
+    rules = [Rule(LinkExtractor(allow=r"/restaurants/[-\w]+"), callback="parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
