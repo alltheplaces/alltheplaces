@@ -7,9 +7,8 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 
 DAY_MAPPING = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
@@ -56,7 +55,7 @@ class BjsWholesaleSpider(SitemapSpider):
         return opening_hours.as_opening_hours()
 
     def parse_store(self, response: Response) -> Any:
-        data = {}
+        store = {}
         json_blob = json.loads(
             response.xpath('//script[@id="bjs-universal-app-state"]/text()')
             .get("")
@@ -68,26 +67,16 @@ class BjsWholesaleSpider(SitemapSpider):
         )
         for key in json_blob:
             if "club/search" in key:
-                data = json_blob[key]["Stores"]["PhysicalStore"][0]
+                store = json_blob[key]["Stores"]["PhysicalStore"][0]
                 break
-        properties = {
-            "branch": data["Description"][0]["displayStoreName"],
-            "ref": data["storeName"],
-            "street_address": clean_address(data["addressLine"]),
-            "city": data["city"].strip(),
-            "state": data["stateOrProvinceName"].strip(),
-            "postcode": data["postalCode"].strip(),
-            "country": data["country"].strip(),
-            "phone": data.get("telephone1", "").strip(),
-            "website": "https://www.bjs.com/mapDetail;city={}".format(data["storeName"]),
-            "lat": float(data["latitude"]),
-            "lon": float(data["longitude"]),
-        }
-
-        hours = self.parse_hours([attr for attr in data["Attribute"] if attr["name"] == "Hours of Operation"])
+        store["ref"] = store.pop("storeName")
+        item = DictParser.parse(store)
+        item["branch"] = store["Description"][0]["displayStoreName"]
+        item["website"] = response.url
+        hours = self.parse_hours([attr for attr in store["Attribute"] if attr["name"] == "Hours of Operation"])
         if hours:
-            properties["opening_hours"] = hours
+            store["opening_hours"] = hours
 
-        apply_category(Categories.SHOP_WHOLESALE, properties)
+        apply_category(Categories.SHOP_WHOLESALE, item)
 
-        yield Feature(**properties)
+        yield item
