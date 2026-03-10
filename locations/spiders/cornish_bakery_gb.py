@@ -1,4 +1,7 @@
+from typing import Iterable
+
 from locations.storefinders.stockist import StockistSpider
+from locations.items import Feature
 
 
 class CornishBakeryGBSpider(StockistSpider):
@@ -8,3 +11,7 @@ class CornishBakeryGBSpider(StockistSpider):
         "brand": "Cornish Bakery",
     }
     key = "u10286"
+
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        yield item
