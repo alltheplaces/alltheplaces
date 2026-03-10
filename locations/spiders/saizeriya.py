@@ -3,14 +3,13 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request
 
-from locations.categories import Categories
 from locations.dict_parser import DictParser
 
 
 class SaizeriyaSpider(Spider):
     name = "saizeriya"
 
-    item_attributes = {        
+    item_attributes = {
         "brand_wikidata": "Q886564",
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -32,14 +31,16 @@ class SaizeriyaSpider(Spider):
         for store in stores:
             item = DictParser.parse(store)
             # item["name"] = None
-            item["branch"] = store["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
+            item["branch"] = (
+                store["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
+            )
             item["ref"] = store["code"]
-            item["lat"] = store["coord"]["lat"] + 0.003 # offset purposely
+            item["lat"] = store["coord"]["lat"] + 0.003  # offset purposely
             item["lon"] = store["coord"]["lon"] - 0.003
             try:
                 item["postcode"] = store["postal_code"]
             except:
-                pass            
+                pass
             try:
                 item["extras"]["branch:ja-Hira"] = store["ruby"].removeprefix("サイゼリヤ")
             except:
@@ -50,4 +51,3 @@ class SaizeriyaSpider(Spider):
 
         if data["count"]["limit"] == len(data["items"]):
             yield self.get_page(data["count"]["limit"] + response.meta["offset"])
-            
