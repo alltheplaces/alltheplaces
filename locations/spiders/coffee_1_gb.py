@@ -35,7 +35,7 @@ class Coffee1GBSpider(scrapy.Spider):
             item["image"] = location["branch_image"]
 
         item["ref"] = re.search(r"/locations/([^/]+)/$", location["url"]).group(1)
-        item["name"] = location["post_title"]
+        item["branch"] = location["post_title"]
         item["city"] = location["branch_city"]
         phone = response.xpath(".//div[@class='locationmap-phone']//text()[2]").get()
         if phone:
