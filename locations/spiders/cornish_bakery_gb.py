@@ -1,7 +1,7 @@
 from typing import Iterable
 
-from locations.storefinders.stockist import StockistSpider
 from locations.items import Feature
+from locations.storefinders.stockist import StockistSpider
 
 
 class CornishBakeryGBSpider(StockistSpider):
