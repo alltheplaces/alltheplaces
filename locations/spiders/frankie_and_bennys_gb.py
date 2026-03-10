@@ -1,7 +1,9 @@
 from typing import Any, Iterable
 
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
 
 from locations.categories import Extras, apply_yes_no
 from locations.google_url import extract_google_position
@@ -10,11 +12,11 @@ from locations.items import Feature
 from locations.spiders.outdoor_supply_hardware_us import decode_email
 
 
-class FrankieAndBennysGBSpider(SitemapSpider):
+class FrankieAndBennysGBSpider(CrawlSpider):
     name = "frankie_and_bennys_gb"
     item_attributes = {"brand": "Frankie & Benny's", "brand_wikidata": "Q5490892"}
-    sitemap_urls = ["https://www.frankieandbennys.com/sitemap.xml"]
-    sitemap_rules = [(r"/restaurants/[-\w]+", "parse")]
+    start_urls = ["https://www.frankieandbennys.com/restaurants"]
+    rules = [Rule(LinkExtractor(allow=r"/restaurants/[-\w]+"), callback="parse_sd")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
