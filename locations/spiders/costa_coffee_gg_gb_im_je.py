@@ -136,7 +136,10 @@ class CostaCoffeeGGGBIMJESpider(Spider):
                 [location["location"]["address"]["address1"], location["location"]["address"]["address2"]]
             )
             item["city"] = location["location"]["address"]["city"]
-
+            
+            unless "Costa" in item["name"]:
+                item["branch"] = item.pop("name")
+            
             item["postcode"] = location["location"]["address"]["postCode"]
             if item["postcode"]:
                 if item["postcode"][:2] == "GY":
