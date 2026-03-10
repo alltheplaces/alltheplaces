@@ -137,7 +137,7 @@ class CostaCoffeeGGGBIMJESpider(Spider):
             )
             item["city"] = location["location"]["address"]["city"]
 
-            if not "Costa" in item["name"]:
+            if "Costa" not in item["name"]:
                 item["branch"] = item.pop("name")
 
             item["postcode"] = location["location"]["address"]["postCode"]
