@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 DQ_GRILL_CHILL = {"name": "DQ Grill & Chill", "brand": "DQ Grill & Chill", "brand_wikidata": "Q1141226"}
 DQ = {"name": "Dairy Queen", "brand": "Dairy Queen", "brand_wikidata": "Q1141226"}
@@ -50,5 +51,14 @@ class DairyQueenUSSpider(Spider):
 
             item["street_address"] = location.get("address3")
             item["website"] = urljoin("https://www.dairyqueen.com", location.get("urlTitle"))
-
+            item["opening_hours"] = self.parse_opening_hours(location.get("storeHours"))
             yield item
+
+    def parse_opening_hours(self, rules: str) -> OpeningHours | None:
+        if not rules:
+            return None
+        opening_hours = OpeningHours()
+        for rule in rules.split(","):
+            day, hours = rule.split(":", 1)
+            opening_hours.add_range(DAYS[int(day) - 1], *hours.split("-"))
+        return opening_hours
