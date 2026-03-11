@@ -32,16 +32,21 @@ class DairyQueenUSSpider(Spider):
             item = DictParser.parse(location)
             item["lat"], item["lon"] = location.get("latlong", ",").split(",", 2)
 
-            if location["conceptType"] == "Food and Treat":
-                item.update(DQ_GRILL_CHILL)
-                apply_category(Categories.FAST_FOOD, item)
-                item["extras"]["cuisine"] = "ice_cream;burger"
-            elif location["conceptType"] == "Treat Only":
-                item.update(DQ)
-                apply_category(Categories.FAST_FOOD, item)
-                item["extras"]["cuisine"] = "ice_cream"
+            concept_type = location.get("conceptType")
+
+            if not concept_type:
+                self.logger.error("Store concept type not available")
             else:
-                self.logger.error("Unexpected type: {}".format(location["conceptType"]))
+                if concept_type == "Food and Treat":
+                    item.update(DQ_GRILL_CHILL)
+                    apply_category(Categories.FAST_FOOD, item)
+                    item["extras"]["cuisine"] = "ice_cream;burger"
+                elif concept_type == "Treat Only":
+                    item.update(DQ)
+                    apply_category(Categories.FAST_FOOD, item)
+                    item["extras"]["cuisine"] = "ice_cream"
+                else:
+                    self.logger.error("Unexpected type: {}".format(concept_type))
 
             item["street_address"] = location.get("address3")
             item["website"] = urljoin("https://www.dairyqueen.com", location.get("urlTitle"))
