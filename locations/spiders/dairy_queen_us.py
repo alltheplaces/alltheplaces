@@ -61,6 +61,8 @@ class DairyQueenUSSpider(Spider):
 
             if website := self.WEBSITE_BY_COUNTRY.get(item["country"]):
                 item["website"] = urljoin(website, location.get("urlTitle").lstrip("/"))
+            else:
+                item["website"] = None
 
             item["opening_hours"] = self.parse_opening_hours(location.get("storeHours"))
             yield item
