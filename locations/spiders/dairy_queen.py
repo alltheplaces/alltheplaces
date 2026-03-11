@@ -12,8 +12,8 @@ DQ_GRILL_CHILL = {"name": "DQ Grill & Chill", "brand": "DQ Grill & Chill", "bran
 DQ = {"name": "Dairy Queen", "brand": "Dairy Queen", "brand_wikidata": "Q1141226"}
 
 
-class DairyQueenUSSpider(Spider):
-    name = "dairy_queen_us"
+class DairyQueenSpider(Spider):
+    name = "dairy_queen"
     allowed_domains = ["prod-dairyqueen.dotcmscloud.com"]
     start_urls = ["https://prod-dairyqueen.dotcmscloud.com/api/es/search"]
     item_attributes = {"nsi_id": "N/A"}
