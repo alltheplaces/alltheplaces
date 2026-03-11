@@ -32,7 +32,7 @@ class FrankieAndBennysGBSpider(CrawlSpider):
         yield from self.parse_item(item, response) or []
 
     def parse_item(self, item: Feature, response: Response, **kwargs) -> Iterable[Feature]:
-        item["branch"] = response.xpath('//h1/span/text()').get()
+        item["branch"] = response.xpath("//h1/span/text()").get()
         facilities = response.xpath('//*[@class="facility-name"]/text()').getall()
         apply_yes_no(Extras.WHEELCHAIR, item, "Wheelchair Access" in facilities)
         apply_yes_no(Extras.OUTDOOR_SEATING, item, "Outdoor Seating" in facilities)
