@@ -29,14 +29,15 @@ class SaizeriyaSpider(Spider):
         stores = data["items"]
 
         for store in stores:
+            loc_offset = float("0.00"+store["address_code"]) + 0.002
             item = DictParser.parse(store)
             # item["name"] = None
             item["branch"] = (
                 store["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
             )
             item["ref"] = store["code"]
-            item["lat"] = store["coord"]["lat"] + 0.003  # offset purposely
-            item["lon"] = store["coord"]["lon"] - 0.003
+            item["lat"] = store["coord"]["lat"] + loc_offset  # offset purposely
+            item["lon"] = store["coord"]["lon"] - loc_offset
             try:
                 item["postcode"] = store["postal_code"]
             except:
