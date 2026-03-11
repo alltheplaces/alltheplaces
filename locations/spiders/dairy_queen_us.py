@@ -17,6 +17,14 @@ class DairyQueenUSSpider(Spider):
     allowed_domains = ["prod-dairyqueen.dotcmscloud.com"]
     start_urls = ["https://prod-dairyqueen.dotcmscloud.com/api/es/search"]
     item_attributes = {"nsi_id": "N/A"}
+    WEBSITE_BY_COUNTRY = {
+        "US": "https://www.dairyqueen.com/en-us/",
+        "CA": "https://www.dairyqueen.com/en-ca/",
+        "MX": "https://dairyqueen.com.mx/es-mx/",
+        # working URL not found for below countries:
+        "BS": None,
+        "QA": None,
+    }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
@@ -50,7 +58,10 @@ class DairyQueenUSSpider(Spider):
                     self.logger.error("Unexpected type: {}".format(concept_type))
 
             item["street_address"] = location.get("address3")
-            item["website"] = urljoin("https://www.dairyqueen.com", location.get("urlTitle"))
+
+            if website := self.WEBSITE_BY_COUNTRY.get(item["country"]):
+                item["website"] = urljoin(website, location.get("urlTitle").lstrip("/"))
+
             item["opening_hours"] = self.parse_opening_hours(location.get("storeHours"))
             yield item
 
