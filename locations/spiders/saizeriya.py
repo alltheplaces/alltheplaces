@@ -29,7 +29,7 @@ class SaizeriyaSpider(Spider):
         stores = data["items"]
 
         for store in stores:
-            loc_offset = float("0.00"+store["address_code"]) + 0.002
+            loc_offset = float("0.00" + store["address_code"]) + 0.002
             item = DictParser.parse(store)
             # item["name"] = None
             item["branch"] = (
