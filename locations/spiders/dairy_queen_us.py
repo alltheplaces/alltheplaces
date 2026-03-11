@@ -37,7 +37,7 @@ class DairyQueenUSSpider(Spider):
             if not concept_type:
                 self.logger.error("Store concept type not available")
             else:
-                if concept_type == "Food and Treat":
+                if concept_type in ["Food and Treat", "Treat & Food"]:
                     item.update(DQ_GRILL_CHILL)
                     apply_category(Categories.FAST_FOOD, item)
                     item["extras"]["cuisine"] = "ice_cream;burger"
