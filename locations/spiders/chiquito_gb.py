@@ -13,7 +13,7 @@ from locations.spiders.outdoor_supply_hardware_us import decode_email
 class ChiquitoGBSpider(SitemapSpider):
     name = "chiquito_gb"
     item_attributes = {"brand": "Chiquito", "brand_wikidata": "Q5101775"}
-    sitemap_urls = ["ttps://www.chiquito.co.uk/sitemap.xml"]
+    sitemap_urls = ["https://www.chiquito.co.uk/sitemap.xml"]
     sitemap_rules = [(r"/restaurants/[-\w]+", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
