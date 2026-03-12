@@ -37,7 +37,5 @@ class OfficeSpider(SitemapSpider):
         else:
             latlng = response.xpath('//script[contains(text(), "google.maps.LatLng(")]/text()').get()
             if latlng:
-                item["lat"], item["lon"] = (
-                    latlng.split("google.maps.LatLng(", 1)[1].split(")", 1)[0].split(",", 1)
-                )
+                item["lat"], item["lon"] = latlng.split("google.maps.LatLng(", 1)[1].split(")", 1)[0].split(",", 1)
         yield item
