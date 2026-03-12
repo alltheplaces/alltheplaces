@@ -3,10 +3,10 @@ from typing import Iterable
 from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.spiders.central_england_cooperative import COOP_FUNERALCARE, set_operator
-from locations.json_blob_spider import JSONBlobSpider
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.central_england_cooperative import COOP_FUNERALCARE, set_operator
 
 
 class TheCooperativeGroupSpider(JSONBlobSpider):
