@@ -21,7 +21,7 @@ class FreebirdsUSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         if feature.get("coming_soon") is True:
             return
-        item["branch"] = item.pop("name").removeprefix("Freebirds - ")
+        item["branch"] = item.pop("name").removeprefix("Freebirds - ").removeprefix("Freebirds ").split(",")[0]
         item["street_address"] = item.pop("street")
         item["opening_hours"] = self.parse_opening_hours(feature.get("business_hours", []))
         yield item
