@@ -21,7 +21,8 @@ class HollisterSpider(scrapy.Spider):
         for row in data["physicalStores"]:
             properties = {
                 "ref": row["storeNumber"],
-                "name": row["name"],
+                "branch": row["name"],
+                "name": "Hollister",
                 "country": row["country"],
                 "state": row["stateOrProvinceName"],
                 "city": row["city"],
