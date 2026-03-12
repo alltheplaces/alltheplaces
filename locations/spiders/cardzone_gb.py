@@ -21,7 +21,6 @@ class CardzoneGBSpider(JSONBlobSpider):
         "Card Centre": {"brand": "Card Centre", "brand_wikidata": "Q129258021"},
     }
 
-
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["name"] = feature["store"]
         for brand_key in self.brands.keys():
