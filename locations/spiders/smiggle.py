@@ -11,7 +11,7 @@ class SmiggleSpider(JSONBlobSpider):
     drop_attributes = {"facebook", "twitter"}
 
     def extract_json(self, response):
-        js_blob = "[" + response.text.split("const storeData = [", 1)[1].split("],", 1)[0] + "]"
+        js_blob = "[" + response.text.split("const storeData = [", 1)[1].split("]", 1)[0] + "]"
         return parse_js_object(js_blob)
 
     def post_process_item(self, item, response, location):
