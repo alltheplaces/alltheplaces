@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -22,4 +23,11 @@ class FreebirdsUSSpider(JSONBlobSpider):
             return
         item["branch"] = item.pop("name").removeprefix("Freebirds - ")
         item["street_address"] = item.pop("street")
+        item["opening_hours"] = self.parse_opening_hours(feature.get("business_hours", []))
         yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for rule in rules:
+            opening_hours.add_range(rule["day"], rule["start"], rule["end"])
+        return opening_hours
