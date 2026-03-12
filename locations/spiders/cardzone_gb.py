@@ -6,8 +6,6 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
-brands
-
 
 class CardzoneGBSpider(JSONBlobSpider):
     name = "cardzone_gb"
@@ -22,6 +20,7 @@ class CardzoneGBSpider(JSONBlobSpider):
         "Yankee Candle": {"brand": "Yankee Candle", "brand_wikidata": "Q8048733"},
         "Card Centre": {"brand": "Card Centre", "brand_wikidata": "Q129258021"},
     }
+
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["name"] = feature["store"]
