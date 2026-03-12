@@ -2,8 +2,6 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, Clothes, apply_category, apply_clothes
-from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
@@ -18,5 +16,5 @@ class CardzoneGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["name"] = feature["store"]
-        item["street_address"] = clean_address([feature["address"],feature["address2"]])
+        item["street_address"] = clean_address([feature["address"], feature["address2"]])
         yield item
