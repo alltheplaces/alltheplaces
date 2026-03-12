@@ -21,7 +21,8 @@ class OfficeSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["website"] = item["ref"] = response.url
-        item["branch"] = response.xpath('//span[@class="bold"]/text()').get().removeprefix("Office ")
+        name = response.xpath('//span[@class="bold"]/text()').get()
+        item["name"], item["branch"] = name.split(" ",1)
         item["phone"] = response.xpath('//div[contains(span/text(), "Tel")]/text()').get()
         item["addr_full"] = merge_address_lines(
             response.xpath('//ul[contains(@class, "storelocator_addressdetails_address")]/li/text()').getall()[1:]
