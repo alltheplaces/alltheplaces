@@ -30,6 +30,5 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
             set_located_in(TescoGBSpider.TESCO, item)
         elif "-express" in response.url:
             set_located_in(TescoGBSpider.TESCO_EXPRESS, item)
-        elif "-kiosk" in response.url:
-            #Not sure what to do here - some kiosks are not in Tescos but still want them
+
         yield item
