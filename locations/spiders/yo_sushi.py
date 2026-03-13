@@ -1,10 +1,10 @@
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.tesco_gb import TescoGBSpider, set_located_in
 from locations.structured_data_spider import StructuredDataSpider
-from locations.categories import Categories, apply_category
 
 
 class YoSushiSpider(SitemapSpider, StructuredDataSpider):
@@ -12,7 +12,7 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Yo! Sushi", "brand_wikidata": "Q3105441"}
     sitemap_urls = ["https://yosushi.com/sitemap.xml"]
     sitemap_rules = [(r"https://yosushi.com/[-\w]+", "parse")]
-    #Not all urls include /restaurant/
+    # Not all urls include /restaurant/
     wanted_types = ["Restaurant"]
     drop_attributes = {"facebook", "twitter", "email"}
 
