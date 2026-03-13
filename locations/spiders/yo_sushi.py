@@ -1,0 +1,35 @@
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.items import Feature
+from locations.spiders.tesco_gb import TescoGBSpider, set_located_in
+from locations.structured_data_spider import StructuredDataSpider
+from locations.categories import Categories, apply_category
+
+
+class YoSushiSpider(SitemapSpider, StructuredDataSpider):
+    name = "yo_sushi"
+    item_attributes = {"brand": "Yo! Sushi", "brand_wikidata": "Q3105441"}
+    sitemap_urls = ["https://yosushi.com/sitemap.xml"]
+    sitemap_rules = [(r"https://yosushi.com/[-\w]+", "parse")]
+    #Not all urls include /restaurant/
+    wanted_types = ["Restaurant"]
+    drop_attributes = {"facebook", "twitter", "email"}
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["lat"], item["lon"] = ld_data["latitude"], ld_data["longitude"]
+        item["branch"] = item.pop("name")
+        if "kiosk" in ld_data["description"].lower():
+            apply_category(Categories.SHOP_KIOSK, item)
+            apply_category(Categories.FAST_FOOD, item)
+        else:
+            apply_category(Categories.RESTAURANT, item)
+        if "-extra" in response.url or "tesco extra" in item["branch"].lower():
+            set_located_in(TescoGBSpider.TESCO_EXTRA, item)
+        elif "-superstore" in response.url:
+            set_located_in(TescoGBSpider.TESCO, item)
+        elif "-express" in response.url:
+            set_located_in(TescoGBSpider.TESCO_EXPRESS, item)
+        elif "-kiosk" in response.url:
+            set_located_in(TescoGBSpider.TESCO, item)
+        yield item
