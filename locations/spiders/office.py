@@ -4,6 +4,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -38,5 +39,7 @@ class OfficeSpider(SitemapSpider):
             response.xpath('//script[contains(text(), "google.maps.LatLng(")]/text()').get(),
         ):
             item["lat"], item["lon"] = latlng.groups()
+
+        apply_category(Categories.SHOP_SHOES, item)
 
         yield item
