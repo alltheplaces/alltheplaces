@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class YoSushiSpider(SitemapSpider, StructuredDataSpider):
     name = "yo_sushi"
-    item_attributes = {"brand": "Yo! Sushi", "brand_wikidata": "Q3105441"}
+    item_attributes = {"brand": "YO! Sushi", "brand_wikidata": "Q3105441"}
     sitemap_urls = ["https://yosushi.com/sitemap.xml"]
     sitemap_rules = [(r"https://yosushi.com/[-\w]+", "parse")]
     # Not all urls include /restaurant/
@@ -31,5 +31,5 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
         elif "-express" in response.url:
             set_located_in(TescoGBSpider.TESCO_EXPRESS, item)
         elif "-kiosk" in response.url:
-            set_located_in(TescoGBSpider.TESCO, item)
+            #Not sure what to do here - some kiosks are not in Tescos but still want them
         yield item
