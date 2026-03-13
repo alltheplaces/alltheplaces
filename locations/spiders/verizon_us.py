@@ -26,6 +26,7 @@ class VerizonUSSpider(CrawlSpider, StructuredDataSpider):
     OPERATORS = {
         "Asurion FSL": {"operator": "Asurion FSL"},
         "BeMobile": {"operator": "BeMobile"},
+        "Best Buy": {"operator": "Best Buy", "operator_wikidata": "Q533415"},
         "Best Wireless": {"operator": "Best Wireless"},
         "Cellular Plus": {"operator": "Cellular Plus"},
         "Cellular Sales": {"operator": "Cellular Sales", "operator_wikidata": "Q5058345"},
@@ -48,8 +49,9 @@ class VerizonUSSpider(CrawlSpider, StructuredDataSpider):
             yield response.follow(url=store_url, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["ref"] = item["website"] = response.url
+        item["website"] = response.url
         store_data = chompjs.parse_js_object(response.xpath('//script[contains(text(), "storeJSON")]/text()').get())
+        item["ref"] = store_data["storeNumber"]
         item["name"] = store_data["storeName"]
 
         if "Authorized Retailer" in store_data["typeOfStore"]:
@@ -62,6 +64,9 @@ class VerizonUSSpider(CrawlSpider, StructuredDataSpider):
             item["branch"] = item.pop("name")
             item["operator"] = self.item_attributes["brand"]
             item["operator_wikidata"] = self.item_attributes["brand_wikidata"]
+
+        if item.get("branch") and "#" in item["branch"]:
+            item["branch"] = item["branch"].split("#")[1].split(" ", 1)[-1]
 
         #  ld_data hours don't match with Google Maps data, hence skipped.
         item["opening_hours"] = self.parse_hours(store_data.get("StoreHours"))
