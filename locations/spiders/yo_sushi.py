@@ -19,9 +19,9 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["lat"], item["lon"] = ld_data["latitude"], ld_data["longitude"]
         item["branch"] = item.pop("name")
-        if "kiosk" in ld_data["description"].lower():
-            apply_category(Categories.SHOP_KIOSK, item)
-            apply_category(Categories.FAST_FOOD, item)
+        if ld_data["description"] and "kiosk" in ld_data["description"].lower():
+                apply_category(Categories.SHOP_KIOSK, item)
+                apply_category(Categories.FAST_FOOD, item)
         else:
             apply_category(Categories.RESTAURANT, item)
         if "-extra" in response.url or "tesco extra" in item["branch"].lower():
@@ -30,5 +30,7 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
             set_located_in(TescoGBSpider.TESCO, item)
         elif "-express" in response.url:
             set_located_in(TescoGBSpider.TESCO_EXPRESS, item)
+        if item["phone"] == "03456779207":
+            item.pop("phone", None)
 
         yield item
