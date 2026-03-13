@@ -33,10 +33,10 @@ class OfficeSpider(SitemapSpider):
             if m := re.search(r"(\w+): (\d{1,2}:\d\d) - (\d\d:\d\d)", rule):
                 item["opening_hours"].add_range(*m.groups())
 
-        if coords := re.search(r"<coordinates>(.*?)</coordinates>", response.text):
-            item["lon"], item["lat"] = coords.group(1).split(",")
-        else:
-            latlng = response.xpath('//script[contains(text(), "google.maps.LatLng(")]/text()').get()
-            if latlng:
-                item["lat"], item["lon"] = latlng.split("google.maps.LatLng(", 1)[1].split(")", 1)[0].split(",", 1)
+        if latlng := re.search(
+            r"LatLng\((-?\d+\.\d+),\s?(-?\d+\.\d+)\),",
+            response.xpath('//script[contains(text(), "google.maps.LatLng(")]/text()').get(),
+        ):
+            item["lat"], item["lon"] = latlng.groups()
+
         yield item
