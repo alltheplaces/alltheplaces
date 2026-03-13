@@ -20,8 +20,8 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
         item["lat"], item["lon"] = ld_data["latitude"], ld_data["longitude"]
         item["branch"] = item.pop("name")
         if ld_data["description"] and "kiosk" in ld_data["description"].lower():
-                apply_category(Categories.SHOP_KIOSK, item)
-                apply_category(Categories.FAST_FOOD, item)
+            apply_category(Categories.SHOP_KIOSK, item)
+            apply_category(Categories.FAST_FOOD, item)
         else:
             apply_category(Categories.RESTAURANT, item)
         if "-extra" in response.url or "tesco extra" in item["branch"].lower():
