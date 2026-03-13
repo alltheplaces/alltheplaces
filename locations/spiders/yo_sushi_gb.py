@@ -15,6 +15,6 @@ class YoSushiGBSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"facbook", "twitter", "email"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["website"] = response.url
+        item["lat"], item["lon"] = ld_data["latitude"], ld_data["longitude"]
         item["branch"] = item.pop("name")
         yield item
