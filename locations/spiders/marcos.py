@@ -1,11 +1,11 @@
 import json
 import time
 
-import chompjs
-from scrapy import Request, Spider
+from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 def minutes_to_time(minutes: int):
@@ -18,43 +18,22 @@ class MarcosSpider(Spider):
         "brand": "Marco's Pizza",
         "brand_wikidata": "Q6757382",
     }
-    # First get country info
-    start_urls = [
-        "https://momspublicstorage.blob.core.windows.net/content/moms/online/brand-data/online-brand-data-LPHP3Y.json"
-    ]
+    start_urls = ["https://www.marcos.com/api/v1.0/locations/stores/A5985C38-D485-4240-8C01-931F7186D567"]
 
-    def parse(self, response):
-        countries = {country["CountryID"]: country for country in response.json()["CONTs"]}
-        # Then fetch locations
-        yield Request(
-            "https://order.marcos.com/brand/?sk=LPHP3Y/locations",
-            callback=self.parse_locations,
-            cb_kwargs={"countries": countries},
-        )
-
-    def parse_locations(self, response, countries):
-        locations = json.loads(
-            chompjs.parse_js_object(response.xpath('//script[contains(text(), "let Temp = ")]/text()').get())[
-                "BrandLocations"
-            ]
-        )
-        for location in locations:
+    def parse(self, response, **kwargs):
+        for location in json.loads(response.json()["result"]):
             item = DictParser.parse(location)
-            item["country"] = countries[location["countryId"]]["IsoCode"]
-            item["ref"] = location["storeKey"]
-            item["phone"] = (
-                None
-                if item["phone"] == "1111111111"
-                else countries[location["countryId"]]["CountryCode"] + item["phone"]
+            item["ref"] = location["SCODE"] or location["SID"]
+            item["street_address"] = merge_address_lines(
+                [location["ADD1"], location["ADD2"], location["ADD3"], location["ADD4"], location["ADD5"]]
             )
-            item["extras"]["website:orders"] = f"{location['OnlineOrderingURL']}?id={location['storeKey']}"
-
+            item["state"] = location["STA"]
             oh = OpeningHours()
-            for day in location["Hours"]:
+            for day in location["HRs"]:
                 oh.add_range(
-                    DAYS_FROM_SUNDAY[day["WeekDayNo"]],
-                    minutes_to_time(day["OpenDayMinute"]),
-                    minutes_to_time(day["CloseDayMinute"]),
+                    DAYS_FROM_SUNDAY[day["WID"]],
+                    minutes_to_time(day["SMIN"]),
+                    minutes_to_time(day["EMIN"]),
                 )
             item["opening_hours"] = oh
 

@@ -129,11 +129,11 @@ class IchTankeStromSpider(scrapy.Spider):
             "Haushaltsteckdose CH": "sev1011_t13",
             "Haushaltsteckdose Schuko": "schuko",
             "IEC 60309": "cee_blue",
-            "Kabel Typ 1": "type1_cable",
+            "Kabel Typ 1": "type1",
             "Kabel Typ 2": "type2_cable",
             "Steckdose Typ 2": "type2",
             "Steckdose Typ 3": "type3",
-            "Tesla": "tesla_supercharger",
+            "Tesla": "type2_combo",
         }
 
         m = html.css(".evse-overview").xpath("//tr/td/text()")
@@ -152,6 +152,6 @@ class IchTankeStromSpider(scrapy.Spider):
         # https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dcharging_station
         tags = {}
         for socket, power in sockets.items():
-            tags["socket:%s" % socket] = len(power)
-            tags["socket:%s:output" % socket] = "%s kW" % max(power)
+            tags[f"socket:{socket}"] = len(power)
+            tags[f"socket:{socket}:output"] = f"{max(power)} kW"
         return tags

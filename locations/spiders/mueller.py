@@ -1,22 +1,22 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import chompjs
-import scrapy
-from scrapy import Request
-from scrapy.http import JsonRequest, Response
+from chompjs import parse_js_object
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.react_server_components import parse_rsc
 
 
-class MuellerSpider(scrapy.Spider):
+class MuellerSpider(Spider):
     name = "mueller"
     item_attributes = {"brand": "Müller", "brand_wikidata": "Q1958759"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     api = "https://backend.prod.ecom.mueller.de/"
     headers = {}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for country, url in [
             ("AT", "https://www.mueller.at/storefinder/"),
             ("CH", "https://www.mueller.ch/storefinder/"),
@@ -28,9 +28,13 @@ class MuellerSpider(scrapy.Spider):
         ]:
             yield Request(url=url, cb_kwargs=dict(country=country))
 
-    def parse(self, response: Response, country: str) -> Any:
-        data = chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-        auth_details = data["props"]["pageProps"]["graphqlSettings"]["publicHost"]["header"]
+    def parse(self, response: Response, country: str):
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        objs = [parse_js_object(s) for s in scripts]
+        rsc = "".join([s for n, s in objs]).encode()
+        data = dict(parse_rsc(rsc))
+
+        auth_details = DictParser.get_nested_key(data, "publicHost")["header"]
         self.headers = {auth_details["key"]: auth_details["value"]}
         yield JsonRequest(
             url=self.api,
@@ -101,7 +105,7 @@ class MuellerSpider(scrapy.Spider):
                 callback=self.parse_stores,
             )
 
-    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
+    def parse_stores(self, response: Response):
         for store in response.json()["data"]["getStoresByIds"]:
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")

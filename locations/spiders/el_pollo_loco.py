@@ -1,16 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.items import Feature
 
 
-class ElPolloLocoSpider(scrapy.Spider):
+class ElPolloLocoSpider(Spider):
     name = "el_pollo_loco"
     item_attributes = {"brand": "El Pollo Loco", "brand_wikidata": "Q2353849"}
     allowed_domains = ["www.elpolloloco.com"]
     start_urls = ["https://www.elpolloloco.com/locations/locations_json"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.elpolloloco.com/locations/locations_json")
 
     def parse(self, response):

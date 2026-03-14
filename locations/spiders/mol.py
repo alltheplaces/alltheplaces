@@ -1,7 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import (
@@ -50,6 +49,7 @@ BRANDS_MAPPING = {
     "EX-OMV": ("MOL", "Q549181"),
     "TIFON": ("Tifon", None),
     "ENERGOPETROL": ("Energopetrol", "Q120433"),
+    "SHELL": ("Shell", "Q110716465"),
 }
 
 FUEL_MAPPING = {
@@ -155,12 +155,11 @@ CARDS_MAPPING = {
 
 # MOL data is also available at https://www.molgroupcards.com/station-finder
 # along with other brands, but not all POIs on this page have fuel types and services.
-class MolSpider(scrapy.Spider):
+class MolSpider(Spider):
     name = "mol"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    download_timeout = 90
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 90}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in COUNTRIES.values():
             yield JsonRequest(
                 url="https://tankstellenfinder.molaustria.at/api.php",

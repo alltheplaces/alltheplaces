@@ -1,7 +1,9 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -13,13 +15,13 @@ SERVICES_MAPPING = {
 }
 
 
-class BurgerKingBRSpider(scrapy.Spider):
+class BurgerKingBRSpider(Spider):
     name = "burger_king_br"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     allowed_domains = ["www.burgerking.com.br"]
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.burgerking.com.br/api/nearest",
             # We can get all POIs using any city from https://www.burgerking.com.br/api/cities
@@ -32,6 +34,7 @@ class BurgerKingBRSpider(scrapy.Spider):
             item["state"] = poi["administrativeArea"]
             self.parse_hours(item, poi)
             self.parse_services(item, poi)
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def parse_hours(self, item: Feature, poi: dict):

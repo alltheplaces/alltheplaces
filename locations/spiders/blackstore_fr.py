@@ -3,7 +3,7 @@ import re
 from chompjs import parse_js_object
 from scrapy import Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.user_agents import BROWSER_DEFAULT
@@ -11,9 +11,9 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class BlackstoreFRSpider(Spider):
     name = "blackstore_fr"
-    item_attributes = {"brand": "Blackstore", "brand_wikidata": "Q125446765", "extras": Categories.SHOP_CLOTHES.value}
+    item_attributes = {"brand": "Blackstore", "brand_wikidata": "Q125446765"}
     start_urls = ["https://www.blackstore.fr/store-finder/"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = "FR"
 
     def parse(self, response, **kwargs):
@@ -28,6 +28,9 @@ class BlackstoreFRSpider(Spider):
             if not re.search("[a-z]", item["addr_full"]):
                 item["addr_full"] = item["addr_full"].title()
             item["opening_hours"] = self.format_opening_hours(location["weekOpeningHours"])
+
+            apply_category(Categories.SHOP_CLOTHES, item)
+
             yield item
 
     def format_opening_hours(self, opening_hours):

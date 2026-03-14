@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class FantasticFurnitureAUSpider(Spider):
     allowed_domains = ["api.fantasticfurniture.com.au"]
     start_urls = ["https://api.fantasticfurniture.com.au/occ/v2/fantasticfurniture-spa/store-finder?fields=FULL&page=0"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, meta={"page": 0})
 

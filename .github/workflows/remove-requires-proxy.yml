@@ -1,0 +1,42 @@
+name: Remove requires_proxy from random spiders
+
+on:
+  schedule:
+    # Run at 2 AM UTC every other day (Monday, Wednesday, Friday)
+    - cron: '0 2 * * 1,3,5'
+  workflow_dispatch:
+
+jobs:
+  remove-requires-proxy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Setup Python
+        run: uv python install
+
+      - name: Install GitHub CLI (if not already available)
+        run: |
+          which gh || sudo apt-get update && sudo apt-get install -y gh
+
+      - name: Run remove_requires_proxy script
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ci
+          uv run python remove_requires_proxy.py

@@ -16,8 +16,10 @@ class TotallyWorkwearAUSpider(Spider):
             item["ref"] = location["path"]
             item["lat"] = location["geometry"]["location"]["lat"]
             item["lon"] = location["geometry"]["location"]["lng"]
-            item["phone"] = location["formatted_phone_number"]
+            item["phone"] = location.get("formatted_phone_number")
+            item["branch"] = item.pop("name").replace("Totally Workwear ", "")
             item["website"] = "https://www.totallyworkwear.com.au/store/" + location["path"]
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(" ".join(location["opening_hours"]["weekday_text"]))
+            if opening_hours := location.get("opening_hours"):
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(" ".join(opening_hours["weekday_text"]))
             yield item

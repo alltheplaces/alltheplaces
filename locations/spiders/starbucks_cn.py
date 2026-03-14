@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.geo import country_iseadgg_centroids
 from locations.items import Feature, merge_items
 from locations.json_blob_spider import JSONBlobSpider
@@ -22,12 +22,12 @@ FEATURE_MAPPING = {
 
 
 class StarbucksCNSpider(JSONBlobSpider):
-    download_timeout = 30
     name = "starbucks_cn"
-    item_attributes = {"brand": "星巴克", "brand_wikidata": "Q37158", "extras": Categories.COFFEE_SHOP.value}
+    item_attributes = {"brand": "星巴克", "brand_wikidata": "Q37158"}
     locations_key = "data"
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self):
         for lat, lon in country_iseadgg_centroids(["CN"], 79):
             yield JsonRequest(
                 url=f"https://www.starbucks.com.cn/api/stores/nearby?lat={lat}&lon={lon}&limit=1000&locale=EN&features=&radius=100000",
@@ -63,4 +63,5 @@ class StarbucksCNSpider(JSONBlobSpider):
                 apply_yes_no(match, item, True)
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_feature/{feature}")
+        apply_category(Categories.COFFEE_SHOP, item)
         yield item

@@ -1,4 +1,4 @@
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.storefinders.yext import YextSpider
 
 SUNGLASS_HUT_SHARED_ATTRIBUTES = {
@@ -11,6 +11,17 @@ PEARLE_VISION_ATTRIBUTES = {"brand": "Pearle Vision", "brand_wikidata": "Q223114
 TARGET_OPTICAL_ATTRIBUTES = {"brand": "Target Optical", "brand_wikidata": "Q19903688"}
 
 SUNGLASS_HUT_BRANDS = {
+    "DAVID_CLULOW": {"brand": "David Clulow", "extras": Categories.SHOP_OPTICIAN.value},
+    "OLIVER_PEOPLES": {
+        "brand": "Oliver Peoples",
+        "brand_wikidata": "Q7087746",
+        "extras": Categories.SHOP_OPTICIAN.value,
+    },
+    "SALMOIRAGHI_VIGANO": {
+        "brand": "Salmoiraghi & Viganò",
+        "brand_wikidata": "Q21272314",
+        "extras": Categories.SHOP_OPTICIAN.value,
+    },
     "LC_OD_AT_MACY'S": LENSCRAFTERS_ATTRIBUTES | {"extras": Categories.OPTOMETRIST.value},
     "LC_OD_NON_TEXAS": LENSCRAFTERS_ATTRIBUTES | {"extras": Categories.OPTOMETRIST.value},
     "LC_OD_TEXAS": LENSCRAFTERS_ATTRIBUTES | {"extras": Categories.OPTOMETRIST.value},
@@ -34,6 +45,7 @@ class SunglassHutSpider(YextSpider):
     def parse_item(self, item, location):
         item.pop("twitter", None)
         item.pop("instagram", None)
+        item.pop("email", None)
         if item["website"] is not None and "?" in item["website"]:
             item["website"] = item["website"].split("?")[0]  # strip yext tracking
         if brand := location.get("c_pagesSubscription"):
@@ -41,7 +53,15 @@ class SunglassHutSpider(YextSpider):
                 item.update(SUNGLASS_HUT_BRANDS.get(brand))
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{brand}")
+        elif item["name"].startswith("David Clulow"):
+            item.update(SUNGLASS_HUT_BRANDS.get("DAVID_CLULOW"))
+            item["branch"] = (
+                item.pop("name").replace("David Clulow Opticians - ", "").replace("David Clulow Sunglasses ", "")
+            )
+        elif item["name"].startswith("Oliver Peoples"):
+            item.update(SUNGLASS_HUT_BRANDS.get("OLIVER_PEOPLES"))
+        elif item["name"].startswith("Salmoiraghi & Viganò"):
+            item.update(SUNGLASS_HUT_BRANDS.get("SALMOIRAGHI_VIGANO"))
         else:
-            self.crawler.stats.inc_value(f"atp/{self.name}/no_brand")
-
+            apply_category(Categories.SHOP_OPTICIAN, item)
         yield item

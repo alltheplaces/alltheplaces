@@ -8,6 +8,6 @@ class RoomsToGoUSSpider(StockistSpider):
 
     def parse_item(self, item, location):
         if "RTG KIDS" in item["name"].upper():
-            item["brand"] = "Rooms to Go Kids"
+            item["brand"] = "Rooms To Go Kids"
             item["brand_wikidata"] = "Q119443278"
         yield item

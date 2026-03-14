@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -13,7 +14,7 @@ class CintasSpider(Spider):
     allowed_domains = ["cintas.com"]
     start_urls = ["https://www.cintas.com/location-finder/GetLocationsByGeoCoordinates"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             # A few search locations are needed to cover the United States and Canada
             yield JsonRequest(

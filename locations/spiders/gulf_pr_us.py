@@ -1,9 +1,10 @@
 import re
 from html import unescape
+from typing import AsyncIterator
 
 from chompjs import parse_js_object
-from scrapy import Request, Selector, Spider
-from scrapy.http import FormRequest
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest, Request
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
@@ -12,7 +13,7 @@ from locations.items import Feature
 class GulfPRUSSpider(Spider):
     name = "gulf_pr_us"
     item_attributes = {"brand": "Gulf", "brand_wikidata": "Q5617505"}
-    allowed_domains = ["www.gulfoil.com"]
+    allowed_domains = ["www.gulfinc.com"]
 
     @staticmethod
     def make_request(page: int) -> FormRequest:
@@ -25,13 +26,13 @@ class GulfPRUSSpider(Spider):
             "view_display_id": "block_2",
         }
         return FormRequest(
-            url="https://www.gulfoil.com/views/ajax?_wrapper_format=drupal_ajax",
+            url="https://www.gulfinc.com/views/ajax?_wrapper_format=drupal_ajax",
             formdata=formdata,
             method="POST",
             meta={"page": page},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(1)
 
     def parse(self, response):
@@ -46,7 +47,7 @@ class GulfPRUSSpider(Spider):
             return
 
         for result in results.xpath('//section[@role="article"]'):
-            url = "https://www.gulfoil.com" + result.xpath("./@about").get()
+            url = "https://www.gulfinc.com" + result.xpath("./@about").get()
             meta = {
                 "atm": result.xpath('.//li[contains(text(), "ATM")]/text()').get() is not None,
                 "convenience_store": result.xpath('.//li[contains(text(), "Convenience Store")]/text()').get()

@@ -1,35 +1,31 @@
 from typing import Iterable
 
-import chompjs
-from scrapy import Selector
 from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class LeeannChinUSSpider(JSONBlobSpider):
+class LeeannChinUSSpider(CrawlSpider, StructuredDataSpider):
     name = "leeann_chin_us"
     item_attributes = {
         "brand": "Leeann Chin",
         "brand_wikidata": "Q6515716",
     }
     start_urls = ["https://www.leeannchin.com/locations"]
+    rules = [Rule(LinkExtractor(allow=r"/restaurant/[-\w]+/[-\w]+/?$"), callback="parse_sd")]
+    json_parser = "chompjs"
+    drop_attributes = {"facebook", "twitter"}
 
-    def extract_json(self, response: Response) -> list:
-        return chompjs.parse_js_object(response.xpath('//script[contains(text(), "var jsonContent")]/text()').get())[
-            "data"
-        ]
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        ld_data.pop("openingHoursSpecification", None)  # Current day is missing from ld_data
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["street"] = feature.get("address_route")
-        item["addr_full"] = feature.get("location")
-        item["branch"] = item.pop("name")
-        item["name"] = self.item_attributes["brand"]
-        hours_info = Selector(text=feature.get("hours", ""))
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["name"] = item["name"].removesuffix(" Fresh Asian Flavors")
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(", ".join(hours_info.xpath("//li/text()").getall()))
-        apply_category(Categories.RESTAURANT, item)
+        for rule in response.xpath('//*[@class="opening-hours"]//li'):
+            item["opening_hours"].add_ranges_from_string(rule.xpath("./text()").get())
         yield item

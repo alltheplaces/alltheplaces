@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -7,7 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 TIME_FORMAT = "%I:%M %p"
 
 
-class LidsSpider(scrapy.Spider):
+class LidsSpider(Spider):
     name = "lids"
     item_attributes = {"brand": "Lids", "brand_wikidata": "Q19841609"}
     allowed_domains = ["lids.com"]
@@ -16,10 +19,10 @@ class LidsSpider(scrapy.Spider):
         "USER_AGENT": BROWSER_DEFAULT,
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         url = "https://www.lids.com/api/data/v2/stores/514599?lat=30.2729209&long=-97.74438630000002&num=12000&shipToStore=false"
         headers = {"Accept": "application/json", "Host": "www.lids.com"}
-        yield scrapy.Request(url, method="GET", headers=headers)
+        yield Request(url, method="GET", headers=headers)
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()

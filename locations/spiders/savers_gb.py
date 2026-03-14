@@ -1,7 +1,8 @@
 from typing import Any
+from urllib.parse import urljoin
 
-import scrapy
 import xmltodict
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
@@ -10,22 +11,24 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SaversGBSpider(scrapy.Spider):
+class SaversGBSpider(Spider):
     name = "savers_gb"
     item_attributes = {"brand": "Savers", "brand_wikidata": "Q7428189"}
     start_urls = ["https://api.savers.co.uk/api/v2/sv/stores?country=GB&currentPage=0&pageSize=1000"]
     requires_proxy = True
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in xmltodict.parse(response.text)["StoreFinderSearchPageWsDTO"]["stores"]["stores"]:
+        for location in xmltodict.parse(response.text)["storeFinderSearchPage"]["stores"]:
             location.update(location.pop("address"))
             location.update(location.pop("geoPoint"))
             item = DictParser.parse(location)
-            item["street_address"] = merge_address_lines([location["line2"], location["line1"]])
-            item["website"] = "https://www.savers.co.uk/" + location["url"]
+            item["ref"] = item.pop("name")
+            item["branch"] = location["displayName"]
+            item["street_address"] = merge_address_lines([location.get("line2"), location.get("line1")])
+            item["website"] = urljoin("https://www.savers.co.uk", location["url"])
             item["opening_hours"] = OpeningHours()
-            for day_time in location["openingHours"]["weekDayOpeningList"]["weekDayOpeningList"]:
+            for day_time in location["openingHours"]["weekDayOpeningList"]:
                 day = day_time["weekDay"]
                 open_time = day_time["openingTime"]["formattedHour"]
                 close_time = day_time["closingTime"]["formattedHour"]

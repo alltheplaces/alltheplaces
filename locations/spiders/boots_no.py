@@ -1,66 +1,69 @@
-import re
-import urllib.parse
+from html import unescape
+from typing import Iterable
+from urllib.parse import urlparse
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request, Response, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 
 
-class BootsNOSpider(scrapy.Spider):
+class BootsNOSpider(Spider):
     name = "boots_no"
     item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
     allowed_domains = ["apotek.boots.no", "zpin.it"]
-    download_delay = 0.5
-    start_urls = [
-        "https://apotek.boots.no",
-    ]
+    start_urls = ["https://zpin.it/on/location/map/boots/ajax/search.php?&c[z%3Acat%3AALL]=1&q=&lang=no&mo=440558&json"]
 
-    def parse_map(self, response):
-        map_data = response.xpath(
-            '//script[@type="text/javascript" and contains(text(), "google.maps.LatLng")]/text()'
-        ).extract_first()
-        coordinates = re.search(r"var latlng \= new google\.maps\.LatLng\((.*)\)", map_data).group(1)
-        lat, lon = coordinates.split(",")
+    def parse(self, response: TextResponse, **kwargs):
+        if data := response.json():
+            relations = data.get("relations")
 
-        properties = {
-            "ref": response.meta["ref"],
-            "name": response.meta["name"],
-            "addr_full": response.meta["addr_full"],
-            "country": response.meta["country"],
-            "lat": lat,
-            "lon": lon,
-            "phone": response.meta["phone"],
-            "website": response.meta["website"],
-        }
+            for store in relations.get("440558"):
+                pin = store.get("pin")
+                if pinId := pin.get("id"):
+                    url = f"https://zpin.it/on/location/map/boots/ajax/company.php?id={pinId}&lang=no&mo=440558"
+                    yield Request(url, callback=self.parse_store, cb_kwargs={"pin": pin})
 
-        apply_category(Categories.PHARMACY, properties)
-        yield Feature(**properties)
+    def parse_store(self, response: Response, pin: dict) -> Iterable[Feature]:
+        item = Feature()
 
-    def parse_store(self, response):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        address = clean_address(
-            response.xpath('//div[contains(text(),"Besøksadresse")]/following-sibling::text()').getall()
-        )
-        name = urllib.parse.unquote_plus(re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1))
-        phone = response.xpath('//a[contains(@href,"tel")]/text()').extract_first()
+        item["ref"] = pin.get("id")
 
-        map_url = "https://zpin.it/on/location/map/?key=440558&id={store_id}".format(store_id=ref)
+        if name := pin.get("name"):
+            item["name"] = name
+            item["branch"] = name.removeprefix("Boots Apotek").removeprefix("Boots apotek").strip()
 
-        meta_props = {
-            "ref": ref,
-            "name": name,
-            "addr_full": address,
-            "country": "NO",
-            "phone": phone,
-            "website": response.url,
-        }
+        if website := response.css("h1 a::attr(href)").get():
+            item["website"] = response.urljoin(website.strip())
 
-        yield scrapy.Request(map_url, meta=meta_props, callback=self.parse_map)
+        if latlng := pin.get("latlng"):
+            item["lat"] = latlng.get("lat")
+            item["lon"] = latlng.get("lng")
 
-    def parse(self, response):
-        urls = response.xpath('//div[@id="mapAsList"]//a/@href').extract()
+        if addr_full := response.css(".Zaddress").xpath("text()").getall():
+            item["addr_full"] = addr_full
 
-        for url in urls:
-            yield scrapy.Request(url, callback=self.parse_store)
+        extract_phone(item, response)
+        extract_email(item, response)
+
+        apply_category(Categories.PHARMACY, item)
+
+        yield item
+
+
+def extract_phone(item: Feature, selector: Response) -> None:
+    for link in selector.xpath(".//a/@href").getall():
+        link = unescape(link.strip())
+        if link.startswith("tel:"):
+            if number := urlparse(link).path or urlparse(link).netloc:
+                item["phone"] = number
+            return
+
+
+def extract_email(item: Feature, selector: Response) -> None:
+    for link in selector.xpath(".//a/@href").getall():
+        link = unescape(link.strip())
+        if link.startswith("mailto:") and "@" in link:
+            item["email"] = urlparse(link).path
+            return

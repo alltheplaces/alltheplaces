@@ -28,16 +28,18 @@ class NewYorkCityDepartmentOfParksAndRecreationTreesUSSpider(SocrataSpider):
 
         item["ref"] = feature["globalid"]
         apply_category(Categories.NATURAL_TREE, item)
+        item["extras"]["protected"] = "yes"
 
         if species_label := feature["genusspecies"]:
             if " - " in species_label:
                 scientific_name, common_name = species_label.split(" - ", 1)
-                item["extras"]["species"] = scientific_name
-                item["extras"]["taxon:en"] = common_name
-            else:
+                if scientific_name.title() != "Unspecified":
+                    item["extras"]["species"] = scientific_name
+                if common_name.title() != "Unspecified":
+                    item["extras"]["taxon:en"] = common_name
+            elif species_label.title() != "Unspecified":
                 item["extras"]["taxon:en"] = species_label
 
-        item["extras"]["protected"] = "yes"
         if dbh_in := feature.get("dbh"):
             item["extras"]["diameter"] = f"{dbh_in} in"
         if planted_date := feature.get("planteddate"):

@@ -1,3 +1,6 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -12,9 +15,9 @@ class BarAndBlockGBSpider(CrawlSpider):
     item_attributes = {"brand": "Bar + Block", "brand_wikidata": "Q117599706"}
     start_urls = ["https://www.barandblock.co.uk/en-gb/locations"]
     rules = [Rule(LinkExtractor(allow=r"\/en-gb\/locations\/[-\w]+$"), callback="parse")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["name"] = response.xpath("//@data-ldname").get()
         item["ref"] = response.xpath("//@data-lid").get()

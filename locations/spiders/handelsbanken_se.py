@@ -1,24 +1,22 @@
 import json
+from typing import Any
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class HandelsbankenSESpider(scrapy.Spider):
+class HandelsbankenSESpider(Spider):
     name = "handelsbanken_se"
     item_attributes = {"brand": "Handelsbanken", "brand_wikidata": "Q1421630"}
-    start_urls = [
-        "https://locator.maptoweb.dk/handelsbanken.com/locator/points/where/CountryCode/eqi/se?callback=jQuery1820675693055071215_1676888222517&_=1676888222528"
-    ]
+    start_urls = ["https://locator.maptoweb.dk/handelsbanken.com/locator/points/where/CountryCode/eqi/se"]
+    requires_proxy = True
 
-    def parse(self, response, **kwargs):
-        stores_raw = response.text
-        stores = json.loads(stores_raw.replace("jQuery1820675693055071215_1676888222517(", "").rstrip(");"))
-
-        for store in stores.get("results"):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["results"]:
             oh = OpeningHours()
             location_type = None
             for options in store.get("options"):
@@ -31,10 +29,9 @@ class HandelsbankenSESpider(scrapy.Spider):
                     oh.add_range(DAYS[int(day.get("Weekday"))], day.get("Open"), day.get("Close"))
             website = store.get("url")
             if website and website.startswith("www."):
-                website = website.replace("www.", "https://www.")
+                website = "https://" + website
             properties = {
                 "ref": str(store.get("id")),
-                "name": store.get("name"),
                 "housenumber": store.get("houseNumber"),
                 "postcode": store.get("zipCode"),
                 "city": store.get("cityName"),
@@ -49,8 +46,8 @@ class HandelsbankenSESpider(scrapy.Spider):
             }
             if location_type in ["ATM", "CRS"]:
                 apply_category(Categories.ATM, properties)
-                if location_type == "CRS":
-                    apply_yes_no("cash_out", properties, True)
+                apply_yes_no("cash_out", properties, location_type == "CRS")
             elif location_type == "Branch":
+                properties["branch"] = store.get("name")
                 apply_category(Categories.BANK, properties)
             yield Feature(**properties)

@@ -34,6 +34,11 @@ class SizzlerUSSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day, time in location["location"]["opening_hours"].items():
                 if " - " in time:
-                    item["opening_hours"].add_range(day, *time.split(" - "), time_format="%I:%M%p")
+                    open_time, close_time = time.split(" - ")
+                    if ":" not in open_time:
+                        open_time = f"{open_time[:-2]}:00am"
+                    if ":" not in close_time:
+                        close_time = f"{close_time[:-2]}:00pm"
+                    item["opening_hours"].add_range(day, open_time, close_time, time_format="%I:%M%p")
 
             yield item

@@ -1,40 +1,48 @@
 from typing import Any, Iterable
 
-import scrapy
+from chompjs import chompjs
+from scrapy import Spider
 from scrapy.http import Response
 
-from locations.hours import OpeningHours
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
+from locations.react_server_components import parse_rsc
 
 
-class BudniDESpider(scrapy.Spider):
+class BudniDESpider(Spider):
     name = "budni_de"
     allowed_domains = ["www.budni.de"]
-    start_urls = ["https://www.budni.de/api/infra/branches"]
+    start_urls = ["https://www.budni.de/filialen"]
     item_attributes = {"brand": "Budni", "brand_wikidata": "Q1001516"}
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        for location_data in response.json():
-            yield Feature(
-                {
-                    "ref": location_data["id"],
-                    "street_address": location_data["street"],
-                    "city": location_data["city"],
-                    "postcode": location_data["zip"],
-                    "country": "DE",
-                    "lat": location_data["location"]["lat"],
-                    "lon": location_data["location"]["lon"],
-                    "website": f'https://www.budni.de{location_data["navigationPath"]}',
-                    "image": location_data["headerImage"],
-                    "opening_hours": self.parse_opening_hours(location_data["openingHours"]),
-                    "email": location_data["email"],
-                }
-            )
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        objs = [chompjs.parse_js_object(s) for s in scripts]
+        rsc = "".join([s for n, s in objs]).encode()
+        data = dict(parse_rsc(rsc))
 
-    @staticmethod
-    def parse_opening_hours(hours_definition):
-        oh = OpeningHours()
-        for day, interval in hours_definition.items():
-            open_time, close_time = interval.strip().strip(" Uhr").split("-")
-            oh.add_range(day.title(), open_time.replace(":", "."), close_time.replace(":", "."), time_format="%H.%M")
-        return oh
+        def resolve_reference(obj):
+            if isinstance(obj, str) and obj.startswith("$"):
+                reference = int(store.removeprefix("$"), 16)
+                return data[reference]
+            else:
+                return obj
+
+        for store in resolve_reference(DictParser.get_nested_key(data, "markets")):
+            store = resolve_reference(store)
+            for key, value in store.items():
+                store[key] = resolve_reference(value)
+            # Rename keys to help DictParser find the content
+            store["address"] = store.pop("contact")
+            store["address"]["street_address"] = store["address"].pop("streetAndNumber")
+            store["location"] = store["address"]
+
+            item = DictParser.parse(store)
+            item["website"] = "https://www.budni.de/filialen/{}".format(item["ref"])
+            if item["name"].startswith("budni - "):
+                item["branch"] = item.pop("name").removeprefix("budni - ")
+            hours = OpeningHours()
+            hours.add_ranges_from_string(store["workingDaysSummary"], DAYS_DE)
+            item["opening_hours"] = hours
+            yield item

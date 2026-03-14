@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator
 from urllib.parse import quote
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
@@ -18,7 +18,7 @@ class BestAndLessAUSpider(Spider):
             url="https://prodapi.bestandless.com.au/occ/v2/bnlsite/stores?fields=FULL&currentPage={}".format(page)
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response):

@@ -10,7 +10,7 @@ from locations.structured_data_spider import extract_phone
 
 class NicolasSpider(SitemapSpider):
     name = "nicolas"
-    item_attributes = {"brand": "Nicolas", "brand_wikidata": "Q3340012"}
+    item_attributes = {"brand": "Maison Nicolas", "brand_wikidata": "Q3340012"}
     sitemap_urls = ["https://www.nicolas.com/robots.txt"]
     sitemap_follow = ["Store-fr-"]
     sitemap_rules = [(r"/fr/magasins/[^/]+/s/(\d+).html$", "parse")]

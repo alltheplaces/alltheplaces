@@ -14,7 +14,7 @@ class MaxAndCompanySpider(Spider):
         "https://gb.maxandco.com/store-locator?south=-90&west=-180&north=90&east=180&listJson=true&withoutRadius=false"
     ]
     no_refs = True
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response, **kwargs):
         for location in response.json()["features"]:

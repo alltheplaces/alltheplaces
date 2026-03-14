@@ -1,46 +1,29 @@
-import chompjs
-from scrapy.http import JsonRequest, Request
+import re
+from typing import Any
 
-from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
+from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class UciCinemasITSpider(JSONBlobSpider):
+class UciCinemasITSpider(CrawlSpider):
     name = "uci_cinemas_it"
     item_attributes = {"brand": "UCI", "brand_wikidata": "Q521922"}
-    start_urls = ["https://www.ucicinemas.it/rest/v3/cinemas/"]
-    http_page = "https://www.ucicinemas.it/cinema/"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    id_to_website = dict()
-    requires_proxy = True  # Cloudflare bot protection used
+    start_urls = ["https://ucicinemas.it/cinema/"]
+    rules = [Rule(LinkExtractor(allow=r"/cinema/uci-.*"), callback="parse")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
-    def start_requests(self):
-        yield Request(self.http_page, callback=self.map_websites, dont_filter=True)
-
-    def map_websites(self, response):
-        links = response.css(".autocomplete-datasource .cinema a")
-        for link in links:
-            self.id_to_website[link.attrib["data-cr-id"]] = f"https://www.ucicinemas.it{link.attrib['href']}"
-        yield JsonRequest(self.start_urls[0], headers={"Authorization": "Bearer SkAkzoScIbhb3uNcGdk8UL0XMIbvs5"})
-
-    def pre_process_data(self, location):
-        location["id"] = location.pop("source_id")
-        location["website"] = self.id_to_website.get(str(location["id"]))
-
-    def post_process_item(self, item, response, location):
-        item["branch"] = item["name"]
-        item["name"] = item["name"].split("|")[0].strip()
-        apply_category(Categories.CINEMA, item)
-        if url := item.get("website"):
-            yield Request(url, cb_kwargs={"item": item}, callback=self.extract_address)
-        else:
-            yield item
-
-    def extract_address(self, response, item):
-        obj = chompjs.parse_js_object(
-            response.xpath("//script[@type=$ldjson]/text()", ldjson="application/ld+json").get()
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["name"] = response.xpath("//h1/text()").get()
+        item["addr_full"] = clean_address(
+            response.xpath('//*[@class="text-gray-1 text-base"]').xpath("normalize-space()").get()
         )
-        item["addr_full"] = obj["address"]["streetAddress"]
-        item["postcode"] = obj["address"]["postalCode"]
-        item["city"] = obj["address"]["addressLocality"]
+        item["lat"], item["lon"] = re.search(r"\"(-?\d+\.\d+)\",\"(-?\d+\.\d+)\"", response.text).groups()
+        item["ref"] = item["website"] = response.url
         yield item

@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -56,9 +56,20 @@ class KiaSpider(scrapy.Spider):
             item["ref"] = store.get("dealerSeq")
             item["country"] = store.get("dealerCountry")
             dealer_type = store.get("dealerDealertype", "").lower()
+
             if "sales" in dealer_type:
-                apply_category(Categories.SHOP_CAR, item)
-            else:
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-            apply_yes_no("service:vehicle:car_repair", item, "service" in dealer_type)
-            yield item
+                sales_item = item.deepcopy()
+                sales_item["ref"] = f"{item['ref']}-sales"
+                apply_category(Categories.SHOP_CAR, sales_item)
+                apply_yes_no(Extras.CAR_REPAIR, sales_item, "service" in dealer_type)
+                yield sales_item
+
+            if "service" in dealer_type:
+                service_item = item.deepcopy()
+                service_item["ref"] = f"{item['ref']}-service"
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                yield service_item
+
+            if not any(cat in dealer_type for cat in ["sales", "service"]):
+                self.logger.error(f"Unknown dealer type: {dealer_type} for dealer {item['ref']}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/unknown_dealer_type")

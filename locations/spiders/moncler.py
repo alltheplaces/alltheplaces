@@ -13,8 +13,7 @@ class MonclerSpider(scrapy.Spider):
     allowed_domains = ["moncler.com"]
     start_urls = ["https://www.moncler.com/on/demandware.store/Sites-MonclerEU-Site/it_IT/StoresApi-FindAll"]
     requires_proxy = True
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:

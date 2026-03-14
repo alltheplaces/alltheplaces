@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -6,11 +8,11 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 
 
-class RosselkhozbankRUSpider(scrapy.Spider):
+class RosselkhozbankRUSpider(Spider):
     name = "rosselkhozbank_ru"
     item_attributes = {"brand_wikidata": "Q3920226"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://www.rshb.ru/api/v1/regions", callback=self.parse_regions)
 
     def parse_regions(self, response):

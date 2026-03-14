@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class AswakAssalamMASpider(Spider):
     name = "aswak_assalam_ma"
-    item_attributes = {"brand": "Aswak Assalam", "brand_wikidata": "Q2868678"}
+    item_attributes = {"brand_wikidata": "Q2868678"}
     allowed_domains = ["www.aswakassalam.com"]
     start_urls = ["https://www.aswakassalam.com/nos-magasins/"]
 

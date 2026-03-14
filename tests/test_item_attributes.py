@@ -5,6 +5,28 @@ from locations.exporters.geojson import iter_spider_classes_in_modules
 from locations.name_suggestion_index import NSI
 
 
+def test_presence_of_deprecated_class_attributes():
+    # Details: https://github.com/alltheplaces/alltheplaces/pull/14183
+
+    errors = []
+    for spider_class in iter_spider_classes_in_modules():
+        for attr in [
+            "download_delay",
+            "download_maxsize",
+            "download_warnsize",
+            "max_concurrent_requests",
+            "download_timeout",
+            "user_agent",
+        ]:
+            if hasattr(spider_class, attr):
+                errors.append(f"{spider_class.name} has deprecated attribute {attr}")
+    if errors:
+        for error in errors:
+            logging.error(error)
+            logging.error("Please move deprecated attributes to appropriate custom_settings.")
+        assert False
+
+
 def test_item_attributes_type():
     for spider_class in iter_spider_classes_in_modules():
         item_attributes = getattr(spider_class, "item_attributes", {})

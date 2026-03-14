@@ -9,7 +9,7 @@ class SterKinekorSpider(JSONBlobSpider):
     item_attributes = {"brand": "Ster-Kinekor", "brand_wikidata": "Q130179"}
     start_urls = ["https://www.sterkinekor.com/middleware/api/v2/regions"]
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,

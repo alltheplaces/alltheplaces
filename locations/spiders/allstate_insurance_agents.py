@@ -10,7 +10,6 @@ class AllstateInsuranceAgentsSpider(scrapy.Spider):
     name = "allstate_insurance_agents"
     item_attributes = {"brand": "Allstate", "brand_wikidata": "Q2645636"}
     allowed_domains = ["agents.allstate.com"]
-    download_delay = 0.5
     start_urls = ("https://agents.allstate.com/",)
 
     def parse_hours(self, hours):

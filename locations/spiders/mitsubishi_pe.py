@@ -3,7 +3,7 @@ from typing import Any
 import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
@@ -12,7 +12,6 @@ class MitsubishiPESpider(scrapy.Spider):
     name = "mitsubishi_pe"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
     start_urls = ["https://www.mitsubishi-motors.com.pe/concesionarios"]
-    no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for value in response.xpath('//*[@id="dep"]//option//@value').getall():
@@ -29,14 +28,20 @@ class MitsubishiPESpider(scrapy.Spider):
             item["phone"] = location.xpath('.//*[contains(@href,"tel:")]/text()').get()
             extract_google_position(item, location)
             location_type = location.xpath(".//ul//li").xpath("normalize-space()").getall()
-            if "Concesionario" not in location_type:
-                if "Taller" in location_type:
-                    apply_category(Categories.SHOP_CAR_REPAIR, item)
-                    apply_yes_no(Extras.CAR_PARTS, item, "Repuestos" in location_type)
-                else:
-                    apply_category(Categories.SHOP_CAR_PARTS, item)
-            else:
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, "Taller" in location_type)
-                apply_yes_no(Extras.CAR_PARTS, item, "Repuestos" in location_type)
-            yield item
+
+            for dept in location_type:
+                if dept == "Concesionario":
+                    sales_item = item.deepcopy()
+                    sales_item["ref"] = sales_item["branch"] + "-SALES"
+                    apply_category(Categories.SHOP_CAR, sales_item)
+                    yield sales_item
+                elif dept == "Taller":
+                    service_item = item.deepcopy()
+                    service_item["ref"] = service_item["branch"] + "-SERVICE"
+                    apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                    yield service_item
+                elif dept == "Repuestos":
+                    spare_parts_item = item.deepcopy()
+                    spare_parts_item["ref"] = spare_parts_item["branch"] + "-SPARE_PARTS"
+                    apply_category(Categories.SHOP_CAR_PARTS, spare_parts_item)
+                    yield spare_parts_item

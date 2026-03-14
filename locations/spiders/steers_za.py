@@ -1,43 +1,34 @@
-from locations.categories import Extras, apply_yes_no
-from locations.pipelines.address_clean_up import clean_address
-from locations.storefinders.yext_search import YextSearchSpider
+from typing import Iterable
 
-KNOWN_FUEL_STATIONS = ["Engen", "Sasol", "Shell", "Total"]
-STEERS_FILTERS = {
-    "Halaal": Extras.HALAL,
-    "Generator": Extras.BACKUP_GENERATOR,
-    "Drive Thru": Extras.DRIVE_THROUGH,
-}
+from scrapy.http import Request, Response
+
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
+from locations.items import Feature
+from locations.storefinders.go_review_api import GoReviewApiSpider
 
 
-class SteersZASpider(YextSearchSpider):
+class SteersZASpider(GoReviewApiSpider):
     name = "steers_za"
     item_attributes = {"brand": "Steers", "brand_wikidata": "Q3056765"}
-    host = "https://location.steers.co.za"
 
-    def parse_item(self, location, item):
-        apply_yes_no(Extras.DELIVERY, item, location["profile"].get("c_delivery"), False)
+    domain = "locations.steers.co.za"
 
-        if location_filters := location["profile"].get("c_steersLocatorFilters"):
-            for filter, attribute in STEERS_FILTERS.items():
-                apply_yes_no(attribute, item, filter in location_filters, False)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
+        item["branch"] = item.pop("name").removeprefix("Steers ")
+        if feature.get("attributes") is not None:
+            attributes = [attribute["value"] for attribute in feature["attributes"]]
+            apply_yes_no(Extras.DELIVERY, item, "Delivery" in attributes)
+            apply_yes_no(PaymentMethods.CARDS, item, "Card" in attributes)
+            apply_yes_no(PaymentMethods.DEBIT_CARDS, item, "Debit cards" in attributes)
+            apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "Credit cards" in attributes)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-through" in attributes)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in attributes)
+            apply_yes_no(Extras.BREAKFAST, item, "Breakfast" in attributes)
+            apply_yes_no(Extras.BRUNCH, item, "Brunch" in attributes)
 
-        if item["email"] == "info@steers.co.za":
-            item.pop("email")
+            for attribute in attributes:
+                self.crawler.stats.inc_value(f"atp/{self.name}/attribute/{attribute}")
 
-        street_address = item["street_address"]
-        if item["branch"] in street_address:
-            street_address = clean_address(street_address.replace(item["branch"], ""))
-        if "," in street_address and any([fuel in street_address.split(",")[0] for fuel in KNOWN_FUEL_STATIONS]):
-            street_address = clean_address(street_address.split(",", 1)[1])
-
-        try:
-            if " " in street_address:
-                int(street_address.split(" ")[0])
-                item["housenumber"] = street_address.split(" ", 1)[0]
-                item["street"] = street_address.split(",")[0].split(" ", 1)[1]
-        except ValueError:
-            if not any([i in street_address for i in [",", "Corner", "Cnr", "c/o", "Portion"]]):
-                item["street"] = street_address
+        apply_category(Categories.FAST_FOOD, item)
 
         yield item

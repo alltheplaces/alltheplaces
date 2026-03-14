@@ -11,8 +11,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class DiscountTireSpider(SitemapSpider):
     name = "discount_tire"
     item_attributes = {"brand": "Discount Tire", "brand_wikidata": "Q5281735"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     sitemap_urls = ["https://sitemaps.discounttire.com/store.xml"]
 
     def parse(self, response, **kwargs):

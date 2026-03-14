@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -18,7 +18,7 @@ class IonitySpider(Spider):
 
     # Ionity API found from its payment website: https://payment.ionity.eu/dashboard
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://ionity-api.ionity.cloud/api/v1/user/collective")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

@@ -1,7 +1,9 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
@@ -10,13 +12,13 @@ from locations.user_agents import BROWSER_DEFAULT
 class WoolworthsNZSpider(Spider):
     name = "woolworths_nz"
     METRO = {"brand": "Woolworths Metro", "brand_wikidata": "Q123699264"}
-    item_attributes = {"brand": "Woolworths", "brand_wikidata": "Q5176845", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "Woolworths", "brand_wikidata": "Q5176845"}
     allowed_domains = ["api.cdx.nz"]
     start_urls = ["https://api.cdx.nz/site-location/api/v1/sites?latitude=-42&longitude=174&maxResults=10000"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = "NZ"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -47,4 +49,7 @@ class WoolworthsNZSpider(Spider):
                     location["tradingHours"][0].get(day_name.lower())["endTime"],
                     "%H:%M:%S",
                 )
+
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+
             yield item

@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy import Request, Selector
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
@@ -11,20 +11,8 @@ from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
     name = "teds_camera_stores_au"
-    item_attributes = {
-        "brand": "Ted's Camera Stores",
-        "brand_wikidata": "Q117958394",
-        "extras": Categories.SHOP_CAMERA.value,
-    }
+    item_attributes = {"brand": "Ted's Camera Stores", "brand_wikidata": "Q117958394"}
     allowed_domains = ["www.teds.com.au"]
-
-    def start_requests(self) -> Iterable[Request]:
-        # The request won't work without the headers supplied below.
-        headers = {
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        for domain in self.allowed_domains:
-            yield Request(url=f"https://{domain}/amlocator/index/ajax/", method="POST", headers=headers)
 
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Request]:
         item["addr_full"] = ", ".join(
@@ -49,4 +37,7 @@ class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
             )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
+
+        apply_category(Categories.SHOP_CAMERA, item)
+
         yield item

@@ -1,17 +1,18 @@
 import re
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class BodystreetSpider(scrapy.Spider):
+class BodystreetSpider(Spider):
     name = "bodystreet"
     item_attributes = {"brand": "Bodystreet", "brand_wikidata": "Q117880186"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.bodystreet.com/api/v1/entries/entrysearch",
             method="POST",

@@ -11,11 +11,10 @@ from locations.user_agents import BROWSER_DEFAULT
 class MediaExpertPLSpider(Spider):
     name = "media_expert_pl"
 
-    user_agent = BROWSER_DEFAULT
-
     custom_settings = {
         # somehow this actually seems to work
         "RETRY_HTTP_CODES": [403],
+        "USER_AGENT": BROWSER_DEFAULT,
     }
 
     requires_proxy = True  # Cloudflare geoblocking in use

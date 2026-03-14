@@ -1,5 +1,5 @@
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import Request, Response
 
@@ -14,7 +14,7 @@ class Big4HolidayParksAUSpider(JSONBlobSpider):
     allowed_domains = ["www.big4.com.au"]
     start_urls = ["https://www.big4.com.au/park-directory"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         headers = {
             "Content-Type": "text/plain;charset=UTF-8",
             "Next-Action": "7651f6930c5534ce73277e1932d402973523f326",

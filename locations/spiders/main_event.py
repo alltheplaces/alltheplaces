@@ -8,7 +8,6 @@ from locations.structured_data_spider import StructuredDataSpider
 class MainEventSpider(SitemapSpider, StructuredDataSpider):
     name = "main_event"
     item_attributes = {"brand": "Main Event", "brand_wikidata": "Q56062981"}
-    download_delay = 0.2
     sitemap_urls = ["https://www.mainevent.com/sitemap.xml"]
     sitemap_rules = [(r"\/locations\/", "parse_sd")]
 

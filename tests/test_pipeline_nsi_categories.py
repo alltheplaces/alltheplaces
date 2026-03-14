@@ -1,4 +1,4 @@
-from scrapy import Spider
+from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
 from locations.categories import Categories, apply_category, get_category_tags
@@ -7,15 +7,15 @@ from locations.pipelines.apply_nsi_categories import ApplyNSICategoriesPipeline
 
 
 def get_objects():
-    spider = Spider(name="test")
-    spider.crawler = get_crawler()
-    return Feature(), ApplyNSICategoriesPipeline(), spider
+    crawler = get_crawler(DefaultSpider)
+    crawler.spider = crawler._create_spider()
+    return Feature(), ApplyNSICategoriesPipeline(crawler), crawler.spider
 
 
 def test_no_categories():
     item, pipeline, _ = get_objects()
 
-    assert get_category_tags(item) is None
+    assert get_category_tags(item) == {}
 
 
 def test_categories_apply():
@@ -137,7 +137,7 @@ def test_cc_filter():
 def test_nsi_brand_matching():
     item, pipeline, spider = get_objects()
     item["brand_wikidata"] = "Q4683851"
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
 
     assert item["nsi_id"]
 
@@ -145,7 +145,7 @@ def test_nsi_brand_matching():
 def test_nsi_operator_matching():
     item, pipeline, spider = get_objects()
     item["operator_wikidata"] = "Q4829193"
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
 
     assert item["nsi_id"]
 

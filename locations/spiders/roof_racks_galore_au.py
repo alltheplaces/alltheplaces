@@ -18,6 +18,7 @@ class RoofRacksGaloreAUSpider(Spider):
     }
     allowed_domains = ["www.roofracksgalore.com.au"]
     start_urls = ["https://www.roofracksgalore.com.au/locations"]
+    requires_proxy = True
 
     def parse(self, response: Response) -> Iterable[JsonRequest]:
         js_blob = response.xpath('//script[contains(text(), "var storelocations = [")]/text()').get()

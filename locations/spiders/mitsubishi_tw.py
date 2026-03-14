@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
@@ -12,7 +14,7 @@ class MitsubishiTWSpider(JSONBlobSpider):
         "brand_wikidata": "Q36033",
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for node_type in ["1", "2"]:
             yield FormRequest(
                 url="https://www.mitsubishi-motors.com.tw/do/locationsdo.php",

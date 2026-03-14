@@ -1,11 +1,13 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class DiSpider(scrapy.Spider):
+class DiSpider(Spider):
     name = "di"
     item_attributes = {
         "brand": "Di",
@@ -19,7 +21,7 @@ class DiSpider(scrapy.Spider):
         },
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.di.be/ajax.V1.php/fr_FR/Rbs/Storelocator/Store/",
             data={
