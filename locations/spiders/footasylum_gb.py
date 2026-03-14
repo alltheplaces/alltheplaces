@@ -14,6 +14,8 @@ class FootasylumGBSpider(SitemapSpider, StructuredDataSpider):
         ("https://www.footasylum.com/store-locator/[^/]+/", "parse_sd"),
     ]
     wanted_types = ["Store"]
+    drop_attributes = {"facebook", "image", "twitter"}
+
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
