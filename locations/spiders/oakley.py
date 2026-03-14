@@ -1,4 +1,5 @@
 import json
+from urllib.parse import unquote
 
 from scrapy.spiders import SitemapSpider
 
@@ -23,15 +24,21 @@ class OakleySpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.SHOP_OPTICIAN, item)
 
-        script = response.xpath("//script[starts-with(text(), 'window.__INITIAL__DATA__ = ')]/text()").get()
-        initial_data = json.loads(script[len("window.__INITIAL__DATA__ = ") :])
-        document = initial_data["document"]
+        prefix = "pageProps: JSON.parse(decodeURIComponent("
+        script = response.xpath(f"//script[contains(text(), {prefix!r})]/text()").get()
+        if script is None:
+            self.logger.error("Can't find JSON data in page, coordinates might be missing")
+        else:
+            start = script.find(prefix) + len(prefix)
+            end = script.find(")),\n", start)
+            initial_data = json.loads(unquote(json.loads(script[start:end])))
+            document = initial_data["document"]
 
-        item["branch"] = document.get("address", {}).get("extraDescription")
-        item["image"] = document.get("c_locationPhoto", {}).get("image", {}).get("url")
-        item["ref"] = document.get("id", response.url)
-        item["lat"] = document.get("yextDisplayCoordinate", {}).get("latitude")
-        item["lon"] = document.get("yextDisplayCoordinate", {}).get("longitude")
+            item["branch"] = document.get("address", {}).get("extraDescription")
+            item["image"] = document.get("c_locationPhoto", {}).get("image", {}).get("url")
+            item["ref"] = document.get("id", response.url)
+            item["lat"] = document.get("yextDisplayCoordinate", {}).get("latitude")
+            item["lon"] = document.get("yextDisplayCoordinate", {}).get("longitude")
 
         yield item
 

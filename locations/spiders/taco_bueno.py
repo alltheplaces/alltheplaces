@@ -1,57 +1,56 @@
-from typing import AsyncIterator
+import re
+from datetime import datetime
+from typing import Any
 
-from geonamescache import GeonamesCache
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.items import SocialMedia, set_closed, set_social_media
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TacoBuenoSpider(Spider):
     name = "taco_bueno"
     item_attributes = {"brand": "Taco Bueno", "brand_wikidata": "Q7673958"}
+    start_urls = ["https://locations.tacobueno.com/"]
 
-    async def start(self) -> AsyncIterator[Request]:
-        for state in GeonamesCache().get_us_states():
-            yield Request(f"https://buenoonthego.com/mp/ndXTAL/searchByStateCode_JSON?stateCode='{state}'")
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield JsonRequest(
+            url="https://locations.tacobueno.com/_next/data/{}/index.json".format(
+                re.search(r"buildId\"\s*:\s*\"(.+)\",", response.text).group(1)
+            ),
+            callback=self.parse_locations,
+        )
 
-    @staticmethod
-    def convert_hours(times: dict) -> OpeningHours:
-        if times == "Closed":
-            return
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["pageProps"]["locations"]:
+            item = DictParser.parse(location)
+            item["ref"] = location["storeCode"]
+            item["street_address"] = merge_address_lines(location["addressLines"])
+            item["website"] = item["website"].replace("\t", "")
+            item["phone"] = "; ".join(location["phoneNumbers"])
+
+            item["opening_hours"] = self.parse_opening_hours(location["businessHours"])
+            apply_category(Categories.FAST_FOOD, item)
+
+            set_social_media(item, SocialMedia.FACEBOOK, location["attributes"].get("url_facebook"))
+            item["extras"]["website:menu"] = location["attributes"]["url_order_ahead"]
+            apply_yes_no(Extras.INDOOR_SEATING, item, location["attributes"]["serves_dine_in"] is True)
+            apply_yes_no(Extras.TAKEAWAY, item, location["attributes"]["has_takeout"] is True)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, location["attributes"].get("has_drive_through") is True)
+            if hours := (location.get("otherHours") or {}).get("DRIVE_THROUGH"):
+                item["extras"]["opening_hours:drive_through"] = self.parse_opening_hours(hours).as_opening_hours()
+            item["extras"]["start_date"] = location["openingDate"]
+            if location["closingDate"]:
+                set_closed(item, datetime.fromisoformat(location["closingDate"]))
+
+            yield item
+
+    def parse_opening_hours(self, hours: list) -> OpeningHours:
         oh = OpeningHours()
-        start_time, end_time = times.split(" - ")
-        oh.add_days_range(DAYS, start_time, end_time, time_format="%I:%M %p")
+        for day, hours in zip(DAYS, hours):
+            oh.add_range(day, hours[0], hours[1])
         return oh
-
-    def parse(self, response):
-        results = response.json()
-        if results:
-            for i in results:
-                ref = i["storeid"]
-                name = i["restaurantname"]
-                street = clean_address([i["address1"], i["address2"], i["address3"]])
-                city = i["city"]
-                state = i["statecode"]
-                postcode = i["zipcode"]
-                country = i["country"]
-                phone = i["phone"]
-                lon = i["longitude"]
-                lat = i["latitude"]
-                # business_hours seems to hold bad data
-                hours = self.convert_hours(i["businesshours"])
-                yield Feature(
-                    ref=ref,
-                    name=name,
-                    street_address=street,
-                    city=city,
-                    state=state,
-                    postcode=postcode,
-                    country=country,
-                    phone=phone,
-                    lon=lon,
-                    lat=lat,
-                    opening_hours=hours,
-                )
