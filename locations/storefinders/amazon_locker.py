@@ -1,10 +1,13 @@
-from scrapy import Request
+from typing import AsyncIterator, Iterable
+
 from scrapy.downloadermiddlewares.retry import get_retry_request
+from scrapy.http import Request, TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.country_utils import CountryUtils
 from locations.geo import city_locations, postal_regions
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -95,61 +98,64 @@ BRANDS_IN_ADDRESS = {
 
 
 class AmazonLockerSpider(JSONBlobSpider):
-    item_attributes = {
+    allowed_domains: list[str] = []
+    item_attributes: dict = {
         "brand": "Amazon Locker",
         "brand_wikidata": "Q16974764",
     }
-    locations_key = "locationList"
+    locations_key: str | list[str] = "locationList"
 
-    async def start(self):
+    async def start(self) -> AsyncIterator[Request]:
         country_utils = CountryUtils()
-        for domain in self.allowed_domains:
-            for country in country_utils.country_codes_from_spider_name(self.name):
-                if country in ("GB", "US", "FR"):
-                    # Tested in US to be the maximum population limit that still returns all lockers
-                    regions = postal_regions(country, 6799)
-                else:
-                    regions = city_locations(country, 6799)
-                for region in regions:
-                    yield Request(
-                        f"https://{domain}/location_selector/fetch_locations?longitude={region['longitude']}&latitude={region['latitude']}&clientId=amazon_us_add_to_addressbook_mkt_mobile&countryCode={country}&sortType=DISTANCE"
-                    )
+        if len(self.allowed_domains) != 1:
+            raise ValueError("Specify one domain name in the allowed_domains list attribute.")
+            return
+        for country in country_utils.country_codes_from_spider_name(self.name):
+            if country in ("GB", "US", "FR"):
+                # Tested in US to be the maximum population limit that still returns all lockers
+                regions = postal_regions(country, 6799)
+            else:
+                regions = city_locations(country, 6799)
+            for region in regions:
+                yield Request(
+                    f"https://{self.allowed_domains[0]}/location_selector/fetch_locations?longitude={region['longitude']}&latitude={region['latitude']}&clientId=amazon_us_add_to_addressbook_mkt_mobile&countryCode={country}&sortType=DISTANCE"
+                )
 
-    def parse(self, response):
-        if response.json().get("isErrored", True):
+    def parse(self, response: TextResponse) -> Iterable[Feature | Request]:
+        if response.json().get("isErrored", True) and response.request:
             # Usually intermittent
-            return get_retry_request(response.request, spider=self)
+            if retry_request := get_retry_request(response.request, spider=self):
+                yield retry_request
         else:
             yield from super().parse(response)
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         # Only process actual lockers.
-        if location["accessPointType"] != "LOCKER":
+        if feature["accessPointType"] != "LOCKER":
             return
 
-        if location["addressLine1"] in BRANDS_IN_ADDRESS:
+        if feature["addressLine1"] in BRANDS_IN_ADDRESS:
             # addressLine1 is frequently the name of the business it's in.
             # But not always, so only remove it if it's a known brand.
-            located_in = location.pop("addressLine1")
+            located_in = feature.pop("addressLine1")
             item["located_in"] = located_in
             item["located_in_wikidata"] = BRANDS_IN_ADDRESS[located_in]
-        if location["storeType"]:
-            item.update(STORE_TYPES[location["storeType"]])
+        if feature["storeType"]:
+            item.update(STORE_TYPES[feature["storeType"]])
 
         item["street_address"] = merge_address_lines(
-            [location.get("addressLine1"), location["addressLine2"], location["addressLine3"]]
+            [feature.get("addressLine1"), feature.get("addressLine2"), feature.get("addressLine3")]
         )
-        item["state"] = location["stateOrRegion"]
+        item["state"] = feature["stateOrRegion"]
 
-        if location["isRestricted"]:
+        if feature["isRestricted"]:
             item["extras"]["access"] = "private"
 
-        apply_yes_no(Extras.WHEELCHAIR, item, location["hasLowerLocker"])
+        apply_yes_no(Extras.WHEELCHAIR, item, feature["hasLowerLocker"])
 
-        oh = OpeningHours()
-        for hours in location["operationalInfo"]:
-            oh.add_ranges_from_string(f"{hours['operationalDayOfWeek']} {hours['operationalHours']}")
-        item["opening_hours"] = oh
+        item["opening_hours"] = OpeningHours()
+        for hours in feature["operationalInfo"]:
+            item["opening_hours"].add_ranges_from_string(f"{hours['operationalDayOfWeek']} {hours['operationalHours']}")
 
         apply_category(Categories.PARCEL_LOCKER, item)
 

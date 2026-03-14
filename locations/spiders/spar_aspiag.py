@@ -1,5 +1,7 @@
-import scrapy
-from scrapy.http.request import Request
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -42,7 +44,7 @@ BRANDS = {
 }
 
 
-class SparAspiagSpider(scrapy.Spider):
+class SparAspiagSpider(Spider):
     # Spar stores run by ASPIAG: https://www.aspiag.com/en/countries
     # See also https://github.com/alltheplaces/alltheplaces/pull/9379
     name = "spar_aspiag"
@@ -54,7 +56,7 @@ class SparAspiagSpider(scrapy.Spider):
         {"country": "hu", "path": "uzletek", "days": DAYS_HU},
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for config in self.COUNTRIES:
             yield Request(
                 f'https://www.spar.{config["country"]}/{config["path"]}/_jcr_content.stores.v2.html',

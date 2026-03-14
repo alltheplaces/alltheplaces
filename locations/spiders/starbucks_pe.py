@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 
 from locations.geo import city_locations
@@ -9,7 +11,7 @@ class StarbucksPESpider(StarbucksUSSpider):
     item_attributes = StarbucksUSSpider.item_attributes
     country_filter = ["PE"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("PE", 15000):
             yield JsonRequest(
                 url=STORELOCATOR.format(city["latitude"], city["longitude"]),

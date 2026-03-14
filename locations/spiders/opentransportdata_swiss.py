@@ -126,7 +126,7 @@ class OpentransportdataSwissSpider(Spider):
     def handle_service_points(self, response):
         self.stations = {}
         # "swiss-only" is an misnomer; the actual data goes far beyond.
-        for row in self.read_csv("actual_date-swiss-only-service_point", response):
+        for row in self.read_csv("actual-date-swiss-service-point", response):
             if row["status"] != "VALIDATED":
                 continue
             sloid = row["sloid"]
@@ -183,7 +183,7 @@ class OpentransportdataSwissSpider(Spider):
         yield Request(url, callback=self.handle_traffic_points)
 
     def handle_traffic_points(self, response):
-        for row in self.read_csv("actual_date-world-traffic_point", response):
+        for row in self.read_csv("actual-date-world-traffic-point", response):
             # This table does not seem to have a status column,
             # so we do not check for status="VALIDATED" here.
             sloid = row["sloid"]

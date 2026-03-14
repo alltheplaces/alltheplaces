@@ -1,7 +1,7 @@
 import re
+from typing import AsyncIterator
 
-from scrapy import Request
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Request
 
 from locations.spiders.john_lewis_gb import JohnLewisGBSpider
 from locations.structured_data_spider import StructuredDataSpider
@@ -10,9 +10,10 @@ from locations.structured_data_spider import StructuredDataSpider
 class ReissGBSpider(StructuredDataSpider):
     name = "reiss_gb"
     item_attributes = {"brand": "Reiss", "brand_wikidata": "Q7310479"}
+    allowed_domains = ["www.reiss.com"]
     start_urls = ["https://www.reiss.com/storelocator/data/stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

@@ -2,7 +2,7 @@ from typing import Any, AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature, get_merged_item
 from locations.json_blob_spider import JSONBlobSpider
@@ -44,6 +44,7 @@ class BurgerKingEGSpider(JSONBlobSpider):
         item["addr_full"] = location["attributes"]["line1"]
         # item["country"] = location["attributes"]["country"] # Incorrect country (SA) reported for some locations
 
+        apply_category(Categories.FAST_FOOD, item)
         apply_yes_no(Extras.DELIVERY, item, location["attributes"]["delivery-enabled"] == 1, False)
         apply_yes_no(Extras.DRIVE_THROUGH, item, location["attributes"]["is-drive-thru-enabled"], False)
 

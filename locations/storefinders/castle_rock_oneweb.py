@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -27,11 +27,11 @@ class CastleRockOneWebSpider(JSONBlobSpider):
         not available, omit this parameter.
     """
 
-    api_endpoint: str = None
-    locations_key: list[str] = ["data", "mapFeaturesQuery", "mapFeatures"]
-    video_url_template: str = None
+    api_endpoint: str
+    locations_key: str | list[str] = ["data", "mapFeaturesQuery", "mapFeatures"]
+    video_url_template: str | None = None
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "query": "query MapFeatures($input: MapFeaturesArgs!, $plowType: String) { mapFeaturesQuery(input: $input) { mapFeatures { bbox tooltip uri features { id geometry properties } ... on Sign { signDisplayType } ... on Event { priority } __typename ... on Camera { active views(limit: 5) { uri ... on CameraView { url } category } } ... on Plow { views(limit: 5, plowType: $plowType) { uri ... on PlowCameraView { url } category } } } error { message type } } }",
             "variables": {
@@ -49,7 +49,7 @@ class CastleRockOneWebSpider(JSONBlobSpider):
         }
         yield JsonRequest(url=self.api_endpoint, data=data, method="POST")
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         if (
             feature["features"][0]["geometry"]["coordinates"][0] == 0
             and feature["features"][0]["geometry"]["coordinates"][1] == 0

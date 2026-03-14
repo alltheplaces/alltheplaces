@@ -1,6 +1,6 @@
 import re
 from copy import deepcopy
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 import reverse_geocoder
 from geonamescache import GeonamesCache
@@ -65,7 +65,7 @@ class VolkswagenSpider(JSONBlobSpider):
     countries.pop("BW")  # included in ZA
     countries.pop("NA")  # included in ZA
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.fetch_json)
 

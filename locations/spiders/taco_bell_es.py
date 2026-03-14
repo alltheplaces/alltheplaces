@@ -1,6 +1,5 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -24,7 +23,7 @@ class TacoBellESSpider(Spider):
             meta={"offset": offset},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

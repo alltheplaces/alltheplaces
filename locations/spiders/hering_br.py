@@ -14,8 +14,7 @@ class HeringBRSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.hering.com.br/_v/public/graphql/v1",
-            data={
-                "query": """
+            data={"query": """
                 query getStores {
                  documents(acronym: "BA", fields: ["cep", "cidade", "rua", "telefones", "bairro", "nome"],
                                             where: "cidade=*", pageSize: 1000)
@@ -25,8 +24,7 @@ class HeringBRSpider(Spider):
                                                     value
                                                    }
                                             }
-                                        }"""
-            },
+                                        }"""},
         )
 
     def parse(self, response, **kwargs):

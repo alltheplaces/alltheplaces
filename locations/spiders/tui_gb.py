@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.linked_data_parser import LinkedDataParser
 from locations.user_agents import BROWSER_DEFAULT
@@ -38,5 +39,5 @@ class TuiGBSpider(SitemapSpider):
         if "INSIDE NEXT" in item["name"].upper():
             item["located_in"] = "Next"
             item["located_in_wikidata"] = "Q246655"
-
+        apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
         return item

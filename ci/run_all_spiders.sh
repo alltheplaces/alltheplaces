@@ -36,7 +36,7 @@ do
     # The CLOSESPIDER_TIMEOUT setting is used to limit the maximum run time of each spider.
     # Sometimes spiders can hang during network operations, so we use the timeout command to enforce
     # a hard limit slightly longer than CLOSESPIDER_TIMEOUT to ensure the spider is killed.
-    echo "timeout -k 15m 495m uv run scrapy crawl --output ${SPIDER_RUN_DIR}/output/${spider}.geojson:geojson --output ${SPIDER_RUN_DIR}/output/${spider}.parquet:parquet --logfile ${SPIDER_RUN_DIR}/logs/${spider}.txt --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
+    echo "timeout -k 15m 495m uv run scrapy crawl --output ${SPIDER_RUN_DIR}/output/${spider}.geojson:geojson --output ${SPIDER_RUN_DIR}/output/${spider}.ndgeojson:ndgeojson --logfile ${SPIDER_RUN_DIR}/logs/${spider}.txt --loglevel ERROR --set TELNETCONSOLE_ENABLED=0 --set CLOSESPIDER_TIMEOUT=${SPIDER_TIMEOUT} --set LOGSTATS_FILE=${SPIDER_RUN_DIR}/stats/${spider}.json ${spider}" >> ${SPIDER_RUN_DIR}/commands.txt
 done
 
 mkdir -p "${SPIDER_RUN_DIR}/logs"
@@ -86,9 +86,6 @@ fi
 OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
 
-uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
-(>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
-
 tippecanoe --cluster-distance=25 \
            --drop-rate=1 \
            --maximum-zoom=15 \
@@ -108,22 +105,24 @@ else
     include_pmtiles=true
 fi
 
-uv run python ci/concatenate_parquet.py \
-    --output "${SPIDER_RUN_DIR}/output.parquet" \
-    "${SPIDER_RUN_DIR}/output/*.parquet"
+uv run python ci/ndgeojsons_to_parquet.py \
+    --directory "${SPIDER_RUN_DIR}/output" \
+    --output "${SPIDER_RUN_DIR}/output.parquet"
 retval=$?
 if [ ! $retval -eq 0 ]; then
-    (>&2 echo "Couldn't concatenate parquet files, won't include in output")
+    (>&2 echo "Couldn't create parquet file from ndgeojsons, won't include in output")
     include_parquet=false
 else
     include_parquet=true
 fi
 
-# concatenate_parquet.py leaves behind the parquet files for each spider, and I don't
-# want to include those in the output zip, so delete them here.
-rm "${SPIDER_RUN_DIR}"/output/*.parquet
+# Clean up ndgeojson files as they are packed into parquet and no longer needed
+rm "${SPIDER_RUN_DIR}"/output/*.ndgeojson
 
-(>&2 echo "Done concatenating parquet files")
+(>&2 echo "Done creating parquet file")
+
+uv run scrapy insights --atp-nsi-osm "${SPIDER_RUN_DIR}/output" --outfile "${SPIDER_RUN_DIR}/stats/_insights.json"
+(>&2 echo "Done comparing against Name Suggestion Index and OpenStreetMap")
 
 (>&2 echo "Writing out summary JSON")
 echo "{\"count\": ${SPIDER_COUNT}, \"results\": []}" >> "${SPIDER_RUN_DIR}/stats/_results.json"

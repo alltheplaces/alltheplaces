@@ -9,8 +9,8 @@ from locations.structured_data_spider import StructuredDataSpider
 class TmobileUSSpider(SitemapSpider, StructuredDataSpider):
     name = "tmobile_us"
     item_attributes = {"brand": "T-Mobile", "brand_wikidata": "Q3511885"}
-    sitemap_urls = ["https://www.t-mobile.com/stores/sitemap-business-main-pages.xml"]
-    sitemap_rules = [(r"/stores/[a-z]{2}/t-mobile-", "parse_sd")]
+    sitemap_urls = ["https://www.t-mobile.com/stores/sitemap.xml"]
+    sitemap_rules = [(r"/stores/[a-z]{2}/t-mobile-[-\w]+/?$", "parse_sd")]
     allowed_domains = ["www.t-mobile.com"]
     drop_attributes = {"facebook", "twitter"}
     custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 3}

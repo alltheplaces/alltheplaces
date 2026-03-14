@@ -1,7 +1,8 @@
-import json
 import re
+from json import loads
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
@@ -9,7 +10,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
-class TerryWhiteChemmartAUSpider(scrapy.Spider):
+class TerryWhiteChemmartAUSpider(Spider):
     name = "terry_white_chemmart_au"
     item_attributes = {
         "brand": "TerryWhite Chemmart",
@@ -18,7 +19,7 @@ class TerryWhiteChemmartAUSpider(scrapy.Spider):
     }
     allowed_domains = ["terrywhitechemmart.com.au"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://terrywhitechemmart.com.au/store-api/get-stores-summary",
             data={},
@@ -26,7 +27,7 @@ class TerryWhiteChemmartAUSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        stores = json.loads(response.body)
+        stores = loads(response.body)
         for store in stores["data"]:
             item = DictParser.parse(store)
             item["ref"] = store["sharedStoreIdentifier"]
@@ -44,4 +45,4 @@ class TerryWhiteChemmartAUSpider(scrapy.Spider):
                     if start_time != "" and end_time != "":
                         item["opening_hours"].add_range(day, start_time, end_time, time_format="%H%M")
 
-            yield (item)
+            yield item

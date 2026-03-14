@@ -1,5 +1,5 @@
 from typing import Any, AsyncIterator, Iterable
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 
 from scrapy.http import JsonRequest, Response
 
@@ -16,11 +16,10 @@ class CostcoAUSpider(JSONBlobSpider):
     item_attributes = COSTCO_SHARED_ATTRIBUTES
     allowed_domains = ["www.costco.com.au"]
     locations_key = "stores"
+    stores_url = "https://www.costco.com.au/rest/v2/australia/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999"
 
     async def start(self) -> AsyncIterator[Any]:
-        yield JsonRequest(
-            url="https://www.costco.com.au/rest/v2/australia/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999",
-        )
+        yield JsonRequest(url=self.stores_url)
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
@@ -30,7 +29,7 @@ class CostcoAUSpider(JSONBlobSpider):
         item["branch"] = feature["displayName"]
         item.pop("name", None)
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
-        item["website"] = f'https://www.costco.com.au/store-finder/{quote(item["branch"])}'
+        item["website"] = urljoin(response.url, f"/store-finder/{quote(item['branch'])}")
 
         warehouse = item.deepcopy()
 

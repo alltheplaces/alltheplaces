@@ -87,8 +87,6 @@ For these UPRNs we can assign postcodes or build polygons.
 a [postal town](https://wiki.openstreetmap.org/wiki/Key:addr:city).
 These can generally be computed from the postcode.
 
-[postal_towns.csv](postal_towns.csv) is generated from OSM, most common `addr:city` for the outward code.
-
 ## OpenStreetMap
 
 OSM has some data available, it is great in some areas and missing in most.
@@ -104,21 +102,55 @@ requests.
 The resulting data set(s) are then assigned postcodes and co-ordinates from public OS and ONS data by
 Owen and published. Others are helping.
 
-| Council               | Status                                                                                                                                                                                             |
-|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Barnet                | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr23.htm) blog entry.                                                                                                                     |
-| Birmingham City       | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr11.htm) blog entry.                                                                                                                     |
-| Brighton & Hove City  | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr26.htm) blog entry.                                                                                                                     |
-| Bristol City          | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr19.htm) blog entry.                                                                                                                     |
-| Buckinghamshire       | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr22.htm) blog entry.                                                                                                                     |
-| City of Wolverhampton | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr24.htm) blog entry.                                                                                                                     |
-| Cornwall              | [Council tax data](https://www.cornwall.gov.uk/council-tax/your-council-tax-bill/council-tax-data/) + [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr14.htm) blog entry.               |
-| Durham County Council | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr17.htm) blog entry.                                                                                                                     |
-| Leeds City            | [Council Tax Bands](https://datamillnorth.org/dataset/council-tax-bands-of-all-properties-in-leeds-em7lg) released ([Owen Boswarva](https://www.owenboswarva.com/blog/post-addr9.htm) blog entry). |
-| Lichfield District    | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr11.htm) blog entry.                                                                                                                     |
-| London (Camden)       | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr21.htm) blog entry.                                                                                                                     |
-| London (Hackney)      | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr12.htm) blog entry.                                                                                                                     |
-| London (Islington)    | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr15.htm) blog entry.                                                                                                                     |
-| Manchester City       | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr25.htm) blog entry.                                                                                                                     |
-| Rushcliffe Borough    | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr13.htm) blog entry.                                                                                                                     |
-| Wiltshire             | [Owen Boswarva](https://www.owenboswarva.com/blog/post-addr18.htm) blog entry.                                                                                                                     |
+| Local Authority                        | Links                                                                                                                                 |
+|----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| Aberdeenshire Council                  | https://www.owenboswarva.com/blog/post-addr47.htm                                                                                     |
+| Barnet Council                         | https://www.owenboswarva.com/blog/post-addr23.htm                                                                                     |
+| Birmingham City Council                | https://www.owenboswarva.com/blog/post-addr11.htm                                                                                     |
+| Bradford Council                       | https://www.owenboswarva.com/blog/post-addr29.htm                                                                                     |
+| Brent Council                          | https://www.owenboswarva.com/blog/post-addr49.htm                                                                                     |
+| Brighton & Hove City Council           | https://www.owenboswarva.com/blog/post-addr26.htm                                                                                     |
+| Bristol City Council                   | https://www.owenboswarva.com/blog/post-addr19.htm                                                                                     |
+| Buckinghamshire Council                | https://www.owenboswarva.com/blog/post-addr22.htm                                                                                     |
+| Camden Council                         | https://www.owenboswarva.com/blog/post-addr21.htm                                                                                     |
+| Cheshire East Council                  | https://www.owenboswarva.com/blog/post-addr28.htm                                                                                     |
+| City of Wolverhampton Council          | https://www.owenboswarva.com/blog/post-addr24.htm                                                                                     |
+| Cornwall Council                       | https://www.cornwall.gov.uk/council-tax/your-council-tax-bill/council-tax-data/ https://www.owenboswarva.com/blog/post-addr14.htm     |
+| Dorset Council                         | https://www.owenboswarva.com/blog/post-addr20.htm                                                                                     |
+| Dundee City Council                    | FoI request lodged (2025-10-29), never responded.                                                                                     |
+| Durham County Council                  | https://www.owenboswarva.com/blog/post-addr17.htm                                                                                     |
+| Ealing Council                         | https://www.owenboswarva.com/blog/post-addr39.htm                                                                                     |
+| East Suffolk Council                   | https://www.owenboswarva.com/blog/post-addr55.htm                                                                                     |
+| Edinburgh City                         | https://edinburgh.axlr8.uk/disclose/ FoI request 58303                                                                                |
+| Gateshead Council                      | https://www.owenboswarva.com/blog/post-addr58.htm                                                                                     |
+| Hackney Council                        | https://www.owenboswarva.com/blog/post-addr12.htm                                                                                     |
+| Haringey Council                       | https://www.owenboswarva.com/blog/post-addr52.htm                                                                                     |
+| Ipswich Borough Council                | https://www.owenboswarva.com/blog/post-addr32.htm                                                                                     |
+| Isle of Wight Council                  | https://www.whatdotheyknow.com/request/current_list_of_assigned_council https://www.owenboswarva.com/blog/post-addr38.htm             |
+| Islington Council                      | https://www.owenboswarva.com/blog/post-addr15.htm                                                                                     |
+| Leeds City Council                     | https://datamillnorth.org/dataset/council-tax-bands-of-all-properties-in-leeds-em7lg https://www.owenboswarva.com/blog/post-addr9.htm |
+| Lewisham Council                       | https://www.owenboswarva.com/blog/post-addr48.htm                                                                                     |
+| Lichfield District Council             | https://www.owenboswarva.com/blog/post-addr11.htm                                                                                     |
+| London Borough of Bexley               | https://www.owenboswarva.com/blog/post-addr49.htm                                                                                     |
+| London Borough of Richmond upon Thames | https://www.owenboswarva.com/blog/post-addr56.htm                                                                                     |
+| Manchester City Council                | https://www.owenboswarva.com/blog/post-addr25.htm                                                                                     |
+| Mansfield District Council             | https://www.owenboswarva.com/blog/post-addr53.htm                                                                                     |
+| Merton Council                         | https://www.owenboswarva.com/blog/post-addr54.htm                                                                                     |
+| Milton Keynes City Council             | https://www.owenboswarva.com/blog/post-addr46.htm                                                                                     |
+| Newcastle City Council                 | https://www.owenboswarva.com/blog/post-addr36.htm                                                                                     |
+| Newham Council                         | https://www.owenboswarva.com/blog/post-addr43.htm                                                                                     |
+| North Lanarkshire Council              | https://www.owenboswarva.com/blog/post-addr45.htm                                                                                     |
+| North Northamptonshire Council         | https://www.owenboswarva.com/blog/post-addr31.htm                                                                                     |
+| Northumberland County Council          | https://www.owenboswarva.com/blog/post-addr37.htm                                                                                     |
+| Plymouth City Council                  | https://www.owenboswarva.com/blog/post-addr35.htm                                                                                     |
+| Rhondda Cynon Taf                      | https://www.owenboswarva.com/blog/post-addr41.htm                                                                                     |
+| Royal Borough of Greenwich             | https://www.owenboswarva.com/blog/post-addr40.htm                                                                                     |
+| Rushcliffe Borough Council             | https://www.owenboswarva.com/blog/post-addr13.htm                                                                                     |
+| Sheffield City Council                 | https://www.owenboswarva.com/blog/post-addr16.htm                                                                                     |
+| Somerset Council                       | https://www.owenboswarva.com/blog/post-addr42.htm                                                                                     |
+| Southwark Council                      | https://www.owenboswarva.com/blog/post-addr33.htm                                                                                     |
+| Stockport Metropolitan Borough Council | https://www.owenboswarva.com/blog/post-addr34.htm                                                                                     |
+| Wandsworth Council                     | https://www.owenboswarva.com/blog/post-addr57.htm                                                                                     |
+| West Northamptonshire Council          | https://www.owenboswarva.com/blog/post-addr27.htm                                                                                     |
+| Wigan Council                          | https://www.owenboswarva.com/blog/post-addr30.htm                                                                                     |
+| Wiltshire Council                      | https://www.owenboswarva.com/blog/post-addr18.htm                                                                                     |

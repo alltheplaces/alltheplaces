@@ -39,5 +39,5 @@ class PizzaExpressGBSpider(scrapy.Spider):
                     item["image"] = "https://www.pizzaexpress.com" + img["Src"]
 
             item["website"] = "https://www.pizzaexpress.com" + i["link"]
-
+            item["branch"] = item.pop("name")
             yield item

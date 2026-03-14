@@ -1,5 +1,7 @@
-from scrapy import FormRequest, Spider
-from scrapy.http import Response
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -11,7 +13,7 @@ class SparPLSpider(Spider):
     name = "spar_pl"
     item_attributes = SPAR_SHARED_ATTRIBUTES
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://spar.pl/wp-admin/admin-ajax.php",
             formdata={

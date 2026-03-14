@@ -12,7 +12,7 @@ class KfcJPSpider(Spider):
     item_attributes = {"brand_wikidata": "Q524757"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for points in ["x", "wv", "wy"]:
+        for points in ["x", "w", "z"]:
             yield JsonRequest(url=f"https://search.kfc.co.jp/api/points/{points}")
 
     def parse(self, response):

@@ -12,7 +12,7 @@ class StarbucksZASpider(JSONBlobSpider):
     locations_key = "data"
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self):
         for lat, lon in country_iseadgg_centroids("ZA", 158):
             yield JsonRequest(
                 url=f"https://www.starbucks.co.za/api/v2/stores/?filter%5Bcoordinates%5D%5Blatitude%5D={lat}&filter%5Bcoordinates%5D%5Blongitude%5D={lon}&filter%5Bradius%5D=158"

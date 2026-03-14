@@ -1,9 +1,13 @@
-import scrapy
+from typing import AsyncIterator
 
+from scrapy import Spider
+from scrapy.http import Request
+
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class TravelexSpider(scrapy.Spider):
+class TravelexSpider(Spider):
     name = "travelex"
     item_attributes = {"brand": "Travelex", "brand_wikidata": "Q2337964"}
     countries = [
@@ -46,9 +50,9 @@ class TravelexSpider(scrapy.Spider):
     # If a new country is added to the brand, you might want to check them here:
     # https://api.travelex.net/salt/site/list?key=Travelex
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for country in self.countries:
-            yield scrapy.Request(
+            yield Request(
                 f"https://api.travelex.net/salt/store/search?key=Travelex&mode=storeLocator&site=/{country}&lat={0.0}&lng={0.0}",
                 meta={"country": country},
             )
@@ -72,5 +76,5 @@ class TravelexSpider(scrapy.Spider):
                     item["website"] = url_format.format(row["storeUrl"])
                 else:
                     item["website"] = None
-
+                apply_category(Categories.BUREAU_DE_CHANGE, item)
                 yield item
