@@ -169,7 +169,7 @@ class StatensVegvesenNvdbNOSpider(scrapy.Spider):
 
     name = "statens_vegvesen_nvdb_no"
     allowed_domains = ["nvdb-eksport.atlas.vegvesen.no"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 600, "DOWNLOAD_WARNSIZE": 268435456}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 600}
     dataset_attributes = Licenses.NO_NLODv2.value | {
         "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD) distributed by Statens vegvesen"
     }
