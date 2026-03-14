@@ -35,6 +35,11 @@ def test_country_field_check():
     pipeline.process_item(item)
     assert spider.crawler.stats.get_value("atp/field/country/invalid")
 
+    # Turn nan lat and long to invalid geometry
+    item = Feature(lat=float("nan"), lon=20.2)
+    pipeline.process_item(item)
+    assert spider.crawler.stats.get_value("atp/field/geometry/invalid")
+
 
 def test_geometry_preservation():
     spider, pipeline = get_objects()

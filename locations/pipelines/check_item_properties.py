@@ -162,6 +162,8 @@ class CheckItemPropertiesPipeline:
         try:
             lat_typed = float(lat_untyped)
             lon_typed = float(lon_untyped)
+            if math.isnan(lat_typed) or math.isnan(lon_typed):
+                raise ValueError("Latitude or longitude is NaN")
         except (TypeError, ValueError):
             if spider.crawler.stats:
                 spider.crawler.stats.inc_value("atp/field/geometry/invalid")
