@@ -60,6 +60,7 @@ class InditexSpider(PlaywrightSpider):
             item["website"] = "https://www.{}.com/".format(brand) + item["country"].lower()
             item.update(self.my_brands.get(brand))
             item["phone"] = store.get("phones", [None])[0]
+            item["branch"] = item.pop("name")
             item["street_address"] = store["addressLines"][0]
             oh = OpeningHours()
             for record in store["openingHours"]["schedule"]:
