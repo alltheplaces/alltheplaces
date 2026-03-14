@@ -19,7 +19,7 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["lat"], item["lon"] = ld_data["latitude"], ld_data["longitude"]
         item["branch"] = item.pop("name")
-        if "kiosk" in ld_data.get("description").lower():
+        if (ld_data.get("description") and "kiosk" in ld_data["description"].lower()) or "-kiosk" in response.url:
             apply_category(Categories.SHOP_KIOSK, item)
             apply_category(Categories.FAST_FOOD, item)
         else:
