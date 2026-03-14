@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -31,4 +32,6 @@ class PlayPLSpider(Spider):
                 item["opening_hours"].add_range(
                     day="Su", open_time=sun_range[0].strip(), close_time=sun_range[1].strip()
                 )
+            item["street_address"] = item.pop("addr_full", None)
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
             yield item

@@ -6,7 +6,7 @@ from locations.linked_data_parser import LinkedDataParser
 
 class RitzCarltonSpider(SitemapSpider):
     name = "ritz_carlton"
-    item_attributes = {"brand": "The Ritz Carlton", "brand_wikidata": "Q782200"}
+    item_attributes = {"brand": "The Ritz-Carlton", "brand_wikidata": "Q782200"}
     sitemap_urls = ["https://www.ritzcarlton.com/robots.txt"]
     sitemap_rules = [(r"/en/hotels/[a-z-]+/overview/$", "parse")]
 

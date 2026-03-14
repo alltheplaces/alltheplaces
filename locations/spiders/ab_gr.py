@@ -1,8 +1,8 @@
 import json
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -13,7 +13,7 @@ class AbGRSpider(Spider):
     name = "ab_gr"
     item_attributes = {"brand": "AB", "brand_wikidata": "Q4721807", "nsi_id": "N/A"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.ab.gr/api/v1/?{}".format(
                 urlencode(

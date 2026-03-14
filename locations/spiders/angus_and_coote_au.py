@@ -8,7 +8,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class AngusAndCooteAUSpider(JSONBlobSpider):
     name = "angus_and_coote_au"
-    item_attributes = {"brand": "Angus & Coote", "brand_wikidata": "Q18162112"}
+    item_attributes = {"brand": "Angus and Coote", "brand_wikidata": "Q18162112"}
     allowed_domains = ["www.anguscoote.com.au"]
     start_urls = ["https://www.anguscoote.com.au/stores/all-stores"]
 

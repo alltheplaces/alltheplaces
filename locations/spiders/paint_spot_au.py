@@ -36,4 +36,5 @@ class PaintSpotAUSpider(AmastyStoreLocatorSpider):
             else:
                 item["opening_hours"].add_range(day_name.title(), open_time, break_start)
                 item["opening_hours"].add_range(day_name.title(), break_end, close_time)
+        item["street_address"] = item.pop("addr_full", None)
         yield item

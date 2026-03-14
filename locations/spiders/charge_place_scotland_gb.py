@@ -10,7 +10,7 @@ from locations.dict_parser import DictParser
 
 class ChargePlaceScotlandGBSpider(Spider):
     name = "charge_place_scotland_gb"
-    item_attributes = {"brand": "ChargePlace Scotland", "brand_wikidata": "Q105359316"}
+    item_attributes = {"operator": "ChargePlace Scotland", "operator_wikidata": "Q105359316"}
     start_urls = ["https://chargeplacescotland.org/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

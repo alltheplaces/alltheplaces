@@ -6,7 +6,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class PizzaExpressGBSpider(scrapy.Spider):
     name = "pizza_express_gb"
-    item_attributes = {"brand": "Pizza Express", "brand_wikidata": "Q662845"}
+    item_attributes = {"brand": "PizzaExpress", "brand_wikidata": "Q662845"}
     start_urls = ["https://www.pizzaexpress.com/api/restaurants/FindRestaurantsByLatLong?limit=2000"]
 
     def parse(self, response):
@@ -39,5 +39,5 @@ class PizzaExpressGBSpider(scrapy.Spider):
                     item["image"] = "https://www.pizzaexpress.com" + img["Src"]
 
             item["website"] = "https://www.pizzaexpress.com" + i["link"]
-
+            item["branch"] = item.pop("name")
             yield item

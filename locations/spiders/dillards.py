@@ -1,49 +1,40 @@
-import json
-
+import chompjs
 from scrapy.downloadermiddlewares.retry import get_retry_request
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class DillardsSpider(SitemapSpider):
+class DillardsSpider(SitemapSpider, StructuredDataSpider):
     name = "dillards"
     item_attributes = {"brand": "Dillard's", "brand_wikidata": "Q844805"}
     allowed_domains = ["www.dillards.com"]
-    sitemap_urls = ("https://www.dillards.com/sitemap/sitemap_storeLocator_1.xml",)
-    download_delay = 0.5
+    sitemap_urls = ["https://www.dillards.com/robots.txt"]
+    sitemap_follow = ["sitemap_storeLocator_"]
+    sitemap_rules = [(r"/stores/[^/]+/[^/]+/(\d+)$", "parse")]
+    wanted_types = ["DepartmentStore"]
 
-    sitemap_rules = [(r"https://www.dillards.com/stores/.*/.*", "parse")]
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Dillard's ").split(" in ", 1)[0]
+
+        script_data = chompjs.parse_js_object(response.xpath('//script/text()[contains(.,"__INITIAL_STATE__")]').get())
+        item["lat"] = script_data["contentData"]["store"]["latitude"]
+        item["lon"] = script_data["contentData"]["store"]["longitude"]
+
+        item["opening_hours"] = OpeningHours()
+        for rule in script_data["contentData"]["store"]["attr_hours"]:
+            day, times = rule.split("|")
+            item["opening_hours"].add_range(day.split(" ")[0], *times.split(" - "), "%I:%M %p")
+
+        item["website"] = response.url
+
+        yield item
 
     def parse(self, response):
         if "Access Denied" in response.text:
             return get_retry_request(response.request, spider=self, reason="throttle")
-
-        ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,"DepartmentStore")]').get()
-        data = json.loads(ldjson)
-
-        script = response.xpath('//script/text()[contains(.,"__INITIAL_STATE__")]').get()
-        script_data = json.decoder.JSONDecoder().raw_decode(script, script.index("{"))[0]
-        lat = script_data["contentData"]["store"]["latitude"]
-        lon = script_data["contentData"]["store"]["longitude"]
-
-        hours = OpeningHours()
-        for row in data["openingHoursSpecification"]:
-            day = row["dayOfWeek"]["name"][:2]
-            hours.add_range(day, row["opens"], row["closes"], "%I:%M %p")
-
-        properties = {
-            "ref": response.css(".storeNumber::text").get(),
-            "lat": lat,
-            "lon": lon,
-            "website": response.url,
-            "name": data["name"],
-            "phone": data["telephone"],
-            "street_address": data["address"]["streetAddress"],
-            "city": data["address"]["addressLocality"],
-            "state": data["address"]["addressRegion"],
-            "postcode": data["address"]["postalCode"],
-            "opening_hours": hours.as_opening_hours(),
-        }
-        return Feature(**properties)
+        else:
+            return super().parse(response)

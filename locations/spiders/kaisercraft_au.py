@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -15,7 +16,7 @@ class KaisercraftAUSpider(Spider):
     # Also appears to be rebadged as "ProMap Store Locator by AMAI" (https://help.amai.com/en/collections/3274749-promap-store-locator)
     start_urls = ["https://www.kaisercraft.com.au/cdn/shop/t/548/assets/sca.storelocatordata.json"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -32,4 +33,5 @@ class KaisercraftAUSpider(Spider):
                 hours_string = " ".join(hours_string.replace("<br>", " ").split())
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(hours_string)
+            item["street_address"] = item.pop("addr_full", None)
             yield item

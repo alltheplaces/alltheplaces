@@ -23,6 +23,6 @@ class JcpenneySpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     ]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     wanted_types = ["DepartmentStore"]
     requires_proxy = True

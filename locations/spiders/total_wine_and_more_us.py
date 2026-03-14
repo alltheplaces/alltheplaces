@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 import pycountry
 from scrapy import Spider
 from scrapy.http import FormRequest
@@ -10,11 +12,11 @@ from locations.pipelines.address_clean_up import clean_address
 
 class TotalWineAndMoreUSSpider(Spider):
     name = "total_wine_and_more_us"
-    item_attributes = {"brand": "Total Wine & More", "brand_wikidata": "Q7828084"}
+    item_attributes = {"brand": "Total Wine", "brand_wikidata": "Q7828084"}
     allowed_domains = ["www.totalwine.com"]
     start_urls = ["https://www.totalwine.com/registry/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for url in self.start_urls:
             for state in pycountry.subdivisions.get(country_code="US"):
                 formdata = {
@@ -37,12 +39,6 @@ class TotalWineAndMoreUSSpider(Spider):
             item["ref"] = location["storeNumber"]
             item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
             item["website"] = "https://www.totalwine.com/store-info/" + item["ref"]
-
-            for social_account in location.get("socialMedia", []):
-                if social_account["socialMediaType"] == "facebook":
-                    item["facebook"] = social_account["url"]
-                elif social_account["socialMediaType"] == "instagram":
-                    item["extras"]["contact:instagram"] = social_account["url"]
 
             apply_yes_no(Extras.WIFI, item, location["wifiAvailable"], False)
 

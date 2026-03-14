@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class DozApotekSESpider(Spider):
     name = "doz_apotek_se"
-    item_attributes = {"brand": "Doz Apotek", "brand_wikidata": "Q10475311"}
+    item_attributes = {"brand": "DOZ Apotek", "brand_wikidata": "Q10475311"}
     start_urls = ["https://dozapotek.se/hitta-apotek"]
 
     def parse(self, response, **kwargs):

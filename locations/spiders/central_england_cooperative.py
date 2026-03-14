@@ -23,24 +23,15 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["image"] = None
-
-        if "logo-food" in ld_data["logo"]:
+        set_operator(CENTRAL_COOP, item)
+        name = item["name"]
+        if "FOOD" in name.upper():
             apply_category(Categories.SHOP_CONVENIENCE, item)
-            set_operator(CENTRAL_COOP, item)
-
             item.update(COOP_FOOD)
-            item["brand"], item["branch"] = item.pop("name").split(" - ", 1)
-        elif "logo-funeral" in ld_data["logo"]:
+            item["branch"] = item.pop("name").split(" - ", 1)[1].strip()
+        else:
             apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
-            set_operator(CENTRAL_COOP, item)
-
             if "Central Co-op Funeral" in item["name"]:
                 item.update(COOP_FUNERALCARE)
                 item["branch"] = item.pop("name").replace("Central Co-op Funeral", "").strip(" -")
-        else:
-            apply_category(Categories.SHOP_FLORIST, item)
-            set_operator(CENTRAL_COOP, item)
-
-            item["brand"], item["branch"] = item.pop("name").split(" - ", 1)
-
         yield item

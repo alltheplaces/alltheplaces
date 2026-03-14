@@ -17,13 +17,17 @@ class ContinentePTSpider(Spider):
 
     def parse(self, response, **kwargs):
         for location in response.json()["response"]["locations"]:
+            if location["name"].startswith("MAXMAT "):
+                continue
+
             item = DictParser.parse(location)
 
             item["street_address"] = location["streetAndNumber"]
 
             item["opening_hours"] = OpeningHours()
             for rule in location["openingHours"]:
-                item["opening_hours"].add_range(DAYS[rule["dayOfWeek"] - 1], rule["from1"], rule["to1"])
+                to_time = rule["to1"].replace(":030", ":30").replace(":000", ":00")
+                item["opening_hours"].add_range(DAYS[rule["dayOfWeek"] - 1], rule["from1"], to_time)
 
             for photo in location["photos"]:
                 if photo["type"] == "MAIN":
@@ -31,8 +35,9 @@ class ContinentePTSpider(Spider):
                     break
 
             for brand in self.brands:
-                if brand["brand"].lower() in item["name"].lower():
+                if item["name"].startswith(brand["brand"]):
                     item.update(brand)
+                    item["branch"] = item.pop("name").removeprefix(item["brand"])
                     break
 
             apply_category(Categories.SHOP_SUPERMARKET, item)

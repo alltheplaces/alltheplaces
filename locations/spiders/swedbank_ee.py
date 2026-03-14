@@ -25,4 +25,5 @@ class SwedbankEESpider(scrapy.Spider):
                 apply_category(Categories.BANK, item)
             else:
                 self.crawler.stats.inc_value(f"atp/unknown_type/{type}")
+            item["street_address"] = item.pop("addr_full", None)
             yield item

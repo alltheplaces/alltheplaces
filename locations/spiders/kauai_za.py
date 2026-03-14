@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Request
 from scrapy.linkextractors import LinkExtractor
 
@@ -9,14 +11,12 @@ class KauaiZASpider(GoReviewSpider):
     item_attributes = {"brand": "Kauai", "brand_wikidata": "Q116498799"}
     start_urls = ["https://kauai.goreview.co.za/store-locator"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_store)
 
     def fetch_store(self, response):
-        links = LinkExtractor(allow=r"^https:\/\/kauai\d+\.goreview\.co\.za\/goreview\/default$").extract_links(
-            response
-        )
+        links = LinkExtractor(allow=r"^https:\/\/.+\.goreview\.co\.za\/goreview\/default$").extract_links(response)
         for link in links:
             store_page_url = link.url.replace("goreview.co.za/goreview/default", "goreview.co.za/store-information")
             yield Request(url=store_page_url, callback=self.parse)

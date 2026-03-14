@@ -14,6 +14,7 @@ class SalonCentricUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.saloncentric.com/sitemap.xml"]
     sitemap_rules = [(r"com/\w\w/[^/]+/(\d+)$", "parse")]
     wanted_types = ["HealthAndBeautyBusiness"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "Coming Soon" in item["name"]:

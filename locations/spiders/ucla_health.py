@@ -5,11 +5,9 @@ from locations.items import Feature
 
 class UclaHealthSpider(scrapy.Spider):
     name = "ucla_health"
-    item_attributes = {"brand": "UCLA Health", "brand_wikidata": "Q18394900"}
+    item_attributes = {"operator": "UCLA Health", "operator_wikidata": "Q18394900"}
     allowed_domains = ["maps.uclahealth.org"]
-    start_urls = [
-        "https://maps.uclahealth.org/googlemaps/json/clinicdatabase.json",
-    ]
+    start_urls = ["https://maps.uclahealth.org/googlemaps/json/clinicdatabase.json"]
 
     def parse(self, response):
         result = response.json()

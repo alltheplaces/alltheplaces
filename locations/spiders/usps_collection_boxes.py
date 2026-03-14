@@ -1,8 +1,10 @@
-import json
+from json import dumps, loads
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.geo import MILES_TO_KILOMETERS, vincenty_distance
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -24,23 +26,19 @@ USPS_HEADERS = {
 }
 
 
-class UspsCollectionBoxesSpider(scrapy.Spider):
+class UspsCollectionBoxesSpider(Spider):
     name = "usps_collection_boxes"
-    item_attributes = {
-        "brand": "United States Postal Service",
-        "brand_wikidata": "Q668687",
-        "extras": Categories.POST_BOX.value,
-    }
+    custom_settings = {"DOWNLOAD_DELAY": 0.1}
+    item_attributes = {"operator": "United States Postal Service", "operator_wikidata": "Q668687"}
     allowed_domains = ["usps.com"]
-    download_delay = 0.1
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         with open_searchable_points("us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:
                 _, lat, lon = tuple(map(float, point.strip().split(",")))
 
-                current_state = json.dumps(
+                current_state = dumps(
                     {
                         "lbro": "",
                         "requestRefineHours": "",
@@ -53,7 +51,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
                     }
                 )
 
-                yield scrapy.Request(
+                yield Request(
                     USPS_URL,
                     method="POST",
                     body=current_state,
@@ -101,7 +99,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
         return collection_times
 
     def parse(self, response):
-        stores = json.loads(response.body)
+        stores = loads(response.body)
 
         stores = stores.get("locations") or []
 
@@ -120,7 +118,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
                     angle,
                 )
 
-                current_state = json.dumps(
+                current_state = dumps(
                     {
                         "lbro": "",
                         "requestRefineHours": "",
@@ -133,7 +131,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
                     }
                 )
 
-                yield scrapy.Request(
+                yield Request(
                     url=USPS_URL,
                     method="POST",
                     body=current_state,
@@ -152,7 +150,7 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
             properties = {
                 "ref": store["locationID"],
                 "name": store["locationName"],
-                "addr_full": store["address1"],
+                "street_address": store["address1"],
                 "city": store["city"],
                 "state": store["state"],
                 "postcode": store["zip5"],
@@ -169,5 +167,13 @@ class UspsCollectionBoxesSpider(scrapy.Spider):
             h = self.parse_hours(store["locationServiceHours"][0]["dailyHoursList"])
             if h:
                 properties["extras"]["collection_times"] = h
+
+            if properties.get("name") == "USPS COLLECTION BOX - BLUE BOX":
+                properties.pop("name")
+            elif properties.get("name") == "USPS COLLECTION BOX - PO LOBBY":
+                properties["extras"]["indoor"] = "yes"
+                properties.pop("name")
+
+            apply_category(Categories.POST_BOX, properties)
 
             yield Feature(**properties)

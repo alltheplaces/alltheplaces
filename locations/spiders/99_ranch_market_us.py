@@ -1,22 +1,20 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class NinetynineRanchMarketUSSpider(Spider):
     name = "99_ranch_market_us"
-    item_attributes = {
-        "brand": "99 Ranch Market",
-        "brand_wikidata": "Q4646307",
-        "extras": Categories.SHOP_SUPERMARKET.value,
-    }
+    item_attributes = {"brand": "99 Ranch Market", "brand_wikidata": "Q4646307"}
     allowed_domains = ["api.awsprod.99ranch.com"]
     start_urls = ["https://api.awsprod.99ranch.com/store/web/nearby/stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "address": "Foster City, CA, USA",
             "zipCode": "",
@@ -43,5 +41,7 @@ class NinetynineRanchMarketUSSpider(Spider):
                 )
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
+
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item

@@ -1,4 +1,3 @@
-import json
 import re
 
 from scrapy import Request, Spider
@@ -12,6 +11,7 @@ class HalfordsNLSpider(Spider):
     name = "halfords_nl"
     item_attributes = {"brand": "Halfords", "brand_wikidata": "Q3398786"}
     start_urls = ["https://www.halfords.nl/halfords-winkels/"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         store_urls = response.xpath('//*[@class="amlocator-store-list"]//*[@href]/@href').getall()
@@ -30,14 +30,11 @@ class HalfordsNLSpider(Spider):
         yield item
 
     def get_lat_long(self, response, item):
-        latlong = response.xpath('//*[@id="maincontent"]/div[4]/div/script[2]').get()
-        lat_lon = json.loads(
-            re.findall("{ lat: [0-9]*.[0-9]*, lng: [0-9]*.[0-9]* }", latlong)[0]
-            .replace("lat", '"lat"')
-            .replace("lng", '"lng"')
-        )
-        item["lat"], item["lon"] = lat_lon["lat"], lat_lon["lng"]
-
+        script = response.xpath('//script[contains(text(), "myLatLng")]/text()').get()
+        lat_lng = re.search(r"lat: ([\d.-]+), lng: ([\d.-]+)", script)
+        if lat_lng:
+            item["lat"] = float(lat_lng.group(1))
+            item["lon"] = float(lat_lng.group(2))
         return item
 
     def get_address(self, response, item):

@@ -17,9 +17,10 @@ class PizzaExpressAESpider(SitemapSpider):
         item["image"] = response.xpath('//meta[@itemprop="image"]/@content').get()
         item["phone"] = response.xpath('//span[@style="text-decoration:underline"]/text()').get()
 
-        data = json.loads(response.xpath('//*[@class="sqs-block map-block sqs-block-map"]/@data-block-json').get())
+        data = json.loads(response.xpath("//@data-context").get())
         item["lat"] = data["location"]["markerLat"]
         item["lon"] = data["location"]["markerLng"]
+        item["name"] = data["location"]["addressTitle"]
         item["branch"] = data["location"]["addressTitle"].removeprefix("PizzaExpress ")
-
+        item["street_address"] = data["location"]["addressLine1"]
         yield item

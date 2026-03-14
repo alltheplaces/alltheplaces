@@ -1,6 +1,8 @@
-import json
+from json import loads
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
@@ -19,7 +21,7 @@ DAY_MAPPING = {
 }
 
 
-class LittleCaesarsSpider(scrapy.Spider):
+class LittleCaesarsSpider(Spider):
     name = "little_caesars"
     item_attributes = {
         "brand": "Little Caesars",
@@ -27,20 +29,19 @@ class LittleCaesarsSpider(scrapy.Spider):
         "country": "US",
     }
     allowed_domains = ["littlecaesars.com"]
-    download_delay = 0.1
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for record in postal_regions("US"):
             url = "https://api.cloud.littlecaesars.com/bff/api/stores?zip=" + record["postal_region"]
-            yield scrapy.http.Request(url, self.parse, method="GET")
+            yield Request(url, self.parse, method="GET")
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         body = response.text
         if not body:
             return
 
-        result = json.loads(body)
+        result = loads(body)
         stores = result.get("stores")
 
         for store in stores:
@@ -51,7 +52,7 @@ class LittleCaesarsSpider(scrapy.Spider):
             # We already have some details about each store returned from the search
             # in our current response, but a superset of these details are available
             # through another API.
-            yield scrapy.http.Request(
+            yield Request(
                 url=f"https://api.cloud.littlecaesars.com/bff/api/stores/{store_id}",
                 method="GET",
                 callback=self.parse_store,
@@ -62,7 +63,7 @@ class LittleCaesarsSpider(scrapy.Spider):
         if not body:
             return
 
-        result = json.loads(body)
+        result = loads(body)
         store = result.get("store")
         if not store:
             return

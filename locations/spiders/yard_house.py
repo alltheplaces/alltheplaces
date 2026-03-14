@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -17,7 +18,7 @@ class YardHouseSpider(Spider):
     item_attributes = {"brand": "Yard House", "brand_wikidata": "Q21189156"}
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://www.yardhouse.com/api/restaurants", headers={"x-source-channel": "WEB"})
 
     def parse(self, response):
@@ -25,12 +26,12 @@ class YardHouseSpider(Spider):
             item = DictParser.parse(location["contactDetail"]["address"])
             item["ref"] = location["restaurantNumber"]
             item["branch"] = location["restaurantName"]
-            item["phone"] = location["contactDetail"]["phoneDetail"][0]["phoneNumber"]
+            item["phone"] = location["contactDetail"]["phoneDetail"][0].get("phoneNumber")
             item["street_address"] = merge_address_lines(
                 [location["contactDetail"]["address"]["street1"], location["contactDetail"]["address"].get("street2")]
             )
             item["country"] = location["contactDetail"]["address"]["country"]
-            item["extras"]["start_date"] = location["restaurantOpenDate"]
+            item["extras"]["start_date"] = location.get("restaurantOpenDate")
             # Opening hours are only today's
 
             apply_yes_no(
@@ -40,12 +41,13 @@ class YardHouseSpider(Spider):
                 or location["features"].get("onlineTogoEnabled")
                 or location["features"].get("curbSideTogoEnabled"),
             )
+            amenities = {amenity["title"] for amenity in location.get("amenities", [])}
             apply_yes_no(
                 Extras.OUTDOOR_SEATING,
                 item,
-                any(amenity["title"] == "Patio seating available" for amenity in location["amenities"]),
+                "Patio seating available" in amenities,
             )
-            apply_yes_no(Extras.WIFI, item, any(amenity["title"] == "Free WiFi" for amenity in location["amenities"]))
+            apply_yes_no(Extras.WIFI, item, "Free WiFi" in amenities)
 
             item["website"] = (
                 f"https://www.yardhouse.com/locations/{slugify(item['state'])}/{slugify(item['city'])}/{slugify(item['branch'])}/{item['ref']}"

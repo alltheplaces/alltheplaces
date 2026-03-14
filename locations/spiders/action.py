@@ -1,39 +1,22 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class ActionSpider(Spider):
+class ActionSpider(SitemapSpider, StructuredDataSpider):
     name = "action"
     item_attributes = {"brand": "Action", "brand_wikidata": "Q2634111"}
-    start_urls = ["https://www.action.com/api/stores/all/"]
+    sitemap_urls = ["https://www.action.com/robots.txt"]
+    sitemap_rules = [(r"^(?!.*nl-be).*", "parse_sd")]
+    sitemap_follow = ["store"]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url, callback=self.parse_location_list)
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        ld_data["address"]["addressLocality"] = ld_data["address"]["addressLocality"].pop("city")
+        ld_data["address"].update(ld_data["address"].pop("postalCode"))
+        ld_data.pop("openingHours")
 
-    def parse_location_list(self, response):
-        for location in response.json()["items"]:
-            location_id = location["id"]
-            yield JsonRequest(url=f"https://www.action.com/api/stores/{location_id}/", callback=self.parse_location)
-
-    def parse_location(self, response):
-        location = response.json()["data"]
-        if location["permanentlyClosedDate"]:
-            return
-        item = DictParser.parse(location)
-        item["ref"] = location["branchNumber"]
-        item["name"] = location["store"]
-        item["housenumber"] = "".join(filter(None, [location["houseNumber"], location["houseNumberAddition"]]))
-        item["street"] = location["street"]
-        item["website"] = "https://www.action.com" + location["url"]
-        item["opening_hours"] = OpeningHours()
-        for day_hours in location["openingHours"]:
-            if day_hours["thisWeek"]["closed"]:
-                continue
-            item["opening_hours"].add_range(
-                day_hours["dayName"], day_hours["thisWeek"]["opening"], day_hours["thisWeek"]["closing"]
-            )
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name")
         yield item

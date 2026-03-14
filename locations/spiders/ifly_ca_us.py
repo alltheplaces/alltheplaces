@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class IflyCAUSSpider(Spider):
     allowed_domains = ["dataanywhereprod.azure-api.net"]
     start_urls = ["https://dataanywhereprod.azure-api.net/SL/V2/api/stores/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         headers = {
             "Referer": "https://www.iflyworld.com/",
             "ocp-apim-subscription-key": "d8c538d6a8de45398f6f1d4a6405102f",
@@ -45,4 +47,5 @@ class IflyCAUSSpider(Spider):
                     item["opening_hours"].add_range(
                         day_abbrev.title(), hours_range["StartTime"], hours_range["EndTime"], "%I:%M%p"
                     )
+            item["street_address"] = item.pop("addr_full", None)
             yield item

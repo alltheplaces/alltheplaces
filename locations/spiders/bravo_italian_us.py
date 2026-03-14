@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 
 class BravoItalianUSSpider(Spider):
     name = "bravo_italian_us"
-    item_attributes = {"brand": "Bravo Cucina", "brand_wikidata": "Q64055574"}
+    item_attributes = {"brand": "Bravo", "brand_wikidata": "Q64055574"}
     allowed_domains = ["www.bravoitalian.com"]
     start_urls = ["https://www.bravoitalian.com/locations/"]
 

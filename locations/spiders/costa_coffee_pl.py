@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class CostaCoffeePLSpider(scrapy.Spider):
     name = "costa_coffee_pl"
-    item_attributes = {"brand": "Costa Coffee", "brand_wikidata": "Q608845"}
+    item_attributes = {"brand": "Costa", "brand_wikidata": "Q608845"}
     allowed_domains = ["costacoffee.pl"]
     start_urls = ["https://www.costacoffee.pl/api/cf/?content_type=storeLocatorStore&limit=1000"]
     no_refs = True

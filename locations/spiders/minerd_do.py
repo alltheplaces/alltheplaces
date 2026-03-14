@@ -1,16 +1,17 @@
-import json
+from json import dumps
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class MinerdDOSpider(Spider):
     name = "minerd_do"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             method="POST",
             url="https://apps.minerd.gob.do/Maps/MapsWebServices/RegionalWS.asmx/getRegionales",
@@ -28,7 +29,7 @@ class MinerdDOSpider(Spider):
         yield JsonRequest(
             url="https://apps.minerd.gob.do/Maps/MapsWebServices/PlantaFisicaWS.asmx/getPlantasFisicasByFilter",
             data={
-                "parametros": json.dumps(
+                "parametros": dumps(
                     [
                         {
                             "ParameterName": "#selectDistritos",
@@ -50,7 +51,7 @@ class MinerdDOSpider(Spider):
             item["phone"] = school["Telefono"]
             item["extras"]["school:type"] = school["Sector"]
 
-            apply_category({"amenity": "school"}, item)
+            apply_category(Categories.SCHOOL, item)
 
             yield item
 

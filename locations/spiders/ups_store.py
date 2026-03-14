@@ -9,3 +9,4 @@ class UpsStoreSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["locations.theupsstore.com"]
     sitemap_urls = ["https://locations.theupsstore.com/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/locations.theupsstore.com\/[a-z]{2}\/[a-z]+\/\d+-[a-z-]+$", "parse_sd")]
+    drop_attributes = {"image"}

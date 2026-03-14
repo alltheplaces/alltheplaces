@@ -37,7 +37,10 @@ class KauflandSpider(Spider):
             oh = OpeningHours()
             for rule in location["wod"]:
                 day, start_time, end_time = rule.split("|")
-                oh.add_range(day, start_time, end_time)
+                if start_time == "00:00" and end_time == "00:00":
+                    oh.set_closed(day)
+                else:
+                    oh.add_range(day, start_time, end_time)
             item["opening_hours"] = oh
 
             item["website"] = self.website_formats.get(response.url).format(location["friendlyUrl"])

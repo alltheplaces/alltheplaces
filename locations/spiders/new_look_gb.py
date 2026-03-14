@@ -17,4 +17,7 @@ class NewLookGBSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.urljoin(item["website"])
+        if state := item.get("state"):
+            if isinstance(state, list):
+                item["state"] = state[0]
         yield item

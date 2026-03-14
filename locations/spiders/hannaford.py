@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -13,6 +14,7 @@ class HannafordSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://stores.hannaford.com/sitemap.xml"]
     sitemap_rules = [(r"[0-9]+$", "parse_sd")]
     wanted_types = ["GroceryStore"]
+    drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         days = json.loads(response.xpath("//@data-days").get())
@@ -26,5 +28,6 @@ class HannafordSpider(SitemapSpider, StructuredDataSpider):
                     time_format="%H%M",
                 )
         item["opening_hours"] = oh.as_opening_hours()
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item

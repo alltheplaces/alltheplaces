@@ -1,64 +1,42 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+import re
+from typing import Any
 
+from scrapy import Request, Spider
+from scrapy.http import Response
+
+from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CarharttWipSpider(Spider):
     name = "carhartt_wip"
     item_attributes = {"brand": "Carhartt Work in Progress", "brand_wikidata": "Q123015694"}
-    graphql_url = "https://carharrt-storefinder-api.herokuapp.com/graphql"
+    start_urls = ["https://www.carhartt-wip.com/en-dk/stores"]
 
-    def start_requests(self):
-        for offset in range(0, 150, 50):
-            yield JsonRequest(
-                url=self.graphql_url,
-                method="POST",
-                data={
-                    "operationName": "offline",
-                    "variables": {
-                        "withStores": True,
-                        "withStockists": False,
-                        "country": "",
-                        "hasPosition": False,
-                        "offset": offset,
-                    },
-                    "query": "fragment hours on Weekday {\n  openIntervals {\n    start\n    end\n    __typename\n  }\n  isClosed\n  __typename\n}\n\nfragment store on Store {\n  name\n  address {\n    line1\n    line2\n    city\n    postalCode\n    countryCode\n    __typename\n  }\n  displayCoordinate {\n    latitude\n    longitude\n    __typename\n  }\n mainPhone\n  emails\n c_storeType\n  c_tempClosed\n  hours {\n    monday {\n      ...hours\n      __typename\n    }\n    tuesday {\n      ...hours\n      __typename\n    }\n    wednesday {\n      ...hours\n      __typename\n    }\n    thursday {\n      ...hours\n      __typename\n    }\n    friday {\n      ...hours\n      __typename\n    }\n    saturday {\n      ...hours\n      __typename\n    }\n    sunday {\n      ...hours\n      __typename\n    }\n    __typename\n  }\n  websiteUrl {\n    url\n    __typename\n  }\n  meta {\n    uid\n    id\n    __typename\n  }\n  c_newsletter_URL\n  c_storedetailseiten_URL\n  __typename\n}\n\nfragment distance on Distance {\n  id\n  distanceKilometers\n  __typename\n}\n\nquery offline($withStores: Boolean!, $withStockists: Boolean!, $position: String, $hasPosition: Boolean!, $country: String!, $offset: Int!) {\n  stores(position: $position, country: $country, offset: $offset) @include(if: $withStores) {\n    entities {\n      ...store\n      __typename\n    }\n    distances @include(if: $hasPosition) {\n      ...distance\n      __typename\n    }\n    geo @include(if: $hasPosition) {\n      coordinate {\n        latitude\n        longitude\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  stockists(position: $position, country: $country, offset: $offset) @include(if: $withStockists) {\n    entities {\n      ...store\n      __typename\n    }\n    distances @include(if: $hasPosition) {\n      ...distance\n      __typename\n    }\n    geo @include(if: $hasPosition) {\n      coordinate {\n        latitude\n        longitude\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n",
-                },
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for slug in re.findall(r"{\\\"href\\\":\\\"/stores/([-\w]+)\\\",", response.text):
+            yield Request(
+                url=f"https://www.carhartt-wip.com/en-dk/stores/{slug}",
+                callback=self.parse_location,
+                cb_kwargs=dict(slug=slug),
             )
 
-    def parse(self, response):
-        data = response.json()
-        store_data = data.get("data").get("stores").get("entities")
-
-        for store in store_data:
-            oh = OpeningHours()
-            day_data = store.get("hours") or {}
-            day_dict = dict(day_data)
-            for day, value in day_dict.items():
-                if isinstance(value, str) or value.get("isClosed"):
-                    continue
-                for interval in value.get("openIntervals"):
-                    oh.add_range(
-                        day=day.title()[:2],
-                        open_time=interval.get("start"),
-                        close_time=interval.get("end"),
-                        time_format="%H:%M",
-                    )
-            emails = store.get("emails")
-            properties = {
-                "ref": store.get("meta").get("uid"),
-                "name": store.get("name"),
-                "street_address": store.get("address").get("line1"),
-                "city": store.get("address").get("city"),
-                "phone": store.get("mainPhone"),
-                "email": emails[0] if emails else None,
-                "postcode": store.get("address").get("postalCode"),
-                "country": store.get("address").get("countryCode"),
-                "lat": store.get("displayCoordinate").get("latitude"),
-                "lon": store.get("displayCoordinate").get("longitude"),
-                "website": f"https://www.carhartt-wip.com{store.get('c_storedetailseiten_URL')}",
-                "opening_hours": oh.as_opening_hours(),
-            }
-            yield Feature(**properties)
+    def parse_location(self, response: Response, slug: str) -> Any:
+        if address := merge_address_lines(response.xpath("//address/p/text()").getall()):
+            item = Feature()
+            item["ref"] = slug
+            item["website"] = response.url
+            item["branch"] = response.xpath("//h1/text()").get()
+            item["addr_full"] = address
+            contact = response.xpath('//div/h2[contains(text(), "Contact")]')
+            item["phone"] = contact.xpath("./following-sibling::p[1]/text()").get()
+            item["email"] = contact.xpath("./following-sibling::p[2]/text()").get()
+            extract_google_position(item, response)
+            item["opening_hours"] = OpeningHours()
+            for i in range(1, 8):
+                day = response.xpath(f"//dt[{i}]/p/text()").get("")
+                hours = response.xpath(f"//dd[{i}]/p/text()").get("")
+                item["opening_hours"].add_ranges_from_string(f"{day}: {hours}")
+            yield item

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -16,7 +16,7 @@ class HoneyBakedHamUSSpider(Spider):
     item_attributes = {"brand": "Honey Baked Ham", "brand_wikidata": "Q5893363", "extras": Categories.FAST_FOOD.value}
     allowed_domains = ["api.honeybaked.com"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in country_iseadgg_centroids(["US"], 94):
             yield JsonRequest(f"https://api.honeybaked.com/api/store/v1/?long={lon}&lat={lat}&radius=100")
 
@@ -46,11 +46,12 @@ class HoneyBakedHamUSSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             days_from_sunday = DAYS[-1:] + DAYS[:-1]
-            for day_hours in attributes["storeHours"]:
-                if day_hours["closed"]:
-                    continue
-                item["opening_hours"].add_range(
-                    days_from_sunday[day_hours["dayOfTheWeek"]], day_hours["openTime"], day_hours["closeTime"]
-                )
+            if store_hours := attributes.get("storeHours"):
+                for day_hours in store_hours:
+                    if day_hours["closed"]:
+                        continue
+                    item["opening_hours"].add_range(
+                        days_from_sunday[day_hours["dayOfTheWeek"]], day_hours["openTime"], day_hours["closeTime"]
+                    )
 
             yield item

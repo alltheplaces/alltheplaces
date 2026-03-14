@@ -6,14 +6,11 @@ from locations.pipelines.address_clean_up import clean_address
 
 class MtnZASpider(JSONBlobSpider):
     name = "mtn_za"
-    item_attributes = {
-        "brand_wikidata": "Q1813361",
-        "brand": "MTN",
-    }
+    item_attributes = {"brand": "MTN", "brand_wikidata": "Q1813361"}
     start_urls = [
         "https://www.mtn.co.za/api/cms/v1/store-location/1725724280978268358/coverage-map-store-app?storeCount=10000&latitude=-29&longitude=24"
     ]
-    download_timeout = 60
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def post_process_item(self, item, response, location):
         apply_category(Categories.SHOP_MOBILE_PHONE, item)

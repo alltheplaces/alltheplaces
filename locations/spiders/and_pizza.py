@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -11,7 +13,7 @@ class AndPizzaSpider(Spider):
     item_attributes = {"brand": "&pizza", "brand_wikidata": "Q21189222"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.andpizza.com/webapi/v100/partners/shops",
             headers={

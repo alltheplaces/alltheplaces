@@ -86,7 +86,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
                     apply_category(Categories.SHOP_CONVENIENCE, properties)
                 else:
                     properties["name"] = "Marks & Spencer"
-                    apply_category({"shop": "yes"}, properties)
+                    apply_category(Categories.GENERIC_SHOP, properties)
 
             services = [s["id"] for s in store["services"]]
             apply_yes_no(Extras.ATM, properties, "SVC_CASHMC" in services)

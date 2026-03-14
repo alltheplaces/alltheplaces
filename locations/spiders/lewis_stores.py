@@ -1,15 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 
 
-class LewisStoresSpider(scrapy.Spider):
+class LewisStoresSpider(Spider):
     name = "lewis_stores"
     item_attributes = {"brand": "Lewis Stores", "brand_wikidata": "Q115117217"}
 
-    def start_requests(self):
-        yield scrapy.http.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             url="https://lewisstores.co.za/controllers/get_locations.php",
             formdata={"param1": "Lewis Stores"},
         )
@@ -38,34 +41,38 @@ class LewisStoresSpider(scrapy.Spider):
 
             oh = OpeningHours()
             time_format = "%I:%M%p" if "am" in location["TradingMonFri"] else "%H:%M"
-            if location["TradingMonFri"] == "CLOSED":
-                oh.set_closed(DAYS_WEEKDAY)
-            else:
-                for day in DAYS_WEEKDAY:
+
+            if TradingMonFri := location.get("TradingMonFri"):
+                if TradingMonFri == "CLOSED":
+                    oh.set_closed(DAYS_WEEKDAY)
+                else:
+                    for day in DAYS_WEEKDAY:
+                        oh.add_range(
+                            day,
+                            TradingMonFri.split("-")[0].strip(),
+                            TradingMonFri.split("-")[1].strip(),
+                            time_format=time_format,
+                        )
+            if TradingSat := location.get("TradingSat"):
+                if TradingSat == "CLOSED":
+                    oh.set_closed("Sat")
+                else:
                     oh.add_range(
-                        day,
-                        location["TradingMonFri"].split("-")[0].strip(),
-                        location["TradingMonFri"].split("-")[1].strip(),
+                        "Sat",
+                        TradingSat.split("-")[0].strip(),
+                        TradingSat.split("-")[1].strip(),
                         time_format=time_format,
                     )
-            if location["TradingSat"] == "CLOSED":
-                oh.set_closed("Sat")
-            else:
-                oh.add_range(
-                    "Sat",
-                    location["TradingSat"].split("-")[0].strip(),
-                    location["TradingSat"].split("-")[1].strip(),
-                    time_format=time_format,
-                )
-            if location["TradingSunPub"] == "CLOSED":
-                oh.set_closed("Sun")
-            else:
-                oh.add_range(
-                    "Sun",
-                    location["TradingSunPub"].split("-")[0].strip(),
-                    location["TradingSunPub"].split("-")[1].strip(),
-                    time_format=time_format,
-                )
+            if TradingSunPub := location.get("TradingSunPub"):
+                if TradingSunPub == "CLOSED":
+                    oh.set_closed("Sun")
+                else:
+                    oh.add_range(
+                        "Sun",
+                        TradingSunPub.split("-")[0].strip(),
+                        TradingSunPub.split("-")[1].strip(),
+                        time_format=time_format,
+                    )
 
             item["opening_hours"] = oh
 

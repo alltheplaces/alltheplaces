@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -65,7 +67,7 @@ class RetailApparelGroupSpider(Spider):
         },
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = """query storeLocations($location:LocationRequest $pageSize:Int=20 $currentPage:Int=1) {
     stockists(location:$location pageSize:$pageSize currentPage:$currentPage) {
         canonical_url
@@ -128,7 +130,7 @@ class RetailApparelGroupSpider(Spider):
                     item["brand"] = brand["brand"]
                     item["brand_wikidata"] = brand["brand_wikidata"]
                     break
-            item["addr_full"] = location["address"]["addr_full"]
+            item["street_address"] = location["address"]["addr_full"]
             item["phone"] = location["address"]["phone"]
             item["website"] = response.json()["data"]["stockists"]["canonical_url"].replace(
                 "/stores", "/store/" + location["url_key"].lower().replace(" ", "-")

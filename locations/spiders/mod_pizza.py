@@ -19,6 +19,7 @@ class ModPizzaSpider(scrapy.spiders.SitemapSpider):
     sitemap_rules = [
         (r"https://locations\.modpizza\.com/.+\/.+\/.+\/.+", "parse"),
     ]
+    drop_attributes = {"image"}
 
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)

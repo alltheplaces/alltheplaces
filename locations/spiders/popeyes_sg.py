@@ -19,5 +19,4 @@ class PopeyesSGSpider(scrapy.Spider):
             item["addr_full"] = merge_address_lines(
                 [item["street"], item["housenumber"], store.xpath("./p/text()[3]").get()]
             )
-            item["website"] = "https://www.popeyes.com.sg/"
             yield item

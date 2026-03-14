@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class ZingPopCultureAUSpider(SitemapSpider, StructuredDataSpider):
     name = "zing_pop_culture_au"
-    item_attributes = {"brand": "Zing Pop Culture Australia", "brand_wikidata": "Q23023711"}
+    item_attributes = {"brand": "Zing Pop Culture", "brand_wikidata": "Q23023711"}
     sitemap_urls = ["https://www.zingpopculture.com.au/sitemap-stores.xml"]
     sitemap_rules = [(r"/stores/store/(\d+)-[-\w]+$", "parse_sd")]
     is_playwright_spider = True

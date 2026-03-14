@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class TexaidBGSpider(scrapy.Spider):
     name = "texaid_bg"
-    item_attributes = {"brand": "Texaid", "brand_wikidata": "Q1395183"}
+    item_attributes = {"operator": "TEXAID Bulgaria", "operator_wikidata": "Q1395183"}
     allowed_domains = ["texaidbg.texaid.com"]
     start_urls = ["https://texaidbg.texaid.com/bg/kontejneri-za-sbirane.html"]
     no_refs = True

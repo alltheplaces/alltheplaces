@@ -13,7 +13,7 @@ class CoopNOSpider(Spider):
         "02": {"brand": "Obs", "brand_wikidata": "Q5167707"},
         "03": {"brand": "Coop Mega", "brand_wikidata": "Q4581010"},
         "04": {"brand": "Coop Marked", "brand_wikidata": "Q5167703"},
-        "07": {"brand": "Extra", "brand_wikidata": "Q11964085"},
+        "07": {"brand": "Extra", "brand_wikidata": "Q11964085", "extras": Categories.SHOP_SUPERMARKET.value},
         "08": {"brand": "Matkroken", "brand_wikidata": "Q11988679"},
         "41": {"brand": "Coop Byggmix", "brand_wikidata": "Q12714075"},
         "43": {"brand": "Obs BYGG", "brand_wikidata": "Q5167707"},

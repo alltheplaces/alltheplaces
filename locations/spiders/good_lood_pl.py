@@ -15,9 +15,9 @@ class GoodLoodPLSpider(Spider):
             if not feature["visible"]:
                 continue
             item = DictParser.parse(feature)
-            item["image"] = feature["image"]
+            item["image"] = feature.get("image")
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(feature["openingHours"])
             apply_yes_no(Extras.WHEELCHAIR, item, feature["facilities"]["ramp"])
-            item.pop("name", None)
+            item["branch"] = item.pop("name").replace("Good Lood ", "")
             yield item

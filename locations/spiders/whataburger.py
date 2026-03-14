@@ -76,7 +76,7 @@ class WhataburgerSpider(scrapy.Spider):
             lon=float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
             lat=float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
             name=response.xpath('//span[@class="Banner-titleGeo"]/text()').extract_first(),
-            addr_full=response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
+            street_address=response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             city=response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             state=response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
             postcode=response.xpath('//span[@itemprop="postalCode"]/text()').extract_first().strip(),

@@ -1,6 +1,6 @@
-import json
 import re
 
+import chompjs
 from scrapy import Spider
 
 from locations.categories import Categories, apply_category
@@ -16,7 +16,7 @@ class MetaSpider(Spider):
     def parse(self, response, **kwargs):
         script = response.xpath('//script[contains(text(), "jobCount")]/text()').get()
         blob = re.search(r"handle\((.+)\);", script)
-        data = json.loads(blob.group(1))
+        data = chompjs.parse_js_object(blob.group(1))
 
         for location in DictParser.get_nested_key(data, "locations"):
             item = Feature()

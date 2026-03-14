@@ -1,8 +1,8 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import unquote_plus
 
-from scrapy import Request, Selector
-from scrapy.http import Response
+from scrapy import Selector
+from scrapy.http import Request, Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -20,7 +20,7 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
     ]
     data_from_locator_page = {}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for allowed_domain in self.allowed_domains:
             self.data_from_locator_page[allowed_domain] = {}
             yield Request(
@@ -29,7 +29,7 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
                 callback=self.scrape_data_from_locator_page,
             )
 
-    def scrape_data_from_locator_page(self, response: Response) -> Iterable[Request]:
+    async def scrape_data_from_locator_page(self, response: Response) -> AsyncIterator[Request]:
         features_html = response.xpath('//div[@class="amlocator-store-desc"]')
         for feature in features_html:
             ref = feature.xpath(".//@data-amid").get()
@@ -48,7 +48,8 @@ class BedBathNTableSpider(AmastyStoreLocatorSpider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
             self.data_from_locator_page[response.meta["allowed_domain"]][ref] = item
-        yield from super().start_requests()
+        async for request in super().start():
+            yield request
 
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         if "TEMPORARILY CLOSED" in popup_html.xpath('//a[@class="amlocator-link"]/@title').get("").upper():

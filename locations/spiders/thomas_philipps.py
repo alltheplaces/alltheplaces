@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -7,9 +9,9 @@ from locations.hours import DAYS, OpeningHours
 
 class ThomasPhilippsSpider(Spider):
     name = "thomas_philipps"
-    item_attributes = {"brand": "Thomas Philipps", "brand_wikidata": "Q1424735"}
+    item_attributes = {"brand": "Thomas Philipps Sonderposten", "brand_wikidata": "Q1424735"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://www.thomas-philipps.de/od/maps/getLocations",
             data={

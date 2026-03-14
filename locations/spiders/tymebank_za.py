@@ -27,7 +27,7 @@ class TymebankZASpider(LocationBankSpider):
     brand_name_regex = re.compile(r"^(" + "|".join(located_in_brands) + r") ", re.IGNORECASE)
 
     def post_process_item(self, item, response, location):
-        apply_category(Categories.VENDING_MACHINE_GENERIC, item)
+        apply_category(Categories.VENDING_MACHINE, item)
         item.pop("website")
         item["branch"] = item["branch"].removeprefix("Kiosk ")
 
@@ -35,6 +35,6 @@ class TymebankZASpider(LocationBankSpider):
             item["located_in"] = self.located_in_brands[m.group(1).upper()]["brand"]
             item["located_in_wikidata"] = self.located_in_brands[m.group(1).upper()]["brand_wikidata"]
         else:
-            self.crawler.stats.inc_value(f"atp/{self.name}/located_in_failed/{item['branch']}")
+            self.crawler.stats.inc_value(f"atp/located_in_failed/{item['branch']}")
 
         yield item

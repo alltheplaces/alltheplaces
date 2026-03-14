@@ -1,49 +1,48 @@
-from typing import Dict, Iterable
+from typing import Iterable
 
-from scrapy import Selector
 from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class BabyCityZASpider(AmastyStoreLocatorSpider):
+class BabyCityZASpider(CrawlSpider):
     name = "baby_city_za"
     item_attributes = {"brand": "Baby City", "brand_wikidata": "Q116732888"}
     allowed_domains = ["www.babycity.co.za"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    opening_hours_map = {}
+    start_urls = ["https://www.babycity.co.za/find-a-store"]
+    rules = [Rule(LinkExtractor(restrict_xpaths='//a[contains(@class, "store-info")]'), "parse")]
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        self.opening_hours_map = self.parse_opening_hours(response.json()["block"])
-        yield from self.parse_features(response.json()["items"])
-
-    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector):
-        item.pop("website")  # Websites don't seem to be provided or are the homepage
-        item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
-        info = popup_html.xpath('.//div[@class="amlocator-info-popup"]/text()').getall()
-        for line in info:
-            if line.strip().startswith("City:"):
-                item["city"] = line.replace("City:", "").strip()
-            elif line.strip().startswith("Postal Code:"):
-                item["postcode"] = line.replace("Postal Code:", "").strip()
-            elif line.strip().startswith("State:"):
-                item["state"] = line.replace("State:", "").strip()
-            elif line.strip().startswith("Address:"):
-                item["street_address"] = line.replace("Address:", "").strip()
-
-        item["opening_hours"] = self.opening_hours_map.get(str(item["ref"]))
-
-        yield item
-
-    @staticmethod
-    def parse_opening_hours(html: str) -> Dict[str, OpeningHours]:
-        hours_map = {}
-        for x in Selector(text=html).xpath('//div[@class="amlocator-store-desc"]'):
-            _id = x.xpath("@data-amid").get()
-            oh = OpeningHours()
-            hours = " ".join(x.xpath('.//div[@class="amlocator-schedule-table"]//text()').getall())
-            oh.add_ranges_from_string(hours)
-            hours_map[_id] = oh
-        return hours_map
+        properties = {
+            "ref": response.url,
+            "branch": response.xpath('//h1[contains(@class, "store-title")]/span/text()')
+            .get()
+            .removeprefix("Baby City "),
+            "addr_full": merge_address_lines(
+                response.xpath('//div[contains(@class, "shop-contact-address")]/text()').getall()
+            ),
+            "phone": response.xpath('//div[contains(@class, "phone-number")]/div/span/text()').get(),
+            "website": response.url,
+            "opening_hours": OpeningHours(),
+        }
+        extract_google_position(properties, response)
+        apply_category(Categories.SHOP_BABY_GOODS, properties)
+        hours_text = " ".join(
+            filter(
+                None,
+                map(
+                    str.strip,
+                    response.xpath(
+                        '(//div[@class="product info detailed"]/div[contains(@class, "store-accordion-container")]/div[@class="accordion-item"])[1]/div[contains(@class, "accordion-content")]/span[contains(@class, "day-name")]//text()'
+                    ).getall(),
+                ),
+            )
+        )
+        properties["opening_hours"].add_ranges_from_string(hours_text)
+        yield Feature(**properties)

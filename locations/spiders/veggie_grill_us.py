@@ -21,7 +21,7 @@ class VeggieGrillUSSpider(Spider):
             item["branch"] = item.pop("name")
             item["website"] = response.urljoin(location["url"])
             item["image"] = location["fields"]["herobasic"]["images"][0]["image_url"]
-            item["extras"]["ref:google"] = location["google_place_id"]
+            item["extras"]["ref:google:place_id"] = location["google_place_id"]
             item["street_address"] = item.pop("street")
 
             oh = OpeningHours()

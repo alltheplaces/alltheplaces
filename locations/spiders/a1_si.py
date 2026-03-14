@@ -8,7 +8,7 @@ from locations.hours import DAYS_SI, OpeningHours
 
 class A1SISpider(Spider):
     name = "a1_si"
-    item_attributes = {"brand": "A1", "brand_wikidata": "Q68755"}
+    item_attributes = {"brand": "A1", "brand_wikidata": "Q688755"}
     allowed_domains = ["www.a1.si"]
     start_urls = ["https://www.a1.si/pomoc-in-informacije/prodajna-mesta"]
 
@@ -23,7 +23,7 @@ class A1SISpider(Spider):
         for location in locations:
             if location["type"] != 0 and location["type"] != 1:
                 continue
-            if location["openStatus"] != "open":
+            if not location.get("shown", False):
                 continue
             item = DictParser.parse(location)
             if not location.get("id"):

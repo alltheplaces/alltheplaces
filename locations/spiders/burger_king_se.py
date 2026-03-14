@@ -1,13 +1,15 @@
 from urllib.parse import urljoin
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingSESpider(scrapy.Spider):
+class BurgerKingSESpider(Spider):
     name = "burger_king_se"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = [
@@ -18,7 +20,7 @@ class BurgerKingSESpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json().get("data"):
-            yield scrapy.Request(
+            yield Request(
                 url=urljoin(self.restaurants_url, store.get("slug")),
                 callback=self.parse_store,
             )
@@ -26,24 +28,25 @@ class BurgerKingSESpider(scrapy.Spider):
     def parse_store(self, response):
         store = response.json().get("data")
         coords = store.get("storeLocation").get("coordinates")
-        oh = OpeningHours()
+
+        properties = {
+            "ref": store.get("id"),
+            "name": store.get("storeName"),
+            "street_address": store.get("storeAddress"),
+            "lat": coords.get("latitude"),
+            "lon": coords.get("longitude"),
+            "website": self.website_template.format(slug=store.get("slug")),
+            "opening_hours": OpeningHours(),
+        }
+
         for day in store.get("storeOpeningHours"):
             hours = day.get("hoursOfBusiness")
-            oh.add_range(
+            properties["opening_hours"].add_range(
                 DAYS_EN.get(day.get("dayOfTheWeek")), hours.get("opensAt"), hours.get("closesAt"), "%Y-%m-%dT%H:%M:%S"
             )
-        yield Feature(
-            {
-                "ref": store.get("id"),
-                "name": store.get("storeName"),
-                "street_address": store.get("storeAddress"),
-                "lat": coords.get("latitude"),
-                "lon": coords.get("longitude"),
-                "website": self.website_template.format(slug=store.get("slug")),
-                "opening_hours": oh.as_opening_hours(),
-                "extras": {
-                    "drive_through": "yes" if store.get("hasDriveThru") is True else "no",
-                    "delivery": "yes" if store.get("isDelivery") is True else "no",
-                },
-            }
-        )
+
+        apply_category(Categories.FAST_FOOD, properties)
+        apply_yes_no(Extras.DRIVE_THROUGH, properties, store.get("hasDriveThru") is True, False)
+        apply_yes_no(Extras.DELIVERY, properties, store.get("isDelivery") is True, False)
+
+        yield Feature(**properties)

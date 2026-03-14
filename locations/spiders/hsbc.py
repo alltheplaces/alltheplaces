@@ -13,8 +13,6 @@ class HsbcSpider(CrawlSpider, StructuredDataSpider):
     name = "hsbc"
     item_attributes = {"brand": "HSBC", "brand_wikidata": "Q190464", "extras": Categories.BANK.value}
     start_urls = [
-        "https://www.hsbc.com.ar/branch-list/",
-        "https://www.hsbc.am/en-am/branch-list/",
         "https://www.hsbc.com.au/branch-list/",
         # "https://www.hsbc.com.bh/branch-finder/",
         # "https://www.hsbc.com.bd/1/2/home",

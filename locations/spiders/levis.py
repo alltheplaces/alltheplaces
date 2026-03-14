@@ -24,4 +24,8 @@ class LevisSpider(RioSeoSpider):
         else:
             item["name"] = item["brand"]
 
+        if item.get("image") and "levis-banner.png" in item["image"]:
+            # Generic brand image used instead of image of individual store.
+            item.pop("image")
+
         yield item

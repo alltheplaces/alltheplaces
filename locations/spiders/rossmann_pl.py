@@ -27,7 +27,7 @@ class RossmannPLSpider(Spider):
                 "ref": shop["shopNumber"],
                 "street_address": shop["address"]["street"].replace("\r\n", ""),
                 "street": street,
-                "housenumber": housenumber,
+                "housenumber": housenumber.strip(),
                 "city": shop["address"]["city"],
                 "postcode": shop["address"]["postCode"],
                 "country": "PL",

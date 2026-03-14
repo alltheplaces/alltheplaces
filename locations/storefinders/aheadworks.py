@@ -1,12 +1,12 @@
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from chompjs import parse_js_object
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -16,11 +16,20 @@ class AheadworksSpider(Spider):
     1. https://aheadworks.com/store-locator-extension-for-magento-1
     2. https://aheadworks.com/store-locator-extension-for-magento-2
 
-    To use this spider, supply a 'start_url' for the store finder page that
-    contains embedded JavaScript with a complete store list. The 'post_process_item'
-    method can be overridden if changes to extracted data is necessary, for
-    example, to clean up location names.
+    To use this spider, supply a single URL in the 'start_urls' list attribute
+    for the store finder page that contains embedded JavaScript with a
+    complete store list. The 'post_process_item' method can be overridden if
+    changes to extracted data is necessary, for example, to clean up location
+    names.
     """
+
+    start_urls: list[str] = []
+
+    async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
+        yield Request(url=self.start_urls[0])
 
     def parse(self, response: Response) -> Iterable[Feature]:
         features_js = response.xpath(
@@ -44,7 +53,8 @@ class AheadworksSpider(Spider):
             item["opening_hours"] = OpeningHours()
             if hours_dict := loads(feature["hoursofoperation"])["hoursofoperation"]:
                 for day, hours in hours_dict.items():
-                    item["opening_hours"].add_range(day, hours[0], hours[1])
+                    if day in DAYS_FULL:
+                        item["opening_hours"].add_range(day, hours[0], hours[1])
 
             yield from self.post_process_item(item, response, feature) or []
 

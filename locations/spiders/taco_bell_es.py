@@ -1,12 +1,11 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
-from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
+from locations.spiders.taco_bell_us import TACO_BELL_SHARED_ATTRIBUTES
 
 
 class TacoBellESSpider(Spider):
@@ -24,7 +23,7 @@ class TacoBellESSpider(Spider):
             meta={"offset": offset},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

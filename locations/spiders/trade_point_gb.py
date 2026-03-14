@@ -32,7 +32,7 @@ class TradePointGBSpider(Spider):
             item["extras"] = {
                 "email": store["attributes"]["store"]["contactPoint"]["email"],
                 "fax": store["attributes"]["store"]["contactPoint"]["faxNumber"],
-                "storeType": store["attributes"]["store"]["storeType"],
+                "store_type": store["attributes"]["store"]["storeType"],
             }
 
             item["addr_full"] = ", ".join(

@@ -1,5 +1,8 @@
 import json
+import re
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -30,18 +33,22 @@ class MigrosCHSpider(SitemapSpider):
     }
     obsolete_brands = {"mod"}
     allowed_domains = ["filialen.migros.ch"]
-    sitemap_urls = ["https://filialen.migros.ch/sitemap.xml"]
+    sitemap_urls = ["https://filialen.migros.ch/robots.txt"]
     sitemap_follow = ["/de/"]
-    sitemap_rules = [(r"https://filialen\.migros\.ch/de/", "parse")]
+    sitemap_rules = [(r"https://filialen\.migros\.ch/de/[-\w]+$", "parse")]
 
-    def parse(self, response):
-        data_js = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        data = json.loads(data_js)
-        page_props = data["props"]["pageProps"]
-        store = page_props["initialActiveStore"]
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+
+        data = json.loads(
+            re.search(
+                r"({.*})\]n",
+                response.xpath('//*[contains(text(),"initialActiveStore")]/text()').get().replace("\\", ""),
+            ).group(1)
+        )
+        store = data["initialActiveStore"]
         loc = store["location"]
         for market in store["markets"]:
-            if market["slug"] != page_props["initialSlug"]:
+            if market["slug"] != data["initialSlug"]:
                 continue
             brand_key = market["type"].split("_")[0]
             if brand_key not in self.brands:
@@ -87,4 +94,4 @@ class MigrosCHSpider(SitemapSpider):
                         close_time = hours.get("time_close%d" % i)
                         if open_time and close_time:
                             oh.add_range(day, open_time, close_time)
-        return oh.as_opening_hours()
+        return oh

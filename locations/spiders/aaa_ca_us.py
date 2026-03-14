@@ -1,22 +1,19 @@
+from typing import AsyncIterator
 from urllib.parse import urlencode
 
 from scrapy import Request, Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.geo import country_iseadgg_centroids
 from locations.items import Feature
 
 
 class AaaCAUSSpider(Spider):
     name = "aaa_ca_us"
-    item_attributes = {
-        "brand": "American Automobile Association",
-        "brand_wikidata": "Q463436",
-        "extras": Categories.SHOP_TRAVEL_AGENCY.value,
-    }
+    item_attributes = {"brand": "American Automobile Association", "brand_wikidata": "Q463436"}
     allowed_domains = ["tdr.aaa.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for lat, lon in country_iseadgg_centroids(["CA", "US"], 79):
             params = {
                 "searchtype": "O",
@@ -56,4 +53,7 @@ class AaaCAUSSpider(Spider):
                 "phone": location["phones"].get("phone", {}).get("content"),
             }
             item = Feature(**properties)
+
+            apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
+
             yield item

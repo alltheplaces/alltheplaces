@@ -41,15 +41,14 @@ class CanadianTireCASpider(SitemapSpider):
         location = response.json()
         if not location.get("id"):
             return  # Some locations are null responses (just some fields all set to None)
+        if location.get("address"):
+            location.update(location.pop("address"))
         item = DictParser.parse(location)
-        item["street_address"] = clean_address(
-            [location.get("address", {}).get("line1"), location.get("address", {}).get("line2")]
-        )
-        item["city"] = location.get("address", {}).get("town")
-        item["state"] = location.get("address", {}).get("region", {}).get("name")
-        item["country"] = location.get("address", {}).get("country", {}).get("isocode")
-        item["phone"] = location.get("address", {}).get("phone")
-        item["email"] = location.get("address", {}).get("email")
+        item["branch"] = item.pop("name")
+        if item.get("state"):
+            item["state"] = item["state"]["name"]
+        item["city"] = location.get("town")
+        item["street_address"] = clean_address([location.get("line1", ""), location.get("line2", "")])
         item["website"] = "https://www.canadiantire.ca" + location.get("url")
         item["opening_hours"] = OpeningHours()
         if location.get("storeServices"):

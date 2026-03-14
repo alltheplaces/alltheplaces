@@ -1,15 +1,15 @@
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, apply_category
-from locations.open_graph_spider import OpenGraphSpider
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class IronMountainSpider(scrapy.spiders.SitemapSpider, OpenGraphSpider):
+class IronMountainSpider(CrawlSpider, StructuredDataSpider):
     name = "iron_mountain"
-    item_attributes = {"brand": "Iron Mountain Incorporated", "brand_wikidata": "Q1673079"}
-    sitemap_urls = ["https://locations.ironmountain.com/robots.txt"]
-
-    def post_process_item(self, item, response, **kwargs):
-        apply_category(Categories.OFFICE_COMPANY, item)
-        if item["lat"]:
-            yield item
+    item_attributes = {"brand": "Iron Mountain", "brand_wikidata": "Q1673079"}
+    start_urls = ["https://locations.ironmountain.com"]
+    rules = [
+        Rule(LinkExtractor(restrict_xpaths='//*[@class="map-list-item-wrap is-single"]')),
+        Rule(LinkExtractor(restrict_xpaths='//*[@class="map-list-item is-single"]')),
+        Rule(LinkExtractor(restrict_xpaths='//*[@class="locator"]//ul/li/a[1]'), callback="parse_sd"),
+    ]

@@ -1,17 +1,20 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+
+VIRGIN_ACTIVE_SHARED_ATTRIBUTES = {"brand": "Virgin Active", "brand_wikidata": "Q4013942"}
 
 
 class VirginActiveBWNAZASpider(Spider):
     name = "virgin_active_bw_na_za"
-    item_attributes = {"brand": "Virgin Active", "brand_wikidata": "Q4013942", "extras": Categories.GYM.value}
+    item_attributes = VIRGIN_ACTIVE_SHARED_ATTRIBUTES
     start_urls = ["https://cms.virginactive.co.za/wp-json/api/map_club_list"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_location_list)
 

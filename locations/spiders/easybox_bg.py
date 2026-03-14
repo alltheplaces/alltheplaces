@@ -13,6 +13,7 @@ class EasyboxBGSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "BG"
     no_refs = True
+    drop_attributes = {"image"}
 
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:

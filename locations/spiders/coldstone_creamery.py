@@ -1,33 +1,22 @@
 import json
 
-import scrapy
-
-from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ColdstoneCreamerySpider(scrapy.Spider):
+class ColdstoneCreamerySpider(JSONBlobSpider):
     name = "coldstone_creamery"
     item_attributes = {"brand": "Cold Stone Creamery", "brand_wikidata": "Q1094923"}
-    allowed_domains = ["www.coldstonecreamery.com"]
-    start_urls = ("https://www.coldstonecreamery.com/locator/index.php?brand=14&mode=desktop&pagesize=7000&q=55114",)
+    start_urls = ["https://www.coldstonecreamery.com/locator/index.php?brand=14&mode=desktop&pagesize=7000&q=55114"]
 
-    def parse(self, response):
-        for location_node in response.xpath('//div[@class="listing"]/script/text()'):
-            location_js = location_node.extract()
+    def extract_json(self, response):
+        for location_js in response.xpath('//div[@class="listing"]/script/text()').getall():
             first_bracket = location_js.find("{")
             last_bracket = location_js.rfind("}")
-            store_obj = json.loads(location_js[first_bracket : last_bracket + 1])
-            props = {
-                "street_address": store_obj["Address"],
-                "city": store_obj["City"],
-                "state": store_obj["State"],
-                "postcode": store_obj["Zip"],
-                "country": store_obj["CountryCode"],
-                "phone": store_obj["Phone"],
-                "ref": store_obj["StoreId"],
-                "website": response.urljoin("/stores/%s" % store_obj["StoreId"]),
-                "lat": store_obj["Latitude"],
-                "lon": store_obj["Longitude"],
-            }
+            yield json.loads(location_js[first_bracket : last_bracket + 1])
 
-            yield Feature(**props)
+    def post_process_item(self, item, response, location):
+        item["street_address"] = item.pop("addr_full")
+        item["branch"] = item.pop("name")
+        item["extras"]["website:orders"] = location["OrderOnline"]
+        item["website"] = response.urljoin(f"/stores/{location['StoreId']}")
+        yield item

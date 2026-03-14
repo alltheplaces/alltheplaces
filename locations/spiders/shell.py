@@ -34,7 +34,15 @@ class ShellSpider(GeoMeSpider):
             apply_category(Categories.SHOP_CONVENIENCE, select_shop_item)
             yield select_shop_item
 
-        apply_category(Categories.FUEL_STATION, item)
+        if location.get("site_category") in [
+            "destination_charging_ev",
+            "mobility_hub_ev_plus_hub",
+            "mobility_hub_ev_hub",
+        ]:
+            apply_category(Categories.CHARGING_STATION, item)
+        else:
+            apply_category(Categories.FUEL_STATION, item)
+
         item.pop("name", None)
 
         # As we do not know the name of shop/restaurant attached, we apply to main item

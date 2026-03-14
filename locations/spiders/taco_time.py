@@ -13,3 +13,4 @@ class TacoTimeSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"/stores/", "parse_sd"),
     ]
+    drop_attributes = {"image"}

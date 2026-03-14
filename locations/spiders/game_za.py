@@ -1,49 +1,43 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from typing import Any
 
-from locations.dict_parser import DictParser
+from scrapy import Selector, Spider
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class GameZASpider(Spider):
     name = "game_za"
-    item_attributes = {"brand": "Game", "brand_wikidata": "Q129263113"}
-    start_urls = ["https://api-beta-game.walmart.com/occ/v2/game/stores?fields=FULL"]
-    requires_proxy = True
+    item_attributes = {"brand": "Game", "brand_wikidata": "Q126811048"}
+    start_urls = ["https://www.game.co.za/occ/v2/game/stores?fields=FULL"]
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json()["stores"]:
-            item = DictParser.parse(location)
-            item["ref"] = item.pop("name")
-            item["branch"] = location["displayName"].replace(self.item_attributes["brand"], "").strip()
-            item["street_address"] = location["address"].get("streetAddress")
-            item["city"] = location["address"].get("town")
-            try:
-                item["state"] = location["address"].get("region").get("name")
-            except:
-                pass
-            item["postcode"] = location["address"].get("postalCode")
-            item["phone"] = location["address"].get("phone")
-            item["email"] = location["address"].get("email")
-
-            # Url is given, but redirects to homepage
-            item.pop("website")
-            # item["website"] = "https://www.game.co.za" + location["url"]
-
-            if "openingHours" in location:
-                item["opening_hours"] = OpeningHours()
-                for day in location["openingHours"]["weekDayOpeningList"]:
-                    if day["closed"]:
-                        item["opening_hours"].set_closed(day["weekDay"])
-                    else:
-                        item["opening_hours"].add_range(
-                            day["weekDay"],
-                            day["openingTime"]["formattedHour"].upper(),
-                            day["closingTime"]["formattedHour"].upper(),
-                            "%I:%M %p",
-                        )
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        sel = Selector(text=response.text, type="xml")
+        for location in sel.xpath("//stores"):
+            item = Feature()
+            item["ref"] = location.xpath("./name/text()").get()
+            item["branch"] = location.xpath("./displayName/text()").get().removeprefix("Game ")
+            item["addr_full"] = location.xpath(".//address/formattedAddress/text()").get()
+            item["state"] = location.xpath(".//address/region/name/text()").get()
+            item["phone"] = location.xpath(".//address/phone/text()").get()
+            item["email"] = location.xpath(".//address/email/text()").get()
+            item["lat"] = location.xpath(".//geoPoint/latitude/text()").get()
+            item["lon"] = location.xpath(".//geoPoint/longitude/text()").get()
+            item["website"] = "https://www.game.co.za/"
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+            item["opening_hours"] = self.parse_opening_hours(location)
             yield item
+
+    def parse_opening_hours(self, location: Selector) -> OpeningHours:
+        oh = OpeningHours()
+        try:
+            for day_time in location.xpath(".//openingHours//weekDayOpeningList"):
+                day = day_time.xpath("./weekDay/text()").get()
+                open_time = day_time.xpath("./openingTime/formattedHour/text()").get()
+                close_time = day_time.xpath("./closingTime/formattedHour/text()").get()
+                oh.add_range(day, open_time, close_time, "%I:%M %p")
+        except Exception:
+            pass
+        return oh

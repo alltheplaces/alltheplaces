@@ -1,7 +1,8 @@
 import re
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -26,16 +27,18 @@ class CircleKSpider(Spider):
         "Rainstorm Car Wash": ({"name": "Rainstorm Car Wash", "brand": "Rainstorm Car Wash"}, Categories.CAR_WASH),
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, meta={"page": 0})
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         if response.json()["count"] == 0:
             # crawl completed
             return
 
         for location_id, location in response.json()["stores"].items():
+            if location["op_status"] == "PLANNED":
+                continue
             item = DictParser.parse(location)
             item["ref"] = location_id
             item["street_address"] = item.pop("addr_full")

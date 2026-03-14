@@ -1,27 +1,24 @@
-import re
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
+from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
-class KindredHealthcareSpider(SitemapSpider, StructuredDataSpider):
+class KindredHealthcareSpider(SitemapSpider):
     name = "kindred_healthcare"
-    item_attributes = {"brand": "Kindred Healthcare", "brand_wikidata": "Q921363"}
-    allowed_domains = ["www.kindredhospitals.com"]
-    sitemap_urls = [
-        "https://www.kindredhospitals.com/sitemap/sitemap.xml",
-    ]
-    sitemap_rules = [(r"https://www.kindredhospitals.com/locations/ltac/[\w-]+/contact-us", "parse_sd")]
-    wanted_types = ["Hospital"]
+    item_attributes = {"operator": "Kindred Healthcare", "operator_wikidata": "Q921363", "country": "US"}
+    sitemap_urls = ["https://www.kindredhospitals.com/sitemap.xml"]
+    sitemap_rules = [(r"https://www.kindredhospitals.com/locations/[a-z-0-9]+/[a-z-0-9]+$", "parse")]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def post_process_item(self, item, response, ld_data):
-        facility_type = ld_data["@type"]
-        if facility_type == "Hospital":  # Keep refs consistent
-            ref = re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).group(1)
-        else:
-            ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-
-        item["ref"] = ref
-
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["name"] = response.xpath("//h1/text()").get()
+        item["addr_full"] = clean_address(response.xpath('//*[@class="cmp-text"]/p/text()').get())
+        if phone := response.xpath('//*[contains(@href,"tel:")]/text()').get():
+            item["phone"] = phone.replace(".", "")
+        item["ref"] = item["website"] = response.url
         yield item

@@ -1,7 +1,21 @@
+from scrapy.crawler import Crawler
+
+from locations.items import Feature
+
+
 class CountBrandsPipeline:
-    def process_item(self, item, spider):
+    crawler: Crawler
+
+    def __init__(self, crawler: Crawler):
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler):
+        return cls(crawler)
+
+    def process_item(self, item: Feature):
         if brand := item.get("brand"):
-            spider.crawler.stats.inc_value(f"atp/brand/{brand}")
+            self.crawler.stats.inc_value(f"atp/brand/{brand}")  # ty: ignore[possibly-missing-attribute]
         if wikidata := item.get("brand_wikidata"):
-            spider.crawler.stats.inc_value(f"atp/brand_wikidata/{wikidata}")
+            self.crawler.stats.inc_value(f"atp/brand_wikidata/{wikidata}")  # ty: ignore[possibly-missing-attribute]
         return item

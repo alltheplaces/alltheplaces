@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class BishopsArmsSESpider(CrawlSpider, StructuredDataSpider):
     name = "bishops_arms_se"
-    item_attributes = {"brand": "Bishops Arms", "brand_wikidata": "Q10430084"}
+    item_attributes = {"brand": "The Bishops Arms", "brand_wikidata": "Q10430084"}
     start_urls = ["https://www.bishopsarms.com/vara-hotell/", "https://www.bishopsarms.com/vara-pubar/"]
     rules = [
         Rule(LinkExtractor(allow="/vara-hotell/", restrict_xpaths="//main//a"), "parse"),
@@ -18,8 +18,10 @@ class BishopsArmsSESpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = html.unescape(item["name"])
-        item["street_address"] = html.unescape(item["street_address"])
-        item["city"] = html.unescape(item["city"])
+        if item.get("street_address"):
+            item["street_address"] = html.unescape(item["street_address"])
+        if item.get("city"):
+            item["city"] = html.unescape(item["city"])
 
         if item["name"].startswith("Hotel "):
             apply_category(Categories.HOTEL, item)

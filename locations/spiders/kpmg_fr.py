@@ -10,3 +10,4 @@ class KpmgFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://bureaux.kpmg.fr/sitemap_pois.xml"]
     sitemap_rules = [("/details", "parse_sd")]
     wanted_types = ["LegalService", "FinancialService"]
+    drop_attributes = {"image"}

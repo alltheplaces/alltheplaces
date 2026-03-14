@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import apply_yes_no
@@ -21,7 +21,7 @@ class InpostGBSpider(Spider):
             meta={"page": page},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -45,10 +45,13 @@ class InpostGBSpider(Spider):
             apply_yes_no("parcel_mail_in", item, "parcel_send   " in location["functions"])
             apply_yes_no("parcel_pickup", item, "parcel_collect" in location["functions"])
 
-            if location["location_247"]:
+            if location["location_247"] or location["opening_hours"] == "24/7":
                 item["opening_hours"] = "24/7"
             else:
-                item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
+                try:
+                    item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
+                except Exception as e:
+                    self.logger.error("Error parsing {} {}".format(location["opening_hours"], e))
 
             item["website"] = "https://www.inpost.co.uk/lockers/{}".format(item["ref"])
 

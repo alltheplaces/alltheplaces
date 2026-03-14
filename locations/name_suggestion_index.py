@@ -1,4 +1,6 @@
+import json
 import re
+from pathlib import Path
 from typing import Iterable
 from urllib.parse import urlparse
 
@@ -6,6 +8,12 @@ import pycountry
 import requests
 import tldextract
 from unidecode import unidecode
+
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
+
+_DATA_DIR = Path(__file__).resolve().parent / "data"
+NSI_FILE_PATH = _DATA_DIR / "nsi.json"
+WIKIDATA_FILE_PATH = _DATA_DIR / "nsi-wikidata.json"
 
 
 class Singleton(type):
@@ -31,18 +39,21 @@ class NSI(metaclass=Singleton):
 
     @staticmethod
     def _request_file(file: str) -> dict:
-        resp = requests.get("https://raw.githubusercontent.com/osmlab/name-suggestion-index/main/" + file)
+        resp = requests.get(
+            "https://cdn.jsdelivr.net/npm/name-suggestion-index@7/dist/{}".format(file),
+            headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
+        )
         if not resp.status_code == 200:
             raise Exception("NSI load failure")
         return resp.json()
 
     def _ensure_loaded(self):
         if not self.loaded:
-            self.wikidata_json = self._request_file("dist/wikidata.min.json")["wikidata"]
-            self.nsi_json = self._request_file("dist/nsi.min.json")["nsi"]
+            self.wikidata_json = json.load(open(WIKIDATA_FILE_PATH))["wikidata"]
+            self.nsi_json = json.load(open(NSI_FILE_PATH))["nsi"]
             self.loaded = True
 
-    def get_wikidata_code_from_url(self, url: str = None) -> str | None:
+    def get_wikidata_code_from_url(self, url: str) -> str | None:
         """
         Attempt to return a single Wikidata code corresponding to
         the brand or operator of the supplied URL.
@@ -51,7 +62,7 @@ class NSI(metaclass=Singleton):
         """
         self._ensure_loaded()
         supplied_url_domain = urlparse(url).netloc
-        # First attempt to find an extact FQDN match
+        # First attempt to find an exact FQDN match
         for wikidata_code, org_parameters in self.wikidata_json.items():
             for official_website in org_parameters.get("officialWebsites", []):
                 official_website_domain = urlparse(official_website).netloc
@@ -61,9 +72,9 @@ class NSI(metaclass=Singleton):
         for wikidata_code, org_parameters in self.wikidata_json.items():
             for official_website in org_parameters.get("officialWebsites", []):
                 official_website_domain = urlparse(official_website).netloc
-                if official_website_domain.lstrip("www.") == supplied_url_domain.lstrip("www."):
+                if official_website_domain.removeprefix("www.") == supplied_url_domain.removeprefix("www."):
                     return wikidata_code
-        # Last attempt to find a fuzzy match for registered domain (exlcuding subdomains)
+        # Last attempt to find a fuzzy match for registered domain (excluding subdomains)
         for wikidata_code, org_parameters in self.wikidata_json.items():
             for official_website in org_parameters.get("officialWebsites", []):
                 official_website_reg = tldextract.extract(official_website).registered_domain
@@ -72,16 +83,27 @@ class NSI(metaclass=Singleton):
                     return wikidata_code
         return None
 
-    def lookup_wikidata(self, wikidata_code: str = None) -> dict:
+    def lookup_wikidata(self, wikidata_code: str, include_dissolved: bool = False) -> dict | None:
         """
         Lookup wikidata code in the NSI.
         :param wikidata_code: wikidata code to lookup in the NSI
+        :param include_dissolved: whether or not to return brands marked in wikidata as dissolved
         :return: NSI wikidata.json entry if present
         """
         self._ensure_loaded()
-        return self.wikidata_json.get(wikidata_code)
+        wd_json = self.wikidata_json.get(wikidata_code)
 
-    def iter_wikidata(self, label_to_find: str = None) -> Iterable[tuple[str, dict]]:
+        if not wd_json:
+            return None
+
+        if include_dissolved:
+            return wd_json
+        elif "dissolutions" not in wd_json:
+            return wd_json
+
+        return None
+
+    def iter_wikidata(self, label_to_find: str | None = None) -> Iterable[tuple[str, dict]]:
         """
         Lookup by fuzzy label match in the NSI.
         :param label_to_find: string to fuzzy match
@@ -99,7 +121,7 @@ class NSI(metaclass=Singleton):
                     if label_to_find_fuzzy in nsi_label_fuzzy:
                         yield (k, v)
 
-    def iter_country(self, location_code: str = None) -> Iterable[dict]:
+    def iter_country(self, location_code: str | None = None) -> Iterable[dict]:
         """
         Lookup by country code match in the NSI.
         :param location_code: country code or NSI location to search for
@@ -113,7 +135,7 @@ class NSI(metaclass=Singleton):
                 elif location_code.lower() in item["locationSet"].get("include"):
                     yield item
 
-    def iter_nsi(self, wikidata_code: str = None) -> Iterable[dict]:
+    def iter_nsi(self, wikidata_code: str | None = None) -> Iterable[dict]:
         """
         Iterate NSI for all items in nsi.json with a matching wikidata code
         :param wikidata_code: wikidata code to match, if None then all entries

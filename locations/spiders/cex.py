@@ -27,12 +27,13 @@ class CexSpider(scrapy.Spider):
 
         item["lat"] = store["latitude"]
         item["lon"] = store["longitude"]
-        item["name"] = store["storeName"]
+        item["branch"] = store["storeName"]
+        item["name"] = "CeX"
         item["street_address"] = clean_address([store["addressLine1"], store["addressLine2"]])
         item["city"] = store["city"]
         item["state"] = store["county"]
         item["postcode"] = store["postcode"]
-        item["website"] = "https://uk.webuy.com/site/storeDetail/?branchId=" + ref
+        item["website"] = "https://uk.webuy.com/site/storeDetail?branchId=" + ref
         item["ref"] = ref
         item["image"] = ";".join(store["storeImageUrls"])
 

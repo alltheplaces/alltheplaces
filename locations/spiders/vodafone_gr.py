@@ -1,35 +1,29 @@
 import re
-from urllib.parse import urljoin
+from typing import Iterable
 
-import scrapy
+from scrapy.http import Response
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_GR, OpeningHours, sanitise_day
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class VodafoneGRSpider(scrapy.Spider):
+class VodafoneGRSpider(JSONBlobSpider):
     name = "vodafone_gr"
     item_attributes = {"brand": "Vodafone", "brand_wikidata": "Q122141"}
-    start_urls = ["https://www.vodafone.gr/service/?type=getStores"]
+    start_urls = ["https://www.vodafone.gr/api/store"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    locations_key = ["data", "stores"]
 
-    def parse(self, response, **kwargs):
-        for store in response.json():
-            store["telephone"] = store["telephone"].replace(",", ";")
-            store["website"] = urljoin("https://www.vodafone.gr", store.pop("path"))
-            item = DictParser.parse(store)
-            item["street_address"] = store["address_name"]
-            oh = OpeningHours()
-            for rule in store["workingHours"]:
-                if rule["hours"] == "Κλειστό":  # closed
-                    continue
-                day = sanitise_day(rule["day"], DAYS_GR)
-                if not day:
-                    continue
-                for open_time, close_time in re.findall(
-                    r"(\d\d:\d\d)\s*-\s*(\d\d:\d\d)", rule["hours"].replace(".", ":")
-                ):
-                    oh.add_range(day, open_time, close_time)
-            item["opening_hours"] = oh
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = feature.get("streetNameDefault")
+        item["opening_hours"] = self.parse_opening_hours(feature)
+        yield item
 
-            yield item
+    def parse_opening_hours(self, feature: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            hours = feature.get(f"{day.lower()}Hours") or ""
+            for open_time, close_time in re.findall(r"(\d\d:\d\d)\s*-\s*(\d\d:\d\d)", hours):
+                oh.add_range(day, open_time, close_time)
+        return oh

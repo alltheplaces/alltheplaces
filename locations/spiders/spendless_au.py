@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import FormRequest
@@ -10,11 +11,11 @@ from locations.pipelines.address_clean_up import clean_address
 
 class SpendlessAUSpider(Spider):
     name = "spendless_au"
-    item_attributes = {"brand": "Spendless", "brand_wikidata": "Q120668938"}
+    item_attributes = {"brand": "Spendless Shoes", "brand_wikidata": "Q120668938"}
     allowed_domains = ["www.spendless.com.au"]
     start_urls = ["https://www.spendless.com.au/stockists/index/search/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for url in self.start_urls:
             formdata = {
                 "key": "AIzaSyBBmCV6MpgFqu7dq9ummJrwbXsD5OeCOdU",

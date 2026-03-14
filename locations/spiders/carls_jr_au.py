@@ -21,5 +21,4 @@ class CarlsJrAUSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["lat"] = store.get("map_lat")
             item["lon"] = store.get("map_lng")
-            item["website"] = "https://carlsjr.com.au/"
             yield item

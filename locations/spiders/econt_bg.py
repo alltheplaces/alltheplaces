@@ -14,7 +14,7 @@ def unix_timestamp_to_local_time(timezone, timestamp):
 
 class EcontBGSpider(Spider):
     name = "econt_bg"
-    item_attributes = {"brand": "Econt", "brand_wikidata": "Q12279603"}
+    item_attributes = {"brand": "Еконт", "brand_wikidata": "Q12279603"}
     allowed_domains = ["ee.econt.com"]
     start_urls = ["https://ee.econt.com/services/Nomenclatures/NomenclaturesService.getOffices.json"]
 
@@ -47,11 +47,6 @@ class EcontBGSpider(Spider):
                     saturday_start_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursFrom"])
                     saturday_end_time = unix_timestamp_to_local_time(timezone, location["halfDayBusinessHoursTo"])
                     item["opening_hours"].add_range("Sa", saturday_start_time, saturday_end_time)
-
-                if location["sundayBusinessHoursFrom"] is not None:
-                    sunday_start_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursFrom"])
-                    sunday_end_time = unix_timestamp_to_local_time(timezone, location["sundayBusinessHoursTo"])
-                    item["opening_hours"].add_range("Su", sunday_start_time, sunday_end_time)
 
             name_or_branch = location["name"]
             if location["isAPS"]:

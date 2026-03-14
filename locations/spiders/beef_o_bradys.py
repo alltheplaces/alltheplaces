@@ -5,7 +5,7 @@ from locations.items import Feature
 
 class BeefOBradysSpider(scrapy.Spider):
     name = "beef_o_bradys"
-    item_attributes = {"brand": "Beef 'o' Brady's", "brand_wikidata": "Q4879745"}
+    item_attributes = {"brand": "Beef O'Brady's", "brand_wikidata": "Q4879745"}
     allowed_domains = ["locationstogo.com"]
 
     start_urls = [

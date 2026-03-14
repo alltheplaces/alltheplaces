@@ -1,7 +1,7 @@
 from copy import deepcopy
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
@@ -39,7 +39,7 @@ class PttTHSpider(Spider):
             meta={"page": page},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -61,7 +61,8 @@ class PttTHSpider(Spider):
 
             if location_type == "TEXAS CHICKEN":
                 item.update(self.TEXAS_CHICKEN)
-                apply_category({"amenity": "fast_food", "cuisine": "chicken"}, item)
+                apply_category(Categories.FAST_FOOD, item)
+                item["extras"]["cuisine"] = "chicken"
             else:
                 if "2" in services:  # Jiffy shops co-located with PTT stations
                     shop = deepcopy(item)

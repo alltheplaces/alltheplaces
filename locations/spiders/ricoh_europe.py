@@ -1,16 +1,19 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class RicohEuropeSpider(scrapy.Spider):
+class RicohEuropeSpider(Spider):
     name = "ricoh_europe"
     item_attributes = {"brand": "Ricoh"}
     allowed_domains = ["ricoh-europe.com"]
     REF = 0
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         countries = [
             "United Kingdom",
             "France",
@@ -42,7 +45,7 @@ class RicohEuropeSpider(scrapy.Spider):
         for country in countries:
             url = base_url.format(country=country)
 
-            yield scrapy.Request(url=url, callback=self.parse)
+            yield Request(url=url, callback=self.parse)
 
     def parse(self, response):
         stores = response.json()

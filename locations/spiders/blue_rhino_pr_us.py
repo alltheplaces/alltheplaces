@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -8,14 +10,10 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class BlueRhinoPRUSSpider(Spider):
     name = "blue_rhino_pr_us"
-    item_attributes = {
-        "brand": "Blue Rhino",
-        "brand_wikidata": "Q65681213",
-    }
+    item_attributes = {"brand": "Blue Rhino", "brand_wikidata": "Q65681213"}
     allowed_domains = ["bluerhino.com"]
-    download_delay = 0.2
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # API only appears to support <=5 mile search radiuses, which renders
         # this spider fairly useless due to the huge number of API calls
         # required to search all of US and PR combined.

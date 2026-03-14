@@ -12,7 +12,7 @@ class PatheFRSpider(Spider):
     name = "pathe_fr"
     item_attributes = {"brand": "Pathé Gaumont", "brand_wikidata": "Q3060526"}
     start_urls = ["https://www.pathe.fr/api/cinemas"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

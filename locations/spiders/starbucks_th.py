@@ -13,6 +13,7 @@ class StarbucksTHSpider(scrapy.Spider):
     name = "starbucks_th"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
     start_urls = ["https://www.starbucks.co.th/find-a-store/"]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         data = chompjs.parse_js_object(

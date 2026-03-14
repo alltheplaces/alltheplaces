@@ -13,6 +13,7 @@ class CostcutterGBSpider(scrapy.spiders.SitemapSpider):
     allowed_domains = ["costcutter.co.uk"]
     sitemap_urls = ["https://store-locator.costcutter.co.uk/sitemap.xml"]
     sitemap_rules = [("/costcutter-*", "parse_store")]
+    drop_attributes = {"image"}
 
     def parse_store(self, response):
         item = LinkedDataParser.parse(response, "ConvenienceStore")

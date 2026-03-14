@@ -1,9 +1,10 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
 
 
 class PetshopScienceZASpider(Spider):
@@ -13,24 +14,17 @@ class PetshopScienceZASpider(Spider):
         "https://www.petshopscience.co.za/occ/v2/petshopscience/stores?fields=stores(name%2CdisplayName%2CformattedDistance%2CopeningHours(weekDayOpeningList(FULL)%2CspecialDayOpeningList(FULL))%2CgeoPoint(latitude%2Clongitude)%2Caddress(line1%2Cline2%2Ctown%2Cregion(FULL)%2CpostalCode%2Cphone%2Ccountry%2Cemail)%2C%20features)%2Cpagination(DEFAULT)%2Csorts(DEFAULT)&query=&pageSize=-1&lang=en&curr=ZAR&region=PSS_70857"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
     def parse(self, response):
         for location in response.json()["stores"]:
+            location.update(location.pop("address"))
             item = DictParser.parse(location)
             item["ref"] = item.pop("name")
-            item["branch"] = location["displayName"]
-            item["street_address"] = clean_address([location["address"].get("line1"), location["address"].get("line2")])
-            item["city"] = location["address"].get("town")
-            try:
-                item["state"] = location["address"].get("region").get("name")
-            except:
-                pass
-            item["postcode"] = location["address"].get("postalCode")
-            item["phone"] = location["address"].get("phone")
-            item["email"] = location["address"].get("email")
+            if state := item.get("state"):
+                item["state"] = state.get("name")
             item["website"] = "https://www.petshopscience.co.za/store-finder/country/ZA/" + location["name"]
             if "openingHours" in location:
                 item["opening_hours"] = OpeningHours()

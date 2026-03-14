@@ -28,7 +28,7 @@ class WellsFargoSpider(scrapy.Spider):
         item = Feature()
         item["website"] = response.url
         item["ref"] = response.url.split("/")[-2]
-        item["addr_full"] = response.xpath('.//div[@itemprop="addressRegion"]/text()').get()
+        item["street_address"] = response.xpath('.//div[@itemprop="addressRegion"]/text()').get()
         item["city"] = response.xpath('.//span[@itemprop="addressLocality"]/text()').get()
         item["state"] = response.xpath('.//abbr[@itemprop="addressRegion"]/text()').get()
         item["postcode"] = response.xpath('.//span[@itemprop="postalCode"]/text()').get()
@@ -89,7 +89,7 @@ class WellsFargoSpider(scrapy.Spider):
             self.logger.warning("Could not parse time_range for %s", time_range)
             self.crawler.stats.inc_value("atp/wellsfargo/hours/failed")
 
-        (f_hr, f_min, f_ampm, t_hr, t_min, t_ampm) = match.groups()
+        f_hr, f_min, f_ampm, t_hr, t_min, t_ampm = match.groups()
 
         if f_ampm == "P":
             f_hr = int(f_hr) + 12

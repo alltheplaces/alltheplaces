@@ -30,6 +30,7 @@ class CarrefourESSpider(scrapy.Spider):
     }
     start_urls = ["https://www.carrefour.es/tiendas-carrefour/buscador-de-tiendas/locations.aspx"]
     no_refs = True
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for store_data in xmltodict.parse(response.text)["markers"]["marker"]:

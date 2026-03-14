@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class EkoplazaNLSpider(scrapy.Spider):
     name = "ekoplaza_nl"
-    item_attributes = {"brand": "EkoPlaza", "brand_wikidata": "Q47017915"}
+    item_attributes = {"brand": "Ekoplaza", "brand_wikidata": "Q47017915"}
     start_urls = [
         "https://www.ekoplaza.nl/api/aspos/stores?distanceFromLatitude=48.8619029&distanceFromLongitude=2.3730383&limit=3000&storeTags=Webshop",
     ]

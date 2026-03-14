@@ -1,8 +1,11 @@
+from typing import Iterable
+
 from scrapy.http import JsonRequest
 from scrapy.spiders import CSVFeedSpider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # General Bikeshare Feed Specification
 # https://gbfs.mobilitydata.org/
@@ -15,26 +18,22 @@ from locations.dict_parser import DictParser
 BRAND_MAPPING = {
     "Bay Wheels": {
         "names": ["Bay Wheels"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q16971391",
     },
     "BiciMAD": {
         "names": ["bicimad", "BiciMAD (unofficial)"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q17402113",
     },
-    "Bicing": {
+    "bicing": {
         "names": ["Bicing"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q1833385",
     },
     "Bike Share Toronto": {
         "names": ["Bike Share Toronto"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q17018523",
     },
     "Bird": {
@@ -50,44 +49,37 @@ BRAND_MAPPING = {
             "Bird Sarreguemines",
             "Bird Vichy",
         ],
-        "category": {"amenity": "kick-scooter_rental"},
-        "secondary_category": {"amenity": "bicycle_rental"},
+        "category": Categories.KICK_SCOOTER_RENTAL,
         "wikidata": "",
     },
-    "Biki": {
+    "Bixi": {
         "names": ["BIXI Montr\u00e9al"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q386",
     },
     "Bolt": {
         "names": ["Bolt Technology O\u00dc"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {"amenity": "kick-scooter_rental"},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q20529164",
     },
     "Call a Bike": {
         "names": ["Call a Bike"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q1060525",
     },
     "Capital Bikeshare": {
         "names": ["Capital Bike Share"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q1034635",
     },
     "Citi Bike": {
         "names": ["Citi Bike"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q2974438",
     },
     "Docomo Bike Share": {
         "names": ["docomo bike share service"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q55533296",
     },
     "Donkey Republic": {
@@ -145,53 +137,93 @@ BRAND_MAPPING = {
             "Donkey Republic Worthing",
             "Donkey Republic Yverdon-les-Bains",
         ],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q63753939",
     },
     "Dott": {
-        "names": ["Dott Stockholm"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {"amenity": "kick-scooter_rental"},
+        "names": [
+            "Dott Aalst",
+            "Dott Brussels",
+            "Dott Charleroi",
+            "Dott Ghent",
+            "Dott Liege",
+            "Dott Namur",
+            "Dott Estepona",
+            "Dott Madrid",
+            "Dott Malaga",
+            "Dott Seville",
+            "Dott Bordeaux",
+            "Dott Grenoble",
+            "Dott Lyon",
+            "Dott Marseille",
+            "Dott Ol-Vallee",
+            "Dott Paris",
+            "Dott Tignes",
+            "Dott Val-d’isere",
+            "Dott Bristol",
+            "Dott London",
+            "Dott Petah-Tikva",
+            "Dott Tel-Aviv",
+            "Dott Alghero",
+            "Dott Arzachena",
+            "Dott Cagliari",
+            "Dott Catania",
+            "Dott Ferrara",
+            "Dott Milan",
+            "Dott Monza",
+            "Dott Padua",
+            "Dott Palermo",
+            "Dott Riccione",
+            "Dott Rome",
+            "Dott Turin",
+            "Dott Varese",
+            "Dott Verona",
+            "Dott elblag",
+            "Dott Iława",
+            "Dott Kwidzyn",
+            "Dott Malbork",
+            "Dott Ostroda",
+            "Dott Poznan",
+            "Dott Sobieszewo-Island",
+            "Dott Tczew",
+            "Dott Tricity",
+            "Dott Warsaw",
+            "Dott Stockholm",
+        ],
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q107463014",
     },
     "Ecobici": {
         "names": ["Ecobici"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q5817067",
     },
     "HELLO CYCLING": {
         "names": ["HELLO CYCLING"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q91231927",
     },
     "Lyft": {
         "names": ["Lyft Scooters Chicago", "Lyft Scooters Denver"],
-        "category": {"amenity": "kick-scooter_rental"},
-        "secondary_category": {},
+        "category": Categories.KICK_SCOOTER_RENTAL,
         "wikidata": "Q17077936",
     },
     "Metrorower": {
         "names": ["METROROWER"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q123507620",
     },
-    "Mevo": {
+    "MEVO": {
         "names": ["MEVO"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q60860236",
     },
     "Neuron Mobility": {
         "names": ["Neuron Mobility"],
-        "category": {"amenity": "kick-scooter_rental"},
-        "secondary_category": {"amenity": "bicycle_rental"},
+        "category": Categories.KICK_SCOOTER_RENTAL,
         "wikidata": "",
     },
-    "Nextbike": {
+    "nextbike": {
         "names": [
             "nextbike Bene\u0161ov",
             "nextbike Bergamo",
@@ -256,8 +288,7 @@ BRAND_MAPPING = {
             "nextbike Wiesbaden",
             "nextbike Zl\u00edn",
         ],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q2351279",
     },
     "Pony": {
@@ -282,39 +313,33 @@ BRAND_MAPPING = {
             "Pony Perpignan",
             "Pony Poitiers",
         ],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {"amenity": "kick-scooter_rental"},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "",
     },
     "PubliBike": {
         "names": ["PubliBike"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q3555363",
     },
-    "Shared Mobility": {"names": ["sharedmobility.ch"], "category": {}, "secondary_category": {}, "wikidata": ""},
+    "Shared Mobility": {"names": ["sharedmobility.ch"], "category": {}, "wikidata": ""},
     "TIER": {
         "names": ["TIER Basel", "TIER Bern", "TIER Paris", "TIER Stgallen", "TIER Winterthur", "TIER Zurich"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {"amenity": "kick-scooter_rental"},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q63386916",
     },
-    "V\u00e9lib' Metropole": {
+    "Vélib' Métropole": {
         "names": ["V\u00e9lib' Metropole"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q1120762",
     },
     "Velospot": {
         "names": ["Velospot"],
-        "category": {"amenity": "bicycle_rental"},
-        "secondary_category": {},
+        "category": Categories.BICYCLE_RENTAL,
         "wikidata": "Q56314221",
     },
     "Voi": {
         "names": ["Voi Marseille", "Voi Switzerland"],
-        "category": {"amenity": "kick-scooter_rental"},
-        "secondary_category": {},
+        "category": Categories.KICK_SCOOTER_RENTAL,
         "wikidata": "Q61650427",
     },
 }
@@ -323,11 +348,16 @@ BRAND_MAPPING = {
 class GbfsSpider(CSVFeedSpider):
     name = "gbfs"
     start_urls = ["https://github.com/MobilityData/gbfs/raw/master/systems.csv"]
-    download_delay = 2
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2}
 
     def parse_row(self, response, row):
-        yield JsonRequest(url=row["Auto-Discovery URL"], cb_kwargs=row, callback=self.parse_gbfs)
+        url = row["Auto-Discovery URL"]
+        if auth := row["Authentication Info URL"]:
+            if auth.startswith("http"):
+                return
+            else:
+                url = "{}?{}".format(url, auth)
+        yield JsonRequest(url=url, cb_kwargs=row, callback=self.parse_gbfs)
 
     def parse_gbfs(self, response, **kwargs):
         try:
@@ -337,9 +367,13 @@ class GbfsSpider(CSVFeedSpider):
 
         for feed in DictParser.get_nested_key(data, "feeds") or []:
             if feed["name"] == "station_information":
-                yield JsonRequest(url=feed["url"], cb_kwargs=kwargs, callback=self.parse_stations)
+                url = feed["url"]
+                if auth := kwargs["Authentication Info URL"]:
+                    if auth not in url:
+                        url = "{}?{}".format(url, auth)
+                yield JsonRequest(url=url, cb_kwargs=kwargs, callback=self.parse_stations)
 
-    def parse_stations(self, response, **kwargs):
+    def parse_stations(self, response, **kwargs) -> Iterable[Feature]:
         try:
             data = response.json()
         except:
@@ -352,6 +386,10 @@ class GbfsSpider(CSVFeedSpider):
 
             item = DictParser.parse(station)
 
+            if isinstance(station.get("name"), list):
+                for value in station["name"]:
+                    item["name"] = item["extras"]["name:{}".format(value["language"])] = value["text"]
+
             item["ref"] = item["extras"]["ref:gbfs"] = "{}:{}".format(kwargs["System ID"], station["station_id"])
             item["extras"]["ref:gbfs:{}".format(kwargs["System ID"])] = str(station["station_id"])
 
@@ -361,20 +399,15 @@ class GbfsSpider(CSVFeedSpider):
             item["website"] = kwargs["URL"]
 
             # TODO: Map all brands/names
-            brand_mapped = False
             for brand in BRAND_MAPPING:
                 if kwargs["Name"] in BRAND_MAPPING[brand]["names"]:
                     apply_category(BRAND_MAPPING[brand]["category"], item)
                     item["brand"] = brand
                     item["brand_wikidata"] = BRAND_MAPPING[brand]["wikidata"]
-                    brand_mapped = True
                     break
-            if not brand_mapped:
+            else:
                 item["brand"] = kwargs["Name"]  # Closer to OSM operator or network?
-                if "bike" in kwargs["Name"].lower() or "cycle" in kwargs["Name"].lower():
-                    apply_category(Categories.BICYCLE_RENTAL, item)
-                else:
-                    apply_category({"public_transport": "stop_position"}, item)
+                apply_category(Categories.BICYCLE_RENTAL, item)
 
             if station.get("is_virtual_station"):
                 item["extras"]["physically_present"] = "no"

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class TimHortonsSpider(Spider):
     item_attributes = {"brand": "Tim Hortons", "brand_wikidata": "Q175106"}
     allowed_domains = ["czqk28jt.apicdn.sanity.io"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_th_us/default",
             data={

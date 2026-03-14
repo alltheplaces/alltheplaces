@@ -1,35 +1,24 @@
-import json
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.react_server_components import parse_rsc
 
 
 class CarbonHealthUSSpider(Spider):
     name = "carbon_health_us"
     item_attributes = {"brand": "Carbon Health", "brand_wikidata": "Q110076263"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request("https://carbonhealth.com/locations", headers={"RSC": "1"})
 
-    def parse(self, response):
-        data = None
-        for line in response.body.splitlines():
-            line = line[line.find(b":") + 1 :].strip()
-            if line[0] != ord("["):
-                continue
-            components = json.loads(line)
-            for component in components:
-                if isinstance(component, dict) and "locations" in component:
-                    data = component
-                    break
-            if data is not None:
-                break
-        if data is None:
-            raise Exception("Can't find data")
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        data = dict(parse_rsc(response.body))[2][3]
 
         specialty_id_to_speciality = {}
         urgent_care_specialty_ids = set()
@@ -46,7 +35,7 @@ class CarbonHealthUSSpider(Spider):
             item["name"] = self.item_attributes["brand"]
 
             item["image"] = f"https://images.carbonhealth.com/{location['coverImageId']}/2x.jpg"
-            item["extras"]["ref:google"] = location["googlePlaceId"]
+            item["extras"]["ref:google:place_id"] = location.get("googlePlaceId")
             item["website"] = f"https://carbonhealth.com/locations/{location['slug']}"
 
             address = location["address"]

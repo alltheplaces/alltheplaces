@@ -9,10 +9,10 @@ class CaribouCoffeeUSSpider(YextAnswersSpider):
     experience_key = "location-search"
 
     def parse_item(self, location, item):
-        item["website"] = location["data"].get("c_pagesURL")
+        item["website"] = location.get("c_pagesURL")
 
-        amenities_part_1 = [v for v in location["data"].get("c_amenities", [])]
-        amenities_part_2 = [v for v in location["data"].get("c_storeAmenities", [])]
+        amenities_part_1 = [v for v in location.get("c_amenities", [])]
+        amenities_part_2 = [v for v in location.get("c_storeAmenities", [])]
         amenities = amenities_part_1 + list(set(amenities_part_2) - set(amenities_part_1))
         apply_yes_no(Extras.WIFI, item, "WiFi" in amenities, False)
         apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-Thru" in amenities, False)

@@ -1,8 +1,9 @@
 import binascii
 import os
+from typing import AsyncIterator
 
-import scrapy
 from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
@@ -20,6 +21,7 @@ class CarrefourPLSpider(Spider):
     name = "carrefour_pl"
     # Taken from mobile app
     start_urls = ["https://c4webservice.carrefour.pl:8080/MobileWebService/v3/Bootstrap.svc/App/Bootstrap"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     brands = {
         "Express (Zielony)": CARREFOUR_EXPRESS,
@@ -28,10 +30,9 @@ class CarrefourPLSpider(Spider):
         "Market": CARREFOUR_MARKET,
         "Globi": {"brand": "Globi", "category": Categories.SHOP_CONVENIENCE},
     }
-    user_agent = BROWSER_DEFAULT
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             self.start_urls[0],
             headers={
                 # random 16 hex

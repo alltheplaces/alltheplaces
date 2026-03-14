@@ -1,9 +1,7 @@
-from json import loads
 from typing import Iterable
 
 from scrapy import Selector
 
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
@@ -15,25 +13,9 @@ class LeylandSdmGBSpider(AmastyStoreLocatorSpider):
 
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         item["name"] = item["name"].strip()
-        item["street_address"] = item.pop("addr_full")
-        item.pop("state")
-        item["image"] = feature["photo"]
-        if "https://" not in item["website"]:
-            item["website"] = "https://leylandsdm.co.uk/amlocator/" + item["website"] + "/"
-
-        item["opening_hours"] = OpeningHours()
-        hours_json = loads(feature["schedule_string"])
-        for day_name, day in hours_json.items():
-            if day[f"{day_name}_status"] != "1":
-                continue
-            open_time = day["from"]["hours"] + ":" + day["from"]["minutes"]
-            break_start = day["break_from"]["hours"] + ":" + day["break_from"]["minutes"]
-            break_end = day["break_to"]["hours"] + ":" + day["break_to"]["minutes"]
-            close_time = day["to"]["hours"] + ":" + day["to"]["minutes"]
-            if break_start == break_end:
-                item["opening_hours"].add_range(day_name.title(), open_time, close_time)
-            else:
-                item["opening_hours"].add_range(day_name.title(), open_time, break_start)
-                item["opening_hours"].add_range(day_name.title(), break_end, close_time)
-
+        item["street_address"] = popup_html.xpath("//text()[4]").get().replace("Address:", "")
+        item["city"] = popup_html.xpath("//text()[5]").get().replace("City:", "")
+        item["postcode"] = popup_html.xpath("//text()[6]").get().replace("Postcode:", "")
+        item["phone"] = popup_html.xpath("//text()[7]").get()
+        item["website"] = popup_html.xpath("//@href").get().replace("Maida Vale/", "Maida%20Vale/")
         yield item

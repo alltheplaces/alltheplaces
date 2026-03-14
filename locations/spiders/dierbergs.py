@@ -1,16 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class DierbergsSpider(scrapy.Spider):
+class DierbergsSpider(Spider):
     name = "dierbergs"
-    item_attributes = {"brand": "Dierberg's", "brand_wikidata": "Q5274978"}
+    item_attributes = {"brand": "Dierbergs", "brand_wikidata": "Q5274978"}
     allowed_domains = ["api.dierbergs.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.dierbergs.com/graphql/",
             data={
@@ -23,6 +25,7 @@ class DierbergsSpider(scrapy.Spider):
     def parse(self, response):
         for data in response.json().get("data", {}).get("locations"):
             item = DictParser.parse(data)
+            item["branch"] = item.pop("name")
             item["lon"], item["lat"] = data.get("location").split("/")
             item["country"] = "US"
             oh = OpeningHours()
@@ -32,6 +35,6 @@ class DierbergsSpider(scrapy.Spider):
                     open_time=day.get("start")[:5],
                     close_time=day.get("end")[:5],
                 )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

@@ -1,6 +1,7 @@
+import json
+
 from scrapy.spiders import SitemapSpider
 
-from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -9,24 +10,23 @@ class VueCinemasSpider(SitemapSpider):
     name = "vue_cinemas"
     item_attributes = {"brand": "Vue", "brand_wikidata": "Q2535134"}
     sitemap_urls = ["https://www.myvue.com/sitemap.xml"]
-    sitemap_rules = [(r"/getting-here$", "parse")]
+    sitemap_rules = [(r"/whats-on$", "parse")]
+    requires_proxy = "GB"
 
     def parse(self, response, **kwargs):
         item = Feature()
-        item["ref"] = response.xpath("//@data-selected-locationid").get()
-        item["name"] = response.xpath("//@data-selected-locationname").get()
-        item["website"] = response.url.replace("/getting-here", "")
+        jsondata = response.xpath("//script[@id='__NEXT_DATA__']/text()").get()
+        cinemadata = json.loads(jsondata)["props"]["pageProps"]["layoutData"]["sitecore"]["context"]["cinema"]
 
-        cinema = response.xpath('//div[@data-scroll-id="cinema-details"]')
-
-        address_parts = cinema.xpath('.//img[@alt="location-pin"]/../text()').getall()
-        if not address_parts:
-            address_parts = cinema.xpath(
-                './/div[contains(@data-page-url, "/getting-here")]/following-sibling::div//div[@class="container container--scroll"]/div/p/text()'
-            ).getall()
-
-        item["addr_full"] = merge_address_lines(address_parts)
-
-        extract_google_position(item, cinema)
+        item["website"] = response.url.replace("/whats-on", "")
+        item["ref"] = item["website"].replace("https://www.myvue.com/cinema/", "")
+        item["name"] = "Vue Cinema"
+        item["branch"] = item["ref"].replace("-", " ").title()
+        if cinemadata:
+            item["lat"], item["lon"] = cinemadata["cinemaLocationCoordinates"]["value"].split(",")
+            item["addr_full"] = cinemadata["cinemaAddress"]["value"].replace("\n", ",")
+        else:
+            address_parts = response.xpath("//address/text()").getall()
+            item["addr_full"] = merge_address_lines(address_parts)
 
         yield item

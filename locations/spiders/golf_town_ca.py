@@ -1,11 +1,10 @@
-from locations.storefinders.sweetiq import SweetIQSpider
+from scrapy.spiders import SitemapSpider
+
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class GolfTownCASpider(SweetIQSpider):
+class GolfTownCASpider(SitemapSpider, StructuredDataSpider):
     name = "golf_town_ca"
     item_attributes = {"brand": "Golf Town", "brand_wikidata": "Q112966691"}
-    start_urls = ["https://stores.golftown.com/"]
-
-    def parse_item(self, item, location):
-        item.pop("website")
-        yield item
+    sitemap_urls = ["https://locations.golftown.com/sitemap.xml"]
+    sitemap_rules = [(r"https://locations.golftown.com/golf-town-[-\w]+$", "parse_sd")]

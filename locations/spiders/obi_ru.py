@@ -1,31 +1,69 @@
-import scrapy
+from typing import Any, AsyncIterator
+
+from chompjs import parse_js_object
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, OpeningHours
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.obi_eu import OBI_SHARED_ATTRIBUTES
 
 
-class ObiRUSpider(scrapy.Spider):
+class ObiRUSpider(Spider):
     name = "obi_ru"
-    allowed_domains = ["obi.ru"]
     item_attributes = OBI_SHARED_ATTRIBUTES
-    start_urls = ["https://obi.ru/graphql?hash=2872797852"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    requires_proxy = "RU"
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response):
-        for poi in response.json()["data"]["offlineStores"]:
-            if poi["source_code"] in ["668", "default"]:
-                # Exclude test pois
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            url="https://obi.ru/graphql",
+            data={
+                "query": """
+                  query OfflineStores {
+                    offlineStores {
+                        cash_register_description
+                        city
+                        description
+                        email
+                        enabled
+                        fax
+                        frontend_description
+                        is_central
+                        is_pickup_location_active
+                        latitude
+                        longitude
+                        name
+                        phone
+                        postcode
+                        region
+                        region_id
+                        schedule
+                        source_code
+                        street
+                        url_key
+                    }
+                }
+                """,
+            },
+        )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # HTML response contains JSON data
+        for store in parse_js_object(response.text)["data"]["offlineStores"]:
+            if any(keyword in store["name"] for keyword in ["Тест", "Default"]):
+                continue  # Exclude test POIs
+            if "не работает" in store["schedule"]:  # not operating
                 continue
-            item = DictParser.parse(poi)
-            item["ref"] = poi["source_code"]
-            if not poi["enabled"]:
-                item["extras"]["end_date"] = "yes"
-            try:
-                oh = OpeningHours()
-                oh.add_ranges_from_string(poi.get("schedule"), DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU)
-                item["opening_hours"] = oh.as_opening_hours()
-            except Exception as e:
-                self.logger.warning(f'Fail to parse hours: {poi.get("schedule")}, {e}')
+            item = DictParser.parse(store)
+            item["ref"] = store.get("source_code")
+            item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name").removeprefix("ОБИ ")
+            item["phone"] = item["phone"].split("доб")[0] if item.get("phone") else None
+            item["extras"]["fax"] = store.get("fax")
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(
+                store.get("schedule"), DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU
+            )
             yield item

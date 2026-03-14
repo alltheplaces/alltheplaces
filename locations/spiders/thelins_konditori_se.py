@@ -28,4 +28,5 @@ class ThelinsKonditoriSESpider(JSONBlobSpider):
 
         for rule in location["openingHours"]:
             item["opening_hours"].add_range(DAYS[rule["weekday"] - 1], rule["openingTime"], rule["closingTime"])
+        item["street_address"] = item.pop("addr_full", None)
         yield item

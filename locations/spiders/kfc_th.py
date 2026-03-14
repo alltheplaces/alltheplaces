@@ -6,5 +6,5 @@ class KfcTHSpider(KfcAUSpider):
 
     region_code = "apac"
     tenant_id = "59dhhptudcn7hk1ogssvsb4cujvbcnh6o"
-    web_root = "https://www.kfc.co.th/restaurants/"
+    web_root = None
     requires_proxy = False

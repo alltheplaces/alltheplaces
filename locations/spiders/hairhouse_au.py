@@ -1,31 +1,28 @@
-from scrapy import Spider
+from json import loads
+from typing import Iterable
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 
 
-class HairhouseAUSpider(Spider):
+class HairhouseAUSpider(SitemapSpider):
     name = "hairhouse_au"
     item_attributes = {"brand": "Hairhouse", "brand_wikidata": "Q118383855"}
     allowed_domains = ["www.hairhouse.com.au"]
-    start_urls = [
-        "https://www.hairhouse.com.au/api/storeList?latitude=-23.12&longitude=132.13&distance=20000&top=1000&_data=routes%2F(%24lang)%2Fapi%2FstoreList"
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    sitemap_urls = ["https://www.hairhouse.com.au/store/sitemap.xml"]
+    sitemap_rules = [(r"^https:\/\/www\.hairhouse\.com\.au\/store\/[^\/]+$", "parse")]
+    # wanted_types = ["HealthAndBeautyBusiness"]
 
-    def parse(self, response):
-        for location in response.json():
-            if not location["active"] or not location.get("url_component"):
-                # Warehouses do not have a url_component field set.
-                continue
-            item = DictParser.parse(location)
-            item["ref"] = location["internalid"]
-            item["street_address"] = clean_address([location["address1"], location["address2"]])
-            item["website"] = "https://www.hairhouse.com.au/stores/" + location["url_component"]
-            hours_string = " ".join(
-                [day_hours["day"] + ": " + day_hours["hours"] for day_hours in location["operatingHours"]]
-            )
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
-            yield item
+    def parse(self, response: Response) -> Iterable[Feature]:
+        ldjson_blob = response.xpath('//script[@type="application/ld+json"]/text()').get()
+        ldjson = loads(ldjson_blob)["script:ld+json"]
+        item = LinkedDataParser.parse_ld(ldjson, time_format="%H:%M")
+        item["branch"] = item.pop("name").removeprefix("Hairhouse ")
+        item["addr_full"] = item.pop("street_address", None)
+        item.pop("image", None)
+        apply_category(Categories.SHOP_HAIRDRESSER_SUPPLY, item)
+        yield item

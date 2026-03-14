@@ -1,28 +1,19 @@
+import chompjs
 import scrapy
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BenihanaSpider(scrapy.Spider):
     name = "benihana"
     item_attributes = {"brand": "Benihana", "brand_wikidata": "Q4887996"}
-    allowed_domains = ["benihana.com"]
-
-    start_urls = ["https://www.benihana.com/wp-admin/admin-ajax.php?action=get_all_stores"]
+    start_urls = ["https://www.benihana.com/locations"]
 
     def parse(self, response):
-        for row in response.json().values():
-            properties = {
-                "ref": row["gu"],
-                "website": row["gu"],
-                "name": row["na"],
-                "lat": row["lat"],
-                "lon": row["lng"],
-                "street_address": row["st"],
-                "city": row["ct"],
-                "state": row["rg"],
-                "postcode": row["zp"],
-                "country": row["co"],
-                "phone": row.get("te"),
-            }
-            yield Feature(**properties)
+        for location in chompjs.parse_js_object(
+            response.xpath('//*[contains(text(),"allLocationsData")]/text()').get()
+        ):
+            item = DictParser.parse(location)
+            item["addr_full"] = clean_address(location["address_html"].replace("<p>Address:", "").replace("</p>", ""))
+            yield item

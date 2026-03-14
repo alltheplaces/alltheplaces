@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.storefinders.woosmap import WoosmapSpider
 
 
@@ -9,4 +10,5 @@ class LeroyMerlinPLSpider(WoosmapSpider):
 
     def parse_item(self, item, feature, **kwargs):
         item.pop("name", None)
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item

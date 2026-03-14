@@ -1,4 +1,5 @@
-import json
+from json import loads
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -16,7 +17,7 @@ class HugoBossSpider(Spider):
         "https://api.hugoboss.eu/s/UK/dw/shop/v22_10/stores?client_id=871c988f-3549-4d76-b200-8e33df5b45ba&latitude=53.6912856662977&longitude=-2.0727839000000072&count=200&maxDistance=100000000&distanceUnit=mi&start=0"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -27,7 +28,7 @@ class HugoBossSpider(Spider):
             item["email"] = location.get("c_ContactEmail")
 
             if location.get("store_hours"):
-                opening_hours = json.loads(location["store_hours"])
+                opening_hours = loads(location["store_hours"])
                 item["opening_hours"] = OpeningHours()
                 for day_number, day_hours in opening_hours.items():
                     if type(day_hours[0]) is list:

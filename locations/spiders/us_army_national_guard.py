@@ -1,21 +1,24 @@
-import scrapy
+from typing import AsyncIterator
+
 from geonamescache import GeonamesCache
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.items import Feature
 
 
-class UsArmyNationalGuardSpider(scrapy.Spider):
+class UsArmyNationalGuardSpider(Spider):
     name = "us_army_national_guard"
     item_attributes = {
         "brand": "US Army National Guard",
         "brand_wikidata": "Q928670",
         "country": "US",
     }
-    allowed_domains = ["www.nationalguard.com"]
+    allowed_domains = ["nationalguard.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for state in GeonamesCache().get_us_states().keys() | ["USPR", "USGU", "USVI"]:
-            yield scrapy.Request(url="https://www.nationalguard.com/api/state/" + state)
+            yield Request(url="https://nationalguard.com/api/state/" + state)
 
     def parse(self, response, **kwargs):
         data = response.json()

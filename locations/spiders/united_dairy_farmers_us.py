@@ -7,7 +7,6 @@ from locations.items import Feature
 
 
 class UnitedDairyFarmersUSSpider(scrapy.Spider):
-    download_delay = 0.2
     name = "united_dairy_farmers_us"
     item_attributes = {"brand": "United Dairy Farmers", "brand_wikidata": "Q7887677"}
     allowed_domains = ["udfinc.com"]
@@ -34,7 +33,7 @@ class UnitedDairyFarmersUSSpider(scrapy.Spider):
             properties = {
                 "ref": data[9].split(":")[1],
                 "name": "United Dairy Farmers",
-                "addr_full": data[1].split(":")[1],
+                "street_address": data[1].split(":")[1],
                 "city": data[3].split(":")[1],
                 "state": data[4].split(":")[1],
                 "postcode": data[5].split(":")[1],

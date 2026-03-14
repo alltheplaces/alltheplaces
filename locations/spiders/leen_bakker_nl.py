@@ -27,6 +27,6 @@ class LeenBakkerNLSpider(Spider):
                 if rule["displayValue"] == "Gesloten":
                     continue
                 if day := sanitise_day(rule["label"], DAYS_NL):
-                    item["opening_hours"].add_range(day, *rule["displayValue"].split("-"))
+                    item["opening_hours"].add_range(day, *rule["displayValue"].replace(" ", "").split("-"))
 
             yield item

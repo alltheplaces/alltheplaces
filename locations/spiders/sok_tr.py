@@ -1,8 +1,10 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address, merge_address_lines
 
@@ -11,30 +13,30 @@ DISTRICTS_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/ilceler?city={pro
 STORES_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/magazalarimiz?city={province}&district={district}"
 
 
-class SokTRSpider(scrapy.Spider):
+class SokTRSpider(Spider):
     name = "sok_tr"
     item_attributes = {"brand": "Şok", "brand_wikidata": "Q19613992"}
 
-    def start_requests(self) -> Iterable[scrapy.Request]:
-        yield scrapy.Request(url=PROVINCES_URL, callback=self.parse_provinces)
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(url=PROVINCES_URL, callback=self.parse_provinces)
 
     def parse_provinces(self, response):
         for province in response.json()["cities"]:
-            yield scrapy.Request(
+            yield Request(
                 url=DISTRICTS_URL.format(province=province), callback=self.parse_districts, meta={"province": province}
             )
 
     def parse_districts(self, response):
         province = response.meta["province"]
         for district in response.json()["districts"]:
-            yield scrapy.Request(
+            yield Request(
                 url=STORES_URL.format(province=province, district=district),
                 callback=self.parse_stores,
                 meta={"province": province, "district": district},
             )
 
     def parse_stores(self, response):
-        for store in response.json()["response"]["subeler"]:
+        for store in response.json()["subeler"]:
             item = DictParser.parse(store)
             name, branch_name = self.parse_branch_name(store["name"])
 
@@ -49,6 +51,7 @@ class SokTRSpider(scrapy.Spider):
             item["phone"] = store.get("phone")
             item["street_address"] = clean_address(store["address"])
             item["addr_full"] = merge_address_lines([item["street_address"], item["city"], item["state"]])
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item
 

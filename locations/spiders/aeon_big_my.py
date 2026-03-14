@@ -1,35 +1,36 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import html
+from typing import Any
 
-from locations.categories import Categories
-from locations.google_url import extract_google_position
+from scrapy.http import Response
+from scrapy.spiders import Spider
+
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AeonBigMYSpider(CrawlSpider):
+class AeonBigMYSpider(Spider):
     name = "aeon_big_my"
-    item_attributes = {"brand": "AEON BiG", "brand_wikidata": "Q8077280", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "AEON BiG", "brand_wikidata": "Q8077280"}
     allowed_domains = ["aeonbig.com.my"]
-    start_urls = [
-        "https://aeonbig.com.my/wp-content/themes/twentyseventeen/ajax/portfolio-ajax-load-more-store.php?limit=1000&id=&p=1"
-    ]
-    rules = [Rule(LinkExtractor(allow=r"^https:\/\/aeonbig\.com\.my\/store\/\?[\w\-]+$"), callback="parse")]
+    start_urls = ["https://aeonbig.com.my/store-locator"]
 
-    def parse(self, response):
-        properties = {
-            "ref": response.url,
-            "name": response.xpath('//h4[contains(@class, "heading-primarys")]/text()')
-            .get("")
-            .replace("AEON BiG ", ""),
-            "addr_full": merge_address_lines(response.xpath('//div[@class="store_info"]/ul[1]/li[1]/text()').getall()),
-            "phone": response.xpath('//div[@class="store_info"]/ul[1]/li[2]/text()').get("").strip(),
-            "website": response.url,
-            "opening_hours": OpeningHours(),
-        }
-        extract_google_position(properties, response)
-        hours_string = " ".join(filter(None, map(str.strip, response.xpath('//li[@class="bs_date"]//text()').getall())))
-        hours_string = hours_string.replace("Daily", "Mo-Su").replace("Weekday", "Mo-Fr").replace("Weekend", "Sa-Su")
-        properties["opening_hours"].add_ranges_from_string(hours_string)
-        yield Feature(**properties)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.xpath('//img[contains(@alt,"AEON BiG")]/ancestor::div[contains(@class,"rounded-xl")]'):
+            if branch := location.xpath(".//img/@alt").get("").strip().removeprefix("AEON BiG "):
+                item = Feature()
+                item["ref"] = item["branch"] = branch
+                item["website"] = response.url
+                address = location.xpath('.//div[contains(@class,"p-5")]')
+                item["state"] = address.xpath('./p[contains(@class,"inline-block")]/text()').get()
+                item["addr_full"] = address.xpath('./p[contains(@class,"text-slate")]/text()').get()
+                item["image"] = html.unescape(location.xpath(".//img/@src").get(""))
+                item["phone"] = location.xpath('.//*[contains(text(),"Telephone")]/following-sibling::p/text()').get()
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(
+                    location.xpath('.//*[contains(text(),"Business Hours")]/following-sibling::p/text()')
+                    .get("")
+                    .replace("& PH", "")
+                )
+                apply_category(Categories.SHOP_SUPERMARKET, item)
+                yield item

@@ -2,9 +2,10 @@ import json
 import logging
 import re
 import traceback
+from json import JSONDecodeError
 
-import chompjs
 import json5
+from chompjs import parse_js_object
 
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature, add_social_media
@@ -21,10 +22,10 @@ class LinkedDataParser:
                 if json_parser == "json5":
                     ld_obj = json5.loads(ld)
                 elif json_parser == "chompjs":
-                    ld_obj = chompjs.parse_js_object(ld)
+                    ld_obj = parse_js_object(ld)
                 else:
                     ld_obj = json.loads(ld, strict=False)
-            except (json.decoder.JSONDecodeError, ValueError):
+            except (JSONDecodeError, ValueError):
                 continue
 
             if isinstance(ld_obj, dict):
@@ -38,7 +39,7 @@ class LinkedDataParser:
                 raise TypeError(ld_obj)
 
     @staticmethod
-    def find_linked_data(response, wanted_type, json_parser="json") -> {}:
+    def find_linked_data(response, wanted_type, json_parser="json") -> dict:
         if isinstance(wanted_type, list):
             wanted_types = [LinkedDataParser.clean_type(t) for t in wanted_type]
         else:
@@ -57,6 +58,7 @@ class LinkedDataParser:
 
             if all(wanted in types for wanted in wanted_types):
                 return ld_obj
+        return {}
 
     @staticmethod
     def parse_ld(ld, time_format: str = "%H:%M") -> Feature:  # noqa: C901
@@ -128,7 +130,7 @@ class LinkedDataParser:
             logger.warning(f"Unable to parse opening hours - check time_format? Error was: {str(e)}")
         except Exception as e:
             logger.warning(f"Unhandled error, unable to parse opening hours. Error was: {type(e)} {str(e)}")
-            logger.debug(traceback.print_exc())
+            logger.debug(traceback.format_exc())
 
         if image := LinkedDataParser.get_case_insensitive(ld, "image"):
             if isinstance(image, list):
@@ -159,7 +161,7 @@ class LinkedDataParser:
         return item
 
     @staticmethod
-    def parse(response, wanted_type, json_parser="json") -> Feature:
+    def parse(response, wanted_type, json_parser="json") -> Feature | None:
         ld_item = LinkedDataParser.find_linked_data(response, wanted_type, json_parser=json_parser)
         if ld_item:
             item = LinkedDataParser.parse_ld(ld_item)
@@ -174,6 +176,8 @@ class LinkedDataParser:
 
             return item
 
+        return None
+
     # Parses an openingHoursSpecification dict
     # e.g.:
     # {
@@ -183,13 +187,14 @@ class LinkedDataParser:
     #  "opens":  "09:00:00"
     # }
     # See https://schema.org/OpeningHoursSpecification for further examples.
+    @staticmethod
     def _parse_opening_hours_specification(oh: OpeningHours, rule: dict, time_format: str):
         if (
             not type(LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")) in [list, str]
             or not type(LinkedDataParser.get_case_insensitive(rule, "opens")) == str
             or not type(LinkedDataParser.get_case_insensitive(rule, "closes")) == str
         ):
-            return
+            return oh
 
         days = LinkedDataParser.get_case_insensitive(rule, "dayOfWeek")
         if not isinstance(days, list):
@@ -207,6 +212,7 @@ class LinkedDataParser:
     # Parse an individual https://schema.org/openingHours property value such as
     # "Mo,Tu,We,Th 09:00-12:00"
     # "Mo-Fr 10:00-19:00"
+    @staticmethod
     def _parse_opening_hours(oh: OpeningHours, rule: str, time_format: str):
         days, time_ranges = rule.split(" ", 1)
 
@@ -303,7 +309,7 @@ class LinkedDataParser:
         return type.lower().replace("http://", "").replace("https://", "").replace("schema.org/", "")
 
     @staticmethod
-    def clean_float(value: str | float) -> float:
+    def clean_float(value: str | float) -> str | float:
         if isinstance(value, float):
             return value
         if isinstance(value, str):

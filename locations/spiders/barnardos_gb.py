@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 from urllib.parse import unquote
 
 from scrapy import Selector, Spider
@@ -10,9 +11,9 @@ from locations.items import Feature
 
 class BarnardosGBSpider(Spider):
     name = "barnardos_gb"
-    item_attributes = {"brand": "Barnardos", "brand_wikidata": "Q2884670"}
+    item_attributes = {"brand": "Barnardo's", "brand_wikidata": "Q2884670"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://shop.barnardos.org.uk/api/StoreLocator/RetrieveNearest",
             data={

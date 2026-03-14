@@ -6,7 +6,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 
 class PepZMSpider(Spider):
     name = "pep_zm"
-    item_attributes = {"brand": "Pep", "brand_wikidata": "Q7166182"}
+    item_attributes = {"brand": "PEP", "brand_wikidata": "Q7166182"}
     start_urls = ["https://www.pep.co.zm/api/stores.json"]
 
     def parse(self, response):

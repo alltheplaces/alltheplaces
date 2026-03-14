@@ -1,3 +1,4 @@
+from typing import AsyncIterator
 from urllib.parse import quote
 
 from scrapy import Spider
@@ -14,7 +15,8 @@ query($input: StoreSearchInput!) {
         name
         streetAddress
         locality
-        region postal
+        region
+        postal
         phone
         storeHours
         isPickupAvailable
@@ -24,7 +26,6 @@ query($input: StoreSearchInput!) {
                 latitude
                 longitude
             }
-            type
         }
     }
 }
@@ -35,7 +36,7 @@ class PressedUSSpider(Spider):
     name = "pressed_us"
     item_attributes = {"brand": "Pressed", "brand_wikidata": "Q123005477"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://graphql.pressedjuicery.com/",
             data={
@@ -54,6 +55,7 @@ class PressedUSSpider(Spider):
     def parse(self, response):
         for location in response.json()["data"]["searchStores"]:
             item = DictParser.parse(location)
+            item["geometry"] = None
 
             item["lat"] = location["geometry"]["coordinates"]["latitude"]
             item["lon"] = location["geometry"]["coordinates"]["longitude"]

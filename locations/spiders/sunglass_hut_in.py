@@ -10,7 +10,7 @@ class SunglassHutINSpider(JSONBlobSpider):
     start_urls = ["https://sunglasshut.in/api/service/application/catalog/v1.0/locations/?page_size=100000"]
     locations_key = "items"
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,
@@ -21,7 +21,7 @@ class SunglassHutINSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item["lon"], item["lat"] = location["lat_long"]["coordinates"]
         item["branch"] = item.pop("name")
-        item["postcode"] = location.get("pincode")
+        item["postcode"] = str(location.get("pincode"))
         item["street_address"] = item.pop("addr_full")
         phone = [i for i in location["contacts"] if "number" in i.keys()][0]
         item["phone"] = f"+{phone['country_code']} {phone['number']}"

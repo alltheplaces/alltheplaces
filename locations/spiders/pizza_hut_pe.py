@@ -1,16 +1,17 @@
-import scrapy
-from scrapy import FormRequest
-from scrapy.http import JsonRequest
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest, JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.spiders.pizza_hut_us import PizzaHutUSSpider
 
 
-class PizzaHutPESpider(scrapy.Spider):
+class PizzaHutPESpider(Spider):
     name = "pizza_hut_pe"
     item_attributes = PizzaHutUSSpider.PIZZA_HUT
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.pizzahut.com.pe/v1/oidc/oauth2/token",
             formdata={"grant_type": "guest", "client_id": "ph_pe_web"},
@@ -68,5 +69,4 @@ class PizzaHutPESpider(scrapy.Spider):
             store = location["node"]["store"]
             item = DictParser.parse(store)
             item["lon"], item["lat"] = store["address"]["position"]["coordinates"]
-            item["website"] = "https://www.pizzahut.com.pe/"
             yield item

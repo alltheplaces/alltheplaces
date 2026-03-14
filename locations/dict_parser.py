@@ -1,4 +1,17 @@
+from typing import Any
+
+from locations.geo import extract_geojson_point_geometry
 from locations.items import Feature
+
+
+class KeyVariations:
+    _cache = {}
+
+    @classmethod
+    def get_variations(cls, key: str) -> set[str]:
+        if key not in cls._cache:
+            cls._cache[key] = DictParser.get_variations(key)
+        return cls._cache[key]
 
 
 class DictParser:
@@ -13,6 +26,7 @@ class DictParser:
         "store-id",
         "StoreID",
         "storeID",
+        "storeId",
         "store-number",
         "shop-number",
         "location-id",
@@ -28,6 +42,9 @@ class DictParser:
         "BranchID",
         "branchID",
         "branch-code",
+        # ES
+        "id-tienda",
+        "ID-tienda",
     ]
 
     name_keys = [
@@ -43,6 +60,11 @@ class DictParser:
         "branch-name",
         # ES
         "nombre",
+        # IT
+        "nome",
+        # NO
+        "navn",
+        "fulltnavn",
     ]
 
     house_number_keys = [
@@ -64,6 +86,8 @@ class DictParser:
         "formattedAddress",
         # ES
         "direccion",  # "address"
+        # NO
+        "beliggenhetsadresse",
     ]
 
     street_keys = [
@@ -82,8 +106,11 @@ class DictParser:
         "address-line1",
         "line1",
         "address-line-one",
+        "address-street",
         # JP
         "町域以下住所",  # "address below town limits"
+        # IT
+        "indirizzo",
     ]
 
     city_keys = [
@@ -106,8 +133,11 @@ class DictParser:
         "ciudad",  # "city"
         # IT
         "comune",  # "comune",
+        "citta",
         # DE
         "ort",  # location
+        # NO
+        "poststed",
     ]
 
     region_keys = [
@@ -123,6 +153,7 @@ class DictParser:
         "store-state",
         "store-province",
         "storeProvince",
+        "prefecture",
         # JP
         "都道府県",  # "prefecture"
         # IT
@@ -136,6 +167,8 @@ class DictParser:
         "country",
         "country-name",
         "store-country",
+        # NO
+        "land",
     ]
 
     isocode_keys = [
@@ -159,11 +192,16 @@ class DictParser:
         "store-zip",
         "store-zip-code",
         "store-zipcode",
+        "address-zip",
         # JP
         "郵便番号",  # "post code"
         # DE
         "plz",
         "postleitzahl",
+        # IT
+        "cap",
+        # NO
+        "postnummer",
     ]
 
     email_keys = [
@@ -212,6 +250,8 @@ class DictParser:
         # ES
         "coordenaday",  # "Coordinate Y"
         "latitud",
+        # NO
+        "breddegrad",
     ]
 
     lon_keys = [
@@ -226,11 +266,14 @@ class DictParser:
         "yext-display-lng",
         "map-longitude",
         "geo-lng",
+        "geo-long",
         "GPSLong",
         "geographicCoordinatesLongitude",
         # ES
         "coordenadax",  # "Coordinate X"
         "longitud",
+        # NO
+        "lengdegrad",
     ]
 
     website_keys = [
@@ -244,23 +287,58 @@ class DictParser:
         "websiteURL",
         "location-url",
         "web-address",
+        "WebSiteURL",
+        # NO
+        "internettadresse",
+        "nettside",
     ]
 
-    hours_keys = ["hours", "opening-hours", "open-hours", "store-opening-hours", "store-hours"]
+    hours_keys = [
+        "hours",
+        "opening-hours",
+        "open-hours",
+        "store-opening-hours",
+        "store-hours",
+        # IT
+        "orario",
+        "orari",
+    ]
+
+    twitter_keys = [
+        "twitter",
+        "twitter-link",
+        "twitter-url",
+    ]
+
+    facebook_keys = [
+        "facebook",
+        "facebook-link",
+        "facebook-url",
+    ]
 
     @staticmethod
-    def parse(obj) -> Feature:
+    def parse(obj: dict) -> Feature:
         item = Feature()
 
         item["ref"] = DictParser.get_first_key(obj, DictParser.ref_keys)
         item["name"] = DictParser.get_first_key(obj, DictParser.name_keys)
 
-        if (
-            obj.get("geometry")
-            and obj["geometry"].get("type") is not None
-            and obj["geometry"].get("coordinates") is not None
-        ):
-            item["geometry"] = obj["geometry"]
+        if obj.get("geometry") and obj["geometry"].get("type") in [
+            "Point",
+            "MultiPoint",
+            "LineString",
+            "MultiLineString",
+            "Polygon",
+            "MultiPolygon",
+        ]:
+            if rfc7946_point_geometry := extract_geojson_point_geometry(obj["geometry"]):
+                item["geometry"] = rfc7946_point_geometry
+            elif obj["geometry"]["type"] != "Point":
+                # Source geometry is supplied as a non-Point geometry type
+                # (such as Polygon) and should be returned as-is. There are no
+                # further checks done to ensure this geometry is valid RFC7946
+                # GeoJSON or GJ2008 geometry.
+                item["geometry"] = obj["geometry"]
         else:
             location = DictParser.get_first_key(
                 obj,
@@ -276,14 +354,24 @@ class DictParser:
                     "position",
                     "positions",
                     "display-coordinate",
+                    "location-geopoint",
                     "yextDisplayCoordinate",
+                    # NO
+                    "koordinat",
                 ],
             )
-            # If not a good location object then use the parent
-            if not location or not isinstance(location, dict):
-                location = obj
-            item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
-            item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+            if location and isinstance(location, dict):
+                # First attempt to find coordinates:
+                #   Latitude/longitude are wrapped inside a "coordinates" /
+                #   "location" style of named dictionary.
+                item["lat"] = DictParser.get_first_key(location, DictParser.lat_keys)
+                item["lon"] = DictParser.get_first_key(location, DictParser.lon_keys)
+            if item.get("lat", None) is None or item.get("lon", None) is None:
+                # Second attempt to find coordinates if first attempt failed:
+                #   Latitude/longitude are properties of the root dictionary
+                #   or any other nested dictionary of any name.
+                item["lat"] = DictParser.get_first_key(obj, DictParser.lat_keys)
+                item["lon"] = DictParser.get_first_key(obj, DictParser.lon_keys)
 
         address = DictParser.get_first_key(obj, DictParser.full_address_keys)
 
@@ -316,19 +404,21 @@ class DictParser:
         item["email"] = DictParser.get_first_key(contact, DictParser.email_keys)
         item["phone"] = DictParser.get_first_key(contact, DictParser.phone_keys)
         item["website"] = DictParser.get_first_key(contact, DictParser.website_keys)
+        item["twitter"] = DictParser.get_first_key(contact, DictParser.twitter_keys)
+        item["facebook"] = DictParser.get_first_key(contact, DictParser.facebook_keys)
 
         return item
 
     @staticmethod
-    def get_first_key(obj, keys):
+    def get_first_key(obj: dict, keys: list[str]) -> Any:
         for key in keys:
-            variations = DictParser.get_variations(key)
+            variations = KeyVariations.get_variations(key)
             for variation in variations:
                 if obj.get(variation):
                     return obj[variation]
 
     @staticmethod
-    def get_variations(key):
+    def get_variations(key: str) -> set[str]:
         results = set()
         results.add(key)
 

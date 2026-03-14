@@ -1,15 +1,19 @@
-import scrapy
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class KooperatifmarketTRSpider(scrapy.Spider):
+class KooperatifmarketTRSpider(Spider):
     name = "kooperatifmarket_tr"
     item_attributes = {"brand": "Türkiye Tarım Kredi Kooperatif Market", "brand_wikidata": "Q127328776"}
     start_urls = ["https://www.kooperatifmarket.com.tr/api/stores"]
+    requires_proxy = True
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for poi in response.json():
             item = Feature()
             item["ref"] = item["branch"] = poi["marketAdi"]

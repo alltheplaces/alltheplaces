@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 import scrapy
@@ -11,13 +12,16 @@ from locations.items import Feature
 class ScaniaSpider(scrapy.Spider):
     name = "scania"
     item_attributes = {"brand": "Scania", "brand_wikidata": "Q219960", "extras": Categories.SHOP_TRUCK_REPAIR.value}
-    start_urls = ["https://www.scania.com/content/scanianoe/platform/SalesRegionJson.json"]
+    start_urls = ["https://www.scania.com/group/en/home/admin/misc/sales-region.html"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for country, websites in response.json()["websites"].items():
+        websites = response.xpath('//*[@class="cmp-teaser__action-link"]/@href').getall()
+        for country_website in websites:
+            if m := re.search(r"https://www.scania.com/(.*)/(.*)/", country_website):
+                country, language = m.groups()
             yield JsonRequest(
-                "https://www.scania.com/api/sis.json?type=DealerV2&country={}&currentPage={}".format(
-                    websites[0]["countryCode"].upper(), websites[0]["siteUrl"].replace(".html", "/find-dealers")
+                url="https://www.scania.com/api/sis.json?type=DealerV2&country={}&currentPage=/content/www/{}/{}/home/admin/misc/dealer/contact-locator".format(
+                    country.upper(), country, language
                 ),
                 callback=self.parse_stores,
             )

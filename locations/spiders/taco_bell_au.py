@@ -7,7 +7,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
-from locations.spiders.taco_bell import TACO_BELL_SHARED_ATTRIBUTES
+from locations.spiders.taco_bell_us import TACO_BELL_SHARED_ATTRIBUTES
 from locations.structured_data_spider import extract_phone
 
 
