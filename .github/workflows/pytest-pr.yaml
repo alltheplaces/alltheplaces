@@ -3,22 +3,21 @@ name: Run pytest
 on:
   pull_request:
     paths:
-    - '.github/workflows/*.yaml'
-    - 'locations/**/*.py'
-    - 'tests/*.py'
-    - 'pyproject.toml'
-    - 'uv.lock'
-    - 'locations/data/nsi.json'
-
+      - ".github/workflows/*.yaml"
+      - "locations/**/*.py"
+      - "tests/*.py"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "locations/data/nsi.json"
 
 jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Install uv
-      uses: astral-sh/setup-uv@v5
-    - name: Run pytest
-      run: |
-        uv run pytest
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Run pytest
+        run: |
+          uv run pytest
