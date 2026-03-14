@@ -1,6 +1,6 @@
 from chompjs import parse_js_object
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -44,6 +44,7 @@ class BurgerKingKZSpider(JSONBlobSpider):
                     hours.replace(" 0:00", " 23:59"), DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, DELIMITERS_RU
                 )
 
+        apply_category(Categories.FAST_FOOD, item)
         apply_yes_no(Extras.DRIVE_THROUGH, item, location["drive"] == 1)
 
         yield item

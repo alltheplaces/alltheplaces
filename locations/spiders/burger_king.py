@@ -13,7 +13,6 @@ from locations.pipelines.address_clean_up import clean_address
 BURGER_KING_SHARED_ATTRIBUTES = {
     "brand": "Burger King",
     "brand_wikidata": "Q177054",
-    "extras": Categories.FAST_FOOD.value,
 }
 
 

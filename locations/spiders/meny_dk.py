@@ -1,5 +1,5 @@
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -16,7 +16,7 @@ class MenyDKSpider(JSONBlobSpider):
     start_urls = ["https://meny.dk/search"]
     locations_key = ["response", "docs"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "params": {"wt": "json"},
             "filter": [],

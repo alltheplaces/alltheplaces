@@ -22,7 +22,7 @@ class OportoAUSpider(Spider):
                 item["housenumber"] = " / ".join(
                     filter(None, [address["unit"]["value"], address["streetNumber"]["value"]])
                 )
-                item["street"] = address["streetName"]["value"]
+                item["street_address"] = address["streetName"]["value"]
                 item["city"] = address["suburb"]["value"]
                 item["state"] = address["state"]["value"]
                 item["country"] = address["country"]["longValue"]
@@ -30,7 +30,6 @@ class OportoAUSpider(Spider):
                 item["lat"] = address["latitude"]["value"]
                 item["lon"] = address["longitude"]["value"]
             item["phone"] = location["attributes"]["storePhone"]
-            item["email"] = location["attributes"]["storeEmail"]
             item["website"] = "https://www.oporto.com.au/locations/" + item["branch"].lower().replace(" ", "-")
 
             extra_features = [

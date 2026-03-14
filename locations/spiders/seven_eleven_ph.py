@@ -14,7 +14,7 @@ class SevenElevenPHSpider(WPStoreLocatorSpider):
     item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
     days = DAYS_EN
 
-    def start_requests(self):
+    async def start(self):
         for city in city_locations("PH"):
             lat = city.get("latitude")
             lon = city.get("longitude")

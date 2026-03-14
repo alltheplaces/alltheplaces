@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -12,7 +13,7 @@ class NettoSallingSpider(Spider):
     item_attributes = {"brand": "Netto", "brand_wikidata": "Q552652"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.sallinggroup.com/v2/stores?brand=netto&geo?&radius=100&per_page=100000",
             headers={"Authorization": "Bearer b1832498-0e22-436c-bd18-9ffa325dd846"},

@@ -1,3 +1,4 @@
+import re
 from copy import deepcopy
 from typing import Iterable
 
@@ -6,6 +7,7 @@ from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -66,14 +68,34 @@ class MitsubishiDESpider(JSONBlobSpider):
 
             if sales_available:
                 sales_item = self.build_sales_item(item)
+                # if hours:=poi.get("openingSales"):
+                sales_item["opening_hours"] = self.parse_hours((poi.get("openingSales") or {}))
                 apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
                 yield sales_item
 
             if service_available and type_id in ["1", "2", "3", "5", "6", "7"]:
                 service_item = self.build_service_item(item)
+                # if hours:=poi.get("openingService"):
+                service_item["opening_hours"] = self.parse_hours((poi.get("openingService") or {}))
                 yield service_item
 
             if not sales_available and not service_available:
                 self.logger.warning(f"Unknown type code: {type_id}, {item['name']}, {item['ref']}")
             self.crawler.stats.inc_value(f"atp/{self.name}/type_code/{type_id}")
-            # TODO: opening hours
+
+    def parse_hours(self, hours: dict) -> OpeningHours:
+        try:
+            oh = OpeningHours()
+            for day in hours:
+                if day.lower() == "lunchbreakdaily":
+                    continue
+                for time in hours[day]:
+                    match = re.match(r"(\d{1,2}:\d{2})\s*Uhr\s*-\s*(\d{1,2}:\d{2})\s*Uhr", time)
+                    if match:
+                        open, close = match.groups()
+                        oh.add_range(day, open, close)
+                    elif time.lower() == "geschlossen":
+                        oh.set_closed(day)
+            return oh
+        except Exception as e:
+            self.logger.warning("Error parsing {} {}".format(hours, e))

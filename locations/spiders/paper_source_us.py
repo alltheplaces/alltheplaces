@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy import Request, Selector
-from scrapy.http import FormRequest, Response
+from scrapy import Selector
+from scrapy.http import FormRequest, Request, Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -13,7 +13,7 @@ class PaperSourceUSSpider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "Paper Source", "brand_wikidata": "Q25000269"}
     start_urls = ["https://www.papersource.com/amlocator/index/ajax/"]
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {
             "lat": "0",
             "lng": "0",

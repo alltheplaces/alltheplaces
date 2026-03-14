@@ -1,8 +1,10 @@
 import csv
 from collections import defaultdict
 from math import sqrt
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
@@ -40,7 +42,7 @@ class StarbucksUSSpider(Spider):
         "Ralphs ": {"brand": "Ralphs", "brand_wikidata": "Q3929820"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for point_file in self.searchable_point_files:
             with open_searchable_points(point_file) as points:
                 reader = csv.DictReader(points)

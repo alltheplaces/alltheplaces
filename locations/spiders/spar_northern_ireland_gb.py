@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -14,12 +14,12 @@ class SparNorthernIrelandGBSpider(Spider):
     item_attributes = SPAR_SHARED_ATTRIBUTES
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def make_requests(self, page: int) -> Request:
+    def make_requests(self, page: int) -> JsonRequest:
         return JsonRequest(
             f"https://www.spar-ni.co.uk/umbraco/api/storelocationapi/stores?pageNumber={page}", meta={"page": page}
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_requests(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

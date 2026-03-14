@@ -1,8 +1,8 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import urlparse
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Request, Response, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -40,10 +40,10 @@ class TravelIQSpider(Spider):
      - 'api_key': mandatory parameter
     """
 
-    api_endpoint: str = ""
-    api_key: str = ""
+    api_endpoint: str
+    api_key: str
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         url_parts = urlparse(self.api_endpoint)
         yield Request(url=f"{url_parts.scheme}://{url_parts.netloc}/developers/doc", callback=self.parse_feature_types)
 
@@ -97,7 +97,7 @@ class TravelIQSpider(Spider):
                         "New type of feature detected for Travel-IQ storefinder: {}".format(feature_type)
                     )
 
-    def parse_cameras(self, response: Response) -> Iterable[Feature]:
+    def parse_cameras(self, response: TextResponse) -> Iterable[Feature]:
         cameras = response.json()
         for camera in cameras:
             if camera.get("Status") == "Disabled":

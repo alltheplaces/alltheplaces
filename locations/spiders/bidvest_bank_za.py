@@ -1,4 +1,9 @@
-from locations.categories import Categories
+from typing import Iterable
+
+from scrapy.http import TextResponse
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -7,7 +12,6 @@ class BidvestBankZASpider(JSONBlobSpider):
     item_attributes = {
         "brand": "Bidvest Bank",
         "brand_wikidata": "Q4904284",
-        "extras": Categories.ATM.value,
     }
     start_urls = ["https://www.bidvestbank.co.za/assets/mock/bidvest-branded-atms.json"]
 
@@ -16,3 +20,7 @@ class BidvestBankZASpider(JSONBlobSpider):
         location["Latitude"] = location["Latitude"].replace(",", ".")
         location["Longitude"] = location["Longitude"].replace(",", ".")
         location["street_address"] = location.pop("Street Address")
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        apply_category(Categories.ATM, item)
+        yield item

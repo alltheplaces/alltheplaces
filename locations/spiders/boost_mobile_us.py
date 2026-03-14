@@ -12,7 +12,7 @@ class BoostMobileUSSpider(SitemapSpider, StructuredDataSpider):
         "brand": "Boost Mobile",
         "brand_wikidata": "Q4943790",
     }
-    sitemap_urls = ["https://www.boostmobile.com/locations/sitemap-business-main-pages.xml"]
+    sitemap_urls = ["https://www.boostmobile.com/locations/sitemap.xml"]
     sitemap_rules = [(r"/locations/bd/boost-mobile-[a-z]{2}-[-\w]", "parse_sd")]
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
@@ -25,8 +25,7 @@ class BoostMobileUSSpider(SitemapSpider, StructuredDataSpider):
         ld_data["openingHours"] = ld_data.pop("openingHoursSpecification", [])
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["addr_full"] = item.pop("street_address")
-        item["street_address"] = item.pop("name").removeprefix("Boost ")
+        item.pop("name")
         item["image"] = None
         if "Temporarily Closed" in response.xpath('//*[contains(@class, "location-details")]').get(""):
             item["opening_hours"] = "off"

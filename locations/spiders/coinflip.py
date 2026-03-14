@@ -1,50 +1,41 @@
-from typing import Iterable
+import re
 
-from locations.categories import Categories, apply_category
+from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
-from locations.storefinders.yext_locations import YextLocationsSpider
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class CoinflipSpider(YextLocationsSpider):
+class CoinflipSpider(CrawlSpider, StructuredDataSpider):
     name = "coinflip"
     item_attributes = {"brand": "CoinFlip", "brand_wikidata": "Q109850256"}
-    api_key = "7ef064ccd105050c8cab5880d6bfefa7"
-    api_version = "20231114"
+    start_urls = ["https://locations.coinflip.tech/"]
 
-    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
-        item.pop("name", None)
-        item.pop("email", None)
+    rules = [
+        Rule(LinkExtractor(allow=r"/\w+$", restrict_xpaths="//main//ul")),
+        Rule(LinkExtractor(allow=r"/\w+/[a-z-]+$", restrict_xpaths="//main//ul")),
+        Rule(LinkExtractor(allow=r"/\w+/[a-z-]+/[a-z-]+$", restrict_xpaths="//main//ul")),
+        Rule(
+            LinkExtractor(
+                allow=r"/\w+/[a-z-]+/[a-z-]+/[a-z-0-9]+$",
+            ),
+            callback="parse_sd",
+        ),
+    ]
+    wanted_types = ["AutomatedTeller"]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1, "USER_AGENT": BROWSER_DEFAULT}
 
-        apply_category(Categories.ATM, item)
-        item["extras"]["currency:XBT"] = "yes"
-        match item.get("country"):
-            case "AU":
-                item["extras"]["currency:AUD"] = "yes"
-            case "BR":
-                item["extras"]["currency:BRL"] = "yes"
-            case "CA":
-                item["extras"]["currency:CAD"] = "yes"
-            case "ES" | "IT":
-                item["extras"]["currency:EUR"] = "yes"
-            case "MX":
-                item["extras"]["currency:MXN"] = "yes"
-            case "NZ":
-                item["extras"]["currency:NZD"] = "yes"
-            case "PA" | "PR" | "US":
-                item["extras"]["currency:USD"] = "yes"
-            case "ZA":
-                item["extras"]["currency:ZAR"] = "yes"
-            case None:
-                pass
-            case _:
-                self.logger.warning(
-                    "ATM is located in country '{}' for which the local currency is undefined by this spider. The spider should be updated to map a currency for this country.".format(
-                        item.get("country")
-                    )
-                )
-        item["extras"]["cash_in"] = "yes"
-        if location.get("c_oneWayTwoWay") == "ONE-WAY_ATM":
-            item["extras"]["cash_out"] = "no"
-        else:
-            item["extras"]["cash_out"] = "yes"
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["lat"], item["lon"] = re.search(r"q=(-?\d+\.\d+),(-?\d+\.\d+)", ld_data["hasMap"]).groups()
+        oh = OpeningHours()
+        for day_time in ld_data["openingHoursSpecification"]:
+            day = DAYS_FULL[int(day_time["dayOfWeek"][0])]
+            open_time = day_time["opens"]
+            close_time = day_time["closes"]
+            oh.add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I:%M %p")
+        item["opening_hours"] = oh
         yield item

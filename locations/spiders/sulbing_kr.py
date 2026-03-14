@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class SulbingKRSpider(scrapy.Spider):
     name = "sulbing_kr"
-    item_attributes = {"brand": "Sulbing", "brand_wikidata": "Q18156373"}
+    item_attributes = {"brand_wikidata": "Q18156373"}
     start_urls = ["https://sulbing.com/bbs/board.php?bo_table=store&page=1"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

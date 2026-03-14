@@ -7,7 +7,10 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class SubwaySpider(SitemapSpider, StructuredDataSpider):
-    """Also see SubwayWorldwideSpider for API-based spider."""
+    """
+    Sitemap-based spider for Subway locations outside the US.
+    US locations are handled by SubwayUSSpider which uses the API for better data quality.
+    """
 
     name = "subway"
     item_attributes = {"brand": "Subway", "brand_wikidata": "Q244457"}
@@ -15,6 +18,12 @@ class SubwaySpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://restaurants.subway.com/sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
     drop_attributes = {"image"}
+
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            # Skip US locations - handled by subway_us spider with better data quality
+            if "/united-states/" not in entry["loc"]:
+                yield entry
 
     def pre_process_data(self, ld_data, **kwargs):
         if isinstance(ld_data["name"], list):

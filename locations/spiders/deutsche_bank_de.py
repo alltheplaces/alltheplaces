@@ -13,7 +13,7 @@ class DeutscheBankDESpider(Spider):
     name = "deutsche_bank_de"
     item_attributes = {"brand": "Deutsche Bank", "brand_wikidata": "Q66048"}
     SPARDA_BANK = {"brand": "Sparda-Bank", "brand_wikidata": "Q2307136"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUEST": 1, "DOWNLOAD_DELAY": 3}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         base_url = "https://www.deutsche-bank.de/cip/rest/api/url/pfb/content/gdata/Presentation/DbFinder/Home/IndexJson?label={type}&searchTerm={searchBy}&country=D"

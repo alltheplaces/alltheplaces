@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 from zoneinfo import ZoneInfo
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -24,6 +23,11 @@ class JumboNLSpider(Spider):
     def make_request(self, page: int, size: int = 30) -> JsonRequest:
         return JsonRequest(
             url="https://www.jumbo.com/api/graphql",
+            headers={
+                "apollographql-client-name": "JUMBO_WEB-store",
+                "apollographql-client-version": "master-v22.12.1-web",
+                "content-type": "application/json",
+            },
             data={
                 "operationName": "GetStoreList",
                 "variables": {
@@ -110,7 +114,7 @@ class JumboNLSpider(Spider):
             },
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

@@ -2,7 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.spiders.costcutter_gb import CostcutterGBSpider
 from locations.spiders.james_retail_gb import JamesRetailGBSpider
 from locations.spiders.the_food_warehouse_gb import TheFoodWarehouseGBSpider
@@ -11,7 +11,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
     name = "bargain_booze_gb"
-    item_attributes = {"brand": "Bargain Booze", "brand_wikidata": "Q16971315", "extras": Categories.SHOP_ALCOHOL.value}
+    item_attributes = {"brand": "Bargain Booze", "brand_wikidata": "Q16971315"}
     allowed_domains = ["branches.bargainbooze.co.uk"]
     sitemap_urls = ["https://branches.bargainbooze.co.uk/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/branches\.bargainbooze\.co\.uk\/[\w\-]+\/[\w\-]+\.html$", "parse_sd")]
@@ -69,4 +69,5 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
         item.pop("facebook")
         item.pop("twitter")
         item.pop("image")
+        apply_category(Categories.SHOP_ALCOHOL, item)
         yield item

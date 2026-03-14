@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -13,7 +13,7 @@ class UniqloSpider(JSONBlobSpider):
     locations_key = ["result", "stores"]
     offset = 0
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in [
             "uk",
             "jp",
@@ -28,9 +28,10 @@ class UniqloSpider(JSONBlobSpider):
             "eu-lu",
             "eu-pl",
         ]:
-            yield from self.request_page(country, 0)
+            for request in self.request_page(country, 0):
+                yield request
 
-    def request_page(self, country, offset):
+    def request_page(self, country, offset) -> Iterable[JsonRequest]:
         yield JsonRequest(
             url=f"https://map.uniqlo.com/{country}/api/storelocator/v1/en/stores?limit=100&RESET=true&offset={offset}&r=storelocator",
             meta={

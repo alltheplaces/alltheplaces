@@ -1,32 +1,21 @@
-import re
-from typing import Any
+from typing import Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_3_LETTERS, OpeningHours
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ProHockeyLifeCASpider(Spider):
+class ProHockeyLifeCASpider(JSONBlobSpider):
     name = "pro_hockey_life_ca"
     item_attributes = {"brand": "Pro Hockey Life", "brand_wikidata": "Q123466336"}
-    start_urls = ["https://www.prohockeylife.com/pages/store-locator"]
+    start_urls = ["https://www.prohockeylife.com/cdn/shop/t/37/assets/stores.json"]
+    locations_key = "data"
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        yield response.follow(url=re.search(r'jsonFile="(.+)\?.+";', response.text).group(1), callback=self.parse_json)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
 
-    def parse_json(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["data"]:
-            item = DictParser.parse(location)
-            item["ref"] = location["store_number"]
-            item["branch"] = item.pop("name")
-            item["website"] = "https://www.prohockeylife.com/pages/pro-hockey-life-{}".format(
-                re.sub(r"\s+", "-", location["name"].lower())
-            )
+        apply_category(Categories.SHOP_SPORTS, item)
 
-            item["opening_hours"] = OpeningHours()
-            for day in map(str.lower, DAYS_3_LETTERS):
-                item["opening_hours"].add_range(day, location[f"{day}_opening"], location[f"{day}_closing"])
-
-            yield item
+        yield item

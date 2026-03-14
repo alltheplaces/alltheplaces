@@ -8,50 +8,27 @@ from locations.items import Feature
 class StarbucksTWSpider(Spider):
     name = "starbucks_tw"
     item_attributes = {"brand": "星巴克", "brand_wikidata": "Q37158"}
-    start_urls = ["https://www.starbucks.com.tw/stores/storesearch.jspx"]
-    requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response, **kwargs):
+    async def start(self):
         yield FormRequest(
-            "https://www.starbucks.com.tw/stores/storesearch.jspx",
+            "https://www.starbucks.com.tw/stores/ajax/json_storesearch.aspx",
             formdata={
-                "AJAXREQUEST": "j_id_jsp_139507100_0",
-                "javax.faces.ViewState": response.xpath('//input[@id="javax.faces.ViewState"]/@value').get(),
-                "sbForm:useGeolocation": "0",
-                "sbForm:fetchGeolocation": "1",
-                "sbForm:lon": "0",
-                "sbForm:lat": "0",
-                "sbForm:reserve": "",
-                "sbForm:pour": "",
-                "sbForm:nitro": "",
-                "sbForm:drive": "",
-                "sbForm:fizzio": "",
-                "sbForm:baked": "",
-                "sbForm:wifi": "",
-                "sbForm:mobileOrder": "",
-                "sbForm:mobileOrderInStore": "",
-                "sbForm:mobileOrderOutStore": "",
-                "sbForm:mobileOrderRoadSide": "",
-                "sbForm:coffeeVoucher": "",
-                "sbForm:borrowCup": "",
-                "sbForm:returnCup": "",
-                "sbForm:showUnusualBusinessInfo": "",
-                "storeName": "",
-                "sbForm_SUBMIT": "1",
-                "sbForm:doFindByName": "sbForm:doFindByName",
+                "lat": "0",
+                "lon": "0",
             },
-            callback=self.parse_locations,
+            callback=self.parse,
         )
 
-    def parse_locations(self, response, **kwargs):
-        selector = Selector(text=response.xpath(".").get())
+    def parse(self, response, **kwargs):
+        selector = Selector(text=response.json()["renderElements"][0]["elementHTML"])
         for location in selector.xpath('//li[@class="store_data"]'):
             item = Feature()
             item["ref"], item["lat"], item["lon"] = re.match(
-                r"fetchStoreMapLocation\((\d+),(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\);",
-                location.xpath("./@onmouseover").get(),
+                r"fetchStoreMapLocation\((\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\)",
+                location.xpath("./@onmouseover").get(""),
             ).groups()
-            item["name"] = location.xpath('.//*[@class="store_name"]/text()').get()
+            item["branch"] = location.xpath('.//*[@class="store_name"]/text()').get()
             item["addr_full"] = location.xpath('.//*[@class="store_add"]/text()').get()
             if details := selector.xpath(f'//div[@id="store_info_{item["ref"]}"]'):
                 item["phone"] = details.xpath('.//*[@class="store_phone"]/a/text()').get()

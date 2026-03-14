@@ -35,6 +35,6 @@ class TymebankZASpider(LocationBankSpider):
             item["located_in"] = self.located_in_brands[m.group(1).upper()]["brand"]
             item["located_in_wikidata"] = self.located_in_brands[m.group(1).upper()]["brand_wikidata"]
         else:
-            self.crawler.stats.inc_value(f"atp/{self.name}/located_in_failed/{item['branch']}")
+            self.crawler.stats.inc_value(f"atp/located_in_failed/{item['branch']}")
 
         yield item

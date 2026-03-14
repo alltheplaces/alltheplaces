@@ -1,17 +1,19 @@
-import scrapy
-from scrapy.http import JsonRequest
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest, JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class VakifbankTRSpider(scrapy.Spider):
+class VakifbankTRSpider(Spider):
     name = "vakifbank_tr"
     item_attributes = {"brand": "Vakıfbank", "brand_wikidata": "Q1148521"}
     requires_proxy = True
 
-    def start_requests(self):
-        yield scrapy.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             url="https://apigw.vakifbank.com.tr:8443/auth/oauth/v2/token",
             formdata={
                 "client_id": "l7xx672ef83670e842b0bb2f13a539ddbfb5",

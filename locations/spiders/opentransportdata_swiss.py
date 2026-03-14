@@ -4,9 +4,11 @@ import io
 import re
 import zipfile
 from collections import namedtuple
+from typing import AsyncIterator
 from urllib.parse import urlencode
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.items import Feature
 from locations.user_agents import BOT_USER_AGENT_SCRAPY
@@ -16,7 +18,7 @@ from locations.user_agents import BOT_USER_AGENT_SCRAPY
 Station = namedtuple("Station", "name operator operator_wikidata city country means")
 
 
-class OpentransportdataSwissSpider(scrapy.Spider):
+class OpentransportdataSwissSpider(Spider):
     name = "opentransportdata_swiss"
     allowed_domains = [
         "opentransportdata.swiss",
@@ -37,8 +39,8 @@ class OpentransportdataSwissSpider(scrapy.Spider):
     dataset_pattern = "https://data.opentransportdata.swiss/en/dataset/%s/permalink"
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             "https://query.wikidata.org/sparql?{}".format(
                 urlencode({"query": "SELECT ?item ?sboid WHERE {?item p:P13221 ?s. ?s ps:P13221 ?sboid.}"})
             ),
@@ -52,12 +54,12 @@ class OpentransportdataSwissSpider(scrapy.Spider):
             if m := re.search(r"(Q\d+)", row["item"]):
                 self.operators[row["sboid"].lower().strip()] = m.group(1)
         url = "https://data.opentransportdata.swiss/de/dataset/bfr-rollstuhl"
-        yield scrapy.Request(url, callback=self.handle_wheelchair_overview)
+        yield Request(url, callback=self.handle_wheelchair_overview)
 
     def handle_wheelchair_overview(self, response):
         # The download URL changes daily with every database dump.
         link = next(href for href in response.xpath("//a/@href").getall() if href.endswith("bfr_haltestellendaten.csv"))
-        yield scrapy.Request(link, callback=self.handle_wheelchair_data)
+        yield Request(link, callback=self.handle_wheelchair_data)
 
     def handle_wheelchair_data(self, response):
         # The data feed supplies seperate properties for railbound
@@ -100,7 +102,7 @@ class OpentransportdataSwissSpider(scrapy.Spider):
             )
         # Next, fetch data file for wheelchair-accessible toilets.
         url = self.dataset_pattern % "prm-toilet-actual-date"
-        yield scrapy.Request(url, callback=self.handle_wheelchair_toilets)
+        yield Request(url, callback=self.handle_wheelchair_toilets)
 
     def handle_wheelchair_toilets(self, response):
         self.toilets_wheelchair = {}  # "ch:1:sloid:2213" -> "yes"
@@ -119,12 +121,12 @@ class OpentransportdataSwissSpider(scrapy.Spider):
         )
         # Next, fetch data file for "service points" (stations/stop areas).
         url = self.dataset_pattern % "service-points-actual-date"
-        yield scrapy.Request(url, callback=self.handle_service_points)
+        yield Request(url, callback=self.handle_service_points)
 
     def handle_service_points(self, response):
         self.stations = {}
         # "swiss-only" is an misnomer; the actual data goes far beyond.
-        for row in self.read_csv("actual_date-swiss-only-service_point", response):
+        for row in self.read_csv("actual-date-swiss-service-point", response):
             if row["status"] != "VALIDATED":
                 continue
             sloid = row["sloid"]
@@ -178,10 +180,10 @@ class OpentransportdataSwissSpider(scrapy.Spider):
 
         # Next, fetch data for "traffic points" (platforms).
         url = self.dataset_pattern % "traffic-points-actual-date"
-        yield scrapy.Request(url, callback=self.handle_traffic_points)
+        yield Request(url, callback=self.handle_traffic_points)
 
     def handle_traffic_points(self, response):
-        for row in self.read_csv("actual_date-world-traffic_point", response):
+        for row in self.read_csv("actual-date-world-traffic-point", response):
             # This table does not seem to have a status column,
             # so we do not check for status="VALIDATED" here.
             sloid = row["sloid"]

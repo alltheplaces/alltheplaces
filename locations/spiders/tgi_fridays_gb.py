@@ -1,6 +1,6 @@
-import json
 import re
-from typing import Iterable
+from json import loads
+from typing import AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy.http import FormRequest, Request
@@ -39,12 +39,12 @@ class TgiFridaysGBSpider(Spider):
             meta={"page": page},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(0)
 
     def parse(self, response):
         data = response.xpath("//textarea/text()").get()
-        jsondata = json.loads(data)[1]["args"][1]
+        jsondata = loads(data)[1]["args"][1]
 
         for location in jsondata["results"]:
             item = DictParser.parse(location)

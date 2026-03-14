@@ -4,11 +4,8 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class EuropabankBESpider(JSONBlobSpider):
     name = "europabank_be"
-    item_attributes = {
-        "brand": "Europabank",
-        "brand_wikidata": "Q2134017",
-    }
-    start_urls = ["https://www.europabank.be/WebsiteAPI/rest/offices/all"]
+    item_attributes = {"brand": "Europabank", "brand_wikidata": "Q2134017"}
+    start_urls = ["https://www.europabank.be/WebBackendAPI/v1/public/offices"]
 
     def post_process_item(self, item, response, location):
         item["branch"] = location["kantoorNaam"]

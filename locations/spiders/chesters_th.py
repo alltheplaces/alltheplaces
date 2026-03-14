@@ -16,8 +16,7 @@ class ChestersTHSpider(JSONBlobSpider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://chester-api.chesters.co.th/api/gql",
-            data={
-                "query": """query {
+            data={"query": """query {
     master_branchs(status: "active", brand_id: "62f9c84ebc4a20ae9e5ae88f") {
         data {
             address
@@ -35,8 +34,7 @@ class ChestersTHSpider(JSONBlobSpider):
             }
         }
     }
-}"""
-            },
+}"""},
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

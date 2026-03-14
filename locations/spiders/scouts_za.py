@@ -16,7 +16,7 @@ class ScoutsZASpider(JSONBlobSpider):
     start_urls = ["https://www.scouts.org.za/scouts-near-you/"]
     allowed_domains = ["scouts.org.za"]
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield Request(url=url, callback=self.parse_province)
 
