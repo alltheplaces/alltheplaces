@@ -1,6 +1,6 @@
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -50,4 +50,5 @@ class BurgerKingNOSpider(JSONBlobSpider):
                 time_format="%H:%M:%S",
             )
 
+        apply_category(Categories.FAST_FOOD, item)
         yield item

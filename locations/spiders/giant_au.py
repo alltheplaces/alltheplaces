@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -15,7 +15,7 @@ class GiantAUSpider(JSONBlobSpider):
     start_urls = ["https://www.giant-bicycles.com/au/stores/dealers"]
     locations_key = "dealers"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "campaigncodes": [],
             "keyword": "",

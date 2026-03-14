@@ -14,14 +14,16 @@ class VitalantSpider(SitemapSpider):
     def parse(self, response):
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["name"] = response.xpath('//h1[@class="content__title"]/text()').get()
-        address_data = response.xpath('//*[@class="location__address"]/p/text()').getall()
-        address = address_data[0]
-        line_2 = address_data[1]
-        if line_2 is not None:
-            if "877" not in line_2:
-                address = address + line_2
-        item["addr_full"] = clean_address(address)
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/@href').get().replace("tel:", "")
+        item["branch"] = response.xpath('//h1[@class="content__title"]/text()').get().replace("Vitalant", "")
+        try:
+            if address_data := response.xpath('//*[contains(@class,"location__address")]/p/text()').getall():
+                address = address_data[0]
+                line_2 = address_data[1]
+                if line_2 is not None:
+                    if "877" not in line_2:
+                        address = address + line_2
+                item["addr_full"] = clean_address(address)
+        except:
+            self.logger.warning(f"Could not parse hours: {address_data}")
         extract_google_position(item, response)
         yield item

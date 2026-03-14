@@ -1,11 +1,10 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.items import Feature, get_merged_item
-from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 from locations.storefinders.yext_search import YextSearchSpider
 
 AMENITIES_MAP = {"Drive Through": Extras.DRIVE_THROUGH, "WiFi": Extras.WIFI}
@@ -13,10 +12,10 @@ AMENITIES_MAP = {"Drive Through": Extras.DRIVE_THROUGH, "WiFi": Extras.WIFI}
 
 class StarbucksMenaSpider(YextSearchSpider):
     name = name = "starbucks_mena"
-    item_attributes = STARBUCKS_SHARED_ATTRIBUTES
+    item_attributes = {"brand": "ستاربكس", "brand_wikidata": "Q37158"}
     stored_items = {}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         offset = 0
         yield JsonRequest(
             url=f"https://locations.starbucks.eg/index.html?search&r=250000&per={self.page_size}&offset={offset}"

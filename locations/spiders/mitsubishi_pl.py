@@ -1,48 +1,61 @@
-from typing import Any
+import re
+from copy import deepcopy
+from typing import Iterable
 
-from scrapy import FormRequest, Spider
+import chompjs
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class MitsubishiPLSpider(Spider):
+class MitsubishiPLSpider(JSONBlobSpider):
     name = "mitsubishi_pl"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
     start_urls = ["https://www.mitsubishi.pl/dealerzy"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        # Fetch cookie
-        user_session = ""
-        for cookie in response.headers.getlist("Set-Cookie"):
-            if b"user_session" in cookie:
-                user_session = cookie.split(b"=")[1].split(b";")[0].decode("utf-8")
-                break
-
-        token = response.xpath('//meta[@name="csrf-token"]/@content').get()
-
-        yield FormRequest(
-            url="https://www.mitsubishi.pl/api/modules/dealers/markers/pl",
-            headers={"x-csrf-token": token},
-            cookies={"user_session": user_session},
-            formdata={"filters[region]": "", "filters[query]": ""},
-            callback=self.parse_locations,
+    def extract_json(self, response: Response) -> list[dict]:
+        return chompjs.parse_js_object(
+            re.search(
+                r"dealerLocations\":(\[.*\])}\]\],\[\[\"\$\"",
+                response.xpath('//*[contains(text(),"latitude")]/text()').get().replace("\\", ""),
+            ).group(1)
         )
 
-    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
-            location["street"] = location.pop("address_street", "")
-            item = DictParser.parse(location)
-            item["lat"] = location.get("marker_lat")
-            item["lon"] = location.get("marker_lng")
-            item["housenumber"] = location.get("address_number")
-            item["postcode"] = location.get("address_postal")
-            if phone := location.get("address_phone") or location.get("service_phone"):
-                item["phone"] = phone.strip().removeprefix("0")
-            if "serwis" in location["email"].lower() or "Serwis" in location["name"].title():
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-            else:
-                apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, location.get("service_phone"))
-            yield item
+    def build_sales_item(self, item):
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-sales"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
+
+    def build_service_item(self, item):
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-service"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = item.pop("addr_full")
+        item["addr_full"] = feature["full_address"]
+        item["name"] = feature["dealer_name"]
+
+        if isinstance(feature["dealer_websites"], list):
+            item["website"] = feature["dealer_websites"][0]["url"]
+
+        services = feature["services"]
+        sales_available = "SHOWROOM" in services
+        service_available = "SERVICE" in services
+
+        if sales_available:
+            sales_item = self.build_sales_item(item)
+            if service_available:
+                apply_yes_no(Extras.CAR_REPAIR, sales_item, True)
+            yield sales_item
+
+        if service_available:
+            service_item = self.build_service_item(item)
+            yield service_item
+
+        if not sales_available and not service_available:
+            self.logger.error(f"Unknown services: {services}, {item['name']}, {item['ref']}")

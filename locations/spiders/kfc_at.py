@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class KfcATSpider(Spider):
     allowed_domains = ["www.kfc.co.at"]
     start_urls = ["https://www.kfc.co.at/api/collections/shops/entries"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url)
 

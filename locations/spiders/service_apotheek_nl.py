@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -9,12 +9,12 @@ from locations.dict_parser import DictParser
 class ServiceApotheekNLSpider(Spider):
     name = "service_apotheek_nl"
     item_attributes = {"brand": "Service Apotheek", "brand_wikidata": "Q124129179"}
+    allowed_domains = ["gate.serviceapotheek.nl"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://gate.serviceapotheek.nl/graphql",
-            data={
-                "query": """
+            data={"query": """
             query GetLocators {
                 locators {
                     type
@@ -36,8 +36,7 @@ class ServiceApotheekNLSpider(Spider):
                         }
                     }
                 }
-            }"""
-            },
+            }"""},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

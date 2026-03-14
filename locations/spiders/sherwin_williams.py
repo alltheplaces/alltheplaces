@@ -1,19 +1,21 @@
 import html
 import json
+from typing import AsyncIterator
 from urllib.parse import urlencode
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SherwinWilliamsSpider(scrapy.Spider):
+class SherwinWilliamsSpider(Spider):
     name = "sherwin_williams"
     item_attributes = {"brand": "Sherwin-Williams", "brand_wikidata": "Q48881"}
     allowed_domains = ["www.sherwin-williams.com"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     #  Covers United States, Canada, UK, Puerto Rico, Bahamas with 500 mile radius - (from regis spider)
     lats = [
@@ -61,7 +63,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
         "-0.17578125",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         params = {
             "sideBarType": "LSTORES",
             "radius": "50",
@@ -88,10 +90,10 @@ class SherwinWilliamsSpider(scrapy.Spider):
             for point in points:
                 _, lat, lon = point.strip().split(",")
                 params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
-                yield scrapy.Request(
+                yield Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
-                    meta={"store_type": "Sherwin-Williams Paint Store"},
+                    meta={"store_type": "Sherwin-Williams"},
                 )
 
         with open_searchable_points("ca_centroids_50mile_radius.csv") as points:
@@ -99,18 +101,18 @@ class SherwinWilliamsSpider(scrapy.Spider):
             for point in points:
                 _, lat, lon = point.strip().split(",")
                 params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
-                yield scrapy.Request(
+                yield Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
-                    meta={"store_type": "Sherwin-Williams Paint Store"},
+                    meta={"store_type": "Sherwin-Williams"},
                 )
 
         for lat, lon in addtional_lat_lons:
             params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
-            yield scrapy.Request(
+            yield Request(
                 url=base_url + urlencode(params),
                 callback=self.parse,
-                meta={"store_type": "Sherwin-Williams Paint Store"},
+                meta={"store_type": "Sherwin-Williams"},
             )
 
         # the other store types are much more sparse so we can search with a larger
@@ -132,7 +134,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                         "longitude": lon,
                     }
                 )
-                yield scrapy.Request(
+                yield Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
                     meta={"store_type": type_name},
@@ -147,7 +149,8 @@ class SherwinWilliamsSpider(scrapy.Spider):
             for store in data["stores"]:
                 properties = {
                     "ref": store["storeNumber"],
-                    "name": store["name"],
+                    "name": store_type,
+                    "branch": store["name"],
                     "addr_full": html.unescape(store["address"].strip()),
                     "city": store["city"].strip(),
                     "state": store["state"].strip(),
@@ -156,10 +159,6 @@ class SherwinWilliamsSpider(scrapy.Spider):
                     "lat": float(store["latitude"]),
                     "lon": float(store["longitude"]),
                     "website": "https://www.sherwin-williams.com" + store["url"],
-                    "brand": store_type,
-                    "extras": {
-                        "number": store["storeNumber"],
-                    },
                 }
 
                 yield Feature(**properties)

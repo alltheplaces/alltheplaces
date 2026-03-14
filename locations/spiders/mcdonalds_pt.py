@@ -16,6 +16,7 @@ class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.mcdonalds.pt"]
     sitemap_urls = ["https://www.mcdonalds.pt/sitemap"]
     sitemap_rules = [("/restaurantes/", "parse_sd")]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = html.unescape(item.pop("name")).removeprefix("McDonald's ")

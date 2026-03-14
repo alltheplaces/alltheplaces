@@ -6,10 +6,8 @@ from locations.structured_data_spider import StructuredDataSpider
 class GncSpider(SitemapSpider, StructuredDataSpider):
     name = "gnc"
     item_attributes = {"brand": "GNC", "brand_wikidata": "Q4808595"}
-    download_delay = 5
+    custom_settings = {"DOWNLOAD_DELAY": 5}
     sitemap_urls = ("https://stores.gnc.com/sitemap.xml",)
-    sitemap_rules = [
-        (r"^https://stores.gnc.com/all-stores-[^/]+/[^/]+/[^/]+$", "parse_sd"),
-    ]
+    sitemap_rules = [(r"^https://stores.gnc.com/all-stores-[^/]+/[^/]+/[^/]+$", "parse_sd")]
     wanted_types = ["HobbyShop"]
     drop_attributes = {"image"}

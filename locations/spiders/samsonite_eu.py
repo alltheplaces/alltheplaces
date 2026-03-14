@@ -1,18 +1,21 @@
-import scrapy
+from typing import AsyncIterator
+
 import xmltodict
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature, SocialMedia, set_social_media
 
 
-class SamsoniteEUSpider(scrapy.Spider):
+class SamsoniteEUSpider(Spider):
     name = "samsonite_eu"
     CHIC_ACCENT = {"brand": "Chic Accent"}
     SAMSONITE = {"brand": "Samsonite", "brand_wikidata": "Q1203426"}
     allowed_domains = ["samsonite.com", "storelocator.samsonite.eu"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         country_eu = [
             "AL",
             "CZ",
@@ -55,7 +58,7 @@ class SamsoniteEUSpider(scrapy.Spider):
         ]
         template = "https://storelocator.samsonite.eu/data-exchange/getDealerLocatorMapV2_Radius.aspx?s=sams&country={}&search=dealer&lat=48.85799300000001&lng=2.381153&radius=100000"
         for country in country_eu:
-            yield scrapy.Request(url=template.format(country), callback=self.parse)
+            yield Request(url=template.format(country), callback=self.parse)
 
     def parse(self, response):
         data = xmltodict.parse(response.text)

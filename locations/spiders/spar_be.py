@@ -3,13 +3,14 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 
 class SparBESpider(scrapy.Spider):
     name = "spar_be"
     allowed_domains = ["www.spar.be"]
     start_urls = ["https://www.spar.be/winkels"]
-    item_attributes = {"brand": "Spar", "brand_wikidata": "Q610492"}
+    item_attributes = SPAR_SHARED_ATTRIBUTES
 
     def parse(self, response, **kwargs):
         result = response.xpath("//*[@id][@data-lat]")
@@ -36,13 +37,12 @@ class SparBESpider(scrapy.Spider):
         for rule in response.xpath('//tr[contains(@class, "office-hours__item")]'):
             day = sanitise_day(rule.xpath(r'./td[@class="office-hours__item-label"]/text()').get(), DAYS_NL)
             time = rule.xpath('./td[@class="office-hours__item-slots"]/text()').get()
-
-            if (time == "Gesloten") or (day is None):
-                continue
-
-            for period in time.split(","):
-                open_time, close_time = period.split("-")
-                item["opening_hours"].add_range(day, open_time.strip(), close_time.strip())
+            if "Closed" in time:
+                item["opening_hours"].set_closed(day)
+            else:
+                for period in time.split(","):
+                    open_time, close_time = period.split("-")
+                    item["opening_hours"].add_range(day, open_time.strip(), close_time.strip())
 
         if item["name"].startswith("SPAR Express"):
             item["branch"] = item.pop("name").removeprefix("SPAR Express ")

@@ -1,7 +1,10 @@
-import chompjs
-from scrapy import Request
+from typing import AsyncIterator, Iterable
+
+from chompjs import parse_js_object
+from scrapy.http import Request, TextResponse
 
 from locations.dict_parser import DictParser
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -11,22 +14,25 @@ class StoreifySpider(JSONBlobSpider):
 
     Detectable via `https://sl.storeify.app/js/stores/{api_key}/storeifyapps-storelocator-geojson.js`
 
-    To use, specify `api_key` and `domain`
+    To use, specify `api_key` and `domain`, where `domain` is the domain used
+    for individual store/feature webpages at the brand's website (e.g.
+    "stores.example.net/stores/example-location").
     """
 
-    api_key = None
-    domain = None
+    dataset_attributes: dict = {"source": "api", "api": "storeify.app"}
+    api_key: str
+    domain: str
 
     # TODO: Autodetection
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=f"https://sl.storeify.app/js/stores/{self.api_key}/storeifyapps-storelocator-geojson.js")
 
-    # API returns a geojson feature collection
-    def extract_json(self, response):
-        return chompjs.parse_js_object(response.text)["features"]
+    def extract_json(self, response: TextResponse) -> dict | list[dict]:
+        # API returns a GeoJSON feature collection
+        return parse_js_object(response.text)["features"]
 
-    def parse_feature_array(self, response, feature_array):
+    def parse_feature_array(self, response: TextResponse, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
             self.pre_process_data(feature)
             item = DictParser.parse(feature["properties"])

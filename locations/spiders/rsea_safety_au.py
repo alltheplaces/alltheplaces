@@ -1,6 +1,9 @@
-from scrapy import Request, Selector, Spider
-from scrapy.http import FormRequest
+from typing import AsyncIterator
 
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest, Request
+
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -11,15 +14,12 @@ class RseaSafetyAUSpider(Spider):
     item_attributes = {
         "brand": "RSEA Safety",
         "brand_wikidata": "Q122418895",
-        "extras": {
-            "shop": "safety_equipment",
-        },
     }
     allowed_domains = ["www.rsea.com.au"]
     start_urls = ["https://www.rsea.com.au/service/storeLocator/findNearestStore"]
     custom_settings = {"COOKIES_ENABLED": True}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         # A session cookie first needs to be obtained.
         yield Request(url="https://www.rsea.com.au/store-locator", callback=self.request_location_data)
 
@@ -58,4 +58,5 @@ class RseaSafetyAUSpider(Spider):
             hours_string = " ".join(Selector(text=location["OpeningHoursHTML"]).xpath("//text()").getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
+            apply_category(Categories.SHOP_SAFETY_EQUIPMENT, item)
             yield item

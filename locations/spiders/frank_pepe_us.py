@@ -11,7 +11,7 @@ from locations.dict_parser import DictParser
 class FrankPepeUSSpider(Spider):
     name = "frank_pepe_us"
     item_attributes = {"brand": "Frank Pepe's", "brand_wikidata": "Q963973"}
-    start_urls = ["https://pepe-new-admin.projects.3owl.agency/api/v1/restaurants"]
+    start_urls = ["https://admin.pepespizzeria.com/api/v1/restaurants"]
 
     BASE_URL = "https://pepespizzeria.com/store/"
     PAYMENT_MAP = {

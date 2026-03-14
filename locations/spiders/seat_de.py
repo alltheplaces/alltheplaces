@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import scrapy
 
 from locations.categories import Categories, apply_category
@@ -21,5 +23,15 @@ class SeatDESpider(scrapy.Spider):
             item["postcode"] = data.get("PLZ")
             item["lat"] = data.get("XPOS")
             item["lon"] = data.get("YPOS")
-            apply_category(Categories.SHOP_CAR, item)
-            yield item
+            item["website"] = data.get("URL")
+            item["email"] = data.get("EMAIL")
+            if data.get("HAENDLERVERTRAG") == "J":
+                shop_item = deepcopy(item)
+                shop_item["ref"] = f"{item['ref']}-SHOP"
+                apply_category(Categories.SHOP_CAR, shop_item)
+                yield shop_item
+            if data.get("SERVICEPARTNERVERTRAG") == "J":
+                service_item = deepcopy(item)
+                service_item["ref"] = f"{item['ref']}-SERVICE"
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                yield service_item

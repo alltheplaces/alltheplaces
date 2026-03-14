@@ -15,7 +15,6 @@ class PublixUSSpider(Spider):
     start_urls = [
         "https://services.publix.com/storelocator/api/v1/stores/?count=3000&distance=5000&includeOpenAndCloseDates=true&isWebsite=true&latitude=39.8422945&longitude=-74.8828235"
     ]
-    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:
@@ -61,6 +60,9 @@ class PublixUSSpider(Spider):
             elif location["type"] == "W":
                 item["name"] = "Publix GreenWise Market"
                 apply_category(Categories.SHOP_SUPERMARKET, item)
+            elif location["type"] == "X":
+                item["name"] = "Publix Office"
+                apply_category(Categories.OFFICE_COMPANY, item)
             else:
                 self.logger.error("Unrecognised type: {}".format(location["type"]))
                 self.crawler.stats.inc_value(f'atp/publix_us/unmapped_category/{location["type"]}')

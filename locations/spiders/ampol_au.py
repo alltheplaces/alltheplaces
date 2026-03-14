@@ -1,10 +1,15 @@
+import re
+from typing import Any
+
+import scrapy
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.spiders.central_england_cooperative import set_operator
+from locations.user_agents import BROWSER_DEFAULT
 
 EG = {"brand": "EG Australia", "brand_wikidata": "Q5023980"}
 
@@ -12,23 +17,23 @@ EG = {"brand": "EG Australia", "brand_wikidata": "Q5023980"}
 class AmpolAUSpider(Spider):
     name = "ampol_au"
     item_attributes = {"brand": "Ampol", "brand_wikidata": "Q4748528"}
-    allowed_domains = ["www.ampol.com.au"]
-    start_urls = ["https://www.ampol.com.au/custom/api/locator/get"]
+    allowed_domains = ["www.ampol.com.au", "digital-api.ampol.com.au"]
+    start_urls = ["https://www.ampol.com.au/find-a-service-station"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        js_url = response.xpath('//*[contains(@src,"route")]/@src').get()
+        yield scrapy.Request(url="https://www.ampol.com.au" + js_url, callback=self.parse_token)
+
+    def parse_token(self, response):
+        token = re.search(r"Ocp-Apim-Subscription-Key\"\s*:\s*\"([a-z0-9]+)", response.text).group(1)
         yield JsonRequest(
-            url="https://www.ampol.com.au/custom/api/authorize/token",
-            method="POST",
-            headers={"X-Requested-With": "XMLHttpRequest"},
-            callback=self.parse_auth_token,
+            url="https://digital-api.ampol.com.au/siteservice/Service/",
+            headers={"ocp-apim-subscription-key": token},
+            callback=self.parse_details,
         )
 
-    def parse_auth_token(self, response):
-        token = response.json()
-        for url in self.start_urls:
-            yield JsonRequest(url=url, headers={"Authorization": f"Bearer {token}"})
-
-    def parse(self, response):
+    def parse_details(self, response):
         for location in response.json()["value"]:
             address = location.pop("Address")
             item = DictParser.parse(location)

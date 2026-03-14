@@ -1,17 +1,21 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 
 
-class BirkenstockSpider(scrapy.Spider):
+class BirkenstockSpider(Spider):
     name = "birkenstock"
     item_attributes = {
         "brand": "Birkenstock",
         "brand_wikidata": "Q648458",
     }
     allowed_domains = ["birkenstock.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         countries = {
             "EU": [
                 "en_ES",
@@ -35,7 +39,7 @@ class BirkenstockSpider(scrapy.Spider):
         for key, value in countries.items():
             for country in value:
                 url = f"https://www.birkenstock.com/on/demandware.store/Sites-{key}-Site/{country}/Stores-GetStoresJson?&storeLocatorType=regular&storetype1=true"
-                yield scrapy.Request(url=url, callback=self.parse)
+                yield Request(url=url, callback=self.parse)
 
     def parse(self, response):
         for _, data in response.json().get("stores").items():

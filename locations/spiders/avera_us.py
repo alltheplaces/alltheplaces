@@ -10,7 +10,6 @@ class AveraUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"operator": "Avera Health", "operator_wikidata": "Q4828238"}
     sitemap_urls = ["https://www.avera.org/sitemap.xml"]
     sitemap_rules = [(r"https://www.avera.org/locations/profile/[-\w]+", "parse_sd")]
-    user_agent = BROWSER_DEFAULT
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": DEFAULT_REQUEST_HEADERS
         | {
@@ -19,6 +18,7 @@ class AveraUSSpider(SitemapSpider, StructuredDataSpider):
             "sec-ch-dpr": "",
         },
         "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
     }
     requires_proxy = "US"
     time_format = "%H:%M:%S"

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -19,7 +21,7 @@ class CaltexSpider(Spider):
         "https://www.caltex.com/bin/services/getStations.json?pagePath=/content/caltex/th/th/find-us&siteType=b2c",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

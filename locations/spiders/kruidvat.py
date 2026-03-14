@@ -6,6 +6,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -13,10 +14,16 @@ class KruidvatSpider(scrapy.Spider):
     name = "kruidvat"
     item_attributes = {"brand": "Kruidvat", "brand_wikidata": "Q2226366"}
     start_urls = [
-        "https://www.kruidvat.be/api/v2/kvb/stores?lang=nl_BE&radius=100000&pageSize=10000&fields=FULL",
-        "https://www.kruidvat.nl/api/v2/kvn/stores?lang=nl&radius=100000&pageSize=10000&fields=FULL",
+        "https://www.kruidvat.be/api/v2/kvb/stores?lang=nl_BE&radius=100&pageSize=3000&fields=FULL",
+        "https://www.kruidvat.nl/api/v2/kvn/stores?lang=nl&radius=500&pageSize=3000&fields=FULL",
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DOWNLOAD_TIMEOUT": 120,
+        "CONCURRENT_REQUESTS": 1,
+    }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath("//stores"):

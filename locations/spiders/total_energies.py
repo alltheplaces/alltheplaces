@@ -174,8 +174,6 @@ class TotalEnergiesSpider(WoosmapSpider):
             # Other types, possibly interesting
             return
 
-        item["website"] = f'https://store.totalenergies.fr/en_EN/{item["ref"]}'
-
         self.apply_services(item, feature)
 
         if brand := self.BRANDS.get(feature["properties"]["user_properties"]["brand"]):

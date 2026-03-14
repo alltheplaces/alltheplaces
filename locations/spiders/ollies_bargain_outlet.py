@@ -1,18 +1,20 @@
-import scrapy
-from scrapy import FormRequest
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.linked_data_parser import LinkedDataParser
 
 
-class OlliesBargainOutletSpider(scrapy.Spider):
+class OlliesBargainOutletSpider(Spider):
     name = "ollies_bargain_outlet"
     allowed_domains = ["ollies.us"]
     item_attributes = {"brand": "Ollie's Bargain Outlet", "brand_wikidata": "Q7088304"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "US"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {
             "Page": "0",
             "PageSize": "1",

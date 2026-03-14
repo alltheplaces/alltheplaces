@@ -12,7 +12,7 @@ from locations.json_blob_spider import JSONBlobSpider
 class LagkagehusetDKSpider(JSONBlobSpider):
     name = "lagkagehuset_dk"
     item_attributes = {"brand": "Lagkagehuset", "brand_wikidata": "Q12323572"}
-    start_urls = ["https://lagkagehuset.dk/select-shop"]
+    start_urls = ["https://lagkagehuset.dk/butikker"]
 
     def extract_json(self, response: Response) -> list:
         return json.loads(re.search(r"\"shops\":(\[.+?\])}", response.text.replace('\\"', '"')).group(1))

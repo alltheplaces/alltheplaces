@@ -1,12 +1,12 @@
 from typing import Iterable
 
+import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
-from locations.hours import CLOSED_NL, DAYS_NL, OpeningHours
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BrainwashNLSpider(Spider):
@@ -14,25 +14,19 @@ class BrainwashNLSpider(Spider):
     item_attributes = {"brand": "BrainWash", "brand_wikidata": "Q114905133"}
     allowed_domains = ["www.brainwash-kappers.nl"]
     start_urls = ["https://www.brainwash-kappers.nl/salons/"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        for salon in response.xpath('//div[@class="salon-item"]'):
-            properties = {
-                "ref": salon.xpath("./@data-marker-id").get(),
-                "branch": salon.xpath(".//h4/text()").get().removeprefix("Brainwash ").removeprefix("BrainWash "),
-                "lat": salon.xpath("./@data-marker-lat").get(),
-                "lon": salon.xpath("./@data-marker-lng").get(),
-                "addr_full": merge_address_lines(
-                    salon.xpath('.//div[@class="info-window"]/p/text()[position()<=2]').getall()
-                ),
-                "phone": salon.xpath('.//div[@class="info-window"]/p/text()[3]').get(),
-                "website": salon.xpath('.//div[@class="info-window"]/a/@href').get(),
-                "opening_hours": OpeningHours(),
-            }
-
-            hours_string = " ".join(salon.xpath(".//div[@data-open-hours-table]//text()").getall())
-            properties["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_NL, closed=CLOSED_NL)
-
-            apply_category(Categories.SHOP_HAIRDRESSER, properties)
-
-            yield Feature(**properties)
+        for salon in chompjs.parse_js_object(
+            chompjs.parse_js_object(response.xpath('//*[contains(text(),"postalCode")]/text()').get())[1]
+        )[3]["salons"]:
+            item = DictParser.parse(salon)
+            item["website"] = "https://www.brainwash-kappers.nl/salons/" + salon["slug"]
+            oh = OpeningHours()
+            for day_time in salon["openingTimes"]:
+                day = day_time["day"]
+                open_time = day_time["from"].replace(".000", "")
+                close_time = day_time["till"].replace(".000", "")
+                oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
+            item["opening_hours"] = oh
+            yield item

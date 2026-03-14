@@ -1,8 +1,10 @@
-from scrapy import Request, Spider
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.settings import ITEM_PIPELINES
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -17,15 +19,11 @@ class GovCmaFuelGBSpider(Spider):
     }
     start_urls = ["https://www.gov.uk/guidance/access-fuel-price-data"]
     custom_settings = {
-        "ITEM_PIPELINES": ITEM_PIPELINES  # Disable NSI due to mismatch on Tesco Cafe
-        | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None},
         "ROBOTSTXT_OBEY": False,  # Asda, Shell!
+        "USER_AGENT": BROWSER_DEFAULT,  # TESCO!
     }
 
-    user_agent = BROWSER_DEFAULT  # TESCO!
-
     brand_map = {
-        "applegreen": {"brand": "Applegreen", "brand_wikidata": "Q7178908"},
         "asda": {"brand": "Asda", "brand_wikidata": "Q297410"},
         "asda express": {"brand": "Asda Express", "brand_wikidata": "Q114826023"},
         "bp": {"brand": "BP", "brand_wikidata": "Q152057"},
@@ -39,6 +37,7 @@ class GovCmaFuelGBSpider(Spider):
         "shell": {"brand": "Shell", "brand_wikidata": "Q110716465"},
         "tesco": {"brand": "Tesco", "brand_wikidata": "Q487494"},
         "texaco": {"brand": "Texaco", "brand_wikidata": "Q775060"},
+        "valero": {"brand": "Valero", "brand_wikidata": "Q1283291"},
     }
 
     fuel_map = {
@@ -48,11 +47,11 @@ class GovCmaFuelGBSpider(Spider):
         # "SDV": "ethanol", # TODO: ?
     }
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for url in response.xpath("//table/tbody/tr/td[2]/text()").getall():
-            yield Request(url, self.parse_locations)
+            yield JsonRequest(url, self.parse_locations)
 
-    def parse_locations(self, response, **kwargs):
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stations"]:
             item = Feature()
             item["ref"] = location["site_id"]

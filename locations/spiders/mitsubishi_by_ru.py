@@ -17,9 +17,7 @@ class MitsubishiBYRUSpider(JSONBlobSpider):
     no_refs = True
 
     def extract_json(self, response: Response) -> list[dict]:
-        return list(chompjs.parse_js_objects(response.xpath('//script[contains(text(), "placemarks")]/text()').get()))[
-            -1
-        ]
+        return chompjs.parse_js_object(response.xpath('//script[contains(text(), "placemarks")]/text()').get())
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         extract_phone(item, Selector(text=feature["phone"]))

@@ -1,39 +1,43 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class TasmanianGovernmentFreeWifiAUSpider(Spider):
+class TasmanianGovernmentFreeWifiAUSpider(JSONBlobSpider):
     name = "tasmanian_government_free_wifi_au"
-    item_attributes = {"operator": "Government of Tasmania", "operator_wikidata": "Q3112571"}
-    allowed_domains = ["freewifi.tas.gov.au"]
-    start_urls = ["https://freewifi.tas.gov.au/api/application.json"]
+    item_attributes = {
+        "operator": "Government of Tasmania",
+        "operator_wikidata": "Q3112571",
+        "state": "TAS",
+        "nsi_id": "N/A",
+    }
+    allowed_domains = ["www.digital.tas.gov.au"]
+    start_urls = ["https://www.digital.tas.gov.au/__data/assets/file/0041/379967/locations.json"]
     no_refs = True
+    locations_key = "locations"
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # Invalid robots.txt cannot be parsed
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json()["locations"]:
-            for hotspot in location.get("hotspots", []):
-                if hotspot["disabled"]:
-                    continue
-                properties = {
-                    "name": hotspot["label"],
-                    "lat": hotspot["latitude"],
-                    "lon": hotspot["longitude"],
-                    "city": location["title"]["en"],
-                    "state": "Tasmania",
-                    "extras": {
-                        "internet_access": "wlan",
-                        "internet_access:fee": "no",
-                        "internet_access:operator": "Telstra",
-                        "internet_access:operator:wikidata": "Q721162",
-                        "internet_access:ssid": "TasGov_Free",
-                    },
-                }
-                apply_category(Categories.ANTENNA, properties)
-                yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = item.pop("addr_full", None)
+        if hours_string := feature.get("wifiHours"):
+            if hours_string != "Available on request":
+                hours_string = hours_string.replace("Seven days a week,", "Mon-Sun:").replace(
+                    "24 hours per day", "12:00am - 11:59pm"
+                )
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(hours_string)
+        apply_category(Categories.ANTENNA, item)
+        item["extras"]["internet_access"] = "wlan"
+        item["extras"]["internet_access:fee"] = "no"
+        item["extras"]["internet_access:operator"] = self.item_attributes["operator"]
+        item["extras"]["internet_access:operator:wikidata"] = self.item_attributes["operator_wikidata"]
+        if item.get("name") and item["name"].endswith(" Library"):
+            item["extras"]["internet_access:ssid"] = "Libraries_Tasmania"
+        else:
+            item["extras"]["internet_access:ssid"] = "TasGov_Free"
+        yield item

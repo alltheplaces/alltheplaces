@@ -1,8 +1,10 @@
 import csv
 from collections import defaultdict
 from math import sqrt
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
@@ -12,7 +14,7 @@ from locations.searchable_points import open_searchable_points
 from locations.spiders.tesco_gb import set_located_in
 
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-STORELOCATOR = "https://www.starbucks.com/bff/locations?lat={}&lng={}"
+STORELOCATOR = "https://www.starbucks.com/apiproxy/v1/locations?lat={}&lng={}"
 STARBUCKS_SHARED_ATTRIBUTES = {"brand": "Starbucks", "brand_wikidata": "Q37158"}
 
 
@@ -40,7 +42,7 @@ class StarbucksUSSpider(Spider):
         "Ralphs ": {"brand": "Ralphs", "brand_wikidata": "Q3929820"},
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for point_file in self.searchable_point_files:
             with open_searchable_points(point_file) as points:
                 reader = csv.DictReader(points)
@@ -54,7 +56,7 @@ class StarbucksUSSpider(Spider):
                     request.meta["distance"] = 1
                     yield request
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         stores = response.json()
 
         for poi in stores:
@@ -86,7 +88,6 @@ class StarbucksUSSpider(Spider):
                 "ref": store["id"],
                 "lon": store_lon,
                 "lat": store_lat,
-                "website": f'https://www.starbucks.com/store-locator/store/{store["storeNumber"]}/{store["slug"]}',
                 "extras": {"ownership_type": store["ownershipTypeCode"]},
             }
             item = Feature(**properties)

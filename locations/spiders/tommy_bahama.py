@@ -2,6 +2,7 @@ import json
 import urllib
 
 from scrapy import Request
+from scrapy.http import Response
 
 from locations.categories import Categories
 from locations.hours import OpeningHours
@@ -19,10 +20,10 @@ class TommyBahamaSpider(StructuredDataSpider):
     search_for_twitter = False
     search_for_facebook = False
     search_for_image = False
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs):
         script = response.xpath("//div[@tbr-all-stores]/following-sibling::script/text()").get()
         all_stores_data = json.loads(script[script.find("[") : script.rfind("]") + 1])
         for store in all_stores_data:

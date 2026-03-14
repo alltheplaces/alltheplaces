@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -13,7 +15,7 @@ class GodivaChocolatierJPSpider(Spider):
     allowed_domains = ["shop.godiva.co.jp"]
     start_urls = ["https://shop.godiva.co.jp/api/delivery/stores/search/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "lat": "",
             "lng": "",

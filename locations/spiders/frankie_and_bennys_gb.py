@@ -1,47 +1,40 @@
 from typing import Any, Iterable
-from urllib.parse import urljoin
 
-from scrapy.http import JsonRequest, Response
-from scrapy.spiders import Spider
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.categories import Extras, apply_yes_no
+from locations.google_url import extract_google_position
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.outdoor_supply_hardware_us import decode_email
 
 
-class FrankieAndBennysGBSpider(Spider):
+class FrankieAndBennysGBSpider(SitemapSpider):
     name = "frankie_and_bennys_gb"
     item_attributes = {"brand": "Frankie & Benny's", "brand_wikidata": "Q5490892"}
-    api = "https://netapi.bigtablegroup.com/api/v1/content/search-restaurants/"
-    brand_key = "frankies"
-
-    def start_requests(self) -> Iterable[JsonRequest]:
-        yield JsonRequest(url=self.api, headers={"brandkey": self.brand_key})
+    sitemap_urls = ["https://www.frankieandbennys.com/sitemap.xml"]
+    sitemap_rules = [(r"/restaurants/[-\w]+", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["restaurants"]:
-            item = Feature()
-            item["ref"] = location["storeId"]
-            item["lat"] = location["addressLocation"]["lat"]
-            item["lon"] = location["addressLocation"]["lon"]
-            item["branch"] = location["title"]
-            item["street_address"] = merge_address_lines([location["addressLine1"], location["addressLine2"]])
-            item["city"] = location["addressCity"]
-            item["postcode"] = location["postcode"]
-            item["phone"] = location["phoneNumber"]
-            item["email"] = location["email"]
+        item = Feature()
+        extract_google_position(item, response)
+        item["ref"] = item["website"] = response.url
+        item["addr_full"] = response.xpath('//*[@class="address"]/text()').get()
+        item["phone"] = response.xpath('//*[contains(@href, "tel:")]/@href').get()
+        item["email"] = decode_email(response.xpath("//@data-cfemail").get(""))
+        item["opening_hours"] = OpeningHours()
+        for rule in response.xpath('//*[@class="opening-hours-day"]'):
+            if day := rule.xpath("./span[1]/text()").get():
+                item["opening_hours"].add_ranges_from_string(f"{day}: {rule.xpath('./span[2]/text()').get()}")
 
-            if location.get("hours"):
-                item["opening_hours"] = OpeningHours()
-                for day in map(str.lower, DAYS_FULL):
-                    item["opening_hours"].add_range(
-                        day,
-                        location["hours"]["{}Open".format(day)].strip(),
-                        location["hours"]["{}Close".format(day)].strip(),
-                    )
+        yield from self.parse_item(item, response) or []
 
-            yield from self.parse_item(item, location) or []
-
-    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
-        item["website"] = urljoin("https://www.frankieandbennys.com/restaurants/", location["slug"])
+    def parse_item(self, item: Feature, response: Response, **kwargs) -> Iterable[Feature]:
+        item["branch"] = response.xpath('//*[@class="d-block gamay-extra-bold"]/text()').get()
+        facilities = response.xpath('//*[@class="facility-name"]/text()').getall()
+        apply_yes_no(Extras.WHEELCHAIR, item, "Wheelchair Access" in facilities)
+        apply_yes_no(Extras.OUTDOOR_SEATING, item, "Outdoor Seating" in facilities)
+        apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "Baby Changing" in facilities)
+        apply_yes_no(Extras.WIFI, item, "Wi-Fi" in facilities)
         yield item

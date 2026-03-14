@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
@@ -11,7 +11,7 @@ class AllegroOneBoxPLSpider(Spider):
     item_attributes = {"brand": "Allegro One Box", "brand_wikidata": "Q110738715"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             method="GET",
             url="https://edge.allegro.pl/general-deliveries?nwLat=56.04770689192265&nwLon=2.5567803015399404&seLat=48.224919937057095&seLon=38.32826467653994&brandKeys=ALLEGRO_APM&deliveryMethods=0b257488-c85d-4507-b967-9b45ffbfa2e8&deliveryMethods=0aafb43c-e66a-46ec-9cc4-29bb39ebb483&sellerId=95826291&clusterThreshold=900000000",

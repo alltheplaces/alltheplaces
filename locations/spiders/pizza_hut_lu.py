@@ -1,31 +1,29 @@
-import re
+from typing import Any
+from urllib import parse
 
-import scrapy
-from scrapy.linkextractors import LinkExtractor
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.google_url import url_to_coords
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 
 
-class PizzaHutLUSpider(scrapy.Spider):
+class PizzaHutLUSpider(SitemapSpider):
     name = "pizza_hut_lu"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    start_urls = ["https://restaurants.pizzahut.lu"]
+    sitemap_urls = ["https://restaurants.pizzahut.lu/restaurants-sitemap.xml"]
+    sitemap_rules = [(r"restaurants.pizzahut.lu/de/restaurants/[-\w]+/$", "parse")]
 
-    def parse(self, response, **kwargs):
-        for link in LinkExtractor(restrict_xpaths='//*[@id="restaurant_submenu"]').extract_links(response):
-            parsed_link = re.sub(r"/restaurant/(.+)", r"/pages/restaurant.php?attr=\1", link.url)
-            yield response.follow(parsed_link, callback=self.parse_restaurant, cb_kwargs=dict(website=link.url))
-
-    def parse_restaurant(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        location_info = response.xpath('//*[@class="map-info"]')
         item = Feature()
-        item["ref"] = item["website"] = kwargs.get("website")
-        address = response.xpath('//*[@id="left_bar_content"]//b/text()').getall()
-        item["name"] = "Pizza Hut " + address[0].title()
-        item["addr_full"] = clean_address(address[1:]).strip(", Tél.")
-        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", "")
-        if map_data := response.xpath('//script[contains(text(), "google.maps.LatLng")]/text()').get():
-            item["lat"], item["lon"] = re.search(r"LatLng\(([-\d.]+)\s*,\s*([-\d.]+)\)", map_data).groups()
+        item["ref"] = item["website"] = response.url
+        item["branch"] = location_info.xpath("./h3/text()").get("").removeprefix("Pizza Hut ")
+        item["addr_full"] = location_info.xpath('.//*[@class="address"]/text()').get()
+        if map_url := response.xpath("//@data-src-cmplz").get():
+            item["lat"], item["lon"] = url_to_coords(map_url)
+        item["phone"] = parse.unquote(response.xpath('//a[contains(@href,"tel:")]/@href').get(""))
+        item["email"] = response.xpath('//a[contains(@href,"mailto:")]/@href').get()
         apply_category(Categories.RESTAURANT, item)
         yield item

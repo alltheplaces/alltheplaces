@@ -7,7 +7,6 @@ from locations.items import Feature
 
 
 class MedstarUSSpider(scrapy.Spider):
-    # download_delay = 0.2
     name = "medstar_us"
     item_attributes = {"brand": "Medstar Health", "brand_wikidata": "Q6804943"}
     allowed_domains = ["www.medstarhealth.org"]

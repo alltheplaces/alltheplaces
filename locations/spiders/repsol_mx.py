@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -13,7 +15,7 @@ class RepsolMXSpider(Spider):
         "https://www.repsol.com.mx/content/dam/aplicaciones/repsol-paises/mx/es/estaciones-de-servicio/data/data.json"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

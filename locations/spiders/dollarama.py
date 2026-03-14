@@ -1,18 +1,20 @@
+from typing import AsyncIterator
 from urllib.parse import urlencode
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
 
-class DollaramaSpider(scrapy.Spider):
+class DollaramaSpider(Spider):
     name = "dollarama"
     item_attributes = {"brand": "Dollarama", "brand_wikidata": "Q3033947"}
     allowed_domains = ["dollarama.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         base_url = "https://www.dollarama.com/en-CA/locations/GetDataByCoordinates?"
 
         params = {"distance": "100", "units": "miles"}
@@ -22,7 +24,7 @@ class DollaramaSpider(scrapy.Spider):
             for point in points:
                 _, lat, lon = point.strip().split(",")
                 params |= {"latitude": lat, "longitude": lon}
-                yield scrapy.Request(url=base_url + urlencode(params), method="POST")
+                yield Request(url=base_url + urlencode(params), method="POST")
 
     def parse_hours(self, hours):
         hrs = hours.split("|")

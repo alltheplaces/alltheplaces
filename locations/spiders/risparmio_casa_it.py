@@ -1,9 +1,9 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -13,7 +13,6 @@ class RisparmioCasaITSpider(Spider):
     item_attributes = {
         "brand": "Risparmio Casa",
         "brand_wikidata": "Q125936928",
-        "extras": Categories.SHOP_HOUSEWARE.value,
     }
 
     def make_request(self, page: int) -> JsonRequest:
@@ -22,7 +21,7 @@ class RisparmioCasaITSpider(Spider):
             meta={"page": page},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -45,4 +44,5 @@ class RisparmioCasaITSpider(Spider):
             "{}/{}".format(self.name, response.xpath('//div[@class="store_locator_single_categories"]/text()').get())
         )
 
+        apply_category(Categories.SHOP_HOUSEWARE, item)
         yield item

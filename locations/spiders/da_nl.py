@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class DaNLSpider(Spider):
     allowed_domains = ["www.da.nl"]
     item_attributes = {"brand": "DA", "brand_wikidata": "Q4899756", "extras": Categories.SHOP_CHEMIST.value}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = """query GetRetailStores($storeId: Int = 3) {
     retailStores(pageSize: 5000, storeId: $storeId) {
         id

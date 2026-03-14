@@ -1,27 +1,34 @@
-import re
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.open_graph_spider import OpenGraphSpider
-from locations.pipelines.address_clean_up import merge_address_lines
-from locations.structured_data_spider import extract_email, extract_facebook, extract_instagram
+from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
+from locations.hours import OpeningHours
+from locations.items import Feature
 
 
-class LoungesGBSpider(SitemapSpider, OpenGraphSpider):
+class LoungesGBSpider(SitemapSpider):
     name = "lounges_gb"
     item_attributes = {"brand": "Lounges", "brand_wikidata": "Q114313933"}
-    sitemap_urls = ["https://thelounges.co.uk/lounges-sitemap.xml"]
-    wanted_types = ["article"]
+    sitemap_urls = ["https://thelounges.co.uk/robots.txt"]
+    sitemap_rules = [(r"https://thelounges.co.uk/[^/]+/$", "parse")]
 
-    def post_process_item(self, item, response, **kwargs):
-        item["name"] = item["name"].split(" - ")[0].strip()
-
-        lounge_header = merge_address_lines(response.xpath('//section[@class="lounge-header"]/p//text()').getall())
-        if m := re.match(r"(.+)(?: •|,) ([\d ]+) •", lounge_header):
-            item["addr_full"], item["phone"] = m.groups()
-
-        extract_email(item, response)
-        extract_facebook(item, response)
-        extract_instagram(item, response)
-
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["branch"] = response.xpath("//h1/span/text()").get()
+        item["addr_full"] = (
+            response.xpath('//*[contains(@class ,"title-section__address-section")]').xpath("normalize-space()").get()
+        )
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        item["email"] = response.xpath('//*[contains(@href,"mailto:")]/text()').get()
+        item["ref"] = item["website"] = response.url
+        extract_google_position(item, response)
+        apply_category(Categories.RESTAURANT, item)
+        item["opening_hours"] = OpeningHours()
+        for day_time in response.xpath('//*[contains(@class,"promo-banner__overlay-content")]//p//text()').getall()[
+            -2:
+        ]:
+            item["opening_hours"].add_ranges_from_string(day_time)
         yield item

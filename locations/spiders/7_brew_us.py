@@ -22,7 +22,8 @@ class SevenBrewUSSpider(SitemapSpider):
         item = Feature()
         item["name"] = response.xpath("//h1//text()").get()
         item["street_address"] = response.xpath("//h5//text()").get()
-        item["addr_full"] = ",".join([item["street_address"], response.xpath("//em/text()").get()])
+        if city_state := response.xpath("//em/text()").get():
+            item["city"], item["state"] = city_state.split(",")
         item["ref"] = item["website"] = response.url
         item["opening_hours"] = OpeningHours()
         for day_time in response.xpath("//tbody/tr"):

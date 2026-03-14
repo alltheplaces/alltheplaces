@@ -11,7 +11,7 @@ class MegoLVSpider(JSONBlobSpider):
     name = "mego_lv"
     start_urls = ["https://mego.lv/wp-admin/admin-ajax.php?action=store_filter"]
     item_attributes = {"brand_wikidata": "Q16363314"}
-    download_timeout = 120
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
     def extract_json(self, response: Response) -> list[dict]:
         stores = []

@@ -1,30 +1,55 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 
 
-class DennerCHSpider(StructuredDataSpider):
+class DennerCHSpider(Spider):
     name = "denner_ch"
     item_attributes = {"brand": "Denner", "brand_wikidata": "Q379911"}
-    start_urls = ["https://www.denner.ch/de/index.php?type=667&tx_dennerstores_storelocator%5Baction%5D=mapdata"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json().values():
-            yield scrapy.Request(url=response.urljoin(store["uri"]), callback=self.parse_sd, meta={"list_entry": store})
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://www.denner.ch/api/store/list?page={page}",
+            cb_kwargs={"current_page": page},
+        )
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["name"] = response.meta["list_entry"]["name"]
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_request(1)
 
-        if response.meta["list_entry"]["name"] == "Denner Express":
-            apply_category(Categories.SHOP_CONVENIENCE, item)
-        else:
+    def parse(self, response: Response, current_page: int) -> Any:
+        results = response.json()["data"]
+
+        for location in results.get("hits", []):
+            location.update(location.pop("_geo"))
+            location["street-number"] = location.pop("number")
+            location["street"] = location.pop("address")
+            item = DictParser.parse(location)
+            item.pop("name")
+            item["website"] = response.urljoin(location["link"])
+            opening_hours = (location.get("openingTimes") or {}).get("weeklyOpeningTimes", [])
+            try:
+                item["opening_hours"] = self.parse_opening_hours(opening_hours)
+            except:
+                self.logger.error(f"Failed to parse opening hours: {opening_hours}")
             apply_category(Categories.SHOP_SUPERMARKET, item)
+            yield item
 
-        item["lat"] = response.xpath('//*[@id="storeLatitude"]/@value').get()
-        item["lon"] = response.xpath('//*[@id="storeLongitude"]/@value').get()
-        yield item
+        if current_page < results["totalPages"]:
+            yield self.make_request(current_page + 1)
+
+    def parse_opening_hours(self, opening_hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in opening_hours:
+            if day := sanitise_day(rule.get("weekday"), DAYS_DE):
+                hours_info = rule.get("statements")
+                if hours_info[0]["info"] and hours_info[0]["info"][0].get("name") == "geschlossen":
+                    oh.set_closed(day)
+                else:
+                    for shift in hours_info:
+                        oh.add_range(day, shift["openFrom"], shift["openTo"])
+        return oh

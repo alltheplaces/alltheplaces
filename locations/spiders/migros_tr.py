@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import Request, Response
 
 from locations.categories import Categories
@@ -29,14 +29,13 @@ CATEGORY_MAPPING = {
 }
 
 
-class MigrosTRSpider(scrapy.Spider):
+class MigrosTRSpider(Spider):
     name = "migros_tr"
-    item_attributes = {"brand": "Migros", "brand_wikidata": "Q1754510"}
 
-    def start_requests(self) -> Iterable[scrapy.Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request("https://api.migroskurumsal.com/api/StoreLocation/GetStoresWithDetails", method="POST")
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for poi in response.json()["data"]:
             item = DictParser.parse(poi)
 

@@ -1,8 +1,9 @@
-import json
 from html import unescape
+from json import loads
+from typing import AsyncIterator
 
-from scrapy import Request, Selector
-from scrapy.http import JsonRequest
+from scrapy import Selector
+from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories
 from locations.hours import DAYS_FR, OpeningHours
@@ -18,12 +19,12 @@ class MicromaniaFRSpider(StructuredDataSpider):
         "https://www.micromania.fr/on/demandware.store/Sites-Micromania-Site/default/Stores-FindStoresLocator?radius=3000&postalCode=*"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_store_list)
 
     def parse_store_list(self, response):
-        locations = json.loads(response.json()["locations"])
+        locations = loads(response.json()["locations"])
         for location in locations:
             html_blob = Selector(text=location["infoWindowHtml"])
             store_page = html_blob.xpath('//a[contains(@class, "info-window__magazine-link")]/@href').get()
@@ -40,7 +41,7 @@ class MicromaniaFRSpider(StructuredDataSpider):
         item.pop("twitter", None)
 
         hours_json_string = unescape(" ".join(response.xpath('//span[@itemprop="openingHours"]/text()').getall()))
-        hours_json = json.loads(hours_json_string)
+        hours_json = loads(hours_json_string)
         item["opening_hours"] = OpeningHours()
         for day_hours in hours_json.values():
             if day_hours["ouverture"] == day_hours["fermeture"]:

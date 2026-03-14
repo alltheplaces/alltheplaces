@@ -1,5 +1,7 @@
+from typing import AsyncIterator
+
 from chompjs import parse_js_object
-from scrapy import Request
+from scrapy.http import Request
 
 from locations.categories import Categories
 from locations.hours import DAYS_FULL, OpeningHours
@@ -26,7 +28,7 @@ class OldMutualZASpider(JSONBlobSpider):
     start_urls = ["https://www.oldmutual.co.za/about/branch-locator/"]
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_js)
 

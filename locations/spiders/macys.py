@@ -16,7 +16,8 @@ class MacysSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(r"/stores/\w\w/[^/]+/[^/]+\_(\d+).html$"), "parse"),
     ]
     wanted_types = ["Store"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None

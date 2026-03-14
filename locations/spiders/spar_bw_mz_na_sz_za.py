@@ -2,28 +2,29 @@ from typing import Iterable
 
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
-SPAR_ZA_BRANDS = {
-    "SPAR": {"brand": "Spar", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value},
-    "SUPERSPAR": {"brand": "Superspar", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value},
-    "KWIKSPAR": {"brand": "KwikSpar", "brand_wikidata": "Q610492", "extras": Categories.SHOP_CONVENIENCE.value},
-    "SPAR Express": {"brand": "Spar Express", "brand_wikidata": "Q610492", "extras": Categories.SHOP_CONVENIENCE.value},
-    "Savemor": {"brand": "SaveMor", "brand_wikidata": "Q610492", "extras": Categories.SHOP_SUPERMARKET.value},
-    "Pharmacy": {"brand": "Pharmacy at SPAR", "brand_wikidata": "Q610492", "extras": Categories.PHARMACY.value},
+BRANDS = {
+    "SPAR": ("Spar", SPAR_SHARED_ATTRIBUTES, Categories.SHOP_SUPERMARKET),
+    "SUPERSPAR": ("Superspar", SPAR_SHARED_ATTRIBUTES, Categories.SHOP_SUPERMARKET),
+    "KWIKSPAR": ("KwikSpar", SPAR_SHARED_ATTRIBUTES, Categories.SHOP_CONVENIENCE),
+    "SPAR Express": ("Spar Express", SPAR_SHARED_ATTRIBUTES, Categories.SHOP_CONVENIENCE),
+    "Savemor": ("SaveMor", {"brand": "SaveMor", "brand_wikidata": "Q610492"}, Categories.SHOP_SUPERMARKET),
+    "Pharmacy": (None, {"brand": "Pharmacy at SPAR", "brand_wikidata": "Q610492"}, Categories.PHARMACY),
 }
 
 
 class SparBWMZNASZZASpider(JSONBlobSpider):
-    download_timeout = 30
     name = "spar_bw_mz_na_sz_za"
     start_urls = []
     skip_auto_cc_domain = True
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self):
         yield JsonRequest(
             url="https://www.spar.co.za/api/stores/search",
             data={"Types": ["SPAR", "SUPERSPAR", "KWIKSPAR", "SPAR Express", "Savemor", "Pharmacy"]},
@@ -35,7 +36,15 @@ class SparBWMZNASZZASpider(JSONBlobSpider):
         if item.get("addr_full") is not None:
             item["street_address"] = item.pop("addr_full")
 
-        item.update(SPAR_ZA_BRANDS.get(location["Type"]))
+            name, brand, category = BRANDS.get(location["Type"])
+            if name:
+                item["name"] = name
+
+            if brand:
+                item.update(brand)
+
+            if category:
+                apply_category(category, item)
 
         item["opening_hours"] = OpeningHours()
         try:

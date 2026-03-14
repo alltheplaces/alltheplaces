@@ -2,6 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -27,5 +28,6 @@ class HannafordSpider(SitemapSpider, StructuredDataSpider):
                     time_format="%H%M",
                 )
         item["opening_hours"] = oh.as_opening_hours()
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item

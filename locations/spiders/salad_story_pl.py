@@ -1,6 +1,9 @@
-from scrapy import Request, Spider
+from typing import AsyncIterator
 
-from locations.categories import Categories
+from scrapy import Spider
+from scrapy.http import Request
+
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -8,19 +11,12 @@ from locations.items import Feature
 
 class SaladStoryPLSpider(Spider):
     name = "salad_story_pl"
-    item_attributes = {
-        "brand": "Salad Story",
-        "extras": {
-            **Categories.FAST_FOOD.value,
-            "cuisine": "salad;soup",
-            "diet:vegetarian": "yes",
-        },
-    }
+    item_attributes = {"brand": "Salad Story", "brand_wikidata": "Q137426017"}
     start_urls = ["https://www.saladstory.com/lokale"]
     locals_url_base = "https://www.saladstory.com/restapi/restaurants/"
     allowed_domains = ["www.saladstory.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(
                 url=url,
@@ -48,6 +44,9 @@ class SaladStoryPLSpider(Spider):
                 close_time = location["openingHours"].get(day + "Close")
                 if open_time and close_time:
                     item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+            apply_category(Categories.FAST_FOOD, item)
+            item["extras"]["cuisine"] = "salad;soup"
+            item["extras"]["diet:vegetarian"] = "yes"
             yield item
 
     def fix_streets(self, item) -> Feature:
