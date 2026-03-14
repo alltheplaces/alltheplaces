@@ -4,7 +4,6 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -15,9 +14,8 @@ class ClintonsGBGGIMJESpider(JSONBlobSpider):
     start_urls = ["https://clintonscards.co.uk/wp-json/store-locations/v1/search"]
     drop_attributes = {"facebook", "twitter", "email"}
 
-
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["street_address"] = merge_address_lines([item.pop("addr_full"),feature["address2"]])
+        item["street_address"] = merge_address_lines([item.pop("addr_full"), feature["address2"]])
         item["branch"] = item.pop("name", None)
         item["name"] = "Clintons"
         item["ref"] = feature["link"]
