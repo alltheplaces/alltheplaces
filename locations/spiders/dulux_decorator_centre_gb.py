@@ -1,9 +1,9 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Selector, Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -13,17 +13,14 @@ class DuluxDecoratorCentreGBSpider(Spider):
     item_attributes = {
         "brand": "Dulux Decorator Centre",
         "brand_wikidata": "Q115593557",
-        "extras": Categories.SHOP_PAINT.value,
     }
     allowed_domains = ["www.duluxdecoratorcentre.co.uk"]
-    start_urls = ["https://www.duluxdecoratorcentre.co.uk/store/getstores"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+        yield JsonRequest(url="https://www.duluxdecoratorcentre.co.uk/store/getstores", cookies={"BVBRANDID": ""})
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Points"]:
             item = DictParser.parse(location)
             store_details = Selector(text=location["FormattedAddress"])
@@ -38,4 +35,5 @@ class DuluxDecoratorCentreGBSpider(Spider):
             hours_string = " ".join(store_details.xpath('//div[@class="store-days"]//text()').getall())
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string)
+            apply_category(Categories.SHOP_PAINT, item)
             yield item
