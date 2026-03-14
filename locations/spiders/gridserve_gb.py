@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Request, Response
 
@@ -14,7 +14,7 @@ class GridserveGBSpider(JSONBlobSpider):
     start_urls = ["https://dnms-api.gridserve.com/api/v1/locations/1/All?searchText=&sort=&orderType=asc"]
     locations_key = "data"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://electrichighway.gridserve.com/", callback=self.parse_js_files)
 
     def parse_js_files(self, response: Response) -> Iterable[Request]:

@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator
 
 import chompjs
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
@@ -14,7 +14,7 @@ class FraserHartGBSpider(JSONBlobSpider):
     shop = "www.fraserhart.co.uk"
     api_key = "4a4f06f9-ddef-4c3e-a843-7ed8bb1de4c4"
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(f"https://{self.host}/p/boot/?w={self.api_key}")
 
     def extract_json(self, response: Response) -> list:

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -8,9 +10,8 @@ from locations.dict_parser import DictParser
 class PizzaHutMXSpider(Spider):
     name = "pizza_hut_mx"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://apisae1.phdvasia.com/v1/product-hut-fe/localizations?limit=400",
             headers={"Client": "e73194ae-309e-4f8e-81d7-ef95c3179d20"},

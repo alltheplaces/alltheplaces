@@ -1,6 +1,8 @@
 import hashlib
+from typing import AsyncIterator
 
-from scrapy import FormRequest, Selector, Spider
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest
 
 from locations.geo import point_locations
 from locations.items import Feature
@@ -10,7 +12,7 @@ class CashzoneGBSpider(Spider):
     name = "cashzone_gb"
     item_attributes = {"brand": "Cashzone", "brand_wikidata": "Q110738461"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "UK"):
             yield FormRequest(
                 url="https://bankmachine.locatorsearch.com/GetItems.aspx",

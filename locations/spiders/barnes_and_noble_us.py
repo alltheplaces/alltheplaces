@@ -1,8 +1,8 @@
 import json
-from typing import Any
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import apply_yes_no
 from locations.dict_parser import DictParser
@@ -18,7 +18,7 @@ class BarnesAndNobleUSSpider(Spider):
         "stores.barnesandnoble.com",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for city in city_locations("US", 15000):
             yield Request(
                 url=f'https://stores.barnesandnoble.com/?searchText={city["name"]}'.replace(" ", "+"),

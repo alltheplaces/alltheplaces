@@ -1,5 +1,7 @@
 import re
+from typing import AsyncIterator, Iterable
 
+from scrapy.http import Request, TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -10,29 +12,40 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class GoReviewSpider(CrawlSpider):
     """
-    To use this spider, specify one or more start_urls,
-    normally something like "https://hlinfo.goreview.co.za/store-locator"
+    GoReview is also known as socialplaces.io or Social Places.
 
-    Override days if something other than DAYS_EN is required
+    To use this spider, specify a URL in the 'start_urls' list attribute.
+    Usually the expected URL is similar to
+    "https://hlinfo.goreview.co.za/store-locator".
 
-    Also known as socialplaces.io or Social Places
+    Override 'days' if a language other than DAYS_EN is required.
     """
 
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt disallows everything
-    rules = [
+    start_urls: list[str] = []
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}  # robots.txt disallows everything
+    rules: list[Rule] = [
         Rule(
             LinkExtractor(allow=r"^https:\/\/.+\.goreview\.co\.za\/store-information.+$"),
             callback="parse",
         )
     ]
-    days = DAYS_EN
+    days: dict = DAYS_EN
 
-    def parse(self, response):
+    async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
+        yield Request(url=self.start_urls[0])
+
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         item = Feature()
         item["ref"] = re.sub(r"\.goreview\.co\.za.*", "", re.sub(r"https:\/\/", "", response.url))
 
         branch_raw = response.xpath('//div[@class="left-align-header"]/h2/text()').get()
-        item["branch"] = branch_raw.replace(self.item_attributes["brand"], "").strip()
+        if attribs := getattr(self, "item_attributes", None):
+            if isinstance(attribs, dict):
+                if brand_name := attribs.get("brand"):
+                    item["branch"] = branch_raw.replace(brand_name, "").strip()
 
         item["addr_full"] = merge_address_lines(
             response.xpath('//div[contains(@class, "content-wrapper")]/div[2]/div[1]//p/text()').getall(),
@@ -62,6 +75,6 @@ class GoReviewSpider(CrawlSpider):
 
         yield from self.post_process_item(item, response) or []
 
-    def post_process_item(self, item, response):
+    def post_process_item(self, item: Feature, response: TextResponse) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

@@ -19,7 +19,7 @@ class StorcashNOSpider(SylinderSpider):
         "5090",  # Bodø Storcash
     ]
 
-    def start_requests(self):
+    async def start(self):
         yield JsonRequest(url="https://api.ngdata.no/sylinder/stores/v1/extended-info")
 
     def parse(self, response, **kwargs):

@@ -25,7 +25,7 @@ class GailsBakeryGBSpider(Spider):
             item["street_address"] = props["address1"] + props["address2"]
             item["city"] = props["city"]
             item["image"] = props["image"]
-            item["name"] = props["name"]
+            item["branch"] = props["name"]
             item["postcode"] = props["zip"]
 
             yield item

@@ -1,10 +1,13 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class AvedaSpider(scrapy.Spider):
+class AvedaSpider(Spider):
     name = "aveda"
     item_attributes = {
         "brand": "Aveda",
@@ -12,11 +15,11 @@ class AvedaSpider(scrapy.Spider):
     }
     custom_settings = {"DOWNLOAD_TIMEOUT": 100}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         url = "https://www.aveda.com/rpc/jsonrpc.tmpl?dbgmethod=locator.doorsandevents"
         headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
         payload = 'JSONRPC=[{"method":"locator.doorsandevents","params":[{"fields":"ACTUAL_ADDRESS, ACTUAL_ADDRESS2, ACTUAL_CITY, STORE_TYPE, STATE, ZIP, DOORNAME, ADDRESS, ADDRESS2, CITY, STATE_OR_PROVINCE, ZIP_OR_POSTAL, COUNTRY, PHONE1, LONGITUDE, LATITUDE, LOCATION, WEBURL, EMAILADDRESS, APPT_URL","radius":"10200","latitude":48.9098994,"longitude":8.2499462,"uom":"miles"}]}]'
-        yield scrapy.Request(url=url, body=payload, method="POST", headers=headers, callback=self.parse)
+        yield Request(url=url, body=payload, method="POST", headers=headers, callback=self.parse)
 
     def parse(self, response):
         data = response.json()[0].get("result", {}).get("value", {}).get("results", {}).items()

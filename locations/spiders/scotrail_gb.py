@@ -14,7 +14,6 @@ class ScotrailGBSpider(SitemapSpider):
     item_attributes = {"operator": "ScotRail", "operator_wikidata": "Q18356161"}
     sitemap_urls = ["https://www.scotrail.co.uk/default/sub/sitemaps/content--station/sitemap.xml"]
     sitemap_rules = [(r"/plan-your-journey", "parse")]
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()

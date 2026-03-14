@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Selector
 from scrapy.http import FormRequest, Response
@@ -17,7 +17,7 @@ class AdvantageNZSpider(JSONBlobSpider):
     allowed_domains = ["advantagetyres.co.nz"]
     start_urls = ["https://advantagetyres.co.nz/wp/wp-admin/admin-ajax.php"]
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(url=self.start_urls[0], formdata={"action": "get_all_stores_location", "nonce": ""})
 
     def pre_process_data(self, feature: dict) -> None:

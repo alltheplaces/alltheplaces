@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -14,7 +14,7 @@ class FnbcCASpider(Spider):
     FNBC = {"brand": "First Nations Bank of Canada", "brand_wikidata": "Q1419511"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.forge.central1.cc/find-branch-atm-service/v1/places?latitude=58.55148693137242&longitude=-94.06979&radius=4000&type=all&dedupeAtms=true",
             headers={"c1-tid": "sk_fnbc"},

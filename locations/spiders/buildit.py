@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 import chompjs
 from scrapy.http import JsonRequest, Request
 
@@ -11,7 +13,7 @@ class BuilditSpider(JSONBlobSpider):
     skip_auto_cc_spider_name = True
     skip_auto_cc_domain = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.store_search)
 

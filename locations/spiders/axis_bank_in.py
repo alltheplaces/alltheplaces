@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import JsonRequest
 from scrapy.spiders import Spider
 
@@ -11,7 +13,7 @@ class AxisBankINSpider(Spider):
     item_attributes = {"brand": "Axis Bank", "brand_wikidata": "Q2003549"}
     start_urls = ["https://branch.axisbank.com/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://j617xjxwjd.execute-api.ap-south-1.amazonaws.com/axis_bank_prod/getCmsData-V18",
             data={

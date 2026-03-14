@@ -72,11 +72,6 @@ class AverittSpider(scrapy.spiders.SitemapSpider):
         phone = response.xpath(
             "/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[1]/div/div/p/a/text()"
         ).get()
-        email = (
-            response.xpath("/html/body/div[2]/div/div[1]/div/div/span/div[2]/div/div/div/div[2]/div/div/span/a/@href")
-            .get()
-            .replace("mailto:", "")
-        )
         name = response.xpath(
             "/html/body/div[2]/div/div[1]/div/div/span/div[4]/div/div/div/div[2]/div/div/h3/strong/text()"
         ).get()
@@ -88,7 +83,6 @@ class AverittSpider(scrapy.spiders.SitemapSpider):
             "state": state,
             "postcode": postcode,
             "phone": phone,
-            "email": email,
             "website": response.url,
         }
         extract_google_position(properties, response)

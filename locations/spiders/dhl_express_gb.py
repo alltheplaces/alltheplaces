@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -9,12 +9,12 @@ from locations.items import Feature
 from locations.spiders.dhl_express_de import DHL_EXPRESS_SHARED_ATTRIBUTES
 
 
-class DhlExpressGBSpider(scrapy.Spider):
+class DhlExpressGBSpider(Spider):
     name = "dhl_express_gb"
     item_attributes = DHL_EXPRESS_SHARED_ATTRIBUTES
     allowed_domains = ["dhlparcel.co.uk"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://track.dhlparcel.co.uk/UKMail/Handlers/DepotData", method="POST")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

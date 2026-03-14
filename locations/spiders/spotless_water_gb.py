@@ -8,6 +8,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, Vending, add_vending, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.pipelines.extract_gb_postcode import GB_POSTCODE_PATTERN
 
 
 class SpotlessWaterGBSpider(Spider):
@@ -16,10 +17,9 @@ class SpotlessWaterGBSpider(Spider):
     start_urls = ["https://www.spotlesswater.co.uk/locations/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        postcode_re = re.compile(r"(\w{1,2}\d{1,2}\w? \d\w{2})")
         for location in json.loads(re.search(r";[\n\s]+var locations = (\[.+\]);", response.text).group(1)):
             item = Feature()
-            if postcode := postcode_re.search(location["title"].upper()):
+            if postcode := GB_POSTCODE_PATTERN.search(location["title"].upper()):
                 item["postcode"] = postcode.group(1)
             item["lat"] = location["lat"]
             item["lon"] = location["lng"]

@@ -1,15 +1,17 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class CafeAmazonSpider(scrapy.Spider):
+class CafeAmazonSpider(Spider):
     name = "cafe_amazon"
     item_attributes = {"brand": "คาเฟ่ อเมซอน", "brand_wikidata": "Q43247503"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.cafe-amazon.com/api/store-list",
             method="POST",

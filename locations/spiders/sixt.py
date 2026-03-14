@@ -8,7 +8,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class SixtSpider(SitemapSpider, StructuredDataSpider):
     name = "sixt"
-    item_attributes = {"brand": "SIXT", "brand_wikidata": "Q705664"}
+    item_attributes = {"brand": "Sixt", "brand_wikidata": "Q705664"}
     sitemap_urls = ["https://www.sixt.co.uk/sitemap_index.xml"]
     sitemap_rules = [(r"\/car-hire\/[-\w]+\/[-\w]+\/[-\w]+\/$", "parse_sd")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}

@@ -5,6 +5,7 @@ from requests import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class KutxabankESSpider(scrapy.Spider):
@@ -14,7 +15,7 @@ class KutxabankESSpider(scrapy.Spider):
         "https://portal.kutxabank.es/cs/jsp/oficinascajeros/buscaroficinascajeros.jsp?idioma=03&entidad=2095&tipo=2&longMax=180&longMin=-180&latMax=90&latMin=-90&zoom=13",
         "https://portal.kutxabank.es/cs/jsp/oficinascajeros/buscaroficinascajeros.jsp?idioma=03&entidad=2095&tipo=1&servicios=todos&longMax=180&longMin=-180&latMax=90&latMin=-90&zoom=14",
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     no_refs = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

@@ -1,0 +1,33 @@
+name: Vendor NSI
+
+on:
+  schedule:
+    - cron: '47 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Fetch data
+        id: fetch-data
+        run: |
+          output=$(uv run scrapy vendor_nsi -t --nolog | tee output.log)
+          echo "$output"
+          echo "output<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: '[Core] Update NSI'
+          title: '[Core] Update NSI'
+          branch: action/fetch-data
+          body: ${{ env.output }}

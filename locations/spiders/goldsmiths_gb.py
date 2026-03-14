@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
@@ -12,7 +12,7 @@ class GoldsmithsGBSpider(Spider):
     name = "goldsmiths_gb"
     item_attributes = {"brand": "Goldsmiths", "brand_wikidata": "Q16993095"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.thewosgroup.com/occ/v2/Goldsmiths_UK/stores?longitude=0&latitude=0&radius=100000&pageSize=10000"
         )

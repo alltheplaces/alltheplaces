@@ -1,6 +1,9 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import Request
 
+from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -14,11 +17,11 @@ class BurgerKingSGSpider(Spider):
     allowed_domains = ["burgerking.com.sg"]
     website_root = "https://www.burgerking.com.sg"
 
-    def start_requests(self):
-        yield from self.request_page(1)
+    async def start(self) -> AsyncIterator[Request]:
+        yield self.request_page(1)
 
-    def request_page(self, page):
-        yield Request(url=f"{self.website_root}/Locator?page={page}", callback=self.parse, meta={"page": page})
+    def request_page(self, page: int) -> Request:
+        return Request(url=f"{self.website_root}/Locator?page={page}", callback=self.parse, meta={"page": page})
 
     def parse(self, response):
         for location in response.xpath('//div[@id="locationsList"]/ul/div'):
@@ -29,7 +32,7 @@ class BurgerKingSGSpider(Spider):
             item["website"] = f"{self.website_root}/Locator/Details/" + item["ref"]
             yield Request(url=item["website"], callback=self.parse_location, meta={"item": item})
         if response.xpath('//a[contains(@class, "bk-btn-next")]').get() is not None:
-            yield from self.request_page(response.meta["page"] + 1)
+            yield self.request_page(response.meta["page"] + 1)
 
     def parse_location(self, response):
         item = response.meta["item"]
@@ -42,4 +45,5 @@ class BurgerKingSGSpider(Spider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string("Mo-Su " + hours.replace("Operation Hours", ""))
 
+        apply_category(Categories.FAST_FOOD, item)
         yield item

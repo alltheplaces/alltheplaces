@@ -1,8 +1,8 @@
-from typing import Any
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -14,7 +14,7 @@ class MobilelinkUSSpider(Spider):
     item_attributes = {"brand": "Cricket Wireless", "brand_wikidata": "Q5184987", "operator": "Mobilelink"}
     allowed_domains = ["mobilelinkusa.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url="https://mobilelinkusa.com/GetStores",
             method="POST",

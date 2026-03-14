@@ -1,49 +1,59 @@
 import re
 from hashlib import sha1
 from html import unescape
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Selector, Spider
-from scrapy.http import Response
+from scrapy.http import Request, TextResponse
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
-# Lighthouse e-commerce platform store finder, with official URL of
-# https://www.lighthouse.gr/
-#
-# This store finder is detected via a HTML node:
-#   <meta name="generator" content="Created by Lighthouse, powered by VENDD
-#   e-commerce platform - www.lighthouse.gr" />
-# As well as HTML nodes for each location/feature:
-#   <article data-control="box" data-latitude=".." data-longitude="..">
-#
-# To use this spider, specify a 'start_url' for the store finder page. If
-# opening hours are provided, also specify 'days' as a language-specific list
-# of days as specified in locations/hours.py (such as DAYS_GR). If 'days' is
-# not specified, an attempt will be made to automatically detect the language.
-#
-# The following methods can be overridden:
-# 1. parse_extras
-#      Override this method to provide customised feature tag extraction of
-#      facts such as whether the feature has a publicly accessible toilet. By
-#      default, known feature tags are automatically extracted.
-# 2. parse_opening_hours
-#      Override this method to provide customised opening hours extraction
-#      and parsing, should this be necessary. By default, opening hours are
-#      extracted by guessing the language these opening hours are provided in.
-#      Use the 'days' attribute to specify the language explicitly.
-# 3. parse_item
-#      Override this method to clean up extracted data such as location names
-#      with unwanted suffixes.
-
 
 class LighthouseSpider(Spider):
-    days: dict = None
+    """
+    Lighthouse e-commerce platform store finder, with official website of
+    https://www.lighthouse.gr
 
-    def parse(self, response: Response):
+    This store finder is detected via a HTML node:
+        <meta name="generator" content="Created by Lighthouse, powered by
+        VENDD e-commerce platform - www.lighthouse.gr" />
+    As well as HTML nodes for each location/feature:
+        <article data-control="box" data-latitude=".." data-longitude="..">
+
+    To use this spider, specify a single URL for the 'start_urls' list
+    attribute being the store finder page. If opening hours are provided, also
+    specify 'days' as a language-specific list of days as specified in
+    locations/hours.py (such as DAYS_GR). If 'days' is not specified, an
+    attempt will be made to automatically detect the language.
+
+    The following methods can be overridden:
+    1. parse_extras
+       Override this method to provide customised feature tag extraction of
+       facts such as whether the feature has a publicly accessible toilet. By
+       default, known feature tags are automatically extracted.
+    2. parse_opening_hours
+       Override this method to provide customised opening hours extraction
+       and parsing, should this be necessary. By default, opening hours are
+       extracted by guessing the language these opening hours are provided in.
+       Use the 'days' attribute to specify the language explicitly.
+    3. parse_item
+       Override this method to clean up extracted data such as location names
+       with unwanted suffixes.
+    """
+
+    start_urls: list[str] = []
+    days: dict | None = None
+
+    async def start(self) -> AsyncIterator[Request]:
+        if len(self.start_urls) != 1:
+            raise ValueError("Specify one URL in the start_urls list attribute.")
+            return
+        yield Request(url=self.start_urls[0])
+
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.xpath('//article[@data-control="box"]'):
             item = Feature()
             item["ref"] = location.xpath("@id").get()

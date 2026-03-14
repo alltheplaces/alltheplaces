@@ -1,9 +1,8 @@
-import json
-from typing import Any, Iterable
+from json import dumps
+from typing import Any, AsyncIterator, Iterable
 from urllib.parse import urlencode
 
-from scrapy import Request
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 from scrapy.spiders import Spider
 
 from locations.categories import Drink, Extras, PaymentMethods, apply_yes_no
@@ -48,11 +47,11 @@ GOOGLE_WHEELCHAIR_KEYS = [
 
 
 class YextAnswersSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "yext"}
+    dataset_attributes: dict = {"source": "api", "api": "yext"}
 
     endpoint: str = "https://liveapi.yext.com/v2/accounts/me/answers/vertical/query"
-    api_key: str = ""
-    experience_key: str = ""
+    api_key: str
+    experience_key: str
     api_version: str = "20220511"
     page_limit: int = 50
     locale: str = "en"
@@ -72,23 +71,21 @@ class YextAnswersSpider(Spider):
                         "version": self.environment,
                         "locale": self.locale,
                         "verticalKey": self.feature_type,
-                        "filters": json.dumps(
-                            {"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}
-                        ),
+                        "filters": dumps({"builtin.location": {"$near": {"lat": 0, "lng": 0, "radius": 50000000}}}),
                         "limit": str(self.page_limit),
                         "offset": str(offset),
                         "source": "STANDARD",
-                        "facetFilters": json.dumps(self.facet_filters),
+                        "facetFilters": dumps(self.facet_filters),
                     }
                 ),
             ),
             meta={"offset": offset},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature | JsonRequest]:
         for location in response.json()["response"]["results"]:
             location = location["data"]
             item = DictParser.parse(location)
@@ -162,30 +159,29 @@ class YextAnswersSpider(Spider):
                 item["extras"]["website:menu"] = menu_url_dict.get("url")
 
     @staticmethod
-    def parse_opening_hours(hours: dict) -> OpeningHours | None:
+    def parse_opening_hours(hours: dict) -> OpeningHours:
         """
         Parse opening hours from the supplied dictionary and return an
         OpeningHours object.
         :param hours: dictionary provided by a Yext API.
-        :returns: OpeningHours object if hours could be parsed, or None if the
-                  supplied hours dictionary cnanot be parsed.
+        :returns: OpeningHours object.
         """
-        if not hours:
-            return None
         oh = OpeningHours()
-        for day, rule in hours.items():
-            if not isinstance(rule, dict):
-                continue
-            if day == "holidayHours":
-                continue
-            if rule.get("isClosed") is True:
-                oh.set_closed(day)
-                continue
-            for time in rule["openIntervals"]:
-                oh.add_range(day, time["start"], time["end"])
+        if hours:
+            for day, rule in hours.items():
+                if not isinstance(rule, dict):
+                    continue
+                if day == "holidayHours":
+                    continue
+                if rule.get("isClosed") is True:
+                    oh.set_closed(day)
+                    continue
+                for time in rule["openIntervals"]:
+                    oh.add_range(day, time["start"], time["end"])
         return oh
 
-    def parse_payment_methods(self, location: dict, item: Feature) -> None:
+    @staticmethod
+    def parse_payment_methods(location: dict, item: Feature) -> None:
         if payment_methods := location.get("paymentOptions"):
             payment_methods = [p.lower().replace(" ", "") for p in payment_methods]
             apply_yes_no(PaymentMethods.ALIPAY, item, "alipay" in payment_methods)
@@ -203,7 +199,8 @@ class YextAnswersSpider(Spider):
             apply_yes_no(PaymentMethods.VISA, item, "visa" in payment_methods)
             apply_yes_no(PaymentMethods.WECHAT, item, "wechatpay" in payment_methods)
 
-    def parse_google_attributes(self, location: dict, item: Feature) -> None:
+    @staticmethod
+    def parse_google_attributes(location: dict, item: Feature) -> None:
         if google_attributes := location.get("googleAttributes"):
             for key, attribute in GOOGLE_ATTRIBUTES_MAP.items():
                 if key in google_attributes:

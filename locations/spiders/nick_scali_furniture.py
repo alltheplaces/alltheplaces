@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy import Request, Selector
-from scrapy.http import Response
+from scrapy import Selector
+from scrapy.http import Request, Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -13,7 +13,7 @@ class NickScaliFurnitureSpider(AmastyStoreLocatorSpider):
     item_attributes = {"brand": "Nick Scali", "brand_wikidata": "Q17053453"}
     allowed_domains = ["www.nickscali.com.au", "www.nickscali.co.nz"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for domain in self.allowed_domains:
             headers = {
                 "X-Requested-With": "XMLHttpRequest",

@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -20,7 +20,7 @@ class VolgCHSpider(Spider):
         "https://www.volg.ch/standorte-oeffnungszeiten/?tx_kochvolgstores_storelist[action]=search&tx_kochvolgstores_storelist[controller]=Stores"
     ]
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         for lat, lon in country_iseadgg_centroids(["CH", "LI"], 24):
             yield FormRequest(
                 url=self.start_urls[0],

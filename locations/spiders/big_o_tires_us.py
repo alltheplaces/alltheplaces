@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest
@@ -11,7 +13,7 @@ class BigOTiresUSSpider(Spider):
     name = "big_o_tires_us"
     item_attributes = {"brand": "Big O Tires", "brand_wikidata": "Q4906085"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         with open_searchable_points("us_centroids_100mile_radius.csv") as points:
             next(points)
             for point in points:

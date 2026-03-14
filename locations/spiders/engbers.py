@@ -1,6 +1,5 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -14,7 +13,7 @@ class EngbersSpider(JSONBlobSpider):
     item_attributes = {"brand": "engbers", "brand_wikidata": "Q1290088"}
     EMILIO_ADANI = {"brand": "emilio adani", "brand_wikidata": "Q123022474"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://engbersos-engbers.frontastic.live/frontastic/action/stores/getStoresByLocation",
             data={"type": "storeFinder"},

@@ -24,6 +24,7 @@ class BottegaVenetaSpider(scrapy.Spider):
         for store in response.json()["storesData"]["stores"]:
             item = DictParser.parse(store)
             item["website"] = store.get("detailsUrl")
+            item["branch"] = item.pop("name")
             oh = OpeningHours()
             for day, hour in store.get("openingHours").items():
                 if hour.get("openFromTo") == "NO DATA":

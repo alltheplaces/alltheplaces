@@ -49,6 +49,25 @@ class AmplifonSpider(SitemapSpider, StructuredDataSpider):
     coordinates_pattern = re.compile(r"LatLng\((-?[.\d]+)[,\s]+(-?[.\d]+)\)")
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        if item.get("image") in (
+            "https://www.amplifon.com/content/dam/content-factory/photos/Store/outside/de/FG%2520Hellersdorf-2.jpg",
+            "https://www.amplifon.com/content/dam/amplifon-emea/stores/it/store.png",
+            "https://www.amplifon.com/content/dam/content-factory/photos/Store/inside/fr/397_2018-02-22-14-52-49_1.JPG",
+            "https://www.amplifon.com/content/dam/content-factory/photos/Store/inside/ch/Luzern-Hirschmatt-Empfang.jpg",
+            "https://assets-apac.amplifon.com/content/dam/content-factory-nz/store/unbranded/_DSC9556.jpg",
+            "https://www.minisom.pt/content/dam/content-factory/photos/Store/inside/pt/PT%20inside%20Store.jpg",
+            "https://www.amplifon.com/content/dam/content-factory/photos/Store/shooting/amplicare-new-store-concept/goodbye-man-no-coat-minisom.jpg",
+            "https://www.beterhoren.nl/content/dam/content-factory/photos/tvc-campaign/nl/netherlands/tvc_beterhoren2.jpg",
+            "https://assets-apac.amplifon.com/content/dam/content-factory/photos/Store/shooting/amplifon/amplifon-941.jpg",
+            "https://www.amplifon.com/content/dam/content-factory/photos/Store/inside/fr/amplifon_store_interior_3.jpg",
+            "https://assets-apac.amplifon.com/content/dam/amplifon-apac/au/amplicare-amplifon/outside-store/couple_male_grey_female_blonde_leave_store_horizontal_v2.jpg",
+            "https://www.amplifon.com/content/dam/content-factory/photos/Store/outside/de/FG%20Hellersdorf-2.jpg",
+            "https://www.gaes.es/content/dam/content-factory/photos/Store/outside/es/_LimboAgency_Gaes_190611_0043.jpg",
+            "https://www.amplifon.com/content/dam/content-factory/photos/Store/shooting/amplicare-new-store-concept/audiologist-female-portrait-coat.jpg",
+            "https://www.amplifon.com/content/dam/content-factory/photos/amplifon-hq/2019-07-16-AMPLIFON%20Azienda%200039.jpg",
+        ):
+            item["image"] = None
+
         if not item.get("lat"):
             if coordinates := re.search(self.coordinates_pattern, response.text):
                 item["lat"], item["lon"] = coordinates.groups()

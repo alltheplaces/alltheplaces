@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
 
@@ -18,7 +19,7 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
     locations_key = "contentlets"
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {"size": 100000, "query": {"bool": {"must": {"query_string": {"query": "+contentType:Center"}}}}}
         yield JsonRequest("https://www.caliber.com/api/es/search", data=data)
 

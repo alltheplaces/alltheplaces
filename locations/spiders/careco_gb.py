@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -12,7 +12,7 @@ class CarecoGBSpider(Spider):
     name = "careco_gb"
     item_attributes = {"name": "CareCo", "brand": "CareCo"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://www.careco.co.uk/rest/default/V1/store-locator/showrooms")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

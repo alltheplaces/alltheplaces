@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
@@ -14,7 +14,7 @@ class OsterreichischePostATSpider(Spider):
     name = "osterreichische_post_at"
     custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://api.post.at/branchservice/core/graphql",
             data={

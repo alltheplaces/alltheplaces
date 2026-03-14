@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -10,7 +11,7 @@ class CfcIDSpider(Spider):
     name = "cfc_id"
     item_attributes = {"brand": "California Fried Chicken", "brand_wikidata": "Q5020502"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for page in range(1, 22):
             yield Request(f"https://www.cfcindonesia.com/index.php?page=peta&hal={page}")
 

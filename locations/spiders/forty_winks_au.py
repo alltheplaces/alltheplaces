@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from typing import AsyncIterator
 from zoneinfo import ZoneInfo
 
 from scrapy import Spider
@@ -26,7 +27,7 @@ class FortyWinksAUSpider(Spider):
     allowed_domains = ["fortywinks-prod.azure-api.net"]
     start_urls = ["https://fortywinks-prod.azure-api.net/store-app/stores?storeUrl=undefined"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

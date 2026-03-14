@@ -1,15 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.geo import city_locations
 from locations.items import Feature
 
 
-class NespressoSpider(scrapy.Spider):
+class NespressoSpider(Spider):
     name = "nespresso"
     allowed_domains = ["nespresso.com"]
     item_attributes = {"brand": "Nespresso", "brand_wikidata": "Q301301"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         countries = [
             "AD",
             "AE",
@@ -81,7 +84,7 @@ class NespressoSpider(scrapy.Spider):
             for city in city_locations(country, 1000000):
                 lat, lon = city["latitude"], city["longitude"]
                 url = base_url.format(lat=lat, lon=lon)
-                yield scrapy.Request(url, callback=self.parse)
+                yield Request(url, callback=self.parse)
 
     def parse(self, response):
         stores = response.json()

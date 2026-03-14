@@ -1,4 +1,5 @@
-import json
+from json import loads
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -21,7 +22,7 @@ class RevolutionLaundrySpider(Spider):
         {"id": "68", "latitude": 38.74712, "longitude": -9.164427},  # Portugal
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for company in self.companies:
             yield JsonRequest(
                 url="https://stores.revolution-laundry.com/Ajax/searchByCoordinates",
@@ -42,7 +43,7 @@ class RevolutionLaundrySpider(Spider):
             )
 
     def parse(self, response):
-        for result in json.loads(response.json()["data"])["data"]:
+        for result in loads(response.json()["data"])["data"]:
             item = DictParser.parse(result["location"])
             item["lat"] = result["location"]["geoCoordinates"]["latitude"]
             item["lon"] = result["location"]["geoCoordinates"]["longitude"]

@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
@@ -11,7 +11,7 @@ class SamsClubMXSpider(Spider):
     name = "sams_club_mx"
     item_attributes = {"brand": "Sam's Club", "brand_wikidata": "Q1972120"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("MX", 55000):
             yield JsonRequest(
                 url="https://www.sams.com.mx/orchestra/graphql",

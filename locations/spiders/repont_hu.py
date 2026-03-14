@@ -1,13 +1,13 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-import scrapy
-from scrapy.http import JsonRequest, Request, Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.dict_parser import DictParser
 
 
-class RepontHUSpider(scrapy.Spider):
+class RepontHUSpider(Spider):
     name = "repont_hu"
     item_attributes = {
         "brand": "REpont",
@@ -16,13 +16,13 @@ class RepontHUSpider(scrapy.Spider):
         "operator_wikidata": "Q130207606",
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://map.mohu.hu/api/Map/SearchPoisGeneralData",
             data={"wastePointTypes": ["repont"], "hideDrsPoints": False},
         )
 
-    def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
         for poi in response.json():
             yield JsonRequest(
                 f"https://map.mohu.hu/api/Map/GetDrsPointDetails?id={poi['id']}", callback=self.parse_details

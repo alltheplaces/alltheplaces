@@ -1,14 +1,17 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 
 
-class AtriumHealthSpider(scrapy.Spider):
+class AtriumHealthSpider(Spider):
     name = "atrium_health"
     item_attributes = {"operator": "Atrium Health", "operator_wikidata": "Q5044932"}
     allowed_domains = ["atriumhealth.org"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         base_url = "https://atriumhealth.org/mobileDataApI/MobileserviceAPi/LocationSearch?cityName=Charlotte%2C+NC+28202%2C+USA&locationType=&locationName=&pageNumber={page}&pageSize=793&latitude=35.2326781&longitude=-80.8460822&sortBy=Distance&datasource=f829e711-f2ef-4b46-98d6-a268f958a2d0&childrensLocationOnly=false&community=All+Communities"
 
         headers = {
@@ -24,7 +27,7 @@ class AtriumHealthSpider(scrapy.Spider):
         for page in range(1, 160):
             url = base_url.format(page=page)
 
-            yield scrapy.http.FormRequest(url=url, method="GET", headers=headers, callback=self.parse)
+            yield FormRequest(url=url, method="GET", headers=headers, callback=self.parse)
 
     def parse(self, response):
         data = response.json()

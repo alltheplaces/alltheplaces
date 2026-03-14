@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 from urllib.parse import unquote
 
 from scrapy import Selector, Spider
@@ -15,7 +16,7 @@ class MidasAUSpider(Spider):
     allowed_domains = ["www.midas.com.au"]
     start_urls = ["https://www.midas.com.au/wp-admin/admin-ajax.php?action=get_all_stores"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

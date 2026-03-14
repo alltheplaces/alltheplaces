@@ -1,9 +1,9 @@
 import io
 import zipfile
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Spider
+from scrapy.http import FormRequest, JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -45,7 +45,7 @@ class BanxicoMXSpider(Spider):
         "40140": ("Consubanco", None),
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://www.banxico.org.mx/canje-efectivo/web/ubica-cc")  # branches
         yield Request(
             url="https://www.banxico.org.mx/services/ubicajeros-banxico-mobile-app.html", callback=self.parse_atms

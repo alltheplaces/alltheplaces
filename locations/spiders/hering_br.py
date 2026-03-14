@@ -1,19 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class HeringBRSpider(scrapy.Spider):
+class HeringBRSpider(Spider):
     name = "hering_br"
     item_attributes = {"brand": "Hering", "brand_wikidata": "Q5119055"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.hering.com.br/_v/public/graphql/v1",
-            data={
-                "query": """
+            data={"query": """
                 query getStores {
                  documents(acronym: "BA", fields: ["cep", "cidade", "rua", "telefones", "bairro", "nome"],
                                             where: "cidade=*", pageSize: 1000)
@@ -23,8 +24,7 @@ class HeringBRSpider(scrapy.Spider):
                                                     value
                                                    }
                                             }
-                                        }"""
-            },
+                                        }"""},
         )
 
     def parse(self, response, **kwargs):

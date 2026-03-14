@@ -1,4 +1,7 @@
-from scrapy import FormRequest, Spider
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 
@@ -8,7 +11,7 @@ class NorielROSpider(Spider):
     item_attributes = {"brand": "Noriel", "brand_wikidata": "Q18544426"}
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://noriel.ro/noriel_stores/filter/products/",
             formdata={"selected_products[]": ["Jucarii", "Bebelusi", "Fashion"]},

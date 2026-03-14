@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request, Response
@@ -14,7 +14,7 @@ class BurgerKingCNSpider(JSONBlobSpider):
     item_attributes = {"brand_wikidata": "Q177054"}
     locations_key = ["data", "data"]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://www.bkchina.cn/website/new/js/area.js", callback=self.parse_regions)
 
     def parse_regions(self, response: Response) -> Any:

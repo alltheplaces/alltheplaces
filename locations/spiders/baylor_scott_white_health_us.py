@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -17,7 +17,7 @@ class BaylorScottWhiteHealthUSSpider(Spider):
         "x-bsw-clientid": "BSWHealth.com",
     }
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=self.base_url + "?perPage=1",
             headers=self.headers,

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
 
@@ -10,7 +10,7 @@ class DominosPizzaNLSpider(DominosPizzaAUSpider):
     name = "dominos_pizza_nl"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("NL", 15000):
             yield JsonRequest(
                 url=f"https://www.dominos.nl/dynamicstoresearchapi/getstoresfromquery?lon={city['longitude']}&lat={city['latitude']}",

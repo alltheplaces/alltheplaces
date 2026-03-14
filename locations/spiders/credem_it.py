@@ -1,23 +1,23 @@
 import re
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 
 
-class CredemITSpider(scrapy.Spider):
+class CredemITSpider(Spider):
     name = "credem_it"
     item_attributes = {"brand": "Credem", "brand_wikidata": "Q3696881"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for city in city_locations("IT", 15000):
             for location_type in ["bancomat", "filiale"]:
                 body = f'lat={city["latitude"]}&lon={city["longitude"]}&{location_type}=true'
-                yield scrapy.Request(
+                yield Request(
                     url="https://www.credem.it/content/credem/it/contatti/ricerca-filiali.locator.json",
                     method="POST",
                     body=body,

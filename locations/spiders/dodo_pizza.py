@@ -1,7 +1,9 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_yes_no
+from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -14,7 +16,7 @@ class DodoPizzaSpider(Spider):
     # TODO: update list of countries in 2024
     countries = ["RU", "BY", "GB", "VN", "DE", "KZ", "CN", "KG", "LT", "NG", "PL", "RO", "SI", "TJ", "UZ", "EE", "US"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in self.countries:
             yield JsonRequest(
                 url=f"https://publicapi.dodois.io/{country}/api/v1/unitinfo/all",
@@ -47,8 +49,8 @@ class DodoPizzaSpider(Spider):
                 )
                 item["housenumber"] = address_details.get("HouseNumber")
 
-            apply_yes_no("delivery", item, poi.get("DeliveryEnabled"))
-            apply_yes_no("payment:cards", item, poi.get("CardPaymentPickup"))
+            apply_yes_no(Extras.DELIVERY, item, poi.get("DeliveryEnabled"))
+            apply_yes_no(PaymentMethods.CARDS, item, poi.get("CardPaymentPickup"))
             self.parse_hours(item, poi)
             yield item
 
