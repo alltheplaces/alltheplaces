@@ -31,7 +31,6 @@ class FustCHSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
         item["branch"] = item.pop("name").replace("-", " ").title().removesuffix(" Center")
-        item["website"] = response.urljoin(feature["url"].split("?")[0].replace("/store/", "/store-finder/"))
         item["opening_hours"] = OpeningHours()
         for rule in feature.get("openingHours", {}).get("weekDayOpeningList", []):
             if day := sanitise_day(rule["weekDay"].replace(".", ""), DAYS_DE):

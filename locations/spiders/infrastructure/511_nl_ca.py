@@ -17,6 +17,7 @@ class FivehundredelevenNLCASpider(JSONBlobSpider):
     allowed_domains = ["511nl.ca"]
     start_urls = ["https://511nl.ca/map/mapIcons/Cameras"]
     locations_key = "item2"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def pre_process_data(self, feature: dict) -> None:
         feature["lat"] = feature["location"][0]

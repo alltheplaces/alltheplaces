@@ -1,6 +1,6 @@
 from scrapy import Spider
 from scrapy.crawler import Crawler
-from scrapy.http import Request, Response
+from scrapy.http import Request, Response, TextResponse
 from scrapy.spiders import SitemapSpider, XMLFeedSpider
 from scrapy_camoufox.page import PageMethod
 
@@ -85,6 +85,11 @@ class PlaywrightMiddleware:
             # and removed from all ATP spiders.
             # Spider does not want Camoufox/Playwright to be used. Skip this
             # middleware and do nothing to the response.
+            return response
+
+        if isinstance(response, TextResponse):
+            # Response object is JSON format and therefore doesn't need to be
+            # processed further.
             return response
 
         # If a Playwright or Camoufox request is for a plaintext-type file

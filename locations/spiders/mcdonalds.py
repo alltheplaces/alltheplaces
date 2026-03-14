@@ -23,6 +23,7 @@ class McdonaldsSpider(Spider):
     async def start(self) -> AsyncIterator[Request]:
         template = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={}&longitude={}&radius=50&maxResults=250&country={}&language={}&showClosed="
         for locale in [
+            "en-au",
             "en-ca",
             "en-gb",
             "fi-fi",

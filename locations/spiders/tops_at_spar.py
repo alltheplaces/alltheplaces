@@ -12,7 +12,6 @@ class TopsAtSparSpider(Spider):
     item_attributes = {"brand_wikidata": "Q116377563"}
     skip_auto_cc_spider_name = True
     skip_auto_cc_domain = True
-    requires_proxy = "ZA"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
