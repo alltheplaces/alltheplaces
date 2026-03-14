@@ -1,32 +1,35 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# To use this store finder, specify the brand/application key using the
-# "app_key" attribute of this class. Also specify a 'base_url' value which
-# is prefixed to store identifiers to generate a website field value for each
-# extracted feature.
-#
-# If required, override the 'parse_item' method to extract additional location
-# data or to clean up and modify extracted data.
-
 
 class SylinderSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "api.ngadata.no"}
-    app_key: str = None
-    base_url: str = None
+    """
+    To use this store finder, specify the brand/application key using the
+    'app_key' attribute of this class. Also specify a 'base_url' value which
+    is prefixed to store identifiers to generate a website field value for
+    each extracted feature.
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    If required, override the 'parse_item' method to extract additional
+    location data or to clean up and modify extracted data.
+    """
+
+    dataset_attributes: dict = {"source": "api", "api": "api.ngadata.no"}
+
+    app_key: str
+    base_url: str | None = None
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
         if self.base_url is None:
             self.logger.warning("Specify self.base_url to allow extraction of website values for each feature.")
         yield JsonRequest(url=f"https://api.ngdata.no/sylinder/stores/v1/extended-info?chainId={self.app_key}")
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json():
             yield from self.parse_location(location) or []
 

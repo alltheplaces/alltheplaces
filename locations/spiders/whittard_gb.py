@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -18,7 +18,7 @@ class WhittardGBSpider(Spider):
             meta={"offset": next_offset},
         )
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield self.request_page(0)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

@@ -9,7 +9,7 @@ from locations.storefinders.where2getit import Where2GetItSpider
 class BassettFurnitureSpider(Where2GetItSpider):
     name = "bassett_furniture"
     item_attributes = {"brand": "Bassett Furniture", "brand_wikidata": "Q4868109"}
-    api_endpoint = "https://stores.bassettfurniture.com/rest/getlist"
+    api_brand_name = "bassettfurniture"
     api_key = "A605E3A0-6CA3-11EB-A657-F9FB92322438"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:

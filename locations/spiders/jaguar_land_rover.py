@@ -114,7 +114,7 @@ COUNTRIES = {
     ("en", "zm", "ZM"),
     ("en", "zw", "ZW"),
     ("en", "us", "US"),
-    # ("en", "ca", "CA"),  # doesn't work with coordinate queries, see start_requests
+    # ("en", "ca", "CA"),  # doesn't work with coordinate queries, see start()
     ("es", "cr", "CR"),
     ("es", "do", "DO"),
     ("es", "gt", "GT"),

@@ -14,7 +14,7 @@ class FrasersGBSpider(JSONBlobSpider):
         "ROBOTSTXT_OBEY": False,
     }
 
-    def start_requests(self):
+    async def start(self):
         headers = {"content-type": "application/json"}
         url = "https://api-fras.prd.frasersgroup.services/graphql?op=getStoresByLocation"
         formdata = {

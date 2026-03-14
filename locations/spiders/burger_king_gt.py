@@ -3,7 +3,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -31,6 +31,7 @@ class BurgerKingGTSpider(Spider):
             item["geometry"] = location.get("point")
             item["branch"] = item.pop("name").removeprefix("BK ").removeprefix("Burger King ")
             item["website"] = "https://app.bk.gt/#/"
+            apply_category(Categories.FAST_FOOD, item)
             apply_yes_no(Extras.KIDS_AREA, item, location.get("kidsZone"))
             apply_yes_no(Extras.BREAKFAST, item, location.get("breakfast"))
             apply_yes_no(Extras.DELIVERY, item, location.get("delivery"))

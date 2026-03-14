@@ -1,16 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 
 
-class SydneyToolsAUSpider(scrapy.Spider):
+class SydneyToolsAUSpider(Spider):
     name = "sydney_tools_au"
     item_attributes = {"brand": "Sydney Tools", "brand_wikidata": "Q116779309"}
     allowed_domains = ["sydneytools.com.au"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = "query routes_StoreList_Query { viewer { ...StoreList_viewer id } } fragment StoreList_viewer on Customer { id email myStore { id } stores(first: 10000) { edges { node { id name address city postcode state description fax phone lat lng canPickup hours { monday { open close } tuesday { open close } wednesday { open close } thursday { open close } friday { open close } saturday { open close } sunday { open close } } } } } }"
         data = {"query": graphql_query, "variables": {}}
         yield JsonRequest(url="https://sydneytools.com.au/graphql", data=data)

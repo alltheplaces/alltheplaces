@@ -1,11 +1,12 @@
-import scrapy
+from scrapy import Spider
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-class BurgerKingESPTSpider(scrapy.Spider):
+class BurgerKingESPTSpider(Spider):
     name = "burger_king_es_pt"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     start_urls = [
@@ -42,10 +43,9 @@ class BurgerKingESPTSpider(scrapy.Spider):
                 item["name"] = "Burger King"
                 item["addr_full"] = store["address"]
                 item["country"] = country
-                item["opening_hours"] = opening_hours.as_opening_hours()
-                item["extras"] = {
-                    "drive_through": "yes" if store["autoking"] is True else "no",
-                    "delivery": "yes" if store["delivery"] is True else "no",
-                    "takeaway": "yes" if store["kiosko"] is True else "no",
-                }
+                item["opening_hours"] = opening_hours
+                apply_category(Categories.FAST_FOOD, item)
+                apply_yes_no(Extras.DRIVE_THROUGH, item, store["autoking"] is True, False)
+                apply_yes_no(Extras.DELIVERY, item, store["delivery"] is True, False)
+                apply_yes_no(Extras.TAKEAWAY, item, store["kiosko"] is True, False)
                 yield item

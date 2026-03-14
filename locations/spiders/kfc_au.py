@@ -17,7 +17,6 @@ class KfcAUSpider(Spider):
     region_code = "apac"
     tenant_id = "afd3813afa364270bfd33f0a8d77252d"
     web_root = "https://www.kfc.com.au/restaurants/"
-    requires_proxy = True  # Requires AU proxy, possibly residential IPs only.
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[JsonRequest]:

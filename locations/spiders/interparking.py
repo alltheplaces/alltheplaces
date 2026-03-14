@@ -1,16 +1,18 @@
+import json
+import re
 from typing import AsyncIterator
-from urllib.parse import urljoin
 
-from scrapy import Selector, Spider
+from scrapy import Spider
 from scrapy.http import FormRequest
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
 class InterparkingSpider(Spider):
     name = "interparking"
     item_attributes = {"brand": "Interparking", "brand_wikidata": "Q1895863"}
-    countries = ["be", "fr", "fr", "it", "nl", "pl", "ro", "es"]
+    countries = ["be", "fr", "it", "nl", "pl", "ro", "es"]
+    skip_auto_cc_domain = True
 
     async def start(self) -> AsyncIterator[FormRequest]:
         for country in self.countries:
@@ -20,16 +22,15 @@ class InterparkingSpider(Spider):
             )
 
     def parse(self, response, **kwargs):
-        for location in response.json()["MapItems"]:
-            item = Feature()
-            item["lat"], item["lon"] = location["Point"]
-            item["ref"] = location["Id"]
-
-            sel = Selector(text=location["Html"])
-
-            item["website"] = urljoin(response.url, sel.xpath('//a[@class="link"]/@href').get())
-            item["image"] = urljoin(response.url, sel.xpath("//img/@src").get())
-            item["addr_full"] = sel.xpath("//p/text()").get()
-            item["name"] = sel.xpath("//strong/text()").get()
-
-            yield item
+        for location in json.loads(
+            re.search(
+                r'"carParks":(\[.*\]),\"cities',
+                response.xpath('//*[contains(text(),"carParks")]/text()').get().replace("\\", ""),
+            ).group(1)
+        ):
+            if location["brand"] == "Interparking":
+                item = DictParser.parse(location)
+                item["ref"] = location["externalId"]
+                item["city"] = item["city"]["title"]
+                item["website"] = "https://www.interparking.it/" + item["website"]
+                yield item

@@ -2,6 +2,37 @@
 
 A project to generate [point of interest (POI)](https://en.wikipedia.org/wiki/Point_of_interest) data sourced [from websites](docs/WHY_SPIDER.md) with 'store location' pages. The project uses [`scrapy`](https://scrapy.org/), a popular Python-based web scraping framework, to execute individual site [spiders](https://doc.scrapy.org/en/latest/topics/spiders.html) that retrieve POI data, publishing the results in a [standard format](DATA_FORMAT.md). There are various `scrapy` tutorials on the Internet and [this series on YouTube](https://www.youtube.com/watch?v=s4jtkzHhLzY) is reasonable.
 
+## Data users
+
+All the Places is used many places, including some of the most popular maps.
+Having high quality, fresh, first party data here helps help brands be accurately listed in many apps.
+
+```mermaid
+---
+sources:
+      overture: https://docs.overturemaps.org/blog/2025/11/19/release-notes/#places
+      foursquare: https://docs.foursquare.com/data-products/docs/fsq-os-places-release-notes#november-2025
+---
+flowchart
+   Spiders(["Thousands of first party datasets"])
+   ATP(["All the Places"])
+   click ATP "https://alltheplaces.xyz/"
+   OSM(["OpenStreetMap"])
+   click OSM "https://www.openstreetmap.org/"
+   TT(["TomTom"])
+   click TT "https://www.tomtom.com/"
+   Overture(["Overture"])
+   click Overture "https://overturemaps.org/"
+   Foursquare(["Foursquare OS Places"])
+   click Foursquare "https://opensource.foursquare.com/os-places/"
+
+   Spiders --> ATP
+   ATP --> TT
+   ATP --> OSM
+   ATP --> Overture
+   Overture --> Foursquare
+```
+
 ## Getting started
 
 ### Development setup
@@ -110,6 +141,8 @@ Many of the sites provide their data in a [standard format](docs/STRUCTURED_DATA
 * [Data from many POI pages can be extracted without writing code](docs/STRUCTURED_DATA.md)
 * [What is expected in a pull request?](docs/PULL_REQUEST.md)
 * [What we do behind the scenes](docs/PIPELINES.md)
+
+Spiders are typically written by map makers who want the data, however we welcome [brands to be involved](docs/MY_BRAND.md).
 
 ### The weekly run
 

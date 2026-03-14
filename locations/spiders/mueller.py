@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Request, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.react_server_components import parse_rsc
 
 
 class MuellerSpider(Spider):
@@ -27,9 +28,13 @@ class MuellerSpider(Spider):
         ]:
             yield Request(url=url, cb_kwargs=dict(country=country))
 
-    def parse(self, response: Response, country: str) -> Any:
-        data = parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-        auth_details = data["props"]["pageProps"]["graphqlSettings"]["publicHost"]["header"]
+    def parse(self, response: Response, country: str):
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        objs = [parse_js_object(s) for s in scripts]
+        rsc = "".join([s for n, s in objs]).encode()
+        data = dict(parse_rsc(rsc))
+
+        auth_details = DictParser.get_nested_key(data, "publicHost")["header"]
         self.headers = {auth_details["key"]: auth_details["value"]}
         yield JsonRequest(
             url=self.api,
@@ -100,7 +105,7 @@ class MuellerSpider(Spider):
                 callback=self.parse_stores,
             )
 
-    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
+    def parse_stores(self, response: Response):
         for store in response.json()["data"]["getStoresByIds"]:
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")

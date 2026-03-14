@@ -1,6 +1,5 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -14,13 +13,13 @@ class FitnessParkSpider(Spider):
     item_attributes = {"brand": "Fitness Park", "brand_wikidata": "Q102351191"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def make_request(self, offset: int, page_size: int = 50) -> Request:
+    def make_request(self, offset: int, page_size: int = 50) -> JsonRequest:
         return JsonRequest(
             "https://lesclubs.fitnesspark.fr/search?per={}&offset={}".format(page_size, offset),
             cb_kwargs={"offset": offset, "page_size": page_size},
         )
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
     def parse(self, response: Response, offset: int, page_size: int, **kwargs: Any) -> Any:

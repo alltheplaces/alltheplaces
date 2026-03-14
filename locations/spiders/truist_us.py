@@ -2,8 +2,10 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
+from locations.spiders.safeway import SafewaySpider
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -25,6 +27,10 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
     search_for_twitter = False
     drop_attributes = {"facebook"}
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+
+    LOCATED_IN_MAPPINGS = [
+        (["SAFEWAY"], SafewaySpider.item_attributes),
+    ]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         # Name is formatted something like:
@@ -48,10 +54,18 @@ class TruistUSSpider(SitemapSpider, StructuredDataSpider):
                 atm["phone"] = None
                 atm["opening_hours"] = "24/7"
                 apply_category(Categories.ATM, atm)
+                if branch:
+                    atm["located_in"], atm["located_in_wikidata"] = extract_located_in(
+                        branch, self.LOCATED_IN_MAPPINGS, self
+                    )
                 yield atm
             apply_category(Categories.BANK, item)
         elif location_info.get("locationType").upper() == "ATM":
             apply_category(Categories.ATM, item)
+            if branch:
+                item["located_in"], item["located_in_wikidata"] = extract_located_in(
+                    branch, self.LOCATED_IN_MAPPINGS, self
+                )
 
         if ld_data["openingHours"] == "24 Hours":
             item["opening_hours"] = "24/7"

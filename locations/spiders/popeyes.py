@@ -18,8 +18,7 @@ class PopeyesSpider(Spider):
         for country in ["us", "fr", "ca", "kr", "ro"]:
             yield JsonRequest(
                 f"https://czqk28jt.apicdn.sanity.io/v1/graphql/prod_plk_{country}/default",
-                data={
-                    "query": """query AllRestaurants {
+                data={"query": """query AllRestaurants {
                         allRestaurants(limit: -1, where: { environment: "prod", status: "Open" }) {
                             check_date: _updatedAt
                             ref: _id
@@ -64,8 +63,7 @@ class PopeyesSpider(Spider):
                             }
                         }
                     }
-                    """
-                },
+                    """},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

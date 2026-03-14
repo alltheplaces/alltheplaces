@@ -1,13 +1,22 @@
 import re
 from html import unescape
-
-from scrapy import Spider
+from typing import Any
 
 from locations.items import Feature
 
 
-def merge_address_lines(address_lines: list[str]) -> str:
-    return ", ".join(filter(None, [line.strip() if line else None for line in address_lines]))
+def merge_address_lines(address_lines: list[Any]) -> str:
+    """
+    For the strings provided in a list of objects, combine the strings
+    together in the order they are listed into a single address string.
+    :param address_lines: ordered list of objects from which string objects
+                          are extracted, and remaining objects ignored.
+    :return: single address string where each address component is separated
+             by a comma. An address component could be a house number, street
+             name, town/city, postcode, etc.
+    """
+    address_line_strings = [x for x in address_lines if isinstance(x, str)]
+    return ", ".join(filter(None, [line.strip() if line else None for line in address_line_strings]))
 
 
 _multiple_spaces = re.compile(r" +")
@@ -35,7 +44,7 @@ def is_primarily_cjk(text: str) -> bool:
     return cjk_count > len(text) / 2
 
 
-def clean_address(address: list[str] | str, min_length=2) -> str:
+def clean_address(address: list[Any] | str, min_length=2) -> str:
     if not address:
         return ""
 
@@ -77,7 +86,7 @@ def clean_address(address: list[str] | str, min_length=2) -> str:
 
 
 class AddressCleanUpPipeline:
-    def process_item(self, item: Feature, spider: Spider):
+    def process_item(self, item: Feature):
         targeted_fields = {
             "street": 2,
             "city": 2,

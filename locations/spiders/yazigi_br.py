@@ -1,16 +1,19 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import apply_category
 from locations.dict_parser import DictParser
 
 
-class YazigiBRSpider(scrapy.Spider):
+class YazigiBRSpider(Spider):
     name = "yazigi_br"
     item_attributes = {"brand": "Yázigi", "brand_wikidata": "Q10394813"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://www.yazigi.com.br/BuscaUnidadesMapa"
-        yield scrapy.FormRequest(
+        yield FormRequest(
             url=url,
             formdata={"isLead": "false", "isMapa": "true", "isTeste": "false"},
         )
@@ -24,7 +27,7 @@ class YazigiBRSpider(scrapy.Spider):
             item["branch"] = poi["Unidade"].get("NomeFantasia")
             item["phone"] = poi["Unidade"].get("Telefone")
             address = poi["Unidade"]["Endereco"]
-            item["addr_full"] = address.get("Logradouro")
+            item["street_address"] = address.get("Logradouro")
             item["city"] = address.get("CidadeNome")
             item["state"] = address.get("EstadoNome")
             item["postcode"] = address.get("CEP")
