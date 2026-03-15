@@ -20,7 +20,7 @@ class SaizeriyaSpider(Spider):
 
     def get_page(self, n):
         return Request(
-            f"https://shop.saizeriya.co.jp/sz_restaurant/api/proxy2/shop/list?limit=500&offset={n}",
+            f"https://shop.saizeriya.co.jp/sz_restaurant/api/proxy2/shop/list?datum=wgs84&limit=500&offset={n}",
             meta={"offset": n},
         )
 
@@ -29,15 +29,14 @@ class SaizeriyaSpider(Spider):
         stores = data["items"]
 
         for store in stores:
-            loc_offset = float("0.00" + store["address_code"]) + 0.002
             item = DictParser.parse(store)
             # item["name"] = None
             item["branch"] = (
                 store["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
             )
             item["ref"] = store["code"]
-            item["lat"] = store["coord"]["lat"] + loc_offset  # offset purposely
-            item["lon"] = store["coord"]["lon"] - loc_offset
+            item["lat"] = store["coord"]["lat"]
+            item["lon"] = store["coord"]["lon"]
             try:
                 item["postcode"] = store["postal_code"]
             except:
