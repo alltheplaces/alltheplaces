@@ -23,7 +23,7 @@ class AcomJPSpider(Spider):
 
     def get_page(self, n):
         return Request(
-            f"https://store.acom.co.jp/acomnavi/api/proxy2/shop/list?limit=500&offset={n}",
+            f"https://store.acom.co.jp/acomnavi/api/proxy2/shop/list?datum=wgs84&limit=500&offset={n}",
             meta={"offset": n},
         )
 
