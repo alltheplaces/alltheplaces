@@ -25,13 +25,6 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-      - name: Setup Python
-        run: uv python install
-
-      - name: Install GitHub CLI (if not already available)
-        run: |
-          which gh || sudo apt-get update && sudo apt-get install -y gh
-
       - name: Run remove_requires_proxy script
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

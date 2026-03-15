@@ -18,5 +18,4 @@ jobs:
       - uses: astral-sh/setup-uv@v7
 
       - name: Run ty
-        run: |
-          uv run ty check ./locations/ --exclude 'locations/spiders/'
+        run: uv run ty check ./locations/ --exclude 'locations/spiders/'
