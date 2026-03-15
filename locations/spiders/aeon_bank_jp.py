@@ -41,7 +41,7 @@ class AeonBankJPSpider(Spider):
             except:
                 item["name"] = "イオン銀行"
                 item.update({"brand_wikidata": "Q11286327"})
-            
+
             item["branch"] = store["name"].removesuffix("出張所")
             item["ref"] = store["code"]
             item["lat"] = store["coord"]["lat"]
