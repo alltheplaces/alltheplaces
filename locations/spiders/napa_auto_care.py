@@ -17,9 +17,8 @@ class NapaAutoCareSpider(SitemapSpider):
     item_attributes = {"brand": "NAPA AutoCare Center", "brand_wikidata": "Q6970842"}
     sitemap_urls = ["https://www.napaonline.com/autocare_sitemap.xml"]
     sitemap_rules = [(r"/en/autocare/\?facilityId=", "parse")]
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         if match := re.search(r"https://maps\.googleapis\.com/maps/api/staticmap\?center=(.+?)\"", response.text):
