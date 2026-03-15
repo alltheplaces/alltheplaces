@@ -13,8 +13,16 @@ class RepsolSpider(Spider):
     name = "repsol"
     item_attributes = {"brand": "Repsol", "brand_wikidata": "Q174747"}
     allowed_domains = ["www.repsol.es"]
-    start_urls = ["https://www.repsol.es/bin/repsol/searchmiddleware/station-search.json?action=search&tipo=1,2"]
-    skip_auto_cc_domain = True
+    start_urls = [
+        "https://www.repsol.es/bin/repsol/searchmiddleware/station-search.json?action=search&idioma=es&tipo=1,2"
+    ]
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": "https://www.repsol.es",
+            "Referer": "https://www.repsol.es/buscador-eess-y-puntos-de-recarga/",
+        }
+    }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
@@ -53,7 +61,7 @@ class RepsolSpider(Spider):
             apply_yes_no(
                 Fuel.OCTANE_95,
                 properties,
-                "Efitec 95" in products or "S/CHUMBO 95" in products or "Efitec 95 Premium" in products,
+                any(p in products for p in ["Efitec 95", "S/CHUMBO 95", "Efitec 95 Premium", "Gasolina S/Chumbo 95"]),
                 False,
             )
             apply_yes_no(Fuel.OCTANE_98, properties, "Efitec 98" in products, False)
@@ -64,7 +72,7 @@ class RepsolSpider(Spider):
                 False,
             )
             apply_yes_no(Fuel.PROPANE, properties, "Propano 11 Kg" in products, False)
-            apply_yes_no(Fuel.DIESEL, properties, "Diésel e+" in products or "GASÓLEO" in products, False)
+            apply_yes_no(Fuel.DIESEL, properties, any(p in products for p in ["Diésel e+", "GASÓLEO"]), False)
             apply_yes_no(Fuel.GTL_DIESEL, properties, "Diésel e+10" in products, False)
             apply_yes_no(Fuel.UNTAXED_DIESEL, properties, "Gasóleo B" in products, False)
             apply_yes_no(Fuel.LPG, properties, "Autogás" in products, False)

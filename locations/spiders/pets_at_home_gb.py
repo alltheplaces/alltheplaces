@@ -38,6 +38,7 @@ class PetsAtHomeGBSpider(Spider):
             item["ref"] = item["website"] = f'https://community.petsathome.com{node["slug"]}'
             item["lat"] = node["lat"]
             item["lon"] = node["lng"]
+            item["branch"] = item.pop("name")
             item["addr_full"] = node["formattedaddress"]
             # TODO: opentimes
 

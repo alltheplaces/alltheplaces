@@ -45,4 +45,5 @@ class NationalBankOfGreeceGRSpider(Spider):
     def parse_poi(self, poi):
         item = DictParser.parse(poi)
         item["city"] = poi.get("Location")
+        item["street_address"] = item.pop("addr_full", None)
         return item

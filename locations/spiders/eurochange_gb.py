@@ -23,4 +23,5 @@ class EurochangeGBSpider(SitemapSpider, StructuredDataSpider):
         if "NM Money" in item["name"]:
             item.update(self.NM_MONEY)
             item["website"] = item["website"].replace("eurochange.co.uk", "nmmoney.co.uk")
+        item["branch"] = item.pop("name").replace("eurochange -", "")
         yield item

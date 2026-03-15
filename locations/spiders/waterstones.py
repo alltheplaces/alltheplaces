@@ -28,10 +28,12 @@ class WaterstonesSpider(CrawlSpider):
         except IndexError:
             # No bookshop
             return
+        branch, name = self.get_meta_property(response, "og:title").split(" | ")
 
         properties = {
             "ref": ref,
-            "name": self.get_meta_property(response, "og:title"),
+            "name": name,
+            "branch": branch.replace("Bookshop in ", ""),
             "street_address": self.get_meta_property(response, "business:contact_data:street_address"),
             "city": self.get_meta_property(response, "business:contact_data:locality"),
             "postcode": self.get_meta_property(response, "business:contact_data:postal_code"),

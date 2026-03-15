@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -10,9 +11,9 @@ from locations.user_agents import BROWSER_DEFAULT
 class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
     name = "livique_ch"
     brands = {
-        "Import Parfumerie": "Q1660352",
         "Livique": "Q15851221",
         "Lumimart": "Q111722218",
+        "Lumi": "Q111722218",
     }
     allowed_domains = ["www.livique.ch"]
     sitemap_urls = ["https://www.livique.ch/sitemap.xml"]
@@ -25,9 +26,13 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         for brand_name, brand_wikidata in self.brands.items():
-            if item["name"].title().startswith(brand_name):
+            if brand_name in item["name"]:
                 item["brand"] = brand_name
                 item["brand_wikidata"] = brand_wikidata
+                if "Lumi" in item["name"]:
+                    apply_category(Categories.SHOP_LIGHTING, item)
+                else:
+                    apply_category(Categories.SHOP_FURNITURE, item)
                 item["branch"] = item["name"].title().removeprefix(brand_name).strip()
                 item.pop("name", None)
                 break
@@ -38,7 +43,8 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
 
         item["country"] = "CH"
         item["image"] = self.cleanup_image(item["image"])
-        item["phone"] = self.cleanup_phone(item["phone"])
+        if phone := item.get("phone"):
+            item["phone"] = self.cleanup_phone(phone)
         item["ref"] = item["ref"].split("/")[-1].replace("_pos", "")
         item["street_address"] = self.cleanup_street(item["street_address"])
         item["website"] = item["website"].replace("_pos", "_POS")

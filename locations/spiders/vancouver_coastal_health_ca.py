@@ -10,6 +10,7 @@ class VancouverCoastalHealthCASpider(Spider):
     name = "vancouver_coastal_health_ca"
     item_attributes = {"operator": "Vancouver Coastal Health", "operator_wikidata": "Q7914144"}
     start_urls = ["https://www.vch.ca/en/find-location"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     CATEGORIES = {
         "0": Categories.HOSPITAL,

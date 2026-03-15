@@ -6,6 +6,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.bp import BpSpider
 from locations.spiders.caltex import CaltexSpider
 from locations.spiders.engen import EngenSpider
+from locations.spiders.game_za import GameZASpider
 from locations.spiders.ok_foods import OK_FOODS_BRANDS
 from locations.spiders.sasol_za import SasolZASpider
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
@@ -45,7 +46,7 @@ class AbsaZASpider(JSONBlobSpider):
         (["OK VALUE"], OK_FOODS_BRANDS["OK VALUE"]),
         (["OK GROCER"], OK_FOODS_BRANDS["OK GROCER"]),
         (["OK MINI", "OK MINIMARKET"], OK_FOODS_BRANDS["OK MINIMARK"]),
-        (["GAME"], {"brand": "Game", "brand_wikidata": "Q126811048"}),
+        (["GAME"], GameZASpider.item_attributes),
     ]
 
     def post_process_item(self, item, response, location):

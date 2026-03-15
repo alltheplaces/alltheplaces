@@ -1,30 +1,38 @@
+import re
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
+
 from locations.categories import Categories, apply_category
-from locations.storefinders.yext_search import YextSearchSpider
+from locations.dict_parser import DictParser
+
+CHECKERS = {"brand": "Checkers", "brand_wikidata": "Q63919315"}
+RALLYS = {"brand": "Rally's", "brand_wikidata": "Q63919323"}
 
 
-class CheckersAndRallysUSSpider(YextSearchSpider):
+class CheckersAndRallysUSSpider(Spider):
     name = "checkers_and_rallys_us"
-    host = "https://locations.checkersandrallys.com"
-    brands = {
-        "Checkers": {"brand": "Checkers", "brand_wikidata": "Q63919315"},
-        "Rally's": {"brand": "Rally's", "brand_wikidata": "Q63919323"},
-    }
+    start_urls = ["https://checkersandrallys.com/unified-gateway/online-ordering/v1/all-stores/8159"]
 
-    def parse_item(self, location, item):
-        if "CLOSED" in item.get("name", "").upper():
-            return
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["stores_v1"]:
+            if location["name"] in ("Checkers - POS Test Store", "Checkers Drive-In Restaurants (demo)"):
+                continue
+            item = DictParser.parse(location["address"])
+            item["name"] = None
+            item["street_address"] = item.pop("street")
+            item["addr_full"] = location["address"]["formatted_address"]
 
-        if location["profile"].get("c_alphaNumericStoreID"):
-            item["ref"] = location["profile"]["c_alphaNumericStoreID"]
+            if m := re.match(r"^(Checkers|Rally's) ?\((\d+)\)(.+)?$", location["name"]):
+                if m.group(1) == "Checkers":
+                    item.update(CHECKERS)
+                elif m.group(1) == "Rally's":
+                    item.update(RALLYS)
+                item["ref"] = m.group(2)
+            else:
+                self.logger.error("Unexpected location: {}".format(location["name"]))
 
-        if "Checkers" in location["profile"].get("brands", []):
-            item["brand"] = self.brands["Checkers"]["brand"]
-            item["brand_wikidata"] = self.brands["Checkers"]["brand_wikidata"]
-        elif "Rally's" in location["profile"].get("brands", []):
-            item["brand"] = self.brands["Rally's"]["brand"]
-            item["brand_wikidata"] = self.brands["Rally's"]["brand_wikidata"]
-        elif len(location["profile"].get("brands", [])) >= 1:
-            raise ValueError("Unknown brand detected: {}".format(", ".join(location["profile"]["brands"])))
+            apply_category(Categories.FAST_FOOD, item)
 
-        apply_category(Categories.FAST_FOOD, item)
-        yield item
+            yield item

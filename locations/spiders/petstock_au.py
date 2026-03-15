@@ -15,13 +15,14 @@ class PetstockAUSpider(AlgoliaSpider):
     api_key = "38ef8ba1d407151e9ca1c95adaa8d598"
     app_id = "SAZG66NOPD"
     index_name = "location_prod"
-    referer = "https://www.petstock.com.au/"
+    domain = "com.au"
+    referer = f"https://www.petstock.{domain}/"
 
     def pre_process_data(self, feature: dict):
         feature["ref"] = feature.pop("handle")
         feature["coordinates"] = feature.pop("_geoloc")
         feature["address"] = clean_address([feature.pop("addressLine1"), feature.pop("addressLine2")])
-        feature["website"] = "https://www.petstock.com.au/store/" + feature["ref"]
+        feature["website"] = "https://www.petstock.{}/store/{}".format(self.domain, feature["ref"])
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature["isActive"] is not True:
