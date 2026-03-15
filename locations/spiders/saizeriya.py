@@ -37,14 +37,9 @@ class SaizeriyaSpider(Spider):
             item["ref"] = store["code"]
             item["lat"] = store["coord"]["lat"]
             item["lon"] = store["coord"]["lon"]
-            try:
-                item["postcode"] = store["postal_code"]
-            except:
-                pass
-            try:
-                item["extras"]["branch:ja-Hira"] = store["ruby"].removeprefix("サイゼリヤ")
-            except:
-                pass
+            item["postcode"] = store.get("postal_code")
+            if ruby := store.get("ruby"):
+                item["extras"]["branch:ja-Hir"] = ruby.removeprefix("サイゼリヤ")
             item["addr_full"] = store["address_name"]
             item["website"] = f"https://shop.saizeriya.co.jp/sz_restaurant/spot/detail?code={store['code']}"
             yield item
