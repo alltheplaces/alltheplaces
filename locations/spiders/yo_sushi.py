@@ -11,8 +11,7 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
     name = "yo_sushi"
     item_attributes = {"brand": "YO! Sushi", "brand_wikidata": "Q3105441"}
     sitemap_urls = ["https://yosushi.com/sitemap.xml"]
-    sitemap_rules = [(r"https://yosushi.com/[-\w]+", "parse")]
-    # Not all urls include /restaurant/
+    sitemap_rules = [(r"https://yosushi\.com/restaurants/[-\w]+", "parse")]
     wanted_types = ["Restaurant"]
     drop_attributes = {"facebook", "twitter", "email"}
 
@@ -20,10 +19,10 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
         item["lat"], item["lon"] = ld_data["latitude"], ld_data["longitude"]
         item["branch"] = item.pop("name")
         if (ld_data.get("description") and "kiosk" in ld_data["description"].lower()) or "-kiosk" in response.url:
-            apply_category(Categories.SHOP_KIOSK, item)
             apply_category(Categories.FAST_FOOD, item)
         else:
             apply_category(Categories.RESTAURANT, item)
+
         if "-extra" in response.url or "tesco extra" in item["branch"].lower():
             set_located_in(TescoGBSpider.TESCO_EXTRA, item)
         elif "-superstore" in response.url:
