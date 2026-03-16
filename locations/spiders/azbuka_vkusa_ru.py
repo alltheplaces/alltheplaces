@@ -18,7 +18,9 @@ class AzbukaVkusaRUSpider(JSONBlobSpider):
     locations_key = "data"
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item.pop("name")  # Name contains an address; also name_eng is available, but it's a bit inaccurate to capture
+        item.pop("name")
+        # Name contains an address which is in address field;
+        # also name_eng is available, but it's a bit inaccurate to capture
         item.pop("state")
 
         item["ref"] = feature.get("code")
