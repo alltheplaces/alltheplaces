@@ -1,19 +1,14 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class AeonBankJPSpider(Spider):
     name = "aeon_bank_jp"
-
-    item_attributes = {
-        "extras": {
-            "amenity": "atm",
-        },
-    }
 
     async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(0)
@@ -24,7 +19,7 @@ class AeonBankJPSpider(Spider):
             meta={"offset": n},
         )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
         stores = data["items"]
 
@@ -50,6 +45,9 @@ class AeonBankJPSpider(Spider):
             item["addr_full"] = store["address_name"]
             item["postcode"] = store.get("postal_code")
             item["website"] = f"https://map.aeonbank.co.jp/aeonbank/spot/detail?code={store['code']}"
+
+            apply_category(Categories.ATM, item)
+
             yield item
 
         if data["count"]["limit"] == len(data["items"]):
