@@ -1,16 +1,17 @@
 from typing import Iterable
 
 from scrapy.http import Response
-from locations.hours import OpeningHours, DAYS_FULL
+
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+
 
 class WeirdFishGBSpider(JSONBlobSpider):
     name = "weird_fish_gb"
     item_attributes = {"brand": "Weird Fish", "brand_wikidata": "Q19903788"}
     start_urls = ["https://www.weirdfish.co.uk/template/GetAllStores"]
     locations_key = "stores"
-
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature.get("link"):
@@ -19,13 +20,13 @@ class WeirdFishGBSpider(JSONBlobSpider):
             else:
                 item["website"] = "https://www.weirdfish.co.uk" + feature["link"]
 
-        item["branch"] = item.pop("name").replace("Weird Fish","").replace("Store","")
+        item["branch"] = item.pop("name").replace("Weird Fish", "").replace("Store", "")
         item["opening_hours"] = OpeningHours()
 
         for day in DAYS_FULL:
             try:
                 if feature.get("openingTimes")[day.lower()]:
-                    open,close=feature["openingTimes"][day.lower()].replace(" ","").split("-")
+                    open, close = feature["openingTimes"][day.lower()].replace(" ", "").split("-")
                     if "am" in open:
                         item["opening_hours"].add_range(day, open, close, "%I:%M%p")
                     else:
