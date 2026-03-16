@@ -11,8 +11,10 @@ class BevmoUSSpider(JSONBlobSpider):
 
     start_urls = ["https://bevmo.com/pages/store-locator"]
 
+    requires_proxy = True
+
     def extract_json(self, response):
-        script = response.xpath("//script[@defer='defer']/text()").get()
+        script = response.xpath("//script[contains(text(), 'const locations')]/text()").get()
         starter = "const locations = "
         begin = script.find(starter) + len(starter)
         end = script.find('";', begin + 1) + 1
