@@ -13,13 +13,12 @@ class CrustAUSpider(Spider):
     name = "crust_au"
     item_attributes = {"brand": "Crust", "brand_wikidata": "Q100792715"}
     allowed_domains = ["www.crust.com.au"]
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield scrapy.Request(url="https://www.crust.com.au/stores/stores_for_map_markers.json?catering_active=null")
+    start_urls = ["https://www.crust.com.au/stores/stores_for_map_markers.json?catering_active=null"]
 
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["lat"], item["lon"] = location["location"].split(",", 1)
             item.pop("addr_full", None)
             item["street_address"] = clean_address([location["address"], location["address2"]])
