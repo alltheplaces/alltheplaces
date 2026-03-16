@@ -11,7 +11,13 @@ class YoSushiSpider(SitemapSpider, StructuredDataSpider):
     name = "yo_sushi"
     item_attributes = {"brand": "YO! Sushi", "brand_wikidata": "Q3105441"}
     sitemap_urls = ["https://yosushi.com/sitemap.xml"]
-    sitemap_rules = [(r"https://yosushi\.com/restaurants/[-\w]+", "parse")]
+    sitemap_rules = [
+        (r"https://yosushi\.com/restaurants/[-\w]+", "parse"),
+        ("https://yosushi.com/aberdeen", "parse"),
+        ("https://yosushi.com/birmingham-selfridges", "parse"),
+        ("https://yosushi.com/luton-airport", "parse"),
+        ("https://yosushi.com/york-outlet", "parse"),
+    ]
     wanted_types = ["Restaurant"]
     drop_attributes = {"facebook", "twitter", "email"}
 
