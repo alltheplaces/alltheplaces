@@ -30,9 +30,8 @@ class SaizeriyaSpider(Spider):
 
         for store in stores:
             item = DictParser.parse(store)
-            # item["name"] = None
             item["branch"] = (
-                store["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
+                item.pop("name").removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
             )
             item["ref"] = store["code"]
             item["lat"] = store["coord"]["lat"]
