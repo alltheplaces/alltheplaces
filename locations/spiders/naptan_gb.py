@@ -1,14 +1,29 @@
-from scrapy import Spider
+from typing import Any
+
+from scrapy import Request, Spider
+from scrapy.http import XmlResponse
 
 from locations.items import Feature
 
 
 class NaptanGBSpider(Spider):
     name = "naptan_gb"
-    # Smaller areas can be tested: eg "&atcoAreaCodes=010"
-    start_urls = ["https://naptan.api.dft.gov.uk/v1/access-nodes?dataFormat=xml"]
+    start_urls = ["https://naptan.api.dft.gov.uk/v1/nptg"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: XmlResponse, **kwargs: Any) -> Any:
+        response.selector.register_namespace("n", "http://www.naptan.org.uk/")
+
+        for area in response.xpath(
+            "/n:NationalPublicTransportGazetteer/n:Regions/n:Region/n:AdministrativeAreas/n:AdministrativeArea"
+        ):
+            yield Request(
+                "https://naptan.api.dft.gov.uk/v1/access-nodes?dataFormat=xml&atcoAreaCodes={}".format(
+                    area.xpath("./n:AtcoAreaCode/text()").get()
+                ),
+                callback=self.parse_nodes,
+            )
+
+    def parse_nodes(self, response: XmlResponse, **kwargs: Any) -> Any:
         response.selector.remove_namespaces()
 
         for point in response.xpath("/NaPTAN/StopAreas/StopArea"):
