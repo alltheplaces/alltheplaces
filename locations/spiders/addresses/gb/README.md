@@ -146,7 +146,7 @@ Owen and published. Others are helping.
 | Plymouth City Council                  | https://www.owenboswarva.com/blog/post-addr35.htm                                                                                     |
 | Rhondda Cynon Taf                      | https://www.owenboswarva.com/blog/post-addr41.htm                                                                                     |
 | Royal Borough of Greenwich             | https://www.owenboswarva.com/blog/post-addr40.htm                                                                                     |
-| Rushcliffe Borough Council             | https://www.owenboswarva.com/blog/post-addr13.htm                                                                                     |
+| Rushcliffe Borough Council             | https://www.owenboswarva.com/blog/post-addr13.htm https://www.owenboswarva.com/blog/post-addr60.htm                                   |
 | Sheffield City Council                 | https://www.owenboswarva.com/blog/post-addr16.htm                                                                                     |
 | Somerset Council                       | https://www.owenboswarva.com/blog/post-addr42.htm                                                                                     |
 | Southwark Council                      | https://www.owenboswarva.com/blog/post-addr33.htm                                                                                     |
