@@ -4,10 +4,12 @@ from scrapy import Request, Spider
 from scrapy.http import XmlResponse
 
 from locations.items import Feature
+from locations.licenses import Licenses
 
 
 class NaptanGBSpider(Spider):
     name = "naptan_gb"
+    dataset_attributes = Licenses.GB_OGLv3.value
     start_urls = ["https://naptan.api.dft.gov.uk/v1/nptg"]
 
     def parse(self, response: XmlResponse, **kwargs: Any) -> Any:
@@ -56,11 +58,11 @@ class NaptanGBSpider(Spider):
             elif stop_type == "GFTD":  # Ferry Terminal
                 item["extras"]["amenity"] = "ferry_terminal"
             elif stop_type == "GTMU":  # Tram
-                item["extras"]["public_transport"] = "platform"
-                item["extras"]["railway"] = "platform"
+                item["extras"]["public_transport"] = "station"
+                item["extras"]["tram"] = "yes"
             elif stop_type == "GRLS":  # Train station
-                item["extras"]["public_transport"] = "platform"
-                item["extras"]["railway"] = "platform"
+                item["extras"]["public_transport"] = "station"
+                item["extras"]["railway"] = "station"
             else:
                 item["extras"]["stop_type"] = stop_type
 
