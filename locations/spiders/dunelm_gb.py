@@ -20,7 +20,7 @@ class DunelmGBSpider(scrapy.Spider):
         for location in response.json()["data"]["result"]:
             item = DictParser.parse(location)
             item["ref"] = location["sapSiteId"]
-            item["street_address"] = merge_address_lines([location["localArea"], item["street_address"]])
+            item["street_address"] = merge_address_lines([item["street_address"], location["localArea"]])
             item["website"] = "https://www.dunelm.com/stores/" + location["uri"]
             apply_category(Categories.SHOP_INTERIOR_DECORATION, item)
             yield item
