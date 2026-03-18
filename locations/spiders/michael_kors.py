@@ -12,7 +12,7 @@ class MichaelKorsSpider(SitemapSpider, StructuredDataSpider):
     name = "michael_kors"
     item_attributes = {"brand": "Michael Kors", "brand_wikidata": "Q134612138"}
     sitemap_urls = ["https://locations.michaelkors.com/sitemap.xml","https://locations.michaelkors.co.uk/sitemap.xml"]
-    sitemap_rules = [(r"^https://locations.michaelkors.(co.uk|com)/[\w-]+(?:/[\w-]+)?/[\w-]+/[\w-]+$", "parse_sd")]
+    sitemap_rules = [(r"^https://locations.michaelkors.(?:co.uk|com)/[\w-]+(?:/[\w-]+)?/[\w-]+/[\w-]+$", "parse_sd")]
     search_for_twitter = False
     search_for_fimage = False
     drop_attributes = {"facebook"}
