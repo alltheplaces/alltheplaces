@@ -1,34 +1,26 @@
-from typing import Iterable
+from typing import Any
 
+import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories
-from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.storefinders.algolia import AlgoliaSpider
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class DunelmGBSpider(AlgoliaSpider):
+class DunelmGBSpider(scrapy.Spider):
     name = "dunelm_gb"
     item_attributes = {
-        "name": "Dunelm",
         "brand": "Dunelm",
         "brand_wikidata": "Q5315020",
-        "extras": Categories.SHOP_INTERIOR_DECORATION.value,
     }
-    app_id = "FY8PLEBN34"
-    api_key = "ae9bc9ca475f6c3d7579016da0305a33"
-    index_name = "stores_prod"
+    start_urls = ["https://sloc-service.dunelm.com/api/v2/dunelm/stores/locations"]
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["lat"] = feature["_geoloc"]["lat"]
-        item["lon"] = feature["_geoloc"]["lng"]
-        item["branch"] = item.pop("name")
-        item["ref"] = feature["sapStoreId"]
-        item["website"] = "https://www.dunelm.com/stores/" + feature["uri"]
-
-        item["opening_hours"] = OpeningHours()
-        for rule in feature["openingHours"]:
-            item["opening_hours"].add_range(rule["day"], rule["open"], rule["close"])
-
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["data"]["result"]:
+            item = DictParser.parse(location)
+            item["ref"] = location["sapSiteId"]
+            item["street_address"] = merge_address_lines([location["localArea"], item["street_address"]])
+            item["website"] = "https://www.dunelm.com/stores/" + item["city"].lower()
+            apply_category(Categories.SHOP_INTERIOR_DECORATION, item)
+            yield item
