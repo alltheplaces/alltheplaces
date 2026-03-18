@@ -19,6 +19,7 @@ class DunelmGBSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]["result"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["ref"] = location["sapSiteId"]
             item["street_address"] = merge_address_lines([item["street_address"], location["localArea"]])
             item["website"] = "https://www.dunelm.com/stores/" + location["uri"]
