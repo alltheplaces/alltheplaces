@@ -20,6 +20,7 @@ class DrummondGolfAUSpider(SitemapSpider, StructuredDataSpider):
         if item.get("street_address"):
             if coords := re.search(r"\"(-?\d+\.\d+),\s?(-?\d+\.\d+)\"", response.xpath("//@data-markers").get("")):
                 item["lat"], item["lon"] = coords.groups()
+            item["phone"] = None
             item["branch"] = response.xpath("//title/text()").get().removesuffix(" Drummond Golf")
             item["website"] = response.url
             apply_category(Categories.SHOP_SPORTS, item)
