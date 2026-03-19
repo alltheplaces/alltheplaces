@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -33,4 +34,7 @@ class WeirdFishGBSpider(JSONBlobSpider):
                         item["opening_hours"].add_range(day, open, close, "%H:%M")
             except:
                 continue
+
+        apply_category(Categories.SHOP_CLOTHES, item)
+
         yield item
