@@ -6,7 +6,7 @@ import chompjs
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.linked_data_parser import LinkedDataParser
 
 
 class Big4HolidayParksAUSpider(SitemapSpider):
@@ -17,10 +17,9 @@ class Big4HolidayParksAUSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_data = json.loads(
-            chompjs.parse_js_object(response.xpath('//*[contains(text(),"postalCode")]//text()').get())[1]
+            chompjs.parse_js_object(response.xpath('//script[contains(text(), "postalCode")]/text()').get())[1]
         )
-        raw_data.update(raw_data.pop("address"))
-        item = DictParser.parse(raw_data)
+        item = LinkedDataParser.parse_ld(raw_data)
         item["website"] = item["ref"] = response.url
 
         if lat_lon_data := response.xpath('//script[contains(text(), "latitude")]/text()').get():
