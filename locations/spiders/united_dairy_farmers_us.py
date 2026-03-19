@@ -15,6 +15,7 @@ class UnitedDairyFarmersUSSpider(StructuredDataSpider):
     wanted_types = ["AutoDealer"]
     search_for_facebook = False
     search_for_twitter = False
+    search_for_email = False
     requires_proxy = True
     no_refs = True
 
