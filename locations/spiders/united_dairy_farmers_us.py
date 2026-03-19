@@ -11,10 +11,12 @@ class UnitedDairyFarmersUSSpider(StructuredDataSpider):
     name = "united_dairy_farmers_us"
     item_attributes = {"brand": "United Dairy Farmers", "brand_wikidata": "Q7887677"}
     start_urls = ["https://www.udfinc.com/our-stores"]
-    requires_proxy = True
-    no_refs = True
     time_format = "%H:%M:%S"
     wanted_types = ["AutoDealer"]
+    search_for_facebook = False
+    search_for_twitter = False
+    requires_proxy = True
+    no_refs = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").split("-")[0]
