@@ -11,6 +11,7 @@ class UnitedDairyFarmersUSSpider(StructuredDataSpider):
     name = "united_dairy_farmers_us"
     item_attributes = {"brand": "United Dairy Farmers", "brand_wikidata": "Q7887677"}
     start_urls = ["https://www.udfinc.com/our-stores"]
+    requires_proxy = True
     no_refs = True
     time_format = "%H:%M:%S"
 
