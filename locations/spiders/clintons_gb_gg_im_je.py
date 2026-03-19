@@ -17,11 +17,11 @@ class ClintonsGBGGIMJESpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["street_address"] = merge_address_lines([item.pop("addr_full"), feature["address2"]])
         item["branch"] = item.pop("name", None)
-        item["name"] = "Clintons"
         item["country"] = "GB"
         item["ref"] = feature["link"]
-        if item.get("phone"):
-            if not item["phone"].startswith("+44"):
-                item["phone"] = "+44 " + item["phone"]
+        if item.get("phone") and not item["phone"].startswith("+44"):
+            item["phone"] = "+44 " + item["phone"]
+
         apply_category(Categories.SHOP_GIFT, item)
+
         yield item
