@@ -1,43 +1,26 @@
-from scrapy import Spider
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
+
+FRANPRIX = {"brand": "Franprix", "brand_wikidata": "Q2420096"}
+MARCHE = {"brand_wikidata": "Q130165186"}
 
 
-class FranprixFRSpider(Spider):
+class FranprixFRSpider(SitemapSpider, StructuredDataSpider):
     name = "franprix_fr"
-    item_attributes = {"brand": "Franprix", "brand_wikidata": "Q2420096"}
-    start_urls = ["https://www.franprix.fr/xhr-cache/resource/stores"]
+    sitemap_urls = ["https://www.franprix.fr/sitemap.xml"]
+    sitemap_rules = [(r"/magasins/\d+$", "parse_sd")]
     requires_proxy = True
 
-    def parse(self, response):
-        data = response.json()
-        store_data = data.get("list")
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        if item["name"].lower().startswith("franprix "):
+            item["branch"] = item.pop("name").split(" ", 1)[1]
+            item.update(FRANPRIX)
+        elif item["name"].startswith("Marché d'à Côté "):
+            item["branch"] = item.pop("name").removeprefix("Marché d'à Côté ")
+            item.update(MARCHE)
 
-        for store in store_data:
-            oh = OpeningHours()
-            for day in store.get("hours"):
-                day_str = day.get("day").title()[:2]
-                opening_hours = list(day.get("hours"))
-                if not opening_hours:
-                    continue
-                formatted_hours = opening_hours[0].lstrip("T").split("/")
-                oh.add_range(
-                    day=day_str,
-                    open_time=formatted_hours[0],
-                    close_time=formatted_hours[1],
-                    time_format="%H:%M",
-                )
-            properties = {
-                "ref": store.get("id"),
-                "branch": store.get("store_name"),
-                "addr_full": store.get("street"),
-                "city": store.get("city"),
-                "phone": store.get("phone"),
-                "postcode": store.get("postcode"),
-                "lat": store.get("lat"),
-                "lon": store.get("lon"),
-                "website": f"https://www.franprix.fr/magasins/{store.get('id')}",
-                "opening_hours": oh.as_opening_hours(),
-            }
-            yield Feature(**properties)
+        item["ref"] = response.url.split("/")[-1]
+        apply_category(Categories.SHOP_CONVENIENCE, item)
+        yield item
