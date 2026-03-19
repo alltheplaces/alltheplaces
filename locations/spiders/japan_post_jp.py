@@ -1,5 +1,4 @@
 import csv
-import re
 from io import StringIO
 
 from chompjs import parse_js_object
