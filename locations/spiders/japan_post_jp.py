@@ -52,14 +52,15 @@ class JapanPostJPSpider(Spider):
             item["website"] = f"https://map.japanpost.jp/p/{MAP_ID}/dtl/{row[0]}/"
             item["lat"] = row[1]
             item["lon"] = row[2]
-            item["branch"] = row[6].removesuffix("出張所")
             item["postcode"] = row[12]
             item["addr_full"] = row[13]
             if "郵便局" in row[6]:
                 apply_category(Categories.POST_OFFICE, item)
                 item.update({"brand": "日本郵便", "brand_wikidata": "Q11509260"})
+                item["name"] = row[6].removesuffix("出張所")
             else:
                 apply_category(Categories.ATM, item)
                 item.update({"brand": "ゆうちょ銀行", "brand_wikidata": "Q907103"})
+                item["branch"] = row[6].removesuffix("出張所")
 
             yield item
