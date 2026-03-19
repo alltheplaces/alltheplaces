@@ -20,9 +20,13 @@ class Big4HolidayParksAUSpider(SitemapSpider):
             chompjs.parse_js_object(response.xpath('//*[contains(text(),"postalCode")]//text()').get())[1]
         )
         raw_data.update(raw_data.pop("address"))
-        lat_lon_data = response.xpath('//*[contains(text(),"latitude")]//text()').get().replace("\\", "")
         item = DictParser.parse(raw_data)
         item["website"] = item["ref"] = response.url
-        item["lat"] = re.search(r"\"latitude\":\"\s*(-?\d+\.\d+)\"", lat_lon_data).group(1)
-        item["lon"] = re.search(r"\"longitude\":\"\s*(-?\d+\.\d+)\"", lat_lon_data).group(1)
+
+        if lat_lon_data := response.xpath('//script[contains(text(), "latitude")]/text()').get():
+            if match := re.search(
+                r"{\\\"latitude\\\":\\\"(-?\d+\.\d+)\\\",\\\"longitude\\\":\\\"(-?\d+\.\d+)\\\"}", lat_lon_data
+            ):
+                item["lat"], item["lon"] = match.groups()
+
         yield item
