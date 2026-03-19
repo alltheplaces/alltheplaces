@@ -57,7 +57,7 @@ class JapanPostJPSpider(Spider):
             if "郵便局" in row[6]:
                 apply_category(Categories.POST_OFFICE, item)
                 item.update({"brand": "日本郵便", "brand_wikidata": "Q11509260"})
-                item["name"] = row[6].removesuffix("出張所")
+                item["name"] = row[6]
             else:
                 apply_category(Categories.ATM, item)
                 item.update({"brand": "ゆうちょ銀行", "brand_wikidata": "Q907103"})
