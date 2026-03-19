@@ -25,7 +25,7 @@ class Big4HolidayParksAUSpider(SitemapSpider):
 
         if lat_lon_data := response.xpath('//script[contains(text(), "latitude")]/text()').get():
             if match := re.search(
-                r"{\\\"latitude\\\":\\\"(-?\d+\.\d+)\\\",\\\"longitude\\\":\\\"(-?\d+\.\d+)\\\"}", lat_lon_data
+                r"{\\\"latitude\\\":\\\"(-?\d+\.\d+)\\\",\\\"longitude\\\":\\\"\s?(-?\d+\.\d+)\\\"}", lat_lon_data
             ):
                 item["lat"], item["lon"] = match.groups()
 
