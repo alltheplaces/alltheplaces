@@ -12,7 +12,6 @@ from locations.user_agents import BROWSER_DEFAULT
 class SouthernRailwayGBSpider(Spider):
     name = "southern_railway_gb"
     item_attributes = {"operator": "Southern Railway", "operator_wikidata": "Q1258373"}
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Any]:
         yield Request(
