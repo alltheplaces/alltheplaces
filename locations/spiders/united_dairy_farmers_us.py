@@ -14,6 +14,7 @@ class UnitedDairyFarmersUSSpider(StructuredDataSpider):
     requires_proxy = True
     no_refs = True
     time_format = "%H:%M:%S"
+    wanted_types = ["AutoDealer"]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").split("-")[0]
