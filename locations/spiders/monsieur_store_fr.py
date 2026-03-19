@@ -13,6 +13,7 @@ class MonsieurStoreFRSpider(SitemapSpider):
     name = "monsieur_store_fr"
     item_attributes = {"brand": "Monsieur Store", "brand_wikidata": "Q113686692"}
     sitemap_urls = ["https://monsieurstore.com/sitemap_index.xml"]
+    sitemap_follow = ["store-sitemap.xml"]
     sitemap_rules = [(r"https://monsieurstore.com/magasin/[a-z-0-9]+/$", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -22,6 +23,7 @@ class MonsieurStoreFRSpider(SitemapSpider):
             .get()
             .strip()
             .removeprefix("Monsieur Store ")
+            .strip("– ")
         )
         item["addr_full"] = ",".join(response.xpath('//*[@class="store-header__address"]//text()').getall())
         item["ref"] = item["website"] = response.url
