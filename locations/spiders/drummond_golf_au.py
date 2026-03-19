@@ -18,9 +18,8 @@ class DrummondGolfAUSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if item.get("street_address"):
-            item["lat"], item["lon"] = re.search(
-                r"\"coordinates\":\s*\"(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\"", response.xpath("//@data-markers").get()
-            ).groups()
+            if coords := re.search(r'"lat":([-\d.]+),"lng":([-\d.]+)', response.xpath("//@data-markers").get("")):
+                item["lat"], item["lon"] = coords.groups()
             item["branch"] = response.xpath("//title/text()").get().removesuffix(" Drummond Golf")
             item["website"] = response.url
             apply_category(Categories.SHOP_SPORTS, item)
