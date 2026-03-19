@@ -1,29 +1,47 @@
-from typing import Any
+from typing import Iterable
 
-from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy import Selector
+from scrapy.http import Response, TextResponse
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class KfcINSpider(CrawlSpider):
+class KfcINSpider(SitemapSpider, StructuredDataSpider):
     name = "kfc_in"
     item_attributes = KFC_SHARED_ATTRIBUTES
-    start_urls = ["https://restaurants.kfc.co.in/?page=1"]
-    rules = [Rule(LinkExtractor(r"/\?page=\d+$"), callback="parse", follow=True)]
+    sitemap_urls = ["https://restaurants.kfc.co.in/robots.txt"]
+    sitemap_rules = [(r"/kfc-[-\w]+-(\d+)/Home", "parse_sd")]
+    time_format = "%I:%M %p"
+    drop_attributes = {"image", "facebook"}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath('//div[@class="store-info-box"]'):
-            item = Feature()
-            item["ref"] = item["website"] = location.xpath('.//a[contains(@href, "/Home")]/@href').get()
-            item["lat"] = location.xpath('input[@class="outlet-latitude"]/@value').get()
-            item["lon"] = location.xpath('input[@class="outlet-longitude"]/@value').get()
-            item["street_address"] = merge_address_lines(
-                location.xpath('.//li[@class="outlet-address"]/div[@class="info-text"]/span/text()').getall()
-            )
-            item["phone"] = location.xpath('.//li[@class="outlet-phone"]/div[@class="info-text"]/a/text()').get()
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):
+            if "openingHoursSpecification" in ld_obj.keys():  # desired ld_data
+                yield ld_obj
 
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        # city and state values are not correct, better to collect them to form addr_full
+        item["addr_full"] = merge_address_lines(
+            [item.pop("street_address"), item.pop("city"), item.pop("state"), item["postcode"]]
+        )
+        yield item
+
+    def extract_amenity_features(self, item: Feature | dict, selector: Selector, ld_item: dict) -> None:
+        services_list = []
+        for services in ld_item.get("amenityFeature", []):
+            if isinstance(services["value"], list):
+                services_info = services["value"][0]
+                if "," in services_info:
+                    for service in services_info.split(","):
+                        services_list.append(service.strip())
+                else:
+                    services_list.append(services_info)
+        apply_yes_no(Extras.INDOOR_SEATING, item, "Dine In" in services_list)
+        apply_yes_no(Extras.DELIVERY, item, "Delivery" in services_list)
+        apply_yes_no(Extras.TAKEAWAY, item, "Takeaway" in services_list)
