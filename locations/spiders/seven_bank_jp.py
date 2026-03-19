@@ -7,16 +7,16 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class AcomJPSpider(Spider):
-    name = "acom_jp"
-    item_attributes = {"brand": "アコム", "brand_wikidata": "Q4674469"}
+class SevenBankJPSpider(Spider):
+    name = "seven_bank_jp"
+    item_attributes = {"brand": "セブン銀行", "brand_wikidata": "Q7457182"}
 
     async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(0)
 
     def get_page(self, n):
         return Request(
-            f"https://store.acom.co.jp/acomnavi/api/proxy2/shop/list?datum=wgs84&limit=500&offset={n}",
+            f"https://location.sevenbank.co.jp/sevenbank/api/proxy2/shop/list?datum=wgs84&limit=500&offset={n}",
             meta={"offset": n},
         )
 
@@ -26,16 +26,17 @@ class AcomJPSpider(Spider):
 
         for store in stores:
             item = DictParser.parse(store)
-            item["name"] = "アコム"
-            item["branch"] = store["name"]
+            item["name"] = "セブン銀行"
+            item["branch"] = store["name"].removesuffix("　共同出張所")
             item["ref"] = store["code"]
             item["lat"] = store["coord"]["lat"]
             item["lon"] = store["coord"]["lon"]
             item["extras"]["branch:ja-Hira"] = store["ruby"]
             item["addr_full"] = store["address_name"]
-            item["website"] = f"https://store.acom.co.jp/acomnavi/spot/detail?code={store['code']}"
+            item["postcode"] = store["postal_code"]
+            item["website"] = f"https://location.sevenbank.co.jp/sevenbank/spot/detail?code={store['code']}"
 
-            apply_category(Categories.SHOP_MONEY_LENDER, item)
+            apply_category(Categories.ATM, item)
 
             yield item
 
