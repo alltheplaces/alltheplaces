@@ -38,7 +38,6 @@ from locations.spiders.piggly_wiggly_us import PigglyWigglyUSSpider
 from locations.spiders.quickchek_us import QuickchekUSSpider
 from locations.spiders.race_trac_us import RaceTracUSSpider
 from locations.spiders.recipe_unlimited import RecipeUnlimitedSpider
-from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
 from locations.spiders.safeway import SafewaySpider
 from locations.spiders.schnucks_us import SchnucksUSSpider
@@ -117,7 +116,6 @@ LOCATION_MAPPINGS = [
     (["RANDALLS"], AlbertsonsSpider.brands["randalls"]),
     (["RALPHS"], KROGER_BRANDS["https://www.ralphs.com/"]),
     (["ROYAL FARMS"], RoyalFarmsSpider.item_attributes),
-    (["RITE AID"], RiteAidUSSpider.item_attributes),
     (["RUTTERS", "RUTTER'S"], {"brand": "Rutter's", "brand_wikidata": "Q7383544"}),
     (["SAFEWAY"], SafewaySpider.item_attributes),
     (["SHAWS", "SHAW'S"], AlbertsonsSpider.brands["shaws"]),
