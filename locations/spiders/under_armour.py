@@ -1,6 +1,7 @@
 from typing import Any
 
 import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -9,15 +10,13 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class UnderArmourSpider(scrapy.Spider):
+class UnderArmourSpider(Spider):
     name = "under_armour"
     item_attributes = {"brand": "Under Armour", "brand_wikidata": "Q2031485"}
     allowed_domains = ["store-locator.underarmour.com"]
 
     def start_requests(self):
-        yield JsonRequest(
-            url="https://store-locator.underarmour.com/api/stores/nearby/?lat=0&lng=0&radius=50000",
-        )
+        yield JsonRequest(url="https://store-locator.underarmour.com/api/stores/nearby/?lat=0&lng=0&radius=50000")
 
     def parse(self, response: Response, **kwargs: Any):
         for store in response.json()["stores"]:
@@ -32,7 +31,7 @@ class UnderArmourSpider(scrapy.Spider):
             item["street_address"] = merge_address_lines(
                 [store["address"].get("street"), store["address"].get("street2")]
             )
-            item["website"] = f"https://store-locator.underarmour.com/en-us/store/{store['id']}"
+            item["website"] = f"https://store-locator.underarmour.com/en-us/store/{store['id']}/"
 
             self._parse_hours(item, store)
 
