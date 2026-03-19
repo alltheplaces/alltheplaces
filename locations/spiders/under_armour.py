@@ -1,6 +1,5 @@
 from typing import Any
 
-import scrapy
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
@@ -26,7 +25,18 @@ class UnderArmourSpider(Spider):
                 continue
 
             item = DictParser.parse(store)
-            item["branch"] = item.pop("name")
+            item["branch"] = (
+                item.pop("name").removeprefix("UNDER ARMOUR ").removeprefix("Under Armour ").removeprefix("UA ")
+            )
+            if item["branch"].startswith("BRAND HOUSE ") or item["branch"].startswith("Brand House "):
+                item["name"] = "Under Armour Brand House"
+                item["branch"] = item["branch"][12:].strip("- ")
+            elif "Factory House" in item["branch"]:
+                item["name"] = "Under Armour Factory House"
+                item["branch"] = item["branch"].replace("Factory House", "").strip(" |-")
+            else:
+                item["name"] = "Under Armour"
+                item["branch"] = item["branch"].strip("- ")
             item["street"] = None
             item["street_address"] = merge_address_lines(
                 [store["address"].get("street"), store["address"].get("street2")]
