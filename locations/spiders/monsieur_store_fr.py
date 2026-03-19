@@ -3,7 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
@@ -11,11 +11,7 @@ from locations.items import Feature
 
 class MonsieurStoreFRSpider(SitemapSpider):
     name = "monsieur_store_fr"
-    item_attributes = {
-        "brand_wikidata": "Q113686692",
-        "brand": "Monsieur Store",
-        "extras": Categories.SHOP_WINDOW_BLIND.value,
-    }
+    item_attributes = {"brand": "Monsieur Store", "brand_wikidata": "Q113686692"}
     sitemap_urls = ["https://monsieurstore.com/sitemap_index.xml"]
     sitemap_rules = [(r"https://monsieurstore.com/magasin/[a-z-0-9]+/$", "parse")]
 
@@ -43,4 +39,7 @@ class MonsieurStoreFRSpider(SitemapSpider):
                     open_time, close_time = time.split("-")
                     oh.add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
         item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_WINDOW_BLIND, item)
+
         yield item
