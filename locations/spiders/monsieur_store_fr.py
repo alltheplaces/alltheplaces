@@ -4,7 +4,6 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -28,7 +27,7 @@ class MonsieurStoreFRSpider(SitemapSpider):
         item["addr_full"] = ",".join(response.xpath('//*[@class="store-header__address"]//text()').getall())
         item["ref"] = item["website"] = response.url
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]//@href').get().replace("tel:", "")
-        extract_google_position(item, response)
+
         oh = OpeningHours()
         for day_time in response.xpath('//*[@class="store-header__schedule"]//li'):
             day = sanitise_day(day_time.xpath('.//*[@class="store-header__day"]/text()').get().strip(), DAYS_FR)
