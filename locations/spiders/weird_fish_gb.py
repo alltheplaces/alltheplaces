@@ -21,9 +21,12 @@ class WeirdFishGBSpider(JSONBlobSpider):
             else:
                 item["website"] = "https://www.weirdfish.co.uk" + feature["link"]
 
-        item["branch"] = item.pop("name").replace("Weird Fish", "").replace("Store", "")
-        item["opening_hours"] = OpeningHours()
+        item["branch"] = item.pop("name").strip().removeprefix("Weird Fish ").removeprefix("Store ").strip("- ")
+        if item["branch"].startswith("Outlet "):
+            item["name"] = "Weird Fish Outlet"
+            item["branch"] = item["branch"].removeprefix("Outlet ")
 
+        item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:
             try:
                 if feature.get("openingTimes")[day.lower()]:
