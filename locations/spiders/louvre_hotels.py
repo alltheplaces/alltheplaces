@@ -1,3 +1,4 @@
+import json
 from json import dumps
 from typing import Any, AsyncIterator
 
@@ -56,7 +57,7 @@ class LouvreHotelsSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        resorts = response.json()["data"]["resortsSearchByBrandsV2"]
+        resorts = json.loads(response.xpath("//pre/text()").get())["data"]["resortsSearchByBrandsV2"]
 
         for resort in resorts:
             item = DictParser.parse(resort)

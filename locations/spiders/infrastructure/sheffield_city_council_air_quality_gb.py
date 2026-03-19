@@ -4,17 +4,19 @@ from scrapy.http import Response
 
 from locations.categories import Categories, MonitoringTypes, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
+
+# https://sheffield-city-council-open-data-sheffieldcc.hub.arcgis.com/datasets/56a292d1d6de438c954044b2ea063118_1/explore
 
 
 class SheffieldCityCouncilAirQualityGBSpider(ArcGISFeatureServerSpider):
     name = "sheffield_city_council_air_quality_gb"
-    dataset_attributes = {
-        "source": "api",
-        "api": "arcgis",
-        "license": "INSPIRE End User Licence",
-        "license:website": "https://www.ordnancesurvey.co.uk/documents/licensing/inspire-end-user-licence.pdf",
-    }
+    dataset_attributes = (
+        ArcGISFeatureServerSpider.dataset_attributes
+        | Licenses.GB_INSPIRE.value
+        | {"attribution:name": "SCC Environmental data released under the European Directive INSPIRE."}
+    )
     item_attributes = {
         "operator": "Sheffield City Council",
         "operator_wikidata": "Q7492609",

@@ -13,7 +13,7 @@ class ShopkoSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
-            url="https://api.scheduler.fielmannusa.com/api/FindNearestRetailStores",
+            url="https://api.scheduler.fielmannusa.com/api/FindNearestRetailStores?bn=shopko",
             data={"latitude": 41.8780025, "longitude": -93.097702},
             method="POST",
         )
