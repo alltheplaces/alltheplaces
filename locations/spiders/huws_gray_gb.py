@@ -12,6 +12,7 @@ class HuwsGrayGBSpider(Spider):
     name = "huws_gray_gb"
     item_attributes = {"brand": "Huws Gray", "brand_wikidata": "Q16965780"}
     start_urls = ["https://www.huwsgray.co.uk/branch/ajax/stores"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for ref, location in response.json()["response"].items():
