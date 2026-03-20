@@ -17,7 +17,6 @@ class ChuysSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["restaurants"]:
             location.update(location["contactDetail"].pop("address"))
-            print(location)
             item = DictParser.parse(location)
             item["country"] = location["country"]
             item["name"] = location["restaurantName"]
