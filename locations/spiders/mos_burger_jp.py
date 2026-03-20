@@ -2,6 +2,7 @@ from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
+
 from locations.dict_parser import DictParser
 
 
@@ -12,7 +13,6 @@ class MosBurgerJPSpider(Spider):
         "brand_wikidata": "Q1204169",
     }
     start_urls = ["https://www.mos.jp/data/shop/shop.json"]
-    
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["shops"]:
