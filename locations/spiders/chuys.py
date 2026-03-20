@@ -1,30 +1,26 @@
-import re
+from typing import Any, AsyncIterator
 
 import scrapy
+from scrapy.http import JsonRequest, Response
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ChuysSpider(scrapy.Spider):
     name = "chuys"
-    allowed_domains = ["www.chuys.com"]
     item_attributes = {"brand": "Chuy's", "brand_wikidata": "Q5118415"}
-    start_urls = ["https://www.chuys.com/api/locations.json"]
 
-    def parse(self, response):
-        for data in response.json().get("locations"):
-            properties = {
-                "ref": data.get("id"),
-                "addr_full": data.get("address", {}).get("address"),
-                "housenumber": data.get("address", {}).get("parts", {}).get("number"),
-                "street_address": data.get("address").get("parts", {}).get("address"),
-                "postcode": data.get("address", {}).get("parts", {}).get("postcode"),
-                "city": data.get("address", {}).get("parts", {}).get("city"),
-                "state": (re.findall("[A-Z]{2}", data.get("address", {}).get("address"))[0:1] or (None,))[0],
-                "website": data.get("url"),
-                "lat": data.get("address", {}).get("lat"),
-                "lon": data.get("address", {}).get("lng"),
-                "phone": data.get("phoneNumber", {}).get("text") if data.get("phoneNumber") else None,
-            }
+    async def start(self) -> AsyncIterator[Any]:
+        yield JsonRequest(url="https://www.chuys.com/api/restaurants", headers={"x-source-channel": "WEB"})
 
-            yield Feature(**properties)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["restaurants"]:
+            location.update(location["contactDetail"].pop("address"))
+            print(location)
+            item = DictParser.parse(location)
+            item["country"] = location["country"]
+            item["name"] = location["restaurantName"]
+            item["ref"] = location["restaurantNumber"]
+            item["street_address"] = merge_address_lines([location.get("street2"), location.get("street1")])
+            yield item
