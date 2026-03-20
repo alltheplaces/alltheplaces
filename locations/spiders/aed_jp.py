@@ -9,7 +9,6 @@ from locations.dict_parser import DictParser
 
 class AedJPSpider(Spider):
     name = "aed_jp"
-    country_code = "JP"
 
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
@@ -27,6 +26,8 @@ class AedJPSpider(Spider):
         aeds = data["aeds"]
 
         for aed in aeds:
+            if aed["rank"] == "E": #removes AEDs older than 8 years.
+                continue
             item = DictParser.parse(aed)
             item["ref"] = aed["id"]
             item["lat"] = aed["location"]["latitude"]
