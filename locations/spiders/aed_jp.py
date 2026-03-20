@@ -26,7 +26,7 @@ class AedJPSpider(Spider):
         aeds = data["aeds"]
 
         for aed in aeds:
-            if aed["rank"] == "E": #removes AEDs older than 8 years.
+            if aed["rank"] == "E":  # removes AEDs older than 8 years.
                 continue
             item = DictParser.parse(aed)
             item["ref"] = aed["id"]
