@@ -1,22 +1,20 @@
-from typing import Any, AsyncIterator
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations, country_iseadgg_centroids
 
 RADIUS_KM = 24
+
 
 class ReparkJPSpider(Spider):
     name = "repark_jp"
     item_attributes = {"brand_wikidata": "Q55521368"}
 
     def make_request(self, lat, lon):
-        return JsonRequest(
-            f"https://www.repark.jp/ajax/time_markers.json?range=C{lat},{lon}N90W0S0E180"
-        )
+        return JsonRequest(f"https://www.repark.jp/ajax/time_markers.json?range=C{lat},{lon}N90W0S0E180")
 
     async def start(self):
         for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
