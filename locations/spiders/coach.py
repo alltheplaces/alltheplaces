@@ -16,11 +16,11 @@ class CoachSpider(CrawlSpider, StructuredDataSpider):
         "https://uk.coach.com/stores/index.html",
     ]
     rules = [
-        Rule(LinkExtractor(allow=r"/stores/[-\w]+\.html$")),
-        Rule(LinkExtractor(allow=r"/stores/[-\w]+/[-\w]+\.html$")),
-        Rule(LinkExtractor(allow=r"/stores/[-\w]+/[-\w]+/[-\w]+\.html$"), callback="parse_sd"),
+        Rule(LinkExtractor(allow=r"[-\w]+/[-\w]+\.html$")),
+        Rule(LinkExtractor(allow=r"\.\./[-\w]+/[-\w]+/[-\w]+\.html$"), callback="parse_sd"),
     ]
     wanted_types = ["Organization"]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if not ld_data.get("address", {}).get("streetAddress"):
