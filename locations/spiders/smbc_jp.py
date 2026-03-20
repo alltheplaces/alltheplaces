@@ -6,7 +6,6 @@ from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
 from locations.geo import country_iseadgg_centroids
-from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 MAX_ITEMS = 1640  # determined experimentally
@@ -63,7 +62,7 @@ class SmbcJPSpider(Spider):
                 item["branch"] = row[6]
                 item["extras"]["branch:ja-Hira"] = row[7]
                 item["extras"]["branch:en"] = row[17]
-            
+
             item["addr_full"] = row[10]
 
             yield item
