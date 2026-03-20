@@ -10,6 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class ChuysSpider(scrapy.Spider):
     name = "chuys"
     item_attributes = {"brand": "Chuy's", "brand_wikidata": "Q5118415"}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(url="https://www.chuys.com/api/restaurants", headers={"x-source-channel": "WEB"})
