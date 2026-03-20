@@ -1,3 +1,4 @@
+import json
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
@@ -34,7 +35,7 @@ class BancoMercantilBRSpider(Spider):
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = response.json().get("d", {}).get("agencias") or []
+        locations = json.loads(response.xpath("//pre/text()").get()).get("d", {}).get("agencias") or []
         for location in locations:
             item = Feature()
             item["branch"] = location["nomeAgencia"]
