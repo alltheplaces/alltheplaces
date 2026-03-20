@@ -1,4 +1,5 @@
 from typing import Any, AsyncIterator, Iterable
+from urllib.parse import quote, urljoin
 
 from scrapy.http import JsonRequest, Response
 
@@ -56,7 +57,7 @@ class CostcoSpider(JSONBlobSpider):
         if isinstance(item.get("state"), dict):
             item["state"] = item.get("state")["name"]
         item.pop("name", None)
-        item.pop("website", None)
+        item["website"] = urljoin(response.url, f"/store-finder/{quote(item['branch'])}")
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
 
         warehouse = item.deepcopy()
