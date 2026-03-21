@@ -6,7 +6,7 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 
 
-class CanDoJPSpider(Spider):
+class CanDOJPSpider(Spider):
     name = "can_do_jp"
     item_attributes = {
         "brand": "キャンドゥ",
