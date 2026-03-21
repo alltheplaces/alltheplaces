@@ -1,4 +1,4 @@
-from typing import Any, AsyncIterator
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -13,7 +13,7 @@ class CocoIchibanyaJPSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         for points in ["w", "xj", "xn", "xp", "z"]:
             yield JsonRequest(url=f"https://tenpo.ichibanya.co.jp/api/point/{points}/")
-    
+
     item_attributes = {
         "brand_wikidata": "Q5986105",
     }
