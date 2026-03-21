@@ -23,7 +23,7 @@ class RouteinnJPSpider(Spider):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
-            
+
             item["website"] = store["extra_fields"]["詳細ページへのリンク"]
             item["extras"]["website:booking"] = store["extra_fields"]["予約ページURL（PC）"]
             item["postcode"] = store["extra_fields"]["postal_code"]
