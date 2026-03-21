@@ -29,7 +29,7 @@ class RouteinnJPSpider(Spider):
             item["postcode"] = store["extra_fields"]["postal_code"]
             item["phone"] = f"+81 {store['extra_fields']['phone']}"
             item["branch"] = store["name"].removeprefix("ホテルルートイン")
-            item["extras"]["branch:en"] = store["extra_fields"]["name.en"].removeprefix("HOTEL ROUTE INN ")
+            item["extras"]["branch:en"] = store["extra_fields"]["name.en"].removeprefix("HOTEL ROUTE INN ").title()
             apply_category(Categories.HOTEL, item)
             item["name"] = "ホテルルートイン"
             yield item
