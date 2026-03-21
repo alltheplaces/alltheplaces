@@ -18,7 +18,6 @@ class MegroupJPSpider(Spider):
         return JsonRequest(f"https://locator.me-group.jp/api/Machines/GetNearbyMachines?lat={lat}&lon={lon}")
 
     async def start(self):
-        headers = {"content-type": "application/json"}
         for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
             yield self.make_request(lat, lon)
         for city in city_locations("JP"):
