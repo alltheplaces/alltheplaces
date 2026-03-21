@@ -45,6 +45,5 @@ class MegroupJPSpider(Spider):
                 elif loc["MachineType"] == "N":
                     item["name"] = "NAMES ステッカー"
                     item["extras"]["vending"] = "stickers"
-                
-            
+
             yield item
