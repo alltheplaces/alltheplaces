@@ -9,7 +9,7 @@ class OceanStateJobLotUSSpider(StructuredDataSpider):
 
     def parse(self, response):
         for store in response.json()['locations']:
-            item = DictParser.parse({})
+            item = DictParser.parse(store)
             item['city'] = store['businessAddress']['addressLocality']
             item['state'] = store['businessAddress']['addressRegion']
             item['postcode'] = store['businessAddress']['postalCode']
