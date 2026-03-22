@@ -30,4 +30,5 @@ class RitualsSpider(SitemapSpider, StructuredDataSpider):
         item["ref"] = response.url.rsplit("=", maxsplit=1)[-1]
         item["website"] = response.url
         item["branch"] = item.pop("name")
+        item.pop("contact:facebook",None)
         yield item
