@@ -29,4 +29,5 @@ class RitualsSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.rsplit("=", maxsplit=1)[-1]
         item["website"] = response.url
+        item["branch"] = item.pop("name")
         yield item
