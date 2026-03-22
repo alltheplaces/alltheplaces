@@ -28,7 +28,8 @@ class JptcaSpider(SitemapSpider):
             item["extras"]["name:ja-Hira"] = hira.group(1)
 
         if img := re.search(r"background-image:url\('(.+sakuhin.jpg)'", response.text):
-            item["image"] = "https://jptca.org" + img.group(1)
+            if item["ref"] in img.group(1):
+                item["image"] = "https://jptca.org" + img.group(1)
 
         item["extras"]["tourism"] = "artwork"
         yield item
