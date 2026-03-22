@@ -3,20 +3,19 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request, Response
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.items import Feature
 
 
-class AcomJPSpider(Spider):
-    name = "acom_jp"
-    item_attributes = {"brand": "アコム", "brand_wikidata": "Q4674469"}
+class DoutorJPSpider(Spider):
+    name = "doutor_jp"
+    item_attributes = {"brand": "ドトール", "brand_wikidata": "Q11322732"}
 
     async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(0)
 
     def get_page(self, n):
         return Request(
-            f"https://store.acom.co.jp/acomnavi/api/proxy2/shop/list?datum=wgs84&limit=500&offset={n}",
+            f"https://shop.doutor.co.jp/doutor/api/proxy2/shop/list?datum=wgs84&limit=500&offset={n}",
             meta={"offset": n},
         )
 
@@ -25,19 +24,17 @@ class AcomJPSpider(Spider):
         stores = data["items"]
 
         for store in stores:
-            item = DictParser.parse(store)
-            item["name"] = "アコム"
-            item["branch"] = store["name"]
+            item = Feature()
+            item["branch"] = store["name"].removeprefix("ドトールコーヒーショップ ")
             item["ref"] = store["code"]
+            item["phone"] = f"+81 {store['phone']}"
             item["lat"] = store["coord"]["lat"]
             item["lon"] = store["coord"]["lon"]
-            item["extras"]["branch:ja-Hira"] = store["ruby"]
             item["addr_full"] = store["address_name"]
-            item["website"] = f"https://store.acom.co.jp/acomnavi/spot/detail?code={store['code']}"
-
-            apply_category(Categories.SHOP_MONEY_LENDER, item)
+            item["postcode"] = store["postal_code"]
+            item["website"] = f"https://shop.doutor.co.jp/doutor/spot/detail?code={store['code']}"
 
             yield item
 
-        if data["count"]["limit"] == len(data["items"]):
+        if data["count"]["offset"] + data["count"]["limit"] < data["count"]["total"]:
             yield self.get_page(data["count"]["limit"] + response.meta["offset"])

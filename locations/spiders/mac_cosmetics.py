@@ -72,6 +72,7 @@ class MacCosmeticsSpider(Spider):
                 any_open, opening_hours = self.parse_opening_hours(feature)
                 item["opening_hours"] = opening_hours
             if any_open and not item["name"].endswith("- Closed"):
+                item["branch"] = item.pop("name").replace("M·A·C ", "").replace("MAC Cosmetics at ", "")
                 yield item
 
     def parse_opening_hours(self, feature):
