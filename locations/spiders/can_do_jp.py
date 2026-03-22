@@ -23,7 +23,7 @@ class CanDOJPSpider(Spider):
             item["website"] = f"https://shopinfo.cando-web.co.jp/detail/{store['storeCode']}/"
             if store["phoneNumber"] is not None:
                 item["phone"] = f"+81 {store['phoneNumber']}"
-            item["branch"] = store["nameKanji"].removeprefix("Can★Do").removeprefix("Can★Doセレクト")
+            item["branch"] = store["nameKanji"].removeprefix("Can★Doセレクト").removeprefix("Can★Do")
             item["extras"]["branch:ja-Hira"] = store["nameKana"]
             item["postcode"] = store["postalCode"]
             item["addr_full"] = store["address"]
