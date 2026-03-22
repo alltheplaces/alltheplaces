@@ -16,7 +16,7 @@ class JptcaSpider(SitemapSpider):
         if latlon := re.search(r"LatLng\(\s*(\d+\.\d+),(\d+\.\d+)\);", response.text):  # only get items with location
             item["lat"], item["lon"] = latlon.groups()
         else:
-            yield None
+            return
         item["ref"] = "".join(filter(str.isdigit, response.url))
         item["website"] = response.url
         item["extras"]["website:en"] = f"https://jptca.org/en/publicart{item['ref']}/"
