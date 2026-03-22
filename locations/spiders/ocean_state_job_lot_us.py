@@ -1,5 +1,7 @@
 import scrapy
+
 from locations.dict_parser import DictParser
+
 
 class OceanStateJobLotUSSpider(scrapy.Spider):
     name = "ocean_state_job_lot_us"
