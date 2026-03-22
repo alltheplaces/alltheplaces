@@ -3,7 +3,6 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request, Response
 
-from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -37,6 +36,5 @@ class DoutorJPSpider(Spider):
 
             yield item
 
-        
         if data["count"]["offset"] + data["count"]["limit"] < data["count"]["total"]:
             yield self.get_page(data["count"]["limit"] + response.meta["offset"])
