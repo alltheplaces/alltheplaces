@@ -65,7 +65,7 @@ class MacCosmeticsSpider(Spider):
                 if old in feature:
                     feature[new] = feature.pop(old)
             item = DictParser.parse(feature)
-            item["branch"] = item.pop("name").replace("M·A·C ","")
+            item["branch"] = item.pop("name").replace("M·A·C ", "")
             if len(feature.get("STORE_TYPE", "")) > 0:
                 item["extras"]["store_type"] = feature["STORE_TYPE"]
             any_open = True
