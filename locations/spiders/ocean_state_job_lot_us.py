@@ -1,8 +1,7 @@
+import scrapy
 from locations.dict_parser import DictParser
-from locations.structured_data_spider import StructuredDataSpider
 
-
-class OceanStateJobLotUSSpider(StructuredDataSpider):
+class OceanStateJobLotUSSpider(scrapy.Spider):
     name = "ocean_state_job_lot_us"
     item_attributes = {"brand": "Ocean State Job Lot", "brand_wikidata": "Q7076076"}
     start_urls = ["https://www.oceanstatejoblot.com/stat/api/locations/search?limit=1000000"]
