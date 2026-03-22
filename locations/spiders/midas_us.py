@@ -22,4 +22,6 @@ class MidasUSSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["website"] = store["ShopDetailsLink"]
             item["name"] = "Midas"
+            # Emails are not unique to each store and some are personal email addresses.
+            item["email"] = None
             yield item
