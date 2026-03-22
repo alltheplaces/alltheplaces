@@ -13,6 +13,10 @@ class JptcaSpider(SitemapSpider):
 
     def parse(self, response, **kwargs):
         item = Feature()
+        if latlon := re.search(r"LatLng\(\s*(\d+\.\d+),(\d+\.\d+)\);", response.text): #only get items with location
+            item["lat"], item["lon"] = latlon.groups()
+        else:
+            yield None
         item["ref"] = "".join(filter(str.isdigit, response.url))
         item["website"] = response.url
         item["extras"]["website:en"] = f"https://jptca.org/en/publicart{item['ref']}/"
@@ -22,10 +26,9 @@ class JptcaSpider(SitemapSpider):
 
         if hira := re.search(r'kana">(.+)<\/', response.text):
             item["extras"]["name:ja-Hira"] = hira.group(1)
-
-        item["lat"], item["lon"] = re.search(r"LatLng\(\s*(\d+\.\d+),(\d+\.\d+)\);", response.text).groups()
-        item["image"] = "https://jptca.org" + re.search(
-            r"background-image:url\('(.+sakuhin.jpg)'", response.text
-        ).group(1)
+        
+        if img := re.search(r"background-image:url\('(.+sakuhin.jpg)'", response.text):
+            item["image"] = "https://jptca.org" + img.group(1)
+        
         item["extras"]["tourism"] = "artwork"
         yield item
