@@ -15,6 +15,8 @@ class HoneyDewDonutsUSSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for result in response.json():
             if store := result.get("acf"):
+                if store.get("coming_soon") is True:
+                    continue
                 store.pop("region", "")
                 item = DictParser.parse(store)
                 item["street_address"] = ", ".join(
