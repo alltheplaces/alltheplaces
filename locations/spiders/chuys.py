@@ -18,9 +18,19 @@ class ChuysSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["restaurants"]:
             location.update(location["contactDetail"].pop("address"))
+            location.update(location["contactDetail"]["phoneDetail"].pop(0))
             item = DictParser.parse(location)
             item["country"] = location["country"]
             item["name"] = location["restaurantName"]
             item["ref"] = location["restaurantNumber"]
-            item["street_address"] = merge_address_lines([location.get("street2"), location.get("street1")])
+            item["street_address"] = merge_address_lines([location.get("street1"), location.get("street2")])
+            item["website"] = "/".join(
+                [
+                    "https://www.chuys.com/locations",
+                    location["stateCode"].lower(),
+                    location["city"].lower(),
+                    location["restaurantName"].lower().replace(" ", "-"),
+                    str(location["restaurantNumber"]),
+                ]
+            )
             yield item
