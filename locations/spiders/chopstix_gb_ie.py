@@ -53,6 +53,11 @@ class ChopstixGBIESpider(JSONBlobSpider):
         item["opening_hours"] = oh
 
         item["phone"] = response.xpath('//h4[contains(text(), "STORE NUMBER")]/following-sibling::p/text()').get()
-        item["addr_full"] = response.xpath('//h4[contains(text(), "ADDRESS")]/following-sibling::p[1]').get().replace('<p style="text-align: left;">',"").replace("</p>","")
+        item["addr_full"] = (
+            response.xpath('//h4[contains(text(), "ADDRESS")]/following-sibling::p[1]')
+            .get()
+            .replace('<p style="text-align: left;">', "")
+            .replace("</p>", "")
+        )
 
         yield item
