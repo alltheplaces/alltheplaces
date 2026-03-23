@@ -9,8 +9,8 @@ from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class ChuysSpider(Spider):
-    name = "chuys"
+class ChuysUSSpider(Spider):
+    name = "chuys_us"
     item_attributes = {"brand": "Chuy's", "brand_wikidata": "Q5118415"}
     start_urls = ["https://www.chuys.com/locations-sitemap.xml"]
 
