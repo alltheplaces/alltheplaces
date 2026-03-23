@@ -19,6 +19,7 @@ class HoneyDewDonutsUSSpider(scrapy.Spider):
                     continue
                 store.pop("region", "")
                 item = DictParser.parse(store)
+                item["branch"] = store["internal_store_code"]
                 item["street_address"] = ", ".join(
                     filter(None, [store.get("address_line_1"), store.get("address_line_2")])
                 )
