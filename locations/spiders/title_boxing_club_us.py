@@ -18,6 +18,7 @@ class TitleBoxingClubUSSpider(scrapy.Spider):
             poi["values"]["street_address"] = poi["values"].pop("address")
             item = DictParser.parse(poi["values"])
             item["website"] = "https://www.titleboxingclub.com/location/" + poi["values"]["site_slug"]
+            item["branch"] = item.pop("name")
             item["name"] = "Title Boxing Club"
             apply_category(Categories.GYM, item)
             yield item
