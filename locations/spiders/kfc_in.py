@@ -1,12 +1,11 @@
 from typing import Iterable
 
 from scrapy import Selector
-from scrapy.http import Response, TextResponse
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
-from locations.linked_data_parser import LinkedDataParser
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
@@ -19,11 +18,7 @@ class KfcINSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/kfc-[-\w]+-(\d+)/Home", "parse_sd")]
     time_format = "%I:%M %p"
     drop_attributes = {"image", "facebook"}
-
-    def iter_linked_data(self, response: Response) -> Iterable[dict]:
-        for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):
-            if "openingHoursSpecification" in ld_obj.keys():  # desired ld_data
-                yield ld_obj
+    wanted_types = ["LocalBusiness"]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         # city and state values are not correct, better to collect them to form addr_full
