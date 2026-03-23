@@ -1,13 +1,13 @@
 from typing import Any
 
 from scrapy.http import JsonRequest, Response
-from scrapy.spiders import CrawlSpider
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class MidasUSSpider(CrawlSpider):
+class MidasUSSpider(Spider):
     name = "midas_us"
     item_attributes = {"brand": "Midas", "brand_wikidata": "Q3312613"}
     start_urls = ["https://www.midas.com/store"]
