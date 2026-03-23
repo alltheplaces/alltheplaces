@@ -29,7 +29,7 @@ class ChuysSpider(Spider):
             location.update(location["contactDetail"]["phoneDetail"].pop(0))
             item = DictParser.parse(location)
             item["country"] = location["country"]
-            item["name"] = location["restaurantName"]
+            item["branch"] = location["restaurantName"]
             item["ref"] = location["restaurantNumber"]
             item["street_address"] = merge_address_lines([location.get("street1"), location.get("street2")])
             item["website"] = self.urls.get(str(location["restaurantNumber"]))
