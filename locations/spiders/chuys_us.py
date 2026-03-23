@@ -13,6 +13,7 @@ class ChuysUSSpider(Spider):
     name = "chuys_us"
     item_attributes = {"brand": "Chuy's", "brand_wikidata": "Q5118415"}
     start_urls = ["https://www.chuys.com/locations-sitemap.xml"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         self.urls = {}
