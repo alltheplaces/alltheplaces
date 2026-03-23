@@ -4,7 +4,7 @@ from scrapy import Selector
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
@@ -25,6 +25,7 @@ class KfcINSpider(SitemapSpider, StructuredDataSpider):
         item["addr_full"] = merge_address_lines(
             [item.pop("street_address"), item.pop("city"), item.pop("state"), item["postcode"]]
         )
+        apply_category(Categories.FAST_FOOD, item)
         yield item
 
     def extract_amenity_features(self, item: Feature | dict, selector: Selector, ld_item: dict) -> None:
