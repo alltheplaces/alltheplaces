@@ -17,7 +17,7 @@ class SkyZoneSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["addr_full"] = None
-            item["street_address"] = merge_address_lines([location["address2"], location["address"]])
+            item["street_address"] = merge_address_lines([location["address"], location["address2"]])
             item["branch"] = location["store"].removeprefix("DEFY ").removeprefix("Sky Zone ")
             item["website"] = location["park_url"]
 
