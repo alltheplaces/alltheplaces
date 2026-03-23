@@ -4,7 +4,6 @@ from scrapy import Spider
 from scrapy.http import Request, Response
 
 from locations.items import Feature
-from locations.categories import Categories, apply_category
 
 
 class SeijoishiiJPSpider(Spider):
@@ -30,7 +29,7 @@ class SeijoishiiJPSpider(Spider):
                 case "03":
                     pass
                 case _:
-                    continue # skip other types
+                    continue  # skip other types
 
             item["branch"] = store["name"]
             item["extras"]["branch:ja-Hira"] = store.get("ruby")
