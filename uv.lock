@@ -240,7 +240,7 @@ wheels = [
 
 [[package]]
 name = "awscli"
-version = "1.44.58"
+version = "1.44.63"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "botocore" },
@@ -250,9 +250,9 @@ dependencies = [
     { name = "rsa" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/64/c1789eab13958852950685ca580ef138238d7f846afb0ea2face9715c974/awscli-1.44.58.tar.gz", hash = "sha256:12e7dbb895e01de4af9e3bd1ca6a628ef9398c6583d4e02633c280c440736a7f", size = 1884281, upload-time = "2026-03-13T19:32:11.934Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/39/0dddc7b57818f3bc5f7401481881a6eba867634af768458eaab46fbbf93c/awscli-1.44.63.tar.gz", hash = "sha256:81e0fb0028f48d0387782bc272a8e6df69a644520e0ce2a1bcf025ec157fe454", size = 1886381, upload-time = "2026-03-20T19:39:48.003Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/ce/3b43c9940dee050a57cce5dc9901d0a5f480291f51d53f048c5590aa54d7/awscli-1.44.58-py3-none-any.whl", hash = "sha256:2f1e427be0b792aa6f9fcc552c0ece2e250d53555c7cb531a0f9726ba2137305", size = 4622328, upload-time = "2026-03-13T19:32:08.019Z" },
+    { url = "https://files.pythonhosted.org/packages/11/4f/5d16ee94872b2077ad202f91d6fdc1d38be1ac27906b2a61395f00759bdf/awscli-1.44.63-py3-none-any.whl", hash = "sha256:290298451e46aaf94018cbbf653ca1d7ab890e137888330191152d56f1c827ef", size = 4623761, upload-time = "2026-03-20T19:39:44.236Z" },
 ]
 
 [[package]]
@@ -302,16 +302,16 @@ wheels = [
 
 [[package]]
 name = "botocore"
-version = "1.42.68"
+version = "1.42.73"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3f/22/87502d5fbbfa8189406a617b30b1e2a3dc0ab2669f7268e91b385c1c1c7a/botocore-1.42.68.tar.gz", hash = "sha256:3951c69e12ac871dda245f48dac5c7dd88ea1bfdd74a8879ec356cf2874b806a", size = 14994514, upload-time = "2026-03-13T19:32:03.577Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/28/23/0c88ca116ef63b1ae77c901cd5d2095d22a8dbde9e80df74545db4a061b4/botocore-1.42.73.tar.gz", hash = "sha256:575858641e4949aaf2af1ced145b8524529edf006d075877af6b82ff96ad854c", size = 15008008, upload-time = "2026-03-20T19:39:40.082Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3c/2a/1428f6594799780fe6ee845d8e6aeffafe026cd16a70c878684e2dcbbfc8/botocore-1.42.68-py3-none-any.whl", hash = "sha256:9df7da26374601f890e2f115bfa573d65bf15b25fe136bb3aac809f6145f52ab", size = 14668816, upload-time = "2026-03-13T19:31:58.572Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/65/971f3d55015f4d133a6ff3ad74cd39f4b8dd8f53f7775a3c2ad378ea5145/botocore-1.42.73-py3-none-any.whl", hash = "sha256:7b62e2a12f7a1b08eb7360eecd23bb16fe3b7ab7f5617cf91b25476c6f86a0fe", size = 14681861, upload-time = "2026-03-20T19:39:35.341Z" },
 ]
 
 [[package]]
@@ -1200,11 +1200,11 @@ wheels = [
 
 [[package]]
 name = "phonenumbers"
-version = "9.0.24"
+version = "9.0.26"
 source = { registry = "https://pypi.python.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/5e/bf/277ae37edb6f5189937223cc3b2a21b8de9d70ac2d0eb684cf33ba055fdd/phonenumbers-9.0.24.tar.gz", hash = "sha256:97c38e4b5b8af992c75de01bd9c0f84e61701a9c900fd84f49744714910a4dc3", size = 2298138, upload-time = "2026-02-13T11:28:57.724Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/43/a3/3720326431a23c8e8944a07cdf51520608f1fded87e32e991116fdb801bd/phonenumbers-9.0.26.tar.gz", hash = "sha256:9e582c827f0f5503cddeebef80099475a52ffa761551d8384099c7ec71298cbf", size = 2298587, upload-time = "2026-03-13T11:34:19.656Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2a/c7/b01beac6077df7261d92c6b52408617690147144d8946f6f6ecb7d9766ab/phonenumbers-9.0.24-py2.py3-none-any.whl", hash = "sha256:fa86ab7112ef8b286a811392311bd76bbbae7d1d271c2ed26cf73f2e9fa4d3c6", size = 2584198, upload-time = "2026-02-13T11:28:55.334Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/93/8825b3c9c23e595f34aa11735b29550c27a0f57fe4fc8c9ee737390566ca/phonenumbers-9.0.26-py2.py3-none-any.whl", hash = "sha256:ff473da5712965b6c7f7a31cbff8255864df694eb48243771133ecb761e807c1", size = 2584969, upload-time = "2026-03-13T11:34:16.671Z" },
 ]
 
 [[package]]
@@ -1455,7 +1455,7 @@ wheels = [
 
 [[package]]
 name = "pygithub"
-version = "2.8.1"
+version = "2.9.0"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "pyjwt", extra = ["crypto"] },
@@ -1464,9 +1464,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c1/74/e560bdeffea72ecb26cff27f0fad548bbff5ecc51d6a155311ea7f9e4c4c/pygithub-2.8.1.tar.gz", hash = "sha256:341b7c78521cb07324ff670afd1baa2bf5c286f8d9fd302c1798ba594a5400c9", size = 2246994, upload-time = "2025-09-02T17:41:54.674Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a6/9a/44f918e9be12e49cb8b053f09d5d0733b74df52bf4dabc570da1c3ecd9f6/pygithub-2.9.0.tar.gz", hash = "sha256:a26abda1222febba31238682634cad11d8b966137ed6cc3c5e445b29a11cb0a4", size = 2592289, upload-time = "2026-03-22T21:14:39.053Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/ba/7049ce39f653f6140aac4beb53a5aaf08b4407b6a3019aae394c1c5244ff/pygithub-2.8.1-py3-none-any.whl", hash = "sha256:23a0a5bca93baef082e03411bf0ce27204c32be8bfa7abc92fe4a3e132936df0", size = 432709, upload-time = "2025-09-02T17:41:52.947Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/de/72e02bc7674e161b155a4b5a03b2347129d0626115bc97ba5bad5070cac9/pygithub-2.9.0-py3-none-any.whl", hash = "sha256:5e2b260ce327bffce9b00f447b65953ef7078ffe93e5a5425624a3075483927c", size = 449653, upload-time = "2026-03-22T21:14:37.726Z" },
 ]
 
 [[package]]
@@ -1899,16 +1899,17 @@ wheels = [
 
 [[package]]
 name = "scrapy-zyte-api"
-version = "0.32.0"
+version = "0.33.0"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "scrapy" },
+    { name = "typing-extensions" },
     { name = "zyte-api" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8d/01/65979d8aeea21eb840fcc545d8ba12af6f39cf2b80e81142cf84208ace1f/scrapy_zyte_api-0.32.0.tar.gz", hash = "sha256:669331c2956a9f3997bc827d4a46fbbc99424e65516717c3ae73ca067d417fe6", size = 127642, upload-time = "2026-01-20T12:34:01.849Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8f/b9/800ca394fc90d7c21cba66d0adc476e26cd67c61390fde7bf833c17c3acb/scrapy_zyte_api-0.33.0.tar.gz", hash = "sha256:430d3d67b4eb5dbf08ff774d0a0d677f5a8407bf954d48a363e62ffec5f627ec", size = 132693, upload-time = "2026-03-19T11:52:38.617Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/d9/1a77baef257eb0119ab767f0743edf942801c2740e3c7668ad13718e4e5a/scrapy_zyte_api-0.32.0-py3-none-any.whl", hash = "sha256:44ef77a65b5afdcc6ecc8679008099717458d404f47af7bfa3c6e0dd8ccd029a", size = 44389, upload-time = "2026-01-20T12:34:00.345Z" },
+    { url = "https://files.pythonhosted.org/packages/57/8b/6ab519c2bda78dc67a03de9a1079e4e82e0b1b99ff33a94ce70f5486ee93/scrapy_zyte_api-0.33.0-py3-none-any.whl", hash = "sha256:3f56b9f6069d70c947d4598d95f1c52bab4215cdc1d156210ef97fc9e8de8894", size = 45585, upload-time = "2026-03-19T11:52:37.251Z" },
 ]
 
 [[package]]
