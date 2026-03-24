@@ -114,27 +114,27 @@ class CheckItemPropertiesPipeline:
                             if len(coords) == 2:
                                 lat_untyped = coords[1]
                                 lon_untyped = coords[0]
-                    elif geometry.get("type") in [
-                        "MultiPoint",
-                        "LineString",
-                        "MultiLineString",
-                        "Polygon",
-                        "MultiPolygon",
-                    ]:
-                        # Other geometry types are currently not validated by
-                        # ATP so this pipeline will assume they're correct.
-                        item.pop("lat", None)
-                        item.pop("lon", None)
-                        return
-                    else:
-                        # Invalid geometry type. Refer to RFC 7946 for valid
-                        # types.
-                        if spider.crawler.stats:
-                            spider.crawler.stats.inc_value("atp/field/geometry/invalid")
-                        item.pop("lat", None)
-                        item.pop("lon", None)
-                        item.pop("geometry", None)
-                        return
+                elif geometry.get("type") in [
+                    "MultiPoint",
+                    "LineString",
+                    "MultiLineString",
+                    "Polygon",
+                    "MultiPolygon",
+                ]:
+                    # Other geometry types are currently not validated by
+                    # ATP so this pipeline will assume they're correct.
+                    item.pop("lat", None)
+                    item.pop("lon", None)
+                    return
+                else:
+                    # Invalid geometry type. Refer to RFC 7946 for valid
+                    # types.
+                    if spider.crawler.stats:
+                        spider.crawler.stats.inc_value("atp/field/geometry/invalid")
+                    item.pop("lat", None)
+                    item.pop("lon", None)
+                    item.pop("geometry", None)
+                    return
             else:
                 # Invalid geometry type.
                 if spider.crawler.stats:
