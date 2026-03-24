@@ -1,7 +1,3 @@
-locations / spiders  # cat molton_brown.py
-
-
-
 from locations.json_blob_spider import JSONBlobSpider
 
 
