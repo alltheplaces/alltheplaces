@@ -30,7 +30,8 @@ class MoltonBrownSpider(JSONBlobSpider):
 
     def pre_process_data(self, feature: dict) -> None:
         feature["id"] = feature["name"]
-        feature["name"] = feature["displayName"]
+        if feature.get("displayName"):
+            feature["name"] = feature["displayName"]
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["website"] = "https://www.moltonbrown.co.uk/store/store-finder/" + item["website"].replace(" ", "-")
