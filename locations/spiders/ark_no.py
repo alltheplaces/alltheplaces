@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.react_server_components import parse_rsc
 
@@ -33,19 +33,12 @@ class ArkNOSpider(Spider):
             store = resolve_reference(store)
             if isinstance(store, dict):
                 item = DictParser.parse(store)
+
                 item["branch"] = item.pop("name").removeprefix("ARK").strip()
 
                 opening_hours = OpeningHours()
-                for key, day in (
-                    ("mondayOpeningHours", "Mo"),
-                    ("tuesdayOpeningHours", "Tu"),
-                    ("wednesdayOpeningHours", "We"),
-                    ("thursdayOpeningHours", "Th"),
-                    ("fridayOpeningHours", "Fr"),
-                    ("saturdayOpeningHours", "Sa"),
-                    ("sundayOpeningHours", "Su"),
-                ):
-                    if not (day_hours := store.get(key)):
+                for day in map(str.lower, DAYS_FULL):
+                    if not (day_hours := store.get("{}OpeningHours".format(day))):
                         continue
                     if not day_hours.get("isOpen"):
                         opening_hours.set_closed(day)
