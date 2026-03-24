@@ -1,7 +1,8 @@
+import scrapy
 from scrapy.http import Response
 
 from locations.items import Feature
-import scrapy
+
 
 class PlayaBowlsUSSpider(scrapy.Spider):
     name = "playa_bowls_us"
