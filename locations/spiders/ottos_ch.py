@@ -27,16 +27,15 @@ class OttosCHSpider(scrapy.Spider):
                 item["state"] = state["isocodeShort"]
             item["street_address"] = merge_address_lines([store.get("line1"), store.get("line2")])
             item["opening_hours"] = OpeningHours()
-            if opening_hours := store.get("openingHours"):
-                for day_time in opening_hours.get("weekDayOpeningList"):
-                    if day_time["closed"] == "true":
-                        item["opening_hours"].set_closed(day_time["weekDay"])
-                    else:
-                        item["opening_hours"].add_range(
-                            day_time["weekDay"],
-                            day_time["openingTime"]["formattedHour"],
-                            day_time["closingTime"]["formattedHour"],
-                        )
+            for day_time in (store.get("openingHours") or {}).get("weekDayOpeningList") or []:
+                if day_time["closed"] == "true":
+                    item["opening_hours"].set_closed(day_time["weekDay"])
+                else:
+                    item["opening_hours"].add_range(
+                        day_time["weekDay"],
+                        day_time["openingTime"]["formattedHour"],
+                        day_time["closingTime"]["formattedHour"],
+                    )
 
             if store["displayName"].startswith("OTTO'S Beauty Shop "):
                 item["branch"] = store["displayName"].removeprefix("OTTO'S Beauty Shop ")
