@@ -1,11 +1,8 @@
 from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, Request, TextResponse
+from scrapy.http import TextResponse
 
-from locations.dict_parser import DictParser
 from locations.items import Feature
-
 from locations.json_blob_spider import JSONBlobSpider
 
 
