@@ -31,31 +31,28 @@ class ArkNOSpider(Spider):
 
         for store in resolve_reference(DictParser.get_nested_key(data, "stores")):
             store = resolve_reference(store)
-            if isinstance(store, dict):
-                for key, value in store.items():
-                    store[key] = resolve_reference(value)
 
-                item = DictParser.parse(store)
+            item = DictParser.parse(store)
 
-                item["branch"] = item.pop("name").removeprefix("ARK").strip()
+            item["branch"] = item.pop("name").removeprefix("ARK").strip()
 
-                opening_hours = OpeningHours()
-                for key, day in (
-                    ("mondayOpeningHours", "Mo"),
-                    ("tuesdayOpeningHours", "Tu"),
-                    ("wednesdayOpeningHours", "We"),
-                    ("thursdayOpeningHours", "Th"),
-                    ("fridayOpeningHours", "Fr"),
-                    ("saturdayOpeningHours", "Sa"),
-                    ("sundayOpeningHours", "Su"),
-                ):
-                    if not (day_hours := store.get(key)):
-                        continue
-                    if not day_hours.get("isOpen"):
-                        opening_hours.set_closed(day)
-                        continue
-                    opening_hours.add_range(day, day_hours.get("openFrom"), day_hours.get("openTo"), "%H:%M:%S")
+            opening_hours = OpeningHours()
+            for key, day in (
+                ("mondayOpeningHours", "Mo"),
+                ("tuesdayOpeningHours", "Tu"),
+                ("wednesdayOpeningHours", "We"),
+                ("thursdayOpeningHours", "Th"),
+                ("fridayOpeningHours", "Fr"),
+                ("saturdayOpeningHours", "Sa"),
+                ("sundayOpeningHours", "Su"),
+            ):
+                if not (day_hours := store.get(key)):
+                    continue
+                if not day_hours.get("isOpen"):
+                    opening_hours.set_closed(day)
+                    continue
+                opening_hours.add_range(day, day_hours.get("openFrom"), day_hours.get("openTo"), "%H:%M:%S")
 
-                item["opening_hours"] = opening_hours
+            item["opening_hours"] = opening_hours
 
-                yield item
+            yield item
