@@ -1,10 +1,9 @@
 from scrapy.http import Response
 
 from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+import scrapy
 
-
-class PlayaBowlsUSSpider(StructuredDataSpider):
+class PlayaBowlsUSSpider(scrapy.Spider):
     name = "playa_bowls_us"
     item_attributes = {"brand": "Playa Bowls", "brand_wikidata": "Q114618507"}
     start_urls = ["https://playabowls.com/locations"]
@@ -28,8 +27,8 @@ class PlayaBowlsUSSpider(StructuredDataSpider):
         phone_and_map_links = response.css('div[data-id="8640f65"] a::attr(href)').getall()
         item["phone"] = phone_and_map_links[0].split(":")[1].replace("%20", " ")
         # coordinates get extracted from a google maps link
-        lat = phone_and_map_links[1].split("?q=")[1].split(",")[0].strip("%20")
-        lon = phone_and_map_links[1].split("?q=")[1].split(",")[1].strip("%20")
+        lat = phone_and_map_links[1].split("?q=")[1].split(",")[0].replace("%20", "")
+        lon = phone_and_map_links[1].split("?q=")[1].split(",")[1].replace("%20", "")
         lat, lon = float(lat), float(lon)
         item["geometry"] = {"type": "Point", "coordinates": [lon, lat]}
 
