@@ -43,6 +43,7 @@ class ChopstixGBIESpider(JSONBlobSpider):
 
     def parse_store_page(self, response, item):
         if response.status == 404:
+            item["website"] = None
             yield item
             return
 
