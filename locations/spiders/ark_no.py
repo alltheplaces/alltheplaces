@@ -33,6 +33,7 @@ class ArkNOSpider(Spider):
             store = resolve_reference(store)
             if isinstance(store, dict):
                 item = DictParser.parse(store)
+                item["street_address"] = item.pop("street")
 
                 item["branch"] = item.pop("name").removeprefix("ARK").strip()
 
