@@ -47,7 +47,7 @@ class MoltonBrownSpider(JSONBlobSpider):
             yield from self.parse_feature_array(response, features) or []
         if response.json()["pagination"]["totalPages"] > response.meta["page"]:
             if response.meta["page"] == 1:
-                #page 2 gives a 400 error
+                # page 2 gives a 400 error
                 yield self.make_request(response.meta["page"] + 2)
             else:
                 yield self.make_request(response.meta["page"] + 1)
