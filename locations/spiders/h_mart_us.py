@@ -2,8 +2,8 @@ import json
 
 import scrapy
 
-from locations.dict_parser import DictParser
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
 class HMartUSSpider(scrapy.Spider):
