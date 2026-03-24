@@ -5,7 +5,7 @@ import scrapy
 from locations.dict_parser import DictParser
 
 
-class HmartStoresSpider(scrapy.Spider):
+class HMartUSSpider(scrapy.Spider):
     name = "h_mart_us"
     item_attributes = {"brand": "H Mart", "brand_wikidata": "Q5636306"}
 
