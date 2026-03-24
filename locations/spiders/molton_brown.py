@@ -33,6 +33,6 @@ class MoltonBrownSpider(JSONBlobSpider):
         feature["name"] = feature["displayName"]
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["website"] = "https://www.moltonbrown.co.uk/store/store-finder/" + item["website"].replace(" ","-")
-        #the link on the Molton Brown site includes a space
+        item["website"] = "https://www.moltonbrown.co.uk/store/store-finder/" + item["website"].replace(" ", "-")
+        # the link on the Molton Brown site includes a space
         yield item
