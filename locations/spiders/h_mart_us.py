@@ -3,6 +3,7 @@ import json
 import scrapy
 
 from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 
 
 class HMartUSSpider(scrapy.Spider):
@@ -39,9 +40,8 @@ class HMartUSSpider(scrapy.Spider):
     def parse(self, response):
         stores = response.json()["data"]["getStores"]["items"]
         for store in stores:
-            if store["isActive"] != True:
+            if store["isActive"] is not True:
                 continue
-
             store["address"]["street_address"] = store["address"].pop("street")
             item = DictParser.parse(store)
             item.update(DictParser.parse(store["address"]))
@@ -49,5 +49,5 @@ class HMartUSSpider(scrapy.Spider):
             item["branch"] = store["name"]
             item["phone"] = store["instructions"]
             item["ref"] = store["id"]
-
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
