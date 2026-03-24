@@ -40,13 +40,16 @@ class MoltonBrownSpider(JSONBlobSpider):
         yield self.make_request(0)
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
-        features = self.extract_json(response)
-        if isinstance(features, dict):
-            yield from self.parse_feature_dict(response, features) or []
-        else:
-            yield from self.parse_feature_array(response, features) or []
-        if response.json()["pagination"]["totalPages"] > response.meta["page"]:
+        if response.status in ["400"]:
             yield self.make_request(response.meta["page"] + 1)
+        else:
+            features = self.extract_json(response)
+            if isinstance(features, dict):
+                yield from self.parse_feature_dict(response, features) or []
+            else:
+                yield from self.parse_feature_array(response, features) or []
+            if response.json()["pagination"]["totalPages"] > response.meta["page"]:
+                yield self.make_request(response.meta["page"] + 1)
 
     def pre_process_data(self, feature: dict) -> None:
         feature["id"] = feature["name"]
