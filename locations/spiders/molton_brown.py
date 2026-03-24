@@ -1,3 +1,11 @@
+from typing import Iterable
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request, TextResponse
+
+from locations.dict_parser import DictParser
+from locations.items import Feature
+
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -22,3 +30,7 @@ class MoltonBrownSpider(JSONBlobSpider):
         "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
         "DOWNLOAD_DELAY": 10,
     }
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["website"] = "https://www.moltonbrown.co.uk/store/store-finder/" + item["website"]
+        yield item
