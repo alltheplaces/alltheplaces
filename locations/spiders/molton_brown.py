@@ -61,5 +61,5 @@ class MoltonBrownSpider(JSONBlobSpider):
         if item.get("website"):
             item["website"] = "https://www.moltonbrown.co.uk/store/store-finder/" + item["website"].replace(" ", "-")
             # the link on the Molton Brown site includes a space
-        if feature["storeType"] != "STOCKISTS" and feature["storeType"] != "ORIBESTORES":
+        if feature["storeType"] == "MBSTORES":
             yield item
