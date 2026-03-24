@@ -1,9 +1,8 @@
-from typing import Iterable, AsyncIterator, Any
-
-from scrapy.http import TextResponse
+from typing import AsyncIterator, Iterable
 
 from scrapy import Request
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
+
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -12,10 +11,10 @@ class MoltonBrownSpider(JSONBlobSpider):
     name = "molton_brown"
     item_attributes = {"brand": "Molton Brown", "brand_wikidata": "Q17100584"}
     #    start_urls = ["https://api.moltonbrown.com/kaowebservices/v2/moltonbrown-gb/kao/stores"]
-    #page = 0
-    #start_urls = [
+    # page = 0
+    # start_urls = [
     #    f"https://api.cxur-kaocorpor1-p3-public.model-t.cc.commerce.ondemand.com/kaowebservices/v2/moltonbrown-gb/stores/?currentPage={page}"
-    #]
+    # ]
     locations_key = ["stores"]
 
     custom_settings = {
@@ -40,7 +39,6 @@ class MoltonBrownSpider(JSONBlobSpider):
     async def start(self) -> AsyncIterator[Request]:
         yield self.make_request(0)
 
-
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         features = self.extract_json(response)
         if isinstance(features, dict):
@@ -49,7 +47,6 @@ class MoltonBrownSpider(JSONBlobSpider):
             yield from self.parse_feature_array(response, features) or []
         if response.json()["pagination"]["totalPages"] > response.meta["page"]:
             yield self.make_request(response.meta["page"] + 1)
-
 
     def pre_process_data(self, feature: dict) -> None:
         feature["id"] = feature["name"]
