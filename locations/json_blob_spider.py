@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Request, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -57,10 +57,10 @@ class JSONBlobSpider(Spider):
     Example 2:
     locations_key = ["data", "locationData", "stores"]
     """
-    locations_key: str | list[str] = None
+    locations_key: str | list[str] | None = None
     needs_json_request = False
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[JsonRequest | Request]:
         if self.needs_json_request:
             for url in self.start_urls:
                 yield JsonRequest(url)
@@ -68,7 +68,7 @@ class JSONBlobSpider(Spider):
             for url in self.start_urls:
                 yield Request(url)
 
-    def extract_json(self, response: Response) -> dict | list[dict]:
+    def extract_json(self, response: TextResponse) -> dict | list[dict]:
         """
         Override this method to extract the main JSON content from the page. The default
         behaviour is to treat the returned body as JSON and treat it as an array of
@@ -95,14 +95,14 @@ class JSONBlobSpider(Spider):
                     json_data = json_data[key]
         return json_data
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         features = self.extract_json(response)
         if isinstance(features, dict):
             yield from self.parse_feature_dict(response, features) or []
         else:
             yield from self.parse_feature_array(response, features) or []
 
-    def parse_feature_array(self, response: Response, feature_array: list) -> Iterable[Feature]:
+    def parse_feature_array(self, response: TextResponse, feature_array: list) -> Iterable[Feature]:
         for feature in feature_array:
             if feature is None:
                 continue
@@ -110,7 +110,7 @@ class JSONBlobSpider(Spider):
             item = DictParser.parse(feature)
             yield from self.post_process_item(item, response, feature) or []
 
-    def parse_feature_dict(self, response: Response, feature_dict: dict) -> Iterable[Feature]:
+    def parse_feature_dict(self, response: TextResponse, feature_dict: dict) -> Iterable[Feature]:
         for feature_id, feature in feature_dict.items():
             if feature is None:
                 continue
@@ -125,6 +125,6 @@ class JSONBlobSpider(Spider):
     def pre_process_data(self, feature: dict) -> None:
         """Override with any pre-processing on the data, ie normalising key names for DictParser."""
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        """Override ith any post process on the item"""
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        """Override with any post processing on the item"""
         yield item

@@ -35,7 +35,7 @@ class RecipeUnlimitedSpider(YextSpider):
             "extras": {"amenity": "restaurant", "diet:vegetarian": "only"},
         },
         "Harvey's": {"brand": "Harvey's", "brand_wikidata": "Q1466184"},
-        "Kelseys Original Roadhouse": {"brand": "Kelseys Original Roadhouse", "brand_wikidata": "Q6386459"},
+        "Kelseys Original Roadhouse": {"brand": "Kelsey's", "brand_wikidata": "Q6386459"},
         "Landing": {
             "brand": "The Landing Group",
             "brand_wikidata": "Q118744373",

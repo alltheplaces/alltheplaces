@@ -1,5 +1,7 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -12,7 +14,7 @@ class JaycarAUSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/stores/", "parse_sd")]
     time_format = "%H:%M:%S"
     wanted_types = ["ElectronicsStore"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
     def sitemap_filter(self, entries):
@@ -21,7 +23,7 @@ class JaycarAUSpider(SitemapSpider, StructuredDataSpider):
                 # Filter out resellers
                 yield entry
 
-    def post_process_item(self, item, response, ld_data):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if "RESELLER | " in item["name"]:
             return
         item.pop("facebook", None)

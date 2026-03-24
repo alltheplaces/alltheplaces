@@ -1,4 +1,5 @@
 from json import loads
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -15,7 +16,7 @@ class DaisoUSSpider(Spider):
     # Also appears to be rebadged as "ProMap Store Locator by AMAI" (https://help.amai.com/en/collections/3274749-promap-store-locator)
     start_urls = ["https://daisous.com/cdn/shop/t/68/assets/sca.storelocatordata.json"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

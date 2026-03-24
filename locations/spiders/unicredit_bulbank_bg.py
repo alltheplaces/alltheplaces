@@ -11,8 +11,7 @@ class UnicreditBulbankBGSpider(JSONBlobSpider):
         "https://www.unicreditbulbank.bg/bg/api/locations/branches.json",
         "https://www.unicreditbulbank.bg/bg/api/locations/atms.json",
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     locations_key = "data"
 
     def post_process_item(self, item, response, location):

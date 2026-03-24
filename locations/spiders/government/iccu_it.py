@@ -94,10 +94,10 @@ class IccuITSpider(JSONBlobSpider):
         item["ref"] = item["extras"]["ref:isil"]
 
         item["extras"]["official_name"] = item["name"]
-        for name in location["denominazioni"]["alternative"]:
+        for name in location["denominazioni"].get("alternative", []):
             if name := name.strip():
                 item["extras"]["alt_name"] = name
-        for name in location["denominazioni"]["precedenti"]:
+        for name in location["denominazioni"].get("precedenti", []):
             if name := name.strip():
                 item["extras"]["old_name"] = name
 

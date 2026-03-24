@@ -1,7 +1,10 @@
-import pycountry
-import scrapy
+from copy import deepcopy
+from typing import AsyncIterator
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+import pycountry
+from scrapy.http import Request
+
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import SocialMedia, set_social_media
 from locations.json_blob_spider import JSONBlobSpider
@@ -12,11 +15,12 @@ LEXUS_SHARED_ATTRIBUTES = {"brand": "Lexus", "brand_wikidata": "Q35919"}
 
 
 class ToyotaEUSpider(JSONBlobSpider):
-    download_timeout = 60
     name = "toyota_eu"
     BRAND_MAPPING = {"Lexus": LEXUS_SHARED_ATTRIBUTES, "Toyota": TOYOTA_SHARED_ATTRIBUTES}
     locations_key = "dealers"
-
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+    SHOP_ATTRIBUTES = ["ShowRoom", "UsedCars", "BusinessCenter"]
+    SERVICE_ATTRIBUTES = ["WorkShop", "BodyShop", "PaintShop"]
     all_countries = [country.alpha_2.lower() for country in pycountry.countries]
     exclude_countries = [
         "au",  # toyota_au
@@ -57,11 +61,11 @@ class ToyotaEUSpider(JSONBlobSpider):
         "zw",  # toyota_africa
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         available_countries = [c for c in self.all_countries if c not in self.exclude_countries]
         for brand in ["toyota", "lexus"]:
             for country in available_countries:
-                yield scrapy.Request(
+                yield Request(
                     f"https://kong-proxy-intranet.toyota-europe.com/dxp/dealers/api/{brand}/{country}/en/all",
                     callback=self.parse,
                 )
@@ -71,47 +75,47 @@ class ToyotaEUSpider(JSONBlobSpider):
         feature["email"] = feature.pop("eMail")
 
     def post_process_item(self, item, response, location):
-
         if match := self.BRAND_MAPPING.get(location["brand"]):
             item["brand"] = match["brand"]
             item["brand_wikidata"] = match["brand_wikidata"]
         else:
             self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{location['brand']}")
-
-        services = [i["service"] for i in location["services"]]
-        for service in services:
-            self.crawler.stats.inc_value(f"atp/{self.name}/services/{service}")
-        if "ShowRoom" in services:
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, "WorkShop" in services, False)
-            apply_yes_no(Extras.USED_CAR_SALES, item, "UsedCars" in services, False)
-            apply_yes_no(Extras.CAR_PARTS, item, "PartsShop" in services)
-        elif "UsedCars" in services:
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.USED_CAR_SALES, item, True)
-            apply_yes_no(Extras.NEW_CAR_SALES, item, False, False)
-            apply_yes_no(Extras.CAR_REPAIR, item, "WorkShop" in services, False)
-        elif "WorkShop" in services:
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        elif "PartsShop" in services:
-            apply_category(Categories.SHOP_CAR_PARTS, item)
-        else:  # Some locations have no services listed, so fall back to shop=car
-            apply_category(Categories.SHOP_CAR, item)
-
         item["country"] = location["country"]
         item["street_address"] = clean_address(
             [location["address"].get("address1"), location["address"].get("address")]
         )
         set_social_media(item, SocialMedia.WHATSAPP, location.get("whatsapp"))
+        services = [i["service"] for i in location["services"]]
+        # Some locations have no services listed, so fall back to shop=car
+        if not services:
+            services.append("ShowRoom")
+        shop_match = next((attr for attr in self.SHOP_ATTRIBUTES if attr in services), None)
+        service_match = next((attr for attr in self.SERVICE_ATTRIBUTES if attr in services), None)
+        if shop_match:
+            shop_item = deepcopy(item)
+            shop_item["ref"] = f"{item['ref']}-SHOP"
+            shop_item["opening_hours"] = self.parse_hours(location["openingDays"], shop_match)
+            apply_category(Categories.SHOP_CAR, shop_item)
+            yield shop_item
+        if service_match:
+            service_item = deepcopy(item)
+            service_item["ref"] = f"{item['ref']}-SERVICE"
+            service_item["opening_hours"] = self.parse_hours(location["openingDays"], service_match)
+            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            yield service_item
+        if "PartsShop" in services and not shop_match and not service_match:
+            parts_item = deepcopy(item)
+            parts_item["ref"] = f"{item['ref']}-PARTS"
+            parts_item["opening_hours"] = self.parse_hours(location["openingDays"], "PartsShop")
+            apply_category(Categories.SHOP_CAR_PARTS, parts_item)
+            yield parts_item
 
+    def parse_hours(self, schedule: list[dict], service: str) -> OpeningHours:
         oh = OpeningHours()
-        for day in location["openingDays"]:
-            if day["originalService"] == "ShowRoom":
+        for day in schedule:
+            if day["originalService"] == service:
                 for hours in day["hours"]:
                     oh.add_ranges_from_string(
                         f"{day['startDayCode']}-{day['endDayCode']} {hours['startTime']}-{hours['endTime']}"
                     )
-            else:
-                self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_hours_type/{day['originalService']}")
-        item["opening_hours"] = oh
-        yield item
+        return oh

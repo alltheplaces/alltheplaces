@@ -1,19 +1,21 @@
 import html
 import json
+from typing import AsyncIterator
 from urllib.parse import urlencode
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SherwinWilliamsSpider(scrapy.Spider):
+class SherwinWilliamsSpider(Spider):
     name = "sherwin_williams"
     item_attributes = {"brand": "Sherwin-Williams", "brand_wikidata": "Q48881"}
     allowed_domains = ["www.sherwin-williams.com"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     #  Covers United States, Canada, UK, Puerto Rico, Bahamas with 500 mile radius - (from regis spider)
     lats = [
@@ -61,7 +63,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
         "-0.17578125",
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         params = {
             "sideBarType": "LSTORES",
             "radius": "50",
@@ -88,7 +90,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
             for point in points:
                 _, lat, lon = point.strip().split(",")
                 params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
-                yield scrapy.Request(
+                yield Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
                     meta={"store_type": "Sherwin-Williams"},
@@ -99,7 +101,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
             for point in points:
                 _, lat, lon = point.strip().split(",")
                 params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
-                yield scrapy.Request(
+                yield Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
                     meta={"store_type": "Sherwin-Williams"},
@@ -107,7 +109,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
 
         for lat, lon in addtional_lat_lons:
             params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
-            yield scrapy.Request(
+            yield Request(
                 url=base_url + urlencode(params),
                 callback=self.parse,
                 meta={"store_type": "Sherwin-Williams"},
@@ -132,7 +134,7 @@ class SherwinWilliamsSpider(scrapy.Spider):
                         "longitude": lon,
                     }
                 )
-                yield scrapy.Request(
+                yield Request(
                     url=base_url + urlencode(params),
                     callback=self.parse,
                     meta={"store_type": type_name},

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -13,7 +13,7 @@ class AsbNZSpider(JSONBlobSpider):
     item_attributes = {"brand_wikidata": "Q297214"}
     locations_key = "value"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://api.asb.co.nz/public/v1/locations", headers={"apikey": "l7xx106c7605d7f34e30af0017ca9c69be51"}
         )

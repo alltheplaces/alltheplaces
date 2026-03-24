@@ -3,7 +3,7 @@ from typing import Iterable
 from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 
 from scrapy import Selector, Spider
-from scrapy.http import Response
+from scrapy.http import Response, TextResponse
 
 from locations.categories import PaymentMethods, map_payment
 from locations.items import Feature
@@ -11,23 +11,23 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
 
-def extract_email(item, sel: Selector):
-    for link in sel.xpath(".//a[contains(@href, 'mailto')]/@href").getall():
+def extract_email(item: Feature | dict, selector: Selector) -> None:
+    for link in selector.xpath(".//a[contains(@href, 'mailto')]/@href").getall():
         link = link.strip()
         if link.startswith("mailto:") and "@" in link:
             item["email"] = urlparse(link).path
             return
 
 
-def extract_phone(item, sel: Selector):
-    for link in sel.xpath(".//a[contains(@href, 'tel')]/@href").getall():
+def extract_phone(item: Feature | dict, selector: Selector) -> None:
+    for link in selector.xpath(".//a[contains(@href, 'tel')]/@href").getall():
         link = link.strip()
         if link.startswith("tel:"):
             item["phone"] = urlparse(link).path
             return
 
 
-def clean_twitter(url: str) -> str:
+def clean_twitter(url: str) -> str | None:
     if not url:
         return None
     return (
@@ -42,18 +42,18 @@ def clean_twitter(url: str) -> str:
     )
 
 
-def extract_twitter(item: Feature, sel: Selector):
-    if twitter := sel.xpath('//meta[@name="twitter:site"]/@content').get():
+def extract_twitter(item: Feature | dict, selector: Selector) -> None:
+    if twitter := selector.xpath('//meta[@name="twitter:site"]/@content').get():
         if twitter := clean_twitter(twitter):
             item["twitter"] = twitter
             return
-    for url in sel.xpath('.//a[contains(@href, "twitter.com")]/@href').getall():
+    for url in selector.xpath('.//a[contains(@href, "twitter.com")]/@href').getall():
         if twitter := clean_twitter(url):
             item["twitter"] = twitter
             return
 
 
-def clean_facebook(url: str) -> str:
+def clean_facebook(url: str) -> str | None:
     if not url:
         return None
     clean_url = urlparse(url)
@@ -77,8 +77,8 @@ def clean_facebook(url: str) -> str:
         return clean_url.geturl()
 
 
-def extract_facebook(item: Feature, sel: Selector):
-    for fb in sel.xpath(
+def extract_facebook(item: Feature | dict, selector: Selector) -> None:
+    for fb in selector.xpath(
         './/a[contains(@href, "facebook.com")]'
         '[not(contains(@href, " "))]'
         '[not(contains(@href, "events"))]'
@@ -90,12 +90,12 @@ def extract_facebook(item: Feature, sel: Selector):
             item["facebook"] = url
             return
 
-    if fb := sel.xpath('.//div[@class="fb-customerchat"][@page_id]/@page_id').get():
+    if fb := selector.xpath('.//div[@class="fb-customerchat"][@page_id]/@page_id').get():
         item["facebook"] = f"https://www.facebook.com/profile.php?id={fb}"
         return
 
 
-def clean_instagram(url: str) -> str:
+def clean_instagram(url: str) -> str | None:
     if not url:
         return None
     clean_url = urlparse(url)
@@ -107,22 +107,22 @@ def clean_instagram(url: str) -> str:
     return clean_url.geturl()
 
 
-def extract_instagram(item: Feature, response: Selector):
-    for instagram in response.xpath('.//a[contains(@href, "instagram.com")]/@href').getall():
+def extract_instagram(item: Feature | dict, selector: Selector) -> None:
+    for instagram in selector.xpath('.//a[contains(@href, "instagram.com")]/@href').getall():
         if url := clean_instagram(instagram):
             item["extras"]["contact:instagram"] = url
             return
 
 
-def extract_image(item, response):
-    if image := response.xpath('//meta[@name="twitter:image"]/@content').get():
+def extract_image(item: Feature | dict, selector: Selector) -> None:
+    if image := selector.xpath('//meta[@name="twitter:image"]/@content').get():
         item["image"] = image.strip()
         return
-    if image := response.xpath('//meta[@name="og:image"]/@content').get():
+    if image := selector.xpath('//meta[@name="og:image"]/@content').get():
         item["image"] = image.strip()
 
 
-def get_url(response) -> str:
+def get_url(response: TextResponse) -> str:
     if canonical := response.xpath('//link[@rel="canonical"]/@href').get():
         return canonical
     return response.url
@@ -247,10 +247,11 @@ class StructuredDataSpider(Spider):
             else:
                 self.wanted_types[i] = LinkedDataParser.clean_type(wanted)
 
-    def parse(self, response: Response, **kwargs):
+    def parse(self, response: TextResponse, **kwargs):
         yield from self.parse_sd(response)
 
-    def parse_sd(self, response: Response):  # noqa: C901
+    def parse_sd(self, response: TextResponse):  # noqa: C901
+        selector = response.selector
         if self.convert_microdata:
             MicrodataParser.convert_to_json_ld(response)
         for ld_item in self.iter_linked_data(response):
@@ -274,28 +275,28 @@ class StructuredDataSpider(Spider):
                 item["website"] = urljoin(response.url, item["website"])
 
             if self.search_for_email and item["email"] is None:
-                extract_email(item, response)
+                extract_email(item, selector)
 
             if self.search_for_phone and item["phone"] is None:
-                extract_phone(item, response)
+                extract_phone(item, selector)
 
             if self.search_for_twitter and item.get("twitter") is None:
-                extract_twitter(item, response)
+                extract_twitter(item, selector)
 
             if self.search_for_facebook and item.get("facebook") is None:
-                extract_facebook(item, response)
+                extract_facebook(item, selector)
 
             if self.search_for_image and item.get("image") is None:
-                extract_image(item, response)
+                extract_image(item, selector)
 
             if self.search_for_amenity_features:
-                self.extract_amenity_features(item, response, ld_item)
+                self.extract_amenity_features(item, selector, ld_item)
 
             if self.search_for_payment_accepted:
-                self.extract_payment_accepted(item, response, ld_item)
+                self.extract_payment_accepted(item, selector, ld_item)
 
             if self.search_for_instagram and not item["extras"].get("instagram"):
-                extract_instagram(item, response)
+                extract_instagram(item, selector)
 
             if item.get("image") and item["image"].startswith("/"):
                 item["image"] = urljoin(response.url, item["image"])
@@ -321,15 +322,16 @@ class StructuredDataSpider(Spider):
                 elif wanted_types in types:
                     yield ld_obj
 
-    def extract_amenity_features(self, item, response: Response, ld_item):
+    def extract_amenity_features(self, item: Feature | dict, selector: Selector, ld_item: dict) -> None:
         if "amenityFeature" in ld_item and len(ld_item["amenityFeature"]) > 0:
             self.logger.info(
                 "Found amenityFeature data, implement `extract_amenity_features` or set `search_for_amenity_features` to suppress this message"
             )
             self.logger.debug(ld_item["amenityFeature"])
-            self.crawler.stats.inc_value("atp/structured_data/unmapped/amenity_features")
+            if self.crawler.stats:
+                self.crawler.stats.inc_value("atp/structured_data/unmapped/amenity_features")
 
-    def extract_payment_accepted(self, item, response: Response, ld_item):
+    def extract_payment_accepted(self, item: Feature | dict, selector: Selector, ld_item: dict) -> None:
         """
         https://schema.org/paymentAccepted
         """
@@ -355,9 +357,10 @@ class StructuredDataSpider(Spider):
                     "Found paymentAccepted data that could not be mapped, implement `extract_payment_accepted` or set `search_for_payment_accepted` to suppress this message"
                 )
                 self.logger.debug(payment)
-                self.crawler.stats.inc_value("atp/structured_data/unmapped/payment_accepted/{}".format(payment))
+                if self.crawler.stats:
+                    self.crawler.stats.inc_value("atp/structured_data/unmapped/payment_accepted/{}".format(payment))
 
-    def get_ref(self, url: str, response: Response) -> str:
+    def get_ref(self, url: str, response: TextResponse) -> str:
         if hasattr(self, "rules"):  # Attempt to pull a match from CrawlSpider.rules
             for rule in getattr(self, "rules"):
                 for allow in rule.link_extractor.allow_res:
@@ -372,9 +375,9 @@ class StructuredDataSpider(Spider):
                         return match.group(1)
         return url
 
-    def pre_process_data(self, ld_data: dict, **kwargs):
+    def pre_process_data(self, ld_data: dict, **kwargs) -> None:
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

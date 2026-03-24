@@ -1,50 +1,55 @@
-from typing import Iterable
+from typing import Any, AsyncIterator
 
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_FULL
-from locations.items import Feature
-from locations.linked_data_parser import LinkedDataParser
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 
 
-class DennerCHSpider(SitemapSpider, StructuredDataSpider):
+class DennerCHSpider(Spider):
     name = "denner_ch"
     item_attributes = {"brand": "Denner", "brand_wikidata": "Q379911"}
-    sitemap_urls = ["https://www.denner.ch/sitemap.store.xml"]
-    sitemap_rules = [("/de/filialen/", "parse_sd")]
 
-    def iter_linked_data(self, response: Response) -> Iterable[dict]:
-        for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):
-            if isinstance(ld_obj.get("@graph"), list):
-                ld_obj = ld_obj["@graph"][0]
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://www.denner.ch/api/store/list?page={page}",
+            cb_kwargs={"current_page": page},
+        )
 
-            if not ld_obj.get("@type"):
-                continue
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_request(1)
 
-            types = ld_obj["@type"]
+    def parse(self, response: Response, current_page: int) -> Any:
+        results = response.json()["data"]
 
-            if not isinstance(types, list):
-                types = [types]
+        for location in results.get("hits", []):
+            location.update(location.pop("_geo"))
+            location["street-number"] = location.pop("number")
+            location["street"] = location.pop("address")
+            item = DictParser.parse(location)
+            item.pop("name")
+            item["website"] = response.urljoin(location["link"])
+            opening_hours = (location.get("openingTimes") or {}).get("weeklyOpeningTimes", [])
+            try:
+                item["opening_hours"] = self.parse_opening_hours(opening_hours)
+            except:
+                self.logger.error(f"Failed to parse opening hours: {opening_hours}")
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+            yield item
 
-            types = [LinkedDataParser.clean_type(t) for t in types]
+        if current_page < results["totalPages"]:
+            yield self.make_request(current_page + 1)
 
-            for wanted_types in self.wanted_types:
-                if isinstance(wanted_types, list):
-                    if all(wanted in types for wanted in wanted_types):
-                        yield ld_obj
-                elif wanted_types in types:
-                    yield ld_obj
-
-    def pre_process_data(self, ld_data: dict, **kwargs):
-        for index, rule in enumerate(
-            ld_data.get("openingHoursSpecification", [])
-        ):  # Actual hours starts from Monday, but raw data wrongly starts from Tuesday
-            rule["dayOfWeek"] = DAYS_FULL[index]
-
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["name"] = ld_data["name"].removesuffix(" Filiale")
-        apply_category(Categories.SHOP_SUPERMARKET, item)
-        yield item
+    def parse_opening_hours(self, opening_hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in opening_hours:
+            if day := sanitise_day(rule.get("weekday"), DAYS_DE):
+                hours_info = rule.get("statements")
+                if hours_info[0]["info"] and hours_info[0]["info"][0].get("name") == "geschlossen":
+                    oh.set_closed(day)
+                else:
+                    for shift in hours_info:
+                        oh.add_range(day, shift["openFrom"], shift["openTo"])
+        return oh

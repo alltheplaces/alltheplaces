@@ -11,7 +11,7 @@ from locations.materials import MATERIALS_DE
 class StadtZuerichCHSpider(scrapy.Spider):
     name = "stadt_zuerich_ch"
     allowed_domains = ["ogd.stadt-zuerich.ch"]
-    download_timeout = 20
+    custom_settings = {"DOWNLOAD_TIMEOUT": 20}
 
     dataset_attributes = {
         "attribution": "optional",
@@ -75,7 +75,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         # Sometimes we get 3 coordinates, but the z value is always zero.
         lon, lat = coords[0], coords[1]
         id = f["id"]
-        (operator, operator_wikidata) = self.operators.get(props.get("da"), (None, None))
+        operator, operator_wikidata = self.operators.get(props.get("da"), (None, None))
         tags = {
             "email": props.get("mail"),
             "name": self.parse_name(props),

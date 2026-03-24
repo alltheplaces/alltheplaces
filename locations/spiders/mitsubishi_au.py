@@ -1,11 +1,15 @@
-import scrapy
+from copy import deepcopy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class MitsubishiAUSpider(scrapy.Spider):
+class MitsubishiAUSpider(Spider):
     """
     The API is found in https://www.mitsubishi-motors.com.au/buying-tools/locate-a-dealer.html
     """
@@ -17,7 +21,7 @@ class MitsubishiAUSpider(scrapy.Spider):
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://store.mitsubishi-motors.com.au/graphql", data=self.build_query())
 
     def build_query(self):
@@ -87,6 +91,18 @@ class MitsubishiAUSpider(scrapy.Spider):
             """,
         }
 
+    def build_sales_item(self, item):
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-sales"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
+
+    def build_service_item(self, item):
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-service"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
+
     def parse(self, response, **kwargs):
         pois = response.json()["data"].get("stockists", {}).get("locations", [])
 
@@ -97,14 +113,34 @@ class MitsubishiAUSpider(scrapy.Spider):
             item["ref"] = "-".join([str(poi["identifier"]) + str(poi["stockist_id"])])
 
             services = [s.lower() for s in poi.get("services", [])]
-            if "sales" in services:
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no("service:vehicle:car_repair", item, "service" in services, True)
-            elif "service" in services:
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-            else:
+            sales_available = "sales" in services
+            service_available = "service" in services
+
+            if sales_available:
+                sales_item = self.build_sales_item(item)
+                sales_item["opening_hours"] = self.parse_hours(poi.get("trading_hours", {}))
+                apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
+                yield sales_item
+
+            if service_available:
+                service_item = self.build_service_item(item)
+                service_item["opening_hours"] = self.parse_hours(poi.get("service_hours", {}))
+                yield service_item
+
+            if not sales_available and not service_available:
                 self.logger.error(f"Unknown services: {services}, {item['ref']}")
 
-            # TODO: opening hours
-
-            yield item
+    def parse_hours(self, hours: dict) -> OpeningHours:
+        try:
+            oh = OpeningHours()
+            for day, time in hours.items():
+                if day == "public_holidays":
+                    continue
+                if "closed" in time.lower():
+                    oh.set_closed(day)
+                elif "-" in time:
+                    open, close = time.split("-")
+                    oh.add_range(day, open.strip(), close.strip(), "%I:%M%p")
+            return oh
+        except Exception as e:
+            self.logger.warning("Error parsing {} {}".format(hours, e))

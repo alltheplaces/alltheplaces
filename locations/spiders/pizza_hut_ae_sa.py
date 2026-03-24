@@ -1,27 +1,26 @@
-import uuid
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
+from uuid import uuid4
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class PizzaHutAESASpider(scrapy.Spider):
+class PizzaHutAESASpider(Spider):
     name = "pizza_hut_ae_sa"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
-    user_agent = None
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for key, value in {"uae": "uae", "saudi": "ksa"}.items():
             body = f'{{"payload":{{"path":"https://phprodblob-a0gebddqcze0bwhz.a03.azurefd.net/phprodblobstorage/phd/production/","country":"{value}","subPath":"?sv=2020-02-10&ss=bf&srt=o&sp=rlf&se=2025-06-21T02:09:06Z&st=2021-06-20T18:09:06Z&spr=https&sig=1jVlax0%2FNb2czQlUGw6kZv5KEvtVHSu4T7F0s0%2Fefyw%3D"}}}}'
             headers = {
                 "brand": "PHD",
                 "country": value.upper(),
-                "deviceid": str(uuid.uuid4()),
+                "deviceid": str(uuid4()),
             }
             url = f"https://{key}.pizzahut.me/api/getStoreList"
             yield JsonRequest(url=url, method="POST", body=body, headers=headers, cb_kwargs={"country": key})

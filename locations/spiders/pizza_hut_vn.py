@@ -1,11 +1,11 @@
-import base64
 import hashlib
 import hmac
 import time
-import uuid
-from typing import Any
+from base64 import b64decode, b64encode
+from typing import Any, AsyncIterator
+from uuid import uuid4
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -15,25 +15,25 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class PizzaHutVNSpider(scrapy.Spider):
+class PizzaHutVNSpider(Spider):
     name = "pizza_hut_vn"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
     api_url = "https://rwapi.pizzahut.vn/api/store/GetAllStoreList"
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         timestamp = int(time.time() * 1000)
-        device_uid = uuid.uuid4()
+        device_uid = uuid4()
 
         auth_data = {"app_code": "REDWEB_DI1rpn3vHlyp", "access_key": "9GQ3cVW5Vqq4", "secret_key": "1YWkf7Rh0oJB"}
 
         query_string = f"TimeStamp={timestamp}&DeviceUID={device_uid}&AppCode={auth_data['app_code']}&AccessKey={auth_data['access_key']}&Method=GET&url=/STORE/GETALLSTORELIST&Body="
 
-        key = base64.b64decode(auth_data["secret_key"])
+        key = b64decode(auth_data["secret_key"])
         message = query_string.encode("utf-8")
         signature = hmac.new(key, message, hashlib.sha512)
 
-        access_token = base64.b64encode(signature.digest()).decode("utf-8")
+        access_token = b64encode(signature.digest()).decode("utf-8")
 
         yield JsonRequest(
             url=self.api_url,

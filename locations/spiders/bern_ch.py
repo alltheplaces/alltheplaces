@@ -2,8 +2,10 @@ import hashlib
 import io
 import json
 import zipfile
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Vending, add_vending, apply_category, apply_yes_no
 from locations.items import Feature
@@ -12,7 +14,7 @@ from locations.items import Feature
 # Open Data of the Land Surveying Office of the City of Bern, Switzerland
 # https://opendata.swiss/en/organization/geoinformation-der-stadt-bern
 # https://opendata.swiss/en/dataset/velo-themen
-class BernCHSpider(scrapy.Spider):
+class BernCHSpider(Spider):
     name = "bern_ch"
     allowed_domains = ["map.bern.ch"]
 
@@ -37,8 +39,8 @@ class BernCHSpider(scrapy.Spider):
         "Rent a Bike": ("Q115701374", {}),
     }
 
-    def start_requests(self):
-        yield scrapy.Request("https://map.bern.ch/ogd/poi_velo/poi_velo_json.zip", callback=self.parse_bicycle_zipfile)
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request("https://map.bern.ch/ogd/poi_velo/poi_velo_json.zip", callback=self.parse_bicycle_zipfile)
 
     def parse_bicycle_zipfile(self, response):
         with zipfile.ZipFile(io.BytesIO(response.body)) as feed_zip:

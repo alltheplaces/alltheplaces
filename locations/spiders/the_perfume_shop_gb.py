@@ -13,7 +13,8 @@ class ThePerfumeShopGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "The Perfume Shop", "brand_wikidata": "Q7756719"}
     sitemap_urls = ["https://www.theperfumeshop.com/robots.txt"]
     sitemap_rules = [("/store/", "parse")]
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("The Perfume Shop ")

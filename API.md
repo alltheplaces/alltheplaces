@@ -36,3 +36,11 @@ See above for the metadata fields.
 Returns the metadata for the latest run.
 
 You can use the `output_url` field to download the GeoJSON output of the latest run.
+
+### `GET /runs/latest.zip`
+
+Responds with an HTTP 302 redirect to the `output_url` of the latest run. This allows you to download the latest output directly without needing to first query the metadata.
+
+### `GET /runs/latest/output/{spider_name}.geojson`
+
+Responds with an HTTP 302 redirect to the GeoJSON output for a specific spider from the latest successful run. A successful run is one that completed with >0 rows of output for that spider.

@@ -13,8 +13,10 @@ class ChoiceHotelsSpider(SitemapSpider):
     allowed_domains = ["choicehotels.com"]
     # Sitemapindex with below in it is "https://www.choicehotels.com/sitemapindex.xml"
     sitemap_urls = ["https://www.choicehotels.com/brandsearchsitemap.xml.gz"]
-    user_agent = CHROME_LATEST
-    download_delay = 5  # Requested by https://www.choicehotels.com/robots.txt
+    custom_settings = {
+        "DOWNLOAD_DELAY": 5,  # Requested by https://www.choicehotels.com/robots.txt
+        "USER_AGENT": CHROME_LATEST,
+    }
     requires_proxy = True
 
     brand_mapping = {

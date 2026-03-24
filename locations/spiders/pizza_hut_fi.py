@@ -1,34 +1,30 @@
-from typing import Iterable
+from typing import Any
 
-from chompjs import parse_js_object
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class PizzaHutFISpider(JSONBlobSpider):
+class PizzaHutFISpider(SitemapSpider):
     name = "pizza_hut_fi"
     item_attributes = {"brand": "Pizza Hut", "brand_wikidata": "Q191615"}
-    start_urls = ["https://www.pizzahut.fi/fi/store-locator"]
+    sitemap_urls = ["https://www.pizzahut.fi/sitemap.xml"]
+    sitemap_rules = [("/toimipisteet/", "parse")]
 
-    def extract_json(self, response):
-        data = response.xpath('.//script[@id="__NEXT_DATA__"]/text()').get()
-        return parse_js_object(data)["props"]["pageProps"]["data"]["chainStores"]["msg"]
-
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["name"] = None
-        item["extras"]["branch:en"] = feature["title"]["en_US"].removeprefix("PIZZA HUT ")
-        item["branch"] = item["extras"]["branch:fi"] = feature["title"]["fi_FI"].removeprefix("PIZZA HUT ")
-        item["country"] = feature["address"]["countryCode"]
-        item["addr_full"] = feature["address"]["formatted"]
-        item["city"] = feature["address"].get("city")
-        item["lat"] = feature["address"]["latLng"]["lat"]
-        item["lon"] = feature["address"]["latLng"]["lng"]
-        item["phone"] = feature["contact"]["phone"]
-        item["email"] = feature["contact"]["email"]
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["street_address"] = response.xpath('//*[@class="yhteystiedot p-4"]/p[2]/text()').get()
+        item["addr_full"] = merge_address_lines(
+            [item["street_address"], response.xpath('//*[@class="yhteystiedot p-4"]/p[3]/text()').get()]
+        )
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        item["branch"] = response.xpath("//h2/text()").get()
+        item["email"] = response.xpath('//*[contains(text(),"@pizzahut.fi")]/text()').get()
+        item["ref"] = item["website"] = response.url
+        extract_google_position(item, response)
         apply_category(Categories.RESTAURANT, item)
-        apply_yes_no(Extras.DELIVERY, item, feature.get("deliveryAllowed"))
-        apply_yes_no(Extras.TAKEAWAY, item, feature.get("pickUpAllwed"))
         yield item

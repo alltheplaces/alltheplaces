@@ -14,4 +14,5 @@ class GlobalesESSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.HOTEL, item)
         item["branch"] = item.pop("name").replace("Globales ", "")
+        item["postcode"] = str(item.get("postcode")) if item.get("postcode") else None
         yield item

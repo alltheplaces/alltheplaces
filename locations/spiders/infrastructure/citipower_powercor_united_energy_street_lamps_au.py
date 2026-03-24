@@ -15,7 +15,7 @@ class CitipowerPowercorUnitedEnergyStreetLampsAUSpider(Spider):
     item_attributes = {"state": "VIC", "nsi_id": "N/A"}
     allowed_domains = ["publiclighting.portal.powercor.com.au"]
     start_urls = ["https://publiclighting.portal.powercor.com.au/PublicLightFault"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     _request_attribs: dict = {}  # Authorization token and other attributes
     # captured once and required to be sent with
     # each API request.

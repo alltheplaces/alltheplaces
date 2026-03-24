@@ -1,15 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 
 
-class LewisStoresSpider(scrapy.Spider):
+class LewisStoresSpider(Spider):
     name = "lewis_stores"
     item_attributes = {"brand": "Lewis Stores", "brand_wikidata": "Q115117217"}
 
-    def start_requests(self):
-        yield scrapy.http.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             url="https://lewisstores.co.za/controllers/get_locations.php",
             formdata={"param1": "Lewis Stores"},
         )

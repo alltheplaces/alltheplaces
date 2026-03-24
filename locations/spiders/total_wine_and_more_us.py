@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 import pycountry
 from scrapy import Spider
 from scrapy.http import FormRequest
@@ -14,7 +16,7 @@ class TotalWineAndMoreUSSpider(Spider):
     allowed_domains = ["www.totalwine.com"]
     start_urls = ["https://www.totalwine.com/registry/"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for url in self.start_urls:
             for state in pycountry.subdivisions.get(country_code="US"):
                 formdata = {

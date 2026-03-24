@@ -13,7 +13,6 @@ class PapaJohnsGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.papajohns.co.uk/sitemap.xml"]
     sitemap_rules = [(r"https:\/\/www\.papajohns\.co\.uk\/stores\/([-.\w]+)$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
-    requires_proxy = True
     search_for_facebook = False
     search_for_twitter = False
 

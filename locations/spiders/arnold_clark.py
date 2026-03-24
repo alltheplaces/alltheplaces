@@ -13,7 +13,7 @@ class ArnoldClarkSpider(SitemapSpider):
     sitemap_urls = ["https://www.arnoldclark.com/sitemap/branch.xml"]
     sitemap_rules = [
         (
-            r"https:\/\/www\.arnoldclark\.com\/find-a-dealer\/([-\w]+)\/ref\/([-\w]+)$",
+            r"https:\/\/www\.arnoldclark\.com\/find-a-dealer\/ref\/([-\w]+)$",
             "parse_item",
         )
     ]

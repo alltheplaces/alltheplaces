@@ -8,13 +8,15 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import CHROME_LATEST
 
 
 class HiltonSpider(Spider):
     name = "hilton"
     start_urls = ["https://www.hilton.com/en/locations/hilton-hotels/"]
-    custom_settings = {
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "User-Agent": CHROME_LATEST,
@@ -165,7 +167,7 @@ class HiltonSpider(Spider):
 
     def get_hotels(self, quadrant_id):
         # TODO: we should use JsonRequest here, but it doesn't work with this endpoint for some reason!
-        url = "https://www.hilton.com/graphql/customer?appName=dx_shop_search_app&operationName=hotelSummaryOptions&originalOpName=hotelSummaryOptions&bl=en"
+        url = "https://www.hilton.com/graphql/customer?appName=dx_shop_search_app&operationName=hotelSummaryOptions_geocodePage&originalOpName=hotelSummaryOptions_geocodePage&bl=en"
         data = {
             "operationName": "hotelSummaryOptions",
             "query": """

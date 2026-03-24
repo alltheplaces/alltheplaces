@@ -11,10 +11,7 @@ class MarinerFinanceSpider(scrapy.Spider):
     name = "mariner_finance"
     item_attributes = {"brand": "Mariner Finance"}
     allowed_domains = ["www.marinerfinance.com", "loans.marinerfinance.com"]
-    start_urls = [
-        "https://www.marinerfinance.com/location-sitemap.xml",
-    ]
-    download_delay = 0.3
+    start_urls = ["https://www.marinerfinance.com/location-sitemap.xml"]
 
     def parse(self, response):
         response.selector.remove_namespaces()

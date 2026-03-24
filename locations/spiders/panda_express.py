@@ -1,5 +1,6 @@
-from scrapy import FormRequest
-from scrapy.http import JsonRequest
+from typing import AsyncIterator
+
+from scrapy.http import FormRequest, JsonRequest
 
 from locations.storefinders.nomnom import NomNomSpider, slugify
 from locations.user_agents import BROWSER_DEFAULT
@@ -9,11 +10,10 @@ class PandaExpressSpider(NomNomSpider):
     name = "panda_express"
     item_attributes = {"brand": "Panda Express", "brand_wikidata": "Q1358690"}
     domain = "pandaexpress.com"
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     use_calendar = False
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         # Fetch cookies to avoid DataDome captcha blockage
         yield FormRequest(
             url="https://api-js.datadome.co/js/",

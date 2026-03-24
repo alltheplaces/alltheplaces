@@ -1,4 +1,7 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.hours import (
     DAYS_DE,
@@ -16,7 +19,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class GantSpider(scrapy.Spider):
+class GantSpider(Spider):
     name = "gant"
     item_attributes = {
         "brand": "GANT",
@@ -37,14 +40,14 @@ class GantSpider(scrapy.Spider):
         ("https://www.gant.co.uk/stores", DAYS_EN),
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url, language in self.start_urls:
-            yield scrapy.Request(url=url, callback=self.parse, cb_kwargs={"language": language})
+            yield Request(url=url, callback=self.parse, cb_kwargs={"language": language})
 
     def parse(self, response, language):
         if (part_url := response.xpath("//*[@data-lat]/@data-action-url").get()) is not None:
             complete_url = response.url.replace("/stores", "") + part_url
-            yield scrapy.Request(url=complete_url, callback=self.parse_website, cb_kwargs={"language": language})
+            yield Request(url=complete_url, callback=self.parse_website, cb_kwargs={"language": language})
 
     def parse_website(self, response, language):
         stores = response.json()["stores"]

@@ -1,5 +1,6 @@
 from unidecode import unidecode
 
+from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -15,5 +16,6 @@ class BurgerKingNCSpider(JSONBlobSpider):
         item["website"] = (
             f'https://www.burgerking.nc/restaurants/burger-king-{unidecode(item["branch"].replace(" ", "-").lower())}/'
         )
+        apply_category(Categories.FAST_FOOD, item)
         yield item
         # TODO more info on individual pages, but doesn't seem worth html parsing for 4 locations

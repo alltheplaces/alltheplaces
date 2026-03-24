@@ -1,3 +1,4 @@
+import re
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -12,19 +13,26 @@ from locations.spiders.central_england_cooperative import set_operator
 class AnPostIESpider(Spider):
     name = "an_post_ie"
     AN_POST = {"brand": "An Post", "brand_wikidata": "Q482490"}
+    start_urls = ["https://www.anpost.com/Store-Locator"]
 
     cats = {
         "Parcel Locker": Categories.PARCEL_LOCKER,
         "Post Office": Categories.POST_OFFICE,
     }
 
-    def start_requests(self):
+    def parse(self, response):
+        subscription_key = re.search(
+            r"intAPISubscriptionKey\s*=\s*\'(\w+)\';",
+            response.xpath('//*[contains(text(),"intAPISubscriptionKey ")]/text()').get(),
+        ).group(1)
         yield JsonRequest(
-            "https://www.anpost.com/AnPost/StoreLocatorServices.asmx/Search?name=%27%27&radius=2000&userLat=53.1879823&userLon=-7.981917&service=%27%27&type=%27%27"
+            "https://apim-anpost-apwebapis.anpost.com/apweb-intservicesapi/v1/StoreLocator/Search",
+            headers={"Ocp-Apim-Subscription-Key": subscription_key},
+            callback=self.parse_details,
         )
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["d"]:
+    def parse_details(self, response, **kwargs):
+        for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = None
             item["addr_full"] = merge_address_lines(

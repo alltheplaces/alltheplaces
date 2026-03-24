@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import Request, Response
 
@@ -16,7 +16,7 @@ class CampBowWowSpider(JSONBlobSpider):
     start_urls = ["https://www.campbowwow.com/locations/Systems-Advanced-Map.svc?action=GetMapData"]
     locations_key = "Localities"
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, headers={"x-request-from": "https://www.campbowwow.com/locations/"})
 

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -13,7 +15,7 @@ class RemaxESSpider(Spider):
     allowed_domains = ["www.remax.es"]
     start_urls = ["https://www.remax.es/buscador-de-oficinas/jsonData.php"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, headers={"X-Requested-With": "XMLHttpRequest"})
 

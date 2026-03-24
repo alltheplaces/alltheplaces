@@ -1,40 +1,25 @@
-from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
-from locations.items import Feature
-from locations.storefinders.where2getit import Where2GetItSpider
+from typing import Any
+
+import chompjs
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class CaptainDUSSpider(Where2GetItSpider):
+class CaptainDUSSpider(SitemapSpider):
     name = "captain_d_us"
     item_attributes = {"brand": "Captain D's", "brand_wikidata": "Q5036616"}
-    api_endpoint = "https://locations.captainds.com/rest/getlist"
-    api_key = "596EECC8-DFC6-11EE-AA1D-2E122CD69500"
-    custom_settings = {
-        "DOWNLOAD_WARNSIZE": 67108864,  # 64 MiB needed as results are >32 MiB
-    }
+    sitemap_urls = ["https://locations.captainds.com/sitemap_index.xml"]
+    sitemap_rules = [(r"https://locations.captainds.com/ll/[^/]+/[^/]+/[^/]+/[a-z-0-9]+/$", "parse")]
 
-    def parse_item(self, item: Feature, location: dict):
-        if not location.get("latitude"):
-            # There is at least one "corporate" feature which is not a real
-            # feature with physical address. Ignore such "feature".
-            return
-        if location.get("name") and "COMING SOON" in location["name"].upper():
-            return
-
-        item["lat"] = location["latitude"]
-        item["lon"] = location["longitude"]
-        item["branch"] = item.pop("name", None)
-
-        item["opening_hours"] = OpeningHours()
-        for day_name in DAYS_FULL:
-            if not location.get("{}_open".format(day_name.lower())):
-                item["opening_hours"].set_closed(DAYS_EN[day_name])
-            else:
-                item["opening_hours"].add_range(
-                    DAYS_EN[day_name],
-                    location["{}_open".format(day_name.lower())],
-                    location["{}_close".format(day_name.lower())],
-                )
-
-        apply_category(Categories.FAST_FOOD, item)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        raw_data = chompjs.parse_js_object(response.xpath('//*[@type="application/ld+json"][2]/text()').get().strip())
+        item = DictParser.parse(raw_data)
+        item["ref"] = item["website"] = response.url
+        oh = OpeningHours()
+        for day_time in response.xpath('//*[@itemprop="openingHours"]/@content').getall():
+            oh.add_ranges_from_string(day_time)
+        item["opening_hours"] = oh
         yield item

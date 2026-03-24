@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -21,7 +21,7 @@ class SleepNumberUSSpider(Spider):
         "DOWNLOAD_DELAY": 3,
     }
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in country_iseadgg_centroids("US", 458):
             yield JsonRequest(
                 url="https://www.sleepnumber.com/api/storefront/store-locations?lat={}&lng={}&limit=100&radius=300".format(
@@ -47,6 +47,8 @@ class SleepNumberUSSpider(Spider):
     def parse_opening_hours(self, hours: dict) -> OpeningHours:
         oh = OpeningHours()
         for day_name, day_hours in hours.items():
+            if "holiday" in day_name:
+                continue
             if not day_hours:
                 continue
             if day_hours.get("isClosed"):

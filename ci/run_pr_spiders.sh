@@ -85,7 +85,8 @@ upload_file() {
     upload_to_r2 "${file_path}" "${R2_BUCKET}/${path}"
 }
 
-PR_COMMENT_BODY="I ran the spiders in this pull request and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
+PR_COMMENT_BODY="I ran the spiders in this pull request for a __2 minute__ test and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
+HAD_TIMEOUT=false
 
 if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_APP_PRIVATE_KEY_BASE64}" ] || [ -z "${GITHUB_APP_INSTALLATION_ID}" ]; then
     echo "GitHub App credentials not set"
@@ -142,10 +143,15 @@ if [ "${spider_count}" -eq 0 ]; then
     fi
 fi
 
-if grep PLAYWRIGHT -q -m 1 $spiders; then
-    echo "Playwright detected. Installing requirements."
+if grep PlaywrightSpider -q -m 1 $spiders; then
+    echo "Playwright spider detected. Installing requirements."
     uv run playwright install-deps
     uv run playwright install firefox
+fi
+
+if grep CamoufoxSpider -q -m 1 $spiders; then
+    echo "Camoufox spider detected. Installing requirements."
+    uv run camoufox fetch
 fi
 
 RUN_DIR="/tmp/output"
@@ -166,14 +172,14 @@ do
 
     LOGFILE="${SPIDER_RUN_DIR}/log.txt"
     OUTFILE="${SPIDER_RUN_DIR}/output.geojson"
-    PARQUETFILE="${SPIDER_RUN_DIR}/output.parquet"
+    NDGEOJSON="${SPIDER_RUN_DIR}/output.ndgeojson"
     STATSFILE="${SPIDER_RUN_DIR}/stats.json"
     FAILURE_REASON="success"
 
-    timeout -k 5s 150s \
+    timeout -k 1m 150s \
     uv run scrapy runspider \
         -o "file://${OUTFILE}:geojson" \
-        -o "file://${PARQUETFILE}:parquet" \
+        -o "file://${NDGEOJSON}:ndgeojson" \
         --loglevel=INFO \
         --logfile="${LOGFILE}" \
         -s CLOSESPIDER_TIMEOUT=120 \
@@ -185,6 +191,7 @@ do
         (>&2 echo "${spider} hit shell timeout")
         EXIT_CODE=1
         FAILURE_REASON="timeout"
+        HAD_TIMEOUT=true
     elif grep -q "Spider closed (closespider_errorcount)" $LOGFILE; then
         (>&2 echo "${spider} exited with errors")
         EXIT_CODE=1
@@ -192,6 +199,7 @@ do
     elif grep -q "Spider closed (closespider_timeout)" $LOGFILE; then
         (>&2 echo "${spider} exited because of timeout")
         FAILURE_REASON="timeout"
+        HAD_TIMEOUT=true
     fi
 
     upload_file "${LOGFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/log.txt"
@@ -201,7 +209,7 @@ do
 
     if [ -f "${OUTFILE}" ]; then
         upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
-        upload_file "${PARQUETFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.parquet"
+        upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
         if [ -f "${STATSFILE}" ]; then
@@ -213,10 +221,36 @@ do
                 FEATURE_COUNT="0"
             fi
 
+            # Short compare: show only an arrow and delta (e.g. "↑3" or "↓2").
+            # Also set a small link to the previous run stats when available.
+            COMPARE_TEXT=""
+            latest_run_id=$(curl -s 'https://data.alltheplaces.xyz/runs/latest.json' | jq -r '.run_id' 2>/dev/null)
+            if [ -n "${latest_run_id}" ] && [ "${latest_run_id}" != "null" ]; then
+                prev_stats_url="https://alltheplaces-data.openaddresses.io/runs/${latest_run_id}/stats/${SPIDER_NAME}.json"
+                prev_count=$(curl -s "${prev_stats_url}" | jq --raw-output '.item_scraped_count' 2>/dev/null)
+                if [ -z "${prev_count}" ] || [ "${prev_count}" = "null" ]; then
+                    # Don't show compare info if we can't get previous count
+                    COMPARE_TEXT=""
+                fi
+
+                if [ -n "${FEATURE_COUNT}" ]; then
+                    diff=$((FEATURE_COUNT - prev_count))
+                    if [ "$diff" -gt 0 ]; then
+                        COMPARE_TEXT=" [↑${diff}](${prev_stats_url})"
+                    elif [ "$diff" -lt 0 ]; then
+                        # show positive number after down arrow
+                        absdiff=${diff#-}
+                        COMPARE_TEXT=" [↓${absdiff}](${prev_stats_url})"
+                    else
+                        COMPARE_TEXT=" [→0](${prev_stats_url})"
+                    fi
+                fi
+            fi
+
             if [ "${FEATURE_COUNT}" == "0" ]; then
                 echo "${spider} has no output"
                 FAILURE_REASON="no output"
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})| (No Output) ${COMPARE_TEXT} |Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
                 EXIT_CODE=1
                 continue
             fi
@@ -230,18 +264,16 @@ do
                 STATS_ERRORS="${STATS_ERRORS}<li>🚨 Category is not set on ${missing_category} items</li>"
             fi
 
-            # Warn if items are missing a lat/lon
-            missing_lat=$(jq '."atp/field/lat/missing" // 0' "${STATSFILE}")
-            missing_lon=$(jq '."atp/field/lon/missing" // 0' "${STATSFILE}")
-            if [ $missing_lat -gt 0 ] || [ $missing_lon -gt 0 ]; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Latitude or Longitude is missing on ${missing_lat} items</li>"
+            # Warn if items are missing geometry
+            missing_geometry=$(jq '."atp/field/geometry/missing" // 0' "${STATSFILE}")
+            if [ $missing_geometry -gt 0 ]; then
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Geometry is missing on ${missing_geometry} items</li>"
             fi
 
-            # Error if items have invalid lat/lon
-            invalid_lat=$(jq '."atp/field/lat/invalid" // 0' "${STATSFILE}")
-            invalid_lon=$(jq '."atp/field/lon/invalid" // 0' "${STATSFILE}")
-            if [ $invalid_lat -gt 0 ] || [ $invalid_lon -gt 0 ]; then
-                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Latitude or Longitude is invalid on ${invalid_lat} items</li>"
+            # Error if items have invalid geometry
+            invalid_geometry=$(jq '."atp/field/geometry/invalid" // 0' "${STATSFILE}")
+            if [ $invalid_geometry -gt 0 ]; then
+                STATS_ERRORS="${STATS_ERRORS}<li>🚨 Geometry is invalid on ${invalid_geometry} items</li>"
             fi
 
             # Error if items have invalid website
@@ -293,9 +325,9 @@ do
 
             if [ "${num_errors}" -gt 0 ] || [ "${num_warnings}" -gt 0 ]; then
                 # Include details in an expandable section if there are warnings or errors
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL})) ${COMPARE_TEXT}|<details><summary>Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) 🚨${num_errors} ⚠️${num_warnings}</summary><ul>${STATS_ERRORS}${STATS_WARNINGS}</ul></details>|\\n"
             else
-                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
+                PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL})) ${COMPARE_TEXT}|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL})) ✅|\\n"
             fi
             continue
         else
@@ -318,6 +350,10 @@ done
 if [[ ! "$(ls ${RUN_DIR})" ]]; then
     echo "Nothing ran. Exiting."
     echo $EXIT_CODE
+fi
+
+if [ "${HAD_TIMEOUT}" = true ]; then
+    PR_COMMENT_BODY="${PR_COMMENT_BODY}\\n<details><summary>ℹ️ What does <code>timeout</code> mean?</summary>\\n\\nThe pull request CI runs each spider for a maximum of **2 minutes**. A \`timeout\` result means the spider was still running when this time limit was reached. This is not necessarily a problem — many spiders take longer than 2 minutes to complete a full run. The important thing is to check that the spider is producing results and that the output looks correct within the time allowed.\\n</details>\\n"
 fi
 
 if [ "${pull_request_number}" != "false" ]; then

@@ -13,12 +13,10 @@ class ClicksSpider(CrawlSpider):
     name = "clicks"
     item_attributes = {"brand": "Clicks", "brand_wikidata": "Q62563622"}
     allowed_domains = ["clicks.co.za"]
-    start_urls = [
-        "https://clicks.co.za/sitemap/stores",
-    ]
+    start_urls = ["https://clicks.co.za/sitemap/stores"]
     rules = [Rule(LinkExtractor(allow=r"/store/"), callback="parse")]
     skip_auto_cc_domain = True
-    download_delay = 10  # as requested by robots.txt
+    custom_settings = {"DOWNLOAD_DELAY": 10}  # as requested by robots.txt
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()

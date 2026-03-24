@@ -1,19 +1,21 @@
 import json
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class BayshoreHealthcareSpider(scrapy.Spider):
+class BayshoreHealthcareSpider(Spider):
     name = "bayshore_healthcare"
     item_attributes = {"brand": "Bayshore Healthcare"}
     allowed_domains = ["bayshore.ca"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://www.bayshore.ca/wp-admin/admin-ajax.php?action=location_finder&language=en"
 
         headers = {
@@ -25,7 +27,7 @@ class BayshoreHealthcareSpider(scrapy.Spider):
             "search_type": "location",
         }
 
-        yield scrapy.http.FormRequest(url, self.parse, method="POST", headers=headers, formdata=formdata)
+        yield FormRequest(url, self.parse, method="POST", headers=headers, formdata=formdata)
 
     def parse(self, response):
         stores = json.loads(response.body)

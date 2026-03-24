@@ -11,7 +11,7 @@ class HRBlockSpider(SitemapSpider, StructuredDataSpider):
     name = "h_r_block"
     item_attributes = {"brand": "H&R Block", "brand_wikidata": "Q5627799"}
     sitemap_urls = ["https://www.hrblock.com/sitemap.xml"]
-    sitemap_rules = [(r"https://www\.hrblock\.com/local-tax-offices/[^/]+/[^/]+/[^/]+/\d+/$", "parse_sd")]
+    sitemap_rules = [(r"/tax-office-near-me/[^/]+/[^/]+/\d+/?$", "parse_sd")]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "METAREFRESH_ENABLED": False,

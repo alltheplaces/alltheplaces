@@ -1,7 +1,9 @@
 import html
 import re
+from typing import Any
 
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -13,9 +15,9 @@ class SephoraMXSpider(Spider):
     item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     allowed_domains = ["www.sephora.com.mx"]
     start_urls = ["https://www.sephora.com.mx/stores/"]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath("//li[@data-storeaddress]"):
             properties = {
                 "lat": location.xpath("./@data-latitude").get().strip(),

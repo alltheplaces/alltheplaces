@@ -3,12 +3,12 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.flatgeobuf_spider import FlatGeobufSpider
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.vector_file_spider import VectorFileSpider
 
 
-class FrankstonCityCouncilMchNurseClinicsAUSpider(FlatGeobufSpider):
+class FrankstonCityCouncilMchNurseClinicsAUSpider(VectorFileSpider):
     name = "frankston_city_council_mch_nurse_clinics_au"
     item_attributes = {
         "operator": "Frankston City Council",

@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
@@ -30,4 +31,5 @@ class BurgerKingEELTLVSpider(JSONBlobSpider):
             day = day.lower()
             hours = hours.replace(f"{day}.", day)
         item["opening_hours"].add_ranges_from_string(hours)
+        apply_category(Categories.FAST_FOOD, item)
         yield item

@@ -21,7 +21,7 @@ class SephoraUSCASpider(SitemapSpider, StructuredDataSpider):
         (r"\/happening\/stores\/(?!kohls).+", "parse_sd"),
         (r"\/ca\/en\/happening\/stores\/(?!kohls).+", "parse_sd"),
     ]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item.pop("image")

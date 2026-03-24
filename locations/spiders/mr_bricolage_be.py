@@ -12,7 +12,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class MrBricolageBESpider(JSONBlobSpider):
     name = "mr_bricolage_be"
-    item_attributes = {"brand": "Mr. Bricolage", "brand_wikidata": "Q3141657"}
+    item_attributes = {"brand": "Mr.Bricolage", "brand_wikidata": "Q3141657"}
     start_urls = ["https://www.mr-bricolage.be/magasins"]
 
     def extract_json(self, response: Response) -> list:

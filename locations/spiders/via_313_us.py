@@ -11,7 +11,7 @@ class Via313USSpider(Where2GetItSpider):
         "brand_wikidata": "Q115699944",
         "nsi_id": "N/A",
     }
-    api_endpoint = "https://locations.via313.com/rest/getlist"
+    api_brand_name = "via313sites"
     api_key = "BF91495A-EBDF-11ED-B150-EA449DC6E625"
 
     def parse_item(self, item: Feature, location: dict):

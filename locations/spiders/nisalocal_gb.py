@@ -11,8 +11,14 @@ class NisalocalGBSpider(CrawlSpider, StructuredDataSpider):
     allowed_domains = ["nisalocally.co.uk"]
     start_urls = ["https://www.nisalocally.co.uk/stores/index.html"]
     rules = [Rule(LinkExtractor(allow=".*/stores/.*"), callback="parse_sd", follow=True)]
-    download_delay = 0.5
+    search_for_twitter = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category(Categories.SHOP_CONVENIENCE, item)
+        if item["name"].startswith("Test "):
+            return
+        elif "Nisa Extra" in item["name"]:
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        else:
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+
         yield item

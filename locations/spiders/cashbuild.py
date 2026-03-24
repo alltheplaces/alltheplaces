@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import FormRequest, Response
 
@@ -15,8 +15,9 @@ class CashbuildSpider(JSONBlobSpider):
     allowed_domains = ["www.cashbuild.co.za"]
     start_urls = ["https://www.cashbuild.co.za/module/radiusdelivery/StoreSelectorAjax"]
     locations_key = "stores"
+    requires_proxy = True
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         for country_code in ["BW", "LS", "MW", "NA", "SZ", "ZA"]:
             formdata = {
                 "ajax": "1",

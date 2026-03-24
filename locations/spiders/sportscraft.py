@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,17 +14,19 @@ class SportscraftSpider(Spider):
     allowed_domains = ["www.sportscraft.com.au"]
     start_urls = ["https://www.sportscraft.com.au/custom_api/commercetools/channels"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
     def parse(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+            item.pop("email", None)
             item["ref"] = location["key"]
             item["name"] = item["name"].split("(", 1)[0].strip()
             item["street_address"] = clean_address([location["address1"].strip(), location["address2"].strip()])
-            item["city"] = item["city"].strip()
+            if city := item.get("city"):
+                item["city"] = city.strip()
             item["website"] = "https://www.sportscraft.com.au/store-locator/store-details?id=" + location["key"]
             item["opening_hours"] = OpeningHours()
             hours_string = ""

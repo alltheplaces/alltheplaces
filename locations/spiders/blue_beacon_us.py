@@ -1,13 +1,13 @@
-from typing import Iterable
+import json
+import re
+from typing import Any
 
-from chompjs import parse_js_object
 from scrapy import Selector
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
@@ -17,13 +17,12 @@ class BlueBeaconUSSpider(Spider):
     start_urls = ["https://bluebeacon.com/locations/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response: Response) -> Iterable[Feature]:
-        js_blob = response.xpath('//script[contains(text(), "SABAI.GoogleMaps.map(")]/text()').get()
-        js_blob = (
-            js_blob.split('SABAI.GoogleMaps.map("#sabai-content .sabai-directory-map",', 1)[1].split("}]", 1)[0] + "}]"
-        )
-        features = parse_js_object(js_blob)
-        for feature in features:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for feature in json.loads(
+            re.search(
+                r"SABAI\.GoogleMaps\.map\(\n\s+'#sabai-content \.sabai-directory-map',\n\s+(\[{.+}]),", response.text
+            ).group(1)
+        ):
             item = DictParser.parse(feature)
             html_listing = Selector(text=feature["content"])
             item["branch"] = html_listing.xpath('//div[@class="sabai-directory-title"]/a/@title').get()

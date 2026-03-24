@@ -1,5 +1,6 @@
 import logging
 from xml.sax.saxutils import XMLGenerator
+from xml.sax.xmlreader import AttributesImpl
 
 from scrapy.exporters import XmlItemExporter
 
@@ -19,11 +20,14 @@ class OSMExporter(XmlItemExporter):
 
     def __init__(self, file, **kwargs):
         logging.warning("Deprecated, no not use!")
+        if not self.encoding:
+            raise RuntimeError("Encoding must be specified for this exporter. Default is 'UTF-8'.")
         self.xg = XMLGenerator(file, encoding=self.encoding, short_empty_elements=True)
 
     def start_exporting(self):
         self.xg.startDocument()
-        self.xg.startElement("osm", {"version": "0.6", "upload": "never", "generator": "All The Places"})
+        attrs = {"version": "0.6", "upload": "never", "generator": "All the Places"}
+        self.xg.startElement("osm", AttributesImpl(attrs))
         self._beautify_newline(new_item=True)
 
     def export_item(self, item):
@@ -31,7 +35,8 @@ class OSMExporter(XmlItemExporter):
         if not coords:
             coords = (0, 0)
         self._beautify_indent(depth=1)
-        self.xg.startElement(self.item_element, {"id": str(self.next_id), "lat": str(coords[0]), "lon": str(coords[1])})
+        attrs = {"id": str(self.next_id), "lat": str(coords[0]), "lon": str(coords[1])}
+        self.xg.startElement(self.item_element, AttributesImpl(attrs))
         self.next_id -= 1
         self._beautify_newline()
         for name, value in self._get_serialized_fields(item, default_value=""):
@@ -51,6 +56,7 @@ class OSMExporter(XmlItemExporter):
         self._beautify_indent(depth=depth)
         if not isinstance(serialized_value, str):
             raise Exception("{} is {} not str".format(name, type(serialized_value).__name__))
-        self.xg.startElement("tag", {"k": name, "v": serialized_value})
+        attrs = {"k": name, "v": serialized_value}
+        self.xg.startElement("tag", AttributesImpl(attrs))
         self.xg.endElement("tag")
         self._beautify_newline()

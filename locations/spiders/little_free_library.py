@@ -1,17 +1,15 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from typing import Any, AsyncIterator
 
-from locations.categories import Categories
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class LittleFreeLibrarySpider(Spider):
     name = "little_free_library"
-    item_attributes = {
-        "brand": "Little Free Library",
-        "brand_wikidata": "Q6650101",
-        "extras": Categories.PUBLIC_BOOKCASE.value,
-    }
+    item_attributes = {"brand": "Little Free Library", "brand_wikidata": "Q6650101"}
     allowed_domains = ["appapi.littlefreelibrary.org"]
     start_urls = ["https://appapi.littlefreelibrary.org/library/map.json?page_size=500"]
     # It takes a long time for the server to provide 500 locations in a
@@ -19,14 +17,13 @@ class LittleFreeLibrarySpider(Spider):
     # sent in a brief period of time. Thus it's necessary to ask for more
     # locations at a time and wait for the slow responses, and also necessary
     # to add a large delay between requests.
-    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
-    download_delay = 60
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60, "DOWNLOAD_DELAY": 60}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_library_list)
 
-    def parse_library_list(self, response):
+    def parse_library_list(self, response: Response, **kwargs: Any) -> Any:
         for library in response.json()["libraries"]:
             properties = {
                 "ref": library.get("Official_Charter_Number__c"),
@@ -51,6 +48,7 @@ class LittleFreeLibrarySpider(Spider):
                 properties["name"] = library.get("List_As_Name__c")
             else:
                 properties["name"] = library.get("Name")
+            apply_category(Categories.PUBLIC_BOOKCASE, properties)
             yield Feature(**properties)
 
         if "&page=" not in response.url:

@@ -13,7 +13,7 @@ class JohnLewisGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "John Lewis", "brand_wikidata": "Q1918981"}
     sitemap_urls = ["https://www.johnlewis.com/shops-services.xml"]
     sitemap_rules = [("/our-shops/", "parse_sd")]
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):

@@ -3,46 +3,26 @@ import re
 import scrapy
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.spiders.carls_jr_us import CarlsJrUSSpider
 from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
+
+BRANDS = {
+    "bilka": ({"brand": "Bilka", "brand_wikidata": "Q861880"}, Categories.SHOP_SUPERMARKET),
+    "br": ({"brand": "BR", "brand_wikidata": "Q4353228"}, Categories.SHOP_TOYS),
+    "carlsjr": (CarlsJrUSSpider.item_attributes, Categories.FAST_FOOD),
+    "foetex": ({"brand": "Føtex", "brand_wikidata": "Q1480395"}, Categories.SHOP_SUPERMARKET),
+    "netto": ({"brand": "Netto", "brand_wikidata": "Q552652"}, Categories.SHOP_SUPERMARKET),
+    "salling": ({"brand": "Salling", "brand_wikidata": "Q68166349"}, Categories.SHOP_DEPARTMENT_STORE),
+    "starbucks": (STARBUCKS_SHARED_ATTRIBUTES, Categories.COFFEE_SHOP),
+}
 
 
 class SallingGroupDKSpider(scrapy.Spider):
     name = "salling_group_dk"
     start_urls = ["https://www.foetex.dk/_nuxt/app.js"]
-    brands = {
-        "netto": {"brand": "Netto", "brand_wikidata": "Q552652"},
-        "foetex": {
-            "brand": "føtex",
-            "brand_wikidata": "Q1480395",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-            "website": "https://www.foetex.dk/kundeservice/find-din-foetex/",
-        },
-        "bilka": {
-            "brand": "Bilka",
-            "brand_wikidata": "Q861880",
-            "extras": Categories.SHOP_SUPERMARKET.value,
-            "website": "https://www.bilka.dk/kundeservice/info/find-din-bilka/c/find-din-bilka/",
-        },
-        "br": {
-            "brand": "BR",
-            "brand_wikidata": "Q4353228",
-            "extras": Categories.SHOP_TOYS.value,
-            "website": "https://www.br.dk/kundeservice/find-din-br/",
-        },
-        "salling": {
-            "brand": "Salling",
-            "brand_wikidata": "Q68166349",
-            "extras": Categories.SHOP_DEPARTMENT_STORE.value,
-            "website": "https://salling.dk/kundeservice/abningstider/",
-        },
-        "starbucks": STARBUCKS_SHARED_ATTRIBUTES | {"extras": Categories.COFFEE_SHOP.value},
-        "carlsjr": {"brand": "Carl's Jr", "brand_wikidata": "Q1043486", "website": "https://carlsjr.dk/find-os/"},
-    }
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
         if token := re.search(r"Bearer.+?concat\(\w\|\|\"([-\w]+)\"", response.text):
@@ -57,8 +37,14 @@ class SallingGroupDKSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["street_address"] = item.pop("street", "")
             item["lon"], item["lat"] = store.get("coordinates", [None, None])
-            if brand := self.brands.get(store.get("brand")):
-                if store["brand"] in ["netto", "starbucks"]:
-                    continue  # POIs already covered by netto_salling & starbucks_eu spider
-                item.update(brand)
+
+            if store["brand"] in ["netto", "starbucks"]:
+                continue  # POIs already covered by netto_salling & starbucks_eu spider
+
+            if store["brand"] in BRANDS:
+                item.update(BRANDS[store["brand"]][0])
+                apply_category(BRANDS[store["brand"]][1], item)
+            else:
+                self.logger.error("Unexpected brand: {}".format(store.get("brand")))
+
             yield item

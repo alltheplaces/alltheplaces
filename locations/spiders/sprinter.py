@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
@@ -13,9 +13,9 @@ class SprinterSpider(JSONBlobSpider):
     SPRINTER = {"brand": "Sprinter", "brand_wikidata": "Q6133465"}
     SPORT_ZONE = {"brand": "Sport Zone", "brand_wikidata": "Q18485899"}
     locations_key = "stores"
-    user_agent = FIREFOX_LATEST
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[JsonRequest | Request]:
         yield JsonRequest(
             url="https://www.sprintersports.com/api/store/by_points",
             method="POST",

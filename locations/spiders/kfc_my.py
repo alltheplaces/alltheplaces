@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -13,7 +15,7 @@ class KfcMYSpider(Spider):
     allowed_domains = ["kfc.com.my"]
     start_urls = ["https://kfc.com.my/graphql"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         gql_query = """query allLocation {
     allLocation {
         locations {

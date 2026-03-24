@@ -16,12 +16,12 @@ class McdonaldsPHSpider(scrapy.Spider):
     name = "mcdonalds_ph"
     item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.com.ph/store-locator"]
-    user_agent = BROWSER_DEFAULT
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
         "DOWNLOAD_DELAY": 10,
         "RETRY_TIMES": 10,
+        "USER_AGENT": BROWSER_DEFAULT,
     }
 
     def parse(self, response: XmlResponse, **kwargs):

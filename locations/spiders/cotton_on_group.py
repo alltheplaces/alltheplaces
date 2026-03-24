@@ -1,6 +1,6 @@
 from html import unescape
 from json import loads
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Request, Response
@@ -18,7 +18,11 @@ class CottonOnGroupSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     brands = {
         "Cotton On": {"brand": "Cotton On", "brand_wikidata": "Q5175717", "category": Categories.SHOP_CLOTHES},
-        "Cotton On Body": {"brand": "Cotton On Body", "brand_wikidata": None, "category": Categories.SHOP_CLOTHES},
+        "Cotton On Body": {
+            "brand": "Cotton On Body",
+            "brand_wikidata": "Q134983660",
+            "category": Categories.SHOP_CLOTHES,
+        },
         "Cotton On Kids": {
             "brand": "Cotton On Kids",
             "brand_wikidata": "Q113961498",
@@ -27,7 +31,7 @@ class CottonOnGroupSpider(Spider):
         "Factorie": {"brand": "Factorie", "brand_wikidata": None, "category": Categories.SHOP_CLOTHES},
         "Rubi Shoes": {"brand": "Rubi", "brand_wikidata": None, "category": Categories.SHOP_SHOES},
         "Supre": {"brand": "Supré", "brand_wikidata": "Q7645153", "category": Categories.SHOP_CLOTHES},
-        "TYPO": {"brand": "Typo", "brand_wikidata": None, "category": Categories.SHOP_STATIONERY},
+        "TYPO": {"brand": "Typo", "brand_wikidata": "Q134963694", "category": Categories.SHOP_STATIONERY},
     }
     countries = {
         "AE": ("23.424076", "53.847818"),
@@ -51,7 +55,7 @@ class CottonOnGroupSpider(Spider):
         "ZA": ("-30.559482", "22.937506"),
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://cottonon.com/AU/store-finder/", callback=self.parse_csrf_token)
 
     def parse_csrf_token(self, response: Response) -> Iterable[FormRequest]:

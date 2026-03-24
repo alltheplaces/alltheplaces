@@ -83,7 +83,6 @@ if os.environ.get("ZYTE_API_KEY"):
         "scrapy_zyte_api.ScrapyZyteAPIDownloaderMiddleware": 1000,
     }
     REQUEST_FINGERPRINTER_CLASS = "scrapy_zyte_api.ScrapyZyteAPIRequestFingerprinter"
-    TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 
 DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 500
 
@@ -95,6 +94,7 @@ DOWNLOADER_MIDDLEWARES["locations.middlewares.cdnstats.CDNStatsMiddleware"] = 50
 
 EXTENSIONS = {
     "locations.extensions.add_lineage.AddLineageExtension": 100,
+    "locations.extensions.filter_stats.FilterStatsExtension": 150,
     "locations.extensions.log_stats.LogStatsExtension": 1000,
 }
 
@@ -122,6 +122,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.count_categories.CountCategoriesPipeline": 800,
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
     "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
+    "locations.pipelines.count_located_in.CountLocatedInPipeline": 830,
 }
 
 LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
@@ -148,20 +149,54 @@ LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 DEFAULT_PLAYWRIGHT_SETTINGS = {
-    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
-    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
-    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
-    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
     "DOWNLOAD_HANDLERS": {
         "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
         "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
     },
     "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document",
+    "PLAYWRIGHT_BROWSER_TYPE": "firefox",
+    "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 30 * 1000,
 }
 
 DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS = DEFAULT_PLAYWRIGHT_SETTINGS | {
-    "PLAYWRIGHT_ABORT_REQUEST": lambda request: not request.resource_type == "document"
-    and not request.resource_type == "script",
+    "PLAYWRIGHT_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script"],
+}
+
+DEFAULT_CAMOUFOX_SETTINGS = {
+    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document",
+    "CAMOUFOX_LAUNCH_OPTIONS": {
+        "headless": True,
+    },
+    "DOWNLOAD_HANDLERS": {
+        "http": "scrapy_camoufox.handler.ScrapyCamoufoxDownloadHandler",
+        "https": "scrapy_camoufox.handler.ScrapyCamoufoxDownloadHandler",
+    },
+    "DOWNLOADER_MIDDLEWARES": {"locations.middlewares.playwright_middleware.PlaywrightMiddleware": 543},
+    "ROBOTSTXT_OBEY": False,
+}
+
+DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE = DEFAULT_CAMOUFOX_SETTINGS | {
+    # Cloudflare Turnstile makes script, xhr, fetch and image requests to
+    # challenges.cloudflare.com.
+    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document"
+    and not (
+        request.resource_type in ["document", "script", "xhr", "fetch", "image"]
+        and (
+            "/cdn-cgi/challenge-platform/" in request.url or request.url.startswith("https://challenges.cloudflare.com")
+        )
+    ),
+    "CAMOUFOX_LAUNCH_OPTIONS": {
+        "config": {
+            # Required for playwright_captcha.
+            "forceScopeAccess": True,
+        },
+        # Required for playwright_captcha.
+        "disable_coop": True,
+        "headless": True,
+        # Required for playwright_captcha.
+        "i_know_what_im_doing": True,
+    },
 }
 
 REQUESTS_CACHE_ENABLED = True

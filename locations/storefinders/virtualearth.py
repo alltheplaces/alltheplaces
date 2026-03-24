@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -25,23 +27,22 @@ class VirtualEarthSpider(Spider):
       - `page_size`: optional parameter, default value is 250
     """
 
-    dataset_attributes = {"source": "api", "api": "virtualearth.net"}
+    dataset_attributes: dict = {"source": "api", "api": "virtualearth.net"}
 
-    dataset_id = ""
-    dataset_name = ""
-    api_key = ""
-    dataset_filter = "Adresstyp Eq 1"
-    dataset_select = "*"
+    dataset_id: str
+    dataset_name: str
+    api_key: str
+    dataset_filter: str = "Adresstyp Eq 1"
+    dataset_select: str = "*"
+    page_size: int = 250
 
-    page_size = 250
-
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"https://spatial.virtualearth.net/REST/v1/data/{self.dataset_id}/{self.dataset_name}?key={self.api_key}&$filter={self.dataset_filter}&$select={self.dataset_select}&$format=json&$top=1&$inlinecount=allpages",
             callback=self.pages,
         )
 
-    def pages(self, response: Response):
+    def pages(self, response: TextResponse) -> Iterable[JsonRequest]:
         total_count = int(response.json()["d"]["__count"])
         offset = 0
 
@@ -51,7 +52,7 @@ class VirtualEarthSpider(Spider):
             )
             offset += self.page_size
 
-    def parse(self, response: Response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         for feature in response.json()["d"]["results"]:
             feature["ref"] = feature.get("EntityID")
             feature["address"] = {
@@ -66,5 +67,5 @@ class VirtualEarthSpider(Spider):
 
             yield from self.parse_item(item, feature) or []
 
-    def parse_item(self, item: Feature, feature: dict):
+    def parse_item(self, item: Feature, feature: dict) -> Iterable[Feature]:
         yield item

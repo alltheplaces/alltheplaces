@@ -1,8 +1,8 @@
 import re
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
@@ -14,20 +14,74 @@ from locations.spiders.carrefour_fr import (
 )
 
 
-class CarrefourARSpider(scrapy.Spider):
+class CarrefourARSpider(Spider):
     name = "carrefour_ar"
-    # TODO: I suspect other Carrefour domains have this very same interface
-    # TODO: Figure out how to handle change of sha256Hash of persistedQuery.
-    start_urls = [
-        """https://www.carrefour.com.ar/_v/public/graphql/v1?workspace=master&maxAge=short&appsEtag=remove&domain=store&locale=es-AR&operationName=getStoreLocations&extensions={"persistedQuery":{"version":1,"sha256Hash":"81646d6f8cea93c5500fb78cce9a7e282b0a8585bb77079f6085d8e7f5036127","sender":"valtech.carrefourar-store-locator@0.x","provider":"vtex.store-graphql@2.x"},"variables":"eyJhY2NvdW50IjoiY2FycmVmb3VyYXIifQ=="}"""
-    ]
-
     brands = {
         "Express": CARREFOUR_EXPRESS,
         "Hipermercado": CARREFOUR_SUPERMARKET,
         "Market": CARREFOUR_MARKET,
         "Maxi": CARREFOUR_SUPERMARKET,
     }
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            url="https://www.carrefour.com.ar/_v/public/graphql/v1",
+            data={
+                "query": """
+                    query getStoreLocations($account: String)
+                      @context(sender: "valtech.carrefourar-store-locator@0.1.0") {
+
+                      documents(
+                        acronym: "SL",
+                        schema: "mdv1",
+                        fields: [
+                          "id",
+                          "coverPhoto",
+                          "addressLineOne",
+                          "addressLineTwo",
+                          "addressLineThree",
+                          "addressLineFour",
+                          "addressLineFive",
+                          "administrativeArea",
+                          "businessName",
+                          "additionalCategories",
+                          "labels",
+                          "locality",
+                          "subLocality",
+                          "latitude",
+                          "longitude",
+                          "postalCode",
+                          "mondayHours",
+                          "tuesdayHours",
+                          "wednesdayHours",
+                          "thursdayHours",
+                          "fridayHours",
+                          "saturdayHours",
+                          "sundayHours",
+                          "holidayHours",
+                          "specialHours",
+                          "openingDate",
+                          "storeCode",
+                          "primaryPhone",
+                          "fromTheBusiness",
+                        ],
+                        sort: "storeCode ASC",
+                        account: $account,
+                        pageSize: 1000
+                      )
+                      @context(provider: "vtex.store-graphql") {
+                        id
+                        fields {
+                          key
+                          value
+                        }
+                      }
+                    }
+                """,
+                "variables": {"account": "carrefourar"},
+                "operationName": "getStoreLocations",
+            },
+        )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for data in response.json()["data"]["documents"]:

@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 class JigsawGBSpider(Spider):
     name = "jigsaw_gb"
     item_attributes = {"brand": "Jigsaw", "brand_wikidata": "Q6192383"}
-    start_urls = ["https://jigsawimagestorage.blob.core.windows.net/jigsaw-logos/google-map-data-V3.json"]
+    start_urls = ["https://jigsawimagestorage.blob.core.windows.net/jigsaw/google-map-data.json"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["features"]:

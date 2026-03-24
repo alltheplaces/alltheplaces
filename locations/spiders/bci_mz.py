@@ -2,7 +2,7 @@ from chompjs import parse_js_object
 from scrapy import Selector, Spider
 from scrapy.http import Request
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -10,7 +10,7 @@ class BciMZSpider(Spider):
     name = "bci_mz"
     allowed_domains = ["www.bci.co.mz"]
     start_urls = ["https://www.bci.co.mz/onde-estamos/"]
-    item_attributes = {"brand": "BCI", "brand_wikidata": "Q9645132", "extras": Categories.BANK.value}
+    item_attributes = {"brand": "BCI", "brand_wikidata": "Q9645132"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
 
@@ -36,4 +36,5 @@ class BciMZSpider(Spider):
             info = Selector(text=location["infoWindow"]["content"])
             item["phone"] = info.xpath('//span[contains(text(), "Tel:")]/../text()').get()
             item["email"] = info.xpath('//span[contains(text(), "E-mail:")]/../text()').get()
+            apply_category(Categories.BANK, item)
             yield item

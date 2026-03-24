@@ -18,7 +18,7 @@ class MtsRUSpider(scrapy.Spider):
             item["lat"] = poi["longitude"]
             item["lon"] = poi["latitude"]
             self.parse_hours(item, poi)
-            apply_category(Categories.SHOP_TELECOMMUNICATION, item)
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
             yield item
 
     def parse_hours(self, item, poi):

@@ -1,13 +1,15 @@
-import json
+from json import loads
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class RuralKingUSSpider(scrapy.Spider):
+class RuralKingUSSpider(Spider):
     """
     Rural King spider that visits each store page to collect service information
     and other details. This spider identifies services like RKGuns, propane,
@@ -18,26 +20,22 @@ class RuralKingUSSpider(scrapy.Spider):
     """
 
     name = "rural_king_us"
-    item_attributes = {
-        "brand": "Rural King",
-        "brand_wikidata": "Q7380525",
-    }
+    item_attributes = {"brand": "Rural King", "brand_wikidata": "Q7380525"}
     allowed_domains = ["ruralking.com"]
-    download_delay = 0.5  # Reasonable delay to avoid overloading servers
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         # Check if a specific URL was passed for testing
         if hasattr(self, "url") and self.url:
-            yield scrapy.Request(self.url, callback=self.parse_api)
+            yield Request(self.url, callback=self.parse_api)
         else:
             # Use a single API request to get all stores at once
             # This uses origin point (0,0) with a large radius to cover the entire US
             # and maxItems=1000 to ensure all stores are returned
             all_stores_url = "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/0/longitude/0?maxItems=1000&radius=2500&siteLevelStoreSearch=false"
-            yield scrapy.Request(all_stores_url, callback=self.parse_api)
+            yield Request(all_stores_url, callback=self.parse_api)
 
     def parse_api(self, response):
-        data = json.loads(response.text)
+        data = loads(response.text)
         stores = data.get("PhysicalStore", [])
 
         if not stores:
@@ -52,7 +50,7 @@ class RuralKingUSSpider(scrapy.Spider):
             state_code = store.get("stateOrProvinceName", "").lower()
             store_page_url = f"https://www.ruralking.com/{city_slug}-{state_code}"
 
-            yield scrapy.Request(
+            yield Request(
                 url=store_page_url,
                 callback=self.parse_store_page,
                 meta={"store_data": store},
@@ -138,7 +136,7 @@ class RuralKingUSSpider(scrapy.Spider):
             apply_yes_no(Fuel.PROPANE, item, True)
 
         if "RKGuns" in services:
-            extras["shop"] = "guns"
+            extras["shop"] = "weapons"
 
         if "In-Store Pickup" in services:
             extras["pickup"] = "yes"

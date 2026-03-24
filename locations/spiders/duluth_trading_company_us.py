@@ -17,8 +17,7 @@ class DuluthTradingCompanyUSSpider(JSONBlobSpider):
     allowed_domains = ["www.duluthtrading.com"]
     start_urls = ["https://www.duluthtrading.com/mobify/proxy/ocapi/s/DTC/api/store/all/"]
     needs_json_request = True
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("store"))

@@ -1,21 +1,22 @@
+import argparse
 import re
+from typing import Iterable
 from urllib.parse import urlparse
 
-import scrapy
 from scrapy.commands import BaseRunSpiderCommand
 from scrapy.exceptions import UsageError
+from scrapy.http import Request, Response
+from scrapy.spiders import SitemapSpider
 from scrapy.spiders.sitemap import iterloc
 from scrapy.utils.sitemap import Sitemap, sitemap_urls_from_robots
 
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MySitemapSpider(scrapy.spiders.SitemapSpider):
+class MySitemapSpider(SitemapSpider):
     name = "my_sitemap_spider"
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 0.5, "USER_AGENT": BROWSER_DEFAULT}
     pages = False
-    download_delay = 0.5
     requires_proxy = False
     # Generated from the codebase, see https://github.com/alltheplaces/alltheplaces/issues/7723
     common_sitemap_patterns = [
@@ -318,7 +319,7 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
     matched_patterns = {}
 
     # Examine a url and highlight possible store pages, store finder pages of interest
-    def extract_possible_store(self, url):
+    def extract_possible_store(self, url: str) -> None:
         print(url)
         for pattern in self.common_sitemap_patterns:
             if re.search(pattern, url):
@@ -327,12 +328,12 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
                 else:
                     self.matched_patterns[pattern] = 1
 
-    def _parse_sitemap(self, response):
+    def _parse_sitemap(self, response: Response) -> Iterable[Request]:
         if response.url.endswith("/robots.txt"):
             for url in sitemap_urls_from_robots(response.text, base_url=response.url):
                 if not self.pages:
                     print(url)
-                yield scrapy.Request(url, callback=self._parse_sitemap)
+                yield Request(url, callback=self._parse_sitemap)
         else:
             body = self._get_sitemap_body(response)
             if body is None:
@@ -347,7 +348,7 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
                     if any(x.search(loc) for x in self._follow):
                         if not self.pages:
                             print(loc)
-                        yield scrapy.Request(loc, callback=self._parse_sitemap)
+                        yield Request(loc, callback=self._parse_sitemap)
             elif s.type == "urlset":
                 for loc in iterloc(it, self.sitemap_alternate_links):
                     if self.pages:
@@ -362,13 +363,13 @@ class SitemapCommand(BaseRunSpiderCommand):
     requires_project = True
     default_settings = {"LOG_ENABLED": False}
 
-    def syntax(self):
+    def syntax(self) -> str:
         return "[options] <root URL | robots.txt URL | sitemap URL>"
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return "Probe website robots.txt / sitemap.xml for spider development insights"
 
-    def add_options(self, parser):
+    def add_options(self, parser: argparse.ArgumentParser) -> None:
         super().add_options(parser)
         parser.add_argument(
             "--requires-proxy",
@@ -386,7 +387,7 @@ class SitemapCommand(BaseRunSpiderCommand):
             help="show crawler stats",
         )
 
-    def run(self, args, opts):
+    def run(self, args: list[str], opts: argparse.Namespace) -> None:
         if len(args) != 1:
             raise UsageError("Please specify a URL for the SitemapSpider")
 
@@ -399,9 +400,15 @@ class SitemapCommand(BaseRunSpiderCommand):
         MySitemapSpider.requires_proxy = opts.requires_proxy
         MySitemapSpider.pages = opts.pages
 
-        crawler = self.crawler_process.create_crawler(MySitemapSpider, **opts.spargs)
-        self.crawler_process.crawl(crawler)
-        self.crawler_process.start()
-        if opts.stats:
-            for k, v in crawler.stats.get_stats().items():
-                print(k + ": " + str(v))
+        if crawler_process := self.crawler_process:
+            crawler = crawler_process.create_crawler(MySitemapSpider, **opts.spargs)
+            crawler_process.crawl(crawler)
+            crawler_process.start()
+            if opts.stats:
+                if crawler.stats:
+                    for k, v in crawler.stats.get_stats().items():
+                        print(k + ": " + str(v))
+                else:
+                    raise RuntimeError("Statistics collector not defined for crawler process")
+        else:
+            raise RuntimeError("Crawler process not defined")

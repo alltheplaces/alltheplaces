@@ -1,19 +1,20 @@
-import json
 import re
+from json import loads
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class JmclaughlinUSSpider(scrapy.Spider):
+class JmclaughlinUSSpider(Spider):
     name = "jmclaughlin_us"
     item_attributes = {"brand": "J. McLaughlin", "brand_wikidata": "Q111230943"}
     allowed_domains = ["orders.jmclaughlin.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://orders.jmclaughlin.com/searchForStores",
             data={},
@@ -22,7 +23,7 @@ class JmclaughlinUSSpider(scrapy.Spider):
     def parse(self, response):
         raw_text = response.text[1 : len(response.text) - 1]
         raw_text = raw_text.replace('\\"', '"')
-        response_json = json.loads(raw_text)
+        response_json = loads(raw_text)
         for start_index in range(0, len(list(response_json["SupplierNames"].keys())), 25):
             supplier_ids = ",".join(list(response_json["SupplierNames"].keys())[start_index : start_index + 25])
             yield JsonRequest(
@@ -37,7 +38,7 @@ class JmclaughlinUSSpider(scrapy.Spider):
         raw_text = response.text[1 : len(response.text) - 1]
         raw_text = raw_text.replace('\\"', '"')
         raw_text = raw_text.replace("\\/", "/")
-        response_json = json.loads(raw_text)
+        response_json = loads(raw_text)
         for n in response_json:
             location = response_json[n]
             item = DictParser.parse(location)

@@ -18,8 +18,7 @@ class FoodlandGroceryUSSpider(AgileStoreLocatorSpider):
             item["name"] = "FoodLand Plus"
         else:
             item["branch"] = item.pop("name").removesuffix(" Foodland")
-
-        if m := re.search(r"store-locations/([^/]+)/$", item.pop("website")):
-            item["website"] = "https://www.foodlandgrocery.com/store-locations/{}/".format(m.group(1))
-
+        if website := item.pop("website"):
+            if m := re.search(r"store-locations/([^/]+)/$", website):
+                item["website"] = "https://www.foodlandgrocery.com/store-locations/{}/".format(m.group(1))
         yield item
