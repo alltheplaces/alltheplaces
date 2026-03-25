@@ -10,11 +10,6 @@ from locations.json_blob_spider import JSONBlobSpider
 class MoltonBrownSpider(JSONBlobSpider):
     name = "molton_brown"
     item_attributes = {"brand": "Molton Brown", "brand_wikidata": "Q17100584"}
-    #    start_urls = ["https://api.moltonbrown.com/kaowebservices/v2/moltonbrown-gb/kao/stores"]
-    # page = 0
-    # start_urls = [
-    #    f"https://api.cxur-kaocorpor1-p3-public.model-t.cc.commerce.ondemand.com/kaowebservices/v2/moltonbrown-gb/stores/?currentPage={page}"
-    # ]
     locations_key = ["stores"]
 
     custom_settings = {
@@ -32,7 +27,7 @@ class MoltonBrownSpider(JSONBlobSpider):
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
-            url=f"https://api.cxur-kaocorpor1-p3-public.model-t.cc.commerce.ondemand.com/kaowebservices/v2/moltonbrown-gb/stores/?currentPage={page}",
+            url=f"https://api.moltonbrown.com/kaowebservices/v2/moltonbrown-gb/stores/?currentPage={page}",
             meta={"page": page},
         )
 
@@ -48,6 +43,7 @@ class MoltonBrownSpider(JSONBlobSpider):
         if response.json()["pagination"]["totalPages"] > response.meta["page"]:
             if response.meta["page"] == 1:
                 # page 2 gives a 400 error
+                # page 6 also gives an error - there must be shops missing from these 2 pages It doesn't have the 2 stores in Greece for example.
                 yield self.make_request(response.meta["page"] + 2)
             else:
                 yield self.make_request(response.meta["page"] + 1)
