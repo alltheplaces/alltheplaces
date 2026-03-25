@@ -1,14 +1,13 @@
 import scrapy
+
 from locations.dict_parser import DictParser
 from locations.user_agents import FIREFOX_LATEST
-
 
 
 class NorthernToolUSSpider(scrapy.Spider):
     name = "northern_tool_us"
     item_attributes = {"brand": "Northern Tool + Equipment", "brand_wikidata": "Q43379813"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
-
 
     def start_requests(self):
         url = "https://www.northerntool.com/wcs/resources/store/6970/storelocator/location?country=USA"
