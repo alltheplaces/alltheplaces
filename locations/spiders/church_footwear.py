@@ -28,11 +28,12 @@ class ChurchFootwearSpider(JSONBlobSpider):
     locations_key = "allStores"
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        branch = feature["Description"]["displayStoreName"]
-        lowername = s = re.sub("[^0-9a-zA-Z]+", "-", branch.lower())
-        item["branch"] = branch.replace("Church's ", "")
-        item["website"] = (
-            "https://www.church-footwear.com/gb/en/store-locator/" + lowername + "/" + item["name"] + ".html"
-        )
-        item.pop("name", None)
-        yield item
+        if "SC" in item["name"]:
+            branch = feature["Description"]["displayStoreName"]
+            lowername = re.sub("[^0-9a-zA-Z]+", "-", branch.lower())
+            item["branch"] = branch.replace("Church's ", "")
+            item["website"] = (
+                "https://www.church-footwear.com/gb/en/store-locator/" + lowername + "/" + item["name"] + ".html"
+            )
+            item.pop("name", None)
+            yield item
