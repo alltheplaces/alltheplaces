@@ -41,7 +41,7 @@ class HmvSpider(JSONBlobSpider):
         return json_data
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        #Add Instagram?
-        #merge AddressOne and AddressTwo
-        #Add opening hours
+        # Add Instagram?
+        # merge AddressOne and AddressTwo
+        # Add opening hours
         yield item
