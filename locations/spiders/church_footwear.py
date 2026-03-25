@@ -1,3 +1,9 @@
+from typing import AsyncIterator, Iterable
+import re
+from scrapy import Request
+from scrapy.http import JsonRequest, TextResponse
+
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -20,3 +26,14 @@ class ChurchFootwearSpider(JSONBlobSpider):
         },
     }
     locations_key = "allStores"
+
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        branch = feature["Description"]["displayStoreName"]
+        lowername = s = re.sub('[^0-9a-zA-Z]+', '-', branch.lower())
+        item["branch"] = branch.replace("Church's ","")
+        item["website"] = "https://www.church-footwear.com/gb/en/store-locator/" + lowername + "/" + item["name"] + ".html"
+        item.pop("name", None)
+        yield item
+
+
