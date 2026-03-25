@@ -31,7 +31,6 @@ FUEL_TYPES_MAPPING = {
 
 class PetroCanadaCASpider(scrapy.Spider):
     name = "petro_canada_ca"
-    requires_proxy = True
     item_attributes = {"brand": "Petro-Canada", "brand_wikidata": "Q1208279"}
     start_urls = [
         "https://www.petro-canada.ca/en/api/petrocanada/locations?limit=10000000&range=10000000",
