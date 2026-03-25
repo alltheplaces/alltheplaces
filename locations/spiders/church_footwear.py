@@ -1,5 +1,6 @@
-from locations.user_agents import BROWSER_DEFAULT
 from locations.json_blob_spider import JSONBlobSpider
+from locations.user_agents import BROWSER_DEFAULT
+
 
 class ChurchFootwearSpider(JSONBlobSpider):
     name = "church_footwear"
@@ -16,6 +17,6 @@ class ChurchFootwearSpider(JSONBlobSpider):
             "Referer": "https://www.church-footwear.com/",
             "storeId": "churchsStore-GB",
             "Origin": "https://www.church-footwear.com",
-        }
+        },
     }
     locations_key = "allStores"
