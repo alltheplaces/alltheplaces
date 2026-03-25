@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class HMVSpider(JSONBlobSpider):
+class HmvSpider(JSONBlobSpider):
     name = "hmv"
     item_attributes = {"brand": "HMV", "brand_wikidata": "Q10854572"}
     start_urls = ["https://hmv.com/api/stores?limitTo=3000&source=StoreFinder&type=1&postcode=Birmingham"]
@@ -32,7 +32,6 @@ class HMVSpider(JSONBlobSpider):
         data = xmltodict.parse(response.text)
         json_data = json.dumps(data)
         json_data = json.loads(json_data)
-        print(json_data)
         if self.locations_key:
             if isinstance(self.locations_key, str):
                 json_data = json_data[self.locations_key]
@@ -42,5 +41,7 @@ class HMVSpider(JSONBlobSpider):
         return json_data
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        print(feature)
+        #Add Instagram?
+        #merge AddressOne and AddressTwo
+        #Add opening hours
         yield item
