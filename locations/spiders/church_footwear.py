@@ -3,6 +3,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -18,9 +19,16 @@ class ChurchFootwearSpider(JSONBlobSpider):
         if "SC" in item["name"]:
             branch = feature["Description"]["displayStoreName"]
             lowername = re.sub("[^0-9a-zA-Z]+", "-", branch.lower())
-            item["branch"] = branch.replace("Church's ", "")
+            item["branch"] = branch.removeprefix("Church's ").removeprefix("Church’s ")
+            if item["branch"] == "Factory Shop":
+                item["branch"] = None
+                item["name"] = "Church's Factory Shop"
+            else:
+                item["name"] = None
             item["website"] = (
-                "https://www.church-footwear.com/gb/en/store-locator/" + lowername + "/" + item["name"] + ".html"
+                "https://www.church-footwear.com/gb/en/store-locator/" + lowername + "/" + item["ref"] + ".html"
             )
-            item.pop("name", None)
+
+            apply_category(Categories.SHOP_SHOES, item)
+
             yield item
