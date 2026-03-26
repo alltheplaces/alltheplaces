@@ -1,7 +1,7 @@
 from copy import deepcopy
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -15,7 +15,7 @@ class HEBUSSpider(Spider):
     proxy_required = True
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = {
             "query": """
                 query StoreDetailsSearch($address: String!, $radius: Int!, $size: Int!) {

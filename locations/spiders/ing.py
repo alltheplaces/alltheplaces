@@ -15,6 +15,8 @@ class IngSpider(scrapy.Spider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
+    CASHPOINT_BRAND = {"brand": "Cash", "brand_wikidata": "Q112875867"}
+
     def parse(self, response, **kwargs):
         for store in response.json().get("locations"):
             if store["type"] == "ISP":
@@ -32,6 +34,7 @@ class IngSpider(scrapy.Spider):
                     "lat": store.get("latitude"),
                     "lon": store.get("longitude"),
                     "name": store.get("name"),
+                    "type": store.get("type"),
                 },
             )
 
@@ -57,6 +60,9 @@ class IngSpider(scrapy.Spider):
             apply_category(Categories.BANK, item)
         elif timetable := store["timetable"].get("cashpoint"):
             apply_category(Categories.ATM, item)
+
+        if response.meta.get("type") == "CASHPOINT":
+            item.update(self.CASHPOINT_BRAND)
 
         for hours in timetable:
             for day_hours in hours.get("hours", []):

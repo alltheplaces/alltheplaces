@@ -2,7 +2,7 @@ from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
@@ -73,4 +73,5 @@ class BurgerKingNGSpider(JSONBlobSpider):
                 else:
                     item["opening_hours"].add_range(DAYS[day - 1], rule["time_from"], rule["time_to"])
 
+        apply_category(Categories.FAST_FOOD, item)
         yield item

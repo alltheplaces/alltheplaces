@@ -47,9 +47,6 @@ class GeoparquetExporter(BaseItemExporter):
             gdf.to_parquet(self.file.name)
         else:
             # It's a file-like object (BytesIO), convert geometry to WKB and use pyarrow directly
-            gdf_copy = gdf.copy()
-            if "geometry" in gdf_copy.columns:
-                gdf_copy["geometry"] = gdf_copy["geometry"].to_wkb()
-
-            table = pa.Table.from_pandas(gdf_copy, preserve_index=False)
+            gdf_wkb = gdf.to_wkb()
+            table = pa.Table.from_pandas(gdf_wkb, preserve_index=False)
             pyarrow.parquet.write_table(table, self.file)

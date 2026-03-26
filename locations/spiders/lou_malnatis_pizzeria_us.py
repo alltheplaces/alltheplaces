@@ -1,4 +1,5 @@
 from html import unescape
+from typing import AsyncIterator
 
 from scrapy import Selector, Spider
 from scrapy.http import FormRequest
@@ -13,7 +14,7 @@ class LouMalnatisPizzeriaUSSpider(Spider):
     allowed_domains = ["www.loumalnatis.com"]
     start_urls = ["https://www.loumalnatis.com/resources/js/ajax_php/locatorAJAX.php"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         regions = [
             ("1", "Phoenix, AZ, USA", 33.4483771, -112.0740373),
             ("2", "Rockford, IL, USA", 42.2711311, -89.0939952),

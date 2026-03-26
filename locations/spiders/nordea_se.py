@@ -1,17 +1,17 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class NordeaSESpider(scrapy.Spider):
+class NordeaSESpider(Spider):
     name = "nordea_se"
     item_attributes = {"brand": "Nordea", "brand_wikidata": "Q1123823"}
 
-    def start_requests(self) -> Iterable[Any]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://public-api.nordea.com/api/dbf/ca/nordea-locations-v1/branches-and-atms",
             data={

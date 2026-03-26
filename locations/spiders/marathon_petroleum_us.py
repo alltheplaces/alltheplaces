@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -16,7 +18,7 @@ class MarathonPetroleumUSSpider(Spider):
         "https://www.marathonarcorewards.com/ajax_trip_planner_search.html?reason=get-station-info&reason=get-station-info"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url)
 

@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import apply_category
 from locations.items import Feature
@@ -12,7 +12,7 @@ class SosBRSpider(Spider):
     item_attributes = {"brand": "SOS Tecnologia e Educação", "brand_wikidata": "Q129847471"}
     requires_proxy = True
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
             url="https://www.sos.com.br/BuscaUnidadesMapa",
             method="POST",

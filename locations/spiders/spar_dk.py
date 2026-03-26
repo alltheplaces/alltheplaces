@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -19,11 +19,11 @@ DAYS = {
 }
 
 
-class SparDKSpider(scrapy.Spider):
+class SparDKSpider(Spider):
     name = "spar_dk"
     item_attributes = SPAR_SHARED_ATTRIBUTES
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             "https://spar.dk/search",
             data={

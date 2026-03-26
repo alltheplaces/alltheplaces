@@ -6,7 +6,7 @@ class BeSTWalAddressesBESpider(BeSTAddressesBESpider):
     name = "best_wal_addresses_be"
     dataset_attributes = {
         "attribution": "required",
-        "attribution:name": "Service public de Wallonie (SPW)  - ICAR - Points d'adresses",
+        "attribution:name": "Service public de Wallonie (SPW) - ICAR - Points d'adresses",
         "attribution:website": "https://geodata.wallonie.be/id/2998bccd-dae4-49fb-b6a5-867e6c37680f",
         "license": "Creative Commons Attribution 4.0 International",
         "license:website": "http://creativecommons.org/licenses/by/4.0/",

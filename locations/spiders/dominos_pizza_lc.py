@@ -5,4 +5,4 @@ class DominosPizzaLCSpider(DominosPizzaInternationalSpider):
     name = "dominos_pizza_lc"
     region_code = "LC"
     dpz_market = "ST_LUCIA"
-    domain = "order.golo01.dominos.com"
+    domain = "order.golo04.dominos.com"

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class VirginActiveBWNAZASpider(Spider):
     item_attributes = VIRGIN_ACTIVE_SHARED_ATTRIBUTES
     start_urls = ["https://cms.virginactive.co.za/wp-json/api/map_club_list"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_location_list)
 

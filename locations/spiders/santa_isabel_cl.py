@@ -1,10 +1,11 @@
 import re
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
 from unidecode import unidecode
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_ES, DELIMITERS_ES, OpeningHours
 from locations.items import Feature
 
@@ -14,12 +15,11 @@ class SantaIsabelCLSpider(Spider):
     item_attributes = {
         "brand": "Santa Isabel",
         "brand_wikidata": "Q7419620",
-        "extras": Categories.SHOP_SUPERMARKET.value,
     }
     allowed_domains = ["assets.santaisabel.cl"]
     start_urls = ["https://assets.santaisabel.cl/json/cms/page-1506.json"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -51,4 +51,5 @@ class SantaIsabelCLSpider(Spider):
             properties["opening_hours"] = OpeningHours()
             properties["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_ES, delimiters=DELIMITERS_ES)
 
+            apply_category(Categories.SHOP_SUPERMARKET, properties)
             yield Feature(**properties)

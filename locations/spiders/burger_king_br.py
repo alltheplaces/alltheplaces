@@ -3,7 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -34,6 +34,7 @@ class BurgerKingBRSpider(Spider):
             item["state"] = poi["administrativeArea"]
             self.parse_hours(item, poi)
             self.parse_services(item, poi)
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def parse_hours(self, item: Feature, poi: dict):

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class SweetgreenUSSpider(Spider):
     allowed_domains = ["sweetgreen.com"]
     start_urls = ["https://order.sweetgreen.com/graphql"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = "query LocationsSearchByArea($topLeft: GeoCoordinates!, $bottomRight: GeoCoordinates!, $showHidden: Boolean) { searchLocationsByBoundingBox(topLeft: $topLeft bottomRight: $bottomRight showHidden: $showHidden) {location { id name latitude longitude slug address city state zipCode isOutpost phone storeHours enabled acceptingOrders notAcceptingOrdersReason imageUrl hidden }}}"
         # The GraphQL query only returns a maximum of 100 locations, so the
         # geographic search has to be narrowed to a maximum of a 100x100mile

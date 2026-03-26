@@ -1,8 +1,8 @@
-import json
-from typing import Any, Iterable
+from json import dumps
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.exceptions import CloseSpider
 from scrapy.http import JsonRequest, Response
 
@@ -18,7 +18,7 @@ class NatwestGBSpider(Spider):
     total_pois = -1
     seen_refs = set()
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for region in postal_regions("GB"):
             yield JsonRequest(
                 url="https://www.natwest.com/content/natwest_com/en_uk/personal/search-results/locator/jcr:content/root/responsivegrid/locator/results.blapi.search.json?{}".format(
@@ -27,14 +27,15 @@ class NatwestGBSpider(Spider):
                             "search_term": region["postal_region"],
                             "search_limit": "50",
                             "search_radius": "2000",
-                            "filter": json.dumps(
+                            "filter": dumps(
                                 {
                                     "$and": [
                                         {"c_brand": {"$eq": "NatWest"}},
                                         {
                                             "$or": [
                                                 {"meta.entityType": {"$eq": "atm"}},
-                                                {"c_launch": {"$eq": "ACTIVE_BRANCH"}},
+                                                {"meta.entityType": {"$eq": "location"}},
+                                                {"meta.entityType": {"$eq": "ce_mobileBranches"}},
                                             ]
                                         },
                                     ]
@@ -59,21 +60,32 @@ class NatwestGBSpider(Spider):
                 else None
             )
 
-            if location.get("c_launch") == "ACTIVE_BRANCH":
-                apply_category(Categories.BANK, item)
+            if location.get("entityType") == "location":
+                if item["name"].endswith("Banking Hub"):
+                    item["branch"] = item.pop("name").removesuffix("Banking Hub")
+                    item["name"] = "Banking Hub"
+                    apply_category(Categories.BANK, item)
+                else:
+                    item["branch"] = item.pop("name").removeprefix("NatWest")
+                    item["name"] = "NatWest"
+                    apply_category(Categories.BANK, item)
+
                 apply_yes_no(
                     Extras.ATM, item, location.get("c_externalATM") == "1" or location.get("c_internalATM") == "1"
                 )
 
-                item["facebook"] = "https://www.facebook.com/{}".format(location["facebookVanityUrl"])
+                if "facebookVanityUrl" in location:
+                    item["facebook"] = "https://www.facebook.com/{}".format(location["facebookVanityUrl"])
+
                 item["extras"]["ref:facebook"] = location.get("facebookPageUrl", "").split("/")[-1]
-                item["extras"]["ref:google:place_id"] = location["googlePlaceId"]
+                item["extras"]["ref:google:place_id"] = location.get("googlePlaceId")
 
-                if "phone" in item and item["phone"].replace(" ", "").startswith("+443"):
-                    # not a phone number specific to given branch
-                    item["phone"] = None
-
-            else:
+                item["phone"] = None
+            elif location.get("entityType") == "ce_mobileBranches":
+                item["branch"] = item.pop("name").removesuffix(" Mobile Branch")
+                item["name"] = "NatWest Mobile Branch"
+                apply_category(Categories.BANK, item)
+            elif location.get("entityType") == "atm":
                 apply_category(Categories.ATM, item)
                 apply_yes_no(Extras.CASH_IN, item, location.get("c_cashdepositMachine") == "1")
 

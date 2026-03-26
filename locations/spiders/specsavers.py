@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -11,14 +12,25 @@ from locations.pipelines.address_clean_up import clean_address
 class SpecsaversSpider(Spider):
     name = "specsavers"
     item_attributes = {"brand": "Specsavers", "brand_wikidata": "Q2000610"}
+    BRANDS = {
+        "specsavers": ("Specsavers", "Q2000610"),
+        "louisnielsen": ("Louis Nielsen", "Q26697880"),
+    }
     allowed_domains = [
         "www.specsavers.co.uk",
         "www.specsavers.ca",
         "www.specsavers.com.au",
+        "www.specsavers.co.nz",
+        "www.specsavers.ie",
+        "www.specsavers.nl",
+        "www.specsavers.no",
+        "www.specsavers.fi",
+        "www.specsavers.se",
+        "www.louisnielsen.dk",
     ]
     requires_proxy = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for domain in self.allowed_domains:
             country_code = domain[-2:].upper()
             if country_code == "UK":
@@ -143,6 +155,9 @@ fragment sectionalNotification on StoreSectionalNotification {
                 if not store.get(store_type):
                     continue
                 item = deepcopy(base_item)
+                brand = response.url.split(".")[1]
+                if brand_details := self.BRANDS.get(brand):
+                    item["brand"], item["brand_wikidata"] = brand_details
                 item["ref"] = store[store_type]["storeNumber"]
                 item["branch"] = item.pop("name")
                 if store[store_type].get("contactInfo"):

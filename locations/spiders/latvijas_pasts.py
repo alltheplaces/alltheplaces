@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -11,12 +11,15 @@ from locations.spiders.central_england_cooperative import set_operator
 
 class LatvijasPastsSpider(Spider):
     name = "latvijas_pasts"
+    start_urls = [
+        "https://mans.pasts.lv/api/public/addresses/service_location?type[]=7&type[]=6&type[]=1&type[]=2&search=&itemsPerPage=1500&page=1"
+    ]
+    allowed_domains = ["mans.pasts.lv"]
     LATVIJAS_PASTS = {"brand": "Latvijas Pasts", "brand_wikidata": "Q1807088"}
 
-    def start_requests(self):
-        yield JsonRequest(
-            url="https://mans.pasts.lv/api/public/addresses/service_location?type[]=7&type[]=6&type[]=1&type[]=2&search=&itemsPerPage=1500&page=1"
-        )
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():

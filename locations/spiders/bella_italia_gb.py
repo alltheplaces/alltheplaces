@@ -9,7 +9,7 @@ from locations.spiders.frankie_and_bennys_gb import FrankieAndBennysGBSpider
 class BellaItaliaGBSpider(FrankieAndBennysGBSpider):
     name = "bella_italia_gb"
     item_attributes = {"brand": "Bella Italia", "brand_wikidata": "Q4883362"}
-    sitemap_urls = ["https://www.bellaitalia.co.uk/sitemap.xml"]
+    start_urls = ["https://www.bellaitalia.co.uk/restaurants"]
 
     def parse_item(self, item: Feature, response: Response, **kwargs) -> Iterable[Feature]:
         item["branch"] = (

@@ -1,17 +1,20 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.dict_parser import DictParser
 
 
-class TakarakujiJPSpider(scrapy.Spider):
+class TakarakujiJPSpider(Spider):
     name = "takarakuji_jp"
     country_code = "JP"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield self.get_page(1)
 
     def get_page(self, n):
-        return scrapy.Request(
+        return Request(
             f"https://www.takarakuji-official.jp/map/shoplist/?pageno={n}",
             meta={"page": n},
         )

@@ -1,7 +1,5 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.hours import OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.storefinders.where2getit import Where2GetItSpider
 
 BRANDS = {
     "OfficeMax": {"brand": "OfficeMax", "brand_wikidata": "Q7079111"},
@@ -9,28 +7,23 @@ BRANDS = {
 }
 
 
-class OfficeDepotSpider(SitemapSpider, StructuredDataSpider):
+class OfficeDepotSpider(Where2GetItSpider):
     name = "office_depot"
-    allowed_domains = ["officedepot.com"]
-    sitemap_urls = ["https://www.officedepot.com/storelocator_0.xml"]
-    json_parser = "json5"
-    requires_proxy = "US"
+    api_key = "592778B0-A13B-11EB-B3DB-84030D516365"
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = response.url
-        if item.get("image") == "http://www.example.com/LocationImageURL":
-            item["image"] = None
-        oh = OpeningHours()
-        for row in response.css(".thehours .hoursrow"):
-            day = row.css(".hourslabel::text").get()
-            interval = row.css(".hour::text").get().strip()
-            if interval.lower() == "closed":
-                continue
-            open_time, close_time = interval.split("-")
-            oh.add_range(day[:2], open_time, close_time, "%I:%M%p")
-        item["opening_hours"] = oh.as_opening_hours()
-
-        name = item["name"] = response.css(".storetitle::text").get().strip()
-        item.update(BRANDS[name])
-
+    def parse_item(self, item, location):
+        item["name"] = location.get("lname")
+        match location.get("icon"):
+            case "officedepot":
+                item.update(BRANDS["Office Depot"])
+            case "officemax":
+                item.update(BRANDS["OfficeMax"])
+        item["image"] = location.get("location image").get("Image URL")
+        hours_string = ""
+        for day in DAYS_FULL:
+            open_time = location.get(day.lower() + "_open")
+            close_time = location.get(day.lower() + "_close")
+            hours_string = hours_string + f" {day}: {open_time} - {close_time}"
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_string)
         yield item

@@ -1,6 +1,6 @@
 import random
 import time
-from typing import Any
+from typing import Any, AsyncIterator
 
 from chompjs import parse_js_object
 from scrapy import Spider
@@ -16,7 +16,7 @@ class SideStepSpider(Spider):
     item_attributes = {"brand": "Side Step", "brand_wikidata": "Q116894527"}
     requires_proxy = "ZA"
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         form_key = self.get_form_key()
         req_time = str(int(time.time() * 1000))
         yield FormRequest(

@@ -1,8 +1,8 @@
-import json
-from typing import Any, Iterable
+from json import loads
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -25,7 +25,7 @@ class OutdoorSupplyHardwareUSSpider(Spider):
     }
     requires_proxy = True
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url="https://www.outdoorsupplyhardware.com/Locations",
             headers={
@@ -42,7 +42,7 @@ class OutdoorSupplyHardwareUSSpider(Spider):
         for el in root:
             el.text = decode_email(el.get("data-cfemail"))
 
-        for location in json.loads(root.text_content()):
+        for location in loads(root.text_content()):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["street_address"] = item.pop("street", None)

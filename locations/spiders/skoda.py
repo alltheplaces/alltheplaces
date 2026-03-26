@@ -1,8 +1,8 @@
 from copy import deepcopy
-from typing import Any
+from typing import Any, AsyncIterator
 
 import reverse_geocoder
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
@@ -10,7 +10,7 @@ from locations.dict_parser import DictParser
 from locations.spiders.volkswagen import VolkswagenSpider
 
 
-class SkodaSpider(scrapy.Spider):
+class SkodaSpider(Spider):
     name = "skoda"
     item_attributes = {"brand": "Škoda", "brand_wikidata": "Q29637"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
@@ -35,6 +35,7 @@ class SkodaSpider(scrapy.Spider):
         308: ("fr-ma", "MA"),
         318: ("en-dz", "DZ"),
         334: ("fr-TN", "TN"),
+        352: ("vi-VN", "VN"),
         411: ("lv-LV", "LV"),
         423: ("tr-tr", "TR"),
         428: ("en-sa", "SA"),
@@ -66,7 +67,7 @@ class SkodaSpider(scrapy.Spider):
 
     available_countries_porsche_api = ["AL", "AT", "BA", "CL", "CO", "HR", "HU", "MK", "PT", "RO", "SG", "SI"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest | Request]:
         # TODO: check how to get country ids dynamically
         for country_id, country in self.available_countries_skoda_api.items():
             yield JsonRequest(

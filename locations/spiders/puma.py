@@ -1,4 +1,5 @@
 import re
+from typing import AsyncIterator
 
 import pycountry
 from scrapy.http import JsonRequest, Request
@@ -23,7 +24,7 @@ class PumaSpider(JSONBlobSpider):
         countries.pop(countries.index(country))
     start_urls = [f"https://prod.storelocator.puma.com/api/stores?market={cc}" for cc in countries]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         self.brand_name_regex = re.compile(r"^(" + "|".join(PUMA_BRANDS) + r") ", re.IGNORECASE)
         for url in self.start_urls:
             yield Request(url=url, callback=self.parse)

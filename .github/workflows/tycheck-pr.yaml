@@ -1,0 +1,21 @@
+name: Run ty
+
+on:
+  pull_request:
+    paths:
+      - "locations/**/*.py"
+      - "!locations/spiders/**"
+
+permissions:
+  contents: read
+
+jobs:
+  tycheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Run ty
+        run: uv run ty check ./locations/ --exclude 'locations/spiders/'

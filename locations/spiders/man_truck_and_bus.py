@@ -10,7 +10,7 @@ from locations.items import Feature
 class ManTruckAndBusSpider(scrapy.Spider):
     name = "man_truck_and_bus"
     start_urls = ["https://settlement.man.eu/settlement/public/mui/world.js?"]
-    item_attributes = {"brand": "MAN Truck & Bus", "brand_wikidata": "Q708667"}
+    item_attributes = {"brand": "MAN", "brand_wikidata": "Q708667"}
     vehicle_ids = [0, 1, 2]
     # 0 - Truck
     # 1 - Bus
