@@ -3,6 +3,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -31,4 +32,7 @@ class HmvGBSpider(JSONBlobSpider):
                 item["opening_hours"].add_range(day, *time.split(" - "))
         item["branch"] = item.pop("name").replace("hmv ", "")
         item["twitter"] = feature["twitter"]
+
+        apply_category(Categories.SHOP_MUSIC, item)
+
         yield item
