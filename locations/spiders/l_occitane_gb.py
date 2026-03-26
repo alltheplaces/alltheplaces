@@ -33,7 +33,6 @@ class LOccitaneGBSpider(JSONBlobSpider):
             "Sec-Fetch-Mode": "navigate",
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
-
         },
     }
     locations_key = ["stores"]
