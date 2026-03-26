@@ -12,8 +12,8 @@ from locations.user_agents import BROWSER_DEFAULT
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class HmvSpider(JSONBlobSpider):
-    name = "hmv"
+class HmvGBSpider(JSONBlobSpider):
+    name = "hmv_gb"
     item_attributes = {"brand": "HMV", "brand_wikidata": "Q10854572"}
     start_urls = ["https://hmv.com/api/stores?limitTo=3000&source=StoreFinder&type=1&postcode=Birmingham"]
     locations_key = ["StoreFinderResults", "Stores", "StoreFinderResult"]
