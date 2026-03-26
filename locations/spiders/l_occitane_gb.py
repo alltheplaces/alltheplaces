@@ -23,7 +23,6 @@ class LOccitaneGBSpider(JSONBlobSpider):
             "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
             "Alt-Used": "uk.loccitane.com",
             "Connection": "keep-alive",
-
         },
     }
     locations_key = ["stores"]
