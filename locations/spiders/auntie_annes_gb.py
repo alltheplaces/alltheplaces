@@ -28,7 +28,10 @@ class AuntieAnnesGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["addr_full"] = feature["location"]["address"]["formatted"]
-        item["city"] = feature["location"]["address"]["postal_town"]
+        if feature["location"]["address"].get("postal_town"):
+            item["city"] = feature["location"]["address"]["postal_town"]
+        else:
+            item["city"] = feature["location"]["address"]["locality"]
         item["lat"], item["lon"] = feature["location"]["geoPoint"]["lat"], feature["location"]["geoPoint"]["lng"]
         item["branch"] = item.pop("name")
         item["opening_hours"] = OpeningHours()
