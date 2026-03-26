@@ -14,5 +14,6 @@ class TousLesJoursSpider(StorepointSpider):
         if "[COMING SOON]" in item["name"]:
             return
         item["branch"] = item.pop("name")
+        item["website"] = None
         apply_category(Categories.SHOP_BAKERY, item)
         yield item
