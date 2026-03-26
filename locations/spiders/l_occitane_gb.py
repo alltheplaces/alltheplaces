@@ -18,8 +18,12 @@ class LOccitaneGBSpider(JSONBlobSpider):
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
         "DEFAULT_REQUEST_HEADERS": {
+            "Host": "uk.loccitane.com",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:148.0) Gecko/20100101 Firefox/148.0",
             "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+            "Alt-Used": "uk.loccitane.com",
+            "Connection": "keep-alive",
+
         },
     }
     locations_key = ["stores"]
