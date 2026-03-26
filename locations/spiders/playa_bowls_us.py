@@ -21,9 +21,7 @@ class PlayaBowlsUSSpider(Spider):
         item["ref"] = response.meta["link"].split("/")[-1]
         item["website"] = response.meta["link"]
 
-        address_text_list = texts = response.css(
-            'div.elementor-widget-heading .elementor-heading-title::text'
-        ).getall()
+        address_text_list = texts = response.css("div.elementor-widget-heading .elementor-heading-title::text").getall()
         address_text_list = [t.replace("\xa0", "").strip(", ") for t in address_text_list]
         item["branch"] = address_text_list[0]
         item["street_address"] = address_text_list[1]
