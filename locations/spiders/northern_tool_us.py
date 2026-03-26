@@ -21,6 +21,7 @@ class NorthernToolUSSpider(scrapy.Spider):
         stores = response.json()["PhysicalStore"]
         for store in stores:
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
             item["ref"] = store["uniqueID"]
             item["website"] = "https://www.northerntool.com/store/" + store["x_url"]
             yield item
