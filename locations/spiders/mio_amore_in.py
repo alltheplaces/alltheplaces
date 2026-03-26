@@ -15,6 +15,7 @@ class MioAmoreINSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]["stores"]:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("Mio Amore").strip(" -,")
             item["street_address"] = merge_address_lines([location["address_line_1"], location["address_line_2"]])
             item["postcode"] = location["pincode"]
             yield item
