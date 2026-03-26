@@ -10,7 +10,7 @@ class HMartUSSpider(scrapy.Spider):
     name = "h_mart_us"
     item_attributes = {"brand": "H Mart", "brand_wikidata": "Q5636306"}
 
-    def start_requests(self):
+    async def start(self):
         url = "https://www.hmart.com/_v/private/graphql/v1?workspace=master&maxAge=long&appsEtag=remove&domain=store&locale=en-US&__bindingId=0b48cd1a-951b-4fa9-8472-2b68ae904016"
 
         headers = {
@@ -19,7 +19,7 @@ class HMartUSSpider(scrapy.Spider):
             "Origin": "https://www.hmart.com",
             "Referer": "https://www.hmart.com/storelocator",
             "User-Agent": "Mozilla/5.0",
-            "x-vtex-use-https": "true",  # keep this, VTEX sometimes needs it
+            "x-vtex-use-https": "true",
         }
 
         payload = {
