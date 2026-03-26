@@ -7,22 +7,15 @@ from locations.user_agents import FIREFOX_LATEST
 class NorthernToolUSSpider(scrapy.Spider):
     name = "northern_tool_us"
     item_attributes = {"brand": "Northern Tool + Equipment", "brand_wikidata": "Q43379813"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    def start_requests(self):
-        url = "https://www.northerntool.com/wcs/resources/store/6970/storelocator/location?country=USA"
-
-        headers = {
+    start_urls = ["https://www.northerntool.com/wcs/resources/store/6970/storelocator/location?country=USA"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DEFAULT_REQUEST_HEADERS": {
             "User-Agent": FIREFOX_LATEST,
             "Accept": "application/json, text/plain, */*",
             "Referer": "https://www.northerntool.com/store-locator",
-        }
-
-        yield scrapy.Request(
-            url=url,
-            headers=headers,
-            callback=self.parse,
-        )
+        },
+    }
 
     def parse(self, response):
         stores = response.json()["PhysicalStore"]
