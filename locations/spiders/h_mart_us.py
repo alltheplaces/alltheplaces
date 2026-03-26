@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 
 
 class HMartUSSpider(Spider):
@@ -40,5 +41,12 @@ class HMartUSSpider(Spider):
             item["housenumber"] = store["address"]["number"]
             item["branch"] = item.pop("name")
             item["phone"] = store["instructions"]
+            item["opening_hours"] = self.parse_opening_hours(store["businessHours"])
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
+
+    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            oh.add_range(DAYS[rule["dayOfWeek"] - 1], rule["openingTime"], rule["closingTime"], time_format="%H:%M:%S")
+        return oh
