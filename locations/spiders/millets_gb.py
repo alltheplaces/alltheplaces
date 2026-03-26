@@ -32,6 +32,7 @@ class MilletsGBSpider(scrapy.Spider):
             item["website"] = "https://www.millets.co.uk/pages/stores/" + item["name"].lower().replace(
                 " ", "-"
             ).replace("\xa0", "-")
+            item["branch"] = item.pop("name").removeprefix("Millets").strip()
             oh = OpeningHours()
             for day, time in raw_data["hours_sets"]["primary"]["days"].items():
                 for open_close_time in time:
