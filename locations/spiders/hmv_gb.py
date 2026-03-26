@@ -1,5 +1,5 @@
-import re
 import json
+import re
 from typing import Iterable
 
 import xmltodict
@@ -8,8 +8,8 @@ from scrapy.http import TextResponse
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HmvGBSpider(JSONBlobSpider):
@@ -45,11 +45,11 @@ class HmvGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["street_address"] = merge_address_lines([feature["AddressOne"], feature["AddressTwo"]])
-#        item["instagram"] = feature["Instagram"]
+        #        item["instagram"] = feature["Instagram"]
         item["opening_hours"] = OpeningHours()
         time = str(feature["OpeningTimes"])
-        time = re.sub('<[^<]+?>', '', time)
+        time = re.sub("<[^<]+?>", "", time)
         item["opening_hours"].add_ranges_from_string(time)
-        item["branch"] = item.pop("name").replace("hmv ","")
+        item["branch"] = item.pop("name").replace("hmv ", "")
         item["twitter"] = feature["TwitterName"]
         yield item
