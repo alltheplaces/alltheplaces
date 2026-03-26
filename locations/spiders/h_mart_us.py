@@ -35,10 +35,10 @@ class HMartUSSpider(Spider):
                 continue
             store["address"]["street_address"] = store["address"].pop("street")
             item = DictParser.parse(store)
-            item.update(DictParser.parse(store["address"]))
+            item["lat"] = store["address"]["location"]["latitude"]
+            item["lon"] = store["address"]["location"]["longitude"]
             item["housenumber"] = store["address"]["number"]
-            item["branch"] = store["name"]
+            item["branch"] = item.pop("name")
             item["phone"] = store["instructions"]
-            item["ref"] = store["id"]
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
