@@ -1,15 +1,16 @@
 import json
 from typing import Any
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class MilletsGBSpider(scrapy.Spider):
+class MilletsGBSpider(Spider):
     name = "millets_gb"
     item_attributes = {"brand": "Millets", "brand_wikidata": "Q64822903"}
     start_urls = ["https://www.millets.co.uk/pages/our-stores"]
@@ -24,9 +25,8 @@ class MilletsGBSpider(scrapy.Spider):
                 callback=self.parse_location,
             )
 
-    def parse_location(self, response):
-        if data := response.json()["stores"]:
-            raw_data = data[0]
+    def parse_location(self, response: Response, **kwargs: Any) -> Any:
+        for raw_data in response.json()["stores"]:
             item = DictParser.parse(raw_data)
             item["street_address"] = merge_address_lines([raw_data["address_1"], raw_data["address_2"]])
             item["phone"] = raw_data.get("local_phone")
@@ -34,12 +34,19 @@ class MilletsGBSpider(scrapy.Spider):
                 " ", "-"
             ).replace("\xa0", "-")
             item["branch"] = item.pop("name").removeprefix("Millets").strip()
-            oh = OpeningHours()
-            for day, time in raw_data["hours_sets"]["primary"]["days"].items():
-                for open_close_time in time:
-                    open_time = open_close_time["open"]
-                    close_time = open_close_time["close"]
-                    oh.add_range(day, open_time, close_time)
-            item["opening_hours"] = oh
+
+            try:
+                item["opening_hours"] = self.parse_hours(raw_data["hours_sets"]["primary"]["days"])
+            except:
+                pass
+
+            apply_category(Categories.SHOP_OUTDOOR, item)
 
             yield item
+
+    def parse_hours(self, rules: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day, times in rules.items():
+            for rule in times:
+                oh.add_range(day, rule["open"], rule["close"])
+        return oh
