@@ -18,7 +18,7 @@ class XlBygNOSpider(scrapy.Spider):
             item["website"] = f'https://www.xl-bygg.no/butikker/{store.get("slug")}'
             item["image"] = store.get("imageUrl")
             item["branch"] = item.pop("name").removeprefix("XL-BYGG ").strip().capitalize()
-            item.pop("state") # State in source data is just their "store region"
+            item.pop("state")  # State in source data is just their "store region"
 
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
