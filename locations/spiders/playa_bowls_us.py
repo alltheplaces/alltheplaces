@@ -1,10 +1,10 @@
-import scrapy
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.items import Feature
 
 
-class PlayaBowlsUSSpider(scrapy.Spider):
+class PlayaBowlsUSSpider(Spider):
     name = "playa_bowls_us"
     item_attributes = {"brand": "Playa Bowls", "brand_wikidata": "Q114618507"}
     start_urls = ["https://playabowls.com/locations"]
@@ -18,18 +18,25 @@ class PlayaBowlsUSSpider(scrapy.Spider):
     def parse_store(self, response):
         # parse_sd does not work on this site so it had to be done manually
         item = Feature()
-        item["street_address"] = response.css('div[data-id="7eeffe5"] span::text').get()
         item["ref"] = response.meta["link"].split("/")[-1]
         item["website"] = response.meta["link"]
-        item["city"] = response.css('div[data-id="bd633ea"] span::text').get().strip(",")
-        item["state"] = response.css('div[data-id="fc3f0c2"] span::text').get()
-        item["postcode"] = response.css('div[data-id="723fa8e"] span::text').get()
 
-        phone_and_map_links = response.css('div[data-id="8640f65"] a::attr(href)').getall()
-        item["phone"] = phone_and_map_links[0].split(":")[1].replace("%20", " ")
-        # coordinates get extracted from a google maps link
-        lat = phone_and_map_links[1].split("?q=")[1].split(",")[0].replace("%20", "")
-        lon = phone_and_map_links[1].split("?q=")[1].split(",")[1].replace("%20", "")
+        address_text_list = texts = response.css(
+            'div.elementor-widget-heading .elementor-heading-title::text'
+        ).getall()
+        address_text_list = [t.replace("\xa0", "").strip(", ") for t in address_text_list]
+        item["branch"] = address_text_list[0]
+        item["street_address"] = address_text_list[1]
+        item["city"] = address_text_list[2]
+        item["state"] = address_text_list[3]
+        item["postcode"] = address_text_list[4]
+
+        phone_link = response.css('a[href^="tel:"]::attr(href)').get()
+        item["phone"] = phone_link.split(":")[1].replace("%20", " ")
+
+        google_maps_link = response.css('a[href*="google.com/maps"]::attr(href)').get()
+        lat = google_maps_link.split("?q=")[1].split(",")[0].replace("%20", "")
+        lon = google_maps_link.split("?q=")[1].split(",")[1].replace("%20", "")
         lat, lon = float(lat), float(lon)
         item["geometry"] = {"type": "Point", "coordinates": [lon, lat]}
 
