@@ -22,9 +22,13 @@ class HmvGBSpider(JSONBlobSpider):
         item["street_address"] = merge_address_lines([feature["addressOne"], feature["addressTwo"]])
         #        item["instagram"] = feature["Instagram"]
         item["opening_hours"] = OpeningHours()
-        time = str(feature["openingTimes"])
-        time = re.sub("<[^<]+?>", "", time)
-        item["opening_hours"].add_ranges_from_string(time)
+        for day, time in re.findall(
+            r"(?:<br>|<strong>)(.+?):(?:|</strong>)?<span>(.+?)</span>", feature["openingTimes"]
+        ):
+            if time == "Closed":
+                item["opening_hours"].set_closed(day)
+            else:
+                item["opening_hours"].add_range(day, *time.split(" - "))
         item["branch"] = item.pop("name").replace("hmv ", "")
         item["twitter"] = feature["twitter"]
         yield item
