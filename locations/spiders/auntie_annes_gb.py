@@ -34,6 +34,7 @@ class AuntieAnnesGBSpider(JSONBlobSpider):
             item["city"] = feature["location"]["address"]["locality"]
         item["lat"], item["lon"] = feature["location"]["geoPoint"]["lat"], feature["location"]["geoPoint"]["lng"]
         item["branch"] = item.pop("name")
+        item["country"] = feature["location"]["address"]["country"]
         item["opening_hours"] = OpeningHours()
         time = str(feature["opening_hours"])
         time = re.sub("<[^<]+?>", "", time)
