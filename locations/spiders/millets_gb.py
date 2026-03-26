@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MilletsGBSpider(scrapy.Spider):
@@ -27,7 +28,7 @@ class MilletsGBSpider(scrapy.Spider):
         if data := response.json()["stores"]:
             raw_data = data[0]
             item = DictParser.parse(raw_data)
-            item["street_address"] = raw_data["address_1"]
+            item["street_address"] = merge_address_lines([raw_data["address_1"], raw_data["address_2"]])
             item["phone"] = raw_data.get("local_phone")
             item["website"] = "https://www.millets.co.uk/pages/stores/" + item["name"].lower().replace(
                 " ", "-"
