@@ -25,6 +25,9 @@ class OfficeSpider(SitemapSpider):
         name = response.xpath('//span[@class="bold"]/text()').get()
         item["name"], item["branch"] = name.split(" ", 1)
         item["name"] = item["name"].title()
+        if "Offspring" in item["name"]:
+            item["brand"] = "Offspring Shoes"
+            item["brand:wikidata"] = "Q138802866"
         item["phone"] = response.xpath('//div[contains(span/text(), "Tel")]/text()').get()
         item["addr_full"] = merge_address_lines(
             response.xpath('//ul[contains(@class, "storelocator_addressdetails_address")]/li/text()').getall()[1:]
