@@ -124,6 +124,7 @@ Owen and published. Others are helping.
 | East Suffolk Council                   | https://www.owenboswarva.com/blog/post-addr55.htm                                                                                     |
 | Edinburgh City                         | https://edinburgh.axlr8.uk/disclose/ FoI request 58303                                                                                |
 | Gateshead Council                      | https://www.owenboswarva.com/blog/post-addr58.htm                                                                                     |
+| Glasgow City Council                   | https://www.owenboswarva.com/blog/post-addr61.htm                                                                                     |
 | Hackney Council                        | https://www.owenboswarva.com/blog/post-addr12.htm                                                                                     |
 | Haringey Council                       | https://www.owenboswarva.com/blog/post-addr52.htm                                                                                     |
 | Ipswich Borough Council                | https://www.owenboswarva.com/blog/post-addr32.htm                                                                                     |
