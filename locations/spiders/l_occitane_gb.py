@@ -37,6 +37,7 @@ class LOccitaneGBSpider(JSONBlobSpider):
     }
     locations_key = ["stores"]
     needs_json_request = True
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
