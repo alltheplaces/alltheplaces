@@ -1,47 +1,28 @@
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Request
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.location_cloud import LocationCloudSpider
 
-from locations.dict_parser import DictParser
 
-
-class SaizeriyaSpider(Spider):
+class SaizeriyaSpider(LocationCloudSpider):
     name = "saizeriya"
 
-    item_attributes = {
-        "brand_wikidata": "Q886564",
-    }
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    item_attributes = {"brand_wikidata": "Q886564"}
     skip_auto_cc_domain = True
+    api_endpoint = "https://shop.saizeriya.co.jp/sz_restaurant/api/proxy2/shop/list"
+    website_formatter = "https://shop.saizeriya.co.jp/sz_restaurant/spot/detail?code={}"
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield self.get_page(0)
 
-    def get_page(self, n):
-        return Request(
-            f"https://shop.saizeriya.co.jp/sz_restaurant/api/proxy2/shop/list?datum=wgs84&limit=500&offset={n}",
-            meta={"offset": n},
-        )
+def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
 
-    def parse(self, response):
-        data = response.json()
-        stores = data["items"]
+    item["branch"] = (
+        source_feature["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
+    )
+    item["extras"]["branch:ja-Hira"] = source_feature.get("ruby").removeprefix("サイゼリヤ")
+    if ruby := source_feature.get("ruby"):
+        item["extras"]["branch:ja-Hira"] = ruby.removeprefix("サイゼリヤ")
 
-        for store in stores:
-            item = DictParser.parse(store)
-            item["branch"] = (
-                item.pop("name").removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
-            )
-            item["ref"] = store["code"]
-            item["lat"] = store["coord"]["lat"]
-            item["lon"] = store["coord"]["lon"]
-            item["postcode"] = store.get("postal_code")
-            if ruby := store.get("ruby"):
-                item["extras"]["branch:ja-Hira"] = ruby.removeprefix("サイゼリヤ")
-            item["addr_full"] = store["address_name"]
-            item["website"] = f"https://shop.saizeriya.co.jp/sz_restaurant/spot/detail?code={store['code']}"
-            yield item
+    apply_category(Categories.RESTAURANT, item)
 
-        if data["count"]["limit"] == len(data["items"]):
-            yield self.get_page(data["count"]["limit"] + response.meta["offset"])
+    yield item
