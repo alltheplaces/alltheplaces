@@ -1,8 +1,10 @@
+from typing import Any
+
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import Feature
 
 
 class HardRockSpider(Spider):
@@ -20,7 +22,7 @@ class HardRockSpider(Spider):
         "Casino": ({"brand": "Hard Rock Casino"}, Categories.CASINO),
     }
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]["locationsList"]["items"]:
             item = DictParser.parse(location)
 
@@ -32,4 +34,4 @@ class HardRockSpider(Spider):
                 apply_category(category[1], item)
             else:
                 self.logger.error("Unexpected type: {}".format(location.get("lineOfBusiness")))
-            yield Feature(**item)
+            yield item
