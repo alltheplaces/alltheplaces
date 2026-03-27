@@ -1,10 +1,10 @@
-import json
 import urllib
 
+import chompjs
 from scrapy import Request
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -24,12 +24,13 @@ class TommyBahamaSpider(StructuredDataSpider):
     requires_proxy = True
 
     def parse(self, response: Response, **kwargs):
-        script = response.xpath("//div[@tbr-all-stores]/following-sibling::script/text()").get()
-        all_stores_data = json.loads(script[script.find("[") : script.rfind("]") + 1])
+        # The sitemap does not include the restaurants, so use this JS list instead
+        script = response.xpath("//script[contains(text(), 'window.allStoresData = ')]/text()").get()
+        all_stores_data = chompjs.parse_js_object(script)
         for store in all_stores_data:
             yield Request(
                 response.urljoin(store["url"]),
-                callback=self.parse_island if store["storeType"] == "ISLAND" else self.parse_sd,
+                callback=self.parse_island if store.get("restaurantUrl", False) else self.parse_sd,
             )
 
     def parse_island(self, response):
@@ -42,12 +43,13 @@ class TommyBahamaSpider(StructuredDataSpider):
         item["addr_full"] = merge_address_lines(
             [item["street_address"], response.xpath("//@location-city-state-zip").get()]
         )
-        item["extras"] = Categories.RESTAURANT.value
 
         oh = OpeningHours()
         for row in response.css(".hours tr"):
             oh.add_ranges_from_string(" ".join(row.xpath("*/text()").getall()))
         item["opening_hours"] = oh
+
+        apply_category(Categories.RESTAURANT, item)
 
         yield item
 
