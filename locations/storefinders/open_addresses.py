@@ -52,7 +52,7 @@ class OpenAddressesSpider(AddressSpider):
         item["geometry"] = feature["geometry"]
 
         # OA outputs nulls as empty strings, adding "or None" here means our output is None and item_attributes or other pipelines apply
-        item["ref"] = feature["properties"]["hash"]  #  feature["properties"]["id"]?
+        item["ref"] = feature["properties"]["hash"]  # feature["properties"]["id"]?
         item["housenumber"] = feature["properties"]["number"] or None
         item["street"] = feature["properties"]["street"] or None
         item["extras"]["addr:unit"] = feature["properties"]["unit"] or None
