@@ -16,15 +16,12 @@ class AuntieAnnesGBSpider(JSONBlobSpider):
     drop_attributes = {"facebook", "twitter"}
 
     def extract_json(self, response: Response) -> dict | list[dict]:
-        search = "var mapsvg_options = "
-        script = (
-            response.xpath(f"//script[contains(text(), {search!r})]/text()")
-            .get()
-            .split('"data_objects":')[1]
-            .split(',"schema":')[0]
-            + "}"
+        return chompjs.parse_js_object(
+            re.search(
+                r'"objects":(\[.+?]),"schema"',
+                response.xpath("//script[contains(text(), 'mapsvg_options')]/text()").get(),
+            ).group(1)
         )
-        return chompjs.parse_js_object(script)["objects"]
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["addr_full"] = feature["location"]["address"]["formatted"]
