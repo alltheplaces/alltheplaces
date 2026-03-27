@@ -12,6 +12,7 @@ class SamsClubSpider(Spider):
         "https://www.samsclub.com/api/node/vivaldi/browse/v2/clubfinder/list?singleLineAddr=USA&distance=50000&nbrOfStores=1000"
     ]
     custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http.HTTPDownloadHandler"}}
+    requires_proxy = True
 
     def parse(self, response):
         for store in response.json():
