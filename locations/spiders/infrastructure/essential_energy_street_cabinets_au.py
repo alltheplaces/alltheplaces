@@ -13,7 +13,7 @@ class EssentialEnergyStreetCabinetsAUSpider(ArcGISFeatureServerSpider):
     host = "services-ap1.arcgis.com"
     context_path = "3o0vFs4fJRsuYuBO/ArcGIS"
     service_id = "streetlightcontroller__STLC_"
-    layer_id = "80"
+    layer_id = "1"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["WACS_ID_A"]
