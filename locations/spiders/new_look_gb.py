@@ -11,12 +11,11 @@ class NewLookGBSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
     drop_attributes = {"facebook", "twitter", "image"}
     custom_settings = {"DOWNLOAD_DELAY": 5}
-    
 
     def sitemap_filter(self, entries):
-       for entry in entries:
-           if "closed" not in entry["loc"].lower():
-               yield entry
+        for entry in entries:
+            if "closed" not in entry["loc"].lower():
+                yield entry
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.urljoin(item["website"])
