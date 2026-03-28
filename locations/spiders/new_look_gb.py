@@ -10,7 +10,7 @@ class NewLookGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https:\/\/www\.newlook\.com\/uk\/store\/[-\w]+-(\d+)$", "parse_sd")]
     wanted_types = ["Store"]
 
-    #def sitemap_filter(self, entries):
+    # def sitemap_filter(self, entries):
     #    for entry in entries:
     #        if "closed" not in entry["loc"].lower():
     #            yield entry
