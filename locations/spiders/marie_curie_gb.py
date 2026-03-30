@@ -1,12 +1,9 @@
 import json
-from copy import deepcopy
-from typing import Any, AsyncIterator, Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy.http import JsonRequest, Response, TextResponse
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
-from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -16,7 +13,7 @@ class MarieCurieGBSpider(JSONBlobSpider):
     item_attributes = {"brand": "Marie Curie", "brand_wikidata": "Q16997351"}
     graphql_url = "https://shop.mariecurie.org.uk/api/2024-07/graphql.json"
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    locations_key = ["data","metaobjects","edges"]
+    locations_key = ["data", "metaobjects", "edges"]
     drop_attributes = {"twitter", "facebook"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -33,7 +30,7 @@ class MarieCurieGBSpider(JSONBlobSpider):
                 "query": """
 \n {\n metaobjects(type:\"store_location\", first: 250) {\n edges{\n node {\n id\n handle\n title:field(key:\"title\") {\n value\n }\n latitude:field(key:\"latitude\") {\n value\n }\n longitude:field(key:\"longitude\") {\n value\n }\n address:field(key:\"address\") {\n value\n }\n email:field(key:\"email_address\") {\n value\n }\n phone:field(key:\"phone_number\") {\n value\n }\n hours:field(key:\"opening_hours\") {\n value\n }\n }\n }\n }\n }\n
                 """,
-                #"variables": {"first": 250},
+                # "variables": {"first": 250},
             },
         )
 
@@ -53,8 +50,7 @@ class MarieCurieGBSpider(JSONBlobSpider):
                 feature[key] = feature[key]["value"]
         feature["address"] = json.loads(feature["address"])["children"][0]["children"][0]["value"]
 
-
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").replace("Marie Curie Charity Shop ","")
+        item["branch"] = item.pop("name").replace("Marie Curie Charity Shop ", "")
 
         yield item
