@@ -103,33 +103,6 @@ class ChargepointSpider(Spider):
             }
         )
 
-    def parse_station_list(self, response, bounds: dict):
-        if "error" in response.json():
-            self.logger.error(f"Server error from {response.url} : {response.json()['error']}")
-            if "station_list" not in response.json():
-                yield get_retry_request(
-                    response.request,
-                    spider=self,
-                    reason=response.json()["error"],
-                )
-
-        station_list = response.json()["station_list"]
-
-        if "error" in station_list:
-            self.logger.error(f"Error in station_list from {response.url} : {station_list['error']}")
-            if "stations" not in station_list:
-                yield get_retry_request(
-                    response.request,
-                    spider=self,
-                    reason=station_list["error"],
-                )
-
-        if station_list["page_offset"] != "last_page":
-            yield self.make_station_list_request(bounds, station_list["page_offset"])
-
-        for station in station_list.get("stations", []):
-            yield self.parse_station_in_list(station)
-
     def parse_map_data(self, response):
         if "error" in response.json():
             self.logger.error(f"Server error from {response.url} : {response.json()['error']}")
@@ -157,6 +130,33 @@ class ChargepointSpider(Spider):
                 yield self.make_map_data_request(blob["bounds"])
 
         for station in map_data.get("stations", []):
+            yield self.parse_station_in_list(station)
+
+    def parse_station_list(self, response, bounds: dict):
+        if "error" in response.json():
+            self.logger.error(f"Server error from {response.url} : {response.json()['error']}")
+            if "station_list" not in response.json():
+                yield get_retry_request(
+                    response.request,
+                    spider=self,
+                    reason=response.json()["error"],
+                )
+
+        station_list = response.json()["station_list"]
+
+        if "error" in station_list:
+            self.logger.error(f"Error in station_list from {response.url} : {station_list['error']}")
+            if "stations" not in station_list:
+                yield get_retry_request(
+                    response.request,
+                    spider=self,
+                    reason=station_list["error"],
+                )
+
+        if station_list["page_offset"] != "last_page":
+            yield self.make_station_list_request(bounds, station_list["page_offset"])
+
+        for station in station_list.get("stations", []):
             yield self.parse_station_in_list(station)
 
     def parse_station_in_list(self, station: dict):
