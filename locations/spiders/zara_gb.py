@@ -7,6 +7,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class ZaraGBSpider(JSONBlobSpider):
@@ -15,15 +16,7 @@ class ZaraGBSpider(JSONBlobSpider):
     start_urls = [
         "https://www.zara.com/uk/en/stores-locator/extended/search?lat=53.5072178&lng=-1.1275862&isDonationOnly=false&showOnlyPickup=false&showStoresCapacity=false&radius=1000&ajax=true"
     ]
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        "DEFAULT_REQUEST_HEADERS": {
-            "Host": "www.zara.com",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Connection": "keep-alive",
-        },
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
