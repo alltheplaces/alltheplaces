@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Iterable, Iterator
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
@@ -16,13 +16,13 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
     sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse_sitemap(self, response: Response):
+    def parse_sitemap(self, response: Response) -> Iterable[Request]:
         for request in super()._parse_sitemap(response):
             request.meta["playwright"] = True
             request.meta["playwright_include_page"] = True
             yield request
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: Response, **kwargs: Any) -> Iterator[Feature]:
         item = Feature()
         item["website"] = response.url
         item["ref"] = response.url.rsplit("-", 1)[1].strip("/")
