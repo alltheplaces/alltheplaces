@@ -3,6 +3,7 @@ from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -11,8 +12,6 @@ from locations.json_blob_spider import JSONBlobSpider
 class MarieCurieGBSpider(JSONBlobSpider):
     name = "marie_curie_gb"
     item_attributes = {"brand": "Marie Curie", "brand_wikidata": "Q16997351"}
-    graphql_url = "https://shop.mariecurie.org.uk/api/2024-07/graphql.json"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
     locations_key = ["data", "metaobjects", "edges"]
     drop_attributes = {"twitter", "facebook"}
 
@@ -22,15 +21,40 @@ class MarieCurieGBSpider(JSONBlobSpider):
         version = "2024-07"
         yield JsonRequest(
             url=f"https://{domain}/api/{version}/graphql.json",
-            headers={
-                # 'Content-Type': 'application/json',
-                "X-Shopify-Storefront-Access-Token": token,
-            },
+            headers={"X-Shopify-Storefront-Access-Token": token},
             data={
                 "query": """
-\n {\n metaobjects(type:\"store_location\", first: 250) {\n edges{\n node {\n id\n handle\n title:field(key:\"title\") {\n value\n }\n latitude:field(key:\"latitude\") {\n value\n }\n longitude:field(key:\"longitude\") {\n value\n }\n address:field(key:\"address\") {\n value\n }\n email:field(key:\"email_address\") {\n value\n }\n phone:field(key:\"phone_number\") {\n value\n }\n hours:field(key:\"opening_hours\") {\n value\n }\n }\n }\n }\n }\n
-                """,
-                # "variables": {"first": 250},
+                    {
+                        metaobjects(type: "store_location", first: 250) {
+                            edges {
+                                node {
+                                    id
+                                    handle
+                                    title: field(key: "title") {
+                                        value
+                                    }
+                                    latitude: field(key: "latitude") {
+                                        value
+                                    }
+                                    longitude: field(key: "longitude") {
+                                        value
+                                    }
+                                    address: field(key: "address") {
+                                        value
+                                    }
+                                    email: field(key: "email_address") {
+                                        value
+                                    }
+                                    phone: field(key: "phone_number") {
+                                        value
+                                    }
+                                    hours: field(key: "opening_hours") {
+                                        value
+                                    }
+                                }
+                            }
+                        }
+                    }""",
             },
         )
 
@@ -55,4 +79,5 @@ class MarieCurieGBSpider(JSONBlobSpider):
         item["country"] = "GB"
         item.pop("lat", None)
         item.pop("lon", None)
+        apply_category(Categories.SHOP_CHARITY, item)
         yield item
