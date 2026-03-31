@@ -30,14 +30,18 @@ class ZaraGBSpider(JSONBlobSpider):
             apply_clothes([Clothes.CHILDREN], item)
         item["street_address"] = merge_address_lines(feature["addressLines"])
 
-        oh = OpeningHours()
-        for day_time in feature["openingHours"]:
-            for open_close_time in day_time["openingHoursInterval"]:
-                oh.add_range(
-                    DAYS_FULL[day_time["weekDay"] - 1], open_close_time["openTime"], open_close_time["closeTime"]
-                )
-        item["opening_hours"] = oh
+        try:
+            item["opening_hours"] = self.parse_hours(feature["openingHours"])
+        except:
+            pass
 
         apply_category(Categories.SHOP_CLOTHES, item)
 
         yield item
+
+    def parse_hours(self, rules: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            for times in rule["openingHoursInterval"]:
+                oh.add_range(DAYS_FULL[rule["weekDay"] - 1], times["openTime"], times["closeTime"])
+        return oh
