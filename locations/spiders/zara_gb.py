@@ -6,6 +6,7 @@ from locations.categories import Categories, Clothes, apply_category, apply_clot
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ZaraGBSpider(JSONBlobSpider):
@@ -34,7 +35,8 @@ class ZaraGBSpider(JSONBlobSpider):
             apply_clothes([Clothes.MEN], item)
         if "Kids" in feature.get("sections", []):
             apply_clothes([Clothes.CHILDREN], item)
-        item["street_address"] = " ".join(feature["addressLines"])
+        item["street_address"] = merge_address_lines(feature["addressLines"])
+
         oh = OpeningHours()
         for day_time in feature["openingHours"]:
             for open_close_time in day_time["openingHoursInterval"]:
@@ -42,4 +44,7 @@ class ZaraGBSpider(JSONBlobSpider):
                     DAYS_FULL[day_time["weekDay"] - 1], open_close_time["openTime"], open_close_time["closeTime"]
                 )
         item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_CLOTHES, item)
+
         yield item
