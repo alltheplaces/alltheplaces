@@ -9,6 +9,63 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
+SOCKET_TYPES = {
+    3: "type1",
+    39: "type1_combo",
+    41: "chademo",
+    51: "type1_combo",
+    61: "chademo",
+    77: "type1_combo",
+    82: "type2",
+    111: "nacs",
+    121: "nacs",
+    131: "nacs",
+    215: "type1",
+    227: "type2",
+    231: "type2",
+    241: "type1_combo",
+    243: "type1_combo",
+    247: "type1_combo",
+    1249: "type1_combo",
+    1257: "type1",
+    1258: "type2",
+    1259: "nacs",
+    100053: "type1_combo",
+    100054: "type1_combo",
+    100067: "type2",
+    100068: "nacs",
+    100074: "type1_combo",
+    100078: "type1_combo",
+    100079: "type1_combo",
+    100080: "type1_combo",
+    100095: "type1_combo",
+    100100: "type1",
+    100102: "nacs",
+    100105: "type1_combo",
+    100107: "type1_combo",
+    100131: "type1_combo",
+    100151: "type1_combo",
+    100190: "nacs",
+    100203: "type1",
+    100271: "type1",
+    1000000025: "type2_cable",
+    1000000035: "schuko",
+    1000000045: "schuko",
+    1000000065: "type2_cable",
+    1000000095: "type1_combo",
+    1000000105: "chademo",
+    1000000225: "type1_combo",
+    1000000235: "chademo",
+    1000000325: "type2_cable",
+    1000000435: "type2_cable",
+    1000000495: "type2_cable",
+    1000000595: "chademo",
+    1000000615: "type2_combo",
+    1000000665: "type1",
+    1000000675: "type2_cable",
+    1000000685: "type3",
+}
+
 
 class ChargepointSpider(Spider):
     name = "chargepoint"
@@ -92,7 +149,7 @@ class ChargepointSpider(Spider):
             total_station_count = sum(blob["port_count"].values())
             if total_station_count <= 0:
                 pass
-            elif total_station_count < 100000:
+            elif total_station_count < 10000:
                 # If there are few enough stations to be covered by a paginated station_list request, use that
                 yield self.make_station_list_request(blob["bounds"])
             else:
@@ -121,7 +178,12 @@ class ChargepointSpider(Spider):
 
         maxPowerPerSocket = defaultdict(float)
         for port in station["ports"]:
-            socket_type = port["port_type"]
+            if port["port_type"] in SOCKET_TYPES:
+                socket_type = SOCKET_TYPES[port["port_type"]]
+            else:
+                self.logger.debug(f"On station {station['device_id']}: unknown socket type {port['port_type']}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_socket_type/{port['port_type']}")
+                socket_type = "unknown"
             apply_yes_no(f"socket:{socket_type}", item, True)
             if "available_power" in port:
                 maxPowerPerSocket[socket_type] = max(maxPowerPerSocket[socket_type], float(port["available_power"]))
