@@ -4,6 +4,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
@@ -29,10 +30,6 @@ class PlayaBowlsUSSpider(CrawlSpider):
         phone_link = response.css('a[href^="tel:"]::attr(href)').get()
         item["phone"] = phone_link.split(":")[1].replace("%20", " ")
 
-        google_maps_link = response.css('a[href*="google.com/maps"]::attr(href)').get()
-        lat = google_maps_link.split("?q=")[1].split(",")[0].replace("%20", "")
-        lon = google_maps_link.split("?q=")[1].split(",")[1].replace("%20", "")
-        lat, lon = float(lat), float(lon)
-        item["geometry"] = {"type": "Point", "coordinates": [lon, lat]}
+        extract_google_position(item, response)
 
         yield item
