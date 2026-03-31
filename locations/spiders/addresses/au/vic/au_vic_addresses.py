@@ -15,7 +15,17 @@ class AuVicAddressesSpider(ArcGISFeatureServerSpider, AddressSpider):
     context_path = "P744lA0wf4LlBZ84/ArcGIS"
     service_id = "Vicmap_Address"
     layer_id = "0"
-    field_names = ["ezi_address", "locality_name", "num_address", "num_road_address", "pfi", "postcode", "road_name", "road_type", "source_verified"]
+    field_names = [
+        "ezi_address",
+        "locality_name",
+        "num_address",
+        "num_road_address",
+        "pfi",
+        "postcode",
+        "road_name",
+        "road_type",
+        "source_verified",
+    ]
     item_attributes = {"state": "VIC", "country": "AU"}
     dataset_attributes = Licenses.CCBY4.value | {
         "attribution:name": "State of Victoria",
