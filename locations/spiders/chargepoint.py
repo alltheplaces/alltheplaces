@@ -10,6 +10,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 
 SOCKET_TYPES = {
+    1: "nema_5_20",  # unsure if nema_5_15 or nema_5_20
     3: "type1",
     39: "type1_combo",
     41: "chademo",
@@ -46,6 +47,8 @@ SOCKET_TYPES = {
     100131: "type1_combo",
     100151: "type1_combo",
     100190: "nacs",
+    100200: "type1",
+    100201: "type1",
     100203: "type1",
     100271: "type1",
     1000000025: "type2_cable",
@@ -56,6 +59,7 @@ SOCKET_TYPES = {
     1000000105: "chademo",
     1000000225: "type1_combo",
     1000000235: "chademo",
+    1000000285: "schuko",
     1000000325: "type2_cable",
     1000000435: "type2_cable",
     1000000495: "type2_cable",
@@ -80,14 +84,14 @@ class ChargepointSpider(Spider):
 
     def make_map_data_request(self, bounds: dict) -> JsonRequest:
         return self.make_request(
-            {"map_data": bounds | {"screen_width": 9200, "screen_height": 9200}}, callback=self.parse_map_data
+            {"map_data": bounds | {"screen_width": 100, "screen_height": 100}}, callback=self.parse_map_data
         )
 
     def make_station_list_request(self, bounds: dict, page_offset: str = "") -> JsonRequest:
         return self.make_request(
             {
                 "station_list": bounds
-                | {"screen_width": 9200, "screen_height": 9200, "page_size": 50, "page_offset": page_offset}
+                | {"screen_width": 100, "screen_height": 100, "page_size": 50, "page_offset": page_offset}
             },
             callback=self.parse_station_list,
             cb_kwargs={"bounds": bounds},
@@ -122,7 +126,7 @@ class ChargepointSpider(Spider):
             total_station_count = sum(blob["port_count"].values())
             if total_station_count <= 0:
                 pass
-            elif total_station_count < 10000:
+            elif total_station_count < 1000:
                 # If there are few enough stations to be covered by a paginated station_list request, use that
                 yield self.make_station_list_request(blob["bounds"])
             else:
@@ -153,7 +157,7 @@ class ChargepointSpider(Spider):
                     reason=station_list["error"],
                 )
 
-        if station_list["page_offset"] != "last_page":
+        if "page_offset" in station_list and station_list["page_offset"] != "last_page":
             yield self.make_station_list_request(bounds, station_list["page_offset"])
 
         for station in station_list.get("stations", []):
