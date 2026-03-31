@@ -18,6 +18,7 @@ class ZaraGBSpider(JSONBlobSpider):
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     drop_attributes = {"facebook", "twitter"}
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
