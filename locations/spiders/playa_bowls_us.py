@@ -1,25 +1,22 @@
-from scrapy import Spider
+from typing import Any
+
 from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.items import Feature
 
 
-class PlayaBowlsUSSpider(Spider):
+class PlayaBowlsUSSpider(CrawlSpider):
     name = "playa_bowls_us"
     item_attributes = {"brand": "Playa Bowls", "brand_wikidata": "Q114618507"}
     start_urls = ["https://playabowls.com/locations"]
+    rules = [Rule(LinkExtractor("/location/"), callback="parse_store")]
 
-    def parse(self, response: Response):
-        location_links = response.css("a::attr(href)").getall()
-        location_links = [link for link in location_links if "/location/" in link]
-        for link in location_links:
-            yield response.follow(link, callback=self.parse_store, meta={"link": link})
-
-    def parse_store(self, response):
-        # parse_sd does not work on this site so it had to be done manually
+    def parse_store(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["ref"] = response.meta["link"].split("/")[-1]
-        item["website"] = response.meta["link"]
+        item["ref"] = response.url.split("/")[-1]
+        item["website"] = response.url
 
         address_text_list = response.css("div.elementor-widget-heading .elementor-heading-title::text").getall()
         address_text_list = [t.replace("\xa0", "").strip(", ") for t in address_text_list]
