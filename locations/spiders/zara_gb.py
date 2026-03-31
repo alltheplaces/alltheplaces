@@ -37,10 +37,9 @@ class ZaraGBSpider(JSONBlobSpider):
         item["street_address"] = " ".join(feature["addressLines"])
         oh = OpeningHours()
         for day_time in feature["openingHours"]:
-            day = DAYS_FULL[day_time["weekDay"] - 1]
             for open_close_time in day_time["openingHoursInterval"]:
-                open_time = open_close_time["openTime"]
-                close_time = open_close_time["closeTime"]
-                oh.add_range(day=day, open_time=open_time, close_time=close_time)
+                oh.add_range(
+                    DAYS_FULL[day_time["weekDay"] - 1], open_close_time["openTime"], open_close_time["closeTime"]
+                )
         item["opening_hours"] = oh
         yield item
