@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, Clothes, apply_category, apply_clothes
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -35,12 +35,12 @@ class ZaraGBSpider(JSONBlobSpider):
         if "Kids" in feature.get("sections", []):
             apply_clothes([Clothes.CHILDREN], item)
         item["street_address"] = " ".join(feature["addressLines"])
-        item["opening_hours"] = OpeningHours()
-        if len(feature["openingHours"]) > 0:
-            for i in range(7):
-                item["opening_hours"].add_range(
-                    DAYS[i],
-                    feature["openingHours"][i]["openingHoursInterval"][0]["openTime"],
-                    feature["openingHours"][i]["openingHoursInterval"][0]["closeTime"],
-                )
+        oh = OpeningHours()
+        for day_time in feature["openingHours"]:
+            day = DAYS_FULL[day_time["weekDay"] - 1]
+            for open_close_time in day_time["openingHoursInterval"]:
+                open_time = open_close_time["openTime"]
+                close_time = open_close_time["closeTime"]
+                oh.add_range(day=day, open_time=open_time, close_time=close_time)
+        item["opening_hours"] = oh
         yield item
