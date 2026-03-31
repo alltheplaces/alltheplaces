@@ -4,6 +4,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
@@ -31,5 +32,6 @@ class PlayaBowlsUSSpider(CrawlSpider):
         item["phone"] = phone_link.split(":")[1].replace("%20", " ")
 
         extract_google_position(item, response)
+        apply_category(Categories.FAST_FOOD, item)
 
         yield item
