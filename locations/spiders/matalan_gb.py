@@ -37,10 +37,6 @@ class MatalanGBSpider(SitemapSpider):
             item["phone"] = None
             item["website"] = response.url
 
-            features = [f["title"] for f in location["storeFacility"] if f["icon"] == "YES"]
-            for f in features:
-                self.crawler.stats.inc_value("xc/{}".format(f))
-
             item["opening_hours"] = self.parse_hours(location["openingTimes"])
 
             if item["name"].startswith("COLLEAGUE ONLY "):
