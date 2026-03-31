@@ -1,6 +1,6 @@
-from typing import Iterable, Iterator
+from typing import Any, Iterable, Iterator
 
-from scrapy.http import Response
+from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
