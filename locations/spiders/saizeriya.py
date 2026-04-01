@@ -14,15 +14,14 @@ class SaizeriyaSpider(LocationCloudSpider):
     website_formatter = "https://shop.saizeriya.co.jp/sz_restaurant/spot/detail?code={}"
 
 
-def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
+    def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
 
-    item["branch"] = (
+        item["branch"] = (
         source_feature["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
-    )
-    item["extras"]["branch:ja-Hira"] = source_feature.get("ruby").removeprefix("サイゼリヤ")
-    if ruby := source_feature.get("ruby"):
-        item["extras"]["branch:ja-Hira"] = ruby.removeprefix("サイゼリヤ")
+        )
+        if ruby := source_feature.get("ruby"):
+            item["extras"]["branch:ja-Hira"] = ruby.removeprefix("サイゼリヤ")
 
-    apply_category(Categories.RESTAURANT, item)
+        apply_category(Categories.RESTAURANT, item)
 
-    yield item
+        yield item
