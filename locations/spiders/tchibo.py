@@ -1,23 +1,26 @@
 import re
+from typing import Any, AsyncIterator
 
+import scrapy
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
-from locations.structured_data_spider import StructuredDataSpider
 
 """
 Covers Following Countries : AT,DE,CZ,SK,HU,PL,CH,TR
 """
 
 
-class TchiboSpider(StructuredDataSpider):
+class TchiboSpider(scrapy.Spider):
     name = "tchibo"
     item_attributes = {"brand": "Tchibo", "brand_wikidata": "Q564213"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    start_urls = [
-        "https://www.tchibo.de/service/storefinder/api/plugins/storefinder/storefinder/api/stores?viewLat=0&viewLng=0&precision=1000000&size=100&page=0&storeTypeFilters=Filiale",
-    ]
+
+    async def start(self) -> AsyncIterator[Any]:
+        yield JsonRequest(
+            url="https://www.tchibo.de/service/storefinder/api/plugins/storefinder/storefinder/api/stores?page=0&size=100&viewLat=48.5335627&viewLng=12.948368&precision=100000&storeTypeFilters=Filiale"
+        )
 
     def parse(self, response, **kwargs):
         for store in response.json().get("content"):
