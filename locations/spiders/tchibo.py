@@ -4,6 +4,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -31,6 +32,8 @@ class TchiboSpider(Spider):
                 item["opening_hours"] = self.parse_hours(store["daysDto"])
             except:
                 pass
+
+            apply_category(Categories.COFFEE_SHOP, item)
 
             yield item
 
