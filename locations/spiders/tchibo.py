@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 
 """
 Covers Following Countries : AT,DE,CZ,SK,HU,PL,CH,TR
@@ -27,20 +27,14 @@ class TchiboSpider(Spider):
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
             oh = OpeningHours()
-
-            for rule, time in store.get("daysDto").items():
-                day = sanitise_day(rule)
-                for k in time.keys():
-                    if time[k] == "null":
-                        continue
-                    if k in ["morningOpening", "afternoonOpening"]:
-                        open_time = time.get(k)
-                    elif k in ["morningClosing", "afternoonClosing"]:
-                        close_time = time.get(k)
-                        if open_time and close_time in ["null", ""]:
-                            continue
-
-                        oh.add_range(day, open_time, close_time.replace("23:59:59", "23:59"))
+            for day, rule in store["daysDto"].items():
+                if rule["morningOpening"] == rule["afternoonClosing"] == "null":
+                    oh.set_closed(day)
+                elif rule["morningClosing"] != "null":
+                    oh.add_range(day, rule["morningOpening"], rule["morningClosing"])
+                    oh.add_range(day, rule["afternoonOpening"], rule["afternoonClosing"])
+                else:
+                    oh.add_range(day, rule["morningOpening"], rule["afternoonClosing"].replace("23:59:59", "23:59"))
             item["opening_hours"] = oh
 
             yield item
