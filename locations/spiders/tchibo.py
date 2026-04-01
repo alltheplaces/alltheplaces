@@ -26,16 +26,11 @@ class TchiboSpider(Spider):
             [store.update(store.pop(key)) for key in ["locationGeographicDto", "addressDto"]]
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
-            oh = OpeningHours()
-            for day, rule in store["daysDto"].items():
-                if rule["morningOpening"] == rule["afternoonClosing"] == "null":
-                    oh.set_closed(day)
-                elif rule["morningClosing"] != "null":
-                    oh.add_range(day, rule["morningOpening"], rule["morningClosing"])
-                    oh.add_range(day, rule["afternoonOpening"], rule["afternoonClosing"])
-                else:
-                    oh.add_range(day, rule["morningOpening"], rule["afternoonClosing"].replace("23:59:59", "23:59"))
-            item["opening_hours"] = oh
+
+            try:
+                item["opening_hours"] = self.parse_hours(store["daysDto"])
+            except:
+                pass
 
             yield item
 
@@ -44,3 +39,15 @@ class TchiboSpider(Spider):
         if current_page < pages:
             url = re.sub(r"page=\d+", f"page={current_page + 1}", response.url)
             yield JsonRequest(url=url)
+
+    def parse_hours(self, rules: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day, rule in rules.items():
+            if rule["morningOpening"] == rule["afternoonClosing"] == "null":
+                oh.set_closed(day)
+            elif rule["morningClosing"] != "null":
+                oh.add_range(day, rule["morningOpening"], rule["morningClosing"])
+                oh.add_range(day, rule["afternoonOpening"], rule["afternoonClosing"])
+            else:
+                oh.add_range(day, rule["morningOpening"], rule["afternoonClosing"].replace("23:59:59", "23:59"))
+        return oh
