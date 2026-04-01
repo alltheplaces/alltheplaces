@@ -1,24 +1,37 @@
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
+from locations.items import Feature
 
 
-class PlayaBowlsUSSpider(Spider):
+class PlayaBowlsUSSpider(CrawlSpider):
     name = "playa_bowls_us"
     item_attributes = {"brand": "Playa Bowls", "brand_wikidata": "Q114618507"}
-    allowed_domains = ["www.playabowls.com"]
-    start_urls = ["https://services.playabowls.com/api/locations"]
+    start_urls = ["https://playabowls.com/locations"]
+    rules = [Rule(LinkExtractor("/location/"), callback="parse_store")]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
-            location["street_address"] = location.pop("address")
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
-            item["website"] = location["link"]
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(location["timing"].replace("Open Everyday ", "Mo-Su"))
-            yield item
+    def parse_store(self, response: Response, **kwargs: Any) -> Any:
+        item = Feature()
+        item["ref"] = response.url.split("/")[-1]
+        item["website"] = response.url
+
+        address_text_list = response.css("div.elementor-widget-heading .elementor-heading-title::text").getall()
+        address_text_list = [t.replace("\xa0", "").strip(", ") for t in address_text_list]
+        item["branch"] = address_text_list[0]
+        item["street_address"] = address_text_list[1]
+        item["city"] = address_text_list[2]
+        item["state"] = address_text_list[3]
+        item["postcode"] = address_text_list[4]
+
+        phone_link = response.css('a[href^="tel:"]::attr(href)').get()
+        item["phone"] = phone_link.split(":")[1].replace("%20", " ")
+
+        extract_google_position(item, response)
+        apply_category(Categories.FAST_FOOD, item)
+
+        yield item
