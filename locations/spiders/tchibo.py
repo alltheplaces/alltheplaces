@@ -27,6 +27,7 @@ class TchiboSpider(Spider):
             [store.update(store.pop(key)) for key in ["locationGeographicDto", "addressDto"]]
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
+            item["street_address"] = item.pop("street")
 
             try:
                 item["opening_hours"] = self.parse_hours(store["daysDto"])
