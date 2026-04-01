@@ -79,6 +79,7 @@ class BlinkSpider(Spider):
                 f"https://apigw.blinknetwork.com/v3/locations/{location['locationId']}",
                 callback=self.parse_points,
                 cb_kwargs={"parent": item},
+                priority=-1,
             )
 
     def parse_points(self, response: Response, parent: Feature) -> Iterable[Feature]:
