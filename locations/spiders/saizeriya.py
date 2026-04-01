@@ -13,11 +13,10 @@ class SaizeriyaSpider(LocationCloudSpider):
     api_endpoint = "https://shop.saizeriya.co.jp/sz_restaurant/api/proxy2/shop/list"
     website_formatter = "https://shop.saizeriya.co.jp/sz_restaurant/spot/detail?code={}"
 
-
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
 
         item["branch"] = (
-        source_feature["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
+            source_feature["name"].removeprefix("サイゼリヤ ").removeprefix("Saizeriya　 ").removeprefix("Saizeriya ")
         )
         if ruby := source_feature.get("ruby"):
             item["extras"]["branch:ja-Hira"] = ruby.removeprefix("サイゼリヤ")
