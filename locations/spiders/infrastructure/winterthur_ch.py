@@ -8,6 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.licenses import Licenses
 
+
 # Open Data of the City of Winterthur, Switzerland
 class WinterthurCHSpider(Spider):
     name = "winterthur_ch"

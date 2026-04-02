@@ -1,6 +1,7 @@
 from locations.items import Feature
-from locations.spiders.addresses.be.best_addresses_be import BeSTAddressesBESpider
 from locations.licenses import Licenses
+from locations.spiders.addresses.be.best_addresses_be import BeSTAddressesBESpider
+
 
 class BeSTVlgAddressesBESpider(BeSTAddressesBESpider):
     name = "best_vlg_addresses_be"

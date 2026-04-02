@@ -8,8 +8,9 @@ import phonenumbers as pn
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import set_social_media
 from locations.json_blob_spider import JSONBlobSpider
-from locations.settings import ITEM_PIPELINES
 from locations.licenses import Licenses
+from locations.settings import ITEM_PIPELINES
+
 
 class IccuITSpider(JSONBlobSpider):
     name = "iccu_it"

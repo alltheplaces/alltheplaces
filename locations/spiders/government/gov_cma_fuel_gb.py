@@ -5,8 +5,9 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 from locations.licenses import Licenses
+from locations.user_agents import BROWSER_DEFAULT
+
 
 class GovCmaFuelGBSpider(Spider):
     name = "gov_cma_fuel_gb"

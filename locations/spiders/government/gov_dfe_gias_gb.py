@@ -5,9 +5,10 @@ from scrapy.spiders import CSVFeedSpider
 
 from locations.categories import Categories, apply_category, get_category_tags
 from locations.items import Feature, set_closed
+from locations.licenses import Licenses
 from locations.pipelines.address_clean_up import clean_address
 from locations.settings import ITEM_PIPELINES
-from locations.licenses import Licenses
+
 
 class GovDfeGiasGBSpider(CSVFeedSpider):
     name = "gov_dfe_gias_gb"

@@ -4,8 +4,9 @@ import scrapy
 
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
-from locations.materials import MATERIALS_DE
 from locations.licenses import Licenses
+from locations.materials import MATERIALS_DE
+
 
 # Open Data of the City of Zürich, https://data.stadt-zuerich.ch/
 class StadtZuerichCHSpider(scrapy.Spider):
@@ -13,7 +14,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
     allowed_domains = ["ogd.stadt-zuerich.ch"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 20}
 
-    dataset_attributes = Licenses.CC0.value |  {
+    dataset_attributes = Licenses.CC0.value | {
         "attribution:name:de": "Stadt Zürich",
         "attribution:name:en": "City of Zurich",
         "attribution:website:de": "https://www.stadt-zuerich.ch/",
