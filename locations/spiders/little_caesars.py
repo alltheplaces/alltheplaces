@@ -1,24 +1,15 @@
-from json import loads
+from datetime import datetime
+from json import dumps
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request, Response
 
+from locations.categories import Extras, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.geo import postal_regions
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
-
-DAY_MAPPING = {
-    "SUN": "Su",
-    "MON": "Mo",
-    "TUE": "Tu",
-    "WED": "We",
-    "THU": "Th",
-    "FRI": "Fr",
-    "SAT": "Sa",
-}
 
 
 class LittleCaesarsSpider(Spider):
@@ -29,85 +20,50 @@ class LittleCaesarsSpider(Spider):
         "country": "US",
     }
     allowed_domains = ["littlecaesars.com"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[Request]:
         for record in postal_regions("US"):
-            url = "https://api.cloud.littlecaesars.com/bff/api/stores?zip=" + record["postal_region"]
-            yield Request(url, self.parse, method="GET")
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        body = response.text
-        if not body:
-            return
-
-        result = loads(body)
-        stores = result.get("stores")
-
-        for store in stores:
-            store_id = store.get("storeId")
-            if not store_id:
-                continue
-
-            # We already have some details about each store returned from the search
-            # in our current response, but a superset of these details are available
-            # through another API.
+            body = dumps({"address": {"street": "", "city": "", "state": "", "zip": record["postal_region"]}})
             yield Request(
-                url=f"https://api.cloud.littlecaesars.com/bff/api/stores/{store_id}",
-                method="GET",
-                callback=self.parse_store,
+                url="https://onlo-bff-api.littlecaesars.com/api/GetClosestStores",
+                method="POST",
+                body=body,
+                headers={"Content-Type": "application/json"},
+                callback=self.parse,
             )
 
-    def parse_store(self, response):
-        body = response.text
-        if not body:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        result = response.json()
+        if not result.get("succeeded"):
             return
 
-        result = loads(body)
-        store = result.get("store")
-        if not store:
-            return
+        for store in result.get("stores", []):
+            item = DictParser.parse(store)
 
-        address = store.get("address")
-        if not address:
-            return
+            item["ref"] = store.get("locationNumber")
+            item["street_address"] = item.pop("street")
+            item["website"] = f"https://littlecaesars.com/en-us/store/{store.get('locationNumber')}"
 
-        properties = {
-            # 'siteId' appears to be the publicly facing store number.  I would prefer to use it, but
-            # it comes back as null for some stores.  'id' also appears in the data, reliably.
-            # So use it instead.
-            "ref": store.get("locationNumber"),
-            "street_address": merge_address_lines([address.get("street"), address.get("street2")]),
-            "city": address.get("city"),
-            "state": address.get("state"),
-            "postcode": address.get("zip"),
-            "phone": store.get("phone"),
-            "website": response.url,
-            "lon": store.get("longitude"),
-            "lat": store.get("latitude"),
-        }
+            features = store.get("features", {})
+            apply_yes_no(Extras.DELIVERY, item, features.get("hasDelivery"))
+            apply_yes_no(Extras.INDOOR_SEATING, item, features.get("hasDineIn"))
+            apply_yes_no(Extras.DRIVE_THROUGH, item, features.get("hasDriveThru"))
 
-        opening_hours = self.add_hours(result.get("orderingHours"))
-        if opening_hours:
-            properties["opening_hours"] = opening_hours
+            item["opening_hours"] = self.parse_hours(store.get("storeHours", []))
 
-        yield Feature(**properties)
+            yield item
 
-    def add_hours(self, ordering_hours):
-        opening_hours = OpeningHours()
-
-        for o in ordering_hours:
-            try:
-                opening_hours.add_range(
-                    DAY_MAPPING[o["dayName"]],
-                    f"{o['hourOpen']}:{o['minuteOpen']}",
-                    f"{o['hourClose']}:{o['minuteClose']}",
-                )
-            except (KeyError, ValueError):
-                # In rare cases, we've seen the day name is missing from the data.
-                # If we hit any errors at all, don't return opening hours, even if
-                # we were able to get opening hours for different day names.  Otherwise,
-                # we may give the false impression the location is closed on certain days.
-                return
-
-        return opening_hours.as_opening_hours()
+    def parse_hours(self, store_hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for entry in store_hours:
+            if entry.get("reasonForClosure"):
+                continue
+            open_time = entry.get("openTime")
+            close_time = entry.get("closeTime")
+            if not open_time or not close_time:
+                continue
+            open_dt = datetime.fromisoformat(open_time)
+            close_dt = datetime.fromisoformat(close_time)
+            day = DAYS[open_dt.weekday()]
+            oh.add_range(day, open_dt.strftime("%H:%M"), close_dt.strftime("%H:%M"))
+        return oh
