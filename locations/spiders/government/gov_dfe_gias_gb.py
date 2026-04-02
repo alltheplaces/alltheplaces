@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category, get_category_tags
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import clean_address
 from locations.settings import ITEM_PIPELINES
-
+from locations.licenses import Licenses
 
 class GovDfeGiasGBSpider(CSVFeedSpider):
     name = "gov_dfe_gias_gb"
@@ -16,13 +16,7 @@ class GovDfeGiasGBSpider(CSVFeedSpider):
     start_urls = [
         f"https://ea-edubase-api-prod.azurewebsites.net/edubase/downloads/public/edubasealldata{yesterday.year}{yesterday.month:02d}{yesterday.day:02d}.csv"
     ]
-    dataset_attributes = {
-        "license": "Open Government Licence v3.0",
-        "license:website": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-        "license:wikidata": "Q99891702",
-        "attribution": "required",
-        "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
-    }
+    dataset_attributes = Licenses.GB_OGLv3.value
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_operators.CountOperatorsPipeline": None},
