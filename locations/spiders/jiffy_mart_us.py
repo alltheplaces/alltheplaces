@@ -6,6 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.uberall import UberallSpider
 
+
 class JiffyMartUSSpider(UberallSpider):
     name = "jiffy_mart_us"
     item_attributes = {"brand": "Jiffy Mart", "brand_wikidata": "Q119592174"}
