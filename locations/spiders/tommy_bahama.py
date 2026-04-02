@@ -14,7 +14,6 @@ class TommyBahamaSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.tommybahama.com/en/sitemap.xml"]
     sitemap_rules = [("/en/store/", "parse_sd")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
     wanted_types = ["ClothingStore"]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
