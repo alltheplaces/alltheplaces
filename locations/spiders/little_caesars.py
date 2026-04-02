@@ -9,7 +9,6 @@ from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
 
 
 class LittleCaesarsSpider(Spider):
