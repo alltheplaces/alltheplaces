@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -17,5 +18,7 @@ class TommyBahamaSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["ClothingStore"]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["email"] = None
         item["ref"] = item["website"] = response.url
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item
