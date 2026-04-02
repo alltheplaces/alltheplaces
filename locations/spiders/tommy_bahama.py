@@ -17,9 +17,11 @@ class TommyBahamaSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/en/store/", "parse_sd")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     wanted_types = ["ClothingStore"]
+    search_for_twitter = False
+    search_for_facebook = False
+    search_for_email = False
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["email"] = None
         item["ref"] = item["website"] = response.url
         try:
             item["opening_hours"] = self.parse_hours(response)
