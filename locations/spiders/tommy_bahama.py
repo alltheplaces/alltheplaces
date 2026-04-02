@@ -23,10 +23,23 @@ class TommyBahamaSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = item["website"] = response.url
+
+        branch = item.pop("name")
+        if branch.startswith("Tommy Bahama Home Store"):
+            item["name"] = "Tommy Bahama Home Store"
+            item["branch"] = branch.removeprefix("Tommy Bahama Home Store").strip(" -")
+        elif branch.endswith(" (Outlet)"):
+            item["name"] = "Tommy Bahama Outlet"
+            item["branch"] = branch.removesuffix("(Outlet)")
+        else:
+            item["name"] = "Tommy Bahama"
+            item["branch"] = branch
+
         try:
             item["opening_hours"] = self.parse_hours(response)
         except:
             pass
+
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
 
