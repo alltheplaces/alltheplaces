@@ -4,6 +4,7 @@ from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -20,5 +21,27 @@ class TommyBahamaSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["email"] = None
         item["ref"] = item["website"] = response.url
+        try:
+            item["opening_hours"] = self.parse_hours(response)
+        except:
+            pass
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
+
+    def parse_hours(self, response: TextResponse) -> OpeningHours:
+        oh = OpeningHours()
+        for day, time in zip(
+            response.xpath(
+                '//div[@id="store-hours-container"]//div[@class="store-hours-columns"]/div[1]/div/text()'
+            ).getall(),
+            response.xpath(
+                '//div[@id="store-hours-container"]//div[@class="store-hours-columns"]/div[2]/div/text()'
+            ).getall(),
+        ):
+            if time == "CLOSED":
+                oh.set_closed(day)
+                continue
+            else:
+                start_time, end_time = time.replace("–", "-").split("-")
+                oh.add_range(day, start_time.strip(), end_time.strip(), time_format="%I:%M %p")
+        return oh
