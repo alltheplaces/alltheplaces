@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, OpeningHours
 from locations.items import Feature
+from locations.licenses import Licenses
 
 CATEGORY_MAPPING = {
     "ремонт телефонов, планшетов": Categories.CRAFT_ELECTRONICS_REPAIR.value | {"electronics_repair": "phone"},
@@ -73,17 +74,13 @@ class OpendataMosSpider(Spider):
     allowed_domains = ["apidata.mos.ru"]
     api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
     requires_proxy = True
-    dataset_attributes = {
-        "attribution": "required",
+    dataset_attributes = Licenses.CC3.value | {
         "attribution:name:ru": "ПОРТАЛ ОТКРЫТЫХ ДАННЫХ Правительства Москвы",
         "attribution:name:en": "OPEN DATA PORTAL of Moscow Government",
         "attribution:website": "https://data.mos.ru/",
         "contact:email": "opendata@mos.ru",
-        "license": "Creative Commons Attribution 3.0 Unported",
-        "license:website": "https://creativecommons.org/licenses/by/3.0/",
-        "license:wikidata": "Q14947546",
-        "use:commercial": "permit",
     }
+
     datasets = {}
     category_mapping = {}
 
