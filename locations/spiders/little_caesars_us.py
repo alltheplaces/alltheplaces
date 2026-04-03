@@ -10,13 +10,9 @@ from locations.geo import postal_regions
 from locations.hours import DAYS, OpeningHours
 
 
-class LittleCaesarsSpider(Spider):
-    name = "little_caesars"
-    item_attributes = {
-        "brand": "Little Caesars",
-        "brand_wikidata": "Q1393809",
-        "country": "US",
-    }
+class LittleCaesarsUSSpider(Spider):
+    name = "little_caesars_us"
+    item_attributes = {"brand": "Little Caesars", "brand_wikidata": "Q1393809"}
     allowed_domains = ["littlecaesars.com"]
 
     async def start(self) -> AsyncIterator[Request]:
