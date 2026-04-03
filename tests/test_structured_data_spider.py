@@ -123,6 +123,6 @@ def test_extract_twitter_meta_takes_precedence():
 
 def test_extract_twitter_no_twitter():
     item = Feature()
-    selector = Selector(text="<html><body><a href="https://netflix.com/movie">No social links</a></body></html>")
+    selector = Selector(text='<html><body><a href="https://netflix.com/movie">No social links</a></body></html>')
     extract_twitter(item, selector)
     assert item.get("twitter") is None
