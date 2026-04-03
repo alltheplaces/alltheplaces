@@ -1,4 +1,3 @@
-import csv
 import re
 from typing import Any
 from urllib.parse import urlencode
@@ -8,7 +7,7 @@ from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.searchable_points import open_searchable_points
+from locations.geo import point_locations
 
 CATEGORY_MAPPING = {
     "1": "Donation Site",
@@ -40,21 +39,19 @@ class GoodwillSpider(Spider):
             return
         nonce = nonce_match.group(1)
 
-        with open_searchable_points("us_centroids_100mile_radius.csv") as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                # Appears to be a silent limit of 1000 mile radius
-                # But any value larger than 200 seems to cause 500 errors
-                params = {
-                    "action": "gwlf_get_locations",
-                    "security": nonce,
-                    "radius": "200",
-                    "lat": point["latitude"],
-                    "lng": point["longitude"],
-                    "cats": "1,2,3,4,5",
-                }
+        for latitude, longitude in point_locations("us_centroids_100mile_radius.csv"):
+            # Appears to be a silent limit of 1000 mile radius
+            # But any value larger than 200 seems to cause 500 errors
+            params = {
+                "action": "gwlf_get_locations",
+                "security": nonce,
+                "radius": "200",
+                "lat": latitude,
+                "lng": longitude,
+                "cats": "1,2,3,4,5",
+            }
 
-                yield JsonRequest(url="https://www.goodwill.org/wp-admin/admin-ajax.php?" + urlencode(params))
+            yield JsonRequest(url="https://www.goodwill.org/wp-admin/admin-ajax.php?" + urlencode(params))
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         response_json = response.json()
