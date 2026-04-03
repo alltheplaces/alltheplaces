@@ -16,7 +16,7 @@ class LittleCaesarsUSSpider(Spider):
     allowed_domains = ["littlecaesars.com"]
 
     async def start(self) -> AsyncIterator[Request]:
-        for record in postal_regions("US"):
+        for record in postal_regions("US", min_population=50000, consolidate_cities=True):
             yield JsonRequest(
                 url="https://onlo-bff-api.littlecaesars.com/api/GetClosestStores",
                 data={"address": {"street": "", "city": "", "state": "", "zip": record["postal_region"]}},
