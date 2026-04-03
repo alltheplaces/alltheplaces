@@ -56,6 +56,8 @@ class LittleCaesarsSpider(Spider):
             close_time = entry.get("closeTime")
             if not open_time or not close_time:
                 continue
+            elif open_time == "Closed" and close_time == "All Day":
+                continue
             open_dt = datetime.fromisoformat(open_time)
             close_dt = datetime.fromisoformat(close_time)
             day = DAYS[open_dt.weekday()]
