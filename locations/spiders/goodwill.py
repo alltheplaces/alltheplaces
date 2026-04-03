@@ -29,7 +29,7 @@ class GoodwillSpider(Spider):
     }
     allowed_domains = ["www.goodwill.org"]
 
-    def start_requests(self):
+    async def start(self):
         yield Request(url="https://www.goodwill.org/locator/", callback=self.parse_locator)
 
     def parse_locator(self, response: Response):
@@ -69,12 +69,13 @@ class GoodwillSpider(Spider):
             item["phone"] = store.get("LocationPhoneOffice")
             item["lat"] = store.get("LocationLatitude1")
             item["lon"] = store.get("LocationLongitude1")
-            item["operator"] = store.get("Name_Parent")
 
+            item["operator"] = store.get("Name_Parent")
             item["extras"]["operator:phone"] = store.get("Phone_Parent")
             item["extras"]["operator:website"] = store.get("LocationParentWebsite")
             item["extras"]["operator:facebook"] = store.get("LocationParentURLFacebook")
             item["extras"]["operator:twitter"] = store.get("LocationParentURLTwitter")
+
             item["extras"]["store_categories"] = store.get("calcd_ServicesOffered")
 
             apply_category(Categories.SHOP_CHARITY, item)
