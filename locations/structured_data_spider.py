@@ -48,7 +48,7 @@ def extract_twitter(item: Feature | dict, selector: Selector) -> None:
         if twitter := clean_twitter(twitter):
             item["twitter"] = twitter
             return
-    for url in selector.xpath('.//a[contains(@href, "twitter.com") or contains(@href, "x.com")]/@href').getall():
+    for url in selector.xpath('.//a[contains(@href, "twitter.com") or contains(@href, "//x.com")]/@href').getall():
         if twitter := clean_twitter(url):
             item["twitter"] = twitter
             return
