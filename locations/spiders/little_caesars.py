@@ -1,9 +1,8 @@
 from datetime import datetime
-from json import dumps
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -22,13 +21,9 @@ class LittleCaesarsSpider(Spider):
 
     async def start(self) -> AsyncIterator[Request]:
         for record in postal_regions("US"):
-            body = dumps({"address": {"street": "", "city": "", "state": "", "zip": record["postal_region"]}})
-            yield Request(
+            yield JsonRequest(
                 url="https://onlo-bff-api.littlecaesars.com/api/GetClosestStores",
-                method="POST",
-                body=body,
-                headers={"Content-Type": "application/json"},
-                callback=self.parse,
+                data={"address": {"street": "", "city": "", "state": "", "zip": record["postal_region"]}},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
