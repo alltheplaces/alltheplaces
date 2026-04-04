@@ -4,12 +4,18 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
+ZYTE_API_BROWSER = {"zyte_api": {"browserHtml": True, "geolocation": "GB"}}
+
 
 class BootsSpider(scrapy.Spider):
     name = "boots"
     item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
     allowed_domains = ["www.boots.com", "www.boots.ie"]
     start_urls = ["http://www.boots.com/store-a-z", "http://www.boots.ie/store-a-z"]
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield scrapy.Request(url, meta=ZYTE_API_BROWSER)
 
     def parse_hours(self, rules) -> OpeningHours:
         hours = OpeningHours()
@@ -67,4 +73,4 @@ class BootsSpider(scrapy.Spider):
     def parse(self, response):
         urls = response.xpath('//div[@class="brand_list_viewer"]/div[@class="column"]/ul/li/a/@href').extract()
         for path in urls:
-            yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
+            yield scrapy.Request(response.urljoin(path), callback=self.parse_stores, meta=ZYTE_API_BROWSER)
