@@ -1,14 +1,12 @@
 import json
-import re
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request, Response
 
-from locations.categories import Categories, Drink, Extras, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Drink, Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
-from locations.items import set_social_media, SocialMedia
+from locations.items import SocialMedia, set_social_media
 
 ATTRIBUTE_MAP = {
     Extras.HALAL: ["serves_halal_food"],
@@ -43,6 +41,7 @@ ATTRIBUTE_MAP = {
     PaymentMethods.DEBIT_CARDS: ["pay_debit_card"],
 }
 
+
 class IkesUSSpider(Spider):
     name = "ikes_us"
     item_attributes = {"brand": "Ike's Love and Sandwiches", "brand_wikidata": "Q112028897"}
@@ -76,7 +75,7 @@ class IkesUSSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location.get("uid")
             item["branch"] = item.pop("name", "")
-            
+
             if openDate := location.get("openDate"):
                 item["extras"]["start_date"] = openDate
 
@@ -85,7 +84,6 @@ class IkesUSSpider(Spider):
 
             attributes = location.get("location", {}).get("attributes", {})
 
-
             for extra, keys in ATTRIBUTE_MAP.items():
                 values = [attributes.get(key) for key in keys]
                 if "yes" in values:
@@ -93,8 +91,7 @@ class IkesUSSpider(Spider):
                 elif "no" in values:
                     apply_yes_no(extra, item, False, apply_positive_only=False)
 
-
-            item["extras"]["website:menu"] =attributes.get("url_menu")
+            item["extras"]["website:menu"] = attributes.get("url_menu")
 
             payment_forms = location.get("location", {}).get("payment_forms", [])
             apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in payment_forms)
