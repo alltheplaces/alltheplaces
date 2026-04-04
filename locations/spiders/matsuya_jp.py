@@ -12,9 +12,9 @@ class MatsuyaJPSpider(LocationCloudSpider):
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
 
-        if "併設" in source_feature.get("name"): #removes locations with multiple brands
+        if "併設" in source_feature.get("name"):  # removes locations with multiple brands
             return
-        
+
         match source_feature["categories"][0]["code"]:
             case "0101":
                 item["branch"] = source_feature.get("name").removeprefix("松屋 ")
@@ -24,7 +24,7 @@ class MatsuyaJPSpider(LocationCloudSpider):
                 item["branch"] = source_feature.get("name")
                 item["extras"]["branch:ja-Hira"] = source_feature.get("ruby")
                 item["brand"] = source_feature["categories"][0]["name"]
-        
+
         apply_category(Categories.RESTAURANT, item)
-        
+
         yield item
