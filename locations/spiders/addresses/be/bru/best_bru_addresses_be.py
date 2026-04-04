@@ -5,7 +5,7 @@ from locations.spiders.addresses.be.best_addresses_be import BeSTAddressesBESpid
 
 class BeSTBruAddressesBESpider(BeSTAddressesBESpider):
     name = "best_bru_addresses_be"
-    dataset_attributes = Licenses.CC4.value | {
+    dataset_attributes = Licenses.CCBY4.value | {
         "attribution:name": "Paradigm.brussels",
         "attribution:website": "https://datastore.brussels/web/data/dataset/a8c9ccde-5c2b-11ed-913a-900f0cda5d5c",
         "use:commercial": "permit",
