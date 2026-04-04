@@ -23,7 +23,7 @@ class MatsuyaJPSpider(LocationCloudSpider):
             case _:
                 item["branch"] = source_feature.get("name")
                 item["extras"]["branch:ja-Hira"] = source_feature.get("ruby")
-                item["brand"] = source_feature["categories"][0]["name"]
+                item["brand"] = item["name"] = source_feature["categories"][0]["name"]
 
         apply_category(Categories.RESTAURANT, item)
 
