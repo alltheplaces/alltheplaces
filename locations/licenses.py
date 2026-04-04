@@ -8,7 +8,7 @@ class Licenses(Enum):
         "license:wikidata": "Q6938433",
         "attribution": "optional",
     }
-    CC4 = {
+    CCBY4 = {
         "license": "Creative Commons Attribution 4.0 International",
         "license:website": "http://creativecommons.org/licenses/by/4.0/",
         "license:wikidata": "Q20007257",
