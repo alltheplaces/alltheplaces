@@ -19,7 +19,9 @@ class FreshnessBurgerJPSpider(Spider):
 
             item = DictParser.parse(store)
 
-            item["branch"] = store.get("nameKanji").removeprefix("フレッシュネスバーガー").removeprefix("チーズネスバーガー")
+            item["branch"] = (
+                store.get("nameKanji").removeprefix("フレッシュネスバーガー").removeprefix("チーズネスバーガー")
+            )
             item["extras"]["branch:ja-Hira"] = store.get("nameKana")
             item["website"] = f"https://search.freshnessburger.co.jp/detail/{store.get('storeCode')}/"
             item["extras"]["start_date"] = store.get("openingDate")
