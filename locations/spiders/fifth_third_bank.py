@@ -53,6 +53,8 @@ class FifthThirdBankSpider(CrawlSpider):
         for day, time in json.loads(response.xpath("//@data-days").get()).items():
             day = day.replace("Hours", "")
             if time:
+                if time == "false":
+                    continue
                 if time == "Closed":
                     oh.set_closed(day)
                 else:
@@ -61,6 +63,8 @@ class FifthThirdBankSpider(CrawlSpider):
                         open_time = open_time.replace("am", ":00am")
                     if ":" not in close_time:
                         close_time = close_time.replace("pm", ":00pm")
+                    open_time = open_time.replace(" ", "")
+                    close_time = close_time.replace(" ", "")
                     oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M%p")
         item["opening_hours"] = oh
         yield item
