@@ -195,9 +195,9 @@ class CheckItemPropertiesPipeline:
             if not isinstance(twitter, str):
                 if spider.crawler.stats:
                     spider.crawler.stats.inc_value("atp/field/twitter/wrong_type")
-            elif not (self.url_regex.match(twitter) and "twitter.com" in twitter) and not self.twitter_regex.match(
-                twitter
-            ):
+            elif not (
+                self.url_regex.match(twitter) and ("twitter.com" in twitter or "x.com" in twitter)
+            ) and not self.twitter_regex.match(twitter):
                 if spider.crawler.stats:
                     spider.crawler.stats.inc_value("atp/field/twitter/invalid")
         else:
