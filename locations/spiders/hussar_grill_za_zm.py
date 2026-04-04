@@ -18,6 +18,7 @@ ATTRIBUTE_EXTRAS = {
     "Wheelchair Accessible": (Extras.WHEELCHAIR, True),
 }
 
+
 class HussarGrillZAZMSpider(JSONBlobSpider):
     name = "hussar_grill_za_zm"
     item_attributes = {
@@ -38,7 +39,7 @@ class HussarGrillZAZMSpider(JSONBlobSpider):
 
         item["ref"] = feature.get("location_code")
         item["branch"] = item.pop("name").removeprefix("The Hussar Grill ")
-       
+
         item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:
             if not (day_hours := feature.get(day.lower())):
