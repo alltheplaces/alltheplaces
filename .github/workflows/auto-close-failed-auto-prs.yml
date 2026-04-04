@@ -1,7 +1,7 @@
 name: Auto-close failed remove-requires-proxy PRs
 
 on:
-  status: {}
+  status:
 
 permissions:
   checks: read
@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Close auto PRs created by remove-requires-proxy
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

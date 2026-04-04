@@ -15,7 +15,7 @@ class GsfCarPartsGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "GSF Car Parts", "brand_wikidata": "Q80963064"}
     sitemap_urls = ["https://www.gsfcarparts.com/robots.txt"]
     sitemap_follow = ["branch-sitemap"]
-    sitemap_rules = [(r"/branches/(\w+)$", "parse")]
+    sitemap_rules = [(r"/branches/([-\w]+)$", "parse")]
     wanted_types = ["Organization"]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:

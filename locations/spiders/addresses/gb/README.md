@@ -105,8 +105,10 @@ Owen and published. Others are helping.
 | Local Authority                        | Links                                                                                                                                 |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | Aberdeenshire Council                  | https://www.owenboswarva.com/blog/post-addr47.htm                                                                                     |
+| Arun District Council                  | https://www.owenboswarva.com/blog/post-addr67.htm                                                                                     |
 | Barnet Council                         | https://www.owenboswarva.com/blog/post-addr23.htm                                                                                     |
 | Birmingham City Council                | https://www.owenboswarva.com/blog/post-addr11.htm                                                                                     |
+| Borough Council of King's Lynn & West Norfolk | https://www.owenboswarva.com/blog/post-addr66.htm                                                                              |
 | Bradford Council                       | https://www.owenboswarva.com/blog/post-addr29.htm                                                                                     |
 | Brent Council                          | https://www.owenboswarva.com/blog/post-addr49.htm                                                                                     |
 | Brighton & Hove City Council           | https://www.owenboswarva.com/blog/post-addr26.htm                                                                                     |
@@ -114,6 +116,7 @@ Owen and published. Others are helping.
 | Buckinghamshire Council                | https://www.owenboswarva.com/blog/post-addr22.htm                                                                                     |
 | Camden Council                         | https://www.owenboswarva.com/blog/post-addr21.htm                                                                                     |
 | Cheshire East Council                  | https://www.owenboswarva.com/blog/post-addr28.htm                                                                                     |
+| City of Doncaster Council              | https://www.owenboswarva.com/blog/post-addr59.htm                                                                                     |
 | City of Wolverhampton Council          | https://www.owenboswarva.com/blog/post-addr24.htm                                                                                     |
 | Cornwall Council                       | https://www.cornwall.gov.uk/council-tax/your-council-tax-bill/council-tax-data/ https://www.owenboswarva.com/blog/post-addr14.htm     |
 | Dorset Council                         | https://www.owenboswarva.com/blog/post-addr20.htm                                                                                     |
@@ -145,7 +148,7 @@ Owen and published. Others are helping.
 | Plymouth City Council                  | https://www.owenboswarva.com/blog/post-addr35.htm                                                                                     |
 | Rhondda Cynon Taf                      | https://www.owenboswarva.com/blog/post-addr41.htm                                                                                     |
 | Royal Borough of Greenwich             | https://www.owenboswarva.com/blog/post-addr40.htm                                                                                     |
-| Rushcliffe Borough Council             | https://www.owenboswarva.com/blog/post-addr13.htm                                                                                     |
+| Rushcliffe Borough Council             | https://www.owenboswarva.com/blog/post-addr13.htm https://www.owenboswarva.com/blog/post-addr60.htm                                   |
 | Sheffield City Council                 | https://www.owenboswarva.com/blog/post-addr16.htm                                                                                     |
 | Somerset Council                       | https://www.owenboswarva.com/blog/post-addr42.htm                                                                                     |
 | Southwark Council                      | https://www.owenboswarva.com/blog/post-addr33.htm                                                                                     |

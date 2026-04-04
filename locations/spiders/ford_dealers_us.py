@@ -32,7 +32,7 @@ class FordDealersUSSpider(scrapy.Spider):
         )
 
     def parse_state(self, response, **kwargs):
-        state_list = (re.search(r"var\s*u\s*=\s*\"(.+)\"\.split\(\";\"\),", response.text).group(1)).split(";")
+        state_list = (re.search(r"var\s*\w+\s*=\s*\"(.+)\"\.split\(\";\"\),", response.text).group(1)).split(";")
         for state in state_list:
             yield JsonRequest(
                 url="https://www.ford.com/cxservices/dealer/Dealers.json?make=Ford&state={}".format(state),

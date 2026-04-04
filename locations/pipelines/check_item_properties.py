@@ -114,27 +114,27 @@ class CheckItemPropertiesPipeline:
                             if len(coords) == 2:
                                 lat_untyped = coords[1]
                                 lon_untyped = coords[0]
-                    elif geometry.get("type") in [
-                        "MultiPoint",
-                        "LineString",
-                        "MultiLineString",
-                        "Polygon",
-                        "MultiPolygon",
-                    ]:
-                        # Other geometry types are currently not validated by
-                        # ATP so this pipeline will assume they're correct.
-                        item.pop("lat", None)
-                        item.pop("lon", None)
-                        return
-                    else:
-                        # Invalid geometry type. Refer to RFC 7946 for valid
-                        # types.
-                        if spider.crawler.stats:
-                            spider.crawler.stats.inc_value("atp/field/geometry/invalid")
-                        item.pop("lat", None)
-                        item.pop("lon", None)
-                        item.pop("geometry", None)
-                        return
+                elif geometry.get("type") in [
+                    "MultiPoint",
+                    "LineString",
+                    "MultiLineString",
+                    "Polygon",
+                    "MultiPolygon",
+                ]:
+                    # Other geometry types are currently not validated by
+                    # ATP so this pipeline will assume they're correct.
+                    item.pop("lat", None)
+                    item.pop("lon", None)
+                    return
+                else:
+                    # Invalid geometry type. Refer to RFC 7946 for valid
+                    # types.
+                    if spider.crawler.stats:
+                        spider.crawler.stats.inc_value("atp/field/geometry/invalid")
+                    item.pop("lat", None)
+                    item.pop("lon", None)
+                    item.pop("geometry", None)
+                    return
             else:
                 # Invalid geometry type.
                 if spider.crawler.stats:
@@ -195,9 +195,9 @@ class CheckItemPropertiesPipeline:
             if not isinstance(twitter, str):
                 if spider.crawler.stats:
                     spider.crawler.stats.inc_value("atp/field/twitter/wrong_type")
-            elif not (self.url_regex.match(twitter) and "twitter.com" in twitter) and not self.twitter_regex.match(
-                twitter
-            ):
+            elif not (
+                self.url_regex.match(twitter) and ("twitter.com" in twitter or "x.com" in twitter)
+            ) and not self.twitter_regex.match(twitter):
                 if spider.crawler.stats:
                     spider.crawler.stats.inc_value("atp/field/twitter/invalid")
         else:
