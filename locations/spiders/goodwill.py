@@ -1,14 +1,13 @@
-import base64
-import csv
-from typing import Any, AsyncIterator
+import re
+from typing import Any
 from urllib.parse import urlencode
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
-from locations.searchable_points import open_searchable_points
+from locations.dict_parser import DictParser
+from locations.geo import point_locations
 
 CATEGORY_MAPPING = {
     "1": "Donation Site",
@@ -16,11 +15,9 @@ CATEGORY_MAPPING = {
     "3": "Retail Store",
     "4": "Job & Career Support",
     "5": "Headquarters",
+    "6": "Staffing Services",
+    "7": "Specialty Retail",
 }
-
-
-def b64_wrap(obj) -> str:
-    return base64.b64encode(str(obj).encode()).decode()
 
 
 class GoodwillSpider(Spider):
@@ -31,44 +28,56 @@ class GoodwillSpider(Spider):
         "nsi_id": "-1",
     }
     allowed_domains = ["www.goodwill.org"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        with open_searchable_points("us_centroids_25mile_radius.csv") as points:
-            reader = csv.DictReader(points)
-            for point in reader:
-                # Unable to find a way to specify a search radius
-                # Appears to use a set search radius somewhere > 25mi, using 25mi to be safe
-                params = {
-                    "lat": point["latitude"],
-                    "lng": point["longitude"],
-                    "cats": "3,1,2,4,5",  # Includes donation sites
-                }
+    async def start(self):
+        yield Request(url="https://www.goodwill.org/locator/", callback=self.parse_locator)
 
-                yield JsonRequest(url="https://www.goodwill.org/GetLocAPI.php?" + urlencode(params))
+    def parse_locator(self, response: Response):
+        nonce_match = re.search(r'gwlfGlobal[^;]*?"nonce"\s*:\s*"([^"]+)"', response.text)
+        if not nonce_match:
+            self.logger.error("Could not extract gwlfGlobal.nonce from locator page")
+            return
+        nonce = nonce_match.group(1)
+
+        for latitude, longitude in point_locations("us_centroids_100mile_radius.csv"):
+            # Appears to be a silent limit of 1000 mile radius
+            # But any value larger than 200 seems to cause 500 errors
+            params = {
+                "action": "gwlf_get_locations",
+                "security": nonce,
+                "radius": "200",
+                "lat": latitude,
+                "lng": longitude,
+                "cats": "1,2,3,4,5",
+            }
+
+            yield JsonRequest(url="https://www.goodwill.org/wp-admin/admin-ajax.php?" + urlencode(params))
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json().get("data", []):
-            properties = {
-                "name": self.item_attributes["brand"],
-                "ref": store["LocationId"],
-                "street_address": store["LocationStreetAddress1"],
-                "city": store["LocationCity1"],
-                "state": store["LocationState1"],
-                "postcode": store["LocationPostal1"],
-                "phone": store.get("LocationPhoneOffice"),
-                "lat": store.get("LocationLatitude1"),
-                "lon": store.get("LocationLongitude1"),
-                "website": f'https://www.goodwill.org/locator/location/?store={b64_wrap(store["LocationId"])}&lat={b64_wrap(store["LocationLatitude1"])}&lng={b64_wrap(store["LocationLongitude1"])}',
-                "operator": store.get("Name_Parent"),
-                "extras": {
-                    "store_categories": store.get("calcd_ServicesOffered"),
-                    "operator:website": store.get("LocationParentWebsite"),
-                    "operator:phone": store.get("Phone_Parent"),
-                    "operator:facebook": store.get("LocationParentURLFacebook"),
-                    "operator:twitter": store.get("LocationParentURLTwitter"),
-                },
-            }
-            apply_category(Categories.SHOP_CHARITY, properties)
+        response_json = response.json()
+        if not response_json.get("success") or not (data := response_json.get("data", {})).get("success"):
+            return
 
-            yield Feature(**properties)
+        for store in data.get("data", []):
+            item = DictParser.parse(store)
+
+            item["name"] = self.item_attributes["brand"]
+            item["street_address"] = store.get("LocationStreetAddress1")
+            item["city"] = store.get("LocationCity1")
+            item["state"] = store.get("LocationState1")
+            item["postcode"] = store.get("LocationPostal1")
+            item["phone"] = store.get("LocationPhoneOffice")
+            item["lat"] = store.get("LocationLatitude1")
+            item["lon"] = store.get("LocationLongitude1")
+
+            item["operator"] = store.get("Name_Parent")
+            item["extras"]["operator:phone"] = store.get("Phone_Parent")
+            item["extras"]["operator:website"] = store.get("LocationParentWebsite")
+            item["extras"]["operator:facebook"] = store.get("LocationParentURLFacebook")
+            item["extras"]["operator:twitter"] = store.get("LocationParentURLTwitter")
+
+            item["extras"]["store_categories"] = store.get("calcd_ServicesOffered")
+
+            apply_category(Categories.SHOP_CHARITY, item)
+
+            yield item

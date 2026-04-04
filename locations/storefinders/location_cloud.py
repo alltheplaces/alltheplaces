@@ -33,8 +33,8 @@ class LocationCloudSpider(Spider):
             item["ref"] = location["code"]
             item["lat"] = location["coord"]["lat"]
             item["lon"] = location["coord"]["lon"]
-            item["addr_full"] = location["address_name"]
-            item["postcode"] = location["postal_code"]
+            item["addr_full"] = location.get("address_name")
+            item["postcode"] = location.get("postal_code")
 
             yield from self.post_process_feature(item, location)
 
