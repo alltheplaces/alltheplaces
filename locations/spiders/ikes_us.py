@@ -6,6 +6,7 @@ from scrapy.http import Request, Response
 
 from locations.categories import Drink, Extras, PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import SocialMedia, set_social_media
 
 ATTRIBUTE_MAP = {
@@ -99,5 +100,13 @@ class IkesUSSpider(Spider):
             apply_yes_no(PaymentMethods.CASH, item, "Cash" in payment_forms)
             apply_yes_no(PaymentMethods.VISA, item, "Visa" in payment_forms)
             apply_yes_no(PaymentMethods.MASTER_CARD, item, "Mastercard" in payment_forms)
+
+            hours = location.get("location", {}).get("hours", {})
+            item["opening_hours"] = OpeningHours()
+            for day in DAYS_FULL:
+                if day.lower() in hours:
+                    for time_range in hours[day.lower()]:
+                        open_time, close_time = time_range.split("-")
+                        item["opening_hours"].add_range(day=day[:2], open_time=open_time, close_time=close_time)
 
             yield item
