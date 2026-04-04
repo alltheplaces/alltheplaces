@@ -2,7 +2,6 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
