@@ -209,7 +209,9 @@ do
 
     if [ -f "${OUTFILE}" ]; then
         upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
-        upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
+        if [ -f "${NDGEOJSON}" ]; then
+            upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
+        fi
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
         if [ -f "${STATSFILE}" ]; then

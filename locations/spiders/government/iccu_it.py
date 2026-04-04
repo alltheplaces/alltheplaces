@@ -8,6 +8,7 @@ import phonenumbers as pn
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import set_social_media
 from locations.json_blob_spider import JSONBlobSpider
+from locations.licenses import Licenses
 from locations.settings import ITEM_PIPELINES
 
 
@@ -17,16 +18,12 @@ class IccuITSpider(JSONBlobSpider):
     start_urls = ["https://opendata.anagrafe.iccu.sbn.it/biblioteche.zip"]
     requires_proxy = True  # scraping from server times out
 
-    dataset_attributes = {
-        "attribution": "optional",
+    dataset_attributes = Licenses.CC0.value | {
         "attribution:name": "Istituto Centrale per il Catalogo Unico delle Biblioteche Italiane e per le Informazioni Bibliografiche",
+        "attribution:website": "https://anagrafe.iccu.sbn.it/it/open-data/",
         "contact:email": "ic-cu.anagrafe@beniculturali.it",
-        "license": "Creative Commons Zero",
-        "license:website": "https://creativecommons.org/publicdomain/zero/1.0/deed.it",
-        "license:wikidata": "Q6938433",
         "use:commercial": "permit",
         "use:openstreetmap": "yes",
-        "website": "https://anagrafe.iccu.sbn.it/it/open-data/",
     }
 
     custom_settings = {

@@ -21,12 +21,10 @@ class BigLotsUSSpider(Spider):
             location.update(location.pop("place"))
             item = DictParser.parse(location)
             item["website"] = item["name"] = None
-
-            item["image"] = location["photo"]["url"]
+            if location["photo"]:
+                item["image"] = location["photo"]["url"]
             item["extras"]["ref:google:place_id"] = location["placeId"]
-
             item["opening_hours"] = self.parse_opening_hours(location)
-
             yield item
 
     def parse_opening_hours(self, location: dict) -> OpeningHours:
