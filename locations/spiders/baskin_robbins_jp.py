@@ -1,6 +1,5 @@
 from typing import Iterable
 
-from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.location_cloud import LocationCloudSpider
 
@@ -14,5 +13,5 @@ class BaskinRobbinsJPSpider(LocationCloudSpider):
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
 
         item["branch"] = source_feature.get("name").removeprefix("サーティワンアイスクリーム　")
-        
+
         yield item
