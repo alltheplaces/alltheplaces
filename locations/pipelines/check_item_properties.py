@@ -19,13 +19,13 @@ def check_field(
 ) -> None:
     if val := item.get(param):
         if not isinstance(val, allowed_types):
-            spider.logger.error(  # ty: ignore [possibly-missing-attribute]
+            spider.logger.error(  # ty: ignore[unresolved-attribute]
                 f'Invalid type "{type(val).__name__}" for attribute "{param}". Expected type(s) are "{allowed_types}".'
             )
             if spider and spider.crawler and spider.crawler.stats:
                 spider.crawler.stats.inc_value(f"atp/field/{param}/wrong_type")
         elif match_regex and not match_regex.match(val):
-            spider.logger.warning(  # ty: ignore [possibly-missing-attribute]
+            spider.logger.warning(  # ty: ignore[unresolved-attribute]
                 f'Invalid value "{val}" for attribute "{param}". Value did not match expected regular expression of r"{match_regex.pattern}".'
             )
             if spider and spider.crawler and spider.crawler.stats:
