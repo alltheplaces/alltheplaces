@@ -52,8 +52,8 @@ jobs:
               const headRef = pr.head && pr.head.ref || '';
               const headRepoFull = pr.head && pr.head.repo && pr.head.repo.full_name;
 
-              const isAuto = login === 'github-actions[bot]' || login === 'github-actions' || displayName === 'GitHub Actions' || headRef.includes('remove-requires-proxy') || (pr.title && pr.title.includes('requires_proxy'));
-              if (!isAuto) {
+              const isAutoProxy = headRef.includes('remove-requires-proxy') || (pr.title && pr.title.includes('requires_proxy'));
+              if (!isAutoProxy) {
                 core.info(`PR #${prNumber} not identified as auto-generated; skipping.`);
                 continue;
               }
