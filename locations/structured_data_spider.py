@@ -158,7 +158,7 @@ class StructuredDataSpider(Spider):
 
     dataset_attributes = {"source": "structured_data"}
 
-    wanted_types = [
+    wanted_types: list[str | list[str]] = [
         "LocalBusiness",
         "ConvenienceStore",
         "Store",

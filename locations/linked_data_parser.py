@@ -228,9 +228,6 @@ class LinkedDataParser:
             if "-" in days:
                 start_day, end_day = days.split("-")
 
-                start_day = sanitise_day(start_day)
-                end_day = sanitise_day(end_day)
-
                 for day in day_range(start_day, end_day):
                     oh.add_range(day, start_time, end_time, time_format)
             else:
