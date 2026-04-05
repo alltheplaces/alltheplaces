@@ -966,8 +966,8 @@ logger = logging.getLogger(__name__)
 
 
 def day_range(start_day, end_day):
-    start_ix = DAYS.index(sanitise_day(start_day))
-    end_ix = DAYS.index(sanitise_day(end_day))
+    start_ix = DAYS.index(sanitise_day(start_day))  # ty: ignore[invalid-argument-type]
+    end_ix = DAYS.index(sanitise_day(end_day))  # ty: ignore[invalid-argument-type]
     if start_ix <= end_ix:
         return DAYS[start_ix : end_ix + 1]
     else:
