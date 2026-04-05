@@ -49,6 +49,6 @@ class McdonaldsITSpider(PlaywrightSpider):
 
         oh = OpeningHours()
         for rule in rules["days"]:
-            if rule["times"]:
+            if rule.get("times"):
                 oh.add_range(rule["name"], *rule["times"].split(","))
         return oh.as_opening_hours()
