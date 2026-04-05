@@ -5,7 +5,7 @@ from locations.spiders.addresses.be.best_addresses_be import BeSTAddressesBESpid
 
 class BeSTVlgAddressesBESpider(BeSTAddressesBESpider):
     name = "best_vlg_addresses_be"
-    dataset_attributes = Licenses.CC4.value | {
+    dataset_attributes = Licenses.CCBY4.value | {
         "attribution:name": "Digitaal Vlaanderen",
         "attribution:website": "https://www.vlaanderen.be/digitaal-vlaanderen/onze-diensten-en-platformen/gebouwen-en-adressenregister#het-adressenregister",
         "use:commercial": "permit",

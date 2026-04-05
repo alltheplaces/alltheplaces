@@ -22,7 +22,7 @@ class DiscoverSwissSpider(Spider):
         "ROBOTSTXT_OBEY": False,
         "URLLENGTH_LIMIT": 4096,
     }
-    dataset_attributes = Licenses.CC4.value | {
+    dataset_attributes = Licenses.CCBY4.value | {
         # Mandatory attribution as per CC-BY 4.0, waived for OpenStreetMap
         # via standard template. Negotiations took place in January 2025
         # between Hotellerie Suisse (who runs the discover.swiss platform)
