@@ -16,7 +16,6 @@ class BankingHubGBSpider(CrawlSpider):
     item_attributes = {
         "brand": "Banking Hub",
         "brand_wikidata": "Q131824197",
-        "operator": "Post Office",
         "operator_wikidata": "Q1783168",
     }
     start_urls = ["https://www.cashaccess.co.uk/hubs/"]
