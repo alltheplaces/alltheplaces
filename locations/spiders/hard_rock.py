@@ -1,15 +1,18 @@
-import json
+from typing import Any
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
-class HardRockSpider(scrapy.Spider):
+class HardRockSpider(Spider):
     name = "hard_rock"
     allowed_domains = ["www.hardrock.com"]
-    start_urls = ["https://www.hardrock.com/files/5880/widget935343.js?callback=widget935343DataCallback"]
+    start_urls = [
+        "https://www.hardrock.com/graphql/execute.json/shrss/locationListing;cfPath=/content/dam/shrss/cf/locations;hotel=Hotel;cafe=Cafe;casino=Casino"
+    ]
 
     cats = {
         "Cafe": ({"brand": "Hard Rock Cafe", "brand_wikidata": "Q918151"}, Categories.RESTAURANT),
@@ -19,26 +22,16 @@ class HardRockSpider(scrapy.Spider):
         "Casino": ({"brand": "Hard Rock Casino"}, Categories.CASINO),
     }
 
-    def parse(self, response):
-        data = json.loads(response.text.replace("widget935343DataCallback(", "").replace(");", ""))
-        for location in data.get("PropertyorInterestPoint", []):
-            properties = {
-                "name": location["interestpointpropertyname"],
-                "ref": location["ClassIndex"],
-                "street_address": location["interestpointpropertyaddress"],
-                "city": location["interestpointCity"],
-                "postcode": location["interestpointPostalCode"],
-                "state": location["interestpointState"],
-                "country": location["LocationCountry"],
-                "lat": float(location["interestpointinterestlatitude"]),
-                "lon": float(location["interestpointinterestlongitude"]),
-                "phone": location["interestpointPhoneNumber"],
-                "website": location["interestpointMoreInfoLink"],
-            }
-            if cat := self.cats.get(location["LocationLocationType"]):
-                properties.update(cat[0])
-                apply_category(cat[1], properties)
-            else:
-                self.logger.error("Unexpected type: {}".format(location["LocationLocationType"]))
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["data"]["locationsList"]["items"]:
+            item = DictParser.parse(location)
 
-            yield Feature(**properties)
+            item["website"] = location.get("webpage")
+            item["name"] = location.get("locationShortName")
+
+            if category := self.cats.get(location.get("lineOfBusiness")):
+                item.update(category[0])
+                apply_category(category[1], item)
+            else:
+                self.logger.error("Unexpected type: {}".format(location.get("lineOfBusiness")))
+            yield item
