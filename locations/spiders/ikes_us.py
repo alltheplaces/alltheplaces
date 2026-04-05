@@ -109,4 +109,9 @@ class IkesUSSpider(Spider):
                         open_time, close_time = time_range.split("-")
                         item["opening_hours"].add_range(day=day[:2], open_time=open_time, close_time=close_time)
 
+            self.post_cleaning(item)
             yield item
+
+    def post_cleaning(self, item: dict) -> None:
+        if "website" in item and not item["website"].startswith("http"):
+            item["website"] = "https://" + item["website"]
