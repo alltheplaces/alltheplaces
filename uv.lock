@@ -162,7 +162,7 @@ requires-dist = [
     { name = "requests-cache" },
     { name = "reverse-geocoder" },
     { name = "scrapy", specifier = ">=2.14.0" },
-    { name = "scrapy-camoufox" },
+    { name = "scrapy-camoufox", git = "https://github.com/iandees/scrapy-camoufox.git" },
     { name = "scrapy-playwright", specifier = ">=0.0.45" },
     { name = "scrapy-zyte-api", specifier = ">=0.32.0" },
     { name = "shapely" },
@@ -1872,16 +1872,12 @@ wheels = [
 
 [[package]]
 name = "scrapy-camoufox"
-version = "0.0.12"
-source = { registry = "https://pypi.python.org/simple" }
+version = "0.0.2"
+source = { git = "https://github.com/iandees/scrapy-camoufox.git#d871f7086d2f33f621ec8caad9e05d408df18333" }
 dependencies = [
     { name = "camoufox", extra = ["geoip"] },
     { name = "playwright" },
     { name = "scrapy" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e3/67/2f41bc13eda5856c462f636b9aa94c3f604dae928937cb9a6f8272e8b6b8/scrapy_camoufox-0.0.12.tar.gz", hash = "sha256:fa9d68ae94e919b5cdf060ebf942c38df59c71e2909c0b6b5b731a1093fe0472", size = 11086, upload-time = "2025-01-16T04:51:02.977Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/af/55/e1431a7fc5e42288d9216c52eca8eff8e12e79853bc6f72e9da21971a675/scrapy_camoufox-0.0.12-py3-none-any.whl", hash = "sha256:3fa00eea568ba218a96d99604787565b3a0960cf57e7bc1737e359481b29b847", size = 13105, upload-time = "2025-01-16T04:50:59.193Z" },
 ]
 
 [[package]]
