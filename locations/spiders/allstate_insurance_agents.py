@@ -2,15 +2,25 @@ import re
 
 import scrapy
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 
-class AllstateInsuranceAgentsSpider(scrapy.Spider):
+class AllstateInsuranceAgentsSpider(CamoufoxSpider):
     name = "allstate_insurance_agents"
     item_attributes = {"brand": "Allstate", "brand_wikidata": "Q2645636"}
     allowed_domains = ["agents.allstate.com"]
     start_urls = ("https://agents.allstate.com/",)
+    captcha_type = "cloudflare_turnstile"
+    captcha_selector_indicating_success = '//li[@class="Directory-listItem"]'
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {
+        "CAMOUFOX_MAX_PAGES_PER_CONTEXT": 1,
+        "CAMOUFOX_MAX_CONTEXTS": 1,
+        "DOWNLOAD_DELAY": 5,
+        "RETRY_TIMES": 5,
+    }
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
