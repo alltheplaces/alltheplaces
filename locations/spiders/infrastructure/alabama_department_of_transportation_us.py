@@ -16,7 +16,7 @@ class AlabamaDepartmentOfTransportationUSSpider(JSONBlobSpider):
         "extras": Categories.SURVEILLANCE_CAMERA.value,
     }
     allowed_domains = ["api.algotraffic.com"]
-    start_urls = ["https://api.algotraffic.com/v3.0/Cameras"]
+    start_urls = ["https://api.algotraffic.com/v4.0/Cameras"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["name"] = " ".join(
@@ -24,6 +24,8 @@ class AlabamaDepartmentOfTransportationUSSpider(JSONBlobSpider):
         )
         item["lat"] = feature["location"]["latitude"]
         item["lon"] = feature["location"]["longitude"]
-        item["extras"]["contact:webcam"] = ";".join(filter(None, [feature["hlsUrl"], feature["imageUrl"]]))
+        item["extras"]["contact:webcam"] = ";".join(
+            filter(None, [feature.get("playbackUrls", {}).get("hls"), feature.get("snapshotImageUrl")])
+        )
         item["extras"]["camera:type"] = "fixed"
         yield item
