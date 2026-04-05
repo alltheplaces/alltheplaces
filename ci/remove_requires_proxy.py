@@ -98,6 +98,8 @@ Created by remove_requires_proxy.py"""
             pr_title,
             "--body",
             pr_body,
+            "--label",
+            "automated:auto-proxy-check",
             "--base",
             "master",
             "--head",
