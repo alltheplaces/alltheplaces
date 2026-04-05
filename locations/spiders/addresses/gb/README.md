@@ -153,7 +153,9 @@ Owen and published. Others are helping.
 | Somerset Council                       | https://www.owenboswarva.com/blog/post-addr42.htm                                                                                     |
 | Southwark Council                      | https://www.owenboswarva.com/blog/post-addr33.htm                                                                                     |
 | Stockport Metropolitan Borough Council | https://www.owenboswarva.com/blog/post-addr34.htm                                                                                     |
+| Tameside Metropolitan Borough Council  | https://www.owenboswarva.com/blog/post-addr62.htm                                                                                     |
 | Wandsworth Council                     | https://www.owenboswarva.com/blog/post-addr57.htm                                                                                     |
 | West Northamptonshire Council          | https://www.owenboswarva.com/blog/post-addr27.htm                                                                                     |
+| West Suffolk Council                   | https://www.owenboswarva.com/blog/post-addr63.htm                                                                                     |
 | Wigan Council                          | https://www.owenboswarva.com/blog/post-addr30.htm                                                                                     |
 | Wiltshire Council                      | https://www.owenboswarva.com/blog/post-addr18.htm                                                                                     |
