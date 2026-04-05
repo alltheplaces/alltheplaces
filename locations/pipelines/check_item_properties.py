@@ -87,10 +87,10 @@ class CheckItemPropertiesPipeline:
         check_field(item, self.crawler.spider, "operator", (str,))
         check_field(item, self.crawler.spider, "branch", (str,))
 
-        self.check_geom(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
-        self.check_twitter(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
-        self.check_opening_hours(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
-        self.check_country(item, self.crawler.spider)  # ty: ignore[invalid-argument-type]
+        self.check_geom(item, self.crawler.spider)
+        self.check_twitter(item, self.crawler.spider)
+        self.check_opening_hours(item, self.crawler.spider)
+        self.check_country(item, self.crawler.spider)
 
         if country_code := item.get("country"):
             if (

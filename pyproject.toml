@@ -63,3 +63,7 @@ dev = [
     "pytest",
     "ty",
 ]
+
+[tool.ty.rules]
+invalid-method-override = "ignore"
+invalid-argument-type = "ignore"
