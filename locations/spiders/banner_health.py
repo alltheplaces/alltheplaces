@@ -12,6 +12,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class BannerHealthSpider(StructuredDataSpider):
     name = "banner_health"
     item_attributes = {"operator": "Banner Health", "operator_wikidata": "Q4856918"}
+    requires_proxy = True
     allowed_domains = ["bannerhealth.com"]
     start_urls = ["https://www.bannerhealth.com/api/sitecore/location/LocationSearch"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
