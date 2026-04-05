@@ -45,7 +45,7 @@ class NomNomSpider(Spider):
             parsed = urlparse.urlparse(url)
             params = dict(urlparse.parse_qs(parsed.query))
             today = date.today()
-            params["nomnom"] = "calendars"
+            params["nomnom"] = ["calendars"]
             params["nomnom_calendars_from"] = [today.strftime("%Y%m%d")]
             params["nomnom_calendars_to"] = [(today + timedelta(days=6)).strftime("%Y%m%d")]
             parsed = parsed._replace(query=urlparse.urlencode(params, doseq=True))

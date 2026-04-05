@@ -34,8 +34,8 @@ class NSI(metaclass=Singleton):
 
     def __init__(self):
         self.loaded: bool = False
-        self.wikidata_json: dict = None
-        self.nsi_json: dict = None
+        self.wikidata_json: dict = None  # ty: ignore[invalid-assignment]
+        self.nsi_json: dict = None  # ty: ignore[invalid-assignment]
 
     @staticmethod
     def _request_file(file: str) -> dict:
