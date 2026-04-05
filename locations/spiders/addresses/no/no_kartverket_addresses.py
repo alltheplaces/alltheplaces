@@ -19,7 +19,7 @@ class NoKartverketAddressesSpider(AddressSpider):
 
     name = "no_kartverket_addresses"
     allowed_domains = ["nedlasting.geonorge.no"]
-    dataset_attributes = Licenses.CC4.value | {
+    dataset_attributes = Licenses.CCBY4.value | {
         "attribution:website": "https://kartkatalog.geonorge.no/metadata/matrikkelen-adresse/f7df7a18-b30f-4745-bd64-d0863812350c",
         "attribution:name": "Contains data from Matrikkelen - Adresse distributed by Kartverket",
     }
