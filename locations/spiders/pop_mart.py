@@ -41,8 +41,8 @@ class PopMartSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for day in DAYS_3_LETTERS:
-                start = location.get(f"storeWorkTimeInOneWeek", {}).get(f"{day.lower()}StartTime")
-                end = location.get(f"storeWorkTimeInOneWeek", {}).get(f"{day.lower()}EndTime")
+                start = location.get("storeWorkTimeInOneWeek", {}).get(f"{day.lower()}StartTime")
+                end = location.get("storeWorkTimeInOneWeek", {}).get(f"{day.lower()}EndTime")
                 if start and end:
                     item["opening_hours"].add_range(day, start, end)
 
