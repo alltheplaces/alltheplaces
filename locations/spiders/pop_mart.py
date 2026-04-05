@@ -4,6 +4,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 
@@ -46,4 +47,5 @@ class PopMartSpider(Spider):
                 if start and end:
                     item["opening_hours"].add_range(day, start, end)
 
+            apply_category(Categories.SHOP_TOYS, item)
             yield item
