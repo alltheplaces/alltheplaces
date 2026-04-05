@@ -6,6 +6,7 @@ from scrapy.spiders import CSVFeedSpider
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.arnold_clark import ArnoldClarkSpider
 from locations.spiders.kwik_fit_gb import KwikFitGBSpider
@@ -13,13 +14,9 @@ from locations.spiders.kwik_fit_gb import KwikFitGBSpider
 
 class GovMotGBSpider(CSVFeedSpider):
     name = "gov_mot_gb"
-    dataset_attributes = {
-        "license": "Open Government Licence v3.0",
-        "license:website": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-        "license:wikidata": "Q99891702",
-        "attribution": "required",
-        "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
-    }  # https://www.whatdotheyknow.com/request/re_use_of_active_mot_test_statio
+    dataset_attributes = (
+        Licenses.GB_OGLv3.value
+    )  # https://www.whatdotheyknow.com/request/re_use_of_active_mot_test_statio
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
