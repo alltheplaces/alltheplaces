@@ -62,7 +62,7 @@ class StockistSpider(Spider):
                         if response.json()["error"] in ["Method unavailable.", "Method not allowed."]:
                             yield Request(
                                 url=f"https://stockist.co/api/v1/{self.key}/widget.js",
-                                callback=self.parse_search_config,
+                                callback=self.parse_search_config,  # ty: ignore[invalid-argument-type]
                             )
 
     def parse_search_config(self, response: TextResponse) -> Iterable[JsonRequest]:

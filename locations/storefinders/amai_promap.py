@@ -27,7 +27,7 @@ class AmaiPromapSpider(JSONBlobSpider):
         if len(self.start_urls) != 1:
             raise ValueError("Specify one URL in the start_urls list attribute.")
             return
-        yield Request(url=self.start_urls[0], callback=self.fetch_js)
+        yield Request(url=self.start_urls[0], callback=self.fetch_js)  # ty: ignore[invalid-argument-type]
 
     def fetch_js(self, response: TextResponse) -> Iterable[JsonRequest]:
         urls = parse_js_object(

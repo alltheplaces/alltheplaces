@@ -135,7 +135,7 @@ class YextAnswersSpider(Spider):
 
         if google_place_id := location.get("googlePlaceId"):
             item["extras"]["ref:google"] = google_place_id
-        if twitter_handle := location.get("tritterHandle"):
+        if twitter_handle := location.get("twitterHandle"):
             item["twitter"] = twitter_handle
         if instagram_handle := location.get("instagramHandle"):
             item["extras"]["contact:instagram"] = instagram_handle

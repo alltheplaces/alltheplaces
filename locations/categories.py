@@ -269,6 +269,7 @@ class Categories(Enum):
     CANTEEN = {"amenity": "canteen"}
     CARAVAN_SITE = {"tourism": "caravan_site"}
     CASINO = {"amenity": "casino"}
+    CHARGE_POINT = {"man_made": "charge_point"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
     CINEMA = {"amenity": "cinema"}
