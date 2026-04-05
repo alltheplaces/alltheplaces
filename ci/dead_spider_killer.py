@@ -158,6 +158,119 @@ def fetch_spider_stats(run_id, spider_name):
     return resp.json()
 
 
+def _extract_evidence(stats):
+    """Extract status codes, exceptions, and other evidence from Scrapy stats."""
+    evidence = {}
+
+    status_codes = {}
+    for key, value in stats.items():
+        m = re.match(r"downloader/response_status_count/(\d+)", key)
+        if m:
+            status_codes[int(m.group(1))] = value
+    evidence["status_codes"] = status_codes
+
+    exceptions = {}
+    for key, value in stats.items():
+        for prefix in ("downloader/exception_type_count/", "spider_exceptions/"):
+            if key.startswith(prefix):
+                exceptions[key[len(prefix) :]] = value
+    evidence["exceptions"] = exceptions
+
+    evidence["finish_reason"] = stats.get("finish_reason", "")
+    evidence["elapsed_time"] = stats.get("elapsed_time_seconds", 0)
+    evidence["full_stats"] = stats
+
+    return evidence
+
+
+def _sum_matching(mapping, *patterns):
+    """Sum values in a dict where any pattern appears in the key."""
+    return sum(v for k, v in mapping.items() if any(p in k for p in patterns))
+
+
+def _classify_from_evidence(evidence, filename):  # noqa: C901
+    """Classify failure type from extracted evidence. Order matters."""
+    status_codes = evidence["status_codes"]
+    exceptions = evidence["exceptions"]
+    stats = evidence["full_stats"]
+
+    total_requests = sum(status_codes.values()) + sum(exceptions.values())
+    count_404 = status_codes.get(404, 0)
+
+    # Estimated non-robots content responses
+    non_robots_200 = max(0, status_codes.get(200, 0) - 1)
+    content_responses = non_robots_200 + sum(c for code, c in status_codes.items() if code != 200)
+
+    # 1. Timeout
+    if stats.get("finish_reason") == "closespider_timeout":
+        return FailureType.TIMEOUT
+    timeout_errors = _sum_matching(exceptions, "TimeoutError", "TCPTimedOutError")
+    if timeout_errors > 0 and total_requests > 0 and timeout_errors / total_requests > 0.5:
+        return FailureType.TIMEOUT
+
+    # 2. Zyte/proxy issue
+    if any("zyte" in k.lower() for k in stats) and has_requires_proxy(filename):
+        return FailureType.ZYTE_PROXY
+
+    # 3. DNS failure
+    if _sum_matching(exceptions, "DNSLookupError") > 0:
+        return FailureType.DNS_FAILURE
+
+    # 4. Parse errors
+    if _sum_matching(exceptions, "JSONDecodeError", "XMLSyntaxError", "ParserError", "ValueError") > 0:
+        return FailureType.PARSE_ERROR
+
+    # 5. Site gone (404)
+    if count_404 > 0 and content_responses > 0 and count_404 / content_responses > 0.5:
+        return FailureType.SITE_GONE_404
+
+    # 6. Connection refused / response never received
+    conn_errors = _sum_matching(
+        exceptions, "ConnectionRefusedError", "ResponseNeverReceived", "ResponseFailed", "NotSupported"
+    )
+    if conn_errors > 0 and total_requests > 0 and conn_errors / total_requests > 0.5:
+        return FailureType.CONNECTION_REFUSED
+
+    # 7. Spider code exceptions
+    if _sum_matching(exceptions, "KeyError", "TypeError", "AttributeError", "IndexError", "UnboundLocalError") > 0:
+        return FailureType.SPIDER_EXCEPTION
+
+    # 8. Needs proxy
+    if status_codes.get(403, 0) + status_codes.get(429, 0) > 0 and not has_requires_proxy(filename):
+        return FailureType.NEEDS_PROXY
+
+    # 9. Redirect-only
+    redirect_count = sum(status_codes.get(c, 0) for c in (301, 302, 307, 308))
+    real_200 = status_codes.get(200, 0) - min(status_codes.get(200, 0), 2)
+    if redirect_count > 0 and real_200 == 0 and count_404 == 0:
+        return FailureType.REDIRECT_ONLY
+
+    # 10. HTTP error codes as dominant response
+    error_responses = sum(c for code, c in status_codes.items() if code >= 400)
+    if error_responses > 0 and content_responses > 0 and error_responses / content_responses > 0.5:
+        return FailureType.HTTP_ERROR
+
+    # 11. No responses at all or only robots.txt
+    if not status_codes and not exceptions:
+        return FailureType.NO_RESPONSE
+    if status_codes.get(200, 0) <= 2 and len(status_codes) <= 1 and not exceptions:
+        return FailureType.NO_RESPONSE
+
+    # 12. IgnoreRequest - middleware rejected all requests
+    if _sum_matching(exceptions, "IgnoreRequest") > 0 and status_codes.get(200, 0) <= 2:
+        return FailureType.SITE_CHANGED
+
+    # 13. Zyte API errors without requires_proxy
+    if _sum_matching(exceptions, "zyte") > 0:
+        return FailureType.CONNECTION_REFUSED
+
+    # 14. Site changed - got 200s but found no items
+    if status_codes.get(200, 0) > 2 and not exceptions:
+        return FailureType.SITE_CHANGED
+
+    return FailureType.UNKNOWN
+
+
 def classify_failure(spider_name, filename, run_id):
     """Classify why a spider is producing 0 results.
 
@@ -167,124 +280,9 @@ def classify_failure(spider_name, filename, run_id):
     if stats is None:
         return FailureType.UNKNOWN, {"reason": "Stats file not found"}
 
-    evidence = {}
-
-    # Collect response status codes
-    status_codes = {}
-    for key, value in stats.items():
-        m = re.match(r"downloader/response_status_count/(\d+)", key)
-        if m:
-            status_codes[int(m.group(1))] = value
-    evidence["status_codes"] = status_codes
-
-    # Collect exception types
-    exceptions = {}
-    for key, value in stats.items():
-        for prefix in ("downloader/exception_type_count/", "spider_exceptions/"):
-            if key.startswith(prefix):
-                exc_type = key[len(prefix) :]
-                exceptions[exc_type] = value
-    evidence["exceptions"] = exceptions
-
-    evidence["finish_reason"] = stats.get("finish_reason", "")
-    evidence["elapsed_time"] = stats.get("elapsed_time_seconds", 0)
-    evidence["full_stats"] = stats
-
-    # Classification logic (order matters)
-
-    # 1. Timeout - either Scrapy's closespider_timeout or connection-level timeouts
-    if stats.get("finish_reason") == "closespider_timeout":
-        return FailureType.TIMEOUT, evidence
-    timeout_errors = sum(v for k, v in exceptions.items() if "TimeoutError" in k or "TCPTimedOutError" in k)
-    total_requests = sum(status_codes.values()) + sum(exceptions.values())
-    if timeout_errors > 0 and total_requests > 0 and timeout_errors / total_requests > 0.5:
-        return FailureType.TIMEOUT, evidence
-
-    # 2. Zyte/proxy issue - spider uses proxy and has Zyte-related stats
-    has_zyte_stats = any("zyte" in k.lower() for k in stats)
-    if has_zyte_stats and has_requires_proxy(filename):
-        return FailureType.ZYTE_PROXY, evidence
-
-    # 3. DNS failure
-    dns_errors = sum(v for k, v in exceptions.items() if "DNSLookupError" in k)
-    if dns_errors > 0:
-        return FailureType.DNS_FAILURE, evidence
-
-    # 4. Parse errors (JSON, XML, etc.)
-    parse_errors = sum(
-        v
-        for k, v in exceptions.items()
-        if any(err in k for err in ("JSONDecodeError", "XMLSyntaxError", "ParserError", "ValueError"))
-    )
-    if parse_errors > 0:
-        return FailureType.PARSE_ERROR, evidence
-
-    # 5. Site gone (404) - predominantly 404 responses (excluding robots.txt)
-    non_robots_200 = max(0, status_codes.get(200, 0) - 1)  # subtract robots.txt
-    content_responses = non_robots_200 + sum(count for code, count in status_codes.items() if code != 200)
-    count_404 = status_codes.get(404, 0)
-    if count_404 > 0 and content_responses > 0 and count_404 / content_responses > 0.5:
-        return FailureType.SITE_GONE_404, evidence
-
-    # 6. Connection refused / response never received
-    conn_errors = sum(
-        v
-        for k, v in exceptions.items()
-        if any(
-            err in k for err in ("ConnectionRefusedError", "ResponseNeverReceived", "ResponseFailed", "NotSupported")
-        )
-    )
-    if conn_errors > 0 and total_requests > 0 and conn_errors / total_requests > 0.5:
-        return FailureType.CONNECTION_REFUSED, evidence
-
-    # 7. Spider code exceptions (KeyError, TypeError, AttributeError, etc.)
-    spider_exc_count = sum(
-        v
-        for k, v in exceptions.items()
-        if any(err in k for err in ("KeyError", "TypeError", "AttributeError", "IndexError", "UnboundLocalError"))
-    )
-    if spider_exc_count > 0:
-        return FailureType.SPIDER_EXCEPTION, evidence
-
-    # 8. Needs proxy - 403/429 responses without requires_proxy
-    blocked_responses = status_codes.get(403, 0) + status_codes.get(429, 0)
-    if blocked_responses > 0 and not has_requires_proxy(filename):
-        return FailureType.NEEDS_PROXY, evidence
-
-    # 9. Redirect-only responses (301/302/307/308 with no real content)
-    redirect_codes = sum(status_codes.get(c, 0) for c in (301, 302, 307, 308))
-    robots_200 = min(status_codes.get(200, 0), 2)  # assume up to 2 are robots.txt
-    real_200 = status_codes.get(200, 0) - robots_200
-    if redirect_codes > 0 and real_200 == 0 and count_404 == 0:
-        return FailureType.REDIRECT_ONLY, evidence
-
-    # 10. HTTP error codes (400, 401, 500, etc.) as dominant response
-    error_responses = sum(count for code, count in status_codes.items() if code >= 400)
-    if error_responses > 0 and content_responses > 0 and error_responses / content_responses > 0.5:
-        return FailureType.HTTP_ERROR, evidence
-
-    # 11. No responses at all - spider made no requests or only got robots.txt
-    if not status_codes and not exceptions:
-        return FailureType.NO_RESPONSE, evidence
-    if status_codes.get(200, 0) <= 2 and len(status_codes) <= 1 and not exceptions:
-        # Only 1-2 200 responses (robots.txt) and nothing else
-        return FailureType.NO_RESPONSE, evidence
-
-    # 12. IgnoreRequest - middleware rejected all requests (e.g. sitemap found no URLs)
-    ignore_count = sum(v for k, v in exceptions.items() if "IgnoreRequest" in k)
-    if ignore_count > 0 and status_codes.get(200, 0) <= 2:
-        return FailureType.SITE_CHANGED, evidence
-
-    # 13. Zyte API errors without requires_proxy
-    zyte_errors = sum(v for k, v in exceptions.items() if "zyte" in k.lower())
-    if zyte_errors > 0:
-        return FailureType.CONNECTION_REFUSED, evidence
-
-    # 14. Site changed - spider got 200s but found no items (content changed)
-    if status_codes.get(200, 0) > 2 and not exceptions:
-        return FailureType.SITE_CHANGED, evidence
-
-    return FailureType.UNKNOWN, evidence
+    evidence = _extract_evidence(stats)
+    classification = _classify_from_evidence(evidence, filename)
+    return classification, evidence
 
 
 def _is_only_robots(stats):
