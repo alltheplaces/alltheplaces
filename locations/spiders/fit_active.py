@@ -1,5 +1,5 @@
 from locations.hours import CLOSED_IT, DAYS_IT, OpeningHours
-from locations.items import set_social_media
+from locations.items import SocialMedia, set_social_media
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -18,9 +18,9 @@ class FitActiveSpider(JSONBlobSpider):
             item["image"] = f"https://www.fitactive.it/{img_path.lstrip('/')}"
         item["branch"] = item.pop("name")
         if fb := location.get("fbLinkString"):
-            set_social_media(item, "facebook", fb.strip())
+            set_social_media(item, SocialMedia.FACEBOOK, fb.strip())
         if insta := location.get("linkInsta"):
-            set_social_media(item, "instagram", insta.strip())
+            set_social_media(item, SocialMedia.INSTAGRAM, insta.strip())
         if start := location.get("dataApertura"):
             if start != "SOON":
                 item["extras"]["start_date"] = start.strip()

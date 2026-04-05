@@ -6,7 +6,7 @@ import zipfile
 import phonenumbers as pn
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.items import set_social_media
+from locations.items import SocialMedia, set_social_media
 from locations.json_blob_spider import JSONBlobSpider
 from locations.licenses import Licenses
 from locations.settings import ITEM_PIPELINES
@@ -178,7 +178,7 @@ class IccuITSpider(JSONBlobSpider):
                 pass
             else:
                 valore = self.contact_match["facebook_url"].sub(r"https://www.facebook.com/\1", valore)
-                set_social_media(item, "facebook", valore)
+                set_social_media(item, SocialMedia.FACEBOOK, valore)
                 return True
         if self.contact_match["instagram_url"].match(valore):
             if "/invites/contact" in valore.lower():
@@ -187,14 +187,14 @@ class IccuITSpider(JSONBlobSpider):
                 pass
             else:
                 valore = self.contact_match["instagram_url"].sub(r"https://www.instagram.com/\1", valore)
-                set_social_media(item, "instagram", valore)
+                set_social_media(item, SocialMedia.INSTAGRAM, valore)
                 return True
         if self.contact_match["twitter_url"].match(valore):
             if valore.startswith("@") and "instagram" not in note.lower():
                 pass
             else:
                 valore = self.contact_match["twitter_url"].sub(r"https://x.com/\1", valore)
-                set_social_media(item, "twitter", valore)
+                set_social_media(item, SocialMedia.TWITTER, valore)
                 return True
         if tipo == "website":
             if item["website"]:
