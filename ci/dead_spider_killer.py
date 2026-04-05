@@ -433,12 +433,13 @@ def _format_evidence_summary(evidence):
 
 
 def _format_run_history_table(run_history, spider_name):
-    """Format run history as a markdown table with links to stats."""
-    lines = ["| Run | Features | Errors | Elapsed | Stats |", "|-----|----------|--------|---------|-------|"]
+    """Format run history as a markdown table with links to stats and logs."""
+    lines = ["| Run | Features | Errors | Elapsed | Links |", "|-----|----------|--------|---------|-------|"]
     for entry in run_history:
-        stats_link = f"{DATA_BASE_URL}/runs/{entry['run_id']}/stats/{spider_name}.json"
+        run_url = f"{DATA_BASE_URL}/runs/{entry['run_id']}"
+        links = f"[stats]({run_url}/stats/{spider_name}.json) · [log]({run_url}/logs/{spider_name}.txt)"
         lines.append(
-            f"| {entry['run_id']} | {entry['features']} | {entry['errors']} | {entry['elapsed_time']:.0f}s | [stats]({stats_link}) |"
+            f"| {entry['run_id']} | {entry['features']} | {entry['errors']} | {entry['elapsed_time']:.0f}s | {links} |"
         )
     return "\n".join(lines)
 
@@ -480,8 +481,7 @@ This spider has produced **0 results for {len(run_history)} consecutive runs**.
 {full_stats_json}
 ```
 </details>
-
-Seen in #9885"""
+"""
 
     if dry_run:
         logger.info("[DRY RUN] Would create removal PR for %s (%s)", spider_name, classification.value)
@@ -526,6 +526,8 @@ Seen in #9885"""
                 f"Remove dead spider: `{spider_name}` — {info['title']}",
                 "--body",
                 pr_body,
+                "--label",
+                "automated:dead-spider-removal",
                 "--base",
                 "master",
                 "--head",
@@ -570,15 +572,24 @@ Spider `{spider_name}` (`{filename}`) has produced **0 results for {len(run_hist
 
 ### Run history
 {history_table}
-
-Seen in #9885"""
+"""
 
     if dry_run:
         logger.info("[DRY RUN] Would create issue for %s (%s)", spider_name, classification.value)
         return True
 
     result = subprocess.run(
-        ["gh", "issue", "create", "--title", f"Dead spider: `{spider_name}` — {info['title']}", "--body", issue_body],
+        [
+            "gh",
+            "issue",
+            "create",
+            "--title",
+            f"Dead spider: `{spider_name}` — {info['title']}",
+            "--body",
+            issue_body,
+            "--label",
+            "automated:dead-spider-investigation",
+        ],
         capture_output=True,
         text=True,
     )
