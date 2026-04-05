@@ -46,7 +46,9 @@ class MapsMarkerProSpider(Spider):
         }
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
             yield FormRequest(
-                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php", method="POST", formdata=formdata  # ty: ignore[invalid-argument-type]
+                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php",
+                method="POST",
+                formdata=formdata,  # ty: ignore[invalid-argument-type]
             )
         elif len(self.start_urls) == 1:
             yield FormRequest(
