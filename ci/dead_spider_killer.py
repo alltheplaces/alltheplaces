@@ -433,12 +433,13 @@ def _format_evidence_summary(evidence):
 
 
 def _format_run_history_table(run_history, spider_name):
-    """Format run history as a markdown table with links to stats."""
-    lines = ["| Run | Features | Errors | Elapsed | Stats |", "|-----|----------|--------|---------|-------|"]
+    """Format run history as a markdown table with links to stats and logs."""
+    lines = ["| Run | Features | Errors | Elapsed | Links |", "|-----|----------|--------|---------|-------|"]
     for entry in run_history:
-        stats_link = f"{DATA_BASE_URL}/runs/{entry['run_id']}/stats/{spider_name}.json"
+        run_url = f"{DATA_BASE_URL}/runs/{entry['run_id']}"
+        links = f"[stats]({run_url}/stats/{spider_name}.json) · [log]({run_url}/logs/{spider_name}.txt)"
         lines.append(
-            f"| {entry['run_id']} | {entry['features']} | {entry['errors']} | {entry['elapsed_time']:.0f}s | [stats]({stats_link}) |"
+            f"| {entry['run_id']} | {entry['features']} | {entry['errors']} | {entry['elapsed_time']:.0f}s | {links} |"
         )
     return "\n".join(lines)
 
