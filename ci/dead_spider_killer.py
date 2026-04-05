@@ -122,9 +122,7 @@ def find_dead_spiders(runs):
         if all(r["features"] == 0 for r in data["runs"].values()):
             dead_spiders[name] = {
                 "filename": data["filename"],
-                "run_history": [
-                    {"run_id": rid, **data["runs"][rid]} for rid in run_ids
-                ],
+                "run_history": [{"run_id": rid, **data["runs"][rid]} for rid in run_ids],
             }
 
     logger.info("Found %d spiders with 0 features across all %d runs", len(dead_spiders), len(run_ids))
@@ -197,9 +195,7 @@ def classify_failure(spider_name, filename, run_id):
     # 1. Timeout - either Scrapy's closespider_timeout or connection-level timeouts
     if stats.get("finish_reason") == "closespider_timeout":
         return FailureType.TIMEOUT, evidence
-    timeout_errors = sum(
-        v for k, v in exceptions.items() if "TimeoutError" in k or "TCPTimedOutError" in k
-    )
+    timeout_errors = sum(v for k, v in exceptions.items() if "TimeoutError" in k or "TCPTimedOutError" in k)
     total_requests = sum(status_codes.values()) + sum(exceptions.values())
     if timeout_errors > 0 and total_requests > 0 and timeout_errors / total_requests > 0.5:
         return FailureType.TIMEOUT, evidence
@@ -225,9 +221,7 @@ def classify_failure(spider_name, filename, run_id):
 
     # 5. Site gone (404) - predominantly 404 responses (excluding robots.txt)
     non_robots_200 = max(0, status_codes.get(200, 0) - 1)  # subtract robots.txt
-    content_responses = non_robots_200 + sum(
-        count for code, count in status_codes.items() if code != 200
-    )
+    content_responses = non_robots_200 + sum(count for code, count in status_codes.items() if code != 200)
     count_404 = status_codes.get(404, 0)
     if count_404 > 0 and content_responses > 0 and count_404 / content_responses > 0.5:
         return FailureType.SITE_GONE_404, evidence
@@ -236,7 +230,9 @@ def classify_failure(spider_name, filename, run_id):
     conn_errors = sum(
         v
         for k, v in exceptions.items()
-        if any(err in k for err in ("ConnectionRefusedError", "ResponseNeverReceived", "ResponseFailed", "NotSupported"))
+        if any(
+            err in k for err in ("ConnectionRefusedError", "ResponseNeverReceived", "ResponseFailed", "NotSupported")
+        )
     )
     if conn_errors > 0 and total_requests > 0 and conn_errors / total_requests > 0.5:
         return FailureType.CONNECTION_REFUSED, evidence
@@ -309,7 +305,19 @@ def _existing_pr_or_issue(spider_name):
     # Check for open or recently closed/merged PRs on this branch
     for state in ("open", "closed", "merged"):
         result = subprocess.run(
-            ["gh", "pr", "list", "--head", branch, "--state", state, "--json", "number,closedAt,mergedAt", "--limit", "1"],
+            [
+                "gh",
+                "pr",
+                "list",
+                "--head",
+                branch,
+                "--state",
+                state,
+                "--json",
+                "number,closedAt,mergedAt",
+                "--limit",
+                "1",
+            ],
             capture_output=True,
             text=True,
         )
@@ -430,9 +438,7 @@ def _format_run_history_table(run_history):
     """Format run history as a markdown table."""
     lines = ["| Run | Features | Errors | Elapsed |", "|-----|----------|--------|---------|"]
     for entry in run_history:
-        lines.append(
-            f"| {entry['run_id']} | {entry['features']} | {entry['errors']} | {entry['elapsed_time']:.0f}s |"
-        )
+        lines.append(f"| {entry['run_id']} | {entry['features']} | {entry['errors']} | {entry['elapsed_time']:.0f}s |")
     return "\n".join(lines)
 
 
@@ -511,7 +517,19 @@ Seen in #9885"""
 
         # Create PR
         result = subprocess.run(
-            ["gh", "pr", "create", "--title", f"Remove dead spider: `{spider_name}` — {info['title']}", "--body", pr_body, "--base", "master", "--head", branch],
+            [
+                "gh",
+                "pr",
+                "create",
+                "--title",
+                f"Remove dead spider: `{spider_name}` — {info['title']}",
+                "--body",
+                pr_body,
+                "--base",
+                "master",
+                "--head",
+                branch,
+            ],
             capture_output=True,
             text=True,
         )
@@ -574,10 +592,14 @@ Seen in #9885"""
 
 def main():
     parser = argparse.ArgumentParser(description="Dead Spider Killer - find and remove broken spiders")
-    parser.add_argument("--weeks", type=int, default=5, help="Number of consecutive zero-result runs required (default: 5)")
+    parser.add_argument(
+        "--weeks", type=int, default=5, help="Number of consecutive zero-result runs required (default: 5)"
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print report without creating PRs or issues")
     parser.add_argument("--max-prs", type=int, default=5, help="Max removal PRs to create per run (default: 5)")
-    parser.add_argument("--max-issues", type=int, default=10, help="Max investigation issues to create per run (default: 10)")
+    parser.add_argument(
+        "--max-issues", type=int, default=10, help="Max investigation issues to create per run (default: 10)"
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
     args = parser.parse_args()
 
