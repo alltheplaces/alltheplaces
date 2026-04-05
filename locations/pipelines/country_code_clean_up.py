@@ -30,18 +30,14 @@ class CountryCodeCleanUpPipeline:
             if country := self.country_utils.country_code_from_spider_name(
                 self.crawler.spider.name  # ty: ignore[unresolved-attribute]
             ):
-                self.crawler.stats.inc_value(  # ty: ignore[unresolved-attribute]
-                    "atp/field/country/from_spider_name"
-                )
+                self.crawler.stats.inc_value("atp/field/country/from_spider_name")  # ty: ignore[unresolved-attribute]
                 item["country"] = country
                 return item
 
         if not getattr(self.crawler.spider, "skip_auto_cc_domain", False):
             # Still no country set, see if it can be cleanly deduced from a website URL if present
             if country := self.country_utils.country_code_from_url(item.get("website")):
-                self.crawler.stats.inc_value(  # ty: ignore[unresolved-attribute]
-                    "atp/field/country/from_website_url"
-                )
+                self.crawler.stats.inc_value("atp/field/country/from_website_url")  # ty: ignore[unresolved-attribute]
                 item["country"] = country
                 return item
 
