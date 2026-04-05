@@ -6,20 +6,18 @@ from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.licenses import Licenses
 
 
 # Open Data of the City of Winterthur, Switzerland
 class WinterthurCHSpider(Spider):
     name = "winterthur_ch"
     allowed_domains = ["stadtplan.winterthur.ch"]
-    dataset_attributes = {
-        "attribution": "optional",
+    dataset_attributes = Licenses.CC0.value | {
         "attribution:name:de": "Stadt Winterthur",
         "attribution:name:en": "City of Winterthur",
         "attribution:wikidata": "Q9125",
-        "license": "Creative Commons Zero",
-        "license:website": "https://stadtplan.winterthur.ch/stadtgruen/spielplatzkontrolle-service/swagger/index.html",
-        "license:wikidata": "Q6938433",
+        "attribution:website": "https://stadtplan.winterthur.ch/stadtgruen/spielplatzkontrolle-service/swagger/index.html",
     }
     no_refs = True
 

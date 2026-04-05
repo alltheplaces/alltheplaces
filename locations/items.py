@@ -151,11 +151,6 @@ def get_social_media(item: Feature, service: str | Enum) -> str:
         return str(item["extras"].get("contact:{}".format(service_str)))
 
 
-def add_social_media(item: Feature, service: str, account: str) -> None:
-    """Deprecated, use set_social_media"""
-    set_social_media(item, service, account)
-
-
 def set_social_media(item: Feature, service: str | Enum, account: str) -> None:
     if isinstance(service, Enum):
         service_str = service.value

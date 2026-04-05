@@ -965,9 +965,15 @@ CLOSED_FR = ["fermée", "fermé", "fermee", "ferme"]
 logger = logging.getLogger(__name__)
 
 
-def day_range(start_day, end_day):
-    start_ix = DAYS.index(sanitise_day(start_day))
-    end_ix = DAYS.index(sanitise_day(end_day))
+def day_range(start_day: str, end_day: str) -> list[str]:
+    start = sanitise_day(start_day)
+    end = sanitise_day(end_day)
+    if start is None:
+        raise ValueError(f"Unrecognised start day: {start_day!r}")
+    if end is None:
+        raise ValueError(f"Unrecognised end day: {end_day!r}")
+    start_ix = DAYS.index(start)
+    end_ix = DAYS.index(end)
     if start_ix <= end_ix:
         return DAYS[start_ix : end_ix + 1]
     else:

@@ -5,7 +5,7 @@ import tempfile
 from locations.exporters.geojson import GeoJsonExporter, item_to_properties
 from locations.exporters.geoparquet import GeoparquetExporter
 from locations.exporters.ld_geojson import LineDelimitedGeoJsonExporter
-from locations.items import Feature, add_social_media, set_lat_lon
+from locations.items import Feature, SocialMedia, set_lat_lon, set_social_media
 
 
 def test_item_to_properties():
@@ -66,10 +66,10 @@ def test_has_geom():
 def test_item_socials():
     item = Feature()
     item["ref"] = "a"
-    add_social_media(item, "facebook", "abc")
+    set_social_media(item, SocialMedia.FACEBOOK, "abc")
     assert item["facebook"] == "abc"
 
-    add_social_media(item, "instagram", "abc")
+    set_social_media(item, SocialMedia.INSTAGRAM, "abc")
     assert item["extras"]["contact:instagram"] == "abc"
 
     assert item_to_properties(item) == {"ref": "a", "contact:facebook": "abc", "contact:instagram": "abc"}

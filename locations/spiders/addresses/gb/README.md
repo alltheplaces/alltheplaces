@@ -105,8 +105,10 @@ Owen and published. Others are helping.
 | Local Authority                        | Links                                                                                                                                 |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | Aberdeenshire Council                  | https://www.owenboswarva.com/blog/post-addr47.htm                                                                                     |
+| Arun District Council                  | https://www.owenboswarva.com/blog/post-addr67.htm                                                                                     |
 | Barnet Council                         | https://www.owenboswarva.com/blog/post-addr23.htm                                                                                     |
 | Birmingham City Council                | https://www.owenboswarva.com/blog/post-addr11.htm                                                                                     |
+| Borough Council of King's Lynn & West Norfolk | https://www.owenboswarva.com/blog/post-addr66.htm                                                                              |
 | Bradford Council                       | https://www.owenboswarva.com/blog/post-addr29.htm                                                                                     |
 | Brent Council                          | https://www.owenboswarva.com/blog/post-addr49.htm                                                                                     |
 | Brighton & Hove City Council           | https://www.owenboswarva.com/blog/post-addr26.htm                                                                                     |

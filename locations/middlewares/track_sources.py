@@ -35,7 +35,7 @@ class TrackSourcesMiddleware:
                 "atp/item_scraped_host_count/{}".format(urlparse(item["extras"]["@source_uri"]).netloc)
             )
         except ValueError:
-            self.crawler.spider.logger.error(  # ty: ignore [possibly-missing-attribute]
+            self.crawler.spider.logger.error(  # ty: ignore[unresolved-attribute]
                 "Failed to parse @source_uri: {}".format(item["extras"]["@source_uri"])
             )
             self.crawler.stats.inc_value("atp/parse_error/@source_uri")
