@@ -9,6 +9,7 @@ from locations.items import Feature
 class AllstateInsuranceAgentsSpider(scrapy.Spider):
     name = "allstate_insurance_agents"
     item_attributes = {"brand": "Allstate", "brand_wikidata": "Q2645636"}
+    requires_proxy = True
     allowed_domains = ["agents.allstate.com"]
     start_urls = ("https://agents.allstate.com/",)
 
