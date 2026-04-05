@@ -434,11 +434,14 @@ def _format_evidence_summary(evidence):
     return "\n".join(lines)
 
 
-def _format_run_history_table(run_history):
-    """Format run history as a markdown table."""
-    lines = ["| Run | Features | Errors | Elapsed |", "|-----|----------|--------|---------|"]
+def _format_run_history_table(run_history, spider_name):
+    """Format run history as a markdown table with links to stats."""
+    lines = ["| Run | Features | Errors | Elapsed | Stats |", "|-----|----------|--------|---------|-------|"]
     for entry in run_history:
-        lines.append(f"| {entry['run_id']} | {entry['features']} | {entry['errors']} | {entry['elapsed_time']:.0f}s |")
+        stats_link = f"{DATA_BASE_URL}/runs/{entry['run_id']}/stats/{spider_name}.json"
+        lines.append(
+            f"| {entry['run_id']} | {entry['features']} | {entry['errors']} | {entry['elapsed_time']:.0f}s | [stats]({stats_link}) |"
+        )
     return "\n".join(lines)
 
 
@@ -457,7 +460,7 @@ def create_removal_pr(spider_name, filename, classification, evidence, run_histo
 
     info = FAILURE_EXPLANATIONS[classification]
     evidence_summary = _format_evidence_summary(evidence)
-    history_table = _format_run_history_table(run_history)
+    history_table = _format_run_history_table(run_history, spider_name)
     full_stats_json = json.dumps(evidence.get("full_stats", {}), indent=2, default=str)
 
     pr_body = f"""## {info["title"]}
@@ -552,7 +555,7 @@ def create_investigation_issue(spider_name, filename, classification, evidence, 
 
     info = FAILURE_EXPLANATIONS[classification]
     evidence_summary = _format_evidence_summary(evidence)
-    history_table = _format_run_history_table(run_history)
+    history_table = _format_run_history_table(run_history, spider_name)
 
     suggestion_section = ""
     if info["suggestion"]:
