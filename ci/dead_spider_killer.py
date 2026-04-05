@@ -481,8 +481,7 @@ This spider has produced **0 results for {len(run_history)} consecutive runs**.
 {full_stats_json}
 ```
 </details>
-
-Seen in #9885"""
+"""
 
     if dry_run:
         logger.info("[DRY RUN] Would create removal PR for %s (%s)", spider_name, classification.value)
@@ -571,8 +570,7 @@ Spider `{spider_name}` (`{filename}`) has produced **0 results for {len(run_hist
 
 ### Run history
 {history_table}
-
-Seen in #9885"""
+"""
 
     if dry_run:
         logger.info("[DRY RUN] Would create issue for %s (%s)", spider_name, classification.value)
