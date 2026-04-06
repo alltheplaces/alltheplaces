@@ -10,7 +10,7 @@ from locations.address_spider import AddressSpider
 from locations.items import Feature
 
 
-class OpenAddressesSpider(AddressSpider):
+class OpenAddressesOutputSpider(AddressSpider):
     source: str
 
     async def start(self) -> AsyncIterator[Any]:

@@ -1,7 +1,7 @@
-from locations.storefinders.open_addresses import OpenAddressesSpider
+from locations.storefinders.open_addresses_output import OpenAddressesOutputSpider
 
 
-class AeAlDhafrahSpider(OpenAddressesSpider):
+class AeAlDhafrahSpider(OpenAddressesOutputSpider):
     name = "ae_al_dhafrah"
     item_attributes = {
         "city": "Al Dhafra Region",
