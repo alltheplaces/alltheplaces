@@ -29,6 +29,7 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.SHOP_CONVENIENCE, item)
             item.update(COOP_FOOD)
             item["branch"] = item.pop("name").split(" - ", 1)[1].strip()
+            item["name"] = "Central Coop Food"
         else:
             apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
             if "Central Co-op Funeral" in item["name"]:
