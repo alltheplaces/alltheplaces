@@ -31,7 +31,6 @@ class CosmoJPSpider(Spider):
             apply_yes_no(Extras.CAR_WASH, item, store.get("洗車"))
             apply_yes_no(Fuel.ELECTRIC, item, store.get("EV急速充電器"))
             apply_yes_no("sells:food", item, store.get("セブン-イレブン複合店"))
-            
 
             apply_yes_no(PaymentMethods.ID, item, store.get("Id"))
             apply_yes_no(PaymentMethods.WAON, item, store.get("WAON"))
