@@ -29,7 +29,7 @@ dependencies = [
     "requests-cache",
     "reverse-geocoder",
     "scrapy>=2.14.0",
-    "scrapy-camoufox",
+    "scrapy-camoufox @ git+https://github.com/iandees/scrapy-camoufox.git",
     "scrapy-playwright>=0.0.45",
     "scrapy-zyte-api>=0.32.0",
     "shapely",

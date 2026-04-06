@@ -47,14 +47,12 @@ jobs:
               core.info(`Processing PR #${prNumber}`);
               const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
 
-              const login = pr.user && pr.user.login || '';
-              const displayName = pr.user && pr.user.name || '';
               const headRef = pr.head && pr.head.ref || '';
               const headRepoFull = pr.head && pr.head.repo && pr.head.repo.full_name;
 
-              const isAuto = login === 'github-actions[bot]' || login === 'github-actions' || displayName === 'GitHub Actions' || headRef.includes('remove-requires-proxy') || (pr.title && pr.title.includes('requires_proxy'));
-              if (!isAuto) {
-                core.info(`PR #${prNumber} not identified as auto-generated; skipping.`);
+              const hasLabel = pr.labels && pr.labels.some(l => l.name === 'automated:auto-proxy-check');
+              if (!hasLabel) {
+                core.info(`PR #${prNumber} does not have automated:auto-proxy-check label; skipping.`);
                 continue;
               }
 
