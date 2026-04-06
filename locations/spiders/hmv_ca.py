@@ -11,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class HmvCASpider(JSONBlobSpider):
     name = "hmv_ca"
-    item_attributes = {"brand": "HMV", "brand_wikidata": "Q299752"}
+    item_attributes = {"brand": "HMV", "brand_wikidata": "Q10854572"}
     locations_key = "stores"
 
     async def start(self) -> AsyncIterator[Request]:
