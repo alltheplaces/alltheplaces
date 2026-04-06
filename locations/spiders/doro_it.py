@@ -2,6 +2,7 @@ import re
 
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
@@ -26,5 +27,10 @@ class DoroITSpider(WPStoreLocatorSpider):
 
         if state := item.get("state"):
             item["state"] = state.strip("()")
+
+        if "Daily" in item["name"]:
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        else:
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
