@@ -25,6 +25,8 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
         item["image"] = None
         set_operator(CENTRAL_COOP, item)
         name = item["name"]
+        item.pop("twitter", None)
+        item["website"] = response.url
         if "FOOD" in name.upper():
             apply_category(Categories.SHOP_CONVENIENCE, item)
             item.update(COOP_FOOD)
