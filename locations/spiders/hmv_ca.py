@@ -21,6 +21,7 @@ class HmvCASpider(JSONBlobSpider):
             )
 
     def post_process_item(self, item, response, location):
+        item["branch"] = item.pop("name")
         item["street_address"] = merge_address_lines([location.get("address1"), location.get("address2")])
         item["website"] = (
             f"https://www.hmv.ca/en/stores/{location['storePageUrl']}" if location.get("storePageUrl") else None
