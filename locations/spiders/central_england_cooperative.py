@@ -37,11 +37,16 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
                 item.update(COOP_FUNERALCARE)
                 item["branch"] = item.pop("name").replace("Central Co-op Funeral", "").strip(" -")
         elif "FLORIST" in name.upper():
+            #No structured data on florist pages yet
             apply_category(Categories.SHOP_FLORIST, item)
             if "Central Co-op Florist" in item["name"]:
                 item.update(CENTRAL_COOP)
                 item["name"], item["branch"] = item["name"].split(" - ")
         else:
+            if "PETROL" in name.upper():
+                fuel_item = deepcopy(item)
+                apply_category(Categories.SHOP_FUEL, fuel_item)
+                yield fuel_item
             apply_category(Categories.SHOP_CONVENIENCE, item)
             if item["name"].startswith("The Co-operative"):
                 item.update(COOP_FOOD)
@@ -49,5 +54,4 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
             else:
                 item.update(CENTRAL_COOP)
                 item["name"], item["branch"] = item["name"].split(" - ")
-
         yield item
