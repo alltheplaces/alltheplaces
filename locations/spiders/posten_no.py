@@ -47,10 +47,10 @@ class PostenNOSpider(Spider):
                 apply_category(Categories.POST_OFFICE, item)
                 item["extras"]["post_office"] = "bureau"
             elif attributes["enhetstype"] == 4:
-                apply_category(Categories.GENERIC_POI, item)
+                apply_category(Categories.POST_OFFICE, item)
                 item["extras"]["post_office"] = "post_partner"
             elif attributes["enhetstype"] == 19:
-                apply_category(Categories.GENERIC_POI, item)
+                apply_category(Categories.POST_OFFICE, item)
                 item["extras"]["post_office"] = "post_partner"
                 apply_yes_no("post_office:parcel_pickup", item, True)
             elif attributes["enhetstype"] == 37:
