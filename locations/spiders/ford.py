@@ -179,7 +179,10 @@ class FordSpider(Spider):
             item["name"] = data.get("DealerName")
             item["country"] = self.get_country_code(data.get("CountryCode"))
             item["opening_hours"] = oh
-            item = self.repair_website(data["PrimaryURL"], item)
+            try:
+                item = self.repair_website(data["PrimaryURL"], item)
+            except:
+                pass
 
             item["brand"] = self.brand_mapping.get(data.get("Brand")).get("brand")
             item["brand_wikidata"] = self.brand_mapping.get(data.get("Brand")).get("brand_wikidata")
@@ -203,16 +206,17 @@ class FordSpider(Spider):
 
     def repair_website(self, website, item):
         if "http://" in website:
-            website = website.replace("http://", "https://")
+            website = website.replace("http://", "https://").split(" - ", 1)[0]
             item["website"] = website
         elif website.startswith("www."):
-            website = website.replace("www.", "https://www.")
-            item["website"] = website
-        elif website.startswith("ford-"):
-            website = website.replace("ford-", "https://ford-")
+            website = website.replace("www.", "https://www.").split(" / ", 1)[0]
             item["website"] = website
         elif "@" in website:
             item["email"] = website
+        elif website.startswith("ford-"):
+            website = website.replace("ford-", "https://ford-")
+            item["website"] = website
+
         return item
 
     @functools.lru_cache()
