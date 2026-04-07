@@ -26,6 +26,8 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
         item.pop("twitter", None)
         item.pop("image", None)
         item["website"] = response.url
+        if "CLOSED" in name.upper():
+            return
         if "FUNERAL" in name.upper() or "CREMATORIUM" in name.upper() or "COFFINS" in name.upper():
             apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
             if "Central Co-op Funeral" in item["name"]:
