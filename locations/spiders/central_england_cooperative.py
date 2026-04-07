@@ -23,7 +23,10 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(CENTRAL_COOP, item)
         name = item["name"]
-        item.pop("twitter", None)
+        if item.get("twitter") == 'mycoopfood':
+            item.pop("twitter", None)
+        if item.get("facebook") == 'https://www.facebook.com/centralcoopfood"':
+            item.pop("facebook", None)
         item.pop("image", None)
         item["website"] = response.url
         if "CLOSED" in name.upper():
