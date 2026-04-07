@@ -23,7 +23,7 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(CENTRAL_COOP, item)
         name = item["name"]
-        if item.get("twitter") == 'mycoopfood':
+        if item.get("twitter") == "mycoopfood":
             item.pop("twitter", None)
         if item.get("facebook") == 'https://www.facebook.com/centralcoopfood"':
             item.pop("facebook", None)
