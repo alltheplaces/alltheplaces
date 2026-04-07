@@ -1,4 +1,5 @@
 from copy import deepcopy
+
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
