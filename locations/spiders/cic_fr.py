@@ -1,9 +1,10 @@
 import re
+from copy import deepcopy
 
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -51,5 +52,13 @@ class CicFRSpider(CrawlSpider):
                 else:
                     open_time, close_time = time.replace("h", ":").split(" - ")
                     item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+        has_atm = bool(response.css(".ei_rogi_picto_withdrawal_bills_eur").get())
+        apply_yes_no(Extras.ATM, item, has_atm)
         apply_category(Categories.BANK, item)
         yield item
+
+        if has_atm:
+            atm_item = deepcopy(item)
+            atm_item["ref"] += "-ATM"
+            apply_category(Categories.ATM, atm_item)
+            yield atm_item
