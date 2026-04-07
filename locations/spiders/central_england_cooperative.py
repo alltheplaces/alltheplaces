@@ -35,14 +35,14 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.SHOP_FLORIST, item)
             if "Central Co-op Florist" in item["name"]:
                 item.update(CENTRAL_COOP)
-                item["name"],item["branch"] = item["name"].split(" - ")
+                item["name"], item["branch"] = item["name"].split(" - ")
         else:
             apply_category(Categories.SHOP_CONVENIENCE, item)
             if item["name"].startswith("The Co-operative"):
                 item.update(COOP_FOOD)
-                item["branch"] = item["name"].replace("The Co-operative ","")
+                item["branch"] = item["name"].replace("The Co-operative ", "")
             else:
                 item.update(CENTRAL_COOP)
-                item["name"],item["branch"] = item["name"].split(" - ")
+                item["name"], item["branch"] = item["name"].split(" - ")
 
         yield item
