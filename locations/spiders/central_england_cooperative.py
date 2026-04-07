@@ -37,7 +37,7 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
                 item.update(COOP_FUNERALCARE)
                 item["branch"] = item.pop("name").replace("Central Co-op Funeral", "").strip(" -")
         elif "FLORIST" in name.upper():
-            #No structured data on florist pages yet
+            # No structured data on florist pages yet
             apply_category(Categories.SHOP_FLORIST, item)
             if "Central Co-op Florist" in item["name"]:
                 item.update(CENTRAL_COOP)
