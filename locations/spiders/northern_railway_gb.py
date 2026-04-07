@@ -14,6 +14,7 @@ class NorthernRailwayGBSpider(PlaywrightSpider):
     item_attributes = {"operator": "Northern", "operator_wikidata": "Q85789775"}
     start_urls = ["https://www.northernrailway.co.uk/api/northern_station_list_auto_complete"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in json.loads(response.xpath("//pre/text()").get())["results"]:
