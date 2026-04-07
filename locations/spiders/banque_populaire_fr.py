@@ -1,6 +1,8 @@
+from copy import deepcopy
+
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -12,8 +14,17 @@ class BanquePopulaireFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = response.url  # Bad url in linked data
+        item["website"] = response.url
 
-        apply_category(Categories.BANK, item)
+        has_atm = bool(response.xpath('//*[contains(@class, "em-details__services-dab")]'))
 
-        yield item
+        bank = deepcopy(item)
+        apply_category(Categories.BANK, bank)
+        apply_yes_no(Extras.ATM, bank, has_atm)
+        yield bank
+
+        if has_atm:
+            atm = deepcopy(item)
+            atm["ref"] += "-ATM"
+            apply_category(Categories.ATM, atm)
+            yield atm
