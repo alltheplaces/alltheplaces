@@ -1,4 +1,3 @@
-
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -13,7 +12,8 @@ class BanquePopulaireFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = response.url
+        item["branch"] = item.pop("name")
+        item["website"] = response.url  # Bad url in linked data+
 
         apply_category(Categories.BANK, item)
         apply_yes_no(Extras.ATM, item, bool(response.xpath('//*[contains(@class, "em-details__services-dab")]')))
