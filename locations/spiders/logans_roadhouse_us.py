@@ -7,7 +7,7 @@ class LogansRoadhouseUSSpider(Spider):
     name = "logans_roadhouse_us"
     item_attributes = {"brand": "Logan's Roadhouse", "brand_wikidata": "Q6666872"}
 
-    def start_requests(self):
+    async def start(self):
         yield FormRequest(
             url="https://logansroadhouse.com/wp-admin/admin-ajax.php",
             method="POST",
