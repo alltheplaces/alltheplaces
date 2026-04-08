@@ -1,4 +1,3 @@
-from copy import deepcopy
 
 from scrapy.spiders import SitemapSpider
 
