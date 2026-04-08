@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
-from locations.items import Feature
-from locations.google_url import extract_google_position
 
+from locations.google_url import extract_google_position
+from locations.items import Feature
 
 
 class DruryHotelsUSSpider(SitemapSpider):
@@ -10,9 +10,7 @@ class DruryHotelsUSSpider(SitemapSpider):
 
     allowed_domains = ["druryhotels.com"]
 
-    sitemap_urls = [
-        "https://www.druryhotels.com/sitemap.xml"
-    ]
+    sitemap_urls = ["https://www.druryhotels.com/sitemap.xml"]
 
     # Only match hotel detail pages (not city pages)
     sitemap_rules = [
@@ -29,7 +27,7 @@ class DruryHotelsUSSpider(SitemapSpider):
         item["postcode"] = response.css('span[itemprop="postalCode"]::text').get()
         item["phone"] = response.css('span[itemprop="telephone"] a::text').get()
         item["country"] = "US"
-        item["image"] = response.css('.first ::attr(data-src)').get()
-        extract_google_position(item,response)
+        item["image"] = response.css(".first ::attr(data-src)").get()
+        extract_google_position(item, response)
 
         yield item
