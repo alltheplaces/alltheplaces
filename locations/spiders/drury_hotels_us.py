@@ -6,16 +6,11 @@ from locations.items import Feature
 
 class DruryHotelsUSSpider(SitemapSpider):
     name = "drury_hotels_us"
-    item_attributes = {"brand": "Drury Hotels", "brand_wikidata": "Q5309391"}
-
+    item_attributes = {"brand": "Drury Inn & Suites", "brand_wikidata": "Q5309391"}
     allowed_domains = ["druryhotels.com"]
-
     sitemap_urls = ["https://www.druryhotels.com/sitemap.xml"]
-
     # Only match hotel detail pages (not city pages)
-    sitemap_rules = [
-        (r"/locations/[^/]+/[^/]+$", "parse"),
-    ]
+    sitemap_rules = [(r"/locations/[^/]+/[^/]+$", "parse")]
 
     def parse(self, response):
         item = Feature()
