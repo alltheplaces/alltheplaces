@@ -4,28 +4,23 @@ from typing import Iterable
 from chompjs import parse_js_object
 from scrapy.http import Request, TextResponse
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class Cb2CAUSSpider(StructuredDataSpider, CamoufoxSpider):
+class Cb2CAUSSpider(StructuredDataSpider):
     name = "cb2_ca_us"
     item_attributes = {"brand": "CB2", "brand_wikidata": "Q113164236"}
     allowed_domains = ["www.cb2.com", "www.cb2.ca"]
     start_urls = ["https://www.cb2.com/stores/?viewIndex=storeList"]
     # Basic anti-bot detection and rate limiting in use.
     # Check for non-zero "downloader/response_status_count/403" stat.
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"DOWNLOAD_DELAY": 7}
+    requires_proxy = True
 
     def parse(self, response: TextResponse) -> Iterable[Request]:
-        # Possibly due to the page continuing to "hydrate" (yay React!) after
-        # Playwright thinks the page has fully loaded, CrawlSpider and similar
-        # do not detect all store URLs. We can get all the store URLs by
-        # parsing the raw JavaScript array used by React to "hydrate" the HTML
-        # content.
+        # Parse the raw store list from a JavaScript blob as React is used
+        # and dynamically renders the DOM from this JavaScript blob.
         store_list_js_blob = response.xpath(
             '//script[contains(text(), "React.createElement(CB2StoreList,")]/text()'
         ).get()
