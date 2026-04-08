@@ -1,5 +1,7 @@
 import re
+
 import scrapy
+from scrapy.selector import Selector
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
@@ -7,7 +9,6 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.outdoor_supply_hardware_us import decode_email
-from scrapy.selector import Selector
 
 
 class FournosZASpider(scrapy.Spider):
@@ -36,7 +37,9 @@ class FournosZASpider(scrapy.Spider):
                 item["email"] = None
 
             item["phone"] = loc.xpath('.//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
-            item["addr_full"] = clean_address(loc.xpath(".//p[strong[contains(., 'Email')]]/following-sibling::p[.//br][1]//text()").getall()).rstrip(".")
+            item["addr_full"] = clean_address(
+                loc.xpath(".//p[strong[contains(., 'Email')]]/following-sibling::p[.//br][1]//text()").getall()
+            ).rstrip(".")
 
             item["opening_hours"] = self.parse_hours(loc)
             yield item
