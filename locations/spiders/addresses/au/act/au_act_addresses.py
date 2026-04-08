@@ -1,4 +1,3 @@
-from datetime import UTC, datetime
 from typing import Iterable
 
 from scrapy.http import Response
