@@ -14,18 +14,10 @@ class CicFRSpider(CrawlSpider):
     start_urls = ["https://www.cic.fr/fr/agences-et-distributeurs/Regions.aspx"]
     allowed_domains = ["cic.fr"]
     rules = [
-        Rule(
-            LinkExtractor(allow=r"/Departements\.aspx\?regionId=")
-        ),
-        Rule(
-            LinkExtractor(allow=r"/Localites\.aspx\?regionId=")
-        ),
-        Rule(
-            LinkExtractor(allow=r"/ResultatsRechercheGeographique\.aspx\?inseeCode=")
-        ),
-        Rule(
-            LinkExtractor(allow=r"/fr/agence/"), callback="parse"
-        ),
+        Rule(LinkExtractor(allow=r"/Departements\.aspx\?regionId=")),
+        Rule(LinkExtractor(allow=r"/Localites\.aspx\?regionId=")),
+        Rule(LinkExtractor(allow=r"/ResultatsRechercheGeographique\.aspx\?inseeCode=")),
+        Rule(LinkExtractor(allow=r"/fr/agence/"), callback="parse"),
     ]
 
     def parse(self, response):
