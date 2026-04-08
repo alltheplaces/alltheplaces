@@ -38,7 +38,7 @@ class AuQldAddressesSpider(ArcGISFeatureServerSpider, AddressSpider):
             if unit_suffix := feature.get("unit_suffix"):
                 item["extras"]["addr:unit"] = f"{unit_number}{unit_suffix}"
             else:
-                item["extras"]["addr_unit"] = f"{unit_number}"
+                item["extras"]["addr:unit"] = f"{unit_number}"
 
         if floor_number := feature.get("floor_number"):
             item["extras"]["addr:floor"] = f"{floor_number}"
