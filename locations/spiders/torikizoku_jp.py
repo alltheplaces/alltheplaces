@@ -14,7 +14,7 @@ class TorikizokuJPSpider(CanlySpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if "予定" in feature.get("nameKanji"):
             item = None
-            return # skip future openings
+            return  # skip future openings
 
         item["branch"] = feature.get("nameKanji").removeprefix("鳥貴族 ")
         item["extras"]["branch:ja-Hira"] = feature.get("nameKana").removeprefix("トリキゾク ")
