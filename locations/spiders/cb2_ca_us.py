@@ -26,7 +26,9 @@ class Cb2CAUSSpider(StructuredDataSpider, CamoufoxSpider):
         # do not detect all store URLs. We can get all the store URLs by
         # parsing the raw JavaScript array used by React to "hydrate" the HTML
         # content.
-        store_list_js_blob = response.xpath('//script[contains(text(), "React.createElement(CB2StoreList,")]/text()').get()
+        store_list_js_blob = response.xpath(
+            '//script[contains(text(), "React.createElement(CB2StoreList,")]/text()'
+        ).get()
         store_list_js_blob = store_list_js_blob.split('"allStoreList":', 1)[1].split(',"storeListView":', 1)[0]
         store_list = parse_js_object(store_list_js_blob)
         for store in store_list:
