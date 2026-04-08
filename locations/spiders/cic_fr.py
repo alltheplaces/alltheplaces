@@ -1,5 +1,4 @@
 import re
-from copy import deepcopy
 
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -16,17 +15,16 @@ class CicFRSpider(CrawlSpider):
     allowed_domains = ["cic.fr"]
     rules = [
         Rule(
-            LinkExtractor(allow=r"/Departements\.aspx\?regionId="),
+            LinkExtractor(allow=r"/Departements\.aspx\?regionId=")
         ),
         Rule(
-            LinkExtractor(allow=r"/Localites\.aspx\?regionId="),
+            LinkExtractor(allow=r"/Localites\.aspx\?regionId=")
         ),
         Rule(
-            LinkExtractor(allow=r"/ResultatsRechercheGeographique\.aspx\?inseeCode="),
+            LinkExtractor(allow=r"/ResultatsRechercheGeographique\.aspx\?inseeCode=")
         ),
         Rule(
-            LinkExtractor(allow=r"/fr/agence/"),
-            callback="parse",
+            LinkExtractor(allow=r"/fr/agence/"), callback="parse"
         ),
     ]
 
@@ -56,9 +54,3 @@ class CicFRSpider(CrawlSpider):
         apply_yes_no(Extras.ATM, item, has_atm)
         apply_category(Categories.BANK, item)
         yield item
-
-        if has_atm:
-            atm_item = deepcopy(item)
-            atm_item["ref"] += "-ATM"
-            apply_category(Categories.ATM, atm_item)
-            yield atm_item
