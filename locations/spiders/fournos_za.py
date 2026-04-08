@@ -25,14 +25,10 @@ class FournosZASpider(scrapy.Spider):
             extract_google_position(item, loc)
             item["ref"] = loc.xpath("./@id").get("").replace("popmake-", "")
             item["branch"] = loc.xpath(".//div[contains(@class,'pum-title')]/text()").get("").strip()
-            if item["branch"] == "Head Office":
-                item["branch"] = ""
-                apply_category(Categories.OFFICE_COMPANY, item)
 
             encoded = loc.xpath(".//span[@class='__cf_email__']/@data-cfemail").get()
             if encoded:
                 item["email"] = decode_email(encoded)
-
             else:
                 item["email"] = None
 
