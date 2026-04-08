@@ -1,15 +1,14 @@
 from scrapy.spiders import SitemapSpider
+
 from locations.structured_data_spider import StructuredDataSpider
+
 
 class BonchonUSSpider(SitemapSpider, StructuredDataSpider):
     name = "bonchon_us"
     item_attributes = {"brand": "Bonchon", "brand_wikidata": "Q4941248"}
     drop_attributes = {"facebook"}
 
-
-    sitemap_urls = [
-        "https://restaurants.bonchon.com/sitemap.xml"
-    ]
+    sitemap_urls = ["https://restaurants.bonchon.com/sitemap.xml"]
 
     sitemap_rules = [
         (r"/locations/[^/]+/[^/]+/[^/]+$", "parse_sd"),
