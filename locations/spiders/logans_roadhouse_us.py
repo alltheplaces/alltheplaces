@@ -1,4 +1,5 @@
-from scrapy import Spider, FormRequest
+from scrapy import FormRequest, Spider
+
 from locations.dict_parser import DictParser
 
 
@@ -30,5 +31,5 @@ class LogansRoadhouseUSSpider(Spider):
             item["city"] = location["address_state"].split(", ")[0]
             item["postcode"] = location["address_state"].split(", ")[2]
             item.pop("name")
-            
+
             yield item
