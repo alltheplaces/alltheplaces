@@ -16,15 +16,6 @@ class BanquePopulaireFRSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url
 
-        has_atm = bool(response.xpath('//*[contains(@class, "em-details__services-dab")]'))
-
-        bank = deepcopy(item)
-        apply_category(Categories.BANK, bank)
-        apply_yes_no(Extras.ATM, bank, has_atm)
-        yield bank
-
-        if has_atm:
-            atm = deepcopy(item)
-            atm["ref"] += "-ATM"
-            apply_category(Categories.ATM, atm)
-            yield atm
+        apply_category(Categories.BANK, item)
+        apply_yes_no(Extras.ATM, item, bool(response.xpath('//*[contains(@class, "em-details__services-dab")]')))
+        yield item
