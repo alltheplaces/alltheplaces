@@ -13,7 +13,6 @@ class McdonaldsILSpider(JSONBlobSpider):
     item_attributes = {"brand_wikidata": "Q12061542"}
     start_urls = ["https://order.mcdonalds.co.il"]
     locations_key = ["data", "stores"]
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         yield response.follow(
