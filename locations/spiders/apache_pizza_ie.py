@@ -1,7 +1,7 @@
 from typing import Any
 
-from scrapy import FormRequest, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -13,9 +13,9 @@ class ApachePizzaIESpider(Spider):
     start_urls = ["https://apache.ie/stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        yield FormRequest(
+        yield JsonRequest(
             url="https://apache.ie/General/GetFilteredStores/",
-            formdata={"includeSliceStores": "true"},
+            data={"includeSliceStores": "true"},
             headers={
                 "RequestVerificationToken": response.xpath('//input[@id="completeAntiForgeryToken"]/@value').get()
             },
