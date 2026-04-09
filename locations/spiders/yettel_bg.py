@@ -46,17 +46,17 @@ class YettelBGSpider(Spider):
                 split = sat_hours.split("-")
                 opening_time = split[0]
                 closing_time = split[1]
-                item["opening_hours"].add_range('Sa', opening_time, closing_time)
+                item["opening_hours"].add_range("Sa", opening_time, closing_time)
             elif sat_hours == "затворено":
-                item["opening_hours"].set_closed('Sa')
+                item["opening_hours"].set_closed("Sa")
 
             sun_hours = store["workingTimeSun"].replace(" ", "").lower()
             if sun_hours is not None and sun_hours != "затворено":
                 split = sun_hours.split("-")
                 opening_time = split[0]
                 closing_time = split[1]
-                item["opening_hours"].add_range('Su', opening_time, closing_time)
+                item["opening_hours"].add_range("Su", opening_time, closing_time)
             elif sun_hours == "затворено":
-                item["opening_hours"].set_closed('Su')
+                item["opening_hours"].set_closed("Su")
 
             yield item
