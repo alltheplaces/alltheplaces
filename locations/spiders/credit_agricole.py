@@ -2,7 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
 
 
