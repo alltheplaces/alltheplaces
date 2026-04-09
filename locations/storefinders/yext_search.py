@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -11,19 +11,19 @@ from locations.storefinders.yext_answers import YextAnswersSpider
 
 
 class YextSearchSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "yext"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    dataset_attributes: dict = {"source": "api", "api": "yext"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 
-    host: str = "https://locator.chick-fil-a.com.yext-cdn.com"
+    host: str = "https://locator.example-brand.yext-cdn.com"
     page_size: int = 50
 
     def make_request(self, offset: int) -> JsonRequest:
         return JsonRequest("{}/search?r=250000&per={}&offset={}".format(self.host, self.page_size, offset))
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield self.make_request(0)
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature | JsonRequest]:
         for location in response.json()["response"]["entities"]:
             item = Feature()
             profile = location["profile"]
@@ -71,30 +71,30 @@ class YextSearchSpider(Spider):
             if profile.get("googlePlaceId"):
                 item["extras"]["ref:google"] = profile.get("googlePlaceId")
 
-            YextAnswersSpider.parse_payment_methods(self, profile, item)
+            YextAnswersSpider.parse_payment_methods(profile, item)
 
             item["opening_hours"] = self.parse_opening_hours(profile.get("hours"))
-            if oh := self.parse_opening_hours(profile.get("deliveryHours")):
-                item["extras"]["opening_hours:delivery"] = oh.as_opening_hours()
+            if oh := self.parse_opening_hours(profile.get("deliveryHours")).as_opening_hours():
+                item["extras"]["opening_hours:delivery"] = oh
 
             yield from self.parse_item(location, item) or []
 
         yield from self.request_next_page(response, **kwargs)
 
-    def request_next_page(self, response: Response, **kwargs: Any) -> Any:
+    def request_next_page(self, response: TextResponse, **kwargs: Any) -> Iterable[JsonRequest]:
         pager = response.json()["queryParams"]
         offset = int(pager["offset"][0])
         page_size = int(pager["per"][0])
         if offset + page_size < response.json()["response"]["count"]:
             yield self.make_request(offset + page_size)
 
-    def parse_opening_hours(self, hours: dict, **kwargs: Any) -> OpeningHours | None:
+    def parse_opening_hours(self, hours: dict, **kwargs: Any) -> OpeningHours:
         oh = OpeningHours()
         if not hours:
-            return None
+            return oh
         normal_hours = hours.get("normalHours")
         if not normal_hours:
-            return None
+            return oh
         for day in normal_hours:
             if day.get("isClosed"):
                 oh.set_closed(day["day"].title())

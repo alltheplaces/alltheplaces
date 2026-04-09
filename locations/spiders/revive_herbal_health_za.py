@@ -1,9 +1,12 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.items import Feature
 
 
-class ReviveHerbalHealthZASpider(scrapy.Spider):
+class ReviveHerbalHealthZASpider(Spider):
     name = "revive_herbal_health_za"
     item_attributes = {
         "brand_wikidata": "Q116498098",
@@ -13,8 +16,8 @@ class ReviveHerbalHealthZASpider(scrapy.Spider):
         "reviveherbalhealth.co.za",
     ]
 
-    def start_requests(self):
-        yield scrapy.FormRequest(
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
             url="https://reviveherbalhealth.co.za/shop/wp-admin/admin-ajax.php",
             formdata={
                 "action": "get_all_stores",

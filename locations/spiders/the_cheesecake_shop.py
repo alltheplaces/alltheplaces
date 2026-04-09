@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -17,7 +19,7 @@ class TheCheesecakeShopSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     store_list = {}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url, callback=self.parse_store_list)
 

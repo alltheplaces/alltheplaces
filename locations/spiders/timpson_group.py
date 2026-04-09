@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import FormRequest, Response
 
@@ -94,7 +94,7 @@ class TimpsonGroupSpider(JSONBlobSpider):
         },
     }
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         formdata = {"start": "50000"}
         headers = {"X-Requested-With": "XMLHttpRequest"}
         yield FormRequest(url=self.start_urls[0], formdata=formdata, headers=headers, method="POST")
@@ -162,6 +162,9 @@ class TimpsonGroupSpider(JSONBlobSpider):
             case "clothing-care":
                 # TODO: unknown brand/feature type.
                 pass
+            case "co-op":
+                # Cannot determine located_in as "coop" does not indicate specific brand
+                pass
             case "homebase":
                 item["located_in"] = HomebaseGBIESpider.item_attributes["brand"]
                 item["located_in_wikidata"] = HomebaseGBIESpider.item_attributes["brand_wikidata"]
@@ -174,6 +177,9 @@ class TimpsonGroupSpider(JSONBlobSpider):
             case "morrisons" | "Morrisons":
                 item["located_in"] = MorrisonsGBSpider.MORRISONS["brand"]
                 item["located_in_wikidata"] = MorrisonsGBSpider.MORRISONS["brand_wikidata"]
+            case "postoffice":
+                # No brand available
+                pass
             case "road-chef":
                 # TODO: change in the future if ATP implements a Roadchef spider.
                 item["located_in"] = "Roadchef"

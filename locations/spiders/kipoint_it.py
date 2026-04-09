@@ -1,4 +1,5 @@
-import json
+from json import loads
+from typing import AsyncIterator
 from urllib.parse import parse_qs, unquote, urlsplit
 
 import chompjs
@@ -27,7 +28,7 @@ class KipointITSpider(JSONBlobSpider):
     }
     start_urls = ["https://www.kipoint.it/punti-vendita"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url, callback=self.fetch_mymaps)
 
@@ -38,7 +39,7 @@ class KipointITSpider(JSONBlobSpider):
     def extract_json(self, response):
         _pageData = response.xpath('//script[contains(text(), "var _pageData = ")]/text()').get()
         _pageData = _pageData.split("var _pageData = ")[-1].strip().strip(";")
-        pdata = chompjs.parse_js_object(json.loads(_pageData))[1][6][0][12][0][13][0]
+        pdata = chompjs.parse_js_object(loads(_pageData))[1][6][0][12][0][13][0]
         places = []
         for s in pdata:
             place = {"ref": s[5][0][1][0], "coords": {"lat": s[1][0][0][0], "lon": s[1][0][0][1]}}

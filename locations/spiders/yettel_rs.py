@@ -1,16 +1,19 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.hours import DAYS_RS, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class YettelRSSpider(scrapy.Spider):
+class YettelRSSpider(Spider):
     name = "yettel_rs"
     item_attributes = {"brand": "Yettel", "brand_wikidata": "Q1780171"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://www.yettel.rs/stores/latlong/"
-        yield scrapy.http.FormRequest(url=url, formdata={"lat": "0", "lng": "0", "dist": "10000000000"}, method="POST")
+        yield FormRequest(url=url, formdata={"lat": "0", "lng": "0", "dist": "10000000000"}, method="POST")
 
     def parse(self, response):
         for index, store in enumerate(response.json()["data"]["stores"]):

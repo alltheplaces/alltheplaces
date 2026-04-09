@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.items import Feature
@@ -20,11 +20,10 @@ class AlgoliaSpider(Spider):
     page.
     """
 
-    dataset_attributes = {"source": "api", "api": "algolia"}
-
-    api_key: str = ""
-    app_id: str = ""
-    index_name: str = ""
+    dataset_attributes: dict = {"source": "api", "api": "algolia"}
+    api_key: str
+    app_id: str
+    index_name: str
     myfilter: str | None = None
     referer: str | None = None
 
@@ -52,10 +51,10 @@ class AlgoliaSpider(Spider):
             },
         )
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield self._make_request(None)
 
-    def parse(self, response: Response) -> Iterable[Feature | JsonRequest]:
+    def parse(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         result = response.json()["results"][0]
         for feature in result["hits"]:
             self.pre_process_data(feature)
@@ -68,6 +67,6 @@ class AlgoliaSpider(Spider):
     def pre_process_data(self, location: dict) -> None:
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

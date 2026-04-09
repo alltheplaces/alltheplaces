@@ -18,6 +18,7 @@ class BhfGBSpider(SitemapSpider):
         (r"/find-bhf-near-you/.+-furniture-.*$", "parse"),
         (r"/find-bhf-near-you/stockbridge$", "parse"),
         (r"/find-bhf-near-you/pontefract$", "parse"),
+        (r"/find-bhf-near-you/bristol-vintage$", "parse"),
         (r"/find-bhf-near-you/portsmouth-home-fashion", "parse"),
     ]
 
@@ -29,15 +30,9 @@ class BhfGBSpider(SitemapSpider):
         item["website"] = response.url
         item["name"] = "British Heart Foundation"
         item["branch"] = response.xpath("//h1/text()").get()
-        if "permanently closed" in item["branch"]:
-            return
         item["addr_full"] = response.xpath('//p[@class="highlighted-info-block__description"]/text()').get()
-        item["lat"], item["lon"] = (
-            response.xpath('//a[contains (@href,"www.google.com/maps/place/")]/@href')
-            .get()
-            .replace("https://www.google.com/maps/place/", "")
-            .split(",")
-        )
+        if location := response.xpath('//a[contains (@href,"www.google.com/maps/place/")]/@href').get():
+            item["lat"], item["lon"] = location.replace("https://www.google.com/maps/place/", "").split(",")
         item["opening_hours"] = OpeningHours()
         hours_string = (
             " ".join(response.xpath('//div[@class="opening-hours__days"]//text()').getall())

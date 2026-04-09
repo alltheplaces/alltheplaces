@@ -13,7 +13,7 @@ class HsbcUkGBSpider(CrawlSpider, StructuredDataSpider):
     name = "hsbc_uk_gb"
     item_attributes = {"brand": "HSBC UK", "brand_wikidata": "Q64767453"}
     start_urls = ["https://www.hsbc.co.uk/branch-list/"]
-    rules = [Rule(LinkExtractor(allow="/branch-list//"), callback="parse_sd")]
+    rules = [Rule(LinkExtractor(allow="/branch-list/"), callback="parse_sd")]
 
     def iter_linked_data(self, response: Response) -> Iterable[dict]:
         for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):

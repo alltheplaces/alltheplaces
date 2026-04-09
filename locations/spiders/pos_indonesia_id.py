@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
@@ -13,7 +13,7 @@ class PosIndonesiaIDSpider(Spider):
     item_attributes = {"operator": "Pos Indonesia", "operator_wikidata": "Q4273095"}
     handle_httpstatus_list = [400]
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://postoffice.posindonesia.co.id/backend/externalweb/carikantor",
             data={"perPage": 20000, "currentPage": 1, "cari": "", "jnsktr": ""},

@@ -1,9 +1,9 @@
-import json
 import re
-from typing import Any, Iterable
+from json import dumps
+from typing import Any, AsyncIterator
 
-from requests import Response
-from scrapy import FormRequest, Request, Spider
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
@@ -23,7 +23,7 @@ class MacCosmeticsSpider(Spider):
     re_period = re.compile(r"\s*[,/&]\s*")
     re_range = re.compile(r"\s*(?:-|–| to )\s*")
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         jsonrpc = [
             {
                 "method": "locator.doorsandevents",
@@ -47,7 +47,7 @@ class MacCosmeticsSpider(Spider):
         yield FormRequest(
             "https://www.maccosmetics.com/rpc/jsonrpc.tmpl?dbgmethod=locator.doorsandevents",
             method="POST",
-            formdata={"JSONRPC": json.dumps(jsonrpc)},
+            formdata={"JSONRPC": dumps(jsonrpc)},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -72,6 +72,7 @@ class MacCosmeticsSpider(Spider):
                 any_open, opening_hours = self.parse_opening_hours(feature)
                 item["opening_hours"] = opening_hours
             if any_open and not item["name"].endswith("- Closed"):
+                item["branch"] = item.pop("name").replace("M·A·C ", "").replace("MAC Cosmetics at ", "")
                 yield item
 
     def parse_opening_hours(self, feature):

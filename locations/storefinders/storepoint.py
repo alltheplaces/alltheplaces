@@ -1,19 +1,30 @@
+from typing import AsyncIterator, Iterable
+
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 
 
 class StorepointSpider(Spider):
-    dataset_attributes = {"source": "api", "api": "storepoint.co"}
-    key: str = ""
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    """
+    Storepoint is a cloud-hosted storefinder service with an official website
+    of https://storepoint.co/
 
-    def start_requests(self):
+    To use this storefinder, specify a value for the `key` attribute.
+    """
+
+    dataset_attributes: dict = {"source": "api", "api": "storepoint.co"}
+    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+
+    key: str
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=f"https://api.storepoint.co/v1/{self.key}/locations")
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
         if not response.json()["success"]:
             return
 
@@ -32,5 +43,5 @@ class StorepointSpider(Spider):
             item["opening_hours"].add_ranges_from_string(hours_string)
             yield from self.parse_item(item, location)
 
-    def parse_item(self, item, location: {}, **kwargs):
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         yield item

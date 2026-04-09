@@ -1,4 +1,6 @@
-from scrapy import Request
+from typing import AsyncIterator
+
+from scrapy.http import Request
 
 from locations.geo import point_locations
 from locations.spiders.swarovski_us import SwarovskiUSSpider
@@ -9,7 +11,7 @@ class SwarovskiEUSpider(SwarovskiUSSpider):
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
     allowed_domains = ["swarovski.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         point_files = "eu_centroids_120km_radius_country.csv"
         for lat, lon in point_locations(point_files):
             yield Request(

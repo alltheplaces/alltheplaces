@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -13,15 +13,16 @@ class NationalParksBoardTreesSGSpider(ArcGISFeatureServerSpider):
     item_attributes = {"operator": "National Parks Board", "operator_wikidata": "Q6974762"}
     host = "services6.arcgis.com"
     context_path = "s5gdswleLl0QthYa/ArcGIS"
-    service_id = "TreeInformation_Hashing"
+    service_id = "TreesSG_TreeInformation_Trees"
     layer_id = "0"
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.nparks.gov.sg/ptmapi/TokenAuthApi/GetAuthToken", callback=self.parse_token)
 
-    def parse_token(self, response: Response) -> Iterable[JsonRequest]:
+    async def parse_token(self, response: Response) -> AsyncIterator[JsonRequest]:
         self.additional_parameters = {"token": response.json()["ViewToken"]}
-        yield from super().start_requests()
+        async for request in super().start():
+            yield request
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["Public_treeid"]

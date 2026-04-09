@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -11,7 +11,7 @@ class TommyHRSpider(Spider):
     name = "tommy_hr"
     item_attributes = {"brand": "Tommy", "brand_wikidata": "Q12643718"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://spiza.tommy.hr/api/v2/shop/channels?itemsPerPage=500")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

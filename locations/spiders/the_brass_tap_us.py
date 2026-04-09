@@ -1,5 +1,7 @@
-from scrapy import Request, Spider
-from scrapy.http import JsonRequest
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -13,7 +15,7 @@ class TheBrassTapUSSpider(Spider):
         "https://www.brasstapbeerbar.com/pinsNearestBrassTap.ashx?lat1=27.950&lon1=-82.45&range=100000&food=%25&lunch=%25&brunch=%25&music=%25"
     ]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

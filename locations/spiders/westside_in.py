@@ -1,19 +1,18 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy import Selector
-from scrapy.http import Response
+from scrapy import Selector, Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class WestsideINSpider(scrapy.Spider):
+class WestsideINSpider(Spider):
     name = "westside_in"
     item_attributes = {"brand": "Westside", "brand_wikidata": "Q2336948"}
 
-    def start_requests(self):
-        yield scrapy.Request(
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
             url="https://customapp.trent-tata.com/api/custom/getstore-all?type=Westside&page=1",
             headers={"Referer": "https://www.westside.com/"},
         )
@@ -30,7 +29,7 @@ class WestsideINSpider(scrapy.Spider):
             yield item
 
         if next_page_url := data.xpath('//*[contains(@aria-label,"Next")]/@href').get():
-            yield scrapy.Request(
+            yield Request(
                 url=next_page_url + "&type=Westside",
                 headers={"Referer": "https://www.westside.com/"},
                 callback=self.parse,

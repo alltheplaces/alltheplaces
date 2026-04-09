@@ -24,6 +24,4 @@ class LosAngelesCountyDepartmentOfPublicWorksSewerPumpStationsUSSpider(ArcGISFea
         item["ref"] = feature["CW_ASSETID"]
         item["name"] = feature["PUMP_STATION_NAME"]
         apply_category(Categories.PUMPING_STATION_SEWAGE, item)
-        if dms_pump_station_ids := feature["DMS_PUMP_STATION_ID"]:
-            item["extras"]["alt_ref"] = dms_pump_station_ids.replace(",", ";")
         yield item

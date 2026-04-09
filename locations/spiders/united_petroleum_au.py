@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
 from scrapy import Spider
@@ -25,7 +25,7 @@ class UnitedPetroleumAUSpider(Spider):
     UNITED = {"brand": "United", "brand_wikidata": "Q28224393"}
     allowed_domains = ["servicestations.unitedpetroleum.com.au"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://servicestations.unitedpetroleum.com.au/api/find",
             data={

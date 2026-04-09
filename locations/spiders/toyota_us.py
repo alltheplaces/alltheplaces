@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import timedelta
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Request, Response
 
@@ -17,7 +17,7 @@ class ToyotaUSSpider(JSONBlobSpider):
     locations_key = "dealers"
     requires_proxy = True
 
-    def start_requests(self) -> Iterable[JsonRequest | Request]:
+    async def start(self) -> AsyncIterator[JsonRequest | Request]:
         # API can not handle huge radius coverage, therefore
         # I decicded to use zipcodes from:
         # Alaska(99775), Florida(33040), California(91932), Washington(98221), Kansas(66952), Maine(04619)

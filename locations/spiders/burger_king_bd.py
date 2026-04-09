@@ -1,6 +1,7 @@
 from chompjs import parse_js_object
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
@@ -17,4 +18,5 @@ class BurgerKingBDSpider(Spider):
             item["branch"] = location[0].replace("Burger King ", "")
             item["lat"] = location[1]
             item["lon"] = location[2]
+            apply_category(Categories.FAST_FOOD, item)
             yield item

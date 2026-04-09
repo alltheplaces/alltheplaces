@@ -3,7 +3,7 @@ from typing import Iterable
 from phpserialize import unserialize
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
@@ -11,12 +11,13 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class BarburritoCASpider(WPStoreLocatorSpider):
     name = "barburrito_ca"
-    item_attributes = {"brand": "BarBurrito", "brand_wikidata": "Q104844862", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {"brand": "BarBurrito", "brand_wikidata": "Q104844862"}
     allowed_domains = ["www.barburrito.ca"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         item.pop("addr_full", None)
+        apply_category(Categories.FAST_FOOD, item)
         yield item
 
     def parse_opening_hours(self, feature: dict, days: dict) -> OpeningHours:

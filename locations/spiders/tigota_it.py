@@ -1,6 +1,5 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator
 
-from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
@@ -12,7 +11,7 @@ class TigotaITSpider(Spider):
     name = "tigota_it"
     item_attributes = {"brand": "Tigotà", "brand_wikidata": "Q107464330"}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://gom.gottardospa.it/negozi/shops",
             headers={

@@ -1,10 +1,13 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_RU, OpeningHours
 from locations.items import Feature
+from locations.licenses import Licenses
 
 CATEGORY_MAPPING = {
     "ремонт телефонов, планшетов": Categories.CRAFT_ELECTRONICS_REPAIR.value | {"electronics_repair": "phone"},
@@ -60,7 +63,7 @@ CATEGORY_MAPPING = {
 }
 
 
-class OpendataMosSpider(scrapy.Spider):
+class OpendataMosSpider(Spider):
     """
     A spider for Open Data Portal of Moscow Government.
         Documentation: https://data.mos.ru/developers
@@ -70,26 +73,21 @@ class OpendataMosSpider(scrapy.Spider):
 
     allowed_domains = ["apidata.mos.ru"]
     api_key = "8caab471-cc9f-46c8-aeea-fa3f5e1c765c"
-    custom_settings = {"DOWNLOAD_DELAY": 0.25}
     requires_proxy = True
-    dataset_attributes = {
-        "attribution": "required",
+    dataset_attributes = Licenses.CC3.value | {
         "attribution:name:ru": "ПОРТАЛ ОТКРЫТЫХ ДАННЫХ Правительства Москвы",
         "attribution:name:en": "OPEN DATA PORTAL of Moscow Government",
         "attribution:website": "https://data.mos.ru/",
         "contact:email": "opendata@mos.ru",
-        "license": "Creative Commons Attribution 3.0 Unported",
-        "license:website": "https://creativecommons.org/licenses/by/3.0/",
-        "license:wikidata": "Q14947546",
-        "use:commercial": "permit",
     }
+
     datasets = {}
     category_mapping = {}
 
     def filter_function(self, row):
         return row
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         for name, id in self.datasets.items():
             yield Request(
                 url=f"https://apidata.mos.ru/v1/datasets/{id}/count?api_key={self.api_key}",

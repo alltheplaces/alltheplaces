@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -22,7 +22,7 @@ class HarborFreightToolsUSSpider(JSONBlobSpider):
         "DOWNLOAD_DELAY": 10
     }  # Aggressive HTTP 403 rate limiting is used, robots.txt wants a delay of 10s
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         # GraphQL query returns results in a 60mi radius.
         for coordinates in country_iseadgg_centroids(["US"], 94):
             graphql_url = (

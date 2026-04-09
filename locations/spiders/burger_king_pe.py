@@ -4,6 +4,7 @@ from typing import Any
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -69,4 +70,5 @@ class BurgerKingPESpider(Spider):
                 close_time = shift.get("endHour")
                 if open_time and close_time:
                     item["opening_hours"].add_days_range(DAYS, open_time, close_time)
+            apply_category(Categories.FAST_FOOD, item)
             yield item

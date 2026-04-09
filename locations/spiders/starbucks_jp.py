@@ -12,7 +12,7 @@ class StarbucksJPSpider(JSONBlobSpider):
     start_urls = ["https://store.starbucks.co.jp/store_vue/js/store.js"]
     locations_key = ["hits", "hit"]
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield Request(
                 url=url,

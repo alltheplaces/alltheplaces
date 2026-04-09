@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
@@ -22,7 +22,7 @@ class NoptaBoreholesSpider(ArcGISFeatureServerSpider):
 
     _wells: dict = {}
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], callback=self.parse_odata_well_list)
 
     def parse_odata_well_list(self, response: Response) -> Iterable[JsonRequest]:

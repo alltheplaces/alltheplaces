@@ -1,18 +1,18 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import FormRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 
 
-class SuzukiDESpider(scrapy.Spider):
+class SuzukiDESpider(Spider):
     name = "suzuki_de"
     item_attributes = {"brand": "Suzuki", "brand_wikidata": "Q181642"}
 
-    def start_requests(self):
-        yield from self.request_for_data()
-
-    def request_for_data(self):
+    async def start(self) -> AsyncIterator[FormRequest]:
         for city in city_locations("DE", 50000):
             form_data = {
                 "dealertype": ["V", "S"],
@@ -22,8 +22,7 @@ class SuzukiDESpider(scrapy.Spider):
                 "lat": str(city["latitude"]),
                 "lng": str(city["longitude"]),
             }
-
-            yield scrapy.http.FormRequest(
+            yield FormRequest(
                 url="https://auto.suzuki.de/dealersearch/search",
                 formdata=form_data,
             )

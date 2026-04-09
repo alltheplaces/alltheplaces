@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy.http import Request
 
 from locations.hours import OpeningHours
@@ -14,7 +16,7 @@ class YuppiechefZASpider(PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
     no_refs = True
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url=self.start_urls[0],
             meta={"playwright": True, "playwright_include_page": True},

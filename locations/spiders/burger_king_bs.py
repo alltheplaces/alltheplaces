@@ -4,14 +4,14 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.geo import city_locations
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-# Also used by DO, FJ, HU, PY
+# Also used by DO, HU, PY
 class BurgerKingBSSpider(Spider):
     name = "burger_king_bs"
     allowed_domains = ["www.burgerking.bs"]
@@ -59,6 +59,7 @@ class BurgerKingBSSpider(Spider):
                     times = "-".join([time for time in times.split(";") if time != "0"])
                     item["opening_hours"].add_ranges_from_string(f"{day} {times}")
 
+            apply_category(Categories.FAST_FOOD, item)
             drive_through = location.xpath('div[@class="bk-dt-lane-type"]/text()').get() in ["Single Lane"]
             apply_yes_no(Extras.WIFI, item, location.xpath('div[@class="bk-wifi-supported"]/text()').get() == "1")
             apply_yes_no(

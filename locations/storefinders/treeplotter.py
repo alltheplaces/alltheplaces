@@ -1,7 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import FormRequest, Request, Response
+from scrapy.http import FormRequest, Request, Response, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -24,6 +24,13 @@ class TreePlotterSpider(Spider):
       host = "pg-cloud.com"
       folder = "SampleCustomer"
 
+    Some TreePlotter instances also have a concept of "organizations" where
+    trees are managed by 2 or more separate organisations. For such instances,
+    create a new spider for each organisation whose managed trees are of
+    interest, and set the `organisation_id` parameter to an integer value of
+    the organisation. This integer value is present in form request attribute
+    params[args][filtersPkg][layerFilters][organization][advFilterFilters][pid][hasSpecifics]
+
     Be aware that some TreePlotter customers allow the public to modify their
     database and quality can therefore be questionable both in accuracy (such
     as correctly identified species) as well as currency.
@@ -32,16 +39,18 @@ class TreePlotterSpider(Spider):
     """
 
     host: str = "pg-cloud.com"
-    folder: str = ""
-    layer_name: str = ""
+    folder: str
+    layer_name: str
+    organisation_id: None | int = None
 
     _species: dict = {}
+    _tree_count: int = 0
 
     # Cookies required to maintain a PHPSESSIONID across requests.
     # robots.txt does not exist and returns a 404 HTML error page.
     custom_settings = {"COOKIES_ENABLED": True, "ROBOTSTXT_OBEY": False}
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url=f"https://{self.host}/{self.folder}/", callback=self.parse_cookie)
 
     def parse_cookie(self, response: Response) -> Iterable[FormRequest]:
@@ -57,12 +66,12 @@ class TreePlotterSpider(Spider):
         }
         yield FormRequest(
             url=f"https://{self.host}/main/server/db.php",
-            formdata=formdata,
+            formdata=formdata,  # ty: ignore[invalid-argument-type]
             method="POST",
             callback=self.parse_species_list,
         )
 
-    def parse_species_list(self, response: Response) -> Iterable[FormRequest]:
+    def parse_species_list(self, response: TextResponse) -> Iterable[FormRequest]:
         for species_id, species_details in response.json()["results"].items():
             self._species[species_id] = {}
             if latin_name := species_details.get("latin_name"):
@@ -73,6 +82,45 @@ class TreePlotterSpider(Spider):
                 self._species[species_id]["taxon:en"] = common_name
             # elif alias := species_details.get("alias"):
             #    self._species[species_id]["taxon:en"] = species["alias"]
+        yield from self.request_tree_count()
+
+    def request_tree_count(self) -> Iterable[FormRequest]:
+        formdata = {
+            "action": "getShowingData",
+            "params[folder]": self.folder,
+            "params[layerName]": self.layer_name,
+            "params[extent][]": ["-100000000", "-100000000", "100000000", "100000000"],
+            "params[mustTurnOn]": "",
+            "params[geom_field]": "geom",
+            "params[bulkCountLayer]": "",
+            "params[bulkCountField]": "",
+            "params[filtersPkg][settings][andor]": "AND",
+            "params[filtersPkg][settings][boundToResults]": "",
+        }
+        self.add_organisation_filter_to_query(formdata)
+        yield FormRequest(
+            url=f"https://{self.host}/main/server/db.php",
+            formdata=formdata,  # ty: ignore[invalid-argument-type]
+            method="POST",
+            callback=self.parse_tree_count,
+        )
+
+    def add_organisation_filter_to_query(self, formdata: dict, api_function_call: bool = False) -> None:
+        if self.organisation_id:
+            # Filter trees by a specified organisation
+            args = ""
+            if api_function_call:
+                args = "[args]"
+            formdata[f"params{args}[filtersPkg][layerFilters][organization][layerName]"] = "organization"
+            formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterFilters][pid][fieldName]"] = "pid"
+            formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterFilters][pid][hasSpecifics]"] = (
+                str(self.organisation_id)
+            )
+            formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterFilters][pid][type]"] = "range"
+            formdata[f"params{args}[filtersPkg][layerFilters][organization][advFilterOptions]"] = ""
+
+    def parse_tree_count(self, response: TextResponse) -> Iterable[FormRequest]:
+        self._tree_count = int(response.json()["total"])
         yield from self.request_tree_ids()
 
     def request_tree_ids(self) -> Iterable[FormRequest]:
@@ -94,19 +142,23 @@ class TreePlotterSpider(Spider):
             "params[args][filtersPkg][settings][andor]": "AND",
             "params[args][filtersPkg][settings][boundToResults]": "1",
         }
+        self.add_organisation_filter_to_query(formdata, api_function_call=True)
         yield FormRequest(
             url=f"https://{self.host}/main/server/db.php",
-            formdata=formdata,
+            formdata=formdata,  # ty: ignore[invalid-argument-type]
             method="POST",
             callback=self.parse_tree_ids,
         )
 
-    def parse_tree_ids(self, response: Response) -> Iterable[FormRequest]:
+    def parse_tree_ids(self, response: TextResponse) -> Iterable[FormRequest]:
         tree_ids = response.json()["results"]["pids"]
-        if len(tree_ids) != response.json()["results"]["total"]["count"]:
+        if len(tree_ids) != self._tree_count:
+            # At present, this storefinder does not support geographic search
+            # or filtering of trees to request individual tree IDs in batches.
+            # All individual tree IDs are instead requested in a single query.
             raise RuntimeError(
                 "Requested up to 1000000 features (of a total of {}) but only received {} features.".format(
-                    response.json()["results"]["total"]["count"], len(tree_ids)
+                    self._tree_count, len(tree_ids)
                 )
             )
         for offset in range(0, len(tree_ids), 1000):
@@ -127,18 +179,17 @@ class TreePlotterSpider(Spider):
         }
         yield FormRequest(
             url=f"https://{self.host}/main/server/db.php",
-            formdata=formdata,
+            formdata=formdata,  # ty: ignore[invalid-argument-type]
             method="POST",
             callback=self.parse_tree_details,
         )
 
-    def parse_tree_details(self, response: Response) -> Iterable[Feature]:
+    def parse_tree_details(self, response: TextResponse) -> Iterable[Feature]:
         for tree in response.json()["results"][self.layer_name]["geojson"]["features"]:
-            properties = {
-                "ref": str(tree["properties"]["pid"]),
-                "geometry": tree["geometry"],
-            }
-            apply_category(Categories.NATURAL_TREE, properties)
+            item = Feature()
+            item["ref"] = str(tree["properties"]["pid"])
+            item["geometry"] = tree["geometry"]
+            apply_category(Categories.NATURAL_TREE, item)
             if not tree["properties"].get("species_common"):
                 if not tree["properties"].get("species_latin"):
                     # Generally a lack of species code means low quality data,
@@ -156,14 +207,14 @@ class TreePlotterSpider(Spider):
                     "Tree with PID={} has unknown species {}.".format(tree["properties"]["pid"], species_id)
                 )
             else:
-                properties["extras"].update(self._species[species_id])
+                item["extras"].update(self._species[species_id])
             if dbh_cm := tree["properties"].get("dbh_cm"):
-                properties["extras"]["diameter"] = f"{dbh_cm} cm"
+                item["extras"]["diameter"] = f"{dbh_cm} cm"
             elif dbh_dm := tree["properties"].get("dbh"):
                 dbh_cm = dbh_dm * 10
-                properties["extras"]["diameter"] = f"{dbh_cm} cm"
-            yield from self.post_process_item(Feature(**properties), response, tree)
+                item["extras"]["diameter"] = f"{dbh_cm} cm"
+            yield from self.post_process_item(item, response, tree)
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

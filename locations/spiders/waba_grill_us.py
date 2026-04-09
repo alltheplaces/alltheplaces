@@ -7,5 +7,5 @@ class WabaGrillUSSpider(Where2GetItSpider):
         "brand_wikidata": "Q113163467",
         "brand": "WaBa Grill",
     }
-    api_endpoint = "https://locations.wabagrill.com/rest/getlist"
+    api_brand_name = "wabagrillsites"
     api_key = "7512DE42-E61C-11EE-B773-E61A326043C3"

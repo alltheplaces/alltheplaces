@@ -1,4 +1,5 @@
 import urllib
+from typing import AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -17,7 +18,7 @@ class TiffanySpider(Spider):
     custom_settings = {"USER_AGENT": FIREFOX_LATEST}  # ATP and older user agents are blocked.
     requires_proxy = True  # Data centre netblocks appear to be blocked.
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

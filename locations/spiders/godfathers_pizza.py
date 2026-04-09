@@ -14,7 +14,6 @@ class GodfathersPizzaSpider(scrapy.Spider):
     start_urls = [
         "https://godfathers.orderexperience.net/locations?_gl=1*wnu5aw*_gcl_au*MjAzNTAxNDc1OC4xNzYxODMwODU1*_ga*MjEwODI5ODM0My4xNzYxODMwODU1*_ga_TG5PXZSCYT*czE3NjE4MzA4NTUkbzEkZzEkdDE3NjE4MzA4NTgkajU3JGwwJGgw"
     ]
-    requires_proxy = True
 
     def parse(self, response):
         yield scrapy.Request(

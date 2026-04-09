@@ -1,8 +1,7 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from chompjs import chompjs
-from scrapy.http import Response
+from chompjs import parse_js_object
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -13,15 +12,14 @@ class HesburgerSpider(JSONBlobSpider):
     name = "hesburger"
     item_attributes = {"brand": "Hesburger", "brand_wikidata": "Q1276832"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["fi", "ee", "lv", "lt", "de", "bg", "ua"]:
-            yield scrapy.Request(
+            yield JsonRequest(
                 url=f"https://www.hesburger.com/restaurants?country={country}",
-                callback=self.parse,
             )
 
     def extract_json(self, response: Response) -> dict | list[dict]:
-        store_details = chompjs.parse_js_object(response.xpath('//script[contains(text(), "var DATA")]/text()').get())
+        store_details = parse_js_object(response.xpath('//script[contains(text(), "var DATA")]/text()').get())
         return store_details
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Request, Response
 
@@ -19,7 +19,7 @@ class MojeSklepyPLSpider(JSONBlobSpider):
         "groszek": ("Groszek", "Q9280965"),
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         yield Request(url="https://mojesklepy.pl/wybierz-sklep/", callback=self.parse_auth_token)
 
     def parse_auth_token(self, response: Response) -> Iterable[JsonRequest]:

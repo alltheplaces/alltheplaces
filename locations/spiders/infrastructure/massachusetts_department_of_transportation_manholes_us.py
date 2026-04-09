@@ -47,7 +47,7 @@ class MassachusettsDepartmentOfTransportationManholesUSSpider(ArcGISFeatureServe
             case "Drainage":
                 item["extras"]["manhole"] = "drain"
                 item["extras"]["utility"] = "stormwater"
-                item["extras"]["substance"] = "wastewater"
+                item["extras"]["substance"] = "rainwater"
             case "Electric":
                 item["extras"]["manhole"] = "power"
                 item["extras"]["utility"] = "power"

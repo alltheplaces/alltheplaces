@@ -1,8 +1,8 @@
 import urllib.parse
-from typing import Any
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
@@ -20,17 +20,17 @@ class MomentFeedSpider(Spider):
       - `page_size`: optional parameter, default value is 100
     """
 
-    dataset_attributes = {"source": "api", "api": "momentfeed.com"}
-    api_key: str = ""
+    dataset_attributes: dict = {"source": "api", "api": "momentfeed.com"}
+    api_key: str
     page_size: int = 100
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url=f"https://uberall.com/api/mf-lp-adapter/llp.json?center=0,0&coordinates=-90,180,90,-180&pageSize={self.page_size}&page=1",
             headers={"Authorization": self.api_key},
         )
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature | JsonRequest]:
         if "message" in response.json():
             return
 
@@ -77,5 +77,5 @@ class MomentFeedSpider(Spider):
                 oh.add_range(DAYS[int(rule[0]) - 1], rule[1], rule[2].replace("2400", "2359"), "%H%M")
         return oh
 
-    def parse_item(self, item: Feature, feature: dict, store_info: dict):
+    def parse_item(self, item: Feature, feature: dict, store_info: dict) -> Iterable[Feature]:
         yield item

@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
@@ -12,7 +14,7 @@ class TheCoffeeClubAUSpider(Spider):
     allowed_domains = ["api.mdkl.com.au"]
     states_list = ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for state in self.states_list:
             yield JsonRequest(
                 url=f"https://api.mdkl.com.au/v1/Stores/GetByCountryAndState?brandId=TCC&country=Australia&stateAbr={state}"

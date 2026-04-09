@@ -1,4 +1,6 @@
-import scrapy
+from typing import AsyncIterator
+
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -8,12 +10,12 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class DepartmentVeteransAffairsSpider(scrapy.Spider):
+class DepartmentVeteransAffairsSpider(Spider):
     name = "department_veterans_affairs"
     item_attributes = {"operator": "Veterans Health Administration", "operator_wikidata": "Q6580225"}
     allowed_domains = ["api.va.gov"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
             "page": 1,
             "per_page": 1000,

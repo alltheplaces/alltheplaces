@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
 import pycountry
 from scrapy.http import Request, Response
@@ -44,7 +44,7 @@ class PorscheHoldingSpider(JSONBlobSpider):
         "RETRY_TIMES": 5,
     }
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
             yield Request(url=url, callback=self.get_countries)
 

@@ -1,25 +1,28 @@
-from typing import Any
+from typing import Any, Iterable, Iterator
 
-from geonamescache import GeonamesCache
-from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.http import Request, Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class EvgoUSSpider(CrawlSpider):
+class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
     name = "evgo_us"
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
-    start_urls = [
-        "https://evgo.com/find-a-charger/{}/".format(state.lower()) for state in GeonamesCache().get_us_states().keys()
-    ]
-    rules = [Rule(LinkExtractor(r"/find-a-charger/\w\w/[^/]+/[^/]+\-(\d+)/?$"), "parse")]
-    custom_settings = {"REDIRECT_ENABLED": False}
+    sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse_sitemap(self, response: Response) -> Iterable[Request]:
+        for request in super()._parse_sitemap(response):
+            request.meta["playwright"] = True
+            request.meta["playwright_include_page"] = True
+            yield request
+
+    def parse(self, response: Response, **kwargs: Any) -> Iterator[Feature]:
         item = Feature()
         item["website"] = response.url
         item["ref"] = response.url.rsplit("-", 1)[1].strip("/")

@@ -1,9 +1,12 @@
 import urllib.parse
+from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Request
 
 from locations.categories import Categories, PaymentMethods, apply_category, map_payment
 from locations.items import Feature
+from locations.licenses import Licenses
 
 # Hotels (including hostels and serviced apartments) in Switzerland
 
@@ -12,21 +15,22 @@ from locations.items import Feature
 # that aren't part of a chain.
 
 
-class DiscoverSwissSpider(scrapy.Spider):
+class DiscoverSwissSpider(Spider):
     name = "discover_swiss"
     allowed_domains = ["api.discover.swiss"]
-    dataset_attributes = {
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "URLLENGTH_LIMIT": 4096,
+    }
+    dataset_attributes = Licenses.CCBY4.value | {
         # Mandatory attribution as per CC-BY 4.0, waived for OpenStreetMap
         # via standard template. Negotiations took place in January 2025
         # between Hotellerie Suisse (who runs the discover.swiss platform)
         # and the Swiss OpenStreetMap association.
         # https://osmfoundation.org/wiki/Licence/Waiver_and_Permission_Templates
-        "attribution": "required",
         "attribution:name": "discover.swiss",
         "attribution:wikidata": "Q131983936",
         "use:openstreetmap": "yes",
-        "license": "CC-BY 4.0",
-        "license:wikidata": "Q20007257",
     }
     headers = {
         "Ocp-Apim-Subscription-Key": "defe4e15094b4d388ecf3b37bbe88a85",
@@ -34,8 +38,8 @@ class DiscoverSwissSpider(scrapy.Spider):
     }
     url = "https://api.discover.swiss/info/v2/lodgingbusinesses/?project=dsod-content&top=-1"
 
-    def start_requests(self):
-        yield scrapy.Request(self.url, headers=self.headers)
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(self.url, headers=self.headers)
 
     def parse(self, response):
         data = response.json()
@@ -43,7 +47,7 @@ class DiscoverSwissSpider(scrapy.Spider):
         if token and data.get("hasNextPage"):
             token_quoted = urllib.parse.quote(token, safe="")
             next_url = self.url + "&continuationToken=" + token_quoted
-            yield scrapy.Request(next_url, headers=self.headers)
+            yield Request(next_url, headers=self.headers)
         for item in data.get("data", []):
             category = self.parse_category(item)
             ref = self.parse_ref(item)
