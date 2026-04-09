@@ -17,6 +17,7 @@ class AlabamaDepartmentOfTransportationUSSpider(JSONBlobSpider):
     }
     allowed_domains = ["api.algotraffic.com"]
     start_urls = ["https://api.algotraffic.com/v4.0/Cameras"]
+    requires_proxy = True  # Imperva WAF blocks datacenter IP ranges
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["name"] = " ".join(
