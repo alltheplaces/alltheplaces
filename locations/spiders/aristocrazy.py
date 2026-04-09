@@ -5,10 +5,11 @@ from scrapy import Spider
 from locations.items import Feature
 
 
-class AristocrazyESSpider(Spider):
-    name = "aristocrazy_es"
+class AristocrazySpider(Spider):
+    name = "aristocrazy"
     item_attributes = {"brand": "Aristocrazy", "brand_wikidata": "Q117802848"}
     start_urls = ["https://www.aristocrazy.com/en/pages/aristocrazy-stores"]
+    requires_proxy = True
 
     def parse(self, response):
         for store_list in response.css(".accordion__content"):
