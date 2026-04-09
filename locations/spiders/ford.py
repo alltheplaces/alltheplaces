@@ -3,7 +3,7 @@ from typing import AsyncIterator
 
 import pycountry
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -146,15 +146,18 @@ class FordSpider(Spider):
         "Setra": {"brand": "Setra", "brand_wikidata": "Q938615"},
         "Motorcraft": {"brand": "Ford", "brand_wikidata": "Q44294"},
     }
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"x-apikey": "45ab9277-3014-4c9e-b059-6c0542ad9484"}}
 
     async def start(self) -> AsyncIterator[Request]:
         for country in self.available_countries:
-            url = f"https://spatial.virtualearth.net/REST/v1/data/1652026ff3b247cd9d1f4cc12b9a080b/FordEuropeDealers_Transition/Dealer?$filter=CountryCode%20Eq%20%27{country}%27&$top=100000&$format=json&key=Al1EdZ_aW5T6XNlr-BJxCw1l4KaA0tmXFI_eTl1RITyYptWUS0qit_MprtcG7w2F&$skip=0"
-            yield Request(url=url, callback=self.parse_stores)
+            url = f"https://www.ford.com/ecommsearch/non-secure/gep/ecom-search-dealer/api/public/{country}/dealers/search"
+            yield JsonRequest(
+                url=url,
+                data={"latitude": 0, "longitude": 0, "radius": "99999", "unit": "mi", "count": "1000", "filters": ""},
+                callback=self.parse_stores,
+            )
 
     def parse_stores(self, response):
-        results = response.json().get("d").get("results")
+        results = response.json().get("dealers").get("results")
 
         for data in results:
             oh = OpeningHours()
@@ -176,7 +179,10 @@ class FordSpider(Spider):
             item["name"] = data.get("DealerName")
             item["country"] = self.get_country_code(data.get("CountryCode"))
             item["opening_hours"] = oh
-            item = self.repair_website(data["PrimaryURL"], item)
+            try:
+                item = self.repair_website(data["PrimaryURL"], item)
+            except:
+                pass
 
             item["brand"] = self.brand_mapping.get(data.get("Brand")).get("brand")
             item["brand_wikidata"] = self.brand_mapping.get(data.get("Brand")).get("brand_wikidata")
@@ -200,16 +206,17 @@ class FordSpider(Spider):
 
     def repair_website(self, website, item):
         if "http://" in website:
-            website = website.replace("http://", "https://")
+            website = website.replace("http://", "https://").split(" - ", 1)[0]
             item["website"] = website
         elif website.startswith("www."):
-            website = website.replace("www.", "https://www.")
-            item["website"] = website
-        elif website.startswith("ford-"):
-            website = website.replace("ford-", "https://ford-")
+            website = website.replace("www.", "https://www.").split(" / ", 1)[0]
             item["website"] = website
         elif "@" in website:
             item["email"] = website
+        elif website.startswith("ford-"):
+            website = website.replace("ford-", "https://ford-")
+            item["website"] = website
+
         return item
 
     @functools.lru_cache()
