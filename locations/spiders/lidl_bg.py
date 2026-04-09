@@ -4,6 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_BG, OpeningHours, sanitise_day
 from locations.storefinders.virtualearth import VirtualEarthSpider
 
+
 def transliterate(text):
     cyrillic_to_latin = {
         "а": "a",
