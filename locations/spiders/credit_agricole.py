@@ -2,7 +2,7 @@ import json
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -24,10 +24,15 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
             item["lat"] = coords["latitude"]
             item["lon"] = coords["longitude"]
 
-        if (
-            "guichets automatiques"
-            in response.xpath('//span[@class="npc-sl-strct-srv-card--text "]/text()').get(default="").lower()
-        ):
-            apply_yes_no(Extras.ATM, item, True)
+        services = response.xpath('//span[@class="npc-sl-strct-srv-card--text "]/text()').getall()
+        has_atm = any("distributeur" in s.lower() and "billets" in s.lower() for s in services)
 
-        yield item
+        if has_atm:
+            apply_yes_no(Extras.ATM, item, True)
+            yield item
+            atm_item = item.deepcopy()
+            atm_item["ref"] += "-ATM"
+            apply_category(Categories.ATM, atm_item)
+            yield atm_item
+        else:
+            yield item
