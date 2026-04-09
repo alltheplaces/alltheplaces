@@ -21,6 +21,7 @@ class QdStoresGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["street_address"] = merge_address_lines([item.pop("addr_full"), feature["address2"]])
         item["branch"] = item.pop("name").removeprefix("QD ")
+        item["name"] = "QD Stores"
         name = item["branch"].replace(" ", "-").lower()
         item["website"] = "https://www.qdstores.co.uk/pages/" + name + "-qd"
         apply_category(Categories.SHOP_VARIETY_STORE, item)
