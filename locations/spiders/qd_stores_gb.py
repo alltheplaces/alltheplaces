@@ -6,6 +6,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.categories import Categories, apply_category
+
 
 
 class QdStoresGBSpider(JSONBlobSpider):
@@ -22,7 +24,7 @@ class QdStoresGBSpider(JSONBlobSpider):
         item["branch"] = item.pop("name").removeprefix("QD ")
         name = item["branch"].replace(" ", "-").lower()
         item["website"] = "https://www.qdstores.co.uk/pages/" + name + "-qd"
-
+        apply_category(Categories.SHOP_VARIETY_STORE, item)
         oh = OpeningHours()
         oh.add_ranges_from_string(feature["hour_of_operation"])
         item["opening_hours"] = oh
