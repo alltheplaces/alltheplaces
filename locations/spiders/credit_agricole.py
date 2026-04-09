@@ -27,12 +27,4 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
         services = response.xpath('//span[@class="npc-sl-strct-srv-card--text "]/text()').getall()
         has_atm = any("distributeur" in s.lower() and "billets" in s.lower() for s in services)
 
-        if has_atm:
-            apply_yes_no(Extras.ATM, item, True)
-            yield item
-            atm_item = item.deepcopy()
-            atm_item["ref"] += "-ATM"
-            apply_category(Categories.ATM, atm_item)
-            yield atm_item
-        else:
-            yield item
+        yield item
