@@ -526,6 +526,8 @@ This spider has produced **0 results for {len(run_history)} consecutive runs**.
                 f"Remove dead spider: `{spider_name}` — {info['title']}",
                 "--body",
                 pr_body,
+                "--label",
+                "automated:dead-spider-removal",
                 "--base",
                 "master",
                 "--head",
@@ -577,7 +579,17 @@ Spider `{spider_name}` (`{filename}`) has produced **0 results for {len(run_hist
         return True
 
     result = subprocess.run(
-        ["gh", "issue", "create", "--title", f"Dead spider: `{spider_name}` — {info['title']}", "--body", issue_body],
+        [
+            "gh",
+            "issue",
+            "create",
+            "--title",
+            f"Dead spider: `{spider_name}` — {info['title']}",
+            "--body",
+            issue_body,
+            "--label",
+            "automated:dead-spider-investigation",
+        ],
         capture_output=True,
         text=True,
     )
