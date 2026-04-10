@@ -13,7 +13,7 @@ class EasyboxBGSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "BG"
     no_refs = True
-    
+
     def get_tld(self):
         return "bg"
 
