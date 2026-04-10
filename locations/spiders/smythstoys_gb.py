@@ -10,3 +10,4 @@ class SmythstoysGBSpider(WoosmapSpider):
 
 def parse_item(self, item, feature, **kwargs):
     item["branch"] = item.pop("name")
+    yield item
