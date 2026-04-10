@@ -13,13 +13,16 @@ class EasyboxBGSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = "BG"
     no_refs = True
-    drop_attributes = {"image"}
+    
+    def get_tld(self):
+        return "bg"
 
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
             apply_category(Categories.PARCEL_LOCKER, item)
-            item["image"] = "https://sameday.bg" + location["photo"]
+            if location["photo"] is not None:
+                item["image"] = f"https://sameday.{self.get_tld()}{location['photo']}"
             item["opening_hours"] = OpeningHours()
             for day_schedule in location["schedule"]:
                 day = DAYS[day_schedule["day"] - 1]
