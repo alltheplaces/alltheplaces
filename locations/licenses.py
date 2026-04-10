@@ -8,6 +8,12 @@ class Licenses(Enum):
         "license:wikidata": "Q6938433",
         "attribution": "optional",
     }
+    CCBY3AU = {
+        "license": "Creative Commons Attribution 3.0 Australia",
+        "license:website": "https://creativecommons.org/licenses/by/3.0/au/",
+        "license:wikidata": "Q52555753",
+        "attribution": "required",
+    }
     CCBY4 = {
         "license": "Creative Commons Attribution 4.0 International",
         "license:website": "http://creativecommons.org/licenses/by/4.0/",
