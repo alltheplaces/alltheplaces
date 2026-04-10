@@ -27,6 +27,10 @@ class IsmashGBSpider(Spider):
             item["extras"]["contact:yelp"] = urljoin("https://www.yelp.co.uk/biz/", location["yelpID"])
 
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_days_range(DAYS[:5], *location["mon_fri"].split("-"))
-
+            if "-" in location.get("mon_fri"):
+                item["opening_hours"].add_days_range(DAYS[:5], *location["mon_fri"].split("-"))
+            if "-" in location.get("sat"):
+                item["opening_hours"].add_range("Sa", *location["sat"].split("-"))
+            if "-" in location.get("sun"):
+                item["opening_hours"].add_range("Su", *location["sun"].split("-"))
             yield item
