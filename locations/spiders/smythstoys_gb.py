@@ -7,5 +7,6 @@ class SmythstoysGBSpider(WoosmapSpider):
     key = "woos-49066dab-d11d-3614-98c7-ab241da1565b"
     origin = "https://www.smythstoys.com/"
 
+
 def parse_item(self, item, feature, **kwargs):
     item["branch"] = item.pop("name")
