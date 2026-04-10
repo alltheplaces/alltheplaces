@@ -10,10 +10,13 @@ class SmashburgerSpider(CrawlSpider, StructuredDataSpider):
     name = "smashburger"
     item_attributes = {"brand": "Smashburger", "brand_wikidata": "Q17061332"}
     allowed_domains = ["smashburger.com"]
-    start_urls = ["https://smashburger.com/locations","https://smashburger.co.uk/locations"]
+    start_urls = ["https://smashburger.com/locations", "https://smashburger.co.uk/locations"]
     rules = [
         Rule(LinkExtractor(allow=r"^https://smashburger\.co(?:m|.uk)/locations/\w\w(?:/\w\w)?(?:/[^/]+)?$")),
-        Rule(LinkExtractor(allow=r"^https://smashburger\.co(?:m|.uk)/locations/\w\w/\w\w/[^/]+/[^/]+$"), callback="parse_sd"),
+        Rule(
+            LinkExtractor(allow=r"^https://smashburger\.co(?:m|.uk)/locations/\w\w/\w\w/[^/]+/[^/]+$"),
+            callback="parse_sd",
+        ),
     ]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
