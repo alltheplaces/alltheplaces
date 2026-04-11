@@ -18,7 +18,13 @@ class TomodsJPSpider(CanlySpider):
 
         if "トモズ" in feature["nameKanji"]:
             item["brand_wikidata"] = "Q7820097"
-            item["branch"] = feature.get("nameKanji").removeprefix("トモズ ").removeprefix("薬局トモズ ").removeprefix("トモズ").removeprefix("薬局トモズ")
+            item["branch"] = (
+                feature.get("nameKanji")
+                .removeprefix("トモズ ")
+                .removeprefix("薬局トモズ ")
+                .removeprefix("トモズ")
+                .removeprefix("薬局トモズ")
+            )
             item["extras"]["branch:ja-Hira"] = feature.get("nameKana")
         elif "AP" in feature["nameKanji"]:
             item["branch"] = feature.get("nameKanji").removeprefix("AP by AMERICAN PHARMACY ")
