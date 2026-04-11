@@ -12,7 +12,9 @@ class ParismikiJPSpider(CanlySpider):
     brand_key = "27"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = feature.get("nameKanji").removeprefix("パリミキ ").removeprefix("OPTIQUE PARIS MIKI ").removesuffix("店")
+        item["branch"] = (
+            feature.get("nameKanji").removeprefix("パリミキ ").removeprefix("OPTIQUE PARIS MIKI ").removesuffix("店")
+        )
         item["website"] = f"https://shop.paris-miki.co.jp/detail/{feature.get('storeCode')}/"
 
         yield item
