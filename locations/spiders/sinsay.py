@@ -47,9 +47,7 @@ class SinsaySpider(XMLFeedSpider):
         ps = description.xpath("//p/text()")
         item["addr_full"] = ps[0:3].getall()
         item["city"] = ps[1].get()
-        if phone := ps[3].get().replace("tel. ", ""):
-            item["phone"] = phone
         item["opening_hours"] = oh = OpeningHours()
-        oh.add_ranges_from_string(", ".join(ps[4:].getall()))
+        oh.add_ranges_from_string(", ".join(ps[3:].getall()))
         set_closed_missing_days(oh)
         return item
