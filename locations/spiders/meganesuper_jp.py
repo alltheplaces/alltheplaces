@@ -12,8 +12,25 @@ class MeganesuperJPSpider(CanlySpider):
     brand_key = "271"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = feature.get("nameKanji").removeprefix("メガネスーパーコンタクト").removeprefix("メガネスーパー　").removeprefix("メガネスーパー ").removeprefix("メガネスーパー").removeprefix("メガネハウス").removesuffix("店　　　コンタクトすぐ買えます。").removesuffix("店")
-        item["extras"]["branch:ja-Hira"] = feature.get("nameKana").removeprefix("メガネスーパーコンタクト").removeprefix("メガネスーパー　").removeprefix("メガネスーパー ").removeprefix("メガネスーパー").removeprefix("メガネハウス").removesuffix("テン")
+        item["branch"] = (
+            feature.get("nameKanji")
+            .removeprefix("メガネスーパーコンタクト")
+            .removeprefix("メガネスーパー　")
+            .removeprefix("メガネスーパー ")
+            .removeprefix("メガネスーパー")
+            .removeprefix("メガネハウス")
+            .removesuffix("店　　　コンタクトすぐ買えます。")
+            .removesuffix("店")
+        )
+        item["extras"]["branch:ja-Hira"] = (
+            feature.get("nameKana")
+            .removeprefix("メガネスーパーコンタクト")
+            .removeprefix("メガネスーパー　")
+            .removeprefix("メガネスーパー ")
+            .removeprefix("メガネスーパー")
+            .removeprefix("メガネハウス")
+            .removesuffix("テン")
+        )
         item["website"] = f"https://shop.meganesuper.co.jp/shops/detail/{feature.get('storeCode')}/"
 
         yield item
