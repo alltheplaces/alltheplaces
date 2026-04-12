@@ -1,11 +1,6 @@
-import json
-from typing import Any
 
-from scrapy.http import Response
-from scrapy.spiders import Spider
-
-from locations.dict_parser import DictParser
 from scrapy.spiders import SitemapSpider
+
 from locations.structured_data_spider import StructuredDataSpider
 
 
