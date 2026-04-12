@@ -19,8 +19,7 @@ class MeganesuperJPSpider(CanlySpider):
             .removeprefix("メガネスーパー ")
             .removeprefix("メガネスーパー")
             .removeprefix("メガネハウス")
-            .removesuffix("店　　　コンタクトすぐ買えます。")
-            .removesuffix("店")
+            .removesuffix("　　　コンタクトすぐ買えます。")
         )
         item["extras"]["branch:ja-Hira"] = (
             feature.get("nameKana")
@@ -29,7 +28,6 @@ class MeganesuperJPSpider(CanlySpider):
             .removeprefix("メガネスーパー ")
             .removeprefix("メガネスーパー")
             .removeprefix("メガネハウス")
-            .removesuffix("テン")
         )
         item["website"] = f"https://shop.meganesuper.co.jp/shops/detail/{feature.get('storeCode')}/"
 
