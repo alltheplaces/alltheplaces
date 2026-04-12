@@ -6,11 +6,12 @@ brands = {
     "福太郎": {"brand": "くすりの福太郎", "brand_wikidata": "Q17214460"},
     "杏林堂": {"brand": "杏林堂", "brand_wikidata": "Q11522605"},
     "イレブン": {"brand": "ドラッグイレブン", "brand_wikidata": "Q11323075"},
-    "ウォンツ": {"brand": "ウォンツ"}, #no wikidata for below
+    "ウォンツ": {"brand": "ウォンツ"},  # no wikidata for below
     "ウェルネス": {"brand": "ウェルネス"},
     "レデイ": {"brand": "くすりのレデイ"},
     "B＆D": {"brand": "B＆D調剤薬局"},
 }
+
 
 class TsuruhadrugSpider(YextAnswersSpider):
     name = "tsuruhadrug"
@@ -23,14 +24,23 @@ class TsuruhadrugSpider(YextAnswersSpider):
 
     def parse_item(self, location, item):
         if "c" in item["ref"]:
-            item = None #skip pharmacy ids
+            item = None  # skip pharmacy ids
             return
 
         for brand_key in brands.keys():
             if brand_key in item["name"]:
                 item.update(brands[brand_key])
 
-        item["branch"] = item.get("name").removeprefix("ツルハドラッグ").removeprefix("くすりの福太郎").removeprefix("杏林堂").removeprefix("ドラッグイレブン").removeprefix("ウォンツ").removeprefix("くすりのレデイ").removeprefix("B＆D調剤薬局")
+        item["branch"] = (
+            item.get("name")
+            .removeprefix("ツルハドラッグ")
+            .removeprefix("くすりの福太郎")
+            .removeprefix("杏林堂")
+            .removeprefix("ドラッグイレブン")
+            .removeprefix("ウォンツ")
+            .removeprefix("くすりのレデイ")
+            .removeprefix("B＆D調剤薬局")
+        )
 
         item["name"] = None
 
