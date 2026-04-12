@@ -17,6 +17,7 @@ class GreenhalghsGBSpider(WPStoreLocatorSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item.pop("addr_full", None)
         item["street_address"] = feature.get("address2")
+        item["branch"] = item.pop("name")
         if item["website"] and item["website"].startswith("/"):
             item["website"] = "https://www.greenhalghs.com" + item["website"]
         yield item
