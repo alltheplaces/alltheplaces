@@ -1,8 +1,7 @@
 from scrapy import Spider
 
-from locations.dict_parser import DictParser
 from locations.categories import Categories, apply_category, apply_yes_no
-
+from locations.dict_parser import DictParser
 
 
 class NouriaUSSpider(Spider):
@@ -27,4 +26,3 @@ class NouriaUSSpider(Spider):
 
             apply_yes_no("sells:alcohol", item, "beer-wine" in location["filters"])
             yield item
-        
