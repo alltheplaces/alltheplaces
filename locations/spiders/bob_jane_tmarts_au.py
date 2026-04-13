@@ -1,3 +1,4 @@
+from pprint import pp
 from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
@@ -35,9 +36,12 @@ class BobJaneTmartsAUSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]["locations"]["edges"]:
+            if location["node"]["name"].startswith("warehouse"):
+                continue
             location.update(location.pop("node"))
             location.update(location.pop("address"))
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["addr_full"] = merge_address_lines(location["formatted"])
-            item["website"] = f"https://www.bobjane.com.au/pages/{item['name'].lower().replace(' ','-')}-t-marts"
+            item["website"] = f"https://www.bobjane.com.au/pages/{item['branch'].lower().replace(' ','-')}-t-marts"
             yield item
