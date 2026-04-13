@@ -1,4 +1,3 @@
-from pprint import pp
 from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
