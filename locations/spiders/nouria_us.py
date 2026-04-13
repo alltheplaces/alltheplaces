@@ -17,7 +17,7 @@ class NouriaUSSpider(Spider):
         for location in response.json():
             location = location | location["address"]
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
+            item["ref"] = item.pop("name").rsplit(" - ", 1)[1]
             item["website"] = location["link"]
             item["street_address"] = merge_address_lines(
                 [location["address"]["address_line_1"], location["address"]["address_line_2"]]
