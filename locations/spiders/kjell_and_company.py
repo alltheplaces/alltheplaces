@@ -32,6 +32,7 @@ class KjellAndCompanySpider(Spider):
                 item = DictParser.parse(location)
                 item["country"] = country
                 item["opening_hours"] = self.parse_hours(location)
+                item["branch"] = item.pop("name")
                 apply_yes_no(PaymentMethods.CASH, item, not location.get("noCash", False))
                 apply_category(Categories.SHOP_ELECTRONICS, item)
                 yield item
