@@ -16,7 +16,6 @@ class UciCinemasITSpider(CrawlSpider):
     start_urls = ["https://ucicinemas.it/cinema/"]
     rules = [Rule(LinkExtractor(allow=r"/cinema/uci-.*"), callback="parse")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
