@@ -12,11 +12,9 @@ class BobJaneTmartsAUSpider(Spider):
     item_attributes = {"brand": "Bob Jane T-Marts", "brand_wikidata": "Q16952468"}
 
     async def start(self) -> AsyncIterator[Any]:
-        url = "https://www.bobjane.com.au/api/2026-01/graphql.json"
-        headers = {
-            "content-type": "application/json",
-        }
-        payload = {"query": """{
+        yield JsonRequest(
+            url="https://www.bobjane.com.au/api/2026-01/graphql.json",
+            data={"query": """{
               locations(first:250,sortKey:NAME) {
                 edges {
                   node {
@@ -32,13 +30,7 @@ class BobJaneTmartsAUSpider(Spider):
                   }
                 }
               }
-            }"""}
-
-        yield JsonRequest(
-            url=url,
-            headers=headers,
-            data=payload,
-            method="POST",
+            }"""},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
