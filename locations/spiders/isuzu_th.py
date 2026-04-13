@@ -28,8 +28,7 @@ class IsuzuTHSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["addr_full"] = feature["mirai"].get("address")
         item["state"] = feature["mirai"].get("region")
-        item["name"] = feature["mirai"].get("name_th")
-        item["extras"] = {}
+        item["name"] = item["extras"]["name:th"] = feature["mirai"].get("name_th")
         item["extras"]["name:en"] = feature["mirai"].get("name_en")
         item["lat"] = feature.get("sale", {}).get("lat")
         item["lon"] = feature.get("sale", {}).get("lon")
