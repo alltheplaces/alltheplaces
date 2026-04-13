@@ -2,7 +2,6 @@ import json
 import re
 from typing import AsyncIterator
 
-import scrapy
 from scrapy import Spider
 from scrapy.http import Request
 
@@ -32,8 +31,8 @@ class Dats24BESpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["street_address"] = merge_address_lines([location["addressNumber"], item["street_address"]])
-            yield scrapy.Request(
-                url=f"https://dats24.be/nl/particulier/sdp/tankstation-{item.get('name').replace(' (','-').replace(')','_')}_{location['id']}",
+            yield Request(
+                url=f"https://dats24.be/nl/particulier/sdp/tankstation-{item.get('branch').replace(' (','-').replace(')','_')}_{location['id']}",
                 meta={"item": item},
                 callback=self.parse_fuel_details,
             )
