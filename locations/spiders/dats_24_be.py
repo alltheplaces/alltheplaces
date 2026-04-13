@@ -30,6 +30,7 @@ class Dats24BESpider(Spider):
     def parse_locations_list(self, response):
         for location in response.json():
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["street_address"] = merge_address_lines([location["addressNumber"], item["street_address"]])
             yield scrapy.Request(
                 url=f"https://dats24.be/nl/particulier/sdp/tankstation-{item.get('name').replace(' (','-').replace(')','_')}_{location['id']}",
