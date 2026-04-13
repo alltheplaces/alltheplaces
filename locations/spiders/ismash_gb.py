@@ -24,7 +24,8 @@ class IsmashGBSpider(Spider):
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             item["branch"] = location["name"]
-            item["extras"]["contact:yelp"] = urljoin("https://www.yelp.co.uk/biz/", location["yelpID"])
+            if location["yelpID"]:
+                item["extras"]["contact:yelp"] = urljoin("https://www.yelp.co.uk/biz/", location["yelpID"])
 
             item["opening_hours"] = OpeningHours()
             if "-" in location.get("mon_fri"):
