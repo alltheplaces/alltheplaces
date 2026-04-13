@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class CarlsJrUSSpider(SitemapSpider, StructuredDataSpider):
     name = "carls_jr_us"
     item_attributes = {"brand": "Carl's Jr.", "brand_wikidata": "Q1043486"}
-    sitemap_urls = ["https://locations.carlsjr.com/sitemap_index.xml"]
+    sitemap_urls = ["https://locations.carlsjr.com/robots.txt"]
     sitemap_rules = [(r"^https://locations\.carlsjr\.com/[a-z]{2}/[^/]+/[^/]+/?$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
 
