@@ -1,6 +1,7 @@
+import json
+import re
 from typing import Any
 
-import chompjs
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
@@ -41,22 +42,23 @@ class RaceTracUSSpider(Spider):
     item_attributes = {"brand": "RaceTrac", "brand_wikidata": "Q735942"}
     allowed_domains = ["www.racetrac.com"]
     start_urls = ["https://www.racetrac.com/locations/"]
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        raw_data = chompjs.parse_js_object(response.xpath('//*[contains(text(),"storedata")]/text()').get())
-        for location in raw_data:
-            item = DictParser.parse(location)
-            item["street_address"] = location.get("StoreAddress1")
-            if item.get("website"):
-                item["website"] = response.urljoin(item["website"])
-            apply_category(Categories.FUEL_STATION, item)
-            if amenities := location.get("Amenities"):
-                for amenity in amenities:
-                    if attribute := ATTRIBUTES_MAP.get(amenity["DisplayName"]):
-                        apply_yes_no(attribute, item, True)
-                    else:
-                        self.crawler.stats.inc_value(
-                            "atp/racetrac_us/unmapped_attribute/{}".format(amenity["DisplayName"])
-                        )
-            yield item
+        if raw_data := re.search(
+            r"storedata\s*=\s*(\[.*\]);\s*var", response.xpath('//*[contains(text(),"storedata")]/text()').get()
+        ):
+            for location in json.loads(raw_data.group(1)):
+                item = DictParser.parse(location)
+                item["street_address"] = location.get("StoreAddress1")
+                if item.get("website"):
+                    item["website"] = response.urljoin(item["website"])
+                apply_category(Categories.FUEL_STATION, item)
+                if amenities := location.get("Amenities"):
+                    for amenity in amenities:
+                        if attribute := ATTRIBUTES_MAP.get(amenity["DisplayName"]):
+                            apply_yes_no(attribute, item, True)
+                        else:
+                            self.crawler.stats.inc_value(
+                                "atp/racetrac_us/unmapped_attribute/{}".format(amenity["DisplayName"])
+                            )
+                yield item
