@@ -3,7 +3,8 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.hours import DAYS_WEEKDAY, OpeningHours
+from locations.dict_parser import DictParser
+from locations.hours import CLOSED_BG, OpeningHours
 from locations.items import Feature
 
 
@@ -13,48 +14,30 @@ class YettelBGSpider(Spider):
     start_urls = ["https://www.yettel.bg/eshop/bff/v1/reactRequest/getStoresList"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        json_data = response.json()
-        for store in json_data["stores"]:
-            item = Feature()
-            item["ref"] = store["id"]
-
-            item["lat"] = store["lat"]
-            item["lon"] = store["lng"]
-
+        for store in response.json()["stores"]:
+            item = DictParser.parse(store)
+            item["name"] = store["name"]["bg"]
             item["street_address"] = store["address"]["bg"]
             item["city"] = store["city"]["bg"]
 
-            item["opening_hours"] = OpeningHours()
-            mo_fr_hours = store["workingTimeMoFr"].replace(" ", "").replace("–", "-").lower()
+            mo_fr_hours = store["workingTimeMoFr"]
             if "временнозатворен" in mo_fr_hours:
                 # The store is temporarily closed, skip opening hours
                 item["opening_hours"] = "closed"
                 yield item
                 continue
-            if mo_fr_hours is not None and mo_fr_hours != "затворено":
-                split = mo_fr_hours.split("-")
-                opening_time = split[0]
-                closing_time = split[1]
-                item["opening_hours"].add_days_range(DAYS_WEEKDAY, opening_time, closing_time)
-            elif mo_fr_hours == "затворено":
-                item["opening_hours"].set_closed(DAYS_WEEKDAY)
 
-            sat_hours = store["workingTimeSat"].replace(" ", "").lower()
-            if sat_hours is not None and sat_hours != "затворено":
-                split = sat_hours.split("-")
-                opening_time = split[0]
-                closing_time = split[1]
-                item["opening_hours"].add_range("Sa", opening_time, closing_time)
-            elif sat_hours == "затворено":
-                item["opening_hours"].set_closed("Sa")
+            oh = OpeningHours()
+            if mo_fr_hours is not None:
+                oh.add_ranges_from_string(f"Mo-Fr {mo_fr_hours}", closed=CLOSED_BG)
 
-            sun_hours = store["workingTimeSun"].replace(" ", "").lower()
-            if sun_hours is not None and sun_hours != "затворено":
-                split = sun_hours.split("-")
-                opening_time = split[0]
-                closing_time = split[1]
-                item["opening_hours"].add_range("Su", opening_time, closing_time)
-            elif sun_hours == "затворено":
-                item["opening_hours"].set_closed("Su")
+            sat_hours = store["workingTimeSat"]
+            if sat_hours is not None:
+                oh.add_ranges_from_string(f"Sa {sat_hours}", closed=CLOSED_BG)
 
-            yield item
+            sun_hours = store["workingTimeSun"]
+            if sun_hours is not None:
+                oh.add_ranges_from_string(f"Su {sun_hours}", closed=CLOSED_BG)
+
+            item["opening_hours"] = oh
+            yield Feature(item)
