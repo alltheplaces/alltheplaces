@@ -27,11 +27,8 @@ class PigeonExpressBGSpider(Spider):
 
             oh = OpeningHours()
             for rule in location["working_hours"]:
-                day = rule["day"]
-                open = rule["open"]
-                close = rule["close"]
-                oh.add_range(day, open, close)
-            item["opening_hours"] = oh.as_opening_hours()
+                oh.add_range(rule["day"], rule["open"], rule["close"])
+            item["opening_hours"] = oh
 
             if location["type"] == "office":
                 apply_category(Categories.POST_OFFICE, item)
