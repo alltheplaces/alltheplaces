@@ -6,15 +6,13 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
-COUNTRIES = ["se", "no", "dk", "fi"]
-
 
 class NordeaSpider(Spider):
     name = "nordea"
     item_attributes = {"brand": "Nordea", "brand_wikidata": "Q1123823"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for country in COUNTRIES:
+        for country in ["se", "no", "dk", "fi"]:
             yield JsonRequest(
                 url="https://public-api.nordea.com/api/dbf/ca/nordea-locations-v1/branches-and-atms",
                 data={
@@ -25,8 +23,6 @@ class NordeaSpider(Spider):
                     "services": [],
                     "currencies": [],
                 },
-                method="POST",
-                callback=self.parse,
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -45,6 +41,6 @@ class NordeaSpider(Spider):
                 apply_category(Categories.ATM, item)
                 apply_yes_no(Extras.CASH_IN, item, True)
             else:
-                self.crawler.stats.inc_value(f"atp/unmapped_category/{location_type}")
+                self.logger.error("Unexpected category: {}".format(location_type))
 
             yield item
