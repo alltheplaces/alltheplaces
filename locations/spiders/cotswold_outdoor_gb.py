@@ -18,7 +18,7 @@ class CotswoldOutdoorGBSpider(SitemapSpider, StructuredDataSpider):
         for exclude in ["closed", "test"]:
             if exclude in item["name"].lower():
                 return
-
+        item["branch"] = item.pop("name")
         if item["ref"] == "marketing-samples":
             return
 
