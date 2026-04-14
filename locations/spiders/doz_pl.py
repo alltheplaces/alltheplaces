@@ -11,10 +11,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class DozPLSpider(CrawlSpider, StructuredDataSpider):
     name = "doz_pl"
-    item_attributes = {
-        "brand": "Dbam o Zdrowie",
-        "brand_wikidata": "Q62563833",
-    }
+    item_attributes = {"brand": "Dbam o Zdrowie", "brand_wikidata": "Q62563833"}
     allowed_domains = ["www.doz.pl"]
     start_urls = ["https://www.doz.pl/apteki"]
     rules = [
@@ -24,6 +21,7 @@ class DozPLSpider(CrawlSpider, StructuredDataSpider):
     ]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["name"] = None
         apply_category(Categories.PHARMACY, item)
         del item["facebook"]  # privacy policy link
         yield item
