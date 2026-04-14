@@ -37,6 +37,8 @@ class ElectrifyAmericaSpider(JSONBlobSpider):
 
         city_slug = re.sub(r"\s", "-", feature["city"]).lower()
         address_slug = re.sub(r"[<>#%|'’.]", "", re.sub(r"\s", "-", feature["address"])).lower()
+        # The /-/ is supposed to be the state abbreviation, but we only have the full state name.
+        # The placeholder results in an extra redirect.
         item["website"] = f"https://www.{self.domain}/locate-charger/-/{city_slug}/{address_slug}/{feature['id']}/"
 
         yield item
