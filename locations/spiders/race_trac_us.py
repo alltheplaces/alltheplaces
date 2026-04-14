@@ -41,6 +41,7 @@ class RaceTracUSSpider(Spider):
     item_attributes = {"brand": "RaceTrac", "brand_wikidata": "Q735942"}
     allowed_domains = ["www.racetrac.com"]
     start_urls = ["https://www.racetrac.com/locations/"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_data = chompjs.parse_js_object(response.xpath('//*[contains(text(),"storedata")]/text()').get())
