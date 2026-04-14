@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
+from locations.hours import DAYS_BG, OpeningHours
 from locations.items import Feature
 
 
@@ -29,21 +29,11 @@ class TechnopolisBGSpider(scrapy.Spider):
             item["image"] = f"https://api.technopolis.bg{location['image']}"
 
             item["opening_hours"] = OpeningHours()
-
             for worktime in (
                 location["properties"]["contacts"]["worktime"]
-                .replace("–", "-")
-                .replace(" - ", "-")
                 .replace("ч.", "")
-                .replace(": ", " ")
-                .replace(";", "")
                 .replace(".", ":")
                 .split("<br />")
             ):
-                days = [sanitise_day(day, DAYS_BG) for day in worktime.split(" ")[0].split("-")]
-                hours = worktime.split(" ")[1].split("-")
-                if len(days) == 2:
-                    item["opening_hours"].add_days_range(day_range(days[0], days[1]), hours[0], hours[1])
-                else:
-                    item["opening_hours"].add_range(days[0], hours[0], hours[1])
+                item["opening_hours"].add_ranges_from_string(worktime, days=DAYS_BG)
             yield item
