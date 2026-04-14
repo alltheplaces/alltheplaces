@@ -21,8 +21,8 @@ class EasyboxBGSpider(scrapy.Spider):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
             apply_category(Categories.PARCEL_LOCKER, item)
-            if location["photo"] is not None:
-                item["image"] = f"https://sameday.{self.get_tld()}{location['photo']}"
+            if location["photo"]:
+                item["image"] = response.urljoin(location["photo"])
             item["opening_hours"] = OpeningHours()
             for day_schedule in location["schedule"]:
                 day = DAYS[day_schedule["day"] - 1]
