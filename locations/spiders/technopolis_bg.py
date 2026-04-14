@@ -30,10 +30,7 @@ class TechnopolisBGSpider(scrapy.Spider):
 
             item["opening_hours"] = OpeningHours()
             for worktime in (
-                location["properties"]["contacts"]["worktime"]
-                .replace("ч.", "")
-                .replace(".", ":")
-                .split("<br />")
+                location["properties"]["contacts"]["worktime"].replace("ч.", "").replace(".", ":").split("<br />")
             ):
                 item["opening_hours"].add_ranges_from_string(worktime, days=DAYS_BG)
             yield item
