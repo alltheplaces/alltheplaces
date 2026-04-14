@@ -19,7 +19,6 @@ class PigeonExpressBGSpider(Spider):
             item["name"] = None
             item["ref"] = location["code"]
             item["branch"] = f"{location['city']} {location['name']}"
-            item["street_address"] = location["address"]
             # 359700... is generic number for all parcel lockers
             item["phone"] = (
                 f"+{location['phone']}" if location["phone"] and not location["phone"] == "35970011133" else None
