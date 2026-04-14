@@ -35,8 +35,6 @@ class NordeaSpider(Spider):
             item["lat"] = location["coordinate1"]
             item["lon"] = location["coordinate2"]
             item["city"] = item.pop("state", None)
-            if item.get("name") == "Nordea":
-                item["name"] = None
 
             location_type = location.get("typeof", "")
             if location_type == "branch":
