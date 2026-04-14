@@ -14,9 +14,6 @@ class EasyboxBGSpider(scrapy.Spider):
     requires_proxy = "BG"
     no_refs = True
 
-    def get_tld(self):
-        return "bg"
-
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
