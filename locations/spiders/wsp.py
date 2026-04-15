@@ -1,11 +1,9 @@
 import scrapy
-from scrapy.http import Response
 
 from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
-
 
 COUNTRY_MAP = {
     "Greater China": "CN",
@@ -39,11 +37,7 @@ class WspSpider(CamoufoxSpider):
             if not ref:
                 continue
 
-            texts = [
-                t.strip()
-                for t in office.css("div.office-address div.text::text").getall()
-                if t.strip()
-            ]
+            texts = [t.strip() for t in office.css("div.office-address div.text::text").getall() if t.strip()]
             addr_full = ", ".join(texts) if texts else None
 
             properties = {
