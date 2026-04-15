@@ -9,8 +9,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class BitstopPRUSSpider(JSONBlobSpider):
-    name = "bitstop_pr_us"
+class BitstopPRUSCASpider(JSONBlobSpider):
+    name = "bitstop_pr_us_ca"
     allowed_domains = ["static.plutonial.net"]
     start_urls = ["https://static.plutonial.net/clients/loc/bitstop/current_p.json"]
     operators = {
