@@ -12,7 +12,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 class GBPeterboroughSpider(OwenBaseSpider):
     name = "gb_peterborough"
     dataset_attributes = Licenses.GB_OGLv3.value | {
-        "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0."  #  address strings                                                                                # address strings
+        "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0."  # address strings                                                                                # address strings
         + " Contains OS data © Crown copyright and database right 2025."  # OS Open UPRN, coords
         + " Contains Royal Mail data © Royal Mail copyright and Database right."  # Postcodes
         + " Contains GeoPlace data © Local Government Information House Limited copyright and database right."
