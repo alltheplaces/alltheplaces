@@ -9,7 +9,7 @@ class GongChaSpider(StorepointSpider):
 
     def parse_item(self, item, location):
         item["website"] = f"https://www.gong-cha.com/store-finder?l={location['id']}"
-        item["name"] = None # otherwise, branch would be the name
+        item["name"] = None  # otherwise, branch would be the name
         item["branch"] = location["name"]
         item["extras"]["cuisine"] = "bubble_tea"
         item["extras"]["takeaway"] = "yes"
