@@ -28,6 +28,7 @@ class GbGlasgowSpider(OwenBaseSpider):
         spider._re = re.compile(
             r"(.+?), (BAILLIESTON|BRIDGETON|CARMUNNOCK|CARMYLE|CLARKSTON|GARROWHILL BAILLIESTON|MOUNT VERNON|SPRINGBOIG|UDDINGSTON)$"
         )
+        return spider
 
     def parse_row(self, item: Feature, addr: dict):
         item["street_address"] = (
