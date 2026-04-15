@@ -1,4 +1,4 @@
-from locations.hours import OpeningHours, DAYS_CN
+from locations.hours import DAYS_CN, OpeningHours
 from locations.spiders.costco_au import CostcoAUSpider
 
 

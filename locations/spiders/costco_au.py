@@ -4,7 +4,7 @@ from urllib.parse import quote, urljoin
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
-from locations.hours import OpeningHours, DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -39,7 +39,9 @@ class CostcoAUSpider(JSONBlobSpider):
             return
         item["branch"] = feature["displayName"]
         item.pop("name", None)
-        item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2"), feature.get("line3"), feature.get("line4")])
+        item["street_address"] = merge_address_lines(
+            [feature.get("line1"), feature.get("line2"), feature.get("line3"), feature.get("line4")]
+        )
         item["website"] = urljoin(response.url, f"/store-finder/{quote(item['branch'])}")
 
         warehouse = item.deepcopy()
