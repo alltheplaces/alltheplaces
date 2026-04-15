@@ -1,7 +1,7 @@
 import re
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -35,9 +35,6 @@ class BitstopPRUSCASpider(JSONBlobSpider):
         },
         "PAI": {"operator": "PAI", "brand": "PAI"},
     }
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url=self.start_urls[0])
 
     def extract_json(self, response: Response) -> list[dict]:
         # Keys of feature properties are remapped to codes to reduce the size
