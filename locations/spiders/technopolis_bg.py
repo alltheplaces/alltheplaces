@@ -1,25 +1,23 @@
-import scrapy
+from typing import Any, AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.hours import DAYS_BG, OpeningHours
 from locations.items import Feature
 
 
-class TechnopolisBGSpider(scrapy.Spider):
+class TechnopolisBGSpider(Spider):
     name = "technopolis_bg"
     item_attributes = {"brand": "Technopolis", "brand_wikidata": "Q28056752", "country": "BG"}
-    allowed_domains = ["www.technopolis.bg"]
-    start_urls = [
-        "https://api.technopolis.bg/videoluxcommercewebservices/v2/technopolis-bg/mapbox/customerpreferedstore"
-    ]
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,  # No robots.txt
-        "DEFAULT_REQUEST_HEADERS": {
-            "Accept": "application/json, text/plain, */*",
-            "Origin": "https://www.technopolis.bg",  # without origin, the server returns XML
-        },
-    }
 
-    def parse(self, response):
+    async def start(self) -> AsyncIterator[Any]:
+        yield JsonRequest(
+            "https://api.technopolis.bg/videoluxcommercewebservices/v2/technopolis-bg/mapbox/customerpreferedstore",
+            headers={"Origin": "https://www.technopolis.bg"},
+        )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["storesMap"]["features"]:
             item = Feature()
             item["ref"] = location["id"]
