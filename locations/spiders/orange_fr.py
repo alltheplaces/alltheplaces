@@ -17,7 +17,7 @@ class OrangeFRSpider(Spider):
 
     def make_request(self, page: int, page_size: int = 100) -> JsonRequest:
         return JsonRequest(
-            url="https://7jl9sk5vbq-dsn.algolia.net/1/indexes/stores_locator_ofr/query?x-algolia-application-id=7JL9SK5VBQ&x-algolia-api-key=409fd5e4ef65efe7dacf57d93698910c",
+            url="https://7jl9sk5vbq-dsn.algolia.net/1/indexes/stores_locator_ofr/query?x-algolia-application-id=7JL9SK5VBQ&x-algolia-api-key=b2b7037d97e57d65b53dc5daab37b989",
             data={"params": "hitsPerPage={}&page={}".format(page_size, page)},
         )
 
