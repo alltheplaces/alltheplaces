@@ -24,11 +24,12 @@ class StorcashNOSpider(SylinderSpider):
     base_url = "https://storcash.no/butikker/"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
-        branch = item.pop("name")
-        branch = branch.removeprefix("Storcash Norge avd ").removeprefix("Storcash ")
-        branch = branch.removesuffix(" Storcash")
-        branch = " ".join(branch.replace(" Storcash ", " ").split())
-
+        branch = (
+            item.pop("name")
+            .removeprefix("Storcash Norge avd ")
+            .removeprefix("Storcash ")
+            .removesuffix(" Storcash")
+        )
         item["name"] = "Storcash"
-        item["branch"] = branch
+        item["branch"] = " ".join(branch.replace(" Storcash ", " ").split())
         yield item

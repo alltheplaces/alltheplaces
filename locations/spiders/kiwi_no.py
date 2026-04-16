@@ -12,9 +12,8 @@ class KiwiNOSpider(SylinderSpider):
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         branch = item.pop("name").removeprefix("KIWI ")
-        branch_parts = branch.split(" ", 1)
-        if len(branch_parts) == 2 and branch_parts[0].isdigit():
-            branch = branch_parts[1]
-
+        first, sep, rest = branch.partition(" ")
+        if sep and first.isdigit():
+            branch = rest
         item["branch"] = branch
         yield item

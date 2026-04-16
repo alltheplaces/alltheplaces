@@ -12,16 +12,11 @@ class MenyNOSpider(SylinderSpider):
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         raw_name = item.pop("name")
-        if raw_name.startswith("Jacobs "):
-            item["name"] = "Jacobs"
-            item["branch"] = raw_name.removeprefix("Jacobs ")
-        elif raw_name.startswith("CC Mat "):
-            item["name"] = "CC Mat"
-            item["branch"] = raw_name.removeprefix("CC Mat ")
-        elif raw_name.startswith("MENY "):
-            item["name"] = "Meny"
-            item["branch"] = raw_name.removeprefix("MENY ")
+        for prefix, name in [("Jacobs ", "Jacobs"), ("CC Mat ", "CC Mat"), ("MENY ", "Meny")]:
+            if raw_name.startswith(prefix):
+                item["name"] = name
+                item["branch"] = raw_name.removeprefix(prefix)
+                break
         else:
             item["name"] = raw_name
-
         yield item
