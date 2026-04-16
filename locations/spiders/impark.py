@@ -46,7 +46,7 @@ class ImparkSpider(Spider):
             item["state"] = address.get("provState")
             item["postcode"] = address.get("postalCode")
             item["country"] = address.get("country")
-            item["website"] = f"https://lots.impark.com/{op_code.lower()}/en#details={branch_number},{lot_number}"
+            item["website"] = f"https://lots.impark.com/imp#details={branch_number},{lot_number}"
             item.update(BRANDS[op_code])
 
             for feature in lot.get("features", []):
