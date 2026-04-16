@@ -13,7 +13,10 @@ class TechnopolisBGSpider(scrapy.Spider):
     ]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,  # No robots.txt
-        "DEFAULT_REQUEST_HEADERS": {"Accept": "application/json, text/plain, */*"},
+        "DEFAULT_REQUEST_HEADERS": {
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://www.technopolis.bg" # without origin, the server returns XML
+        },
     }
 
     def parse(self, response):
