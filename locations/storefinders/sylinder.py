@@ -3,6 +3,7 @@ from typing import AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
+from locations.categories import Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -10,10 +11,10 @@ from locations.items import Feature
 
 class SylinderSpider(Spider):
     """
-    To use this store finder, specify the brand/application key using the
-    'app_key' attribute of this class. Also specify a 'base_url' value which
-    is prefixed to store identifiers to generate a website field value for
-    each extracted feature.
+    To use this store finder, specify one or more brand/application keys using
+    the 'app_keys' attribute of this class. Also specify a 'base_url' value
+    which is prefixed to store identifiers to generate a website field value
+    for each extracted feature.
 
     If required, override the 'parse_item' method to extract additional
     location data or to clean up and modify extracted data.
@@ -21,36 +22,76 @@ class SylinderSpider(Spider):
 
     dataset_attributes: dict = {"source": "api", "api": "api.ngadata.no"}
 
-    app_key: str
+    app_keys: list[str]
     base_url: str | None = None
+    warn_if_no_base_url: bool = True
+    shop_service_post_partners = {
+        "DHL": "DHL",
+        "HELTHJEM": "Helthjem",
+        "MYP": "PostNord",
+        "PIB": "Posten",
+    }
+    shop_service_parcel_pickup = {
+        "INSTABOX_I": "Instabox",
+        "INSTABOX_U": "Instabox",
+        "PN_PB_U": "PostNord",
+        "PP": "Posten",
+        "P_PB_U": "Posten",
+    }
+
+    def chain_ids(self) -> set[str]:
+        return set(self.app_keys)
+
+    def apply_shop_services(self, item: Feature, location: dict) -> None:
+        # Only map service codes that have a clear OSM equivalent on the host shop POI.
+        for service in location["storeDetails"].get("shopServices", []):
+            code = service["typeCode"]
+
+            # BAX_NT = Tipping / BAX_RT = Rikstoto
+            if code == "BAX_NT" or code == "BAX_RT":
+                apply_yes_no("lottery", item, True)
+            elif code == "CAT":
+                apply_yes_no("catering", item, True)
+            elif code == "KIB":
+                apply_yes_no(Extras.CASH_IN, item, True)
+                apply_yes_no("cash_withdrawal", item, True)
+            elif code == "ZPROPN":
+                apply_yes_no(Fuel.PROPANE, item, True)
+            elif brand := self.shop_service_post_partners.get(code):
+                apply_category({"post_office": "post_partner"}, item)
+                apply_category({"post_office:brand": brand}, item)
+            elif brand := self.shop_service_parcel_pickup.get(code):
+                apply_category({"post_office:parcel_pickup": brand}, item)
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        if self.base_url is None:
+        if self.base_url is None and self.warn_if_no_base_url:
             self.logger.warning("Specify self.base_url to allow extraction of website values for each feature.")
-        yield JsonRequest(url=f"https://api.ngdata.no/sylinder/stores/v1/extended-info?chainId={self.app_key}")
+        chain_ids = self.chain_ids()
+        if len(chain_ids) == 1:
+            yield JsonRequest(
+                url=f"https://api.ngdata.no/sylinder/stores/v1/extended-info?chainId={next(iter(chain_ids))}"
+            )
+        else:
+            yield JsonRequest(url="https://api.ngdata.no/sylinder/stores/v1/extended-info")
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
+        chain_ids = self.chain_ids()
         for location in response.json():
+            if location["storeDetails"]["chainId"] not in chain_ids:
+                continue
             yield from self.parse_location(location) or []
 
     def parse_location(self, location: dict) -> Iterable[Feature]:
-        item = DictParser.parse(location["storeDetails"])
+        location = {**location, **location.pop("storeDetails")}
+        location = {**location, **location.pop("organization")}
+
+        item = DictParser.parse(location)
         item["ref"] = location["gln"]
 
-        # Example:
-        # {'gln': '7080001064310', 'storeDetails': {'storeId': '1020', 'storeName': 'MENY Ski', 'slug': 'meny-ski', 'position': {'lat': 59.713270584310074, 'lng': 10.835573416901537}, 'shopServices': [{'typeCode': 'BHG', 'name': 'Gavekort'}, {'typeCode': 'BAX_NT', 'name': 'Tipping'}, {'typeCode': 'P_PB_U', 'name': 'Posten pakkeboks ute'}, {'typeCode': 'KIB', 'name': 'Kontanttjenester i Butikk'}], 'chainId': '1300', 'organization': {'address': 'Eikeliv 1', 'addressType': 'Delivery', 'postalCode': '1400', 'city': 'SKI', 'phone': '64 878090', 'fax': '64 863312', 'facebookUrl': None, 'email': 'butikksjef.ski@meny.no'}, 'municipality': 'NORDRE FOLLO', 'county': 'AKERSHUS', 'lastChanged': '2024-01-24T14:03:23.0000000+01:00', 'metadata': {'messageReceived': '2024-01-24T14:03:25.8000000+01:00', 'source': 'NGG IntStore'}}, 'openingHours': {'isOpenSunday': False, 'metadata': {'messageReceived': '2024-02-26T15:36:07.9070000+01:00', 'source': 'SAP Retail OSB'}}}
-        # item["city"] = location["storeDetails"]["municipality"]
-        item["state"] = location["storeDetails"]["county"]
-        item["street_address"] = location["storeDetails"]["organization"]["address"]
-        item["city"] = location["storeDetails"]["organization"]["city"]
-        item["postcode"] = location["storeDetails"]["organization"]["postalCode"]
-
-        item["phone"] = location["storeDetails"]["organization"]["phone"]
-        item["email"] = location["storeDetails"]["organization"]["email"]
-
-        item["facebook"] = location["storeDetails"]["organization"]["facebookUrl"]
         if self.base_url is not None:
-            item["website"] = self.base_url + location["storeDetails"]["slug"]
+            item["website"] = f"{self.base_url}{location['slug']}"
+
+        self.apply_shop_services(item, location)
 
         if location.get("openingHours"):
             item["opening_hours"] = OpeningHours()
