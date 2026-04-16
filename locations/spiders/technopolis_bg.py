@@ -20,7 +20,7 @@ class TechnopolisBGSpider(scrapy.Spider):
         for location in response.json()["storesMap"]["features"]:
             item = Feature()
             item["ref"] = location["id"]
-            item["name"] = location["properties"]["name"]
+            item["branch"] = location["properties"]["name"].removeprefix("Технополис ")
             item["street_address"] = location["properties"]["contacts"]["address"]
             item["postcode"] = location["properties"]["postal"]
             item["city"] = location["properties"]["city"]
