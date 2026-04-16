@@ -49,14 +49,14 @@ class SylinderSpider(Spider):
 
             # BAX_NT = Tipping / BAX_RT = Rikstoto
             if code == "BAX_NT" or code == "BAX_RT":
-                apply_yes_no("lottery", item, True)
+                apply_yes_no("lottery", item)
             elif code == "CAT":
-                apply_yes_no("catering", item, True)
+                apply_yes_no("catering", item)
             elif code == "KIB":
-                apply_yes_no(Extras.CASH_IN, item, True)
-                apply_yes_no("cash_withdrawal", item, True)
+                apply_yes_no(Extras.CASH_IN, item)
+                apply_yes_no("cash_withdrawal", item)
             elif code == "ZPROPN":
-                apply_yes_no(Fuel.PROPANE, item, True)
+                apply_yes_no(Fuel.PROPANE, item)
             elif brand := self.shop_service_post_partners.get(code):
                 apply_category({"post_office": "post_partner"}, item)
                 apply_category({"post_office:brand": brand}, item)
