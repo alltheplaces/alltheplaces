@@ -31,7 +31,7 @@ class OrangeFRSpider(Spider):
                 continue
             item = Feature()
             item["ref"] = location["objectID"]
-            item["name"] = location["Location name"]
+            item["branch"] = location["Location name"].removeprefix("Orange").strip(" -")
             item["lat"] = location["_geoloc"]["lat"]
             item["lon"] = location["_geoloc"]["lng"]
             item["website"] = urljoin("https://agence.orange.fr/", location["URL"])
