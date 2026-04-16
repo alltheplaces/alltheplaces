@@ -1,6 +1,7 @@
 import scrapy
 
-from locations.hours import DAYS_BG, OpeningHours, sanitise_day
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_BG, OpeningHours
 from locations.items import Feature
 
 
@@ -12,29 +13,15 @@ class A1BGSpider(scrapy.Spider):
 
     def parse(self, response):
         for store in response.json()["response"]:
-            item = Feature()
-            item["ref"] = store["id"]
-            item["name"] = store["name"]
+            item = DictParser.parse(store)
             item["street_address"] = store["address"].strip()
-            item["lat"] = store["latitude"]
-            item["lon"] = store["longitude"]
-            item["phone"] = store["phone"]
-            item["opening_hours"] = self.get_opening_hours(store, item["ref"])
-            yield item
+            item["opening_hours"] = self.get_opening_hours(store)
+            yield Feature(item)
 
-    def get_opening_hours(self, store, ref):
-        try:
-            o = OpeningHours()
-            for day in store["worktime"]:
-                if (
-                    (workdays := day.get("workday").split("-"))
-                    and (hour_from := day.get("hour_from"))
-                    and (hour_to := day.get("hour_to"))
-                ):
-                    for workday in workdays:
-                        o.add_range(sanitise_day(workday, DAYS_BG), hour_from, hour_to, "%H:%M")
+    def get_opening_hours(self, store):
+        oh = OpeningHours()
+        for rule in store["worktime"]:
+            rule_str = f"{rule['workday']} {rule['hour_from']}-{rule['hour_to']}"
+            oh.add_ranges_from_string(rule_str, DAYS_BG)
 
-            return o.as_opening_hours()
-        except Exception as e:
-            self.logger.warning(f"Failed to parse opening hours for {ref}, {e}")
-            self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
+        return oh.as_opening_hours()
