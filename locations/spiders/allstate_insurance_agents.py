@@ -13,6 +13,7 @@ class AllstateInsuranceAgentsSpider(CamoufoxSpider):
     item_attributes = {"brand": "Allstate", "brand_wikidata": "Q2645636"}
     allowed_domains = ["agents.allstate.com"]
     start_urls = ("https://agents.allstate.com/",)
+    requires_proxy = "US"
     captcha_type = "cloudflare_turnstile"
     captcha_selector_indicating_success = '//li[@class="Directory-listItem"]'
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {

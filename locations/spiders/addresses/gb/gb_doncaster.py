@@ -1,18 +1,15 @@
-import csv
 import re
-from io import BytesIO, TextIOWrapper
-from typing import Any
-from zipfile import ZipFile
+from typing import Any, Self
 
-from scrapy.http import Response
+from scrapy.crawler import Crawler
 
-from locations.address_spider import AddressSpider
 from locations.items import Feature
 from locations.licenses import Licenses
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
-class GbDoncasterSpider(AddressSpider):
+class GbDoncasterSpider(OwenBaseSpider):
     name = "gb_doncaster"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0."  # City of Doncaster Council, address strings
@@ -21,14 +18,14 @@ class GbDoncasterSpider(AddressSpider):
         + " Contains GeoPlace data © Local Government Information House Limited copyright and database right."
         + " Office for National Statistics licensed under the Open Government Licence v.3.0."
     }
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60 * 5}
-    no_refs = True
-    start_urls = [
-        "https://drive.usercontent.google.com/download?id=1yeRNbG9rb-5k2GIE38JZHE4NnpzsFzcZ&export=download&confirm=t"
-    ]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        _re = re.compile(
+    drive_id = "1yeRNbG9rb-5k2GIE38JZHE4NnpzsFzcZ"
+    csv_filename = "DONCASTER_CTBANDS_OSOU_202602.csv"
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler, *args: Any, **kwargs: Any) -> Self:
+        spider = super().from_crawler(crawler, *args, **kwargs)
+        spider._re = re.compile(
             r"^(.+?)(?:, ({}))?, ({})(?:, South Yorkshire|, S Yorks|, S Yorkshire|, East Yorkshire)?$".format(
                 "|".join(
                     [
@@ -105,29 +102,16 @@ class GbDoncasterSpider(AddressSpider):
                 ),
             )
         )
+        return spider
 
-        with ZipFile(BytesIO(response.body)) as zip_file:
-            for addr in csv.DictReader(
-                TextIOWrapper(zip_file.open("DONCASTER_CTBANDS_OSOU_202602.csv"), encoding="utf-8")
-            ):
-                item = Feature()
-                item["ref"] = addr["PROPREF"]
-                item["extras"]["ref:GB:uprn"] = addr["UPRN"]
-                item["lat"] = addr["LAT"]
-                item["lon"] = addr["LNG"]
-                item["postcode"] = addr["POSTCODE"]
+    def parse_row(self, item: Feature, addr: dict):
+        if m := self._re.match(
+            addr["ADDR"].replace(", Donaster", ", Doncaster"),  # :)
+        ):
+            item["street_address"], item["extras"]["addr:suburb"], item["city"] = m.groups()
 
-                if m := _re.match(
-                    addr["ADDR"].replace(", Donaster", ", Doncaster"),  # :)
-                ):
-                    item["street_address"], item["extras"]["addr:suburb"], item["city"] = m.groups()
-
-                    if item["city"] in ("Bawtry", "Finningley", "Mexborough", "Moss"):
-                        item["extras"]["addr:suburb"] = item["city"]
-                        item["city"] = "Doncaster"
-                else:
-                    item["addr_full"] = merge_address_lines([addr["ADDR"], item.get("postcode")])
-
-                item["country"] = "GB"
-
-                yield item
+            if item["city"] in ("Bawtry", "Finningley", "Mexborough", "Moss"):
+                item["extras"]["addr:suburb"] = item["city"]
+                item["city"] = "Doncaster"
+        else:
+            item["addr_full"] = merge_address_lines([addr["ADDR"], item.get("postcode")])
