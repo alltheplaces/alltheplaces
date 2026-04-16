@@ -5,7 +5,6 @@ from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import CLOSED_BG, OpeningHours
-from locations.items import Feature
 
 
 class YettelBGSpider(Spider):
@@ -40,4 +39,4 @@ class YettelBGSpider(Spider):
                 oh.add_ranges_from_string(f"Su {sun_hours}", closed=CLOSED_BG)
 
             item["opening_hours"] = oh
-            yield Feature(item)
+            yield item
