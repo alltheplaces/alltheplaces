@@ -11,7 +11,7 @@ from locations.items import Feature
 
 class OrangeFRSpider(Spider):
     name = "orange_fr"
-    item_attributes = {"brand": "Orange", "brand_wikidata": "Q1431486", "nsi_id": "N/A"}
+    item_attributes = {"brand": "Orange", "brand_wikidata": "Q1431486"}
     skip_auto_cc_domain = True
     skip_auto_cc_spider_name = True
 
@@ -45,7 +45,7 @@ class OrangeFRSpider(Spider):
                 for time in times:
                     item["opening_hours"].add_range(day, time[0], time[1])
 
-            apply_category(Categories.SHOP_MOBILE_PHONE, item)
+            apply_category(Categories.SHOP_TELECOMMUNICATION, item)
 
             yield item
 
