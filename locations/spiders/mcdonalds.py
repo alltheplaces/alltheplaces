@@ -20,7 +20,7 @@ class McdonaldsSpider(Spider):
     }
     allowed_domains = ["www.mcdonalds.com"]
 
-    ISEADGG_COUNTRIES = {"NZ"}
+    ISEADGG_COUNTRIES = {"NZ", "US"}
 
     async def start(self) -> AsyncIterator[Request]:
         template = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={}&longitude={}&radius=50&maxResults=250&country={}&language={}&showClosed="
