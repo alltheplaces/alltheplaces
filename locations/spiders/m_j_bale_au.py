@@ -7,7 +7,6 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.spiders.david_jones_au_nz import DavidJonesAUNZSpider
 from locations.spiders.myer_au import MyerAUSpider
 
 
@@ -27,8 +26,8 @@ class MJBaleAUSpider(JSONBlobSpider):
         item["addr_full"] = merge_address_lines([feature.get("address_street_1"), feature.get("address_street_2")])
 
         if feature["name"].startswith("David Jones "):
-            item["located_in"] = DavidJonesAUNZSpider.item_attributes["brand"]
-            item["located_in_wikidata"] = DavidJonesAUNZSpider.item_attributes["brand_wikidata"]
+            item["located_in"] = "David Jones"
+            item["located_in_wikidata"] = "Q5235753"
         elif feature["name"].startswith("Myer "):
             item["located_in"] = MyerAUSpider.item_attributes["brand"]
             item["located_in_wikidata"] = MyerAUSpider.item_attributes["brand_wikidata"]
