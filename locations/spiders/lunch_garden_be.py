@@ -19,14 +19,14 @@ class LunchGardenBESpider(Spider):
         yield scrapy.Request(url=urljoin(response.url, url_path), callback=self.parse_location)
 
     def parse_location(self, response, **kwargs):
-        pattern = r'\"([^\"]+)\",\s*"([^\"]+)\",\s*\{\"lat\":\d+,\"lng\":\d+\},\s*([\d.]+),\s*([\d.]+),.*?\"([^\"]+)\",\s*\"([^\"]+)\",\s*"([^\"]+)\"'
+        pattern = r"\"([^\"]+,\s*\d{4}\s*[^\"]+)\".*?\{\s*\"lat\"\s*:\s*\d+,\s*\"lng\"\s*:\s*\d+\s*\}\s*,\s*([\d.]+)\s*,\s*([\d.]+).*?\"(Lunch Garden[^\"]+)\".*?\"([a-z0-9-]+)\""
         matches = re.findall(pattern, response.text, re.DOTALL)
         if matches:
             for location in matches:
                 item = Feature()
-                item["branch"] = location[4].removeprefix("Lunch Garden ")
-                item["addr_full"] = location[1]
-                item["lat"] = location[2]
-                item["lon"] = location[3]
+                item["branch"] = location[3].removeprefix("Lunch Garden ")
+                item["addr_full"] = location[0]
+                item["lat"] = location[1]
+                item["lon"] = location[2]
                 item["website"] = item["ref"] = "https://www.lunchgarden.be/nl/restaurants/" + location[-1]
                 yield item
