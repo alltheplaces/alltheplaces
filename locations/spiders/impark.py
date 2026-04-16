@@ -7,7 +7,7 @@ from locations.items import Feature
 
 BRANDS = {
     "IMP": {"brand": "Impark", "brand_wikidata": "Q6006077"},
-    "CCP": {"brand": "City Center Parking", "brand_wikidata": "Q108276976"},
+    "CCP": {"operator": "City Center Parking", "operator_wikidata": "Q108276976"},
     "ADV": {"brand": "Advanced Parking"},
 }
 
