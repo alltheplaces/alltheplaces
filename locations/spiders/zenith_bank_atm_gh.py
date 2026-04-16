@@ -12,7 +12,7 @@ class ZenithBankAtmGHSpider(Spider):
     no_refs = True
 
     def parse(self, response):
-        for location in response.xpath('.//div[@class="vc_column-inner"]/.//li/a'):
+        for location in response.xpath('.//div[@id="atm-locator"]/.//li/a'):
             item = Feature()
             item["lat"] = location.xpath("@data-lat").get()
             item["lon"] = location.xpath("@data-lng").get()
