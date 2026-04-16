@@ -43,43 +43,36 @@ class SylinderSpider(Spider):
         return set(self.app_keys)
 
     def apply_shop_services(self, item: Feature, location: dict) -> None:
-        # Only map service codes that have a clear OSM equivalent on the host shop POI.
-        for service in location["storeDetails"].get("shopServices", []):
-            code = service["typeCode"]
-
-            # BAX_NT = Tipping / BAX_RT = Rikstoto
-            if code == "BAX_NT" or code == "BAX_RT":
-                apply_yes_no("lottery", item, True)
-            elif code == "CAT":
-                apply_yes_no("catering", item, True)
-            elif code == "KIB":
-                apply_yes_no(Extras.CASH_IN, item, True)
-                apply_yes_no("cash_withdrawal", item, True)
-            elif code == "ZPROPN":
-                apply_yes_no(Fuel.PROPANE, item, True)
-            elif brand := self.shop_service_post_partners.get(code):
-                apply_category({"post_office": "post_partner"}, item)
-                apply_category({"post_office:brand": brand}, item)
-            elif brand := self.shop_service_parcel_pickup.get(code):
-                apply_category({"post_office:parcel_pickup": brand}, item)
+        for service in location.get("shopServices", []):
+            match service["typeCode"]:
+                case "BAX_NT" | "BAX_RT":  # BAX_NT = Tipping / BAX_RT = Rikstoto
+                    apply_yes_no("lottery", item, True)
+                case "CAT":
+                    apply_yes_no("catering", item, True)
+                case "KIB":
+                    apply_yes_no(Extras.CASH_IN, item, True)
+                    apply_yes_no("cash_withdrawal", item, True)
+                case "ZPROPN":
+                    apply_yes_no(Fuel.PROPANE, item, True)
+                case code if brand := self.shop_service_post_partners.get(code):
+                    apply_category({"post_office": "post_partner", "post_office:brand": brand}, item)
+                case code if brand := self.shop_service_parcel_pickup.get(code):
+                    apply_category({"post_office:parcel_pickup": brand}, item)
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         if self.base_url is None and self.warn_if_no_base_url:
             self.logger.warning("Specify self.base_url to allow extraction of website values for each feature.")
         chain_ids = self.chain_ids()
+        url = "https://api.ngdata.no/sylinder/stores/v1/extended-info"
         if len(chain_ids) == 1:
-            yield JsonRequest(
-                url=f"https://api.ngdata.no/sylinder/stores/v1/extended-info?chainId={next(iter(chain_ids))}"
-            )
-        else:
-            yield JsonRequest(url="https://api.ngdata.no/sylinder/stores/v1/extended-info")
+            url += f"?chainId={next(iter(chain_ids))}"
+        yield JsonRequest(url=url)
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         chain_ids = self.chain_ids()
         for location in response.json():
-            if location["storeDetails"]["chainId"] not in chain_ids:
-                continue
-            yield from self.parse_location(location) or []
+            if location["storeDetails"]["chainId"] in chain_ids:
+                yield from self.parse_location(location) or []
 
     def parse_location(self, location: dict) -> Iterable[Feature]:
         location = {**location, **location.pop("storeDetails")}
@@ -93,20 +86,13 @@ class SylinderSpider(Spider):
 
         self.apply_shop_services(item, location)
 
-        if location.get("openingHours"):
+        if opening_hours := location.get("openingHours"):
             item["opening_hours"] = OpeningHours()
-
             # For now, not collecting special opening hours
             # print(location["openingHours"]["upcomingSpecialOpeningHours"])
-
-            for day in location["openingHours"]["upcomingOpeningHours"]:
-                if day["closed"]:
-                    continue
-
-                if day["isSpecial"]:
-                    continue
-
-                item["opening_hours"].add_range(day["abbreviatedDayOfWeek"], day["opens"], day["closes"])
+            for day in opening_hours["upcomingOpeningHours"]:
+                if not day["closed"] and not day["isSpecial"]:
+                    item["opening_hours"].add_range(day["abbreviatedDayOfWeek"], day["opens"], day["closes"])
 
         yield from self.parse_item(item, location) or []
 
