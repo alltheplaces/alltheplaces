@@ -16,7 +16,7 @@ class YettelBGSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
-            item["name"] = store["name"]["bg"]
+            item["name"] = None
             item["street_address"] = store["address"]["bg"]
             item["city"] = store["city"]["bg"]
 
