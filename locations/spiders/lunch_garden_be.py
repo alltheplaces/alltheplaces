@@ -1,30 +1,32 @@
-import html
+import re
+from typing import Any
+from urllib.parse import urljoin
 
+import scrapy
 from scrapy import Spider
+from scrapy.http import Response
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 
 
 class LunchGardenBESpider(Spider):
     name = "lunch_garden_be"
     item_attributes = {"brand": "Lunch Garden", "brand_wikidata": "Q2491217"}
-    start_urls = ["https://www.lunchgarden.be/fr/app/json"]
+    start_urls = ["https://www.lunchgarden.be/nl/restaurants"]
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["restaurants"]:
-            for k, v in location["restaurant"].items():
-                location[k.replace("field_", "")] = v
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        url_path = response.xpath('//*[@type="application/json"]//@data-src').get()
+        yield scrapy.Request(url=urljoin(response.url, url_path), callback=self.parse_location)
 
-            item = DictParser.parse(location)
-
-            item["street_address"] = html.unescape(location["adresse_1"])
-            item["addr_full"] = html.unescape(location["adresse"])
-
-            item["opening_hours"] = OpeningHours()
-            for day in DAYS_FULL:
-                if times := location.get(day.lower()):
-                    start_time, end_time = times.split(" – ")
-                    item["opening_hours"].add_range(day, start_time, end_time)
-
-            yield item
+    def parse_location(self, response, **kwargs):
+        pattern = r'\"([^\"]+)\",\s*"([^\"]+)\",\s*\{\"lat\":\d+,\"lng\":\d+\},\s*([\d.]+),\s*([\d.]+),.*?\"([^\"]+)\",\s*\"([^\"]+)\",\s*"([^\"]+)\"'
+        matches = re.findall(pattern, response.text, re.DOTALL)
+        if matches:
+            for location in matches:
+                item = Feature()
+                item["branch"] = location[4].removeprefix("Lunch Garden ")
+                item["addr_full"] = location[1]
+                item["lat"] = location[2]
+                item["lon"] = location[3]
+                item["website"] = item["ref"] = "https://www.lunchgarden.be/nl/restaurants/" + location[-1]
+                yield item
