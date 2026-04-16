@@ -15,7 +15,7 @@ class TechnopolisBGSpider(scrapy.Spider):
         "ROBOTSTXT_OBEY": False,  # No robots.txt
         "DEFAULT_REQUEST_HEADERS": {
             "Accept": "application/json, text/plain, */*",
-            "Origin": "https://www.technopolis.bg" # without origin, the server returns XML
+            "Origin": "https://www.technopolis.bg",  # without origin, the server returns XML
         },
     }
 
