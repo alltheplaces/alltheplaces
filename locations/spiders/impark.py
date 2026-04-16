@@ -1,3 +1,5 @@
+from typing import AsyncIterator, Any
+
 from scrapy import Spider
 from scrapy.http import JsonRequest, Request
 
@@ -21,7 +23,7 @@ class ImparkSpider(Spider):
     name = "impark"
     allowed_domains = ["lots.impark.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Any]:
         for op_code in BRANDS:
             yield JsonRequest(
                 url=f"https://lots.impark.com/api/lots/{op_code}/en"
