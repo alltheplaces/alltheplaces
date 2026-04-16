@@ -25,10 +25,7 @@ class StorcashNOSpider(SylinderSpider):
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         branch = (
-            item.pop("name")
-            .removeprefix("Storcash Norge avd ")
-            .removeprefix("Storcash ")
-            .removesuffix(" Storcash")
+            item.pop("name").removeprefix("Storcash Norge avd ").removeprefix("Storcash ").removesuffix(" Storcash")
         )
         item["name"] = "Storcash"
         item["branch"] = " ".join(branch.replace(" Storcash ", " ").split())
