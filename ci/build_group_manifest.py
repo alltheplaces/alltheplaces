@@ -1,3 +1,4 @@
+import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -58,7 +59,6 @@ def build_manifest(
 
 
 def main():
-    import argparse
 
     parser = argparse.ArgumentParser(description="Build or update a group manifest")
     parser.add_argument("--group", required=True, help="Group name")
@@ -71,7 +71,7 @@ def main():
 
     args = parser.parse_args()
 
-    spider_names = Path(args.spider_list).read_text().strip().splitlines()
+    spider_names = [s for s in Path(args.spider_list).read_text().strip().splitlines() if s]
     stats_dir = Path(args.stats_dir)
 
     previous_manifest = None
