@@ -3,6 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Response, TextResponse
 
+from locations.categories import apply_category, Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -13,18 +14,12 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class ReiUSSpider(JSONBlobSpider, PlaywrightSpider):
     name = "rei_us"
-    item_attributes = {
-        "brand": "REI",
-        "brand_wikidata": "Q3414933",
-        "country": "US",
-    }
+    item_attributes = {"brand": "REI", "brand_wikidata": "Q3414933"}
 
     start_urls = ["https://www.rei.com/stores/map"]
     requires_proxy = True
 
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "USER_AGENT": BROWSER_DEFAULT,
-    }
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         raw_data = response.xpath('//script[@id="modelData"]/text()').get()
@@ -36,6 +31,7 @@ class ReiUSSpider(JSONBlobSpider, PlaywrightSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature.get("storeNumber"))
+        item["branch"] = item.pop("name")
 
         if url_path := feature.get("storePageUrl"):
             item["website"] = f"https://www.rei.com/{url_path.lstrip('/')}"
@@ -43,14 +39,12 @@ class ReiUSSpider(JSONBlobSpider, PlaywrightSpider):
         if hours_list := feature.get("storeHours"):
             item["opening_hours"] = self.parse_opening_hours(hours_list)
 
+        apply_category(Categories.SHOP_OUTDOOR, item)
+
         yield item
 
-    def parse_opening_hours(self, hours_list: list) -> str:
+    def parse_opening_hours(self, hours_list: list) -> OpeningHours:
         oh = OpeningHours()
         for h in hours_list:
-            day_part = h.get("days")
-            open_t = h.get("openAt")
-            close_t = h.get("closeAt")
-            if day_part and open_t and close_t:
-                oh.add_ranges_from_string(f"{day_part} {open_t} - {close_t}")
+            oh.add_ranges_from_string("{} {} - {}".format(h.get("days"), h.get("openAt"), h.get("closeAt")))
         return oh
