@@ -1,6 +1,6 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
@@ -11,7 +11,33 @@ from locations.hours import OpeningHours
 class AxisBankINSpider(Spider):
     name = "axis_bank_in"
     item_attributes = {"brand": "Axis Bank", "brand_wikidata": "Q2003549"}
-    start_urls = ["https://branch.axisbank.com/"]
+    custom_settings = {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_TIMEOUT": 300}
+
+    def make_request(
+        self, state: str, location_type: str, total_count: int, offset: int, limit: int = 3
+    ) -> JsonRequest:
+        return JsonRequest(
+            url="https://j617xjxwjd.execute-api.ap-south-1.amazonaws.com/axis_bank_prod/getCmsData-V18",
+            data={
+                "functionName": "getHomeSearchResultElastic",
+                "city": "",
+                "searchType": "Advanced",
+                "state": state,
+                "cityAdvanceSearch": "",
+                "location": "",
+                "radius": "",
+                "outletType": "",
+                "searchCategory": [location_type],
+                "searchService": [],
+                "search": "",
+                "offSet": offset,
+                "pagesize": limit,
+            },
+            callback=self.parse_details,
+            cb_kwargs=dict(
+                state=state, location_type=location_type, offset=offset, limit=limit, total_count=total_count
+            ),
+        )
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
@@ -22,39 +48,29 @@ class AxisBankINSpider(Spider):
                 "location": "",
                 "cityAdvanceSearch": "",
                 "state": "",
-                "outletType": "Both",
+                "outletType": "",
             },
-            callback=self.parse,
         )
 
-    def parse(self, response, **kwargs):
-        for state in response.json()["state"]:
-            yield JsonRequest(
-                url="https://j617xjxwjd.execute-api.ap-south-1.amazonaws.com/axis_bank_prod/getCmsData-V18",
-                data={
-                    "functionName": "getHomeSearchResultElastic",
-                    "city": "",
-                    "searchType": "Advanced",
-                    "state": f"{state}",
-                    "cityAdvanceSearch": "",
-                    "location": "",
-                    "radius": "",
-                    "outletType": "Both",
-                    "searchCategory": [],
-                    "searchService": [],
-                    "search": "",
-                    "offSet": "0",
-                    "pagesize": "2000",
-                },
-                callback=self.parse_details,
-            )
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location_type in ["Branch", "ATM"]:
+            for state in response.json()["state"]:
+                yield self.make_request(state, location_type, 0, 0)
 
-    def parse_details(self, response):
+    def parse_details(
+        self, response: Response, state: str, location_type: str, offset: int, limit: int, total_count: int
+    ) -> Any:
         for location in response.json()["dealerData"]:
             location["latitude"] = location["latitude"].replace(", ", "")
             item = DictParser.parse(location)
             item["addr_full"] = location["complete_address"]
-            item["branch"] = location["dealerName"].removeprefix("Axis Bank Branch ")
+            item["branch"] = (
+                location["dealerName"]
+                .removeprefix("Axis Bank Branch")
+                .removeprefix("Axis Bank ATM")
+                .strip()
+                .split(",")[0]
+            )
             item["website"] = "/".join(["https://branch.axisbank.com", location["seoSlug"], "Home"])
             item["postcode"] = location["pin_code"]
             item["opening_hours"] = OpeningHours()
@@ -67,3 +83,8 @@ class AxisBankINSpider(Spider):
             else:
                 apply_category(Categories.ATM, item)
             yield item
+
+        new_offset = offset + limit
+        total_count = total_count or response.json()["totalCount"]
+        if new_offset < total_count:
+            yield self.make_request(state, location_type, total_count, new_offset)
