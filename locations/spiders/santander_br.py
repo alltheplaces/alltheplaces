@@ -14,7 +14,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class SantanderBRSpider(PlaywrightSpider):
     name = "santander_br"
-    item_attributes = {"brand": "Banco Santander", "brand_wikidata": "Q2882087"}
+    item_attributes = {"brand": "Banco Santander", "brand_wikidata": "Q6496310"}
     start_urls = ["https://www.santander.com.br/agencias"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
