@@ -23,7 +23,6 @@ class KwikTripSpider(scrapy.Spider):
     name = "kwik_trip"
     item_attributes = {"brand": "Kwik Trip", "brand_wikidata": "Q6450420"}
     allowed_domains = ["www.kwiktrip.com"]
-    requires_proxy = "US"
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
