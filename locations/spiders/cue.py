@@ -1,53 +1,26 @@
 import json
-from typing import AsyncIterator
+import re
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
-from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CueSpider(Spider):
     name = "cue"
-    item_attributes = {"brand": "Cue", "brand_wikidata": "Q5192554", "extras": Categories.SHOP_CLOTHES.value}
-    allowed_domains = ["www.cue.com"]
-    start_urls = [
-        "https://www.cue.com/Geolocation/GetStoresByState",
-        "https://www.cue.com/GeoLocation/GetStoresByCoordinates",
-    ]
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            if "GetStoresByState" in url:
-                for state_code in ["ACT", "NSW", "QLD", "SA", "TAS", "VIC", "WA"]:  # No stores in NT
-                    yield JsonRequest(url=url, method="POST", data={"code": state_code})
-            elif "GetStoresByCoordinates" in url:
-                yield JsonRequest(
-                    url=url, method="POST", data={"countryCode": "NZ", "latitude": -36.85, "longitude": 174.76}
-                )  # Auckland
-                yield JsonRequest(
-                    url=url, method="POST", data={"countryCode": "NZ", "latitude": -41.29, "longitude": 174.79}
-                )  # Wellington
-                yield JsonRequest(
-                    url=url, method="POST", data={"countryCode": "NZ", "latitude": -43.53, "longitude": 172.63}
-                )  # Christchurch
+    item_attributes = {"brand": "Cue", "brand_wikidata": "Q5192554"}
+    start_urls = ["https://www.cue.com/stores"]
 
     def parse(self, response):
-        cleaned_json = (
-            response.text[1:-1].replace('\\"', '"').replace("\\\\r", "").replace("\\\\n", " ").replace("\\\\/", "")
+        raw_data = json.loads(
+            re.search(
+                r"locations\":(\[.*\]),\"coords", response.xpath('//*[contains(text(),"address2")]/text()').get()
+            ).group(1)
         )
-        locations = json.loads(cleaned_json)
-        for location in locations:
-            if not location["Active"]:
-                continue
+        for location in raw_data:
+            location.update(location.pop("address"))
             item = DictParser.parse(location)
-            item["ref"] = location["StoreID"]
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(str(location["StoreHours"]))
-
-            if postcode := item.get("postcode"):
-                item["postcode"] = str(postcode)
-
+            item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
+            item["addr_full"] = merge_address_lines(location["formatted"])
             yield item
