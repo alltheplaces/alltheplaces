@@ -22,7 +22,6 @@ class BubbakoosBurritosUSSpider(SitemapSpider, StructuredDataSpider):
                 r"\"({.*})\"\]", response.xpath('//*[contains(text(),"GeoCoordinates")]/text()').get().replace("\\", "")
             ).group(1)
         )
-        print(ld_data)
         item = DictParser.parse(ld_data)
         item["ref"] = item["website"] = response.url
         oh = OpeningHours()
@@ -34,9 +33,3 @@ class BubbakoosBurritosUSSpider(SitemapSpider, StructuredDataSpider):
                 oh.add_range(day=day, open_time=open_time, close_time=close_time)
         item["opening_hours"] = oh
         yield item
-
-    # def post_process_item(self, item: Feature, response: Response, ld_data: dict):
-    #     item["branch"] = response.xpath("//h1/text()").get()
-    #     item.pop("facebook", None)
-    #     apply_category(Categories.FAST_FOOD, item)
-    #     yield item
