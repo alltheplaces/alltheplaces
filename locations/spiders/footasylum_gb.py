@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class FootasylumGBSpider(SitemapSpider, StructuredDataSpider):
     name = "footasylum_gb"
-    item_attributes = {"brand": "Footasylum", "brand_wikidata": "Q126913565"}
+    item_attributes = {"name": "Footasylum", "brand": "Footasylum", "brand_wikidata": "Q126913565"}
     sitemap_urls = [
         "https://www.footasylum.com/ArticlesSiteMap.xml",
     ]
