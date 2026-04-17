@@ -6,13 +6,9 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class FootasylumGBSpider(SitemapSpider, StructuredDataSpider):
     name = "footasylum_gb"
-    item_attributes = {"name": "Footasylum", "brand": "Footasylum", "brand_wikidata": "Q126913565"}
-    sitemap_urls = [
-        "https://www.footasylum.com/ArticlesSiteMap.xml",
-    ]
-    sitemap_rules = [
-        ("https://www.footasylum.com/store-locator/[^/]+/", "parse_sd"),
-    ]
+    item_attributes = {"brand": "Footasylum", "brand_wikidata": "Q126913565"}
+    sitemap_urls = ["https://www.footasylum.com/ArticlesSiteMap.xml"]
+    sitemap_rules = [("https://www.footasylum.com/store-locator/[^/]+/", "parse_sd")]
     requires_proxy = True
     wanted_types = ["Store"]
     drop_attributes = {"facebook", "image", "twitter"}
@@ -22,4 +18,7 @@ class FootasylumGBSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.SHOP_SHOES, item)
         # opening hours are wrong in the structured data
         item.pop("opening_hours", None)
+
+        apply_category(Categories.SHOP_SHOES, item)
+
         yield item
