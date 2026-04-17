@@ -1,7 +1,7 @@
 import re
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -9,10 +9,10 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class BitstopPRUSSpider(JSONBlobSpider):
-    name = "bitstop_pr_us"
-    allowed_domains = ["locus.bitstop.co"]
-    start_urls = ["https://locus.bitstop.co:42010/api/current-locations"]
+class BitstopPRUSCASpider(JSONBlobSpider):
+    name = "bitstop_pr_us_ca"
+    allowed_domains = ["static.plutonial.net"]
+    start_urls = ["https://static.plutonial.net/clients/loc/bitstop/current_p.json"]
     operators = {
         "ATM Ops Inc": {
             "operator": "ATM Ops Inc",
@@ -35,9 +35,6 @@ class BitstopPRUSSpider(JSONBlobSpider):
         },
         "PAI": {"operator": "PAI", "brand": "PAI"},
     }
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url=self.start_urls[0], method="POST")
 
     def extract_json(self, response: Response) -> list[dict]:
         # Keys of feature properties are remapped to codes to reduce the size

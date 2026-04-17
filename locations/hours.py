@@ -944,6 +944,8 @@ DELIMITERS_KR = DELIMITERS_EN + ["~"]
 
 CLOSED_AT = ["geschlossen"]
 
+CLOSED_BG = ["затворено", "затворен", "почивен"]
+
 CLOSED_EN = ["closed", "off"]
 
 CLOSED_DE = ["geschlossen"]
