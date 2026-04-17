@@ -11,9 +11,10 @@ from locations.hours import OpeningHours
 class AxisBankINSpider(Spider):
     name = "axis_bank_in"
     item_attributes = {"brand": "Axis Bank", "brand_wikidata": "Q2003549"}
+    custom_settings = {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_TIMEOUT": 300}
 
     def make_request(
-        self, state: str, location_type: str, total_count: int, offset: int, limit: int = 10
+        self, state: str, location_type: str, total_count: int, offset: int, limit: int = 3
     ) -> JsonRequest:
         return JsonRequest(
             url="https://j617xjxwjd.execute-api.ap-south-1.amazonaws.com/axis_bank_prod/getCmsData-V18",
