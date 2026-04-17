@@ -20,6 +20,6 @@ class FootasylumGBSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
         apply_category(Categories.SHOP_SHOES, item)
-        #opening hours are wrong in the structured data
+        # opening hours are wrong in the structured data
         item.pop("opening_hours", None)
         yield item
