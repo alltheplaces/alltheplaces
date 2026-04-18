@@ -4,11 +4,7 @@ import sys
 from scrapy.commands import ScrapyCommand
 from scrapy.exceptions import UsageError
 
-from locations.extensions.add_lineage import (
-    VALID_GROUPS,
-    lineage_for_group,
-    spider_class_to_lineage,
-)
+from locations.extensions.add_lineage import VALID_GROUPS, lineage_for_group, spider_class_to_lineage
 
 
 class ListGroupCommand(ScrapyCommand):

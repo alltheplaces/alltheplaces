@@ -36,36 +36,42 @@ def build_latest_json(manifests_dir: Path, url_prefix: str) -> dict:
                 if entry.get("ran_at", "") > existing_entry.get("ran_at", ""):
                     logger.warning(
                         "Spider %s found in both %s and %s, keeping %s (more recent)",
-                        spider_name, existing_group, group_name, group_name,
+                        spider_name,
+                        existing_group,
+                        group_name,
+                        group_name,
                     )
                     all_spiders[spider_name] = (group_name, entry)
                 else:
                     logger.warning(
                         "Spider %s found in both %s and %s, keeping %s (more recent)",
-                        spider_name, existing_group, group_name, existing_group,
+                        spider_name,
+                        existing_group,
+                        group_name,
+                        existing_group,
                     )
             else:
                 all_spiders[spider_name] = (group_name, entry)
 
     groups = []
     for group_name, manifest in sorted(group_data.items()):
-        spiders_in_group = {
-            name: entry for name, (g, entry) in all_spiders.items() if g == group_name
-        }
+        spiders_in_group = {name: entry for name, (g, entry) in all_spiders.items() if g == group_name}
         spider_count = len(spiders_in_group)
         feature_count = sum(e.get("feature_count", 0) for e in spiders_in_group.values())
         run_id = manifest.get("run_id", "")
 
-        groups.append({
-            "name": group_name,
-            "spider_count": spider_count,
-            "feature_count": feature_count,
-            "last_run_time": manifest.get("updated_at", ""),
-            "last_run_id": run_id,
-            "zip_url": f"{url_prefix}/runs/latest/{group_name}.zip",
-            "parquet_url": f"{url_prefix}/runs/latest/{group_name}.parquet",
-            "pmtiles_url": f"{url_prefix}/runs/latest/{group_name}.pmtiles",
-        })
+        groups.append(
+            {
+                "name": group_name,
+                "spider_count": spider_count,
+                "feature_count": feature_count,
+                "last_run_time": manifest.get("updated_at", ""),
+                "last_run_id": run_id,
+                "zip_url": f"{url_prefix}/runs/latest/{group_name}.zip",
+                "parquet_url": f"{url_prefix}/runs/latest/{group_name}.parquet",
+                "pmtiles_url": f"{url_prefix}/runs/latest/{group_name}.pmtiles",
+            }
+        )
 
     total_spiders = len(all_spiders)
     total_lines = sum(entry.get("feature_count", 0) for _, entry in all_spiders.values())

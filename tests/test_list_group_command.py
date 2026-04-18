@@ -1,8 +1,4 @@
-from locations.extensions.add_lineage import (
-    Lineage,
-    spider_class_to_lineage,
-    VALID_GROUPS,
-)
+from locations.extensions.add_lineage import VALID_GROUPS, Lineage, spider_class_to_lineage
 
 
 def test_spider_group_resolution_from_path():
@@ -11,10 +7,7 @@ def test_spider_group_resolution_from_path():
         AuroraCityCouncilTrafficSignalsUSSpider,
     )
 
-    assert (
-        spider_class_to_lineage(AuroraCityCouncilTrafficSignalsUSSpider).group
-        == "infrastructure"
-    )
+    assert spider_class_to_lineage(AuroraCityCouncilTrafficSignalsUSSpider).group == "infrastructure"
 
 
 def test_spider_group_resolution_brands_default():

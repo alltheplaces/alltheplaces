@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from ci.build_latest_json import build_latest_json
 

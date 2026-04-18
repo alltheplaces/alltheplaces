@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from ci.build_group_manifest import build_manifest
 
@@ -8,8 +7,12 @@ def test_fresh_manifest_from_successful_spiders(tmp_path):
     """First run: no previous manifest, all spiders succeed."""
     stats_dir = tmp_path / "stats"
     stats_dir.mkdir()
-    (stats_dir / "mcdonalds.json").write_text(json.dumps({"item_scraped_count": 100, "log_count/ERROR": 0, "elapsed_time_seconds": 42.5}))
-    (stats_dir / "burger_king.json").write_text(json.dumps({"item_scraped_count": 50, "log_count/ERROR": 1, "elapsed_time_seconds": 30.0}))
+    (stats_dir / "mcdonalds.json").write_text(
+        json.dumps({"item_scraped_count": 100, "log_count/ERROR": 0, "elapsed_time_seconds": 42.5})
+    )
+    (stats_dir / "burger_king.json").write_text(
+        json.dumps({"item_scraped_count": 50, "log_count/ERROR": 1, "elapsed_time_seconds": 30.0})
+    )
 
     manifest = build_manifest(
         group="brands",
@@ -24,7 +27,10 @@ def test_fresh_manifest_from_successful_spiders(tmp_path):
     assert manifest["run_id"] == "2026-04-16-14-00-00"
     assert "mcdonalds" in manifest["spiders"]
     assert manifest["spiders"]["mcdonalds"]["feature_count"] == 100
-    assert manifest["spiders"]["mcdonalds"]["geojson_url"] == "https://example.com/runs/brands/2026-04-16-14-00-00/output/mcdonalds.geojson"
+    assert (
+        manifest["spiders"]["mcdonalds"]["geojson_url"]
+        == "https://example.com/runs/brands/2026-04-16-14-00-00/output/mcdonalds.geojson"
+    )
     assert "burger_king" in manifest["spiders"]
 
 
