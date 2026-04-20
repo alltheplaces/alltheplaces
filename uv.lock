@@ -164,7 +164,7 @@ requires-dist = [
     { name = "scrapy", specifier = ">=2.14.0" },
     { name = "scrapy-camoufox", git = "https://github.com/iandees/scrapy-camoufox.git" },
     { name = "scrapy-playwright", specifier = ">=0.0.45" },
-    { name = "scrapy-zyte-api", specifier = ">=0.32.0" },
+    { name = "scrapy-zyte-api", specifier = ">=0.33.1" },
     { name = "shapely" },
     { name = "twisted", extras = ["http2"] },
     { name = "tzdata" },
@@ -1895,7 +1895,7 @@ wheels = [
 
 [[package]]
 name = "scrapy-zyte-api"
-version = "0.33.0"
+version = "0.33.1"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "packaging" },
@@ -1903,9 +1903,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "zyte-api" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8f/b9/800ca394fc90d7c21cba66d0adc476e26cd67c61390fde7bf833c17c3acb/scrapy_zyte_api-0.33.0.tar.gz", hash = "sha256:430d3d67b4eb5dbf08ff774d0a0d677f5a8407bf954d48a363e62ffec5f627ec", size = 132693, upload-time = "2026-03-19T11:52:38.617Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/38/63/718806eacfd120b2b616bca4a8445d20c9f96eb988af1cef2d2fc19349ea/scrapy_zyte_api-0.33.1.tar.gz", hash = "sha256:a9dc69274eefbc2ccba119ac7b8d128dd4f19c0433d4acd27d016df2ed8634b9", size = 133866, upload-time = "2026-04-07T12:40:56.638Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/57/8b/6ab519c2bda78dc67a03de9a1079e4e82e0b1b99ff33a94ce70f5486ee93/scrapy_zyte_api-0.33.0-py3-none-any.whl", hash = "sha256:3f56b9f6069d70c947d4598d95f1c52bab4215cdc1d156210ef97fc9e8de8894", size = 45585, upload-time = "2026-03-19T11:52:37.251Z" },
+    { url = "https://files.pythonhosted.org/packages/a9/7d/4383a45b5169ea45c98eb98a3c9e0aace8c66e0d984a1a8aff88c66fe149/scrapy_zyte_api-0.33.1-py3-none-any.whl", hash = "sha256:23c320e7667ec075a11154a19a1a634e7e85748b88b2615497920df77908accd", size = 45541, upload-time = "2026-04-07T12:40:54.885Z" },
 ]
 
 [[package]]
