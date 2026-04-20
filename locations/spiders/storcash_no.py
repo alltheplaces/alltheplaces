@@ -1,13 +1,13 @@
 from typing import Iterable
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.sylinder import SylinderSpider
 
 
 class StorcashNOSpider(SylinderSpider):
     name = "storcash_no"
-    item_attributes = {"brand": "Storcash", "extras": Categories.SHOP_WHOLESALE.value}
+    item_attributes = {"name": "Storcash", "brand": "Storcash"}
     app_keys = [
         "5000",  # Bergen Storcash Storcash (NO)
         "5010",  # Storcash Partivare
@@ -27,6 +27,6 @@ class StorcashNOSpider(SylinderSpider):
         branch = (
             item.pop("name").removeprefix("Storcash Norge avd ").removeprefix("Storcash ").removesuffix(" Storcash")
         )
-        item["name"] = "Storcash"
         item["branch"] = " ".join(branch.replace(" Storcash ", " ").split())
+        apply_category(Categories.SHOP_WHOLESALE, item)
         yield item
