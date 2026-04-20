@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest, Response
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
+from locations.geo import postal_regions
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.bargain_booze_gb import BargainBoozeGBSpider
 from locations.spiders.bestone_gb import BestoneGBSpider
@@ -46,11 +46,11 @@ class PaypointGBSpider(Spider):
     ]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for city in city_locations("GB", 15000):
+        for region in postal_regions("GB"):
             yield JsonRequest(
                 url="https://www.paypoint.com/umbraco/surface/StoreLocatorSurface/StoreLocator",
                 data={
-                    "searchCriteria": f'{city["latitude"]},{city["longitude"]}',
+                    "searchCriteria": f'{region["latitude"]},{region["longitude"]}',
                     "product": "",
                     "siteServices": "",
                     "searchType": 6,
