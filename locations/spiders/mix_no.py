@@ -13,5 +13,5 @@ class MixNOSpider(SylinderSpider):
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("MIX ")
-        apply_category(Categories.SHOP_KIOSK, item)
+        apply_category(Categories.SHOP_CONVENIENCE, item)
         yield item
