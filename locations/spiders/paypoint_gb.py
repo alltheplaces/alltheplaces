@@ -51,8 +51,8 @@ class PaypointGBSpider(Spider):
                 url="https://www.paypoint.com/umbraco/surface/StoreLocatorSurface/StoreLocator",
                 data={
                     "searchCriteria": f'{city["latitude"]},{city["longitude"]}',
-                    "product": "ATM",  # null values for product/siteServices returns lower count for ATMs
-                    "siteServices": "ATM",
+                    "product": "",
+                    "siteServices": "",
                     "searchType": 6,
                 },
                 callback=self.parse_locations,
