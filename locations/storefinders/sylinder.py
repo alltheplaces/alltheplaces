@@ -91,7 +91,11 @@ class SylinderSpider(Spider):
             # For now, not collecting special opening hours
             # print(location["openingHours"]["upcomingSpecialOpeningHours"])
             for day in opening_hours["upcomingOpeningHours"]:
-                if not day["closed"] and not day["isSpecial"]:
+                if day["isSpecial"] is True:
+                    continue
+                elif day["closed"] is True:
+                    item["opening_hours"].set_closed(day["abbreviatedDayOfWeek"])
+                else:
                     item["opening_hours"].add_range(day["abbreviatedDayOfWeek"], day["opens"], day["closes"])
 
         yield from self.parse_item(item, location) or []
