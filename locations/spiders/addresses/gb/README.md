@@ -147,6 +147,7 @@ Owen and published. Others are helping.
 | Newcastle City Council                        | https://www.owenboswarva.com/blog/post-addr36.htm                                                                                     |
 | Newham Council                                | https://www.owenboswarva.com/blog/post-addr43.htm                                                                                     |
 | North Lanarkshire Council                     | https://www.owenboswarva.com/blog/post-addr45.htm                                                                                     |
+| North Norfolk District Council                | https://www.owenboswarva.com/blog/post-addr73.htm                                                                                     |
 | North Northamptonshire Council                | https://www.owenboswarva.com/blog/post-addr31.htm                                                                                     |
 | Northumberland County Council                 | https://www.owenboswarva.com/blog/post-addr37.htm                                                                                     |
 | Peterborough City Council                     | https://www.owenboswarva.com/blog/post-addr68.htm                                                                                     |
@@ -158,6 +159,7 @@ Owen and published. Others are helping.
 | Somerset Council                              | https://www.owenboswarva.com/blog/post-addr42.htm                                                                                     |
 | Southampton City Council                      | https://www.owenboswarva.com/blog/post-addr64.htm                                                                                     |
 | Southwark Council                             | https://www.owenboswarva.com/blog/post-addr33.htm                                                                                     |
+| Staffordshire Moorlands District Council      | https://www.owenboswarva.com/blog/post-addr74.htm                                                                                     |
 | Stockport Metropolitan Borough Council        | https://www.owenboswarva.com/blog/post-addr34.htm                                                                                     |
 | Stoke-on-Trent City Council                   | https://www.owenboswarva.com/blog/post-addr70.htm                                                                                     |
 | Tameside Metropolitan Borough Council         | https://www.owenboswarva.com/blog/post-addr62.htm                                                                                     |
