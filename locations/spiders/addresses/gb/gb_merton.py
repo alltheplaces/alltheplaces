@@ -1,5 +1,4 @@
 import re
-from functools import cached_property
 from typing import Any, Self
 
 from scrapy.crawler import Crawler
