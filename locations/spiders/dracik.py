@@ -17,6 +17,7 @@ class DracikSpider(Spider):
         "https://www.dracik.cz/mapa-prodejen/",
         "https://www.dracik.sk/mapa-predajni/",
     ]
+    requires_proxy = True
 
     def parse(self, response):
         country = "CZ" if "dracik.cz" in response.url else "SK"
