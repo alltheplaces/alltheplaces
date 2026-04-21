@@ -31,7 +31,7 @@ class AmaiPromapSpider(JSONBlobSpider):
 
     def fetch_js(self, response: TextResponse) -> Iterable[JsonRequest]:
         urls = parse_js_object(
-            response.xpath('.//script[contains(text(), "var urls =")]/text()').get().split("var urls =")[1]
+            response.xpath('.//script[contains(text(), "var urls =")]/text()').get("").split("var urls =")[1]
         )
         js_url = [
             u for u in urls if any(f"{locator}.com/storelocator-prod/wtb/" in u for locator in self._locators)
