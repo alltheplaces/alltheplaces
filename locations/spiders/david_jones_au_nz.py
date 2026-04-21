@@ -15,6 +15,7 @@ class DavidJonesAUNZSpider(JSONBlobSpider):
     item_attributes = {"brand": "David Jones", "brand_wikidata": "Q5235753"}
     allowed_domains = ["www.davidjones.com"]
     start_urls = ["https://www.davidjones.com/stores"]
+    requires_proxy = True
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
         js_blob = response.xpath('//script[contains(text(), "window.geodata = ")]/text()').get()
