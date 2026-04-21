@@ -12,6 +12,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class SportsDirectSpider(CrawlSpider, StructuredDataSpider):
     name = "sports_direct"
     SPORTS_DIRECT = {"brand": "Sports Direct", "brand_wikidata": "Q7579661"}
+    FIELD_TREK = {"brand": "Field & Trek", "brand_wikidata": "Q117088469"}
     start_urls = ["https://www.sportsdirect.com/stores/all"]
     rules = [Rule(LinkExtractor(allow=r"store\-([\d]+)$"), callback="parse_sd")]
     wanted_types = ["LocalBusiness"]
@@ -22,9 +23,8 @@ class SportsDirectSpider(CrawlSpider, StructuredDataSpider):
             item.update(SportMasterDKSpider.item_attributes)
             item["branch"] = item.pop("name").removeprefix("Sportmaster ")
         elif item["name"].startswith("Field & Trek "):
-            item.update(SportMasterDKSpider.item_attributes)
+            item.update(self.FIELD_TREK)
             item["branch"] = item.pop("name").removeprefix("Field & Trek ")
-            item["name"] = item["brand"] = "Field & Trek"
             apply_category(Categories.SHOP_SPORTS, item)
         else:
             item["branch"] = item.pop("name").removeprefix("Sports Direct ")
