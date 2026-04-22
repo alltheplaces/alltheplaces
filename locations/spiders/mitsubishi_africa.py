@@ -13,5 +13,6 @@ class MitsubishiAfricaSpider(UberallSpider):
     key = "mmoFptTX9q828jrXV2qSSLTW6c8AAp"
 
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
+        item["name"] = item["name"].replace(" by CFAO", "")
         apply_category(Categories.SHOP_CAR, item)
         yield item
