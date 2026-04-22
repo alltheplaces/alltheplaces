@@ -21,7 +21,6 @@ class TescoEUSpider(Spider):
         "sk": "https://www.tesco.sk/obchody/",
     }
     BRANDING_WORDS = ["tesco", "expres", "extra", "expressz"]  # lowercase
-    requires_proxy = "CZ"
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[Request]:
