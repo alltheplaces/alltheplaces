@@ -23,8 +23,9 @@ class FordDealersUSSpider(scrapy.Spider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs):
+
         client_id = re.search(r"clientId\":\"([0-9-a-z-]+)\"", response.text).group(1)
-        js_path = response.xpath('//*[@id="baseBrand-5c0f3b34d2"]/script[10]/@src').get()
+        js_path = response.xpath('//*[contains(@src,"clientlibs/skin/")]/@src').get()
         yield scrapy.Request(
             url="https://www.ford.com" + js_path,
             callback=self.parse_state,
