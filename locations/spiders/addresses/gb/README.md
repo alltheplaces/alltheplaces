@@ -87,6 +87,8 @@ For these UPRNs we can assign postcodes or build polygons.
 a [postal town](https://wiki.openstreetmap.org/wiki/Key:addr:city).
 These can generally be computed from the postcode.
 
+[postal_cities.csv](postal_cities.csv) is generated from OSM, most common `addr:city` for the outward code.
+
 ## OpenStreetMap
 
 OSM has some data available, it is great in some areas and missing in most.
