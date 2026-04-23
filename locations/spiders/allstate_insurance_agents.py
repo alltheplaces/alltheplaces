@@ -1,79 +1,23 @@
-import re
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.camoufox_spider import CamoufoxSpider
-from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class AllstateInsuranceAgentsSpider(CamoufoxSpider):
+class AllstateInsuranceAgentsSpider(SitemapSpider, StructuredDataSpider):
     name = "allstate_insurance_agents"
     item_attributes = {"brand": "Allstate", "brand_wikidata": "Q2645636"}
     allowed_domains = ["agents.allstate.com"]
-    start_urls = ("https://agents.allstate.com/",)
-    requires_proxy = "US"
-    captcha_type = "cloudflare_turnstile"
-    captcha_selector_indicating_success = '//li[@class="Directory-listItem"]'
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {
-        "CAMOUFOX_MAX_PAGES_PER_CONTEXT": 1,
-        "CAMOUFOX_MAX_CONTEXTS": 1,
-        "DOWNLOAD_DELAY": 5,
-        "RETRY_TIMES": 5,
-    }
+    sitemap_urls = ["https://agents.allstate.com/sitemap.xml"]
+    wanted_types = ["InsuranceAgency"]
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-        for hour in hours:
-            day, times = hour.split(" ")
-            if times == "Closed":
-                continue
-            open_time, close_time = times.split("-")
-            opening_hours.add_range(day, open_time=open_time, close_time=close_time)
-
-        return opening_hours.as_opening_hours()
-
-    def parse_stores(self, response):
-        properties = {
-            "name": response.xpath('//span[@class="Hero-name"]/text()').extract_first(),
-            "addr_full": response.xpath('normalize-space(//meta[@itemprop="streetAddress"]/@content)').extract_first(),
-            "phone": response.xpath('normalize-space(//*[@itemprop="telephone"]/@content)').extract_first(),
-            "city": response.xpath('normalize-space(//meta[@itemprop="addressLocality"]/@content)').extract_first(),
-            "state": response.xpath('normalize-space(//abbr[@itemprop="addressRegion"]/text())').extract_first(),
-            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
-            "ref": re.findall(r"[^\/]+$", response.url)[0].split(".")[0],
-            "website": response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            "lat": float(
-                response.xpath('normalize-space(//meta[@name="geo.position"]/@content)').extract_first().split(";")[0]
-            ),
-            "lon": float(
-                response.xpath('normalize-space(//meta[@name="geo.position"]/@content)').extract_first().split(";")[1]
-            ),
-        }
-        hours = response.xpath('//tr[@itemprop="openingHours"]/@content').extract()
-        content_hours = self.parse_hours(hours)
-        if content_hours:
-            properties["opening_hours"] = content_hours
-        yield Feature(**properties)
-
-    def parse_city_stores(self, response):
-        stores = response.xpath('//a[contains(@class, "Teaser-title")]/@href').extract()
-        for store in stores:
-            yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
-
-    def parse_state(self, response):
-        city_urls = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
-        for path in city_urls:
-            if re.search(r"usa\/[a-z]{2}\/[^\/]+$", path):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
-            else:
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_stores)
-
-    def parse(self, response):
-        urls = response.xpath('//li[@class="Directory-listItem"]/a/@href').extract()
-        for path in urls:
-            if re.search(r"usa\/[a-z]{2}\/[^\/]+$", path):
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
-            else:
-                yield scrapy.Request(response.urljoin(path), callback=self.parse_state)
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace(": Allstate Insurance", "")
+        yield item
