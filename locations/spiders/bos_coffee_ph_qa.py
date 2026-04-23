@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class BosCoffeePHSpider(JSONBlobSpider):
-    name = "bos_coffee_ph"
+class BosCoffeePHQASpider(JSONBlobSpider):
+    name = "bos_coffee_ph_qa"
     item_attributes = {
         "brand_wikidata": "Q30591352",
         "brand": "Bo's Coffee",
