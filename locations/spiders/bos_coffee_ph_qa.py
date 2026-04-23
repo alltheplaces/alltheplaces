@@ -16,9 +16,7 @@ class BosCoffeePHQASpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        if website := item.get("website"):
-            if not website.startswith("http"):
-                item["website"] = f"https://{website}"
+        item["website"] = None
 
         apply_category(Categories.CAFE, item)
 
