@@ -17,5 +17,5 @@ class KateSpadeCAUSSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider)
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("Kate Spade ")
+        item["branch"] = item.pop("name").removeprefix("About ")
         yield item
