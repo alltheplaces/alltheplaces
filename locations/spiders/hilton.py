@@ -29,7 +29,6 @@ class HiltonSpider(Spider):
         "DOWNLOAD_DELAY": 5,
         "RETRY_TIMES": 5,
     }
-    token = None
     requires_proxy = "US"
 
     # More details about brand codes is in filters section of https://www.hilton.com/en/locations/hilton-hotels/
@@ -141,7 +140,207 @@ class HiltonSpider(Spider):
 
         payload = json.dumps(
             {
-                "query": 'query hotelSummaryOptions_geocodePage($language: String!, $path: String!, $queryLimit: Int!, $currencyCode: String!, $distanceUnit: HotelDistanceUnit, $titleFormat: MarkdownFormatType!, $input: HotelSummaryOptionsInput) {\n  geocodePage(language: $language, path: $path) {\n    location {\n      pageInterlinks {\n        title\n        links {\n          name\n          uri\n        }\n      }\n      title(format: $titleFormat)\n      accessibilityTitle\n      meta {\n        pageTitle\n        description\n      }\n      name\n      brandCode\n      category\n      uri\n      globalBounds\n      breadcrumbs {\n        uri\n        name\n      }\n      about {\n        contentBlocks {\n          title(format: text)\n          descriptions\n          orderedList\n          unorderedList\n        }\n        contentBlocks_noTx: contentBlocks {\n          title(format: text)\n          descriptions\n          orderedList\n          unorderedList\n        }\n        isContentLocalized\n      }\n      paths {\n        base\n      }\n      hotelSummaryExtractUrl\n    }\n    match {\n      address {\n        city\n        country\n        countryName\n        state\n        stateName\n      }\n      geometry {\n        location {\n          latitude\n          longitude\n        }\n        bounds {\n          northeast {\n            latitude\n            longitude\n          }\n          southwest {\n            latitude\n            longitude\n          }\n        }\n      }\n      id\n      name\n      type\n    }\n    hotelSummaryOptions(\n      distanceUnit: $distanceUnit\n      sortBy: distance\n      input: $input\n    ) {\n      _hotels {\n        totalSize\n      }\n      bounds {\n        northeast {\n          latitude\n          longitude\n        }\n        southwest {\n          latitude\n          longitude\n        }\n      }\n      amenities {\n        id\n        name\n        hint\n      }\n      amenityCategories {\n        name\n        id\n        amenityIds\n      }\n      brands {\n        code\n        name\n      }\n      hotels(first: $queryLimit) {\n        amenityIds\n        brandCode\n        ctyhocn\n        distance\n        distanceFmt\n        facilityOverview {\n          allowAdultsOnly\n          homeUrlTemplate\n        }\n        name\n        contactInfo {\n          phoneNumber\n        }\n        display {\n          open\n          openDate\n          preOpenMsg\n          resEnabled\n          resEnabledDate\n          treatments\n        }\n        disclaimers {\n          desc\n          type\n        }\n        address {\n          addressFmt\n          addressLine1\n          city\n          country\n          countryName\n          postalCode\n          state\n          stateName\n        }\n        localization {\n          currencyCode\n          coordinate {\n            latitude\n            longitude\n          }\n        }\n        images {\n          master(ratios: [threeByTwo]) {\n            altText\n            ratios {\n              size\n              url\n            }\n          }\n          carousel(ratios: [threeByTwo]) {\n            altText\n            ratios {\n              url\n              size\n            }\n          }\n        }\n        leadRate {\n          lowest {\n            cmaTotalPriceIndicator\n            feeTransparencyIndicator\n            rateAmount(currencyCode: $currencyCode)\n            rateAmountFmt(decimal: 0, strategy: ceiling)\n            ratePlanCode\n            ratePlan {\n              ratePlanName @toTitleCase\n              ratePlanDesc\n            }\n          }\n        }\n      }\n    }\n    ctyhocnList: hotelSummaryOptions(distanceUnit: $distanceUnit, sortBy: distance) {\n      hotelList: hotels {\n        ctyhocn\n      }\n    }\n  }\n  geocodePageEn: geocodePage(language: "en", path: $path) {\n    match {\n      name\n    }\n  }\n}',
+                "query": """
+                        query hotelSummaryOptions_geocodePage(
+                          $language: String!,
+                          $path: String!,
+                          $queryLimit: Int!,
+                          $currencyCode: String!,
+                          $distanceUnit: HotelDistanceUnit,
+                          $titleFormat: MarkdownFormatType!,
+                          $input: HotelSummaryOptionsInput
+                        ) {
+                          geocodePage(language: $language, path: $path) {
+                            location {
+                              pageInterlinks {
+                                title
+                                links {
+                                  name
+                                  uri
+                                }
+                              }
+                              title(format: $titleFormat)
+                              accessibilityTitle
+                              meta {
+                                pageTitle
+                                description
+                              }
+                              name
+                              brandCode
+                              category
+                              uri
+                              globalBounds
+                              breadcrumbs {
+                                uri
+                                name
+                              }
+                              about {
+                                contentBlocks {
+                                  title(format: text)
+                                  descriptions
+                                  orderedList
+                                  unorderedList
+                                }
+                                contentBlocks_noTx: contentBlocks {
+                                  title(format: text)
+                                  descriptions
+                                  orderedList
+                                  unorderedList
+                                }
+                                isContentLocalized
+                              }
+                              paths {
+                                base
+                              }
+                              hotelSummaryExtractUrl
+                            }
+                            match {
+                              address {
+                                city
+                                country
+                                countryName
+                                state
+                                stateName
+                              }
+                              geometry {
+                                location {
+                                  latitude
+                                  longitude
+                                }
+                                bounds {
+                                  northeast {
+                                    latitude
+                                    longitude
+                                  }
+                                  southwest {
+                                    latitude
+                                    longitude
+                                  }
+                                }
+                              }
+                              id
+                              name
+                              type
+                            }
+                            hotelSummaryOptions(
+                              distanceUnit: $distanceUnit
+                              sortBy: distance
+                              input: $input
+                            ) {
+                              _hotels {
+                                totalSize
+                              }
+                              bounds {
+                                northeast {
+                                  latitude
+                                  longitude
+                                }
+                                southwest {
+                                  latitude
+                                  longitude
+                                }
+                              }
+                              amenities {
+                                id
+                                name
+                                hint
+                              }
+                              amenityCategories {
+                                name
+                                id
+                                amenityIds
+                              }
+                              brands {
+                                code
+                                name
+                              }
+                              hotels(first: $queryLimit) {
+                                amenityIds
+                                brandCode
+                                ctyhocn
+                                distance
+                                distanceFmt
+                                facilityOverview {
+                                  allowAdultsOnly
+                                  homeUrlTemplate
+                                }
+                                name
+                                contactInfo {
+                                  phoneNumber
+                                }
+                                display {
+                                  open
+                                  openDate
+                                  preOpenMsg
+                                  resEnabled
+                                  resEnabledDate
+                                  treatments
+                                }
+                                disclaimers {
+                                  desc
+                                  type
+                                }
+                                address {
+                                  addressFmt
+                                  addressLine1
+                                  city
+                                  country
+                                  countryName
+                                  postalCode
+                                  state
+                                  stateName
+                                }
+                                localization {
+                                  currencyCode
+                                  coordinate {
+                                    latitude
+                                    longitude
+                                  }
+                                }
+                                images {
+                                  master(ratios: [threeByTwo]) {
+                                    altText
+                                    ratios {
+                                      size
+                                      url
+                                    }
+                                  }
+                                  carousel(ratios: [threeByTwo]) {
+                                    altText
+                                    ratios {
+                                      url
+                                      size
+                                    }
+                                  }
+                                }
+                                leadRate {
+                                  lowest {
+                                    cmaTotalPriceIndicator
+                                    feeTransparencyIndicator
+                                    rateAmount(currencyCode: $currencyCode)
+                                    rateAmountFmt(decimal: 0, strategy: ceiling)
+                                    ratePlanCode
+                                    ratePlan {
+                                      ratePlanName @toTitleCase
+                                      ratePlanDesc
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            ctyhocnList: hotelSummaryOptions(distanceUnit: $distanceUnit, sortBy: distance) {
+                              hotelList: hotels {
+                                ctyhocn
+                              }
+                            }
+                          }
+                          geocodePageEn: geocodePage(language: "en", path: $path) {
+                            match {
+                              name
+                            }
+                          }
+                        }
+                """,
                 "operationName": "hotelSummaryOptions_geocodePage",
                 "variables": {
                     "path": location_url,
