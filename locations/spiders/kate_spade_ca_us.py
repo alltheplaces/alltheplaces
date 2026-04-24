@@ -15,6 +15,7 @@ class KateSpadeCAUSSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider)
     sitemap_urls = ["https://www.katespade.com/stores/sitemap.xml"]
     sitemap_rules = [(r"/stores/\w\w/[-\w]+/[-\w]+$", "parse_sd")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    drop_attributes = {"facebook"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name").removeprefix("About ")
