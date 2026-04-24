@@ -18,6 +18,34 @@ DAY_MAPPING = {
     "so": "Su",
 }
 
+# The embedded JSON blob uses explicit JS escapes (\uXXXX, \xXX, \n, \", \/, \\)
+# but emits non-ASCII characters as raw UTF-8 bytes. The ``unicode-escape`` codec
+# mis-decodes those bytes as Latin-1, so unescape only the real JS escapes.
+_JS_ESCAPE_RE = re.compile(r"\\(u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2}|.)", re.DOTALL)
+_JS_SIMPLE_ESCAPES = {
+    "n": "\n",
+    "r": "\r",
+    "t": "\t",
+    "b": "\b",
+    "f": "\f",
+    "v": "\v",
+    "0": "\0",
+    '"': '"',
+    "'": "'",
+    "/": "/",
+    "\\": "\\",
+}
+
+
+def _js_unescape(s: str) -> str:
+    def replace(match: re.Match) -> str:
+        esc = match.group(1)
+        if esc[0] in ("u", "x"):
+            return chr(int(esc[1:], 16))
+        return _JS_SIMPLE_ESCAPES.get(esc, esc)
+
+    return _JS_ESCAPE_RE.sub(replace, s)
+
 
 class CommerzbankDESpider(CrawlSpider):
     name = "commerzbank_de"
@@ -47,8 +75,11 @@ class CommerzbankDESpider(CrawlSpider):
             r"const decodedResults = JSON\.parse\(\$\(\"<div\/>\"\)\.html\(\"(.+?)\"\)\.text\(\)\);", response.text
         ):
             raw_data = match.group(1)
-            clean_json = raw_data.encode().decode("unicode-escape")
-            data = json.loads(clean_json)
+            clean_json = _js_unescape(raw_data)
+            try:
+                data = json.loads(clean_json)
+            except json.JSONDecodeError:
+                return
 
             for branch in data:
                 properties = {
