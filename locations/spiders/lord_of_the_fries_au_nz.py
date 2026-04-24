@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy import Selector
 from scrapy.http import TextResponse
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
