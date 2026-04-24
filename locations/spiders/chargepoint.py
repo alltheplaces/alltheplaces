@@ -8,6 +8,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.user_agents import CHROME_LATEST
 
 SOCKET_TYPES = {
     1: "nema_5_20",  # unsure if nema_5_15 or nema_5_20
@@ -74,6 +75,7 @@ SOCKET_TYPES = {
 class ChargepointSpider(Spider):
     name = "chargepoint"
     item_attributes = {"brand": "ChargePoint", "brand_wikidata": "Q5176149"}
+    custom_settings = {"USER_AGENT": CHROME_LATEST}
 
     def make_request(self, query: dict, **kwargs) -> JsonRequest:
         return JsonRequest(
