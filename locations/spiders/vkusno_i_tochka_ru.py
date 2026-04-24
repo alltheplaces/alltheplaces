@@ -20,7 +20,6 @@ class VkusnoITochkaRUSpider(scrapy.Spider):
     single_restaurant_url = "https://vkusnoitochka.ru/api/restaurant/"
     restaurants_map_url = "https://vkusnoitochka.ru/restaurants/map/"
     start_urls = [all_restaurants_url]
-    requires_proxy = "RU"
 
     def parse(self, response, **kwargs):
         for _, restaurant in response.json()["restaurants"].items():
