@@ -15,7 +15,7 @@ class CashbuildSpider(JSONBlobSpider):
     allowed_domains = ["www.cashbuild.co.za"]
     start_urls = ["https://www.cashbuild.co.za/module/radiusdelivery/StoreSelectorAjax"]
     locations_key = "stores"
-    requires_proxy = True
+    requires_proxy = "ZA"
 
     async def start(self) -> AsyncIterator[FormRequest]:
         for country_code in ["BW", "LS", "MW", "NA", "SZ", "ZA"]:
@@ -35,7 +35,7 @@ class CashbuildSpider(JSONBlobSpider):
             return
 
         item["ref"] = str(feature["id_store"])
-        item["branch"] = item.pop("name", None)
+        item["branch"] = item.pop("name", "").removesuffix("| Cashbuild")
         item["addr_full"] = merge_address_lines([feature["address1"], feature["address2"]])
         item.pop("street_address", None)
 

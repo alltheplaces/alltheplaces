@@ -1,11 +1,14 @@
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy.http import JsonRequest, Response
+import chompjs
+from scrapy.http import Response, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import CLOSED_TH, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.react_server_components import parse_rsc
 from locations.spiders.isuzu_jp import ISUZU_SHARED_ATTRIBUTES
 
 
@@ -13,29 +16,19 @@ class IsuzuTHSpider(JSONBlobSpider):
     name = "isuzu_th"
     item_attributes = ISUZU_SHARED_ATTRIBUTES
     allowed_domains = ["www.isuzu-tis.com"]
-    start_urls = ["https://www.isuzu-tis.com/api/contentstack"]
-    locations_key = "entries"
+    start_urls = ["https://www.isuzu-tis.com/dealer"]
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        data = {
-            "bodyPaint": False,
-            "changeTire": False,
-            "districtIDs": "",
-            "overhaul": False,
-            "provinceID": "",
-            "route": "getDealersWithQuery",
-            "searchText": "",
-            "service": True,
-            "showroom": True,
-            "vehicleType": "lcv",
-        }
-        yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
+    def extract_json(self, response: TextResponse) -> dict | list[dict]:
+        scripts = response.xpath("//script[contains(text(), 'open_time')]/text()").getall()
+        objs = [chompjs.parse_js_object(s) for s in scripts]
+        rsc = "".join([s for n, s in objs]).encode()
+        data = dict(parse_rsc(rsc))
+        return DictParser.get_nested_key(data, "data")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["addr_full"] = feature["mirai"].get("address")
         item["state"] = feature["mirai"].get("region")
-        item["name"] = feature["mirai"].get("name_th")
-        item["extras"] = {}
+        item["name"] = item["extras"]["name:th"] = feature["mirai"].get("name_th")
         item["extras"]["name:en"] = feature["mirai"].get("name_en")
         item["lat"] = feature.get("sale", {}).get("lat")
         item["lon"] = feature.get("sale", {}).get("lon")

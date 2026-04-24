@@ -1,3 +1,5 @@
+import json
+import re
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -5,7 +7,7 @@ from scrapy.http import Request
 
 from locations.categories import Categories, Extras, Fuel, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class Dats24BESpider(Spider):
@@ -15,7 +17,7 @@ class Dats24BESpider(Spider):
     allowed_domains = ["dats24.be"]
 
     async def start(self) -> AsyncIterator[Request]:
-        query = '{"latitude":0,"longitude":0,"searchRadius":1000000000,"filterCriteria":{"serviceDeliveryPointType":["FUEL"],"serviceDeliveryPointAvailability":[],"chargingConnectorType":[],"chargingConnectorPowerType":[],"chargingLocationOperatorName":["ALL"],"fuelProductType":[]}}'
+        query = '{"latitude":50.7360328,"longitude":2.4155658,"searchRadius":230447,"serviceDeliveryPointType":["FUEL"],"fuelProductType":[]}'
         yield Request(
             url=self.start_urls[0],
             method="POST",
@@ -25,37 +27,25 @@ class Dats24BESpider(Spider):
         )
 
     def parse_locations_list(self, response):
-        for location in response.json()["serviceDeliveryPoints"]:
-            item = Feature()
-            item["ref"] = location["fuelStation"]["id"]
-            item["name"] = location["fuelStation"]["name"]
-            item["lat"] = location["latitude"]
-            item["lon"] = location["longitude"]
-            query = '{"deliveryPointId":' + str(location["fuelStation"]["id"]) + ',"deliveryPointType":"FUEL"}'
+        for location in response.json():
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
+            item["street_address"] = merge_address_lines([location["addressNumber"], item["street_address"]])
             yield Request(
-                url="https://dats24.be/api/service_point_details",
-                method="POST",
-                body=query,
-                headers={"Content-Type": "text/plain;charset=UTF-8"},
+                url=f"https://dats24.be/nl/particulier/sdp/tankstation-{item.get('branch').replace(' (','-').replace(')','_')}_{location['id']}",
                 meta={"item": item},
-                callback=self.parse_location_details,
+                callback=self.parse_fuel_details,
             )
 
-    def parse_location_details(self, response):
+    def parse_fuel_details(self, response):
         item = response.meta["item"]
-        location_details = response.json()["serviceDeliveryPoint"]
-        location_details["street_address"] = location_details.pop("street", None)
-        item2 = DictParser.parse(location_details)
-        item2["ref"] = item["ref"]
-        item2["name"] = item["name"]
-        item2["lat"] = item["lat"]
-        item2["lon"] = item["lon"]
-        item2["addr_full"] = location_details.pop("address", None)
-        product_codes = [product["code"] for product in location_details["fuelStation"]["products"]]
-        apply_yes_no(Fuel.E10, item2, "U" in product_codes, False)
-        apply_yes_no(Fuel.OCTANE_98, item2, "P" in product_codes, False)
-        apply_yes_no(Fuel.DIESEL, item2, "D" in product_codes, False)
-        apply_yes_no(Fuel.CNG, item2, "C" in product_codes, False)
-        apply_yes_no(Fuel.ADBLUE, item2, "A" in product_codes, False)
-        apply_yes_no(Extras.COMPRESSED_AIR, item2, "B" in product_codes, False)
-        yield item2
+        item["website"] = response.url
+        fuel_details = json.loads(re.search(r"FuelProduct\"\s*:\s*(\[.+\]),\"FuelPump", response.text).group(1))
+        product_codes = [product["code"] for product in fuel_details]
+        apply_yes_no(Fuel.E10, item, "U" in product_codes, False)
+        apply_yes_no(Fuel.OCTANE_98, item, "P" in product_codes, False)
+        apply_yes_no(Fuel.DIESEL, item, "D" in product_codes, False)
+        apply_yes_no(Fuel.CNG, item, "C" in product_codes, False)
+        apply_yes_no(Fuel.ADBLUE, item, "A" in product_codes, False)
+        apply_yes_no(Extras.COMPRESSED_AIR, item, "B" in product_codes, False)
+        yield item

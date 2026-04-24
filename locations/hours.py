@@ -773,6 +773,23 @@ DAYS_JP = {
     "日": "Su",
 }
 
+DAYS_IS = {
+    "Mán": "Mo",
+    "Mánudagur": "Mo",
+    "Þri": "Tu",
+    "Þriðjudagur": "Tu",
+    "Mið": "We",
+    "Miðvikudagur": "We",
+    "Fim": "Th",
+    "Fimmtudagur": "Th",
+    "Fös": "Fr",
+    "Föstudagur": "Fr",
+    "Lau": "Sa",
+    "Laugardagur": "Sa",
+    "Sun": "Su",
+    "Sunnudagur": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
@@ -799,6 +816,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_HR,
     DAYS_HU,
     DAYS_IL,
+    DAYS_IS,
     DAYS_NL,
     DAYS_NO,
     DAYS_RO,
@@ -943,6 +961,8 @@ DELIMITERS_RU = DELIMITERS_EN + ["с", "по", "до", "в", "во"]
 DELIMITERS_KR = DELIMITERS_EN + ["~"]
 
 CLOSED_AT = ["geschlossen"]
+
+CLOSED_BG = ["затворено", "затворен", "почивен"]
 
 CLOSED_EN = ["closed", "off"]
 
