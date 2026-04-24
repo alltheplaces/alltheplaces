@@ -1,13 +1,20 @@
+from typing import Iterable
+
+from scrapy.http import TextResponse
+
 from locations.categories import Categories, apply_category
-from locations.storefinders.metizsoft import MetizsoftSpider
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class HabitaniaAUSpider(MetizsoftSpider):
+class HabitaniaAUSpider(JSONBlobSpider):
     name = "habitania_au"
     item_attributes = {"brand": "Habitania", "brand_wikidata": "Q117923291"}
-    shopify_url = "hab2015.myshopify.com"
+    start_urls = ["https://storelocator.metizapps.com/v2/api/front/store-locator/?shop=hab2015.myshopify.com"]
+    locations_key = "stores"
 
-    def parse_item(self, item, location):
-        item.pop("website")
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace("Habitania ", "")
+        item["name"] = self.item_attributes["brand"]
         apply_category(Categories.SHOP_HOUSEWARE, item)
         yield item
