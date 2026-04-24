@@ -1,7 +1,4 @@
-from typing import Iterable
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.items import Feature
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 
