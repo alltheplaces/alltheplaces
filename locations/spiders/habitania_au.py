@@ -3,7 +3,6 @@ from typing import Iterable
 from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -18,7 +17,4 @@ class HabitaniaAUSpider(JSONBlobSpider):
         item["branch"] = item.pop("name").replace("Habitania ", "")
         item["name"] = self.item_attributes["brand"]
         apply_category(Categories.SHOP_HOUSEWARE, item)
-        oh = OpeningHours()
-        oh.add_ranges_from_string(feature.get("hour_of_operation"))
-        item["opening_hours"] = oh
         yield item
