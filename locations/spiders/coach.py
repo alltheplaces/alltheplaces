@@ -1,26 +1,22 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.items import SocialMedia, set_social_media
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CoachSpider(CrawlSpider, StructuredDataSpider):
+class CoachSpider(SitemapSpider, StructuredDataSpider):
     name = "coach"
     item_attributes = {"brand": "Coach", "brand_wikidata": "Q727697"}
-    start_urls = [
-        "https://de.coach.com/stores/index.html",
-        "https://es.coach.com/stores/index.html",
-        "https://fr.coach.com/stores/index.html",
-        "https://it.coach.com/stores/index.html",
-        "https://uk.coach.com/stores/index.html",
+    sitemap_urls = [
+        "https://de.coach.com/stores/sitemap.xml",
+        "https://es.coach.com/stores/sitemap.xml",
+        "https://fr.coach.com/stores/sitemap.xml",
+        "https://it.coach.com/stores/sitemap.xml",
+        "https://uk.coach.com/stores/sitemap.xml",
     ]
-    rules = [
-        Rule(LinkExtractor(allow=r"/stores/[-\w]+\.html$")),
-        Rule(LinkExtractor(allow=r"/stores/[-\w]+/[-\w]+\.html$")),
-        Rule(LinkExtractor(allow=r"/stores/[-\w]+/[-\w]+/[-\w]+\.html$"), callback="parse_sd"),
-    ]
+    sitemap_rules = [(r"/stores/[-\w]+/[-\w]+/[-\w]+\.html$", "parse_sd")]
     wanted_types = ["Organization"]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if not ld_data.get("address", {}).get("streetAddress"):

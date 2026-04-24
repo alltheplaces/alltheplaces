@@ -1,22 +1,16 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CoachCASpider(CrawlSpider, StructuredDataSpider):
+class CoachCASpider(SitemapSpider, StructuredDataSpider):
     name = "coach_ca"
     item_attributes = {"brand": "Coach", "brand_wikidata": "Q727697"}
-    start_urls = ["https://ca.coach.com/stores/index.html"]
-    rules = [
-        Rule(LinkExtractor(allow=r"/stores/(outlets/)?\w\w$", deny=r"/fr_ca/")),
-        Rule(LinkExtractor(allow=r"/stores/(outlets/)?\w\w/[-\w]+$", deny=r"/fr_ca/")),
-        Rule(
-            LinkExtractor(allow=r"/stores/(outlets/)?\w\w/[-\w]+/.+$", deny=r"/fr_ca/"),
-            callback="parse_sd",
-        ),
-    ]
+    sitemap_urls = ["https://ca.coach.com/sitemap_index.xml"]
+    sitemap_follow = [r"/en/"]
+    sitemap_rules = [(r"/en/stores/(outlets/)?\w\w/[-\w]+/.+$", "parse_sd")]
     wanted_types = ["Store", "OutletStore"]
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["extras"]["website:fr"] = response.urljoin(response.xpath('//a[text()="Français"]/@href').get())
