@@ -10,7 +10,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class LegoSpider(JSONBlobSpider):
     name = "lego"
-    item_attributes = {"brand": "Lego", "brand_wikidata": "Q1063455"}
+    item_attributes = {"name": "Lego", "brand": "Lego", "brand_wikidata": "Q1063455"}
     # locations_key = ["data", "storeSearch", "stores"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
