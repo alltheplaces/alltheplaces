@@ -10,11 +10,10 @@ class MrLiquorAUSpider(JSONBlobSpider):
     locations_key = "stores"
 
     def post_process_item(self, item, response, location):
-        name = location.get("storename")
-        if not name:
+        if not location.get("storename"):
             return
 
-        item["branch"] = name.replace(self.item_attributes["brand"], "").strip()
+        item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
         # to avoid clean_strings warning for addr_full
         item["addr_full"] = location.get("address").strip()
         location["lat"] = location.get("mapLatitude")
