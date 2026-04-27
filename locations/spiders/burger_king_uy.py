@@ -1,5 +1,6 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -22,5 +23,7 @@ class BurgerKingUYSpider(Spider):
                 "addr_full": location.xpath('.//div[@class="title-rest"]/p/text()').get().strip(),
                 "phone": location.xpath('.//div[contains(@class, "phone-rest")]//text()').getall()[1].strip(),
             }
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield Feature(**item)
