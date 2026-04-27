@@ -7,6 +7,7 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -23,13 +24,14 @@ class InditexSpider(scrapy.Spider):
     }
     # Each site has the same multi-brand catalogue JSON, could have picked any site!
     start_urls = ["https://www.massimodutti.com/itxrest/2/web/seo/config?appId=1"]
-    custom_settings = {
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        config = json.loads(response.text)["seoParamMap"]
+        config = json.loads(response.xpath("//pre/text()").get())["seoParamMap"]
         for store_id, country in config["storeId"].items():
             for brand in config["brandId"].values():
                 if brand == "dutti":
@@ -46,7 +48,7 @@ class InditexSpider(scrapy.Spider):
 
     #
     def parse_stores(self, response: Response, brand: str) -> Iterable[Feature]:
-        for store in json.loads(response.text)["stores"]:
+        for store in json.loads(response.xpath("//pre/text()").get())["stores"]:
             item = DictParser.parse(store)
             item["website"] = "https://www.{}.com/".format(brand) + item["country"].lower()
             item.update(self.my_brands.get(brand))
