@@ -16,7 +16,6 @@ class BurgerKingUYSpider(Spider):
             item = {
                 # ref: name used because site lacks IDs and contains overlapping lat/lon pairs
                 "ref": f"{raw_name}",
-                "name": raw_name,
                 "branch": raw_name.replace("SHOPP.", "").strip(),
                 "lat": location.attrib.get("data-lat"),
                 "lon": location.attrib.get("data-lon"),
