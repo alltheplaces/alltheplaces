@@ -2,12 +2,12 @@ import json
 import re
 from typing import Iterable
 
-from scrapy.http import Response
 from scrapy import Selector
+from scrapy.http import Response
 
-from locations.pipelines.address_clean_up import clean_address
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import clean_address
 
 
 class Tog24GBSpider(JSONBlobSpider):
