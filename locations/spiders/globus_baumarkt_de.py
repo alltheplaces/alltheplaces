@@ -4,6 +4,7 @@ from scrapy.http import TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
@@ -21,6 +22,7 @@ class GlobusBaumarktDESpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("GLOBUS BAUMARKT ", "")
         oh = OpeningHours()
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         try:
             start_day, end_day = (
                 response.xpath('//*[@class="opening-day is--wide"]/text()')
