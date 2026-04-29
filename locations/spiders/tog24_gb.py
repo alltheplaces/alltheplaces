@@ -26,8 +26,9 @@ class Tog24GBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         store_info = Selector(text=item.pop("addr_full"))
-        item["branch"] = store_info.xpath('//*[@class="name"]/text()').get("").strip()
+        item["branch"] = store_info.xpath('//*[@class="name"]/text()').get("").replace("TOG24","").strip()
         item["addr_full"] = clean_address(store_info.xpath('//*[contains(@class, "address")]/text()').getall())
         item["phone"] = store_info.xpath('//*[@class="phone"]/text()').get()
         item["email"] = store_info.xpath('//*[@class="email"]/text()').get()
-        yield item
+        unless "Stockist" in item["branch"]:
+            yield item
