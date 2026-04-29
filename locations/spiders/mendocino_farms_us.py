@@ -9,8 +9,8 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MendocinoFarmsSpider(CrawlSpider, StructuredDataSpider):
-    name = "mendocino_farms"
+class MendocinoFarmsUSSpider(CrawlSpider, StructuredDataSpider):
+    name = "mendocino_farms_us"
     item_attributes = {"brand": "Mendocino Farms", "brand_wikidata": "Q110671982"}
     start_urls = ["https://www.mendocinofarms.com/locations"]
     rules = [Rule(LinkExtractor(restrict_xpaths='//li[@class="location-item"]/a'), "parse")]
