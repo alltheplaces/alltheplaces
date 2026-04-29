@@ -30,5 +30,5 @@ class Tog24GBSpider(JSONBlobSpider):
         item["addr_full"] = clean_address(store_info.xpath('//*[contains(@class, "address")]/text()').getall())
         item["phone"] = store_info.xpath('//*[@class="phone"]/text()').get()
         item["email"] = store_info.xpath('//*[@class="email"]/text()').get()
-        unless "Stockist" in item["branch"]:
+        if "Stockist" not in item["branch"]:
             yield item
