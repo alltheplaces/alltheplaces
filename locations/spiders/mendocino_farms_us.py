@@ -33,6 +33,6 @@ class MendocinoFarmsUSSpider(CrawlSpider, StructuredDataSpider):
         item["branch"] = item.pop("name")
         item["website"] = response.url
 
-        apply_category(Categories.FAST_FOOD, item)
+        apply_category(Categories.RESTAURANT, item)
 
         yield item
