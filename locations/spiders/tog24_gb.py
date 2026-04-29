@@ -2,12 +2,10 @@ import json
 import re
 from typing import Iterable
 
-from scrapy import Selector
 from scrapy.http import Response
 
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import clean_address
 
 
 class Tog24GBSpider(JSONBlobSpider):
@@ -25,13 +23,13 @@ class Tog24GBSpider(JSONBlobSpider):
         ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-#        store_info = Selector(text=item.pop("addr_full"))
-#        item["branch"] = store_info.xpath('//*[@class="name"]/text()').get("").strip()
-#        item["street_address"] = clean_address(store_info.xpath('//*[contains(@class, "address")]/text()').getall())
-#        item["city"] = store_info.xpath('//*[@class="city"]/text()').get()
-#        item["state"] = store_info.xpath('//*[@class="prov_state"]/text()').get()
-#        item["postcode"] = store_info.xpath('//*[@class="postal_zip"]/text()').get()
-#        item["country"] = store_info.xpath('//*[@class="country"]/text()').get()
- #       if response.url != "https://davidstea.com/apps/store-locator/":
- #           item["website"] = response.url
+        #        store_info = Selector(text=item.pop("addr_full"))
+        #        item["branch"] = store_info.xpath('//*[@class="name"]/text()').get("").strip()
+        #        item["street_address"] = clean_address(store_info.xpath('//*[contains(@class, "address")]/text()').getall())
+        #        item["city"] = store_info.xpath('//*[@class="city"]/text()').get()
+        #        item["state"] = store_info.xpath('//*[@class="prov_state"]/text()').get()
+        #        item["postcode"] = store_info.xpath('//*[@class="postal_zip"]/text()').get()
+        #        item["country"] = store_info.xpath('//*[@class="country"]/text()').get()
+        #       if response.url != "https://davidstea.com/apps/store-locator/":
+        #           item["website"] = response.url
         yield item
