@@ -14,7 +14,7 @@ class HallAndWoodhouseGBSpider(JSONBlobSpider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.hall-woodhouse.co.uk/wp-admin/admin-ajax.php?action=pub_locations",
-            data={"security": "b3fd77d261", "data": {}},
+            data="security=b3fd77d261&data={}",
             headers={
                 "Host": "www.hall-woodhouse.co.uk",
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
