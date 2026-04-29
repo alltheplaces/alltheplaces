@@ -62,9 +62,10 @@ class BambuSpider(Spider):
         yield req
 
     def parse_pages(self, response):
-        if response.json().get("exception", False):
-            raise RuntimeError(result["name"] + result["message"])
-        result = response.json()["result"]
+        data = response.json()
+        if data.get("exception", False):
+            raise RuntimeError(data["name"] + data["message"])
+        result = data["result"]
         if result.get("status", 200) != 200:
             raise RuntimeError(f"{result['status']}: {result['message']}")
         for location in result["data"]["items"]:

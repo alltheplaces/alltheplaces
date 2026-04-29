@@ -44,9 +44,6 @@ class HornbachSpider(JSONBlobSpider):
     def parse_locations(self, response: TextResponse) -> Any:
         yield from super().parse(response)
 
-    def pre_process_data(self, feature: dict) -> None:
-        feature.update(feature.pop("data"))
-
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("street")
         item["branch"] = item.pop("name").removeprefix("BODENHAUS ").removeprefix("HORNBACH ")

@@ -1,10 +1,9 @@
 import html
 import json
 
-from scrapy import Request, Spider
+from scrapy import Spider
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 
 
 class CarpetCourtAUSpider(Spider):
@@ -12,6 +11,7 @@ class CarpetCourtAUSpider(Spider):
     item_attributes = {"brand": "Carpet Court", "brand_wikidata": "Q117156437"}
     allowed_domains = ["www.carpetcourt.com.au"]
     start_urls = ["https://www.carpetcourt.com.au/stores"]
+    requires_proxy = "AU"
 
     def parse(self, response):
         locations = json.loads(
@@ -44,19 +44,4 @@ class CarpetCourtAUSpider(Spider):
                 case _:
                     item.pop("state")
             item["website"] = "https://www.carpetcourt.com.au/stores/" + html.unescape(location["url_key"])
-            yield Request(url=item["website"], meta={"item": item}, callback=self.add_hours)
-
-    def add_hours(self, response):
-        item = response.meta["item"]
-        if response.xpath('//div[contains(@class, "amlocator-location-image")]'):
-            item["image"] = (
-                (response.xpath('//div[contains(@class, "amlocator-location-image")]/@style').get().split("url('", 1))[
-                    1
-                ].split("');", 1)
-            )[0]
-        item["opening_hours"] = OpeningHours()
-        hours_string = " ".join(
-            response.xpath('//div[contains(@class, "amlocator-schedule-table")]/div/span/text()').getall()
-        )
-        item["opening_hours"].add_ranges_from_string(hours_string)
-        yield item
+            yield item

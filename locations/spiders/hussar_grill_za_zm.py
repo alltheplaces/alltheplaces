@@ -1,55 +1,61 @@
-from scrapy.spiders import SitemapSpider
+from typing import Iterable
 
-from locations.google_url import extract_google_position
-from locations.hours import OpeningHours
-from locations.items import Feature, SocialMedia, add_social_media
-from locations.pipelines.address_clean_up import clean_address
-from locations.structured_data_spider import clean_facebook
+from scrapy.http import TextResponse
+
+from locations.categories import Extras, apply_yes_no
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature, SocialMedia, set_social_media
+from locations.json_blob_spider import JSONBlobSpider
+
+ATTRIBUTE_EXTRAS = {
+    "Wifi": (Extras.WIFI, False),
+    "Halal food": (Extras.HALAL, False),
+    "Takeaway": (Extras.TAKEAWAY, False),
+    "Delivery": (Extras.DELIVERY, False),
+    "Play area": (Extras.KIDS_AREA, False),
+    "Dine-in": (Extras.INDOOR_SEATING, False),
+    "Smoking Section": (Extras.SMOKING_AREA, True),
+    "Wheelchair Accessible": (Extras.WHEELCHAIR, True),
+}
 
 
-class HussarGrillZAZMSpider(SitemapSpider):
+class HussarGrillZAZMSpider(JSONBlobSpider):
     name = "hussar_grill_za_zm"
     item_attributes = {
         "brand": "The Hussar Grill",
         "brand_wikidata": "Q130232305",
     }
-    sitemap_urls = ["https://www.hussargrill.co.za/robots.txt"]
-    sitemap_rules = [
-        (r"/find-us/[-\w]+/[-\w]+/$", "parse"),
-    ]
-    skip_auto_cc_domain = True
+    allowed_domains = ["hussargrill.co.za"]
+    start_urls = ("https://hussargrill.co.za/api/gostoreall",)
+    locations_key = ["res", "stores"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response):
-        item = Feature()
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        attributes = {
+            attribute["name"]: attribute.get("value")
+            for attribute in feature.get("attributes", [])
+            if attribute.get("name") is not None
+        }
 
-        if branch := response.xpath('.//div[contains(@class,"sub-title")]/h3/text()').get():
-            item["branch"] = branch.strip()
-        else:
-            return  # Some dud locations in sitemap with no content
-
-        item["website"] = response.url
-        item["ref"] = response.url
-        item["addr_full"] = clean_address(response.xpath('.//strong[contains(text(), "Address")]/../p/text()').getall())
-        item["phone"] = response.xpath('.//a[contains(@href, "tel:")]/@href').get()
-        # item["email"] = response.xpath('.//a[contains(@href, "mailto:")]/@href').get() # Email is protected
-
-        extract_google_position(item, response)
-
-        trip_advisor_link = response.xpath('.//a[contains(@href, "tripadvisor.co")]/@href').get()
-        if trip_advisor_link not in ["https://www.tripadvisor.co.za/"]:
-            add_social_media(item, SocialMedia.TRIP_ADVISOR, trip_advisor_link)
-
-        add_social_media(
-            item,
-            SocialMedia.FACEBOOK,
-            clean_facebook(
-                response.xpath('.//div[@class="btn-primary-wrap"]/a[contains(@href, "facebook.com")]/@href').get()
-            ),
-        )
+        item["ref"] = feature.get("location_code")
+        item["branch"] = item.pop("name").removeprefix("The Hussar Grill ")
 
         item["opening_hours"] = OpeningHours()
-        times = response.xpath('.//strong[contains(text(), "Trading Hours")]/../p/text()').getall()
-        for day in times:
-            item["opening_hours"].add_ranges_from_string(day)
+        for day in DAYS_FULL:
+            if not (day_hours := feature.get(day.lower())):
+                continue
+            if day_hours.get("all_day") is True:
+                item["opening_hours"].add_range(day, "00:00", "23:59")
+                continue
+            item["opening_hours"].add_range(day, day_hours.get("open"), day_hours.get("close"), "%H:%M:%S")
+
+        if tripadvisor_url := feature.get("tripadvisor_url") or attributes.get("Trip Advisor URL"):
+            set_social_media(item, SocialMedia.TRIPADVISOR, tripadvisor_url)
+        if instagram_url := feature.get("instagram_url"):
+            set_social_media(item, SocialMedia.INSTAGRAM, instagram_url)
+
+        for attribute_name, (extra, apply_positive_only) in ATTRIBUTE_EXTRAS.items():
+            if attribute_name in attributes:
+                apply_yes_no(extra, item, attributes[attribute_name] is True, apply_positive_only)
 
         yield item

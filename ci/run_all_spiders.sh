@@ -95,8 +95,9 @@ tippecanoe --cluster-distance=25 \
            --read-parallel \
            --attribution="<a href=\"https://www.alltheplaces.xyz/\">All the Places</a> ${RUN_TIMESTAMP}" \
            -o "${SPIDER_RUN_DIR}/output.pmtiles" \
-           "${SPIDER_RUN_DIR}"/output/*.geojson
-retval=$?
+           "${SPIDER_RUN_DIR}"/output/*.geojson \
+           2>&1 | grep -v -E '^\s*[0-9]+\.[0-9]+%\s|^Reordering geometry:\s*[0-9]|^Read [0-9]+\.[0-9]+ million features|^Sorting\.\.\.' >&2
+retval=${PIPESTATUS[0]}
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't generate pmtiles, won't include in output")
     include_pmtiles=false
@@ -409,7 +410,7 @@ do
         --endpoint-url="${R2_ENDPOINT_URL}" \
         cp \
         --only-show-errors \
-        --website-redirect"${RUN_URL_PREFIX}/output/${spider}.geojson" \
+        --website-redirect="${RUN_URL_PREFIX}/output/${spider}.geojson" \
         "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
         "s3://${R2_BUCKET}/runs/latest/output/${spider}.geojson"
 
