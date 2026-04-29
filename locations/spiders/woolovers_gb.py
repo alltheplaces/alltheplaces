@@ -5,6 +5,7 @@ from scrapy.http import Response
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.categories import Categories, apply_category
 
 
 class WooloversGBSpider(JSONBlobSpider):
@@ -25,4 +26,5 @@ class WooloversGBSpider(JSONBlobSpider):
                 open, closed = feature[day.lower()].replace(".", ":").split(" - ")
                 oh.add_range(day, open, closed)
         item["opening_hours"] = oh
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item
