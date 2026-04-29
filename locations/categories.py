@@ -295,6 +295,7 @@ class Categories(Enum):
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
+    INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
