@@ -2,10 +2,10 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.categories import Categories, apply_category
 
 
 class WooloversGBSpider(JSONBlobSpider):
