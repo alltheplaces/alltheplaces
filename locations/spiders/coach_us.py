@@ -1,30 +1,14 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class CoachUSSpider(CrawlSpider, StructuredDataSpider):
+class CoachUSSpider(SitemapSpider, StructuredDataSpider):
     name = "coach_us"
     item_attributes = {"brand": "Coach", "brand_wikidata": "Q727697"}
-    start_urls = ["https://www.coach.com/stores/index.html"]
-    rules = [
-        Rule(LinkExtractor(allow=r"/stores/(outlets/)?\w\w$")),
-        Rule(LinkExtractor(allow=r"/stores/(outlets/)?\w\w/[-\w]+$")),
-        Rule(
-            LinkExtractor(allow=r"/stores/(outlets/)?\w\w/[-\w]+/.+$"),
-            callback="parse_sd",
-        ),
-    ]
-    wanted_types = ["Store", "OutletStore"]
-    drop_attributes = {"image"}
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        if item["name"].startswith("COACH Outlet"):
-            item["name"] = "COACH Outlet"
-        else:
-            item["name"] = "COACH"
-
-        item["branch"] = ld_data["name"].removeprefix(item["name"]).strip()
-
-        yield item
+    sitemap_urls = ["https://www.coach.com/stores/sitemap.xml"]
+    sitemap_rules = [(r"https://www.coach.com/stores/[^/]+/[^/]+/[^/]+$", "parse_sd")]
+    is_playwright_spider = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
