@@ -22,7 +22,6 @@ class GlobusBaumarktDESpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("GLOBUS BAUMARKT ", "")
         oh = OpeningHours()
-        apply_category(Categories.SHOP_DOITYOURSELF, item)
         try:
             start_day, end_day = (
                 response.xpath('//*[@class="opening-day is--wide"]/text()')
@@ -40,28 +39,5 @@ class GlobusBaumarktDESpider(CrawlSpider, StructuredDataSpider):
             item["opening_hours"] = oh
         except:
             pass
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item
-
-    # def parse(self, response):
-    #     raw_data = response.xpath('//script[@type="application/ld+json"][contains(text(), "Place")]/text()').get()
-    #
-    #     if not raw_data:
-    #         return
-    #
-    #     # The image field currently breaks the JSON
-    #     data = json.loads(re.sub(r'"image": (\[".+"\],)', "", raw_data))
-    #     item = LinkedDataParser.parse_ld(data)
-    #     item["ref"] = response.url
-    #     item["extras"]["fax"] = data.get("fax")
-    #     item["branch"] = item.pop("name").replace("Globus Baumarkt ", "")
-    #     for i in response.xpath('//div[@class="medium-6 cell"]/p').getall():
-    #         day_hour_list = re.findall(r'<span class="opening-day is--wide">(.*?) Uhr', i)
-    #         if day_hour_list:
-    #             item["opening_hours"] = OpeningHours()
-    #             for day_hour in day_hour_list:
-    #                 day_range, hour_range = day_hour.split(":</span>")
-    #                 item["opening_hours"].add_ranges_from_string(
-    #                     day_range.replace(".", "") + " " + hour_range, days=DAYS_DE
-    #                 )
-    #     apply_category(Categories.SHOP_DOITYOURSELF, item)
-    #     yield item
