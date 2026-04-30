@@ -31,17 +31,3 @@ class MacysSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
         yield item
-
-    # start_urls = ["https://www.macys.com/stores/browse/"]
-    # rules = [
-    #     Rule(LinkExtractor(r"/stores/\w\w/$")),
-    #     Rule(LinkExtractor(r"/stores/\w\w/[^/]+/$")),
-    #     Rule(LinkExtractor(r"/stores/\w\w/[^/]+/[^/]+\_(\d+).html$"), "parse"),
-    # ]
-    # wanted_types = ["Store"]
-    # custom_settings = {"USER_AGENT": BROWSER_DEFAULT,"ROBOTSTXT_OBEY":False}
-    # # requires_proxy = True
-    #
-    # def post_process_item(self, item, response, ld_data, **kwargs):
-    #     item["name"] = None
-    #     yield item
