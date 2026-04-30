@@ -13,6 +13,7 @@ class Take5USSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
     search_for_twitter = False
     search_for_image = False
+
     def post_process_item(self, item, response, ld_data):
         if ld_data["@type"] == "AutoWash":
             apply_category(Categories.CAR_WASH, item)
