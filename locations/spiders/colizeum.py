@@ -11,10 +11,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class ColizeumSpider(JSONBlobSpider):
     name = "colizeum"
-    item_attributes = {
-        "brand": "Colizeum",
-        "brand_wikidata": "Q139567421",
-    }
+    item_attributes = {"brand": "Colizeum", "brand_wikidata": "Q139567421"}
     start_urls = ["https://colizeumarena.com/arenas/"]
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
@@ -28,15 +25,13 @@ class ColizeumSpider(JSONBlobSpider):
             feature["lon"] = coords[1]
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        branch = feature.get("name", "").removeprefix("COLIZEUM ").strip()
-        if branch:
-            item["branch"] = branch
-        item.pop("name", None)
+        item["branch"] = (
+            item.pop("name").removeprefix("COLIZEUM").removeprefix("Colizeum").removeprefix("COLISEUM").strip(" |")
+        )
 
         if site := feature.get("site"):
             item["website"] = site if site.startswith("http") else f"https://{site}"
 
         apply_category(Categories.INTERNET_CAFE, item)
-        apply_yes_no("service:gaming", item, True)
 
         yield item
