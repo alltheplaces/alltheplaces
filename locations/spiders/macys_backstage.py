@@ -1,11 +1,13 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MacysBackstageSpider(CrawlSpider, StructuredDataSpider):
+class MacysBackstageSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
     name = "macys_backstage"
     item_attributes = {"brand": "Macy's Backstage", "brand_wikidata": "Q122914589"}
     start_urls = ["https://www.macys.com/stores/backstage/browse/"]
@@ -15,8 +17,8 @@ class MacysBackstageSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(r"/stores/backstage/\w\w/[^/]+/[^/]+\_(\d+b).html$"), "parse"),
     ]
     wanted_types = ["store"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
