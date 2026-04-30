@@ -8,7 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class GlobusBaumarktDESpider(CrawlSpider, StructuredDataSpider):
@@ -17,7 +16,7 @@ class GlobusBaumarktDESpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.globus-baumarkt.de/alle-maerkte/"]
     rules = [Rule(LinkExtractor(restrict_xpaths='//a[@target="_self"]', allow="/info/markt/"), callback="parse")]
     wanted_types = [["LocalBusiness", "HardwareStore"]]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("GLOBUS BAUMARKT ", "")
