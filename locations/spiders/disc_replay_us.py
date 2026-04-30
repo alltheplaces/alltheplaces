@@ -11,7 +11,7 @@ class DiscReplayUSSpider(CrawlSpider):
     item_attributes = {"brand": "Disc Replay", "brand_wikidata": "Q108202431"}
     allowed_domains = ["www.discreplay.com"]
     start_urls = ["https://www.discreplay.com/locations-list/"]
-    rules = Rule(LinkExtractor(allow=r"/locations/.+"), callback="parse")
+    rules = [Rule(LinkExtractor(allow=r"/locations/.+"), callback="parse")]
 
     def parse(self, response):
         item = Feature()
