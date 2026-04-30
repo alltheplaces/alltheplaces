@@ -13,6 +13,7 @@ class YoursclothingGBSpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["Store"]
     skip_auto_cc_spider_name = True
     skip_auto_cc_domain = True
+    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = ld_data["address"]["name"].removesuffix(" Store")
