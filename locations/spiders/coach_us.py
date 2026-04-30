@@ -19,6 +19,6 @@ class CoachUSSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").removeprefix("About ")
+        item["branch"] = (item.pop("name", "") or "").removeprefix("About ")
         apply_category(Categories.SHOP_BAG, item)
         yield item
