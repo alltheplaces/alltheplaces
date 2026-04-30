@@ -3,7 +3,6 @@ from typing import Any, Self
 
 from scrapy.crawler import Crawler
 
-from locations import address_spider
 from locations.items import Feature
 from locations.licenses import Licenses
 from locations.pipelines.address_clean_up import merge_address_lines
