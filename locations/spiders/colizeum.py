@@ -4,7 +4,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
-from locations.categories import Categories, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
