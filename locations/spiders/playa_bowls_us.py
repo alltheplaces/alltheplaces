@@ -5,8 +5,9 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 
 
 class PlayaBowlsUSSpider(SitemapSpider):
@@ -23,8 +24,8 @@ class PlayaBowlsUSSpider(SitemapSpider):
                 (response.xpath('//*[@type="application/ld+json"]//text()').get().strip()),
             )
         )
-        item = DictParser.parse((ld_data))
-        item["ref"] = response.url
+        item = LinkedDataParser.parse_ld(ld_data)
+        item["ref"] = response.url.split("/")[-1]
         item["branch"] = item.pop("name").replace("Playa Bowls - ", "")
         oh = OpeningHours()
         try:
@@ -39,4 +40,6 @@ class PlayaBowlsUSSpider(SitemapSpider):
         except:
             pass
         item["opening_hours"] = oh
+        apply_category(Categories.FAST_FOOD, item)
+
         yield item
