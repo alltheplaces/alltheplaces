@@ -1,28 +1,19 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
 class DiscReplayUSSpider(CrawlSpider):
     name = "disc_replay_us"
-    item_attributes = {
-        "brand": "Disc Replay",
-        "brand_wikidata": "Q108202431",
-        "extras": Categories.SHOP_VIDEO_GAMES.value,
-    }
+    item_attributes = {"brand": "Disc Replay", "brand_wikidata": "Q108202431"}
     allowed_domains = ["www.discreplay.com"]
     start_urls = ["https://www.discreplay.com/locations-list/"]
-    rules = (
-        Rule(
-            LinkExtractor(allow=r"/locations/.+"),
-            callback="parse_store",
-        ),
-    )
+    rules = Rule(LinkExtractor(allow=r"/locations/.+"), callback="parse")
 
-    def parse_store(self, response):
+    def parse(self, response):
         item = Feature()
         item["ref"] = response.url.rstrip("/").split("/")[-1]
         item["addr_full"] = response.css(".address::text").get()
@@ -37,5 +28,7 @@ class DiscReplayUSSpider(CrawlSpider):
         hours_string = " ".join([f"{x[0]}: {x[1]}" for x in zip(days_list, hours_list)])
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(hours_string)
+
+        apply_category(Categories.SHOP_VIDEO_GAMES, item)
 
         yield item
