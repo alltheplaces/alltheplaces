@@ -9,6 +9,7 @@ class StadtZuerichTreesCHSpider(Spider):
     name = "stadt_zuerich_trees_ch"
     allowed_domains = ["www.ogd.stadt-zuerich.ch"]
     dataset_attributes = Licenses.CC0.value
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     start_urls = [
         "https://www.ogd.stadt-zuerich.ch/wfs/geoportal/Baumkataster?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GeoJSON&typename=baumkataster_baumstandorte"
     ]
