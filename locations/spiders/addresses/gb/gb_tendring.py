@@ -5,7 +5,7 @@ from scrapy.crawler import Crawler
 
 from locations.items import Feature
 from locations.licenses import Licenses
-from locations.pipelines.address_clean_up import merge_address_lines, clean_address
+from locations.pipelines.address_clean_up import clean_address, merge_address_lines
 from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
