@@ -1,40 +1,43 @@
-import re
 from typing import Any
 
-import xmltodict
 from requests_cache import Response
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import NAMED_DAY_RANGES_EN, OpeningHours
+from locations.hours import DAYS, OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class LillyRSSpider(Spider):
     name = "lilly_rs"
     item_attributes = {"brand": "Lilly", "brand_wikidata": "Q111764460"}
     allowed_domains = ["www.lilly.rs"]
-    start_urls = ["https://www.lilly.rs/rest/V1/locations?name="]
+    start_urls = ["https://www.lilly.rs/locations/index/index?name="]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = "RS"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in xmltodict.parse(response.text)["response"]["item"]:
+        for location in response.json():
             item = DictParser.parse(location)
-            item["ref"] = location["entity_id"]
-            item["branch"] = item.pop("name")
+            item["ref"] = item.pop("name").removeprefix("Apoteka ")
             item["street_address"] = item.pop("addr_full")
 
-            oh = OpeningHours()
-            hours_data = {
-                "Weekdays": re.sub("Ne radi", "", location["monday_to_friday_wh"]),
-                "Sa": re.sub("Ne radi", "", location["saturday_wh"]),
-                "Su": re.sub("Ne radi", "", location["sunday_wh"]),
-            }
-            for day, hours in hours_data.items():
-                if hours:
-                    hour = hours.split("-")
-                    if len(hour) == 2:
-                        oh.add_days_range(
-                            NAMED_DAY_RANGES_EN[day] if day == "Weekdays" else [day], hour[0].strip(), hour[1].strip()
-                        )
+            try:
+                item["opening_hours"] = self.parse_opening_hours(location)
+            except:
+                self.logger.error("Error parsing opening hours: {}".format(location))
 
-            item["opening_hours"] = oh
+            apply_category(Categories.SHOP_CHEMIST, item)
+
             yield item
+
+    def parse_opening_hours(self, location: dict):
+        oh = OpeningHours()
+        for key, days in (("monday_to_friday_wh", DAYS[0:5]), ("saturday_wh", ["Sa"]), ("sunday_wh", ["Su"])):
+            if location[key] == "Ne radi":
+                oh.set_closed(days)
+            elif "-" in location[key]:
+                start_time, end_time = location[key].split("-")
+                oh.add_days_range(days, start_time.strip(), end_time.strip())
+        return oh

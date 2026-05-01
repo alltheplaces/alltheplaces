@@ -269,11 +269,12 @@ class Categories(Enum):
     CANTEEN = {"amenity": "canteen"}
     CARAVAN_SITE = {"tourism": "caravan_site"}
     CASINO = {"amenity": "casino"}
+    CHARGE_POINT = {"man_made": "charge_point"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
     CINEMA = {"amenity": "cinema"}
     CLINIC = {"amenity": "clinic", "healthcare": "clinic"}
-    CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "urgent_care": "yes"}
+    CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "healthcare:speciality": "urgent"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMMUNITY_CENTRE = {"amenity": "community_centre"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
@@ -294,6 +295,7 @@ class Categories(Enum):
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
+    INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
@@ -557,9 +559,11 @@ class Fuel(Enum):
     E30 = "fuel:e30"
     E85 = "fuel:e85"
     E88 = "fuel:e88"
+    ETHANOL = "fuel:ethanol"
     ETHANOL_FREE = "fuel:ethanol_free"
     METHANOL = "fuel:methanol"
     BIOGAS = "fuel:biogas"
+    GASOLINE = "fuel:gasoline"
     LPG = "fuel:lpg"
     CNG = "fuel:cng"
     LNG = "fuel:lng"

@@ -8,7 +8,13 @@ class Licenses(Enum):
         "license:wikidata": "Q6938433",
         "attribution": "optional",
     }
-    CC4 = {
+    CCBY3AU = {
+        "license": "Creative Commons Attribution 3.0 Australia",
+        "license:website": "https://creativecommons.org/licenses/by/3.0/au/",
+        "license:wikidata": "Q52555753",
+        "attribution": "required",
+    }
+    CCBY4 = {
         "license": "Creative Commons Attribution 4.0 International",
         "license:website": "http://creativecommons.org/licenses/by/4.0/",
         "license:wikidata": "Q20007257",
@@ -35,4 +41,18 @@ class Licenses(Enum):
         "license:wikidata": "Q106835855",
         "attribution": "required",
         "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD).",
+    }
+    CC3 = {
+        "license": "Creative Commons Attribution 3.0 Unported",
+        "license:website": "https://creativecommons.org/licenses/by/3.0/",
+        "license:wikidata": "Q14947546",
+        "attribution": "required",
+        "use:commercial": "permit",
+    }
+    UNLICENSE = {
+        "license": "Unlicense",
+        "license:website": "https://unlicense.org/",
+        "license:wikidata": "Q21659044",
+        "attribution": "optional",
+        "use:commercial": "yes",
     }

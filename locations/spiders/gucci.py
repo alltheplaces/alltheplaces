@@ -1,34 +1,25 @@
-import json
-from typing import Any, AsyncIterator
+from typing import Iterable
 
-from scrapy.http import Request, Response
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.playwright_spider import PlaywrightSpider
+from locations.google_url import extract_google_position
+from locations.items import Feature
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import FIREFOX_LATEST
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class GucciSpider(PlaywrightSpider):
+class GucciSpider(SitemapSpider, StructuredDataSpider):
     name = "gucci"
     item_attributes = {"brand": "Gucci", "brand_wikidata": "Q178516"}
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST} | DEFAULT_PLAYWRIGHT_SETTINGS
+    sitemap_urls = ["https://www.gucci.com/robots.txt"]
+    sitemap_follow = ["sitemap/STORE"]
+    sitemap_rules = [(r"https://www.gucci.com/\w+/en_\w+|\w+/store/[a-z-0-9]+", "parse_sd")]
+    is_playwright_spider = True
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(
-            url="https://www.gucci.com/int/en/store/all?south=-90&west=-180&north=90&east=180&latitude=0&longitude=0",
-            headers={"Referer": "https://www.gucci.com/int/en/store?store-search=&search-cat=store-locator"},
-        )
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre/text()").get())["features"]:
-            if location["properties"]["active"] is not True:
-                continue
-            item = DictParser.parse(location["properties"])
-            item["website"] = "https://www.gucci.com/int/en{}".format(item["website"])
-            item["ref"] = location["properties"]["storeCode"]
-            item["street_address"] = location["properties"]["address"]["location"]
-            item["phone"] = location["properties"]["address"]["phone"]
-            self.crawler.stats.inc_value("z/type/{}".format(location["properties"]["type"]))
-
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        extract_google_position(item, response)
+        yield item

@@ -34,6 +34,8 @@ class SportclubARSpider(Spider):
                 item["geometry"] = club["location"]
                 item["geometry"]["type"] = "Point"
                 item["street_address"] = club.get("direccion")
+                if item.get("street_address") == item.get("addr_full"):
+                    item.pop("addr_full", None)
                 item["city"] = club.get("zona")
                 item["state"] = club.get("provincia")
                 item["phone"] = club.get("telefono")

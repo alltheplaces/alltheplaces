@@ -124,9 +124,14 @@ if [ ! $retval -eq 0 ]; then
 fi
 (>&2 echo "Changed files: ${changed_filenames}")
 
-spiders=$(echo "${changed_filenames}" | grep "^locations/spiders/")
+spiders=$(echo "${changed_filenames}" | grep "^locations/spiders/.*\.py$")
 
-spider_count=$(echo "${spiders}" | wc -l)
+if [ -z "${spiders}" ]; then
+    spider_count=0
+else
+    spider_count=$(echo "${spiders}" | wc -l)
+fi
+
 if [ "${spider_count}" -gt 15 ]; then
     (>&2 echo "refusing to run on more than 15 spiders")
     exit 1
@@ -209,7 +214,9 @@ do
 
     if [ -f "${OUTFILE}" ]; then
         upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
-        upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
+        if [ -f "${NDGEOJSON}" ]; then
+            upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
+        fi
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
         if [ -f "${STATSFILE}" ]; then
@@ -347,9 +354,9 @@ do
     (>&2 echo "${spider} done")
 done
 
-if [[ ! "$(ls ${RUN_DIR})" ]]; then
+if [[ ! "$(ls ${RUN_DIR} 2>/dev/null)" ]]; then
     echo "Nothing ran. Exiting."
-    echo $EXIT_CODE
+    exit $EXIT_CODE
 fi
 
 if [ "${HAD_TIMEOUT}" = true ]; then

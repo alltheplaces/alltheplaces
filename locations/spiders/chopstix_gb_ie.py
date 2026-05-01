@@ -4,6 +4,7 @@ from scrapy import Request
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ChopstixGBIESpider(JSONBlobSpider):
@@ -43,6 +44,7 @@ class ChopstixGBIESpider(JSONBlobSpider):
 
     def parse_store_page(self, response, item):
         if response.status == 404:
+            item["website"] = None
             yield item
             return
 
@@ -53,6 +55,8 @@ class ChopstixGBIESpider(JSONBlobSpider):
         item["opening_hours"] = oh
 
         item["phone"] = response.xpath('//h4[contains(text(), "STORE NUMBER")]/following-sibling::p/text()').get()
-        item["addr_full"] = response.xpath('//h4[contains(text(), "ADDRESS")]/following-sibling::p[1]').get()
+        item["addr_full"] = merge_address_lines(
+            response.xpath('//h4[contains(text(), "ADDRESS")]/following-sibling::p[1]/text()').getall()
+        )
 
         yield item

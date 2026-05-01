@@ -1,4 +1,3 @@
-import ast
 import json
 import re
 
@@ -24,15 +23,17 @@ class FordDealersUSSpider(scrapy.Spider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs):
+
         client_id = re.search(r"clientId\":\"([0-9-a-z-]+)\"", response.text).group(1)
+        js_path = response.xpath('//*[contains(@src,"clientlibs/skin/")]/@src').get()
         yield scrapy.Request(
-            url="https://www.ford.com/etc/designs/brand_ford/brand/skin/ford.min.js",
+            url="https://www.ford.com" + js_path,
             callback=self.parse_state,
             cb_kwargs={"token": client_id},
         )
 
     def parse_state(self, response, **kwargs):
-        state_list = ast.literal_eval(re.search(r"fullStateNames\s*=\s*(\[.*\]);", response.text).group(1))
+        state_list = (re.search(r"var\s*\w+\s*=\s*\"(.+)\"\.split\(\";\"\),", response.text).group(1)).split(";")
         for state in state_list:
             yield JsonRequest(
                 url="https://www.ford.com/cxservices/dealer/Dealers.json?make=Ford&state={}".format(state),

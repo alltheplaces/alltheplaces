@@ -28,10 +28,10 @@ dependencies = [
     "requests",
     "requests-cache",
     "reverse-geocoder",
-    "scrapy>=2.14.0",
-    "scrapy-camoufox",
+    "scrapy>=2.15.0",
+    "scrapy-camoufox @ git+https://github.com/iandees/scrapy-camoufox.git",
     "scrapy-playwright>=0.0.45",
-    "scrapy-zyte-api>=0.32.0",
+    "scrapy-zyte-api>=0.33.1",
     "shapely",
     "twisted[http2]",
     "tzdata",
@@ -63,3 +63,6 @@ dev = [
     "pytest",
     "ty",
 ]
+
+[tool.ty.rules]
+invalid-method-override = "ignore"

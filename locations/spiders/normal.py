@@ -12,7 +12,7 @@ from locations.pipelines.address_clean_up import clean_address
 class NormalSpider(Spider):
     name = "normal"
     item_attributes = {"brand": "Normal", "brand_wikidata": "Q19562429"}
-    start_urls = ["https://www.normal.no/stores?culture=en-150"]
+    start_urls = ["https://www.normalstores.com/stores?culture=en-150"]
 
     def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature]:
         for location in response.json():

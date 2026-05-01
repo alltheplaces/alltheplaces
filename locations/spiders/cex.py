@@ -27,7 +27,8 @@ class CexSpider(scrapy.Spider):
 
         item["lat"] = store["latitude"]
         item["lon"] = store["longitude"]
-        item["name"] = store["storeName"]
+        item["branch"] = store["storeName"]
+        item["name"] = "CeX"
         item["street_address"] = clean_address([store["addressLine1"], store["addressLine2"]])
         item["city"] = store["city"]
         item["state"] = store["county"]

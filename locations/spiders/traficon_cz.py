@@ -1,6 +1,6 @@
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_CZ, OpeningHours
 from locations.items import Feature
 
@@ -9,7 +9,7 @@ class TraficonCZSpider(scrapy.Spider):
     name = "traficon_cz"
     allowed_domains = ["www.traficon.cz"]
     start_urls = ["https://www.traficon.cz/prodejny/"]
-    item_attributes = {"brand": "TRAFICON", "brand_wikidata": "Q67807570", "extras": Categories.SHOP_TOBACCO.value}
+    item_attributes = {"brand": "Traficon", "brand_wikidata": "Q67807570"}
 
     def parse(self, response):
         for branch in response.xpath("//div[@id='jq_branchMap']//span[@class='jq_mapMarker']"):
@@ -37,6 +37,8 @@ class TraficonCZSpider(scrapy.Spider):
             ).getall()
             for day, hrs in zip(days, hours):
                 oh.add_ranges_from_string(day.strip() + " " + hrs.strip(), DAYS_CZ)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
+
+            apply_category(Categories.SHOP_TOBACCO, item)
 
             yield item
