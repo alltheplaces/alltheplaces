@@ -36,7 +36,7 @@ def parse_rsc(data_raw: Iterable[int]) -> Iterator[tuple[int, Any]]:
                 row_data = row_tag.encode() + row_data
                 row_tag = b"\0"
 
-        if array_type := ARRAY_TYPES.get(row_tag):
+        if array_type := ARRAY_TYPES.get(row_tag):  # ty: ignore[invalid-argument-type]
             yield row_id, array.array(array_type, row_data)
         else:
             row_str = row_data.decode()

@@ -13,7 +13,7 @@ from locations.spiders.giant_eagle_us import GiantEagleUSSpider
 from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.phillips_66_conoco_76 import Phillips66Conoco76Spider
 from locations.spiders.quality_dairy_us import QualityDairyUSSpider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.shell import ShellSpider
 from locations.spiders.sinclair_us import SinclairUSSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
@@ -45,7 +45,7 @@ class AthenaSpider(StoreRocketSpider):
         (["CONOCO"], Phillips66Conoco76Spider.BRANDS["CON"]),
         (["SINCLAIR"], SinclairUSSpider.item_attributes),
         (["CITGO"], CitgoSpider.item_attributes),
-        (["7 ELEVEN", "7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["7 ELEVEN", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["PHILLIPS 66"], Phillips66Conoco76Spider.BRANDS["P66"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
         (["AMOCO"], BpSpider.brands["amoco"]),

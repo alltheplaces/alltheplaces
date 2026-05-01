@@ -1,7 +1,9 @@
 import re
 
-from scrapy import Request
+import scrapy
+from scrapy.http import TextResponse
 
+from locations.items import Feature
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -9,27 +11,20 @@ from locations.structured_data_spider import StructuredDataSpider
 class McdonaldsLUSpider(StructuredDataSpider):
     name = "mcdonalds_lu"
     item_attributes = McdonaldsSpider.item_attributes
-    allowed_domains = ["mcd.lu"]
-    start_urls = ["https://mcd.lu/"]
+    allowed_domains = ["mcdonalds.lu"]
+    start_urls = ["https://mcdonalds.lu/fr/restaurants/"]
 
-    def parse_latlon(self, data):
-        match = re.search(r"sll=(.*),(.*)&amp;ss", data)
-        if match:
-            return match.groups()[0].strip(), match.groups()[1].strip()
-        else:
-            return None, None
+    def parse(self, response: TextResponse, **kwargs):
+        for url in response.xpath(
+            '//*[@class="restaurantlist-card"]//*[@class="restaurantlist-infos"]/a/@href'
+        ).getall():
+            yield scrapy.Request(url=url, callback=self.parse_details)
 
-    def parse(self, response, **kwargs):
-        for ref in response.xpath('//a[starts-with(@id, "snav_1_")]/@id').getall():
-            yield Request(
-                "https://mcd.lu/content.php?r={}&lang=de".format(ref.replace("snav_", "")), callback=self.parse_sd
-            )
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = None
-        item["addr_full"] = " ".join(
-            filter(None, map(str.strip, response.xpath('//div[@class="txt"]/h2/following::text()').getall()))
-        ).split(" Tel ", 1)[0]
-        item["lat"], item["lon"] = self.parse_latlon(response.text)
-
+    def parse_details(self, response):
+        item = Feature()
+        item["branch"] = (
+            response.xpath("//h2//text()").get().replace("McDonald’s ", "").replace("» ", "").replace(" «", "")
+        )
+        item["lat"], item["lon"] = re.search(r"setView\(\[(\d+\.\d+),\s*(\d+\.\d+)\],", response.text).groups()
+        item["ref"] = item["website"] = response.url
         yield item

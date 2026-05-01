@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import datetime
 from typing import Any
 
 from scrapy.http import Response
@@ -7,7 +8,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
+from locations.items import Feature, set_closed
 
 
 class MigrosCHSpider(SitemapSpider):
@@ -56,17 +57,12 @@ class MigrosCHSpider(SitemapSpider):
                     self.logger.error('unknown brand: "%s"' % brand_key)
                 continue
             brand, brand_wikidata, category = self.brands[brand_key]
-            extras = {
-                "start_date": market.get("opening_date"),
-                "end_date": market.get("closing_date"),
-            }
             item = Feature(
                 brand=brand,
                 brand_wikidata=brand_wikidata,
                 city=loc["city"],
                 country=loc["country"],
                 email=market["email"],
-                extras={k: v for k, v in extras.items() if v},
                 lat=loc["geo"]["lat"],
                 lon=loc["geo"]["lon"],
                 name=brand,
@@ -77,6 +73,12 @@ class MigrosCHSpider(SitemapSpider):
                 street_address=loc.get("address"),
                 website=response.url,
             )
+
+            if start_date := market.get("opening_date"):
+                item["extras"]["start_date"] = datetime.fromisoformat(start_date).strftime("%Y-%m-%d")
+            if end_date := market.get("closing_date"):
+                set_closed(item, datetime.fromisoformat(end_date))
+
             apply_category(category, item)
             yield item
 

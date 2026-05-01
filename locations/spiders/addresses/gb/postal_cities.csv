@@ -1,0 +1,2838 @@
+Outward Code,addr:city
+AB10,Aberdeen
+AB11,Aberdeen
+AB12,Aberdeen
+AB13,Aberdeen
+AB14,Peterculter
+AB15,Aberdeen
+AB16,Aberdeen
+AB21,Aberdeen
+AB22,Aberdeen
+AB23,Aberdeen
+AB24,Aberdeen
+AB25,Aberdeen
+AB30,Laurencekirk
+AB31,Banchory
+AB32,Westhill
+AB33,Alford
+AB34,Aboyne
+AB35,Ballater
+AB36,Strathdon
+AB37,Ballindalloch
+AB38,Aberlour
+AB39,Stonehaven
+AB41,Ellon
+AB42,Peterhead
+AB43,Fraserburgh
+AB44,Macduff
+AB45,Banff
+AB51,Inverurie
+AB52,Insch
+AB53,Turriff
+AB54,Huntly
+AB55,Keith
+AB56,Buckie
+AL1,St Albans
+AL10,Hatfield
+AL2,St Albans
+AL3,St Albans
+AL4,St Albans
+AL5,Harpenden
+AL6,Welwyn
+AL7,Welwyn Garden City
+AL8,Welwyn Garden City
+AL9,Hatfield
+B1,Birmingham
+B10,Birmingham
+B11,Birmingham
+B12,Birmingham
+B13,Birmingham
+B14,Birmingham
+B15,Birmingham
+B16,Birmingham
+B17,Birmingham
+B18,Birmingham
+B19,Birmingham
+B2,Birmingham
+B20,Birmingham
+B21,Birmingham
+B23,Birmingham
+B24,Birmingham
+B25,Birmingham
+B26,Birmingham
+B27,Birmingham
+B28,Birmingham
+B29,Birmingham
+B3,Birmingham
+B30,Birmingham
+B31,Birmingham
+B32,Birmingham
+B33,Birmingham
+B34,Birmingham
+B35,Birmingham
+B36,Solihull
+B37,Solihull
+B38,Birmingham
+B4,Birmingham
+B40,Birmingham
+B42,Birmingham
+B43,Birmingham
+B44,Birmingham
+B45,Birmingham
+B46,Water Orton
+B47,Hollywood
+B48,Alvechurch
+B49,Alcester
+B5,Birmingham
+B50,Bidford on Avon
+B6,Birmingham
+B60,Bromsgrove
+B61,Bromsgrove
+B62,Rowley Regis
+B63,Halesowen
+B64,Cradley Heath
+B65,Rowley Regis
+B66,Smethwick
+B67,Smethwick
+B68,Oldbury
+B69,Oldbury
+B7,Birmingham
+B70,West Bromwich
+B71,West Bromwich
+B72,Sutton Coldfield
+B73,Sutton Coldfield
+B74,Sutton Coldfield
+B75,Sutton Coldfield
+B76,Sutton Coldfield
+B77,Tamworth
+B78,Tamworth
+B79,Tamworth
+B8,Birmingham
+B80,Redditch
+B9,Birmingham
+B90,Solihull
+B91,Solihull
+B92,Solihull
+B93,Solihull
+B94,Solihull
+B95,Henley-in-Arden
+B96,Redditch
+B97,Redditch
+B98,Redditch
+BA1,Bath
+BA10,Bruton
+BA11,Frome
+BA12,Warminster
+BA13,Westbury
+BA14,Trowbridge
+BA15,South Wraxall
+BA16,Street
+BA2,Bath
+BA20,Yeovil
+BA21,Yeovil
+BA22,Yeovil
+BA3,Radstock
+BA4,Shepton Mallet
+BA5,Wells
+BA6,Glastonbury
+BA7,Castle Cary
+BA8,Templecombe
+BA9,Wincanton
+BB1,Blackburn
+BB10,Burnley
+BB11,Burnley
+BB12,Burnley
+BB18,Barnoldswick
+BB2,Blackburn
+BB3,Darwen
+BB4,Rossendale
+BB5,Accrington
+BB6,Blackburn
+BB7,Clitheroe
+BB8,Colne
+BB9,Nelson
+BD1,Bradford
+BD10,Bradford
+BD11,Bradford
+BD12,Bradford
+BD13,Bradford
+BD14,Bradford
+BD15,Bradford
+BD16,Bingley
+BD17,Shipley
+BD18,Shipley
+BD19,Cleckheaton
+BD2,Bradford
+BD20,Keighley
+BD21,Keighley
+BD22,Keighley
+BD23,Skipton
+BD24,Settle
+BD3,Bradford
+BD4,Bradford
+BD5,Bradford
+BD6,Bradford
+BD7,Bradford
+BD8,Bradford
+BD9,Bradford
+BD97,Bingley
+BH1,Bournemouth
+BH10,Bournemouth
+BH11,Bournemouth
+BH12,Poole
+BH13,Poole
+BH14,Poole
+BH15,Poole
+BH16,Poole
+BH17,Poole
+BH18,Broadstone
+BH19,Swanage
+BH2,Bournemouth
+BH20,Wareham
+BH21,Wimborne
+BH22,Ferndown
+BH23,Christchurch
+BH24,Ringwood
+BH25,New Milton
+BH3,Bournemouth
+BH31,Verwood
+BH4,Bournemouth
+BH5,Bournemouth
+BH6,Bournemouth
+BH7,Bournemouth
+BH8,Bournemouth
+BH9,Bournemouth
+BL0,Bury
+BL1,Bolton
+BL2,Bolton
+BL3,Bolton
+BL4,Bolton
+BL5,Bolton
+BL6,Bolton
+BL7,Bolton
+BL8,Bury
+BL9,Bury
+BN1,Brighton
+BN10,Peacehaven
+BN11,Worthing
+BN12,Worthing
+BN13,Worthing
+BN14,Worthing
+BN15,Lancing
+BN16,Rustington
+BN17,Littlehampton
+BN18,Arundel
+BN2,Brighton
+BN20,Eastbourne
+BN21,Eastbourne
+BN22,Eastbourne
+BN23,Eastbourne
+BN24,Pevensey Bay
+BN25,Seaford
+BN26,Polegate
+BN27,Hailsham
+BN3,Hove
+BN41,Brighton
+BN42,Brighton
+BN43,Shoreham-by-Sea
+BN44,Steyning
+BN45,Poynings
+BN5,Henfield
+BN6,Hassocks
+BN7,Lewes
+BN8,Lewes
+BN9,Newhaven
+BR1,Bromley
+BR2,Bromley
+BR3,Beckenham
+BR4,West Wickham
+BR5,Orpington
+BR6,Orpington
+BR7,Chislehurst
+BR8,Swanley
+BS1,Bristol
+BS10,Bristol
+BS11,Bristol
+BS13,Bristol
+BS14,Bristol
+BS15,Bristol
+BS16,Bristol
+BS2,Bristol
+BS20,Bristol
+BS21,Clevedon
+BS22,Weston-super-Mare
+BS23,Weston-super-Mare
+BS24,Weston-super-Mare
+BS25,Bristol
+BS26,Axbridge
+BS27,Cheddar
+BS28,Blackford
+BS29,Banwell
+BS3,Bristol
+BS30,Bristol
+BS31,Bristol
+BS32,Bristol
+BS34,Bristol
+BS35,Thornbury
+BS36,Bristol
+BS37,Yate
+BS39,Bristol
+BS4,Bristol
+BS40,Bristol
+BS41,Bristol
+BS48,Bristol
+BS49,Bristol
+BS5,Bristol
+BS6,Bristol
+BS7,Bristol
+BS8,Bristol
+BS9,Bristol
+BT1,Belfast
+BT10,Belfast
+BT11,Belfast
+BT12,Belfast
+BT13,Belfast
+BT14,Belfast
+BT15,Belfast
+BT16,Dundonald
+BT17,Belfast
+BT18,Holywood
+BT19,Groomsport
+BT2,Belfast
+BT20,Bangor
+BT21,Donaghadee
+BT22,Newtownards
+BT23,Newtownards
+BT24,Ballynahinch
+BT25,Dromore
+BT26,Hillsborough
+BT27,Lisburn
+BT28,Lisburn
+BT29,Crumlin
+BT3,Belfast
+BT30,"Killough, Downpatrick"
+BT31,Castlewellan
+BT32,Banbridge
+BT33,Newcastle
+BT34,Newry
+BT35,Newry
+BT36,Newtownabbey
+BT37,Newtownabbey
+BT38,Greenisland
+BT39,Ballyclare
+BT4,Belfast
+BT40,Larne
+BT41,Antrim
+BT42,Ballymena
+BT43,Ballymena
+BT44,Portglenone
+BT45,Magherafelt
+BT46,Maghera
+BT47,Claudy
+BT48,Londonderry
+BT49,Limavady
+BT5,Belfast
+BT51,Coleraine
+BT52,Coleraine
+BT53,Ballymoney
+BT54,Ballycastle
+BT55,Portstewart
+BT56,Portrush
+BT57,Bushmills
+BT6,Belfast
+BT60,Armagh
+BT61,Armagh
+BT62,Portadown
+BT63,Portadown
+BT64,Craigavon
+BT65,Craigavon
+BT66,Lurgan
+BT67,Moira
+BT68,Caledon
+BT69,Aughnacloy
+BT7,Belfast
+BT70,Dungannon
+BT71,Dungannon
+BT74,Enniskillen
+BT75,Fivemiletown
+BT76,Clogher
+BT77,Augher
+BT78,Omagh
+BT79,Omagh
+BT8,Belfast
+BT80,Cookstown
+BT81,Castlederg
+BT82,Strabane
+BT9,Belfast
+BT92,Lisnaskea
+BT93,Belleek
+BT94,Irvinestown
+CA1,Carlisle
+CA10,Orton
+CA11,Penrith
+CA12,Keswick
+CA13,Cockermouth
+CA14,Workington
+CA15,Maryport
+CA16,Appleby-in-Westmorland
+CA17,Kirkby Stephen
+CA18,Ravenglass
+CA19,Holmrook
+CA2,Carlisle
+CA20,Seascale
+CA21,Beckermet
+CA22,Egremont
+CA23,Cleator
+CA24,Moor Row
+CA25,Cleator Moor
+CA26,Frizington
+CA27,St Bees
+CA28,Whitehaven
+CA3,Carlisle
+CA4,Carlisle
+CA5,Carlisle
+CA6,Carlisle
+CA7,Wigton
+CA8,Brampton
+CA9,Alston
+CB1,Cambridge
+CB10,Great Chesterford
+CB11,Widdington
+CB2,Cambridge
+CB21,Cambridge
+CB22,Great Shelford
+CB23,Cambridge
+CB24,Cambridge
+CB25,Waterbeach
+CB3,Cambridge
+CB4,Cambridge
+CB5,Cambridge
+CB6,Ely
+CB7,Ely
+CB8,Newmarket
+CB9,Haverhill
+CF10,Cardiff
+CF11,Cardiff
+CF14,Cardiff
+CF15,Cardiff
+CF23,Cardiff
+CF24,Cardiff
+CF3,Cardiff
+CF31,Bridgend
+CF32,Bridgend
+CF33,Bridgend
+CF34,Maesteg
+CF35,Bridgend
+CF36,Porthcawl
+CF37,Pontypridd
+CF38,Pontypridd
+CF39,Tonyrefail
+CF40,Tonypandy
+CF41,Pentre
+CF42,Treorchy
+CF43,Penrhys
+CF44,Aberdare
+CF45,Mountain Ash
+CF46,Treharris
+CF47,Merthyr Tydfil
+CF48,Merthyr Tydfil
+CF5,Cardiff
+CF61,Llantwit Major
+CF62,Barry
+CF63,Barry
+CF64,Penarth
+CF71,Cowbridge
+CF72,Pontyclun
+CF81,Bargoed
+CF82,Ystrad Mynach
+CF83,Caerphilly
+CF99,Cardiff
+CH1,Chester
+CH2,Chester
+CH3,Chester
+CH4,Chester
+CH41,Birkenhead
+CH42,Birkenhead
+CH43,Prenton
+CH44,Wallasey
+CH45,Wallasey
+CH46,Wirral
+CH47,Wirral
+CH48,Wirral
+CH49,Wirral
+CH5,Deeside
+CH6,Flint
+CH60,Wirral
+CH61,Wirral
+CH62,Wirral
+CH63,Wirral
+CH64,Neston
+CH65,Ellesmere Port
+CH66,Ellesmere Port
+CH7,Mold
+CH8,Holywell
+CH99,Chester
+CM0,Burnham-On-Crouch
+CM1,Chelmsford
+CM11,Billericay
+CM12,Billericay
+CM13,Brentwood
+CM14,Brentwood
+CM15,Brentwood
+CM16,Epping
+CM17,Harlow
+CM18,Harlow
+CM19,Harlow
+CM2,Chelmsford
+CM20,Harlow
+CM21,Sawbridgeworth
+CM22,Bishop's Stortford
+CM23,Bishop's Stortford
+CM24,Stansted
+CM3,Chelmsford
+CM4,Ingatestone
+CM5,Ongar
+CM6,Dunmow
+CM7,Braintree
+CM77,Braintree
+CM8,Witham
+CM9,Maldon
+CM92,Chelmsford
+CO1,Colchester
+CO10,Sudbury
+CO11,Manningtree
+CO12,Harwich
+CO13,Frinton-on-Sea
+CO14,Walton-on-the-Naze
+CO15,Clacton-on-Sea
+CO16,Clacton-on-Sea
+CO2,Colchester
+CO3,Colchester
+CO4,Colchester
+CO5,Tiptree
+CO6,Colchester
+CO7,Brightlingsea
+CO8,Bures
+CO9,Castle Hedingham
+CR0,Croydon
+CR2,South Croydon
+CR3,Caterham
+CR4,Mitcham
+CR5,Coulsdon
+CR6,Warlingham
+CR7,Thornton Heath
+CR8,Purley
+CR9,Croydon
+CT1,Canterbury
+CT10,Broadstairs
+CT11,Ramsgate
+CT12,Ramsgate
+CT13,Sandwich
+CT14,Deal
+CT15,Swingfield
+CT16,Dover
+CT17,Dover
+CT18,Hawkinge
+CT19,Folkestone
+CT2,Canterbury
+CT20,Folkestone
+CT21,Hythe
+CT3,Canterbury
+CT4,Canterbury
+CT5,Whitstable
+CT6,Herne Bay
+CT7,Birchington
+CT8,Westgate-on-Sea
+CT9,Margate
+CV1,Coventry
+CV10,Nuneaton
+CV11,Nuneaton
+CV12,Bedworth
+CV13,Market Bosworth
+CV2,Coventry
+CV21,Rugby
+CV22,Rugby
+CV23,Rugby
+CV3,Coventry
+CV31,Leamington Spa
+CV32,Leamington Spa
+CV33,Harbury
+CV34,Warwick
+CV35,Hampton Magna
+CV36,Shipston on Stour
+CV37,Stratford upon Avon
+CV4,Coventry
+CV47,Southam
+CV5,Coventry
+CV6,Coventry
+CV7,Coventry
+CV8,Kenilworth
+CV9,Atherstone
+CW1,Crewe
+CW10,Middlewich
+CW11,Sandbach
+CW12,Congleton
+CW2,Crewe
+CW3,Crewe
+CW4,Holmes Chapel
+CW5,Nantwich
+CW6,Tarporley
+CW7,Winsford
+CW8,Northwich
+CW9,Northwich
+DA1,Dartford
+DA10,Ebbsfleet Valley
+DA11,Gravesend
+DA12,Gravesend
+DA13,Gravesend
+DA14,Sidcup
+DA15,Sidcup
+DA16,Welling
+DA17,Belvedere
+DA18,Erith
+DA2,Dartford
+DA3,Longfield
+DA4,Dartford
+DA5,Bexley
+DA6,Bexleyheath
+DA7,Bexleyheath
+DA8,Erith
+DA9,Greenhithe
+DD1,Dundee
+DD10,Montrose
+DD11,Arbroath
+DD2,Dundee
+DD3,Dundee
+DD4,Dundee
+DD5,Dundee
+DD6,Newport-on-Tay
+DD7,Carnoustie
+DD8,Forfar
+DD9,Brechin
+DE1,Derby
+DE11,Swadlincote
+DE12,Swadlincote
+DE13,Burton-on-Trent
+DE14,Burton-on-Trent
+DE15,Burton-on-Trent
+DE21,Derby
+DE22,Derby
+DE23,Derby
+DE24,Derby
+DE3,Derby
+DE4,Matlock
+DE45,Bakewell
+DE5,Ripley
+DE55,Alfreton
+DE56,Belper
+DE6,Ashbourne
+DE65,Derby
+DE7,Ilkeston
+DE72,Derby
+DE73,Derby
+DE74,Derby
+DE75,Heanor
+DG1,Dumfries
+DG10,Moffat
+DG11,Lockerbie
+DG12,Annan
+DG13,Langholm
+DG14,Canonbie
+DG16,Gretna
+DG2,Dumfries
+DG3,Thornhill
+DG4,Sanquhar
+DG5,Dalbeattie
+DG6,Kirkcudbright
+DG7,Castle Douglas
+DG8,Newton Stewart
+DG9,Stranraer
+DH1,Durham
+DH2,Chester-le-Street
+DH3,Chester-le-Street
+DH4,Houghton-le-Spring
+DH5,Houghton-le-Spring
+DH6,Durham
+DH7,Durham
+DH8,Consett
+DH9,Stanley
+DL1,Darlington
+DL10,Richmond
+DL11,Richmond
+DL12,Barnard Castle
+DL13,Bishop Auckland
+DL14,Bishop Auckland
+DL15,Crook
+DL16,Spennymoor
+DL17,Ferryhill
+DL2,Darlington
+DL3,Darlington
+DL4,Shildon
+DL5,Newton Aycliffe
+DL6,Northallerton
+DL7,Northallerton
+DL8,Bedale
+DL9,Catterick Garrison
+DN1,Doncaster
+DN10,Doncaster
+DN11,Doncaster
+DN12,Doncaster
+DN14,Goole
+DN15,Scunthorpe
+DN16,Scunthorpe
+DN17,Scunthorpe
+DN18,Barton-upon-Humber
+DN19,Barrow-upon-Humber
+DN2,Doncaster
+DN20,Brigg
+DN21,Gainsborough
+DN22,Retford
+DN3,Doncaster
+DN31,Grimsby
+DN32,Grimsby
+DN33,Grimsby
+DN34,Grimsby
+DN35,Cleethorpes
+DN36,Grimsby
+DN37,Grimsby
+DN38,Barnetby
+DN39,Ulceby
+DN4,Doncaster
+DN40,Immingham
+DN41,Grimsby
+DN5,Doncaster
+DN6,Doncaster
+DN7,Doncaster
+DN8,Doncaster
+DN9,Doncaster
+DT1,Dorchester
+DT10,Sturminster Newton
+DT11,Blandford Forum
+DT2,Puddletown
+DT3,Weymouth
+DT4,Weymouth
+DT5,Portland
+DT6,Bridport
+DT7,Lyme Regis
+DT8,Beaminster
+DT9,Sherborne
+DY1,Dudley
+DY10,Kidderminster
+DY11,Kidderminster
+DY12,Bewdley
+DY13,Stourport on Severn
+DY14,Cleobury Mortimer
+DY2,Dudley
+DY3,Dudley
+DY4,Tipton
+DY5,Brierley Hill
+DY6,Kingswinford
+DY7,Stourbridge
+DY8,Stourbridge
+DY9,Stourbridge
+E1,London
+E10,London
+E11,London
+E12,London
+E13,London
+E14,London
+E15,London
+E16,London
+E17,London
+E18,London
+E1W,London
+E2,London
+E20,London
+E22,London
+E3,London
+E4,London
+E5,London
+E6,London
+E7,London
+E8,London
+E9,London
+EC1A,London
+EC1M,London
+EC1N,London
+EC1R,London
+EC1V,London
+EC1Y,London
+EC2A,London
+EC2M,London
+EC2N,London
+EC2R,London
+EC2V,London
+EC2Y,London
+EC3A,London
+EC3M,London
+EC3N,London
+EC3R,London
+EC3V,London
+EC4A,London
+EC4M,London
+EC4N,London
+EC4R,London
+EC4V,London
+EC4Y,London
+EH1,Edinburgh
+EH10,Edinburgh
+EH11,Edinburgh
+EH12,Edinburgh
+EH13,Edinburgh
+EH14,Edinburgh
+EH15,Edinburgh
+EH16,Edinburgh
+EH17,Edinburgh
+EH18,Lasswade
+EH19,Bonnyrigg
+EH2,Edinburgh
+EH20,Loanhead
+EH21,Musselburgh
+EH22,Dalkeith
+EH23,Gorebridge
+EH24,Rosewell
+EH25,Roslin
+EH26,Penicuik
+EH27,Kirknewton
+EH28,Edinburgh
+EH29,Kirkliston
+EH3,Edinburgh
+EH30,South Queensferry
+EH31,Gullane
+EH32,Prestonpans
+EH33,Tranent
+EH34,Pencaitland
+EH35,Ormiston
+EH36,Humbie
+EH37,Pathhead
+EH38,Heriot
+EH39,North Berwick
+EH4,Edinburgh
+EH40,East Linton
+EH41,Haddington
+EH42,Dunbar
+EH43,Walkerburn
+EH44,Innerleithen
+EH45,Peebles
+EH46,West Linton
+EH47,Bathgate
+EH48,Bathgate
+EH49,Linlithgow
+EH5,Edinburgh
+EH51,Bo'Ness
+EH52,Winchburgh
+EH53,East Calder
+EH54,Livingston
+EH55,West Calder
+EH6,Edinburgh
+EH7,Edinburgh
+EH8,Edinburgh
+EH9,Edinburgh
+EH99,Edinburgh
+EN1,Enfield
+EN10,Broxbourne
+EN11,Hoddesdon
+EN2,Enfield
+EN3,Enfield
+EN4,Barnet
+EN5,Barnet
+EN6,Potters Bar
+EN7,Waltham Cross
+EN8,Cheshunt
+EN9,Waltham Abbey
+EX1,Exeter
+EX10,Sidmouth
+EX11,Ottery St Mary
+EX12,Seaton
+EX13,Axminster
+EX14,Honiton
+EX15,Cullompton
+EX16,Tiverton
+EX17,Crediton
+EX18,Chulmleigh
+EX19,Winkleigh
+EX2,Exeter
+EX20,Okehampton
+EX21,Beaworthy
+EX22,Holsworthy
+EX23,Bude
+EX24,Colyton
+EX3,Exeter
+EX31,Barnstaple
+EX32,Barnstaple
+EX33,Braunton
+EX34,Ilfracombe
+EX35,Lynton
+EX36,South Molton
+EX37,Umberleigh
+EX38,Torrington
+EX39,Bideford
+EX4,Exeter
+EX5,Exeter
+EX6,Exeter
+EX7,Dawlish
+EX8,Exmouth
+EX9,Budleigh Salterton
+FK1,Falkirk
+FK10,Alloa
+FK11,Menstrie
+FK12,Alva
+FK13,Tillicoultry
+FK14,Dollar
+FK15,Dunblane
+FK16,Doune
+FK17,Callander
+FK18,Callander
+FK19,Lochearnhead
+FK2,Falkirk
+FK20,Crianlarich
+FK21,Killin
+FK3,Grangemouth
+FK4,Bonnybridge
+FK5,Larbert
+FK6,Denny
+FK7,Stirling
+FK8,Stirling
+FK9,Stirling
+FY1,Blackpool
+FY2,Blackpool
+FY3,Blackpool
+FY4,Blackpool
+FY5,Thornton-Cleveleys
+FY6,Poulton-le-Fylde
+FY7,Fleetwood
+FY8,Lytham St Annes
+G1,Glasgow
+G11,Glasgow
+G12,Glasgow
+G13,Glasgow
+G14,Glasgow
+G15,Glasgow
+G2,Glasgow
+G20,Glasgow
+G21,Glasgow
+G22,Glasgow
+G23,Glasgow
+G3,Glasgow
+G31,Glasgow
+G32,Glasgow
+G33,Glasgow
+G34,Glasgow
+G4,Glasgow
+G40,Glasgow
+G41,Glasgow
+G42,Glasgow
+G43,Glasgow
+G44,Glasgow
+G45,Glasgow
+G46,Glasgow
+G5,Glasgow
+G51,Glasgow
+G52,Glasgow
+G53,Glasgow
+G60,Glasgow
+G61,Glasgow
+G62,Glasgow
+G63,Glasgow
+G64,Glasgow
+G65,Kilsyth
+G66,Glasgow
+G67,Cumbernauld
+G68,Cumbernauld
+G69,Glasgow
+G71,Glasgow
+G72,Glasgow
+G73,Glasgow
+G74,Glasgow
+G75,Glasgow
+G76,Glasgow
+G77,Glasgow
+G78,Glasgow
+G79,East Kilbride
+G81,Clydebank
+G82,Dumbarton
+G83,Alexandria
+G84,Helensburgh
+GL1,Gloucester
+GL10,Stonehouse
+GL11,Dursley
+GL12,Wotton-under-Edge
+GL13,Bristol
+GL14,Newnham on Severn
+GL15,Lydney
+GL16,Coleford
+GL17,Drybrook
+GL18,Newent
+GL19,Gloucester
+GL2,Gloucester
+GL20,Tewkesbury
+GL3,Gloucester
+GL4,Gloucester
+GL5,Stroud
+GL50,Cheltenham
+GL51,Cheltenham
+GL52,Cheltenham
+GL53,Cheltenham
+GL54,Cheltenham
+GL55,Chipping Campden
+GL56,Moreton-in-Marsh
+GL6,Stroud
+GL7,Cirencester
+GL8,Tetbury
+GL9,Acton Turville
+GU1,Guildford
+GU10,Farnham
+GU11,Aldershot
+GU12,Ash Vale
+GU14,Farnborough
+GU15,Camberley
+GU16,Frimley
+GU17,Blackwater
+GU18,Lightwater
+GU19,Bagshot
+GU2,Guildford
+GU20,Windlesham
+GU21,Woking
+GU22,Woking
+GU23,Ripley
+GU24,Woking
+GU25,Virginia Water
+GU26,Hindhead
+GU27,Haslemere
+GU28,Petworth
+GU29,Midhurst
+GU3,Guildford
+GU30,Liphook
+GU31,Petersfield
+GU32,Petersfield
+GU33,Liss
+GU34,Alton
+GU35,Bordon
+GU4,Chilworth
+GU46,Yateley
+GU47,Sandhurst
+GU5,Bramley
+GU51,Fleet
+GU52,Fleet
+GU6,Cranleigh
+GU7,Godalming
+GU8,Hambledon
+GU9,Farnham
+HA0,Wembley
+HA1,Harrow
+HA2,Harrow
+HA3,Harrow
+HA4,Ruislip
+HA5,Pinner
+HA6,Northwood
+HA7,Stanmore
+HA8,Edgware
+HA9,Wembley
+HD1,Huddersfield
+HD2,Huddersfield
+HD3,Huddersfield
+HD4,Huddersfield
+HD5,Huddersfield
+HD6,Brighouse
+HD7,Huddersfield
+HD8,Huddersfield
+HD9,Holmfirth
+HG1,Harrogate
+HG2,Harrogate
+HG3,Harrogate
+HG4,Ripon
+HG5,Knaresborough
+HP1,Hemel Hempstead
+HP10,High Wycombe
+HP11,High Wycombe
+HP12,High Wycombe
+HP13,High Wycombe
+HP14,High Wycombe
+HP15,High Wycombe
+HP16,Great Missenden
+HP17,Haddenham
+HP18,Aylesbury
+HP19,Aylesbury
+HP2,Hemel Hempstead
+HP20,Aylesbury
+HP21,Aylesbury
+HP22,Aylesbury
+HP23,Tring
+HP27,Speen
+HP3,Hemel Hempstead
+HP4,Berkhamsted
+HP5,Chesham
+HP6,Amersham
+HP7,Amersham
+HP8,Chalfont St Giles
+HP9,Beaconsfield
+HR1,Hereford
+HR2,Hereford
+HR3,Glasbury
+HR4,Hereford
+HR5,Kington
+HR6,Leominster
+HR7,Bromyard
+HR8,Ledbury
+HR9,Ross-on-Wye
+HS1,Stornoway
+HS2,Isle of Lewis
+HS3,Isle of Harris
+HS4,Isle of Scalpay
+HS5,Isle of Harris
+HS6,Isle of North Uist
+HS7,Isle of Benbecula
+HS8,Isle of South Uist
+HS9,Isle of Barra
+HU1,Hull
+HU10,Hull
+HU11,Hull
+HU12,Hull
+HU13,Hessle
+HU14,North Ferriby
+HU15,Brough
+HU16,Cottingham
+HU17,Beverley
+HU18,Hornsea
+HU19,Withernsea
+HU2,Hull
+HU20,Cottingham
+HU3,Hull
+HU4,Hull
+HU5,Hull
+HU6,Kingston upon Hull
+HU7,Kingston upon Hull
+HU8,Hull
+HU9,Hull
+HX1,Halifax
+HX2,Halifax
+HX3,Halifax
+HX4,Halifax
+HX5,Elland
+HX6,Sowerby Bridge
+HX7,Hebden Bridge
+IG1,Ilford
+IG10,Loughton
+IG11,Barking
+IG2,Ilford
+IG3,Ilford
+IG4,Ilford
+IG5,Ilford
+IG6,Ilford
+IG7,Chigwell
+IG8,Woodford Green
+IG9,Buckhurst Hill
+IP1,Ipswich
+IP10,Ipswich
+IP11,Felixstowe
+IP12,Woodbridge
+IP13,Woodbridge
+IP14,Stowmarket
+IP15,Aldeburgh
+IP16,Leiston
+IP17,Saxmundham
+IP18,Southwold
+IP19,Halesworth
+IP2,Ipswich
+IP20,Harleston
+IP21,Diss
+IP22,Diss
+IP23,Eye
+IP24,Thetford
+IP25,Thetford
+IP26,Thetford
+IP27,Brandon
+IP28,Bury St Edmunds
+IP29,Bury St Edmunds
+IP3,Ipswich
+IP30,Bury St Edmunds
+IP31,Bury St Edmunds
+IP32,Bury St Edmunds
+IP33,Bury St Edmunds
+IP4,Ipswich
+IP5,Ipswich
+IP6,Barking
+IP7,Hadleigh
+IP8,Ipswich
+IP9,Ipswich
+IP98,Diss
+IV1,Inverness
+IV10,Fortrose
+IV11,Cromarty
+IV12,Nairn
+IV13,Inverness
+IV14,Strathpeffer
+IV15,Dingwall
+IV16,Evanton
+IV17,Alness
+IV18,Invergordon
+IV19,Tain
+IV2,Inverness
+IV20,Tain
+IV21,Gairloch
+IV22,Achnasheen
+IV23,Garve
+IV24,Ardgay
+IV25,Dornoch
+IV26,Ullapool
+IV27,Lairg
+IV28,Rogart
+IV3,Inverness
+IV30,Elgin
+IV31,Lossiemouth
+IV32,Fochabers
+IV36,Forres
+IV4,Beauly
+IV40,Kyle
+IV41,Kyleakin
+IV42,Ashaig
+IV43,Isle of Skye
+IV44,Isle of Skye
+IV45,Isle of Skye
+IV46,Isle of Skye
+IV47,"Carbost, Isle of Skye"
+IV48,Sconser
+IV49,Isle of Skye
+IV5,Kirkhill
+IV51,Portree
+IV52,Plockton
+IV53,Strome Ferry
+IV54,Strathcarron
+IV55,Dunvegan
+IV56,Isle Of Skye
+IV6,Muir of Ord
+IV63,Inverness
+IV7,Culbokie
+IV8,Munlochy
+IV9,Avoch
+KA1,Kilmarnock
+KA10,Troon
+KA11,Irvine
+KA12,Irvine
+KA13,Kilwinning
+KA14,Glengarnock
+KA15,Beith
+KA16,Newmilns
+KA17,Darvel
+KA18,Ochiltree
+KA19,Maybole
+KA2,Kilmarnock
+KA20,Stevenston
+KA21,Saltcoats
+KA22,Ardrossan
+KA23,West Kilbride
+KA24,Dalry
+KA25,Kilbirnie
+KA26,Girvan
+KA27,Isle of Arran
+KA28,Isle Of Cumbrae
+KA29,Fairlie
+KA3,Kilmarnock
+KA30,Largs
+KA4,Galston
+KA5,Mauchline
+KA6,Ayr
+KA7,Ayr
+KA8,Ayr
+KA9,Prestwick
+KT1,Kingston upon Thames
+KT10,Esher
+KT11,Cobham
+KT12,Walton-on-Thames
+KT13,Weybridge
+KT14,Byfleet
+KT15,Addlestone
+KT16,Chertsey
+KT17,Epsom
+KT18,Epsom
+KT19,Epsom
+KT2,Kingston upon Thames
+KT20,Tadworth
+KT21,Ashtead
+KT22,Leatherhead
+KT23,Great Bookham
+KT24,East Horsley
+KT3,New Malden
+KT4,Worcester Park
+KT5,Surbiton
+KT6,Surbiton
+KT7,Thames Ditton
+KT8,Molesey
+KT9,Chessington
+KW1,Wick
+KW10,Golspie
+KW11,Kinbrace
+KW12,Halkirk
+KW13,Forsinard
+KW14,Thurso
+KW15,Kirkwall
+KW16,Stromness
+KW17,Finstown
+KW2,
+KW3,Lybster
+KW5,Latheron
+KW6,Dunbeath
+KW7,Berriedale
+KW8,Helmsdale
+KW9,Brora
+KY1,Kirkcaldy
+KY10,Anstruther
+KY11,Dalgety Bay
+KY12,Dunfermline
+KY13,Kinross
+KY14,Newburgh
+KY15,Cupar
+KY16,St. Andrews
+KY2,Kirkcaldy
+KY3,Burntisland
+KY4,Lumphinnans
+KY5,Lochgelly
+KY6,Glenrothes
+KY7,Glenrothes
+KY8,Upper Largo
+KY9,Elie
+L1,Liverpool
+L10,Liverpool
+L11,Liverpool
+L12,Liverpool
+L13,Liverpool
+L14,Liverpool
+L15,Liverpool
+L16,Liverpool
+L17,Liverpool
+L18,Liverpool
+L19,Liverpool
+L2,Liverpool
+L20,Liverpool
+L21,Liverpool
+L22,Liverpool
+L23,Liverpool
+L24,Liverpool
+L25,Liverpool
+L26,Liverpool
+L27,Liverpool
+L28,Liverpool
+L29,Liverpool
+L3,Liverpool
+L30,Liverpool
+L31,Liverpool
+L32,Liverpool
+L33,Liverpool
+L34,Prescot
+L35,Liverpool
+L36,Liverpool
+L37,Formby
+L38,Liverpool
+L39,Ormskirk
+L4,Liverpool
+L40,Ormskirk
+L5,Liverpool
+L6,Liverpool
+L69,Liverpool
+L7,Liverpool
+L70,Liverpool
+L8,Liverpool
+L9,Liverpool
+LA1,Lancaster
+LA10,Sedbergh
+LA11,Grange-over-Sands
+LA12,Ulverston
+LA13,Barrow-in-Furness
+LA14,Barrow-in-Furness
+LA15,Dalton-in-Furness
+LA16,Askam-in-Furness
+LA17,Kirkby-in-Furness
+LA18,Millom
+LA19,Bootle
+LA2,Halton
+LA20,Ulpha
+LA21,Coniston
+LA22,Ambleside
+LA23,Windermere
+LA3,Morecambe
+LA4,Morecambe
+LA5,Carnforth
+LA6,Holme
+LA7,Milnthorpe
+LA8,Staveley
+LA9,Kendal
+LD1,Llandrindod Wells
+LD2,Builth Wells
+LD3,Brecon
+LD4,Llangammarch Wells
+LD5,Llanwrtyd Wells
+LD6,Rhayader
+LD7,Knighton
+LD8,Presteigne
+LE1,Leicester
+LE10,Hinckley
+LE11,Loughborough
+LE12,Loughborough
+LE13,Melton Mowbray
+LE14,Melton Mowbray
+LE15,Oakham
+LE16,Market Harborough
+LE17,Lutterworth
+LE18,Wigston
+LE19,Leicester
+LE2,Leicester
+LE3,Leicester
+LE4,Leicester
+LE5,Leicester
+LE6,Leicester
+LE65,Ashby-de-la-Zouch
+LE67,Coalville
+LE7,Leicester
+LE8,Blaby
+LE9,Leicester
+LL11,Wrexham
+LL12,Rossett
+LL13,Wrexham
+LL14,Chirk
+LL15,Ruthin
+LL16,Denbigh
+LL17,St Asaph
+LL18,Rhyl
+LL19,Prestatyn
+LL20,Llangollen
+LL21,Corwen
+LL22,Abergele
+LL23,Y Bala
+LL24,Betws y Coed
+LL25,Dolwyddelan
+LL26,Llanrwst
+LL27,Trefriw
+LL28,Colwyn Bay
+LL29,Colwyn Bay
+LL30,Llandudno
+LL31,Llandudno Junction
+LL32,Conwy
+LL33,Llanfairfechan
+LL34,Penmaenmawr
+LL35,Aberdyfi
+LL36,Tywyn
+LL37,Llwyngwril
+LL38,Fairbourne
+LL39,Arthog
+LL40,Dolgellau
+LL41,Blaenau Ffestiniog
+LL42,Barmouth
+LL43,Talybont
+LL44,Dyffryn Ardudwy
+LL45,Llanbedr
+LL46,Harlech
+LL47,Talsarnau
+LL48,Penrhyndeudraeth
+LL49,Porthmadog
+LL51,Garndolbenmaen
+LL52,Criccieth
+LL53,Pwllheli
+LL54,Penygroes
+LL55,Caernarfon
+LL56,Y Felinheli
+LL57,Bangor
+LL58,Beaumaris
+LL59,Menai Bridge
+LL60,Gaerwen
+LL61,Llanfairpwllgwyngyll
+LL62,Bodorgan
+LL63,Llanfaelog
+LL64,Rhosneigr
+LL65,Holyhead
+LL66,Rhosgoch
+LL67,Bae Cemaes
+LL68,Amlwch
+LL69,Penysarn
+LL70,Dulas
+LL71,Llanerchymedd
+LL72,Moelfre
+LL73,Marianglas
+LL74,Benllech
+LL75,Pentraeth
+LL76,Llanbedrgoch
+LL77,Llangefni
+LL78,Brynteg
+LN1,Lincoln
+LN10,Woodhall Spa
+LN11,Louth
+LN12,Mablethorpe
+LN13,Alford
+LN2,Lincoln
+LN3,Lincoln
+LN4,Lincoln
+LN5,Lincoln
+LN6,Lincoln
+LN7,Market Rasen
+LN8,Market Rasen
+LN9,Horncastle
+LS1,Leeds
+LS10,Leeds
+LS11,Leeds
+LS12,Leeds
+LS13,Leeds
+LS14,Leeds
+LS15,Leeds
+LS16,Leeds
+LS17,Leeds
+LS18,Leeds
+LS19,Leeds
+LS2,Leeds
+LS20,Leeds
+LS21,Otley
+LS22,Wetherby
+LS23,Wetherby
+LS24,Tadcaster
+LS25,Leeds
+LS26,Leeds
+LS27,Leeds
+LS28,Pudsey
+LS29,Ilkley
+LS3,Leeds
+LS4,Leeds
+LS5,Leeds
+LS6,Leeds
+LS7,Leeds
+LS8,Leeds
+LS9,Leeds
+LS98,Leeds
+LU1,Luton
+LU2,Luton
+LU3,Luton
+LU4,Luton
+LU5,Dunstable
+LU6,Dunstable
+LU7,Leighton Buzzard
+M1,Manchester
+M11,Manchester
+M12,Manchester
+M13,Manchester
+M14,Manchester
+M15,Manchester
+M16,Manchester
+M17,Manchester
+M18,Manchester
+M19,Manchester
+M2,Manchester
+M20,Manchester
+M21,Manchester
+M22,Manchester
+M23,Manchester
+M24,Middleton
+M25,Manchester
+M26,Manchester
+M27,Manchester
+M28,Manchester
+M29,Tyldesley
+M3,Salford
+M30,Salford
+M31,Manchester
+M32,Manchester
+M33,Sale
+M34,Manchester
+M35,Manchester
+M38,Salford
+M4,Manchester
+M40,Manchester
+M41,Manchester
+M43,Manchester
+M44,Salford
+M45,Whitefield
+M46,Manchester
+M5,Salford
+M50,Salford
+M6,Salford
+M60,Manchester
+M7,Salford
+M8,Manchester
+M9,Manchester
+M90,Manchester
+ME1,Rochester
+ME10,Sittingbourne
+ME11,Queenborough
+ME12,Sheerness
+ME13,Faversham
+ME14,Maidstone
+ME15,Maidstone
+ME16,Maidstone
+ME17,Maidstone
+ME18,Maidstone
+ME19,"Kings Hill, West Malling"
+ME2,Rochester
+ME20,Aylesford
+ME3,Rochester
+ME4,Chatham
+ME5,Chatham
+ME6,Snodland
+ME7,Gillingham
+ME8,Gillingham
+ME9,Teynham
+MK1,Milton Keynes
+MK10,Milton Keynes
+MK11,Milton Keynes
+MK12,Milton Keynes
+MK13,Milton Keynes
+MK14,Milton Keynes
+MK15,Milton Keynes
+MK16,Milton Keynes
+MK17,Aspley Guise
+MK18,Buckingham
+MK19,Milton Keynes
+MK2,Milton Keynes
+MK3,Milton Keynes
+MK4,Milton Keynes
+MK40,Bedford
+MK41,Bedford
+MK42,Bedford
+MK43,Marston Moretaine
+MK44,Sharnbrook
+MK45,Bedford
+MK46,Olney
+MK5,Milton Keynes
+MK6,Milton Keynes
+MK7,Milton Keynes
+MK8,Milton Keynes
+MK9,Milton Keynes
+ML1,Motherwell
+ML10,Strathaven
+ML11,Lesmahagow
+ML12,Biggar
+ML2,Wishaw
+ML3,Hamilton
+ML4,Bellshill
+ML5,Coatbridge
+ML6,Airdrie
+ML7,Shotts
+ML8,Law
+ML9,Larkhall
+N1,London
+N10,London
+N11,London
+N12,London
+N13,London
+N14,London
+N15,London
+N16,London
+N17,London
+N18,London
+N19,London
+N1C,London
+N2,London
+N20,London
+N21,London
+N22,London
+N3,London
+N4,London
+N5,London
+N6,London
+N7,London
+N8,London
+N9,London
+NE1,Newcastle Upon Tyne
+NE10,Gateshead
+NE11,Gateshead
+NE12,Newcastle upon Tyne
+NE13,Newcastle upon Tyne
+NE15,Newcastle Upon Tyne
+NE16,Newcastle upon Tyne
+NE17,Newcastle upon Tyne
+NE18,Newcastle upon Tyne
+NE19,Newcastle upon Tyne
+NE2,Newcastle Upon Tyne
+NE20,Newcastle upon Tyne
+NE21,Blaydon-on-Tyne
+NE22,Bedlington
+NE23,Cramlington
+NE24,Blyth
+NE25,Whitley Bay
+NE26,Whitley Bay
+NE27,Newcastle upon Tyne
+NE28,Wallsend
+NE29,North Shields
+NE3,Newcastle Upon Tyne
+NE30,North Shields
+NE31,Hebburn
+NE32,Jarrow
+NE33,South Shields
+NE34,South Shields
+NE35,Boldon Colliery
+NE36,East Boldon
+NE37,Washington
+NE38,Washington
+NE39,Rowlands Gill
+NE4,Newcastle Upon Tyne
+NE40,Ryton
+NE41,Wylam
+NE42,Prudhoe
+NE43,Stocksfield
+NE44,Riding Mill
+NE45,Corbridge
+NE46,Hexham
+NE47,Hexham
+NE48,Hexham
+NE49,Haltwhistle
+NE5,Newcastle upon Tyne
+NE6,Newcastle Upon Tyne
+NE61,Morpeth
+NE62,Choppington
+NE63,Ashington
+NE64,Newbiggin-by-the-Sea
+NE65,Morpeth
+NE66,Alnwick
+NE67,Chathill
+NE68,Seahouses
+NE69,Bamburgh
+NE7,Newcastle Upon Tyne
+NE70,Belford
+NE71,Wooler
+NE8,Gateshead
+NE9,Gateshead
+NE98,Newcastle Upon Tyne
+NE99,Newcastle Upon Tyne
+NG1,Nottingham
+NG10,Nottingham
+NG11,Nottingham
+NG12,Nottingham
+NG13,Nottingham
+NG14,Nottingham
+NG15,Nottingham
+NG16,Nottingham
+NG17,Nottingham
+NG18,Mansfield
+NG19,Mansfield
+NG2,Nottingham
+NG20,Mansfield
+NG21,Mansfield
+NG22,Newark
+NG23,Newark
+NG24,Newark
+NG25,Southwell
+NG3,Nottingham
+NG31,Grantham
+NG32,Grantham
+NG33,Grantham
+NG34,Sleaford
+NG4,Nottingham
+NG5,Nottingham
+NG6,Nottingham
+NG7,Nottingham
+NG8,Nottingham
+NG80,Nottingham
+NG9,Nottingham
+NG90,Nottingham
+NN1,Northampton
+NN10,Rushden
+NN11,Daventry
+NN12,Towcester
+NN13,Brackley
+NN14,Kettering
+NN15,Kettering
+NN16,Kettering
+NN17,Corby
+NN18,Corby
+NN2,Northampton
+NN29,Wellingborough
+NN3,Northampton
+NN4,Northampton
+NN5,Northampton
+NN6,Northampton
+NN7,Northampton
+NN8,Wellingborough
+NN9,Wellingborough
+NP10,Newport
+NP11,Newport
+NP12,Blackwood
+NP13,Abertillery
+NP15,Usk
+NP16,Chepstow
+NP18,Newport
+NP19,Newport
+NP20,Newport
+NP22,Tredegar
+NP23,Ebbw Vale
+NP24,New Tredegar
+NP25,Monmouth
+NP26,Rogiet
+NP4,Pontypool
+NP44,Cwmbran
+NP7,Abergavenny
+NP8,Crickhowell
+NR1,Norwich
+NR10,Norwich
+NR11,Norwich
+NR12,Norwich
+NR13,Acle
+NR14,Norwich
+NR15,Norwich
+NR16,Norwich
+NR17,Attleborough
+NR18,Wymondham
+NR19,Dereham
+NR2,Norwich
+NR20,Dereham
+NR21,Fakenham
+NR22,Walsingham
+NR23,Wells-next-the-Sea
+NR24,Melton Constable
+NR25,Holt
+NR26,Sheringham
+NR27,Cromer
+NR28,North Walsham
+NR29,Great Yarmouth
+NR3,Norwich
+NR30,Great Yarmouth
+NR31,Great Yarmouth
+NR32,Lowestoft
+NR33,Lowestoft
+NR34,Beccles
+NR35,Bungay
+NR4,Norwich
+NR5,Norwich
+NR6,Norwich
+NR7,Norwich
+NR8,Norwich
+NR9,Norwich
+NW1,London
+NW10,London
+NW11,London
+NW2,London
+NW3,London
+NW4,London
+NW5,London
+NW6,London
+NW7,London
+NW8,London
+NW9,London
+OL1,Oldham
+OL10,Heywood
+OL11,Rochdale
+OL12,Rochdale
+OL13,Bacup
+OL14,Todmorden
+OL15,Littleborough
+OL16,Rochdale
+OL2,Oldham
+OL3,Oldham
+OL4,Oldham
+OL5,Ashton-under-Lyne
+OL6,Ashton-under-Lyne
+OL7,Ashton-under-Lyne
+OL8,Oldham
+OL9,Oldham
+OX1,Oxford
+OX10,Wallingford
+OX11,Didcot
+OX12,Wantage
+OX13,Abingdon
+OX14,Abingdon
+OX15,Banbury
+OX16,Banbury
+OX17,Banbury
+OX18,Carterton
+OX2,Oxford
+OX20,Woodstock
+OX25,Bicester
+OX26,Bicester
+OX27,Bicester
+OX28,Witney
+OX29,Stanton Harcourt
+OX3,Oxford
+OX33,Oxford
+OX39,Chinnor
+OX4,Oxford
+OX44,Oxford
+OX49,Watlington
+OX5,Shipton-on-Cherwell
+OX7,Bledington
+OX9,Thame
+PA1,Paisley
+PA10,Kilbarchan
+PA11,Bridge of Weir
+PA12,Lochwinnoch
+PA13,Kilmacolm
+PA14,Port Glasgow
+PA15,Greenock
+PA16,Greenock
+PA17,Skelmorlie
+PA18,Wemyss Bay
+PA19,Gourock
+PA2,Paisley
+PA20,Rothesay
+PA21,Tighnabruaich
+PA22,Colintraive
+PA23,Dunoon
+PA24,Lochgoilhead
+PA25,St Catherines
+PA26,Cairndow
+PA27,Cairndow
+PA28,Campbeltown
+PA29,Tarbert
+PA3,Paisley
+PA30,Lochgilphead
+PA31,Lochgilphead
+PA32,Inveraray
+PA33,Dalmally
+PA34,Oban
+PA35,Taynuilt
+PA36,Bridge of Orchy
+PA37,Connel
+PA38,Appin
+PA4,Renfrew
+PA41,Isle of Gigha
+PA42,Port Ellen
+PA43,Bowmore
+PA44,"Bridgend, Isle of Islay"
+PA45,Ballygrant
+PA46,Isle of Islay
+PA47,Isle of Islay
+PA48,Port Charlotte
+PA49,Isle of Islay
+PA5,Johnstone
+PA6,Johnstone
+PA60,Craighouse
+PA61,Isle of Colonsay
+PA62,Isle of Mull
+PA63,
+PA64,Craignure
+PA65,Craignure
+PA66,Fionnphort
+PA67,Isle of Mull
+PA68,
+PA69,Isle of Mull
+PA7,Bishopton
+PA70,Isle of Mull
+PA71,
+PA72,Isle of Mull
+PA73,Isle of Mull
+PA74,
+PA75,Tobermory
+PA76,Isle of Iona
+PA77,Isle of Tiree
+PA78,Isle of Coll
+PA8,Erskine
+PA80,Lochaline
+PA9,Howwood
+PE1,Peterborough
+PE10,Bourne
+PE11,Spalding
+PE12,Spalding
+PE13,Wisbech
+PE14,Wisbech
+PE15,March
+PE16,Chatteris
+PE19,St Neots
+PE2,Peterborough
+PE20,Boston
+PE21,Boston
+PE22,Boston
+PE23,Spilsby
+PE24,Skegness
+PE25,Skegness
+PE26,Huntingdon
+PE27,St Ives
+PE28,Huntingdon
+PE29,Huntingdon
+PE3,Peterborough
+PE30,King's Lynn
+PE31,King's Lynn
+PE32,King's Lynn
+PE33,King's Lynn
+PE34,King's Lynn
+PE35,Sandringham
+PE36,Hunstanton
+PE37,Swaffham
+PE38,Downham Market
+PE4,Peterborough
+PE5,Peterborough
+PE6,Peterborough
+PE7,Peterborough
+PE8,Peterborough
+PE9,Stamford
+PH1,Perth
+PH10,Blairgowrie
+PH11,Alyth
+PH12,Blairgowrie
+PH13,Coupar Angus
+PH14,Inchture
+PH15,Aberfeldy
+PH16,Pitlochry
+PH17,Bridge of Gaur
+PH18,Pitlochry
+PH19,Dalwhinnie
+PH2,Perth
+PH20,Newtonmore
+PH21,Kingussie
+PH22,Aviemore
+PH23,Carrbridge
+PH24,Boat of Garten
+PH25,Nethy Bridge
+PH26,Grantown-on-Spey
+PH3,Auchterarder
+PH30,Corrour
+PH31,Roybridge
+PH32,Fort Augustus
+PH33,Fort William
+PH34,Spean Bridge
+PH35,Invergarry
+PH36,Acharacle
+PH37,Glenfinnan
+PH38,Lochailort
+PH39,Arisaig
+PH4,Blackford
+PH40,Mallaig
+PH41,Mallaig
+PH42,Isle of Eigg
+PH43,Isle of Rum
+PH44,Isle Of Canna
+PH49,Ballachulish
+PH5,Muthill
+PH50,Kinlochleven
+PH6,Crieff
+PH7,Crieff
+PH8,Dunkeld
+PH9,Pitlochry
+PL1,Plymouth
+PL10,Torpoint
+PL11,Torpoint
+PL12,Saltash
+PL13,Polperro
+PL14,Liskeard
+PL15,Launceston
+PL16,Broadwoodwidger
+PL17,Cornwall
+PL18,Calstock
+PL19,Tavistock
+PL2,Plymouth
+PL20,Yelverton
+PL21,Ivybridge
+PL22,Lostwithiel
+PL23,Fowey
+PL24,Par
+PL25,St Austell
+PL26,St Austell
+PL27,Wadebridge
+PL28,Padstow
+PL29,Port Isaac
+PL3,Plymouth
+PL30,Bodmin
+PL31,Bodmin
+PL32,Hallworthy
+PL33,Delabole
+PL34,Tintagel
+PL35,Boscastle
+PL4,Plymouth
+PL5,Plymouth
+PL6,Plymouth
+PL7,Plymouth
+PL8,Plymouth
+PL9,Plymouth
+PO1,Portsmouth
+PO10,Emsworth
+PO11,Hayling Island
+PO12,Gosport
+PO13,Lee-on-the-Solent
+PO14,Fareham
+PO15,Whiteley
+PO16,Fareham
+PO17,Fareham
+PO18,Chichester
+PO19,Chichester
+PO2,Portsmouth
+PO20,Chichester
+PO21,Bognor Regis
+PO22,Bognor Regis
+PO3,Portsmouth
+PO30,Newport
+PO31,Cowes
+PO32,East Cowes
+PO33,Ryde
+PO34,Seaview
+PO35,Bembridge
+PO36,Sandown
+PO37,Shanklin
+PO38,Ventnor
+PO39,Totland
+PO4,Portsmouth
+PO40,Freshwater
+PO41,Yarmouth
+PO5,Southsea
+PO6,Portsmouth
+PO7,Waterlooville
+PO8,Clanfield
+PO9,Havant
+PR1,Preston
+PR2,Preston
+PR25,Leyland
+PR26,Leyland
+PR3,Preston
+PR4,Preston
+PR5,Preston
+PR6,Chorley
+PR7,Chorley
+PR8,Southport
+PR9,Southport
+RG1,Reading
+RG10,Reading
+RG12,Bracknell
+RG14,Newbury
+RG17,Hungerford
+RG18,Thatcham
+RG19,Thatcham
+RG2,Reading
+RG20,Newbury
+RG21,Basingstoke
+RG22,Basingstoke
+RG23,Basingstoke
+RG24,Basingstoke
+RG25,Basingstoke
+RG26,Tadley
+RG27,Hook
+RG28,Whitchurch
+RG29,Odiham
+RG30,Reading
+RG31,Reading
+RG4,Reading
+RG40,Wokingham
+RG41,Wokingham
+RG42,Bracknell
+RG45,Crowthorne
+RG5,Reading
+RG6,Reading
+RG7,Reading
+RG8,Reading
+RG9,Henley-on-Thames
+RH1,Redhill
+RH10,Crawley
+RH11,Crawley
+RH12,Horsham
+RH13,Horsham
+RH14,Billingshurst
+RH15,Burgess Hill
+RH16,Haywards Heath
+RH17,Haywards Heath
+RH18,Forest Row
+RH19,East Grinstead
+RH2,Reigate
+RH20,Pulborough
+RH3,Betchworth
+RH4,Dorking
+RH5,Dorking
+RH6,Horley
+RH7,Lingfield
+RH8,Oxted
+RH9,Godstone
+RM1,Romford
+RM10,Dagenham
+RM11,Hornchurch
+RM12,Hornchurch
+RM13,Rainham
+RM14,Upminster
+RM15,South Ockendon
+RM16,Chafford Hundred
+RM17,Grays
+RM18,Tilbury
+RM19,Purfleet
+RM2,Romford
+RM20,Grays
+RM3,Romford
+RM4,Romford
+RM5,Romford
+RM6,Romford
+RM7,Romford
+RM8,Dagenham
+RM9,Dagenham
+S1,Sheffield
+S10,Sheffield
+S11,Sheffield
+S12,Sheffield
+S13,Sheffield
+S14,Sheffield
+S17,Sheffield
+S18,Dronfield
+S2,Sheffield
+S20,Sheffield
+S21,Sheffield
+S25,Sheffield
+S26,Sheffield
+S3,Sheffield
+S32,Hope Valley
+S33,Hope Valley
+S35,Sheffield
+S36,Sheffield
+S4,Sheffield
+S40,Chesterfield
+S41,Chesterfield
+S42,Chesterfield
+S43,Chesterfield
+S44,Chesterfield
+S45,Chesterfield
+S49,Chesterfield
+S5,Sheffield
+S6,Sheffield
+S60,Rotherham
+S61,Rotherham
+S62,Rotherham
+S63,Rotherham
+S64,Mexborough
+S65,Rotherham
+S66,Rotherham
+S7,Sheffield
+S70,Barnsley
+S71,Barnsley
+S72,Barnsley
+S73,Barnsley
+S74,Barnsley
+S75,Barnsley
+S8,Sheffield
+S80,Worksop
+S81,Worksop
+S9,Sheffield
+SA1,Swansea
+SA10,Neath
+SA11,Neath
+SA12,Cwmafan
+SA13,Port Talbot
+SA14,Llanelli
+SA15,Llanelli
+SA16,Burry Port
+SA17,Crwbin
+SA18,Ammanford
+SA19,Llanwrda
+SA2,Swansea
+SA20,Llandovery
+SA3,Swansea
+SA31,Carmarthen
+SA32,Carmarthen
+SA33,Caerfyrddin
+SA34,Llanboidy
+SA35,Tegryn
+SA36,Glogue
+SA37,Newchapel
+SA38,Newcastle Emlyn
+SA39,Llanllwni
+SA4,Swansea
+SA40,Cwrtnewydd
+SA41,Felindre Farchog
+SA42,Newport
+SA43,Cardigan
+SA44,Llandysul
+SA45,New Quay
+SA46,Aberaeron
+SA47,Llanarth
+SA48,Cwmann
+SA5,Swansea
+SA6,Morriston
+SA61,Haverfordwest
+SA62,Haverfordwest
+SA63,Clarbeston Road
+SA64,Goodwick
+SA65,Fishguard
+SA66,Clunderwen
+SA67,Narberth
+SA68,Kilgetty
+SA69,Saundersfoot
+SA7,Swansea
+SA70,Tenby
+SA71,Pembroke
+SA72,Pembroke Dock
+SA73,Milford Haven
+SA8,Pontardawe
+SA9,Ystradgynlais
+SE1,London
+SE10,London
+SE11,London
+SE12,London
+SE13,London
+SE14,London
+SE15,London
+SE16,London
+SE17,London
+SE18,London
+SE19,London
+SE2,London
+SE20,London
+SE21,London
+SE22,London
+SE23,London
+SE24,London
+SE25,London
+SE26,London
+SE27,London
+SE28,London
+SE3,London
+SE4,London
+SE5,London
+SE6,London
+SE7,London
+SE8,London
+SE9,London
+SG1,Stevenage
+SG10,Much Hadham
+SG11,Ware
+SG12,Ware
+SG13,Hertford
+SG14,Hertford
+SG15,Arlesey
+SG16,Henlow
+SG17,Shefford
+SG18,Biggleswade
+SG19,Sandy
+SG2,Stevenage
+SG3,Knebworth
+SG4,Hitchin
+SG5,Hitchin
+SG6,Letchworth Garden City
+SG7,Baldock
+SG8,Royston
+SG9,Buntingford
+SK1,Stockport
+SK10,Macclesfield
+SK11,Macclesfield
+SK12,Stockport
+SK13,Glossop
+SK14,Hyde
+SK15,Stalybridge
+SK16,Dukinfield
+SK17,Buxton
+SK2,Stockport
+SK22,High Peak
+SK23,High Peak
+SK3,Stockport
+SK4,Stockport
+SK5,Stockport
+SK6,Romiley
+SK7,Stockport
+SK8,Cheadle
+SK9,Wilmslow
+SL0,Iver
+SL1,Slough
+SL2,Slough
+SL3,Slough
+SL4,Windsor
+SL5,Ascot
+SL6,Maidenhead
+SL7,Marlow
+SL8,Bourne End
+SL9,Gerrards Cross
+SM1,Sutton
+SM2,Sutton
+SM3,Morden
+SM4,Morden
+SM5,Carshalton
+SM6,Wallington
+SM7,Banstead
+SN1,Swindon
+SN10,Devizes
+SN11,Calne
+SN12,Melksham
+SN13,Corsham
+SN14,Chippenham
+SN15,Chippenham
+SN16,Malmesbury
+SN2,Swindon
+SN25,Swindon
+SN26,Swindon
+SN3,Swindon
+SN38,Swindon
+SN4,Swindon
+SN5,Swindon
+SN6,Swindon
+SN7,Faringdon
+SN8,Marlborough
+SN9,Upavon
+SO14,Southampton
+SO15,Southampton
+SO16,Southampton
+SO17,Southampton
+SO18,Southampton
+SO19,Southampton
+SO20,Broughton
+SO21,Winchester
+SO22,Winchester
+SO23,Winchester
+SO24,Alresford
+SO30,Southampton
+SO31,Southampton
+SO32,Southampton
+SO40,Southampton
+SO41,Lymington
+SO42,Brockenhurst
+SO43,Lyndhurst
+SO45,Southampton
+SO50,Eastleigh
+SO51,Romsey
+SO52,Southampton
+SO53,Eastleigh
+SP1,Salisbury
+SP10,Andover
+SP11,Andover
+SP2,Salisbury
+SP3,Barford St. Martin
+SP4,Salisbury
+SP5,Salisbury
+SP6,Fordingbridge
+SP7,Shaftesbury
+SP8,Gillingham
+SP9,Tidworth
+SR1,Sunderland
+SR2,Sunderland
+SR3,Sunderland
+SR4,Sunderland
+SR5,Sunderland
+SR6,Sunderland
+SR7,Seaham
+SR8,Peterlee
+SS0,Westcliff-on-Sea
+SS1,Southend-on-Sea
+SS11,Wickford
+SS12,Wickford
+SS13,Basildon
+SS14,Basildon
+SS15,Basildon
+SS16,Basildon
+SS17,Stanford-le-Hope
+SS2,Southend-on-Sea
+SS3,"Shoeburyness, Southend-on-Sea"
+SS4,Rochford
+SS5,Hockley
+SS6,Rayleigh
+SS7,Benfleet
+SS8,Canvey Island
+SS9,Leigh-on-Sea
+ST1,Stoke-on-Trent
+ST10,Staffordshire
+ST11,Stoke-on-Trent
+ST12,Stoke-on-Trent
+ST13,Leek
+ST14,Uttoxeter
+ST15,Stone
+ST16,Stafford
+ST17,Stafford
+ST18,Stafford
+ST19,Penkridge
+ST2,Stoke-on-Trent
+ST20,Stafford
+ST21,Eccleshall
+ST3,Stoke-on-Trent
+ST4,Stoke on Trent
+ST5,Newcastle-under-Lyme
+ST6,Stoke-On-Trent
+ST7,Alsager
+ST8,Biddulph Moor
+ST9,Stoke-on-Trent
+SW10,London
+SW11,London
+SW12,London
+SW13,London
+SW14,London
+SW15,London
+SW16,London
+SW17,London
+SW18,London
+SW19,London
+SW1A,London
+SW1E,London
+SW1H,London
+SW1P,London
+SW1V,London
+SW1W,London
+SW1X,London
+SW1Y,London
+SW2,London
+SW20,London
+SW3,London
+SW4,London
+SW5,London
+SW6,London
+SW7,London
+SW8,London
+SW9,London
+SY1,Shrewsbury
+SY10,Oswestry
+SY11,Oswestry
+SY12,Ellesmere
+SY13,Prees
+SY14,Malpas
+SY15,Montgomery
+SY16,Newtown
+SY17,Caersws
+SY18,Llanidloes
+SY19,Dylife
+SY2,Shrewsbury
+SY20,Machynlleth
+SY21,Welshpool
+SY22,Llanymynech
+SY23,Aberystwyth
+SY24,Borth
+SY25,Ystrad Meurig
+SY3,Shrewsbury
+SY4,Wem
+SY5,Shrewsbury
+SY6,Church Stretton
+SY7,Craven Arms
+SY8,Ludlow
+SY9,Bishop's Castle
+TA1,Taunton
+TA10,Langport
+TA11,Somerton
+TA12,Martock
+TA13,South Petherton
+TA14,Stoke-sub-Hamdon
+TA15,Montacute
+TA16,Merriott
+TA17,Hinton St George
+TA18,Crewkerne
+TA19,Ilminster
+TA2,Taunton
+TA20,Chard
+TA21,Wellington
+TA22,Dulverton
+TA23,Watchet
+TA24,Minehead
+TA3,Taunton
+TA4,Taunton
+TA5,Bridgwater
+TA6,Bridgwater
+TA7,Bridgwater
+TA8,Burnham-on-Sea
+TA9,Highbridge
+TD1,Galashiels
+TD10,Greenlaw
+TD11,Gavinton
+TD12,Coldstream
+TD13,Cockburnspath
+TD14,Eyemouth
+TD15,Berwick Upon Tweed
+TD2,Lauder
+TD3,Gordon
+TD4,Earlston
+TD5,Kelso
+TD6,Melrose
+TD7,Selkirk
+TD8,Jedburgh
+TD9,Hawick
+TF1,Telford
+TF10,Newport
+TF11,Shifnal
+TF12,Broseley
+TF13,Much Wenlock
+TF2,Telford
+TF3,Telford
+TF4,Telford
+TF5,Telford
+TF6,Telford
+TF7,Telford
+TF8,Telford
+TF9,Market Drayton
+TN1,Tunbridge Wells
+TN10,Tonbridge
+TN11,Tonbridge
+TN12,Marden
+TN13,Sevenoaks
+TN14,Sevenoaks
+TN15,West Kingsdown
+TN16,Westerham
+TN17,Cranbrook
+TN18,Hawkhurst
+TN19,Burwash
+TN2,Tunbridge Wells
+TN20,Mayfield
+TN21,Heathfield
+TN22,Uckfield
+TN23,Ashford
+TN24,Ashford
+TN25,Ashford
+TN26,Ashford
+TN27,Headcorn
+TN28,New Romney
+TN29,Dymchurch
+TN3,Tunbridge Wells
+TN30,Tenterden
+TN31,Rye
+TN32,Robertsbridge
+TN33,Battle
+TN34,Hastings
+TN35,Hastings
+TN36,Winchelsea
+TN37,St. Leonards-on-Sea
+TN38,St. Leonards-on-Sea
+TN39,Bexhill-on-Sea
+TN4,Tunbridge Wells
+TN40,Bexhill-on-Sea
+TN5,Wadhurst
+TN6,Crowborough
+TN7,Hartfield
+TN8,Edenbridge
+TN9,Tonbridge
+TQ1,Torquay
+TQ10,South Brent
+TQ11,Buckfastleigh
+TQ12,Newton Abbot
+TQ13,Newton Abbot
+TQ14,Teignmouth
+TQ2,Torquay
+TQ3,Paignton
+TQ4,Paignton
+TQ5,Brixham
+TQ6,Dartmouth
+TQ7,Kingsbridge
+TQ8,Salcombe
+TQ9,Totnes
+TR1,Truro
+TR10,Penryn
+TR11,Falmouth
+TR12,Gweek
+TR13,Helston
+TR14,Camborne
+TR15,Redruth
+TR16,Redruth
+TR17,Marazion
+TR18,Penzance
+TR19,Penzance
+TR2,Truro
+TR20,Penzance
+TR21,Hugh Town
+TR22,St Agnes
+TR23,Bryher
+TR24,Tresco
+TR25,St Martin's
+TR26,St Ives
+TR27,Hayle
+TR3,Truro
+TR4,Truro
+TR5,St Agnes
+TR6,Perranporth
+TR7,Newquay
+TR8,Newquay
+TR9,Fraddon
+TS1,Middlesbrough
+TS10,Redcar
+TS11,Redcar
+TS12,Saltburn-By-The-Sea
+TS13,Saltburn-by-the-Sea
+TS14,Guisborough
+TS15,Yarm
+TS16,Stockton-on-Tees
+TS17,Stockton-on-Tees
+TS18,Stockton-on-Tees
+TS19,Stockton-on-Tees
+TS2,Middlesbrough
+TS20,Stockton-On-Tees
+TS21,Stockton-on-Tees
+TS22,Billingham
+TS23,Billingham
+TS24,Hartlepool
+TS25,Hartlepool
+TS26,Hartlepool
+TS27,Hartlepool
+TS28,Wingate
+TS29,Trimdon Station
+TS3,Middlesbrough
+TS4,Middlesbrough
+TS5,Middlesbrough
+TS6,Middlesbrough
+TS7,Middlesbrough
+TS8,Middlesbrough
+TS9,Middlesbrough
+TW1,Twickenham
+TW10,Richmond
+TW11,Teddington
+TW12,Hampton
+TW13,Feltham
+TW14,Feltham
+TW15,Ashford
+TW16,Sunbury-on-Thames
+TW17,Shepperton
+TW18,Staines-upon-Thames
+TW19,Staines-Upon-Thames
+TW2,Twickenham
+TW20,Egham
+TW3,Hounslow
+TW4,Hounslow
+TW5,Hounslow
+TW6,Hounslow
+TW7,Isleworth
+TW8,Brentford
+TW9,Richmond
+UB1,Southall
+UB10,Uxbridge
+UB11,Uxbridge
+UB2,Southall
+UB3,Hayes
+UB4,Hayes
+UB5,Northolt
+UB6,Greenford
+UB7,West Drayton
+UB8,Uxbridge
+UB9,Uxbridge
+W10,London
+W11,London
+W12,London
+W13,London
+W14,London
+W1A,London
+W1B,London
+W1C,London
+W1D,London
+W1F,London
+W1G,London
+W1H,London
+W1J,London
+W1K,London
+W1S,London
+W1T,London
+W1U,London
+W1W,London
+W2,London
+W3,London
+W4,London
+W5,London
+W6,London
+W7,London
+W8,London
+W9,London
+WA1,Warrington
+WA10,St Helens
+WA11,St Helens
+WA12,Newton-le-Willows
+WA13,Lymm
+WA14,Altrincham
+WA15,Altrincham
+WA16,Knutsford
+WA2,Warrington
+WA3,Warrington
+WA4,Warrington
+WA5,Warrington
+WA6,Frodsham
+WA7,Runcorn
+WA8,Widnes
+WA9,St Helens
+WC1A,London
+WC1B,London
+WC1E,London
+WC1H,London
+WC1N,London
+WC1R,London
+WC1V,London
+WC1X,London
+WC2A,London
+WC2B,London
+WC2E,London
+WC2H,London
+WC2N,London
+WC2R,London
+WD17,Watford
+WD18,Watford
+WD19,Watford
+WD23,Bushey
+WD24,Watford
+WD25,Watford
+WD3,Rickmansworth
+WD4,Kings Langley
+WD5,Abbots Langley
+WD6,Borehamwood
+WD7,Radlett
+WF1,Wakefield
+WF10,Castleford
+WF11,Knottingley
+WF12,Dewsbury
+WF13,Dewsbury
+WF14,Mirfield
+WF15,Liversedge
+WF16,Heckmondwike
+WF17,Batley
+WF2,Wakefield
+WF3,Wakefield
+WF4,Wakefield
+WF5,Ossett
+WF6,Normanton
+WF7,Pontefract
+WF8,Pontefract
+WF9,Pontefract
+WF90,Wakefield
+WN1,Wigan
+WN2,Wigan
+WN3,Wigan
+WN4,Wigan
+WN5,Wigan
+WN6,Wigan
+WN7,Leigh
+WN8,Skelmersdale
+WR1,Worcester
+WR10,Pershore
+WR11,Evesham
+WR12,Broadway
+WR13,Malvern
+WR14,Malvern
+WR15,Tenbury Wells
+WR2,Worcester
+WR3,Worcester
+WR4,Worcester
+WR5,Worcester
+WR6,Worcester
+WR7,Worcester
+WR8,Worcester
+WR9,Droitwich
+WS1,Walsall
+WS10,Wednesbury
+WS11,Norton Canes
+WS12,Hednesford
+WS13,Lichfield
+WS14,Lichfield
+WS15,Rugeley
+WS2,Walsall
+WS3,Walsall
+WS4,Walsall
+WS5,Walsall
+WS6,Walsall
+WS7,Burntwood
+WS8,Brownhills
+WS9,Walsall
+WV1,Wolverhampton
+WV10,Wolverhampton
+WV11,Wolverhampton
+WV12,Willenhall
+WV13,Willenhall
+WV14,Bilston
+WV15,Bridgnorth
+WV16,Bridgnorth
+WV2,Wolverhampton
+WV3,Wolverhampton
+WV4,Wolverhampton
+WV5,Wombourne
+WV6,Wolverhampton
+WV7,Albrighton
+WV8,Wolverhampton
+WV9,Wolverhampton
+YO1,York
+YO10,York
+YO11,Scarborough
+YO12,Scarborough
+YO13,Scarborough
+YO14,Filey
+YO15,Bridlington
+YO16,Bridlington
+YO17,Malton
+YO18,Pickering
+YO19,York
+YO21,Whitby
+YO22,Whitby
+YO23,York
+YO24,York
+YO25,Driffield
+YO26,York
+YO30,York
+YO31,York
+YO32,York
+YO41,York
+YO42,York
+YO43,York
+YO51,York
+YO60,York
+YO61,York
+YO62,York
+YO7,Thirsk
+YO8,Selby
+YO90,York
+ZE1,Shetland
+ZE2,Shetland
+ZE3,Shetland

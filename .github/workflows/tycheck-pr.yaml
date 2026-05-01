@@ -3,18 +3,22 @@ name: Run ty
 on:
   pull_request:
     paths:
-    - 'locations/**/*.py'
-    - '!locations/spiders/**'
+      - ".github/workflows/*.yaml"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "locations/**/*.py"
+      - "!locations/spiders/**"
 
+permissions:
+  contents: read
 
 jobs:
   tycheck:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Install uv
-      uses: astral-sh/setup-uv@v5
-    - name: Run ty
-      run: |
-        uv run ty check ./locations/ --exclude 'locations/spiders/'
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Run ty
+        run: uv run ty check ./locations/ --exclude 'locations/spiders/'

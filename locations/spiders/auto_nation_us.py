@@ -18,7 +18,7 @@ class AutoNationUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.autonation.com/robots.txt"]
     sitemap_rules = [(r"https://www.autonation.com/dealers/[^/]+$", "parse")]
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         store_data = json.loads(response.xpath('//script[@id="store-detail-state"]/text()').get())
