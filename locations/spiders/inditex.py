@@ -30,29 +30,23 @@ class InditexSpider(PlaywrightSpider):
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 5,
-        "DEFAULT_REQUEST_HEADERS": {
-            "Host": "www.massimodutti.com",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Connection": "keep-alive",
-        },
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         config = json.loads(response.xpath("//pre/text()").get())["seoParamMap"]
         for store_id, country in config["storeId"].items():
-            # First character of the store_id is the index into the brand table.
-            brand = config["brandId"][store_id[0]]
-            if brand == "dutti":
-                brand = "massimodutti"
-            if brand == "uterque":
-                # Discontinued brand, still in their config as time of writing.
-                continue
-            url = "https://www.{}.com/itxrest/2/bam/store/{}/physical-stores-by-country?countryCode={}".format(
-                brand,
-                store_id,
-                country.upper(),
-            )
-            yield scrapy.http.JsonRequest(url, callback=self.parse_stores, cb_kwargs=dict(brand=brand))
+            for brand in config["brandId"].values():
+                if brand == "dutti":
+                    brand = "massimodutti"
+                if brand == "uterque":
+                    # Discontinued brand, still in their config as time of writing.
+                    continue
+                url = "https://www.{}.com/itxrest/2/bam/store/{}/physical-stores-by-country?countryCode={}".format(
+                    brand,
+                    store_id,
+                    country.upper(),
+                )
+                yield scrapy.http.JsonRequest(url, callback=self.parse_stores, cb_kwargs=dict(brand=brand))
 
     def parse_stores(self, response: Response, brand: str) -> Iterable[Feature]:
         for store in json.loads(response.xpath("//pre/text()").get())["stores"]:
