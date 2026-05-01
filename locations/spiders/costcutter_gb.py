@@ -17,5 +17,6 @@ class CostcutterGBSpider(scrapy.spiders.SitemapSpider):
 
     def parse_store(self, response):
         item = LinkedDataParser.parse(response, "ConvenienceStore")
+        item["website"] = response.url
         if item and "closed" not in item["name"].lower():
             return item
