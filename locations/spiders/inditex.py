@@ -7,11 +7,12 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class InditexSpider(scrapy.Spider):
+class InditexSpider(PlaywrightSpider):
     name = "inditex"
     my_brands = {
         "bershka": {"brand": "Bershka", "brand_wikidata": "Q827258"},
@@ -24,10 +25,11 @@ class InditexSpider(scrapy.Spider):
     }
     # Each site has the same multi-brand catalogue JSON, could have picked any site!
     start_urls = ["https://www.massimodutti.com/itxrest/2/web/seo/config?appId=1"]
-    is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_DELAY": 5,
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -46,7 +48,6 @@ class InditexSpider(scrapy.Spider):
                 )
                 yield scrapy.http.JsonRequest(url, callback=self.parse_stores, cb_kwargs=dict(brand=brand))
 
-    #
     def parse_stores(self, response: Response, brand: str) -> Iterable[Feature]:
         for store in json.loads(response.xpath("//pre/text()").get())["stores"]:
             item = DictParser.parse(store)
