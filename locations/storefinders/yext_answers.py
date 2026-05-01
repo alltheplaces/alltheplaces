@@ -92,6 +92,7 @@ class YextAnswersSpider(Spider):
             self.logger.error(f"Error in response: {data['error']}")
             if data["error"].get("errorType") == "TIMEOUT" and response.request:
                 yield get_retry_request(response.request, spider=self)
+            return
 
         for location in data.get("results", []):
             location = location["data"]
