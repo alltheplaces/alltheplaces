@@ -11,6 +11,7 @@ class NewLookGBSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
     drop_attributes = {"facebook", "twitter", "image"}
     custom_settings = {"DOWNLOAD_DELAY": 5}
+    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
