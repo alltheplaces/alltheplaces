@@ -12,6 +12,7 @@ class SkyZoneSpider(Spider):
     name = "sky_zone"
     item_attributes = {"brand": "Sky Zone", "brand_wikidata": "Q7537557"}
     start_urls = ["https://skyzone.com/wp-admin/admin-ajax.php?action=store_search&autoload=1"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
