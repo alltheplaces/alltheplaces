@@ -10,7 +10,7 @@ class DennysUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Denny's", "brand_wikidata": "Q1189695"}
     sitemap_urls = ["https://locations.dennys.com/robots.txt"]
     sitemap_rules = [(r"https://locations.dennys.com/[^/]+/[^/]+/(\d+)$", "parse_sd")]
-    search_for_twitter = False 
+    search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["name"] = None
