@@ -1,22 +1,15 @@
-import scrapy
+from scrapy.spiders import SitemapSpider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CostcutterGBSpider(scrapy.spiders.SitemapSpider):
+class CostcutterGBSpider(SitemapSpider, StructuredDataSpider):
     name = "costcutter_gb"
-    item_attributes = {
-        "brand": "Costcutter",
-        "brand_wikidata": "Q5175072",
-        "country": "GB",
-    }
+    item_attributes = {"brand": "Costcutter", "brand_wikidata": "Q5175072"}
     allowed_domains = ["costcutter.co.uk"]
     sitemap_urls = ["https://store-locator.costcutter.co.uk/sitemap.xml"]
-    sitemap_rules = [("/costcutter-*", "parse_store")]
+    sitemap_rules = [(r"uk/en-gb/[^/]+/[^/]+/(\d+)$", "parse")]
+    wanted_types = ["FoodEstablishment"]
     drop_attributes = {"image"}
-
-    def parse_store(self, response):
-        item = LinkedDataParser.parse(response, "ConvenienceStore")
-        if item and "closed" not in item["name"].lower():
-            item["website"] = response.url
-            return item
+    search_for_facebook = False
+    search_for_twitter = False
