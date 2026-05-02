@@ -2,6 +2,7 @@ from json import dumps
 from typing import Any, AsyncIterator, Iterable
 from urllib.parse import urlencode
 
+from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import JsonRequest, TextResponse
 from scrapy.spiders import Spider
 
@@ -86,7 +87,14 @@ class YextAnswersSpider(Spider):
         yield self.make_request(0)
 
     def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature | JsonRequest]:
-        for location in response.json()["response"]["results"]:
+        data = response.json()["response"]
+        if "error" in data:
+            self.logger.error(f"Error in response: {data['error']}")
+            if data["error"].get("errorType") == "TIMEOUT" and response.request:
+                yield get_retry_request(response.request, spider=self)
+            return
+
+        for location in data.get("results", []):
             location = location["data"]
             item = DictParser.parse(location)
             item["branch"] = location.get("geomodifier")
@@ -108,7 +116,7 @@ class YextAnswersSpider(Spider):
 
             yield from self.parse_item(location, item) or []
 
-        if len(response.json()["response"]["results"]) == self.page_limit:
+        if len(data.get("results", [])) == self.page_limit:
             yield self.make_request(response.meta["offset"] + self.page_limit)
 
     @staticmethod
