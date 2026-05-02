@@ -40,7 +40,7 @@ def lineage_for_group(group: str) -> "Lineage":
     return _GROUP_TO_LINEAGE[group]
 
 
-def spider_class_to_lineage(spider: Spider) -> Lineage:
+def spider_class_to_lineage(spider: type[Spider]) -> Lineage:
     """
     Provide an indication of the origin of the spider.
     :param spider: the spider
