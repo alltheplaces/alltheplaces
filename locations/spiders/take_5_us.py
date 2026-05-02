@@ -7,9 +7,12 @@ from locations.structured_data_spider import StructuredDataSpider
 class Take5USSpider(SitemapSpider, StructuredDataSpider):
     name = "take_5_us"
     item_attributes = {"brand": "Take 5", "brand_wikidata": "Q112359190"}
-    sitemap_urls = ["https://www.take5.com/sitemap-0.xml"]
+    sitemap_urls = ["https://www.take5.com/sitemap.xml"]
     sitemap_rules = [(r"/locations/oil-change", "parse_sd"), (r"/locations/car-wash", "parse_sd")]
     wanted_types = ["AutoRepair", "AutoWash"]
+    search_for_facebook = False
+    search_for_twitter = False
+    search_for_image = False
 
     def post_process_item(self, item, response, ld_data):
         if ld_data["@type"] == "AutoWash":
