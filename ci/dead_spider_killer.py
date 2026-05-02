@@ -107,10 +107,12 @@ def fetch_lookback_runs(n, lookback):
     total = n + lookback
     window = history[-total:]
     lookback_runs = window[:lookback]  # older runs
-    recent_runs = window[lookback:]   # the last n runs
+    recent_runs = window[lookback:]  # the last n runs
     logger.info(
         "Found %d total runs, using last %d for detection + %d for lookback",
-        len(history), len(recent_runs), len(lookback_runs),
+        len(history),
+        len(recent_runs),
+        len(lookback_runs),
     )
     return recent_runs, lookback_runs
 
@@ -874,8 +876,10 @@ def main():  # noqa: C901
         "--weeks", type=int, default=5, help="Number of consecutive zero-result runs required (default: 5)"
     )
     parser.add_argument(
-        "--lookback", type=int, default=3,
-        help="Additional older runs to check for recent successes before flagging (default: 3)"
+        "--lookback",
+        type=int,
+        default=3,
+        help="Additional older runs to check for recent successes before flagging (default: 3)",
     )
     parser.add_argument("--dry-run", action="store_true", help="Print report without creating PRs or issues")
     parser.add_argument("--max-prs", type=int, default=5, help="Max removal PRs to create per run (default: 5)")
