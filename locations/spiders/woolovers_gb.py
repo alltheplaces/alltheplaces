@@ -23,8 +23,8 @@ class WooloversGBSpider(JSONBlobSpider):
         oh = OpeningHours()
         for day in DAYS_FULL:
             if "-" in feature[day.lower()]:
-                open, closed = feature[day.lower()].replace(".", ":").split(" - ")
-                oh.add_range(day, open, closed)
+                opens, closes = feature[day.lower()].replace(".", ":").split(" - ")
+                oh.add_range(day, opens, closes)
         item["opening_hours"] = oh
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
