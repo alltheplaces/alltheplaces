@@ -22,6 +22,8 @@ class DrMaxSpider(Spider):
         "it": "https://www.drmax.it/le-nostre-farmacie/",
         "ro": "https://www.drmax.ro/farmacii/",
     }
+    requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for country in self.store_locators:
