@@ -94,6 +94,27 @@ def fetch_recent_runs(n):
     return runs
 
 
+def fetch_lookback_runs(n, lookback):
+    """Fetch the last n+lookback runs, returning (recent_runs, lookback_runs).
+
+    recent_runs: the last n runs used for dead-spider detection.
+    lookback_runs: the lookback older runs used to check for recent successes.
+    """
+    logger.info("Fetching run history from %s", HISTORY_URL)
+    resp = session.get(HISTORY_URL, timeout=30)
+    resp.raise_for_status()
+    history = resp.json()
+    total = n + lookback
+    window = history[-total:]
+    lookback_runs = window[:lookback]  # older runs
+    recent_runs = window[lookback:]   # the last n runs
+    logger.info(
+        "Found %d total runs, using last %d for detection + %d for lookback",
+        len(history), len(recent_runs), len(lookback_runs),
+    )
+    return recent_runs, lookback_runs
+
+
 def fetch_run_results(stats_url):
     """Fetch a run's _results.json and return the results list."""
     logger.info("Fetching results from %s", stats_url)
@@ -103,13 +124,16 @@ def fetch_run_results(stats_url):
     return data.get("results", [])
 
 
-def find_dead_spiders(runs):
+def find_dead_spiders(runs, lookback_runs=None):
     """Find spiders that produced 0 features in ALL of the given runs.
 
     Returns a dict of {spider_name: {"filename": str, "run_history": [{run_id, features, errors}]}}
     Only includes spiders that were present in every run and had 0 features each time.
+
+    If lookback_runs is provided, any spider that produced non-zero features in ANY
+    of those older runs is excluded — it's intermittently failing, not truly dead.
     """
-    # Build per-spider history across all runs
+    # Build per-spider history across detection runs
     spider_data = {}
     run_ids = []
 
@@ -128,6 +152,15 @@ def find_dead_spiders(runs):
                 "elapsed_time": entry.get("elapsed_time", 0),
             }
 
+    # Build per-spider feature counts from lookback runs
+    lookback_successes = set()
+    if lookback_runs:
+        for run in lookback_runs:
+            results = fetch_run_results(run["stats_url"])
+            for entry in results:
+                if entry.get("features", 0) > 0:
+                    lookback_successes.add(entry["spider"])
+
     # Filter to spiders present in ALL runs with 0 features each time
     dead_spiders = {}
     for name, data in spider_data.items():
@@ -135,11 +168,17 @@ def find_dead_spiders(runs):
         if len(data["runs"]) != len(run_ids):
             continue
         # Must have 0 features in every run
-        if all(r["features"] == 0 for r in data["runs"].values()):
-            dead_spiders[name] = {
-                "filename": data["filename"],
-                "run_history": [{"run_id": rid, **data["runs"][rid]} for rid in run_ids],
-            }
+        if not all(r["features"] == 0 for r in data["runs"].values()):
+            continue
+        # Skip spiders that produced results in the lookback window — they're
+        # intermittently failing, not consistently dead.
+        if name in lookback_successes:
+            logger.info("Skipping %s — had successful runs in the lookback window", name)
+            continue
+        dead_spiders[name] = {
+            "filename": data["filename"],
+            "run_history": [{"run_id": rid, **data["runs"][rid]} for rid in run_ids],
+        }
 
     logger.info("Found %d spiders with 0 features across all %d runs", len(dead_spiders), len(run_ids))
     return dead_spiders
@@ -834,6 +873,10 @@ def main():  # noqa: C901
     parser.add_argument(
         "--weeks", type=int, default=5, help="Number of consecutive zero-result runs required (default: 5)"
     )
+    parser.add_argument(
+        "--lookback", type=int, default=3,
+        help="Additional older runs to check for recent successes before flagging (default: 3)"
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print report without creating PRs or issues")
     parser.add_argument("--max-prs", type=int, default=5, help="Max removal PRs to create per run (default: 5)")
     parser.add_argument(
@@ -848,12 +891,12 @@ def main():  # noqa: C901
     )
 
     # Step 1: Fetch recent runs
-    runs = fetch_recent_runs(args.weeks)
+    runs, lookback_runs = fetch_lookback_runs(args.weeks, args.lookback)
     if len(runs) < args.weeks:
         logger.warning("Only %d runs available, need %d. Proceeding with what we have.", len(runs), args.weeks)
 
-    # Step 2: Find consistently dead spiders
-    dead_spiders = find_dead_spiders(runs)
+    # Step 2: Find consistently dead spiders (excluding intermittent failures)
+    dead_spiders = find_dead_spiders(runs, lookback_runs=lookback_runs)
     if not dead_spiders:
         logger.info("No consistently dead spiders found.")
         return 0
