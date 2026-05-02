@@ -131,7 +131,7 @@ class HiltonSpider(Spider):
 
                             apply_category(Categories.HOTEL, item)
                             yield item
-                    except:
+                    except Exception:
                         self.logger.error(f'Error parsing locations for path: {region["locationPageUri"]}')
 
     def get_hotels(self, location_url: str):
