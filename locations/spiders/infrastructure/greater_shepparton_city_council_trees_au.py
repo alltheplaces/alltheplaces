@@ -15,6 +15,7 @@ class GreaterSheppartonCityCouncilTreesAUSpider(JSONBlobSpider):
         "https://data.gov.au/data/dataset/e794491f-2eb7-4035-8b0c-f7248c28feda/resource/8f46fcc0-778c-44d3-bba6-38ac9120123e/download/greater_shepparton_city_council_street_and_park_trees.json"
     ]
     locations_key = ["features"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("properties"))
