@@ -18,7 +18,7 @@ class SpeedyBGSpider(Spider):
     start_urls = ["https://services.speedy.bg/officesmap_v2/?src=sws"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        script_obj = response.xpath("//script[contains(text(), \"var speedy_offices =\")]/text()").get("")
+        script_obj = response.xpath('//script[contains(text(), "var speedy_offices =")]/text()').get("")
         if not script_obj:
             return
 
