@@ -15,6 +15,7 @@ class GlenEiraCityCouncilTreesAUSpider(JSONBlobSpider):
         "https://data.gov.au/data/dataset/ed15e3ea-48dc-47d2-afa6-518e6f5276e1/resource/85c2d44c-8ccf-4a32-9881-872f1a511ef7/download/streetandparktrees.json"
     ]
     locations_key = "features"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("properties"))
