@@ -17,6 +17,7 @@ class KingstonCityCouncilWasteBasketsAUSpider(JSONBlobSpider):
     ]
     locations_key = "features"
     no_refs = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("properties"))
