@@ -14,7 +14,11 @@ class FireAndRescueNswAUSpider(CrawlSpider):
     item_attributes = {"operator": "Fire and Rescue NSW", "operator_wikidata": "Q5451532"}
     allowed_domains = ["www.fire.nsw.gov.au"]
     start_urls = ["https://www.fire.nsw.gov.au/contact/contact-details/locations/station-index"]
-    rules = [Rule(LinkExtractor(allow=r"^https:\/\/www\.fire\.nsw\.gov\.au\/contact\/fire-station\/\d{3}$"), callback="parse")]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"^https:\/\/www\.fire\.nsw\.gov\.au\/contact\/fire-station\/\d{3}$"), callback="parse"
+        )
+    ]
     custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt is HTTP 404 (causes parse warnings)
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
