@@ -1,10 +1,8 @@
-import json
 from typing import Any
 
 import chompjs
-import scrapy
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours
@@ -37,25 +35,20 @@ class SpeedyBGSpider(Spider):
             else:
                 apply_category(Categories.POST_OFFICE, item)
 
-            api_url = "https://services.speedy.bg/officesmap_v2/classBuilder.php"
-            params = {
-                "class": "",
-                "function": "bubbleHtmlFiller",
-                "arguments": {
-                    "id": str(location["oID"]),
-                    "selectOfficeButtonCaption": "",
-                    "textButtonImage": "Снимка",
-                    "textDirections": "упътвания",
-                    "src": "sws",
+            yield JsonRequest(
+                "https://services.speedy.bg/officesmap_v2/classBuilder.php",
+                data={
+                    "class": "",
+                    "function": "bubbleHtmlFiller",
+                    "arguments": {
+                        "id": str(location["oID"]),
+                        "selectOfficeButtonCaption": "",
+                        "textButtonImage": "Снимка",
+                        "textDirections": "упътвания",
+                        "src": "sws",
+                    },
+                    "lang": "bg",
                 },
-                "lang": "bg",
-            }
-
-            yield scrapy.Request(
-                api_url,
-                method="POST",
-                body=json.dumps(params),
-                headers={"Content-Type": "application/json"},
                 callback=self.parse_extra_info,
                 cb_kwargs={"item": item},
             )
