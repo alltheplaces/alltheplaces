@@ -9,23 +9,23 @@ from locations.items import Feature
 
 GRAPHQL_QUERY = """
 query SearchVendingMachines($lon: numeric!, $lat: numeric!, $radius: Int!) {
-	search_vending_machines(args: {
-		p_longitude: $lon
-		p_latitude: $lat
-		p_max: $radius
-	}) {
-		vending_machine_id
-		longitude
-		latitude
-		prefecture
-		city
-		address
-		base
-		inner
-		vending_machine_type1
-		product_name1
-		product_name2
-	}
+    search_vending_machines(args: {
+        p_longitude: $lon
+        p_latitude: $lat
+        p_max: $radius
+    }) {
+        vending_machine_id
+        longitude
+        latitude
+        prefecture
+        city
+        address
+        base
+        inner
+        vending_machine_type1
+        product_name1
+        product_name2
+    }
 }"""
 
 
