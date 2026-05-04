@@ -19,7 +19,6 @@ class FireAndRescueNswAUSpider(CrawlSpider):
             LinkExtractor(allow=r"^https:\/\/www\.fire\.nsw\.gov\.au\/contact\/fire-station\/\d{3}$"), callback="parse"
         )
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt is HTTP 404 (causes parse warnings)
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         properties = {
