@@ -28,11 +28,12 @@ class SpeedyBGSpider(Spider):
             item["ref"] = location["oID"]
             item["lat"] = location["Y"]
             item["lon"] = location["X"]
-            item["name"] = location["officeName"]
 
             if location["officeType"] == "APT":
+                item["name"] = location["officeName"].removesuffix(" (АВТОМАТ)")
                 apply_category(Categories.PARCEL_LOCKER, item)
             else:
+                item["name"] = location["officeName"]
                 apply_category(Categories.POST_OFFICE, item)
 
             yield JsonRequest(
