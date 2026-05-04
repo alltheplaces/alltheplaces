@@ -28,7 +28,7 @@ dependencies = [
     "requests",
     "requests-cache",
     "reverse-geocoder",
-    "scrapy>=2.15.1",
+    "scrapy>=2.15.2",
     "scrapy-camoufox @ git+https://github.com/iandees/scrapy-camoufox.git",
     "scrapy-playwright>=0.0.45",
     "scrapy-zyte-api>=0.33.1",
