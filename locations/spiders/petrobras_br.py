@@ -1,4 +1,7 @@
+from typing import Any, AsyncIterator
+
 from scrapy import FormRequest, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
@@ -52,7 +55,7 @@ class PetrobrasBRSpider(Spider):
     name = "petrobras_br"
     item_attributes = {"brand": "BR", "brand_wikidata": "Q4836468"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Any]:
         base_url = "https://www.postospetrobras.com.br/api/get_postos"
         for state in STATES_BR.values():
             yield FormRequest(
@@ -60,7 +63,7 @@ class PetrobrasBRSpider(Spider):
                 formdata={"estado": state, "cidade": ""},
             )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for data in response.json():
             item = Feature()
             item["ref"] = data["codigoSAP"]

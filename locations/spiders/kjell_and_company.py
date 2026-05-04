@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -16,7 +17,7 @@ class KjellAndCompanySpider(Spider):
     item_attributes = {"brand": "Kjell & Company", "brand_wikidata": "Q6419332"}
     allowed_domains = ["kjell.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Any]:
         for country_code, country in COUNTRIES.items():
             yield JsonRequest(
                 url="https://www.kjell.com/resolvedynamicdata",

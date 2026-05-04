@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
@@ -30,7 +30,7 @@ class FreshopSpider(Spider):
     app_key: str
     location_type_ids: list[str] = ["1567647"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(url=f"https://api.freshop.com/1/stores?app_key={self.app_key}")
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
