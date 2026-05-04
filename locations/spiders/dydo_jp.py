@@ -37,21 +37,23 @@ class DydoJPSpider(Spider):
         for lt, ln in country_iseadgg_centroids("JP", 24):
             yield JsonRequest(
                 url="https://vending-api.dydo.cmsod.jp/v1/graphql",
-                data={"query": GRAPHQL_QUERY, "variables": {"lon": ln, "lat": lt, "radius": 24000}, },
+                data={
+                    "query": GRAPHQL_QUERY,
+                    "variables": {"lon": ln, "lat": lt, "radius": 24000},
+                },
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]["search_vending_machines"]:
-           
+
             item = Feature()
-            
+
             item["ref"] = store.get("vending_machine_id")
             item["lon"] = store.get("longitude")
             item["lat"] = store.get("latitude")
             item["extras"]["addr:province"] = store.get("prefecture")
             item["city"] = store.get("city")
             item["street_address"] = store.get("address")
-            
+
             apply_category(Categories.VENDING_MACHINE, item)
             yield item
-
