@@ -66,8 +66,8 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
                 flags=re.IGNORECASE,
             ).strip()
             item["name"] = "Bargain Booze in Costcutter"
-        item.pop("facebook",None)
-        item.pop("twitter",None)
-        item.pop("image",None)
+        item.pop("facebook", None)
+        item.pop("twitter", None)
+        item.pop("image", None)
         apply_category(Categories.SHOP_ALCOHOL, item)
         yield item
