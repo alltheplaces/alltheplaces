@@ -8,5 +8,6 @@ class BpPulseGBSpider(UberallSpider):
     key = "Ngy4Zpj26HVGztRS6HikqkGY8AEUZ2"
 
     def post_process_item(self, item, response, location):
+        item["name"] = item["phone"] = None
         apply_category(Categories.CHARGING_STATION, item)
         yield item
