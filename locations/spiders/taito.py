@@ -17,7 +17,10 @@ class TaitoSpider(Spider):
             store.update(store.pop("StoreData"))
             item = DictParser.parse(store)
             item["ref"] = store.get("StoreID")
-            item["website"] = f"https://www.taito.co.jp{store.get('LinkUrl')}"
+            if "http" in store.get("LinkUrl"):
+                item["website"] = store.get("LinkUrl")
+            else:
+                item["website"] = f"https://www.taito.co.jp{store.get('LinkUrl')}"
             item["image"] = "https://" + store.get("ImagePath") + store.get("MobileImageName01")
             item["extras"]["branch:ja-Hira"] = store.get("StoreNameCana")
             item["phone"] = store.get("TelephoneNo")
