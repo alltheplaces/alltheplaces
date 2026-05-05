@@ -11,7 +11,6 @@ class TaitoSpider(Spider):
     item_attributes = {"brand_wikidata": "Q1054844"}
 
     start_urls = ["https://www.taito.co.jp/api/LanguageStoreSearch/?isGlobalOnly=false&lang=ja"]
-    
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
