@@ -25,7 +25,7 @@ class KontantenSESpider(Spider):
             coordinates = (store.get("geometry") or {}).get("coordinates") or [None, None]
             item = Feature()
             item["ref"] = store.get("id")
-            item["branch"] = (store.get("place") or "").removeprefix("Kontanten ").strip() or None
+            item["located_in"] = (store.get("place") or "").removeprefix("Kontanten ").strip()
             item["street_address"] = store.get("address")
             item["postcode"] = store.get("postal")
             item["city"] = store.get("city")
