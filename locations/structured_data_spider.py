@@ -37,6 +37,7 @@ def clean_twitter(url: str) -> str | None:
         .replace("www.", "")
         .replace("twitter.com", "")
         .replace("twitter.co.uk", "")
+        .replace("x.com", "")
         .strip("@/")
         .split("?", 1)[0]
     )
@@ -47,7 +48,7 @@ def extract_twitter(item: Feature | dict, selector: Selector) -> None:
         if twitter := clean_twitter(twitter):
             item["twitter"] = twitter
             return
-    for url in selector.xpath('.//a[contains(@href, "twitter.com")]/@href').getall():
+    for url in selector.xpath('.//a[contains(@href, "twitter.com") or contains(@href, "//x.com")]/@href').getall():
         if twitter := clean_twitter(url):
             item["twitter"] = twitter
             return
@@ -157,7 +158,7 @@ class StructuredDataSpider(Spider):
 
     dataset_attributes = {"source": "structured_data"}
 
-    wanted_types = [
+    wanted_types: list[str | list[str]] = [
         "LocalBusiness",
         "ConvenienceStore",
         "Store",

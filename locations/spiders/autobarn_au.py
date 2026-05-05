@@ -14,6 +14,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class AutobarnAUSpider(SitemapSpider):
     name = "autobarn_au"
     item_attributes = {"brand": "Autobarn", "brand_wikidata": "Q105831666"}
+    requires_proxy = True
     allowed_domains = ["autobarn.com.au"]
     sitemap_urls = ["https://autobarn.com.au/ab/sitemap/store/store-sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/autobarn\.com\.au\/ab\/store\/[A-Z][a-zA-Z\s\-]*$", "parse")]

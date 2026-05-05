@@ -25,7 +25,7 @@ class ClosePipeline:
         if name := item.get("name"):
             for label in self.closed_labels:
                 if label in str(name).lower():
-                    self.crawler.spider.logger.warning(  # ty: ignore[possibly-missing-attribute]
+                    self.crawler.spider.logger.warning(  # ty: ignore[unresolved-attribute]
                         f'Found {label} in {name} ({item.get("ref")})'
                     )
                     if self.crawler.stats:

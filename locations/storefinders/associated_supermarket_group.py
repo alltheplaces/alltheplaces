@@ -85,11 +85,11 @@ class AssociatedSupermarketGroupSpider(Spider):
 
         for store in stores:
             store_id = store.attrib.get("data-store", "")
-            name = store.css(".locator-store-name::text").get().strip()
-            street = store.css(".locator-address::text").get().strip()
+            name = store.css(".locator-store-name::text").get("").strip()
+            street = store.css(".locator-address::text").get("").strip()
 
             # Extract location information
-            info_text = store.css(".locator-storeinformation::text").get().strip()
+            info_text = store.css(".locator-storeinformation::text").get("").strip()
             city_state_zip_match = re.search(r"([^,]+),\s*([A-Z]{2})\s*(\d{5})", info_text)
 
             if city_state_zip_match:

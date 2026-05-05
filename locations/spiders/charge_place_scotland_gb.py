@@ -4,7 +4,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -36,6 +36,6 @@ class ChargePlaceScotlandGBSpider(Spider):
                 )
             # TODO: connectors available location["properties"]["connectorGroups"]
 
-            apply_category({"man_made": "charge_point"}, item)
+            apply_category(Categories.CHARGE_POINT, item)
 
             yield item

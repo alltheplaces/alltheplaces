@@ -11,7 +11,6 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://ecomprdsharedstorage.blob.core.windows.net/sitemaps/20000/stores-sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["Store"]
-    requires_proxy = "US"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         matches = re.search(r'location: \["(.*)", "(.*)"\],', response.text)

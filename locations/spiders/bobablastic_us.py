@@ -18,6 +18,7 @@ class BobablasticUSSpider(WPStoreLocatorSpider):
     search_radius = 100
     max_results = 50
     days = DAYS_EN
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.FAST_FOOD, item)

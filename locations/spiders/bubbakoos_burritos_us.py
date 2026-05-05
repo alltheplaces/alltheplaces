@@ -1,8 +1,6 @@
-from scrapy.http import Response
+import chompjs
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
-from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -10,10 +8,14 @@ class BubbakoosBurritosUSSpider(SitemapSpider, StructuredDataSpider):
     name = "bubbakoos_burritos_us"
     item_attributes = {"brand": "Bubbakoo's Burritos", "brand_wikidata": "Q114619751"}
     sitemap_urls = ["https://locations.bubbakoos.com/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/locations\.bubbakoos\.com\/locations\/[a-z]{2}\/[\w\-]+$", "parse_sd")]
+    sitemap_rules = [(r"^https://locations\.bubbakoos\.com/locations/[a-z]{2}/[\w-]+$", "parse")]
+    wanted_types = ["Restaurant"]
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict):
-        item["branch"] = response.xpath("//h1/text()").get()
-        item.pop("facebook", None)
-        apply_category(Categories.FAST_FOOD, item)
-        yield item
+    def parse(self, response):
+        for nextjs_script in response.xpath(
+            "//script[starts-with(text(), 'self.__next_f.push([1,\"{\\\"@context')]/text()"
+        ).getall():
+            script_el = response.selector.root.makeelement("script", {"type": "application/ld+json"})
+            script_el.text = chompjs.parse_js_object(nextjs_script)[1]
+            response.selector.root.append(script_el)
+        yield from super().parse(response)

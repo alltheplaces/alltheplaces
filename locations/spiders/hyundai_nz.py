@@ -38,7 +38,7 @@ class HyundaiNZSpider(JSONBlobSpider):
                 service_feature["ref"] = service_feature["ref"] + "_Service"
                 yield item
                 yield service_feature
-            elif feature["Type"][0] == "Service only agents":
+            elif feature["Type"][0] in ["Service only agents", "Service only"]:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
                 item["ref"] = item["ref"] + "_Service"
                 yield item
@@ -55,7 +55,7 @@ class HyundaiNZSpider(JSONBlobSpider):
                 apply_category({"boat:repair": "yes"}, item)
                 apply_category({"boat:parts": "yes"}, item)
                 yield item
-            elif feature["Type"][0] == "Sales only":
+            elif feature["Type"][0] in ["Sales", "Sales only"]:
                 apply_category(Categories.SHOP_CAR, item)
                 item["ref"] = item["ref"] + "_Sales"
                 yield item

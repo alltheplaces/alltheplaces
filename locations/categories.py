@@ -269,6 +269,7 @@ class Categories(Enum):
     CANTEEN = {"amenity": "canteen"}
     CARAVAN_SITE = {"tourism": "caravan_site"}
     CASINO = {"amenity": "casino"}
+    CHARGE_POINT = {"man_made": "charge_point"}
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
     CINEMA = {"amenity": "cinema"}
@@ -294,6 +295,7 @@ class Categories(Enum):
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
     HOTEL = {"tourism": "hotel"}
+    INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}

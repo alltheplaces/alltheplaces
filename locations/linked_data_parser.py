@@ -8,7 +8,7 @@ import json5
 from chompjs import parse_js_object
 
 from locations.hours import OpeningHours, day_range, sanitise_day
-from locations.items import Feature, add_social_media
+from locations.items import Feature, SocialMedia, set_social_media
 
 logger = logging.getLogger(__name__)
 
@@ -228,9 +228,6 @@ class LinkedDataParser:
             if "-" in days:
                 start_day, end_day = days.split("-")
 
-                start_day = sanitise_day(start_day)
-                end_day = sanitise_day(end_day)
-
                 for day in day_range(start_day, end_day):
                     oh.add_range(day, start_time, end_time, time_format)
             else:
@@ -340,6 +337,6 @@ class LinkedDataParser:
                 same_as = [same_as]
             for link in same_as:
                 if "facebook.com" in link:
-                    add_social_media(item, "facebook", link)
+                    set_social_media(item, SocialMedia.FACEBOOK, link)
                 elif "tripadvisor.com" in link:
-                    add_social_media(item, "tripadvisor", link)
+                    set_social_media(item, SocialMedia.TRIPADVISOR, link)

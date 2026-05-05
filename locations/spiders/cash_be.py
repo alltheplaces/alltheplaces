@@ -8,7 +8,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.carrefour_fr import CARREFOUR_SUPERMARKET
-from locations.spiders.cora_be_lu import CoraBELUSpider
 from locations.spiders.delhaize import DELHAIZE
 
 
@@ -25,7 +24,7 @@ class CashBESpider(Spider):
     LOCATED_IN_MAPPINGS = [
         (["DELHAIZE"], DELHAIZE),
         (["CARREFOUR"], CARREFOUR_SUPERMARKET),
-        (["CORA"], CoraBELUSpider.item_attributes),
+        (["CORA"], {"brand": "Cora", "brand_wikidata": "Q686643"}),
     ]
 
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:

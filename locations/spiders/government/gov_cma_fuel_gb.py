@@ -5,18 +5,13 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class GovCmaFuelGBSpider(Spider):
     name = "gov_cma_fuel_gb"
-    dataset_attributes = {
-        "license": "Open Government Licence v3.0",
-        "license:website": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-        "license:wikidata": "Q99891702",
-        "attribution": "required",
-        "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
-    }
+    dataset_attributes = Licenses.GB_OGLv3.value
     start_urls = ["https://www.gov.uk/guidance/access-fuel-price-data"]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,  # Asda, Shell!

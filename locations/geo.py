@@ -4,7 +4,7 @@ import json
 import math
 from io import TextIOWrapper
 from itertools import groupby
-from typing import Iterable
+from typing import Any, Iterable
 
 import geonamescache
 from pyproj import Transformer
@@ -507,7 +507,7 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
 
     # At this point, we either have validly typed Point geometry or a validly
     # typed Multi-Point geometry containing a single point.
-    new_geometry = {"type": "Point"}
+    new_geometry: dict[str, Any] = {"type": "Point"}
     if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
         # Multi-Point geometry with a single point confirmed. Convert to Point
         # geometry.

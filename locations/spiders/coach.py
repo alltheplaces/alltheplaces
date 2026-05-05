@@ -1,7 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.items import add_social_media
+from locations.items import SocialMedia, set_social_media
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -27,7 +27,7 @@ class CoachSpider(CrawlSpider, StructuredDataSpider):
             return  # skip bad duplicate linked data
 
         if wa := response.xpath('//a[contains(@href, "https://wa.me/")]/@href').get():
-            add_social_media(item, "whatsapp", wa)
+            set_social_media(item, SocialMedia.WHATSAPP, wa)
 
         item["website"] = response.url
 

@@ -15,7 +15,7 @@ class CountBrandsPipeline:
 
     def process_item(self, item: Feature):
         if brand := item.get("brand"):
-            self.crawler.stats.inc_value(f"atp/brand/{brand}")  # ty: ignore[possibly-missing-attribute]
+            self.crawler.stats.inc_value(f"atp/brand/{brand}")  # ty: ignore[unresolved-attribute]
         if wikidata := item.get("brand_wikidata"):
-            self.crawler.stats.inc_value(f"atp/brand_wikidata/{wikidata}")  # ty: ignore[possibly-missing-attribute]
+            self.crawler.stats.inc_value(f"atp/brand_wikidata/{wikidata}")  # ty: ignore[unresolved-attribute]
         return item

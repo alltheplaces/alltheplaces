@@ -34,7 +34,7 @@ class LogStatsExtension:
             with open(filename, "w") as f:
                 f.write(
                     json.dumps(
-                        self.crawler.stats.get_stats(),  # ty: ignore [possibly-missing-attribute]
+                        self.crawler.stats.get_stats(),  # ty: ignore[unresolved-attribute]
                         default=myconverter,
                         sort_keys=True,
                         indent=1,

@@ -13,12 +13,18 @@ class ChetyreLapyRUSpider(scrapy.Spider):
     start_urls = ["https://4lapy.ru/shops/"]
     item_attributes = {"brand_wikidata": "Q62390783"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "RU"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        manifest_src = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get()
+        if not manifest_src:
+            self.logger.error(
+                "Could not find _ssgManifest.js script on %s; site may be serving a captcha or non-Next.js page",
+                response.url,
+            )
+            return
         yield JsonRequest(
-            url="https://4lapy.ru/_next/data/{}/shops.json".format(
-                response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
-            ),
+            url="https://4lapy.ru/_next/data/{}/shops.json".format(manifest_src.split("/")[3]),
             callback=self.parse_pois,
         )
 

@@ -18,7 +18,6 @@ BRANDS = {
 
 class CarrefourBRSpider(Spider):
     name = "carrefour_br"
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(

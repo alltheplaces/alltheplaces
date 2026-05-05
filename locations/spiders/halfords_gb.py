@@ -50,7 +50,7 @@ class HalfordsGBSpider(scrapy.Spider):
                 if data["storePrefix"] == "Halfords Autocentre":
                     item["brand_wikidata"] = "Q5641894"
                 elif data["storePrefix"] == "Halfords Garage Services":
-                    item["brand"] = "Halfords"
+                    item["brand_wikidata"] = "Q130270919"
                     apply_category(Categories.SHOP_CAR_REPAIR, item)
                 elif data["storePrefix"] == "National Tyres and Autocare":
                     item["brand_wikidata"] = "Q6979055"

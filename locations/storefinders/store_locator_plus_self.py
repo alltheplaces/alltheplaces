@@ -105,7 +105,7 @@ class StoreLocatorPlusSelfSpider(Spider):
                     "lng": str(lon),
                     "radius": str(self.search_radius),
                 }
-                yield FormRequest(url=url, formdata=formdata, method="POST")
+                yield FormRequest(url=url, formdata=formdata, method="POST")  # ty: ignore[invalid-argument-type]
         elif url and len(self.searchable_points_files) > 0 and self.search_radius != 0 and self.max_results != 0:
             # NONPREFERRED geographic radius search method using a manually
             # specified list of searchable_points_file containing centroids.
@@ -117,7 +117,7 @@ class StoreLocatorPlusSelfSpider(Spider):
                         "lng": str(lon),
                         "radius": str(self.search_radius),
                     }
-                    yield FormRequest(url=url, formdata=formdata, method="POST")
+                    yield FormRequest(url=url, formdata=formdata, method="POST")  # ty: ignore[invalid-argument-type]
         else:
             raise ValueError(
                 "Either iseadgg_countries_list or searchable_points_files must be specified with one or more values. The search_radius attribute must also be specified."

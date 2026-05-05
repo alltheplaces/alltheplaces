@@ -16,22 +16,22 @@ class EcobulpackBGSpider(Spider):
     item_attributes = {"operator": "Екобулпак", "operator_wikidata": "Q116687156"}
     allowed_domains = ["ecobulpack.bg"]
     start_urls = [
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Bankya-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Vitosha-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Vrabnitsa-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Vazrazhdane-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Izgrev-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Ilinden-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Krasna-polyana-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Kremikovtsi-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Lozenets-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Lyulin-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Ovcha-kupel-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Nadezhda-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Pancharevo-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Poduyane-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Serdika-Spisak.pdf",
-        "https://www.ecobulpack.bg/files/obshtini/stolichna/2025-Slatina-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Bankya-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Vitosha-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Vrabnitsa-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Vazrazhdane-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Izgrev-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Ilinden-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Krasna-polyana-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Kremikovtsi-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Lozenets-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Lyulin-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Ovcha-kupel-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Nadezhda-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Pancharevo-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Poduyane-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Serdika-Spisak.pdf",
+        "https://www.ecobulpack.bg/files/obshtini/stolichna/2026-Slatina-Spisak.pdf",
     ]
     no_refs = True
 

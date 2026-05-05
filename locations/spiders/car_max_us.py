@@ -14,6 +14,7 @@ class CarMaxUSSpider(Spider):
     item_attributes = {"brand": "CarMax", "brand_wikidata": "Q5037190"}
     start_urls = ["https://www.carmax.com/stores/api/all"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = "US"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():

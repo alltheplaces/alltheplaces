@@ -13,7 +13,7 @@ class NationalParksBoardTreesSGSpider(ArcGISFeatureServerSpider):
     item_attributes = {"operator": "National Parks Board", "operator_wikidata": "Q6974762"}
     host = "services6.arcgis.com"
     context_path = "s5gdswleLl0QthYa/ArcGIS"
-    service_id = "TreeInformation_Hashing"
+    service_id = "TreesSG_TreeInformation_Trees"
     layer_id = "0"
 
     async def start(self) -> AsyncIterator[JsonRequest]:

@@ -7,6 +7,23 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
+def _is_populateable(v: int, payload: list) -> bool:
+    return isinstance(v, int) and 0 < v < len(payload)
+
+
+def populate(index: int, payload: list):
+    val = payload[index]
+    if isinstance(val, dict):
+        for k, v in val.items():
+            if _is_populateable(v, payload):
+                val[k] = populate(v, payload)
+    elif isinstance(val, list):
+        for i in range(0, len(val)):
+            if _is_populateable(val[i], payload):
+                val[i] = populate(val[i], payload)
+    return val
+
+
 class DinoPLSpider(JSONBlobSpider):
     name = "dino_pl"
     item_attributes = {"brand": "Dino", "brand_wikidata": "Q11694239"}
@@ -16,34 +33,13 @@ class DinoPLSpider(JSONBlobSpider):
     no_refs = True
 
     def extract_json(self, response: Response) -> list:
-        payload = response.json()
-
-        def is_populateable(v) -> bool:
-            return isinstance(v, int) and 0 < v < len(payload)
-
-        def populate(index: int):
-            val = payload[index]
-            if isinstance(val, dict):
-                for k, v in val.items():
-                    if is_populateable(v):
-                        val[k] = populate(v)
-            elif isinstance(val, list):
-                for i in range(0, len(val)):
-                    if is_populateable(val[i]):
-                        val[i] = populate(val[i])
-            elif isinstance(val, dict):
-                for k, v in val.items():
-                    if is_populateable(v):
-                        val[k] = payload[v]
-            return val
-
         return [
             v["properties"]
             | {
                 "lon": v["geometry"]["coordinates"][0],
                 "lat": v["geometry"]["coordinates"][1],
             }
-            for v in populate(0)["data"][1]["map-data"]["features"]
+            for v in populate(0, response.json())["data"][1]["map-data"]["features"]
         ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

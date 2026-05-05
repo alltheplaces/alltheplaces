@@ -15,7 +15,6 @@ from locations.spiders.bricomarche_pl import BricomarchePLSpider
 from locations.spiders.carrefour_fr import CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.conad_it import ConadITSpider
-from locations.spiders.cora_be_lu import CoraBELUSpider
 from locations.spiders.e_leclerc import ELeclercSpider
 from locations.spiders.eko_gr import EkoGRSpider
 from locations.spiders.elinoil_gr import ElinoilGRSpider
@@ -158,7 +157,7 @@ class MaesDkvSpider(scrapy.Spider):
         "PREEM": PREEM,
         "CEPSA MOEVE": TotalEnergiesSpider.BRANDS["cepsa"],
         "NESTE": {"brand": "Neste", "brand_wikidata": "Q616376"},
-        "CORA": CoraBELUSpider.item_attributes,
+        "CORA": {"brand": "Cora", "brand_wikidata": "Q686643"},
         "TAMOIL": AviaEUSpider.BRANDS_MAPPING["Tamoil"],
         "TAMOIL-OILONE": AviaEUSpider.BRANDS_MAPPING["Tamoil"],
         "AUCHAN": AuchanFRSpider.item_attributes,

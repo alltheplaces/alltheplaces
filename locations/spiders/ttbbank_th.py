@@ -9,7 +9,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.big_c_th import BigCTHSpider
-from locations.spiders.cp_freshmart_th import CpFreshmartTHSpider
 from locations.spiders.familymart_my import FamilymartMYSpider
 from locations.spiders.lotuss_th import LotussTHSpider
 from locations.spiders.makro_th import MakroTHSpider
@@ -36,7 +35,7 @@ class TtbbankTHSpider(Spider):
         (["เซ็นทรัล", "CENTRAL"], {"brand": "Central Department Store", "brand_wikidata": "Q5060703"}),
         (["โรบินสัน", "ROBINSON"], {"brand": "Robinson Department Store", "brand_wikidata": "Q5060703"}),
         (["ฟู้ดแลนด์", "FOODLAND", "FOOD LAND"], {"brand": "Foodland", "brand_wikidata": "Q5465559"}),
-        (["ซีพี", "CP"], CpFreshmartTHSpider.item_attributes),
+        (["ซีพี", "CP"], {"brand": "CP Fresh Mart", "brand_wikidata": "Q117457709"}),
         (["แมคโดนัลด์", "MCDONALDS", "MCDONALD"], McdonaldsSpider.item_attributes),
         (["CJ EXPRESS", "CJ. EXPRESS"], {"brand": "CJ Express", "brand_wikidata": "Q125874457"}),
         (["CJ MORE"], {"brand": "CJ More", "brand_wikidata": "Q125874457"}),

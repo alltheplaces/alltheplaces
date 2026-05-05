@@ -15,7 +15,7 @@ class OSMExporter(XmlItemExporter):
     root_element = "osm"
     indent = 2
     export_empty_fields = False
-    fields_to_export = dict(mapping)
+    fields_to_export: dict[str, str] = {k: v for k, v in mapping}
     encoding = "UTF-8"
 
     def __init__(self, file, **kwargs):

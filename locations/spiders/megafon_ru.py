@@ -11,7 +11,6 @@ class MegafonRUSpider(scrapy.Spider):
     item_attributes = {"brand_wikidata": "Q1720713"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ["https://www.megafon.ru/api/store-locator/map-tile/b2c/"]
-    requires_proxy = "RU"
 
     def parse(self, response):
         offices = response.json()["offices"]

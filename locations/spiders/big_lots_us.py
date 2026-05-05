@@ -1,33 +1,30 @@
-from typing import Any
+from typing import Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
 
-from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class BigLotsUSSpider(Spider):
+class BigLotsUSSpider(JSONBlobSpider):
     name = "big_lots_us"
     item_attributes = {"brand": "Big Lots", "brand_wikidata": "Q4905973"}
     start_urls = [
         "https://core.service.elfsight.com/p/boot/?page=https%3A%2F%2Fbiglots.com%2Fstore-locator%2F&w=38636f5f-4115-4585-8c00-9e245fd92818"
     ]
+    locations_key = ["data", "widgets", "38636f5f-4115-4585-8c00-9e245fd92818", "data", "settings", "locations"]
+    drop_attributes = {"website", "name"}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["data"]["widgets"]["38636f5f-4115-4585-8c00-9e245fd92818"]["data"]["settings"][
-            "locations"
-        ]:
-            location.update(location.pop("place"))
-            item = DictParser.parse(location)
-            item["website"] = item["name"] = None
+    def pre_process_data(self, location: dict) -> None:
+        location.update(location.pop("place"))
 
-            item["image"] = location["photo"]["url"]
-            item["extras"]["ref:google:place_id"] = location["placeId"]
-
-            item["opening_hours"] = self.parse_opening_hours(location)
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature.get("photo"):
+            item["image"] = feature["photo"]["url"]
+        item["extras"]["ref:google:place_id"] = feature["placeId"]
+        item["opening_hours"] = self.parse_opening_hours(feature)
+        yield item
 
     def parse_opening_hours(self, location: dict) -> OpeningHours:
         oh = OpeningHours()

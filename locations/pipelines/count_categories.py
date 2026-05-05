@@ -17,10 +17,10 @@ class CountCategoriesPipeline:
     def process_item(self, item: Feature):
         if categories := get_category_tags(item):
             for k, v in sorted(categories.items()):
-                self.crawler.stats.inc_value("atp/category/%s/%s" % (k, v))  # ty: ignore[possibly-missing-attribute]
+                self.crawler.stats.inc_value("atp/category/%s/%s" % (k, v))  # ty: ignore[unresolved-attribute]
                 break
             if len(categories) > 1:
-                self.crawler.stats.inc_value("atp/category/multiple")  # ty: ignore[possibly-missing-attribute]
+                self.crawler.stats.inc_value("atp/category/multiple")  # ty: ignore[unresolved-attribute]
         else:
-            self.crawler.stats.inc_value("atp/category/missing")  # ty: ignore[possibly-missing-attribute]
+            self.crawler.stats.inc_value("atp/category/missing")  # ty: ignore[unresolved-attribute]
         return item

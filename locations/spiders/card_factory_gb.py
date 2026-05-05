@@ -11,7 +11,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 class CardFactoryGBSpider(Spider):
     name = "card_factory_gb"
     item_attributes = {"brand": "Card Factory", "brand_wikidata": "Q5038192"}
-    url_template = "https://www.cardfactory.co.uk/on/demandware.store/Sites-cardfactory-UK-Site/default/Stores-FindStores?showMap=true&radius=100&lat={}&long={}"
+    url_template = "https://www.cardfactory.co.uk/on/demandware.store/Sites-cardfactory-UK-Site/default/Stores-FindStores?showMap=true&radius=100&lat={}&long={}&pageType=storeLocator"
 
     async def start(self) -> AsyncIterator[Request]:
         for country in ["GB", "IE"]:
