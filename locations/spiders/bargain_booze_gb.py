@@ -14,7 +14,7 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Bargain Booze", "brand_wikidata": "Q16971315"}
     allowed_domains = ["branches.bargainbooze.co.uk"]
     sitemap_urls = ["https://branches.bargainbooze.co.uk/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/branches\.bargainbooze\.co\.uk\/[\w\-]+\/[\w\-]+\.html$", "parse_sd")]
+    sitemap_rules = [(r"^https:\/\/branches\.bargainbooze\.co\.uk\/en-gb\/[\w\-]+\/[\w\-]+\/[\w\-]+$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data):
         if "CLOSED" in item["name"].upper() or "COMING SOON" in item["name"].upper():
@@ -66,8 +66,8 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
                 flags=re.IGNORECASE,
             ).strip()
             item["name"] = "Bargain Booze in Costcutter"
-        item.pop("facebook")
-        item.pop("twitter")
-        item.pop("image")
+        item.pop("facebook",None)
+        item.pop("twitter",None)
+        item.pop("image",None)
         apply_category(Categories.SHOP_ALCOHOL, item)
         yield item
