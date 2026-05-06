@@ -1,16 +1,17 @@
+import json
 from typing import Any
 
 import scrapy
-from scrapy import FormRequest
+from scrapy import FormRequest, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.pipelines.address_clean_up import clean_address, merge_address_lines
 
 
-class BancoDelBienestarMXSpider(scrapy.Spider):
+class BancoDelBienestarMXSpider(Spider):
     name = "banco_del_bienestar_mx"
     item_attributes = {
         "brand": "Banco del Bienestar",
@@ -18,24 +19,37 @@ class BancoDelBienestarMXSpider(scrapy.Spider):
     }
     start_urls = ["https://directoriodesucursales.bancodelbienestar.gob.mx"]
     no_refs = True
+    token = ""
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for state_info in response.xpath('//select[@id="bandas"]/option'):
-            if state_id := state_info.xpath("./@value").get(""):
-                yield FormRequest(
-                    url="https://directoriodesucursales.bancodelbienestar.gob.mx/home.php",
-                    formdata={"entidadtxt": state_id},
-                    callback=self.parse_locations,
-                    cb_kwargs={"state": state_info.xpath("./text()").get("")},
-                )
+        self.token = response.xpath('//input[@name="__RequestVerificationToken"]/@value').get()
+        for state in json.loads(response.xpath('//input[@id="datosEntidad"]/@value').get()):
+            yield FormRequest(
+                url="https://directoriodesucursales.bancodelbienestar.gob.mx/Home/ListarMunalc",
+                formdata={"idEnt": str(state["id_entidad"])},
+                callback=self.parse_state,
+                cb_kwargs={"state":  state["descripcion"]},
+            )
+
+    def parse_state(self, response: Response, state: str) -> Any:
+        for area in response.json()["response"]:
+            yield FormRequest(
+                url="https://directoriodesucursales.bancodelbienestar.gob.mx/Busqueda",
+                formdata={"entidad": str(area["idEnt"]), "munalc": area["munalc"], "__RequestVerificationToken": self.token},
+                callback=self.parse_locations,
+                cb_kwargs={"state": state},
+            )
 
     def parse_locations(self, response: Response, state: str) -> Any:
-        for location in response.xpath('//*[@class="card hsucursal"]'):
-            item = Feature()
-            item["state"] = state
-            item["ref"] = item["branch"] = location.xpath('.//*[@class="card-title"]/text()').get("").strip()
-            item["addr_full"] = clean_address(location.xpath('.//p[@class="card-text"]/text()').getall())
-            if map_url := location.xpath('.//a[contains(@href, "maps")]/@href').get():
-                item["lat"], item["lon"] = url_to_coords(map_url)
-            apply_category(Categories.BANK, item)
-            yield item
+        if locations_data:= response.xpath('//@data-sucursales').get():
+            for location in json.loads(locations_data).get("response", []):
+                item = Feature()
+                item["state"] = state
+                item["city"] = location["munalc"]
+                item["ref"] = location["id"]
+                item["branch"] = location["nomSuc"]
+                item["addr_full"] = location["domicilio"]
+                if map_url := location.get("liga"):
+                    item["lat"], item["lon"] = url_to_coords(map_url)
+                apply_category(Categories.BANK, item)
+                yield item
