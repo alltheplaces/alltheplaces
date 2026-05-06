@@ -18,6 +18,8 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["branches.bargainbooze.co.uk"]
     sitemap_urls = ["https://branches.bargainbooze.co.uk/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/branches\.bargainbooze\.co\.uk\/en-gb\/[\w\-]+\/[\w\-]+\/[\w\-]+$", "parse_sd")]
+    wanted_types = ["FoodEstablishment"]
+    search_for_facebook = False
 
     def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
         for entry in entries:
@@ -75,8 +77,6 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
                 flags=re.IGNORECASE,
             ).strip()
             item["name"] = "Bargain Booze in Costcutter"
-        item.pop("facebook", None)
-        item.pop("twitter", None)
         item.pop("image", None)
 
         apply_category(Categories.SHOP_ALCOHOL, item)
