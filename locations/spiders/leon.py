@@ -19,7 +19,7 @@ class LeonSpider(Spider):
         ):
             if store.get("permanentlyClosed"):
                 continue
-                
+
             store["address"] = store.pop("locationDetails")
             store["address"]["city"] = store["address"].pop("townOrCity", "")
             if not store["address"].get("country"):
