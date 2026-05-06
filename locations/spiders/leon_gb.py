@@ -48,5 +48,5 @@ class LeonGBSpider(Spider):
 
             item["extras"] = {"restaurantType": store.get("restaurantType") or store.get("type")}
             item["branch"] = item.pop("name")
-            
+
             yield item
