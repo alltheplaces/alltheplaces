@@ -15,7 +15,7 @@ class CoachCASpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "coach_ca"
     item_attributes = {"brand": "Coach", "brand_wikidata": "Q727697"}
     sitemap_urls = ["https://ca.coach.com/en/stores/sitemap.xml"]
-    sitemap_rules = [("https://ca.coach.com/en/stores/[^/]+/[^/]+/[^/]+", "parse_sd")]
+    sitemap_rules = [(r"https://ca.coach.com/en/stores/[^/]+/[^/]+/[^/]+", "parse_sd")]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
