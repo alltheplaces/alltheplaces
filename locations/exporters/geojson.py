@@ -8,7 +8,7 @@ from typing import Any, Generator, Type
 
 from scrapy import Item, Spider
 from scrapy.exporters import JsonItemExporter
-from scrapy.utils.misc import walk_modules
+from scrapy.utils.misc import walk_modules_iter
 from scrapy.utils.python import to_bytes
 from scrapy.utils.spider import iter_spider_classes
 
@@ -147,7 +147,7 @@ def find_spider_class(spider_name: str):
 
 def iter_spider_classes_in_modules(modules=SPIDER_MODULES) -> Generator[Type[Spider], Any, None]:
     for mod in modules:
-        for module in walk_modules(mod):
+        for module in walk_modules_iter(mod):
             for spider_class in iter_spider_classes(module):
                 yield spider_class
 
