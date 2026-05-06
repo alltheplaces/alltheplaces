@@ -16,7 +16,6 @@ class BancoDelBienestarMXSpider(Spider):
         "brand_wikidata": "Q5719137",
     }
     start_urls = ["https://directoriodesucursales.bancodelbienestar.gob.mx"]
-    no_refs = True
     token = ""
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
