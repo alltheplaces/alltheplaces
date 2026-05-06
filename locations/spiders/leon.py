@@ -17,6 +17,9 @@ class LeonSpider(Spider):
             json.loads(response.xpath('//script[@type="application/json"][@id="__NEXT_DATA__"]/text()').get()),
             "restaurants",
         ):
+            if store.get("permanentlyClosed"):
+                continue
+                
             store["address"] = store.pop("locationDetails")
             store["address"]["city"] = store["address"].pop("townOrCity", "")
             if not store["address"].get("country"):
