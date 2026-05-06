@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 import scrapy
@@ -16,15 +17,13 @@ class ChetyreLapyRUSpider(scrapy.Spider):
     requires_proxy = "RU"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        manifest_src = response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get()
-        if not manifest_src:
-            self.logger.error(
-                "Could not find _ssgManifest.js script on %s; site may be serving a captcha or non-Next.js page",
-                response.url,
-            )
+        next_data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        if not next_data:
+            self.logger.error(f"Could not find __NEXT_DATA__ script on {response.url}.")
             return
+
         yield JsonRequest(
-            url="https://4lapy.ru/_next/data/{}/shops.json".format(manifest_src.split("/")[3]),
+            url=f"https://4lapy.ru/_next/data/{next_data['buildId']}/shops.json",
             callback=self.parse_pois,
         )
 
@@ -32,7 +31,7 @@ class ChetyreLapyRUSpider(scrapy.Spider):
         for poi in list(response.json()["pageProps"]["fallback"].values())[0]["items"]:
             item = Feature()
             item["ref"] = poi["id"]
-            item["addr_full"] = poi["address"]
+            item["addr_full"] = poi["address"].strip()
             item["city"] = poi["cityName"]
             item["lat"] = poi["coordinates"]["lat"]
             item["lon"] = poi["coordinates"]["lon"]
