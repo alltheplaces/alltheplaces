@@ -20,6 +20,12 @@ class Licenses(Enum):
         "license:wikidata": "Q20007257",
         "attribution": "required",
     }
+    CCBYSA4 = {
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International",
+        "license:website": "http://creativecommons.org/licenses/by-sa/4.0/",
+        "license:wikidata": "Q18199165",
+        "attribution": "required",
+    }
     GB_OGLv3 = {
         "license": "Open Government Licence v3.0",
         "license:website": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
