@@ -1,8 +1,11 @@
 import re
+from typing import Iterable, Any
 
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.spiders.costcutter_gb import CostcutterGBSpider
 from locations.spiders.james_retail_gb import JamesRetailGBSpider
 from locations.spiders.the_food_warehouse_gb import TheFoodWarehouseGBSpider
@@ -16,7 +19,13 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://branches.bargainbooze.co.uk/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/branches\.bargainbooze\.co\.uk\/en-gb\/[\w\-]+\/[\w\-]+\/[\w\-]+$", "parse_sd")]
 
-    def post_process_item(self, item, response, ld_data):
+    def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
+        for entry in entries:
+            if "/en-gb/gb/" in entry["loc"]:
+                continue
+            yield entry
+
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if "CLOSED" in item["name"].upper() or "COMING SOON" in item["name"].upper():
             return
         name = item["name"]
