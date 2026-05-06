@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
-class LeonSpider(Spider):
+class LeonGBSpider(Spider):
     name = "leon_gb"
     item_attributes = {"brand": "LEON", "brand_wikidata": "Q6524851", "extras": Categories.FAST_FOOD.value}
     start_urls = ["https://leon.co/find-leon/"]
