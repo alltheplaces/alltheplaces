@@ -78,5 +78,11 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
         item.pop("facebook", None)
         item.pop("twitter", None)
         item.pop("image", None)
+
         apply_category(Categories.SHOP_ALCOHOL, item)
+
+        if img := response.xpath('//source[contains(@srcset, "api.mapbox.com")]/@srcset').get():
+            if m := re.search(r"\((-?\d+\.\d+),(-?\d+\.\d+)\)", img):
+                item["lon"], item["lat"] = m.groups()
+
         yield item
