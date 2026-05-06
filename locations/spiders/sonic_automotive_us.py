@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import apply_category, Categories, apply_yes_no, Extras
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.spiders.audi import AudiSpider
 from locations.spiders.bmw_group import BmwGroupSpider
