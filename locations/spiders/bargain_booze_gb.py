@@ -1,5 +1,5 @@
 import re
-from typing import Iterable, Any
+from typing import Any, Iterable
 
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
