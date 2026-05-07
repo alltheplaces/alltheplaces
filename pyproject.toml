@@ -24,6 +24,7 @@ dependencies = [
     "pygeohash<4",
     "pygithub",
     "pyproj",
+    "pyshp>=3.0.3",
     "python-json-logger",
     "requests",
     "requests-cache",
