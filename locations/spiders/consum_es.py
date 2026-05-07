@@ -12,9 +12,8 @@ class ConsumESSpider(SitemapSpider, StructuredDataSpider):
     name = "consum_es"
     item_attributes = {"brand": "Consum", "brand_wikidata": "Q8350308"}
     sitemap_urls = ["https://www.consum.es/robots.txt"]
-    sitemap_rules = [(r"es/supermercados/([^/]+)/", "parse")]
+    sitemap_rules = [(r"/supermercados/", "parse")]
     wanted_types = ["Store"]
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name")
