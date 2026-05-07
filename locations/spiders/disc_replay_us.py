@@ -12,6 +12,7 @@ class DiscReplayUSSpider(CrawlSpider):
     allowed_domains = ["www.discreplay.com"]
     start_urls = ["https://www.discreplay.com/locations-list/"]
     rules = [Rule(LinkExtractor(allow=r"/locations/.+"), callback="parse")]
+    requires_proxy = True
 
     def parse(self, response):
         item = Feature()
