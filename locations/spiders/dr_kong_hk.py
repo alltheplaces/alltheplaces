@@ -1,12 +1,19 @@
-from locations.categories import Categories
-from locations.hours import DAYS_EN
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from typing import Iterable
+
+from scrapy.http import TextResponse
+
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class DrKongHKSpider(WPStoreLocatorSpider):
+class DrKongHKSpider(JSONBlobSpider):
     name = "dr_kong_hk"
-    item_attributes = {"brand_wikidata": "Q116547631", "brand": "Dr. Kong", "extras": Categories.SHOP_SHOES.value}
-    allowed_domains = [
-        "www.dr-kong.com.hk",
-    ]
-    days = DAYS_EN
+    item_attributes = {"brand_wikidata": "Q116547631", "brand": "Dr. Kong"}
+    start_urls = ["https://webapi.91app.hk/webapi/LocationV2/GetLocationList?shopId=101&lang=en-HK"]
+    locations_key = ["Data", "List"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["website"] = f"https://www.dr-kong.com.hk/Shop/StoreDetail/101/{item['ref']}"
+        yield item
