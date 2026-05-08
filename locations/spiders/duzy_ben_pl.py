@@ -59,6 +59,7 @@ class DuzyBenPLSpider(scrapy.Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]["pickupPoints"]["pickupPoints"] or []:
             item = DictParser.parse(store)
+            item["street_address"] = item.pop("street")
 
             item["opening_hours"] = OpeningHours()
             days = store.get("openingDays") or {}
