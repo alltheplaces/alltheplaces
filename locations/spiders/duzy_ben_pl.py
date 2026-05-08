@@ -62,7 +62,7 @@ class DuzyBenPLSpider(scrapy.Spider):
             item["street_address"] = item.pop("street")
 
             item["opening_hours"] = OpeningHours()
-            for day, rule in  store["openingDays"].items():
+            for day, rule in store["openingDays"].items():
                 if rule["open"] is True:
                     item["opening_hours"].add_range(day, rule["from"], rule["till"])
                 else:
