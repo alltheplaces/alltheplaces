@@ -6,7 +6,6 @@ from locations.categories import Categories, Clothes, apply_category, apply_clot
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class ZaraSpider(JSONBlobSpider):
