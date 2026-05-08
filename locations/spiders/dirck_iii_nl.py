@@ -24,7 +24,7 @@ class DirckIiiNLSpider(JSONBlobSpider):
             return
 
         item["ref"] = location.get("storelocator_id")
-        item["name"] = location.get("storename")
+        item["branch"] = item.pop("name")
         item["email"] = None
 
         item["street_address"] = clean_address(location.get("address")[1:])
