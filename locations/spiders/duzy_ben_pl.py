@@ -1,25 +1,74 @@
-import json
+import scrapy
+from scrapy.http import JsonRequest
 
-from scrapy import Spider
-
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_PL, OpeningHours
+from locations.geo import country_iseadgg_centroids
+from locations.hours import OpeningHours
 
 
-class DuzyBenPLSpider(Spider):
+class DuzyBenPLSpider(scrapy.Spider):
     name = "duzy_ben_pl"
     item_attributes = {"brand": "Duży Ben", "brand_wikidata": "Q110428071"}
-    start_urls = ["https://duzyben.pl/wp-content/themes/duzyben/stores/stores.json.js"]
+
+    def start_requests(self):
+        query_template = """
+        query {
+          pickupPoints(
+            courierId: 100105
+            location: { latitude: %s, longitude: %s }
+            radius: 100
+          ) {
+            pickupPoints {
+              codeExternal
+              id
+              name
+              address {
+                city
+                postcode
+                street
+                buildingAndHouseNumber
+              }
+              coordinates {
+                latitude
+                longitude
+              }
+              openingDays {
+                monday { open from till }
+                tuesday { open from till }
+                wednesday { open from till }
+                thursday { open from till }
+                friday { open from till }
+                saturday { open from till }
+                sunday { open from till }
+              }
+            }
+          }
+        }
+        """
+
+        # Using 94km ISEADGG grid for optimal Poland coverage
+        for lat, lon in country_iseadgg_centroids("PL", 94):
+            yield JsonRequest(
+                url="https://duzyben.pl/graphql/v1/",
+                data={"query": query_template % (lat, lon)},
+                callback=self.parse,
+            )
 
     def parse(self, response, **kwargs):
-        data = json.loads(response.text.removeprefix("var stores ="))
-        for feature in data:
-            item = DictParser.parse(feature)
-            item["street_address"] = feature["Name"]
-            item["lat"] = feature["Location"]["Latitude"]
-            item["lon"] = feature["Location"]["Longitude"]
+        json_data = response.json()
+
+        for store in json_data.get("data").get("pickupPoints").get("pickupPoints") or []:
+            item = DictParser.parse(store)
+
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(feature["OpenHours"], days=DAYS_PL)
-            item["phone"] = feature["Phone"]
-            item["ref"] = feature["PostID"]
+            days = store.get("openingDays") or {}
+            for day_name, times in days.items():
+                if times and times.get("open") and times.get("from") and times.get("till"):
+                    item["opening_hours"].add_range(day_name[:2].title(), times["from"], times["till"])
+
+            # name contains street address
+            item["name"] = None
+            apply_category(Categories.SHOP_ALCOHOL, item)
+
             yield item
