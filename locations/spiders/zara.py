@@ -6,7 +6,6 @@ from locations.categories import Categories, Clothes, apply_category, apply_clot
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class ZaraSpider(JSONBlobSpider):
@@ -64,9 +63,9 @@ class ZaraSpider(JSONBlobSpider):
     ]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": BROWSER_DEFAULT,
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.zara.com",
+            "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Connection": "keep-alive",
             "Referer": "https://www.zara.com/uk/en/z-stores-st1404.html?v1=2418845",
