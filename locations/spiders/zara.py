@@ -62,7 +62,14 @@ class ZaraSpider(JSONBlobSpider):
         f"https://www.zara.com/{country}/en/stores-locator/extended/search?lat={lat}&lng={lng}&isDonationOnly=false&showOnlyPickup=false&showStoresCapacity=false&radius=1000&ajax=true"
         for country, lat, lng in countries
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DEFAULT_REQUEST_HEADERS": {
+            "Host": "www.zara.com",
+            "Referer": "https://www.zara.com/uk/en/z-stores-st1404.html?v1=2418845",
+        },
+    }
     drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
