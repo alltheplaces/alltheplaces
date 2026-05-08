@@ -1,5 +1,7 @@
+from typing import AsyncIterator, Any
+
 import scrapy
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -11,7 +13,7 @@ class DuzyBenPLSpider(scrapy.Spider):
     name = "duzy_ben_pl"
     item_attributes = {"brand": "Duży Ben", "brand_wikidata": "Q110428071"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Any]:
         query_template = """
         query {
           pickupPoints(
@@ -52,13 +54,10 @@ class DuzyBenPLSpider(scrapy.Spider):
             yield JsonRequest(
                 url="https://duzyben.pl/graphql/v1/",
                 data={"query": query_template % (lat, lon)},
-                callback=self.parse,
             )
 
-    def parse(self, response, **kwargs):
-        json_data = response.json()
-
-        for store in json_data.get("data").get("pickupPoints").get("pickupPoints") or []:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["data"]["pickupPoints"]["pickupPoints"] or []:
             item = DictParser.parse(store)
 
             item["opening_hours"] = OpeningHours()
