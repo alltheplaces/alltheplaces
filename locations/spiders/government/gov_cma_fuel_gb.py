@@ -1,7 +1,7 @@
 from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
