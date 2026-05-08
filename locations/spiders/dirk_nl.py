@@ -1,13 +1,13 @@
 from typing import Iterable
 
 from scrapy.http import TextResponse
+from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import apply_category, Categories
-from locations.hours import sanitise_day, DAYS_NL
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_NL, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-from scrapy.linkextractors import LinkExtractor
 
 
 class DirkNLSpider(CrawlSpider, StructuredDataSpider):
