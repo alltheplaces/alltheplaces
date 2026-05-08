@@ -67,6 +67,8 @@ class ZaraSpider(JSONBlobSpider):
         "USER_AGENT": BROWSER_DEFAULT,
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.zara.com",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Connection": "keep-alive",
             "Referer": "https://www.zara.com/uk/en/z-stores-st1404.html?v1=2418845",
         },
     }
