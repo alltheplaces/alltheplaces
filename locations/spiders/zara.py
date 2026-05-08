@@ -70,7 +70,6 @@ class ZaraSpider(JSONBlobSpider):
             "Referer": "https://www.zara.com/uk/en/z-stores-st1404.html?v1=2418845",
         },
     }
-    drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
