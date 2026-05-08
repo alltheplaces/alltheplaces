@@ -62,10 +62,11 @@ class DuzyBenPLSpider(scrapy.Spider):
             item["street_address"] = item.pop("street")
 
             item["opening_hours"] = OpeningHours()
-            days = store.get("openingDays") or {}
-            for day_name, times in days.items():
-                if times and times.get("open") and times.get("from") and times.get("till"):
-                    item["opening_hours"].add_range(day_name[:2].title(), times["from"], times["till"])
+            for day, rule in  store["openingDays"].items():
+                if rule["open"] is True:
+                    item["opening_hours"].add_range(day, rule["from"], rule["till"])
+                else:
+                    item["opening_hours"].set_closed(day)
 
             # name contains street address
             item["name"] = None
