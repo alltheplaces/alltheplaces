@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy import Selector
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_NL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -13,7 +13,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class DirckIiiNLSpider(JSONBlobSpider):
     name = "dirck_iii_nl"
-    item_attributes = {"brand": "Dirck III", "brand_wikidata": "Q109188079", "extras": Categories.SHOP_ALCOHOL.value}
+    item_attributes = {"brand": "Dirck III", "brand_wikidata": "Q109188079"}
     allowed_domains = ["www.dirckiii.nl"]
     start_urls = ["https://www.dirckiii.nl/storelocator/index/ajax/"]
     locations_key = "data"
@@ -38,5 +38,7 @@ class DirckIiiNLSpider(JSONBlobSpider):
                 if day in DAYS_NL and time_str and " - " in time_str:
                     open_t, close_t = time_str.split(" - ", 1)
                     item["opening_hours"].add_range(DAYS_NL[day], open_t.strip(), close_t.strip())
+
+        apply_category(Categories.SHOP_ALCOHOL, item)
 
         yield item
