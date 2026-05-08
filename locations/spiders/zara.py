@@ -64,8 +64,13 @@ class ZaraSpider(JSONBlobSpider):
     ]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": BROWSER_DEFAULT,
-        "DEFAULT_REQUEST_HEADERS": {"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
+        "USER_AGENT": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0",
+        "DEFAULT_REQUEST_HEADERS": {
+            "Host": "www.zara.com",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Connection": "keep-alive",
+            "Referer": "https://www.zara.com/uk/en/z-stores-st1404.html?v1=2418845",
+        },
     }
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
