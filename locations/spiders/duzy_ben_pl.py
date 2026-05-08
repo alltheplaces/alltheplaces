@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Any
+from typing import Any, AsyncIterator
 
 import scrapy
 from scrapy.http import JsonRequest, Response
