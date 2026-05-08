@@ -32,6 +32,9 @@ class DunhamsSportsUSSpider(Spider):
                 item["lon"] = lat_lon_data["lng"]
                 item["branch"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]/div[1]/text()').get()
                 item["street_address"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]/div[2]/text()').get()
+                item["city"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]//span[1]/text()').get()
+                item["state"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]//span[2]/text()').get()
+                item["postcode"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]//span[3]/text()').get()
                 item["phone"] = location.xpath('.//*[contains(@href,"tel:")]/text()').get()
                 item["ref"] = item["website"] = urljoin(
                     "https://www.dunhamssports.com/", location.xpath(".//span//@href").get().replace(" ", "")
