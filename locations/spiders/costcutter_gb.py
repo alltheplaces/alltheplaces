@@ -14,7 +14,7 @@ class CostcutterGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Costcutter", "brand_wikidata": "Q5175072"}
     allowed_domains = ["costcutter.co.uk"]
     sitemap_urls = ["https://store-locator.costcutter.co.uk/sitemap.xml"]
-    sitemap_rules = [(r"uk/en-gb/[^/]+/[^/]+/(\d+)$", "parse")]
+    sitemap_rules = [(r"uk/en-gb/[-\w]+/[-\w/]+/(\d+)$", "parse")]
     wanted_types = ["FoodEstablishment"]
     drop_attributes = {"image"}
     search_for_facebook = False
