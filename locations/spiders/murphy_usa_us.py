@@ -18,7 +18,6 @@ class MurphyUsaUSSpider(Spider):
     name = "murphy_usa_us"
     allowed_domains = ["service.murphydriverewards.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest("https://service.murphydriverewards.com/api/store/list", callback=self.parse_location_list)
