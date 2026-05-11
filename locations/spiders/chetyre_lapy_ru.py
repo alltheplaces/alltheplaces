@@ -31,7 +31,7 @@ class ChetyreLapyRUSpider(scrapy.Spider):
         for poi in list(response.json()["pageProps"]["fallback"].values())[0]["items"]:
             item = Feature()
             item["ref"] = poi["id"]
-            item["addr_full"] = poi["address"].strip()
+            item["addr_full"] = poi["address"]
             item["city"] = poi["cityName"]
             item["lat"] = poi["coordinates"]["lat"]
             item["lon"] = poi["coordinates"]["lon"]
