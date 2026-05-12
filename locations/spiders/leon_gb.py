@@ -48,8 +48,6 @@ class LeonGBSpider(Spider):
                 else f'https://leon-nl.co/restaurants/{store["slug"]}/'
             )
 
-            item["extras"] = {"restaurantType": store.get("restaurantType") or store.get("type")}
-
             apply_category(Categories.FAST_FOOD, item)
 
             if store.get("permanentlyClosed"):
