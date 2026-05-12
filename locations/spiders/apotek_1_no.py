@@ -2,12 +2,13 @@ import datetime
 
 from scrapy import Spider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 APOTEK_1 = {"name": "Apotek 1", "brand": "Apotek 1", "brand_wikidata": "Q4581428"}
+
 
 class Apotek1NOSpider(Spider):
     name = "apotek_1_no"
