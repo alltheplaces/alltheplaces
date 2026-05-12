@@ -1,18 +1,20 @@
 import json
+from typing import Any
 
 from scrapy import Spider
+from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class LeonGBSpider(Spider):
     name = "leon_gb"
-    item_attributes = {"brand": "LEON", "brand_wikidata": "Q6524851", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {"brand": "LEON", "brand_wikidata": "Q6524851"}
     start_urls = ["https://leon.co/find-leon/"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in DictParser.get_nested_key(
             json.loads(response.xpath('//script[@type="application/json"][@id="__NEXT_DATA__"]/text()').get()),
             "restaurants",
@@ -38,7 +40,7 @@ class LeonGBSpider(Spider):
                     oh.add_range(rule["day"], rule["opensAt"], rule["closesAt"])
                 except:
                     pass
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             item["website"] = (
                 f'https://leon.co/restaurants/{store["slug"]}/'
@@ -48,5 +50,7 @@ class LeonGBSpider(Spider):
 
             item["extras"] = {"restaurantType": store.get("restaurantType") or store.get("type")}
             item["branch"] = item.pop("name")
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield item
