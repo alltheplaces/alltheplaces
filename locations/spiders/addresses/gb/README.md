@@ -109,13 +109,17 @@ Owen and published. Others are helping.
 | Aberdeenshire Council                         | https://www.owenboswarva.com/blog/post-addr47.htm                                                                                     |
 | Arun District Council                         | https://www.owenboswarva.com/blog/post-addr67.htm                                                                                     |
 | Barnet Council                                | https://www.owenboswarva.com/blog/post-addr23.htm                                                                                     |
+| Basildon Borough Council                      | https://www.owenboswarva.com/blog/post-addr76.htm                                                                                     |
 | Birmingham City Council                       | https://www.owenboswarva.com/blog/post-addr11.htm                                                                                     |
 | Borough Council of King's Lynn & West Norfolk | https://www.owenboswarva.com/blog/post-addr66.htm                                                                                     |
 | Bradford Council                              | https://www.owenboswarva.com/blog/post-addr29.htm                                                                                     |
 | Brent Council                                 | https://www.owenboswarva.com/blog/post-addr49.htm                                                                                     |
 | Brighton & Hove City Council                  | https://www.owenboswarva.com/blog/post-addr26.htm                                                                                     |
 | Bristol City Council                          | https://www.owenboswarva.com/blog/post-addr19.htm                                                                                     |
+| Broadland District Council                    | https://www.owenboswarva.com/blog/post-addr80.htm                                                                                     |
+| Broxtowe Borough Council                      | https://www.owenboswarva.com/blog/post-addr77.htm                                                                                     |
 | Buckinghamshire Council                       | https://www.owenboswarva.com/blog/post-addr22.htm                                                                                     |
+| Calderdale Council                            | https://www.owenboswarva.com/blog/post-addr79.htm                                                                                     |
 | Camden Council                                | https://www.owenboswarva.com/blog/post-addr21.htm                                                                                     |
 | Cheshire East Council                         | https://www.owenboswarva.com/blog/post-addr28.htm                                                                                     |
 | Cheshire West and Chester Council             | https://www.owenboswarva.com/blog/post-addr69.htm                                                                                     |
@@ -126,9 +130,11 @@ Owen and published. Others are helping.
 | Dundee City Council                           | FoI request lodged (2025-10-29), never responded.                                                                                     |
 | Durham County Council                         | https://www.owenboswarva.com/blog/post-addr17.htm                                                                                     |
 | Ealing Council                                | https://www.owenboswarva.com/blog/post-addr39.htm                                                                                     |
+| East Riding of Yorkshire Council              | https://www.owenboswarva.com/blog/post-addr78.htm                                                                                     |
 | East Suffolk Council                          | https://www.owenboswarva.com/blog/post-addr55.htm                                                                                     |
 | Edinburgh City                                | https://edinburgh.axlr8.uk/disclose/ FoI request 58303                                                                                |
 | Gateshead Council                             | https://www.owenboswarva.com/blog/post-addr58.htm                                                                                     |
+| Gedling Borough Council                       | https://www.owenboswarva.com/blog/post-addr85.htm                                                                                     |
 | Glasgow City Council                          | https://www.owenboswarva.com/blog/post-addr61.htm                                                                                     |
 | Hackney Council                               | https://www.owenboswarva.com/blog/post-addr12.htm                                                                                     |
 | Haringey Council                              | https://www.owenboswarva.com/blog/post-addr52.htm                                                                                     |
@@ -151,20 +157,26 @@ Owen and published. Others are helping.
 | North Lanarkshire Council                     | https://www.owenboswarva.com/blog/post-addr45.htm                                                                                     |
 | North Norfolk District Council                | https://www.owenboswarva.com/blog/post-addr73.htm                                                                                     |
 | North Northamptonshire Council                | https://www.owenboswarva.com/blog/post-addr31.htm                                                                                     |
+| North Tyneside Council                        | https://www.datadaptive.com/addr/                                                                                                     |
 | Northumberland County Council                 | https://www.owenboswarva.com/blog/post-addr37.htm                                                                                     |
+| Norwich City Council                          | https://www.owenboswarva.com/blog/post-addr82.htm                                                                                     |
 | Peterborough City Council                     | https://www.owenboswarva.com/blog/post-addr68.htm                                                                                     |
 | Plymouth City Council                         | https://www.owenboswarva.com/blog/post-addr35.htm                                                                                     |
 | Rhondda Cynon Taf County Borough Council      | https://www.owenboswarva.com/blog/post-addr41.htm                                                                                     |
+| Rochdale Borough Council                      | https://www.owenboswarva.com/blog/post-addr65.htm                                                                                     |
 | Royal Borough of Greenwich                    | https://www.owenboswarva.com/blog/post-addr40.htm                                                                                     |
 | Rushcliffe Borough Council                    | https://www.owenboswarva.com/blog/post-addr13.htm https://www.owenboswarva.com/blog/post-addr60.htm                                   |
 | Sheffield City Council                        | https://www.owenboswarva.com/blog/post-addr16.htm                                                                                     |
 | Somerset Council                              | https://www.owenboswarva.com/blog/post-addr42.htm                                                                                     |
+| South Norfolk District Council                | https://www.owenboswarva.com/blog/post-addr81.htm                                                                                     |
 | Southampton City Council                      | https://www.owenboswarva.com/blog/post-addr64.htm                                                                                     |
 | Southwark Council                             | https://www.owenboswarva.com/blog/post-addr33.htm                                                                                     |
 | Staffordshire Moorlands District Council      | https://www.owenboswarva.com/blog/post-addr74.htm                                                                                     |
 | Stockport Metropolitan Borough Council        | https://www.owenboswarva.com/blog/post-addr34.htm                                                                                     |
 | Stoke-on-Trent City Council                   | https://www.owenboswarva.com/blog/post-addr70.htm                                                                                     |
 | Tameside Metropolitan Borough Council         | https://www.owenboswarva.com/blog/post-addr62.htm                                                                                     |
+| Tendring District Council                     | https://www.owenboswarva.com/blog/post-addr75.htm                                                                                     |
+| Tewkesbury Borough Council                    | https://www.owenboswarva.com/blog/post-addr83.htm                                                                                     |
 | Wandsworth Council                            | https://www.owenboswarva.com/blog/post-addr57.htm                                                                                     |
 | West Northamptonshire Council                 | https://www.owenboswarva.com/blog/post-addr27.htm                                                                                     |
 | West Suffolk Council                          | https://www.owenboswarva.com/blog/post-addr63.htm                                                                                     |
