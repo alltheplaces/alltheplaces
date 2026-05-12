@@ -22,7 +22,7 @@ ZURICH_TOURISM_CATEGORIES = {
     "Casino": Categories.CASINO,
     "Church": Categories.BUILDING_CHRISTIAN_CHURCH,
     "Cinema": Categories.CINEMA,
-    "CivicStructure": Categories.BUILDING_CIVIC,
+    "CivicStructure": Categories.GENERIC_POI,
     "ConcertHall": Categories.MUSIC_VENUE,
     "CulturalCentre": Categories.ARTS_CENTRE,
     "DaySpa": Categories.SHOP_BEAUTY_SPA,

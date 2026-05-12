@@ -44,8 +44,7 @@ class Categories(Enum):
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
 
-    BUILDING_CHRISTIAN_CHURCH = {"amenity": "place_of_worship", "building": "church", "religion": "christian"}
-    BUILDING_CIVIC = {"building": "civic"}
+    BUILDING_CHRISTIAN_CHURCH = {"amenity": "place_of_worship", "religion": "christian"}
 
     CLUB_SCOUT = {"club": "scout"}
 
