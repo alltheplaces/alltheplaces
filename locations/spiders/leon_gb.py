@@ -7,6 +7,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import set_closed
 
 
 class LeonGBSpider(Spider):
@@ -19,8 +20,6 @@ class LeonGBSpider(Spider):
             json.loads(response.xpath('//script[@type="application/json"][@id="__NEXT_DATA__"]/text()').get()),
             "restaurants",
         ):
-            if store.get("permanentlyClosed"):
-                continue
 
             store["address"] = store.pop("locationDetails")
             store["address"]["city"] = store["address"].pop("townOrCity", "")
@@ -28,6 +27,7 @@ class LeonGBSpider(Spider):
                 store["address"]["country"] = "GB"
 
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
 
             if item["ref"] == "a-title-for-this-restaurant-and-another-one":
                 continue
@@ -49,8 +49,10 @@ class LeonGBSpider(Spider):
             )
 
             item["extras"] = {"restaurantType": store.get("restaurantType") or store.get("type")}
-            item["branch"] = item.pop("name")
 
             apply_category(Categories.FAST_FOOD, item)
+
+            if store.get("permanentlyClosed"):
+                set_closed(item)
 
             yield item
