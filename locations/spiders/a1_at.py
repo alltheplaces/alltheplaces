@@ -12,6 +12,7 @@ class A1ATSpider(Spider):
     item_attributes = {"brand": "A1", "brand_wikidata": "Q688755"}
     allowed_domains = ["www.a1.net"]
     start_urls = ["https://www.a1.net/o/gucci/widgets/apis/shopfinder/bff/microservice-shopfinder/shop/basicData"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
@@ -20,8 +21,9 @@ class A1ATSpider(Spider):
     def parse_store_list(self, response):
         for location in response.json():
             if location["type"] != "SHOP":
-                # DEALER, IT_PARTNER, POST, EXCLUSIVE_STORE
-                # and PREFERRED_PARTNER should be ignored.
+                # Only SHOP is an A1 corporate store. Other types
+                # (DEALER, IT_PARTNER, EXCLUSIVE_STORE, EXCLUSIVE_PARTNER,
+                # PREFERRED_PARTNER, ...) are independent partners.
                 continue
             item = DictParser.parse(location)
             item["street_address"] = item.pop("addr_full", None)
@@ -33,10 +35,6 @@ class A1ATSpider(Spider):
 
     def parse_store(self, response):
         item = response.meta["item"]
-        location = response.json()["basicShopData"]
-        item["phone"] = location.get("phone")
-        item["email"] = location.get("email")
-        item["website"] = location.get("url")
         item["opening_hours"] = OpeningHours()
         for day_hours in response.json().get("hoursShops", []):
             item["opening_hours"].add_range(
