@@ -1,14 +1,13 @@
 import json
-from pprint import pp
 from typing import Any
 from urllib.parse import urljoin
 
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.items import set_social_media, SocialMedia
+from locations.items import SocialMedia, set_social_media
 
 
 class AlbertImmoSpider(Spider):
