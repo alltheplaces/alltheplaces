@@ -1,20 +1,19 @@
+from typing import Any
+
 from scrapy import Spider
-from scrapy.selector import Selector
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
+from locations.google_url import url_to_coords
 from locations.items import Feature
 
 
 class MitsubishiUYSpider(Spider):
     name = "mitsubishi_uy"
-    item_attributes = {
-        "brand": "Mitsubishi",
-        "brand_wikidata": "Q36033",
-    }
+    item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
     start_urls = ["https://www.mitsubishi-motors.com.uy/concesionarios"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for shop_node in response.css("a.link-ubicacion"):
             item = Feature()
             name = shop_node.xpath('.//*[@fs-list-field="nombre"]/text()').get("").strip()
@@ -27,7 +26,7 @@ class MitsubishiUYSpider(Spider):
             item["ref"] = item["branch"] = f"{name} - {dept}" if dept else name
 
             if map_url := shop_node.xpath("./@data-map").get():
-                extract_google_position(item, Selector(text=f'<a href="{map_url}"></a>'))
+                item["lat"], item["lon"] = url_to_coords(map_url)
 
             apply_category(Categories.SHOP_CAR, item)
             yield item
