@@ -4,7 +4,7 @@ from scrapy import Selector
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category, Categories, apply_yes_no, Extras
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
