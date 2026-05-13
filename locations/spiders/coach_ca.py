@@ -20,5 +20,6 @@ class CoachCASpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = (item.pop("name", "") or "").removeprefix("About ")
+        item["name"] = response.xpath('//h4[@class="location-type mt-0 mb-10"]/text()').get()
         apply_category(Categories.SHOP_BAG, item)
         yield item
