@@ -32,7 +32,7 @@ class SubwaySouthAmericaSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if ld_data.get("geo"):
-            item["branch"] = item.pop("name").split("-")[1].replace(" - Restaurante Fast-Food", "")
+            item["branch"] = item.pop("name").replace(" - Restaurante Fast-Food", "").split("-")[1]
             item["image"] = None
             apply_category(Categories.FAST_FOOD, item)
             yield item
