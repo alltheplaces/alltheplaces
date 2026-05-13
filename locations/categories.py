@@ -44,6 +44,8 @@ class Categories(Enum):
     ENFORCEMENT_MAXIMUM_SPEED = {"enforcement": "maxspeed"}
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
 
+    BUILDING_CHRISTIAN_CHURCH = {"amenity": "place_of_worship", "religion": "christian"}
+
     CLUB_SCOUT = {"club": "scout"}
 
     CRAFT_CARPENTER = {"craft": "carpenter"}
@@ -56,6 +58,7 @@ class Categories(Enum):
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
     CRAFT_TAILOR = {"craft": "tailor"}
     CRAFT_WATCHMAKER = {"craft": "watchmaker"}
+    CRAFT_WINERY = {"craft": "winery"}
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
 
@@ -74,6 +77,7 @@ class Categories(Enum):
     LEISURE_RESORT = {"leisure": "resort"}
     LEISURE_SLIPWAY = {"leisure": "slipway"}
     LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
+    LEISURE_SWIMMING_POOL = {"leisure": "swimming_pool"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -85,6 +89,7 @@ class Categories(Enum):
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BATHROOM_FURNISHING = {"shop": "bathroom_furnishing"}
     SHOP_BEAUTY = {"shop": "beauty"}
+    SHOP_BEAUTY_SPA = {"shop": "beauty", "beauty": "spa"}
     SHOP_BED = {"shop": "bed"}
     SHOP_BEVERAGES = {"shop": "beverages"}
     SHOP_BICYCLE = {"shop": "bicycle"}
@@ -241,16 +246,27 @@ class Categories(Enum):
     OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
 
+    TOURISM_ARTWORK = {"tourism": "artwork"}
     TOURISM_APARTMENT = {"tourism": "apartment"}
+    TOURISM_ATTRACTION = {"tourism": "attraction"}
+    TOURISM_ATTRACTION_SQUARE = {"tourism": "attraction", "place": "square"}
+    TOURISM_ATTRACTION_STREET = {"tourism": "attraction", "highway": "street"}
+    TOURISM_BED_AND_BREAKFAST = {"tourism": "guest_house", "guest_house": "bed_and_breakfast"}
+    TOURISM_BOAT_TOURS = {"tourism": "tours", "tours": "boat"}
     TOURISM_CAMP_SITE = {"tourism": "camp_site"}
     TOURISM_CHALET = {"tourism": "chalet"}
+    TOURISM_GALLERY = {"tourism": "gallery"}
     TOURISM_HOSTEL = {"tourism": "hostel"}
+    TOURISM_INFORMATION = {"tourism": "information"}
+    TOURISM_VIEWPOINT = {"tourism": "viewpoint"}
     TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
+    TOURISM_ZOO = {"tourism": "zoo"}
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
     ARCHIVE = {"amenity": "archive"}
+    ARTS_CENTRE = {"amenity": "arts_centre"}
     ATM = {"amenity": "atm"}
     AUDIOLOGIST = {"healthcare": "audiologist"}
     BANK = {"amenity": "bank"}
@@ -287,6 +303,7 @@ class Categories(Enum):
     DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "community"}
     DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
+    EVENTS_VENUE = {"amenity": "events_venue"}
     FAST_FOOD = {"amenity": "fast_food"}
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
@@ -300,6 +317,7 @@ class Categories(Enum):
     KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
     MANHOLE = {"man_made": "manhole"}
+    MARKETPLACE = {"amenity": "marketplace"}
     MEDICAL_IMAGING = {
         "healthcare": "medical_imaging"
     }  # Note: proposed OSM tag per https://wiki.openstreetmap.org/wiki/Proposal:Medical_Imaging
@@ -314,6 +332,7 @@ class Categories(Enum):
     NURSE_CLINIC = {"healthcare": "nurse"}
     NURSING_HOME = {"amenity": "social_facility", "social_facility": "nursing_home", "social_facility:for": "senior"}
     NUTRITIONIST = {"healthcare": "nutrition_counselling"}
+    OPERA_HOUSE = {"amenity": "theatre", "theatre:type": "opera_house", "theatre:genre": "opera"}
     OPTOMETRIST = {"healthcare": "optometrist"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
     PAYMENT_CENTRE = {"amenity": "payment_centre"}
@@ -426,6 +445,7 @@ class Categories(Enum):
     WATER_WELL = {"man_made": "water_well"}
 
     NATURAL_BASIN = {"natural": "water", "water": "basin"}
+    NATURAL_LANDFORM = {"natural": "landform"}
     NATURAL_TREE = {"natural": "tree"}
 
 

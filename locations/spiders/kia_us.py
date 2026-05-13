@@ -1,6 +1,6 @@
 from typing import AsyncIterator
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 
 
-class KiaUSSpider(scrapy.Spider):
+class KiaUSSpider(Spider):
     name = "kia_us"
     item_attributes = {"brand": "Kia", "brand_wikidata": "Q35349"}
 
@@ -20,7 +20,12 @@ class KiaUSSpider(scrapy.Spider):
             if index % 140 == 0:
                 yield JsonRequest(
                     url="https://www.kia.com/us/services/en/dealers/search",
-                    data={"type": "zip", "zipCode": record["postal_region"]},
+                    data={
+                        "type": "zip",
+                        "zipCode": record["postal_region"],
+                        "dealerCertifications": [],
+                        "dealerServices": [],
+                    },
                     headers={"Referer": "https://www.kia.com/us/en/find-a-dealer/"},
                 )
 

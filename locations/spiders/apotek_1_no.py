@@ -2,20 +2,26 @@ import datetime
 
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
+APOTEK_1 = {"name": "Apotek 1", "brand": "Apotek 1", "brand_wikidata": "Q4581428"}
+
 
 class Apotek1NOSpider(Spider):
     name = "apotek_1_no"
-    item_attributes = {"brand": "Apotek 1", "brand_wikidata": "Q4581428"}
     start_urls = [
         "https://api.apotek1.no/wcs/resources/store/10151/storelocator/latitude/0/longitude/0?maxItems=1000&radius=2500000&siteLevelStoreSearch=false"
     ]
 
     def parse(self, response, **kwargs):
         for raw in response.json()["PhysicalStore"]:
+            if raw["storeName"].startswith("Comm-"):
+                # These are some sort of delivery/pickup point - unable
+                # to determine exactly what so skipping.
+                continue
             location = {}
             for k, v in raw.items():
                 # Some values are padded
@@ -32,6 +38,9 @@ class Apotek1NOSpider(Spider):
             item["street_address"] = merge_address_lines(location["addressLine"])
             item["state"] = location["stateOrProvinceName"]
             item["ref"] = location["storeName"]
+            if item["name"].startswith("Apotek 1 "):
+                item["branch"] = item.pop("name").removeprefix("Apotek 1 ")
+                item.update(APOTEK_1)
             item["extras"]["fax"] = location["fax1"]
             item["extras"]["start_date"] = datetime.datetime.strptime(location["OpenDate"], "%d.%m.%Y").strftime(
                 "%Y-%m-%d"
@@ -48,5 +57,7 @@ class Apotek1NOSpider(Spider):
                 if start == "STENGT":
                     continue
                 item["opening_hours"].add_range(day, start, location[f"Close{day}"])
+
+            apply_category(Categories.PHARMACY, item)
 
             yield item
