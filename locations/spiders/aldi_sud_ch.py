@@ -10,9 +10,9 @@ from locations.storefinders.uberall import UberallSpider
 class AldiSudCHSpider(UberallSpider):
     name = "aldi_sud_ch"
     item_attributes = {"brand_wikidata": "Q41171672"}
-    drop_attributes = {"name"}
     key = "lFDqKBoedhfjMheH3C3e0AcRGDuLG4"
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        item["name"] = item["phone"] = None
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
