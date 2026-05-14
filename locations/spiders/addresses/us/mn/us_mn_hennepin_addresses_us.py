@@ -34,8 +34,6 @@ class UsMnHennepinAddressesUSSpider(arcgis_feature_server.ArcGISFeatureServerSpi
             sep=" ",
         )
         item["postcode"] = join_non_null(feature.get("ZIP"), feature.get("ZIP4"), sep="-")
-        item["unit"] = (
-            join_non_null(feature.get("SUB_AD_TYP"), feature.get("SUB_AD_ID"), sep=" ") or None
-        )
+        item["unit"] = join_non_null(feature.get("SUB_AD_TYP"), feature.get("SUB_AD_ID"), sep=" ") or None
         item["city"] = feature.get("MUNI_NAME")
         yield item
