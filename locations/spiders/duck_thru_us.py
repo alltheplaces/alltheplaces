@@ -1,9 +1,9 @@
-from typing import Iterable, Any
+from typing import Any, Iterable
 
 from scrapy import Request
-from scrapy.http import TextResponse, Response
+from scrapy.http import Response, TextResponse
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.shell import ShellSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
@@ -31,7 +31,7 @@ class DuckThruUSSpider(WPStoreLocatorSpider):
             postcode=shop["postcode"],
             state=shop["state"],
             street_address=shop["street_address"],
-            ref=response.url
+            ref=response.url,
         )
 
         if (
