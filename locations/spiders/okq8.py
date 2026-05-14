@@ -30,10 +30,13 @@ class Okq8Spider(Spider):
         )
         for location in raw_data:
             item = DictParser.parse(location)
+            item["street_address"] = item.pop("street")
             item["website"] = location["stationPageUrl"]
             apply_category(Categories.FUEL_STATION, item)
+
             if brand := self.BRANDS.get(location["network"]):
                 item.update(brand)
+
             oh = OpeningHours()
             for days in ["Weekday", "Saturday", "Sunday"]:
                 if time := location[f"openHours{days}"]:
@@ -44,4 +47,5 @@ class Okq8Spider(Spider):
                     else:
                         oh.add_range(days, open_time, close_time)
             item["opening_hours"] = oh
+
             yield item
