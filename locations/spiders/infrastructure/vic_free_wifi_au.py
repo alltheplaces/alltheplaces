@@ -11,7 +11,9 @@ class VicFreeWifiAUSpider(JSONBlobSpider):
     name = "vic_free_wifi_au"
     item_attributes = {"operator": "Victorian State Government", "operator_wikidata": "Q5589335"}
     allowed_domains = ["www.vic.gov.au"]
-    start_urls = ["https://www.vic.gov.au/api/tide/elasticsearch/content-vic__production__sdp_data_pipelines_vicfreewifi/_search?size=10000"]
+    start_urls = [
+        "https://www.vic.gov.au/api/tide/elasticsearch/content-vic__production__sdp_data_pipelines_vicfreewifi/_search?size=10000"
+    ]
     locations_key = ["hits", "hits"]
 
     def pre_process_data(self, feature: dict) -> None:
