@@ -31,11 +31,14 @@ class Okq8Spider(Spider):
         for location in raw_data:
             item = DictParser.parse(location)
             item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name").removesuffix(" (Tanka)")
             item["website"] = location["stationPageUrl"]
             apply_category(Categories.FUEL_STATION, item)
 
             if brand := self.BRANDS.get(location["network"]):
                 item.update(brand)
+            else:
+                continue
 
             oh = OpeningHours()
             for days in ["Weekday", "Saturday", "Sunday"]:
