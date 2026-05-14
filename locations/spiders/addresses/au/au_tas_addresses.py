@@ -38,7 +38,7 @@ class AuTasAddressesSpider(ArcGISFeatureServerSpider, AddressSpider):
         item["ref"] = str(feature["PID"])
 
         if unit_number := feature.get("UNIT_NUMB"):
-            item["extras"]["addr:unit"] = f"{unit_number}"
+            item["unit"] = f"{unit_number}"
 
         housenumber_from = feature.get("ST_NO_FROM")
         if housenumber_from_suffix := feature.get("NO1_SUFFIX"):
