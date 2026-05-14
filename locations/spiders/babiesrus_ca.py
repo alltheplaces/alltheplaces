@@ -11,7 +11,7 @@ class BabiesrusCASpider(SitemapSpider):
     name = "babiesrus_ca"
     item_attributes = {"brand": "Babies R Us", "brand_wikidata": "Q17232036"}
     sitemap_urls = ["https://www.babiesrus.ca/robots.txt"]
-    sitemap_rules = [("/storelocator/", "parse")]
+    sitemap_rules = [("ca/storelocator/", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
