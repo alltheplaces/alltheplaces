@@ -17,6 +17,6 @@ class AnthropologieSpider(scrapy.Spider):
             item = DictParser.parse(store)
             if "< Closed" in store.get("addressLineOne", "") + store.get("addressLineTwo", ""):
                 continue
-            item["name"] = store.get("addresses").get("marketing").get("name") + "- Anthropologie Store"
+            item["branch"] = store.get("addresses").get("marketing").get("name")
             item["lon"], item["lat"] = store.get("loc")[0], store.get("loc")[1]
             yield item
