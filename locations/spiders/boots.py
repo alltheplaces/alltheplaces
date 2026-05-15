@@ -1,16 +1,14 @@
-import scrapy
-from typing import AsyncIterator, Iterable
-import chompjs
 import json
+from typing import AsyncIterator, Iterable
 
-from scrapy.http import JsonRequest, Request, TextResponse
-from locations.pipelines.address_clean_up import merge_address_lines
+from scrapy.http import JsonRequest, TextResponse
+
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, sanitise_day
-from locations.items import Feature
 from locations.geo import city_locations
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
+
 
 class BootsSpider(JSONBlobSpider):
     name = "boots"
@@ -29,9 +27,8 @@ class BootsSpider(JSONBlobSpider):
                 method="GET",
             )
 
-
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
-        data = response.text.replace("/*","").replace("*/","")
+        data = response.text.replace("/*", "").replace("*/", "")
         json_data = json.loads(data)
         if self.locations_key:
             if isinstance(self.locations_key, str):
@@ -56,5 +53,7 @@ class BootsSpider(JSONBlobSpider):
         item["postcode"] = feature["storeAddPostcode"]
         item["city"] = feature["storeAddCity"]
         item["state"] = feature["storeAddCounty"]
-        item["street_address"] = merge_address_lines([feature["storeAddL1"], feature["storeAddL2"], feature["storeAddL3"]])
+        item["street_address"] = merge_address_lines(
+            [feature["storeAddL1"], feature["storeAddL2"], feature["storeAddL3"]]
+        )
         yield item
