@@ -71,7 +71,11 @@ class MyDentistGBSpider(StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item.update(response.meta["location_info"])
         item["website"] = response.url
-        item["addr_full"] = clean_address(response.xpath('//*[@itemprop="address"]//p/text()').get(""))
+        item["addr_full"] = clean_address(
+            response.xpath('//*[contains(@href,"https://www.google.com/maps?daddr=")]/@href')
+            .get("")
+            .replace("https://www.google.com/maps?daddr=", "")
+        )
         if item["name"].startswith("mydentist") or item["name"].startswith("{my}dentist"):
             item.update(self.MYDENTIST)
             item["name"] = "{my}dentist"
