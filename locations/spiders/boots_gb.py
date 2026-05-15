@@ -10,8 +10,8 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class BootsSpider(JSONBlobSpider):
-    name = "boots"
+class BootsGBSpider(JSONBlobSpider):
+    name = "boots_gb"
     item_attributes = {"brand": "Boots", "brand_wikidata": "Q6123139"}
     locations_key = "searchResults"
 
@@ -19,11 +19,6 @@ class BootsSpider(JSONBlobSpider):
         for city in city_locations("GB", 15000):
             yield JsonRequest(
                 url=f'https://www.boots.com/AjaxStoreLocatorSearch?storeId=11352&storeAddressSearch_city={city["name"]}&requesttype=ajax',
-                method="GET",
-            )
-        for city in city_locations("IE", 15000):
-            yield JsonRequest(
-                url=f'https://www.boots.ie/AjaxStoreLocatorSearch?storeId=11352&storeAddressSearch_city={city["name"]}&requesttype=ajax',
                 method="GET",
             )
 
