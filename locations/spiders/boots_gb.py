@@ -16,7 +16,7 @@ class BootsGBSpider(JSONBlobSpider):
     locations_key = "searchResults"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for city in city_locations("GB", 100000):
+        for city in city_locations("GB", 15000):
             yield JsonRequest(
                 url=f'https://www.boots.com/AjaxStoreLocatorSearch?storeId=11352&storeAddressSearch_city={city["name"]}&requesttype=ajax',
                 method="GET",
