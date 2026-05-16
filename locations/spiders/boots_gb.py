@@ -25,15 +25,14 @@ class BootsGBSpider(JSONBlobSpider):
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
         data = response.text.replace("/*", "").replace("*/", "")
         json_data = json.loads(data)
-        if self.locations_key:
-            if isinstance(self.locations_key, str):
-                json_data = json_data[self.locations_key]
-            elif isinstance(self.locations_key, list):
-                for key in self.locations_key:
-                    json_data = json_data[key]
-            else:
-                return
-        return json.loads(json_data)
+        if not "errorMessageKey" in json_data:
+            if self.locations_key:
+                if isinstance(self.locations_key, str):
+                    json_data = json_data[self.locations_key]
+                elif isinstance(self.locations_key, list):
+                    for key in self.locations_key:
+                        json_data = json_data[key]
+            return json.loads(json_data)
 
     def pre_process_data(self, feature: dict) -> None:
         if feature.get("storeId"):
