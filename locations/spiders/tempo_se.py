@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class TempoSeSpider(JSONBlobSpider):
+class TempoSESpider(JSONBlobSpider):
     name = "tempo_se"
     item_attributes = {
         "brand": "Tempo",
