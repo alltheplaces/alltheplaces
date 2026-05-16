@@ -4,7 +4,7 @@ from typing import AsyncIterator, Iterable
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.geo import city_locations
+from locations.geo import postal_regions
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -16,11 +16,12 @@ class BootsGBSpider(JSONBlobSpider):
     locations_key = "searchResults"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for city in city_locations("GB", 15000):
-            yield JsonRequest(
-                url=f'https://www.boots.com/AjaxStoreLocatorSearch?storeId=11352&storeAddressSearch_city={city["name"]}&requesttype=ajax',
-                method="GET",
-            )
+        for record in postal_regions("GB", consolidate_cities=True):
+            if record["city"]:
+                yield JsonRequest(
+                    url=f'https://www.boots.com/AjaxStoreLocatorSearch?storeId=11352&storeAddressSearch_city={record["city"]}&requesttype=ajax',
+                    method="GET",
+                )
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
         data = response.text.replace("/*", "").replace("*/", "")
