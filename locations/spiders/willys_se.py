@@ -7,7 +7,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class WillysESpider(JSONBlobSpider):
+class WillysSESpider(JSONBlobSpider):
     name = "willys_se"
     item_attributes = {"brand": "Willys", "brand_wikidata": "Q10720214"}
     start_urls = ["https://www.willys.se/axfood/rest/store"]
