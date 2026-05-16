@@ -12,7 +12,7 @@ from locations.items import Feature
 STOCKHOLM_TZ = ZoneInfo("Europe/Stockholm")
 
 
-class CitygrossSeSpider(scrapy.Spider):
+class CitygrossSESpider(scrapy.Spider):
     name = "citygross_se"
     item_attributes = {"brand": "City Gross", "brand_wikidata": "Q10453555"}
     start_urls = ["https://www.citygross.se/api/v1/PageData/stores"]
