@@ -1,40 +1,34 @@
-from typing import Any
+from typing import Iterable
 
-import scrapy
 from scrapy.http import Response
 
-from locations.dict_parser import DictParser
 from locations.hours import DAYS_SE, OpeningHours, sanitise_day
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class WillysSESpider(scrapy.Spider):
+class WillysESpider(JSONBlobSpider):
     name = "willys_se"
     item_attributes = {"brand": "Willys", "brand_wikidata": "Q10720214"}
-    start_urls = ["https://www.willys.se/axfood/rest/search/store?q=*&sort=display-name-asc"]
+    start_urls = ["https://www.willys.se/axfood/rest/store"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["results"]:
-            item = DictParser.parse(store)
-            item["branch"] = item.pop("name").removeprefix("Wh ").removeprefix("Willys ")
-            item["phone"] = store["address"]["phoneNumber"]
-            item["website"] = "https://www.willys.se/butik/{}".format(item["ref"])
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if not item["street_address"]:  # Not enough location data
+            return
 
-            try:
-                item["opening_hours"] = self.parse_opening_hours(store["openingHours"])
-            except Exception as e:
-                self.logger.error("Error parsing opening hours: {}".format(e))
+        item["branch"] = (item.pop("name", "") or "").removeprefix("Hemköp ")
+        item["phone"] = feature["address"].get("phone")
+        item["website"] = "https://www.willys.se/butik/{}".format(item["ref"])
 
-            yield item
+        item["opening_hours"] = self.parse_opening_hours(feature.get("openingHours", []))
 
-    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        yield item
+
+    def parse_opening_hours(self, opening_hours: list) -> OpeningHours:
         oh = OpeningHours()
-        for rule in rules:
+        for rule in opening_hours:
             day, times = rule.split(" ")
-            day = sanitise_day(day, DAYS_SE)
-            if not day:
-                continue
-            if times in ["stängd", "00:00-00:00"]:
-                oh.set_closed(day)
-            else:
+            if day := sanitise_day(day, DAYS_SE):
                 oh.add_range(day, *times.split("-"))
         return oh
