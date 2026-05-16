@@ -4,7 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
 
 
-class ApotekhjartatSeSpider(SitemapSpider, StructuredDataSpider):
+class ApotekhjartatSESpider(SitemapSpider, StructuredDataSpider):
     name = "apotekhjartat_se"
     item_attributes = {
         "brand": "Apotek Hjärtat",
