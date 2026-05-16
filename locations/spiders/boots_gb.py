@@ -25,7 +25,9 @@ class BootsGBSpider(JSONBlobSpider):
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
         data = response.text.replace("/*", "").replace("*/", "")
         json_data = json.loads(data)
-        if not "errorMessageKey" in json_data:
+        if "errorMessageKey" in data:
+            return []
+        else:
             if self.locations_key:
                 if isinstance(self.locations_key, str):
                     json_data = json_data[self.locations_key]
