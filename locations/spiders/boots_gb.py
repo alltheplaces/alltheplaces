@@ -48,20 +48,30 @@ class BootsGBSpider(JSONBlobSpider):
             item["brand_wikidata"] = "Q4944037"
             item["name"] = item["name"].replace("Opticians", "").strip("- ")
             apply_category(Categories.SHOP_OPTICIAN, item)
+            #item["website"] = (
+            #    "https://www.bootsopticians.com/stores/"
+            #    + item["name"].replace(" ", "-").lower()
+            #    + "-"
+            #    + item["postcode"].replace(" ", "-").lower()
+            #    + "-"
+            #    + feature["storeNumber"].lstrip("0")
+            #)
         else:
             apply_category(Categories.PHARMACY, item)
+            #item["website"] = (
+            #    "https://www.boots.com/stores/"
+            #    + feature["storeNumber"].lstrip("0")
+            #    + "-"
+            #    + feature["storeName"].replace(" ", "-").lower()
+            #    + "-"
+            #    + item["postcode"].replace(" ", "-").lower()
+            #)
+        item.pop("website")
         item["branch"] = item.pop("name")
         item["postcode"] = feature["storeAddPostcode"]
         item["city"] = feature["storeAddCity"]
         item["state"] = feature["storeAddCounty"]
-        item["website"] = (
-            "https://www.boots.com/stores/"
-            + feature["storeNumber"].lstrip("0")
-            + "-"
-            + feature["storeName"].replace(" ", "-").lower()
-            + "-"
-            + item["postcode"].replace(" ", "-").lower()
-        )
+
         item["street_address"] = merge_address_lines(
             [feature["storeAddL1"], feature["storeAddL2"], feature["storeAddL3"]]
         )
