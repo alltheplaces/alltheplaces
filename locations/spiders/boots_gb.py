@@ -60,7 +60,7 @@ class BootsGBSpider(JSONBlobSpider):
             + "-"
             + feature["storeName"].replace(" ", "-").lower()
             + "-"
-            + feature["postcode"].replace(" ", "-").lower()
+            + item["postcode"].replace(" ", "-").lower()
         )
         item["street_address"] = merge_address_lines(
             [feature["storeAddL1"], feature["storeAddL2"], feature["storeAddL3"]]
