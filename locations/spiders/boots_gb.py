@@ -16,7 +16,7 @@ class BootsGBSpider(JSONBlobSpider):
     locations_key = "searchResults"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for city in city_locations("GB", 15000):
+        for city in city_locations("GB", 50000):
             yield JsonRequest(
                 url=f'https://www.boots.com/AjaxStoreLocatorSearch?storeId=11352&storeAddressSearch_city={city["name"]}&requesttype=ajax',
                 method="GET",
@@ -34,9 +34,12 @@ class BootsGBSpider(JSONBlobSpider):
         return json.loads(json_data)
 
     def pre_process_data(self, feature: dict) -> None:
-        feature["ref"] = feature["storeId"]
+        if feature.get("storeId"):
+            feature["ref"] = feature["storeId"]
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if not item.get("ref"):
+            return
         if item["name"].startswith("Opticians"):
             item["brand"] = "Boots Opticians"
             item["brand_wikidata"] = "Q4944037"
