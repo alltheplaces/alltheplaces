@@ -54,7 +54,9 @@ class BootsGBSpider(JSONBlobSpider):
         item["postcode"] = feature["storeAddPostcode"]
         item["city"] = feature["storeAddCity"]
         item["state"] = feature["storeAddCounty"]
-        item["website"] = "https://www.boots.com/StoreLookupView?catalogId="+feature["catalogId"]+"&storeId=11352&langId=-1"
+        item["website"] = (
+            "https://www.boots.com/StoreLookupView?catalogId=" + feature["catalogId"] + "&storeId=11352&langId=-1"
+        )
         item["street_address"] = merge_address_lines(
             [feature["storeAddL1"], feature["storeAddL2"], feature["storeAddL3"]]
         )
