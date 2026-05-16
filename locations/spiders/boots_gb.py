@@ -54,7 +54,7 @@ class BootsGBSpider(JSONBlobSpider):
         item["postcode"] = feature["storeAddPostcode"]
         item["city"] = feature["storeAddCity"]
         item["state"] = feature["storeAddCounty"]
-        item["website"] = "https://www.boots.com/stores/" + feature["storeNumber"].lstrip('0') + "-" feature["storeName"].replace(" ","-").lower() +"-" + feature["postcode"].replace(" ","-").lower()
+        item["website"] = "https://www.boots.com/stores/" + feature["storeNumber"].lstrip('0') + "-" + feature["storeName"].replace(" ","-").lower() + "-" + feature["postcode"].replace(" ","-").lower()
         item["street_address"] = merge_address_lines(
             [feature["storeAddL1"], feature["storeAddL2"], feature["storeAddL3"]]
         )
