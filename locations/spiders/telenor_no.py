@@ -21,9 +21,8 @@ class TelenorNOSpider(JSONBlobSpider):
             if shopping_centre := address.get("shoppingCentre"):
                 item["located_in"] = shopping_centre
 
-        if name := store.get("name"):
-            slug = name.casefold()
-            slug = slug.removeprefix("telenorbutikken").strip()
+        if branch := item.get("branch"):
+            slug = branch.casefold()
             slug = slug.translate(str.maketrans({"ø": "o", "æ": "ae", "å": "aa"}))
             slug = "-".join(slug.split())
             item["website"] = f"https://www.telenor.no/telenorbutikken/{slug}"
