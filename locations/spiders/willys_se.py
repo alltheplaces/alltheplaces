@@ -17,7 +17,12 @@ class WillysSESpider(JSONBlobSpider):
         if not item["street_address"]:  # Not enough location data
             return
 
-        item["branch"] = (item.pop("name", "") or "").removeprefix("Willys ")
+        if item["name"].startswith("Willys Hemma "):
+            item["branch"] = item.pop("name").removeprefix("Willys Hemma ")
+            item["name"] = "Willys Hemma"
+        else:
+            item["branch"] = item.pop("name").removeprefix("Willys ")
+
         item["phone"] = feature["address"].get("phone")
         item["website"] = "https://www.willys.se/butik/{}".format(item["ref"])
 
