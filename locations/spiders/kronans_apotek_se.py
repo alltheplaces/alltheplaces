@@ -5,8 +5,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class KronansapotekSESpider(JSONBlobSpider):
-    name = "kronansapotek_se"
+class KronansApotekSESpider(JSONBlobSpider):
+    name = "kronans_apotek_se"
     item_attributes = {"brand": "Kronans Apotek", "brand_wikidata": "Q10549422"}
     start_urls = ["https://web-api.kronansapotek.se/bizniz/public/pharmacy/search?page=0&pageSize=1000"]
 
