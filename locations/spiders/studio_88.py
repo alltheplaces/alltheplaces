@@ -6,4 +6,3 @@ class Studio88Spider(OkFurnitureSpider):
     item_attributes = {"brand": "Studio 88", "brand_wikidata": "Q116498145"}
     allowed_domains = ["studio-88.co.za"]
     start_urls = ["https://www.studio-88.co.za/store-locator/"]
-    requires_proxy = "ZA"
