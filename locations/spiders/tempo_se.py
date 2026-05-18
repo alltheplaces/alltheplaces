@@ -22,7 +22,7 @@ class TempoSESpider(JSONBlobSpider):
             feature["City"] = capwords(city)
 
     def post_process_item(self, item, response, location):
-        item["branch"] = item.pop("name", None)
+        item["branch"] = item.pop("name", "").removeprefix("TEMPO ")
         item["name"] = "Tempo"
         item["country"] = "SE"
         if store_link := location.get("StoreLinkString"):
