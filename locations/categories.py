@@ -768,6 +768,7 @@ class PaymentMethods(Enum):
     VISA_DEBIT = "payment:visa_debit"
     VISA_ELECTRON = "payment:visa_electron"
     V_PAY = "payment:v_pay"
+    VIPPS = "payment:vipps"
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
     XXIMO = "payment:xximo"
