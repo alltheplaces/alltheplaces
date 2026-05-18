@@ -3,14 +3,14 @@ from typing import Iterable
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class TempurPedicUSSpider(SitemapSpider, StructuredDataSpider):
     name = "tempur_pedic_us"
-    item_attributes = {"brand":"Tempur-Pedic", "brand_wikidata":"Q1756920"}
+    item_attributes = {"brand": "Tempur-Pedic", "brand_wikidata": "Q1756920"}
     sitemap_urls = ["https://www.tempurpedic.com/robots.txt"]
     sitemap_rules = [("/tempur-pedic-stores/tempur-pedic-", "parse")]
     wanted_types = ["Store"]
