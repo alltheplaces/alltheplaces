@@ -153,7 +153,7 @@ class St1Spider(Spider):
                 yield item
 
     @staticmethod
-    def parse_opening_hours(station: dict) -> str | None:
+    def parse_opening_hours(station: dict) -> OpeningHours | None:
         rules = (station.get("openingHoursTable") or {}).get("station") or []
         if not rules:
             return None
@@ -165,4 +165,4 @@ class St1Spider(Spider):
                     continue
                 for day in day_range(rule.get("from"), rule.get("to")):
                     oh.add_range(day, start_time, end_time, "%H:%M:%S")
-        return oh.as_opening_hours()
+        return oh
