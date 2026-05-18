@@ -11,8 +11,7 @@ from locations.spiders.carrefour_fr import parse_brand_and_category_from_mapping
 
 class CarrefourTWSpider(Spider):
     name = "carrefour_tw"
-    allowed_domains = ["www.carrefour.com.tw"]
-    start_urls = ["https://www.carrefour.com.tw/console/api/v1/stores?page_size=all"]
+    start_urls = ["https://www.uni-prosperity.com.tw/console/api/v1/stores?page_size=all"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     brands = {
