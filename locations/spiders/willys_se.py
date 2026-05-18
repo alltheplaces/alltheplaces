@@ -30,5 +30,8 @@ class WillysSESpider(JSONBlobSpider):
         for rule in opening_hours:
             day, times = rule.split(" ")
             if day := sanitise_day(day, DAYS_SE):
-                oh.add_range(day, *times.split("-"))
+                if times == "stängd":
+                    oh.set_closed(day)
+                else:
+                    oh.add_range(day, *times.split("-"))
         return oh
