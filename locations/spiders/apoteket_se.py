@@ -7,11 +7,12 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class ApoteketSESpider(JSONBlobSpider):
     name = "apoteket_se"
-    item_attributes = {"brand": "Apoteket", "brand_wikidata": "Q17047215"}
+    item_attributes = {"brand": "Apoteket", "brand_wikidata": "Q1785637"}
     start_urls = ["https://www.apoteket.se/bff/v1/pharmacies/all"]
 
     def pre_process_data(self, data: dict, **kwargs):
         data["street-address"] = data.pop("address", None)
+        data["city"] = data.pop("region", None)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Apoteket ").strip()
