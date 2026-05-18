@@ -1,47 +1,44 @@
-from datetime import datetime
-from typing import Any
-
-from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_SE, OpeningHours, sanitise_day
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ApoteketSESpider(Spider):
+class ApoteketSESpider(JSONBlobSpider):
     name = "apoteket_se"
-    item_attributes = {
-        "brand": "Apoteket",
-        "brand_wikidata": "Q1785637",
-    }
+    item_attributes = {"brand": "Apoteket", "brand_wikidata": "Q17047215"}
     start_urls = ["https://www.apoteket.se/bff/v1/pharmacies/all"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json():
-            item = DictParser.parse(store)
-            item["branch"] = store["name"].removeprefix("Apoteket ")
-            item.pop("name", None)
-            item["street_address"] = store["address"]
-            item.pop("addr_full", None)
-            item["city"] = store["region"]
-            item["postcode"] = store["postalCode"]
-            item["country"] = "SE"
-            item["website"] = "https://www.apoteket.se" + store["url"]
-            item["opening_hours"] = self.parse_hours(store["openingHours"])
-            apply_category(Categories.PHARMACY, item)
-            yield item
+    def pre_process_data(self, data: dict, **kwargs):
+        data["street-address"] = data.pop("address", None)
 
-    @staticmethod
-    def parse_hours(hours: list) -> str:
+    def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs):
+        item["branch"] = item.pop("name").removeprefix("Apoteket ").strip()
+
+        if url_path := feature.get("url"):
+            item["website"] = response.urljoin(url_path)
+
+        item["opening_hours"] = self.parse_opening_hours(feature.get("openingHours") or [])
+
+        yield item
+
+    def parse_opening_hours(self, opening_hours: list[dict]) -> OpeningHours:
         oh = OpeningHours()
-        for entry in hours:
-            if not entry["openTime"]:
+        for entry in opening_hours:
+            day = sanitise_day(entry.get("day"), DAYS_SE)
+            if not day:
                 continue
-            day = DAYS[datetime.fromisoformat(entry["date"]).weekday()]
-            if entry["breakStart"]:
-                oh.add_range(day, entry["openTime"], entry["breakStart"])
-                oh.add_range(day, entry["breakEnd"], entry["closeTime"])
+            open_time = entry.get("openTime")
+            close_time = entry.get("closeTime")
+            if not open_time or not close_time:
+                oh.set_closed(day)
+                continue
+            break_start = entry.get("breakStart")
+            break_end = entry.get("breakEnd")
+            if break_start and break_end:
+                oh.add_range(day, open_time, break_start)
+                oh.add_range(day, break_end, close_time)
             else:
-                oh.add_range(day, entry["openTime"], entry["closeTime"])
-        return oh.as_opening_hours()
+                oh.add_range(day, open_time, close_time)
+        return oh
