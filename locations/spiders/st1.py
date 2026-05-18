@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
@@ -23,7 +24,7 @@ CATEGORIES_MAPPING = {
     "finland/diesel20": Fuel.DIESEL,
     "finland/diesel35": Fuel.DIESEL,
     "finland/diesel38": Fuel.DIESEL,
-    "finland/dieselHVO": [Fuel.DIESEL, Fuel.BIODIESEL],
+    "finland/dieselHVO": (Fuel.DIESEL, Fuel.BIODIESEL),
     "finland/twoqualitydiesel": Fuel.DIESEL,
     "norway/diesel": Fuel.DIESEL,
     "sweden/diesel": Fuel.DIESEL,
@@ -84,6 +85,14 @@ CATEGORIES_MAPPING = {
     "finland/atm": Extras.ATM,
 }
 
+ATTRIBUTE_KEYS = ("fuels", "chargings", "services", "trucks")
+
+SITES = (
+    ("https://st1.fi/", "asemahaku", "fi-FI"),
+    ("https://st1.no/", "finn-stasjon", "no-NO"),
+    ("https://st1.se/", "hitta-station", "sv-SE"),
+)
+
 
 class St1Spider(Spider):
     name = "st1"
@@ -92,99 +101,68 @@ class St1Spider(Spider):
     HELMISIMPUKKA = {"brand": "HelmiSimpukka"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        configs = [
-            {
-                "url": "https://st1.fi/proxy/cms-view/v1/content/page?path=asemahaku",
-                "headers": {"x-st1-locale": "fi-FI"},
-                "base_url": "https://st1.fi/",
-            },
-            {
-                "url": "https://st1.no/proxy/cms-view/v1/content/page?path=finn-stasjon",
-                "headers": {"x-st1-locale": "no-NO"},
-                "base_url": "https://st1.no/",
-            },
-            {
-                "url": "https://st1.se/proxy/cms-view/v1/content/page?path=hitta-station",
-                "headers": {"x-st1-locale": "sv-SE"},
-                "base_url": "https://st1.se/",
-            },
-        ]
-
-        for cfg in configs:
+        for base_url, path, locale in SITES:
             yield JsonRequest(
-                url=cfg["url"],
-                headers=cfg["headers"],
-                meta={"base_url": cfg["base_url"]},
+                url=urljoin(base_url, f"proxy/cms-view/v1/content/page?path={path}"),
+                headers={"x-st1-locale": locale},
+                meta={"base_url": base_url},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = response.json()
-        base_url = response.meta.get("base_url", "")
+        base_url = response.meta["base_url"]
+        bodies = (response.json().get("content") or {}).get("body") or []
 
-        content = data.get("content") or {}
-        for body in content.get("body") or []:
-            # Ignore other CMS entries
+        for body in bodies:
             if body.get("type") != "stationlocator":
                 continue
 
             for entry in body.get("data") or []:
                 station = entry.get("station") or {}
-                if not station:
-                    continue
-
                 # Only collect St1-branded sites
                 if station.get("brand") != "St1":
                     continue
 
-                # Parse basic fields
                 item = DictParser.parse(station)
                 item["street_address"] = item.pop("street")
 
-                if item["name"].startswith("HelmiSimpukka Express"):
+                name = item.pop("name")
+                if name.startswith("HelmiSimpukka Express"):
                     item.update(self.HELMISIMPUKKA)
-                    apply_category(Categories.FAST_FOOD, item)
-                    item["branch"] = item.pop("name").removeprefix("HelmiSimpukka Express")
                     item["name"] = "HelmiSimpukka Express"
-                elif item["name"].strip().startswith("St1 ") or item["name"].startswith("ST1 "):
+                    item["branch"] = name.removeprefix("HelmiSimpukka Express").strip()
+                    apply_category(Categories.FAST_FOOD, item)
+                elif (stripped := name.strip()).startswith(("St1 ", "ST1 ")):
                     item.update(self.ST1)
+                    item["branch"] = stripped[4:]
                     apply_category(Categories.FUEL_STATION, item)
-                    item["branch"] = item.pop("name").removeprefix("St1 ").removeprefix("ST1 ")
+                else:
+                    item["name"] = name
 
-                # Website
-                if path := entry.get("path"):
-                    item["website"] = urljoin(base_url, path)
+                if entry_path := entry.get("path"):
+                    item["website"] = urljoin(base_url, entry_path)
 
-                # Opening hours
-                opening_hours_table = (station.get("openingHoursTable") or {}).get("station") or []
-                if opening_hours_table:
-                    oh = OpeningHours()
+                item["opening_hours"] = self.parse_opening_hours(station)
 
-                    for rule in opening_hours_table:
-                        hours = rule.get("hours") or []
-                        for period in hours:
-                            start_time = period.get("startTime")
-                            end_time = period.get("endTime")
-                            if not start_time or not end_time:
-                                continue
-
-                            for day in day_range(rule.get("from"), rule.get("to")):
-                                oh.add_range(day, start_time, end_time)
-
-                    item["opening_hours"] = oh.as_opening_hours()
-
-                # Additional attributes from categories mapping
-                self.parse_attribute(item, station.get("fuels") or [], CATEGORIES_MAPPING)
-                self.parse_attribute(item, station.get("chargings") or [], CATEGORIES_MAPPING)
-                self.parse_attribute(item, station.get("services") or [], CATEGORIES_MAPPING)
-                self.parse_attribute(item, station.get("trucks") or [], CATEGORIES_MAPPING)
+                for value in chain.from_iterable(station.get(key) or [] for key in ATTRIBUTE_KEYS):
+                    tags = CATEGORIES_MAPPING.get(value)
+                    if not tags:
+                        continue
+                    for tag in tags if isinstance(tags, (list, tuple)) else (tags,):
+                        apply_yes_no(tag, item, True)
 
                 yield item
 
-    def parse_attribute(self, item, values: list, mapping: dict):
-        for value in values:
-            if tags := mapping.get(value):
-                if isinstance(tags, (list, tuple)):
-                    for tag in tags:
-                        apply_yes_no(tag, item, True)
-                else:
-                    apply_yes_no(tags, item, True)
+    @staticmethod
+    def parse_opening_hours(station: dict) -> OpeningHours | None:
+        rules = (station.get("openingHoursTable") or {}).get("station") or []
+        if not rules:
+            return None
+
+        oh = OpeningHours()
+        for rule in rules:
+            for period in rule.get("hours") or []:
+                if not (start_time := period.get("startTime")) or not (end_time := period.get("endTime")):
+                    continue
+                for day in day_range(rule.get("from"), rule.get("to")):
+                    oh.add_range(day, start_time, end_time, "%H:%M:%S")
+        return oh
