@@ -1,6 +1,5 @@
 import json
 from typing import Any
-from urllib.parse import urljoin
 
 from scrapy.http import Response
 
