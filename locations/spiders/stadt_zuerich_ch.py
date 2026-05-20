@@ -12,7 +12,7 @@ from locations.materials import MATERIALS_DE
 class StadtZuerichCHSpider(scrapy.Spider):
     name = "stadt_zuerich_ch"
     allowed_domains = ["ogd.stadt-zuerich.ch"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 20}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
     dataset_attributes = Licenses.CC0.value | {
         "attribution:name:de": "Stadt Zürich",
