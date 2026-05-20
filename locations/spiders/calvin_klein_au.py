@@ -27,10 +27,9 @@ class CalvinKleinAUSpider(Spider):
             item["postcode"] = location["a"][3]
             item["website"] = f'https://www.calvinklein.com.au{location["u"]}'
             item["phone"] = location["p"]
-            item["email"] = location["e"]
 
             oh = OpeningHours()
-            for rule in location["oh"].replace(" ", "").split(","):
+            for rule in (location["oh"] or "").replace(" ", "").split(","):
                 if m := re.search(r"(\d)\|(\d+)(:\d+)?(am|pm)-(\d+)(:\d+)?(am|pm)", rule):
                     day, start_hour, start_minute, start_zone, end_hour, end_minute, end_zone = m.groups()
                     start_time = f'{start_hour}{start_minute or ":00"}{start_zone}'
