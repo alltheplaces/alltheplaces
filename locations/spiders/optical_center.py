@@ -1,8 +1,11 @@
 import html
 import json
+from typing import Iterable
 
+from scrapy.http import Response, TextResponse
 from scrapy.spiders import SitemapSpider
 
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -15,10 +18,13 @@ class OpticalCenterSpider(SitemapSpider, StructuredDataSpider):
     requires_proxy = True
     drop_attributes = {"image"}
 
-    def iter_linked_data(self, response):
-        yield json.loads(response.xpath("//script[@data-lf-location-json]/text()").get())
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        if script_content := response.xpath('//script[@type="application/ld+json"]/text()').get():
+            for entry in json.loads(script_content)["@graph"]:
+                if entry.get("@type") == "LocalBusiness":
+                    yield entry
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = response.url.split("/")[-1]
         item["street_address"] = html.unescape(item["street_address"])
         item["city"] = html.unescape(item["city"])
