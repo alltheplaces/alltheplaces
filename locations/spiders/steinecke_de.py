@@ -1,6 +1,8 @@
-from chompjs import parse_js_object
+from itertools import islice
 
-from locations.hours import DAYS_DE, OpeningHours
+from chompjs import parse_js_objects
+
+from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -10,15 +12,16 @@ class SteineckeDESpider(JSONBlobSpider):
     start_urls = ["https://www.steinecke.info/standorte/"]
 
     def extract_json(self, response):
-        js_blob = parse_js_object(response.xpath('//script[@id="gmap-locations-js-extra"]/text()').get())
-        return parse_js_object(js_blob["stores"])
-
-    def pre_process_data(self, location):
-        location["street_address"] = location.pop("address")
+        js_objects = parse_js_objects(response.xpath('//script/text()[contains(., "locations_data")]').get())
+        return next(islice(js_objects, 1, None))
 
     def post_process_item(self, item, response, location):
+        item["ref"] = item["website"] = location["permalink"]
         opening_hours = OpeningHours()
-        for days, hour_range in location["hours"][0].items():
-            opening_hours.add_ranges_from_string(":".join([days, hour_range]), days=DAYS_DE)
+        for day, hour_range in location["opening_hours"].items():
+            if hour_range:
+                start_time, end_time = hour_range.split("-")
+                opening_hours.add_range(day, start_time, end_time)
         item["opening_hours"] = opening_hours
+        item["branch"] = item.pop("name")
         yield item
