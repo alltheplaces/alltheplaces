@@ -99,6 +99,7 @@ class St1Spider(Spider):
     allowed_domains = ["st1.fi", "st1.no", "st1.se"]
     ST1 = {"brand": "St1", "brand_wikidata": "Q7592214"}
     HELMISIMPUKKA = {"brand": "HelmiSimpukka"}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for base_url, path, locale in SITES:
