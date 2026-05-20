@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -16,15 +16,18 @@ class HeringBRSpider(Spider):
             url="https://www.hering.com.br/_v/public/graphql/v1",
             data={"query": """
                 query getStores {
-                 documents(acronym: "BA", fields: ["cep", "cidade", "rua", "telefones", "bairro", "nome"],
-                                            where: "cidade=*", pageSize: 1000)
-                                            {
-                                            fields {
-                                                    key
-                                                    value
-                                                   }
-                                            }
-                                        }"""},
+                    documents(
+                        acronym: "BA"
+                        fields: ["cep", "cidade", "rua", "telefones", "bairro", "nome", "latitude", "longitude"]
+                        where: "cidade=*"
+                        pageSize: 1000
+                    ) {
+                        fields {
+                            key
+                            value
+                        }
+                    }
+                }"""},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -36,6 +39,8 @@ class HeringBRSpider(Spider):
                     store[field["key"]] = value
             item = Feature()
             item["ref"] = store.get("id")
+            item["lat"] = store.get("latitude")
+            item["lon"] = store.get("longitude")
             if name := store.get("nome"):
                 if name.startswith("Hering Kids "):
                     item["branch"] = name.removeprefix("Hering Kids ").removeprefix("Shopping ")
