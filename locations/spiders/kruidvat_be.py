@@ -23,7 +23,7 @@ class KruidvatBESpider(PlaywrightSpider):
         ]
         for location in location_data:
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name").replace("DROGISTERIJ KRUIDVAT", "")
+            item["name"] = None
             item["state"] = location["address"].get("province", "")
             item["ref"] = item["website"] = urljoin("https://www.kruidvat.be", item["website"])
             oh = OpeningHours()
