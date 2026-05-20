@@ -2,26 +2,20 @@ import json
 from typing import Any
 from urllib.parse import urljoin
 
-import scrapy
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class KruidvatBESpider(scrapy.Spider):
+class KruidvatBESpider(PlaywrightSpider):
     name = "kruidvat_be"
     item_attributes = {"brand": "Kruidvat", "brand_wikidata": "Q2226366"}
     start_urls = ["https://www.kruidvat.be/nl/winkelzoeker"]
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": BROWSER_DEFAULT,
-        "DOWNLOAD_TIMEOUT": 120,
-        "CONCURRENT_REQUESTS": 1,
-    }
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs) -> Any:
         location_data = json.loads(response.xpath('//*[@type="application/json"]/text()').get())["all-stores-query"][
