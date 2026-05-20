@@ -36,7 +36,7 @@ class HeringBRSpider(Spider):
                     store[field["key"]] = value
             item = Feature()
             item["ref"] = store.get("id")
-            item["branch"] = store.get("nome").replace("Hering ", "").replace("HERING ", "")
+            item["branch"] = (store.get("nome") or "").replace("Hering ", "").replace("HERING ", "")
             item["city"] = store.get("cidade")
             item["street_address"] = store.get("rua")
             item["postcode"] = store.get("cep")
