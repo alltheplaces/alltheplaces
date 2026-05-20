@@ -23,10 +23,8 @@ class AuchanHUSpider(Spider):
             item = DictParser.parse(location)
             item["lat"], item["lon"] = url_to_coords(location["googleMapsLink"])
             item["branch"] = item.pop("name").removeprefix("MH Auchan ").removesuffix(" benzinkút")
-            item["name"] = "Auchan"
             item["website"] = urljoin("https://auchan.hu/petrol/", location["slug"])
             apply_category(Categories.FUEL_STATION, item)
-            item["nsi_id"] = "N/A"
             yield item
 
     def parse_stores(self, response: Response, **kwargs: Any) -> Any:
