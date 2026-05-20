@@ -11,8 +11,8 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class KruidvatSpider(scrapy.Spider):
-    name = "kruidvat"
+class KruidvatBESpider(scrapy.Spider):
+    name = "kruidvat_be"
     item_attributes = {"brand": "Kruidvat", "brand_wikidata": "Q2226366"}
     start_urls = ["https://www.kruidvat.be/nl/winkelzoeker"]
     is_playwright_spider = True
