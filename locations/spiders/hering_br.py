@@ -53,6 +53,6 @@ class HeringBRSpider(Spider):
             item["city"] = store.get("cidade")
             item["street_address"] = store.get("rua")
             item["postcode"] = store.get("cep")
-            item["phone"] = store.get("telefones")
+            item["phone"] = store.get("telefones", "").replace(",", "; ")
             apply_category(Categories.SHOP_CLOTHES, item)
             yield item
