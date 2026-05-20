@@ -1,22 +1,31 @@
-from typing import Any
+import json
+from typing import Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class AskItalianGBSpider(Spider):
+class AskItalianGBSpider(SitemapSpider, StructuredDataSpider):
     name = "ask_italian_gb"
     item_attributes = {"brand": "ASK Italian", "brand_wikidata": "Q4807056"}
-    start_urls = ["https://www.askitalian.co.uk/wp-json/locations/get_venues"]
+    sitemap_urls = ["https://www.askitalian.co.uk/sitemap.xml"]
+    sitemap_rules = [
+        (
+            r"/italian-restaurants/[^/]+/(?!menus|news|offers|poi|group)[^/]+(?:/(?!menus|news|offers|poi|group)[^/]+)?$",
+            "parse_sd",
+        )
+    ]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["data"]:
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        raw = response.xpath('//script[@type="application/ld+json" and @id="schema-restaurant"]/text()').get()
+        if raw:
+            yield json.loads(raw)
 
-            item["website"] = location["link"]
-            item["image"] = location["featured_image"]
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        apply_category(Categories.RESTAURANT, item)
+        yield item
