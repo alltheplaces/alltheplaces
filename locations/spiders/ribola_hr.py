@@ -2,7 +2,7 @@ import re
 from typing import Iterable
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_HR
+from locations.hours import DAYS_HR, OpeningHours
 from locations.items import Feature
 from locations.storefinders.wp_go_maps import WpGoMapsSpider
 
