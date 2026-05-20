@@ -1,37 +1,17 @@
-import json
-import re
 from typing import Iterable
 
-from scrapy import Selector
-from scrapy.http import Response
-
+from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import clean_address
+from locations.storefinders.storepoint import StorepointSpider
 
 
-class DavidsTeaSpider(JSONBlobSpider):
+class DavidsTeaSpider(StorepointSpider):
     name = "davids_tea"
     item_attributes = {"brand": "DavidsTea", "brand_wikidata": "Q3019129"}
-    start_urls = ["https://davidstea.com/apps/store-locator/"]
+    key = "169e0f2540d9e8"
 
-    def extract_json(self, response: Response) -> list:
-        return [
-            json.loads(store)
-            for store in re.findall(
-                r"markersCoords.push\(({\".+?)\);",
-                response.xpath('//script[contains(text(),"markersCoords")]/text()').get(""),
-            )
-        ]
-
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        store_info = Selector(text=item.pop("addr_full"))
-        item["branch"] = store_info.xpath('//*[@class="name"]/text()').get("").strip()
-        item["street_address"] = clean_address(store_info.xpath('//*[contains(@class, "address")]/text()').getall())
-        item["city"] = store_info.xpath('//*[@class="city"]/text()').get()
-        item["state"] = store_info.xpath('//*[@class="prov_state"]/text()').get()
-        item["postcode"] = store_info.xpath('//*[@class="postal_zip"]/text()').get()
-        item["country"] = store_info.xpath('//*[@class="country"]/text()').get()
-        if response.url != "https://davidstea.com/apps/store-locator/":
-            item["website"] = response.url
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
+        item["ref"] = str(location["id"])
+        item["branch"] = item.pop("name").removeprefix("DAVIDsTEA ")
+        apply_category(Categories.SHOP_TEA, item)
         yield item
