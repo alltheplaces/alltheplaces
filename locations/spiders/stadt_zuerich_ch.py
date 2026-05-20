@@ -208,7 +208,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "Motorrad": {"amenity": "motorcycle_parking", "bicycle": "no"},
             "Velo": {"amenity": "bicycle_parking", "motorcycle": "no"},
             "Beide": {"amenity": "bicycle_parking", "motorcycle": "yes"},
-        }.get(p["name"])
+        }.get(p.get("name"))
         operator, operator_wikidata = self.operators["Tiefbauamt"]
         if tags is not None:
             tags.update(
