@@ -25,15 +25,16 @@ class KruidvatBESpider(PlaywrightSpider):
             item = DictParser.parse(location)
             item["name"] = None
             item["state"] = location["address"].get("province", "")
-            item["ref"] = item["website"] = urljoin("https://www.kruidvat.be", item["website"])
+            item["ref"] = item["website"] = response.urljoin(item["website"])
             oh = OpeningHours()
-            for day_time in location["openingHours"]["weekDayOpeningList"]:
-                day = day_time.get("shortenedWeekDay")
-                if day_time["closed"]:
-                    oh.set_closed(day)
+            for rule in location["openingHours"]["weekDayOpeningList"]:
+                if rule["closed"]:
+                    oh.set_closed(rule["shortenedWeekDay"])
                 else:
-                    open_time = day_time.get("openingTime").get("formattedHour")
-                    close_time = day_time.get("closingTime").get("formattedHour")
-                    oh.add_range(day, open_time, close_time)
+                    oh.add_range(
+                        rule["shortenedWeekDay"],
+                        rule["openingTime"]["formattedHour"],
+                        rule["closingTime"]["formattedHour"],
+                    )
             item["opening_hours"] = oh
             yield item
