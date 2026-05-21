@@ -12,7 +12,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class FressnapfDESpider(Spider):
     name = "fressnapf_de"
     item_attributes = {"brand": "Fressnapf", "brand_wikidata": "Q875796"}
-    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     api_key = "fressnapfDE"
     website_format = "https://www.fressnapf.de/stores/{}/"
 
