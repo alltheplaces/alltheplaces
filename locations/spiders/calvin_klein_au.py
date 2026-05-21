@@ -37,6 +37,6 @@ class CalvinKleinAUSpider(Spider):
                     start_time = f'{start_hour}{start_minute or ":00"}{start_zone}'
                     end_time = f'{end_hour}{end_minute or ":00"}{end_zone}'
                     oh.add_range(DAYS[int(day) - 1], start_time, end_time, time_format="%I:%M%p")
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item
