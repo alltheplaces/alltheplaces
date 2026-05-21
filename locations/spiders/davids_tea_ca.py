@@ -5,8 +5,8 @@ from locations.items import Feature
 from locations.storefinders.storepoint import StorepointSpider
 
 
-class DavidsTeaSpider(StorepointSpider):
-    name = "davids_tea"
+class DavidsTeaCASpider(StorepointSpider):
+    name = "davids_tea_ca"
     item_attributes = {"brand": "DavidsTea", "brand_wikidata": "Q3019129"}
     key = "169e0f2540d9e8"
 
