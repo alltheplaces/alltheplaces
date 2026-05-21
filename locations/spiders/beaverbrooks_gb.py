@@ -1,19 +1,22 @@
 import json
 from typing import Any
 
-import scrapy
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class BeaverbrooksGBSpider(scrapy.Spider):
+class BeaverbrooksGBSpider(PlaywrightSpider):
     name = "beaverbrooks_gb"
     item_attributes = {"brand": "Beaverbrooks", "brand_wikidata": "Q4878226"}
     start_urls = [
         "https://www.beaverbrooks.co.uk/stores",
     ]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for stores in json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())["props"]["pageProps"][
