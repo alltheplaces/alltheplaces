@@ -14,6 +14,7 @@ from locations.user_agents import CHROME_LATEST
 class LietuvosPastasLTSpider(PlaywrightSpider):
     name = "lietuvos_pastas_lt"
     item_attributes = {"operator": "Lietuvos paštas", "operator_wikidata": "Q175964"}
+    drop_attributes = {"phone", "email"}
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[Any]:
