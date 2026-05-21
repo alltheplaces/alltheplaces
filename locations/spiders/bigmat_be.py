@@ -1,20 +1,18 @@
-import json
-import re
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class BigmatBESpider(scrapy.Spider):
+class BigmatBESpider(SitemapSpider, StructuredDataSpider):
     name = "bigmat_be"
     item_attributes = {"brand": "BigMat", "brand_wikidata": "Q101851862"}
-    start_urls = ["https://www.bigmat.be/magasins"]
+    sitemap_urls = ["https://magasins.bigmat.be/sitemap.xml"]
+    sitemap_rules = [("/bigmat-", "parse_sd")]
 
-    def parse(self, response, **kwargs):
-        pattern = r"var\s+elements\s*=\s*(\[.*?\]);\s*var"
-        stores_json = json.loads(re.search(pattern, response.text, re.DOTALL).group(1))
-        for store in stores_json:
-            item = DictParser.parse(store)
-            item["website"] = store.get("link")
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace("BigMat ", "")
+        yield item
