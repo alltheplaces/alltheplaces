@@ -12,7 +12,7 @@ from locations.items import Feature
 
 class BagsToGoAUSpider(Spider):
     name = "bags_to_go_au"
-    item_attributes = {"brand": "Bags To Go", "brand_wikidata": "Q117745930"}
+    item_attributes = {"name": "Bags To Go", "brand": "Bags To Go", "brand_wikidata": "Q117745930"}
     start_urls = ["https://bagstogo.com.au/pages/store-locator"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
