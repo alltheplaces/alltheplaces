@@ -1,6 +1,8 @@
 import re
+from typing import Any
 
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -13,13 +15,13 @@ class CalvinKleinAUSpider(Spider):
     item_attributes = CalvinKleinSpider.item_attributes
     start_urls = ["https://www.calvinklein.com.au/stores/index/dataAjax"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = Feature()
             item["ref"] = location["i"]
             item["lat"] = location["l"]
             item["lon"] = location["g"]
-            item["name"] = location["n"]
+            item["branch"] = location["n"].split(" | ", 1)[1].removeprefix("Calvin Klein ")
             item["addr_full"] = merge_address_lines(location.get("a"))
             item["street_address"] = location["a"][0]
             item["city"] = location["a"][1]
