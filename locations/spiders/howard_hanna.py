@@ -11,10 +11,11 @@ class HowardHannaSpider(SitemapSpider):
     allowed_domains = ["howardhanna.com"]
     sitemap_urls = ["https://www.howardhanna.com/Seo/OfficeSitemap"]
     sitemap_rules = [(r"/Office/Detail/", "parse")]
+    requires_proxy = "US"  # Cloudflare bot protection
 
     def parse(self, response):
         info = response.css(".prop-main .row .row")[0]
-        addr_full = info.css("div.font-13.font-sm-16").xpath("normalize-space()").get()
+        addr_full = info.css("div.fs-13px.fs-md-16px").xpath("normalize-space()").get()
         properties = {
             "ref": response.url.split("/")[-1],
             "name": response.css("h1::text").get().strip(),
