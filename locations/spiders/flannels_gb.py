@@ -20,5 +20,5 @@ class FlannelsGBSpider(CrawlSpider, StructuredDataSpider):
         return ld_data
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").replace("Flannels ", "")
+        item["branch"] = item.pop("name").removeprefix("Flannels ").removesuffix(" FL")
         yield item
