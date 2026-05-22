@@ -10,6 +10,7 @@ class PgaTourSuperstoreUSSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.pgatoursuperstore.com/stores"]
     rules = [Rule(LinkExtractor(r"stores/detail\?StoreID=(\d+)$"), "parse")]
     drop_attributes = {"image"}
+    requires_proxy = "US"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "Club Fittings" in item["name"]:
