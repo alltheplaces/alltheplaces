@@ -1,3 +1,5 @@
+from typing import Iterable, Any
+
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -16,6 +18,12 @@ class ConsumESSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Store"]
     search_for_facebook = False
     search_for_twitter = False
+
+    def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
+        for e in entries:
+            if "/supermercados/" in e["loc"] and not e["loc"].endswith("/"):
+                e["loc"] += "/"
+            yield e
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name")
