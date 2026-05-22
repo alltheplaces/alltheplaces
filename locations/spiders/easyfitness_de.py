@@ -26,4 +26,6 @@ class EasyfitnessDESpider(SitemapSpider, StructuredDataSpider):
         if email_href := response.xpath('//a[contains(@href, "mailto:")]/@href').get():
             item["email"] = re.search(r"mailto:\s*([\w\.-]+@[\w\.-]+\.\w+)", email_href).group(1).strip()
 
+        item["image"] = None
+
         yield item
