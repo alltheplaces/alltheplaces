@@ -1,10 +1,10 @@
-from typing import Iterable, Any
+from typing import Any, Iterable
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, sanitise_day, DAYS_ES
+from locations.hours import DAYS_ES, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
