@@ -13,6 +13,7 @@ class FlannelsGBSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Flannels", "brand_wikidata": "Q18160381"}
     start_urls = ["https://www.flannels.com/stores/az"]
     rules = [Rule(LinkExtractor(allow="/stores/"), "parse_sd")]
+    requires_proxy = True
 
     def pre_process_data(self, ld_data: dict, **kwargs) -> None:
         ld_data.pop("sameAs")
