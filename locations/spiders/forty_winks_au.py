@@ -1,64 +1,46 @@
-import json
-from datetime import datetime
-from typing import AsyncIterator
-from zoneinfo import ZoneInfo
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
-
-STATE_TIMEZONES = {
-    "Australian Capital Territory": "Australia/Sydney",
-    "New South Wales": "Australia/Sydney",
-    "Northern Territory": "Australia/Darwin",
-    "Queensland": "Australia/Brisbane",
-    "South Australia": "Australia/Adelaide",
-    "Tasmania": "Australia/Hobart",
-    "Victoria": "Australia/Melbourne",
-    "Western Australia": "Australia/Perth",
-}
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class FortyWinksAUSpider(Spider):
+class FortyWinksAUSpider(SitemapSpider, PlaywrightSpider, StructuredDataSpider):
     name = "forty_winks_au"
     item_attributes = {"brand": "Forty Winks", "brand_wikidata": "Q106283438"}
-    allowed_domains = ["fortywinks-prod.azure-api.net"]
-    start_urls = ["https://fortywinks-prod.azure-api.net/store-app/stores?storeUrl=undefined"]
+    allowed_domains = ["www.fortywinks.com.au"]
+    sitemap_urls = ["https://www.fortywinks.com.au/sitemap.xml"]
+    sitemap_rules = [(r"/store-finder/", "parse_sd")]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["ref"] = response.url.strip("/").split("/")[-1]
+        item["branch"] = item.pop("name").removeprefix("Forty Winks ")
 
-    def parse(self, response):
-        for location in response.json():
-            item = DictParser.parse(location)
-            item["ref"] = location["key"]
-            item["street_address"] = location["address"]["address"].replace(" , ", ", ")
-            if item["website"]:
-                item["website"] = "https://www.fortywinks.com.au/store-finder" + item["website"]
-            time_zone = ZoneInfo(STATE_TIMEZONES[item["state"]])
-            item["opening_hours"] = OpeningHours()
-            hours_dict = {}
-            for hours_raw in location["openingHours"]:
-                hours_json = json.loads(hours_raw)
-                hours_dict.update(hours_json)
-            for day_name, hours_ranges in hours_dict.items():
-                if not day_name:
-                    specified_day_names = list(filter(None, hours_dict.keys()))
-                    missing_day_names = list(set(DAYS_FULL) - set(specified_day_names))
-                    if len(missing_day_names) == 1:
-                        day_name = missing_day_names[0]
-                    else:
-                        self.logger.error(
-                            "Multiple missing day names in provided opening hours. Extracted opening hours data will be partially incomplete."
-                        )
-                        continue
-                for hours_range in hours_ranges:
-                    if not hours_range["Start"] or not hours_range["Finish"]:
-                        continue
-                    open_time = datetime.fromisoformat(hours_range["Start"]).astimezone(time_zone).strftime("%H:%M")
-                    close_time = datetime.fromisoformat(hours_range["Finish"]).astimezone(time_zone).strftime("%H:%M")
-                    item["opening_hours"].add_range(day_name, open_time, close_time)
-            yield item
+        # Opening hours in JSON-LD is not the actual values
+        item["opening_hours"] = None
+
+        # Extract real opening hours directly from the HTML list elements
+        if hours_elements := response.xpath("//ul[contains(@class, 'mb-6')]/li"):
+            oh = OpeningHours()
+            for li in hours_elements:
+                day_text = "".join(li.xpath("./div[1]/text()").getall()).strip()
+                time_text = "".join(li.xpath("./div[2]/text()").getall()).strip()
+
+                if not day_text or not time_text or "closed" in time_text.lower():
+                    continue
+
+                open_t, close_t = time_text.split("-")
+                oh.add_range(day=day_text, open_time=open_t.strip(), close_time=close_t.strip(), time_format="%I:%M%p")
+
+            if oh:
+                item["opening_hours"] = oh
+
+        item["image"] = item["facebook"] = None
+
+        yield item
