@@ -9,8 +9,8 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class RogersCommunicationsSpider(SitemapSpider, StructuredDataSpider):
-    name = "rogers_communications"
+class RogersCASpider(SitemapSpider, StructuredDataSpider):
+    name = "rogers_ca"
     item_attributes = {"brand": "Rogers", "brand_wikidata": "Q3439663"}
     allowed_domains = ["rogers.com"]
     sitemap_urls = ["https://www.rogers.com/stores/sitemap.xml"]
