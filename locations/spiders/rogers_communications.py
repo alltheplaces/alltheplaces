@@ -1,101 +1,64 @@
-from datetime import datetime
-from typing import Any, AsyncIterator
+import json
+import re
+from typing import Any
 
-from scrapy import Spider
-from scrapy.http import FormRequest, Response
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class RogersCommunicationsSpider(Spider):
+class RogersCommunicationsSpider(SitemapSpider):
     name = "rogers_communications"
     item_attributes = {"brand": "Rogers", "brand_wikidata": "Q3439663"}
-    allowed_domains = ["1-dot-rogers-store-finder.appspot.com", "rogers.com"]
-
-    async def start(self) -> AsyncIterator[FormRequest]:
-        url = "https://1-dot-rogers-store-finder.appspot.com/searchRogersStoresService"
-
-        headers = {
-            "origin": "https://www.rogers.com",
-            "Referer": "https://www.rogers.com/business/contact-us/store-locator",
-            "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-        }
-
-        form_data = {
-            "select": "Record_ID,SCID,Location_Name,Address_Or_Intersection,Address2,City,State_Or_Province,ZIP_Or_Postal_Code,Business_Phone,Intersection,Priority1,Priority2,Priority3,Priority10,Rogers_Video_Store,Rogers_Plus_Store,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Closed_smb,Latitude,Longitude,CONCAT(Longitude, ',' ,Latitude) as geometry,( 6371 * acos( cos( radians(49.2827291) ) * cos( radians(Latitude) ) * cos( radians( Longitude ) - radians( -123.12073750000002) )+sin( radians(49.2827291) ) * sin( radians( Latitude )))) AS distance",
-            "where": "(Closed_smb=''AND Small_biz_centre='Y')OR(Closed_smb=''AND Priority1='Y')OR(Closed_smb=''AND Priority2='Y')",
-            "order": "distance ASC",
-            "limit": "600",
-            "channelID": "ROGERS",
-        }
-
-        yield FormRequest(
-            url=url,
-            method="POST",
-            formdata=form_data,
-            headers=headers,
-            callback=self.parse,
-        )
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        for day, times in hours.items():
-            if times == "CLOSED" or times == "closed" or times == "Closed":
-                pass
-            else:
-                if "-" in times:
-                    time = times.split("-")
-                else:
-                    time = times.split("  ")
-
-                open_time = time[0].replace(" ", "")
-                close_time = time[1].replace(" ", "")
-                open_time = datetime.strptime(open_time, "%I:%M%p").strftime("%H:%M")
-                close_time = datetime.strptime(close_time, "%I:%M%p").strftime("%H:%M")
-
-                opening_hours.add_range(
-                    day=day,
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%H:%M",
-                )
-
-        return opening_hours
+    allowed_domains = ["rogers.com"]
+    sitemap_urls = ["https://www.rogers.com/stores/sitemap.xml"]
+    sitemap_rules = [(r"^https://www\.rogers\.com/stores/(?!fr_ca/)(?!index\.html)[^/]+(?:/[^/]+)?$", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["features"]:
-            properties = {
-                "ref": store["properties"]["Record_ID"],
-                "street_address": store["properties"]["AddressOrIntersection"],
-                "city": store["properties"]["City"],
-                "state": store["properties"]["StateOrProvince"],
-                "postcode": store["properties"]["ZIPOrPostalCode"],
-                "country": "CA",
-                "lat": store["properties"]["Latitude"],
-                "lon": store["properties"]["Longitude"],
-                "phone": store["properties"]["Business_Phone"],
-            }
+        if not response.xpath('//main[@itemtype="http://schema.org/MobilePhoneStore"]'):
+            return
 
-            hours = {
-                "Mo": store["properties"]["Monday"],
-                "Tu": store["properties"]["Tuesday"],
-                "We": store["properties"]["Wednesday"],
-                "Th": store["properties"]["Thursday"],
-                "Fr": store["properties"]["Friday"],
-                "Sa": store["properties"]["Saturday"],
-                "Su": store["properties"]["Sunday"],
-            }
+        item = Feature()
+        item["ref"] = item["website"] = response.url
 
-            try:
-                h = self.parse_hours(hours)
+        if m := re.search(r"Rogers Store at\s+(.*?)\s*-\s", response.xpath("//title/text()").get() or ""):
+            if branch := m.group(1).strip():
+                item["branch"] = branch
 
-                if h:
-                    properties["opening_hours"] = h
-            except:
-                pass
+        item["street_address"] = merge_address_lines(
+            [
+                response.xpath('//span[@class="c-address-street-1"]/text()').get(),
+                response.xpath('//span[@class="c-address-street-2"]/text()').get(),
+            ]
+        )
+        item["city"] = response.xpath('//span[@class="c-address-city"]/text()').get()
+        item["state"] = response.xpath('//abbr[contains(@class,"c-address-state")]/text()').get()
+        item["postcode"] = response.xpath('//*[@itemprop="postalCode"]/text()').get()
+        item["lat"] = response.xpath('//meta[@itemprop="latitude"]/@content').get()
+        item["lon"] = response.xpath('//meta[@itemprop="longitude"]/@content').get()
+        item["phone"] = response.xpath('//*[@itemprop="telephone"]/text()').get()
 
-            apply_category(Categories.SHOP_MOBILE_PHONE, properties)
-            yield Feature(**properties)
+        if data_days := response.xpath('//*[contains(@class,"js-hours-table")]/@data-days').get():
+            item["opening_hours"] = self.parse_hours(data_days)
+
+        apply_category(Categories.SHOP_MOBILE_PHONE, item)
+        yield item
+
+    @staticmethod
+    def parse_hours(data_days: str) -> OpeningHours:
+        oh = OpeningHours()
+        for day in json.loads(data_days):
+            if day.get("isClosed"):
+                continue
+            for interval in day.get("intervals") or []:
+                oh.add_range(
+                    day=day["day"].title()[:2],
+                    open_time=str(interval["start"]).zfill(4),
+                    close_time=str(interval["end"]).zfill(4),
+                    time_format="%H%M",
+                )
+        return oh
