@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import apply_category, Categories
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
@@ -15,32 +16,31 @@ class FortyWinksAUSpider(SitemapSpider, PlaywrightSpider, StructuredDataSpider):
     item_attributes = {"brand": "Forty Winks", "brand_wikidata": "Q106283438"}
     allowed_domains = ["www.fortywinks.com.au"]
     sitemap_urls = ["https://www.fortywinks.com.au/sitemap.xml"]
-    sitemap_rules = [(r"/store-finder/", "parse_sd")]
+    sitemap_rules = [(r"/store-finder/[^/]+/[^/]+/$", "parse_sd")]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    search_for_facebook = False
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = response.url.strip("/").split("/")[-1]
         item["branch"] = item.pop("name").removeprefix("Forty Winks ")
+        item["image"] = None
 
         # Opening hours in JSON-LD is not the actual values
-        item["opening_hours"] = None
-
         # Extract real opening hours directly from the HTML list elements
+        oh = OpeningHours()
         if hours_elements := response.xpath("//ul[contains(@class, 'mb-6')]/li"):
-            oh = OpeningHours()
             for li in hours_elements:
                 day_text = "".join(li.xpath("./div[1]/text()").getall()).strip()
                 time_text = "".join(li.xpath("./div[2]/text()").getall()).strip()
 
-                if not day_text or not time_text or "closed" in time_text.lower():
+                if not day_text or not time_text:
                     continue
 
-                open_t, close_t = time_text.split("-")
-                oh.add_range(day=day_text, open_time=open_t.strip(), close_time=close_t.strip(), time_format="%I:%M%p")
+                open_t, close_t = time_text.split(" - ")
+                oh.add_range(day_text, open_t, close_t, "%I:%M%p")
 
-            if oh:
-                item["opening_hours"] = oh
+        item["opening_hours"] = oh
 
-        item["image"] = item["facebook"] = None
+        apply_category(Categories.SHOP_BED, item)
 
         yield item
