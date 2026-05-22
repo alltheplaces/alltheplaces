@@ -1,27 +1,23 @@
-import chompjs
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from typing import Iterable
 
-from locations.dict_parser import DictParser
+from scrapy.http import TextResponse
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FlannelsGBSpider(SitemapSpider, StructuredDataSpider):
+class FlannelsGBSpider(CrawlSpider, StructuredDataSpider):
     name = "flannels_gb"
     item_attributes = {"brand": "Flannels", "brand_wikidata": "Q18160381"}
-    sitemap_urls = ["https://www.flannels.com/sitemap-store-pages.xml"]
-    requires_proxy = True
+    start_urls = ["https://www.flannels.com/stores/az"]
+    rules = [Rule(LinkExtractor(allow="/stores/"), "parse_sd")]
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("Flannels ").removesuffix(" FL")
-        # Take structured data as well as embedded JSON to form a better POI.
-        json = chompjs.parse_js_object(response.xpath('//script[contains(text(),"var store = ")]/text()').get())
-        json_item = DictParser.parse(json)
-        item["lat"] = json_item["lat"]
-        item["lon"] = json_item["lon"]
-        item["street_address"] = json_item["addr_full"]
-        item["city"] = json_item["city"]
-        # There are a few "IE" stores.
-        item["country"] = json_item["country"]
+    def pre_process_data(self, ld_data: dict, **kwargs) -> None:
+        ld_data.pop("sameAs")
+        return ld_data
+
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace("Flannels ", "")
         yield item
