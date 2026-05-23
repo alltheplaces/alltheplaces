@@ -24,11 +24,8 @@ class FountainTireCASpider(SitemapSpider):
         item["email"] = response.xpath('//*[@property="storeinfo:email"]/@content').get()
         item["ref"] = item["website"] = response.url
         item["lat"], item["lon"] = response.xpath('//*[@property="storeinfo:latlon"]/@content').get().split(",")
-        try:
+        if hours_data := response.xpath('//*[@property="storeinfo:hours"]/@content').get():
             oh = OpeningHours()
-            hours_data = response.xpath('//*[@property="storeinfo:hours"]/@content').get()
             oh.add_ranges_from_string(hours_data)
             item["opening_hours"] = oh
-        except:
-            pass
         yield item
