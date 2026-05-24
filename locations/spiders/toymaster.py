@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class ToymasterSpider(JSONBlobSpider):
     name = "toymaster"
-    item_attributes = {"brand": "Toymaster", "brand_wikidata": "Q7830615"
+    item_attributes = {"brand": "Toymaster", "brand_wikidata": "Q7830615"}
     start_urls = [
         "https://api.toymaster.co.uk/stores?status=Active&storefinder=&lo-GB&api_key=137601c9-ef9c-41e1-8f07-a4cde23f8c7c"
     ]
