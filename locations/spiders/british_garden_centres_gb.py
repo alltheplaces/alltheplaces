@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -18,4 +19,6 @@ class BritishGardenCentresGBSpider(JSONBlobSpider):
             item["name"] = feature["store"]
             item["website"] = "https://www.britishgardencentres.com" + item["website"]
             item["street_address"] = item.pop("addr_full")
+            apply_category(Categories.SHOP_GARDEN_CENTRE, properties)
+
         yield item
