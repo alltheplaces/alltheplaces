@@ -4,7 +4,6 @@ from scrapy.http import Request, Response
 
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BritishGardenCentresGBSpider(JSONBlobSpider):
