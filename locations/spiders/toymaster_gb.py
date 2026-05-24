@@ -19,9 +19,9 @@ class ToymasterGBSpider(JSONBlobSpider):
             [feature.get("Address1"), feature.get("Address2"), feature.get("Address3"), feature.get("Address4")]
         )
         item["website"] = feature["Website"]
-        
+
         if not item["website"].startswith("http"):
-            item["website"]="https://" + item["website"]
+            item["website"] = "https://" + item["website"]
 
         item["facebook"] = feature["SocialFacebook"]
         item["twitter"] = feature["SocialTwitter"]
