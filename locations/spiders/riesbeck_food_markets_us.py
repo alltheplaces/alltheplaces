@@ -2,7 +2,7 @@ import chompjs
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
@@ -13,7 +13,6 @@ class RiesbeckFoodMarketsUSSpider(CrawlSpider):
     item_attributes = {
         "brand": "Riesbeck's",
         "brand_wikidata": "Q28226114",
-        "extras": Categories.SHOP_SUPERMARKET.value,
     }
     allowed_domains = ["www.riesbeckfoods.com"]
     start_urls = ["https://www.riesbeckfoods.com/stores"]
@@ -24,6 +23,7 @@ class RiesbeckFoodMarketsUSSpider(CrawlSpider):
             follow=False,
         )
     ]
+    requires_proxy = "US"
 
     def parse(self, response):
         location = chompjs.parse_js_object(
@@ -37,4 +37,5 @@ class RiesbeckFoodMarketsUSSpider(CrawlSpider):
         apply_yes_no(Extras.DELIVERY, item, location.get("has_delivery"), False)
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(location["hours_md"])
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
