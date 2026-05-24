@@ -29,5 +29,7 @@ class BoroondaraCityCouncilTreesAUSpider(ArcGISFeatureServerSpider):
                 item["extras"]["species"] = description.split(" - ")[-1]
         if planted_date := feature.get("DatePlanted"):
             planted_date_parts = planted_date.split("/")
-            item["extras"]["start_date"] = "{}-{}-{}".format(planted_date_parts[2], planted_date_parts[1], planted_date_parts[0])
+            item["extras"]["start_date"] = "{}-{}-{}".format(
+                planted_date_parts[2], planted_date_parts[1], planted_date_parts[0]
+            )
         yield item
