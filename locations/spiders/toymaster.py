@@ -16,7 +16,7 @@ class ToymasterSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, featur) -> Iterable[Request]:
         item["street_address"] = merge_address_lines(
-            [feature.get("Address1"), feature.get("Address2"), feature.geess3"), feature.get("Address4")]
+            [feature.get("Address1"), feature.get("Address2"), feature.get("Address3"), feature.get("Address4")]
         )
         item["website"] = feature.get("Website")
         if item["website"]:
