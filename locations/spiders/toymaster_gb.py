@@ -18,10 +18,10 @@ class ToymasterGBSpider(JSONBlobSpider):
         item["street_address"] = merge_address_lines(
             [feature.get("Address1"), feature.get("Address2"), feature.get("Address3"), feature.get("Address4")]
         )
-        item["website"] = feature["Website"]
-
-        if not item["website"].startswith("http"):
-            item["website"] = "https://" + item["website"]
+        item["website"] = feature.get("Website")
+        if item["website"]:
+            if not item["website"].startswith("http"):
+                item["website"] = "https://" + item["website"]
 
         item["facebook"] = feature["SocialFacebook"]
         item["twitter"] = feature["SocialTwitter"]
