@@ -19,6 +19,6 @@ class BritishGardenCentresGBSpider(JSONBlobSpider):
             item["name"] = feature["store"]
             item["website"] = "https://www.britishgardencentres.com" + item["website"]
             item["street_address"] = item.pop("addr_full")
-            apply_category(Categories.SHOP_GARDEN_CENTRE, properties)
+            apply_category(Categories.SHOP_GARDEN_CENTRE, item)
 
         yield item
