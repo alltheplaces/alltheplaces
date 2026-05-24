@@ -1,7 +1,7 @@
 from typing import Any
 
 from chompjs import chompjs
-from scrapy import Selector, Spider
+from scrapy import Selector
 from scrapy.http import Response
 
 from locations.camoufox_spider import CamoufoxSpider
