@@ -4,16 +4,18 @@ from chompjs import chompjs
 from scrapy import Selector, Spider
 from scrapy.http import Response
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
 
-class BursonAutoPartsAUSpider(Spider):
+class BursonAutoPartsAUSpider(CamoufoxSpider):
     name = "burson_auto_parts_au"
     item_attributes = {"brand": "Burson Auto Parts", "brand_wikidata": "Q117075930"}
     allowed_domains = ["www.burson.com.au"]
     start_urls = ["https://www.burson.com.au/find-a-store"]
-    requires_proxy = True  # Imperva
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_js = (
