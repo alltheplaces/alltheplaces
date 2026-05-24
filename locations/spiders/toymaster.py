@@ -7,8 +7,8 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class ToymasterGBSpider(JSONBlobSpider):
-    name = "toymaster_gb"
+class ToymasterSpider(JSONBlobSpider):
+    name = "toymaster"
     item_attributes = {"brand": "Toymaster", "brand_wikidata": "Q7830615"}
     start_urls = [
         "https://api.toymaster.co.uk/stores?status=Active&storefinder=true&locale=en-GB&api_key=137601c9-ef9c-41e1-8f07-a4cde23f8c7c"
@@ -28,6 +28,6 @@ class ToymasterGBSpider(JSONBlobSpider):
         # item["instagram"] = feature["SocialInstagram"]
         item["email"] = feature["StorefinderEmail"]
         item["phone"] = feature["StorefinderPhone"]
-        item["ref"] = feature["MemberAccountNumber"]
+        item["ref"] = feature["ANA"]
         # Could add opening hours
         yield item
