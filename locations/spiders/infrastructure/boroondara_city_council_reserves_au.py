@@ -16,7 +16,15 @@ class BoroondaraCityCouncilReservesAUSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["nid"])
-        item["name"] = feature["title"].removeprefix("Barbecue - ").removeprefix("Playground - ").removeprefix("Playround - ").removeprefix("Picnic Shelter - ").removeprefix("Rotunda - ").strip()
+        item["name"] = (
+            feature["title"]
+            .removeprefix("Barbecue - ")
+            .removeprefix("Playground - ")
+            .removeprefix("Playround - ")
+            .removeprefix("Picnic Shelter - ")
+            .removeprefix("Rotunda - ")
+            .strip()
+        )
         item["addr_full"] = re.sub(r"\s+", " ", feature["field_location"]).strip()
         item["lat"], item["lon"] = re.sub(r"\s+", "", feature["field_geo_information"]).strip().split(",", 1)
         match feature["field_location_category"][0]:
@@ -29,5 +37,9 @@ class BoroondaraCityCouncilReservesAUSpider(JSONBlobSpider):
             case "1401":
                 apply_category(Categories.LEISURE_GAZEBO, item)
             case _:
-                self.logger.warning("Unknown feature type '{}'. Feature has unique ID of '{}' and title of '{}'.".format(feature["field_location_category"][0], feature["nid"], feature["title"]))
+                self.logger.warning(
+                    "Unknown feature type '{}'. Feature has unique ID of '{}' and title of '{}'.".format(
+                        feature["field_location_category"][0], feature["nid"], feature["title"]
+                    )
+                )
         yield item
