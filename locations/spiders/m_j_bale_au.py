@@ -17,6 +17,7 @@ class MJBaleAUSpider(JSONBlobSpider):
     allowed_domains = ["www.mjbale.com"]
     start_urls = ["https://www.mjbale.com/apps/arcbridge/v1/shopify/stores/check"]
     locations_key = "stores"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature["clickandcollect_enabled"] != 1 and feature["deptstore_enabled"] != 1:
