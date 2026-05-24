@@ -11,10 +11,10 @@ class ToymasterSpider(JSONBlobSpider):
     name = "toymaster"
     item_attributes = {"brand": "Toymaster", "brand_wikidata": "Q7830615"}
     start_urls = [
-        "https://api.toymaster.co.uk/stores?status=Active&storefinder=&lo-GB&api_key=137601c9-ef9c-41e1-8f07-a4cde23f8c7c"
+        "https://api.toymaster.co.uk/stores?status=Active&storefinder=&locale=en-GB&api_key=137601c9-ef9c-41e1-8f07-a4cde23f8c7c"
     ]
 
-    def post_process_item(self, item: Feature, response: Response, featur) -> Iterable[Request]:
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
         item["street_address"] = merge_address_lines(
             [feature.get("Address1"), feature.get("Address2"), feature.get("Address3"), feature.get("Address4")]
         )
