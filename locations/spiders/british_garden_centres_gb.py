@@ -18,7 +18,7 @@ class BritishGardenCentresGBSpider(JSONBlobSpider):
         if not item["website"].startswith("http"):
             item["name"] = feature["store"]
             item["website"] = "https://www.britishgardencentres.com" + item["website"]
-            item["street_address"] = item.pop("addr_full")
-            apply_category(Categories.SHOP_GARDEN_CENTRE, item)
+        item["street_address"] = item.pop("addr_full")
+        apply_category(Categories.SHOP_GARDEN_CENTRE, item)
 
         yield item
