@@ -5,13 +5,12 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, OpeningHours, DAYS_3_LETTERS
 from locations.spiders.carrefour_fr import parse_brand_and_category_from_mapping
 
 
 class CarrefourTWSpider(Spider):
     name = "carrefour_tw"
-    start_urls = ["https://www.uni-prosperity.com.tw/console/api/v1/stores?page_size=all"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     brands = {
@@ -24,8 +23,7 @@ class CarrefourTWSpider(Spider):
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+        yield JsonRequest(url="https://www.uni-prosperity.com.tw/console/api/v1/stores?page_size=all")
 
     def parse(self, response):
         for location in response.json()["data"]["rows"]:
@@ -36,13 +34,18 @@ class CarrefourTWSpider(Spider):
                 continue
             parse_brand_and_category_from_mapping(item, location["store_type_name"], self.brands)
             item["phone"] = location["contact_tel"]
+            item["website"] = item["extras"]["website:en"] = (
+                "https://www.carrefour.com.tw/store-info-en/?store={}".format(location["name"])
+            )
+            item["extras"]["website:zh"] = "https://www.carrefour.com.tw/store-info/?store={}".format(location["name"])
+
             item["opening_hours"] = OpeningHours()
             if location["is24h"]:
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
             else:
-                for day_name in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
+                for day_name in map(str.lower, DAYS_3_LETTERS):
                     if location.get(f"{day_name}_start") and location.get(f"{day_name}_end"):
                         item["opening_hours"].add_range(
-                            day_name.title(), location.get(f"{day_name}_start"), location.get(f"{day_name}_end")
+                            day_name, location.get(f"{day_name}_start"), location.get(f"{day_name}_end")
                         )
             yield item
