@@ -1,7 +1,8 @@
 from typing import Iterable
+
 from locations.categories import Categories
-from locations.storefinders.storemapper import StoremapperSpider
 from locations.items import Feature
+from locations.storefinders.storemapper import StoremapperSpider
 
 
 class JustForPetsGBSpider(StoremapperSpider):
