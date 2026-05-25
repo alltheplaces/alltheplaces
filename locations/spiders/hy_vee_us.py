@@ -7,6 +7,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class HyVeeUSSpider(SitemapSpider):
@@ -18,17 +19,15 @@ class HyVeeUSSpider(SitemapSpider):
     custom_settings = {"REDIRECT_ENABLED": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        properties = {
-            "ref": response.url.split("=", 1)[1],
-            "name": response.xpath('//div[@id="page_content"]/h1/text()').get().strip(),
-            "addr_full": re.sub(
-                r"\s+",
-                " ",
-                " ".join(response.xpath('//div[contains(strong/text(), "Address")]/text()[not(parent::a)]').getall()),
-            ).strip(),
-            "phone": response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "").strip(),
-            "website": response.url,
-        }
+        properties = Feature(
+            ref=response.url.split("=", 1)[1],
+            name=response.xpath('//div[@id="page_content"]/h1/text()').get().strip(),
+            addr_full=merge_address_lines(
+                response.xpath('//div[contains(strong/text(), "Address")]/text()[not(parent::a)]').getall()
+            ),
+            phone=response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "").strip(),
+            website=response.url,
+        )
 
         if image_path := response.xpath('//img[@class="page_banner"]/@src').get():
             properties["image"] = image_path if "https://" in image_path else "https://www.hy-vee.com" + image_path
@@ -40,4 +39,4 @@ class HyVeeUSSpider(SitemapSpider):
 
         apply_category(Categories.SHOP_SUPERMARKET, properties)
 
-        yield Feature(**properties)
+        yield properties
