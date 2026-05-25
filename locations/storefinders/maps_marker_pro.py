@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from typing import AsyncIterator, Iterable
 
 from scrapy import Selector, Spider
-from scrapy.http import FormRequest, TextResponse
+from scrapy.http import TextResponse
+from scrapy.http.request.form import FormRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_BY_FREQUENCY, OpeningHours
