@@ -32,6 +32,7 @@ class CarrefourTWSpider(Spider):
             if not location["status"]:
                 continue
             item = DictParser.parse(location)
+            item["street_address"] = item.pop("street")
             if location["store_type_name"] not in self.brands.keys():
                 continue
             parse_brand_and_category_from_mapping(item, location["store_type_name"], self.brands)
