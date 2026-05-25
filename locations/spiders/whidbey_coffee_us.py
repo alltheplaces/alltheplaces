@@ -1,12 +1,10 @@
 import re
-from datetime import datetime
 from typing import Any
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 
 
@@ -43,44 +41,5 @@ class WhidbeyCoffeeUSSpider(SitemapSpider):
             phone_text = " ".join(t.strip() for t in phone_block.xpath(".//text()").getall() if t.strip())
             item["phone"] = re.sub(r"(?i)^phone:?\s*", "", phone_text).strip()
 
-        hours_text = response.xpath('//p[strong[contains(text(), "Hours")]]//text()').getall()
-        if hours_text:
-            item["opening_hours"] = self.parse_hours(hours_text)
-
         apply_category(Categories.COFFEE_SHOP, item)
         yield item
-
-    def parse_hours(self, hours: list) -> OpeningHours:
-        opening_hours = OpeningHours()
-        for hour in hours:
-            if "-" not in hour:
-                continue
-            if "Drive Thru" in hour or "Cafe" in hour:
-                continue
-            day_range = hour.split(" ")[0]
-            time_range = "".join(hour.split(" ")[1:])
-            open_time, close_time = time_range.strip().split("-")
-            if ":" not in open_time:
-                open_time = datetime.strptime(open_time, "%I%p").strftime("%I:%M%p")
-            if ":" not in close_time:
-                close_time = datetime.strptime(close_time, "%I%p").strftime("%I:%M%p")
-            if "-" in day_range:
-                start_day, end_day = re.sub(r"[\s:]", "", day_range).split("-")
-                for day in DAYS_3_LETTERS_FROM_SUNDAY[
-                    DAYS_3_LETTERS_FROM_SUNDAY.index(start_day[0:3]) : DAYS_3_LETTERS_FROM_SUNDAY.index(end_day[0:3])
-                    + 1
-                ]:
-                    opening_hours.add_range(
-                        day=day[0:2],
-                        open_time=open_time,
-                        close_time=close_time,
-                        time_format="%I:%M%p",
-                    )
-            else:
-                opening_hours.add_range(
-                    day=day_range[0:2],
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%I:%M%p",
-                )
-        return opening_hours
