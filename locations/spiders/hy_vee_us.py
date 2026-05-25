@@ -29,6 +29,37 @@ class HyVeeUSSpider(SitemapSpider):
             website=response.url,
         )
 
+        if (
+            properties["name"].endswith(" Clinic Pharmacy Hy-Vee")
+            or properties["name"].endswith(" Hy-Vee Clinic Pharmacy")
+            or properties["name"].endswith(" Pharmacy Clinic Hy-Vee")
+        ):
+            properties["branch"] = (
+                properties.pop("name")
+                .removesuffix(" Clinic Pharmacy Hy-Vee")
+                .removesuffix(" Hy-Vee Clinic Pharmacy")
+                .removesuffix(" Pharmacy Clinic Hy-Vee")
+            )
+            apply_category(Categories.PHARMACY, properties)
+        elif properties["name"].endswith(" Dollar Fresh Hy-Vee"):
+            properties["branch"] = properties.pop("name").removesuffix(" Dollar Fresh Hy-Vee")
+            properties["name"] = "Dollar Fresh Hy-Vee"
+            apply_category(Categories.SHOP_SUPERMARKET, properties)
+        elif " Hy-Vee Drugstore" in properties["name"]:
+            properties["branch"] = properties.pop("name").replace(" Hy-Vee Drugstore", "")
+            apply_category(Categories.PHARMACY, properties)
+        elif properties["name"].endswith(" Fast & Fresh Hy-Vee"):
+            properties["branch"] = properties.pop("name").removesuffix(" Fast & Fresh Hy-Vee")
+            properties["name"] = "Fast & Fresh Hy-Vee"
+            apply_category(Categories.SHOP_SUPERMARKET, properties)
+        elif properties["name"].endswith(" Hy-Vee HealthMarket Rx"):
+            properties["branch"] = properties.pop("name").removesuffix(" Hy-Vee HealthMarket Rx")
+            properties["name"] = "Hy-Vee HealthMarket Rx"
+            apply_category(Categories.SHOP_SUPERMARKET, properties)
+        else:
+            properties["branch"] = properties.pop("name").replace(" Hy-Vee", " ")
+            apply_category(Categories.SHOP_SUPERMARKET, properties)
+
         if image_path := response.xpath('//img[@class="page_banner"]/@src').get():
             properties["image"] = image_path if "https://" in image_path else "https://www.hy-vee.com" + image_path
 
@@ -36,8 +67,6 @@ class HyVeeUSSpider(SitemapSpider):
             oh = OpeningHours()
             oh.add_ranges_from_string(hours_raw.upper().replace("A.M.", "AM").replace("P.M.", "PM"))
             properties["opening_hours"] = oh
-
-        apply_category(Categories.SHOP_SUPERMARKET, properties)
 
         if g := response.xpath("//a[contains(@href, 'q=place_id:')]/@href").get():
             properties["extras"]["ref:google:place_id"] = g.rsplit(":", 1)[1]
