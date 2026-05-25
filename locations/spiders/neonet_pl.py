@@ -1,24 +1,27 @@
-import html
 import json
+import re
 from typing import Any
 
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.spiders import Spider
 
-from locations.linked_data_parser import LinkedDataParser
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_PL, OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class NeonetPLSpider(SitemapSpider):
+class NeonetPLSpider(Spider):
     name = "neonet_pl"
     item_attributes = {"brand": "Neonet", "brand_wikidata": "Q11790622"}
-    sitemap_urls = ["https://sklepy.neonet.pl/sitemap.xml"]
-    sitemap_rules = [(r"/polska/.*[0-9]$", "parse")]
+    start_urls = ["https://www.neonet.pl/kontakt"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = json.loads(html.unescape(response.xpath('//*[@type="application/ld+json"]/text()').get()))
-        for entry in data.get("@graph") or []:
-            if entry.get("@type") == "LocalBusiness":
-                item = LinkedDataParser.parse_ld(entry)
-                item["name"] = None
-                yield item
-                return
+        raw_data = json.loads(re.search(r"salons\":(\[.+\]),\"navigation", response.text).group(1))
+        for location in raw_data:
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
+            item["street_address"] = merge_address_lines(location["address"]["lines"])
+            oh = OpeningHours()
+            oh.add_ranges_from_string(merge_address_lines(location["openHours"]), DAYS_PL)
+            item["opening_hours"] = oh
+            yield item
