@@ -36,7 +36,7 @@ class CarrefourTWSpider(Spider):
             if location["store_type_name"] not in self.brands.keys():
                 continue
             parse_brand_and_category_from_mapping(item, location["store_type_name"], self.brands)
-            item["phone"] = location["contact_tel"]
+            item["phone"] = location["contact_tel"].replace("、", "; ")
             item["website"] = item["extras"]["website:en"] = (
                 "https://www.carrefour.com.tw/store-info-en/?store={}".format(location["name"])
             )
