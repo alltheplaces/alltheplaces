@@ -163,7 +163,7 @@ requires-dist = [
     { name = "requests" },
     { name = "requests-cache" },
     { name = "reverse-geocoder" },
-    { name = "scrapy", specifier = ">=2.15.2" },
+    { name = "scrapy", specifier = ">=2.16.0" },
     { name = "scrapy-camoufox", git = "https://github.com/iandees/scrapy-camoufox.git" },
     { name = "scrapy-playwright", specifier = ">=0.0.45" },
     { name = "scrapy-zyte-api", specifier = ">=0.34.0" },
@@ -1854,7 +1854,7 @@ wheels = [
 
 [[package]]
 name = "scrapy"
-version = "2.15.2"
+version = "2.16.0"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -1876,9 +1876,9 @@ dependencies = [
     { name = "w3lib" },
     { name = "zope-interface" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/11/ee/601014b8696e2e869c806d4377da6c468b278fd891b03fc5d1c830f2b641/scrapy-2.15.2.tar.gz", hash = "sha256:c7b8fc8d2c51a39d52f6025bdd7e9c714e43f97afd300e8c44157cf7a05c0c9e", size = 1291748, upload-time = "2026-04-28T13:29:54.141Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/a0/f710c21e87d64686f1b6d153eff7d1a2f7167bd94dd6c19aada07629fb38/scrapy-2.16.0.tar.gz", hash = "sha256:7287952a81fa302797ec0c3370a0096a8d81d4f9fe25a608a76df2a164511714", size = 1280834, upload-time = "2026-05-19T12:29:19.202Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/2c/b9d926e117765d84654efb5a8280379e76a681338155c5c79578b4b207ac/scrapy-2.15.2-py3-none-any.whl", hash = "sha256:ff47379299699f1fcc7bc1d404754306f04371d0822e077c2857777d60743e07", size = 352868, upload-time = "2026-04-28T13:29:52.623Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/c9/7cc7631ca85c08b7e1162e1e08ecb0c139f8f640cc403257ac500a8e50fe/scrapy-2.16.0-py3-none-any.whl", hash = "sha256:fcb83db5500743503b1fea4d55c81aac056b15481d0aad46b6f929d324d9bcf5", size = 344254, upload-time = "2026-05-19T12:29:17.206Z" },
 ]
 
 [[package]]
