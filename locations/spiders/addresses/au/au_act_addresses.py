@@ -32,7 +32,7 @@ class AuActAddressesSpider(ArcGISFeatureServerSpider, AddressSpider):
         item["ref"] = str(feature["ADDRESS_ID"])
 
         if unit_number := feature.get("DOOR_NO"):
-            item["extras"]["addr:unit"] = f"{unit_number}"
+            item["unit"] = f"{unit_number}"
 
         item["housenumber"] = feature["STREET_NUMBER"]
 

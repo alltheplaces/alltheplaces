@@ -21,6 +21,7 @@ class Feature(scrapy.Item):
     name = scrapy.Field()
     branch = scrapy.Field()
     addr_full = scrapy.Field()
+    unit = scrapy.Field()
     housenumber = scrapy.Field()
     street = scrapy.Field()
     street_address = scrapy.Field()
