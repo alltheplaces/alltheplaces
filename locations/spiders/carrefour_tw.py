@@ -11,6 +11,7 @@ from locations.spiders.carrefour_fr import parse_brand_and_category_from_mapping
 
 class CarrefourTWSpider(Spider):
     name = "carrefour_tw"
+    start_urls = ["https://www.uni-prosperity.com.tw/console/api/v1/stores?page_size=all"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     brands = {
@@ -23,7 +24,8 @@ class CarrefourTWSpider(Spider):
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url="https://www.uni-prosperity.com.tw/console/api/v1/stores?page_size=all")
+        for url in self.start_urls:
+            yield JsonRequest(url=url)
 
     def parse(self, response):
         for location in response.json()["data"]["rows"]:
