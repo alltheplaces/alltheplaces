@@ -12,7 +12,9 @@ class GlenEiraCityCouncilBenchesAUSpider(JSONBlobSpider):
     name = "glen_eira_city_council_benches_au"
     item_attributes = {"operator": "Glen Eira City Council", "operator_wikidata": "Q56477767", "state": "VIC"}
     allowed_domains = ["connect.pozi.com"]
-    start_urls = ["https://connect.pozi.com/userdata/gleneira-publisher/Council-Facilities-and-Services/Public_Seating.json"]
+    start_urls = [
+        "https://connect.pozi.com/userdata/gleneira-publisher/Council-Facilities-and-Services/Public_Seating.json"
+    ]
     locations_key = "features"
     custom_settings = {
         "ROBOTSTXT_OBEY": False,  # Avoid HTTP 403 error
