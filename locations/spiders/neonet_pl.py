@@ -1,6 +1,5 @@
 import json
 import re
-from pprint import pprint
 from typing import Any
 from urllib.parse import urljoin
 
