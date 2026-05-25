@@ -25,5 +25,5 @@ class KateSpadeSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     drop_attributes = {"facebook"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("About ")
+        item["branch"] = item.pop("name").removeprefix("About ").removeprefix("KSNY ")
         yield item
