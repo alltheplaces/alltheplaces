@@ -4,7 +4,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -23,6 +23,10 @@ class WhidbeyCoffeeUSSpider(SitemapSpider):
         item = Feature()
         item["ref"] = item["website"] = response.url
         item["branch"] = response.xpath("//h1/text()").get("").strip()
+
+        if item.get("branch") and item["branch"].endswith(" - Drive Thru"):
+            item["branch"] = item["branch"].removesuffix(" - Drive Thru")
+            apply_yes_no(Extras.DRIVE_THROUGH, item, True)
 
         iframe_src = response.xpath('//iframe[contains(@src, "maps")]/@src').get("")
         if m := re.search(r"!3d(-?[\d.]+).*!2d(-?[\d.]+)|!2d(-?[\d.]+).*!3d(-?[\d.]+)", iframe_src):
