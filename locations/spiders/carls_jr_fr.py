@@ -1,47 +1,42 @@
-import re
-from typing import Iterable
-
-from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
-from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.carls_jr_us import CarlsJrUSSpider
 
 
-class CarlsJrFRSpider(Spider):
+class CarlsJrFRSpider(CrawlSpider):
     name = "carls_jr_fr"
     item_attributes = CarlsJrUSSpider.item_attributes
     allowed_domains = ["www.carlsjr.fr"]
     start_urls = ["https://www.carlsjr.fr/nos-restaurants"]
+    rules = [Rule(LinkExtractor(allow=r"/carls-"), callback="parse")]
 
-    def parse(self, response: Response) -> Iterable[Request]:
-        js_file = response.xpath('//script[contains(@src, "front-mainController")]/@src').get()
-        yield response.follow(js_file, callback=self.parse_js_file)
-
-    def parse_js_file(self, response: Response) -> Iterable[Request]:
-        for store_url in re.findall(r"document\.location\.href[=\s]+\"(.+?)\"", response.text):
-            yield response.follow(url=store_url, callback=self.parse_store)
-
-    def parse_store(self, response: Response) -> Iterable[Feature]:
-        contact_details = response.xpath('//strong[contains(text(),"Tel:")]/parent::p')
+    def parse(self, response):
         properties = {
-            "ref": response.url,
-            "addr_full": merge_address_lines(contact_details.xpath("./strong[1]/text()").getall()),
-            "phone": contact_details.xpath('./strong[contains(text(),"Tel:")]/text()')
-            .get()
-            .strip()
-            .removeprefix("Tel: "),
+            "ref": response.url.split("/")[-1],
             "website": response.url,
-            "opening_hours": OpeningHours(),
+            "branch": response.xpath("//title/text()").get("").split("|")[0].strip(),
         }
-        extract_google_position(properties, response)
-        hours_text = " ".join(
-            response.xpath('//table[contains(@class, "horaires")]/tr/td[position()<=2]/text()').getall()
-        )
-        properties["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_FR)
+
+        if contact_box := response.xpath(
+            '//div[contains(@class, "wixui-rich-text") and .//p[contains(string(.), "Tel:")]]'
+        ):
+            raw_text = contact_box.xpath("string(.)").get()
+            lines = [line.strip() for line in raw_text.splitlines() if line.strip()]
+
+            for i, line in enumerate(lines):
+                if "Tel:" in line:
+                    properties["phone"] = line.replace("Tel:", "").strip()
+
+                    addr_lines = lines[:i]
+                    if addr_lines:
+                        addr_lines.pop(0)
+
+                    properties["addr_full"] = merge_address_lines(addr_lines)
+                    break
+
         apply_category(Categories.FAST_FOOD, properties)
         yield Feature(**properties)
