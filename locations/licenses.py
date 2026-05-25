@@ -55,6 +55,13 @@ class Licenses(Enum):
         "attribution": "required",
         "use:commercial": "permit",
     }
+    OPENDATA_SWISS_BY = {
+        "license": "opendata.swiss BY",
+        "license:website": "https://opendata.swiss/en/terms-of-use#terms_by",
+        "license:wikidata": "Q133802534",
+        "attribution": "required",
+        "use:commercial": "permit",
+    }
     UNLICENSE = {
         "license": "Unlicense",
         "license:website": "https://unlicense.org/",
