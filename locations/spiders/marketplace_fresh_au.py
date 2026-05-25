@@ -11,6 +11,7 @@ class MarketplaceFreshAUSpider(Spider):
     name = "marketplace_fresh_au"
     item_attributes = {"brand": "MarketPlace Fresh", "brand_wikidata": "Q117847717"}
     start_urls = ["https://marketplacefresh.com.au/stores"]
+    requires_proxy = True
 
     def parse(self, response):
         for location in json.loads(html.unescape(re.search(r"stores=\".*(\[.*\])\"", response.text).group(1))):
