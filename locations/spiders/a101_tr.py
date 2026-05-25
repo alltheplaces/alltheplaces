@@ -8,7 +8,7 @@ from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import country_iseadgg_centroids
+from locations.geo import point_locations
 
 
 class A101TRSpider(Spider):
@@ -20,12 +20,12 @@ class A101TRSpider(Spider):
     requires_proxy = True
     custom_settings = {
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 1,
+        "DOWNLOAD_DELAY": 2,
         "ROBOTSTXT_OBEY": False,
     }
 
     async def start(self) -> AsyncIterator[Request]:
-        for lat, lon in country_iseadgg_centroids("TR", 24):
+        for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "TR"):
             data = {"geoHash": encode(lat, lon, precision=9)}
             data = b64encode(dumps(data).encode("utf-8"))
             data = data.decode("utf-8")  # convert bytes back to string
