@@ -16,11 +16,11 @@ class CarrefourTWSpider(Spider):
 
     brands = {
         "量販": {
-            "brand": "Carrefour",
-            "brand_wikidata": "Q3117359",
+            "brand": "家樂福",
+            "brand_wikidata": "Q136774386",
             "category": Categories.SHOP_SUPERMARKET,
         },  # "Mass sales" (bad translation but as there are fewer of this type, it is probably the hypermarket brand)
-        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "category": Categories.SHOP_SUPERMARKET},
+        "超市": {"brand": "家樂福超市", "brand_wikidata": "Q136774386", "category": Categories.SHOP_SUPERMARKET},
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -32,9 +32,10 @@ class CarrefourTWSpider(Spider):
             if not location["status"]:
                 continue
             item = DictParser.parse(location)
-            item["street_address"] = item.pop("street")
             if location["store_type_name"] not in self.brands.keys():
                 continue
+            item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name")
             parse_brand_and_category_from_mapping(item, location["store_type_name"], self.brands)
             item["phone"] = location["contact_tel"].replace("、", "; ")
             item["website"] = item["extras"]["website:en"] = (
