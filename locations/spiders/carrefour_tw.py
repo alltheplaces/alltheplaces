@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, DAYS_3_LETTERS, OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.spiders.carrefour_fr import parse_brand_and_category_from_mapping
 
 
@@ -45,7 +45,7 @@ class CarrefourTWSpider(Spider):
             if location["is24h"]:
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
             else:
-                for day_name in map(str.lower, DAYS_3_LETTERS):
+                for day_name in ["mon", "tue", "wed", "thur", "fri", "sat", "sun"]:
                     if location.get(f"{day_name}_start") and location.get(f"{day_name}_end"):
                         item["opening_hours"].add_range(
                             day_name, location.get(f"{day_name}_start"), location.get(f"{day_name}_end")
