@@ -4,14 +4,13 @@ from scrapy.spiders import SitemapSpider
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.spiders.kate_spade import KateSpadeSpider
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
 class KateSpadeSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "kate_spade"
-    item_attributes = KateSpadeSpider.item_attributes
+    item_attributes = {"brand": "Kate Spade New York", "brand_wikidata": "Q6375797"}
     sitemap_urls = [
         "https://www.katespade.com/stores/sitemap.xml",
         "https://www.katespade.de/stores/sitemap.xml",
