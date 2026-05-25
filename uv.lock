@@ -459,18 +459,15 @@ wheels = [
 
 [[package]]
 name = "chompjs"
-version = "1.4.0"
+version = "1.4.1"
 source = { registry = "https://pypi.python.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/73/e7/e5a9874798ec4bc505b34b8cb766337acde9d1ffc8db411cfa96ac59de49/chompjs-1.4.0.tar.gz", hash = "sha256:b0bf92bb508de5c0dbd802e3e6dabac9f0e71caf5f67a6a29112d1213812bd68", size = 17383, upload-time = "2025-08-04T21:08:38.612Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/f1/cbf1868cf274bfe2b35c43e160bba21b47ee2a85fd1ddd6247106b1e1859/chompjs-1.4.1.tar.gz", hash = "sha256:fc1a6d7f03fa6381351306a8cefaa5e0946e841c25fba919c726f35f1a3fc614", size = 17439, upload-time = "2026-05-17T22:08:08.33Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8b/a9/8b8223c643ddfc9cec16c4f68590cc1c6c7a5a4704a0423167df160e9e82/chompjs-1.4.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:01f0c1ef6644dc7e676f0d364ba8b0d5aa54fd066af71cc4af80826fb61e9d72", size = 17079, upload-time = "2025-08-04T21:08:02.753Z" },
-    { url = "https://files.pythonhosted.org/packages/15/05/1650bd29dd51d40e9fdfc52a7d445c9f3bdd8e9d89a7a4438d125803bd45/chompjs-1.4.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:828af4d37efbc58f2c7e95d000cd041b27d7101a3b391d09ea14b88d9c6d5d20", size = 17478, upload-time = "2025-08-04T21:08:04.031Z" },
-    { url = "https://files.pythonhosted.org/packages/d5/d1/a68d8a3b6656f61e88437e42d1db9e54466f5f56f09f47d9b9c30dc5b53d/chompjs-1.4.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:396ce73341117533947d33127098c723d7bc0524e0cce6badd9619faf9ef2325", size = 33826, upload-time = "2025-08-04T21:08:05.821Z" },
-    { url = "https://files.pythonhosted.org/packages/15/f1/58b9834f660e1ce77c50054e60d52528aabb7541fe7f18f000565a4435c6/chompjs-1.4.0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:96c8254f51030f5bd39ed6dca7a6d6dfab21237f4acdbab362a96a485a118a3c", size = 32336, upload-time = "2025-08-04T21:08:06.736Z" },
-    { url = "https://files.pythonhosted.org/packages/ad/df/4ea51974d15b36bc4bc357b6601dd9aa09f4cc666f76f534d4734ac6fb93/chompjs-1.4.0-cp311-cp311-musllinux_1_2_i686.whl", hash = "sha256:58a268db242d319ce1442b871827b54d044e3bb7284f4dc1d52252765bb7e967", size = 32317, upload-time = "2025-08-04T21:08:07.741Z" },
-    { url = "https://files.pythonhosted.org/packages/60/57/cc39d96ee1faaeef51b0b9be9f3986e21bf8217b43d3b410981de158bfff/chompjs-1.4.0-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:976fb229ff7ba856a1833dab2a966d6a88acdb96842244fa44d8becd5380d830", size = 33230, upload-time = "2025-08-04T21:08:08.662Z" },
-    { url = "https://files.pythonhosted.org/packages/ef/2d/16050f64a3fad373b69f21acbb59b19719cdc1215dcdda7ec16ebac28461/chompjs-1.4.0-cp311-cp311-win32.whl", hash = "sha256:ec4ee7c76976fdb7b272f9924e9f834b8e83003e14d4ab3e8b54a590af878afa", size = 17707, upload-time = "2025-08-04T21:08:09.57Z" },
-    { url = "https://files.pythonhosted.org/packages/c9/5f/47febcadfc40f0f69cb2990ade2a28c08edb87715afd2408adbfe818b955/chompjs-1.4.0-cp311-cp311-win_amd64.whl", hash = "sha256:72da31389cb61b6b25f7f7f794570f09759f1f4b994ba70ca05c257277668f7b", size = 18516, upload-time = "2025-08-04T21:08:10.539Z" },
+    { url = "https://files.pythonhosted.org/packages/c4/72/fd7821715128c1c2c9d5783544ab6ee09b31f9a92875a3981e391ab152af/chompjs-1.4.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:261a287799bfa9aee888bd6fca349114d66477019bc05fdc9755de0cd0f9323d", size = 17479, upload-time = "2026-05-17T22:07:30.676Z" },
+    { url = "https://files.pythonhosted.org/packages/16/bc/963e37bf6c1e38c948c38f1cd59bb96ff4157366c409b4c9d7b2197ba9ac/chompjs-1.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0315464301c893e3889e1d322432cd76802ffc94a7bb59209d6a89dc508c81a5", size = 33974, upload-time = "2026-05-17T22:07:32.375Z" },
+    { url = "https://files.pythonhosted.org/packages/76/bc/505d8ce570ddbbfb62b49686a9dbb7fab1e4cbbca809b78fefd3d286d6eb/chompjs-1.4.1-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:a40b1dac781a1ff3735d3676a5f4c6d9d02702f417a4c54d2398fc6eac28e852", size = 33454, upload-time = "2026-05-17T22:07:34.115Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/01/3cd137be3ad3a63ee8a814e1353697af787a48b6dbf68291b8ec58a147cc/chompjs-1.4.1-cp311-cp311-win32.whl", hash = "sha256:419d0d9feaa8f21e3ef1e4095ec34e0f574ea373b67bcf7cafae8915e5d78658", size = 17720, upload-time = "2026-05-17T22:07:35.23Z" },
+    { url = "https://files.pythonhosted.org/packages/8a/a1/c0475a38c7277096b0ac4730a50aef9569d621e6369f1c4d7eae33fac0bc/chompjs-1.4.1-cp311-cp311-win_amd64.whl", hash = "sha256:9e5d91417ab200c428348f74dc75078b377ea1cd0dafb78131d747392cf1cc94", size = 18544, upload-time = "2026-05-17T22:07:36.919Z" },
 ]
 
 [[package]]
