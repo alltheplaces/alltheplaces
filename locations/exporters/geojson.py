@@ -18,6 +18,7 @@ from locations.settings import SPIDER_MODULES
 
 mapping = (
     ("addr_full", "addr:full"),
+    ("unit", "addr:unit"),
     ("housenumber", "addr:housenumber"),
     ("street", "addr:street"),
     ("street_address", "addr:street_address"),

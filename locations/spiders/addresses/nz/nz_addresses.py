@@ -42,7 +42,7 @@ class NzAddressesSpider(ArcGISFeatureServerSpider, AddressSpider):
         item["ref"] = str(feature["address_id"])
 
         if unit_number := feature.get("unit"):
-            item["extras"]["addr:unit"] = f"{unit_number}"
+            item["unit"] = f"{unit_number}"
 
         housenumber_from = feature.get("address_number")
         if housenumber_from_suffix := feature.get("address_number_suffix"):
