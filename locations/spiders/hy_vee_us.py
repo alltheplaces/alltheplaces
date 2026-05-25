@@ -39,4 +39,7 @@ class HyVeeUSSpider(SitemapSpider):
 
         apply_category(Categories.SHOP_SUPERMARKET, properties)
 
+        if g := response.xpath("//a[contains(@href, 'q=place_id:')]/@href").get():
+            properties["extras"]["ref:google:place_id"] = g.rsplit(":", 1)[1]
+
         yield properties
