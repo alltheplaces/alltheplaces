@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours, DAYS_3_LETTERS
+from locations.hours import DAYS, DAYS_3_LETTERS, OpeningHours
 from locations.spiders.carrefour_fr import parse_brand_and_category_from_mapping
 
 
