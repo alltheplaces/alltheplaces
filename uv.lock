@@ -1271,14 +1271,14 @@ wheels = [
 
 [[package]]
 name = "playwright-captcha"
-version = "0.1.4"
+version = "0.1.5"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "2captcha-python-async" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e6/81/ab2c3639e95bc54018446f958c82336d259155344deca6a183c3bc4ac576/playwright_captcha-0.1.4.tar.gz", hash = "sha256:78140c9f8a6710d7b4334bed4ad481f72f0aae18709a914d47dcea5576c6c412", size = 41681, upload-time = "2026-04-05T13:10:08.934Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/4c/f63020c05371e750fc625844033bd37947833296c69040b9cfd830df7136/playwright_captcha-0.1.5.tar.gz", hash = "sha256:ac2b772f9a3fc0381bfb2702981a9403e4d04368fba40d748f55b0a0a115b9cd", size = 42926, upload-time = "2026-05-21T11:10:42.526Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fc/c1/d3b2476d349e7ea2a4ce12c09ca4caa4330878017a1500cbf058dc91beaa/playwright_captcha-0.1.4-py3-none-any.whl", hash = "sha256:b63a6c4eb83c16a544c940e8f79b01f68de10be211c413ac0f45ab72c4bc74ec", size = 65350, upload-time = "2026-04-05T13:10:07.595Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/1a/803f05cc2b6990522a7cede97a6749d84fd29a1b32111bc55f2d2d1f831c/playwright_captcha-0.1.5-py3-none-any.whl", hash = "sha256:3ce30ca0e76f1a521c8a71e90f3b434b57af7ab7543f0293bdc10a3e21d846a8", size = 66494, upload-time = "2026-05-21T11:10:41.232Z" },
 ]
 
 [[package]]
