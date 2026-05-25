@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import FormRequest, Request, Response, TextResponse
+from scrapy.http import Request, Response, TextResponse
+from scrapy.http.request.form import FormRequest
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
