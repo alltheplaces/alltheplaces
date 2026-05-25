@@ -1,23 +1,30 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from typing import Any
 
-from locations.camoufox_spider import CamoufoxSpider
-from locations.categories import Categories, apply_category
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy.http import Response
+from scrapy.spiders import Spider
+
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class AesopSpider(CrawlSpider, StructuredDataSpider, CamoufoxSpider):
+class AesopSpider(Spider):
     name = "aesop"
     item_attributes = {"brand": "Aesop", "brand_wikidata": "Q4688560"}
-    allowed_domains = ["shop.aesop.com"]
-    start_urls = ["https://shop.aesop.com/stores/all"]
-    rules = [Rule(LinkExtractor(allow="/stores/"), callback="parse_sd", follow=True)]
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
-    requires_proxy = True
+    start_urls = ["https://www.aesop.com.hk/skin/store-list.json"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name").replace("Aesop ", "")
-        item["website"] = response.url
-        apply_category(Categories.SHOP_COSMETICS, item)
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for key, value in response.json().items():
+            for location in value:
+                if "aesop" in location.get("store_name").lower():
+                    item = DictParser.parse(location)
+                    item["branch"] = item["ref"] = item.pop("name").replace("Aesop ", "")
+                    item["country"] = key
+                    if "http" not in item.get("website"):
+                        item.pop("website")
+                    try:
+                        oh = OpeningHours()
+                        oh.add_ranges_from_string(location.get("store_time"))
+                        item["opening_hours"] = oh
+                    except:
+                        pass
+                    yield item

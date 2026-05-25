@@ -1,5 +1,6 @@
 import chompjs
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_GR, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -8,10 +9,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class SklavenitisGRSpider(JSONBlobSpider):
     name = "sklavenitis_gr"
-    item_attributes = {
-        "brand": "Σκλαβενίτης",
-        "brand_wikidata": "Q7536037",
-    }
+    item_attributes = {"brand": "Σκλαβενίτης", "brand_wikidata": "Q7536037"}
     start_urls = ["https://www.sklavenitis.gr/about/katastimata/"]
     # TODO: Technically, doesn't need to be playwright as I can get it to work via url when copying what my browser does
     is_playwright_spider = True
@@ -51,5 +49,7 @@ class SklavenitisGRSpider(JSONBlobSpider):
         item["opening_hours"].add_ranges_from_string(location["WorkingHours"].replace("<br/>", "; "), DAYS_GR)
 
         # TODO: Mapping of 'ParkingSlotsAvailable': None, 'Services': None, 'RecyclingServices'
+
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item

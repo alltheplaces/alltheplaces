@@ -14,7 +14,7 @@ class ReweDESpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     sitemap_rules = [(r"/marktseite/[^/]+/(\d+)/[^/]+/$", "parse_sd")]
     # Playwright needed to avoid blocking from certain IP address ranges.
     # Probably use of data centre IPs is the main reason.
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 60 * 1000}
 
     def post_process_item(self, item, response, ld_data):
         item["name"] = None
