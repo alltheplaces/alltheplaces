@@ -14,11 +14,11 @@ logger = getLogger(__name__)
 # Log to both file and stderr so errors appear in ECS logs
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler("ndgeojson_to_parquet.log", mode="a", encoding="utf-8"),
-        logging.StreamHandler(sys.stderr)
-    ]
+        logging.StreamHandler(sys.stderr),
+    ],
 )
 
 
