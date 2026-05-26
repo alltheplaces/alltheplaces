@@ -14,6 +14,7 @@ class GreenMotionSpider(JSONBlobSpider):
     start_urls = ["https://api.greenmotion.com/api/locations/?include=opening_days,country"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     locations_key = "data"
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
