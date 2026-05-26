@@ -15,23 +15,25 @@ class HiltiUSSpider(Spider):
     start_urls = ["https://www.hilti.com/stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath('//script[@id="hdms-website-state"]/text()').get())[
-            "apollo.state"
-        ].values():
-            if location.get("__typename") != "HiltiCenter":
+        state = json.loads(response.xpath('//script[@id="hdms-website-state"]/text()').get())
+        for key, query in state["apollo.state"]["ROOT_QUERY"].items():
+            if not key.startswith("hiltiCenters("):
                 continue
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("street")
-            item["name"] = None
-            item["branch"] = location["description"]
-            item["state"] = location["address"]["region"]["__ref"].split(":", 1)[1]
-            item["website"] = urljoin("https://www.hilti.com/stores/", location["slug"])
+            for result in query["results"]:
+                location = result["hiltiCenter"]
+                item = DictParser.parse(location)
+                item["street_address"] = item.pop("street")
+                item["name"] = None
+                item["branch"] = location["description"]
+                item["state"] = location["address"]["region"]["__ref"].split(":", 1)[1]
+                item["website"] = urljoin("https://www.hilti.com/stores/", location["slug"])
 
-            item["opening_hours"] = OpeningHours()
-            for rule in location["openingSchedule"]["days"]:
-                if rule["open"] is False:
-                    item["opening_hours"].set_closed(rule["day"])
-                else:
-                    for times in rule["workingHours"]:
-                        item["opening_hours"].add_range(rule["day"], times["start"], times["end"], "%H:%M:%S")
-            yield item
+                item["opening_hours"] = OpeningHours()
+                for rule in location["openingSchedule"]["days"]:
+                    if rule["open"] is False:
+                        item["opening_hours"].set_closed(rule["day"])
+                    else:
+                        for times in rule["workingHours"]:
+                            item["opening_hours"].add_range(rule["day"], times["start"], times["end"], "%H:%M:%S")
+                yield item
+            return
