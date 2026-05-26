@@ -22,6 +22,7 @@ class TotalToolsAUSpider(PlaywrightSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in json.loads(response.xpath("//pre/text()").get())["storesjson"]:
             item = DictParser.parse(store)
+            item["branch"] = item.pop("name").removeprefix("Total Tools ")
             item["ref"] = store["storelocator_id"]
             item["street_address"] = item.pop("addr_full")
             item["website"] = "https://www.totaltools.com.au/" + store["rewrite_request_path"]
