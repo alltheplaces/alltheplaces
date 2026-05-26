@@ -24,6 +24,7 @@ class TanningShopIEGBSpider(SitemapSpider, StructuredDataSpider):
             return
 
         item["branch"] = item.pop("name").removeprefix("The Tanning Shop – ").removeprefix("The Tanning Shop ")
+        item["image"] = None
         apply_category(Categories.SHOP_BEAUTY, item)
 
         yield item
