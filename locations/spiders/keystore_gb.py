@@ -1,4 +1,3 @@
-import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -21,17 +20,14 @@ class KeystoreGBSpider(JSONBlobSpider):
         item["city"] = feature["ct"].strip()
         item["country"] = feature["co"].strip()
 
-        if "KeyStoreExpress-MapPin" in feature["ic"]:
-            item["name"] = "KeyStore Express"
-        elif "KeyStoreMore-MapPin" in feature["ic"]:
-            item["name"] = "KeyStore More"
-        elif "KeyStore-MapPin" in feature["ic"]:
-            item["name"] = "KeyStore"
+        for sub_brand in ("KeyStore More", "KeyStore Express", "KeyStore"):
+            if feature["na"].startswith(sub_brand):
+                item["name"] = sub_brand
+                item["branch"] = feature["na"].removeprefix(sub_brand).strip()
+                break
         else:
-            self.logger.warning("Unknown store type: {}".format(feature["ic"]))
-            self.crawler.stats.inc_value("{}/unknown_store_type/{}".format(self.name, feature["ic"]))
-
-        item["branch"] = re.sub(item["name"], "", feature["na"], flags=re.IGNORECASE).strip()
+            self.logger.warning("Unknown store type: {}".format(feature["na"]))
+            self.crawler.stats.inc_value("{}/unknown_store_type/{}".format(self.name, feature["na"]))
 
         features = feature["fi"].values()
         apply_yes_no(Extras.ATM, item, "ATM" in features)
