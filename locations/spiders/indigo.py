@@ -22,18 +22,19 @@ class IndigoSpider(Spider):
 
     def parse(self, response):
         data = response.json()
-        for lot in data["content"]:
-            item = DictParser.parse(lot)
-            item["extras"]["capacity"] = lot.get("totalSpaces", None)
-            item["lat"] = lot.get("geoLocation", {}).get("x")
-            item["lon"] = lot.get("geoLocation", {}).get("y")
-            item["street_address"] = lot.get("address", {}).get("lines", [None])[0]
-            apply_category(Categories.PARKING, item)
-            yield item
-
         if not data.get("last"):
             params = {
                 "location.language": "en",
                 "page": int(data.get("number")) + 1,
             }
             yield Request(self.url + urlencode(params), callback=self.parse)
+
+        for lot in data["content"]:
+            item = DictParser.parse(lot)
+            item["extras"]["capacity"] = lot.get("totalSpaces", None)
+            geo = lot.get("geoLocation") or {}
+            item["lat"] = geo.get("x")
+            item["lon"] = geo.get("y")
+            item["street_address"] = ((lot.get("address") or {}).get("lines") or [None])[0]
+            apply_category(Categories.PARKING, item)
+            yield item
