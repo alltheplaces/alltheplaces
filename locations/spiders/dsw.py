@@ -1,3 +1,5 @@
+from typing import Any
+
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -17,10 +19,7 @@ class DswSpider(SitemapSpider, StructuredDataSpider):
         "https://stores.dsw.ca/sitemap.xml",
     ]
     sitemap_rules = [(r"\/\w{2}\/[^/]+\/[^/]+(\.html)?$$", "parse_sd")]
-    wanted_types = ["LocalBusiness", "ShoeStore"]
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         item["name"] = item["image"] = None
-        item["branch"] = response.xpath('//span[@class="LocationName-geo"]/text()').extract_first()
-
         yield item
