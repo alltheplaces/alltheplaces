@@ -74,7 +74,7 @@ else
 fi
 
 (>&2 echo "Running ${SPIDER_COUNT} spiders ${PARALLELISM} at a time")
-xargs -t -L 1 -P "${PARALLELISM}" -a "${SPIDER_RUN_DIR}/commands.txt" -i sh -c "{} || true"
+xargs -P "${PARALLELISM}" -a "${SPIDER_RUN_DIR}/commands.txt" -I CMD sh -c "CMD || true"
 
 retval=$?
 if [ ! $retval -eq 0 ]; then
