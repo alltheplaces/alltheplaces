@@ -12,6 +12,7 @@ class TopsPizzaGBSpider(Spider):
     name = "tops_pizza_gb"
     item_attributes = {"brand": "Tops Pizza", "brand_wikidata": "Q24439136"}
     start_urls = ["https://topspizza.co.uk/api/stores"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["data"]:
