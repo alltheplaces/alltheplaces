@@ -30,6 +30,10 @@ class TotalToolsAUSpider(PlaywrightSpider):
     def parse_store_page(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
         item["email"] = decode_email(response.xpath("//@data-cfemail").get(""))
+        item["opening_hours"] = self.parse_opening_hours(response)
+        yield item
+
+    def parse_opening_hours(self, response: Response) -> OpeningHours:
         hours_raw = (
             " ".join(response.xpath('//div[@id="open_hour"]/div/table/tbody/tr/td/text()').getall())
             .replace("-", " ")
@@ -42,5 +46,4 @@ class TotalToolsAUSpider(PlaywrightSpider):
             if day[0] not in DAYS_EN:
                 continue
             oh.add_range(DAYS_EN[day[0]], day[1], day[2], "%H:%M")
-        item["opening_hours"] = oh.as_opening_hours()
-        yield item
+        return oh
