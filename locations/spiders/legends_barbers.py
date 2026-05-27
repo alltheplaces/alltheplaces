@@ -32,6 +32,7 @@ class LegendsBarbersSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = str(location["id"])
             item["branch"] = item.pop("name", None)
+            item["phone"] = None
             if coords := location.get("coordinates"):
                 lat, _, lon = coords.partition(",")
                 item["lat"] = lat.strip()
