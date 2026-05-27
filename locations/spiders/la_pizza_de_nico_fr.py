@@ -1,10 +1,10 @@
 from typing import Any
 
 from chompjs import chompjs
-from scrapy import Spider, Selector
+from scrapy import Selector, Spider
 from scrapy.http import Response
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import extract_phone
 
