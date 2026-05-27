@@ -13,11 +13,9 @@ class BatteriesPlusBulbsPRUSSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Batteries Plus Bulbs", "brand_wikidata": "Q17005157"}
     start_urls = ["https://www.batteriesplus.com/store-locator"]
     rules = [
-        Rule(LinkExtractor(allow=r"/store-locator/\w+$")),
-        Rule(LinkExtractor(allow=r"/store-locator/\w+/[a-z-]+$")),
-        Rule(LinkExtractor(allow=r"/store-locator/\w+/[a-z-]+/[a-z-]+\d+$"), callback="parse_sd"),
+        Rule(LinkExtractor(allow=r"/store-locator/\w+/[a-z-]+/[a-z-]+\d+/$"), callback="parse_sd"),
     ]
-    wanted_types = ["ElectronicsStore"]
+    time_format = "%H:%M:%S"
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("Check us out in ", "")
