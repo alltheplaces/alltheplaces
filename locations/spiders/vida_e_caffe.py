@@ -1,6 +1,6 @@
 import chompjs
 
-from locations.categories import Extras, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import OpeningHours, sanitise_day
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -15,17 +15,19 @@ class VidaECaffeSpider(JSONBlobSpider):
 
     def extract_json(self, response):
         return chompjs.parse_js_object(
-            response.xpath('//script[@type="rocketlazyloadscript" and contains(text(), "var stores = ")]/text()').get()
+            response.xpath(
+                '//script[@type="text/rocketlazyloadscript" and contains(text(), "var stores = ")]/text()'
+            ).get()
         )
 
     def post_process_item(self, item, response, location):
-        # {'id': 353, 'title': '@Home Sandton City', 'location': {'address': 'Sandton City, 163 5th St, Sandhurst, Sandton, GP, South Africa', 'lat': '-26.1082596', 'lng': '28.0531383'}, 'images': False, 'email': 'athomesandton@Caffe.co.za', 'facebook': None, 'times': False, 'shop_number': 'Shop U307', 'contact_number': '', 'store_type': ['corporate'], 'store_features': []}
-
         if location["store_type"] == ["vending"]:
-            # Beverage only? Vending machine only? Unclear
+            # Beverage-only vending machine placed inside a third-party business
+            # (petrol stations, service stations etc.), not a vida coffee shop.
             return
 
         item["branch"] = item.pop("name")
+        item["phone"] = None
 
         if isinstance(location["location"], dict):
             item["housenumber"] = location["location"].get("street_number")
@@ -55,7 +57,7 @@ class VidaECaffeSpider(JSONBlobSpider):
         apply_yes_no(Extras.WIFI, item, "free-wifi" in location["store_features"])
         apply_yes_no(Extras.HALAL, item, "halaal" in location["store_features"])
 
-        # Mobile payment?
         apply_yes_no(PaymentMethods.APP, item, "mobile-payment" in location["store_features"])
+        apply_category(Categories.CAFE, item)
 
         yield item
