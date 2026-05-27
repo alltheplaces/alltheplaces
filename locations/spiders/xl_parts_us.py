@@ -39,8 +39,9 @@ class XlPartsUSSpider(Spider):
             if hours_attr := store.xpath("./@data-hours").get():
                 for entry in json.loads(html.unescape(hours_attr)):
                     if entry.get("closed"):
-                        continue
-                    oh.add_range(DAYS[entry["day"] - 1], entry["open"], entry["close"], time_format="%H:%M:%S")
+                        oh.set_closed(DAYS[entry["day"] - 1])
+                    else:
+                        oh.add_range(DAYS[entry["day"] - 1], entry["open"], entry["close"], time_format="%H:%M:%S")
             item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_CAR_PARTS, item)
