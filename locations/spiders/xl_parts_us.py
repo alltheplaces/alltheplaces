@@ -34,6 +34,7 @@ class XlPartsUSSpider(Spider):
             item["lat"] = store.xpath("./@data-lat").get()
             item["lon"] = store.xpath("./@data-lng").get()
             item["phone"] = store.xpath("./@data-phone").get()
+            item["website"] = response.urljoin(store.xpath(".//a/@href").get())
 
             oh = OpeningHours()
             if hours_attr := store.xpath("./@data-hours").get():
