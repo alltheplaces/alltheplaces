@@ -19,7 +19,6 @@ class TuiGBSpider(SitemapSpider):
     sitemap_urls = ["https://www.tui.co.uk/sitemap/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.tui\.co\.uk\/shop-finder\/([-\w]+)$", "parse")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
 
     def sitemap_filter(self, entries):
         for entry in entries:
