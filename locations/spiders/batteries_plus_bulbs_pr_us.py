@@ -15,10 +15,11 @@ class BatteriesPlusBulbsPRUSSpider(CrawlSpider, StructuredDataSpider):
     rules = [
         Rule(LinkExtractor(allow=r"/store-locator/\w+/[a-z-]+/[a-z-]+\d+/$"), callback="parse_sd"),
     ]
+    wanted_types = ["LocalBusiness"]
     time_format = "%H:%M:%S"
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").replace("Check us out in ", "")
+        item.pop("name")
         item["image"] = None
 
         yield item
