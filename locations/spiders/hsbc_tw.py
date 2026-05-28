@@ -14,9 +14,11 @@ class HsbcTWSpider(StructuredDataSpider):
         for location in response.xpath('//*[@class="desktop"]//tbody//tr'):
             item = Feature()
             item["city"] = location.xpath("./td[1]//text()").get()
-            item["branch"] = location.xpath("./td[2]//text()").get()
+            item["branch"] = location.xpath("./td[2]//text()").get().removesuffix(" Branch")
             item["addr_full"] = location.xpath("./td[3]//text()").get()
             item["phone"] = location.xpath("./td[4]//text()").get()
             item["ref"] = location.xpath("./td[5]//text()").get()
+
             apply_category(Categories.BANK, item)
+
             yield item
