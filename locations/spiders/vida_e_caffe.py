@@ -26,7 +26,7 @@ class VidaECaffeSpider(JSONBlobSpider):
             # (petrol stations, service stations etc.), not a vida coffee shop.
             return
 
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").removeprefix("vida ")
         item["phone"] = None
 
         if isinstance(location["location"], dict):
