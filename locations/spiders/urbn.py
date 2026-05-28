@@ -1,10 +1,11 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import set_closed
 from locations.pipelines.address_clean_up import clean_address
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -52,7 +53,7 @@ class UrbnSpider(Spider):
         for url in self.start_urls:
             yield JsonRequest(url=url, headers={"Accept-Language": "en-US,en;q=0.9"})
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["results"]:
             if location.get("closed") is True:
                 continue
@@ -62,9 +63,12 @@ class UrbnSpider(Spider):
             else:
                 continue
             item["ref"] = str(location["number"])
-            item["name"] = location["addresses"]["marketing"].get("name")
-            if "COMING SOON" in item["name"].upper() or "CLOSED" in item["name"].upper().split():
-                continue
+            item["name"] = None
+            if (
+                "COMING SOON" in location["addresses"]["marketing"]["name"].upper()
+                or "CLOSED" in location["addresses"]["marketing"]["name"].upper().split()
+            ):
+                set_closed(item)
             item["street_address"] = clean_address(
                 [
                     location["addresses"]["marketing"].get("addressLineOne"),
