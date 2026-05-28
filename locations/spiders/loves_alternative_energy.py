@@ -3,7 +3,7 @@ import json
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
