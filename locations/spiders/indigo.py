@@ -1,8 +1,8 @@
-from typing import AsyncIterator
+from typing import AsyncIterator, Any
 from urllib.parse import urlencode
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -20,21 +20,23 @@ class IndigoSpider(Spider):
         }
         yield Request(self.url + urlencode(params))
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
+        for lot in data["content"]:
+            item = DictParser.parse(lot)
+            item["extras"]["capacity"] = str(lot.get("totalSpaces", None) or "")
+            geo = lot.get("geoLocation") or {}
+            item["lat"] = geo.get("x")
+            item["lon"] = geo.get("y")
+            item["street_address"] = ((lot.get("address") or {}).get("lines") or [None])[0]
+
+            apply_category(Categories.PARKING, item)
+
+            yield item
+
         if not data.get("last"):
             params = {
                 "location.language": "en",
                 "page": int(data.get("number")) + 1,
             }
             yield Request(self.url + urlencode(params), callback=self.parse)
-
-        for lot in data["content"]:
-            item = DictParser.parse(lot)
-            item["extras"]["capacity"] = lot.get("totalSpaces", None)
-            geo = lot.get("geoLocation") or {}
-            item["lat"] = geo.get("x")
-            item["lon"] = geo.get("y")
-            item["street_address"] = ((lot.get("address") or {}).get("lines") or [None])[0]
-            apply_category(Categories.PARKING, item)
-            yield item
