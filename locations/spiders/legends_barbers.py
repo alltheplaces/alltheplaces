@@ -15,7 +15,7 @@ class LegendsBarbersSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
-            url=f"https://psrhhuiayrosjnvcfjjv.supabase.co/rest/v1/stores?select=*&status=eq.active",
+            url="https://psrhhuiayrosjnvcfjjv.supabase.co/rest/v1/stores?select=*&status=eq.active",
             headers={"apikey": self.key, "Authorization": f"Bearer {self.key}"},
         )
 
