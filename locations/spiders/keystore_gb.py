@@ -18,7 +18,7 @@ class KeystoreGBSpider(JSONBlobSpider):
         item["street_address"] = feature["st"]
         item["postcode"] = feature["zp"]
         item["city"] = feature["ct"].strip()
-        item["country"] = feature["co"].strip()
+        item["country"] = "GB"
 
         for sub_brand in ("KeyStore More", "KeyStore Express", "KeyStore"):
             if feature["na"].startswith(sub_brand):
