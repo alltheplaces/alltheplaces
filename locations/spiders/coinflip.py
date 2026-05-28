@@ -1,13 +1,12 @@
-import re
+from typing import Any, Iterable
 
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class CoinflipSpider(CrawlSpider, StructuredDataSpider):
@@ -26,16 +25,16 @@ class CoinflipSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         ),
     ]
-    wanted_types = ["AutomatedTeller"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1}
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["lat"], item["lon"] = re.search(r"q=(-?\d+\.\d+),(-?\d+\.\d+)", ld_data["hasMap"]).groups()
-        oh = OpeningHours()
-        for day_time in ld_data["openingHoursSpecification"]:
-            day = DAYS_FULL[int(day_time["dayOfWeek"][0])]
-            open_time = day_time["opens"]
-            close_time = day_time["closes"]
-            oh.add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I:%M %p")
-        item["opening_hours"] = oh
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        if name := item.get("name"):
+            item["branch"] = name.removeprefix("CoinFlip Bitcoin ATM - ").strip() or None
+        item["name"] = None
+        item["phone"] = None
+        item["email"] = None
+        item["twitter"] = None
+        item["facebook"] = None
+        apply_category(Categories.ATM, item)
+        apply_yes_no("currency:XBT", item, True)
         yield item
