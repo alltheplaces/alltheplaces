@@ -1,9 +1,9 @@
 from typing import Iterable
 
-from scrapy.http import TextResponse, Response
+from scrapy.http import Response, TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
@@ -45,5 +45,5 @@ class PlacesLeisureGBSpider(SitemapSpider, StructuredDataSpider):
             item["email"] = item["email"].removeprefix("mailto@")
 
         apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
-        
+
         yield item
