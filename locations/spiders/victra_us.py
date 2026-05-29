@@ -1,14 +1,15 @@
-from typing import Iterable
+from typing import Any, AsyncIterator, Iterable
 
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN
+from locations.dict_parser import DictParser
+from locations.geo import country_iseadgg_centroids
 from locations.items import Feature
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class VictraUSSpider(WPStoreLocatorSpider):
+class VictraUSSpider(Spider):
     name = "victra_us"
     item_attributes = {
         "brand": "Verizon",
@@ -17,14 +18,22 @@ class VictraUSSpider(WPStoreLocatorSpider):
         "operator_wikidata": "Q118402656",
     }
     allowed_domains = ["victra.com"]
-    iseadgg_countries_list = ["US"]
-    search_radius = 24
-    max_results = 50
-    days = DAYS_EN
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if branch_name := item.pop("name", None):
-            item["branch"] = branch_name.removeprefix(item.get("state", "") + "-")
+    async def start(self) -> AsyncIterator[Request]:
+        for lat, lon in country_iseadgg_centroids(["US"], 158):
+            yield Request(
+                url=f"https://victra.com/wp-json/vcsl/v1/stores?lat={lat}&lng={lon}&radius=100&max=500",
+                callback=self.parse,
+            )
 
-        apply_category(Categories.SHOP_MOBILE_PHONE, item)
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        for store in response.json().get("stores"):
+            item = DictParser.parse(store)
+
+            item["branch"] = (
+                item.pop("name", None).replace(item.get("state", ""), "").replace("Verizon Store in ", "").strip(" -,")
+            )
+            item["addr_full"] = None
+
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
+            yield item
