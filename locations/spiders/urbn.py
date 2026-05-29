@@ -6,13 +6,14 @@ from scrapy.http import JsonRequest
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class UrbnSpider(Spider):
     name = "urbn"
     allowed_domains = ["www.anthropologie.com"]
     start_urls = ["https://www.anthropologie.com/api/misl/v1/stores/search"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     brands = {
         "ANTHROPOLOGIE": {
