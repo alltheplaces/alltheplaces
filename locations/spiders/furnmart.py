@@ -34,11 +34,14 @@ class FurnmartSpider(Spider):
             item["branch"] = data.get("title", {}).get("iv", "").title() or None
             item["ref"] = item["website"] = f"{response.meta['base']}/stores/{slug}"
             item["phone"] = data.get("telephone", {}).get("iv")
-            item["addr_full"] = clean_address(
+            item["street_addreess"] = clean_address(
                 [data.get("adressStreet", {}).get("iv"), data.get("adressStreet2", {}).get("iv")]
             )
+
             if coords := data.get("addressCoordinates", {}).get("iv"):
                 item["lat"] = coords.get("latitude")
                 item["lon"] = coords.get("longitude")
+
             apply_category(Categories.SHOP_FURNITURE, item)
+
             yield item
