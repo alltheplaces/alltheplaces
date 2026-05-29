@@ -18,7 +18,10 @@ class DswSpider(SitemapSpider, StructuredDataSpider):
         "https://stores.dsw.com/sitemap.xml",
         "https://stores.dsw.ca/sitemap.xml",
     ]
-    sitemap_rules = [(r"\/\w{2}\/[^/]+\/[^/]+(\.html)?$$", "parse_sd")]
+    sitemap_rules = [
+        (r"ca/\w\w/[^/]+\/[^/]+$","parse_sd"),
+        (r"usa/\w\w/[^/]+/[^/]+\.html$", "parse_sd"),
+    ]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         item["name"] = item["image"] = None
