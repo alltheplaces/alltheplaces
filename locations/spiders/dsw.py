@@ -4,7 +4,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -21,7 +21,7 @@ class DswSpider(SitemapSpider, StructuredDataSpider):
         "https://stores.dsw.ca/sitemap.xml",
     ]
     sitemap_rules = [
-        (r"ca/\w\w/[^/]+\/[^/]+$","parse_sd"),
+        (r"ca/\w\w/[^/]+\/[^/]+$", "parse_sd"),
         (r"usa/\w\w/[^/]+/[^/]+\.html$", "parse_sd"),
     ]
     wanted_types = ["Store"]
