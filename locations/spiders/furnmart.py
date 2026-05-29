@@ -34,7 +34,7 @@ class FurnmartSpider(Spider):
             item["branch"] = data.get("title", {}).get("iv", "").title() or None
             item["ref"] = item["website"] = f"{response.meta['base']}/stores/{slug}"
             item["phone"] = data.get("telephone", {}).get("iv")
-            item["street_addreess"] = clean_address(
+            item["street_address"] = clean_address(
                 [data.get("adressStreet", {}).get("iv"), data.get("adressStreet2", {}).get("iv")]
             )
 
