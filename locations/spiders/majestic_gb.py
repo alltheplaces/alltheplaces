@@ -24,7 +24,6 @@ class MajesticGBSpider(CrawlSpider):
         },
         "USER_AGENT": BROWSER_DEFAULT,
     }
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//li[contains(@class, "store-item")]'):
