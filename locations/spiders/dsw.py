@@ -24,6 +24,9 @@ class DswSpider(SitemapSpider, StructuredDataSpider):
         (r"ca/\w\w/[^/]+\/[^/]+$","parse_sd"),
         (r"usa/\w\w/[^/]+/[^/]+\.html$", "parse_sd"),
     ]
+    wanted_types = ["Store"]
+    search_for_facebook = False
+    search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         item["name"] = item["image"] = None
