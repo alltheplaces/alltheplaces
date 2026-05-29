@@ -16,5 +16,6 @@ class TuevNordDESpider(scrapy.Spider):
         data_locations = json.loads(response.xpath("//div/@data-locations").get())
         for location in data_locations:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["website"] = response.urljoin(location.pop("link"))
             yield item
