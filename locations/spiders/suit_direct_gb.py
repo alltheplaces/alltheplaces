@@ -1,29 +1,35 @@
-from typing import Any
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
+from scrapy import Selector
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class SuitDirectGBSpider(Spider):
+class SuitDirectGBSpider(JSONBlobSpider):
     name = "suit_direct_gb"
     item_attributes = {"name": "Suit Direct", "brand": "Suit Direct"}
-    start_urls = ["https://www.suitdirect.co.uk/store-locator"]
+    allowed_domains = ["www.suitdirect.co.uk"]
+    start_urls = ["https://www.suitdirect.co.uk/api/inventory/inventoryGetStoreFilter?countryId=0&cityId=0"]
+    locations_key = ["data"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("//div[@data-storeid]"):
-            item = Feature()
-            item["ref"] = location.xpath("@data-storeid").get()
-            item["lat"] = location.xpath(".//@data-storelatitude").get()
-            item["lon"] = location.xpath(".//@data-storelongitude").get()
-            item["branch"] = location.xpath('//h5[contains(@class, "store-name")]/text()').get()
-            item["street_address"] = location.xpath('.//span[@class="store-single-line"]/text()').get()
-            item["postcode"] = location.xpath('.//span[@class="store-postcode"]/text()').get()
-            item["website"] = response.urljoin(location.xpath('.//span[@class="store-url"]/text()').get())
-            item["phone"] = location.xpath('.//span[@class="store-telephone"]/text()').get()
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if not feature["isActive"]:
+            return  # Closed store
 
-            apply_category(Categories.SHOP_CLOTHES, item)
+        item["ref"] = str(feature["id"])
+        item["branch"] = item.pop("name", None)
+        if slug := feature.get("slug"):
+            item["website"] = "https://www.suitdirect.co.uk/store-locator/" + slug
 
-            yield item
+        if hours_html := feature.get("workingHours"):
+            hours_str = " ".join(Selector(text=hours_html).xpath("//text()").getall())
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours_str)
+
+        apply_category(Categories.SHOP_CLOTHES, item)
+
+        yield item
