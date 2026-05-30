@@ -30,6 +30,7 @@ class HiltiUSSpider(SitemapSpider, StructuredDataSpider):
                 .removesuffix(" Distribution Center")
                 .removesuffix(" and")
                 .removesuffix(" &")
+                .removesuffix(" Store")
             )
 
         apply_category(Categories.SHOP_POWER_TOOLS, item)
