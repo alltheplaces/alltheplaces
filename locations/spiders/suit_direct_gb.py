@@ -22,6 +22,8 @@ class SuitDirectGBSpider(JSONBlobSpider):
 
         item["ref"] = str(feature["id"])
         item["branch"] = item.pop("name", None)
+        item["lat"] = feature["latitude"]
+        item["lon"] = feature["longtitude"]  # Note: has invalid spelling for field name
         if slug := feature.get("slug"):
             item["website"] = "https://www.suitdirect.co.uk/store-locator/" + slug
 
