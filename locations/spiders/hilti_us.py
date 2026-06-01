@@ -1,37 +1,38 @@
-import json
-from typing import Any
-from urllib.parse import urljoin
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class HiltiUSSpider(Spider):
+class HiltiUSSpider(SitemapSpider, StructuredDataSpider):
     name = "hilti_us"
     item_attributes = {"brand": "Hilti", "brand_wikidata": "Q1361530"}
-    start_urls = ["https://www.hilti.com/stores"]
+    sitemap_urls = ["https://www.hilti.com/sitemap_stores_en_US.xml"]
+    sitemap_rules = [("/stores/", "parse")]
+    wanted_types = ["Store"]
+    time_format = "%H:%M:%S"
+    search_for_facebook = False
+    search_for_email = False
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath('//script[@id="hdms-website-state"]/text()').get())[
-            "apollo.state"
-        ].values():
-            if location.get("__typename") != "HiltiCenter":
-                continue
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("street")
-            item["name"] = None
-            item["branch"] = location["description"]
-            item["state"] = location["address"]["region"]["__ref"].split(":", 1)[1]
-            item["website"] = urljoin("https://www.hilti.com/stores/", location["slug"])
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["phone"] = None
+        if item["name"].startswith("Distribution Center "):
+            return
+        else:
+            item["branch"] = (
+                item.pop("name")
+                .removeprefix("Hilti Store ")
+                .removesuffix(" (Cashless)")
+                .removesuffix(" Distribution Center")
+                .removesuffix(" and")
+                .removesuffix(" &")
+                .removesuffix(" Store")
+            )
 
-            item["opening_hours"] = OpeningHours()
-            for rule in location["openingSchedule"]["days"]:
-                if rule["open"] is False:
-                    item["opening_hours"].set_closed(rule["day"])
-                else:
-                    for times in rule["workingHours"]:
-                        item["opening_hours"].add_range(rule["day"], times["start"], times["end"], "%H:%M:%S")
-            yield item
+        apply_category(Categories.SHOP_POWER_TOOLS, item)
+
+        yield item
