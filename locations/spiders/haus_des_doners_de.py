@@ -14,7 +14,13 @@ class HausDesDonersDESpider(JSONBlobSpider):
     locations_key = "markers"
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name")
+        item["branch"] = (item.pop("name") or "").strip()
+        ref = None
+        if " - " in item["branch"]:
+            item["ref"], item["branch"] = item["branch"].split(" - ")
+        elif " " in item["branch"]:
+            item["branch"], item["ref"] = item["branch"].rsplit(" ", 1)
+
         item["website"] = feature.get("buttonLink")
         if feature.get("placeId"):
             item["extras"]["ref:google:place_id"] = feature["placeId"]
