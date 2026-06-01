@@ -20,7 +20,7 @@ class BankLeumiILSpider(Spider):
             item = DictParser.parse(poi)
             item["ref"] = id
             item["street_address"] = item.pop("addr_full")
-            item["phone"] = poi.get("phones", {}).get("phone")
+            item["phone"] = None
             item["lat"], item["lon"] = poi["coords"]["lat"], poi["coords"]["lng"]
             if poi["type"] == "5":
                 # Digital office - an ATM
