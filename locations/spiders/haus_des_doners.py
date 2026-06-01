@@ -15,7 +15,6 @@ class HausDesDonersSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = (item.pop("name") or "").strip()
-        ref = None
         if " - " in item["branch"]:
             item["ref"], item["branch"] = item["branch"].split(" - ")
         elif " " in item["branch"]:
