@@ -1,29 +1,17 @@
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from typing import Iterable
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class KateSpadeSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
+class KateSpadeSpider(RioSeoSpider):
     name = "kate_spade"
     item_attributes = {"brand": "Kate Spade New York", "brand_wikidata": "Q6375797"}
-    sitemap_urls = [
-        "https://www.katespade.com/stores/sitemap.xml",
-        "https://www.katespade.de/stores/sitemap.xml",
-        "https://www.katespade.co.uk/stores/sitemap.xml",
-        "https://www.katespade.eu/be/stores/sitemap.xml",
-        "https://www.katespade.eu/ie/stores/sitemap.xml",
-        "https://www.katespade.eu/nl/stores/sitemap.xml",
-        "https://www.katespade.eu/at/stores/sitemap.xml",
-    ]
-    sitemap_rules = [(r"/stores/[^/]+/[^/]+/[^/]+$", "parse_sd")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
-    drop_attributes = {"facebook"}
+    end_point = "https://maps.stores.katespade.com.prod.rioseo.com"
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("About ").removeprefix("KSNY ")
-        yield item
+    def post_process_feature(self, feature: Feature, location: dict) -> Iterable[Feature]:
+        feature["branch"] = feature.pop("name").removeprefix("About ").removeprefix("KSNY ")
+        feature["email"] = location.get("from_email")
+        apply_category(Categories.SHOP_CLOTHES, feature)
+        yield feature
