@@ -37,7 +37,7 @@ class ZambreroAUSpider(Spider):
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
-        if "Temporarily Closed" in properties["name"]:
+        if "Temporarily Closed" in properties["branch"]:
             return
         if properties["phone"] == "0":
             properties.pop("phone")
