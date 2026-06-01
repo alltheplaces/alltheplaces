@@ -21,7 +21,7 @@ class CasaDoPaoDeQueijoBRSpider(Spider):
         )
 
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
-        for location in chompjs.parse_js_object(re.search(r"RR\s*=\s*(\[.+\]),\s*PR=\(\)", response.text).group(1)):
+        for location in chompjs.parse_js_object(re.search(r"dP\s*=\s*(\[.+\]),\s*fP=\(\)", response.text).group(1)):
             item = Feature()
             item["branch"] = location["nome"].removeprefix("CPQ ")
             item["addr_full"] = item["ref"] = location["endereco"]
