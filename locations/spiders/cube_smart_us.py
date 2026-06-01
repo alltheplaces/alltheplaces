@@ -10,7 +10,6 @@ class CubeSmartUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.cubesmart.com/sitemap-facility.xml"]
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["SelfStorage"]
-    requires_proxy = True
     drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
