@@ -1,6 +1,7 @@
 from scrapy import Spider
 
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class RonJonSurfShopSpider(Spider):
@@ -14,6 +15,7 @@ class RonJonSurfShopSpider(Spider):
     }
     allowed_domains = ["www.ronjonsurfshop.com"]
     start_urls = ["https://www.ronjonsurfshop.com/ajax/store-locator?searchText=&pagesize=15&pageNumber=1"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
         for data in response.json()["results"]:
