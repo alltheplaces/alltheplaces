@@ -17,6 +17,8 @@ class HowardHannaSpider(PlaywrightSpider):
     name = "howard_hanna"
     item_attributes = {"brand": "Howard Hanna", "brand_wikidata": "Q119573413"}
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "DOWNLOAD_DELAY": 5,
+        "CONCURRENT_REQUESTS": 1,
         "DEFAULT_REQUEST_HEADERS": {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -24,7 +26,7 @@ class HowardHannaSpider(PlaywrightSpider):
             "Origin": "https://www.howardhanna.com",
             "Referer": "https://www.howardhanna.com/Office/Map",
             "User-Agent": BROWSER_DEFAULT,
-        }
+        },
     }
 
     async def start(self) -> AsyncIterator[Request]:
