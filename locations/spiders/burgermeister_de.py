@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -20,5 +21,7 @@ class BurgermeisterDESpider(JSONBlobSpider):
 
         item["branch"] = item.pop("name", "").split(" | ")[-1].strip()
         item["image"] = feature.get("pic")
+
+        apply_category(Categories.FAST_FOOD, item)
 
         yield item
