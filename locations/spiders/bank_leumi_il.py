@@ -1,16 +1,21 @@
-import scrapy
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class BankLeumiILSpider(scrapy.Spider):
+class BankLeumiILSpider(Spider):
     name = "bank_leumi_il"
     allowed_domains = ["www.leumi.co.il"]
     item_attributes = {"brand_wikidata": "Q806641"}
     start_urls = ["https://www.leumi.co.il/leumi_main/branches"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for id, poi in response.json()["branches"].items():
             item = DictParser.parse(poi)
             item["ref"] = id
