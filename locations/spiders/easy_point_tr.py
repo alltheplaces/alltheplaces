@@ -35,9 +35,12 @@ class EasyPointTRSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for item in response.json()["result"]:
-            # fix malformed coordinates before giving it to the parser
-            item["latitude"] = parse_float_like_coordinate(item["latitude"])
-            item["longitude"] = parse_float_like_coordinate(item["longitude"])
+            try:
+                # fix malformed coordinates before giving it to the parser
+                item["latitude"] = parse_float_like_coordinate(item["latitude"])
+                item["longitude"] = parse_float_like_coordinate(item["longitude"])
+            except Exception:
+                pass
 
             d = DictParser.parse(item)
             d["opening_hours"] = parse_opening_hours(item["workingDays"])
