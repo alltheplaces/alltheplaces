@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -41,5 +42,8 @@ class PepeJeansSpider(Spider):
                 [item["street_address"], location.xpath(".//p[2]/text()").get()]
             )
             item["phone"] = location.xpath('.//*[@class = "phone"]/text()').get()
+
             extract_google_position(item, location)
+            apply_category(Categories.SHOP_CLOTHES, item)
+
             yield item
