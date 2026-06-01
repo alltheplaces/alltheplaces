@@ -34,7 +34,7 @@ class TchiboSpider(Spider):
             except:
                 pass
 
-            apply_category(Categories.COFFEE_SHOP, item)
+            apply_category(Categories.SHOP_COFFEE, item)
 
             yield item
 

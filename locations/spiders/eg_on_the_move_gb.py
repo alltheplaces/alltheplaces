@@ -12,6 +12,7 @@ class EgOnTheMoveGBSpider(Spider):
     name = "eg_on_the_move_gb"
     item_attributes = {"brand": "EG On the Move", "brand_wikidata": "Q130223576"}
     start_urls = ["https://eg-otm.com/api/sites"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():

@@ -90,5 +90,5 @@ class FloCAUSSpider(Spider):
             apply_yes_no(f"socket:{socket_type}", item, True)
             item["extras"][f"socket:{socket_type}:output"] = f"{location['chargingSpeed']} kW"
 
-        apply_category({"man_made": "charge_point"}, item)
+        apply_category(Categories.CHARGE_POINT, item)
         return item

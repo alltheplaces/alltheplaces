@@ -1,3 +1,4 @@
+from locations.hours import DAYS_SE
 from locations.spiders.costco_au import CostcoAUSpider
 
 
@@ -7,3 +8,5 @@ class CostcoSESpider(CostcoAUSpider):
     stores_url = (
         "https://www.costco.se/rest/v2/sweden/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999"
     )
+    days = DAYS_SE
+    time_format = "%H:%M"

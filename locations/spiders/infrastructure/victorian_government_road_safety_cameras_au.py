@@ -11,7 +11,9 @@ class VictorianGovernmentRoadSafetyCamerasAUSpider(JSONBlobSpider):
     name = "victorian_government_road_safety_cameras_au"
     item_attributes = {"operator": "Department of Justice and Community Safety", "operator_wikidata": "Q5260361"}
     allowed_domains = ["www.vic.gov.au"]
-    start_urls = ["https://www.vic.gov.au/api/tide/elasticsearch/sdp_data_pipelines_scl/_search?size=10000"]
+    start_urls = [
+        "https://www.vic.gov.au/api/tide/elasticsearch/content-vic__production__sdp_data_pipelines_scl/_search?size=10000"
+    ]
     locations_key = ["hits", "hits"]
 
     def pre_process_data(self, feature: dict) -> None:

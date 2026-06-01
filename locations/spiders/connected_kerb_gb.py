@@ -48,5 +48,5 @@ class ConnectedKerbGBSpider(JSONBlobSpider):
             apply_yes_no(f"socket:{socket_type}", point_item, True)
             point_item["extras"][f"socket:{socket_type}:output"] = point_location["maxPower"]
 
-            apply_category({"man_made": "charge_point"}, point_item)
+            apply_category(Categories.CHARGE_POINT, point_item)
             yield point_item

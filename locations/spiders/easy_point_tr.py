@@ -1,20 +1,21 @@
-import scrapy
-from scrapy.http import JsonRequest
+from typing import Any, AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
+
+EASY_POINT = {"brand": "Easy Point", "brand_wikidata": "Q131451912"}
 
 
-class EasyPointTRSpider(scrapy.Spider):
+class EasyPointTRSpider(Spider):
     name = "easy_point_tr"
-    # create a wikidata item for the brand
-    item_attributes = {"brand": "Easy Point", "brand_wikidata": "Q131451912"}
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(
             "https://prod.easypointapi.com/api/get-token",
-            method="POST",
             data={
                 "key": "wHjOKqH25WwOEeHphyGR",
                 "secret": "37m2LWciLhboNNFA6UkQ",
@@ -22,18 +23,17 @@ class EasyPointTRSpider(scrapy.Spider):
             callback=self.parse_token,
         )
 
-    def parse_token(self, response):
+    def parse_token(self, response: Response, **kwargs: Any) -> Any:
         resp = response.json()
         token = resp["result"]["token"]
 
-        yield scrapy.Request(
+        yield JsonRequest(
             "https://prod.easypointapi.com/api/flow/get-points",
             method="POST",
             headers={"Authorization": f"Bearer {token}"},
-            callback=self.parse,
         )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for item in response.json()["result"]:
             # fix malformed coordinates before giving it to the parser
             item["latitude"] = parse_float_like_coordinate(item["latitude"])
@@ -47,36 +47,39 @@ class EasyPointTRSpider(scrapy.Spider):
             # Turkish address fields tend to be wrongly named in the API
             d["state"] = item["city"]  # province/il in Turkish
             d["city"] = item["district"]  # district/ilçe in Turkish
+            d["street_address"] = item["muhaberatAddress1"]
             d["addr_full"] = f"{item['muhaberatAddress1']} {item['district']} {item['city']}"
-            apply_category({"addr:neighborhood": item["region"]}, d)  # mahalle in Turkish
-            apply_category({"addr:desc": item["pointAddressDefinition"]}, d)
+            d["extras"]["addr:neighborhood"] = item["region"]  # mahalle in Turkish
+            d["extras"]["addr:desc"] = item["pointAddressDefinition"]
 
             if bool(int(item["isBox"])):
+                d.update(EASY_POINT)
                 apply_category(Categories.PARCEL_LOCKER, d)
-                apply_category({"post_office:parcel_pickup": parse_parcel_from(item)}, d)
+                d["extras"]["post_office:parcel_pickup"] = parse_parcel_from(item)
 
             elif bool(int(item["isEsnaf"])):
-                apply_category({"post_office:service_provider": self.item_attributes["brand"]}, d)
-                apply_category({"post_office": "post_partner"}, d)
-                apply_category({"post_office:parcel_pickup": parse_parcel_from(item)}, d)
+                apply_category(Categories.GENERIC_POI, d)
+                d["extras"]["post_office"] = "post_partner"
+                d["extras"]["post_office:service_provider"] = EASY_POINT["brand"]
+                d["extras"]["post_office:parcel_pickup"] = parse_parcel_from(item)
 
             elif bool(int(item["isMalKabul"])):
                 apply_category({"amenity": "delivery_area"}, d)
 
             else:
-                apply_category({"post_office:service_provider": self.item_attributes["brand"]}, d)
-                apply_category({"post_office": "post_partner"}, d)
-                apply_category({"post_office:parcel_pickup": parse_parcel_from(item)}, d)
+                apply_category(Categories.GENERIC_POI, d)
+                d["extras"]["post_office"] = "post_partner"
+                d["extras"]["post_office:service_provider"] = EASY_POINT["brand"]
+                d["extras"]["post_office:parcel_pickup"] = parse_parcel_from(item)
 
-            apply_category({"capacity:package": item["packageCapacity"]}, d)
+            d["extras"]["capacity:package"] = item["packageCapacity"]
 
             yield d
 
 
 def parse_opening_hours(item: dict) -> str:
-    keys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
     oh = OpeningHours()
-    for key in keys:
+    for key in map(str.lower, DAYS_FULL):
         if key not in item:
             continue
         day_entry = item.get(key)
@@ -88,9 +91,9 @@ def parse_opening_hours(item: dict) -> str:
             close_time = get_time_str(closed_time_dict)
 
             if open_time and close_time:
-                oh.add_range(day=key[:2].capitalize(), open_time=open_time, close_time=close_time)
+                oh.add_range(day=key, open_time=open_time, close_time=close_time)
 
-    return oh.as_opening_hours()
+    return oh
 
 
 def get_time_str(time_dict: dict) -> str | None:

@@ -1,17 +1,10 @@
-import csv
-from io import BytesIO, TextIOWrapper
-from typing import Any
-from zipfile import ZipFile
-
-from scrapy.http import Response
-
-from locations.address_spider import AddressSpider
 from locations.items import Feature
 from locations.licenses import Licenses
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
-class GBWestSuffolkSpider(AddressSpider):
+class GBWestSuffolkSpider(OwenBaseSpider):
     name = "gb_west_suffolk"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "© West Suffolk Council, 2026. Contains public sector information licensed under the Open Government Licence v3.0."  # address strings
@@ -20,26 +13,12 @@ class GBWestSuffolkSpider(AddressSpider):
         + " Contains GeoPlace data © Local Government Information House Limited copyright and database right."
         + " Office for National Statistics licensed under the Open Government Licence v.3.0."
     }
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 60 * 5}
-    no_refs = True
-    start_urls = [
-        "https://drive.usercontent.google.com/download?id=1WdTFLQ8OAJfDoJWhcdFSNWqhMCTkw7iH&export=download&confirm=t"
-    ]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        with ZipFile(BytesIO(response.body)) as zip_file:
-            for addr in csv.DictReader(
-                TextIOWrapper(zip_file.open("WESTSUFFOLK_CTBANDS_OSOU_202602.csv"), encoding="utf-8")
-            ):
-                item = Feature()
-                item["ref"] = addr["PROPREF"]
-                item["extras"]["ref:GB:uprn"] = addr["UPRN              "]
-                item["lat"] = addr["LAT"]
-                item["lon"] = addr["LNG"]
-                item["postcode"] = addr["POSTCODE"]
+    drive_id = "1WdTFLQ8OAJfDoJWhcdFSNWqhMCTkw7iH"
+    csv_filename = "WESTSUFFOLK_CTBANDS_OSOU_202602.csv"
 
-                item["addr_full"] = merge_address_lines([addr["ADDR1"], addr["ADDR2"], addr["ADDR3"], addr["ADDR4"]])
-
-                item["country"] = "GB"
-
-                yield item
+    def parse_row(self, item: Feature, addr: dict):
+        item["extras"]["ref:GB:uprn"] = addr["UPRN              "]
+        item["addr_full"] = merge_address_lines(
+            [addr["ADDR1"], addr["ADDR2"], addr["ADDR3"], addr["ADDR4"], item.get("postcode")]
+        )

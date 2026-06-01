@@ -14,6 +14,7 @@ class GreaterBendigoCityCouncilTreesAUSpider(VectorFileSpider):
     start_urls = [
         "https://data.gov.au/data/dataset/d17c9e50-fab1-40e6-b91d-6e665faf2656/resource/b3f01081-924c-41b7-989a-cf521ca136ea/download/cogb-environment-trees.shz"
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["AssetID"])

@@ -10,7 +10,8 @@ from locations.items import Feature
 class SulbingKRSpider(scrapy.Spider):
     name = "sulbing_kr"
     item_attributes = {"brand_wikidata": "Q18156373"}
-    start_urls = ["https://sulbing.com/bbs/board.php?bo_table=store&page=1"]
+    start_urls = ["https://sulbing.com/store/"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 150, "CONCURRENT_REQUESTS": 1}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for city in response.xpath('//*[@name="addr1"]/option/text()').getall():

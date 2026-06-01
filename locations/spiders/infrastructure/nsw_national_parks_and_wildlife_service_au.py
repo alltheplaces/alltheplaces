@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class NswNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSpider):
     name = "nsw_national_parks_and_wildlife_service_au"
     item_attributes = {
-        "state": "New South Wales",
+        "state": "NSW",
         "operator": "NSW National Parks and Wildlife Service",
         "operator_wikidata": "Q108872274",
     }
@@ -20,15 +20,6 @@ class NswNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
         )
     ]
     wanted_types = ["Accommodation", "Campground"]
-
-    def sitemap_filter(self, entries):
-        # Sitemap is broken and includes entries with an internal/incorrect domain.
-        for entry in entries:
-            if entry["loc"].startswith("https://auth-prd.nswparks.cloud/"):
-                entry["loc"] = entry["loc"].replace(
-                    "https://auth-prd.nswparks.cloud/", "https://www.nationalparks.nsw.gov.au/"
-                )
-                yield entry
 
     def post_process_item(self, item, response, ld_data):
         item.pop("email", None)

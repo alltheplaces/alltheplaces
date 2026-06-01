@@ -1,7 +1,7 @@
-from typing import Any, AsyncIterator
+from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -14,44 +14,36 @@ YX = {"brand": "YX", "brand_wikidata": "Q4580519"}
 
 class YxSpider(Spider):
     name = "yx"
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(
-            url="https://www.preem.no/api/Stations/AllStations?$select=Id,Name,Address,PostalCode,City,PhoneNumber,StationType,StationSort,StationCardImage,OpeningHourWeekdayTime,ClosingHourWeekdayTime,OpeningHourSaturdayTime,ClosingHourSaturdayTime,OpeningHourSundayTime,ClosingHourSundayTime,CoordinateLatitude,CoordinateLongitude,Services/Name,Services/LinkedPage,Services/IconCssClass,FuelTypes/Name,FuelTypes/LinkedPage,FuelTypes/IconCssClass,FuelTypes/TextColor,FuelTypes/BackgroundColor,FuelTypes/BorderColor,FuelTypes/Type,FriendlyUrl,CampaignImage,CampaignUrl,TrailerRentalUrl,IsTrb,IsSaifa,IsSaifaStation,IsUnoX,IsUnoXTruck,TillhorInternationellaAllianser&$expand=FuelTypes,Services&currentLanguage=no",
-        )
+    start_urls = ["https://www.preem.no/stations-store.json"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
+        for location in response.json().get("data"):
             item = DictParser.parse(location)
-            item["ref"] = location["FriendlyUrl"]
-            item["lat"] = location["CoordinateLatitude"]
-            item["lon"] = location["CoordinateLongitude"]
-            item["street_address"] = item.pop("addr_full")
-            if "https:" not in location["FriendlyUrl"]:
-                item["website"] = "https://www.preem.no" + location["FriendlyUrl"]
-            else:
-                item["website"] = item["ref"]
-            if "Yx" in item["name"] and "7-eleven" not in item["name"]:
+            item["name"] = location["stationName"]
+            item["ref"] = location["stationCode"]
+
+            if "YX" in item["name"] and "7-Eleven" not in item["name"]:
                 item.update(YX)
-                item["branch"] = item.pop("name").removeprefix("Yx ")
+                item["branch"] = item.pop("name").removeprefix("YX ")
                 apply_category(Categories.FUEL_STATION, item)
-            elif "Uno-x" in item["name"] and "7-eleven" not in item["name"]:
+            elif "Uno-X" in item["name"] and "7-Eleven" not in item["name"]:
                 item.update(UNOX)
                 item["branch"] = item.pop("name").removeprefix("Uno-x ")
                 apply_category(Categories.FUEL_STATION, item)
-            elif "7-eleven" in item["name"]:
+            elif "7-Eleven" in item["name"]:
                 item.update(SEVEN_ELEVEN_SHARED_ATTRIBUTES)
-                item["branch"] = item.pop("name").removeprefix("Yx ").removeprefix("7-eleven ")
+                item["branch"] = item.pop("name").removeprefix("Yx ").removeprefix("7-eleven ").removeprefix("Uno-X ")
                 apply_category(Categories.SHOP_CONVENIENCE, item)
             else:
                 item.update(PREEM)
                 item["name"] = None
                 apply_category(Categories.FUEL_STATION, item)
 
-            for fuel_type in location["FuelTypes"]:
-                apply_yes_no(Fuel.ADBLUE, item, "adblue" in fuel_type["Name"].lower())
-                apply_yes_no(Fuel.DIESEL, item, "diesel" in fuel_type["Name"].lower())
-                apply_yes_no(Fuel.OCTANE_95, item, "bensin 95" in fuel_type["Name"].lower())
-                apply_yes_no(Fuel.OCTANE_98, item, "bensin 98" in fuel_type["Name"].lower())
-                apply_yes_no(Fuel.BIODIESEL, item, "hvo100" in fuel_type["Name"].lower())
+            for fuel_type in location.get("fuelTypes") or []:
+                apply_yes_no(Fuel.ADBLUE, item, "adblue" in fuel_type["name"].lower())
+                apply_yes_no(Fuel.DIESEL, item, "diesel" in fuel_type["name"].lower())
+                apply_yes_no(Fuel.OCTANE_95, item, "bensin95" in fuel_type["name"].lower())
+                apply_yes_no(Fuel.OCTANE_98, item, "bensin98" in fuel_type["name"].lower())
+                apply_yes_no(Fuel.BIODIESEL, item, "hvo100" in fuel_type["name"].lower())
             yield item

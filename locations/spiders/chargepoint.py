@@ -74,6 +74,7 @@ SOCKET_TYPES = {
 class ChargepointSpider(Spider):
     name = "chargepoint"
     item_attributes = {"brand": "ChargePoint", "brand_wikidata": "Q5176149"}
+    requires_proxy = True
 
     def make_request(self, query: dict, **kwargs) -> JsonRequest:
         return JsonRequest(

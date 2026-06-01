@@ -34,7 +34,7 @@ class AheadworksSpider(Spider):
     def parse(self, response: Response) -> Iterable[Feature]:
         features_js = response.xpath(
             '//script[contains(text(), "Aheadworks_StoreLocator/js/view/location-list") and contains(text(), "locationRawItems")]/text()'
-        ).get()
+        ).get("")
         features = parse_js_object(features_js)["#aw-storelocator-navigation"]["Magento_Ui/js/core/app"]["components"][
             "locationList"
         ]["locationRawItems"]

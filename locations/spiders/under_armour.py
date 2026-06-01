@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -14,7 +14,7 @@ class UnderArmourSpider(Spider):
     item_attributes = {"brand": "Under Armour", "brand_wikidata": "Q2031485"}
     allowed_domains = ["store-locator.underarmour.com"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(url="https://store-locator.underarmour.com/api/stores/nearby/?lat=0&lng=0&radius=50000")
 
     def parse(self, response: Response, **kwargs: Any):

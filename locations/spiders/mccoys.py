@@ -1,22 +1,26 @@
-from urllib.parse import urljoin
+from scrapy.http import Response
 
-import scrapy
-
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class MccoysSpider(StructuredDataSpider):
     name = "mccoys"
     item_attributes = {"brand": "McCoy's", "brand_wikidata": "Q27877295"}
+    allowed_domains = ["www.mccoys.com"]
     start_urls = ["https://www.mccoys.com/stores"]
-    time_format = "%I%p"
     drop_attributes = {"image"}
 
-    def parse(self, response):
-        locations = response.xpath('//*[@class="btn btn-block btn-outline-secondary"]//@href').getall()
-        for location in locations:
-            url = urljoin("https://www.mccoys.com", location)
-            yield scrapy.Request(url=url, callback=self.parse_sd)
+    def parse(self, response: Response, **kwargs):
+        # Extract all store URLs from links containing "View Store Details"
+        for store_path in response.xpath('//a[contains(text(), "View Store Details")]/@href').getall():
+            yield response.follow(url=store_path, callback=self.parse_sd)
 
     def pre_process_data(self, ld_data, **kwargs):
+        # Fix the key name to match what StructuredDataSpider expects
         ld_data["openingHoursSpecification"] = ld_data.pop("OpeningHoursSpecification", None)
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        apply_category(Categories.SHOP_TRADE, item)
+        yield item

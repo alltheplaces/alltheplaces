@@ -1,37 +1,45 @@
+import json
+import re
 from typing import Any
 
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
-from locations.items import Feature
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.linked_data_parser import LinkedDataParser
 
 
-class PlayaBowlsUSSpider(CrawlSpider):
+class PlayaBowlsUSSpider(SitemapSpider):
     name = "playa_bowls_us"
     item_attributes = {"brand": "Playa Bowls", "brand_wikidata": "Q114618507"}
-    start_urls = ["https://playabowls.com/locations"]
-    rules = [Rule(LinkExtractor("/location/"), callback="parse_store")]
+    sitemap_urls = ["https://playabowls.com/sitemap.xml"]
+    sitemap_rules = [("/location/", "parse")]
 
-    def parse_store(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        ld_data = json.loads(
+            re.sub(
+                r'([}\]"])\s*(?=")',  # end of value followed by next key
+                r"\1,",
+                (response.xpath('//*[@type="application/ld+json"]//text()').get().strip()),
+            )
+        )
+        item = LinkedDataParser.parse_ld(ld_data)
         item["ref"] = response.url.split("/")[-1]
-        item["website"] = response.url
-
-        address_text_list = response.css("div.elementor-widget-heading .elementor-heading-title::text").getall()
-        address_text_list = [t.replace("\xa0", "").strip(", ") for t in address_text_list]
-        item["branch"] = address_text_list[0]
-        item["street_address"] = address_text_list[1]
-        item["city"] = address_text_list[2]
-        item["state"] = address_text_list[3]
-        item["postcode"] = address_text_list[4]
-
-        phone_link = response.css('a[href^="tel:"]::attr(href)').get()
-        item["phone"] = phone_link.split(":")[1].replace("%20", " ")
-
-        extract_google_position(item, response)
+        item["branch"] = item.pop("name").replace("Playa Bowls - ", "")
+        oh = OpeningHours()
+        try:
+            if "Open Everyday " in ld_data.get("openingHours"):
+                for day in DAYS_FULL:
+                    open_time, close_time = ld_data.get("openingHours").replace("Open Everyday ", "").split("-")
+                    oh.add_range(
+                        day=day, open_time=open_time.strip(), close_time=close_time.strip(), time_format="%I%p"
+                    )
+            else:
+                oh.add_ranges_from_string(ld_data["openingHours"])
+        except:
+            pass
+        item["opening_hours"] = oh
         apply_category(Categories.FAST_FOOD, item)
 
         yield item

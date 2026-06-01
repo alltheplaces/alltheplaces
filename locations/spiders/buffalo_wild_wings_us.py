@@ -1,7 +1,9 @@
 import uuid
+from typing import Any, AsyncIterator
 
+from geonamescache import GeonamesCache
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -11,78 +13,21 @@ class BuffaloWildWingsUSSpider(Spider):
     name = "buffalo_wild_wings_us"
     item_attributes = {"brand": "Buffalo Wild Wings", "brand_wikidata": "Q509255"}
 
-    # All US states and D.C.
-    state_codes = [
-        "AL",
-        "AK",
-        "AZ",
-        "AR",
-        "CA",
-        "CO",
-        "CT",
-        "DE",
-        "FL",
-        "GA",
-        "HI",
-        "ID",
-        "IL",
-        "IN",
-        "IA",
-        "KS",
-        "KY",
-        "LA",
-        "ME",
-        "MD",
-        "MA",
-        "MI",
-        "MN",
-        "MS",
-        "MO",
-        "MT",
-        "NE",
-        "NV",
-        "NH",
-        "NJ",
-        "NM",
-        "NY",
-        "NC",
-        "ND",
-        "OH",
-        "OK",
-        "OR",
-        "PA",
-        "RI",
-        "SC",
-        "SD",
-        "TN",
-        "TX",
-        "UT",
-        "VT",
-        "VA",
-        "WA",
-        "WV",
-        "WI",
-        "WY",
-        "DC",
-    ]
-
-    def start_requests(self):
-        for state_code in self.state_codes:
+    async def start(self) -> AsyncIterator[Any]:
+        for state_code in GeonamesCache().get_us_states().keys():
             yield JsonRequest(
                 url=f"https://api-idp.buffalowildwings.com/bww/digital-exp-api/v1/locations/regions?regionCode={state_code}&countryCode=US",
                 headers={
-                    "Accept": "application/json",
-                    "Content-Type": "application/json",
                     "Origin": "https://www.buffalowildwings.com",
                     "Referer": "https://www.buffalowildwings.com/",
-                    "User-Agent": "Mozilla/5.0",
                     "X-Session-Id": str(uuid.uuid4()),
                     "X-Channel": "WEBOA",
                 },
-                callback=self.parse_region,
             )
 
-    def parse_region(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        if not response.json()["locations"]:
+            return
         for city in response.json()["locations"][0]["regions"][0]["cities"]:
             for restaurant in city["locations"]:
                 item = DictParser.parse(restaurant["contactDetails"])
@@ -95,20 +40,10 @@ class BuffaloWildWingsUSSpider(Spider):
 
 
 def parse_opening_hours(locationHours):
-    day_map = {
-        "MONDAY": "Mo",
-        "TUESDAY": "Tu",
-        "WEDNESDAY": "We",
-        "THURSDAY": "Th",
-        "FRIDAY": "Fr",
-        "SATURDAY": "Sa",
-        "SUNDAY": "Su",
-    }
-
     oh = OpeningHours()
 
     for entry in locationHours:
-        day = day_map.get(entry.get("dayOfWeek"))
+        day = entry.get("dayOfWeek")
 
         if entry.get("isTwentyFourHourService"):
             oh.add_range(day=day, open_time="00:00", close_time="24:00")
@@ -122,4 +57,4 @@ def parse_opening_hours(locationHours):
 
         oh.add_range(day=day, open_time=open_time, close_time=close_time)
 
-    return oh.as_opening_hours()
+    return oh
