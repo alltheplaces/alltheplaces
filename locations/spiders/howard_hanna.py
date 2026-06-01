@@ -16,10 +16,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class HowardHannaSpider(PlaywrightSpider):
     name = "howard_hanna"
     item_attributes = {"brand": "Howard Hanna", "brand_wikidata": "Q119573413"}
-    requires_proxy = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "DOWNLOAD_DELAY": 5,
-        "CONCURRENT_REQUESTS": 1,
         "DEFAULT_REQUEST_HEADERS": {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
