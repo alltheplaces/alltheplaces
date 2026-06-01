@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -17,4 +18,7 @@ class HausDesDonersDESpider(JSONBlobSpider):
         item["website"] = feature.get("buttonLink")
         if feature.get("placeId"):
             item["extras"]["ref:google:place_id"] = feature["placeId"]
+
+        apply_category(Categories.FAST_FOOD, item)
+
         yield item
