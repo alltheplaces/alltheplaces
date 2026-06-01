@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class HausDesDonersDESpider(JSONBlobSpider):
-    name = "haus_des_doners_de"
+class HausDesDonersSpider(JSONBlobSpider):
+    name = "haus_des_doners"
     start_urls = ["https://api.atlist.com/v1/map/41de535d-e707-46fa-8440-87c6fe111fb8/markers"]
     item_attributes = {"brand": "Haus des Döners", "brand_wikidata": "Q133461235"}
     locations_key = "markers"
