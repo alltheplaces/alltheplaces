@@ -7,8 +7,8 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class RonJonSurfShopSpider(PlaywrightSpider):
-    name = "ron_jon_surf_shop"
+class RonJonSurfShopUSSpider(PlaywrightSpider):
+    name = "ron_jon_surf_shop_us"
     item_attributes = {"name": "Ron Jon Surf Shop", "brand": "Ron Jon Surf Shop", "brand_wikidata": "Q7363993"}
     allowed_domains = ["www.ronjonsurfshop.com"]
     start_urls = ["https://www.ronjonsurfshop.com/ajax/store-locator?searchText=&pagesize=15&pageNumber=1"]
