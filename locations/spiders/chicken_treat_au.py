@@ -30,9 +30,8 @@ class ChickenTreatAUSpider(Spider):
                 item["lat"] = address_fields["latitude"]["value"]
                 item["lon"] = address_fields["longitude"]["value"]
                 item["street_address"] = address_fields["streetName"]["value"]
-                item["extras"] = {}
                 if address_fields["unit"]["value"]:
-                    item["extras"]["addr:unit"] = address_fields["unit"]["value"]
+                    item["unit"] = address_fields["unit"]["value"]
                 if address_fields["floor"]["value"]:
                     item["extras"]["addr:floor"] = address_fields["floor"]["value"]
                 item["housenumber"] = address_fields["streetNumber"]["value"]

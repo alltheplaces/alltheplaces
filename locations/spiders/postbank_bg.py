@@ -18,13 +18,11 @@ class PostbankBGSpider(Spider):
     requires_proxy = True
 
     async def start(self) -> AsyncIterator[FormRequest]:
-        return [
-            FormRequest(
-                "https://www.postbank.bg/bg-BG/api/locations/locations",
-                formdata={"contextItemPath": "/sitecore/content/postbank/home"},
-                callback=self.parse,
-            )
-        ]
+        yield FormRequest(
+            "https://www.postbank.bg/bg-BG/api/locations/locations",
+            formdata={"contextItemPath": "/sitecore/content/postbank/home"},
+            callback=self.parse,
+        )
 
     def parse(self, response):
         for city in response.json():

@@ -9,8 +9,10 @@ class WoodsCoffeeUSSpider(StockistSpider):
     key = "u11293"
 
     def parse_item(self, item, location):
-        hours_string = location["description"].upper().replace("DAILY", "MON-SUN").replace("\n", " ")
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
+        item["branch"] = (item.pop("name", None) or "").removesuffix(" - Woods Coffee") or None
+        if description := location.get("description"):
+            hours_string = description.upper().replace("DAILY", "MON-SUN").replace("\n", " ")
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours_string)
         apply_category(Categories.COFFEE_SHOP, item)
         yield item

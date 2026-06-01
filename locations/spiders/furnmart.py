@@ -1,63 +1,47 @@
-import re
-from typing import AsyncIterator
-from urllib.parse import urlparse
+from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
 class FurnmartSpider(Spider):
     name = "furnmart"
-    start_urls = [
-        "https://www.furnmart.co.bw/StoreLocator/SearchShops",
-        "https://www.furnmart.com.na/StoreLocator/SearchShops",
-        "https://www.furnmart.co.za/StoreLocator/SearchShops",
-    ]
-    item_attributes = {
-        "brand": "Furnmart",
-        "brand_wikidata": "Q118185771",
+    item_attributes = {"brand": "Furnmart", "brand_wikidata": "Q118185771"}
+    countries = {
+        "https://www.furnmart.co.bw": "fm-bwa",
+        "https://www.furnmart.com.na": "fm-nam",
+        "https://www.furnmart.co.za": "fm-rsa",
     }
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield self.request_page(url, 1)
-
-    def request_page(self, url: str, page: int) -> JsonRequest:
-        return JsonRequest(
-            url=url,
-            data={
-                "latitude": "",
-                "longitude": "",
-                "radius": "100",
-                "tag": "",
-                "sortBy": "10",
-                "pageNumber": page,
-            },
-            meta={"url": url, "page": page},
-        )
-
-    def parse(self, response):
-        for location in response.xpath('.//li[@class="shops-item visible"]'):
-            item = Feature()
-            item["lat"] = location.xpath(".//a/@data-latitude").get()
-            item["lon"] = location.xpath(".//a/@data-longitude").get()
-            item["branch"] = location.xpath(".//@title").get()
-            item["website"] = (
-                urlparse(response.url)._replace(path=location.xpath('.//a[@class="shop-link"]/@href').get()).geturl()
+    async def start(self) -> Any:
+        for base, namespace in self.countries.items():
+            yield JsonRequest(
+                url=f"{base}/api/cms/fetch?path=%2Fapi%2Fcontent%2F{namespace}%2Fstore",
+                meta={"base": base},
             )
-            # item["ref"] = location.xpath('@data-shopid').get() # May not be unique across countries
-            item["ref"] = item["website"]
-            description_raw = location.xpath('.//div[@class="short-description"]').get()
-            description = [line.strip() for line in re.sub(r"<\/?[^b].*?>", " ", description_raw).split("<br>")]
-            if any(["Phone:" in line for line in description]):
-                phone_raw = [line for line in description if "Phone:" in line][0]
-                item["phone"] = phone_raw.replace("Phone:", "")
-                description.remove(phone_raw)
-            item["addr_full"] = clean_address(description)
-            yield item
 
-        if len(response.xpath('.//li[@class="shops-item visible"]')) == 20:
-            yield self.request_page(response.meta["url"], response.meta["page"] + 1)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json().get("items", []):
+            data = location.get("data", {})
+            slug = data.get("slug", {}).get("iv")
+            if not slug:
+                continue
+            item = Feature()
+            item["branch"] = data.get("title", {}).get("iv", "").title() or None
+            item["ref"] = item["website"] = f"{response.meta['base']}/stores/{slug}"
+            item["phone"] = data.get("telephone", {}).get("iv")
+            item["street_address"] = clean_address(
+                [data.get("adressStreet", {}).get("iv"), data.get("adressStreet2", {}).get("iv")]
+            )
+
+            if coords := data.get("addressCoordinates", {}).get("iv"):
+                item["lat"] = coords.get("latitude")
+                item["lon"] = coords.get("longitude")
+
+            apply_category(Categories.SHOP_FURNITURE, item)
+
+            yield item

@@ -61,7 +61,7 @@ class AuVicAddressesSpider(ArcGISFeatureServerSpider, AddressSpider):
                 item["extras"]["addr:flats"] = flats
             else:
                 # Single address for a single unit.
-                item["extras"]["addr:unit"] = flats
+                item["unit"] = flats
         else:
             # Single housenumber or range of housenumbers. No flats/units.
             item["housenumber"] = num_address

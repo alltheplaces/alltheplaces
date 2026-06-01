@@ -1,24 +1,8 @@
-from scrapy.settings.default_settings import DEFAULT_REQUEST_HEADERS
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class AveraUSSpider(SitemapSpider, StructuredDataSpider):
+class AveraUSSpider(YextAnswersSpider):
     name = "avera_us"
     item_attributes = {"operator": "Avera Health", "operator_wikidata": "Q4828238"}
-    sitemap_urls = ["https://www.avera.org/sitemap.xml"]
-    sitemap_rules = [(r"https://www.avera.org/locations/profile/[-\w]+", "parse_sd")]
-    custom_settings = {
-        "DEFAULT_REQUEST_HEADERS": DEFAULT_REQUEST_HEADERS
-        | {
-            "Connection": "keep-alive",
-            "Sec-Fetch-Site": "same-origin",
-            "sec-ch-dpr": "",
-        },
-        "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": BROWSER_DEFAULT,
-    }
-    requires_proxy = "US"
-    time_format = "%H:%M:%S"
+    experience_key = "locator"
+    api_key = "413a34db5016c35c9f4a790833a03dd3"
