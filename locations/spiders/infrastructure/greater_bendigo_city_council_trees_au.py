@@ -13,10 +13,10 @@ class GreaterBendigoCityCouncilTreesAUSpider(VectorFileSpider):
     item_attributes = {"operator": "Greater Bendigo City Council", "operator_wikidata": "Q134285890", "state": "VIC"}
     allowed_domains = ["connect.pozi.com"]
     start_urls = [
-        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Tree_Planting_2026.fgb", # 2026
-        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Tree_Planting_2025.fgb", # 2025
-        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Tree_Planting_2024.fgb", # 2024
-        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Trees.fgb", # Pre 2024
+        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Tree_Planting_2026.fgb",  # 2026
+        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Tree_Planting_2025.fgb",  # 2025
+        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Tree_Planting_2024.fgb",  # 2024
+        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Trees.fgb",  # Pre 2024
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
