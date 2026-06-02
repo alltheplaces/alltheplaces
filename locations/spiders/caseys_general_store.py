@@ -1,22 +1,107 @@
-from scrapy.spiders import SitemapSpider
+from typing import Any, AsyncIterator
 
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy import Spider
+from scrapy.http import JsonRequest, TextResponse
+
+from locations.dict_parser import DictParser
+from locations.geo import city_locations
+from locations.hours import OpeningHours
 
 
-class CaseysGeneralStoreSpider(SitemapSpider, StructuredDataSpider):
+class CaseysGeneralStoreSpider(Spider):
     name = "caseys_general_store"
     item_attributes = {"brand": "Casey's General Store", "brand_wikidata": "Q2940968"}
-    allowed_domains = ["www.caseys.com"]
-    sitemap_urls = ["https://www.caseys.com/sitemap.xml"]
-    sitemap_follow = [r"https://www.caseys.com/medias/sys_master/root/.*/Store-en-USD-.*.xml"]
-    sitemap_rules = [(r"^https://www\.caseys\.com/general-store/[^/]+/[^/]+/(\d+)$", "parse")]
-    wanted_types = ["Restaurant"]
-    time_format = "%I:%M%p"
     requires_proxy = True
 
-    def pre_process_data(self, ld_data: dict, **kwargs):
-        ld_data["name"] = ld_data["url"] = ld_data["@id"] = None
-        for rule in ld_data["openingHoursSpecification"]:
-            if rule.get("opens") == rule.get("closes") == "24 hrs":
-                rule["opens"] = "12:00am"
-                rule["closes"] = "11:59pm"
+    async def start(self) -> AsyncIterator[Any]:
+        url = "https://www.caseys.com/api/graphql"
+
+        for city in city_locations("US", 10000):
+            payload = {
+                "operationName": "GetStoresByFilters",
+                "variables": {
+                    "input": {"latitude": f"{city['latitude']}", "longitude": f"{city['longitude']}"},
+                    "occasionType": "CARRYOUT",
+                    "carryoutType": None,
+                    "withTimeSlots": True,
+                },
+                "extensions": {"clientLibrary": {"name": "@apollo/client", "version": "4.1.9"}},
+                "query": """query GetStoresByFilters($input: StoresByCoordinateInput!, $occasionType: OccasionType!, $carryoutType: CarryoutType, $withTimeSlots: Boolean!) {
+              storesByCoordinate(input: $input) {
+                formattedDistance
+                store {
+                  storeNumber
+                  name
+                  shortName
+                  displayName
+                  brand
+                  address {
+                    id
+                    line1
+                    city
+                    stateAbbreviation
+                    postalCode
+                    phoneNumber
+                  }
+                  geoPoint {
+                    latitude
+                    longitude
+                  }
+                  amenities {
+                    key
+                    value
+                    isEnabled
+                  }
+                  storeOpenHours
+                  carryoutHours
+                  curbsideHours
+                  deliveryHours
+                  carwashHours
+                  locationUrl
+                  hours {
+                    type
+                    hours {
+                      dayOfWeek
+                      blocks {
+                        openDateTime
+                        closeDateTime
+                      }
+                    }
+                  }
+                  timeZoneId
+                  availableTimeSlots(occasionType: $occasionType, carryoutType: $carryoutType) @include(if: $withTimeSlots) {
+                    displayText
+                    option
+                    enabled
+                    timeSlots {
+                      displayText
+                      value
+                    }
+                  }
+                  onlineOrdering
+                  onlineOrderingTemporarilyUnavailable
+                  deliveryDisruption
+                }
+              }
+            }""",
+            }
+
+            yield JsonRequest(
+                url=url,
+                method="POST",
+                data=payload,
+                callback=self.parse,
+            )
+
+    def parse(self, response: TextResponse, **kwargs):
+        for location in response.json()["data"]["storesByCoordinate"]:
+            location.update(location.pop("store"))
+            item = DictParser.parse(location)
+            item.pop("name")
+            item["branch"] = location["displayName"]
+            item["website"] = item["ref"] = response.urljoin(item["website"])
+            oh = OpeningHours()
+            for day_time in location["storeOpenHours"]:
+                oh.add_ranges_from_string(day_time)
+            item["opening_hours"] = oh
+            yield item
