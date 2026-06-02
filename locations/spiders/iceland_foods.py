@@ -14,6 +14,7 @@ class IcelandFoodsSpider(Spider):
     name = "iceland_foods"
     item_attributes = {"brand": "Iceland", "brand_wikidata": "Q721810"}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    drop_attributes = {"email"}
     access_token = ""
 
     async def start(self) -> AsyncIterator[JsonRequest]:
