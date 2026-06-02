@@ -10,11 +10,8 @@ from locations.vector_file_spider import VectorFileSpider
 class GreaterBendigoCityCouncilTreesAUSpider(VectorFileSpider):
     name = "greater_bendigo_city_council_trees_au"
     item_attributes = {"operator": "Greater Bendigo City Council", "operator_wikidata": "Q134285890", "state": "VIC"}
-    allowed_domains = ["data.gov.au"]
-    start_urls = [
-        "https://data.gov.au/data/dataset/d17c9e50-fab1-40e6-b91d-6e665faf2656/resource/b3f01081-924c-41b7-989a-cf521ca136ea/download/cogb-environment-trees.shz"
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    allowed_domains = ["connect.pozi.com"]
+    start_urls = ["https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Trees.fgb"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["AssetID"])
