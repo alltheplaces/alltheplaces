@@ -12,6 +12,7 @@ from locations.items import Feature
 class BarnardosGBSpider(Spider):
     name = "barnardos_gb"
     item_attributes = {"brand": "Barnardo's", "brand_wikidata": "Q2884670"}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
