@@ -11,7 +11,9 @@ class GreaterBendigoCityCouncilDisabledParkingSpacesAUSpider(VectorFileSpider):
     name = "greater_bendigo_city_council_disabled_parking_spaces_au"
     item_attributes = {"operator": "Greater Bendigo City Council", "operator_wikidata": "Q134285890", "state": "VIC"}
     allowed_domains = ["connect.pozi.com"]
-    start_urls = ["https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Accessible_Parking.fgb"]
+    start_urls = [
+        "https://connect.pozi.com/userdata/bendigo-publisher/Pozi_Public_City_of_Greater_Bendigo/Accessible_Parking.fgb"
+    ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if not feature["Responsibility"].startswith("CoGB "):
