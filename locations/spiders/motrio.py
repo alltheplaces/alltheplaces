@@ -58,7 +58,5 @@ class MotrioSpider(Spider):
             if time in [" ", None, []]:
                 continue
             for open_close_time in time:
-                open_time = open_close_time.get("startAt")
-                close_time = open_close_time.get("endAt")
-                opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
+                opening_hours.add_range(day, open_close_time.get("startAt"), open_close_time.get("endAt"), "%H:%M:%S")
         return opening_hours
