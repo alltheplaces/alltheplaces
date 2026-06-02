@@ -1,5 +1,5 @@
 import json
-from typing import Any, AsyncIterator
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -11,23 +11,18 @@ from locations.hours import OpeningHours
 
 class PurebabyAUSpider(Spider):
     name = "purebaby_au"
-    item_attributes = {"brand": "Purebaby", "brand_wikidata": "Q122431533"}
+    item_attributes = {"name": "Purebaby", "brand": "Purebaby", "brand_wikidata": "Q122431533"}
     allowed_domains = ["purebaby.com.au"]
     start_urls = ["https://purebaby.com.au/pages/stores"]
 
-    async def start(self) -> AsyncIterator[Request]:
-        for url in self.start_urls:
-            yield Request(url=url)
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         config = json.loads(response.xpath("//script[@data-stores-page-config]/text()").get())
+        param = config["paginationPageParam"]
+        for page in range(2, config["paginationPages"] + 1):
+            yield Request(url=f"https://purebaby.com.au/pages/stores?{param}={page}", callback=self.parse_stores)
 
-        if response.url == self.start_urls[0]:
-            param = config["paginationPageParam"]
-            for page in range(2, config["paginationPages"] + 1):
-                yield Request(url=f"{self.start_urls[0]}?{param}={page}")
-
-        for location in config["stores"]:
+    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
+        for location in json.loads(response.xpath("//script[@data-stores-page-config]/text()").get())["stores"]:
             if location["type"] != "Store":
                 continue
             item = DictParser.parse(location)
