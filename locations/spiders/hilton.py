@@ -4,7 +4,7 @@ from typing import Any
 import requests
 from chompjs import parse_js_object
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -29,7 +29,6 @@ class HiltonSpider(Spider):
         "DOWNLOAD_DELAY": 5,
         "RETRY_TIMES": 5,
     }
-    token = None
     requires_proxy = "US"
 
     # More details about brand codes is in filters section of https://www.hilton.com/en/locations/hilton-hotels/
@@ -99,97 +98,262 @@ class HiltonSpider(Spider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        config = parse_js_object(
-            response.xpath('//script[contains(text(), "DX_AUTH_API_CUSTOMER_APP_ID")]/text()').get()
-        )
+        for countries in DictParser.iter_matching_keys(
+            parse_js_object(response.xpath('//script[contains(text(), "locationPageUri")]/text()').get()), "countries"
+        ):
+            for country in countries:
+                regions = country.get("states") or country.get("cities")
+                for region in regions:
+                    response = self.get_hotels(region["locationPageUri"])
 
-        yield JsonRequest(
-            url="https://www.hilton.com/dx-customer/auth/applications/token?appName=dx_shop_search_app",
-            headers={"x-dtpc": "ignore"},
-            data={"app_id": config["DX_AUTH_API_CUSTOMER_APP_ID"]},
-            callback=self.parse_token,
-        )
+                    try:
+                        hotels_summary = response.json()["data"]["geocodePage"].get("hotelSummaryOptions") or {}
+                        for poi in hotels_summary.get("hotels", []):
+                            poi.update(poi.pop("address"))
+                            poi.update(poi.pop("contactInfo"))
+                            item = DictParser.parse(poi)
+                            item["ref"] = poi["ctyhocn"]
+                            item["website"] = poi.get("facilityOverview", {}).get("homeUrlTemplate")
+                            item["lat"] = poi.get("localization", {}).get("coordinate", {}).get("latitude")
+                            item["lon"] = poi.get("localization", {}).get("coordinate", {}).get("longitude")
 
-    def parse_token(self, response: Response):
-        self.token = response.json()["access_token"]
-        yield from self.get_quadrants()
+                            if brand_code := poi.get("brandCode"):
+                                if match := self.BRANDS_MAPPING.get(brand_code):
+                                    item["brand"], item["brand_wikidata"] = match
+                                else:
+                                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{brand_code}")
 
-    def get_quadrants(self):
-        url = "https://www.hilton.com/graphql/customer?appName=dx_shop_search_app&operationName=hotelQuadrants&originalOpName=hotelQuadrants&bl=en"
-        data = {
-            "query": "query hotelQuadrants {hotelQuadrants{ id } }",
-            "operationName": "hotelQuadrants",
-            "variables": {},
-        }
-        yield JsonRequest(
-            url,
-            headers={
-                "Authorization": f"Bearer {self.token}",
-            },
-            data=data,
-            callback=self.parse_quadrants,
-        )
+                            for service in poi.get("amenityIds", []):
+                                if match := self.SERVICES_MAPPING.get(service):
+                                    apply_yes_no(match, item, True)
+                                else:
+                                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
 
-    def parse_quadrants(self, response: Response):
-        quadrants = response.json()["data"]["hotelQuadrants"]
-        for quadrant in quadrants:
-            yield from self.parse_hotels(quadrant["id"])
+                            apply_category(Categories.HOTEL, item)
+                            yield item
+                    except Exception:
+                        self.logger.error(f'Error parsing locations for path: {region["locationPageUri"]}')
 
-    def parse_hotels(self, quadrant_id):
-        try:
-            response = self.get_hotels(quadrant_id)
-
-            for poi in response.json()["data"]["hotelSummaryOptions"]["hotels"]:
-                poi.update(poi.pop("address"))
-                poi.update(poi.pop("contactInfo"))
-                item = DictParser.parse(poi)
-                item["ref"] = poi["ctyhocn"]
-                item["website"] = poi.get("facilityOverview", {}).get("homeUrlTemplate")
-                item["lat"] = poi.get("localization", {}).get("coordinate", {}).get("latitude")
-                item["lon"] = poi.get("localization", {}).get("coordinate", {}).get("longitude")
-
-                if brand_code := poi.get("brandCode"):
-                    if match := self.BRANDS_MAPPING.get(brand_code):
-                        item["brand"], item["brand_wikidata"] = match
-                    else:
-                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{brand_code}")
-
-                for service in poi.get("amenityIds", []):
-                    if match := self.SERVICES_MAPPING.get(service):
-                        apply_yes_no(match, item, True)
-                    else:
-                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
-
-                apply_category(Categories.HOTEL, item)
-                yield item
-        except:
-            self.logger.error(f"Request failed for quadrantId: {quadrant_id}")
-
-    def get_hotels(self, quadrant_id):
+    def get_hotels(self, location_url: str):
         # TODO: we should use JsonRequest here, but it doesn't work with this endpoint for some reason!
         url = "https://www.hilton.com/graphql/customer?appName=dx_shop_search_app&operationName=hotelSummaryOptions_geocodePage&originalOpName=hotelSummaryOptions_geocodePage&bl=en"
-        data = {
-            "operationName": "hotelSummaryOptions",
-            "query": """
-                query
-                    hotelSummaryOptions($language: String!, $input: HotelSummaryOptionsInput) {
-                        hotelSummaryOptions(language: $language, input: $input) {
-                            hotels {
-                                ctyhocn
+
+        payload = json.dumps(
+            {
+                "query": """
+                        query hotelSummaryOptions_geocodePage(
+                          $language: String!,
+                          $path: String!,
+                          $queryLimit: Int!,
+                          $currencyCode: String!,
+                          $distanceUnit: HotelDistanceUnit,
+                          $titleFormat: MarkdownFormatType!,
+                          $input: HotelSummaryOptionsInput
+                        ) {
+                          geocodePage(language: $language, path: $path) {
+                            location {
+                              pageInterlinks {
+                                title
+                                links {
+                                  name
+                                  uri
+                                }
+                              }
+                              title(format: $titleFormat)
+                              accessibilityTitle
+                              meta {
+                                pageTitle
+                                description
+                              }
+                              name
+                              brandCode
+                              category
+                              uri
+                              globalBounds
+                              breadcrumbs {
+                                uri
+                                name
+                              }
+                              about {
+                                contentBlocks {
+                                  title(format: text)
+                                  descriptions
+                                  orderedList
+                                  unorderedList
+                                }
+                                contentBlocks_noTx: contentBlocks {
+                                  title(format: text)
+                                  descriptions
+                                  orderedList
+                                  unorderedList
+                                }
+                                isContentLocalized
+                              }
+                              paths {
+                                base
+                              }
+                              hotelSummaryExtractUrl
+                            }
+                            match {
+                              address {
+                                city
+                                country
+                                countryName
+                                state
+                                stateName
+                              }
+                              geometry {
+                                location {
+                                  latitude
+                                  longitude
+                                }
+                                bounds {
+                                  northeast {
+                                    latitude
+                                    longitude
+                                  }
+                                  southwest {
+                                    latitude
+                                    longitude
+                                  }
+                                }
+                              }
+                              id
+                              name
+                              type
+                            }
+                            hotelSummaryOptions(
+                              distanceUnit: $distanceUnit
+                              sortBy: distance
+                              input: $input
+                            ) {
+                              _hotels {
+                                totalSize
+                              }
+                              bounds {
+                                northeast {
+                                  latitude
+                                  longitude
+                                }
+                                southwest {
+                                  latitude
+                                  longitude
+                                }
+                              }
+                              amenities {
+                                id
+                                name
+                                hint
+                              }
+                              amenityCategories {
+                                name
+                                id
+                                amenityIds
+                              }
+                              brands {
+                                code
+                                name
+                              }
+                              hotels(first: $queryLimit) {
                                 amenityIds
                                 brandCode
-                                facilityOverview { allowAdultsOnly homeUrlTemplate }
+                                ctyhocn
+                                distance
+                                distanceFmt
+                                facilityOverview {
+                                  allowAdultsOnly
+                                  homeUrlTemplate
+                                }
                                 name
-                                display { open openDate preOpenMsg resEnabled resEnabledDate treatments }
-                                contactInfo { phoneNumber }
-                                address { addressLine1 city country countryName state stateName _id }
-                                localization { currencyCode coordinate { latitude longitude } }
-                                images { master(ratios: [threeByTwo]) { altText ratios { size url } } carousel(ratios: [threeByTwo]) { altText ratios { url size } } } } } }
-                    """,
-            "variables": {"input": {"guestLocationCountry": "HU", "quadrantId": f"{quadrant_id}"}, "language": "en"},
-        }
+                                contactInfo {
+                                  phoneNumber
+                                }
+                                display {
+                                  open
+                                  openDate
+                                  preOpenMsg
+                                  resEnabled
+                                  resEnabledDate
+                                  treatments
+                                }
+                                disclaimers {
+                                  desc
+                                  type
+                                }
+                                address {
+                                  addressFmt
+                                  addressLine1
+                                  city
+                                  country
+                                  countryName
+                                  postalCode
+                                  state
+                                  stateName
+                                }
+                                localization {
+                                  currencyCode
+                                  coordinate {
+                                    latitude
+                                    longitude
+                                  }
+                                }
+                                images {
+                                  master(ratios: [threeByTwo]) {
+                                    altText
+                                    ratios {
+                                      size
+                                      url
+                                    }
+                                  }
+                                  carousel(ratios: [threeByTwo]) {
+                                    altText
+                                    ratios {
+                                      url
+                                      size
+                                    }
+                                  }
+                                }
+                                leadRate {
+                                  lowest {
+                                    cmaTotalPriceIndicator
+                                    feeTransparencyIndicator
+                                    rateAmount(currencyCode: $currencyCode)
+                                    rateAmountFmt(decimal: 0, strategy: ceiling)
+                                    ratePlanCode
+                                    ratePlan {
+                                      ratePlanName @toTitleCase
+                                      ratePlanDesc
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            ctyhocnList: hotelSummaryOptions(distanceUnit: $distanceUnit, sortBy: distance) {
+                              hotelList: hotels {
+                                ctyhocn
+                              }
+                            }
+                          }
+                          geocodePageEn: geocodePage(language: "en", path: $path) {
+                            match {
+                              name
+                            }
+                          }
+                        }
+                """,
+                "operationName": "hotelSummaryOptions_geocodePage",
+                "variables": {
+                    "path": location_url,
+                    "language": "en",
+                    "queryLimit": 150,  # server-enforced maximum
+                    "currencyCode": "USD",
+                    "titleFormat": "md",
+                    "input": {"guestLocationCountry": "US"},
+                },
+            }
+        )
         headers = {
-            "User-Agent": CHROME_LATEST,
-            "Content-Type": "application/json",
+            "content-type": "application/json",
         }
-        return requests.post(url, headers=headers, data=json.dumps(data))
+
+        return requests.post(url, headers=headers, data=payload)
