@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -15,13 +15,15 @@ class MotrioSpider(Spider):
 
     def make_request(self, page: int, page_size: int = 100) -> JsonRequest:
         return JsonRequest(
-            "https://www.motrio.fr/api/establishments?domain=motrio&size={}&page={}".format(page_size, page)
+            "https://www.motrio.fr/web2c/establishments/by-location?domain=motrio&longitude=2.3513765&latitude=48.8575475&unit=KM&limitDistance=6000&size={}&page={}".format(
+                page_size, page
+            )
         )
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(0)
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
         for store in data.get("content"):
             store.update(store.pop("billingAddress"))
@@ -49,7 +51,7 @@ class MotrioSpider(Spider):
         if not data["last"]:
             yield self.make_request(data["number"] + 1, data["size"])
 
-    def repair_website(self, website):
+    def repair_website(self, website: str) -> str | None:
         if any(keyword in website for keyword in ["maps.", "bing.com", "google", "|", "@"]):
             return None
 
