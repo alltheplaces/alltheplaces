@@ -37,16 +37,7 @@ class MotrioSpider(Spider):
             if lat_lon := store.get("location"):
                 item["lon"], item["lat"] = lat_lon["coordinates"]
             apply_category(Categories.SHOP_CAR_REPAIR, item)
-            item["opening_hours"] = OpeningHours()
-            for day, time in store.get("timeTable").items():
-                if time in [" ", None, []]:
-                    continue
-                for open_close_time in time:
-                    open_time = open_close_time.get("startAt")
-                    close_time = open_close_time.get("endAt")
-                    item["opening_hours"].add_range(
-                        day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S"
-                    )
+            item["opening_hours"] = self.parse_opening_hours(store.get("timeTable"))
             yield item
         if not data["last"]:
             yield self.make_request(data["number"] + 1, data["size"])
@@ -60,3 +51,14 @@ class MotrioSpider(Spider):
         elif "https://" not in website:
             website = "https://" + website
         return website
+
+    def parse_opening_hours(self, rules: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day, time in rules.items():
+            if time in [" ", None, []]:
+                continue
+            for open_close_time in time:
+                open_time = open_close_time.get("startAt")
+                close_time = open_close_time.get("endAt")
+                opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
+        return opening_hours
