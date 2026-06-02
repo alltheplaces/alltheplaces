@@ -28,7 +28,6 @@ class MotrioSpider(Spider):
         for store in data.get("content"):
             store.update(store.pop("billingAddress"))
             item = DictParser.parse(store)
-            item["branch"] = item.pop("name")
             item["street_address"] = item.pop("street")
             if website := item.get("website"):
                 item["website"] = self.repair_website(website)
