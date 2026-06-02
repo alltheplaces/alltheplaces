@@ -28,6 +28,7 @@ class PurebabyAUSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = location["title"].removeprefix("Purebaby ")
             item["name"] = None
+            item["website"] = response.urljoin(location["id"])
             item["image"] = location["image"]
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(location["openHours"])
