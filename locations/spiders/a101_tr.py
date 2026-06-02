@@ -56,7 +56,6 @@ class A101TRSpider(Spider):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.seen_refs: set[str] = set()
         # Every query reveals all stores within (lat, lon, cleared_km); used to
         # skip child cells that earlier queries have already fully covered.
         self.cleared_discs: list[tuple[float, float, float]] = []
@@ -78,9 +77,6 @@ class A101TRSpider(Spider):
         stores = response.json().get("stores", [])
         for poi in stores:
             item = DictParser.parse(poi)
-            if item.get("ref") in self.seen_refs:
-                continue
-            self.seen_refs.add(item["ref"])
             item["street_address"] = item.pop("addr_full")
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
