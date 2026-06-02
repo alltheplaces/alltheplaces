@@ -7,6 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.david_jones_au_nz import DavidJonesAUNZSpider
 from locations.spiders.myer_au import MyerAUSpider
 
 
@@ -16,6 +17,7 @@ class MJBaleAUSpider(JSONBlobSpider):
     allowed_domains = ["www.mjbale.com"]
     start_urls = ["https://www.mjbale.com/apps/arcbridge/v1/shopify/stores/check"]
     locations_key = "stores"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature["clickandcollect_enabled"] != 1 and feature["deptstore_enabled"] != 1:
@@ -26,8 +28,8 @@ class MJBaleAUSpider(JSONBlobSpider):
         item["addr_full"] = merge_address_lines([feature.get("address_street_1"), feature.get("address_street_2")])
 
         if feature["name"].startswith("David Jones "):
-            item["located_in"] = "David Jones"
-            item["located_in_wikidata"] = "Q5235753"
+            item["located_in"] = DavidJonesAUNZSpider.item_attributes["brand"]
+            item["located_in_wikidata"] = DavidJonesAUNZSpider.item_attributes["brand_wikidata"]
         elif feature["name"].startswith("Myer "):
             item["located_in"] = MyerAUSpider.item_attributes["brand"]
             item["located_in_wikidata"] = MyerAUSpider.item_attributes["brand_wikidata"]
