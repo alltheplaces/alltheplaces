@@ -1,6 +1,6 @@
-from re import search
-from urllib.parse import unquote
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
@@ -16,12 +16,10 @@ class GreatWolfResortsUSSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.greatwolf.com"]
     sitemap_urls = ["https://www.greatwolf.com/php-root.sitemap.xml"]
     sitemap_rules = [(r"/customer-service$", "parse_sd")]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Any, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         item.pop("facebook")
-        item.pop("image")
         item.pop("twitter")
-        has_map = unquote(ld_data["hasMap"])
-        item["lat"], item["lon"] = search(r"[@=](-?\d+\.\d+),(-?\d+\.\d+)", has_map).groups()
-
+        item["branch"] = item.pop("name").removeprefix("Great Wolf Lodge ")
         yield item
