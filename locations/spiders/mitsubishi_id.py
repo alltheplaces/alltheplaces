@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import AsyncIterator
 
 from scrapy.http import Request
@@ -33,16 +34,30 @@ class MitsubishiIDSpider(JSONBlobSpider):
             item["street_address"] = item.pop("addr_full")
 
             meta_data = location.get("meta_data", {})
-            if meta_data.get("salesUnitFlag") == "Ya":
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, meta_data.get("serviceFlag") == "Ya")
-                apply_yes_no(Extras.CAR_PARTS, item, meta_data.get("sparepartFlag") == "Ya")
-            elif meta_data.get("serviceFlag") == "Ya":
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-                apply_yes_no(Extras.CAR_PARTS, item, meta_data.get("sparepartFlag") == "Ya")
-            elif meta_data.get("sparepartFlag") == "Ya":
-                apply_category(Categories.SHOP_CAR_PARTS, item)
-            else:
+            has_sales = meta_data.get("salesUnitFlag") == "Ya"
+            has_service = meta_data.get("serviceFlag") == "Ya"
+            has_parts = meta_data.get("sparepartFlag") == "Ya"
+
+            if not has_sales and not has_service and not has_parts:
                 self.logger.error(f"No type present for: {item['ref']}, {item['name']}")
-            # TODO: hours
-            yield item
+                return
+            if has_sales:
+                shop_item = deepcopy(item)
+                shop_item["ref"] = f"{item['ref']}-shop"
+                apply_category(Categories.SHOP_CAR, shop_item)
+                apply_yes_no(Extras.CAR_REPAIR, shop_item, has_service)
+                apply_yes_no(Extras.CAR_PARTS, shop_item, has_parts)
+                yield shop_item
+
+            if has_service:
+                repair_item = deepcopy(item)
+                repair_item["ref"] = f"{item['ref']}-repair"
+                apply_category(Categories.SHOP_CAR_REPAIR, repair_item)
+                apply_yes_no(Extras.CAR_PARTS, repair_item, has_parts)
+                yield repair_item
+
+            if has_parts:
+                parts_item = deepcopy(item)
+                parts_item["ref"] = f"{item['ref']}-parts"
+                apply_category(Categories.SHOP_CAR_PARTS, parts_item)
+                yield parts_item
