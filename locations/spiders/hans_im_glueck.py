@@ -3,7 +3,7 @@ from typing import Iterable
 import chompjs
 from scrapy.http import Response
 
-from locations.hours import OpeningHours, DAYS_FULL
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
