@@ -9,8 +9,4 @@ class EverNewCASpider(ForeverNewAUNZSpider, PlaywrightSpider):
     start_urls = [
         "https://www.evernew.ca/locator/index/search/?address=vancouver&components[country]=CA&radius=10000000&type=all",
     ]
-    # custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
-    #
-    # def extract_json(self, response: TextResponse):
-    #     data = json.loads(response.xpath("//pre/text()").get())["results"]["results"]
-    #     return data
+    requires_proxy = True

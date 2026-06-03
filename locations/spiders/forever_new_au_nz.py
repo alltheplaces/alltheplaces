@@ -19,6 +19,7 @@ class ForeverNewAUNZSpider(JSONBlobSpider, PlaywrightSpider):
         "https://www.forevernew.co.nz/locator/index/search/?address=wellington&components[country]=NZ&radius=1000000000&type=all",
     ]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def extract_json(self, response: TextResponse):
         data = json.loads(response.xpath("//pre/text()").get())["results"]["results"]
