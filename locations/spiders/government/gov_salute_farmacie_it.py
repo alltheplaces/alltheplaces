@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Iterable
 
 from scrapy import Spider
@@ -14,6 +15,7 @@ class GovSaluteFarmacieITSpider(Spider):
     # Source: https://www.dati.salute.gov.it/it/dataset/farmacie/
     # Names are stored in uppercase by the Ministry of Health.
     start_urls = ["https://www.dati.salute.gov.it/it/dataset/farmacie/"]
+    allowed_domains = ["www.dati.salute.gov.it"]
     dataset_attributes = Licenses.IT_IODL2.value | {
         "attribution:name": "Ministero della Salute",
         "attribution:website": "https://www.dati.salute.gov.it/it/dataset/farmacie/",
@@ -41,6 +43,16 @@ class GovSaluteFarmacieITSpider(Spider):
 
             if vat := record.get("p_iva", "").strip():
                 item["extras"]["ref:vatin"] = "IT" + vat.zfill(11)
+
+            if start := record.get("data_inizio_validita", ""):
+                try:
+                    item["extras"]["start_date"] = datetime.strptime(start, "%d/%m/%Y").strftime("%Y-%m-%d")
+                except ValueError:
+                    pass
+
+            if frazione := record.get("frazione", "-").strip():
+                if frazione != "-":
+                    item["extras"]["addr:suburb"] = frazione
 
             lat_raw = record.get("latitudine", "-")
             lon_raw = record.get("longitudine", "-")
