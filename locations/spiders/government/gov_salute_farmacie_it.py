@@ -9,14 +9,20 @@ from locations.items import Feature, set_lat_lon
 from locations.licenses import Licenses
 
 
-class GovSaluteParafarmacieITSpider(Spider):
-    name = "gov_salute_parafarmacie_it"
-    # Source: https://www.dati.salute.gov.it/it/dataset/parafarmacie/
-    start_urls = ["https://www.dati.salute.gov.it/it/dataset/parafarmacie/"]
-    dataset_attributes = Licenses.IT_IODL2.value | {"attribution:name": "Ministero della Salute"}
+class GovSaluteFarmacieITSpider(Spider):
+    name = "gov_salute_farmacie_it"
+    # Source: https://www.dati.salute.gov.it/it/dataset/farmacie/
+    # Names are stored in uppercase by the Ministry of Health.
+    start_urls = ["https://www.dati.salute.gov.it/it/dataset/farmacie/"]
+    dataset_attributes = Licenses.IT_IODL2.value | {
+        "attribution:name": "Ministero della Salute",
+        "attribution:website": "https://www.dati.salute.gov.it/it/dataset/farmacie/",
+        "use:openstreetmap": "yes",
+    }
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
     def parse(self, response: Response) -> Iterable:
-        url = response.xpath('//a[contains(@href, "FRM_PFARMA") and contains(@href, ".json")]/@href').get()
+        url = response.xpath('//a[contains(@href, "FRM_FARMA") and contains(@href, ".json")]/@href').get()
         if url:
             yield response.follow(url, callback=self.parse_data)
 
@@ -26,14 +32,14 @@ class GovSaluteParafarmacieITSpider(Spider):
                 continue
 
             item = Feature()
-            item["ref"] = record["codice_identificativo_sito"]
-            item["name"] = record["sito_logistico"]
+            item["ref"] = record["cod_farmacia"]
+            item["name"] = record["descrizione_farmacia"]
             item["street_address"] = record["indirizzo"]
             item["city"] = record["comune"]
             item["postcode"] = record["cap"]
             item["state"] = record["regione"].title()
 
-            if vat := record.get("partita_iva", "").strip():
+            if vat := record.get("p_iva", "").strip():
                 item["extras"]["ref:vatin"] = "IT" + vat.zfill(11)
 
             lat_raw = record.get("latitudine", "-")
@@ -45,6 +51,12 @@ class GovSaluteParafarmacieITSpider(Spider):
                     pass
 
             apply_category(Categories.PHARMACY, item)
-            item["extras"]["dispensing"] = "no"
+            item["extras"]["dispensing"] = "yes"
+
+            tipologia = record.get("descrizione_tipologia", "").lower()
+            if "dispensario" in tipologia:
+                item["extras"]["pharmacy"] = "dispensario"
+                if "stagionale" in tipologia:
+                    item["extras"]["seasonal"] = "yes"
 
             yield item
