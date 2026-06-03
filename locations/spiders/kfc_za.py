@@ -8,3 +8,8 @@ class KfcZASpider(KfcAUSpider):
     tenant_id = "5f89a603781e4df48d31337a6c1252a8"
     web_root = "https://order.kfc.co.za/restaurants/"
     requires_proxy = False  # Override the value in KfcAUSpider
+
+    def post_process_item(self, item, response, location):
+        if item.get("phone") == "+27 860 100 222":
+            item.pop("phone")
+        yield item
