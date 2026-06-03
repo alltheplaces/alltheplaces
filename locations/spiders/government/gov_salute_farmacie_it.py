@@ -34,6 +34,7 @@ class GovSaluteFarmacieITSpider(Spider):
 
             item = Feature()
             item["ref"] = record["cod_farmacia"]
+            item["extras"]["ref:msal"] = record["cod_farmacia"]
             item["name"] = record["descrizione_farmacia"]
             item["street_address"] = record["indirizzo"]
             item["city"] = record["comune"]

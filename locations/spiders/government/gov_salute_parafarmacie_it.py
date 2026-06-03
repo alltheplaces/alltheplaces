@@ -33,6 +33,7 @@ class GovSaluteParafarmacieITSpider(Spider):
 
             item = Feature()
             item["ref"] = record["codice_identificativo_sito"]
+            item["extras"]["ref:msal"] = record["codice_identificativo_sito"]
             item["name"] = record["sito_logistico"]
             item["street_address"] = record["indirizzo"]
             item["city"] = record["comune"]
