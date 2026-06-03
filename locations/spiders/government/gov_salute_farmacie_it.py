@@ -21,7 +21,6 @@ class GovSaluteFarmacieITSpider(Spider):
         "attribution:website": "https://www.dati.salute.gov.it/it/dataset/farmacie/",
         "use:openstreetmap": "yes",
     }
-    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
     def parse(self, response: Response) -> Iterable:
         url = response.xpath('//a[contains(@href, "FRM_FARMA") and contains(@href, ".json")]/@href').get()
