@@ -6,12 +6,14 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature, set_lat_lon
+from locations.licenses import Licenses
 
 
 class GovSaluteParafarmacieITSpider(Spider):
     name = "gov_salute_parafarmacie_it"
     # Source: https://www.dati.salute.gov.it/it/dataset/parafarmacie/
     start_urls = ["https://www.dati.salute.gov.it/it/dataset/parafarmacie/"]
+    dataset_attributes = Licenses.IT_IODL2.value | {"attribution:name": "Ministero della Salute"}
 
     def parse(self, response: Response) -> Iterable:
         url = response.xpath('//a[contains(@href, "FRM_PFARMA") and contains(@href, ".json")]/@href').get()

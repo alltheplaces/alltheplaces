@@ -6,6 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature, set_lat_lon
+from locations.licenses import Licenses
 
 
 class GovSaluteFarmacieITSpider(Spider):
@@ -13,6 +14,7 @@ class GovSaluteFarmacieITSpider(Spider):
     # Source: https://www.dati.salute.gov.it/it/dataset/farmacie/
     # Names are stored in uppercase by the Ministry of Health.
     start_urls = ["https://www.dati.salute.gov.it/it/dataset/farmacie/"]
+    dataset_attributes = Licenses.IT_IODL2.value | {"attribution:name": "Ministero della Salute"}
     custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
     def parse(self, response: Response) -> Iterable:
