@@ -10,6 +10,6 @@ class KfcZASpider(KfcAUSpider):
     requires_proxy = False  # Override the value in KfcAUSpider
 
     def post_process_item(self, item, response):
-        if item.get("phone") == "+27 860 100 222":
+        if item.get("phone", "").replace(" ", "") == "0860100222":
             item.pop("phone")
         yield item
