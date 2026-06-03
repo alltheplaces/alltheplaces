@@ -15,27 +15,32 @@ class BpsPLSpider(Spider):
     start_urls = ["https://mojbank.pl/znajdz-placowke"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        token_data = response.xpath('//*[@type="application/json"]/text()').get()
-        token = json.loads(token_data).get("csrf.token")
-        for location_type, value in [("znajdz-placowke", "145"), ("bankomaty", "210")]:
-            yield JsonRequest(
-                url=f"https://mojbank.pl/{location_type}?view=maps&amp;format=json&amp;task=getpoints&menuitem={value}&{token}=1",
-                callback=self.parse_details,
-            )
+        token = json.loads(response.xpath('//script[@type="application/json"]/text()').get()).get("csrf.token")
+        yield JsonRequest(
+            url="https://mojbank.pl/znajdz-placowke?view=maps&amp;format=json&amp;task=getpoints&menuitem=145&{}=1".format(
+                token
+            ),
+            callback=self.parse_banks,
+        )
+        yield JsonRequest(
+            url="https://mojbank.pl/bankomaty?view=maps&amp;format=json&amp;task=getpoints&menuitem=210&{}=1".format(
+                token
+            ),
+            callback=self.parse_atms,
+        )
 
-    def parse_details(self, response: Response, **kwargs: Any) -> Any:
-        data = json5.loads(response.text).get("data", {})
-
-        # Process branches
-        for location in data.get("department", []):
+    def parse_banks(self, response: Response, **kwargs: Any) -> Any:
+        for location in json5.loads(response.text).get("data", {})["department"]:
             if location.get("bank") == "BPS":
                 item = DictParser.parse(location)
+                item["street_address"] = item.pop("street")
                 apply_category(Categories.BANK, item)
                 yield item
 
-        # Process ATMs
-        for location in data.get("atm", []):
+    def parse_atms(self, response: Response, **kwargs: Any) -> Any:
+        for location in json5.loads(response.text).get("data", {})["atm"]:
             if location.get("name", "").startswith("Bank Spółdzielczy"):
                 item = DictParser.parse(location)
+                item["street_address"] = item.pop("street")
                 apply_category(Categories.ATM, item)
                 yield item
