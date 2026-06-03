@@ -69,8 +69,8 @@ class KfcAUSpider(Spider):
                 trading_day["availableHours"]["endTime"],
                 "%H%M",
             )
-        yield from self.post_process_item(item, response, feature) or []
+        yield from self.post_process_item(item, response) or []
 
-    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse) -> Iterable[Feature]:
         """Override with any post processing on the item"""
         yield item
