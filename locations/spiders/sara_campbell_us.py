@@ -1,14 +1,29 @@
-from locations.storefinders.stockinstore import StockInStoreSpider
+import re
+from typing import Any, Iterable
+
+from scrapy import Spider
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+
+PHONE_PATTERN = re.compile(r"\d{3}[-.\s]\d{3}[-.\s]\d{4}")
 
 
-class SaraCampbellUSSpider(StockInStoreSpider):
+class SaraCampbellUSSpider(Spider):
     name = "sara_campbell_us"
     item_attributes = {"brand": "Sara Campbell", "brand_wikidata": "Q117747597"}
-    api_site_id = "10108"
-    api_widget_id = "115"
-    api_widget_type = "product"
-    api_origin = "https://saracampbell.com"
+    start_urls = ["https://saracampbell.com/pages/store-locator"]
 
-    def parse_item(self, item, location):
-        item["name"] = item["name"].replace("\xa0", " ")
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        for location in response.css('div.map-section[data-section-type="section-map"]'):
+            item = Feature()
+            item["ref"] = item["branch"] = location.css("h2::text").get("").strip()
+            item["addr_full"] = location.attrib.get("data-address")
+
+            card_text = " ".join(t.strip() for t in location.css(".rte ::text").getall() if t.strip())
+            if phone := PHONE_PATTERN.search(card_text):
+                item["phone"] = phone.group()
+
+            apply_category(Categories.SHOP_CLOTHES, item)
+            yield item
