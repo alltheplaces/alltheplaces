@@ -8,7 +8,6 @@ from locations.categories import Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.spiders.mcdonalds import Categories, McdonaldsSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class McdonaldsPremierCapitalSpider(Spider):
