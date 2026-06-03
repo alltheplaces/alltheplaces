@@ -16,4 +16,5 @@ class PedrosSpider(AgileStoreLocatorSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["addr_full"] = unescape(item.pop("street_address"))
         item["branch"] = item.pop("name").removeprefix("Pedros ")
+        item.pop("website") # Any websites included were just the homepage
         yield item
