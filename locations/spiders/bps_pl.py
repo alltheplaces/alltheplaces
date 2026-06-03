@@ -2,14 +2,14 @@ import json
 from typing import Any
 
 import json5
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class BpsPLSpider(scrapy.Spider):
+class BpsPLSpider(Spider):
     name = "bps_pl"
     item_attributes = {"brand": "Bank Polskiej Spółdzielczości", "brand_wikidata": "Q9165001"}
     start_urls = ["https://mojbank.pl/znajdz-placowke"]
@@ -29,19 +29,13 @@ class BpsPLSpider(scrapy.Spider):
         # Process branches
         for location in data.get("department", []):
             if location.get("bank") == "BPS":
-                yield self.parse_location(location, Categories.BANK)
+                item = DictParser.parse(location)
+                apply_category(Categories.BANK, item)
+                yield item
 
         # Process ATMs
         for location in data.get("atm", []):
             if location.get("name", "").startswith("Bank Spółdzielczy"):
-                yield self.parse_location(location, Categories.ATM)
-
-    def parse_location(self, location: dict, category: str) -> dict:
-        item = DictParser.parse(location)
-
-        item["branch"] = item.pop("name", None)
-        item["name"] = self.item_attributes["brand"]
-
-        apply_category(category, item)
-
-        return item
+                item = DictParser.parse(location)
+                apply_category(Categories.ATM, item)
+                yield item
