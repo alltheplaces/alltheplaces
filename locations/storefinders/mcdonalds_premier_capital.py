@@ -18,7 +18,6 @@ class McdonaldsPremierCapitalSpider(Spider):
 
     item_attributes = McdonaldsSpider.item_attributes
     domain: str
-    requires_proxy = True
     services = {
         "bezmaksas-wifi": Extras.WIFI,
         "brokastis-no-6-lidz-10%e2%80%8b": Extras.BREAKFAST,
