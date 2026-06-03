@@ -1,5 +1,5 @@
 import json
-from typing import Iterable, AsyncIterator, Any
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Request
 from scrapy.http import TextResponse
