@@ -1,8 +1,9 @@
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
+from locations.items import Feature
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
