@@ -23,13 +23,14 @@ def test_spider_group_override_via_lineage():
 
     original = getattr(GreggsGBSpider, "lineage", None)
     try:
-        GreggsGBSpider.lineage = Lineage.Infrastructure
+        setattr(GreggsGBSpider, "lineage", Lineage.Infrastructure)
         assert spider_class_to_lineage(GreggsGBSpider).group == "infrastructure"
     finally:
         if original is None:
-            del GreggsGBSpider.lineage
+            if hasattr(GreggsGBSpider, "lineage"):
+                delattr(GreggsGBSpider, "lineage")
         else:
-            GreggsGBSpider.lineage = original
+            setattr(GreggsGBSpider, "lineage", original)
 
 
 def test_all_groups_have_at_least_one_spider():

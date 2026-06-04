@@ -1172,7 +1172,8 @@ class OpeningHours:
             elif this_day_group["hours"] == hours:
                 this_day_group["to_day"] = day
 
-        day_groups.append(this_day_group)
+        if this_day_group is not None:
+            day_groups.append(this_day_group)
 
         opening_hours = ""
 
