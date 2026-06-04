@@ -1,5 +1,4 @@
-import json
-from typing import Any
+from typing import Any, Iterable
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
@@ -19,23 +18,16 @@ class ExpressSpider(SitemapSpider, StructuredDataSpider):
     ]
     sitemap_rules = [(r"/[a-z]{2}/[^/]+/[^/]+/[^/]+$", "parse_sd")]
 
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        for ld_obj in LinkedDataParser.iter_linked_data(response):
+            if ld_obj.get("credentialSubject"):
+                yield ld_obj["credentialSubject"]
+
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         item["image"] = item["name"] = None
 
         if branch := response.xpath("//title/text()").re_first(r" at (.+?) \|"):
             item["branch"] = branch
-
-        for blob in response.xpath('//script[@type="application/ld+json"]/text()').getall():
-            try:
-                data = json.loads(blob)
-            except json.JSONDecodeError:
-                continue
-            if subject := data.get("credentialSubject"):
-                if geo := subject.get("geo"):
-                    item["lat"] = geo.get("latitude")
-                    item["lon"] = geo.get("longitude")
-                item["opening_hours"] = LinkedDataParser.parse_opening_hours(subject)
-                break
 
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
