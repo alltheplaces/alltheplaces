@@ -17,6 +17,17 @@ class LafarmaciaITSpider(AlgoliaSpider):
     index_name = "prod_LAF_STORES"
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if item["name"].startswith("Lafarmacia."):
+            item["branch"] = item.pop("name").removeprefix("Lafarmacia.")
+        elif item["name"].startswith("Dispensario Lafarmacia."):
+            item["branch"] = (
+                item.pop("name")
+                .removeprefix("Dispensario Lafarmacia.")
+                .replace("Dispensario", "")
+                .replace("dispensario", "")
+            )
+            item["name"] = "Dispensario Lafarmacia."
+
         item["street_address"] = item.pop("addr_full", None)
         item["lat"] = feature["_geoloc"]["lat"]
         item["lon"] = feature["_geoloc"]["lng"]
