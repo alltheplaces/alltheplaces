@@ -27,7 +27,9 @@ class NettoramaNLSpider(Spider):
             item["lat"] = location["coord_latitude"]
             item["lon"] = location["coord_longitude"]
 
-            item["housenumber"] = "".join(filter(None, [location["address_housenumber"],location["address_housenumber_suffix"]]))
+            item["housenumber"] = "".join(
+                filter(None, [location["address_housenumber"], location["address_housenumber_suffix"]])
+            )
             item["street"] = location["address_street"]
             item["postcode"] = location["address_zipcode"]
             item["city"] = location["address_place"]
