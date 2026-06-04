@@ -39,6 +39,6 @@ class BpetTRSpider(scrapy.Spider):
         item["lon"] = response.meta["lon"]
         item["website"] = response.url
         item["branch"] = response.xpath("//main/h3/text()").get()
-        item["street_address"] = response.xpath("//main/h4/text()").get("").strip()
+        item["addr_full"] = response.xpath("//main/h4/text()").get("").strip()
         apply_category(Categories.FUEL_STATION, item)
         yield item
