@@ -1,7 +1,10 @@
+from typing import Any
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -12,22 +15,18 @@ class DickBlickSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.dickblick.com"]
     sitemap_urls = ["https://www.dickblick.com/robots.txt"]
     sitemap_rules = [(r"/stores/[-\w]+/[-\w]+/$", "parse_sd")]
-    wanted_types = ["HobbyShop"]
+    time_format = "%I:%M%p"
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        oh = OpeningHours()
-        for day in response.xpath('//li[contains(@data-testid,"hours")]'):
-            if day.xpath("./text()").get().strip() == "Closed":
-                continue
-            oh.add_range(
-                day=day.xpath("normalize-space(./span/text())").get().strip(":")[:3],
-                open_time=day.xpath("./text()").get().split(" - ")[0],
-                close_time=day.xpath("./text()").get().split(" - ")[1],
-                time_format="%I:%M%p",
-            )
-        item["opening_hours"] = oh
+    def _get_sitemap_body(self, response: Response) -> bytes:
+        if "/v2/sitemap/" in response.url:
+            return response.body
+        return super()._get_sitemap_body(response)
 
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
+        if (item.get("name") or "").upper().startswith("CLOSED"):
+            return
+        item["twitter"] = None
+        item["facebook"] = None
         apply_category(Categories.SHOP_CRAFT, item)
-
         yield item
