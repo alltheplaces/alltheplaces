@@ -9,12 +9,9 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class ExtremePitaCAUSSpider(Spider):
-    name = "extreme_pita_ca_us"
-    item_attributes = {
-        "brand_wikidata": "Q5422367",
-        "brand": "Extreme Pita",
-    }
+class ExtremePitaCASpider(Spider):
+    name = "extreme_pita_ca"
+    item_attributes = {"brand": "Extreme Pita", "brand_wikidata": "Q5422367"}
     allowed_domains = ["extremepita.com"]
     start_urls = ["https://extremepita.com/locations/"]
     seen_refs: set[str] = set()
