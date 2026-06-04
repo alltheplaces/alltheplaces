@@ -39,10 +39,9 @@ class HobbytownUSSpider(Spider):
             sel = Selector(text=html.unescape(location[2]))
             item["branch"] = sel.xpath("//strong/text()").get().removeprefix("HobbyTown ")
             addr = sel.xpath("//body/text()").getall()
-            print(addr)
             item["street_address"] = addr[0]
             item["addr_full"] = merge_address_lines(addr[:2])
-            if len(addr)==3:
+            if len(addr) == 3:
                 item["phone"] = addr[2]
 
             extract_email(item, sel)
