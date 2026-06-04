@@ -4,7 +4,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -24,7 +24,9 @@ class ExpressSpider(SitemapSpider, StructuredDataSpider):
                 yield ld_obj["credentialSubject"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
-        item["image"] = item["name"] = None
+        item["image"] = None
+        if "Closed" in item["name"]:
+            set_closed(item)
 
         if branch := response.xpath("//title/text()").re_first(r" at (.+?) \|"):
             item["branch"] = branch
