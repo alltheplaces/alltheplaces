@@ -127,7 +127,10 @@ class BashSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         for hours_range in location["businessHours"]:
             item["opening_hours"].add_range(
-                DAYS_FROM_SUNDAY[hours_range["dayOfWeek"]], hours_range["openingTime"], hours_range["closingTime"], "%H:%M:%S"
+                DAYS_FROM_SUNDAY[hours_range["dayOfWeek"]],
+                hours_range["openingTime"],
+                hours_range["closingTime"],
+                "%H:%M:%S",
             )
 
         if m := self.brand_name_regex.match(item["name"]):
