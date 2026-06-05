@@ -1,7 +1,8 @@
-import re
+import json
+from typing import Any, AsyncIterator
 
-import chompjs
-import scrapy
+from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -9,34 +10,42 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
-class StarbucksTHSpider(scrapy.Spider):
+class StarbucksTHSpider(Spider):
     name = "starbucks_th"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
-    start_urls = ["https://www.starbucks.co.th/find-a-store/"]
     requires_proxy = True
 
-    def parse(self, response, **kwargs):
-        data = chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "places")]/text()').re_first(r"places\":(\[.+\]),\"styles")
+    def make_request(self, page: int, limit: int = 100) -> Request:
+        return Request(
+            url=f"https://www.starbucks.co.th/en/find-a-store?page={page}&limit={limit}",
+            cb_kwargs={"page": page, "limit": limit},
         )
-        for store in data:
-            store.update(store.pop("location"))
-            week_timing = [store["extra_fields"].get(day.lower(), "") for day in DAYS_FULL]
-            if all("close" in timing.lower() for timing in week_timing):
-                continue
-            item = DictParser.parse(store)
-            item["phone"] = store["extra_fields"]["tel"]
-            item["opening_hours"] = OpeningHours()
-            for day in DAYS_FULL:
-                if timing := store["extra_fields"].get(day.lower()):
-                    if "24 hr" in timing.lower():
-                        open_time, close_time = "00:00", "23:59"
-                    elif m := re.match(r"(\d+:\d+)\s.+\s(\d+:\d+)", timing.replace(".", ":")):
-                        open_time, close_time = m.groups()
-                    else:
-                        continue
-                    item["opening_hours"].add_range(day, open_time, close_time)
 
-            apply_category(Categories.COFFEE_SHOP, item)
+    async def start(self) -> AsyncIterator[Request]:
+        yield self.make_request(1)
 
-            yield item
+    def parse(self, response: Response, page: int, limit: int) -> Any:
+        if stores_info := response.xpath('//script[contains(text(), "Latitude")]'):
+            stores = json.loads(stores_info.xpath("./text()").re_first(r"\\\"items\\\":(\[.*\]),").replace("\\", ""))
+            for store in stores:
+                item = DictParser.parse(store)
+                item["city"] = store["Sub_District"]  # No detailed address field is present
+                item["branch"] = item["extras"]["branch:th"] = store["CommonStoreNameTH"]
+                item["extras"]["branch:en"] = item.pop("name")
+                item["phone"] = store.get("Mobile")
+                item["opening_hours"] = self.parse_opening_hours(store)
+                apply_category(Categories.COFFEE_SHOP, item)
+                yield item
+
+            if len(stores) == limit:
+                yield self.make_request(page + 1, limit)
+
+    def parse_opening_hours(self, store: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day in DAYS_FULL:
+            open_time, close_time = [
+                (store.get(f"{day.lower()}{timing}") or "").split("T")[-1].split(".")[0]
+                for timing in ["OpeningTime", "ClosingTime"]
+            ]
+            opening_hours.add_range(day, open_time, close_time.replace("00:00:00", "23:59:00"), "%H:%M:%S")
+        return opening_hours
