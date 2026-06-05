@@ -1,8 +1,8 @@
 import re
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy import Request
-from scrapy.http import JsonRequest, TextResponse
+import scrapy
+from scrapy.http import TextResponse
 
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -13,13 +13,15 @@ class FreshstopZASpider(JSONBlobSpider):
     item_attributes = {"brand": "FreshStop", "brand_wikidata": "Q116620734"}
     locations_key = "data"
 
-    async def start(self) -> AsyncIterator[JsonRequest | Request]:
-
-        yield JsonRequest(
+    async def start(self):
+        yield scrapy.FormRequest(
             url="https://freshstop.co.za/wp-admin/admin-ajax.php",
             method="POST",
-            headers={"content-type": "application/x-www-form-urlencoded"},
-            body="action=list_stores&lat=28.6327&lng=77.2198",
+            formdata={
+                "action": "list_stores",
+                "lat": "28.6327",
+                "lng": "77.2198",
+            },
             callback=self.parse,
         )
 
