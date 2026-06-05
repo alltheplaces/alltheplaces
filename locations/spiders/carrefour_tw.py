@@ -16,11 +16,11 @@ class CarrefourTWSpider(Spider):
 
     brands = {
         "量販": {
-            "brand": "Carrefour",
-            "brand_wikidata": "Q3117359",
+            "brand": "家樂福",
+            "brand_wikidata": "Q136774386",
             "category": Categories.SHOP_SUPERMARKET,
         },  # "Mass sales" (bad translation but as there are fewer of this type, it is probably the hypermarket brand)
-        "超市": {"brand": "Carrefour Market", "brand_wikidata": "Q2689639", "category": Categories.SHOP_SUPERMARKET},
+        "超市": {"brand": "家樂福超市", "brand_wikidata": "Q136774386", "category": Categories.SHOP_SUPERMARKET},
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -34,15 +34,22 @@ class CarrefourTWSpider(Spider):
             item = DictParser.parse(location)
             if location["store_type_name"] not in self.brands.keys():
                 continue
+            item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name")
             parse_brand_and_category_from_mapping(item, location["store_type_name"], self.brands)
-            item["phone"] = location["contact_tel"]
+            item["phone"] = location["contact_tel"].replace("、", "; ")
+            item["website"] = item["extras"]["website:en"] = (
+                "https://www.carrefour.com.tw/store-info-en/?store={}".format(location["name"])
+            )
+            item["extras"]["website:zh"] = "https://www.carrefour.com.tw/store-info/?store={}".format(location["name"])
+
             item["opening_hours"] = OpeningHours()
             if location["is24h"]:
                 item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
             else:
-                for day_name in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
+                for day_name in ["mon", "tue", "wed", "thur", "fri", "sat", "sun"]:
                     if location.get(f"{day_name}_start") and location.get(f"{day_name}_end"):
                         item["opening_hours"].add_range(
-                            day_name.title(), location.get(f"{day_name}_start"), location.get(f"{day_name}_end")
+                            day_name, location.get(f"{day_name}_start"), location.get(f"{day_name}_end")
                         )
             yield item

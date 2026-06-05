@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Iterable
 
 import chompjs
@@ -39,22 +40,30 @@ class MitsubishiUASpider(JSONBlobSpider):
         }
         SALES = "Відділ продажу"
         SERVICE = "Відділ сервісу"
-        category = ""
 
         if SALES in departments:
-            category = SALES
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, SERVICE in departments)
-        elif SERVICE in departments:
-            category = SERVICE
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
+            sales_item = deepcopy(item)
+            sales_item["ref"] = f"{item['ref']}-sales"
+            dept = departments[SALES]
+            sales_item["phone"] = (dept.get("phones") or "").replace(",", "; ")
+            sales_item["email"] = dept.get("email")
+            oh = OpeningHours()
+            for rule in dept.get("schedule", []):
+                oh.add_ranges_from_string(f'{rule["day"]} {rule["workhours"]}', days=DAYS_RU)
+            sales_item["opening_hours"] = oh
+            apply_category(Categories.SHOP_CAR, sales_item)
+            apply_yes_no(Extras.CAR_REPAIR, sales_item, SERVICE in departments)
+            yield sales_item
 
-        phones = departments[category].get("phones") or ""
-        item["phone"] = phones.replace(",", "; ")
-        item["email"] = departments[category].get("email")
-
-        item["opening_hours"] = OpeningHours()
-        for rule in departments[category].get("schedule", []):
-            item["opening_hours"].add_ranges_from_string(f'{rule["day"]} {rule["workhours"]}', days=DAYS_RU)
-
-        yield item
+        if SERVICE in departments:
+            service_item = deepcopy(item)
+            service_item["ref"] = f"{item['ref']}-service"
+            dept = departments[SERVICE]
+            service_item["phone"] = (dept.get("phones") or "").replace(",", "; ")
+            service_item["email"] = dept.get("email")
+            oh = OpeningHours()
+            for rule in dept.get("schedule", []):
+                oh.add_ranges_from_string(f'{rule["day"]} {rule["workhours"]}', days=DAYS_RU)
+            service_item["opening_hours"] = oh
+            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            yield service_item

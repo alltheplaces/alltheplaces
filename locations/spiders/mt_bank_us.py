@@ -66,11 +66,11 @@ class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.ATM, item, cat == "Branch & ATM")
 
-            if not item.get("name") or not item["name"].startswith("M&T Bank in "):
+            if not item.get("name") or not item["name"].startswith("M&T Bank Branch & ATM: "):
                 # Duplicates, eg:
                 # https://locations.mtb.com/ma/agawam/bank-branches-and-atms-agawam-ma-8422.html
                 # https://locations.mtb.com/ma/agawam/bank-branches-and-atms-agawam-ma-sa7000.html
                 return
-            item["branch"] = item.pop("name").removeprefix("M&T Bank in ")
+            item["branch"] = item.pop("name").removeprefix("M&T Bank Branch & ATM: ")
 
         yield item

@@ -9,7 +9,7 @@ class DominosPizzaUSSpider(YextAnswersSpider):
     api_key = "db579cbf33dcf239cfae2d4466f5ce59"
 
     def parse_item(self, location, item):
-        item["website"] = location["c_pagesURL"]
+        item["website"] = location.get("c_pagesURL")
         if item["website"] == "https://pizza.dominos.com/new-york/new-york/61-ninth-avenue":
             return  # "Test Location"
 

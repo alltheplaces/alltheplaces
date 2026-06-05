@@ -20,9 +20,21 @@ class CircleKSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["US", "CA"]:
-            yield JsonRequest(
-                url=f"https://api.circlek.com/us/ngrp-store-locator/v1/stations?bottomRightLongitude=180.0&bottomRightLatitude=-90.0&topLeftLongitude=-180.0&topLeftLatitude=90.0&maxResults=10000&country={country}&brand=CIRCLEK,COUCHE_TARD,HOLIDAY",
-            )
+            for lat_lon in [
+                (-125.0, 49.0, -115.0, 42.0),
+                (-115.0, 49.0, -105.0, 42.0),
+                (-105.0, 49.0, -95.0, 42.0),
+                (-95.0, 49.0, -85.0, 42.0),
+                (-85.0, 49.0, -75.0, 42.0),
+                (-125.0, 42.0, -115.0, 35.0),
+                (-115.0, 42.0, -105.0, 35.0),
+                (-105.0, 42.0, -95.0, 35.0),
+                (-95.0, 42.0, -85.0, 35.0),
+                (-180.0, 90.0, 180.0, -90.0),
+            ]:
+                yield JsonRequest(
+                    url=f"https://api.circlek.com/us/ngrp-store-locator/v1/stations?bottomRightLongitude={lat_lon[2]}&bottomRightLatitude={lat_lon[3]}&topLeftLongitude={lat_lon[0]}&topLeftLatitude={lat_lon[1]}&maxResults=2000&country={country}&brand=CIRCLEK,COUCHE_TARD,HOLIDAY",
+                )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
