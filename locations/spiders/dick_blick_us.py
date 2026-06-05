@@ -4,13 +4,13 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class DickBlickSpider(SitemapSpider, StructuredDataSpider):
-    name = "dick_blick"
+class DickBlickUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "dick_blick_us"
     item_attributes = {"brand": "Dick Blick", "brand_wikidata": "Q5272692"}
     allowed_domains = ["www.dickblick.com"]
     sitemap_urls = ["https://www.dickblick.com/robots.txt"]
