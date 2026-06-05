@@ -21,7 +21,7 @@ class CostPlusWorldMarketSpider(JSONBlobSpider):
     def post_process_item(
         self, item: Feature, response: TextResponse, location: dict, **kwargs: Any
     ) -> Iterable[Feature]:
-        item["name"] = None
+        item["branch"] = item.pop("name")
         item["website"] = response.urljoin(location["storeExternalLink"])
 
         item["opening_hours"] = OpeningHours()
