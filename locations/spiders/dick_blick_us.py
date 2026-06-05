@@ -26,7 +26,8 @@ class DickBlickSpider(SitemapSpider, StructuredDataSpider):
         return super()._get_sitemap_body(response)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
-        if (item.get("name") or "").upper().startswith("CLOSED"):
-            return
+        if "CLOSED" in item["name"]:
+            set_closed(item)
+        item["branch"] = item.pop("name")
         apply_category(Categories.SHOP_CRAFT, item)
         yield item
