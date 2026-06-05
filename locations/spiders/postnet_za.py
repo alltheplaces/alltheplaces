@@ -25,7 +25,7 @@ class PostnetZASpider(Spider):
             item["postcode"] = location["postal_code"]
             item["phone"] = location["telephone"]
             item["email"] = location["email"]
-            item["website"] = "https://www.postnet.co.za/stores/{}/{}".format(location["tag_name"], location["code"])
+            item["website"] = "https://www.postnet.co.za/stores/{}".format(location["tag_name"])
 
             apply_category(Categories.POST_OFFICE, item)
 
