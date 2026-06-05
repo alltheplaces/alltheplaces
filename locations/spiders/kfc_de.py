@@ -24,7 +24,6 @@ class KfcDESpider(Spider):
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.de/find-a-kfc/allrestaurant"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in chompjs.parse_js_object(response.text):
