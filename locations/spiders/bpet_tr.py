@@ -1,20 +1,18 @@
 import json
 import re
-from typing import Any, AsyncIterator
+from typing import Any
 
-import scrapy
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class BpetTRSpider(scrapy.Spider):
+class BpetTRSpider(Spider):
     name = "bpet_tr"
-    item_attributes = {"brand": "Bpet Energy", "brand_wikidata": "Q25475602"}
-
-    async def start(self) -> AsyncIterator[Any]:
-        yield scrapy.Request("https://www.bpet.com.tr/en/bayi-haritasi")
+    item_attributes = {"brand": "Bpet", "brand_wikidata": "Q25475602"}
+    start_urls = ["https://www.bpet.com.tr/en/bayi-haritasi"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for match in re.finditer(r'\{"photo_id":.+?\}', response.text):
@@ -22,7 +20,7 @@ class BpetTRSpider(scrapy.Spider):
                 data = json.loads(match.group())
             except json.JSONDecodeError:
                 continue
-            yield scrapy.Request(
+            yield Request(
                 url=response.urljoin(data["owner_url"]),
                 callback=self.parse_station,
                 meta={
@@ -38,7 +36,7 @@ class BpetTRSpider(scrapy.Spider):
         item["lat"] = response.meta["lat"]
         item["lon"] = response.meta["lon"]
         item["website"] = response.url
-        item["branch"] = response.xpath("//main/h3/text()").get()
+        item["name"] = response.xpath("//main/h3/text()").get()
         item["addr_full"] = response.xpath("//main/h4/text()").get("").strip()
         apply_category(Categories.FUEL_STATION, item)
         yield item
