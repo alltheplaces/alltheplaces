@@ -11,8 +11,8 @@ from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ThaiExpressCAUSSpider(SitemapSpider, StructuredDataSpider):
-    name = "thai_express_ca_us"
+class ThaiExpressUSSpider(SitemapSpider, StructuredDataSpider):
+    name = "thai_express_us"
     item_attributes = {"brand": "Thaï Express", "brand_wikidata": "Q7711610"}
     sitemap_urls = ["https://locations.thaiexpress.ca/sitemap.xml"]
     sitemap_rules = [(r"https://locations\.thaiexpress\.ca/(?:qc|on|ab|bc|ns|mb|sk|nb|nl|pe)/[^/]+/[^/]+$", "parse_sd")]
