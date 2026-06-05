@@ -1,50 +1,31 @@
-import json
+from typing import Iterable
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.storefinders.where2getit import Where2GetItSpider
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.rio_seo import RioSeoSpider
 
 
-class MattressFirmUSSpider(Where2GetItSpider):
+class MattressFirmUSSpider(RioSeoSpider):
     name = "mattress_firm_us"
-    api_brand_name = "mattressfirmsites"
-    api_key = "1693675C-6DFD-11EE-B679-54AE4A66C4B2"
-    drop_attributes = {"email"}
-    custom_settings = {
-        "DOWNLOAD_TIMEOUT": 30,
-        "DOWNLOAD_WARNSIZE": 268435456,  # 256 MiB needed as results are >150 MiB
-    }
+    end_point = "https://maps.stores.mattressfirm.com.prod.rioseo.com"
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
-    def pre_process_data(self, location):
-        location.pop("location")
-
-    def parse_item(self, item, location, **kwargs):
-        # Apply basic information common to each brand
-        apply_category(Categories.SHOP_BED, item)
-
-        if location["mattress_firm_clearance_center"] == "yes":
-            item["brand"] = "Mattress Firm Clearance"
-            item["brand_wikidata"] = "Q6791878"
-        elif location["sleep_expert_store"] == "yes":
-            item["brand"] = "Sleep Experts"
-            item["brand_wikidata"] = "Q7539688"
+    def post_process_feature(self, feature: Feature, location: dict) -> Iterable[Feature]:
+        # Maintain original brand separation
+        if "Clearance" in location.get("location_name", ""):
+            feature["brand"] = "Mattress Firm Clearance"
+            feature["brand_wikidata"] = "Q6791878"
         else:
-            item["brand"] = "Mattress Firm"
-            item["brand_wikidata"] = "Q6791878"
+            feature["brand"] = "Mattress Firm"
+            feature["brand_wikidata"] = "Q6791878"
 
-        item["branch"] = item.pop("name").removeprefix(item["brand"]).strip()
-
-        # Store attributes
-        # (also includes payment methods, but that's not shown on the website)
-        attributes = {kv["id"]: kv["value"] for kv in json.loads(location["attributes"])}
-        if "has_delivery" in attributes:
-            apply_yes_no(Extras.DELIVERY, item, attributes["has_delivery"] == "yes", attributes["has_delivery"] != "no")
-
-        # Extra contact info
-        project_meta = json.loads(location["project_meta"])
-        item["facebook"] = project_meta.get("Facebook URL")
-        apply_category(
-            {"contact:sms": project_meta.get("SMS Phone Number", "")},
-            item,
+        feature["branch"] = (
+            feature.pop("name", "")
+            .removeprefix("Mattress Firm ")
+            .replace("Mesa Clearance Center at ", "")
+            .replace("Outlet", "")
+            .strip(" -")
         )
+        apply_category(Categories.SHOP_BED, feature)
 
-        yield item
+        yield feature
