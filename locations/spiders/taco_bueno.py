@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import datetime
 from typing import Any
@@ -26,7 +27,9 @@ class TacoBuenoSpider(Spider):
         )
 
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["pageProps"]["locations"]:
+        for location in json.loads(response.xpath('//*[contains(text(),"storeCode")]/text()').get())["props"][
+            "pageProps"
+        ]["locations"]:
             item = DictParser.parse(location)
             item["ref"] = location["storeCode"]
             item["street_address"] = merge_address_lines(location["addressLines"])

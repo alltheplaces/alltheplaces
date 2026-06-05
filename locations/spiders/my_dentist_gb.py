@@ -78,6 +78,6 @@ class MyDentistGBSpider(StructuredDataSpider):
         )
         if item["name"].startswith("mydentist") or item["name"].startswith("{my}dentist"):
             item.update(self.MYDENTIST)
-            item["name"] = "{my}dentist"
+            item["name"] = None
         apply_category(Categories.DENTIST, item)
         yield item

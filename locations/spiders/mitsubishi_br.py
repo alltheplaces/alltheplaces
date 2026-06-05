@@ -1,9 +1,10 @@
+from copy import deepcopy
 from typing import Any
 
 import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -19,8 +20,19 @@ class MitsubishiBRSpider(scrapy.Spider):
             website = dealer.get("website")
             if website and not website.startswith("https"):
                 item["website"] = "https://" + website.strip()
+
             if dealer.get("newCars"):
-                apply_category(Categories.SHOP_CAR, item)
-            elif not dealer.get("newCars") and dealer.get("kitCarParts"):
-                apply_category(Categories.SHOP_CAR_PARTS, item)
-            yield item
+                sales_item = deepcopy(item)
+                sales_item["ref"] = f"{item['ref']}-sales"
+                apply_category(Categories.SHOP_CAR, sales_item)
+                apply_yes_no(Extras.CAR_REPAIR, sales_item, dealer.get("postSalesServices"))
+                apply_yes_no(Extras.USED_CAR_SALES, sales_item, dealer.get("nearlyNewCars"))
+                apply_yes_no(Extras.CAR_PARTS, sales_item, dealer.get("kitCarParts"))
+                yield sales_item
+
+            if dealer.get("postSalesServices"):
+                service_item = deepcopy(item)
+                service_item["ref"] = f"{item['ref']}-service"
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                apply_yes_no(Extras.CAR_PARTS, service_item, dealer.get("kitCarParts"))
+                yield service_item

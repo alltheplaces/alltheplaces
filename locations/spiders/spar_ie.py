@@ -16,6 +16,7 @@ class SparIESpider(Spider):
     name = "spar_ie"
     item_attributes = SPAR_SHARED_ATTRIBUTES
     start_urls = ["https://www.spar.ie/store-locator/"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 90}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         match = re.search(

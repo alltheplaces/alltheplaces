@@ -147,7 +147,7 @@ class BurgerKingSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         ae_endpoint = "https://www.burgerking.ae/api/whitelabel"
         eu_endpoint = "https://euc1-prod-bk.rbictg.com/graphql"
-        gb_endpoint = "https://www.burgerking.co.uk/api/whitelabel"
+        gb_endpoint = "https://euc1-prod-bk.rbictg.com/graphql"
         nz_endpoint = "https://www.burgerking.co.nz/api/whitelabel"
         sa_endpoint = "https://www.burgerking.com.sa/api/whitelabel"
         us_endpoint = "https://use1-prod-bk.rbictg.com/graphql"

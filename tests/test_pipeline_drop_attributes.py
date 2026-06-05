@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.pipelines.drop_attributes import DropAttributesPipeline
 
 
-def get_objects() -> (Spider, DropAttributesPipeline, Feature):
+def get_objects() -> tuple[Spider, DropAttributesPipeline, Feature]:
     crawler = get_crawler(DefaultSpider)
     crawler.spider = crawler._create_spider()
     return crawler.spider, DropAttributesPipeline(crawler), Feature()
