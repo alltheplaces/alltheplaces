@@ -17,6 +17,8 @@ class DickBlickSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/stores/[-\w]+/[-\w]+/$", "parse_sd")]
     time_format = "%I:%M%p"
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    search_for_twitter = False
+    search_for_facebook = False
 
     def _get_sitemap_body(self, response: Response) -> bytes:
         if "/v2/sitemap/" in response.url:
@@ -26,7 +28,5 @@ class DickBlickSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         if (item.get("name") or "").upper().startswith("CLOSED"):
             return
-        item["twitter"] = None
-        item["facebook"] = None
         apply_category(Categories.SHOP_CRAFT, item)
         yield item
