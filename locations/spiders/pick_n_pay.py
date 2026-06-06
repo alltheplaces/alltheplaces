@@ -23,6 +23,8 @@ class PickNPaySpider(scrapy.Spider):
             store.update(address)
             item = DictParser.parse(store)
 
+            item["branch"] = item.pop("name").removeprefix("Boxer ").removeprefix("BP @ ").removeprefix("BP ").removeprefix("Clothing ").removeprefix("PnP ").removeprefix("PnP")
+
             item["opening_hours"] = OpeningHours()
             for day in store.get("tradingHours", []):
                 # dayId is 1 to 8, 1 being Monday
