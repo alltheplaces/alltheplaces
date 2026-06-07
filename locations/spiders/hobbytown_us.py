@@ -2,7 +2,7 @@ import html
 import re
 from typing import Any, AsyncIterator
 
-from chompjs import chompjs
+from chompjs import parse_js_object
 from scrapy import FormRequest, Selector, Spider
 from scrapy.http import Response
 
@@ -23,7 +23,7 @@ class HobbytownUSSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in chompjs.parse_js_object(
+        for location in parse_js_object(
             re.search(
                 r"locations: (\[\[.+?]],)", response.xpath("//script[contains(text(), 'locations')]/text()").get()
             ).group(1)
@@ -39,8 +39,7 @@ class HobbytownUSSpider(Spider):
             sel = Selector(text=html.unescape(location[2]))
             item["branch"] = sel.xpath("//strong/text()").get().removeprefix("HobbyTown ")
             addr = sel.xpath("//body/text()").getall()
-            item["street_address"] = addr[0]
-            item["addr_full"] = merge_address_lines(addr[:2])
+            item["street_address"] = merge_address_lines(addr[:2])
             if len(addr) == 3:
                 item["phone"] = addr[2]
 
