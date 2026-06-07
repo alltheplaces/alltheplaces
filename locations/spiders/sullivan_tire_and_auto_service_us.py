@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class SullivanTireAndAutoServiceUSSpider(SitemapSpider, StructuredDataSpider):
     name = "sullivan_tire_and_auto_service_us"
-    item_attributes = {"brand": "Sullivan Tire and Auto Service", "brand_wikidata": "Q121422824"}
+    item_attributes = {"brand": "Sullivan Tire", "brand_wikidata": "Q121422824"}
     sitemap_urls = ["https://www.sullivantire.com/sitemap.xml"]
     sitemap_rules = [(r"/locations/", "parse_sd")]
     search_for_twitter = False
