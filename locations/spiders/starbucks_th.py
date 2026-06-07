@@ -47,5 +47,6 @@ class StarbucksTHSpider(Spider):
                 (store.get(f"{day.lower()}{timing}") or "").split("T")[-1].split(".")[0]
                 for timing in ["OpeningTime", "ClosingTime"]
             ]
-            opening_hours.add_range(day, open_time, close_time.replace("00:00:00", "23:59:00"), "%H:%M:%S")
+            if open_time and close_time:
+                opening_hours.add_range(day, open_time, close_time.replace("00:00:00", "23:59:00"), "%H:%M:%S")
         return opening_hours
