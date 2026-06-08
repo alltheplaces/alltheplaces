@@ -16,7 +16,7 @@ class A1BGSpider(scrapy.Spider):
             item = DictParser.parse(store)
             item["street_address"] = store["address"].strip()
             item["opening_hours"] = self.get_opening_hours(store)
-            yield Feature(item)
+            yield item
 
     def get_opening_hours(self, store):
         oh = OpeningHours()
