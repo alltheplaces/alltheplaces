@@ -16,8 +16,12 @@ class AcmaRrlAUSpider(Spider):
     name = "acma_rrl_au"
     allowed_domains = ["web.acma.gov.au"]
     start_urls = ["https://web.acma.gov.au/rrl-updates/spectra_rrl.zip"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 120, "DOWNLOAD_WARNSIZE": 268435456}
-    user_agent = BROWSER_DEFAULT
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "DOWNLOAD_TIMEOUT": 120,
+        "DOWNLOAD_WARNSIZE": 268435456,
+        "USER_AGENT": BROWSER_DEFAULT,
+    }
 
     _clients = {}
     _licences = {}
