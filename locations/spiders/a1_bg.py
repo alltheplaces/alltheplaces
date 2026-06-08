@@ -2,7 +2,6 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_BG, OpeningHours
-from locations.items import Feature
 
 
 class A1BGSpider(scrapy.Spider):
