@@ -14,6 +14,7 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
     name = "evgo_us"
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
     sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
+    sitemap_rules = [(r"/find-a-charger/[^/]+/[^/]+/[^/]+-\d+/?$", "parse")]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse_sitemap(self, response: Response) -> Iterable[Request]:
@@ -28,15 +29,17 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
         item["ref"] = response.url.rsplit("-", 1)[1].strip("/")
         item["branch"] = response.xpath("//h1/text()").get()
         item["street_address"] = response.xpath("//ol/li[last()]//span/text()").get()
-        item["state"] = response.xpath("//ol/li[2]//a/text()").get().upper()
+        state = response.xpath("//ol/li[2]//a/text()").get()
+        item["state"] = state.upper() if state else None
+        title = response.xpath("//title/text()").get() or ""
         item["addr_full"] = (
-            response.xpath("//title/text()").get().split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ")
+            title.split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ") or None
         )
-        item["extras"]["capacity"] = (
-            response.xpath('//div[contains(@title, " stalls at this location")]/@title')
-            .get()
-            .removesuffix(" stalls at this location")
-        )
+        capacity = response.xpath(
+            '//div[contains(@title, " stalls at this location")]/@title'
+        ).get()
+        if capacity:
+            item["extras"]["capacity"] = capacity.removesuffix(" stalls at this location")
 
         extract_google_position(item, response)
 
