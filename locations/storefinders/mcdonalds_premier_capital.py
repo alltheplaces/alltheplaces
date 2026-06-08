@@ -53,7 +53,7 @@ class McdonaldsPremierCapitalSpider(Spider):
         )
 
     def parse_api(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        for location in response.json()["data"]:
+        for location in response.json()["data"]:  # ty: ignore[unresolved-attribute]
             location.update(location.pop("latlng"))
             location.pop("street_number", "")  # street address data not consistent,
             location.pop("street_name", "")  # addr_full gets populated with proper address
