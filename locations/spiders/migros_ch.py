@@ -56,7 +56,7 @@ class MigrosCHSpider(Spider):
         "out": ("Outlet Migros", "Q115659564", Categories.SHOP_SUPERMARKET),
         "pickmup": ("PickMup Box", "Q115679275", Categories.PRODUCT_PICKUP),
         "res": ("Migros Restaurant", "Q111803848", Categories.RESTAURANT),
-        "super": ("Migros", "Q115661152", Categories.SHOP_SUPERMARKET),
+        "super": ("Migros", "Q680727", Categories.SHOP_SUPERMARKET),
         "voi": ("VOI", "Q110277616", Categories.SHOP_SUPERMARKET),
     }
     api_url = "https://api.migros.ch/migros/sales/branches/v1/graphql"
@@ -71,14 +71,12 @@ class MigrosCHSpider(Spider):
             url=self.api_url,
             data={"query": QUERY, "variables": {"limit": self.page_size, "offset": offset}},
             headers={"x-api-key": self.api_key, "Accept-Language": "de"},
-            meta={"offset": offset},
+            cb_kwargs={"offset": offset},
         )
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        offset = response.meta["offset"]
+    def parse(self, response: Response, offset: int, **kwargs: Any) -> Any:
         facilities = response.json()["data"]["facilities"]
-        results = facilities["results"]
-        for facility in results:
+        for facility in facilities["results"]:
             yield from self.parse_facility(facility)
         if offset + self.page_size < facilities["total"]:
             yield self.api_request(offset + self.page_size)
