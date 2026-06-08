@@ -31,12 +31,8 @@ class EvgoUSSpider(SitemapSpider):
         state = response.xpath("//ol/li[2]//a/text()").get()
         item["state"] = state.upper() if state else None
         title = response.xpath("//title/text()").get() or ""
-        item["addr_full"] = (
-            title.split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ") or None
-        )
-        capacity = response.xpath(
-            '//div[contains(@title, " stalls at this location")]/@title'
-        ).get()
+        item["addr_full"] = title.split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ") or None
+        capacity = response.xpath('//div[contains(@title, " stalls at this location")]/@title').get()
         if capacity:
             item["extras"]["capacity"] = capacity.removesuffix(" stalls at this location")
 
