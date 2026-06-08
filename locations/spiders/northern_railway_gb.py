@@ -10,6 +10,7 @@ class NorthernRailwayGBSpider(Spider):
     name = "northern_railway_gb"
     item_attributes = {"operator": "Northern", "operator_wikidata": "Q85789775"}
     start_urls = ["https://www.northernrailway.co.uk/api/northern_station_list_auto_complete"]
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.json()["results"]:
