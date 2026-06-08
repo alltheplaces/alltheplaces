@@ -1,11 +1,10 @@
-from pprint import pprint
-from typing import AsyncIterator, Any
+from typing import Any, AsyncIterator
 
 from geonamescache import GeonamesCache
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.state_clean_up import US_TERRITORIES
