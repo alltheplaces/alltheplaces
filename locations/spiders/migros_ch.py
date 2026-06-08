@@ -59,8 +59,8 @@ class MigrosCHSpider(Spider):
         "super": ("Migros", "Q680727", Categories.SHOP_SUPERMARKET),
         "voi": ("VOI", "Q110277616", Categories.SHOP_SUPERMARKET),
     }
-    api_url = "https://api.migros.ch/migros/sales/branches/v1/graphql"
-    api_key = "c3C2RemDDaYV8b2NPDev1MEDn12KsonY"
+    obsolete_brands = {"mod"}
+
     page_size = 200
 
     async def start(self):
@@ -68,9 +68,9 @@ class MigrosCHSpider(Spider):
 
     def api_request(self, offset: int) -> JsonRequest:
         return JsonRequest(
-            url=self.api_url,
+            url="https://api.migros.ch/migros/sales/branches/v1/graphql",
             data={"query": QUERY, "variables": {"limit": self.page_size, "offset": offset}},
-            headers={"x-api-key": self.api_key, "Accept-Language": "de"},
+            headers={"x-api-key": "c3C2RemDDaYV8b2NPDev1MEDn12KsonY", "Accept-Language": "de"},
             cb_kwargs={"offset": offset},
         )
 
@@ -85,6 +85,9 @@ class MigrosCHSpider(Spider):
         for market in facility["markets"]:
             brand_key = market["type"].split("_")[0]
             if brand_key not in self.brands:
+                if brand_key not in self.obsolete_brands:
+                    self.logger.warning('unknown brand: "%s"' % brand_key)
+
                 continue
             brand, brand_wikidata, category = self.brands[brand_key]
             market.update(facility["location"])
@@ -107,18 +110,17 @@ class MigrosCHSpider(Spider):
             yield item
 
     @staticmethod
-    def parse_opening_hours(market: dict) -> Any:
+    def parse_opening_hours(market: dict) -> OpeningHours | str:
         if market["type"] == "pickmup_247pmubox":
             return "24/7"
         oh = OpeningHours()
-        for block in market.get("opening_hours") or []:
-            if not block.get("active"):
-                continue
-            for hours in block.get("opening_hours") or []:
-                for period in ["1", "2"]:
-                    oh.add_range(
-                        DAYS[hours["day_of_week"] - 1],
-                        hours["time_open{}".format(period)],
-                        hours["time_close{}".format(period)],
-                    )
+        for o in market.get("opening_hours") or []:
+            if o.get("active"):
+                for hours in o.get("opening_hours") or []:
+                    day = DAYS[hours["day_of_week"] - 1]
+                    for i in range(5):
+                        open_time = hours.get("time_open%d" % i)
+                        close_time = hours.get("time_close%d" % i)
+                        if open_time and close_time:
+                            oh.add_range(day, open_time, close_time)
         return oh
