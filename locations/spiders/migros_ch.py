@@ -115,16 +115,10 @@ class MigrosCHSpider(Spider):
             if not block.get("active"):
                 continue
             for hours in block.get("opening_hours") or []:
-                day = DAYS[hours["day_of_week"] - 1]
-                ranges = [
-                    (hours.get("time_open1"), hours.get("time_close1")),
-                    (hours.get("time_open2"), hours.get("time_close2")),
-                ]
-                opened = False
-                for open_time, close_time in ranges:
-                    if open_time and close_time:
-                        oh.add_range(day, open_time, close_time)
-                        opened = True
-                if not opened and not hours.get("on_request1") and not hours.get("on_request2"):
-                    oh.set_closed(day)
+                for period in ["1", "2"]:
+                    oh.add_range(
+                        DAYS[hours["day_of_week"] - 1],
+                        hours["time_open{}".format(period)],
+                        hours["time_close{}".format(period)],
+                    )
         return oh
