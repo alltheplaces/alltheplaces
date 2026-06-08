@@ -25,6 +25,7 @@ class InvitroRUSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
+        item["ref"] = response.url.split("ID=")[-1]
         coords = response.xpath('//div[@id="mapOfficeDetail"]/@data-coord').get()
         if coords:
             item["lat"], item["lon"] = coords.strip().split(",")
