@@ -1,27 +1,21 @@
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterator
 
-from scrapy.http import Request, Response
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
 
-class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
+class EvgoUSSpider(SitemapSpider, CamoufoxSpider):
     name = "evgo_us"
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
     sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
     sitemap_rules = [(r"/find-a-charger/[^/]+/[^/]+/[^/]+-\d+/?$", "parse")]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-
-    def parse_sitemap(self, response: Response) -> Iterable[Request]:
-        for request in super()._parse_sitemap(response):
-            request.meta["playwright"] = True
-            request.meta["playwright_include_page"] = True
-            yield request
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Iterator[Feature]:
         item = Feature()
@@ -32,8 +26,12 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
         state = response.xpath("//ol/li[2]//a/text()").get()
         item["state"] = state.upper() if state else None
         title = response.xpath("//title/text()").get() or ""
-        item["addr_full"] = title.split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ") or None
-        capacity = response.xpath('//div[contains(@title, " stalls at this location")]/@title').get()
+        item["addr_full"] = (
+            title.split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ") or None
+        )
+        capacity = response.xpath(
+            '//div[contains(@title, " stalls at this location")]/@title'
+        ).get()
         if capacity:
             item["extras"]["capacity"] = capacity.removesuffix(" stalls at this location")
 
