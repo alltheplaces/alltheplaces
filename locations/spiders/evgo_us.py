@@ -1,6 +1,7 @@
-from typing import Any, Iterator
+import re
+from typing import Any, Iterable, Iterator
 
-from scrapy.http import Response
+from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -19,8 +20,17 @@ class EvgoUSSpider(SitemapSpider):
             "https": "scrapy_zyte_api.ScrapyZyteAPIDownloadHandler",
         },
         "ZYTE_API_TRANSPARENT_MODE": True,
+        "ZYTE_API_DEFAULT_PARAMS": {"browserHtml": True},
         "ROBOTSTXT_OBEY": False,
     }
+
+    def _parse_sitemap(self, response: Response) -> Iterable[Request]:
+        for match in re.finditer(r"<loc>([^<]+)</loc>", response.text):
+            url = match.group(1).strip()
+            for pattern, callback in self._cbs:
+                if pattern.search(url):
+                    yield Request(url, callback=callback)
+                    break
 
     def parse(self, response: Response, **kwargs: Any) -> Iterator[Feature]:
         item = Feature()
@@ -31,8 +41,12 @@ class EvgoUSSpider(SitemapSpider):
         state = response.xpath("//ol/li[2]//a/text()").get()
         item["state"] = state.upper() if state else None
         title = response.xpath("//title/text()").get() or ""
-        item["addr_full"] = title.split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ") or None
-        capacity = response.xpath('//div[contains(@title, " stalls at this location")]/@title').get()
+        item["addr_full"] = (
+            title.split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ") or None
+        )
+        capacity = response.xpath(
+            '//div[contains(@title, " stalls at this location")]/@title'
+        ).get()
         if capacity:
             item["extras"]["capacity"] = capacity.removesuffix(" stalls at this location")
 
