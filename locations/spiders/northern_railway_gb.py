@@ -1,30 +1,26 @@
-import json
-
+from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class NorthernRailwayGBSpider(PlaywrightSpider):
+class NorthernRailwayGBSpider(Spider):
     name = "northern_railway_gb"
     item_attributes = {"operator": "Northern", "operator_wikidata": "Q85789775"}
     start_urls = ["https://www.northernrailway.co.uk/api/northern_station_list_auto_complete"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     requires_proxy = True
 
     def parse(self, response, **kwargs):
-        for location in json.loads(response.xpath("//pre/text()").get())["results"]:
+        for location in response.json()["results"]:
             yield JsonRequest(
                 "https://www.northernrailway.co.uk/api/stations/data/{}".format(location["crs_code"]),
                 callback=self.parse_station,
             )
 
     def parse_station(self, response, **kwargs):
-        location = json.loads(response.xpath("//pre/text()").get())
+        location = response.json()
         item = Feature()
         item["ref"] = item["extras"]["ref:crs"] = location["crs"]
         item["name"] = location["name"]
