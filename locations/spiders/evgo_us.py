@@ -29,6 +29,8 @@ class EvgoUSSpider(SitemapSpider, CamoufoxSpider):
                 "camoufox_page_methods": [
                     PageMethod("wait_for_load_state", "networkidle"),
                 ],
+                "handle_httpstatus_all": True,
+                "dont_retry": True,
             },
             dont_filter=True,
         )
