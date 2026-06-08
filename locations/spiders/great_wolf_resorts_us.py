@@ -28,11 +28,3 @@ class GreatWolfResortsUSSpider(SitemapSpider):
         extract_google_position(item, response)
         apply_category({"leisure": "water_park"}, item)
         yield item
-
-    # def post_process_item(self, item: Any, response: Response, ld_data: dict, **kwargs: Any) -> Any:
-    #     item.pop("facebook")
-    #     item.pop("twitter")
-    #     item["branch"] = item.pop("name").removeprefix("Great Wolf Lodge ")
-    #
-    #     apply_category({"leisure": "water_park"}, item)
-    #     yield item
