@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.go_review_api import GoReviewApiSpider
 
@@ -31,4 +32,12 @@ class SteersZASpider(GoReviewApiSpider):
 
         apply_category(Categories.FAST_FOOD, item)
 
+        yield Request(url=item["website"], cb_kwargs={"item": item}, callback=self.parse_opening_hours)
+
+    def parse_opening_hours(self, response: Response, item: Feature) -> Iterable[Feature]:
+        item["opening_hours"] = OpeningHours()
+        for rule in response.xpath('//*[contains(@class, "operating-hours-day")]'):
+            day = rule.xpath("./text()").get("")
+            hours = rule.xpath("./following-sibling::span/text()").get("").replace("|", "to")
+            item["opening_hours"].add_ranges_from_string(f"{day} {hours}")
         yield item

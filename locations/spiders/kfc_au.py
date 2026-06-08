@@ -1,11 +1,12 @@
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 from locations.user_agents import BROWSER_DEFAULT
@@ -68,4 +69,8 @@ class KfcAUSpider(Spider):
                 trading_day["availableHours"]["endTime"],
                 "%H%M",
             )
+        yield from self.post_process_item(item, response) or []
+
+    def post_process_item(self, item: Feature, response: TextResponse) -> Iterable[Feature]:
+        """Override with any post processing on the item"""
         yield item
