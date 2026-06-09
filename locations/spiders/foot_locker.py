@@ -1,3 +1,5 @@
+import re
+
 from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.storefinders.rio_seo import RioSeoSpider
 
@@ -7,6 +9,10 @@ class FootLockerSpider(RioSeoSpider):
     end_point = "https://maps.stores.footlocker.com"
 
     def post_process_feature(self, feature, location):
+        if feature.get("website") and re.search(r"/[a-z]{2}-[a-z0-9]+/", feature["website"]):
+            # Non-US locale store URLs (e.g. /fr-75/, /de-bw/) redirect to a
+            # schemeless URL ("stores.footlocker.com/") causing a broken redirect.
+            feature["website"] = None
         if "Champs Sports" in feature["name"]:
             feature["brand"] = "Champs Sports"
             feature["brand_wikidata"] = "Q2955924"
