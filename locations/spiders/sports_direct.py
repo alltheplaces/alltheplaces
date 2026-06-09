@@ -7,6 +7,7 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.sport_master_dk import SportMasterDKSpider
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SportsDirectSpider(CrawlSpider, StructuredDataSpider):
@@ -15,6 +16,7 @@ class SportsDirectSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.sportsdirect.com/stores/all"]
     rules = [Rule(LinkExtractor(allow=r"store\-([\d]+)$"), callback="parse_sd")]
     wanted_types = ["LocalBusiness"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = "GB"
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
@@ -22,14 +24,14 @@ class SportsDirectSpider(CrawlSpider, StructuredDataSpider):
             item.update(SportMasterDKSpider.item_attributes)
             item["branch"] = item.pop("name").removeprefix("Sportmaster ")
         elif item["name"].startswith("Field & Trek "):
-            item.update(SportMasterDKSpider.item_attributes)
             item["branch"] = item.pop("name").removeprefix("Field & Trek ")
-            item["name"] = item["brand"] = "Field & Trek"
-            apply_category(Categories.SHOP_SPORTS, item)
+            item["brand"] = item["name"] = "Field & Trek"
+            item["brand_wikidata"] = "Q117088469"
         else:
             item["branch"] = item.pop("name").removeprefix("Sports Direct ")
             item.update(self.SPORTS_DIRECT)
 
+        apply_category(Categories.SHOP_SPORTS, item)
         item["lat"] = response.xpath("//@data-latitude").get()
         item["lon"] = response.xpath("//@data-longitude").get()
         item["street_address"] = merge_address_lines(
