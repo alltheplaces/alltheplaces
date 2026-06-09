@@ -1,9 +1,12 @@
 import json
+
 import scrapy
 from scrapy.http import Request
+
 from locations.categories import Categories, apply_category
-from locations.items import Feature
 from locations.hours import OpeningHours
+from locations.items import Feature
+
 
 class FluggerNoSpider(scrapy.Spider):
     name = "flugger_no"
@@ -55,7 +58,7 @@ class FluggerNoSpider(scrapy.Spider):
         for store in data.get("result", []):
             self.logger.debug(f"Processing store: {store.get('name')}")
 
-            store_name = store.get("name") # The API returns the city name in the name field.
+            store_name = store.get("name")  # The API returns the city name in the name field.
             address = store.get("address", {})
             contact_information = store.get("contactInformation", {})
             opening_hours = store.get("openingHours", {})
