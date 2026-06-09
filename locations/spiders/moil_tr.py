@@ -25,5 +25,4 @@ class MoilTRSpider(Spider):
             item["name"] = item["name"].strip()
             item["addr_full"] = location["info"]["address"]
             apply_category(Categories.FUEL_STATION, item)
-            print(item["lat"], item["lon"])
             yield item
