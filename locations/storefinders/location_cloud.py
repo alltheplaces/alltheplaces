@@ -12,6 +12,7 @@ class LocationCloudSpider(Spider):
     dataset_attributes: dict = {"source": "api"}
 
     api_endpoint: str
+    additional_args: str = ""
     website_formatter: str = ""
 
     async def start(self) -> AsyncIterator[Request]:
@@ -19,7 +20,7 @@ class LocationCloudSpider(Spider):
 
     def _get_page(self, offset: int):
         return Request(
-            "{}?datum=wgs84&limit=500&offset={}".format(self.api_endpoint, offset),
+            "{}?datum=wgs84&limit=500{}&offset={}".format(self.api_endpoint, self.additional_args, offset),
             meta={"offset": offset},
         )
 

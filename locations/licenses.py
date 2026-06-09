@@ -62,6 +62,13 @@ class Licenses(Enum):
         "attribution": "required",
         "use:commercial": "permit",
     }
+    IT_IODL2 = {
+        "license": "Italian Open Data License 2.0",
+        "license:website": "https://www.dati.gov.it/iodl/2.0/",
+        "license:wikidata": "Q26805818",
+        "attribution": "required",
+        "use:commercial": "permit",
+    }
     UNLICENSE = {
         "license": "Unlicense",
         "license:website": "https://unlicense.org/",

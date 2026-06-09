@@ -108,7 +108,10 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
             logger.info("Adding GeoParquet metadata...")
             table = pq.read_table(str(output_file_path))
 
-            xmin, ymin, xmax, ymax = bbox_res
+            if bbox_res is None:
+                xmin, ymin, xmax, ymax = None, None, None, None
+            else:
+                xmin, ymin, xmax, ymax = bbox_res
             geo_meta = {
                 "version": "1.1.0",
                 "primary_column": "geom",

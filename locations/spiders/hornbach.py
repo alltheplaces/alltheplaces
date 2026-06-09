@@ -1,15 +1,17 @@
-from typing import Any, Iterable
+import json
+from typing import Any
 
 import chompjs
 from scrapy.http import JsonRequest, Response, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
-from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class HornbachSpider(JSONBlobSpider):
+class HornbachSpider(PlaywrightSpider):
     name = "hornbach"
     BRANDS = {
         "bodenhaus": {"name": "Bodenhaus", "brand": "Bodenhaus"},
@@ -27,7 +29,7 @@ class HornbachSpider(JSONBlobSpider):
         "https://www.hornbach.se",
         "https://www.hornbach.sk",
     ]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 180}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         client_config = chompjs.parse_js_object(
@@ -42,18 +44,18 @@ class HornbachSpider(JSONBlobSpider):
             )
 
     def parse_locations(self, response: TextResponse) -> Any:
-        yield from super().parse(response)
+        for store in json.loads(response.xpath("//pre/text()").get()):
+            item = DictParser.parse(store)
+            item["street_address"] = item.pop("street")
+            item["branch"] = item.pop("name", "").removeprefix("BODENHAUS ").removeprefix("HORNBACH ").strip()
 
-    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["street_address"] = item.pop("street")
-        item["branch"] = item.pop("name").removeprefix("BODENHAUS ").removeprefix("HORNBACH ")
-        if brand_info := self.BRANDS.get(feature["client"]):
-            item.update(brand_info)
-        if feature["client"] == "bodenhaus":
-            apply_category(Categories.SHOP_FLOORING, item)
+            if brand_info := self.BRANDS.get(store.get("client")):
+                item.update(brand_info)
+            if store.get("client") == "bodenhaus":
+                apply_category(Categories.SHOP_FLOORING, item)
 
-        item["opening_hours"] = self.parse_opening_hours(feature.get("simplifiedOpeningHours", []))
-        yield item
+            item["opening_hours"] = self.parse_opening_hours(store.get("simplifiedOpeningHours", []))
+            yield item
 
     def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
         oh = OpeningHours()
