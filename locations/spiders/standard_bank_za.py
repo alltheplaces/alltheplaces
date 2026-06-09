@@ -140,7 +140,7 @@ class StandardBankZASpider(scrapy.Spider):
                                 times = times.strip()
                                 oh.add_range(day, times.split("-")[0].strip(), times.split("-")[1].strip(), "%HH%M")
                         except ValueError:
-                            pass
+                            return None
                 elif "-" in day_time[0]:
                     try:
                         for times in day_time[1].split("&"):
@@ -154,7 +154,7 @@ class StandardBankZASpider(scrapy.Spider):
                                 "%HH%M",
                             )
                     except ValueError:
-                        pass
+                        return None
             except:
                 pass
         return oh.as_opening_hours()
