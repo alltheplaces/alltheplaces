@@ -3,6 +3,7 @@ from typing import AsyncIterator, Iterable
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.geo import country_iseadgg_centroids
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -49,9 +50,26 @@ class VerizonUSSpider(JSONBlobSpider):
             item["website"] = (
                 f'https://www.verizon.com/nextgendigital/nos/storelocator/detail/{website.removeprefix("/stores/")}'
             )
+
         if business_name := feature.get("businessName"):
             if operator_info := self.operators.get(business_name):
                 item["operator"], item["operator_wikidata"] = operator_info
             else:
                 self.logger.warning(f"Unknown operator for business name: {business_name}")
+
+        try:
+            item["opening_hours"] = self.parse_opening_hours(feature)
+        except Exception as e:
+            self.logger.error(f"Error parsing opening hours: {e}")
+
         yield item
+
+    def parse_opening_hours(self, feature: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day in DAYS_3_LETTERS:
+            if hours := feature.get(f"hours{day}"):
+                if "Closed" in hours:
+                    opening_hours.set_closed(day)
+                    continue
+                opening_hours.add_range(day, *hours.strip().replace("M ", "M-").split("-"), "%I:%M %p")
+        return opening_hours
