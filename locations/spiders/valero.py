@@ -39,6 +39,7 @@ class ValeroSpider(Spider):
 
     def parse(self, response):
         for row in response.json():
+            self.crawler.stats.inc_value("{}/marker_image/{}".format(self.name, row["MarkerImage"]))
             amenities = [detail["Description"] for detail in row["LocationDetails"]]
             website = (
                 f"https://locations.valero.com/en-us/LocationDetails/Index/{row['DetailPageUrlID']}/{row['LocationID']}"
