@@ -12,7 +12,7 @@ from locations.hours import CLOSED_NO, DAYS_NO, OpeningHours
 
 class ClasOhlsonNOSpider(Spider):
     name = "clas_ohlson_no"
-    item_attributes = {"brand": "Clas Ohlson"}
+    item_attributes = {"brand": "Clas Ohlson", "brand_wikidata": "Q3356220"}
     allowed_domains = ["www.clasohlson.com"]
     custom_settings = {
         "USER_AGENT": "",
