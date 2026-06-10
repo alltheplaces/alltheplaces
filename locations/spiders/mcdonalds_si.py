@@ -13,17 +13,15 @@ from locations.spiders.mcdonalds import McdonaldsSpider
 class McdonaldsSISpider(scrapy.Spider):
     name = "mcdonalds_si"
     item_attributes = McdonaldsSpider.item_attributes
-    start_urls = ["https://mcdonalds.si/restavracije"]
-    requires_proxy = True
+    start_urls = ["https://www.mcdonalds.si/restavracije"]
 
     def parse(self, response, **kwargs):
         for location in json.loads(re.search(r"docs = (\[.+\])\.map", response.text).group(1)):
+            location.update(location["marker"]["position"])
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["website"] = location["slugs"]
             item["image"] = location["thumbnail"]
-            item["lat"] = location["marker"]["position"]["lat"]
-            item["lon"] = location["marker"]["position"]["lng"]
 
             try:
                 item["opening_hours"] = self.parse_opening_hours(location.get("hours_shop", []))
