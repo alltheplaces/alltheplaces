@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import sys
 import traceback
 from argparse import ArgumentParser
@@ -8,6 +9,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import duckdb
+import psutil
 import pyarrow.parquet as pq
 
 logger = getLogger(__name__)
@@ -20,6 +22,15 @@ logging.basicConfig(
         logging.StreamHandler(sys.stderr),
     ],
 )
+
+
+def duckdb_memory_limit() -> str:
+    total_bytes = psutil.virtual_memory().total
+    # Reserve 2 GB for Python, pyarrow, and OS overhead
+    reserved_bytes = 2 * 1024**3
+    duckdb_bytes = max(total_bytes - reserved_bytes, reserved_bytes)
+    duckdb_gb = math.floor(duckdb_bytes / 1024**3)
+    return f"{duckdb_gb}GB"
 
 
 def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
@@ -41,8 +52,10 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
             logger.info("Spatial extension loaded successfully")
 
             logger.info("Configuring DuckDB settings...")
+            memory_limit = duckdb_memory_limit()
+            logger.info(f"Setting DuckDB memory limit to {memory_limit} (total system RAM: {psutil.virtual_memory().total / 1024**3:.1f} GB)")
             con.execute(f"SET temp_directory='{temp_dir}'")
-            con.execute("SET memory_limit='8GB'")
+            con.execute(f"SET memory_limit='{memory_limit}'")
             con.execute("SET threads=2")
             con.execute("SET preserve_insertion_order=false")
 
@@ -105,30 +118,31 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
             """)
             logger.info("Parquet file written successfully")
 
-            logger.info("Adding GeoParquet metadata...")
-            table = pq.read_table(str(output_file_path))
+        # DuckDB connection is now closed; release its memory before loading with pyarrow
+        logger.info("Adding GeoParquet metadata...")
+        table = pq.read_table(str(output_file_path))
 
-            if bbox_res is None:
-                xmin, ymin, xmax, ymax = None, None, None, None
-            else:
-                xmin, ymin, xmax, ymax = bbox_res
-            geo_meta = {
-                "version": "1.1.0",
-                "primary_column": "geom",
-                "columns": {
-                    "geom": {"encoding": "WKB", "geometry_types": geom_types or ["Unknown"], "crs": "EPSG:4326"}
-                },
-                "bbox": [xmin, ymin, xmax, ymax],
-            }
+        if bbox_res is None:
+            xmin, ymin, xmax, ymax = None, None, None, None
+        else:
+            xmin, ymin, xmax, ymax = bbox_res
+        geo_meta = {
+            "version": "1.1.0",
+            "primary_column": "geom",
+            "columns": {
+                "geom": {"encoding": "WKB", "geometry_types": geom_types or ["Unknown"], "crs": "EPSG:4326"}
+            },
+            "bbox": [xmin, ymin, xmax, ymax],
+        }
 
-            existing_md = table.schema.metadata or {}
-            new_md = dict(existing_md)
-            new_md[b"geo"] = json.dumps(geo_meta, ensure_ascii=False).encode("utf-8")
+        existing_md = table.schema.metadata or {}
+        new_md = dict(existing_md)
+        new_md[b"geo"] = json.dumps(geo_meta, ensure_ascii=False).encode("utf-8")
 
-            table = table.replace_schema_metadata(new_md)
+        table = table.replace_schema_metadata(new_md)
 
-            logger.info("Writing final parquet file with metadata...")
-            pq.write_table(table, str(output_file_path), compression="ZSTD")
+        logger.info("Writing final parquet file with metadata...")
+        pq.write_table(table, str(output_file_path), compression="ZSTD")
 
     file_size = output_file_path.stat().st_size
     logger.info(f"✓ Created {output_file_path} ({file_size:,} bytes)")
