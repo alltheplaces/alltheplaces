@@ -2,6 +2,7 @@ from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
@@ -54,6 +55,8 @@ class VerizonUSSpider(JSONBlobSpider):
         if business_name := feature.get("businessName"):
             if operator_info := self.operators.get(business_name):
                 item["operator"], item["operator_wikidata"] = operator_info
+                if item["operator"] in ["Victra", "The Cellular Connection"]:  # Covered by Victra & Tcc US Spiders
+                    return
             else:
                 self.logger.warning(f"Unknown operator for business name: {business_name}")
 
@@ -61,7 +64,7 @@ class VerizonUSSpider(JSONBlobSpider):
             item["opening_hours"] = self.parse_opening_hours(feature)
         except Exception as e:
             self.logger.error(f"Error parsing opening hours: {e}")
-
+        apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
 
     def parse_opening_hours(self, feature: dict) -> OpeningHours:
