@@ -11,7 +11,6 @@ from locations.hours import OpeningHours
 class CaseysGeneralStoreSpider(Spider):
     name = "caseys_general_store"
     item_attributes = {"brand": "Casey's General Store", "brand_wikidata": "Q2940968"}
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Any]:
         url = "https://www.caseys.com/api/graphql"
