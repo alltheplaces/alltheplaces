@@ -7,5 +7,5 @@ class ValeroGBIESpider(ValeroSpider):
     allowed_domains = ["valero.com"]
 
     usa_bbox = [-10, 49, 2, 61]
-    xstep=20
-    ystep=20
+    xstep = 20
+    ystep = 20
