@@ -1,6 +1,5 @@
 from typing import AsyncIterator
 
-from scrapy import Spider
 from scrapy.http import FormRequest
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
@@ -13,8 +12,8 @@ class TexacoGBIESpider(ValeroSpider):
     allowed_domains = ["valero.com"]
 
     usa_bbox = [-10, 49, 2, 61]
-    xstep=5
-    ystep=5
+    xstep = 5
+    ystep = 5
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def make_search(self, xmin: int, ymin: int, xmax: int, ymax: int) -> FormRequest:
@@ -29,7 +28,7 @@ class TexacoGBIESpider(ValeroSpider):
             meta={
                 "dont_redirect": True,
             },
-            headers={"referer": "https://locations.valero.com/?site=UK"}
+            headers={"referer": "https://locations.valero.com/?site=UK"},
         )
 
     async def start(self) -> AsyncIterator[FormRequest]:
