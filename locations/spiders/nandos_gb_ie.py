@@ -22,5 +22,6 @@ class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
         if "our Nino restaurant" in response.text:
             item.update(NINO_NANDOS)
             apply_category(Categories.FAST_FOOD, item)
-        if "This restaurant is now closed." not in response.text:
+        if "Closed permanently" not in response.text and "Closed for refurb" not in response.text:
+            #Nandos pages for closed branches include details of 'nearby' open branches, and the spider picks up their data, creating duplicates.
             yield item
