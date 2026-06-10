@@ -19,6 +19,7 @@ dependencies = [
     "phonenumbers",
     "phpserialize",
     "playwright_captcha",
+    "psutil",
     "pyarrow",
     "pycountry",
     "pygeohash<4",
