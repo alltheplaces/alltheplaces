@@ -16,6 +16,7 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
     sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterator[Feature]:
         # Skip the root overview page if it comes through the sitemap
