@@ -23,8 +23,14 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
             item["lat"] = coords["latitude"]
             item["lon"] = coords["longitude"]
 
-        services = response.xpath('//span[@class="npc-sl-strct-srv-card--text "]/text()').getall()
-        apply_yes_no(Extras.ATM, item, any("distributeur" in s.lower() and "billets" in s.lower() for s in services))
+        services = [s.lower() for s in response.xpath('//span[@class="npc-sl-strct-srv-card--text "]/text()').getall()]
+        apply_yes_no(
+            Extras.ATM,
+            item,
+            any(("distributeur" in s and "billets" in s) or ("guichet" in s and "automatique" in s) for s in services),
+        )
+        apply_yes_no(Extras.WHEELCHAIR, item, any("accès handicapé" in s for s in services))
+        apply_yes_no(Extras.CASH_IN, item, any("dépôt" in s and "billets" in s for s in services))
         apply_category(Categories.BANK, item)
 
         yield item
