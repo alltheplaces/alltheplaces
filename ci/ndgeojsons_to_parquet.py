@@ -53,7 +53,9 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
 
             logger.info("Configuring DuckDB settings...")
             memory_limit = duckdb_memory_limit()
-            logger.info(f"Setting DuckDB memory limit to {memory_limit} (total system RAM: {psutil.virtual_memory().total / 1024**3:.1f} GB)")
+            logger.info(
+                f"Setting DuckDB memory limit to {memory_limit} (total system RAM: {psutil.virtual_memory().total / 1024**3:.1f} GB)"
+            )
             con.execute(f"SET temp_directory='{temp_dir}'")
             con.execute(f"SET memory_limit='{memory_limit}'")
             con.execute("SET threads=2")
@@ -129,9 +131,7 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
         geo_meta = {
             "version": "1.1.0",
             "primary_column": "geom",
-            "columns": {
-                "geom": {"encoding": "WKB", "geometry_types": geom_types or ["Unknown"], "crs": "EPSG:4326"}
-            },
+            "columns": {"geom": {"encoding": "WKB", "geometry_types": geom_types or ["Unknown"], "crs": "EPSG:4326"}},
             "bbox": [xmin, ymin, xmax, ymax],
         }
 
