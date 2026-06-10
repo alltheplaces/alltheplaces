@@ -6,7 +6,7 @@ from locations.categories import Categories, Extras, Fuel, apply_category, apply
 from locations.items import Feature
 
 
-class TexacoGBIESpider(ValeroSpider):
+class TexacoGBIESpider(Spider):
     name = "texaco_gb_ie"
     item_attributes = {"brand": "Texaco", "brand_wikidata": "Q775060"}
     allowed_domains = ["valero.com"]
