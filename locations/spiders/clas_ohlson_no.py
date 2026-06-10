@@ -36,7 +36,7 @@ class ClasOhlsonNOSpider(Spider):
         if not address_html:
             return (None, None, None)
 
-        lines = [part.strip() for part in address_html.split("<br />") if part and part.strip()]
+        lines = [line.strip() for line in address_html.split("<br />") if line and line.strip()]
         postcode = city = None
         postcode_line_index = None
 
@@ -46,16 +46,20 @@ class ClasOhlsonNOSpider(Spider):
                 postcode_line_index = index
                 break
 
-        street_candidates = lines[:postcode_line_index] if postcode_line_index is not None else lines
-        street_candidates = [line for line in street_candidates if "clas ohlson" not in line.lower()]
+        street_candidates = [
+            line
+            for line in (lines[:postcode_line_index] if postcode_line_index is not None else lines)
+            if "clas ohlson" not in line.lower()
+        ]
 
         if branch:
-            street_candidates = [line for line in street_candidates if line.lower() != branch.lower()]
+            branch_lower = branch.lower()
+            street_candidates = [line for line in street_candidates if line.lower() != branch_lower]
 
-        street_address = None
-        if street_candidates:
-            candidates_with_number = [line for line in street_candidates if any(char.isdigit() for char in line)]
-            street_address = candidates_with_number[-1] if candidates_with_number else street_candidates[-1]
+        street_address = next(
+            (line for line in reversed(street_candidates) if any(char.isdigit() for char in line)),
+            street_candidates[-1] if street_candidates else None,
+        )
 
         return (street_address, postcode, city)
 
@@ -85,17 +89,21 @@ class ClasOhlsonNOSpider(Spider):
             street_address, postcode, city = self._parse_address(address_html, branch)
             store_map_icon = store.get("storeMapIcon")
 
-            item["ref"] = store_addresses.get("SalesChannelAddressId") or item.get("ref")
-            item["name"] = item.get("name") or self.item_attributes["brand"]
-            item["branch"] = branch
-            item["street_address"] = street_address
-            item["postcode"] = postcode
-            item["city"] = city
-            item["country"] = "NO"
-            item["phone"] = store.get("storeContact") or item.get("phone")
-            item["website"] = None
-            item["image"] = urljoin("https://www.clasohlson.com", store_map_icon) if store_map_icon else None
-            item["opening_hours"] = self._parse_opening_hours(store.get("storeTimings", {}))
+            item.update(
+                {
+                    "ref": store_addresses.get("SalesChannelAddressId"),
+                    "name": self.item_attributes["brand"],
+                    "branch": branch,
+                    "street_address": street_address,
+                    "postcode": postcode,
+                    "city": city,
+                    "country": "NO",
+                    "phone": store.get("storeContact"),
+                    "website": None,
+                    "image": urljoin("https://www.clasohlson.com", store_map_icon) if store_map_icon else None,
+                    "opening_hours": self._parse_opening_hours(store.get("storeTimings", {})),
+                }
+            )
 
             apply_category(Categories.SHOP_HARDWARE, item)
             yield item
