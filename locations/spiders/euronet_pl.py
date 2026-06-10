@@ -9,8 +9,8 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.spiders.alior_bank_pl import AliorBankPLSpider
+from locations.spiders.erste_pl import ErstePLSpider
 from locations.spiders.millennium_bank_pl import MillenniumBankPLSpider
-from locations.spiders.santander_pl import SantanderPLSpider
 from locations.spiders.unicredit_bank_it import UnicreditBankITSpider
 
 BRAND_MAPPING = {
@@ -38,11 +38,11 @@ BRAND_MAPPING = {
         "operator": "mBank",
         "operator_wikidata": "Q1160928",
     },
-    "Santander Bank Polska": {
-        "brand": SantanderPLSpider.item_attributes["brand"],
-        "brand_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
-        "operator": SantanderPLSpider.item_attributes["brand"],
-        "operator_wikidata": SantanderPLSpider.item_attributes["brand_wikidata"],
+    "Erste Bank Polska": {
+        "brand": ErstePLSpider.item_attributes["brand"],
+        "brand_wikidata": ErstePLSpider.item_attributes["brand_wikidata"],
+        "operator": ErstePLSpider.item_attributes["brand"],
+        "operator_wikidata": ErstePLSpider.item_attributes["brand_wikidata"],
     },
     "Kasa Stefczyka": {
         "brand": "SKOK Stefczyka",

@@ -7,10 +7,10 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class SantanderPLSpider(Spider):
-    name = "santander_pl"
-    item_attributes = {"brand": "Santander", "brand_wikidata": "Q806653"}
-    start_urls = ["https://www.santander.pl/_js_places/places.js"]
+class ErstePLSpider(Spider):
+    name = "erste_pl"
+    item_attributes = {"brand": "Erste Bank Polska", "brand_wikidata": "Q806653"}
+    start_urls = ["https://www.erste.pl/_js_places/places.js"]
 
     def parse(self, response, **kwargs):
         data = chompjs.parse_js_object(response.text)
@@ -39,9 +39,11 @@ class SantanderPLSpider(Spider):
 
         if category == Categories.ATM:
             item["name"] = None
+            item["operator"] = "Erste Bank Polska"
+            item["operator_wikidata"] = "Q806653"
         else:
             item["branch"] = item.get("name")
-            item["name"] = None
+            item["name"] = "Erste Bank Polska"
 
         apply_category(category, item)
 
