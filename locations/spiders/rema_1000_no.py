@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import CLOSED_NO, OpeningHours
 
 
 class Rema1000NOSpider(Spider):
@@ -31,7 +31,7 @@ class Rema1000NOSpider(Spider):
             for day_name, day_hours in location.get("openingHours", {}).items():
                 hours_string = "{} {}: {}".format(hours_string, day_name, day_hours)
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
+            item["opening_hours"].add_ranges_from_string(hours_string, closed=CLOSED_NO)
 
             apply_category(Categories.SHOP_SUPERMARKET, item)
 
