@@ -1,5 +1,6 @@
 from typing import AsyncIterator
 
+from scrapy import Spider
 from scrapy.http import FormRequest
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
