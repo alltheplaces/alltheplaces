@@ -14,10 +14,6 @@ class Rema1000NOSpider(Spider):
     allowed_domains = ["www.rema.no"]
     start_urls = ["https://www.rema.no/wp-json/rema-stores/v1/get-stores-data"]
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url)
-
     def build_store_website(self, location: dict, counties: dict) -> str | None:
         if not location.get("slug") or not location.get("countyName") or not location.get("municipalityName"):
             return None
@@ -41,7 +37,7 @@ class Rema1000NOSpider(Spider):
         if not county_slug or not city_slug:
             return None
 
-        return "https://www.rema.no/butikker/{}/{}/{}".format(
+        return "https://www.rema.no/butikker/{}/{}/{}/".format(
             county_slug,
             city_slug,
             location["slug"],
