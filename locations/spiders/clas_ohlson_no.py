@@ -90,6 +90,9 @@ class ClasOhlsonNOSpider(Spider):
             street_address, postcode, city = self._parse_address(address_html, branch)
             store_map_icon = store.get("storeMapIcon")
 
+            if branch == "Kundesenteret":
+                continue
+
             item.update(
                 {
                     "ref": store_addresses.get("SalesChannelAddressId"),
