@@ -7,25 +7,14 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import CLOSED_NO, OpeningHours
+from locations.hours import CLOSED_NO, OpeningHours, DAYS_NO
 
 
 class ClasOhlsonNOSpider(Spider):
     name = "clas_ohlson_no"
     item_attributes = {"brand": "Clas Ohlson", "brand_wikidata": "Q3356220"}
     allowed_domains = ["www.clasohlson.com"]
-    custom_settings = {
-        "USER_AGENT": "",
-    }
-    DAYS_NO = {
-        "Mandager": "Mo",
-        "Tirsdager": "Tu",
-        "Onsdager": "We",
-        "Torsdager": "Th",
-        "Fredager": "Fr",
-        "Lørdager": "Sa",
-        "Søndager": "Su",
-    }
+    custom_settings = {"USER_AGENT": ""}
     postcode_city_pattern = re.compile(r"^(\d{4})\s+(.+)$")
 
     def _make_request(self, page: int) -> JsonRequest:
@@ -77,7 +66,7 @@ class ClasOhlsonNOSpider(Spider):
         oh = OpeningHours()
         hours_string = " ".join(f"{day_name}: {value}" for day_name, value in (store_timings or {}).items() if value)
         if hours_string:
-            oh.add_ranges_from_string(hours_string, days=ClasOhlsonNOSpider.DAYS_NO, closed=CLOSED_NO)
+            oh.add_ranges_from_string(hours_string, days=DAYS_NO, closed=CLOSED_NO)
 
         return oh
 
