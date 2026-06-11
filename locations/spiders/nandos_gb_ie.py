@@ -2,7 +2,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -22,6 +22,10 @@ class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
         if "our Nino restaurant" in response.text:
             item.update(NINO_NANDOS)
             apply_category(Categories.FAST_FOOD, item)
-        if "Closed permanently" not in response.text and "Closed for refurb" not in response.text:
-            # Nandos pages for closed branches include details of 'nearby' open branches, and the spider picks up their data, creating duplicates.
-            yield item
+        else:
+            apply_category(Categories.RESTAURANT, item)
+
+        if "Closed permanently" in response.text or "Closed for refurb" in response.text:
+            set_closed(item)
+
+        yield item
