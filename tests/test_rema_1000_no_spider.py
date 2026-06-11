@@ -69,4 +69,4 @@ def test_parse_builds_store_website():
 
     items = list(spider.parse(WebsiteResponse()))
 
-    assert items[0]["website"] == "https://www.rema.no/butikker/more-og-romsdal/surnadal/rema-1000-surnadal"
+    assert items[0]["website"] == "https://www.rema.no/butikker/more-og-romsdal/surnadal/rema-1000-surnadal/"
