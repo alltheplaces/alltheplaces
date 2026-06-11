@@ -32,22 +32,23 @@ class SeattleCoffeeCompanySpider(SitemapSpider):
                     day, time = day_time.replace(" - ", "-").split(" ")
                     if "-" in day:
                         start_day, end_day = day.split("-")
+                        if end_day == "Holidays":
+                            end_day = start_day
                     else:
                         start_day = day
                         end_day = day
-                    if "-" in time:
+
+                    if "closed" in time.lower():
+                        item["opening_hours"].set_closed(OpeningHours.days_in_day_range(start_day, end_day))
+                    elif "-" in time:
                         open_time, close_time = time.split("-")
                         if ":" not in open_time:
                             open_time = open_time.replace("am", ":00AM")
                         if ":" not in close_time:
                             close_time = close_time.replace("pm", ":00PM")
-                        if end_day == "Holidays":
-                            end_day = start_day
                         item["opening_hours"].add_days_range(
                             day_range(start_day, end_day), open_time, close_time, time_format="%I:%M%p"
                         )
-                    elif "closed" in time.lower():
-                        item["opening_hours"].set_closed(OpeningHours.days_in_day_range(start_day, end_day))
                 except:
                     item["opening_hours"] = ""
                     break
