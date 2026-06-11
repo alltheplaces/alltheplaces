@@ -107,6 +107,5 @@ class ClasOhlsonNOSpider(Spider):
             yield item
 
         page = response.meta["page"]
-        page_size = len(stores)
-        if page_size > 0 and (page + 1) * page_size < total:
+        if (page + 1) * 10 < total:
             yield self._make_request(page + 1)
