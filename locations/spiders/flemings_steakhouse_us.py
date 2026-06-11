@@ -10,8 +10,8 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class FlemingsSteakhouseSpider(CrawlSpider, StructuredDataSpider):
-    name = "flemings_steakhouse"
+class FlemingsSteakhouseUSSpider(CrawlSpider, StructuredDataSpider):
+    name = "flemings_steakhouse_us"
     item_attributes = {"brand": "Fleming's", "brand_wikidata": "Q5458552"}
     start_urls = ["https://www.flemingssteakhouse.com/locations"]
     rules = [Rule(LinkExtractor(allow=r"/locations/[a-z]{2}/[^/]+/?$"), callback="parse_sd", follow=False)]
