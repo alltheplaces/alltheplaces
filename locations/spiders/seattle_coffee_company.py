@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
-from locations.hours import OpeningHours, day_range
+from locations.hours import OpeningHours, day_range, days_in_day_range
 from locations.items import Feature
 
 
@@ -23,7 +23,7 @@ class SeattleCoffeeCompanySpider(SitemapSpider):
 
         item["opening_hours"] = OpeningHours()
         for day_time in response.xpath('//div[contains(@class, "trading")]').xpath("normalize-space()").getall():
-            if ("Closed" in day_time) or ("Church Services" in day_time):
+            if ("Church Services" in day_time):
                 continue
             if "24/7" in day_time:
                 item["opening_hours"] = "24/7"
@@ -46,8 +46,8 @@ class SeattleCoffeeCompanySpider(SitemapSpider):
                         item["opening_hours"].add_days_range(
                             day_range(start_day, end_day), open_time, close_time, time_format="%I:%M%p"
                         )
-                    elif time.lower().strip() == "closed":
-                        item["opening_hours"].set_closed(day_range(start_day, end_day))
+                    elif "closed" in time.lower():
+                        item["opening_hours"].set_closed(days_in_day_range(start_day, end_day))
                 except:
                     item["opening_hours"] = ""
                     break
