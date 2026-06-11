@@ -6,8 +6,6 @@ from locations.items import Feature, set_closed
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
 
-NINO_NANDOS = {"name": "Nino Nando's", "brand": "Nino Nando's", "brand_wikidata": "Q111753283"}
-
 
 class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
     name = "nandos_gb_ie"
@@ -19,13 +17,10 @@ class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name")
-        if "our Nino restaurant" in response.text:
-            item.update(NINO_NANDOS)
-            apply_category(Categories.FAST_FOOD, item)
-        else:
-            apply_category(Categories.RESTAURANT, item)
 
         if "Closed permanently" in response.text or "Closed for refurb" in response.text:
             set_closed(item)
+
+        apply_category(Categories.RESTAURANT, item)
 
         yield item
