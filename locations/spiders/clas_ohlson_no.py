@@ -102,7 +102,6 @@ class ClasOhlsonNOSpider(Spider):
                     "postcode": postcode,
                     "city": city,
                     "country": "NO",
-                    "phone": store.get("storeContact"),
                     "website": None,
                     "image": urljoin("https://www.clasohlson.com", store_map_icon) if store_map_icon else None,
                 }
