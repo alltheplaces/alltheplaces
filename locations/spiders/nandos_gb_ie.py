@@ -17,6 +17,7 @@ class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name")
+        item["image"] = None
 
         if "Closed permanently" in response.text or "Closed for refurb" in response.text:
             set_closed(item)
