@@ -602,20 +602,27 @@ DAYS_RS = {
 DAYS_NO = {
     "Mandag": "Mo",
     "Måndag": "Mo",
+    "Mandager": "Mo",
     "Man": "Mo",
     "Tirsdag": "Tu",
     "Tysdag": "Tu",
+    "Tirsdager": "Tu",
     "Onsdag": "We",
+    "Onsdager": "We",
+    "Torsdager": "Th",
     "Torsdag": "Th",
     "Tors": "Th",
     "Fredag": "Fr",
     "Fre": "Fr",
+    "Fredager": "Fr",
     "Lørdag": "Sa",
     "Laurdag": "Sa",
     "Lør": "Sa",
+    "Lørdager": "Sa",
     "Søndag": "Su",
     "Sundag": "Su",
     "Søn": "Su",
+    "Søndager": "Su",
 }
 DAYS_DK = {
     "Mandag": "Mo",
@@ -1172,7 +1179,8 @@ class OpeningHours:
             elif this_day_group["hours"] == hours:
                 this_day_group["to_day"] = day
 
-        day_groups.append(this_day_group)
+        if this_day_group is not None:
+            day_groups.append(this_day_group)
 
         opening_hours = ""
 

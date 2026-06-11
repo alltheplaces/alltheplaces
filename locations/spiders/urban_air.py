@@ -1,21 +1,36 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from typing import Any, AsyncIterator, Iterable
 
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy.http import JsonRequest, TextResponse
+
+from locations.categories import apply_category
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class UrbanAirSpider(CrawlSpider, StructuredDataSpider):
+class UrbanAirSpider(JSONBlobSpider):
     name = "urban_air"
     item_attributes = {"brand": "Urban Air", "brand_wikidata": "Q110172893"}
-    start_urls = ["https://www.urbanair.com/locations/"]
-    rules = [
-        Rule(LinkExtractor(allow=r"/locations/page/\d+/$")),
-        Rule(
-            LinkExtractor(
-                allow=r"https://www.urbanair.com/.+/$",
-                restrict_xpaths='//div[@class="wp-block-geodirectory-geodir-widget-loop"]',
-            ),
-            callback="parse_sd",
-        ),
-    ]
-    wanted_types = ["SportsActivityLocation"]
+
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            url="https://www.urbanair.com/wp-json/urbanair-api/locations",
+            data={"page": page},
+            meta={"page": page},
+        )
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_request(1)
+
+    def extract_json(self, response: TextResponse) -> list[dict]:
+        return response.json().get("data") or []
+
+    def parse(self, response: TextResponse, **kwargs: Any) -> Any:
+        features = self.extract_json(response)
+        yield from self.parse_feature_array(response, features) or []
+        if features:
+            yield self.make_request(response.meta["page"] + 1)
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = (item.pop("name", None) or "").split(",", 1)[0].strip() or None
+        apply_category({"leisure": "trampoline_park"}, item)
+        yield item

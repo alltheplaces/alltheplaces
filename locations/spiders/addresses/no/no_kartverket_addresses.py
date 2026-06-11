@@ -96,7 +96,7 @@ class NoKartverketAddressesSpider(AddressSpider):
 
         # Unit numbers (apartments)
         if bruksenhetsnummer := self._strip_value(row.get("bruksenhetsnummer")):
-            item["extras"]["addr:unit"] = bruksenhetsnummer
+            item["extras"]["unit"] = bruksenhetsnummer
 
         return item
 

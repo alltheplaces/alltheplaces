@@ -1,7 +1,8 @@
+import json
 import re
 from typing import Any
+from urllib.parse import unquote
 
-import chompjs
 from scrapy import FormRequest, Spider
 from scrapy.http import Response
 
@@ -15,19 +16,23 @@ class McdonaldsBGSpider(Spider):
     name = "mcdonalds_bg"
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.bg"]
-    start_urls = ["https://mcdonalds.bg/restaurants/"]
+    start_urls = ["https://mcdonalds.bg/en/restaurants/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        ajax_endpoints = chompjs.parse_js_object(response.xpath('//script[@id="wgs-endpoints-js-extra"]/text()').get())
+        # The nonce is embedded in a data:text/javascript URL-encoded src attribute
+        src = unquote(response.xpath('//*[@id="wgs-endpoints-js-extra"]/@src').get(""))
+        # Strip the data: MIME prefix to get the JS, then extract the JSON object
+        js = re.sub(r"^data:[^,]+,", "", src)
+        endpoints = json.loads(re.search(r"\{.+\}", js, re.DOTALL).group(0))
         ajax_action = "get_filtered_posts"
         yield FormRequest(
             url="https://mcdonalds.bg/wp-admin/admin-ajax.php",
-            formdata={"action": ajax_action, "ajax-nonce": ajax_endpoints["nonce"][ajax_action]},
+            formdata={"action": ajax_action, "ajax-nonce": endpoints["nonce"][ajax_action]},
             callback=self.parse_locations,
         )
 
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["data"]:
+        for location in response.json()["data"]:  # ty: ignore[unresolved-attribute]
             location.update(location.pop("address_on_map", {}))
             item = DictParser.parse(location)
             item["ref"] = str(item["ref"])
@@ -47,7 +52,6 @@ class McdonaldsBGSpider(Spider):
                 yield mccafe
             apply_yes_no(Extras.WIFI, item, "WiFi" in services)
             apply_yes_no(Extras.DRIVE_THROUGH, item, "McDrive™" in services)
-
             apply_yes_no(Extras.DELIVERY, item, location.get("is_delivery_available"))
 
             item["opening_hours"] = self.parse_opening_hours(location.get("business_hours", []))

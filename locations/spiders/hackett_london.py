@@ -1,28 +1,42 @@
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from typing import Any, AsyncIterator
+
+from scrapy.http import FormRequest, JsonRequest, Response
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class HackettLondonSpider(SitemapSpider, StructuredDataSpider):
+class HackettLondonSpider(Spider):
     name = "hackett_london"
     item_attributes = {"brand": "Hackett London", "brand_wikidata": "Q1136426"}
-    sitemap_urls = ["https://storelocator.hackett.com/sitemap.xml"]
-    sitemap_rules = [
-        ("https://storelocator.hackett.com/hackett-", "parse"),
-        # ("https://storelocator.hackett.com/hackett-london-regent-street-193-564e196a7412", "parse"),
-    ]
-    wanted_types = ["ClothingStore"]
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        if item["name"].startswith("Hackett Outlet "):
-            item["branch"] = item.pop("name").removeprefix("Hackett Outlet ")
-            item["name"] = "Hackett Outlet"
-        else:
-            item["branch"] = item.pop("name").removeprefix("Hackett ").removeprefix("London ")
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
+            url="https://www.hackett.com/mobify/slas/private/shopper/auth/v1/organizations/f_ecom_blrq_prd/oauth2/token",
+            formdata={
+                "grant_type": "refresh_token",
+                "refresh_token": "cZ5zAoHyxVCwqOccdo2EPeVG8sP8OWRiiMlx9DqrHhQ",  # refresh token (valid ~30 days), couldn't find a way to generate it dynamically.
+                "channel_id": "HKT-ES",
+                "dnt": "false",
+            },
+        )
 
-        apply_category(Categories.SHOP_CLOTHES, item)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        token = response.json()["access_token"]
+        yield JsonRequest(
+            url="https://www.hackett.com/mobify/proxy/api/store/shopper-stores/v1/organizations/f_ecom_blrq_prd/store-search?distanceUnit=km&latitude=0&longitude=0&maxDistance=20000&siteId=HKT-ES&limit=200",
+            headers={"Authorization": f"Bearer {token}"},
+            callback=self.parse_location,
+        )
 
-        yield item
+    def parse_location(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["data"]:
+            location["address"] = merge_address_lines([location.pop("address1", None), location.pop("address2", None)])
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name").removeprefix("Hackett ").removeprefix("Outlet ")
+            if "Outlet" in location["name"]:
+                item["name"] = "Hackett London Outlet"
+            apply_category(Categories.SHOP_CLOTHES, item)
+            yield item

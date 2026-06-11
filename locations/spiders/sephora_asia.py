@@ -1,14 +1,15 @@
 import json
 from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 COUNTRIES = {
     "SG": "www.sephora.sg",
@@ -21,10 +22,10 @@ COUNTRIES = {
 }
 
 
-class SephoraAsiaSpider(Spider):
+class SephoraAsiaSpider(PlaywrightSpider):
     name = "sephora_asia"
     item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[Request]:
         for cc, domain in COUNTRIES.items():

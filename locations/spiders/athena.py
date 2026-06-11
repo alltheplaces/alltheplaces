@@ -60,6 +60,8 @@ class AthenaSpider(StoreRocketSpider):
         item.pop("name", None)
         item.pop("facebook", None)
         item["extras"].pop("contact:instagram", None)
+        if item.get("phone") == "-4844":
+            item["phone"] = None
 
         for field in location.get("fields", {}):
             if field["name"] == "Located Inside:":

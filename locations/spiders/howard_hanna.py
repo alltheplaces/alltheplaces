@@ -1,43 +1,65 @@
+import json
 import re
+from typing import Any, AsyncIterator
 
-from scrapy.spiders import SitemapSpider
+import scrapy
+from scrapy import Request
+from scrapy.http import Response
 
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class HowardHannaSpider(SitemapSpider):
+class HowardHannaSpider(PlaywrightSpider):
     name = "howard_hanna"
     item_attributes = {"brand": "Howard Hanna", "brand_wikidata": "Q119573413"}
-    allowed_domains = ["howardhanna.com"]
-    sitemap_urls = ["https://www.howardhanna.com/Seo/OfficeSitemap"]
-    sitemap_rules = [(r"/Office/Detail/", "parse")]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "DEFAULT_REQUEST_HEADERS": {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": "https://www.howardhanna.com",
+            "Referer": "https://www.howardhanna.com/Office/Map",
+            "User-Agent": BROWSER_DEFAULT,
+        },
+    }
 
-    def parse(self, response):
-        info = response.css(".prop-main .row .row")[0]
-        addr_full = info.css("div.font-13.font-sm-16").xpath("normalize-space()").get()
-        properties = {
-            "ref": response.url.split("/")[-1],
-            "name": response.css("h1::text").get().strip(),
-            "website": response.url,
-            "phone": info.xpath('.//*[@title="Phone"]/../..//a/text()').get(),
-            "extras": {
-                "fax": info.xpath('.//*[@title="Fax"]/../..//a/text()').get(),
-            },
-            "addr_full": addr_full,
+    async def start(self) -> AsyncIterator[Request]:
+        url = "https://www.howardhanna.com/Office/MapOffices"
+        formdata = {
+            "SouthLat": "10.236576558188718",
+            "WestLng": "-115.57812500000001",
+            "NorthLat": "59.53851123957454",
+            "EastLng": "-80.42187500000001",
+            "RadiusCenterPointLatitude": "NaN",
+            "RadiusCenterPointLongitude": "NaN",
+            "Location": "My Current Location",
+            "Radius": "10",
+            "OrderBy": "Closest",
+            "Polygon": "",
         }
-        yield response.follow(
-            response.css("a[href*=ViewOnStreet]")[0],
-            meta={"properties": properties},
-            callback=self.parse2,
-        )
 
-    def parse2(self, response):
-        properties = response.meta["properties"]
-        lat, lon = re.search(r"LatLng\('(.*)', '(.*)'\)", response.text).groups()
-        properties.update(
-            {
-                "lat": lat,
-                "lon": lon,
-            }
-        )
-        yield Feature(**properties)
+        yield scrapy.FormRequest(url=url, method="POST", formdata=formdata, callback=self.parse)
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # This fixes the JSONDecodeError by stripping the <pre> tag
+        for office in json.loads(response.xpath("//pre/text()").get()).get("Properties", []):
+            branch = office.get("OfficeName")
+            mls_number = office.get("MlsNumber")
+
+            item = DictParser.parse(office)
+            item["ref"] = mls_number
+            item["branch"] = branch
+            item["street_address"] = item.pop("addr_full")
+            item["website"] = f"https://www.howardhanna.com/Office/Detail/{self.slugify(branch)}/{mls_number}"
+
+            apply_category(Categories.OFFICE_ESTATE_AGENT, item)
+
+            yield item
+
+    def slugify(self, text: str) -> str:
+        slug = re.sub(r"[^a-z0-9\s-]", "", re.split(r"\s-\s|/|\\|\s&\s", text)[0].lower())
+        return re.sub(r"\s+", "-", slug.strip())

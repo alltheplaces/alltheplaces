@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Iterable
 
 from scrapy.http import Response
@@ -21,9 +22,18 @@ class MitsubishiDKSESpider(JSONBlobSpider):
             item["website"] = "https://" + website if website.startswith("www.") else website
 
         categories = (feature.get("categories") or "").split(",")
-        if "1" in categories or "19" in categories:
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, "2" in categories or "18" in categories)
-        elif "2" in categories or "18" in categories:
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        yield item
+        has_shop = "1" in categories or "19" in categories
+        has_repair = "2" in categories or "18" in categories
+
+        if has_shop:
+            shop_item = deepcopy(item)
+            shop_item["ref"] = f"{item['ref']}-shop"
+            apply_category(Categories.SHOP_CAR, shop_item)
+            apply_yes_no(Extras.CAR_REPAIR, shop_item, has_repair)
+            yield shop_item
+
+        if has_repair:
+            repair_item = deepcopy(item)
+            repair_item["ref"] = f"{item['ref']}-repair"
+            apply_category(Categories.SHOP_CAR_REPAIR, repair_item)
+            yield repair_item

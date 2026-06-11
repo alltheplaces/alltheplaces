@@ -5,7 +5,7 @@ from chompjs import parse_js_object
 from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.items import get_lat_lon, set_closed
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
@@ -127,7 +127,10 @@ class BashSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         for hours_range in location["businessHours"]:
             item["opening_hours"].add_range(
-                DAYS[hours_range["dayOfWeek"]], hours_range["openingTime"], hours_range["closingTime"], "%H:%M:%S"
+                DAYS_FROM_SUNDAY[hours_range["dayOfWeek"]],
+                hours_range["openingTime"],
+                hours_range["closingTime"],
+                "%H:%M:%S",
             )
 
         if m := self.brand_name_regex.match(item["name"]):

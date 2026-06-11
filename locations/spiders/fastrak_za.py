@@ -1,25 +1,52 @@
-import scrapy
+import json
+from typing import Any, AsyncIterator, Iterable
 
-from locations.google_url import url_to_coords
+from scrapy import FormRequest
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class FastrakZASpider(scrapy.Spider):
+class FastrakZASpider(JSONBlobSpider):
     name = "fastrak_za"
-    start_urls = ["https://www.fastrak.co.za/pages/fastrak-stores"]
     item_attributes = {
         "brand": "Fastrak",
         "brand_wikidata": "Q120799603",
     }
-    no_refs = True
+    locations_key = ["data", "mapData"]
 
-    def parse(self, response):
-        for location in response.xpath('.//tr[@data-mce-fragment="1"]')[1:]:
-            item = Feature()
-            item["state"] = location.xpath(".//td[1]/text()").get()
-            item["branch"] = location.xpath(".//td[2]/text()").get().replace("Fastrak: ", "")
-            item["phone"] = location.xpath(".//td[3]/text()").get()
-            item["email"] = location.xpath(".//td[4]/a/@href").get()
-            item["lat"], item["lon"] = url_to_coords(location.xpath(".//td[5]/a/@href").get())
+    async def start(self) -> AsyncIterator[FormRequest]:
+        yield FormRequest(
+            "https://msl.cirkleinc.com/api/Send-Records?page=1",
+            formdata={"shop": "fastrak-sa.myshopify.com", "page": "1"},
+        )
 
-            yield item
+    def pre_process_data(self, feature: dict) -> None:
+        feature["ref"] = feature.pop("hash_code")
+        feature["phone"] = feature.pop("phone_no")
+        feature["postcode"] = feature.pop("pin_code")
+        feature["lon"] = feature.pop("lng")
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
+        item.pop("name", None)
+        item.pop("facebook", None)
+        item.pop("website", None)
+        item["branch"] = feature["store_name"].removeprefix("Fastrak:").strip()
+
+        if raw := feature.get("open_hours"):
+            oh = OpeningHours()
+            for day, times in json.loads(raw).items():
+                times = (times or "").strip()
+                if not times:
+                    continue
+                if times.lower() == "closed":
+                    oh.set_closed(DAYS[int(day) - 1])
+                else:
+                    oh.add_ranges_from_string(f"{DAYS[int(day) - 1]} {times}")
+            item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_HIFI, item)
+        yield item

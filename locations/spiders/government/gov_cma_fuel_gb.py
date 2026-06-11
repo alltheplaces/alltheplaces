@@ -1,7 +1,7 @@
 from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
@@ -12,7 +12,22 @@ from locations.user_agents import BROWSER_DEFAULT
 class GovCmaFuelGBSpider(Spider):
     name = "gov_cma_fuel_gb"
     dataset_attributes = Licenses.GB_OGLv3.value
-    start_urls = ["https://www.gov.uk/guidance/access-fuel-price-data"]
+    start_urls = [
+        "https://fuelprices.asconagroup.co.uk/newfuel.json",
+        "https://storelocator.asda.com/fuel_prices_data.json",
+        # "https://www.bp.com/en_gb/united-kingdom/home/fuelprices/fuel_prices_data.json",
+        "https://fuelprices.esso.co.uk/latestdata.json",
+        "https://jetlocal.co.uk/fuel_prices_data.json",
+        "https://devapi.krlpos.com/integration/live_price/krl",
+        "https://www.morrisons.com/fuel-prices/fuel.json",
+        "https://moto-way.com/fuel-price/fuel_prices.json",
+        "https://fuel.motorfuelgroup.com/fuel_prices_data.json",
+        "https://www.rontec-servicestations.co.uk/fuel-prices/data/fuel_prices_data.json",
+        "https://api.sainsburys.co.uk/v1/exports/latest/fuel_prices_data.json",
+        "https://www.sgnretail.uk/files/data/SGN_daily_fuel_prices.json",
+        "https://www.shell.co.uk/fuel-prices-data.html",
+        "https://www.tesco.com/fuel_prices/fuel_prices_data.json",
+    ]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,  # Asda, Shell!
         "USER_AGENT": BROWSER_DEFAULT,  # TESCO!
@@ -43,10 +58,6 @@ class GovCmaFuelGBSpider(Spider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for url in response.xpath("//table/tbody/tr/td[2]/text()").getall():
-            yield JsonRequest(url, self.parse_locations)
-
-    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stations"]:
             item = Feature()
             item["ref"] = location["site_id"]
