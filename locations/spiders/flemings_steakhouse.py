@@ -18,6 +18,7 @@ class FlemingsSteakhouseSpider(CrawlSpider, StructuredDataSpider):
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["image"] = None
         item["branch"] = item.pop("name")
         apply_category(Categories.RESTAURANT, item)
 
