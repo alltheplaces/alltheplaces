@@ -7,7 +7,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import CLOSED_NO, OpeningHours, DAYS_NO
+from locations.hours import CLOSED_NO, DAYS_NO, OpeningHours, sanitise_day
 
 
 class ClasOhlsonNOSpider(Spider):
@@ -64,9 +64,12 @@ class ClasOhlsonNOSpider(Spider):
     @staticmethod
     def _parse_opening_hours(store_timings: dict) -> OpeningHours:
         oh = OpeningHours()
-        hours_string = " ".join(f"{day_name}: {value}" for day_name, value in (store_timings or {}).items() if value)
-        if hours_string:
-            oh.add_ranges_from_string(hours_string, days=DAYS_NO, closed=CLOSED_NO)
+        for day, times in store_timings.items():
+            day_en = sanitise_day(day, DAYS_NO)
+            if times.lower() in CLOSED_NO:
+                oh.set_closed(day_en)
+            else:
+                oh.add_range(day_en, *times.split(" - "))
 
         return oh
 
@@ -99,9 +102,12 @@ class ClasOhlsonNOSpider(Spider):
                     "phone": store.get("storeContact"),
                     "website": None,
                     "image": urljoin("https://www.clasohlson.com", store_map_icon) if store_map_icon else None,
-                    "opening_hours": self._parse_opening_hours(store.get("storeTimings", {})),
                 }
             )
+            try:
+                item["opening_hours"] = self._parse_opening_hours(store.get("storeTimings", {}))
+            except Exception:
+                self.logger.error("Error parsing opening hours")
 
             apply_category(Categories.SHOP_HARDWARE, item)
             yield item
