@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
-from locations.hours import OpeningHours, day_range, days_in_day_range
+from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 
 
@@ -47,7 +47,7 @@ class SeattleCoffeeCompanySpider(SitemapSpider):
                             day_range(start_day, end_day), open_time, close_time, time_format="%I:%M%p"
                         )
                     elif "closed" in time.lower():
-                        item["opening_hours"].set_closed(days_in_day_range(start_day, end_day))
+                        item["opening_hours"].set_closed(OpeningHours.days_in_day_range(start_day, end_day))
                 except:
                     item["opening_hours"] = ""
                     break
