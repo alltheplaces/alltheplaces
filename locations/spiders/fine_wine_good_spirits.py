@@ -1,66 +1,57 @@
-from scrapy import Spider
+from typing import Iterable
+
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.linked_data_parser import LinkedDataParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class FineWineGoodSpiritsSpider(Spider):
+class FineWineGoodSpiritsSpider(SitemapSpider):
     name = "fine_wine_good_spirits"
     item_attributes = {
         "name": "Fine Wine & Good Spirits",
         "brand": "Fine Wine & Good Spirits",
         "brand_wikidata": "Q64514776",
     }
-    start_urls = [
-        "https://www.finewineandgoodspirits.com/webapp/wcs/stores/servlet/FindStoreView?storeId=10051&langId=-1&catalogId=10051&pageNum=1&listSize=1000&category=&city=&zip_code=&county=All+Stores&storeNO="
-    ]
-    allowed_domains = ["www.finewineandgoodspirits.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    sitemap_urls = ["https://www.finewineandgoodspirits.com/productSitemap.xml"]
+    sitemap_rules = [(r"/product/store-\d+", "parse")]
 
-    def parse(self, response):
-        for row in response.css(".tabContentRow"):
-            column_address = row.css(".columnAddress")
-            address_phone_fax = [s.strip() for s in column_address.xpath('*[@class="normalText"]//text()').extract()]
-            if "Fax:" in address_phone_fax:
-                i = address_phone_fax.index("Fax:")
-                fax = address_phone_fax[i + 1]
-                address_phone_fax[i:] = []
-            else:
-                fax = None
-            i = address_phone_fax.index("Phone:")
-            phone = address_phone_fax[i + 1]
-            address_phone_fax[i:] = []
-            address = "\n".join(address_phone_fax).strip().replace("\xa0", " ")
+    def parse(self, response: Response) -> Iterable[Feature]:
+        item = Feature()
+        item["ref"] = response.url.split("-")[-1]
+        item["website"] = response.url
+        item["country"] = "US"
 
-            ref = column_address.xpath('*[@class="boldMaroonText"]/text()').get().strip()
+        street = response.xpath('//h1[@class="heading_1"]/text()').get()
+        item["addr_full"] = merge_address_lines(
+            [street, response.xpath('string(//h1[@class="heading_1"]/following-sibling::p)').get()]
+        )
+        item["branch"] = street.strip() if street else None
+        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
+        item["email"] = response.xpath('//a[contains(@href, "mailto:")]/text()').get()
 
-            type_text = [s.strip() for s in row.xpath('*[@class="columnTypeOfStore"]//text()').extract()]
-            type_of_store = [s for s in type_text if s]
+        img_url = response.urljoin(
+            response.xpath('//div[contains(@class, "storeDetailsCard_image")]/@style')
+            .re_first(r"url\((.*?)\)")
+            .strip("'\"")
+        )
+        # Only save the image if it is an actual photo, not a placeholder
+        if "/placeholders/" not in img_url:
+            item["image"] = img_url
 
-            hours_txt = row.xpath('*[@class="columnHoursOfOprn"]/div/*/text()').extract()
-            opening_hours = [
-                f"{hours_txt[i]} {hours_txt[i + 1]}"
-                for i in range(0, len(hours_txt) // 2, 2)
-                if hours_txt[i + 1] != "Closed"
-            ]
-            oh = LinkedDataParser.parse_opening_hours({"openingHours": opening_hours}, "%I:%M %p")
+        oh = OpeningHours()
+        for element in response.xpath('//div[@class="storeHoursInformation"]//dl/div'):
+            day = element.xpath("./dt/text()").get()
+            hours_text = element.xpath("./dd/text()").get()
+            if not day or not hours_text or day.strip() == "Today":
+                continue
 
-            [lat, lon] = row.xpath("*/form/input").re('name=".*itude" value="(.*)"')
-            if float(lat) == 0 and float(lon) == 0:
-                lat, lon = None, None
+            oh.add_ranges_from_string(f"{day.strip()} {hours_text.strip()}")
 
-            properties = {
-                "lat": lat,
-                "lon": lon,
-                "addr_full": address,
-                "phone": phone,
-                "extras": {
-                    "fax": fax,
-                    "type_of_store": type_of_store,
-                },
-                "ref": ref,
-                "opening_hours": oh,
-            }
-            apply_category(Categories.SHOP_ALCOHOL, properties)
-            yield Feature(**properties)
+        item["opening_hours"] = oh
+        apply_category(Categories.SHOP_ALCOHOL, item)
+
+        yield item
