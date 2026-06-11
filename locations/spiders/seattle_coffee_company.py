@@ -23,7 +23,7 @@ class SeattleCoffeeCompanySpider(SitemapSpider):
 
         item["opening_hours"] = OpeningHours()
         for day_time in response.xpath('//div[contains(@class, "trading")]').xpath("normalize-space()").getall():
-            if ("Church Services" in day_time):
+            if "Church Services" in day_time:
                 continue
             if "24/7" in day_time:
                 item["opening_hours"] = "24/7"
