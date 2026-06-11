@@ -6,6 +6,7 @@ from locations.hours import CLOSED_NO, OpeningHours
 
 REMA_1000 = {"brand": "Rema 1000", "brand_wikidata": "Q28459"}
 
+
 class Rema1000NOSpider(Spider):
     name = "rema_1000_no"
     allowed_domains = ["www.rema.no"]
