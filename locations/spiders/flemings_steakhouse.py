@@ -1,36 +1,24 @@
-import re
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class FlemingsSteakhouseSpider(scrapy.Spider):
+class FlemingsSteakhouseSpider(CrawlSpider, StructuredDataSpider):
     name = "flemings_steakhouse"
     item_attributes = {"brand": "Fleming's", "brand_wikidata": "Q5458552"}
-    allowed_domains = ["flemingssteakhouse.com"]
-    start_urls = ("https://www.flemingssteakhouse.com/locations",)
+    start_urls = ["https://www.flemingssteakhouse.com/locations"]
+    rules = [Rule(LinkExtractor(allow=r"/locations/[a-z]{2}/[^/]+/?$"), callback="parse_sd", follow=False)]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
-        urls = response.xpath('//ul[@class="locations"]/li/a/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        apply_category(Categories.RESTAURANT, item)
 
-    def parse_location(self, response):
-        address_element = response.xpath('//p[contains(text(), "Address")]/../p[2]/text()').extract()
-        address_element = list(filter(None, [a.strip() for a in address_element]))
-        address = address_element[0]
-        city_state_postal_element = address_element[1]
-        city, state, postcode = re.search(r"^(.*), ([A-Z]{2}) (\d{5})$", city_state_postal_element).groups()
-
-        properties = {
-            "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": response.xpath('//div[@id="location-details"]/h1/text()').extract_first(),
-            "addr_full": address,
-            "city": city,
-            "state": state,
-            "postcode": postcode,
-            "website": response.url,
-            "phone": response.xpath('//a[@class="phone"]/text()').extract_first(),
-        }
-        yield Feature(**properties)
+        yield item
