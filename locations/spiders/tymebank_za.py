@@ -29,6 +29,7 @@ class TymebankZASpider(LocationBankSpider):
     def post_process_item(self, item, response, location):
         apply_category(Categories.VENDING_MACHINE, item)
         item.pop("website")
+        item.pop("phone")
         item["branch"] = item["branch"].removeprefix("Kiosk ")
 
         if m := self.brand_name_regex.match(item["branch"]):
