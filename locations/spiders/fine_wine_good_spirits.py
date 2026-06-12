@@ -25,9 +25,9 @@ class FineWineGoodSpiritsSpider(SitemapSpider):
         item["website"] = response.url
         item["country"] = "US"
 
-        street = response.xpath('//h1[@class="heading_1"]/text()').get()
+        item["street_address"] = response.xpath('//h1[@class="heading_1"]/text()').get()
         item["addr_full"] = merge_address_lines(
-            [street, response.xpath('string(//h1[@class="heading_1"]/following-sibling::p)').get()]
+            [item["street_address"], response.xpath('string(//h1[@class="heading_1"]/following-sibling::p)').get()]
         )
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
         item["email"] = response.xpath('//a[contains(@href, "mailto:")]/text()').get()
