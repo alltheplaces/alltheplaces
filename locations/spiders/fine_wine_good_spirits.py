@@ -29,7 +29,6 @@ class FineWineGoodSpiritsSpider(SitemapSpider):
         item["addr_full"] = merge_address_lines(
             [street, response.xpath('string(//h1[@class="heading_1"]/following-sibling::p)').get()]
         )
-        item["branch"] = street.strip() if street else None
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
         item["email"] = response.xpath('//a[contains(@href, "mailto:")]/text()').get()
 
