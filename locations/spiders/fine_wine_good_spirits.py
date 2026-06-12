@@ -37,18 +37,20 @@ class FineWineGoodSpiritsSpider(SitemapSpider):
         )
 
         item = Feature()
-        item["ref"] = response.url.split("-")[-1]
+        item["ref"] = location["b2cStore_id"]
         item["lat"] = location["b2cStore_latitude"]
         item["lon"] = location["b2cStore_longitude"]
         item["website"] = response.url
         item["country"] = "US"
 
-        item["street_address"] = response.xpath('//h1[@class="heading_1"]/text()').get()
-        item["addr_full"] = merge_address_lines(
-            [item["street_address"], response.xpath('string(//h1[@class="heading_1"]/following-sibling::p)').get()]
+        item["street_address"] = merge_address_lines(
+            [location["b2cStore_address1"], location["b2cStore_address2"], location["b2cStore_address3"]]
         )
-        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
-        item["email"] = response.xpath('//a[contains(@href, "mailto:")]/text()').get()
+        item["city"] = location["b2cStore_city"]
+        item["state"] = location["b2cStore_state"]
+        item["postcode"] = location["b2cStore_zip"]
+        item["phone"] = location["b2cStore_phoneNumber"]
+        item["email"] = location["b2cStore_contactEmail"]
 
         img_url = response.urljoin(location["primaryFullImageURL"])
         # Only save the image if it is an actual photo, not a placeholder
