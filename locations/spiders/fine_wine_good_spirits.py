@@ -7,7 +7,8 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, DAYS_FULL
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -55,15 +56,10 @@ class FineWineGoodSpiritsSpider(SitemapSpider):
             item["image"] = img_url
 
         oh = OpeningHours()
-        for element in response.xpath('//div[@class="storeHoursInformation"]//dl/div'):
-            day = element.xpath("./dt/text()").get()
-            hours_text = element.xpath("./dd/text()").get()
-            if not day or not hours_text or day.strip() == "Today":
-                continue
-
-            oh.add_ranges_from_string(f"{day.strip()} {hours_text.strip()}")
-
+        for day in map(str.lower, DAYS_FULL):
+            oh.add_range(day, location["b2cStore_{}OpenTime".format(day)], location["b2cStore_{}CloseTime".format(day)])
         item["opening_hours"] = oh
+
         apply_category(Categories.SHOP_ALCOHOL, item)
 
         yield item
