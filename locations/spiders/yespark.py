@@ -11,7 +11,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class YesparkSpider(SitemapSpider, StructuredDataSpider):
     name = "yespark"
-    item_attributes = {"brand": "Yespark", "brand_wikidata": "Q109046724"}
+    item_attributes = {"operator": "Yespark", "operator_wikidata": "Q109046724"}
     sitemap_urls = [
         "https://www.yespark.fr/sitemap/parkings.xml",
     ]
