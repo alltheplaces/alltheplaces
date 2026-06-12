@@ -1,4 +1,7 @@
+import json
+import re
 from typing import Iterable
+from urllib.parse import unquote
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
@@ -11,17 +14,31 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class FineWineGoodSpiritsSpider(SitemapSpider):
     name = "fine_wine_good_spirits"
-    item_attributes = {
-        "name": "Fine Wine & Good Spirits",
-        "brand": "Fine Wine & Good Spirits",
-        "brand_wikidata": "Q64514776",
-    }
+    item_attributes = {"brand": "Fine Wine & Good Spirits", "brand_wikidata": "Q64514776"}
     sitemap_urls = ["https://www.finewineandgoodspirits.com/productSitemap.xml"]
     sitemap_rules = [(r"/product/store-\d+", "parse")]
 
     def parse(self, response: Response) -> Iterable[Feature]:
+        location = next(
+            iter(
+                DictParser.get_nested_key(
+                    json.loads(
+                        unquote(
+                            re.match(
+                                r"window\.state = JSON\.parse\(decodeURI\(\"(.+?)\"\)\)",
+                                response.xpath('//script[contains(text(), "window.state = ")]/text()').get(),
+                            ).group(1)
+                        )
+                    ),
+                    "products",
+                ).values()
+            )
+        )
+
         item = Feature()
         item["ref"] = response.url.split("-")[-1]
+        item["lat"] = location["b2cStore_latitude"]
+        item["lon"] = location["b2cStore_longitude"]
         item["website"] = response.url
         item["country"] = "US"
 
