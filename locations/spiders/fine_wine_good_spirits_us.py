@@ -13,8 +13,8 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class FineWineGoodSpiritsSpider(SitemapSpider):
-    name = "fine_wine_good_spirits"
+class FineWineGoodSpiritsUSSpider(SitemapSpider):
+    name = "fine_wine_good_spirits_us"
     item_attributes = {"brand": "Fine Wine & Good Spirits", "brand_wikidata": "Q64514776"}
     sitemap_urls = ["https://www.finewineandgoodspirits.com/productSitemap.xml"]
     sitemap_rules = [(r"/product/store-\d+", "parse")]
@@ -41,7 +41,6 @@ class FineWineGoodSpiritsSpider(SitemapSpider):
         item["lat"] = location["b2cStore_latitude"]
         item["lon"] = location["b2cStore_longitude"]
         item["website"] = response.url
-        item["country"] = "US"
 
         item["street_address"] = merge_address_lines(
             [location["b2cStore_address1"], location["b2cStore_address2"], location["b2cStore_address3"]]
