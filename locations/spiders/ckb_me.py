@@ -39,7 +39,6 @@ class CkbMESpider(Spider):
     def parse_detail(
         self, response: Response, lat: str, lng: str, marker_type: str, marker_id: str, **kwargs: Any
     ) -> Any:
-        # Source is HTML, no DictParser
         item = Feature()
         item["ref"] = marker_id
         item["lat"] = lat
@@ -48,7 +47,6 @@ class CkbMESpider(Spider):
         name = response.xpath('normalize-space(//*[contains(@class, "location-name")])').get()
         if " - " in name:
             item["city"], item["street_address"] = name.split(" - ", 1)
-        item["branch"] = name
 
         phones = [p.strip() for p in response.xpath('//*[contains(@class, "location-phone")]/text()').getall()]
         phones = [p for p in phones if p]
