@@ -49,13 +49,9 @@ class FineWineGoodSpiritsSpider(SitemapSpider):
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
         item["email"] = response.xpath('//a[contains(@href, "mailto:")]/text()').get()
 
-        img_url = response.urljoin(
-            response.xpath('//div[contains(@class, "storeDetailsCard_image")]/@style')
-            .re_first(r"url\((.*?)\)")
-            .strip("'\"")
-        )
+        img_url = response.urljoin(location["primaryFullImageURL"])
         # Only save the image if it is an actual photo, not a placeholder
-        if "/placeholders/" not in img_url:
+        if "img/no-image" not in img_url:
             item["image"] = img_url
 
         oh = OpeningHours()
