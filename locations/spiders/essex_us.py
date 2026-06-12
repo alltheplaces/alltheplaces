@@ -18,7 +18,6 @@ class EssexUSSpider(JSONBlobSpider, PlaywrightSpider):
         "operator_wikidata": "Q134703255",
     }
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-    requires_proxy = True
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
         return json.loads(response.xpath("//pre/text()").get())["communities"]
