@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class EffiaSpider(SitemapSpider):
     name = "effia"
-    item_attributes = {"brand": "EFFIA", "brand_wikidata": "Q3045894"}
+    item_attributes = {"brand": "Effia", "brand_wikidata": "Q3045894"}
     sitemap_urls = ["https://www.effia.com/sitemap.xml"]
     sitemap_rules = [(r"/parking/parking-", "parse")]
 
