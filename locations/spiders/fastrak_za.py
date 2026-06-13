@@ -12,11 +12,9 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class FastrakZASpider(JSONBlobSpider):
     name = "fastrak_za"
-    item_attributes = {
-        "brand": "Fastrak",
-        "brand_wikidata": "Q120799603",
-    }
+    item_attributes = {"brand": "Fastrak", "brand_wikidata": "Q120799603"}
     locations_key = ["data", "mapData"]
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
