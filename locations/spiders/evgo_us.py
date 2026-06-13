@@ -1,6 +1,6 @@
-from typing import Any, Iterator
+from typing import Any, Iterable, Iterator
 
-from scrapy.http import Response
+from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -15,8 +15,13 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
     name = "evgo_us"
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
     sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
-    requires_proxy = True
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+
+    def _parse_sitemap(self, response: Response) -> Iterable[Request]:
+        for request in super()._parse_sitemap(response):
+            request.meta["playwright"] = True
+            request.meta["playwright_include_page"] = True
+            yield request
 
     def parse(self, response: Response, **kwargs: Any) -> Iterator[Feature]:
         # Skip the root overview page if it comes through the sitemap
