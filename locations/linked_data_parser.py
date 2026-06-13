@@ -328,7 +328,8 @@ class LinkedDataParser:
             if isinstance(stars, str):
                 item["extras"]["stars"] = stars
             elif isinstance(stars, dict):
-                item["extras"]["stars"] = LinkedDataParser.get_case_insensitive(stars, "ratingValue")
+                if rating_value := LinkedDataParser.get_case_insensitive(stars, "ratingValue"):
+                    item["extras"]["stars"] = str(rating_value).removesuffix(".0")
 
     @staticmethod
     def parse_same_as(ld: dict, item: Feature):
