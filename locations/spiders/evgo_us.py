@@ -17,6 +17,15 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
     sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
 
+    def start_requests(self) -> Iterable[Request]:
+        # Route the sitemap fetch through Playwright to bypass the Vercel security checkpoint
+        for url in self.sitemap_urls:
+            yield Request(
+                url,
+                callback=self._parse_sitemap,
+                meta={"playwright": True, "playwright_include_page": True},
+            )
+
     def _parse_sitemap(self, response: Response) -> Iterable[Request]:
         for request in super()._parse_sitemap(response):
             request.meta["playwright"] = True
