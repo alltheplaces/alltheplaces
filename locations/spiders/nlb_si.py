@@ -5,6 +5,7 @@ from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_SI, OpeningHours
 
 
 class NlbSISpider(Spider):
@@ -31,6 +32,20 @@ class NlbSISpider(Spider):
 
             if facility_url := poi.get("facilityPageUrl"):
                 item["website"] = f"https://www.nlb.si{facility_url}"
+
+            oh = OpeningHours()
+            for avail in poi.get("availabilities") or []:
+                day = DAYS_SI.get(avail["dayOfWeek"])
+                if not day:
+                    continue
+                for r in avail.get("range") or []:
+                    if r.get("closed") or r.get("from") is None:
+                        continue
+                    # Times are formatted as "8.00" / "24.00" — normalise to "HH:MM"
+                    open_time = r["from"].replace(".", ":").zfill(5)
+                    close_time = r["to"].replace(".", ":").zfill(5)
+                    oh.add_range(day, open_time, close_time)
+            item["opening_hours"] = oh.as_opening_hours()
 
             kind = poi.get("kind")
             if kind == "atm":
