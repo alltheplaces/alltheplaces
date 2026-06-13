@@ -51,7 +51,8 @@ class BilLUSpider(Spider):
             item["country"] = location["Pays/Région"]
             item["lat"] = location["Latitude"]
             item["lon"] = location["Longitude"]
-            item["phone"] = location["telephone"]
+            # The source JS contains a single corporate number for all branches — omit it.
+            # item["phone"] = location["telephone"]
             item["opening_hours"] = self.parse_opening_hours(location)
 
             apply_yes_no(
