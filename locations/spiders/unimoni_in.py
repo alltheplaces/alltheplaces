@@ -52,4 +52,6 @@ class UnimoniINSpider(scrapy.Spider):
         item["state"] = kwargs["state"]
         item["addr_full"] = ", ".join(filter(None, [data.get("address1"), data.get("address2"), data.get("address3")]))
         apply_category(Categories.BUREAU_DE_CHANGE, item)
+        if not item["lat"] or not item["lon"] or float(item["lat"]) == 0 or float(item["lon"]) == 0:
+            return
         yield item
