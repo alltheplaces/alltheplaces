@@ -12,7 +12,7 @@ from locations.items import Feature
 
 class ParkbeeSpider(Spider):
     name = "parkbee"
-    item_attributes = {"brand": "ParkBee", "brand_wikidata": "Q121536325"}
+    item_attributes = {"operator": "ParkBee", "operator_wikidata": "Q121536325"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         # Force the search to next Wednesday at 12:00 PM UTC to ensure max availability
