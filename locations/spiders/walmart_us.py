@@ -16,6 +16,7 @@ class WalmartUSSpider(SitemapSpider):
     allowed_domains = ["www.walmart.com"]
     sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
     sitemap_rules = [(r"/store/\d+-", "parse")]
+    requires_proxy = True
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
