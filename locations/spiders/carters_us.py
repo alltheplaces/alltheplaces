@@ -12,6 +12,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class CartersUSSpider(SitemapSpider, StructuredDataSpider):
     name = "carters_us"
     item_attributes = {"brand": "Carter's", "brand_wikidata": "Q5047083"}
+    requires_proxy = True
     allowed_domains = ["www.carters.com"]
     sitemap_urls = ["https://www.carters.com/sitemap_index.xml"]
     sitemap_follow = ["store-page"]
