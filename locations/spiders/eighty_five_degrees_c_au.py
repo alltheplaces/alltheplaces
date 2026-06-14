@@ -11,6 +11,7 @@ from locations.items import Feature
 class EightyFiveDegreesCAUSpider(Spider):
     name = "eighty_five_degrees_c_au"
     item_attributes = {"brand": "85°C Bakery Cafe", "brand_wikidata": "Q4644852"}
+    requires_proxy = True
     start_urls = ["https://www.85cafe.com.au/store-finder/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

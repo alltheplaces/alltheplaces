@@ -10,6 +10,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class EtosNLSpider(SitemapSpider, StructuredDataSpider):
     name = "etos_nl"
     item_attributes = {"brand": "Etos", "brand_wikidata": "Q2609459"}
+    requires_proxy = True
     sitemap_urls = [
         "https://www.etos.nl/sitemap-store_custom_sitemap.xml",
     ]
