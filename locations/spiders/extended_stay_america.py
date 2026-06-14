@@ -27,4 +27,8 @@ class ExtendedStayAmericaSpider(Spider):
             item["branch"] = item.pop("name")
             item["ref"] = location["siteId"]
             item["website"] = response.urljoin(location["urlMap"])
+            # DictParser maps "street" -> addr:street (street name only), but the source
+            # field contains the full address line including house number, so use street_address.
+            if street := item.pop("street", None):
+                item["street_address"] = street
             yield item
