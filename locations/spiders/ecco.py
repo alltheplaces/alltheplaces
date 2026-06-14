@@ -7,6 +7,7 @@ from locations.items import Feature
 class EccoSpider(scrapy.Spider):
     name = "ecco"
     item_attributes = {"brand": "Ecco", "brand_wikidata": "Q1280255"}
+    requires_proxy = True
     start_urls = [
         "https://se.ecco.com/api/store/search?latitudeMin=-90&longitudeMin=-180&latitudeMax=90&longitudeMax=180"
     ]
