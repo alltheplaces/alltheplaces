@@ -11,9 +11,7 @@ class VictorianGovernmentSchoolsAUSpider(JSONBlobSpider):
     name = "victorian_government_schools_au"
     item_attributes = {"operator": "Department of Education", "operator_wikidata": "Q5260272"}
     allowed_domains = ["www.vic.gov.au"]
-    start_urls = [
-        "https://www.vic.gov.au/api/tide/elasticsearch/content-vic__production__sapi_node/_search"
-    ]
+    start_urls = ["https://www.vic.gov.au/api/tide/elasticsearch/content-vic__production__sapi_node/_search"]
     locations_key = ["hits", "hits"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -21,34 +19,12 @@ class VictorianGovernmentSchoolsAUSpider(JSONBlobSpider):
             "from": 0,
             "query": {
                 "bool": {
-                    "filter": [
-                        {
-                            "terms": {
-                                "type": ["det_150_content"]
-                            }
-                        },
-                        {
-                            "terms": {
-                                "field_node_site": [4]
-                            }
-                        }
-                    ],
-                    "must": [
-                        {
-                            "match_all": {}
-                        }
-                    ]
+                    "filter": [{"terms": {"type": ["det_150_content"]}}, {"terms": {"field_node_site": [4]}}],
+                    "must": [{"match_all": {}}],
                 }
             },
             "size": 10000,
-            "sort": [
-                {
-                    "_score": "desc"
-                },
-                {
-                    "title.keyword": "asc"
-                }
-            ]
+            "sort": [{"_score": "desc"}, {"title.keyword": "asc"}],
         }
         yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
 
@@ -62,7 +38,11 @@ class VictorianGovernmentSchoolsAUSpider(JSONBlobSpider):
             case "Closed":
                 return
             case _:
-                self.logger.warning("Unknown school status '{}' for school '{}'.".format(feature["field_school_status_name"][0], feature["field_school_number"][0]))
+                self.logger.warning(
+                    "Unknown school status '{}' for school '{}'.".format(
+                        feature["field_school_status_name"][0], feature["field_school_number"][0]
+                    )
+                )
 
         item["ref"] = feature["field_school_number"][0]
         item["name"] = feature["title"][0].split(" - ", 1)[0]
@@ -122,4 +102,8 @@ class VictorianGovernmentSchoolsAUSpider(JSONBlobSpider):
             case "Camp":
                 apply_category(Categories.NATURE_SCHOOL, item)
             case _:
-                self.logger.warning("Unknown school type '{}' for school '{}'.".format(feature["field_school_type_name"][0], feature["field_school_number"][0]))
+                self.logger.warning(
+                    "Unknown school type '{}' for school '{}'.".format(
+                        feature["field_school_type_name"][0], feature["field_school_number"][0]
+                    )
+                )
