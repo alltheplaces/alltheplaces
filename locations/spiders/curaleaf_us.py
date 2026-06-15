@@ -11,7 +11,6 @@ from locations.json_blob_spider import JSONBlobSpider
 class CuraleafUSSpider(JSONBlobSpider):
     name = "curaleaf_us"
     item_attributes = {"brand": "Curaleaf", "brand_wikidata": "Q85754829"}
-    requires_proxy = True
     allowed_domains = ["curaleaf.com"]
     start_urls = ["https://curaleaf.com/api/dispensaries/store-drawer"]
     locations_key = "data"
