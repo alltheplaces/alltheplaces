@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class VictorianGovernmentSchoolsAUSpider(JSONBlobSpider):
     name = "victorian_government_schools_au"
-    item_attributes = {"operator": "Department of Education", "operator_wikidata": "Q5260272"}
+    item_attributes = {"operator": "Victorian Department of Education", "operator_wikidata": "Q5260272"}
     allowed_domains = ["www.vic.gov.au"]
     start_urls = ["https://www.vic.gov.au/api/tide/elasticsearch/content-vic__production__sapi_node/_search"]
     locations_key = ["hits", "hits"]
