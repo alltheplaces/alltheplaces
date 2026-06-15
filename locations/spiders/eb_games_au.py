@@ -14,6 +14,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class EbGamesAUSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "eb_games_au"
     item_attributes = {"brand": "EB Games", "brand_wikidata": "Q5322604"}
+    requires_proxy = True
     sitemap_urls = ["https://www.ebgames.com.au/sitemap-stores.xml"]
     sitemap_rules = [(r"/stores/store/(\d+)-[-\w]+$", "parse_sd")]
     search_for_facebook = False

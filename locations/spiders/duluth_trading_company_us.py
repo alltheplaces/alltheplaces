@@ -14,6 +14,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class DuluthTradingCompanyUSSpider(JSONBlobSpider):
     name = "duluth_trading_company_us"
     item_attributes = {"brand": "Duluth Trading Company", "brand_wikidata": "Q48977107"}
+    requires_proxy = True
     allowed_domains = ["www.duluthtrading.com"]
     start_urls = ["https://www.duluthtrading.com/mobify/proxy/ocapi/s/DTC/api/store/all/"]
     needs_json_request = True
