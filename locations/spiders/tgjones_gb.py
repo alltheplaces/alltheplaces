@@ -25,7 +25,6 @@ class TgjonesGBSpider(SitemapSpider):
     }
     coordinates_pattern = re.compile(r"google\.maps\.LatLng\(\s*([-\d.]+)[,\s]+([-\d.]+)\s*\)")
     skip_auto_cc_domain = True
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
