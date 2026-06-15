@@ -1,10 +1,8 @@
 from locations.spiders.five_guys_au import FiveGuysAUSpider
-from locations.spiders.five_guys_us import FiveGuysUSSpider
 
 
 class FiveGuysBESpider(FiveGuysAUSpider):
     name = "five_guys_be"
-    item_attributes = FiveGuysUSSpider.item_attributes
     experience_key = "search-backend-be"
     locale = (
         "en-BE"  # Using en because it has google attributes which gives lots of extra details (not present in fr or nl)
