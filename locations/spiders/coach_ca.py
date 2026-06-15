@@ -14,6 +14,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class CoachCASpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "coach_ca"
     item_attributes = {"brand": "Coach", "brand_wikidata": "Q727697"}
+    requires_proxy = True
     sitemap_urls = ["https://ca.coach.com/en/stores/sitemap.xml"]
     sitemap_rules = [(r"https://ca.coach.com/en/stores/[^/]+/[^/]+/[^/]+", "parse_sd")]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}

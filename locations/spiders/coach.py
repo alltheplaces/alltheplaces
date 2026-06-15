@@ -12,6 +12,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class CoachSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "coach"
     item_attributes = {"brand": "Coach", "brand_wikidata": "Q727697"}
+    requires_proxy = True
 
     sitemap_urls = [
         "https://uk.coach.com/stores/sitemap.xml",
