@@ -24,9 +24,12 @@ class Categories(Enum):
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
 
-    SCHOOL = {"amenity": "school"}
-    UNIVERSITY = {"amenity": "university"}
-    COLLEGE = {"amenity": "college"}
+    KINDERGARTEN = {"amenity": "kindergarten", "education": "kindergarten"}
+    SCHOOL = {"amenity": "school", "education": "school"}
+    COLLEGE = {"amenity": "college", "education": "college"}
+    UNIVERSITY = {"amenity": "university", "education": "university"}
+    LANGUAGE_SCHOOL = {"amenity": "school", "education": "language_school"}
+    NATURE_SCHOOL = {"amenity": "school", "education": "nature_school"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -317,7 +320,6 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
-    KINDERGARTEN = {"amenity": "kindergarten"}
     LIBRARY = {"amenity": "library"}
     MANHOLE = {"man_made": "manhole"}
     MARKETPLACE = {"amenity": "marketplace"}
@@ -496,6 +498,7 @@ top_level_tags = [
     "club",
     "craft",
     "dark_store",
+    "education",
     "emergency",
     "healthcare",
     "highway",
@@ -542,6 +545,12 @@ def get_category_tags(source: Feature | Enum | Mapping) -> dict:
             categories[top_level_tag] = v
     if len(categories.keys()) > 1 and categories.get("shop") == "yes":
         categories.pop("shop")
+    if "amenity" in categories.keys() and "education" in categories.keys():
+        # amenity=school is being replaced within OSM by education=*
+        # Whilst ATP still sets amenity=school for backwards compatibility
+        # it is "education" not "amenity" which is the intended top level
+        # category.
+        categories.pop("amenity")
     return categories
 
 
