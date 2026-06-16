@@ -47,6 +47,7 @@ class VerizonUSSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["storeNumber"]
+        item["branch"] = item.pop("name", None)
         if website := item.get("website"):
             item["website"] = (
                 f'https://www.verizon.com/nextgendigital/nos/storelocator/detail/{website.removeprefix("/stores/")}'
