@@ -21,6 +21,7 @@ COUNTRY_MAP = {
 class SunglassHutLatamSpider(Spider):
     name = "sunglass_hut_latam"
     item_attributes = SUNGLASS_HUT_SHARED_ATTRIBUTES
+    requires_proxy = True
     start_urls = [
         "https://latam.sunglasshut.com/cl/tienda.php",
         "https://latam.sunglasshut.com/co/tienda.php",
