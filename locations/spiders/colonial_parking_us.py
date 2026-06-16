@@ -27,4 +27,5 @@ class ColonialParkingUSSpider(Spider):
 
     def parse_location_details(self, response: Response, item: Feature) -> Iterable[Feature]:
         item["addr_full"] = response.xpath('//*[@class="adresse"]/span/text()').get()
+        item["phone"] = response.xpath('//*[contains(text(), "Phone")]/following-sibling::span/text()').get()
         yield item
