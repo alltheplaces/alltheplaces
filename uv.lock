@@ -162,7 +162,7 @@ requires-dist = [
     { name = "pygeohash", specifier = "<4" },
     { name = "pygithub" },
     { name = "pyproj" },
-    { name = "pyshp", specifier = ">=3.0.9" },
+    { name = "pyshp", specifier = ">=3.0.12" },
     { name = "python-json-logger" },
     { name = "requests" },
     { name = "requests-cache" },
@@ -1660,11 +1660,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/d5/7b/65f55513d3c769fd6
 
 [[package]]
 name = "pyshp"
-version = "3.0.9"
+version = "3.0.12"
 source = { registry = "https://pypi.python.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/65/be/b3929ee96a45eb791b79be041e595a74fd18b35d066b8c99659a8ceb0725/pyshp-3.0.9.tar.gz", hash = "sha256:a49d85f2fae1d561dfc11039271aa4f9d5a377765d0a3cd8ad98172f0c6aff81", size = 2203033, upload-time = "2026-05-27T17:11:00.557Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/09/0ee60f56e34c6df34e30d302c29ca67b115a7a76ce1acf21f67924aec9a3/pyshp-3.0.12.tar.gz", hash = "sha256:517f6d80be444f3e85ed3f08b004108845f535dee3efffc2fbca1ba93d22151d", size = 2209829, upload-time = "2026-06-05T18:56:03.08Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/80/5f/010886558cde80f34f5eeef478a37004b97e3ac30281bd036f398ee342bd/pyshp-3.0.9-py3-none-any.whl", hash = "sha256:7d0ef9f5cef26ce3cea5099464a7b29f57fc169435c287663b6dbcc260c69ef9", size = 65766, upload-time = "2026-05-27T17:10:59.461Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/09/e27388e25d5ba562b19b3893140469355150cfa9d49a4184e5033d7464c9/pyshp-3.0.12-py3-none-any.whl", hash = "sha256:f5f55548700e775e09479781a03a0b82aa46bef0270aa2980f86212565ce9092", size = 65235, upload-time = "2026-06-05T18:56:01.876Z" },
 ]
 
 [[package]]
