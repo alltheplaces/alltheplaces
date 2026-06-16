@@ -19,6 +19,7 @@ class HousePLSpider(Spider):
         "brand_wikidata": "Q9294202",
     }
     start_urls = ["https://www.housebrand.com/pl/pl/ajx/stores/all/"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         kml_url = response.json()["content"]["kml_url"]
