@@ -26,6 +26,13 @@ class Licenses(Enum):
         "license:wikidata": "Q18199165",
         "attribution": "required",
     }
+    ETALAB2 = {
+        "license": "Etalab Open License 2.0",
+        "license:website": "https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf",
+        "license:wikidata": "Q80939351",
+        "attribution": "required",
+        "use:commercial": "permit",
+    }
     GB_OGLv3 = {
         "license": "Open Government Licence v3.0",
         "license:website": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
