@@ -87,6 +87,7 @@ class Feature(scrapy.Item):
                 return subdivision.code
         return None
 
+
 def get_lat_lon(item: Feature) -> tuple[float, float] | None:
     """
     Retrieve the latitude and longitude from a Feature if they are defined and

@@ -2,7 +2,6 @@ import unicodedata
 from urllib.parse import urlparse
 
 import geonamescache
-import pycountry
 from babel import Locale, UnknownLocaleError
 
 
