@@ -20,7 +20,7 @@ class SdiBrokerBGSpider(Spider):
     start_urls = ["https://www.sdi.bg/sitemap.xml"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for url in response.xpath("//url/loc/text()").getall():
+        for url in response.xpath("//url/loc/text() | //*[local-name()='loc']/text()").getall():
             if re.match(r"https://www\.sdi\.bg/offices/[a-z].*\.html$", url):
                 yield response.follow(url, callback=self.parse_city)
 

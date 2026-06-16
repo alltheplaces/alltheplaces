@@ -1,3 +1,4 @@
+import json
 import re
 from typing import Any, Iterable
 
@@ -20,26 +21,41 @@ class HobbycoAUSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         # The page embeds a JS FeatureCollection using single-quoted syntax.
-        # Extract the features array and convert to JSON-parseable form.
-        m = re.search(r"const stores\s*=\s*\{.*?'features'\s*:\s*(\[.*?\])\s*\}", response.text, re.DOTALL)
-        if not m:
+        # Use brace-counting to extract the full object reliably.
+        idx = response.text.find("const stores =")
+        if idx < 0:
+            self.logger.error("Could not find 'const stores' in page")
             return
 
+        start = response.text.find("{", idx)
+        if start < 0:
+            return
+
+        depth = 0
+        end = start
+        for i, c in enumerate(response.text[start:], start):
+            if c == "{":
+                depth += 1
+            elif c == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    break
+
+        raw = response.text[start:end]
+
         # Convert single-quoted JS object to valid JSON
-        raw = m.group(1)
-        raw = re.sub(r"'([^']*)'", lambda mo: '"' + mo.group(1).replace('"', '\\"') + '"', raw)
+        raw = re.sub(r"'([^']*?)'", lambda mo: '"' + mo.group(1).replace('"', '\\"') + '"', raw)
         raw = re.sub(r",\s*\}", "}", raw)
         raw = re.sub(r",\s*\]", "]", raw)
 
-        import json
-
         try:
-            features = json.loads(raw)
-        except json.JSONDecodeError:
-            self.logger.error("Failed to parse Hobbyco store JSON")
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            self.logger.error("Failed to parse Hobbyco store JSON: %s", e)
             return
 
-        for feature in features:
+        for feature in data.get("features", []):
             props = feature.get("properties", {})
             coords = feature.get("geometry", {}).get("coordinates", [])
 
@@ -57,7 +73,6 @@ class HobbycoAUSpider(Spider):
 
             if hours_raw := props.get("hours"):
                 oh = OpeningHours()
-                # Format: "Monday 10am - 6pm<br>Tuesday 10am - 6pm<br>..."
                 for line in re.split(r"<br\s*/?>", hours_raw, flags=re.IGNORECASE):
                     oh.add_ranges_from_string(line.strip())
                 item["opening_hours"] = oh
