@@ -49,8 +49,11 @@ class FelleskjopetNOSpider(Spider):
                 item["city"] = unit.get("city")
                 item["postcode"] = unit.get("zipCode")
                 item["phone"] = unit.get("phone") or None
-                item["lat"] = loc.get("latitude")
-                item["lon"] = loc.get("longitude")
+                item["lat"] = loc.get("latitude") or None
+                item["lon"] = loc.get("longitude") or None
+
+                if not item["lat"] or not item["lon"]:
+                    continue
                 item["country"] = "NO"
 
                 if hours_raw := unit.get("openingHours"):
