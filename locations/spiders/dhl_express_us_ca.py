@@ -20,4 +20,5 @@ class DhlExpressUSCASpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data):
         item["country"] = re.findall(r"\.ca|\.us", response.url)[0][1:].upper()
         apply_category(Categories.POST_OFFICE, item)
+        item.pop("image", None)  # Generic brand icon, not per-location
         yield item
