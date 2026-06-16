@@ -1,12 +1,12 @@
 from typing import Iterable
 
+from scrapy import Spider
 from scrapy.http import TextResponse
 
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
 
 
-class YouParkingTWSpider(JSONBlobSpider):
+class YouparkingTWSpider(Spider):
     name = "youparking_tw"
     item_attributes = {"brand": "俥亭停車", "brand_wikidata": "Q132009628"}
     start_urls = ["https://www.youparking.com.tw/parking-list.php"]
