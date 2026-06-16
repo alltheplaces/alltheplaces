@@ -1,0 +1,81 @@
+import json
+import re
+from typing import Any, Iterable
+
+from scrapy import Spider
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
+from locations.items import Feature
+
+
+class HobbycoAUSpider(Spider):
+    """Spider for Hobbyco hobby stores (Australia).
+    Closes #6546
+    """
+
+    name = "hobbyco_au"
+    item_attributes = {"brand": "Hobbyco", "brand_wikidata": "Q124003864"}
+    start_urls = ["https://www.hobbyco.com.au/pages/stores"]
+
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        # The page embeds a JS FeatureCollection using single-quoted syntax.
+        # Use brace-counting to extract the full object reliably.
+        idx = response.text.find("const stores =")
+        if idx < 0:
+            self.logger.error("Could not find 'const stores' in page")
+            return
+
+        start = response.text.find("{", idx)
+        if start < 0:
+            return
+
+        depth = 0
+        end = start
+        for i, c in enumerate(response.text[start:], start):
+            if c == "{":
+                depth += 1
+            elif c == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    break
+
+        raw = response.text[start:end]
+
+        # Convert single-quoted JS object to valid JSON
+        raw = re.sub(r"'([^']*?)'", lambda mo: '"' + mo.group(1).replace('"', '\\"') + '"', raw)
+        raw = re.sub(r",\s*\}", "}", raw)
+        raw = re.sub(r",\s*\]", "]", raw)
+
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            self.logger.error("Failed to parse Hobbyco store JSON: %s", e)
+            return
+
+        for feature in data.get("features", []):
+            props = feature.get("properties", {})
+            coords = feature.get("geometry", {}).get("coordinates", [])
+
+            item = Feature()
+            item["ref"] = props.get("email", "").split("@")[0] or props.get("address")
+            item["branch"] = props.get("address")
+            item["city"] = props.get("city")
+            item["postcode"] = props.get("postalCode")
+            item["country"] = "AU"
+            item["phone"] = props.get("phone") or None
+            item["email"] = props.get("email") or None
+            item["website"] = props.get("maps") or None
+            if len(coords) == 2:
+                item["lon"], item["lat"] = coords
+
+            if hours_raw := props.get("hours"):
+                oh = OpeningHours()
+                for line in re.split(r"<br\s*/?>", hours_raw, flags=re.IGNORECASE):
+                    oh.add_ranges_from_string(line.strip())
+                item["opening_hours"] = oh
+
+            apply_category(Categories.SHOP_TOYS, item)
+            yield item
