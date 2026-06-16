@@ -33,6 +33,10 @@ class NlbMESpider(Spider):
             if facility_url := poi.get("facilityPageUrl"):
                 item["website"] = f"https://www.nlb.me{facility_url}"
 
+            # Drop generic corporate contact details — not location-specific
+            item.pop("phone", None)
+            item.pop("email", None)
+
             oh = OpeningHours()
             for avail in poi.get("availabilities") or []:
                 day = DAYS_HR.get(avail["dayOfWeek"])
