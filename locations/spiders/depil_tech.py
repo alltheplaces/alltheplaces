@@ -10,3 +10,7 @@ class DepilTechSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.depiltech.com/sitemap.xml"]
     sitemap_rules = [(r"/fr/[\w-]+/[\w-]+/\d+", "parse_sd")]
     wanted_types = ["HealthAndBeautyBusiness"]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("image", None)  # Generic brand image, not per-location
+        yield item
