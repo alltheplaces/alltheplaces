@@ -28,15 +28,16 @@ class PizzaHutGBSpider(Spider):
             yield from self.post_process_item(item, response, location) or []
 
     def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs) -> Iterable[Feature]:
-        if location["type"] == "restaurant":
+        disposition = location.get("allowedDisposition", {})
+        # Use allowedDisposition.delivery to distinguish sit-in restaurants from
+        # delivery-only outlets — the type field is unreliable across sectors.
+        if disposition.get("delivery") is False:
             item.update(self.PIZZA_HUT)
             apply_category(Categories.RESTAURANT, item)
-        elif location["type"] == "delivery":
+        else:
             item.update(self.PIZZA_HUT_DELIVERY)
             apply_category(Categories.FAST_FOOD, item)
-        else:
-            self.logger.error("Unexpected type: {}".format(location["type"]))
 
-        apply_yes_no(Extras.DELIVERY, item, location.get("allowedDisposition", {}).get("delivery"))
-        apply_yes_no(Extras.TAKEAWAY, item, location.get("allowedDisposition", {}).get("collection"))
+        apply_yes_no(Extras.DELIVERY, item, disposition.get("delivery"))
+        apply_yes_no(Extras.TAKEAWAY, item, disposition.get("collection"))
         yield item
