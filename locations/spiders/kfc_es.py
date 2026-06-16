@@ -16,6 +16,7 @@ class KfcESSpider(Spider):
     name = "kfc_es"
     item_attributes = KFC_SHARED_ATTRIBUTES
     start_urls = ["https://api.kfc.es/find-a-kfc/allstores"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for store in response.json():
