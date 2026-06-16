@@ -105,7 +105,13 @@ class CommerzbankDESpider(CrawlSpider):
 
                 properties["opening_hours"] = self.parse_hours(branch)
 
-                apply_category(Categories.BANK, properties)
-                apply_yes_no(Extras.ATM, properties, bool(branch.get("geldautomat")))
+                # Locations with orgTyp="SB" (Selbstbedienung / self-service) and
+                # no cashier (kasse=False) are standalone ATM kiosks, not branches.
+                is_atm_only = branch.get("orgTyp") == "SB" or not branch.get("kasse")
+                if is_atm_only:
+                    apply_category(Categories.ATM, properties)
+                else:
+                    apply_category(Categories.BANK, properties)
+                    apply_yes_no(Extras.ATM, properties, bool(branch.get("geldautomat")))
 
                 yield Feature(**properties)
