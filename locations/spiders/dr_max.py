@@ -43,7 +43,7 @@ class DrMaxSpider(Spider):
             item["street_address"] = item.pop("street")
             item.pop("name")
             item["phone"] = "; ".join([n["number"] for n in location["phoneNumbers"]])
-            item["email"] = location.get("additionalParams").get("email")
+            item.pop("email", None)  # generic brand email, not location-specific
             item["image"] = location["pharmacyImage"]
             item["country"] = country = response.meta["country"]
             service_ids = [service["serviceId"] for service in location["services"]]
