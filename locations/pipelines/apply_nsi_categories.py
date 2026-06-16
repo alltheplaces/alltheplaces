@@ -1,5 +1,3 @@
-from typing import Iterable
-
 from scrapy import Spider
 
 from locations.categories import get_category_tags
@@ -11,7 +9,10 @@ class ApplyNSICategoriesPipeline:
     nsi = NSI()
     wikidata_cache = {}
 
-    def process_item(self, item: Feature, spider: Spider) -> Iterable[Feature]:
+    def process_item(self, item: Feature, spider: Spider) -> Feature:
+        stats = spider.crawler.stats
+        if stats is None:
+            return item
         if item.get("nsi_id"):
             # Skip NSI matching and tag synchronisation upon spider request. A
             # spider must set attribute "nsi_id = -1" to skip NSI matching.
@@ -25,8 +26,8 @@ class ApplyNSICategoriesPipeline:
             # Failure to match due to missing brand_wikidata or
             # operator_wikidata fields on the item. One or both of these
             # fields must be supplied.
-            spider.crawler.stats.inc_value("atp/nsi/match_failed")
-            spider.crawler.stats.inc_value("atp/nsi/brand_or_operator_missing")
+            stats.inc_value("atp/nsi/match_failed")
+            stats.inc_value("atp/nsi/brand_or_operator_missing")
             return item
 
         if not get_category_tags(item) and item.get("brand_wikidata"):
@@ -49,7 +50,7 @@ class ApplyNSICategoriesPipeline:
             #   of "Costco" in the US with Wikidata item Q715583 being both
             #   shop/warehouse and amenity/car_wash. The only field different
             #   in NSI entries is the category.
-            spider.crawler.stats.inc_value("atp/nsi/category_missing")
+            stats.inc_value("atp/nsi/category_missing")
         elif not get_category_tags(item):
             # Failure to match due to missing top level category tags on the
             # ATP item, preventing matching with NSI operator entries. Most
@@ -64,15 +65,15 @@ class ApplyNSICategoriesPipeline:
             #   of knowing which of numerous NSI entries associated with the
             #   local government organisation is applicable if no category is
             #   specified.
-            spider.crawler.stats.inc_value("atp/nsi/match_failed")
-            spider.crawler.stats.inc_value("atp/nsi/category_missing")
+            stats.inc_value("atp/nsi/match_failed")
+            stats.inc_value("atp/nsi/category_missing")
             return item
 
         if not item.has_valid_country_code():
             # Not a fatal condition for NSI matching because both the ATP and
             # NSI items may have global applicability (e.g. "001" for NSI).
             # However, it's still worth collecting statistics.
-            spider.crawler.stats.inc_value("atp/nsi/country_missing")
+            stats.inc_value("atp/nsi/country_missing")
 
         if brand_operator_qcode not in self.wikidata_cache:
             # wikidata_cache will usually only hold one thing, but can contain
@@ -87,16 +88,16 @@ class ApplyNSICategoriesPipeline:
             # for a brand, but NSI does not know of this Wikidata item.
             # It is suggested that a change be submitted to:
             # https://github.com/osmlab/name-suggestion-index
-            spider.crawler.stats.inc_value("atp/nsi/match_failed")
-            spider.crawler.stats.inc_value("atp/nsi/brand_unknown")
+            stats.inc_value("atp/nsi/match_failed")
+            stats.inc_value("atp/nsi/brand_unknown")
             return item
         elif len(nsi_matches) == 0 and item.get("operator_wikidata"):
             # Failure to match due to the ATP item specifying a Wikidata item
             # for an operator, but NSI does not know of this Wikidata item.
             # It is suggested that a change be submitted to:
             # https://github.com/osmlab/name-suggestion-index
-            spider.crawler.stats.inc_value("atp/nsi/match_failed")
-            spider.crawler.stats.inc_value("atp/nsi/operator_unknown")
+            stats.inc_value("atp/nsi/match_failed")
+            stats.inc_value("atp/nsi/operator_unknown")
             return item
 
         # Sometimes a brand and operator are the same across both NSI's
@@ -122,8 +123,8 @@ class ApplyNSICategoriesPipeline:
                 # match to NSI is not possible as NSI first needs updating to
                 # reflect the brand "Costco" opening pubs adjoining their
                 # warehouses.
-                spider.crawler.stats.inc_value("atp/nsi/match_failed")
-                spider.crawler.stats.inc_value("atp/nsi/category_unknown")
+                stats.inc_value("atp/nsi/match_failed")
+                stats.inc_value("atp/nsi/category_unknown")
                 return item
 
         location_code = item.get_iso_3166_2_code()
@@ -136,8 +137,8 @@ class ApplyNSICategoriesPipeline:
             # operating within the ATP items designated country and first
             # level subdivision. For example, "Chick-fil-A" is known in NSI
             # to operate in 3 countries, but Andorra ("AD") is not one them.
-            spider.crawler.stats.inc_value("atp/nsi/match_failed")
-            spider.crawler.stats.inc_value("atp/nsi/location_unknown")
+            stats.inc_value("atp/nsi/match_failed")
+            stats.inc_value("atp/nsi/location_unknown")
             return item
 
         if len(nsi_matches) == 1 and (not get_category_tags(item) or not location_code):
@@ -145,13 +146,13 @@ class ApplyNSICategoriesPipeline:
             # match wasn't possible so there is a remaining risk that a
             # mismatch has occurred. Alternatively or additionally, a location
             # match wasn't possible.
-            spider.crawler.stats.inc_value("atp/nsi/match_imperfect")
+            stats.inc_value("atp/nsi/match_imperfect")
             self.apply_nsi_tags(nsi_matches[0], item)
             return item
         elif len(nsi_matches) == 1:
             # Perfect match where only one NSI entry is returned matching the
             # ATP item.
-            spider.crawler.stats.inc_value("atp/nsi/match_perfect")
+            stats.inc_value("atp/nsi/match_perfect")
             self.apply_nsi_tags(nsi_matches[0], item)
             return item
 
@@ -163,8 +164,8 @@ class ApplyNSICategoriesPipeline:
         # country and first level subvision, both of the two KFC NSI entries
         # could be returned at this point. Matching fails here because it's
         # unknown which of the multiple NSI matches to apply.
-        spider.crawler.stats.inc_value("atp/nsi/match_failed")
-        spider.crawler.stats.inc_value("atp/nsi/multiple_matches")
+        stats.inc_value("atp/nsi/match_failed")
+        stats.inc_value("atp/nsi/multiple_matches")
         return item
 
     @staticmethod
