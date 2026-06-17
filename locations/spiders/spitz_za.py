@@ -15,7 +15,6 @@ class SpitzZASpider(Spider):
         "brand": "Spitz",
         "brand_wikidata": "Q116620967",
     }
-    requires_proxy = True
 
     def parse(self, response):
         for url in response.xpath('.//a[@class="directions"]/@href').getall():
