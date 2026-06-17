@@ -24,7 +24,10 @@ class PandoraSpider(RioSeoSpider):
         if location.get("Store Type_CS") == "Authorized Retailers":
             return
         feature["phone"] = location.get("location_phone") or location.get("local_phone")
-        feature["postcode"] = location.get("location_post_code") or location.get("post_code")
+        postcode = location.get("location_post_code") or location.get("post_code")
+        if postcode and not postcode.replace("0", "").strip():
+            postcode = None  # Placeholder like "0000" or "00000"
+        feature["postcode"] = postcode
         feature["country"] = feature["ref"][:2].upper()
         feature["website"] = "https:" + location["indy_url"]
         feature["branch"] = feature.pop("name").removeprefix("Pandora ").removeprefix("Store ").removeprefix("@ ")
