@@ -84,6 +84,7 @@ COUNTRYCODE_COMPONENTS = {
     "LU",
     "LV",
     "MA",
+    "MD",
     "ME",
     "MK",
     "MN",
