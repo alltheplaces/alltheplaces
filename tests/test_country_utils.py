@@ -28,6 +28,7 @@ def test_country_code_from_url():
     assert "ES" == country_utils.country_code_from_url("https://site.co.es/path")
     assert "GB" == country_utils.country_code_from_url("https://site.co.uk/path")
     assert "GB" == country_utils.country_code_from_url("https://site.co.UK/path")
+    assert "SH" == country_utils.country_code_from_url("https://site.ac/path")
 
 
 def test_country_code_from_spider_name():
@@ -36,6 +37,7 @@ def test_country_code_from_spider_name():
     assert not country_utils.country_code_from_spider_name([1, 2, 3])
     assert not country_utils.country_code_from_spider_name("fails")
     assert not country_utils.country_code_from_spider_name("fails_xx")
+    assert not country_utils.country_code_from_spider_name("fails_XX")
     assert not country_utils.country_code_from_spider_name("fails_gbr")
     assert "ES" == country_utils.country_code_from_spider_name("spider_es")
     assert "GB" == country_utils.country_code_from_spider_name("spider_UK")
@@ -44,6 +46,18 @@ def test_country_code_from_spider_name():
     assert not country_utils.country_code_from_spider_name("homebase_gb_ie")
     assert not country_utils.country_code_from_spider_name("spider_with_two_letters_in_the_middle")
     assert "FR" == country_utils.country_code_from_spider_name("le_spider_fr")
+    assert not country_utils.country_code_from_spider_name("spider_GB_ES_FR")
+    assert not country_utils.country_code_from_spider_name("spider_GB_ES")
+    assert not country_utils.country_code_from_spider_name("spider_gb_ES")
+    assert not country_utils.country_code_from_spider_name("spider_gb_es")
+    assert "FR" == country_utils.country_code_from_spider_name("spider_xx_FR")
+    assert "FR" == country_utils.country_code_from_spider_name("spider_xx_fr")
+    assert "FR" == country_utils.country_code_from_spider_name("spider_XX_FR")
+    assert not country_utils.country_code_from_spider_name("spider_fr_xx")
+    assert "GB" == country_utils.country_code_from_spider_name("spider_fr_xx_gb")
+    assert not country_utils.country_code_from_spider_name("spider_fr_")
+    assert "FR" == country_utils.country_code_from_spider_name("spider__fr")
+    assert not country_utils.country_code_from_spider_name("spider_")
 
 
 def test_get_locale():

@@ -5,13 +5,13 @@ STAT=$2
 
 if [ -z "${BUILD_ID}" ]; then
     (>&2 echo "Missing BUILD_ID")
-    (>&2 echo "Try '$0 2022-10-08-13-31-39 atp/nsi/perfect_match'")
+    (>&2 echo "Try '$0 2022-10-08-13-31-39 atp/nsi/match_perfect'")
     exit 1
 fi
 
 if [ -z "${STAT}" ]; then
     (>&2 echo "Missing STAT")
-    (>&2 echo "Try '$0 2022-10-08-13-31-39 atp/nsi/perfect_match'")
+    (>&2 echo "Try '$0 2022-10-08-13-31-39 atp/nsi/match_perfect'")
     exit 1
 fi
 
