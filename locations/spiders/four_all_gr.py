@@ -14,7 +14,7 @@ OH_DAYS = {"1": "Mo", "2": "Tu", "3": "We", "4": "Th", "5": "Fr", "6": "Sa", "7"
 
 
 class FourAllGRSpider(Spider):
-    name = "4all_gr"
+    name = "four_all_gr"
     item_attributes = {"brand": "4all", "brand_wikidata": "Q130279387", "country": "GR"}
     start_urls = ["https://4allstores.gr/wp-admin/admin-ajax.php?action=filter_stores&storesArea="]
 
