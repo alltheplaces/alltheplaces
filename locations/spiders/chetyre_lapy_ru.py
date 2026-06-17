@@ -28,6 +28,13 @@ class ChetyreLapyRUSpider(scrapy.Spider):
         )
 
     def parse_pois(self, response):
+        if "application/json" not in response.headers.get("Content-Type", b"").decode():
+            self.logger.error(
+                "Expected JSON from %s but got non-JSON response (stale buildId?); status=%s",
+                response.url,
+                response.status,
+            )
+            return
         for poi in list(response.json()["pageProps"]["fallback"].values())[0]["items"]:
             item = Feature()
             item["ref"] = poi["id"]
