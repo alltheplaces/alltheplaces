@@ -24,7 +24,7 @@ DHL_POP_BRAND = "DHL"
 DHL_POP_WIKIDATA = "Q489815"
 
 
-class DhlPlSpider(Spider):
+class DhlPLSpider(Spider):
     """DHL parcel pick-up points and parcel lockers (DHL BOX 24/7) in Poland.
 
     Data comes from two endpoints on parcelshop.dhl.pl:
