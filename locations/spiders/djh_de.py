@@ -16,13 +16,13 @@ class DjhDESpider(SitemapSpider):
         "country": "DE",
     }
     sitemap_urls = ["https://www.jugendherberge.de/sitemap.xml"]
-    # Match the /portraet sub-page which is present for each hostel in the sitemap
+    # Match /portraet pages - one per hostel in the sitemap
     sitemap_rules = [
         (r"/jugendherbergen/[^/]+/portraet$", "parse"),
     ]
 
     def parse(self, response: Response, **kwargs):
-        # Extract Vue hostel-map component JSON
+        # Extract coordinates and address from the Vue hostel-map component
         raw = response.css("hostel-map::attr(data-prop-object)").get()
         if not raw:
             return
@@ -44,28 +44,22 @@ class DjhDESpider(SitemapSpider):
         city = (pin.get("City") or "").strip()
         state = (pin.get("State") or "").strip()
 
-        # Phone and email from contact box
-        # Tel. +49 6261 7191 · email@example.com
-        phone_raw = response.css("div.contact-box__reachability span").getall()
+        # Phone from the "Tel. +49 ..." span in the contact box
         phone = None
-        for p in phone_raw:
-            text = re.sub(r"<[^>]+>", "", p).strip()
+        for span_html in response.css("div.contact-box__reachability span").getall():
+            text = re.sub(r"<[^>]+>", "", span_html).strip()
             if text.startswith("Tel."):
                 phone = text.replace("Tel.", "").strip()
                 break
 
-        email = response.css("div.contact-box__reachability a[href^='mailto:']::attr(href)").get()
-        if email:
-            email = email.replace("mailto:", "").strip()
+        email = response.css("div.contact-box__reachability a[href^='mailto:']::attr(href)").get("")
+        email = email.replace("mailto:", "").strip() or None
 
-        # Canonical hostel URL: strip /portraet suffix
-        website = re.sub(r"/portraet$", "/", response.url)
-
-        # Ref from hostel ID
-        ref = hostel_id or re.sub(r".*/jugendherbergen/([^/]+)/.*", r"\1", response.url)
+        # After redirects, response.url is the canonical hostel root page
+        website = response.url
 
         item = Feature()
-        item["ref"] = ref
+        item["ref"] = hostel_id
         item["branch"] = name
         item["lat"] = float(lat)
         item["lon"] = float(lon)
