@@ -29,6 +29,10 @@ class PandoraSpider(RioSeoSpider):
             postcode = None  # Placeholder like "0000" or "00000"
         feature["postcode"] = postcode
         feature["country"] = feature["ref"][:2].upper()
-        feature["website"] = "https:" + location["indy_url"]
+        if indy_url := location.get("indy_url"):
+            if indy_url.startswith("//"):
+                indy_url = "https:" + indy_url
+            if indy_url.startswith("http"):
+                feature["website"] = indy_url
         feature["branch"] = feature.pop("name").removeprefix("Pandora ").removeprefix("Store ").removeprefix("@ ")
         yield feature
