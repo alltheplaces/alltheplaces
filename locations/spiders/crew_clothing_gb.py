@@ -19,6 +19,7 @@ class CrewClothingGBSpider(CrawlSpider, StructuredDataSpider):
             set_closed(item)
 
         item["branch"] = item.pop("name")
+        item.pop("image", None)  # Generic store placeholder, not per-location
 
         if not item.get("lat"):
             if m := re.search(r"dblCustomerlatitude\s*=\s*(-?\d+\.\d+);", response.text):
