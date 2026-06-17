@@ -24,18 +24,20 @@ class GoOutdoorsGBSpider(Spider):
 
     def parse_details(self, response: Response):
         data = response.json().get("store")
-        if data:
-            item = DictParser.parse(data)
-            item["branch"] = item.pop("name").replace("GO Outdoors ", "")
-            item["state"] = data["big_region"]
-            item["phone"] = data["local_phone"]
-            item["street_address"] = merge_address_lines([data["address_2"], data["address_1"]])
-            oh = OpeningHours()
-            for day, time in data.get("hours_sets", "").get("primary", "").get("days").items():
-                for open_close_time in time:
-                    open_time = open_close_time["open"]
-                    close_time = open_close_time["close"]
-                    oh.add_range(day=day, open_time=open_time, close_time=close_time)
-            item["opening_hours"] = oh
+        if not data:
+            print("Error parsing: {}".format(response.url))
+            return
+        item = DictParser.parse(data)
+        item["branch"] = item.pop("name").replace("GO Outdoors ", "")
+        item["state"] = data["big_region"]
+        item["phone"] = data["local_phone"]
+        item["street_address"] = merge_address_lines([data["address_2"], data["address_1"]])
+        oh = OpeningHours()
+        for day, time in data.get("hours_sets", "").get("primary", "").get("days").items():
+            for open_close_time in time:
+                open_time = open_close_time["open"]
+                close_time = open_close_time["close"]
+                oh.add_range(day=day, open_time=open_time, close_time=close_time)
+        item["opening_hours"] = oh
 
-            yield item
+        yield item
