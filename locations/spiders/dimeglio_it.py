@@ -4,14 +4,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import (
-    CLOSED_IT,
-    DAYS_IT,
-    DELIMITERS_IT,
-    NAMED_DAY_RANGES_IT,
-    NAMED_TIMES_IT,
-    OpeningHours,
-)
+from locations.hours import CLOSED_IT, DAYS_IT, DELIMITERS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -24,9 +17,7 @@ class DimeglioITSpider(Spider):
 
     def parse(self, response: Response):
         # Extract store URLs from the clickable table rows, used as refs.
-        store_urls = response.xpath(
-            "//td[contains(@onclick, 'document.location.href')]/@onclick"
-        ).getall()
+        store_urls = response.xpath("//td[contains(@onclick, 'document.location.href')]/@onclick").getall()
         refs = []
         for onclick in store_urls:
             if m := re.search(r"'(https://[^']+)'", onclick):
@@ -34,12 +25,8 @@ class DimeglioITSpider(Spider):
                 refs.append(url.split("/")[-1])
 
         # Extract gMap markers from the embedded JavaScript.
-        gmap_js = response.xpath(
-            '//script[contains(text(), "gMap")][contains(text(), "latitude")]/text()'
-        ).get("")
-        marker_pattern = (
-            r"\{latitude: ([0-9.-]+),longitude: ([0-9.-]+),html: \"(.*?)\",\}"
-        )
+        gmap_js = response.xpath('//script[contains(text(), "gMap")][contains(text(), "latitude")]/text()').get("")
+        marker_pattern = r"\{latitude: ([0-9.-]+),longitude: ([0-9.-]+),html: \"(.*?)\",\}"
         markers = re.findall(marker_pattern, gmap_js, re.DOTALL)
 
         for i, (lat, lon, html_content) in enumerate(markers):
@@ -51,14 +38,8 @@ class DimeglioITSpider(Spider):
             branch = re.sub(r"^Supermercato Di Meglio\s+", "", branch).strip()
 
             # Extract street address.
-            addr_match = re.search(
-                r"Indirizzo:\s*(.*?)(?:<br|Telefono|\[)", html_content, re.DOTALL
-            )
-            addr_raw = (
-                re.sub(r"<[^>]+>", "", addr_match.group(1)).strip().rstrip(",").strip()
-                if addr_match
-                else ""
-            )
+            addr_match = re.search(r"Indirizzo:\s*(.*?)(?:<br|Telefono|\[)", html_content, re.DOTALL)
+            addr_raw = re.sub(r"<[^>]+>", "", addr_match.group(1)).strip().rstrip(",").strip() if addr_match else ""
 
             # Parse city and state from address patterns like "Via X 1, City(ST)" or "Via X | City(ST)".
             city = state = ""
@@ -102,9 +83,7 @@ class DimeglioITSpider(Spider):
                 lat=float(lat),
                 lon=float(lon),
                 opening_hours=oh,
-                website=f"https://www.dimegliosupermercati.com/{refs[i]}/"
-                if i < len(refs)
-                else None,
+                website=f"https://www.dimegliosupermercati.com/{refs[i]}/" if i < len(refs) else None,
             )
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
