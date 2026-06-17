@@ -81,7 +81,7 @@ class ApplyNSICategoriesPipeline:
             # have to call nsi.iter_nsi on every process_item.
             self.wikidata_cache[brand_operator_qcode] = list(self.nsi.iter_nsi(brand_operator_qcode))
 
-        nsi_matches = self.wikidata_cache.get(brand_operator_qcode)
+        nsi_matches = self.wikidata_cache[brand_operator_qcode]
 
         if len(nsi_matches) == 0 and item.get("brand_wikidata"):
             # Failure to match due to the ATP item specifying a Wikidata item
