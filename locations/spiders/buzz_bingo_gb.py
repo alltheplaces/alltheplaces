@@ -12,7 +12,6 @@ class BuzzBingoGBSpider(StructuredDataSpider):
     name = "buzz_bingo_gb"
     item_attributes = {"brand": "Buzz Bingo", "brand_wikidata": "Q60746117"}
     wanted_types = ["LocalBusiness"]
-    start_urls = []
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -33,7 +32,7 @@ class BuzzBingoGBSpider(StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["ref"] = response.meta.get("ref") or response.url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".html")
-        item["branch"] = item.pop("name", None)
+        item["branch"] = item.pop("name").removeprefix("Buzz Bingo ")
         item.pop("image", None)  # shared award logos, not per-location images
         item.pop("facebook", None)  # generic brand page, not per-location
         item.pop("twitter", None)  # generic brand account, not per-location
