@@ -4,6 +4,7 @@ from typing import Any
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
+from locations.categories import apply_category, Categories
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -39,5 +40,7 @@ class GoOutdoorsGBSpider(Spider):
                 close_time = open_close_time["close"]
                 oh.add_range(day=day, open_time=open_time, close_time=close_time)
         item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_OUTDOOR, item)
 
         yield item
