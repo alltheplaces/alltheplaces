@@ -30,9 +30,7 @@ class MujobchodCZSpider(Spider):
             store_id = sel.xpath("//@data-storeid").get()
             name_parts = sel.xpath(".//span[@class='sl-store-name']//text()").getall()
             name = " ".join(p.strip() for p in name_parts if p.strip())
-            address_text = sel.xpath(
-                "normalize-space(.//a[contains(@href,'google.com/maps')]//text())"
-            ).get("").strip()
+            address_text = sel.xpath("normalize-space(.//a[contains(@href,'google.com/maps')]//text())").get("").strip()
 
             # Parse address: "Street, City, PostCode"
             addr_parts = [p.strip() for p in address_text.split(",")]
