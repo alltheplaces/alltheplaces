@@ -1,3 +1,5 @@
+from collections import Counter
+
 import scrapy
 
 from locations.dict_parser import DictParser
@@ -10,7 +12,16 @@ class PizzaExpressGBSpider(scrapy.Spider):
     start_urls = ["https://www.pizzaexpress.com/api/restaurants/FindRestaurantsByLatLong?limit=2000"]
 
     def parse(self, response):
-        for i in response.json():
+        restaurants = response.json()
+
+        # Count how many times each image URL appears; drop any that are shared
+        image_counts = Counter()
+        for i in restaurants:
+            if img := i.get("image"):
+                if img.get("MediaExists") and img.get("Src"):
+                    image_counts[img["Src"]] += 1
+
+        for i in restaurants:
             item = DictParser.parse(i)
 
             item["ref"] = i["restaurantId"]
@@ -35,7 +46,7 @@ class PizzaExpressGBSpider(scrapy.Spider):
                 item["country"] = "GB"
 
             if img := i.get("image"):
-                if img.get("MediaExists"):
+                if img.get("MediaExists") and img.get("Src") and image_counts[img["Src"]] == 1:
                     item["image"] = "https://www.pizzaexpress.com" + img["Src"]
 
             item["website"] = "https://www.pizzaexpress.com" + i["link"]
