@@ -14,28 +14,36 @@ class ConadITSpider(Spider):
     brands = {
         "CONAD": {"brand": "Conad", "brand_wikidata": "Q639075"},
         "CONAD CITY": {"brand": "Conad City", "brand_wikidata": "Q57543102"},
-        "CONAD SELF 24h": {"brand": "Conad", "brand_wikidata": None, "extras": Categories.FUEL_STATION.value},
+        "CONAD SELF 24h": {"brand": "Conad", "brand_wikidata": "Q639075", "extras": Categories.FUEL_STATION.value},
         "CONAD SUPERSTORE": {"brand": "Conad Superstore", "brand_wikidata": "Q118129616"},
         "MARGHERITA CONAD": {
             "brand": "Margherita Conad",
-            "brand_wikidata": None,
+            "brand_wikidata": "Q126035555",
             "extras": Categories.SHOP_CONVENIENCE.value,
         },
         "MARKET CONAD": {"brand": "Conad", "brand_wikidata": "Q639075"},
         "PARAFARMACIA CONAD": {
             "brand": "Parafarmacia Conad",
-            "brand_wikidata": None,
+            "brand_wikidata": "Q639075",
             "extras": Categories.PHARMACY.value,
         },
-        "PET STORE CONAD": {"brand": "Petstore", "brand_wikidata": None, "extras": Categories.SHOP_PET.value},
+        "PET STORE CONAD": {"brand": "Petstore", "brand_wikidata": "Q639075", "extras": Categories.SHOP_PET.value},
         "SAPORI & DINTORNI CONAD": {
             "brand": "Sapori & Dintorni Conad",
-            "brand_wikidata": None,
+            "brand_wikidata": "Q639075",
             "extras": Categories.SHOP_CONVENIENCE.value,
         },
         "SPAZIO CONAD": {"brand": "Spazio Conad", "brand_wikidata": "Q118130063"},
-        "SPESA FACILE": {"brand": "Spesa Facile", "brand_wikidata": None, "extras": Categories.SHOP_CONVENIENCE.value},
-        "TUDAY CONAD": {"brand": "Tuday Conad", "brand_wikidata": None, "extras": Categories.SHOP_CONVENIENCE.value},
+        "SPESA FACILE": {
+            "brand": "Spesa Facile",
+            "brand_wikidata": "Q639075",
+            "extras": Categories.SHOP_CONVENIENCE.value,
+        },
+        "TUDAY CONAD": {
+            "brand": "Tuday Conad",
+            "brand_wikidata": "Q639075",
+            "extras": Categories.SHOP_CONVENIENCE.value,
+        },
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
