@@ -523,7 +523,7 @@ class GbfsSpider(CSVFeedSpider):
                     cat = vehicle_types_categories.get(vehicle_type_id, {})
                     apply_category(cat, item)
                     # Additionally, specify the capacity of each vehicle type
-                    if cat_rental := cat.get("rental") and vehicle_capacity.get("count") is not None:
+                    if (cat_rental := cat.get("rental")) and vehicle_capacity.get("count") is not None:
                         for biketype in cat_rental.split(";"):
                             capacity_key = f"capacity:{biketype}"
                             capacity = item["extras"].get(capacity_key, 0)
