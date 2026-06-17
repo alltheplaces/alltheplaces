@@ -10,7 +10,7 @@ class AllsupsYeswayUSSpider(scrapy.Spider):
     name = "allsups_yesway_us"
     allowed_domains = ["allsups.com"]
     start_urls = [
-        "https://allsups.com/wp-json/acf/v3/business_locations?_embed&per_page=1000",
+        "https://allsups.com/wp-content/themes/allsups/locations/locations.json",
     ]
 
     BRANDS = {
@@ -21,7 +21,7 @@ class AllsupsYeswayUSSpider(scrapy.Spider):
     def parse(self, response):
         for store in response.json():
             item = DictParser.parse(store["acf"])
-            item["ref"] = store["acf"]["internal_store_code"]
+            item["ref"] = store["id"]
             item["phone"] = store["acf"]["primary_phone"]
             item["street_address"] = merge_address_lines(
                 [store["acf"]["address_line_1"], store["acf"]["address_line_2"]]

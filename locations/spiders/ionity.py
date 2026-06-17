@@ -1,4 +1,5 @@
-from typing import Any, AsyncIterator
+import re
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -10,36 +11,15 @@ from locations.dict_parser import DictParser
 class IonitySpider(Spider):
     name = "ionity"
     item_attributes = {"brand": "Ionity", "brand_wikidata": "Q42717773"}
-    SOCKET_MAP = {
-        "CHAdeMO": "chademo",
-        "Type 2": "type2",
-        "CCS": "type2_combo",
-    }
-
-    # Ionity API found from its payment website: https://payment.ionity.eu/dashboard
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url="https://ionity-api.ionity.cloud/api/v1/user/collective")
+    start_urls = ["https://www.ionity.eu/network"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        yield JsonRequest(
-            url="https://ionity-api.ionity.cloud/api/v2/charging-point",
-            headers={"Authorization": f'Bearer {response.json()["accessToken"]}'},
-            callback=self.parse_locations,
-        )
+        json_url = re.search(r"MAP_DATA\s*:\s*\"(.+)\",\s*", response.text).group(1)
+        yield JsonRequest(url=json_url, callback=self.parse_locations)
 
-    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["items"]:
-            location.update(location.pop("address"))
-            if "Ionity" not in location["label"].title():
-                continue
+    def parse_locations(self, response):
+        for location in response.json()["LocationDetails"]:
             item = DictParser.parse(location)
-            item["street_address"] = item.pop("street")
-            item["branch"] = location["label"].title().removeprefix("Ionity ")
-            item["website"] = f'https://payment.ionity.eu/charger-detail/{location["id"]}'
+            item["ref"] = item["name"]
             apply_category(Categories.CHARGING_STATION, item)
-
-            for connector in location.get("connectors", []):
-                if match := self.SOCKET_MAP.get(connector["type"]):
-                    item["extras"][f"socket:{match}:output"] = f'{connector["power"]} kW'
             yield item

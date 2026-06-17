@@ -145,7 +145,7 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
     name = "kaiser_permanente_us"
     allowed_domains = ["healthy.kaiserpermanente.org"]
     sitemap_urls = ["https://healthy.kaiserpermanente.org/robots.txt"]
-    sitemap_follow = ["/facilities/"]
+    sitemap_follow = ["/facilities/sitemap$"]
     wanted_types = ["MedicalBusiness"]
     custom_settings = {
         # The KP website likes to set cookies and then redirect to the same page, which Scrapy counts as a duplicate request.
@@ -158,7 +158,7 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
         # SitemapSpider doesn't honour sitemap_follow while parsing robots.txt
         if response.url.endswith("/robots.txt"):
             for url in sitemap_urls_from_robots(response.text, base_url=response.url):
-                if "/facilities/" in url:
+                if url.endswith("/facilities/sitemap"):
                     yield Request(url, callback=self._parse_sitemap)
         else:
             yield from super()._parse_sitemap(response)
@@ -211,7 +211,7 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
             specialities = [
                 DEPARTMENT_TYPE_MAP.get(department["medicalSpecialty"]) for department in ld_data["department"]
             ]
-            apply_healthcare_specialities(filter(None, specialities), item)
+            apply_healthcare_specialities(list(filter(None, specialities)), item)
 
             for department in ld_data["department"]:
                 specialty = department["medicalSpecialty"]

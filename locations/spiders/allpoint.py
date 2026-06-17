@@ -20,7 +20,7 @@ from locations.spiders.mapco_us import MapcoUSSpider
 from locations.spiders.race_trac_us import RaceTracUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
 from locations.spiders.safeway import SafewaySpider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
 from locations.spiders.target_us import TargetUSSpider
@@ -40,8 +40,8 @@ class AllpointSpider(Spider):
     LOCATED_IN_MAPPINGS = {
         "CVS": CVS_BRANDS["CVS Pharmacy"],
         "Walgreens": WalgreensSpider.WALGREENS,
-        "Alon 7-Eleven": SevenElevenCAUSSpider.item_attributes,
-        "7-Eleven": SevenElevenCAUSSpider.item_attributes,
+        "Alon 7-Eleven": SEVEN_ELEVEN_SHARED_ATTRIBUTES,
+        "7-Eleven": SEVEN_ELEVEN_SHARED_ATTRIBUTES,
         "Target": TargetUSSpider.item_attributes,
         "Costco": {"brand": "Costco", "brand_wikidata": COSTCO_SHARED_ATTRIBUTES["brand_wikidata"]},
         "Costco Wholesale": {"brand": "Costco", "brand_wikidata": COSTCO_SHARED_ATTRIBUTES["brand_wikidata"]},

@@ -4,10 +4,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class FastsignsSpider(JSONBlobSpider):
     name = "fastsigns"
-    item_attributes = {
-        "brand": "Fastsigns",
-        "brand_wikidata": "Q5437127",
-    }
+    item_attributes = {"brand": "Fastsigns", "brand_wikidata": "Q5437127"}
     # Not covered: Dominican Republic, Grand Cayman, Malta
     start_urls = [
         "https://www.fastsigns.com/locations/?CallAjax=AllLocations",  # covers CA, PR, US
@@ -19,7 +16,7 @@ class FastsignsSpider(JSONBlobSpider):
     def post_process_item(self, item, response, location):
         item.pop("name")
         item["street_address"] = merge_address_lines([location["Address1"], location["Address2"]])
-        item["extras"]["addr:unit"] = location["Address2"]
+        item["unit"] = location["Address2"]
         item["ref"] = location["FranchiseLocationID"]
         item["branch"] = location["FriendlyName"]
         item["website"] = response.urljoin(location["Path"])

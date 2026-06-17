@@ -10,11 +10,9 @@ class PostaSISpider(scrapy.Spider):
     item_attributes = {"operator": "Pošta Slovenije", "operator_wikidata": "Q6522631"}
     allowed_domains = ["www.posta.si"]
 
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-
     # There is no "show all" option, but we can search for every letter to get all of them
     start_urls = [
-        "https://www.posta.si/_vti_bin/PostaSI/PostOffices/PostOfficesService.svc/PostalOffice/" + c
+        "https://www.posta.si/zasebno-site/_vti_bin/PostaSI/PostOffices/PostOfficesService.svc/PostalOffice/" + c
         for c in "abcčdefghijklmnoprsštuvzž"
     ]
 

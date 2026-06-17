@@ -11,6 +11,7 @@ import ijson
 import requests
 import scrapy.statscollectors
 from scrapy.commands import ScrapyCommand
+from scrapy.crawler import Crawler
 from scrapy.exceptions import UsageError
 
 from locations.name_suggestion_index import NSI
@@ -154,7 +155,7 @@ class InsightsCommand(ScrapyCommand):
             print(counter)
 
     def check_value_types(self, args: list[str], opts: argparse.Namespace) -> None:
-        crawler = scrapy.Crawler(scrapy.Spider)
+        crawler = Crawler(scrapy.Spider)
         stats = scrapy.statscollectors.StatsCollector(crawler)
         for feature in iter_features(args, opts.filter_spiders):
             spider_name = feature["properties"].get("@spider")

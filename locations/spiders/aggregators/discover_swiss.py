@@ -6,6 +6,7 @@ from scrapy.http import Request
 
 from locations.categories import Categories, PaymentMethods, apply_category, map_payment
 from locations.items import Feature
+from locations.licenses import Licenses
 
 # Hotels (including hostels and serviced apartments) in Switzerland
 
@@ -21,18 +22,15 @@ class DiscoverSwissSpider(Spider):
         "ROBOTSTXT_OBEY": False,
         "URLLENGTH_LIMIT": 4096,
     }
-    dataset_attributes = {
+    dataset_attributes = Licenses.CCBY4.value | {
         # Mandatory attribution as per CC-BY 4.0, waived for OpenStreetMap
         # via standard template. Negotiations took place in January 2025
         # between Hotellerie Suisse (who runs the discover.swiss platform)
         # and the Swiss OpenStreetMap association.
         # https://osmfoundation.org/wiki/Licence/Waiver_and_Permission_Templates
-        "attribution": "required",
         "attribution:name": "discover.swiss",
         "attribution:wikidata": "Q131983936",
         "use:openstreetmap": "yes",
-        "license": "CC-BY 4.0",
-        "license:wikidata": "Q20007257",
     }
     headers = {
         "Ocp-Apim-Subscription-Key": "defe4e15094b4d388ecf3b37bbe88a85",

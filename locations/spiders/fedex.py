@@ -34,6 +34,10 @@ class FedexSpider(CrawlSpider):
     custom_settings = {  # Disable NSI matching
         "ITEM_PIPELINES": ITEM_PIPELINES
         | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None},
+        # Added settings to prevent Cloudflare 403 bans
+        "DOWNLOAD_DELAY": 1.5,
+        "CONCURRENT_REQUESTS_PER_DOMAIN": 2,
+        "AUTOTHROTTLE_ENABLED": True,
     }
     start_urls = ["https://local.fedex.com/en"]
     rules = [

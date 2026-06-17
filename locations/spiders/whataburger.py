@@ -72,10 +72,14 @@ class WhataburgerSpider(scrapy.Spider):
     def parse_store(self, response):
         hours_data = response.xpath('//div[@class="c-hours-details-wrapper js-hours-table"]/@data-days').extract_first()
 
+        name = response.xpath('//span[@class="Banner-titleGeo"]/text()').extract_first()
+        if name == "NA":
+            name = None
+
         yield Feature(
             lon=float(response.xpath('//span/meta[@itemprop="longitude"]/@content').extract_first()),
             lat=float(response.xpath('//span/meta[@itemprop="latitude"]/@content').extract_first()),
-            name=response.xpath('//span[@class="Banner-titleGeo"]/text()').extract_first(),
+            name=name,
             street_address=response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
             city=response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
             state=response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),

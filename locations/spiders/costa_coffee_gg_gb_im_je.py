@@ -123,11 +123,15 @@ class CostaCoffeeGGGBIMJESpider(Spider):
         for location in locations:
             item = DictParser.parse(location)
 
+            if item["name"]:
+                item["branch"] = item.pop("name")
+
             if location["siteType"] == "Global Express":
                 item["brand"] = "Costa Express"
                 item["brand_wikidata"] = "Q113556385"
                 apply_category(Categories.VENDING_MACHINE, item)
             else:
+                item["name"] = "Costa"
                 apply_category(Categories.COFFEE_SHOP, item)
 
             item["lat"] = location["location"]["geo"]["latitude"]

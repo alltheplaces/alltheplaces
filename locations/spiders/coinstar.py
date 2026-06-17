@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
 
@@ -43,4 +44,6 @@ class CoinstarSpider(Spider):
             item["street_address"] = kiosk["street_address_text"]
             item["state"] = kiosk["state_province_code"]
             item["website"] = f"https://coinstar.com/kiosk-info?KioskId={kiosk['machine_placement_id']}"
+            apply_category(Categories.VENDING_MACHINE, item)
+            add_vending(Vending.COIN_CHANGE_MACHINE, item)
             yield item

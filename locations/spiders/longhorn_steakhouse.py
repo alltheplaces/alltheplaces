@@ -11,6 +11,7 @@ class LonghornSteakhouseSpider(Spider):
     item_attributes = {"brand": "LongHorn Steakhouse", "brand_wikidata": "Q3259007"}
     start_urls = ["https://m.longhornsteakhouse.com/api/restaurants?"]
     allowed_domains = ["m.longhornsteakhouse.com"]
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:

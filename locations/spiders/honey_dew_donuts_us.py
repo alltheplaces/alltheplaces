@@ -10,18 +10,20 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 class HoneyDewDonutsUSSpider(scrapy.Spider):
     name = "honey_dew_donuts_us"
     item_attributes = {"brand": "Honey Dew Donuts", "brand_wikidata": "Q5893524"}
-    start_urls = ["https://honeydewdonuts.com/wp-json/acf/v3/business_locations?_embed&per_page=1000"]
+    start_urls = ["https://honeydewdonuts.com/wp-content/themes/honeydew/locations/locations.json"]
 
     def parse(self, response, **kwargs):
         for result in response.json():
             if store := result.get("acf"):
+                if store.get("coming_soon") is True:
+                    continue
                 store.pop("region", "")
                 item = DictParser.parse(store)
+                item["branch"] = store["internal_store_code"]
                 item["street_address"] = ", ".join(
                     filter(None, [store.get("address_line_1"), store.get("address_line_2")])
                 )
                 item["phone"] = store.get("primary_phone")
-                item["email"] = store.get("primary_email")
                 if hours := store.get("hours"):
                     item["opening_hours"] = OpeningHours()
                     for rule in hours:

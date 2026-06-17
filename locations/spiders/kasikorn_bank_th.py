@@ -4,14 +4,40 @@ from typing import Any, AsyncIterator
 from scrapy import Request, Spider
 from scrapy.http import Response
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.spiders.big_c_th import BigCTHSpider
+from locations.spiders.lotuss_th import LotussTHSpider
+from locations.spiders.makro_th import MakroTHSpider
+from locations.spiders.ptt_th import PttTHSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
 class KasikornBankTHSpider(Spider):
     name = "kasikorn_bank_th"
     item_attributes = {"brand_wikidata": "Q276557"}
     requires_proxy = "TH"
+
+    LOCATED_IN_MAPPINGS = [
+        (["7-11", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
+        (
+            ["LOTUS'S GO FRESH"],
+            {"brand": LotussTHSpider.LOTUSS_GO_FRESH[0], "brand_wikidata": LotussTHSpider.LOTUSS_GO_FRESH[1]},
+        ),
+        (
+            ["โลตัส", "LOTUS", "LOTUS'S"],
+            {"brand": LotussTHSpider.LOTUSS[0], "brand_wikidata": LotussTHSpider.LOTUSS[1]},
+        ),
+        (["บิ๊กซี", "BIG C"], BigCTHSpider.item_attributes),
+        (["ปตท", "PTT"], PttTHSpider.item_attributes),
+        (["แม็คโคร", "MAKRO"], MakroTHSpider.item_attributes),
+        (["บางจาก", "BANGCHAK"], {"brand": "Bangchak", "brand_wikidata": "Q6579719"}),
+        (["ท็อปส์", "TOPS"], {"brand": "Tops", "brand_wikidata": "Q7825140"}),
+        (["CJ EXPRESS"], {"brand": "CJ Express", "brand_wikidata": "Q125874457"}),
+        (["CJ MORE"], {"brand": "CJ More", "brand_wikidata": "Q125874457"}),
+        (["CJ SUPERMARKET", "CJ ซุปเปอร์มาร์เก็ต"], {"brand": "CJ Supermarket", "brand_wikidata": "Q125874457"}),
+    ]
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
@@ -59,4 +85,7 @@ class KasikornBankTHSpider(Spider):
                 "https://www.kasikornbank.com/en/branch/Pages/detail.aspx?qs=atm&cz={}".format(location["ky"])
             )
             apply_category(Categories.ATM, item)
+            item["located_in"], item["located_in_wikidata"] = extract_located_in(
+                item.get("branch", ""), self.LOCATED_IN_MAPPINGS, self
+            )
             yield item

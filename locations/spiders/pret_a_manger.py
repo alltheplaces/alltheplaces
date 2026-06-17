@@ -46,6 +46,7 @@ class PretAMangerSpider(scrapy.Spider):
             item["extras"]["storeType"] = store["features"].get("storeType")
             item["extras"]["wheelchair"] = "yes" if store["features"]["wheelchairAccess"] else "no"
             item["extras"]["internet_access"] = "wlan" if store["features"]["wifi"] else "no"
+            item["branch"] = item.pop("name")
 
             if store["features"].get("storeType") == "veggie-pret":
                 item.update(self.VEGGIE_PRET)

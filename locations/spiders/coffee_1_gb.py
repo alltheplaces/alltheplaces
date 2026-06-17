@@ -35,7 +35,7 @@ class Coffee1GBSpider(scrapy.Spider):
             item["image"] = location["branch_image"]
 
         item["ref"] = re.search(r"/locations/([^/]+)/$", location["url"]).group(1)
-        item["name"] = location["post_title"]
+        item["branch"] = location["post_title"]
         item["city"] = location["branch_city"]
         phone = response.xpath(".//div[@class='locationmap-phone']//text()[2]").get()
         if phone:
@@ -56,17 +56,22 @@ class Coffee1GBSpider(scrapy.Spider):
         item["opening_hours"] = OpeningHours()
 
         for row in response.css(".timetable-row"):
-            day = row.css(".timetable-day::text").get().replace(" ", "")
-            time = row.css(".timetable-time::text").get().replace(" ", "").upper()
-            open_time, _, close_time = time.partition("-")
-            time_format = "%I:%M%p" if "AM" in open_time else "%H:%M"
-            if "-" not in day:
-                item["opening_hours"].add_range(day, open_time, close_time, time_format=time_format)
+            try:
+                day = row.css(".timetable-day::text").get().replace(" ", "")
+                time = row.css(".timetable-time::text").get().replace(" ", "").replace("::", ":").upper()
+                open_time, _, close_time = time.partition("-")
+                time_format = "%I:%M%p" if "AM" in open_time else "%H:%M"
+                if "-" not in day:
+                    item["opening_hours"].add_range(day, open_time, close_time, time_format=time_format)
+                    continue
+                start, _, end = day.partition("-")
+                if end:
+                    days = day_range(start, end)
+                    item["opening_hours"].add_days_range(days, open_time, close_time, time_format=time_format)
+                else:
+                    item["opening_hours"].add_range(
+                        day.replace("-", ""), open_time, close_time, time_format=time_format
+                    )
+            except:
                 continue
-            start, _, end = day.partition("-")
-            if end:
-                days = day_range(start, end)
-                item["opening_hours"].add_days_range(days, open_time, close_time, time_format=time_format)
-            else:
-                item["opening_hours"].add_range(day.replace("-", ""), open_time, close_time, time_format=time_format)
         yield item

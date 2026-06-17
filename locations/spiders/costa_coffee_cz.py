@@ -1,34 +1,31 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CostaCoffeeCZSpider(scrapy.Spider):
     name = "costa_coffee_cz"
-    brands = {
-        "costa": ({"brand": "Costa", "brand_wikidata": "Q608845"}, Categories.COFFEE_SHOP),
-        "express": ({"brand": "Costa Express", "brand_wikidata": "Q113556385"}, Categories.VENDING_MACHINE),
-    }
-    SHELL = {"brand": "Shell", "brand_wikidata": "Q154950"}
-    start_urls = ["https://loc.costa-coffee.cz/locator/"]
+    item_attributes = {"brand": "Costa", "brand_wikidata": "Q608845"}
+    start_urls = ["https://www.costa-coffee.cz/kavarny/"]
 
-    def parse(self, response, **kwargs):
-        for shop in response.xpath("//*[@data-lat]"):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for shop in response.xpath("//*[@data-latitude]"):
             item = Feature()
-            item["ref"] = shop.xpath("./@data-id").get()
-            item["name"] = shop.xpath("./@data-name").get()
-            item["lat"] = shop.xpath("./@data-lat").get()
-            item["lon"] = shop.xpath("./@data-lng").get()
-            item["city"] = shop.xpath("./@data-city").get()
-            item["postcode"] = shop.xpath("./@data-postal_code").get()
-            item["street_address"] = shop.xpath("./@data-address").get()
-            item["addr_full"] = shop.xpath('.//*[@class="result-address"]//text()').get()
-            item["website"] = response.url
-            store_type = shop.xpath("./@data-type").get()
-            if brand := self.brands.get(store_type):
-                item.update(brand[0])
-                apply_category(brand[1], item)
-            if "SHELL" in item["name"].upper():
-                item["located_in"], item["located_in_wikidata"] = self.SHELL.values()
+            item["ref"] = shop.xpath("./@id").get()
+            item["branch"] = shop.xpath(".//h2//text()").get()
+            item["name"] = self.item_attributes["brand"]
+            item["lat"] = shop.xpath("./@data-latitude").get()
+            item["lon"] = shop.xpath("./@data-longitude").get()
+            item["street_address"] = shop.xpath(".//*[@class='address px-6']//text()").get()
+            item["postcode"] = shop.xpath(".//*[@class='address px-6']//span[2]/text()").get()
+            item["city"] = shop.xpath(".//*[@class='address px-6']//span[3]/text()").get()
+            item["addr_full"] = merge_address_lines(shop.xpath(".//*[@class='address px-6']//text()").getall())
+
+            apply_category(Categories.COFFEE_SHOP, item)
+
             yield item

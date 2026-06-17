@@ -1,34 +1,24 @@
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.storefinders.sweetiq import SweetIQSpider
+from locations.storefinders.uberall import UberallSpider
 
 
-class FirstHawaiianBankSpider(SweetIQSpider):
+class FirstHawaiianBankSpider(UberallSpider):
     name = "first_hawaiian_bank"
     item_attributes = {"brand": "Hawaiian First Bank", "brand_wikidata": "Q3072937"}
-    start_urls = ["https://locations.fhb.com/"]
+    key = "YBDTqfImunUKrrrbIivdwT2rDp8h2q"
 
-    def parse_item(self, item, location):
-        item.pop("website")
-        if "metaFilterServices" not in location["properties"]:
-            location["properties"]["metaFilterServices"] = location["properties"]["categories"]
+    def post_process_item(self, item, response, location):
+        name = location.get("name", "")
+
         # Branch without an ATM
-        if (
-            "Branch" in location["properties"]["metaFilterServices"]
-            and "ATM" not in location["properties"]["metaFilterServices"]
-        ):
+        if "Branch" in name and "ATM" not in name:
             apply_category(Categories.BANK, item)
         # Branch with an ATM
-        elif (
-            "Branch" in location["properties"]["metaFilterServices"]
-            and "ATM" in location["properties"]["metaFilterServices"]
-        ):
+        elif "Branch" in name and "ATM" in name:
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.ATM, item, True)
         # ATM only
-        elif (
-            "Branch" not in location["properties"]["metaFilterServices"]
-            and "ATM" in location["properties"]["metaFilterServices"]
-        ):
+        elif "ATM" in name:
             apply_category(Categories.ATM, item)
-            item.pop("phone")
+            item.pop("phone", None)
         yield item

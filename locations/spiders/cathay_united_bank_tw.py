@@ -3,13 +3,31 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.spiders.carrefour_tw import CarrefourTWSpider
+from locations.spiders.costco_au import COSTCO_SHARED_ATTRIBUTES
+from locations.spiders.familymart_tw import FamilymartTWSpider
+from locations.spiders.pxmart_tw import PxmartTWSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
 class CathayUnitedBankTWSpider(Spider):
     name = "cathay_united_bank_tw"
     item_attributes = {"brand": "國泰世華商業銀行", "brand_wikidata": "Q702656"}
+
+    LOCATED_IN_MAPPINGS = [
+        (["FAMILYMART", "FAMILY"], FamilymartTWSpider.item_attributes),
+        (["7-ELEVEN", "7-11"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
+        (["HI-LIFE", "HILIFE"], {"brand": "Hi-Life", "brand_wikidata": "Q11326216"}),
+        (["OK MART"], {"brand": "OK Mart", "brand_wikidata": "Q10851968"}),
+        (["PX MART"], PxmartTWSpider.item_attributes),
+        (["CARREFOUR"], CarrefourTWSpider.brands["量販"]),
+        (["RT-MART"], {"brand": "RT-Mart", "brand_wikidata": "Q7277802"}),
+        (["WELLCOME"], {"brand": "Wellcome", "brand_wikidata": "Q706247"}),
+        (["COSTCO"], COSTCO_SHARED_ATTRIBUTES),
+    ]
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
@@ -35,4 +53,8 @@ class CathayUnitedBankTWSpider(Spider):
                         item["ref"] = "-".join([details["Sno"], "ATM"])
                         item["street"] = details["SetAddressKind"]
                         apply_category(Categories.ATM, item)
+                        # Extract retail brand from SetAddressKind field for ATMs
+                        item["located_in"], item["located_in_wikidata"] = extract_located_in(
+                            details.get("SetAddressKind", ""), self.LOCATED_IN_MAPPINGS, self
+                        )
                     yield item

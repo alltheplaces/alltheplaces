@@ -16,6 +16,9 @@ class ShipAndGoROSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = location["Symbol"]
+            # Source uses "n/a" and "0" as placeholder housenumber values
+            if item.get("housenumber") in ("n/a", "0", "N/A"):
+                item["housenumber"] = None
 
             item["opening_hours"] = OpeningHours()
             for day in DAYS:

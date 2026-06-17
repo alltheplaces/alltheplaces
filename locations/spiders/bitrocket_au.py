@@ -4,11 +4,13 @@ from typing import Iterable
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.spiders.coles_au import ColesAUSpider
 
 
 class BitrocketAUSpider(SitemapSpider):
@@ -18,12 +20,18 @@ class BitrocketAUSpider(SitemapSpider):
     sitemap_urls = ["https://www.bitrocket.co/wp-sitemap-posts-page-1.xml"]
     sitemap_rules = [(r"^https:\/\/www\.bitrocket\.co\/locations\/(?:[^\/]+\/){4}$", "parse")]
 
+    LOCATED_IN_MAPPINGS = [
+        (["COLES"], ColesAUSpider.BRANDS[2]),
+    ]
+
     def parse(self, response: Response) -> Iterable[Feature]:
+        location_name = response.xpath(
+            '//section[@id="particles"]/div/div/div/div[1]/div/*[self::h1 or self::h2]/text()'
+        ).get()
+
         properties = {
             "ref": response.url,
-            "name": response.xpath(
-                '//section[@id="particles"]/div/div/div/div[1]/div/*[self::h1 or self::h2]/text()'
-            ).get(),
+            "name": location_name,
             "addr_full": merge_address_lines(
                 response.xpath('//section[@id="particles"]/div/div/div/div[3]/div/h2/text()').getall()
             ),
@@ -32,6 +40,10 @@ class BitrocketAUSpider(SitemapSpider):
             "image": response.xpath("//article/div/div/section[2]/div/div[1]//img/@src").get(),
             "opening_hours": OpeningHours(),
         }
+
+        properties["located_in"], properties["located_in_wikidata"] = extract_located_in(
+            location_name or "", self.LOCATED_IN_MAPPINGS, self
+        )
 
         if map_settings_json := response.xpath('//div[contains(@class, "wpgmza_map")]/@data-settings').get():
             map_settings = loads(map_settings_json)

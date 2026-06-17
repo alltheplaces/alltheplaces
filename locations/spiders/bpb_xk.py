@@ -1,8 +1,6 @@
 import json
 import re
 
-from scrapy import Selector
-
 from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -23,7 +21,6 @@ class BpbXKSpider(JSONBlobSpider):
         item.pop("city")  # is not accurate
         item["ref"] = f"{location.get('title', '').replace(' ', '-')}-{location['type']}"
         item["addr_full"] = location["title"]
-        item["phone"] = Selector(text=location["text"]).xpath("//p/text()").re_first(r"Tel: (.*)")
         if location["type"] == 1:
             apply_category(Categories.BANK, item)
         else:

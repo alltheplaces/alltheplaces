@@ -1,43 +1,17 @@
 from typing import Iterable
 
-from scrapy import Request, Selector
-from scrapy.http import Response
-
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.storefinders.stockist import StockistSpider
 
 
-class TedsCameraStoresAUSpider(AmastyStoreLocatorSpider):
+class TedsCameraStoresAUSpider(StockistSpider):
     name = "teds_camera_stores_au"
     item_attributes = {"brand": "Ted's Camera Stores", "brand_wikidata": "Q117958394"}
-    allowed_domains = ["www.teds.com.au"]
+    key = "map_7q5z92n3"
 
-    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Request]:
-        item["addr_full"] = ", ".join(
-            filter(
-                lambda field: field.strip(),
-                popup_html.xpath('//div[contains(@class, "amlocator-info-popup")]/text()').getall(),
-            )
-        )
-        yield Request(url=item["website"], meta={"item": item}, callback=self.parse_opening_hours)
-
-    def parse_opening_hours(self, response: Response) -> Iterable[Feature]:
-        item = response.meta["item"]
-        if response.xpath('//div[contains(@class, "amlocator-location-info")]').get():
-            item["email"] = (
-                response.xpath('//div[contains(@class, "am-email")]/a[contains(@href, "mailto:")]/text()').get().strip()
-            )
-            item["phone"] = (
-                response.xpath('//div[contains(@class, "am-phone")]/a[contains(@href, "tel:")]/text()').get().strip()
-            )
-            hours_string = " ".join(
-                filter(None, response.xpath('//div[contains(@class, "amlocator-schedule-table")]//text()').getall())
-            )
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
-
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        item["street_address"] = merge_address_lines([location["address_line_2"], item["street_address"]])
         apply_category(Categories.SHOP_CAMERA, item)
-
         yield item

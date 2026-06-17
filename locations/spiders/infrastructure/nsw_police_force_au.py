@@ -7,9 +7,11 @@ from scrapy.spiders import CrawlSpider, Request, Rule
 from locations.categories import apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class NswPoliceForceAUSpider(CrawlSpider):
+class NswPoliceForceAUSpider(CrawlSpider, PlaywrightSpider):
     name = "nsw_police_force_au"
     item_attributes = {"operator": "NSW Police Force", "operator_wikidata": "Q7011763"}
     allowed_domains = ["www.police.nsw.gov.au", "portal.spatial.nsw.gov.au"]
@@ -29,7 +31,8 @@ class NswPoliceForceAUSpider(CrawlSpider):
             follow=False,
         ),
     ]
-    location_geometry = {}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS  # Needed to avoid HTTP 403 errors for police.nsw.gov.au
+    _location_geometry: dict = {}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
@@ -39,7 +42,7 @@ class NswPoliceForceAUSpider(CrawlSpider):
 
     def parse_geometry(self, response):
         for location in response.json()["features"]:
-            self.location_geometry[location["properties"]["generalname"]] = location["geometry"]
+            self._location_geometry[location["properties"]["generalname"]] = location["geometry"]
         for url in self.start_urls:
             yield Request(url=url)
 
@@ -50,8 +53,8 @@ class NswPoliceForceAUSpider(CrawlSpider):
             "state": "NSW",
             "website": response.url,
         }
-        if self.location_geometry.get(properties["name"].upper()):
-            properties["geometry"] = self.location_geometry[properties["name"].upper()]
+        if self._location_geometry.get(properties["name"].upper()):
+            properties["geometry"] = self._location_geometry[properties["name"].upper()]
         for contact_line in response.xpath('//div[@itemprop="articleBody"]//p[2]//text()').getall():
             contact_line = contact_line.replace("\xa0", " ")
             if (

@@ -26,9 +26,9 @@ class GoodstartSpider(scrapy.Spider):
             item["city"] = i["suburb"]
             item["opening_hours"] = OpeningHours()
             if "," in i["hours"]:
-                (hour_range, days_range) = i["hours"].replace("–", "to").split(", ")
-                (from_time, close_time) = hour_range.replace(".", ":").split(" to ")
-                (start_day, end_day) = days_range.split(" to ")
+                hour_range, days_range = i["hours"].replace("–", "to").split(", ")
+                from_time, close_time = hour_range.replace(".", ":").split(" to ")
+                start_day, end_day = days_range.split(" to ")
                 for day in day_range(DAYS_EN[start_day], DAYS_EN[end_day.replace(".", "")]):
                     item["opening_hours"].add_range(day, from_time, close_time, time_format="%I:%M%p")
             apply_category(Categories.CHILD_CARE, item)

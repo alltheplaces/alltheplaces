@@ -1,51 +1,18 @@
-import json
-import re
+from typing import Iterable
 
-import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.items import Feature
+from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
-class QualityDairyUSSpider(scrapy.Spider):
+class QualityDairyUSSpider(AgileStoreLocatorSpider):
     name = "quality_dairy_us"
-    item_attributes = {"name": "Quality Dairy", "brand": "Quality Dairy", "brand_wikidata": "Q23461886"}
-    start_urls = ["https://qualitydairy.com/v15/stores/"]
-    requires_proxy = True
+    item_attributes = {"brand": "Quality Dairy", "brand_wikidata": "Q23461886"}
+    allowed_domains = ["qualitydairy.com"]
 
-    def parse(self, response, **kwargs):
-        for location in json.loads(re.search("qd_locations = (.*);", response.text).group(1)):
-            location["url"] = location["url"]  # .replace("http://", "https://")
-            yield scrapy.Request(
-                location["url"],
-                cb_kwargs={"location": location},
-                callback=self.parse_location,
-            )
-
-    def parse_location(self, response, location, **kwargs):
-        location["street_address"] = merge_address_lines([location.pop("address"), location.pop("address2")])
-        item = DictParser.parse(location)
-
-        item["opening_hours"] = OpeningHours()
-        for rule in response.xpath('//table[@id="hours-table"]//tr'):
-            day, start_time, _, end_time = rule.xpath("./td/text()").getall()
-            item["opening_hours"].add_range(
-                day, self.clean_time(start_time), self.clean_time(end_time), time_format="%I:%M %p"
-            )
-        item["branch"] = item.pop("name").replace("Quality Dairy Store - ", "")
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.get("name", "").removeprefix("Quality Dairy Store - ")
         apply_category(Categories.SHOP_CONVENIENCE, item)
         yield item
-
-    @staticmethod
-    def clean_time(time: str) -> str:
-        # "6 a.m." or "5:00am" or "11 p,m." to "5:00 am"
-        time = time.replace(".", "").replace(",", "")
-        timezone = time[-2:]
-        time = time[:-2].strip()
-
-        if ":" not in time:
-            time += ":00"
-
-        return f"{time} {timezone}"

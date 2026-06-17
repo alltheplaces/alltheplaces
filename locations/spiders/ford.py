@@ -1,223 +1,111 @@
-import functools
+from copy import deepcopy
 from typing import AsyncIterator
 
 import pycountry
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import JsonRequest, Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
+
+FORD_SHARED_ATTRIBUTES = {"brand": "Ford", "brand_wikidata": "Q44294"}
+LINCOLN_SHARED_ATTRIBUTES = {"brand": "Lincoln", "brand_wikidata": "Q216796"}
 
 
 class FordSpider(Spider):
     name = "ford"
-    available_countries = [
-        "PER",
-        "ATG",
-        "JAM",
-        "LBN",
-        "NIC",
-        "FRA",
-        "IRL",
-        "CAN",
-        "HTI",
-        "AGO",
-        "KEN",
-        "DMA",
-        "ZAF",
-        "ITA",
-        "FJI",
-        "MNG",
-        "BRA",
-        "GUM",
-        "DNK",
-        "THA",
-        "PYF",
-        "BHR",
-        "MYS",
-        "VEN",
-        "COG",
-        "SXM",
-        "SAU",
-        "YEM",
-        "SYC",
-        "TTO",
-        "ASM",
-        "MWI",
-        "MOZ",
-        "COL",
-        "AFG",
-        "BMU",
-        "SEN",
-        "QAT",
-        "BEN",
-        "NPL",
-        "ARE",
-        "MUS",
-        "MNP",
-        "SWE",
-        "HUN",
-        "ESP",
-        "UGA",
-        "DOM",
-        "TLS",
-        "CUW",
-        "NGA",
-        "NZL",
-        "ZMB",
-        "BRB",
-        "GAB",
-        "KOR",
-        "PRI",
-        "NAM",
-        "AUT",
-        "DEU",
-        "LUX",
-        "LKA",
-        "BOL",
-        "PAN",
-        "NLD",
-        "CHE",
-        "IND",
-        "SGP",
-        "ETH",
-        "POL",
-        "BRN",
-        "CIV",
-        "FIN",
-        "KHM",
-        "GBR",
-        "VNM",
-        "RUS",
-        "LBR",
-        "GHA",
-        "BEL",
-        "SLV",
-        "LCA",
-        "MDG",
-        "NCL",
-        "JPN",
-        "CZE",
-        "JOR",
-        "BLZ",
-        "WSM",
-        "GRD",
-        "PRT",
-        "KWT",
-        "ABW",
-        "ARG",
-        "PHL",
-        "MAF",
-        "ZWE",
-        "VIR",
-        "CHL",
-        "CPV",
-        "NOR",
-        "BHS",
-        "MMR",
-        "USA",
-        "BFA",
-        "BGD",
-        "GTM",
-        "IRQ",
-        "BWA",
-        "LAO",
-        "OMN",
-        "HKG",
-        "TZA",
-        "SUR",
-        "VUT",
-        "CYM",
-        "MEX",
-        "SLE",
-        "HND",
-        "CMR",
-        "GRC",
-        "AUS",
-        "PNG",
-        "ROU",
-    ]
-
     brand_mapping = {
-        "Ford": {"brand": "Ford", "brand_wikidata": "Q44294"},
-        "Lincoln": {"brand": "Lincoln", "brand_wikidata": "Q216796"},
-        "Fuso": {"brand": "Fuso", "brand_wikidata": "Q1190247"},
-        "Setra": {"brand": "Setra", "brand_wikidata": "Q938615"},
-        "Motorcraft": {"brand": "Ford", "brand_wikidata": "Q44294"},
+        "Ford": FORD_SHARED_ATTRIBUTES,
+        "Lincoln": LINCOLN_SHARED_ATTRIBUTES,
+        "Motorcraft": FORD_SHARED_ATTRIBUTES,
     }
-    custom_settings = {"DEFAULT_REQUEST_HEADERS": {"x-apikey": "45ab9277-3014-4c9e-b059-6c0542ad9484"}}
 
     async def start(self) -> AsyncIterator[Request]:
-        for country in self.available_countries:
-            url = f"https://spatial.virtualearth.net/REST/v1/data/1652026ff3b247cd9d1f4cc12b9a080b/FordEuropeDealers_Transition/Dealer?$filter=CountryCode%20Eq%20%27{country}%27&$top=100000&$format=json&key=Al1EdZ_aW5T6XNlr-BJxCw1l4KaA0tmXFI_eTl1RITyYptWUS0qit_MprtcG7w2F&$skip=0"
-            yield Request(url=url, callback=self.parse_stores)
+        for country in pycountry.countries:
+            if country.alpha_3 in ["USA", "CAN"]:  # included in ford_dealers_us and ford_ca using more accurate API
+                continue
+            url = f"https://www.ford.com/ecommsearch/non-secure/gep/ecom-search-dealer/api/public/{country.alpha_3}/dealers/search"
+            yield JsonRequest(
+                url=url,
+                data={"latitude": 0, "longitude": 0, "radius": "99999", "unit": "mi", "count": "1000", "filters": ""},
+                callback=self.parse_stores,
+            )
 
     def parse_stores(self, response):
-        results = response.json().get("d").get("results")
-
+        results = response.json().get("dealers").get("results")
         for data in results:
-            oh = OpeningHours()
-
-            for day in DAYS_FULL:
-                if opening_time := data.get(f"Sales{day}OpenTime"):
-                    closing_time = data.get(f"Sales{day}CloseTime")
-                    if not self.is_opening_hour_valid(opening_time) or not self.is_opening_hour_valid(closing_time):
-                        continue
-                    opening_time = opening_time.replace("pm", "00").replace("am", "00").replace(":", "")
-                    closing_time = closing_time.replace("pm", "00").replace("am", "00").replace(":", "")
-                    if int(opening_time) > 2400 or int(closing_time) > 2400:
-                        continue
-                    oh.add_range(day=day, open_time=opening_time, close_time=closing_time, time_format="%H%M")
-
             item = DictParser.parse(data)
             item["ref"] = data.get("EntityID")
             item["phone"] = data.get("PrimaryPhone")
             item["name"] = data.get("DealerName")
-            item["country"] = self.get_country_code(data.get("CountryCode"))
-            item["opening_hours"] = oh
-            item = self.repair_website(data["PrimaryURL"], item)
+            item["country"] = data.get("CountryCode")
+            item["opening_hours"] = self.parse_hours(data)
+            self.repair_website(data["PrimaryURL"], item)
 
-            item["brand"] = self.brand_mapping.get(data.get("Brand")).get("brand")
-            item["brand_wikidata"] = self.brand_mapping.get(data.get("Brand")).get("brand_wikidata")
-
-            if data["HasSalesDepartmentPV"] or data["HasSalesDepartmentCV"]:
-                apply_category(Categories.SHOP_CAR, item)
-            elif data["HasServiceDepartmentPV"] or data["HasServiceDepartmentCV"]:
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
-            elif data["HasPartsDepartment"]:
-                apply_category(Categories.SHOP_CAR_PARTS, item)
+            if brand := self.brand_mapping[data.get("Brand")]:
+                item.update(brand)
             else:
-                apply_category(Categories.SHOP_CAR, item)
-            yield item
+                self.logger.error(f"Unknown brand {data.get('Brand')} from {response.url}")
 
-        if len(results) == 250:
-            base_url, skip_value = response.url.split("skip=")
-            yield Request(url=f"{base_url}skip={int(skip_value) + 250}", callback=self.parse_stores)
+            is_sales = data["HasSalesDepartmentPV"] or data["HasSalesDepartmentCV"]
+            is_service = data["HasServiceDepartmentPV"] or data["HasServiceDepartmentCV"]
+            is_parts = data["HasPartsDepartment"]
 
-    def is_ascii(self, str):
-        return all(ord(c) < 128 for c in str)
+            if is_sales:
+                yield self.build_sales_item(item)
+            if is_service:
+                yield self.build_service_item(item)
+            if not is_sales and not is_service and is_parts:
+                yield self.build_parts_item(item)
+            elif not is_sales and not is_service:
+                # fallback category
+                yield self.build_sales_item(item)
 
-    def repair_website(self, website, item):
-        if "http://" in website:
-            website = website.replace("http://", "https://")
-            item["website"] = website
-        elif website.startswith("www."):
-            website = website.replace("www.", "https://www.")
-            item["website"] = website
-        elif website.startswith("ford-"):
-            website = website.replace("ford-", "https://ford-")
-            item["website"] = website
-        elif "@" in website:
-            item["email"] = website
-        return item
+    def build_sales_item(self, item: Feature) -> Feature:
+        sales_item = deepcopy(item)
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
 
-    @functools.lru_cache()
-    def get_country_code(self, alpha_3):
-        return pycountry.countries.get(alpha_3=alpha_3).alpha_2
+    def build_service_item(self, item: Feature) -> Feature:
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-SERVICE"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
 
-    def is_opening_hour_valid(self, opening_hour):
-        if len(opening_hour) > 6:
-            return False
-        invalid_values = {"", "-", "0", "closed"}
-        return opening_hour.lower() not in invalid_values and "." not in opening_hour and self.is_ascii(opening_hour)
+    def build_parts_item(self, item: Feature) -> Feature:
+        parts_item = deepcopy(item)
+        parts_item["ref"] = f"{item['ref']}-PARTS"
+        apply_category(Categories.SHOP_CAR_PARTS, parts_item)
+        return parts_item
+
+    def parse_hours(self, data: dict) -> OpeningHours | None:
+        try:
+            oh = OpeningHours()
+            for day in DAYS_FULL:
+                if opening_time := data.get(f"Sales{day}OpenTime"):
+                    closing_time = data.get(f"Sales{day}CloseTime")
+                    oh.add_range(day=day, open_time=opening_time, close_time=closing_time, time_format="%H%M")
+            if oh.as_opening_hours():
+                return oh
+        except:
+            return None
+
+    def repair_website(self, website: str, item: Feature) -> None:
+        try:
+            if "http://" in website:
+                website = website.replace("http://", "https://").split(" - ", 1)[0]
+                item["website"] = website
+            elif website.startswith("www."):
+                website = website.replace("www.", "https://www.").split(" / ", 1)[0]
+                item["website"] = website
+            elif "@" in website:
+                item["email"] = website
+            elif website.startswith("ford-"):
+                website = website.replace("ford-", "https://ford-")
+                item["website"] = website
+            elif website.startswith("https://"):
+                item["website"] = website
+        except:
+            return None

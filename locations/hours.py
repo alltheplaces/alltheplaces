@@ -602,20 +602,27 @@ DAYS_RS = {
 DAYS_NO = {
     "Mandag": "Mo",
     "Måndag": "Mo",
+    "Mandager": "Mo",
     "Man": "Mo",
     "Tirsdag": "Tu",
     "Tysdag": "Tu",
+    "Tirsdager": "Tu",
     "Onsdag": "We",
+    "Onsdager": "We",
+    "Torsdager": "Th",
     "Torsdag": "Th",
     "Tors": "Th",
     "Fredag": "Fr",
     "Fre": "Fr",
+    "Fredager": "Fr",
     "Lørdag": "Sa",
     "Laurdag": "Sa",
     "Lør": "Sa",
+    "Lørdager": "Sa",
     "Søndag": "Su",
     "Sundag": "Su",
     "Søn": "Su",
+    "Søndager": "Su",
 }
 DAYS_DK = {
     "Mandag": "Mo",
@@ -773,6 +780,23 @@ DAYS_JP = {
     "日": "Su",
 }
 
+DAYS_IS = {
+    "Mán": "Mo",
+    "Mánudagur": "Mo",
+    "Þri": "Tu",
+    "Þriðjudagur": "Tu",
+    "Mið": "We",
+    "Miðvikudagur": "We",
+    "Fim": "Th",
+    "Fimmtudagur": "Th",
+    "Fös": "Fr",
+    "Föstudagur": "Fr",
+    "Lau": "Sa",
+    "Laugardagur": "Sa",
+    "Sun": "Su",
+    "Sunnudagur": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.
@@ -799,6 +823,7 @@ DAYS_BY_FREQUENCY = [
     DAYS_HR,
     DAYS_HU,
     DAYS_IL,
+    DAYS_IS,
     DAYS_NL,
     DAYS_NO,
     DAYS_RO,
@@ -944,6 +969,8 @@ DELIMITERS_KR = DELIMITERS_EN + ["~"]
 
 CLOSED_AT = ["geschlossen"]
 
+CLOSED_BG = ["затворено", "затворен", "почивен"]
+
 CLOSED_EN = ["closed", "off"]
 
 CLOSED_DE = ["geschlossen"]
@@ -965,9 +992,15 @@ CLOSED_FR = ["fermée", "fermé", "fermee", "ferme"]
 logger = logging.getLogger(__name__)
 
 
-def day_range(start_day, end_day):
-    start_ix = DAYS.index(sanitise_day(start_day))
-    end_ix = DAYS.index(sanitise_day(end_day))
+def day_range(start_day: str, end_day: str) -> list[str]:
+    start = sanitise_day(start_day)
+    end = sanitise_day(end_day)
+    if start is None:
+        raise ValueError(f"Unrecognised start day: {start_day!r}")
+    if end is None:
+        raise ValueError(f"Unrecognised end day: {end_day!r}")
+    start_ix = DAYS.index(start)
+    end_ix = DAYS.index(end)
     if start_ix <= end_ix:
         return DAYS[start_ix : end_ix + 1]
     else:
@@ -1146,7 +1179,8 @@ class OpeningHours:
             elif this_day_group["hours"] == hours:
                 this_day_group["to_day"] = day
 
-        day_groups.append(this_day_group)
+        if this_day_group is not None:
+            day_groups.append(this_day_group)
 
         opening_hours = ""
 

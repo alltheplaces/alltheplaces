@@ -15,7 +15,6 @@ class UsBankSpider(SitemapSpider):
         "https://www.usbank.com/locations/sitemap.xml",
     ]
     sitemap_rules = [("/locations/([a-z-]*)/([.a-z-]*)/([.0-9a-z-]*)/", "parse_store_info")]
-    requires_proxy = True
 
     def opening_hours(self, hours):
         opening_hours = OpeningHours()

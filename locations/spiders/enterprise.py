@@ -33,7 +33,7 @@ class EnterpriseSpider(Spider):
                 continue
             item = DictParser.parse(location)
             item["ref"] = location["stationId"]
-            item["name"] = location["locationNameTranslation"]
+            item["branch"] = location["locationNameTranslation"]
             item["street_address"] = clean_address(location["addressLines"])
             item["phone"] = location["formattedPhone"]
             apply_category(Categories.CAR_RENTAL, item)

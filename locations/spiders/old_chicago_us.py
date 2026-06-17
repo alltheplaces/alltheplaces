@@ -14,8 +14,7 @@ class OldChicagoUSSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://oc-api-prod.azurewebsites.net/graphql",
-            data={
-                "query": """query {
+            data={"query": """query {
                     viewer {
                         locations {
                             edges {
@@ -46,8 +45,7 @@ class OldChicagoUSSpider(Spider):
                             }
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def parse(self, response, **kwargs):

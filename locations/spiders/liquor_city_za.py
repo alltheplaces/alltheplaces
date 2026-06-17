@@ -15,11 +15,15 @@ class LiquorCityZASpider(scrapy.Spider):
         for location in response.json()["content"]["branch_list"]:
             location.update(location.pop("address"))
             item = DictParser.parse(location)
+            if name := item.pop("name", None):
+                item["branch"] = name.replace("Liquor City ", "")
             item["ref"] = location["_id"]
             oh = OpeningHours()
             for day_time in location["working_hours"]:
                 day = day_time["day"]
-                if day != "Public Holidays":
+                if "Public Holiday" in day:
+                    continue
+                else:
                     open_time = day_time["from"]
                     close_time = day_time["to"]
                     oh.add_range(day=day, open_time=open_time, close_time=close_time)

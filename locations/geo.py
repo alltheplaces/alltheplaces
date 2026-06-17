@@ -4,7 +4,7 @@ import json
 import math
 from io import TextIOWrapper
 from itertools import groupby
-from typing import Iterable
+from typing import Any, Iterable
 
 import geonamescache
 from pyproj import Transformer
@@ -507,7 +507,7 @@ def extract_geojson_point_geometry(geometry: dict) -> dict | None:  # noqa: C901
 
     # At this point, we either have validly typed Point geometry or a validly
     # typed Multi-Point geometry containing a single point.
-    new_geometry = {"type": "Point"}
+    new_geometry: dict[str, Any] = {"type": "Point"}
     if isinstance(geometry["coordinates"][0], list) or isinstance(geometry["coordinates"][0], tuple):
         # Multi-Point geometry with a single point confirmed. Convert to Point
         # geometry.
@@ -553,7 +553,7 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict | None:  # 
         return None
     if len(geometry["coordinates"]) != 2:
         return None
-    if not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][1], int)) or not (
+    if not (isinstance(geometry["coordinates"][0], float) or isinstance(geometry["coordinates"][0], int)) or not (
         isinstance(geometry["coordinates"][1], float) or isinstance(geometry["coordinates"][1], int)
     ):
         return None
@@ -592,6 +592,17 @@ def convert_gj2008_to_rfc7946_point_geometry(geometry: dict) -> dict | None:  # 
         lon = geometry["coordinates"][0]
     if not (isinstance(lat, float) or isinstance(lat, int)) or not (isinstance(lon, float) or isinstance(lon, int)):
         return None
+    # Normalize near-integer results to ints to avoid floating point precision
+    # artifacts from reprojection libraries (e.g.  -35.00000000000001 -> -35).
+    if isinstance(lat, float):
+        lat_rounded = round(lat)
+        if abs(lat - lat_rounded) < 1e-9:
+            lat = int(lat_rounded)
+    if isinstance(lon, float):
+        lon_rounded = round(lon)
+        if abs(lon - lon_rounded) < 1e-9:
+            lon = int(lon_rounded)
+
     new_geometry = {
         "type": "Point",
         "coordinates": [lon, lat],

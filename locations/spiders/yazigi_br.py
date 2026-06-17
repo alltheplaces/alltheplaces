@@ -27,7 +27,7 @@ class YazigiBRSpider(Spider):
             item["branch"] = poi["Unidade"].get("NomeFantasia")
             item["phone"] = poi["Unidade"].get("Telefone")
             address = poi["Unidade"]["Endereco"]
-            item["addr_full"] = address.get("Logradouro")
+            item["street_address"] = address.get("Logradouro")
             item["city"] = address.get("CidadeNome")
             item["state"] = address.get("EstadoNome")
             item["postcode"] = address.get("CEP")

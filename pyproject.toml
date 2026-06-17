@@ -19,19 +19,21 @@ dependencies = [
     "phonenumbers",
     "phpserialize",
     "playwright_captcha",
+    "psutil",
     "pyarrow",
     "pycountry",
     "pygeohash<4",
     "pygithub",
     "pyproj",
+    "pyshp>=3.0.12",
     "python-json-logger",
     "requests",
     "requests-cache",
     "reverse-geocoder",
-    "scrapy",
-    "scrapy-camoufox",
-    "scrapy-playwright",
-    "scrapy-zyte-api",
+    "scrapy>=2.16.0",
+    "scrapy-camoufox @ git+https://github.com/iandees/scrapy-camoufox.git",
+    "scrapy-playwright>=0.0.45",
+    "scrapy-zyte-api>=0.34.0",
     "shapely",
     "twisted[http2]",
     "tzdata",
@@ -63,3 +65,6 @@ dev = [
     "pytest",
     "ty",
 ]
+
+[tool.ty.rules]
+invalid-method-override = "ignore"

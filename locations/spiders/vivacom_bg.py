@@ -25,14 +25,12 @@ class VivacomBGSpider(Spider):
 
             item = DictParser.parse(store)
             item["name"] = None
-            item["lat"] = store["latitude"]
-            item["lon"] = store["longitude"]
 
             item["opening_hours"] = OpeningHours()
             # working hours are surrounded by HTML tags
             cleaned_hours = store.get("workingHours", "").replace(r"<[^>]*>", "").replace(".", "")
             item["opening_hours"].add_ranges_from_string(cleaned_hours, days=DAYS_BG)
 
-            item["phone"] = store.get("contact", "")
+            item["phone"] = store.get("contact", None)
 
             yield item

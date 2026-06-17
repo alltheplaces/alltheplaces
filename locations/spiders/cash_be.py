@@ -3,9 +3,12 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.spiders.carrefour_fr import CARREFOUR_SUPERMARKET
+from locations.spiders.delhaize import DELHAIZE
 
 
 class CashBESpider(Spider):
@@ -17,6 +20,12 @@ class CashBESpider(Spider):
         "operator_wikidata": "Q97142699",
     }
     start_urls = ["https://cash.be/nl/locations"]
+
+    LOCATED_IN_MAPPINGS = [
+        (["DELHAIZE"], DELHAIZE),
+        (["CARREFOUR"], CARREFOUR_SUPERMARKET),
+        (["CORA"], {"brand": "Cora", "brand_wikidata": "Q686643"}),
+    ]
 
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
         data = response.json()
@@ -37,8 +46,11 @@ class CashBESpider(Spider):
             item["lon"] = location.get("adr_longitude")
             item["website"] = location.get("website")
 
-            # Use Dutch name by default
-            item["name"] = location.get("location_name_nl")
+            # Use Dutch name by default for extraction
+            location_name = location.get("location_name_nl")
+            item["located_in"], item["located_in_wikidata"] = extract_located_in(
+                location_name or "", self.LOCATED_IN_MAPPINGS, self
+            )
 
             # Add multilingual names and address fields to extras
             for lang in ["nl", "fr", "de", "en"]:

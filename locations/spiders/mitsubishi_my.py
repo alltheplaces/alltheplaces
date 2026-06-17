@@ -13,7 +13,7 @@ class MitsubishiMYSpider(JSONBlobSpider):
     start_urls = ["https://www.mitsubishi-motors.com.my/wp-admin/admin-ajax.php?action=update_dealer_markers"]
 
     def pre_process_data(self, feature: dict) -> None:
-        if isinstance(feature.get("state"), list):
+        if feature.get("state") and isinstance(feature.get("state"), list):
             feature["state"] = feature["state"][0].get("name")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

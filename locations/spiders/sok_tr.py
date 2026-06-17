@@ -36,7 +36,7 @@ class SokTRSpider(Spider):
             )
 
     def parse_stores(self, response):
-        for store in response.json()["response"]["subeler"]:
+        for store in response.json()["subeler"]:
             item = DictParser.parse(store)
             name, branch_name = self.parse_branch_name(store["name"])
 

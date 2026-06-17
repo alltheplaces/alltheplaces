@@ -1,45 +1,56 @@
 import json
+import re
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
-from locations.pipelines.address_clean_up import clean_address
+from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 
 
-class WaffleHouseUSSpider(Spider):
+class WaffleHouseUSSpider(SitemapSpider):
     name = "waffle_house_us"
     item_attributes = {"brand": "Waffle House", "brand_wikidata": "Q1701206"}
-    allowed_domains = ["wafflehouse.com"]
-    start_urls = ["https://locations.wafflehouse.com/regions"]
+    sitemap_urls = ["https://locations.wafflehouse.com/sitemap.xml"]
+    sitemap_rules = [(r"/[a-z0-9-]+-[a-z]{2}-(\d+)/$", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        locations = json.loads(locations_text)["props"]["pageProps"]["locations"]
-        for location in locations:
-            item = DictParser.parse(location)
-            item["name"] = item["name"].removesuffix(" #{}".format(location["storeCode"]))
-            item["ref"] = location["storeCode"]
-            item["street_address"] = clean_address(location["addressLines"])
-            item["phone"] = "; ".join(location["phoneNumbers"])
-            item["website"] = "https://locations.wafflehouse.com/{}/".format(location["slug"])
-            item["extras"]["website:orders"] = location["custom"].get("online_order_link")
-            item["operator"] = location["custom"]["operated_by"]
+        if not (m := re.search(r"businessSchema = (\{.*?\})\s*//\s*Append", response.text, re.S)):
+            return
+        ld_text = re.sub(
+            r'"openingHoursSpecification"\s*:\s*openingHoursSpecification',
+            '"openingHoursSpecification": []',
+            m.group(1),
+        )
+        ld_data = json.loads(ld_text)
 
-            try:
-                item["opening_hours"] = self.parse_opening_hours(location["businessHours"] or [])
-            except:
-                self.logger.error("Error parsing opening hours: {}".format(location["businessHours"]))
+        item: Feature = LinkedDataParser.parse_ld(ld_data)
+        item["ref"] = response.url.rstrip("/").rsplit("-", 1)[-1]
+        item["website"] = response.url
+        item.pop("name", None)
+        item.pop("image", None)
 
-            yield item
+        item["opening_hours"] = self.parse_opening_hours(response)
+        apply_category(Categories.RESTAURANT, item)
 
-    def parse_opening_hours(self, rules: list) -> OpeningHours:
+        yield item
+
+    def parse_opening_hours(self, response: Response) -> OpeningHours | None:
+        if not (oc_match := re.search(r"const openClosed = \[(.*?)\];", response.text, re.S)):
+            return None
+        if not (bho_match := re.search(r"const bho = JSON\.parse\(`(\[.*?\])`\)", response.text, re.S)):
+            return None
+        open_closed = re.findall(r"'(open|closed)'", oc_match.group(1))
+        bho = json.loads(bho_match.group(1))
         oh = OpeningHours()
-        for day, times in zip(DAYS, rules):
-            if not times:
+        for day, status, times in zip(DAYS, open_closed, bho):
+            if status == "closed":
                 oh.set_closed(day)
+            elif times == ["0000", "0000"]:
+                oh.add_range(day, "00:00", "23:59")
             else:
-                oh.add_range(day, times[0], times[1].replace("00:00", "24:00"))
+                oh.add_range(day, f"{times[0][:2]}:{times[0][2:]}", f"{times[-1][:2]}:{times[-1][2:]}")
         return oh

@@ -94,5 +94,6 @@ class TravisPerkinsGBSpider(Spider):
             if m := location["capabilities"]["items"]:
                 if "Benchmarx" in m[0]["__typename"]:
                     item.update(self.BENCHMARX)
+            item["branch"] = item.pop("name").replace(" BENCHMARX KICHENS & JOINERY", "")
 
             yield item

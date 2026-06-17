@@ -55,7 +55,9 @@ class MorrisonsGBSpider(Spider):
             if location["storeFormat"] == "supermarket" and location["category"] == "Supermarket":
                 item.update(self.MORRISONS)
                 apply_category(Categories.SHOP_SUPERMARKET, item)
-            elif location["storeFormat"] == "supermarket" and location["category"] == "McColls":
+            elif location["storeFormat"] == "supermarket" and (
+                location["category"] == "McColls" or location["category"] == "Franchise"
+            ):
                 if "Morrisons Daily" in location["storeName"]:
                     item.update(self.MORRISONS_DAILY)
                 elif "McColl's" in location["storeName"]:

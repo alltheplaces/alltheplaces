@@ -74,7 +74,7 @@ class ElfsightSpider(JSONBlobSpider):
             data = parse_js_object(response.text)
             return data["data"]["widgets"][self.api_key]["data"]["settings"]["markers"]
         else:
-            return parse_js_object(unquote(response.xpath("//@data-elfsight-google-maps-options").get()))["markers"]
+            return parse_js_object(unquote(response.xpath("//@data-elfsight-google-maps-options").get("")))["markers"]
 
     def pre_process_data(self, feature: dict) -> None:
         if "infoTitle" in feature:

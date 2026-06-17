@@ -4,9 +4,17 @@ from scrapy import Selector, Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import Request, Response
 
+from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.spiders.bp import BpSpider
+from locations.spiders.caltex import CaltexSpider
+from locations.spiders.engen import EngenSpider
+from locations.spiders.shell import ShellSpider
+from locations.spiders.shoprite_holdings import SHOPRITE_BRANDS
+from locations.spiders.spar_bw_mz_na_sz_za import BRANDS as SPAR_BRANDS
+from locations.spiders.total_energies import TotalEnergiesSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 ZA_PROVINCES = [
@@ -31,6 +39,26 @@ class FnbAtmZASpider(Spider):
         "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
     }
+
+    LOCATED_IN_MAPPINGS = [
+        (["CALTEX"], CaltexSpider.item_attributes),
+        (["BP"], BpSpider.brands["bp"]),
+        (["ENGEN"], EngenSpider.item_attributes),
+        (["SHELL"], ShellSpider.item_attributes),
+        (["TOTAL"], TotalEnergiesSpider.BRANDS["tot"]),
+        (
+            ["SUPERSPAR"],
+            {"brand": SPAR_BRANDS["SUPERSPAR"][0], "brand_wikidata": SPAR_BRANDS["SUPERSPAR"][1]["brand_wikidata"]},
+        ),
+        (
+            ["KWIKSPAR"],
+            {"brand": SPAR_BRANDS["KWIKSPAR"][0], "brand_wikidata": SPAR_BRANDS["KWIKSPAR"][1]["brand_wikidata"]},
+        ),
+        (["SPAR"], SPAR_BRANDS["SPAR"][1]),
+        (["BOXER"], {"brand": "Boxer", "brand_wikidata": "Q116586275"}),
+        (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"]),
+        (["CHECKERS"], SHOPRITE_BRANDS["Checkers"]),
+    ]
 
     async def start(self) -> AsyncIterator[Request]:
         for province in ZA_PROVINCES:
@@ -68,6 +96,10 @@ class FnbAtmZASpider(Spider):
             }
             apply_category(Categories.ATM, properties)
             apply_yes_no(Extras.CASH_IN, properties, deposits == "Yes", False)
+
+            properties["located_in"], properties["located_in_wikidata"] = extract_located_in(
+                properties.get("branch", ""), self.LOCATED_IN_MAPPINGS, self
+            )
 
             yield Feature(**properties)
         except IndexError:

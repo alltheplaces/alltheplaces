@@ -1,3 +1,4 @@
+import json
 from typing import Any, Iterable
 
 import scrapy
@@ -6,11 +7,12 @@ from scrapy.http import Response
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class InditexSpider(scrapy.Spider):
+class InditexSpider(PlaywrightSpider):
     name = "inditex"
     my_brands = {
         "bershka": {"brand": "Bershka", "brand_wikidata": "Q827258"},
@@ -23,42 +25,36 @@ class InditexSpider(scrapy.Spider):
     }
     # Each site has the same multi-brand catalogue JSON, could have picked any site!
     start_urls = ["https://www.massimodutti.com/itxrest/2/web/seo/config?appId=1"]
-    is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 5,
-        "DEFAULT_REQUEST_HEADERS": {
-            "Host": "www.massimodutti.com",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Connection": "keep-alive",
-        },
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        config = response.json()["seoParamMap"]
+        config = json.loads(response.xpath("//pre/text()").get())["seoParamMap"]
         for store_id, country in config["storeId"].items():
-            # First character of the store_id is the index into the brand table.
-            brand = config["brandId"][store_id[0]]
-            if brand == "dutti":
-                brand = "massimodutti"
-            if brand == "uterque":
-                # Discontinued brand, still in their config as time of writing.
-                continue
-            url = "https://www.{}.com/itxrest/2/bam/store/{}/physical-stores-by-country?countryCode={}".format(
-                brand,
-                store_id,
-                country.upper(),
-            )
-            yield scrapy.http.JsonRequest(url, callback=self.parse_stores, cb_kwargs=dict(brand=brand))
+            for brand in config["brandId"].values():
+                if brand == "dutti":
+                    brand = "massimodutti"
+                if brand == "uterque":
+                    # Discontinued brand, still in their config as time of writing.
+                    continue
+                url = "https://www.{}.com/itxrest/2/bam/store/{}/physical-stores-by-country?countryCode={}".format(
+                    brand,
+                    store_id,
+                    country.upper(),
+                )
+                yield scrapy.http.JsonRequest(url, callback=self.parse_stores, cb_kwargs=dict(brand=brand))
 
     def parse_stores(self, response: Response, brand: str) -> Iterable[Feature]:
-        for store in response.json()["stores"]:
+        for store in json.loads(response.xpath("//pre/text()").get())["stores"]:
             item = DictParser.parse(store)
             item["website"] = "https://www.{}.com/".format(brand) + item["country"].lower()
             item.update(self.my_brands.get(brand))
             item["phone"] = store.get("phones", [None])[0]
+            item["branch"] = item.pop("name")
             item["street_address"] = store["addressLines"][0]
             oh = OpeningHours()
             for record in store["openingHours"]["schedule"]:

@@ -1,24 +1,9 @@
-from json import loads
-from typing import AsyncIterator
-
+import chompjs
 from scrapy import Spider
-from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
-
-DAYS_NAME = {
-    "Monday": "Mo",
-    "Tuesday": "Tu",
-    "Wednesday": "We",
-    "Wedsenday": "We",
-    "Thursday": "Th",
-    "Friday": "Fr",
-    "Saturday": "Sa",
-    "Sunday": "Su",
-}
+from locations.hours import DAYS_EN, OpeningHours
 
 CATEGORY_MAP = {
     "Community Hospice": Categories.HOSPICE,
@@ -34,87 +19,69 @@ CATEGORY_MAP = {
     "Senior Living": Categories.NURSING_HOME,
     "Urgent Care": Categories.CLINIC_URGENT,
     "Infusion Center": Categories.CLINIC,
+    "Sleep Lab": Categories.CLINIC,
 }
+
+LISTING_PAGES = [
+    "https://www.wellstar.org/locations/hospitals",
+    "https://www.wellstar.org/locations/health-parks",
+    "https://www.wellstar.org/locations/urgent-care-centers",
+    "https://www.wellstar.org/locations/emergency-departments",
+    "https://www.wellstar.org/locations/imaging-centers",
+    "https://www.wellstar.org/locations/infusion-centers",
+    "https://www.wellstar.org/locations/pharmacies",
+    "https://www.wellstar.org/locations/rehabilitation-centers",
+    "https://www.wellstar.org/locations/hospice",
+    "https://www.wellstar.org/locations/lab-services",
+    "https://www.wellstar.org/locations/sleep-labs",
+]
 
 
 class WellstarUSSpider(Spider):
     name = "wellstar_us"
     item_attributes = {"brand": "WellStar Health System", "brand_wikidata": "Q7981073"}
     allowed_domains = ["www.wellstar.org"]
-    start_urls = ("https://www.wellstar.org/locations",)
+    start_urls = LISTING_PAGES
     requires_proxy = "US"  # Cloudflare geoblocking in use
 
-    async def start(self) -> AsyncIterator[Request]:
-        url = "https://www.wellstar.org/api/LocationSearchApi/GetLocations"
+    def parse(self, response):
+        for link in response.xpath('//a[contains(@href, "/locations/")]/@href').getall():
+            parts = link.strip("/").split("/")
+            if len(parts) >= 3 and parts[0] == "locations":
+                yield response.follow(link, callback=self.parse_location)
 
-        headers = {
-            "authority": "www.wellstar.org",
-            "sec-ch-ua": '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
-            "accept": "application/json, text/javascript, */*; q=0.01",
-            "sec-ch-ua-mobile": "?0",
-            "__requestverificationtoken": "Y0cuJinQRzvtT-kjKKyPZOlZPu0JU48XSyIvEl1p__yzZF4621s-0YUAkImeXkjGgLB7GyZlv8rYby0uII9LChhFlrKiWiDb2Va5skX-TmM1",
-            "user-agent": BROWSER_DEFAULT,
-            "content-type": "application/json",
-            "origin": "https://www.wellstar.org",
-            "sec-fetch-site": "same-origin",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-dest": "empty",
-            "referer": "https://www.wellstar.org/locations",
-            "accept-language": "en-US,en;q=0.9",
-        }
-
-        cookies = {
-            "ASP.NET_SessionId": "24p11pgzrg42p4ghtqwi40gl",
-            "__RequestVerificationToken": "3agF8JY4gLGMg_K1j7eXWtME4IsQmLPf1snFPF0d132SBNJG2JsIHpVgCAJ1cVysztrjgXuRrCmeMYp9kJjHDYNZlqIzc_ZYwq-TmGIeBTk1",
-            "sxa_site": "WellStarOrg",
-            "ARRAffinity": "e29b803b013c7e5c76a254365bc4ef36ddc3a862faece1b8869fa46de635b9c5",
-            "ARRAffinitySameSite": "e29b803b013c7e5c76a254365bc4ef36ddc3a862faece1b8869fa46de635b9c5",
-            "_gid": "GA1.2.1358908497.1614958557",
-            "_fbp": "fb.1.1614958557337.1409275872",
-            "_gcl_au": "1.1.1318529675.1614958557",
-            "SC_ANALYTICS_GLOBAL_COOKIE": "da85aa2fb9ad429eb899c581fcb2376d|True",
-            "fs_uid": "rs.fullstory.com#10J51H#5729266957271040:6498357093580800/1646494557",
-            "isIUnderstand": "true",
-            "searchedlatitude": "33.7489954",
-            "searchedlongitude": "-84.3879824",
-            "latitude": "30.259263699999998",
-            "longitude": "-97.7393472",
-            "_gat_UA-9373927-15": "1",
-            "_gat_UA-9373927-14": "1",
-            "_ga_BM192ND27H": "GS1.1.1614983138.7.1.1614983410.0",
-            "_ga": "GA1.1.688932849.1614958557",
-        }
-
-        body = '{"searchTerm":"","searchFilter":""}'
-
-        yield Request(
-            url=url,
-            method="POST",
-            dont_filter=True,
-            cookies=cookies,
-            headers=headers,
-            body=body,
-            callback=self.parse,
-        )
-
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        if hours:
-            for dt in hours:
-                try:
-                    day = DAYS_NAME[dt.split(":")[0]]
-                    open_time, close_time = hours.get(dt).split("-")
-                    opening_hours.add_range(
-                        day=day,
-                        open_time=open_time.replace(":", "").strip(),
-                        close_time=close_time.replace(":", "").strip(),
-                        time_format="%H%M",
-                    )
-                except Exception:
+    def parse_location(self, response):
+        for script in response.xpath("//script/text()").getall():
+            if "locationLatitude" not in script:
+                continue
+            for location in chompjs.parse_js_objects(script):
+                if not isinstance(location, dict) or "locationLatitude" not in location:
                     continue
 
-        return opening_hours.as_opening_hours()
+                item = DictParser.parse(location)
+                item["lat"] = location.get("locationLatitude")
+                item["lon"] = location.get("locationLongitude")
+                item["phone"] = location.get("contactPhoneNumber")
+                item["website"] = location.get("pageURL") or response.url
+
+                address_data = location.get("address", "")
+                address_attributes = self.get_address_attributes(address_data)
+                if address_data.split(",")[0].strip():
+                    item["street_address"] = address_data.split(",")[0].strip()
+                    if location.get("address2"):
+                        item["street_address"] = f"{item['street_address']}, {location['address2']}"
+                item["city"] = address_attributes.get("city")
+                item["state"] = address_attributes.get("state")
+                item["postcode"] = address_attributes.get("postcode")
+
+                item["opening_hours"] = self.parse_hours(location.get("workingHours"))
+
+                if type_names := location.get("locationTypesNames"):
+                    if cat := CATEGORY_MAP.get(type_names[0]):
+                        apply_category(cat, item)
+
+                yield item
+                return
 
     def get_address_attributes(self, address):
         address_parts = address.split(",")
@@ -128,26 +95,17 @@ class WellstarUSSpider(Spider):
 
         return address_attributes
 
-    def parse(self, response):
-        hdata = loads(response.text)
-
-        hdata = hdata["matchingItems"]
-
-        for row in hdata:
-            address_data = row.pop("Address")
-            address_attributes = self.get_address_attributes(address_data)
-            item = DictParser.parse(row)
-            item["ref"] = row.get("LocationID")
-            item["phone"] = row.get("LocationContactPhone")
-            item["addr_full"] = " ".join([address_data.split(",")[0], row.get("Address2", "") or ""]).strip()
-            item["city"] = address_attributes.get("city")
-            item["state"] = address_attributes.get("state")
-            item["postcode"] = address_attributes.get("postcode")
-            item["website"] = "https://www.wellstar.org" + row["PageURL"]
-            hours = self.parse_hours(row.get("Hours"))
-            item["opening_hours"] = hours
-
-            if cat := CATEGORY_MAP.get(row["LocationTypes"][0]):
-                apply_category(cat, item)
-
-            yield item
+    def parse_hours(self, hours: dict | None) -> OpeningHours:
+        oh = OpeningHours()
+        if not hours:
+            return oh
+        for day_name, time_range in hours.items():
+            try:
+                day = DAYS_EN.get(day_name)
+                if not day:
+                    continue
+                open_time, close_time = time_range.split("-")
+                oh.add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
+            except Exception:
+                continue
+        return oh

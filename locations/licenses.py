@@ -8,11 +8,30 @@ class Licenses(Enum):
         "license:wikidata": "Q6938433",
         "attribution": "optional",
     }
-    CC4 = {
+    CCBY3AU = {
+        "license": "Creative Commons Attribution 3.0 Australia",
+        "license:website": "https://creativecommons.org/licenses/by/3.0/au/",
+        "license:wikidata": "Q52555753",
+        "attribution": "required",
+    }
+    CCBY4 = {
         "license": "Creative Commons Attribution 4.0 International",
         "license:website": "http://creativecommons.org/licenses/by/4.0/",
         "license:wikidata": "Q20007257",
         "attribution": "required",
+    }
+    CCBYSA4 = {
+        "license": "Creative Commons Attribution-ShareAlike 4.0 International",
+        "license:website": "http://creativecommons.org/licenses/by-sa/4.0/",
+        "license:wikidata": "Q18199165",
+        "attribution": "required",
+    }
+    ETALAB2 = {
+        "license": "Etalab Open License 2.0",
+        "license:website": "https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf",
+        "license:wikidata": "Q80939351",
+        "attribution": "required",
+        "use:commercial": "permit",
     }
     GB_OGLv3 = {
         "license": "Open Government Licence v3.0",
@@ -22,6 +41,11 @@ class Licenses(Enum):
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0.",
         "use:commercial": "permit",
     }
+    GB_INSPIRE = {
+        "license": "INSPIRE End User Licence",
+        "license:website": "https://www.ordnancesurvey.co.uk/documents/licensing/inspire-end-user-licence.pdf",
+        "use:commercial": "no",
+    }
     NO_NLODv2 = {
         "license": "Norwegian Licence for Open Government Data 2.0",
         "license:website": "https://data.norge.no/nlod/no",
@@ -30,4 +54,32 @@ class Licenses(Enum):
         "license:wikidata": "Q106835855",
         "attribution": "required",
         "attribution:name": "Contains data under the Norwegian licence for Open Government data (NLOD).",
+    }
+    CC3 = {
+        "license": "Creative Commons Attribution 3.0 Unported",
+        "license:website": "https://creativecommons.org/licenses/by/3.0/",
+        "license:wikidata": "Q14947546",
+        "attribution": "required",
+        "use:commercial": "permit",
+    }
+    OPENDATA_SWISS_BY = {
+        "license": "opendata.swiss BY",
+        "license:website": "https://opendata.swiss/en/terms-of-use#terms_by",
+        "license:wikidata": "Q133802534",
+        "attribution": "required",
+        "use:commercial": "permit",
+    }
+    IT_IODL2 = {
+        "license": "Italian Open Data License 2.0",
+        "license:website": "https://www.dati.gov.it/iodl/2.0/",
+        "license:wikidata": "Q26805818",
+        "attribution": "required",
+        "use:commercial": "permit",
+    }
+    UNLICENSE = {
+        "license": "Unlicense",
+        "license:website": "https://unlicense.org/",
+        "license:wikidata": "Q21659044",
+        "attribution": "optional",
+        "use:commercial": "yes",
     }

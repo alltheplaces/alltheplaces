@@ -1,4 +1,3 @@
-from scrapy import Spider
 from scrapy.utils.spider import DefaultSpider
 from scrapy.utils.test import get_crawler
 
@@ -6,14 +5,14 @@ from locations.items import Feature
 from locations.pipelines.clean_strings import CleanStringsPipeline, clean_string
 
 
-def get_spider() -> Spider:
-    spider = DefaultSpider()
-    spider.crawler = get_crawler()
-    return spider
+def get_objects():
+    crawler = get_crawler(DefaultSpider)
+    crawler.spider = crawler._create_spider()
+    return CleanStringsPipeline(crawler), crawler.spider
 
 
 def test_clean_strings_pipeline():
-    pipeline = CleanStringsPipeline()
+    pipeline, spider = get_objects()
 
     item = Feature(
         ref="  https://example.com/12345   ",
@@ -25,8 +24,7 @@ def test_clean_strings_pipeline():
         brand="McDonald's",
         brand_wikidata="Q38076",
     )
-    spider = get_spider()
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item["ref"] == "https://example.com/12345"
     assert item["name"] == "test"
     assert item["addr_full"] == "test str 123"
@@ -47,8 +45,7 @@ def test_clean_strings_pipeline():
         phone="  &nbsp;1234567890&nbsp;  ",
         website="https://example.com?query=title%20EQ%20'%3CMytitle%3E&amp;test'%20",
     )
-    spider = get_spider()
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item["name"] == "test & test"
     assert item["addr_full"] == "test str 123"
     assert item["phone"] == "1234567890"

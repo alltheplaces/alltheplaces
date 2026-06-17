@@ -27,8 +27,7 @@ class SaveMartUSSpider(JSONBlobSpider):
         for brand in ["fm", "lu", "sm"]:
             yield JsonRequest(
                 f"https://{brand}.swiftlyapi.net/graphql",
-                data={
-                    "query": """
+                data={"query": """
                         {
                             stores {
                                 all {
@@ -60,8 +59,7 @@ class SaveMartUSSpider(JSONBlobSpider):
                                 }
                             }
                         }
-                    """
-                },
+                    """},
             )
 
     def post_process_item(self, item, response, location):

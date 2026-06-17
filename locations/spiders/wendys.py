@@ -1,8 +1,11 @@
 import json
 
+from scrapy import Selector
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -16,6 +19,7 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = ld_data.get("url")
+        item["extras"]["ref:wendys"] = response.xpath("//@data-corporatecode").get()
 
         # Opening hours for the drive-through seem to get included with regular hours, so clean that up
         opening_hours_divs = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')
@@ -30,6 +34,11 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
             item["extras"]["breakfast"] = self.clean_hours(breakfast_hours_divs[0])
 
         yield item
+
+    def extract_amenity_features(self, item: Feature | dict, selector: Selector, ld_item: dict) -> None:
+        if not ld_item.get("amenityFeature"):
+            return
+        apply_yes_no(Extras.WIFI, item, "Wi-Fi" in ld_item["amenityFeature"])
 
     @staticmethod
     def clean_hours(hours_div):

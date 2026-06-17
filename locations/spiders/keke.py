@@ -46,7 +46,7 @@ class KekeSpider(Spider):
             item["ref"] = location["_id"]
             item["addr_full"] = location["address"].get("formatted")
             item["street_address"] = location["address"]["streetAddress"].get("formattedAddressLine")
-            item["extras"]["addr:unit"] = location["address"]["streetAddress"].get("apt")
+            item["unit"] = location["address"]["streetAddress"].get("apt")
             item["street"] = location["address"]["streetAddress"].get("name")
             item["housenumber"] = location["address"]["streetAddress"].get("number")
             item["state"] = location["address"].get("subdivision")

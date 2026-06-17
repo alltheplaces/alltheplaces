@@ -1,10 +1,12 @@
-import re
+from typing import Any
 
-from scrapy import Spider
+from scrapy import Selector, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
 
 
 class BeaconAndBridgeMarketUSSpider(Spider):
@@ -13,33 +15,29 @@ class BeaconAndBridgeMarketUSSpider(Spider):
         "brand": "Beacon & Bridge Market",
         "brand_wikidata": "Q122209684",
     }
-    start_urls = ["https://beaconandbridge.com/locations/"]
+    start_urls = ["https://www.beaconandbridge.com/locations"]
+    no_refs = True
 
-    def parse(self, response):
-        address_list = response.xpath('//div[@id="section_2"]//div[contains(@class, "yes_heads")]')
-        for store in address_list:
-            hour = store.xpath(".//p/text()[2]").get().replace("HOURS: ", "")
-            oh = OpeningHours()
-            for day in DAYS:
-                if hour == "24/7":
-                    hour = "12:00am - 12:00am"
-                h_h = re.split(" - | -", hour)
-                oh.add_range(
-                    day=day,
-                    open_time=h_h[0],
-                    close_time=h_h[1],
-                    time_format="%I:%M%p",
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.xpath('//*[@class="dmNewParagraph"][@data-ai-tag="Section title"]'):
+            location_info = location.xpath("./parent::div[@data-external-id]/following-sibling::div")
+            if address := clean_address(location_info.xpath('.//a[contains(@href,"maps")]/text()').getall()):
+                item = Feature()
+                item["branch"] = location.xpath("./h1/span/text()").get("").split("Store")[0]
+                item["addr_full"] = address
+                item["phone"] = (
+                    location_info.xpath('.//span[contains(text(), "PHONE:")]/text()').get("").replace("PHONE:", "")
                 )
-            properties = {
-                "ref": store.xpath(".//h3/text()").get(),
-                "name": store.xpath(".//h3/text()").get(),
-                "street_address": store.xpath(".//span/a/text()[1]").get(),
-                "city": store.xpath(".//span/a/text()[2]").get().split(", ")[0],
-                "state": store.xpath(".//span/a/text()[2]").get().split(", ")[1],
-                "postcode": store.xpath(".//span/a/text()[3]").get(),
-                "phone": store.xpath(".//p/text()[1]").get().replace("PHONE: ", ""),
-                "opening_hours": oh.as_opening_hours(),
-            }
-            apply_category(Categories.FUEL_STATION, properties)
+                item["opening_hours"] = self.parse_opening_hours(location_info)
+                apply_category(Categories.FUEL_STATION, item)
+                yield item
 
-            yield Feature(**properties)
+    def parse_opening_hours(self, location_info: Selector) -> OpeningHours:
+        opening_hours = OpeningHours()
+        hours_text = location_info.xpath('.//span/text()[contains(.,"HOURS:")]').get("").replace("HOURS:", "")
+        if "24/7" in hours_text:
+            opening_hours = "24/7"
+        else:
+            for day in DAYS:
+                opening_hours.add_ranges_from_string(f"{day} {hours_text}")
+        return opening_hours

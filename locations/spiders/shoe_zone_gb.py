@@ -22,7 +22,7 @@ class ShoeZoneGBSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         # lat/lon are both parsed into lat, separate them
-        (item["lat"], item["lon"]) = item["lat"]
+        item["lat"], item["lon"] = item["lat"]
         jsondata = json.loads(response.xpath('//input[@id="ctl00_mainContent_hidStoreJSON"]//@value').get())
         item["addr_full"] = jsondata["Address"]
         item["postcode"] = jsondata["PostCode"]

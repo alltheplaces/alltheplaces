@@ -35,5 +35,4 @@ class AddressSpider(Spider):
                 "locations.pipelines.count_operators.CountOperatorsPipeline": None,
             },
         )
-        # TODO: figure out whether ty supports use of the Self type hint in this situation
-        return spider  # ty: ignore[invalid-return-type]
+        return spider

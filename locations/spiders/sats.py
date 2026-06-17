@@ -1,28 +1,34 @@
-import scrapy
+from typing import Any
+
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.items import set_closed
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-# Sats (Gym chain in the nordics) is active in SE, NO, DK, FI.
-# This spider is scraping the gym centers in all countries.
-class SatsSpider(scrapy.Spider):
+class SatsSpider(SitemapSpider, StructuredDataSpider):
     name = "sats"
     item_attributes = {"brand": "Sats", "brand_wikidata": "Q4411496"}
-    start_urls = ["https://www.sats.se/api/clubs"]
+    sitemap_urls = [
+        "https://www.sats.se/sitemap.xml",
+        "https://www.sats.no/sitemap.xml",
+        "https://www.sats.dk/sitemap.xml",
+    ]
+    sitemap_rules = [
+        (r"/gym/[^/]+/[^/]+$", "parse_sd"),
+        (r"/treningssenter/[^/]+$", "parse_sd"),
+        (r"/traeningscenter/[^/]+$", "parse_sd"),
+    ]
+    search_for_facebook = False
+    search_for_twitter = False
 
-    def parse(self, response):
-        for club in response.json()["clubs"]:
-            item = DictParser.parse(club)
-            item["city"] = item["city"].title()
-
-            listName = club.get("listName").lower()
-            if listName.startswith("hk "):
-                apply_category(Categories.OFFICE_COMPANY, item)
-                item["nsi_id"] = "N/A"
-
-            if item["name"].endswith(" (closed)"):
-                set_closed(item)
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
+        item["branch"] = item.pop("name").strip()
+        item["website"] = response.url
+        if geo := ld_data.get("location", {}).get("geo"):
+            item["lat"] = geo.get("latitude")
+            item["lon"] = geo.get("longitude")
+        apply_category(Categories.GYM, item)
+        yield item

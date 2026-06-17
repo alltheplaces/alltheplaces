@@ -33,7 +33,9 @@ class TheCourierGuyZASpider(scrapy.Spider):
                     continue
                 open_time = day_time["open_time"]
                 close_time = day_time["close_time"]
-                if re.match(r"\d+:\d+:\d+", open_time):
+                if "--" in open_time:
+                    pass
+                elif re.match(r"\d+:\d+:\d+", open_time):
                     item["opening_hours"].add_range(
                         day=day.strip(), open_time=open_time, close_time=close_time, time_format="%H:%M:%S"
                     )

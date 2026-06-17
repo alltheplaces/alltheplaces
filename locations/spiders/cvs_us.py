@@ -12,9 +12,9 @@ from locations.structured_data_spider import StructuredDataSpider
 CVS = {"name": "CVS Pharmacy", "brand": "CVS Pharmacy", "brand_wikidata": "Q2078880"}
 
 PHARMACY_BRANDS = {
-    "CVS Pharmacy": CVS,
     "CVS HealthHub": CVS,
     "CVS Pharmacy y más": CVS | {"name": "CVS Pharmacy y más"},
+    "CVS Pharmacy": CVS,
     "Longs Drugs": {"brand": "Longs Drugs", "brand_wikidata": "Q16931196"},
     "Navarro": {"name": "Navarro", "brand": "Navarro", "brand_wikidata": "Q6982161"},
 }
@@ -23,9 +23,14 @@ PHARMACY_BRANDS = {
 class CvsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "cvs_us"
     allowed_domains = ["www.cvs.com"]
-    sitemap_urls = ["https://www.cvs.com/sitemap/store-details.xml"]
+    sitemap_urls = ["https://www.cvs.com/sitemap/store_locations_cities.xml"]
+    sitemap_rules = [("/store-locator/cvs-pharmacy-locations/", "parse")]
 
     def parse(self, response):
+        for link in response.xpath('//a[contains(@href, "storeid=")]/@href').getall():
+            yield response.follow(link, callback=self.parse_store)
+
+    def parse_store(self, response):
         if response.css("link[rel~=canonical]").attrib["href"] == "https://www.cvs.comundefined":
             # Weird garbage, seemingly for closed locations
             return

@@ -4,6 +4,7 @@ import scrapy
 
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.materials import MATERIALS_DE
 
 
@@ -11,17 +12,13 @@ from locations.materials import MATERIALS_DE
 class StadtZuerichCHSpider(scrapy.Spider):
     name = "stadt_zuerich_ch"
     allowed_domains = ["ogd.stadt-zuerich.ch"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 20}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
-    dataset_attributes = {
-        "attribution": "optional",
+    dataset_attributes = Licenses.CC0.value | {
         "attribution:name:de": "Stadt Zürich",
         "attribution:name:en": "City of Zurich",
         "attribution:website:de": "https://www.stadt-zuerich.ch/",
         "attribution:website:en": "https://www.stadt-zuerich.ch/en.html",
-        "license": "Creative Commons Zero",
-        "license:website:de": "https://www.stadt-zuerich.ch/portal/de/index/ogd/rahmenbedingungen.html#nutzungsbedingungen",
-        "license:wikidata": "Q6938433",
     }
 
     operators = {
@@ -75,7 +72,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
         # Sometimes we get 3 coordinates, but the z value is always zero.
         lon, lat = coords[0], coords[1]
         id = f["id"]
-        (operator, operator_wikidata) = self.operators.get(props.get("da"), (None, None))
+        operator, operator_wikidata = self.operators.get(props.get("da"), (None, None))
         tags = {
             "email": props.get("mail"),
             "name": self.parse_name(props),
@@ -207,21 +204,25 @@ class StadtZuerichCHSpider(scrapy.Spider):
     def parse_bicycle_parking(self, p):
         # For bicycle and motorcycle parkings, the data feed puts the
         # feature type into the name; the parkings have no real names.
+        default_tags = {"amenity": "bicycle_parking"}  # Fallback so category is never missing
         tags = {
             "Motorrad": {"amenity": "motorcycle_parking", "bicycle": "no"},
             "Velo": {"amenity": "bicycle_parking", "motorcycle": "no"},
             "Beide": {"amenity": "bicycle_parking", "motorcycle": "yes"},
-        }.get(p["name"])
+        }.get(p.get("name"), default_tags)
         operator, operator_wikidata = self.operators["Tiefbauamt"]
-        if tags is not None:
-            tags.update(
-                {
-                    "capacity": str(int(p.get("anzahl_pp", 0))) or None,
-                    "name": None,
-                    "operator": operator,
-                    "operator:wikidata": operator_wikidata,
-                }
-            )
+
+        raw_cap = str(p.get("anzahl_pp", "")).strip()
+        capacity = raw_cap if raw_cap.isdigit() else None
+
+        tags.update(
+            {
+                "capacity": capacity,
+                "name": None,
+                "operator": operator,
+                "operator:wikidata": operator_wikidata,
+            }
+        )
         return tags
 
     def parse_fountain(self, p):

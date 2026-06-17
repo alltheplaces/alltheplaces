@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 import scrapy
@@ -13,12 +14,16 @@ class ChetyreLapyRUSpider(scrapy.Spider):
     start_urls = ["https://4lapy.ru/shops/"]
     item_attributes = {"brand_wikidata": "Q62390783"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "RU"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        next_data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        if not next_data:
+            self.logger.error(f"Could not find __NEXT_DATA__ script on {response.url}.")
+            return
+
         yield JsonRequest(
-            url="https://4lapy.ru/_next/data/{}/shops.json".format(
-                response.xpath("//script[contains(@src, '_ssgManifest.js')]/@src").get().split("/")[3]
-            ),
+            url=f"https://4lapy.ru/_next/data/{next_data['buildId']}/shops.json",
             callback=self.parse_pois,
         )
 

@@ -16,4 +16,7 @@ class DominosPizzaBHSpider(DominosPizzaInternationalSpider):
                 item["addr_full"] = location["LocationInfo"]
         if branch_ar := item["extras"].get("branch:ar"):
             item["branch"] = branch_ar
+        # Bahrain has no states; DictParser maps the country code into state — drop it
+        if item.get("state") == item.get("country"):
+            item["state"] = None
         yield item

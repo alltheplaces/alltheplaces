@@ -15,6 +15,7 @@ from locations.items import set_closed
 class DrMaxSpider(Spider):
     name = "dr_max"
     item_attributes = {"brand": "Dr. Max", "brand_wikidata": "Q56317371"}
+    requires_proxy = True
     store_locators = {
         "pl": "https://www.drmax.pl/apteki/",
         "cz": "https://www.drmax.cz/lekarny/",
@@ -22,6 +23,8 @@ class DrMaxSpider(Spider):
         "it": "https://www.drmax.it/le-nostre-farmacie/",
         "ro": "https://www.drmax.ro/farmacii/",
     }
+    requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for country in self.store_locators:
@@ -40,7 +43,7 @@ class DrMaxSpider(Spider):
             item["street_address"] = item.pop("street")
             item.pop("name")
             item["phone"] = "; ".join([n["number"] for n in location["phoneNumbers"]])
-            item["email"] = location.get("additionalParams").get("email")
+            item.pop("email", None)  # generic brand email, not location-specific
             item["image"] = location["pharmacyImage"]
             item["country"] = country = response.meta["country"]
             service_ids = [service["serviceId"] for service in location["services"]]

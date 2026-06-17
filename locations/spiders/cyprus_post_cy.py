@@ -18,7 +18,7 @@ class CyprusPostCYSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["locations"]:
-            if location["name"].startswith("Parcel24"):
+            if location["name"].startswith("Parcel24") or location["name"].startswith("Parcel 24"):
                 continue
 
             item = Feature()

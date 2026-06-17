@@ -1,10 +1,11 @@
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -13,6 +14,7 @@ class IcelandFoodsSpider(Spider):
     name = "iceland_foods"
     item_attributes = {"brand": "Iceland", "brand_wikidata": "Q721810"}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    drop_attributes = {"email"}
     access_token = ""
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -34,9 +36,7 @@ class IcelandFoodsSpider(Spider):
             item = DictParser.parse(store)
 
             item["branch"] = item.pop("name")
-            if "FWH" in item["branch"] or "Food Ware" in item["branch"]:
-                # The Food Warehouse, obtained via its own spider
-                # The name usually ends with FWH or has Food Warehouse, sometime truncated.
+            if not self.wanted(item["branch"]):
                 continue
 
             item["street_address"] = merge_address_lines([store.get("address1"), store.get("address2")])
@@ -58,9 +58,20 @@ class IcelandFoodsSpider(Spider):
                 f'https://www.iceland.co.uk/store-finder/store?StoreID={item["ref"]}&StoreName={item["branch"].replace(" ", "-")}'
             )
 
-            yield item
+            yield from self.post_process_item(item)
 
         if next_page := response.json().get("next"):
             yield JsonRequest(
                 url=next_page, headers={"authorization": f"Bearer {self.access_token}"}, callback=self.parse_stores
             )
+
+    def wanted(self, branch: str) -> bool:
+        # Food Warehouse stores are scraped by the_food_warehouse_gb; test stores are dropped.
+        return not (self.is_food_warehouse(branch) or "TEST2" in branch.upper())
+
+    @staticmethod
+    def is_food_warehouse(branch: str) -> bool:
+        return "FWH" in branch.upper() or "FOOD WAR" in branch.upper()
+
+    def post_process_item(self, item: Feature) -> Iterable[Feature]:
+        yield item

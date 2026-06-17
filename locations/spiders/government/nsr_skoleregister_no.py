@@ -31,11 +31,13 @@ class NsrSkoleregisterNOSpider(Spider):
             callback=self.get_pages,
         )
 
-    def get_pages(self, response: TextResponse) -> Iterable[JsonRequest]:
+    def get_pages(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         payload = response.json()
         total_pages = payload.get("AntallSider", 1)
 
-        for page in range(1, total_pages + 1):
+        yield from self.parse(response)
+
+        for page in range(2, total_pages + 1):
             yield JsonRequest(
                 url=f"{self.api_base_url}/v4/enheter?sidenummer={page}&antallperside={self.page_size}",
             )

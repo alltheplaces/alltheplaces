@@ -23,7 +23,7 @@ class A1SISpider(Spider):
         for location in locations:
             if location["type"] != 0 and location["type"] != 1:
                 continue
-            if location["openStatus"] != "open":
+            if not location.get("shown", False):
                 continue
             item = DictParser.parse(location)
             if not location.get("id"):

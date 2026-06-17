@@ -1,48 +1,37 @@
-import re
+from typing import Iterable
 
-from scrapy.spiders import SitemapSpider
+import chompjs
+from scrapy.http import Response
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class WolseleyGBSpider(SitemapSpider):
+class WolseleyGBSpider(JSONBlobSpider):
     name = "wolseley_gb"
     item_attributes = {"brand": "Wolseley", "brand_wikidata": "Q8030423"}
-    sitemap_urls = ["https://www.wolseley.co.uk/sitemap.xml"]
+    start_urls = ["https://www.wolseley.co.uk/all-branches/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
-    def sitemap_filter(self, entries):
-        for entry in entries:
-            if entry["loc"].endswith(".xml"):
-                yield entry
-            if m := re.search(r"\.uk/branch/(.+)/$", entry["loc"]):
-                entry["loc"] = f"https://www.wolseley.co.uk/wcs/resources/store/10203/xstorelocator/{m.group(1)}"
-                yield entry
+    def extract_json(self, response: Response) -> list[dict]:
+        return chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())["props"][
+            "pageProps"
+        ]["branches"]
 
-    def parse(self, response, **kwargs):
-        store = response.json()["storeLocation"]
-        store["website"] = f'https://www.wolseley.co.uk/branch/{store["seoName"]}/'
-        store["address"]["street_address"] = clean_address(
-            [
-                store["address"].pop("address1"),
-                store["address"].pop("address2"),
-                store["address"].pop("address3"),
-            ]
-        )
-        item = DictParser.parse(store)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["identifier"]
+        item["website"] = response.urljoin(f'https://www.wolseley.co.uk/branch/{feature["seoName"]}/')
+        item["lat"], item["lon"] = feature["coordinates"]["latitude"], feature["coordinates"]["longitude"]
+        item["branch"] = item.pop("name")
+        if opening_hours := feature.get("openingBusinessHours")["hours"]:
+            item["opening_hours"] = OpeningHours()
+            for rule in opening_hours:
+                if rule["closed"] == "true":
+                    continue
+                item["opening_hours"].add_range(rule["dayOfWeek"], rule["openingTime"], rule["closingTime"])
 
-        item["image"] = ";".join(store["branchImageList"])
-
-        if m := re.match(r"formerly (?:trading as )?(.+)$", store["secondaryName"]):
-            item["extras"] = {"old_name": m.group(1)}
-
-        oh = OpeningHours()
-        for day in store["openingBusinessHours"]["hours"]:
-            if day["closed"]:
-                continue
-            oh.add_range(day["dayOfWeek"], day["openingTime"], day["closingTime"])
-        item["opening_hours"] = oh.as_opening_hours()
-
+        apply_category(Categories.TRADE_PLUMBING, item)
         yield item

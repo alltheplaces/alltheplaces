@@ -1,25 +1,27 @@
+import json
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class WanderhotelsSpider(SitemapSpider):
     name = "wanderhotels"
     item_attributes = {"brand": "Wanderhotels", "brand_wikidata": "Q123436959"}
-    sitemap_urls = ["https://www.wanderhotels.com/en/hotel-sitemap.xml"]
-    sitemap_rules = [(r"https://www\.wanderhotels\.com/en/hotel/.+", "parse")]
+    sitemap_urls = ["https://www.wanderhotels.com/sitemap.xml"]
+    sitemap_rules = [(r"https://www\.wanderhotels\.com/en/wanderhotels/.+", "parse")]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
     def parse(self, response, **kwargs):
-        item = Feature()
-        item["ref"] = item["extras"]["brand:website"] = response.url
-        item["branch"] = response.xpath("//@data-hotelname").get().replace("Wanderhotel ", "")
-        item["addr_full"] = merge_address_lines(response.xpath('//*[@class="singleHotel__street"]/text()').getall())
-        item["country"] = response.xpath('//*[@class="singleHotel__region"]/span[1]/text()').get()
+        raw_data = json.loads(re.search(r"map\":({.*}),\"master", response.text).group(1))
+        item = DictParser.parse(raw_data)
+        item.pop("country")
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/text()').get()
         item["email"] = response.xpath('//a[contains(@href, "mailto")]/text()').get()
-        item["extras"]["fax"] = merge_address_lines(response.xpath('//*[contains(@class, "fax")]/text()').getall())
-        item["website"] = response.xpath('//a[contains(@id, "hotelWebsite")]/@href').get()
+        item["street_address"] = merge_address_lines([item["street"], item.pop("housenumber")])
+        item["ref"] = item["website"] = response.url
         apply_category(Categories.HOTEL, item)
         yield item

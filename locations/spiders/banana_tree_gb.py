@@ -3,10 +3,10 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.items import Feature
-from locations.spiders.frankie_and_bennys_gb import FrankieAndBennysGBSpider
+from locations.spiders.chiquito_gb import ChiquitoGBSpider
 
 
-class BananaTreeGBSpider(FrankieAndBennysGBSpider):
+class BananaTreeGBSpider(ChiquitoGBSpider):
     name = "banana_tree_gb"
     item_attributes = {"brand": "Banana Tree", "brand_wikidata": "Q123013837"}
     sitemap_urls = ["https://bananatree.co.uk/sitemap.xml"]

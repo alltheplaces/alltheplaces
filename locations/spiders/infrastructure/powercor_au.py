@@ -11,13 +11,13 @@ class PowercorAUSpider(RosettaAPRSpider):
     start_urls = ["https://dapr.powercor.com.au/"]
     data_files = [
         RosettaAPRDataFile(
-            url="https://content.rosettaanalytics.com.au/citipower_powercor_layers_serve/CitiPower_Powercor_Zone_Substations.geojson",
+            url="https://content.rosettaanalytics.com.au/citipower_powercor_layers_serve_2025/CitiPower_Powercor_Zone_Substations.geojson",
             file_type="geojson",
             encrypted=True,
             callback_function_name="parse_zone_substations",
         ),
         RosettaAPRDataFile(
-            url="https://content.rosettaanalytics.com.au/citipower_powercor_layers_serve/CitiPower_Powercor_Distribution_Substations_July_2024.geojson",
+            url="https://content.rosettaanalytics.com.au/citipower_powercor_layers_serve_2025/CitiPower_Powercor_Distribution_Substations_July_2024.geojson",
             file_type="geojson",
             encrypted=True,
             callback_function_name="parse_transformers",

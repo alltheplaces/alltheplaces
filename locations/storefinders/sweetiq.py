@@ -26,10 +26,10 @@ class SweetIQSpider(Spider):
         if len(self.start_urls) != 1:
             raise ValueError("Specify one URL in the start_urls list attribute.")
             return
-        yield Request(url=self.start_urls[0], callback=self.parse_locations_list)
+        yield Request(url=self.start_urls[0], callback=self.parse_locations_list)  # ty: ignore[invalid-argument-type]
 
     def parse_locations_list(self, response: TextResponse) -> Iterable[JsonRequest]:
-        js_blob = response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]/text()').get()
+        js_blob = response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]/text()').get("")
         locations_data = parse_js_object(js_blob)
         api_url_base = locations_data["env"]["presBaseUrl"]
         api_store_locator_id = locations_data["dataSettings"]["storeLocatorId"]

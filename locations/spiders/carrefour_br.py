@@ -18,21 +18,18 @@ BRANDS = {
 
 class CarrefourBRSpider(Spider):
     name = "carrefour_br"
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
             url="https://www.carrefour.com.br/_v/public/graphql/v1",
-            data={
-                "query": """query {
+            data={"query": """query {
                   documents(acronym:"LO",fields:["id","lat","lng","logradouro","loja","numero","complemento","cep","cidade","uf","tipo"],pageSize:1000) {
                       fields {
                             key
                             value
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def parse(self, response, **kwargs):

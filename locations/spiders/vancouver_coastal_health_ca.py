@@ -10,6 +10,7 @@ class VancouverCoastalHealthCASpider(Spider):
     name = "vancouver_coastal_health_ca"
     item_attributes = {"operator": "Vancouver Coastal Health", "operator_wikidata": "Q7914144"}
     start_urls = ["https://www.vch.ca/en/find-location"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     CATEGORIES = {
         "0": Categories.HOSPITAL,
@@ -36,7 +37,10 @@ class VancouverCoastalHealthCASpider(Spider):
             location["url"] = f'https://www.vch.ca{location["url"]}'
 
             item = DictParser.parse(location)
-            item["image"] = location["image"]
+            if img := location.get("image"):
+                # Filter generic placeholder images that appear on most locations
+                if "Mountains_pattern" not in img and "VCH_pattern" not in img:
+                    item["image"] = img
 
             if cat := self.CATEGORIES.get(location["type"]["id"]):
                 apply_category(cat, item)

@@ -18,13 +18,6 @@ class BendCityCouncilCrossingsUSSpider(ArcGISFeatureServerSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["FacilityID"]
 
-        # Convert LineString of two coordinates to a midpoint coordinate.
-        # May change back to LineString in the future if ATP starts extracting
-        # more complex geometries than just Point.
-        item["lat"] = (item["geometry"]["coordinates"][0][1] + item["geometry"]["coordinates"][1][1]) / 2
-        item["lon"] = (item["geometry"]["coordinates"][0][0] + item["geometry"]["coordinates"][1][0]) / 2
-        item.pop("geometry", None)
-
         apply_category(Categories.FOOTWAY_CROSSING, item)
 
         if feature["CrosswalkType"] == "marked":

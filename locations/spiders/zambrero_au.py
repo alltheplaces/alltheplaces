@@ -26,7 +26,7 @@ class ZambreroAUSpider(Spider):
     def parse_location(self, response):
         properties = {
             "ref": response.xpath("//@data-location-id").get(),
-            "name": re.sub(r"\s+", " ", response.xpath("//div[@data-location-id]/h4/text()").get()).strip(),
+            "branch": re.sub(r"\s+", " ", response.xpath("//div[@data-location-id]/h4/text()").get()).strip(),
             "lat": response.xpath("//@data-lat").get(),
             "lon": response.xpath("///@data-lng").get(),
             "addr_full": clean_address(
@@ -37,7 +37,7 @@ class ZambreroAUSpider(Spider):
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
-        if "Temporarily Closed" in properties["name"]:
+        if "Temporarily Closed" in properties["branch"]:
             return
         if properties["phone"] == "0":
             properties.pop("phone")

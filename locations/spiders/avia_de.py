@@ -22,6 +22,7 @@ FUEL_TYPES_MAPPING = {
     "AdBlue (Gebinde)": Fuel.ADBLUE,
     "AdBlue Säule (LKW)": Fuel.ADBLUE,
     "AdBlue Säule (PKW)": Fuel.ADBLUE,
+    "AVIA NEXT DIESEL HVO100": Fuel.BIODIESEL,
     "Blue Diesel": Fuel.DIESEL,
     "CNG/Erdgas": Fuel.CNG,
     "Diesel": Fuel.DIESEL,
@@ -49,12 +50,14 @@ SERVICES_MAPPING = {
     "SB-Sauger": Extras.VACUUM_CLEANER,
     "SB-Waschbox": None,
     "SB-Öltheke": None,
+    "AVIA Synth SB-Öltheke": None,
     "Segafredo Kaffee": None,
     "Shop": None,
     "Stromladesäule": Fuel.ELECTRIC,
     "Tankautomat": "automated",
     "TÜV / AU": None,
     "Unbemannte Automatenstation": None,
+    "W-LAN": Extras.WIFI,
     "Waschstrasse": Extras.CAR_WASH,
     "Werkstatt": None,
 }
@@ -72,31 +75,27 @@ class AviaDESpider(scrapy.Spider):
     }
 
     def parse(self, response):
-        def dict_to_list(d):
-            return d.values() if d else []
+        def get_labels(d):
+            return [v.get("label") for v in d.values()] if d else []
 
-        for poi in response.json():
+        for poi in response.json().values():
             poi.update(poi.pop("addressData"))
             poi.update(poi.pop("contactData"))
             poi.update(poi.pop("geoData"))
             item = DictParser.parse(poi)
             item.update(self.BRANDS_MAPPING.get(poi.get("facilityTitle"), {}))
 
-            payments = dict_to_list(poi.get("optionalData", {}).get("paymentMethods"))
-            fuel_cards = dict_to_list(poi.get("optionalData", {}).get("fuelCards", {}))
-            gas_types = dict_to_list(poi.get("optionalData", {}).get("gasTypes", {}))
-            services = dict_to_list(poi.get("optionalData", {}).get("services", {}))
-
-            for payment in payments:
+            optional = poi.get("optionalData", {})
+            for payment in get_labels(optional.get("paymentMethods")):
                 if not map_payment(item, payment, PaymentMethods):
                     self.crawler.stats.inc_value(f"atp/avia_de/payment/fail/{payment}")
 
-            for fuel_card in fuel_cards:
+            for fuel_card in get_labels(optional.get("fuelCards")):
                 if not map_payment(item, fuel_card, FuelCards):
                     self.crawler.stats.inc_value(f"atp/avia_de/fuelCard/fail/{fuel_card}")
 
-            self.parse_attribute(item, gas_types, "gasTypes", FUEL_TYPES_MAPPING)
-            self.parse_attribute(item, services, "services", SERVICES_MAPPING)
+            self.parse_attribute(item, get_labels(optional.get("gasTypes")), "gasTypes", FUEL_TYPES_MAPPING)
+            self.parse_attribute(item, get_labels(optional.get("services")), "services", SERVICES_MAPPING)
 
             apply_category(Categories.FUEL_STATION, item)
 

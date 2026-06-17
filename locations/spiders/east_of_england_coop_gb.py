@@ -46,13 +46,13 @@ class EastOfEnglandCoopGBSpider(SitemapSpider):
             apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
 
         oh = OpeningHours()
-        for day_time in response.xpath('//*[@class="flex flex-col items-center gap-1.5"]//li'):
-            day = day_time.xpath(".//span[1]/text()").get()
-            time = day_time.xpath(".//span[2]").xpath("normalize-space()").get()
+        for rule in response.xpath('//h3[contains(text(), "Opening times")]/parent::div//li'):
+            day = rule.xpath("./div/span/text()").get()
+            time = rule.xpath("./span/text()").get()
             if time == "Closed":
                 oh.set_closed(day)
             else:
-                open_time, close_time = time.split(" - ")
+                open_time, close_time = time.split(" – ")
                 oh.add_range(day=day, open_time=open_time, close_time=close_time)
         item["opening_hours"] = oh
 

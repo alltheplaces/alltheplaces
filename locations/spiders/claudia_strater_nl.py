@@ -11,6 +11,7 @@ class ClaudiaStraterNLSpider(JSONBlobSpider):
     }
     start_urls = ["https://www.claudiastrater.com/over-ons/winkels/"]
     no_refs = True
+    requires_proxy = True
 
     def extract_json(self, response):
         return chompjs.parse_js_object(

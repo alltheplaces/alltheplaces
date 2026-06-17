@@ -1,7 +1,7 @@
 from scrapy import Spider
 
 from locations.categories import Categories
-from locations.google_url import url_to_coords
+from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -18,24 +18,21 @@ class FirstNationalRealEstateAUSpider(Spider):
 
     def parse(self, response):
         for location in response.xpath('//ul[contains(@class, "office-listing")]/li[@class="office-list"]'):
-            properties = {
-                "ref": location.xpath('.//a[contains(@class, "office-name")]/@href')
-                .get()
-                .split("/office/", 1)[1]
-                .split("/", 1)[0],
-                "branch": location.xpath('.//a[contains(@class, "office-name")]/text()')
-                .get()
+            href = location.xpath('.//a[contains(@class, "office-name")]/@href').get()
+            phone = location.xpath('.//a[contains(@href, "tel:")]/@href').get()
+            email = location.xpath('.//a[contains(@href, "mailto:")]/@href').get()
+
+            item = Feature(
+                ref=href.split("/office/", 1)[1].split("/", 1)[0] if href else None,
+                branch=location.xpath('.//a[contains(@class, "office-name")]/text()')
+                .get(default="")
                 .removeprefix("First National Real Estate ")
-                .strip(),
-                "addr_full": clean_address(
-                    location.xpath('.//div[contains(@class, "office-address")]//text()').getall()
-                ),
-                "website": "https://www.firstnational.com.au"
-                + location.xpath('.//a[contains(@class, "office-name")]/@href').get().strip(),
-                "phone": location.xpath('.//a[contains(@href, "tel:")]/@href').get().replace("tel:", "").strip(),
-                "email": location.xpath('.//a[contains(@href, "mailto:")]/@href').get().replace("mailto:", "").strip(),
-            }
-            properties["lat"], properties["lon"] = url_to_coords(
-                location.xpath('.//img[@class="office-map"]/@src').get()
+                .strip()
+                or None,
+                addr_full=clean_address(location.xpath('.//div[contains(@class, "office-address")]//text()').getall()),
+                website=f"https://www.firstnational.com.au{href.strip()}" if href else None,
+                phone=phone.replace("tel:", "") if phone else None,
+                email=email.replace("mailto:", "") if email else None,
             )
-            yield Feature(**properties)
+            extract_google_position(item, location)
+            yield item

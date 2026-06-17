@@ -11,6 +11,7 @@ class VinceSpider(Spider):
     start_urls = [
         "https://www.vince.com/on/demandware.store/Sites-vince-Site/default/Stores-FindStores?radius=20000&lat=0&long=0"
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
         for location in response.json()["stores"]:

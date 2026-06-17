@@ -1,23 +1,30 @@
-import scrapy
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.items import Feature
 
 
-class GoogleOfficesSpider(scrapy.Spider):
+class GoogleOfficesSpider(Spider):
     name = "google_offices"
     allowed_domains = ["about.google"]
     item_attributes = {
         "brand": "Google",
         "brand_wikidata": "Q95",
     }
-    start_urls = ["https://about.google/locations/data/locations.json"]
+    start_urls = ["https://about.google/company-info/locations/"]
 
-    def parse(self, response):
-        for poi in response.json().get("offices", []):
-            item = DictParser.parse(poi)
-            # There are global "regions" in raw data e.g. 'europe', 'asia' etc., not states
-            item["state"] = None
-            item["image"] = poi.get("image")
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.xpath("//*[@data-city-name]"):
+            item = Feature()
+            item["city"] = location.xpath("./@data-city-name").get()
+            item["ref"] = item["branch"] = (
+                location.xpath(".//@data-building-name").get("").strip().removeprefix("Google ")
+            )
+            item["addr_full"] = location.xpath('.//*[contains(@class, "location-address")]/text()').get()
+            item["lat"], item["lon"] = location.xpath(".//@data-coords").get("").split(",")
+            item["image"] = location.xpath('.//img[@class="image"]/@src').get("").split("=")[0]
             apply_category(Categories.OFFICE_COMPANY, item)
             yield item

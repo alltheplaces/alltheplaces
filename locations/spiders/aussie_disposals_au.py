@@ -24,9 +24,12 @@ class AussieDisposalsAUSpider(SitemapSpider):
         # not available through the embedded JavaScript blob this storefinder
         # extracts location information from.
         location_element = response.xpath('//div[@class="amlocator-location-container"]')
+        branch_name = location_element.xpath(".//h3/text()").get()
+        if "PERMANENTLY CLOSED" in branch_name.upper() or "CLOSED" in branch_name.upper():
+            return
         properties = {
             "ref": response.url,
-            "branch": location_element.xpath(".//h3/text()").get(),
+            "branch": branch_name,
             "addr_full": merge_address_lines(
                 location_element.xpath('.//div[@class="amlocator-block-address"]//text()').getall()
             ),

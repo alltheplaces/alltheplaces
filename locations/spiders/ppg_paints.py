@@ -1,44 +1,34 @@
-import re
-import urllib
+from typing import Any, Iterable
 
 import scrapy
+from scrapy.http import JsonRequest
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class PpgPaintsSpider(scrapy.Spider):
     name = "ppg_paints"
     item_attributes = {"brand": "PPG Paints", "brand_wikidata": "Q83891559"}
-    allowed_domains = ["www.ppgpaints.com"]
-    start_urls = [
-        "https://www.ppgpaints.com/store-locator/us",
-        "https://www.ppgpaints.com/store-locator/ca",
-        "https://www.ppgpaints.com/store-locator/mx",
-    ]
+
+    async def start(self) -> Iterable[Any]:
+        for country in ["CA", "US", "MX"]:
+            yield JsonRequest(
+                url="https://app-brandstorelocatoruscprd-001.azurewebsites.net/api/location/GetFilteredLocations",
+                data={
+                    "latitude": 0,
+                    "longitude": 0,
+                    "maxNumberOfResults": 5000,
+                    "filters": [
+                        {"locationType": ["Dealer"], "countryCode": [country], "brand": ["PPG Paints"]},
+                        {"locationType": ["PPC Store"], "countryCode": [country], "brand": ["PPG Paints"]},
+                    ],
+                },
+            )
 
     def parse(self, response):
-        for href in response.xpath('//*[@class="store-locations-item"]//@href').extract():
-            url = response.urljoin(href)
-            yield scrapy.Request(url)
-        for href in response.xpath('//*[@id="store-table"]//@href').extract():
-            url = response.urljoin(href)
-            yield scrapy.Request(url, callback=self.parse_store)
-
-    def parse_store(self, response):
-        map_url = re.search(r"url\('(.*)'\);", response.css(".store-staticmap").attrib["style"]).group(1)
-        [latlng] = urllib.parse.parse_qs(urllib.parse.urlparse(map_url).query)["center"]
-        lat, lon = map(float, latlng.split(","))
-        properties = {
-            "ref": response.xpath('//*[@itemprop="name"]/@href').get(),
-            "lat": lat,
-            "lon": lon,
-            "website": response.url,
-            "name": response.xpath('//*[@itemprop="name"]/text()').get(),
-            "street_address": response.xpath('//*[@itemprop="streetAddress"]/text()').get(),
-            "city": response.xpath('//*[@itemprop="addressLocality"]/text()').get(),
-            "state": response.xpath('//*[@itemprop="addressRegion"]/text()').get(),
-            "postcode": response.xpath('//*[@itemprop="postalCode"]/text()').get(),
-            "phone": response.xpath('//*[@itemprop="telephone"]/text()').get(),
-            "country": response.url.split("/")[4].upper(),
-        }
-        return Feature(**properties)
+        for location in response.json():
+            location.update(location.pop("location"))
+            item = DictParser.parse(location)
+            item["street_address"] = merge_address_lines([location])
+            yield item

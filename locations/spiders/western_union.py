@@ -21,7 +21,6 @@ class WesternUnionSpider(Spider):
     allowed_domains = ["www.westernunion.com"]
     # start_urls[0] is a GraphQL endpoint.
     start_urls = ["https://www.westernunion.com/router/"]
-    custom_settings = {"DOWNLOAD_DELAY": 0.2}
 
     def request_page(self, latitude: float, longitude: float, page_number: int) -> JsonRequest:
         # An access code for querying the GraphQL endpoint is

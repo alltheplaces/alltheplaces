@@ -18,6 +18,7 @@ class DamiraGBSpider(Spider):
             item["branch"] = location.xpath(".//h3/text()").get()
             item["image"] = location.xpath(".//img/@src").get()
             item["postcode"] = location.xpath("@data-post-code").get()
+            item["addr_full"] = location.xpath('.//div[@class="location__inner--text"]/p/text()').get()
             item["ref"] = item["website"] = location.xpath(
                 './/a[contains(@href, "damiradental.co.uk/location/")]/@href'
             ).get()

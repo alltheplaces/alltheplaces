@@ -1,54 +1,29 @@
-import json
-
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from typing import Any, Iterable
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.yext import YextSpider
 
 
-class OzkBankUSSpider(CrawlSpider, StructuredDataSpider):
+class OzkBankUSSpider(YextSpider):
     name = "ozk_bank_us"
     item_attributes = {"brand": "Bank OZK", "brand_wikidata": "Q20708654"}
-    start_urls = ["https://www.ozk.com/locations/locations-list/"]
-    rules = [
-        Rule(LinkExtractor(r"/locations-list/\w\w$")),
-        Rule(LinkExtractor(r"/locations-list/\w\w/[^/]+$")),
-        Rule(LinkExtractor(r"/locations/\w\w/[^/]+/[^/]+/?$"), "parse"),
-    ]
-    wanted_types = ["BankOrCreditUnion"]
-    time_format = "%H:%M:%S"
+    api_key = "7ae7edcf0b6af836f93b52ccd3bd2cf5"
+    wanted_types = ["location", "atm"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        if item["phone"] == "+17702928000":
-            return  # Duplicate ld json on every page
+    def parse_item(self, item: Feature, location: dict, **kwargs: Any) -> Iterable[Feature]:
+        entity_type = location.get("meta", {}).get("entityType")
 
-        if data := response.xpath('//div[@class="store-hours drive hours-box"]//astro-island/@props').get():
-            atm = Feature()
-            atm["opening_hours"] = self.parse_opening_hours(json.loads(data))
-            atm["ref"] = "{}-ATM".format(item["ref"])
-            atm["lat"] = item["lat"]
-            atm["lon"] = item["lon"]
+        if entity_type == "atm":
+            apply_category(Categories.ATM, item)
+        elif entity_type == "location":
+            services = location.get("c_servicesSection", {}).get("services", [])
+            apply_category(Categories.BANK, item)
+            apply_yes_no(Extras.ATM, item, "ATMs" in services)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-Thru Banking" in services)
+            apply_yes_no(Extras.CASH_IN, item, "ATM Deposits" in services)
 
-            apply_category(Categories.ATM, atm)
-            apply_yes_no(Extras.DRIVE_THROUGH, atm, True)
+            if drive_hours := location.get("driveThroughHours"):
+                item["extras"]["opening_hours:drive_through"] = self.parse_opening_hours(drive_hours).as_opening_hours()
 
-            yield atm
-
-        apply_category(Categories.BANK, item)
         yield item
-
-    def parse_opening_hours(self, data: dict) -> OpeningHours:
-        oh = OpeningHours()
-        for day, rules in data["hours"][1].items():
-            if rules[1]["status"][1] == "Closed":
-                oh.set_closed(day)
-            else:
-                for times in rules[1]["blocks"][1]:
-                    end_time = times[1]["to"][1]
-                    if end_time == "2400":
-                        end_time = "2359"
-                    oh.add_range(day, times[1]["from"][1], end_time, "%H%M")
-        return oh

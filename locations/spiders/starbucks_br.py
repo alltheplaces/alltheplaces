@@ -1,37 +1,31 @@
-import chompjs
-import scrapy
+import re
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, sanitise_day
+from locations.items import Feature
 from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
-class StarbucksBRSpider(scrapy.Spider):
+class StarbucksBRSpider(Spider):
     name = "starbucks_br"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
-    start_urls = ["https://starbucks.com.br/lojas"]
+    start_urls = ["https://starbucks.harmo.me/"]  # Locator found on https://starbucks.com.br/
     requires_proxy = True
 
-    def parse(self, response, **kwargs):
-        details = chompjs.parse_js_object(response.xpath('//script[contains(text(), "var placesList")]/text()').get())
-        for store in details:
-            store["address"]["street_address"] = store["address"].pop("street")
-            item = DictParser.parse(store)
-            item["ref"] = store.pop("idPlace")
-            item["website"] = response.url
-            oh = OpeningHours()
-            for rule in store["openingHours"]["weekdays"]:
-                if not rule["isOpen"]:
-                    continue
-                day = sanitise_day(rule["name"])
-                if not day:
-                    continue
-                for period in range(1, 2):  # iterate only once,since second shift has weird data
-                    start_time = rule.get(f"hourStart{period}")
-                    end_time = rule.get(f"hourEnd{period}")
-                    if start_time and end_time:
-                        oh.add_range(day, start_time, end_time, "%H:%M:%S")
-            item["opening_hours"] = oh
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Using xpath we only get few POIs
+        for ref, address, lat, lon, slug in re.findall(
+            r"\"([0-9a-f]+)\"[,\s]+\"(.+?)\"[,\s]+.*?\"([-.\d]+)\"[,\s]+\"([-.\d]+)\"[,\s]+.*?\"(starbucks-[-\w]+)\"",
+            response.xpath('//*[@id="__NUXT_DATA__"]/text()').get(""),
+        ):
+            item = Feature()
+            item["ref"] = ref
+            item["addr_full"] = address
+            item["lat"] = lat
+            item["lon"] = lon
+            item["website"] = response.urljoin(slug)
             apply_category(Categories.COFFEE_SHOP, item)
             yield item

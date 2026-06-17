@@ -1,5 +1,8 @@
+from typing import Any
+
 from chompjs import chompjs
 from scrapy import Selector, Spider
+from scrapy.http import Response
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -10,9 +13,9 @@ class BursonAutoPartsAUSpider(Spider):
     item_attributes = {"brand": "Burson Auto Parts", "brand_wikidata": "Q117075930"}
     allowed_domains = ["www.burson.com.au"]
     start_urls = ["https://www.burson.com.au/find-a-store"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 60}  # Possible anti-bot delay in use
+    requires_proxy = True  # Imperva
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_js = (
             response.xpath('//script[contains(text(), "var map1 = ")]/text()')
             .get()
@@ -22,6 +25,7 @@ class BursonAutoPartsAUSpider(Spider):
         )
         for location in chompjs.parse_js_object(raw_js):
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["city"] = location["location"]["city"]
             item["state"] = location["location"]["state"]
             item["postcode"] = location["location"]["postal_code"]

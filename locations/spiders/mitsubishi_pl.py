@@ -18,7 +18,7 @@ class MitsubishiPLSpider(JSONBlobSpider):
     def extract_json(self, response: Response) -> list[dict]:
         return chompjs.parse_js_object(
             re.search(
-                r"dealerLocations\":(\[.*\])}\]\],\[\[\"\$\"",
+                r"dealerLocations\":(\[.*])",
                 response.xpath('//*[contains(text(),"latitude")]/text()').get().replace("\\", ""),
             ).group(1)
         )

@@ -1,7 +1,6 @@
 from typing import Any
 
 from scrapy import FormRequest
-from scrapy.exceptions import CloseSpider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -62,9 +61,7 @@ class MyDentistGBSpider(StructuredDataSpider):
             # Fetch more location details like address, opening hours etc. from  the location page
             yield response.follow(url, callback=self.parse_sd, meta=dict(location_info=location_info))
 
-        if len(self.seen_refs) == self.total_count:
-            raise CloseSpider()
-        else:
+        if len(self.seen_refs) < self.total_count:
             yield self.make_request(kwargs["page"] + 1)
 
     def pre_process_data(self, ld_data: dict, **kwargs):
@@ -74,9 +71,13 @@ class MyDentistGBSpider(StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item.update(response.meta["location_info"])
         item["website"] = response.url
-        item["addr_full"] = clean_address(response.xpath('//*[@itemprop="address"]//p/text()').get(""))
+        item["addr_full"] = clean_address(
+            response.xpath('//*[contains(@href,"https://www.google.com/maps?daddr=")]/@href')
+            .get("")
+            .replace("https://www.google.com/maps?daddr=", "")
+        )
         if item["name"].startswith("mydentist") or item["name"].startswith("{my}dentist"):
             item.update(self.MYDENTIST)
-            item["name"] = "{my}dentist"
+            item["name"] = None
         apply_category(Categories.DENTIST, item)
         yield item

@@ -30,8 +30,7 @@ class KlierHairGroupSpider(Spider):
             location["website"] = location.pop("sanitized")
             item = DictParser.parse(location)
             item["opening_hours"] = self.parse_opening_hours(location["business_hours"])
-            apply_category(Categories.SHOP_HAIRDRESSER, item)
-            yield item
+            yield from self.post_process_item(item, response, location)
 
     @staticmethod
     def parse_opening_hours(business_hours: dict) -> OpeningHours:
@@ -40,3 +39,7 @@ class KlierHairGroupSpider(Spider):
             if not day["closed"]:
                 hours.add_range(day["openDay"], day["openTime"], day["closeTime"])
         return hours
+
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict, **kwargs) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_HAIRDRESSER, item)
+        yield item

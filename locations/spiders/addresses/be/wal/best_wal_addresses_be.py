@@ -1,16 +1,13 @@
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.spiders.addresses.be.best_addresses_be import BeSTAddressesBESpider
 
 
 class BeSTWalAddressesBESpider(BeSTAddressesBESpider):
     name = "best_wal_addresses_be"
-    dataset_attributes = {
-        "attribution": "required",
+    dataset_attributes = Licenses.CCBY4.value | {
         "attribution:name": "Service public de Wallonie (SPW) - ICAR - Points d'adresses",
         "attribution:website": "https://geodata.wallonie.be/id/2998bccd-dae4-49fb-b6a5-867e6c37680f",
-        "license": "Creative Commons Attribution 4.0 International",
-        "license:website": "http://creativecommons.org/licenses/by/4.0/",
-        "license:wikidata": "Q20007257",
         "use:commercial": "permit",
     }
     region_urls = [

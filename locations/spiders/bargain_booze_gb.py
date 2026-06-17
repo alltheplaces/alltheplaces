@@ -1,8 +1,11 @@
 import re
+from typing import Any, Iterable
 
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.spiders.costcutter_gb import CostcutterGBSpider
 from locations.spiders.james_retail_gb import JamesRetailGBSpider
 from locations.spiders.the_food_warehouse_gb import TheFoodWarehouseGBSpider
@@ -14,9 +17,17 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Bargain Booze", "brand_wikidata": "Q16971315"}
     allowed_domains = ["branches.bargainbooze.co.uk"]
     sitemap_urls = ["https://branches.bargainbooze.co.uk/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/branches\.bargainbooze\.co\.uk\/[\w\-]+\/[\w\-]+\.html$", "parse_sd")]
+    sitemap_rules = [(r"^https:\/\/branches\.bargainbooze\.co\.uk\/en-gb\/[\w\-]+\/[\w\-]+\/[\w\-]+$", "parse_sd")]
+    wanted_types = ["FoodEstablishment"]
+    search_for_facebook = False
 
-    def post_process_item(self, item, response, ld_data):
+    def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
+        for entry in entries:
+            if "/en-gb/gb/" in entry["loc"]:
+                continue
+            yield entry
+
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if "CLOSED" in item["name"].upper() or "COMING SOON" in item["name"].upper():
             return
         name = item["name"]
@@ -66,8 +77,12 @@ class BargainBoozeGBSpider(SitemapSpider, StructuredDataSpider):
                 flags=re.IGNORECASE,
             ).strip()
             item["name"] = "Bargain Booze in Costcutter"
-        item.pop("facebook")
-        item.pop("twitter")
-        item.pop("image")
+        item.pop("image", None)
+
         apply_category(Categories.SHOP_ALCOHOL, item)
+
+        if img := response.xpath('//source[contains(@srcset, "api.mapbox.com")]/@srcset').get():
+            if m := re.search(r"\((-?\d+\.\d+),(-?\d+\.\d+)\)", img):
+                item["lon"], item["lat"] = m.groups()
+
         yield item

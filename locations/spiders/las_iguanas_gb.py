@@ -9,7 +9,7 @@ from locations.spiders.frankie_and_bennys_gb import FrankieAndBennysGBSpider
 class LasIguanasGBSpider(FrankieAndBennysGBSpider):
     name = "las_iguanas_gb"
     item_attributes = {"brand": "Las Iguanas", "brand_wikidata": "Q19875012"}
-    sitemap_urls = ["https://www.iguanas.co.uk/sitemap.xml"]
+    start_urls = ["https://www.iguanas.co.uk/restaurants/"]
 
     def parse_item(self, item: Feature, response: Response, **kwargs) -> Iterable[Feature]:
         item["branch"] = (

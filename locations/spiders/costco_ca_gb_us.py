@@ -3,28 +3,35 @@ from typing import Iterable
 from scrapy.http import Response
 from unidecode import unidecode
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 # Don't specify a brand name so that NSI matching will pick the correct
 # localised brand name.
 COSTCO_SHARED_ATTRIBUTES = {"brand_wikidata": "Q715583"}
 
 
-class CostcoCAGBUSSpider(JSONBlobSpider, CamoufoxSpider):
+class CostcoCAGBUSSpider(JSONBlobSpider):
     name = "costco_ca_gb_us"
     item_attributes = {"brand": "Costco"} | COSTCO_SHARED_ATTRIBUTES
     allowed_domains = ["ecom-api.costco.com"]
     start_urls = [
-        "https://ecom-api.costco.com/warehouseLocatorMobile/v1/warehouses.json?client_id=45823696-9189-482d-89c3-0c067e477ea1&latitude=0&longitude=0&limit=5000&distanceUnit=km"
+        "https://ecom-api.costco.com/core/warehouse-locator/v1/warehouses.json?latitude=0&longitude=0&limit=5000"
     ]
     locations_key = "warehouses"
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "Origin": "https://www.costco.com",
+            "Referer": "https://www.costco.com/",
+            "client-identifier": "7c71124c-7bf1-44db-bc9d-498584cd66e5",
+        },
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+    }
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))

@@ -13,6 +13,7 @@ class DicksSportingGoodsSpider(SitemapSpider):
     sitemap_urls = ["https://stores.dickssportinggoods.com/robots.txt"]
     sitemap_rules = [(r"com/\w\w/[^/]+/(\d+)/", "parse_store")]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def parse_hours(self, response):
         days = response.xpath('//meta[@property="business:hours:day"]/@content').extract()

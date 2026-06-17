@@ -2,8 +2,6 @@ import re
 from html import unescape
 from typing import Any
 
-from scrapy import Spider
-
 from locations.items import Feature
 
 
@@ -88,7 +86,7 @@ def clean_address(address: list[Any] | str, min_length=2) -> str:
 
 
 class AddressCleanUpPipeline:
-    def process_item(self, item: Feature, spider: Spider):
+    def process_item(self, item: Feature):
         targeted_fields = {
             "street": 2,
             "city": 2,

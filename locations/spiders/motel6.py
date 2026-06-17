@@ -1,6 +1,6 @@
+import json
 from typing import Any
 
-import chompjs
 import scrapy
 from scrapy.http import Response
 
@@ -19,7 +19,7 @@ class Motel6Spider(scrapy.Spider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for hotel_id in chompjs.parse_js_object(response.text).keys():  # JSON embedded within HTML
+        for hotel_id in json.loads(response.xpath("//pre/text()").get()).keys():  # JSON embedded within HTML
             try:
                 url = "https://www.motel6.com/bin/g6/propertydata.{}.json".format(int(hotel_id))
                 yield scrapy.Request(url, callback=self.parse_hotel)
@@ -27,11 +27,14 @@ class Motel6Spider(scrapy.Spider):
                 continue
 
     def parse_hotel(self, response: Response, **kwargs: Any) -> Any:
-        data = chompjs.parse_js_object(response.text)
-        address = data.pop("address", {})
+        data = json.loads(response.xpath("//pre/text()").get())
+        if not data:
+            return
+        data.update(data.pop("address", {}))
         item = DictParser.parse(data)
+        item["name"] = None
         item["ref"] = data["property_id"]
-        item["street_address"] = address.get("address_line_0")
+        item["street_address"] = data.get("address_line_0")
         item["website"] = "https://www.motel6.com/en/home/motels.{}.{}.{}.html".format(
             data["state"].lower(),
             data["city"].lower().replace(" ", "-"),

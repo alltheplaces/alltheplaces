@@ -14,7 +14,7 @@ MAZDA_SHARED_ATTRIBUTES = {"brand": "Mazda", "brand_wikidata": "Q35996"}
 class MazdaJPSpider(JSONBlobSpider):
     name = "mazda_jp"
     item_attributes = MAZDA_SHARED_ATTRIBUTES
-    allowed_domains = ["ssl.mazda.co.jp"]
+    allowed_domains = ["www.mazda.co.jp", "ssl.mazda.co.jp", "www2.mazda.co.jp"]
     locations_key = ["Shops"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:

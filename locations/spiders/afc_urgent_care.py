@@ -1,47 +1,34 @@
-import urllib.parse
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class AfcUrgentCareSpider(scrapy.Spider):
+class AfcUrgentCareSpider(JSONBlobSpider):
     name = "afc_urgent_care"
     item_attributes = {"operator": "AFC Urgent Care", "operator_wikidata": "Q110552174"}
     allowed_domains = ["afcurgentcare.com"]
-    start_urls = ("https://www.afcurgentcare.com/modules/multilocation/?near_lat=39&near_lon=-98",)
+    start_urls = ("https://www.afcurgentcare.com/modules/multilocation/?near_lat=39&near_lon=-98&limit=1000",)
+    locations_key = "objects"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response):
-        j = response.json()
-        if j["meta"]["next"] is not None:
-            qs = "?" + urllib.parse.urlparse(j["meta"]["next"]).query
-            yield scrapy.Request(urllib.parse.urljoin(response.url, qs))
-        for obj in j["objects"]:
-            yield from self.parse_store(obj)
+    def pre_process_data(self, feature: dict) -> None:
+        feature["street_address"] = merge_address_lines([feature.pop("street", None), feature.pop("street2", None)])
+        feature["website"] = feature.pop("location_url", None)
+        feature["phone"] = feature.pop("phonemap_e164", {}).get("phone")
 
-    def parse_store(self, obj):
-        properties = {
-            "ref": obj["id"],
-            "lat": obj["lat"],
-            "lon": obj["lon"],
-            "phone": obj["phonemap_e164"].get("phone"),
-            "street_address": merge_address_lines([obj["street"], obj["street2"]]),
-            "name": obj["location_name"],
-            "city": obj["city"],
-            "state": obj["state"],
-            "country": obj["country"],
-            "postcode": obj["postal_code"],
-            "website": obj["location_url"],
-        }
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if not item.get("street_address"):
+            return  # Skip state-level placeholder entries
 
-        o = OpeningHours()
-        for [h, _], day in zip(obj["hours_of_operation"], DAYS):
-            if not h:
-                continue
-            open_time, close_time = h
-            o.add_range(day, open_time, close_time, "%H:%M:%S")
-        properties["opening_hours"] = o
-
-        yield Feature(**properties)
+        if hours := feature.get("hours_of_operation"):
+            item["opening_hours"] = OpeningHours()
+            for (h, _), day in zip(hours, DAYS):
+                if h:
+                    item["opening_hours"].add_range(day, h[0], h[1], "%H:%M:%S")
+        yield item

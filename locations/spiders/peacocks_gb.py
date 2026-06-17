@@ -1,5 +1,3 @@
-import re
-
 from scrapy import Selector, Spider
 
 from locations.dict_parser import DictParser
@@ -19,16 +17,19 @@ class PeacocksGBSpider(Spider):
             item["website"] = store["storeDetailsURL"]
             item["branch"] = item.pop("name").removeprefix("PEACOCKS ")
 
-            item["opening_hours"] = OpeningHours()
-            data = Selector(text=store["storeHours"])
-            for day_time in data.xpath(r'//*[@class = "store-hours"]//tr'):
-                day = day_time.xpath("./td[1]/text()").get().replace(":", "")
-                time = day_time.xpath(".//td[2]/text()").get().replace(".", ":")
-                if time in ["CLOSED", ""]:
-                    continue
-                open_time, close_time = re.search(r"(\d+:\d+\w+).*(\d+:\d+\w+)", time).groups()
-                item["opening_hours"].add_range(
-                    day=day, open_time=open_time, close_time=close_time, time_format="%I:%M%p"
-                )
+            item["opening_hours"] = self.parse_opening_hours(Selector(text=store["storeHours"]))
 
             yield item
+
+    def parse_opening_hours(self, sel: Selector) -> OpeningHours:
+        oh = OpeningHours()
+        columns = iter(sel.xpath('//*[@class="store-hours"]//td/text()'))
+        for r in columns:
+            day = r.get().rstrip(":")
+            time = next(columns).get()
+            if time == "CLOSED":
+                oh.set_closed(day)
+            else:
+                start_time, end_time = time.replace(":", ".").split("-")
+                oh.add_range(day, start_time.strip(), end_time.strip(), time_format="%I.%M%p")
+        return oh

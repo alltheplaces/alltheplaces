@@ -17,4 +17,5 @@ class SkoringenDKNOSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.SHOP_SHOES, item)
         extract_google_position(item, response)
         item.pop("opening_hours")
+        item.pop("image", None)  # Generic placeholder image, not per-location
         yield item

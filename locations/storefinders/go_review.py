@@ -41,7 +41,7 @@ class GoReviewSpider(CrawlSpider):
         item = Feature()
         item["ref"] = re.sub(r"\.goreview\.co\.za.*", "", re.sub(r"https:\/\/", "", response.url))
 
-        branch_raw = response.xpath('//div[@class="left-align-header"]/h2/text()').get()
+        branch_raw = response.xpath('//div[@class="left-align-header"]/h2/text()').get("")
         if attribs := getattr(self, "item_attributes", None):
             if isinstance(attribs, dict):
                 if brand_name := attribs.get("brand"):

@@ -9,15 +9,16 @@ from locations.storefinders.sylinder import SylinderSpider
 class SparNOSpider(SylinderSpider):
     name = "spar_no"
     item_attributes = SPAR_SHARED_ATTRIBUTES
-    app_key = "1210"
-    base_url = "https://spar.no/Finn-butikk/"
+    app_keys = ["1210"]
+    base_url = "https://spar.no/finn-butikk/"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
-        if item["name"].startswith("EUROSPAR "):
-            item["branch"] = item.pop("name").removeprefix("EUROSPAR ")
+        raw_name = item.pop("name")
+        if raw_name.startswith("EUROSPAR "):
             item["name"] = "Eurospar"
-        elif item["name"].startswith("SPAR "):
-            item["branch"] = item.pop("name").removeprefix("SPAR ")
+            item["branch"] = raw_name.removeprefix("EUROSPAR ")
+        else:
             item["name"] = "Spar"
+            item["branch"] = raw_name.removeprefix("SPAR ")
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item

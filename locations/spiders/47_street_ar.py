@@ -16,8 +16,7 @@ class FortysevenStreetARSpider(JSONBlobSpider):
     async def start(self):
         yield JsonRequest(
             url="https://www.47street.com.ar/_v/private/graphql/v1",
-            data={
-                "query": """
+            data={"query": """
                 query {
                     getStores(latitude: 0, longitude: 0, keyword: "") {
                         items {
@@ -44,8 +43,7 @@ class FortysevenStreetARSpider(JSONBlobSpider):
                             }
                         }
                     }
-                }"""
-            },
+                }"""},
         )
 
     def pre_process_data(self, feature: dict) -> None:

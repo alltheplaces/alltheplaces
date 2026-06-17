@@ -21,7 +21,7 @@ class OrlenSpider(Spider):
         "Petrochemia": {"brand": "Petrochemia"},
         "Benzina": {"brand": "Benzina", "brand_wikidata": "Q11130894"},
         "Ventus": {"brand": "Ventus"},
-        "Star": {"brand": "star", "brand_wikidata": "Q109930371"},
+        "Star": {"brand": "star", "brand_wikidata": "Q89432390"},
     }
 
     session_id = None

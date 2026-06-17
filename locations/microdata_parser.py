@@ -255,7 +255,7 @@ def convert_item(item):
     ld = {}
     for itemtype in item.get("type", []):
         schema_type = itemtype
-        for schema in ["http://", "https://"]:
+        for schema in ["http://", "https://", "//"]:
             for host in ["schema.org", "www.schema.org"]:
                 prefix = f"{schema}{host}/"
                 schema_type = remove_prefix(schema_type, prefix)

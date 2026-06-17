@@ -1,10 +1,10 @@
 import csv
 from collections import defaultdict
 from math import sqrt
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
@@ -56,7 +56,7 @@ class StarbucksUSSpider(Spider):
                     request.meta["distance"] = 1
                     yield request
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         stores = response.json()
 
         for poi in stores:
@@ -88,7 +88,6 @@ class StarbucksUSSpider(Spider):
                 "ref": store["id"],
                 "lon": store_lon,
                 "lat": store_lat,
-                "website": f'https://www.starbucks.com/store-locator/store/{store["storeNumber"]}/{store["slug"]}',
                 "extras": {"ownership_type": store["ownershipTypeCode"]},
             }
             item = Feature(**properties)
