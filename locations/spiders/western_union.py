@@ -83,7 +83,7 @@ class WesternUnionSpider(Spider):
             item["opening_hours"].add_ranges_from_string(hours_string)
 
             apply_yes_no(Extras.ATM, item, location["atmLocation"] == "Y")
-            apply_category(Categories.BANK, item)
+            apply_category(Categories.MONEY_TRANSFER, item)
             yield item
 
         # On the first response per radius search of a coordinate,
