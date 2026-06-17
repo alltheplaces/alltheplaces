@@ -23,13 +23,12 @@ class GoOutdoorsGBSpider(Spider):
                 url=f"https://extensions.gooutdoors.co.uk/api/stores/{location['id']}", callback=self.parse_details
             )
 
-    def parse_details(self, response: Response):
+    def parse_details(self, response: Response, **kwargs: Any) -> Any:
         data = response.json().get("store")
         if not data:
             print("Error parsing: {}".format(response.url))
             return
         item = DictParser.parse(data)
-        item["branch"] = item.pop("name").replace("GO Outdoors ", "")
         item["state"] = data["big_region"]
         item["phone"] = data["local_phone"]
         item["street_address"] = merge_address_lines([data["address_2"], data["address_1"]])
@@ -40,6 +39,13 @@ class GoOutdoorsGBSpider(Spider):
                 close_time = open_close_time["close"]
                 oh.add_range(day=day, open_time=open_time, close_time=close_time)
         item["opening_hours"] = oh
+
+        if item["name"].startswith("GO Outdoors Express "):
+            item["branch"] = item.pop("name").removeprefix("GO Outdoors Express ")
+            item["name"] = "Go Outdoors Express"
+        else:
+            item["branch"] = item.pop("name").removeprefix("GO Outdoors ")
+            item["name"] = "Go Outdoors"
 
         apply_category(Categories.SHOP_OUTDOOR, item)
 
