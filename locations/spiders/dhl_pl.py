@@ -1,11 +1,12 @@
-from typing import Any, AsyncIterator
+from typing import Any
 
-from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy import Spider, Request
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.spiders.zabka_pl import ZabkaPLSpider
 
 # Polish day abbreviation keys in the opening_hours API field → ISO day abbreviations
 PL_DAYS = {
@@ -18,10 +19,23 @@ PL_DAYS = {
     "NIEDZ": "Su",
 }
 
-DHL_BOX_BRAND = "DHL BOX 24/7"
-DHL_BOX_WIKIDATA = "Q115568785"
-DHL_POP_BRAND = "DHL"
-DHL_POP_WIKIDATA = "Q489815"
+PARTNERS = {
+    "zabka": (ZabkaPLSpider.item_attributes, Categories.SHOP_CONVENIENCE),
+    "abc": ({"brand_wikidata": "Q11683985"}, Categories.SHOP_CONVENIENCE),
+    "inmedio": ({"brand_wikidata": "Q108599411"}, Categories.SHOP_NEWSAGENT),
+    "lewiatan": ({"brand": "Lewiatan", "brand_wikidata": "Q11755396"}, Categories.GENERIC_SHOP),
+    "shell": ({"brand_wikidata": "Q124359752"}, Categories.SHOP_CONVENIENCE),
+    "kaufland": ({"brand_wikidata": "Q685967"}, Categories.SHOP_SUPERMARKET),
+    "eurosklep": ({"brand": "Euro Sklep", "brand_wikidata": "Q11702591"}, Categories.GENERIC_SHOP),
+    "groszek": ({"brand": "Groszek", "brand_wikidata": "Q9280965"}, Categories.GENERIC_SHOP),
+    "relay": ({"brand_wikidata": "Q3424298"}, Categories.SHOP_NEWSAGENT),
+    "1minute": ({"name": "1 Minute"}, Categories.SHOP_NEWSAGENT),
+    "apimarket": ({"name": "API Market"}, Categories.SHOP_SUPERMARKET),
+    "kolporter": ({"name": "Kolporter"}, Categories.SHOP_NEWSAGENT),
+    "lidl": ({"brand": "Lidl", "brand_wikidata": "Q151954"}, Categories.SHOP_SUPERMARKET),
+    "moya": ({}, Categories.GENERIC_POI),
+    "point": ({}, Categories.GENERIC_POI),
+}
 
 
 class DhlPLSpider(Spider):
@@ -33,50 +47,47 @@ class DhlPLSpider(Spider):
     """
 
     name = "dhl_pl"
-    item_attributes = {"brand": DHL_POP_BRAND, "brand_wikidata": DHL_POP_WIKIDATA}
     allowed_domains = ["parcelshop.dhl.pl"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://parcelshop.dhl.pl/mapa/points"]
 
-    POINTS_URL = "https://parcelshop.dhl.pl/mapa/points"
-    DETAIL_URL = "https://parcelshop.dhl.pl/mapa/point?id={id}"
-
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(
-            self.POINTS_URL,
-            headers={"User-Agent": "Mozilla/5.0 (compatible; AllThePlaces/1.0)"},
-            callback=self.parse_points,
-        )
-
-    def parse_points(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for point in response.json():
-            yield Request(
-                self.DETAIL_URL.format(id=point["ID"]),
-                headers={"User-Agent": "Mozilla/5.0 (compatible; AllThePlaces/1.0)"},
-                callback=self.parse_detail,
-                cb_kwargs={
-                    "point_type": point.get("P_TYPE", ""),
-                    "lat": point.get("SZ_GEOGRAFICZNA"),
-                    "lon": point.get("DL_GEOGRAFICZNA"),
-                },
-            )
+            item = Feature()
+            item["ref"] = point["ID"]
+            item["lat"] = point["SZ_GEOGRAFICZNA"]
+            item["lon"] = point["DL_GEOGRAFICZNA"]
+            if point["P_TYPE"] == "ecobox":
+                item["brand_wikidata"] = "Q115568785"
+                apply_category(Categories.PARCEL_LOCKER, item)
+                yield item
+                continue
+                yield Request(
+                    "https://parcelshop.dhl.pl/mapa/point?id={id}".format(id=point["ID"]),
+                    callback=self.parse_detail,
+                    cb_kwargs={"point_type": point.get("P_TYPE", ""), "item": item},
+                )
+            elif brand_cat := PARTNERS.get(point["P_TYPE"]):
+                item["extras"]["post_office"] = "post_partner"
+                item.update(brand_cat[0])
+                apply_category(brand_cat[1], item)
+                yield item
+            else:
+                item["extras"]["post_office"] = "post_partner"
+                apply_category(Categories.GENERIC_POI, item)
+                self.logger.error("Unexpected type: {}".format(point["P_TYPE"]))
+                yield item
 
-    def parse_detail(self, response: Response, point_type: str, lat: str, lon: str, **kwargs: Any) -> Any:
+    def parse_detail(self, response: Response, point_type: str, item: Feature, **kwargs: Any) -> Any:
         payload = response.json()
         if payload.get("status") != "ok":
             return
         data = payload["data"]
 
-        item = Feature()
-        item["ref"] = str(data["id"])
         item["name"] = data.get("name")
-        street = data.get("street", "")
-        street_no = data.get("streetNo") or data.get("houseNo") or ""
-        item["street_address"] = f"{street} {street_no}".strip() or None
+        item["street"] = data.get("street")
+        item["housenumber"] = data.get("houseNo")
         item["postcode"] = data.get("zip")
         item["city"] = data.get("city")
-        item["country"] = "PL"
-        item["lat"] = lat
-        item["lon"] = lon
 
         # Parse structured opening hours
         oh_data = data.get("opening_hours") or {}
@@ -88,18 +99,5 @@ class DhlPLSpider(Spider):
                 if open_time and close_time:
                     oh.add_range(iso_day, open_time, close_time)
             item["opening_hours"] = oh
-
-        # Assign brand and category by location type
-        if point_type == "ecobox":
-            # Automated parcel locker (DHL BOX 24/7)
-            item["brand"] = DHL_BOX_BRAND
-            item["brand_wikidata"] = DHL_BOX_WIKIDATA
-            apply_category(Categories.PARCEL_LOCKER, item)
-        else:
-            # Partner pick-up / drop-off point (Żabka, InMedio, Lewiatan, etc.)
-            item["brand"] = DHL_POP_BRAND
-            item["brand_wikidata"] = DHL_POP_WIKIDATA
-            apply_category(Categories.POST_OFFICE, item)
-            item["extras"]["post_office"] = "post_partner"
 
         yield item
