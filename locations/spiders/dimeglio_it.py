@@ -6,14 +6,12 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_IT, DAYS_IT, DELIMITERS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class DimeglioITSpider(Spider):
     name = "dimeglio_it"
-    item_attributes = {"brand": "DiMeglio Supermercati"}
+    item_attributes = {"brand": "DiMeglio", "brand_wikidata": "Q3706393"}
     start_urls = ["https://www.dimegliosupermercati.com/punti-vendita-dimeglio/"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response):
         # Extract store URLs from the clickable table rows, used as refs.
