@@ -10,3 +10,7 @@ class AcademyUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_follow = ["storelocator"]
     sitemap_rules = [(r"/store-\d+$", "parse_sd")]
     wanted_types = ["SportingGoodsStore"]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("image", None)  # Generic Yext CDN thumbnails, not per-location
+        yield item
