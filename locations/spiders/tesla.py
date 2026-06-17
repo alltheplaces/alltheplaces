@@ -117,7 +117,12 @@ class TeslaSpider(Spider):
         # Deal with https://github.com/alltheplaces/alltheplaces/issues/10892
         feature_email = feature.get("email")
         if feature_email and isinstance(feature_email, dict) and "value" in feature_email:
-            feature["email"] = feature_email["value"]
+            email = feature_email["value"]
+            # Filter internal distribution list emails (DL-* format)
+            if email and not email.startswith("DL-"):
+                feature["email"] = email
+            else:
+                feature.pop("email", None)
         return feature
 
     def parse_phone(self, location_type: str, location: dict) -> str | None:
