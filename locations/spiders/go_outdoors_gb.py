@@ -25,28 +25,24 @@ class GoOutdoorsGBSpider(Spider):
 
     def parse_details(self, response: Response, **kwargs: Any) -> Any:
         data = response.json().get("store")
-        if not data:
-            print("Error parsing: {}".format(response.url))
-            return
-        item = DictParser.parse(data)
-        item["state"] = data["big_region"]
-        item["phone"] = data["local_phone"]
-        item["street_address"] = merge_address_lines([data["address_2"], data["address_1"]])
-        oh = OpeningHours()
-        for day, time in data.get("hours_sets", "").get("primary", "").get("days").items():
-            for open_close_time in time:
-                open_time = open_close_time["open"]
-                close_time = open_close_time["close"]
-                oh.add_range(day=day, open_time=open_time, close_time=close_time)
-        item["opening_hours"] = oh
+        if data:
+            item = DictParser.parse(data)
+            item["state"] = data["big_region"]
+            item["phone"] = data["local_phone"]
+            item["street_address"] = merge_address_lines([data["address_2"], data["address_1"]])
 
-        if item["name"].startswith("GO Outdoors Express "):
-            item["branch"] = item.pop("name").removeprefix("GO Outdoors Express ")
-            item["name"] = "Go Outdoors Express"
-        else:
-            item["branch"] = item.pop("name").removeprefix("GO Outdoors ")
-            item["name"] = "Go Outdoors"
+            item["opening_hours"] = OpeningHours()
+            for day, rules in data.get("hours_sets", "").get("primary", "").get("days").items():
+                for rule in rules:
+                    item["opening_hours"].add_range(day, rule["open"], rule["close"])
 
-        apply_category(Categories.SHOP_OUTDOOR, item)
+            if item["name"].startswith("GO Outdoors Express "):
+                item["branch"] = item.pop("name").removeprefix("GO Outdoors Express ")
+                item["name"] = "Go Outdoors Express"
+            else:
+                item["branch"] = item.pop("name").removeprefix("GO Outdoors ")
+                item["name"] = "Go Outdoors"
 
-        yield item
+            apply_category(Categories.SHOP_OUTDOOR, item)
+
+            yield item
