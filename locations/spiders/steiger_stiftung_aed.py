@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class SteigerStiftungAEDSpider(CSVFeedSpider):
+class SteigerStiftungAedSpider(CSVFeedSpider):
     name = "steiger_stiftung_aed"
     item_attributes = {
         "operator": "Steiger-Stiftung",
