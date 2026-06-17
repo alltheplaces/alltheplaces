@@ -6,15 +6,14 @@ from scrapy.http import Response
 
 from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class WaterpointJPSpider(Spider):
     name = "waterpoint_jp"
-    item_attributes = {"brand": "WaterPoint", "brand_wikidata": "Q135639331", "operator": "WaterPoint"}
+    item_attributes = {"brand": "WaterPoint", "brand_wikidata": "Q135639331"}
     start_urls = ["https://waterpoint.co.jp/vm-c/"]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # Each marker is structured as:
