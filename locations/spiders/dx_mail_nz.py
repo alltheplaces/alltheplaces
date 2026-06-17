@@ -72,9 +72,8 @@ class DxMailNZSpider(Spider):
                 item["lon"] = lon
                 yield item
             else:
-                # No map link - yield without coordinates only if we have an address
-                if addr_lines:
-                    yield item
+                # No map link — skip; all items must have coordinates per project rules
+                pass
 
     def _parse_short_link(self, response: Response, item: Feature) -> Iterable[Feature]:
         # The final URL after redirect contains coordinates
