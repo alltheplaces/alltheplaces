@@ -16,7 +16,7 @@ class CharlesTyrwhittSpider(scrapy.Spider):
         "brand": "Charles Tyrwhitt",
         "brand_wikidata": "Q924963",
     }
-    start_urls = ["https://www.charlestyrwhitt.com/uk/stores"]
+    start_urls = ["https://www.charlestyrwhitt.com/uk/stores", "https://www.charlestyrwhitt.com/us/stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         mapdata = response.xpath('//*[@id="bm-stores-data"]/text()').get()
