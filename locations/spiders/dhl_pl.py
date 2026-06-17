@@ -1,6 +1,6 @@
 from typing import Any
 
-from scrapy import Spider, Request
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
