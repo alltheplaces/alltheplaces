@@ -21,7 +21,11 @@ class CasaDoPaoDeQueijoBRSpider(Spider):
         )
 
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
-        for location in chompjs.parse_js_object(re.search(r"dP\s*=\s*(\[.+\]),\s*fP=\(\)", response.text).group(1)):
+        match = re.search(r"dP\s*=\s*(\[.+\]),\s*fP=\(\)", response.text)
+        if not match:
+            self.logger.error("Could not find dP=[...] data in bundle at %s", response.url)
+            return
+        for location in chompjs.parse_js_object(match.group(1)):
             item = Feature()
             item["branch"] = location["nome"].removeprefix("CPQ ")
             item["addr_full"] = item["ref"] = location["endereco"]
