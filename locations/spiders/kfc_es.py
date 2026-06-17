@@ -15,6 +15,7 @@ class KfcESSpider(Spider):
 
     name = "kfc_es"
     item_attributes = KFC_SHARED_ATTRIBUTES
+    requires_proxy = True
     start_urls = ["https://api.kfc.es/find-a-kfc/allstores"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
