@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 
 
-class NoiCompriamoAutoITSpider(scrapy.Spider):
+class NoicompriamoautoITSpider(scrapy.Spider):
     name = "noicompriamoauto_it"
     item_attributes = {
         "brand": "Noi Compriamo Auto",
