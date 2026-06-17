@@ -50,13 +50,14 @@ class HertzSpider(Spider):
             )
             item["street_address"] = shop.get("streetAddressLine1")
             if shop.get("streetAddressLine2", ""):
-                item["addr_full"] = "".join(
+                raw = "".join(
                     [
                         shop.get("streetAddressLine1", ""),
                         shop.get("streetAddressLine2", ""),
                         shop.get("streetAddressLine3", ""),
                     ]
                 )
+                item["addr_full"] = re.sub(r"<[^>]+>", "", raw).strip()
             item["opening_hours"] = OpeningHours()
             if opening_data := shop.get("hours"):
                 item["opening_hours"].add_ranges_from_string(ranges_string=opening_data)
