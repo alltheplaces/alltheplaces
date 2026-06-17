@@ -40,5 +40,6 @@ class BuzzBingoGBSpider(StructuredDataSpider):
         contact = ld_data.get("contactPoint", {})
         item["phone"] = contact.get("telephone")
         item["email"] = contact.get("email")
+        item["website"] = response.url
         apply_category({"gambling": "bingo;slot_machines"}, item)
         yield item
