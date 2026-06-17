@@ -4,6 +4,7 @@ import scrapy
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class DesaTRSpider(scrapy.Spider):
@@ -13,6 +14,7 @@ class DesaTRSpider(scrapy.Spider):
         "brand_wikidata": "Q17513880",
     }
     start_urls = ["https://www.desa.com.tr/api/Store/GetStoriesLite"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["magazalar"]:
