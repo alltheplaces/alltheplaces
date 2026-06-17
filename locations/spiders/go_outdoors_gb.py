@@ -29,7 +29,7 @@ class GoOutdoorsGBSpider(Spider):
             item = DictParser.parse(data)
             item["state"] = data["big_region"]
             item["phone"] = data["local_phone"]
-            item["street_address"] = merge_address_lines([data["address_2"], data["address_1"]])
+            item["street_address"] = merge_address_lines([data["address_1"], data["address_b"]])
 
             item["opening_hours"] = OpeningHours()
             for day, rules in data.get("hours_sets", "").get("primary", "").get("days").items():
