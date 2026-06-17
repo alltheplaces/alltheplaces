@@ -6,11 +6,11 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 class GbPlymouthCitySpider(OwenBaseSpider):
     name = "gb_plymouth_city"
     dataset_attributes = Licenses.GB_OGLv3.value | {
-        "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0."
-        + "Contains OS data © Crown copyright and database right 2025."
-        + " Contains Royal Mail data © Royal Mail copyright and Database right."
-        + " Contains GeoPlace data © Local Government Information House Limited copyright and database right."
-        + " Office for National Statistics licensed under the Open Government Licence v.3.0."
+        "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0. "
+        + "Contains OS data © Crown copyright and database right 2025. "
+        + "Contains Royal Mail data © Royal Mail copyright and Database right. "
+        + "Contains GeoPlace data © Local Government Information House Limited copyright and database right. "
+        + "Office for National Statistics licensed under the Open Government Licence v.3.0.",
     }
 
     drive_id = "1wjKPFxr1uI0zj7DdwMxkWWI40mkSWPhr"
