@@ -27,7 +27,7 @@ class WaterpointJPSpider(Spider):
             re.DOTALL,
         )
 
-        for i, match in enumerate(marker_pattern.finditer(response.text)):
+        for match in marker_pattern.finditer(response.text):
             lat, lng, popup_html = match.group(1), match.group(2), match.group(3)
 
             # Popup format: "NAME</br>ADDRESS</br>機種 / TYPE</br>水 / WATER_TYPE</br><a ...>"
@@ -39,7 +39,7 @@ class WaterpointJPSpider(Spider):
             street_address = parts[1] if len(parts) > 1 else None
 
             item = Feature()
-            item["ref"] = str(i + 1)
+            item["ref"] = f"{lat},{lng}"
             item["lat"] = float(lat)
             item["lon"] = float(lng)
             item["name"] = name
