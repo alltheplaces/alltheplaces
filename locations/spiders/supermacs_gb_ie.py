@@ -26,8 +26,10 @@ class SupermacsGBIESpider(Spider):
         for location in response.json()["markers"]:
             item = DictParser().parse(location)
             item["website"] = location["store_link"]
-            if location["store_front_image"]:
-                item["image"] = location["store_front_image"]["url"]
+            if url := (location["store_front_image"] or {}).get("url"):
+                # Filter the generic fallback image that appears on most stores
+                if "Image-1.jpeg" not in url:
+                    item["image"] = url
             item["phone"] = location["store_telephone"]
             item["addr_full"] = item["addr_full"].replace("<br />", "")
             item["ref"] = item["website"]
