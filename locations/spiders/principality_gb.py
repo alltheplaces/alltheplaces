@@ -73,7 +73,7 @@ class PrincipalityGBSpider(Spider):
 
         # Parse opening hours from the <dl> element on the detail page
         oh = OpeningHours()
-        for div in response.xpath('//dl/div'):
+        for div in response.xpath("//dl/div"):
             day = div.xpath("dt/text()").get("").strip()
             hours = div.xpath("dd/text()").get("").strip()
             if day and hours and hours.lower() != "closed":
