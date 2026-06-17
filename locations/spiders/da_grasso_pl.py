@@ -6,6 +6,7 @@ class DaGrassoPLSpider(JSONBlobSpider):
     name = "da_grasso_pl"
     item_attributes = {"brand": "Da Grasso", "brand_wikidata": "Q11692586"}
     start_urls = ["https://api.dagrasso.pl/localization-api/api/v2/stores/pickup"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item, response, feature):
         if raw_name := item.pop("name", ""):
