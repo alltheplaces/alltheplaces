@@ -57,8 +57,6 @@ class StyleFashionZASpider(Spider):
                     if day_hours.get("status") != "1":
                         continue
                     for slot in day_hours.get("slot", []):
-                        item["opening_hours"].add_range(
-                            day_hours["name"], slot["from"], slot["to"]
-                        )
+                        item["opening_hours"].add_range(day_hours["name"], slot["from"], slot["to"])
 
             yield item
