@@ -21,7 +21,7 @@ class DistrictDepartmentOfTransportationTrafficSignalsUSSpider(ArcGISFeatureServ
     layer_id = "170"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["INTERSECTIONID"]
+        item["ref"] = feature["ACISA"]
         item["name"] = feature["INTERSECTIONNAME"]
         apply_category(Categories.HIGHWAY_TRAFFIC_SIGNALS, item)
         yield item
