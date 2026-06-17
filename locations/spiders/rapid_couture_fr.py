@@ -1,4 +1,5 @@
 import html
+import json
 import re
 from typing import Any
 
@@ -21,8 +22,6 @@ class RapidCoutureFRSpider(scrapy.Spider):
         if not m:
             self.logger.error("Could not find 'var ateliers' data on %s", response.url)
             return
-
-        import json
 
         ateliers = json.loads(m.group(1))
         for atelier in ateliers:
