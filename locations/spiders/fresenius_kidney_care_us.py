@@ -14,6 +14,7 @@ class FreseniusKidneyCareUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["MedicalClinic"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("image", None)  # Generic brand image, not per-location
         apply_category({"amenity": "clinic", "healthcare": "dialysis", "healthcare:speciality": "nephrology"}, item)
 
         if item["name"].endswith("- Closed") or item["name"].endswith(" (Closed)"):
