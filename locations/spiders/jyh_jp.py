@@ -31,9 +31,7 @@ class JyhJpSpider(SitemapSpider):
         lat, lon = float(coords.group(1)), float(coords.group(2))
 
         # Extract postcode and address
-        addr_block = re.search(
-            r"住所<br><span class=\"item_price2\">(.*?)</span>", response.text, re.DOTALL
-        )
+        addr_block = re.search(r"住所<br><span class=\"item_price2\">(.*?)</span>", response.text, re.DOTALL)
         postcode = None
         street_address = None
         if addr_block:
