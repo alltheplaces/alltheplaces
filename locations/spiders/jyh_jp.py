@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class JyhJpSpider(SitemapSpider):
+class JyhJPSpider(SitemapSpider):
     name = "jyh_jp"
     item_attributes = {"brand": "Japan Youth Hostel", "brand_wikidata": "Q11441965", "country": "JP"}
     sitemap_urls = ["https://jyh.jp/sitemap.xml"]
