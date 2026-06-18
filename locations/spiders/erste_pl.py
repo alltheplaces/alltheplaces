@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class ErstePLSpider(Spider):
     name = "erste_pl"
-    item_attributes = {"brand": "Erste Bank Polska", "brand_wikidata": "Q806653"}
+    item_attributes = {"brand": "Erste Bank Polska"}
     start_urls = ["https://www.erste.pl/_js_places/places.js"]
 
     def parse(self, response, **kwargs):
