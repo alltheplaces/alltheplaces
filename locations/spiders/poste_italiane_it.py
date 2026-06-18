@@ -1,14 +1,15 @@
-import re
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
-from scrapy.http import JsonRequest
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.hours import CLOSED_IT, DAYS_IT, DELIMITERS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
-from locations.json_blob_spider import JSONBlobSpider
+from locations.items import Feature
 
 
-def add_it_ranges(oh, string):
+def add_it_ranges(oh: OpeningHours, string: str) -> None:
     oh.add_ranges_from_string(
         string,
         days=DAYS_IT,
@@ -19,144 +20,81 @@ def add_it_ranges(oh, string):
     )
 
 
-class PosteItalianeITSpider(JSONBlobSpider):
+class PosteItalianeITSpider(Spider):
     name = "poste_italiane_it"
-    # web page: https://www.poste.it/cerca/index.html#/vieni-in-poste
-    # if grouped differently, they group separate but near points losing information
-    point_groups = [
-        ["UfficioPostale", "PuntoPoste", "PuntoPosteLocker"],
-        ["CassettaPostale", "SpazioFilatelico"],
-        ["Merchant"],
-    ]
-    locations_key = ["data", "listaPunti"]
-    POSTE_BRAND = {"brand": "Poste Italiane", "brand_wikidata": "Q495026"}
-    PUNTO_POSTE_BRAND = {
-        "post_office:brand": "Poste Italiane",
-        "post_office:brand:wikidata": "Q495026",
-    }
-    TOBACCO_MATCH = re.compile(r"^Tabacc[a-z]+\s*(?:N\.\s*)?(\d+)?(?:$|\s+)", re.I)
-    merchant_types = {
-        "ABBIGLIAMENTO": Categories.SHOP_CLOTHES,
-        "CARBURANTE": Categories.FUEL_STATION,
-        "SPESA_E_CUCINA": Categories.SHOP_SUPERMARKET,
-    }
+    item_attributes = {"operator": "Poste Italiane", "operator_wikidata": "Q495026"}
+    custom_settings = {"CONCURRENT_REQUESTS_PER_DOMAIN": 1, "DOWNLOAD_DELAY": 2, "RETRY_TIMES": 10}
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for group in self.point_groups:
+    async def start(self) -> AsyncIterator[Any]:
+        yield JsonRequest(
+            url="https://mapcollection.poste.it/v2/map/geoListByComune",
+            data={
+                "tipoPunto": ["UfficioPostale"],
+                "limit": 50,
+                "offset": 0,
+            },
+            cb_kwargs={"offset": 0},
+            meta={"download_timeout": 30},
+        )
+
+    def parse(self, response: Response, offset: int, **kwargs: Any) -> Any:
+        locations = response.json().get("data", {}).get("listaPunti", [])
+
+        for location in locations:
+            # The endpoint includes a few non-mappable rows without coordinates.
+            if not location.get("lat") or not location.get("lon"):
+                continue
+            yield self.parse_location(location)
+
+        if len(locations) == 50:
             yield JsonRequest(
-                "https://mapcollection.poste.it/v2/map/geoList",
+                url="https://mapcollection.poste.it/v2/map/geoListByComune",
                 data={
-                    "lon": 12.480178129359274,
-                    "lat": 41.89637400808064,
-                    "spanLon": 7,
-                    "spanLat": 7,
-                    "tipoPunto": group,
-                    "limit": 100000,
+                    "tipoPunto": ["UfficioPostale"],
+                    "limit": 50,
+                    "offset": offset + 50,
                 },
+                cb_kwargs={"offset": offset + 50},
                 meta={"download_timeout": 30},
             )
 
-    def pre_process_data(self, location):
-        location["indirizzo"] = location.get("indirizzoPunto")
-        location["name"] = location.get("nomePunto")
-        location["phone"] = location.get("numeroTelefono")
+    def parse_location(self, location: dict[str, Any]) -> Feature:
+        item = DictParser.parse(location)
 
-    def post_process_item(self, item, response, location):
-        tipo = location["tipoPunto"]
-        if tipo == "UfficioPostale":
-            self.post_process_ufficio_postale(item, location)
-        elif tipo == "SpazioFilatelico":
-            self.post_process_spazio_filatelico(item, location)
-        elif tipo == "PuntoPoste":
-            self.post_process_punto_poste(item, location)
-        elif tipo == "PuntoPosteLocker":
-            item["ref"] = location["frazionario"]
-            apply_category(Categories.PARCEL_LOCKER, item)
-            item.update(self.POSTE_BRAND)
-            self.apply_hours(item, location["orari"])
-        elif tipo == "CassettaPostale":
-            self.post_process_cassetta_postale(item, location)
-        elif tipo == "Merchant":
-            self.post_process_merchant(item, location)
-        else:
-            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_type/{tipo}")
-        if vat := location.get("partitaIva"):
-            item["extras"]["ref:vatin"] = "IT" + vat.rjust(11, "0")
+        item["ref"] = location.get("frazionario")
+        item["lat"] = location.get("lat")
+        item["lon"] = location.get("lon")
+        item["street_address"] = location.get("indirizzoPunto")
+        item["city"] = location.get("citta")
+        item["postcode"] = location.get("cap")
+        item["phone"] = location.get("numeroTelefono")
+        item["branch"] = location.get("nomePunto")
+        item["name"] = f'Ufficio Postale {item["branch"]}' if item.get("branch") else None
+        item["extras"]["post_office"] = "bureau"
+
         if fax := location.get("fax"):
             item["extras"]["contact:fax"] = fax
-        yield item
 
-    def post_process_ufficio_postale(self, item, location):
-        item["ref"] = location["frazionario"]
-        item["branch"] = item["name"]
-        item["name"] = f'Ufficio Postale {item["branch"]}'
-        item.update(self.POSTE_BRAND)
         apply_category(Categories.POST_OFFICE, item)
-        item["extras"]["post_office"] = "bureau"
-        self.apply_hours(item, location["orari"])
-        for s in location["servizi"]:
-            apply_yes_no(Extras.WIFI, item, s["codice"] == "WIFI")
-            apply_yes_no(Extras.ATM, item, s["codice"] == "ATMNONH24")
-            apply_yes_no(Extras.ATM, item, s["codice"] == "ATMH24")
+        apply_yes_no(Extras.WIFI, item, any(service.get("codice") == "WIFI" for service in location.get("servizi", [])))
+        apply_yes_no(
+            Extras.ATM,
+            item,
+            any(service.get("codice") in ("ATMNONH24", "ATMH24") for service in location.get("servizi", [])),
+        )
+        self.apply_hours(item, location.get("orari"))
 
-    def post_process_spazio_filatelico(self, item, location):
-        item["ref"] = location["frazionario"]
-        item.update(self.POSTE_BRAND)
-        apply_category(Categories.SHOP_COLLECTOR, item)
-        item["extras"]["collector"] = "coins;medals;postcards;stamps"
-        self.apply_hours(item, location["orari"])
+        return item
 
-    def post_process_punto_poste(self, item, location):
-        item["ref"] = location["frazionario"]
-        apply_category(Categories.GENERIC_POI, item)
-        item["extras"]["post_office"] = "post_partner"
-        item["extras"].update(self.PUNTO_POSTE_BRAND)
-        item["extras"]["ref:poste_italiane"] = item["ref"]
-        self.apply_hours(item, location.get("orariPuntoPoste"))
-        if ref := self.TOBACCO_MATCH.findall(item["name"]):
-            apply_category(Categories.SHOP_TOBACCO, item)
-            item["extras"]["ref:tobacco"] = ref[0]
-
-    def post_process_cassetta_postale(self, item, location):
-        apply_category(Categories.POST_BOX, item)
-        item["extras"]["ref:poste_italiane"] = item["ref"]
-        item["ref"] = item.pop("name")
-        item.update(self.POSTE_BRAND)
-        if coll := location.get("orarioVuotatura"):
-            if "," in coll:
-                days = coll.split(",")
-                h = days[-1].split(" ")[-1]
-                days[-1] = days[-1].strip().split(" ")[0]
-                item["extras"]["collection_times"] = (
-                    ",".join(map(lambda day: DAYS_IT[day.strip().title()], days)) + " " + h
-                )
-            else:
-                oh = OpeningHours()
-                add_it_ranges(oh, f"{coll} - {coll[-5:]}")
-                item["extras"]["collection_times"] = oh.as_opening_hours()[:-6]
-            # self.crawler.stats.inc_value(f"atp/{self.name}/collection_times/{coll}")
-            # self.crawler.stats.inc_value(f"atp/{self.name}/collection_times/{item['extras']['collection_times']}")
-        else:
-            item["extras"]["collection_times:signed"] = "no"
-
-    def post_process_merchant(self, item, location):
-        apply_yes_no(PaymentMethods.BANCOPOSTA, item, True)
-        apply_yes_no(PaymentMethods.POSTEPAY, item, True)
-        codice = location["categoriaMerchant"]["codice"]
-        if category := self.merchant_types.get(codice):
-            apply_category(category, item)
-        elif ref := self.TOBACCO_MATCH.findall(item.get("name") or ""):
-            apply_category(Categories.SHOP_TOBACCO, item)
-            item["extras"]["ref:tobacco"] = ref[0]
-        else:
-            self.crawler.stats.inc_value(f"atp/{self.name}/unknown_merchant/{codice}")
-
-    def apply_hours(self, item, list_h):
-        if not list_h:
+    def apply_hours(self, item: Feature, hours: list[dict[str, Any]] | None) -> None:
+        if not hours:
             return
+
         oh = OpeningHours()
-        for day_h in list_h:
-            day = day_h["giorno"]
-            hour = day_h["orario"]
-            add_it_ranges(oh, f"{day}: {hour}")
+        try:
+            for day_h in hours:
+                add_it_ranges(oh, f'{day_h["giorno"]}: {day_h["orario"]}')
+        except Exception:
+            self.logger.warning("Unable to parse opening hours: {}".format(hours))
+            return
         item["opening_hours"] = oh
