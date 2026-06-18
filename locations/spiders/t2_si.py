@@ -2,8 +2,8 @@ import re
 from typing import Any
 
 from scrapy.http import Response
-from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_SI, OpeningHours
@@ -20,7 +20,9 @@ class T2SISpider(CrawlSpider):
             callback="parse_store",
         ),
     ]
-    custom_settings = {"USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
 
     def parse_store(self, response: Response, **kwargs: Any) -> Any:
         geo_text = response.xpath('//div[@class="geo-data"]/text()').getall()
@@ -30,7 +32,10 @@ class T2SISpider(CrawlSpider):
             return
 
         item = Feature()
-        item["branch"] = response.xpath('//div[@itemprop="name"]/h5/text()').get("").strip().removeprefix("Poslovalnica").strip() or None
+        item["branch"] = (
+            response.xpath('//div[@itemprop="name"]/h5/text()').get("").strip().removeprefix("Poslovalnica").strip()
+            or None
+        )
         item["ref"] = response.url.rstrip("/").rsplit("/", 1)[-1]
         item["lat"] = coords[0]
         item["lon"] = coords[1]
@@ -41,7 +46,9 @@ class T2SISpider(CrawlSpider):
         item["email"] = response.xpath('//span[@itemprop="email"]/a/text()').get("").strip() or None
         item["country"] = "SI"
 
-        hours_html = response.xpath('//div[contains(@class,"label-inline") and contains(text(),"Delovni")]/following-sibling::p').get("")
+        hours_html = response.xpath(
+            '//div[contains(@class,"label-inline") and contains(text(),"Delovni")]/following-sibling::p'
+        ).get("")
         hours_text = re.sub(r"<br\s*/?>", "\n", hours_html)
         hours_text = re.sub(r"<[^>]+>", "", hours_text).strip()
         if hours_text:
