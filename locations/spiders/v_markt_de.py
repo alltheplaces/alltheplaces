@@ -14,7 +14,7 @@ class VMarktDESpider(Spider):
     """
 
     name = "v_markt_de"
-    item_attributes = {"brand": "V-Markt", "brand_wikidata": "Q2523915"}
+    item_attributes = {"brand": "V-MARKT", "brand_wikidata": "Q1504903"}
     start_urls = ["https://www.v-markt.de/standorte_vmarkt"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
@@ -79,7 +79,7 @@ class VMarktDESpider(Spider):
             item = Feature()
             item["ref"] = store_id
             # Strip brand prefix from name to get branch name
-            item["branch"] = re.sub(r"^V-Markt\s*", "", name).strip() or None
+            item["branch"] = re.sub(r"^V-MARKT\s*", "", name, flags=re.IGNORECASE).strip() or None
             item["street_address"] = street_address
             item["city"] = city
             item["postcode"] = postcode

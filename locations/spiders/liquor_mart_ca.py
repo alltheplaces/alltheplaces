@@ -13,7 +13,7 @@ class LiquorMartCASpider(Spider):
     """
 
     name = "liquor_mart_ca"
-    item_attributes = {"brand": "Liquor Mart", "brand_wikidata": "Q29467564"}
+    item_attributes = {"brand": "Liquor Mart", "brand_wikidata": "Q124030913"}
     start_urls = ["https://www.liquormarts.ca/liquormarts"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
@@ -26,7 +26,7 @@ class LiquorMartCASpider(Spider):
             name = location.css("div.views-field-field-store-name .field-content::text").get("").strip()
             if "Express" in name:
                 item["brand"] = "Liquor Mart Express"
-                item["brand_wikidata"] = "Q29467564"
+                item["brand_wikidata"] = "Q124030913"
             item["branch"] = name.removeprefix("Liquor Mart Express").removeprefix("Liquor Mart").strip() or None
 
             item["street_address"] = (

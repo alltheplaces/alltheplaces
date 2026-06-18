@@ -14,7 +14,7 @@ class VomarNLSpider(SitemapSpider):
     """
 
     name = "vomar_nl"
-    item_attributes = {"brand": "Vomar", "brand_wikidata": "Q2410271"}
+    item_attributes = {"brand": "Vomar", "brand_wikidata": "Q3202837"}
     sitemap_urls = ["https://www.vomar.nl/sitemap.xml"]
     sitemap_rules = [(r"https://www\.vomar\.nl/winkels/vomar-[^/]+\.htm$", "parse_store")]
 
