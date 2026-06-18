@@ -8,7 +8,6 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.bp import BpSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
-from locations.spiders.citgo import CitgoSpider
 from locations.spiders.exxon_mobil import ExxonMobilSpider
 from locations.spiders.gulf_pr_us import GulfPRUSSpider
 from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
@@ -40,7 +39,7 @@ class UnbankUSSpider(JSONBlobSpider):
         (["VALERO"], ValeroSpider.item_attributes),
         (["MARATHON"], MarathonPetroleumUSSpider.brands["MARATHON"]),
         (["ARCO"], MarathonPetroleumUSSpider.brands["ARCO"]),
-        (["CITGO"], CitgoSpider.item_attributes),
+        (["CITGO"], {"brand": "Citgo", "brand_wikidata": "Q2974437"}),
         (["GULF"], GulfPRUSSpider.item_attributes),
     ]
 

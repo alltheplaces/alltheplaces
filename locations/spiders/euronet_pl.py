@@ -40,9 +40,9 @@ BRAND_MAPPING = {
     },
     "Erste Bank Polska": {
         "brand": ErstePLSpider.item_attributes["brand"],
-        "brand_wikidata": ErstePLSpider.item_attributes["brand_wikidata"],
+        "brand_wikidata": "Q806653",
         "operator": ErstePLSpider.item_attributes["brand"],
-        "operator_wikidata": ErstePLSpider.item_attributes["brand_wikidata"],
+        "operator_wikidata": "Q806653",
     },
     "Kasa Stefczyka": {
         "brand": "SKOK Stefczyka",
