@@ -11,7 +11,6 @@ from locations.spiders.ampm_us import AmpmUSSpider
 from locations.spiders.bp import BpSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
-from locations.spiders.citgo import CitgoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.eg_america_us import EgAmericaUSSpider
 from locations.spiders.exxon_mobil import ExxonMobilSpider
@@ -46,7 +45,7 @@ class RockitcoinPRUSSpider(JSONBlobSpider):
         (["TEXACO"], CHEVRON_BRANDS["Texaco"][0]),
         (["VALERO"], ValeroSpider.item_attributes),
         (["SUNOCO"], SunocoUSSpider.item_attributes),
-        (["CITGO"], CitgoSpider.item_attributes),
+        (["CITGO"], {"brand": "Citgo", "brand_wikidata": "Q2974437"}),
         (["76 GAS", "76"], Phillips66Conoco76Spider.BRANDS["76"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
         (["PHILLIPS 66"], Phillips66Conoco76Spider.BRANDS["P66"]),
