@@ -14,7 +14,7 @@ class VMarktDESpider(Spider):
     """
 
     name = "v_markt_de"
-    item_attributes = {"brand": "V-Markt", "brand_wikidata": "Q2523915"}
+    item_attributes = {"brand": "V-Markt", "brand_wikidata": "Q1504903"}
     start_urls = ["https://www.v-markt.de/standorte_vmarkt"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
