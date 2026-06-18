@@ -26,7 +26,7 @@ def get_test_objects(
     if isinstance(categories, list):
         for category in categories:
             apply_category(category, feature)
-    return feature, ApplyNSICategoriesPipeline(), spider
+    return feature, ApplyNSICategoriesPipeline.from_crawler(get_crawler()), spider
 
 
 def test_skip_nsi_matching():
@@ -38,7 +38,7 @@ def test_skip_nsi_matching():
         categories=[Categories.FAST_FOOD.value],
     )
     item["nsi_id"] = "-1"
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item["nsi_id"] == "-1"
 
     item, pipeline, spider = get_test_objects(
@@ -49,25 +49,25 @@ def test_skip_nsi_matching():
         categories=[Categories.FAST_FOOD.value],
     )
     item["nsi_id"] = "1234567"
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item["nsi_id"] == "1234567"
 
 
 def test_brand_missing():
     item, pipeline, spider = get_test_objects(spider_name="kfc_us", operator_wikidata="Q668737")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
 def test_operator_missing():
     item, pipeline, spider = get_test_objects(spider_name="city_of_darwin_cctv_au", brand_wikidata="Q125673118")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
 def test_brand_and_operator_missing():
     item, pipeline, spider = get_test_objects(spider_name="failing_spider")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
@@ -80,7 +80,7 @@ def test_brand_category_missing():
     # convenience store, with no difference in branding or labelling of each
     # feature.
     item, pipeline, spider = get_test_objects(spider_name="kfc_us", brand_wikidata="Q524757", country="US", state="TX")
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("nsi_id")
 
 
@@ -95,7 +95,7 @@ def test_brand_category_required():
         state="TX",
         categories=[Categories.CAR_WASH.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("nsi_id")
 
     # Is this Costco feature shop=wholesale, amenity=car_wash...? No match is
@@ -103,7 +103,7 @@ def test_brand_category_required():
     item, pipeline, spider = get_test_objects(
         spider_name="costco_us", brand_wikidata="Q715583", country="US", state="TX"
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
@@ -118,7 +118,7 @@ def test_operator_category_missing():
     item, pipeline, spider = get_test_objects(
         spider_name="city_of_darwin_cctv_au", operator_wikidata="Q125673118", country="AU", state="NT"
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
@@ -132,7 +132,7 @@ def test_brand_country_missing():
         state="NSW",
         categories=[Categories.SHOP_SUPERMARKET.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # A match fails if the country is specified as a blank string (not just
@@ -144,7 +144,7 @@ def test_brand_country_missing():
         state="NSW",
         categories=[Categories.SHOP_SUPERMARKET.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
@@ -157,7 +157,7 @@ def test_brand_country_invalid():
         country="GB",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # Brand is not known by NSI to operate in a specific country.
@@ -168,7 +168,7 @@ def test_brand_country_invalid():
         country="United Kingdom",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # Specified country is entirely invalid.
@@ -178,7 +178,7 @@ def test_brand_country_invalid():
         country="ZZ",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
@@ -188,7 +188,7 @@ def test_brand_country_not_required():
     item, pipeline, spider = get_test_objects(
         spider_name="kfc_us", brand_wikidata="Q524757", categories=[Categories.FAST_FOOD.value]
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("nsi_id")
 
 
@@ -198,7 +198,7 @@ def test_brand_country_required():
     item, pipeline, spider = get_test_objects(
         spider_name="woolworths_au", brand_wikidata="Q3249145", categories=[Categories.SHOP_SUPERMARKET.value]
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # Another failure to specify a country is the country being a blank string
@@ -209,7 +209,7 @@ def test_brand_country_required():
         country="",
         categories=[Categories.SHOP_SUPERMARKET.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
@@ -223,7 +223,7 @@ def test_brand_state_missing():
         country="US",
         categories=[Categories.BANK.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # A match fails if the state is specified as a blank string (not just
@@ -236,7 +236,7 @@ def test_brand_state_missing():
         state="",
         categories=[Categories.BANK.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # Failure to match one of multiple specific regions identified.
@@ -246,7 +246,7 @@ def test_brand_state_missing():
         country="US",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
@@ -260,7 +260,7 @@ def test_brand_state_invalid():
         state="AL",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # Brand is not known by NSI to operate in a specific region.
@@ -272,7 +272,7 @@ def test_brand_state_invalid():
         state="Alabama",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # Specified region is entirely invalid.
@@ -283,7 +283,7 @@ def test_brand_state_invalid():
         state="ZZ",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
     # Specified region is a blank string (not the default of None).
@@ -294,7 +294,7 @@ def test_brand_state_invalid():
         state="",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert not item.get("nsi_id")
 
 
@@ -308,5 +308,5 @@ def test_brand_state_not_required():
         state="TX",
         categories=[Categories.FAST_FOOD.value],
     )
-    pipeline.process_item(item, spider)
+    pipeline.process_item(item)
     assert item.get("nsi_id")
