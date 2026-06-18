@@ -8,10 +8,12 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
+DIA = {"brand": "Dia", "brand_wikidata": "Q925132"}
+CLAREL = {"brand": "Clarel", "brand_wikidata": "Q48784350"}
+
 
 class DiaESSpider(Spider):
     name = "dia_es"
-    item_attributes = {"brand": "Dia", "brand_wikidata": "Q925132"}
     allowed_domains = ["www.dia.es"]
     start_urls = ["https://www.dia.es/tiendas/buscador-tiendas-folletos"]
 
@@ -40,6 +42,13 @@ class DiaESSpider(Spider):
             "city": response.json()["localidad"].strip(),
             "postcode": response.json()["codigoPostal"].strip(),
         }
+        if response.json()["tipoTienda"] == "dia":
+            properties.update(DIA)
+            apply_category(Categories.SHOP_SUPERMARKET, properties)
+        elif response.json()["tipoTienda"] == "clarel":
+            properties.update(CLAREL)
+            apply_category(Categories.SHOP_CHEMIST, properties)
+
         properties["opening_hours"] = OpeningHours()
         for day_number, day_hours in response.json()["horariosTienda"].items():
             if "|" in day_hours:
@@ -49,7 +58,5 @@ class DiaESSpider(Spider):
                     )
             else:
                 properties["opening_hours"].add_range(DAYS[int(day_number) - 1], *day_hours.split(" - ", 1), "%H:%M")
-
-        apply_category(Categories.SHOP_SUPERMARKET, properties)
 
         yield Feature(**properties)
