@@ -3,7 +3,6 @@ from typing import Any, AsyncIterator
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
-from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
 from locations.spiders.taco_bell_us import TACO_BELL_SHARED_ATTRIBUTES
 
@@ -37,8 +36,6 @@ class TacoBellESSpider(Spider):
             item["postcode"] = location["postCodeStore"]
             item["lat"] = location["latitudeStore"]
             item["lon"] = location["longitudeStore"]
-
-            apply_yes_no(Extras.DRIVE_THROUGH, item, location["drivethruStore"])
 
             item["website"] = item["extras"]["website:es"] = "https://tacobell.es/es/restaurantes/{}/{}".format(
                 location["idProvinceStore"], location["idStore"]
