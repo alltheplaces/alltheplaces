@@ -11,7 +11,7 @@ from locations.items import Feature
 
 class LiquidLaundromatNZSpider(Spider):
     name = "liquid_laundromat_nz"
-    item_attributes = {"brand": "Liquid Laundromat", "brand_wikidata": "Q131362924"}
+    item_attributes = {"brand": "Liquid Laundromat"}
     start_urls = ["https://liquidlaundromats.com/nz/locations/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
