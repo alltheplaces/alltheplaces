@@ -494,6 +494,7 @@ def add_list(key: str, value: str, item: Feature) -> None:
         existing_values = []
     if value not in existing_values:
         existing_values.append(value)
+    existing_values.sort()
 
     if key in Feature.fields.keys():
         item[key] = ";".join(existing_values)
