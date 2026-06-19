@@ -6,6 +6,7 @@ from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
 SLOVENSKA_POSTA = {"operator": "Slovenská pošta", "operator_wikidata": "Q1191849"}
@@ -63,4 +64,29 @@ class SlovenskaPostaSKSpider(Spider):
         if phones := location.get("phones"):
             item["phone"] = "; ".join(phones)
 
+        if opening_hours := self.parse_opening_hours(location.get("oh", [])):
+            item["opening_hours"] = opening_hours
+
         return item
+
+    def parse_opening_hours(self, days: list[dict[str, Any]]) -> str | None:
+        try:
+            day_hours = {}
+            for day in days:
+                if not day.get("std"):
+                    continue
+                # The API repeats today's row before the standard week; keep the later weekly row.
+                day_hours[DAYS_EN[day["day"].title()]] = day["std"]
+
+            opening_hours = OpeningHours()
+            for day, hours in day_hours.items():
+                for open_seconds, close_seconds in hours:
+                    opening_hours.add_range(day, self.format_seconds(open_seconds), self.format_seconds(close_seconds))
+            return opening_hours.as_opening_hours() or None
+        except (KeyError, TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def format_seconds(seconds: int) -> str:
+        hours, remainder = divmod(seconds, 3600)
+        return f"{hours:02}:{remainder // 60:02}"
