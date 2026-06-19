@@ -9,8 +9,8 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class BrandywineLivingSpider(scrapy.Spider):
-    name = "brandywine_living"
+class BrandywineLivingUSSpider(scrapy.Spider):
+    name = "brandywine_living_us"
     start_urls = ["https://www.brandycare.com/company/locations/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
