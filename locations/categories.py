@@ -457,15 +457,10 @@ class Categories(Enum):
 def apply_category(category: Mapping | Enum, item: Feature | dict) -> None:
     """
     Apply categories to a Feature, where categories can be supplied as a
-    single Enum, or dictionary of key-value strings. If a value for the
-    category key is already defined, the new value for the category key is
-    appended rather than overwritten. When appending the new value, the list
-    of values is sorted and each value is separated with a semi-colon. Any
-    duplication of values is avoided by ignoring second attempts to add an
-    already existing value.
+    single Enum, or dictionary of key-value strings.
     :param category: Either an Enum member representing a single category to
                      add, or a dictionary of key-value strings representing
-                     multiple categories to add.
+                     a category to add.
     :param item: Feature to which categories should be added to.
     """
     if isinstance(category, Enum):
@@ -478,14 +473,33 @@ def apply_category(category: Mapping | Enum, item: Feature | dict) -> None:
     if not item.get("extras"):
         item["extras"] = {}
 
-    for key, values_str in tags.items():
-        values = set(values_str.split(";"))
-        if key in item["extras"].keys():
-            existing_values = set(item["extras"][key].split(";"))
-            existing_values.update(values)
-            item["extras"][key] = ";".join(sorted(existing_values))
+    for key, value in tags.items():
+        if key in Feature.fields.keys():
+            item[key] = value
         else:
-            item["extras"][key] = values_str
+            item["extras"][key] = value
+
+
+def add_list(key: str, value: str, item: Feature) -> None:
+    if not isinstance(key, str):
+        raise Exception("keys must be strings")
+    if not isinstance(value, str):
+        raise Exception("list values must be strings")
+    existing_value = item.get(key) if key in Feature.fields.keys() else item["extras"].get(key)
+    if existing_value:
+        if not isinstance(existing_value, str):
+            raise Exception("list values must be strings")
+        existing_values = existing_value.split(";")
+    else:
+        existing_values = []
+    if value not in existing_values:
+        existing_values.append(value)
+    existing_values.sort()
+
+    if key in Feature.fields.keys():
+        item[key] = ";".join(existing_values)
+    else:
+        item["extras"][key] = ";".join(existing_values)
 
 
 top_level_tags = [

@@ -5,6 +5,7 @@ from locations.categories import (
     HealthcareSpecialities,
     PaymentMethods,
     Vending,
+    add_list,
     add_vending,
     apply_category,
     apply_clothes,
@@ -46,20 +47,15 @@ def test_shop_tag_sanity():
 
 def test_cuisine_multiple():
     item = Feature()
-    apply_category({"cuisine": "coffee_shop"}, item)
+    add_list("cuisine", "coffee_shop", item)
     assert item["extras"]["cuisine"] == "coffee_shop"
 
-    apply_category({"cuisine": "coffee_shop"}, item)
-    apply_category({"cuisine": "coffee_shop"}, item)
+    add_list("cuisine", "coffee_shop", item)
+    add_list("cuisine", "coffee_shop", item)
     assert item["extras"]["cuisine"] == "coffee_shop"
 
-    apply_category({"cuisine": "coffee_shop"}, item)
-    apply_category({"cuisine": "pizza"}, item)
-    assert item["extras"]["cuisine"] == "coffee_shop;pizza"
-
-    item = Feature()
-    apply_category({"cuisine": "coffee_shop"}, item)
-    apply_category({"cuisine": "pizza;coffee_shop"}, item)
+    add_list("cuisine", "coffee_shop", item)
+    add_list("cuisine", "pizza", item)
     assert item["extras"]["cuisine"] == "coffee_shop;pizza"
 
 
