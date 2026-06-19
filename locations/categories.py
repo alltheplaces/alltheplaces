@@ -24,12 +24,12 @@ class Categories(Enum):
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
 
-    KINDERGARTEN = {"amenity": "kindergarten", "education": "kindergarten"}
-    SCHOOL = {"amenity": "school", "education": "school"}
-    COLLEGE = {"amenity": "college", "education": "college"}
-    UNIVERSITY = {"amenity": "university", "education": "university"}
-    LANGUAGE_SCHOOL = {"amenity": "school", "education": "language_school"}
-    NATURE_SCHOOL = {"amenity": "school", "education": "nature_school"}
+    KINDERGARTEN = {"amenity": "kindergarten"}
+    SCHOOL = {"amenity": "school"}
+    COLLEGE = {"amenity": "college"}
+    UNIVERSITY = {"amenity": "university"}
+    LANGUAGE_SCHOOL = {"amenity": "language_school"}
+    NATURE_SCHOOL = {"education": "nature_school"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -558,11 +558,11 @@ def get_category_tags(source: Feature | Enum | Mapping) -> dict:
     if len(categories.keys()) > 1 and categories.get("shop") == "yes":
         categories.pop("shop")
     if "amenity" in categories.keys() and "education" in categories.keys():
-        # amenity=school is being replaced within OSM by education=*
-        # Whilst ATP still sets amenity=school for backwards compatibility
-        # it is "education" not "amenity" which is the intended top level
+        # Some education tags are being augmented with education=* in OSM
+        # ATP still uses the more common amenity=*
+        # It is "amenity" not "education" which is the intended top level
         # category.
-        categories.pop("amenity")
+        categories.pop("education")
     return categories
 
 
