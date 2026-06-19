@@ -59,7 +59,7 @@ class SlovenskaPostaSKSpider(Spider):
         item["street_address"] = item.pop("street", None)
         item["city"] = location.get("city")
         item["postcode"] = location.get("zip")
-        item["website"] = "https://www.posta.sk/pobocky-a-balikoboxy?{}".format(urlencode({"n": location["nsk"]}))
+        item["website"] = "https://www.posta.sk/pobocky-a-balikoboxy#{}".format(urlencode({"n": location["nsk"]}))
 
         if phones := location.get("phones"):
             item["phone"] = "; ".join(phones)
