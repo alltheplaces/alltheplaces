@@ -10,8 +10,8 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
 
-class PlumblinkZASpider(JSONBlobSpider):
-    name = "plumblink_za"
+class PlumblinkNAZASpider(JSONBlobSpider):
+    name = "plumblink_na_za"
     item_attributes = {"brand": "Plumblink", "brand_wikidata": "Q127596751"}
     start_urls = ["https://api.esolve.co.za/get-locations.php?is_active=true&ws_id=PLNK01"]
     locations_key = "records"
