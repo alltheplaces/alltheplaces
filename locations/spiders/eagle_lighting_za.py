@@ -8,7 +8,7 @@ class EagleLightingZASpider(AgileStoreLocatorSpider):
     allowed_domains = ["eaglelighting.co.za"]
 
     def post_process_item(self, item, response, feature):
-        item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "")
+        item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
         item.pop("website", "")
         apply_category(Categories.SHOP_LIGHTING, item)
         yield item
