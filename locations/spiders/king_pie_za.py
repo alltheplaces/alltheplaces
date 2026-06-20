@@ -16,6 +16,9 @@ class KingPieZASpider(JSONBlobSpider):
         if item["website"] == "https://www.kingpie.co.za/":
             item.pop("website")
 
+        if item["phone"] and item["phone"].replace(" ", "") == "0823350236":
+            item.pop("phone")
+
         item["opening_hours"] = oh = OpeningHours()
         oh.add_ranges_from_string(
             re.sub(r"<[^>]*>|&nbsp;", " ", location["operatingHours"]).replace("24hrs", "00:00 - 23:59")
