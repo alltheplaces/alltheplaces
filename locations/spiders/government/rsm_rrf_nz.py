@@ -1,4 +1,3 @@
-from hashlib import sha1
 from math import ceil, floor
 from typing import AsyncIterator, Iterable
 
@@ -44,8 +43,12 @@ class RsmRrfNZSpider(Spider):
             "searchText": "",
             "suppressed": False,
         }
-        return JsonRequest(url=api_endpoint, data=data, meta={"f_low_mhz": frequency_low_mhz, "f_high_mhz": frequency_high_mhz}, method="POST")
-        
+        return JsonRequest(
+            url=api_endpoint,
+            data=data,
+            meta={"f_low_mhz": frequency_low_mhz, "f_high_mhz": frequency_high_mhz},
+            method="POST",
+        )
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for frequency_range_mhz in self._frequency_ranges_mhz:
@@ -57,12 +60,18 @@ class RsmRrfNZSpider(Spider):
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         total_items = response.json()["totalItems"]
         if total_items >= 100000:
-            raise Exception("More than 100000 results returned from query of frequency range {}-{}MHz. Results have been truncated as only the first 100000 results are provided by the API.".format(f_low_mhz, f_high_mhz))
+            raise Exception(
+                "More than 100000 results returned from query of frequency range {}-{}MHz. Results have been truncated as only the first 100000 results are provided by the API.".format(
+                    f_low_mhz, f_high_mhz
+                )
+            )
             return
 
         for licence in response.json()["results"]:
             if licence["licenceStatus"] != "Current":
-                self.logger.warning("Unknown licence status '{}' for licence ID '{}'".format(licence["licenceStatus"], licence["id"]))
+                self.logger.warning(
+                    "Unknown licence status '{}' for licence ID '{}'".format(licence["licenceStatus"], licence["id"])
+                )
                 continue
 
             if not licence["locationGeoReferences"]:
@@ -140,13 +149,14 @@ class RsmRrfNZSpider(Spider):
                 case "X":
                     properties["extras"]["antenna:polarisation"] = "dual slant"
                 case _:
-                    self.logger.warning("Unknown polarisation type '{}' for licence ID '{}'".format(polarisation, licence_details["id"]))
+                    self.logger.warning(
+                        "Unknown polarisation type '{}' for licence ID '{}'".format(polarisation, licence_details["id"])
+                    )
         if directionality := licence_details["receiveTransmitDisplayType"]:
             if directionality == "TX":
                 properties["extras"]["antenna:transmit"] = "yes"
             elif directionality == "RX":
                 properties["extras"]["antenna:receive"] = "yes"
-
 
     def extract_rsm_reference_properties(self, properties: dict, licence_details: dict) -> None:
         if client_id := licence_details["clientId"]:
@@ -162,7 +172,12 @@ class RsmRrfNZSpider(Spider):
             # of licensed antennas other than mobile phone antennas, so only
             # antennas with expected mobile frequencies should be counted.
             if ref_freq_mhz := licence_details["refFrequency"]:
-                if (ref_freq_mhz > 700 and ref_freq_mhz < 1000) or (ref_freq_mhz > 1700 and ref_freq_mhz < 2400) or (ref_freq_mhz > 2500 and ref_freq_mhz < 2700) or (ref_freq_mhz > 3400 and ref_freq_mhz < 3700):
+                if (
+                    (ref_freq_mhz > 700 and ref_freq_mhz < 1000)
+                    or (ref_freq_mhz > 1700 and ref_freq_mhz < 2400)
+                    or (ref_freq_mhz > 2500 and ref_freq_mhz < 2700)
+                    or (ref_freq_mhz > 3400 and ref_freq_mhz < 3700)
+                ):
                     # Approximate bounds of 4G/5G frequencies used in NZ. Good
                     # enough to exclude satellite communications (etc) of
                     # these mobile phone network operators.
