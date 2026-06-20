@@ -2,6 +2,7 @@ import re
 
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.hours import OpeningHours
 
@@ -31,5 +32,5 @@ class BackstubeNOSpider(Spider):
                     hours_string = "; ".join([h.strip() for h in hours if h.strip()])
                     item["opening_hours"].add_ranges_from_string(hours_string)
 
-
+                apply_category(Categories.SHOP_BAKERY, item)
                 yield item
