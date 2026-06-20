@@ -48,6 +48,7 @@ class Feature(scrapy.Item):
     located_in_wikidata = scrapy.Field()
     nsi_id = scrapy.Field()
     extras = scrapy.Field()
+    category = scrapy.Field()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -251,6 +252,7 @@ KEYS_THAT_SHOULD_MATCH = [
     "located_in",
     "located_in_wikidata",
     "nsi_id",
+    "category",
 ]
 
 TRANSLATABLE_EXTRA_KEYS = [

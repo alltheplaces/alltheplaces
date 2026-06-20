@@ -1,6 +1,6 @@
 from scrapy.crawler import Crawler
 
-from locations.categories import get_category_tags
+from locations.categories import Categories, get_category_tags
 from locations.items import Feature
 from locations.name_suggestion_index import NSI
 
@@ -25,6 +25,13 @@ class ApplyNSICategoriesPipeline:
             # nsi_id is NOT a stable identifier and should not be set manually
             # by a spider unless it does so by lookup of the current NSI
             # database.
+
+            # If the Feature has a Categories Enum member supplied as a value
+            # in the 'category' property, tags need to be copied into the
+            # 'extras' property of the Feature.
+            if isinstance(item.get("category"), Categories):
+               self.copy_feature_category_to_extras_dict(item)
+
             return item
 
         brand_operator_qcode = item.get("brand_wikidata", item.get("operator_wikidata"))
@@ -34,6 +41,13 @@ class ApplyNSICategoriesPipeline:
             # fields must be supplied.
             self.crawler.stats.inc_value("atp/nsi/match_failed")
             self.crawler.stats.inc_value("atp/nsi/brand_or_operator_missing")
+
+            # If the Feature has a Categories Enum member supplied as a value
+            # in the 'category' property, tags need to be copied into the
+            # 'extras' property of the Feature.
+            if isinstance(item.get("category"), Categories):
+               self.copy_feature_category_to_extras_dict(item)
+
             return item
 
         if not get_category_tags(item) and item.get("brand_wikidata"):
@@ -73,6 +87,11 @@ class ApplyNSICategoriesPipeline:
             #   specified.
             self.crawler.stats.inc_value("atp/nsi/match_failed")
             self.crawler.stats.inc_value("atp/nsi/category_missing")
+
+            # Even though the match failed, there is no need to copy tags from
+            # a Categories Enum member supplied as a value in the 'category'
+            # property of the Feature to the 'extras' property of the Feature.
+            # There are no useful top level tags to copy.
             return item
 
         if not item.has_valid_country_code():
@@ -96,7 +115,15 @@ class ApplyNSICategoriesPipeline:
             # https://github.com/osmlab/name-suggestion-index
             self.crawler.stats.inc_value("atp/nsi/match_failed")
             self.crawler.stats.inc_value("atp/nsi/brand_unknown")
+
+            # If the Feature has a Categories Enum member supplied as a value
+            # in the 'category' property, tags need to be copied into the
+            # 'extras' property of the Feature.
+            if isinstance(item.get("category"), Categories):
+               self.copy_feature_category_to_extras_dict(item)
+
             return item
+
         elif len(nsi_matches) == 0 and item.get("operator_wikidata"):
             # Failure to match due to the ATP item specifying a Wikidata item
             # for an operator, but NSI does not know of this Wikidata item.
@@ -104,6 +131,13 @@ class ApplyNSICategoriesPipeline:
             # https://github.com/osmlab/name-suggestion-index
             self.crawler.stats.inc_value("atp/nsi/match_failed")
             self.crawler.stats.inc_value("atp/nsi/operator_unknown")
+
+            # If the Feature has a Categories Enum member supplied as a value
+            # in the 'category' property, tags need to be copied into the
+            # 'extras' property of the Feature.
+            if isinstance(item.get("category"), Categories):
+               self.copy_feature_category_to_extras_dict(item)
+
             return item
 
         # Sometimes a brand and operator are the same across both NSI's
@@ -131,6 +165,13 @@ class ApplyNSICategoriesPipeline:
                 # warehouses.
                 self.crawler.stats.inc_value("atp/nsi/match_failed")
                 self.crawler.stats.inc_value("atp/nsi/category_unknown")
+
+                # If the Feature has a Categories Enum member supplied as a value
+                # in the 'category' property, tags need to be copied into the
+                # 'extras' property of the Feature.
+                if isinstance(item.get("category"), Categories):
+                    self.copy_feature_category_to_extras_dict(item)
+
                 return item
 
         location_code = item.get_iso_3166_2_code()
@@ -145,6 +186,13 @@ class ApplyNSICategoriesPipeline:
             # to operate in 3 countries, but Andorra ("AD") is not one them.
             self.crawler.stats.inc_value("atp/nsi/match_failed")
             self.crawler.stats.inc_value("atp/nsi/location_unknown")
+
+            # If the Feature has a Categories Enum member supplied as a value
+            # in the 'category' property, tags need to be copied into the
+            # 'extras' property of the Feature.
+            if isinstance(item.get("category"), Categories):
+               self.copy_feature_category_to_extras_dict(item)
+
             return item
 
         if len(nsi_matches) == 1 and (not get_category_tags(item) or not location_code):
@@ -172,6 +220,13 @@ class ApplyNSICategoriesPipeline:
         # unknown which of the multiple NSI matches to apply.
         self.crawler.stats.inc_value("atp/nsi/match_failed")
         self.crawler.stats.inc_value("atp/nsi/multiple_matches")
+
+        # If the Feature has a Categories Enum member supplied as a value
+        # in the 'category' property, tags need to be copied into the
+        # 'extras' property of the Feature.
+        if isinstance(item.get("category"), Categories):
+            self.copy_feature_category_to_extras_dict(item)
+
         return item
 
     @staticmethod
@@ -290,3 +345,33 @@ class ApplyNSICategoriesPipeline:
                 if extras.get(key) is None:
                     extras[key] = value
         item["extras"] = extras
+
+    @staticmethod
+    def copy_feature_category_to_extras_dict(item: Feature) -> None:
+        """
+        For a Feature with a Categories Enum member supplied in the 'category'
+        property, copy the tags of this Categories Enum member to the 'extras'
+        property of the Feature.
+
+        If NSI matching is successful, this function would not be called and
+        the 'extras' property of the Feature is instead populated with tags
+        retrieved from the successfully matched NSI entry.
+
+        If NSI matching is not possible, the spider may have set the
+        'category' property and been hopeful for an NSI match, which has not
+        been able to occur successfully. The spider's setting of the
+        'category' property allows tags of this Categories Enum member to be
+        used instead of the tags that would have been otherwise retrieved
+        from a matching NSI entry.
+        :param item: Feature that will, if possible, have tags from the
+                     'category' property (Categories Enum member) copied to
+                     the Feature's 'extras' property.
+        """
+        if category := item.get("category"):
+            if not isinstance(category, Categories):
+                return
+            tags = category.value
+            if not item.get("extras"):
+                item["extras"] = {}
+            for key, value in tags.items():
+                item["extras"][key] = value

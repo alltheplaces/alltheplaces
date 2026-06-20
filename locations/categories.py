@@ -454,21 +454,83 @@ class Categories(Enum):
     NATURAL_TREE = {"natural": "tree"}
 
 
-def apply_category(category: Mapping | Enum, item: Feature | dict) -> None:
+def apply_category(category: Mapping | Categories, item: Feature | dict) -> None:
     """
-    Apply categories to a Feature, where categories can be supplied as a
-    single Enum, or dictionary of key-value strings.
-    :param category: Either an Enum member representing a single category to
-                     add, or a dictionary of key-value strings representing
-                     a category to add.
-    :param item: Feature to which categories should be added to.
+    This 'apply_category' method has been replaced by use of the 'categories'
+    property of the 'Feature' class. It is preferred for a spider to set this
+    category property with either of:
+    1. item_attributes = {"brand": "ACME", "category": Categories.SHOP_WINE}
+    2. item["category"] = Categories.SHOP_WINE
+
+    For older spiders which still rely on this function, current behaviour of
+    this function is documented below.
+
+    A 'category' in ATP corresponds to categories defined in NSI
+    (see https://nsi.guide for list of categories). ATP uses this 'category'
+    to look up an entry in NSI for the Feature extracted to allow additional
+    attributes for the Feature to be automatically populated for the Feature.
+    For example, setting a category of 'amenity=fast_food' in ATP will allow
+    ATP to match a feature with the relevant brand in NSI and then additional
+    attributes such as 'cuisine=chicken' can automatically be added to the ATP
+    feature.
+
+    It's important to note this primary intended use of NSI matching because
+    if there exists a conflict between tagging in OSM and NSI, it is
+    preferred to use the NSI tagging scheme. This issue is seen, for example,
+    with deprecation of amenity=school on OSM and replacement with a new
+    tol level category tag of education=school. If NSI has not yet migrated
+    to use of education=school then it is preferred to follow whatever scheme
+    NSI is currently using.
+
+    This function will apply a 'category' to a Feature. A Feature should only
+    ever have one 'category' declared. Historically, ATP didn't enforce this
+    contraint because ATP stored the category in the 'extras' dictionary which
+    is a property of the Feature class. Spiders were free to add any number of
+    category tags into this 'extras' dictionary, such as:
+      item["extras"] = {"shop": "wine", "amenity": "parking"}
+    For this example, a spider may have set these tags for a single POI that
+    corresponds to a wine cellar shop at a vineyard, as well as customer
+    parking at the vineyard. The correct expectation for ATP spiders is the
+    shop and the parking area should be extracted as two separate features,
+    each with one top level category tag only.
+
+    A 'category' property has more recently been added to the Feature class in
+    ATP to ensure that only one top level category is applied at a time. By
+    passing a member of the Categories Enum member to this function, the
+    'category' property will be replaced with the supplied Categories Enum
+    member. No change is made the 'extras' property of the Feature.
+
+    If a Mapping (dict) is instead supplied to this function, a top level
+    category supplied in this dictionary, such as shop=wine, will be added
+    to the supplied Feature within the 'extras' property (a dictionary). This
+    function will do nothing if the supplied Mapping does not contain a top
+    level category. Do not add two top level categories to the Mapping
+    supplied. Refer to the documentation for the get_category_tags function
+    for more detail on how top level categories are decided. It is always
+    preferred to create a new member of the Categories Enum instead of
+    passing a Mapping (dict) to this function.
+
+    ATP will automatically attempt to use the 'category' property of each
+    Feature class to find a matching entry in NSI, and tags for that entry
+    in NSI will then be added to the 'extras' property of the Feature class.
+    If the Feature has not defined a value for the 'category' property, the
+    get_category_tags function will instead be used to read the 'extras'
+    property of the Feature to determine a top level category to use for
+    matching to an entry in NSI.
+
+    :param category: Either a Categories Enum member representing a single
+                     category to add, or a Mapping (e.g. dictionary) with a
+                     single key-value pair of strings representing a category
+                     to add.
+    :param item: Feature to which the category should be added to.
     """
-    if isinstance(category, Enum):
-        tags = category.value
+    if isinstance(category, Categories):
+        tags = {}
+        item["category"] = category
     elif isinstance(category, Mapping):
-        tags = category
+        tags = get_category_tags(category)
     else:
-        raise TypeError("dict or Enum required")
+        raise TypeError("Supplied top level categories must be a Categories Enum member (preferred) or Mapping (dict).")
 
     if not item.get("extras"):
         item["extras"] = {}
@@ -545,7 +607,10 @@ def get_category_tags(source: Feature | Enum | Mapping) -> dict:
              which are not top-level are ignored.
     """
     if isinstance(source, Feature):
-        tags = source.get("extras", {})
+        if isinstance(source.get("category"), Categories):
+            tags = source["category"].value
+        else:
+            tags = source.get("extras", {})
     elif isinstance(source, Enum):
         tags = source.value
     elif isinstance(source, Mapping):
