@@ -13,6 +13,7 @@ class OutdoorWarehouseNAZASpider(JSONBlobSpider):
     }
     start_urls = ["https://www.outdoorwarehouse.co.za/store-locator"]
     skip_auto_cc_domain = True
+    requires_proxy = "ZA"
 
     def extract_json(self, response):
         return chompjs.parse_js_object(response.xpath("//store-selector").get())
