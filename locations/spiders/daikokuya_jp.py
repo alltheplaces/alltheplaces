@@ -14,8 +14,8 @@ class DaikokuyaJPSpider(LocationCloudSpider):
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
 
-        item["branch"] = source_feature["name"].removesuffix("大黒屋 ")
-        item["extras"]["branch:en"] = source_feature.get("ruby").removesuffix("Daikokuya ")
+        item["branch"] = source_feature["name"].removeprefix("大黒屋 ")
+        item["extras"]["branch:ja-Hira"] = source_feature.get("ruby").removeprefix("だいこくや ")
         item["addr_full"] = re.sub(r"<\/?.*>", "", source_feature.get("address_name"))  # removes HTML
 
         apply_category(Categories.SHOP_PAWNBROKER, item)
