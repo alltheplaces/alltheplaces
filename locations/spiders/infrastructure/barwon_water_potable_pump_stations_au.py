@@ -9,7 +9,11 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 
 class BarwonWaterPotablePumpStationsAUSpider(ArcGISFeatureServerSpider):
     name = "barwon_water_potable_pump_stations_au"
-    item_attributes = {"operator": "Barwon Water", "operator_wikidata": "Q4865988", "category": Categories.PUMPING_STATION_WATER}
+    item_attributes = {
+        "operator": "Barwon Water",
+        "operator_wikidata": "Q4865988",
+        "category": Categories.PUMPING_STATION_WATER,
+    }
     host = "services8.arcgis.com"
     context_path = "uLK1YQYKdEhgFHsx/ArcGIS"
     service_id = "Barwon_Water_Water_Assets"

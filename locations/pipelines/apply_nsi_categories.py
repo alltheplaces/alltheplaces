@@ -30,7 +30,7 @@ class ApplyNSICategoriesPipeline:
             # in the 'category' property, tags need to be copied into the
             # 'extras' property of the Feature.
             if isinstance(item.get("category"), Categories):
-               self.copy_feature_category_to_extras_dict(item)
+                self.copy_feature_category_to_extras_dict(item)
 
             return item
 
@@ -46,7 +46,7 @@ class ApplyNSICategoriesPipeline:
             # in the 'category' property, tags need to be copied into the
             # 'extras' property of the Feature.
             if isinstance(item.get("category"), Categories):
-               self.copy_feature_category_to_extras_dict(item)
+                self.copy_feature_category_to_extras_dict(item)
 
             return item
 
@@ -120,7 +120,7 @@ class ApplyNSICategoriesPipeline:
             # in the 'category' property, tags need to be copied into the
             # 'extras' property of the Feature.
             if isinstance(item.get("category"), Categories):
-               self.copy_feature_category_to_extras_dict(item)
+                self.copy_feature_category_to_extras_dict(item)
 
             return item
 
@@ -136,7 +136,7 @@ class ApplyNSICategoriesPipeline:
             # in the 'category' property, tags need to be copied into the
             # 'extras' property of the Feature.
             if isinstance(item.get("category"), Categories):
-               self.copy_feature_category_to_extras_dict(item)
+                self.copy_feature_category_to_extras_dict(item)
 
             return item
 
@@ -191,7 +191,7 @@ class ApplyNSICategoriesPipeline:
             # in the 'category' property, tags need to be copied into the
             # 'extras' property of the Feature.
             if isinstance(item.get("category"), Categories):
-               self.copy_feature_category_to_extras_dict(item)
+                self.copy_feature_category_to_extras_dict(item)
 
             return item
 
