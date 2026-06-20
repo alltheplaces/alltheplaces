@@ -13,7 +13,7 @@ class ArclandSpider(LocationCloudSpider):
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
         if "os" in source_feature["code"]:
-            return # skip places with fake locations
+            return  # skip places with fake locations
 
         match source_feature["categories"][0]["name"]:
             case "かつや":
