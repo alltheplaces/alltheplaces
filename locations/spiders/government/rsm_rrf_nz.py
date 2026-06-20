@@ -62,7 +62,9 @@ class RsmRrfNZSpider(Spider):
         if total_items >= 100000:
             f_low_mhz = response.meta["f_low_mhz"]
             f_high_mhz = response.meta["f_high_mhz"]
-            error_message = "More than 100000 results returned from query of frequency range {}-{}MHz. Results have been truncated as only the first 100000 results are provided by the API.".format(f_low_mhz, f_high_mhz)
+            error_message = "More than 100000 results returned from query of frequency range {}-{}MHz. Results have been truncated as only the first 100000 results are provided by the API.".format(
+                f_low_mhz, f_high_mhz
+            )
             raise RuntimeError(error_message)
             return
 
