@@ -19,12 +19,14 @@ class ArclandSpider(LocationCloudSpider):
             case "かつや":
                 item["brand_wikidata"] = "Q2855257"
                 item["branch"] = source_feature.get("name").removeprefix("かつや ")
-                item["extras"]["branch:ja-Hira"] = source_feature.get("ruby").removeprefix("カツヤ ")
+                if ruby := source_feature.get("ruby"):
+                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("カツヤ ")
                 apply_category(Categories.FAST_FOOD, item)
             case "からやま":
                 item["brand_wikidata"] = "Q96145071"
                 item["branch"] = source_feature.get("name").removeprefix("からやま ")
-                item["extras"]["branch:ja-Hira"] = source_feature.get("ruby").removeprefix("カラヤマ ")
+                if ruby := source_feature.get("ruby"):
+                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("カラヤマ ")
                 apply_category(Categories.RESTAURANT, item)
             case _:
                 item["brand"] = source_feature["categories"][0]["name"]
