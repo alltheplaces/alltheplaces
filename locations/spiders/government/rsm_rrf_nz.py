@@ -60,6 +60,8 @@ class RsmRrfNZSpider(Spider):
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         total_items = response.json()["totalItems"]
         if total_items >= 100000:
+            f_low_mhz = response.meta["f_low_mhz"]
+            f_high_mhz = response.meta["f_high_mhz"]
             raise Exception(
                 "More than 100000 results returned from query of frequency range {}-{}MHz. Results have been truncated as only the first 100000 results are provided by the API.".format(
                     f_low_mhz, f_high_mhz
