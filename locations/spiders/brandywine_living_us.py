@@ -1,6 +1,7 @@
 import json
 import re
 from typing import Any
+from urllib.parse import quote
 
 import scrapy
 from scrapy.http import Response
@@ -22,9 +23,8 @@ class BrandywineLivingUSSpider(scrapy.Spider):
             location.update(location.pop("address"))
             item = DictParser.parse(location)
             item["street_address"] = location["address_1"]
-            item["website"] = "https://www.brandycare.com/community/" + item["name"].lower().replace(
-                "community - ", ""
-            ).replace(" ", "-")
+            slug = item["name"].lower().replace("community - ", "").replace(" ", "-")
+            item["website"] = "https://www.brandycare.com/community/" + quote(slug, safe="-")
             item["ref"] = location["communityid"]
             apply_category(Categories.NURSING_HOME, item)
 
