@@ -17,6 +17,8 @@ class DaitoJPSpider(LocationCloudSpider):
     website_formatter = "https://pkg.navitime.co.jp/daitobank/spot/detail?code={}"
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
+        if not source_feature.get("categories"):
+            return
 
         match source_feature["categories"][0]["code"]:
             case "01":
@@ -27,7 +29,8 @@ class DaitoJPSpider(LocationCloudSpider):
             case _:
                 return
 
-        item["branch"] = source_feature.get("name").removesuffix("出張所")
-        item["extras"]["branch:ja-Hira"] = source_feature.get("ruby")
+        item["branch"] = (source_feature.get("name") or "").removesuffix("出張所")
+        if ruby := source_feature.get("ruby"):
+            item["extras"]["branch:ja-Hira"] = ruby
 
         yield item
