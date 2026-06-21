@@ -17,18 +17,20 @@ class FirstBankToyamaJPSpider(LocationCloudSpider):
     website_formatter = "https://pkg.navitime.co.jp/first-bank/spot/detail?code={}"
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
-
-        match source_feature["categories"][0]["code"]:
-            case "01":
-                apply_category(Categories.BANK, item)
-                item["extras"]["atm"] = "yes"
-            case "02":
-                apply_category(Categories.ATM, item)
-            case "03":
-                apply_category(Categories.BANK, item)
-                item["extras"]["atm"] = "no"
-            case _:
-                apply_category(Categories.BANK, item)
+        if not source_feature.get("categories"):
+            apply_category(Categories.BANK, item)
+        else:
+            match source_feature["categories"][0]["code"]:
+                case "01":
+                    apply_category(Categories.BANK, item)
+                    item["extras"]["atm"] = "yes"
+                case "02":
+                    apply_category(Categories.ATM, item)
+                case "03":
+                    apply_category(Categories.BANK, item)
+                    item["extras"]["atm"] = "no"
+                case _:
+                    apply_category(Categories.BANK, item)
 
         item["branch"] = source_feature["name"]
 
