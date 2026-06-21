@@ -42,16 +42,16 @@ class DbeGovSchoolsZASpider(Spider):
     # Links obtained from https://www.education.gov.za/Programmes/EMIS/EMISDownloads.aspx
     # It doesn't look like they can be reliably fetched if the page updates with newer data, so require manually updating
     start_urls = [
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=QtU12HAAgYs%3d&tabid=466&portalid=0&mid=13863",  # Eastern Cape
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=q5e0rgNbUts%3d&tabid=466&portalid=0&mid=13863",  # Free State
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=Y9-BKLYjVw8%3d&tabid=466&portalid=0&mid=13863",  # Gauteng
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=riJ7nu90xvc%3d&tabid=466&portalid=0&mid=13863",  # KwaZulu-Natal
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=7usFT-ftgEE%3d&tabid=466&portalid=0&mid=13863",  # Limpopo
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=7TNi-DL2R5I%3d&tabid=466&portalid=0&mid=13863",  # Mpumalanga
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=ueZPh5vTaPY%3d&tabid=466&portalid=0&mid=13863",  # North West
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=XTSyAV7-aeM%3d&tabid=466&portalid=0&mid=13863",  # Northern Cape
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=nYA_9hgidqc%3d&tabid=466&portalid=0&mid=13863",  # Western Cape
-        "https://www.education.gov.za/LinkClick.aspx?fileticket=A5xNnnbCgas%3d&tabid=466&portalid=0&mid=13863",  # Special Needs Educatiom
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=e6lMsXIcB7o%3d&tabid=466&portalid=0&mid=14616",  # Eastern Cape
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=PseEZWkRtV4%3d&tabid=466&portalid=0&mid=14616",  # Free State
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=mlHofRzcFX0%3d&tabid=466&portalid=0&mid=14616",  # Gauteng
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=Uo_ivbMxWpE%3d&tabid=466&portalid=0&mid=14616",  # KwaZulu-Natal
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=4vuFhKYNH_M%3d&tabid=466&portalid=0&mid=14616",  # Limpopo
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=6SXgSqRAckM%3d&tabid=466&portalid=0&mid=14616",  # Mpumalanga
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=1F4TEaSVt34%3d&tabid=466&portalid=0&mid=14616",  # North West
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=zPQtOgy47iE%3d&tabid=466&portalid=0&mid=14616",  # Northern Cape
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=gTqCBRz5VAI%3d&tabid=466&portalid=0&mid=14616",  # Western Cape
+        "https://www.education.gov.za/LinkClick.aspx?fileticket=8x1LctBf_pw%3d&tabid=466&portalid=0&mid=14616",  # Special Needs Educatiom
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -77,30 +77,28 @@ class DbeGovSchoolsZASpider(Spider):
             item["ref"] = location["NatEmis"]
             item["extras"]["ref:ZA:emis"] = location["NatEmis"]
 
-            if location.get("Type_DoE") == "ORDINARY SCHOOL":
-                # Normalise column names
-                if location["Province"] in ["GT"]:
-                    location["GIS_Latitude"] = location.get("Latitude")
-                    location["GIS_Longitude"] = location.get("Longitude")
-                    location["Official_Institution_Name"] = location.get("Institution_Name")
+            # Normalise column names
+            if location["Province"] in ["GT"]:
+                location["GIS_Latitude"] = location.get("GIS_Lat")
+                location["GIS_Longitude"] = location.get("GIS_Long")
 
-                item["lat"] = location.get("GIS_Latitude")
-                item["lon"] = location.get("GIS_Longitude")
+            item["lat"] = location.get("GIS_Latitude")
+            item["lon"] = location.get("GIS_Longitude")
 
-                # Coordinates are reversed in the data for most locations
-                if (
-                    location["Province"] in ["EC"]
-                    and item.get("lon") is not None
-                    and item.get("lat") is not None
-                    and str(item["lon"])[0] == "-"
-                ):
-                    item["lat"], item["lon"] = item["lon"], item["lat"]
+            # Coordinates are reversed in the data for most locations
+            if (
+                location["Province"] in ["EC"]
+                and item.get("lon") is not None
+                and item.get("lat") is not None
+                and str(item["lon"])[0] == "-"
+            ):
+                item["lat"], item["lon"] = item["lon"], item["lat"]
 
-                # Coordinates are stored without decimal point and reversed
-                if location["Province"] in ["NC"] and item.get("lon") is not None and item.get("lat") is not None:
-                    item["lat"], item["lon"] = item["lon"], item["lat"]
-                    item["lat"] = str(item["lat"])[:3] + "." + str(item["lat"])[3:]
-                    item["lon"] = str(item["lon"])[:2] + "." + str(item["lon"])[2:]
+            # Coordinates are stored without decimal point and reversed
+            if location["Province"] in ["NC"] and item.get("lon") is not None and item.get("lat") is not None:
+                item["lat"], item["lon"] = item["lon"], item["lat"]
+                item["lat"] = str(item["lat"])[:3] + "." + str(item["lat"])[3:]
+                item["lon"] = str(item["lon"])[:2] + "." + str(item["lon"])[2:]
 
             if location.get("Town_City") not in [None, 99]:
                 item["city"] = location.get("Town_City").title().replace("'S", "'s")
