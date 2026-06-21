@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class AeonHokkaidoJPSpider(Spider):
     name = "aeon_hokkaido_jp"
-    item_attributes = {"brand": "AEON", "brand_wikidata": "Q11285951"}
+    item_attributes = {"brand": "イオン", "brand_wikidata": "Q11285951"}
 
     BRAND_MAPPING = {
         "01": ("イオン", "Q11285951", Categories.SHOP_SUPERMARKET),
