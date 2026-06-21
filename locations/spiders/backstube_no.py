@@ -24,7 +24,7 @@ class BackstubeNOSpider(Spider):
             item["name"] = "Backstube"
             item["branch"] = name
             item["website"] = "https://backstube.no/visit-us"
-            item["street_address"] = location.css(".location-info::text").get().strip()
+            item["street_address"] = location.css(".location-info::text").get("").strip() or None
 
             hours = location.css(".location-hour div::text").getall()
             if hours:
