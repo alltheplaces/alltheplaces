@@ -39,6 +39,8 @@ class PlumblinkNAZASpider(JSONBlobSpider):
             await page.close()
 
         auth_cookie = next((c for c in cookies if c["name"] == "_ng_eslv_token"), None)
+        if not auth_cookie:
+            return
 
         yield FormRequest(url=self.start_urls[0], headers={"authorization": auth_cookie["value"]})
 
