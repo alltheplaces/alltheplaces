@@ -7,7 +7,11 @@ from locations.storefinders.location_cloud import LocationCloudSpider
 
 class FirstBankToyamaJPSpider(LocationCloudSpider):
     name = "first_bank_toyama_jp"
-    item_attributes = {"brand": "富山第一銀行", "brand_wikidata": "Q11456838", "extras": {"brand:en": "First Bank of Toyama"},}
+    item_attributes = {
+        "brand": "富山第一銀行",
+        "brand_wikidata": "Q11456838",
+        "extras": {"brand:en": "First Bank of Toyama"},
+    }
     api_endpoint = "https://pkg.navitime.co.jp/first-bank/api/proxy2/shop/list"
     additional_args = "&category=01.02.03.04"
     website_formatter = "https://pkg.navitime.co.jp/first-bank/spot/detail?code={}"
