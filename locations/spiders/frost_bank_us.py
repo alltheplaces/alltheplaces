@@ -62,6 +62,7 @@ class FrostBankUSSpider(YextSearchSpider):
                 item["phone"] = "; ".join(phones)
             else:
                 item.pop("phone", None)
+        item.pop("email", None)
 
         if profile.get("c_bankLocationType") == "Branch":
             item.pop("name", None)
