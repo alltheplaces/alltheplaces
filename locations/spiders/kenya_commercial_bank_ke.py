@@ -15,7 +15,10 @@ class KenyaCommercialBankKESpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.BANK, item)
+
         item.pop("email")
+        item.pop("phone")
+
         item["branch"] = item.pop("name").removeprefix("KCB ")
 
         try:
