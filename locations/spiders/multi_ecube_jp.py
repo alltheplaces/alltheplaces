@@ -55,7 +55,7 @@ class MultiEcubeJPSpider(Spider):
                 item["image"] = img["url"]
                 break
 
-        item["extras"]["amenity"] = "left_luggage"
+        item["extras"]["amenity"] = "luggage_locker"
         yield item
 
     def _parse_hours(self, bh: dict) -> OpeningHours:
