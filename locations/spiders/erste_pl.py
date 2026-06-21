@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class ErstePLSpider(Spider):
     name = "erste_pl"
-    item_attributes = {"brand": "Erste", "brand_wikidata": "Q806653"}
+    item_attributes = {"brand": "Erste Bank Polska", "brand_wikidata": "Q696867"}
     start_urls = ["https://www.erste.pl/_js_places/places.js"]
 
     def parse(self, response, **kwargs):
@@ -40,7 +40,7 @@ class ErstePLSpider(Spider):
         if category == Categories.ATM:
             item["name"] = None
             item["operator"] = "Erste Bank Polska"
-            item["operator_wikidata"] = "Q806653"
+            item["operator_wikidata"] = "Q696867"
         else:
             item["branch"] = item.get("name")
             item["name"] = "Erste Bank Polska"
