@@ -45,7 +45,7 @@ class KeyFoodUSSpider(Spider):
             location = store.get("location", {})
             item = DictParser.parse(location)
             item["ref"] = store.get("storeId")
-            item["name"] = store.get("displayName").removesuffix(item.get("street_address")).strip()
+            item["name"] = (store.get("displayName") or "").removesuffix(item.get("street_address") or "").strip()
 
             if phones := store.get("phoneNumbers", []):
                 item["phone"] = phones[0].get("value")
