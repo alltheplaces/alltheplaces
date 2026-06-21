@@ -56,10 +56,11 @@ class JackWillsGBSpider(JSONBlobSpider):
         item["branch"] = item.pop("name", "").removesuffix(" JWO").removesuffix(" JW")
         item["phone"] = feature.get("phoneNumber")
         item["website"] = "https://www.jackwills.com" + feature["slug"]
-        item["street_address"] = feature.get("address").get("address")
+        if address := feature.get("address"):
+            item["street_address"] = address.get("address")
 
         item["opening_hours"] = OpeningHours()
-        for rule in feature.get("openingHours"):
+        for rule in feature.get("openingHours") or []:
             item["opening_hours"].add_range(DAYS[int(rule["day"])], rule["openingTime"], rule["closingTime"])
 
         yield item
