@@ -172,7 +172,7 @@ class AcmaRrlAUSpider(Spider):
                 case "CR":
                     properties["extras"]["antenna:polarisation"] = "right hand circular"
                 case "D":
-                    properties["extras"]["antenna:polarisation"] = "dual"
+                    properties["extras"]["antenna:polarisation"] = "dual linear"
                 case "H":
                     properties["extras"]["antenna:polarisation"] = "horizontal linear"
                 case "L":
