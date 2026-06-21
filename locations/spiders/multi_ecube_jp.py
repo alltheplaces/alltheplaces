@@ -4,6 +4,7 @@ from typing import AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -55,7 +56,7 @@ class MultiEcubeJPSpider(Spider):
                 item["image"] = img["url"]
                 break
 
-        item["extras"]["amenity"] = "luggage_locker"
+        apply_category(Categories.LUGGAGE_LOCKER, item)
         yield item
 
     def _parse_hours(self, bh: dict) -> OpeningHours:
