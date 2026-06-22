@@ -18,11 +18,11 @@ class EcboCloakSpider(Spider):
         self._seen: set[str] = set()
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for city in city_locations("JP", 10000):
+        for city in city_locations("JP", 15000):
             yield JsonRequest(
                 url=f"https://search.ecbo.io/api/v1/search?latitude={city['latitude']}&longitude={city['longitude']}",
             )
-        for city in city_locations("TW", 10000):
+        for city in city_locations("TW", 15000):
             yield JsonRequest(
                 url=f"https://search.ecbo.io/api/v1/search?latitude={city['latitude']}&longitude={city['longitude']}",
             )
