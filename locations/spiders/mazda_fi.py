@@ -28,7 +28,7 @@ class MazdaFISpider(Spider):
         for dealer in dealers:
             services = dealer.get("dealerServices", [])
             base = {
-                "branch": dealer["title"],
+                "name": dealer["title"],
                 "lat": dealer.get("latitude"),
                 "lon": dealer.get("longitude"),
                 "street_address": merge_address_lines([dealer.get("address1"), dealer.get("address2")]),
