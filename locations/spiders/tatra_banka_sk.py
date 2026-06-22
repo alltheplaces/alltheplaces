@@ -12,6 +12,8 @@ from locations.items import Feature
 class TatraBankaSKSpider(Spider):
     name = "tatra_banka_sk"
     item_attributes = {"brand": "Tatra banka", "brand_wikidata": "Q1718069"}
+    requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Any]:
         yield FormRequest(
