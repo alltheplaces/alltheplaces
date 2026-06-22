@@ -19,7 +19,6 @@ class LaHalleFRSpider(Spider):
     ]
     allowed_domains = ["www.lahalle.com"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": FIREFOX_LATEST}
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
