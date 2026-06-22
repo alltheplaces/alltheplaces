@@ -1,8 +1,8 @@
-from typing import AsyncIterator, Any
+from typing import Any
 from urllib.parse import urljoin
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
