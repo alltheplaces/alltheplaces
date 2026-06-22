@@ -40,8 +40,8 @@ class CsobSKSpider(Spider):
         item["street_address"] = address.get("street")
         item["city"] = address.get("city")
         item["postcode"] = address.get("postCode")
-        item["phone"] = address.get("phone")
-        item["email"] = address.get("email")
+        item["phone"] = None
+        item["email"] = None
 
         if branch := self.clean_branch(address.get("locationDescr")):
             item["branch"] = branch
