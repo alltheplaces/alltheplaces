@@ -32,8 +32,6 @@ class MazdaTHSpider(JSONBlobSpider):
         feature.update(feature.pop("detail"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name", None)
-
         if feature["ServiceTypeID"] and len(feature["ServiceTypeID"]) > 0:
             service_item = item.deepcopy()
             service_item["ref"] = service_item["ref"] + "_Service"
