@@ -63,4 +63,3 @@ class HyundaiTHSpider(JSONBlobSpider):
             service_item["ref"] = f"{item['ref']}-service"
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
             yield service_item
-
