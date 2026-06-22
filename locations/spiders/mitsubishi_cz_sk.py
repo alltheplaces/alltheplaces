@@ -1,11 +1,12 @@
 import re
+from copy import deepcopy
 from typing import Any
 
 import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -21,18 +22,15 @@ class MitsubishiCZSKSpider(Spider):
             response.xpath('//script[contains(text(), "var locations")]/text()').get()
         ):
             item = DictParser.parse(location)
-            if "prodej" in location["type"]:
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, "servis" in location["type"])
-            elif "servis" in location["type"]:
-                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            yield response.follow(
+                url=location["url"],
+                callback=self.parse_location_details,
+                cb_kwargs=dict(item=item, location_type=location["type"]),
+            )
 
-            yield response.follow(url=location["url"], callback=self.parse_location_details, cb_kwargs=dict(item=item))
-
-    def parse_location_details(self, response: Response, item: Feature) -> Any:
+    def parse_location_details(self, response: Response, item: Feature, location_type: str) -> Any:
         location = response.xpath(f'//*[@class="dealer-info dealer_info_{item["ref"]}"]//*[@class="dealer-detail"]')
         address = location.xpath(".//p[1]/text()").getall()
-        # clean address
         address_end_index = -1
         for index, text in enumerate(address):
             if "IČ:" in text:
@@ -46,4 +44,21 @@ class MitsubishiCZSKSpider(Spider):
         item["email"] = location.xpath('.//a[contains(@href,"mailto:")]/@href').get()
         item["website"] = location.xpath('.//a[contains(text(), "webová stránka")]/@href').get()
         item["extras"]["brand:website"] = response.url
-        yield item
+
+        has_sales = "prodej" in location_type
+        has_service = "servis" in location_type
+
+        if has_sales:
+            sales_item = deepcopy(item)
+            sales_item["ref"] = f"{item['ref']}-sales"
+            apply_category(Categories.SHOP_CAR, sales_item)
+            yield sales_item
+
+        if has_service:
+            service_item = deepcopy(item)
+            service_item["ref"] = f"{item['ref']}-service"
+            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            yield service_item
+
+        if not has_sales and not has_service:
+            yield item
