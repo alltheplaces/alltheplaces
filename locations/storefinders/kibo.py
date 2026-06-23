@@ -47,8 +47,8 @@ class KiboSpider(Spider):
     def parse(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
         try:
             data = response.json()
-        except Exception:
-            data = json.loads(response.xpath("//pre//text()").get())
+        except:
+            data = json.loads(response.xpath("//pre//text()").get() or "{}")
         for location in data.get("items", []):
             self.pre_process_data(location)
             item = DictParser.parse(location)
