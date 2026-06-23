@@ -475,7 +475,10 @@ def apply_category(category: Mapping | Enum, item: Feature | dict) -> None:
         item["extras"] = {}
 
     for key, value in tags.items():
-        item.set_tag(key, value)
+        if key in Feature.fields.keys():
+            item[key] = value
+        else:
+            item["extras"][key] = value
 
 
 def add_list(key: str, value: str, item: Feature) -> None:
@@ -887,8 +890,10 @@ def apply_yes_no(attribute: str | Enum, item: Feature | dict, state: bool, apply
     else:
         tag_value = "yes" if state else "no"
 
-    item.set_tag(tag_key, tag_value)
-
+    if tag_key in Feature.fields.keys():
+        item[tag_key] = tag_value
+    else:
+        item["extras"][tag_key] = tag_value
 
 class Clothes(Enum):
     """
