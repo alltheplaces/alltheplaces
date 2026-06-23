@@ -19,6 +19,5 @@ class NitoriJPSpider(LocationCloudSpider):
 
         item["branch"] = source_feature.get("name", "")
         item["extras"]["branch:ja-Hira"] = source_feature.get("ruby", "")
-        item["phone"] = None
 
         yield item
