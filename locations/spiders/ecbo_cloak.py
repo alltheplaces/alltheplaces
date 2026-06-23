@@ -3,7 +3,7 @@ from typing import AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.geo import city_locations
 from locations.items import Feature
 
@@ -58,9 +58,9 @@ class EcboCloakSpider(Spider):
 
             location_type = location.get("type")
             if location_type == "space":
-                item["extras"]["amenity"] = "left_luggage"
+                apply_category(Categories.LEFT_LUGGAGE, item)
             else:
                 # pudo and locker_cluster types are luggage lockers
-                item["extras"]["amenity"] = "luggage_locker"
+                apply_category(Categories.LUGGAGE_LOCKER, item)
 
             yield item
