@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from typing import Any
 
 import chompjs
@@ -34,7 +35,7 @@ class MitsubishiCHSpider(JSONBlobSpider):
         item["name"] = feature.get("organisation")
         item["website"] = response.urljoin(feature.get("www"))
 
-        # hasSales, hasService fields are always false.Hence, we need to determine category from the POI pages.
+        # hasSales, hasService fields are always false. Hence, we need to determine category from the POI pages.
 
         yield Request(url=item["website"], callback=self.parse_location, cb_kwargs=dict(item=item))
 
@@ -43,12 +44,18 @@ class MitsubishiCHSpider(JSONBlobSpider):
             response.xpath('//*[@class="haendler-heading-details"]//*[@class="haendler-icon-text"]').get("").lower()
         )
 
-        if "verkauf und service" in location_type:
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, True)
-        elif "verkauf" in location_type:
-            apply_category(Categories.SHOP_CAR, item)
-        elif "service" in location_type:
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
+        has_sales = "verkauf" in location_type
+        has_service = "service" in location_type
 
-        yield item
+        if has_sales:
+            sales_item = deepcopy(item)
+            sales_item["ref"] = f"{item['ref']}-sales"
+            apply_category(Categories.SHOP_CAR, sales_item)
+            apply_yes_no(Extras.CAR_REPAIR, sales_item, has_service)
+            yield sales_item
+
+        if has_service:
+            service_item = deepcopy(item)
+            service_item["ref"] = f"{item['ref']}-service"
+            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            yield service_item
