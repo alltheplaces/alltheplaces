@@ -16,7 +16,7 @@ class NitoriJPSpider(LocationCloudSpider):
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
         if source_feature["categories"][0]["code"] == "03":
             return  # skip logistics centers
-        
+
         item["branch"] = source_feature.get("name", "")
         item["extras"]["branch:ja-Hira"] = source_feature.get("ruby", "")
         item["phone"] = f"+81 {source_feature.get('phone', '')}"
