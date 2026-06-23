@@ -8,24 +8,23 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
-API_BASE = "https://customers.garantibbva.com.tr/digital-public/public-atm-branch-ch/v0"
-
 
 class GarantiBbvaTRSpider(Spider):
     name = "garanti_bbva_tr"
     item_attributes = {"brand": "Garanti Bankası", "brand_wikidata": "Q322962"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # API host robots.txt returns HTTP 500
 
     async def start(self) -> AsyncIterator[Request]:
-        for endpoint, ref_prefix, category in [
-            ("branches", "branch", Categories.BANK),
-            ("atms", "atm", Categories.ATM),
-        ]:
-            yield Request(
-                url=f"{API_BASE}/{endpoint}",
-                headers=self.api_headers(),
-                cb_kwargs={"ref_prefix": ref_prefix, "category": category},
-            )
+        yield Request(
+            url="https://customers.garantibbva.com.tr/digital-public/public-atm-branch-ch/v0/branches",
+            headers=self.api_headers(),
+            cb_kwargs={"ref_prefix": "branch", "category": Categories.BANK},
+        )
+        yield Request(
+            url="https://customers.garantibbva.com.tr/digital-public/public-atm-branch-ch/v0/atms",
+            headers=self.api_headers(),
+            cb_kwargs={"ref_prefix": "atm", "category": Categories.ATM},
+        )
 
     def parse(self, response: Response, ref_prefix: str, category: dict[str, str], **kwargs: Any) -> Any:
         for location in response.json():
