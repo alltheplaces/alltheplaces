@@ -3,7 +3,7 @@ from typing import AsyncIterator
 
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 

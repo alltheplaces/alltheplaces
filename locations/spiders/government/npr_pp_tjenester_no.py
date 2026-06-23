@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
-from locations.categories import Categories, apply_category
+from locations.categories import apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.licenses import Licenses
