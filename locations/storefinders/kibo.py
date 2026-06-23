@@ -1,3 +1,4 @@
+import json
 from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
@@ -44,7 +45,11 @@ class KiboSpider(Spider):
             yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}")
 
     def parse(self, response: TextResponse) -> Iterable[Feature | JsonRequest]:
-        for location in response.json()["items"]:
+        try:
+            data = response.json()
+        except Exception:
+            data = json.loads(response.xpath("//pre//text()").get())
+        for location in data.get("items", []):
             self.pre_process_data(location)
             item = DictParser.parse(location)
 
@@ -73,10 +78,10 @@ class KiboSpider(Spider):
 
             yield from self.parse_item(item, location) or []
 
-            self.page_size = response.json()["pageSize"]
-            locations_remaining = response.json()["totalCount"] - (response.json()["startIndex"] + self.page_size)
+            self.page_size = data["pageSize"]
+            locations_remaining = data["totalCount"] - (data["startIndex"] + self.page_size)
             if locations_remaining > 0:
-                next_start_index = response.json()["startIndex"] + self.page_size
+                next_start_index = data["startIndex"] + self.page_size
                 yield JsonRequest(url=f"{self.start_urls[0]}?pageSize={self.page_size}&startIndex={next_start_index}")
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
