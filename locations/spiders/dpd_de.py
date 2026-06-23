@@ -7,43 +7,37 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class DpdDESpider(scrapy.Spider):
     name = "dpd_de"
     DPD = {"brand": "DPD", "brand_wikidata": "Q541030"}
     start_urls = ["https://my.dpd.de/shopfinder.aspx"]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
         searchable_point_files = [
             "eu_centroids_20km_radius_country.csv",
         ]
+        view_state = response.xpath('//*[@name="__VIEWSTATE"]/@value').get()
+        state_generator = response.xpath('//*[@name="__VIEWSTATEGENERATOR"]/@value').get()
+        event_validation = response.xpath('//*[@name="__EVENTVALIDATION"]/@value').get()
 
         for point_file in searchable_point_files:
+
             with open_searchable_points(point_file) as open_file:
                 results = csv.DictReader(open_file)
                 for result in results:
                     if result["country"] == "DE":
                         formdata = {
-                            "ctl00$hidMarkerHouse": "https://my.dpd.de/themes/Icons/summer2020/house.svg",
-                            "ctl00$hidMarkerShop": "https://my.dpd.de/themes/Icons/summer2020/parcelshop.svg",
-                            "ctl00$hidMarkerShop_Active": "https://my.dpd.de/themes/Icons/summer2020/parcelshop_active.svg",
-                            "ctl00$hidMarkerCar_Left": "https://my.dpd.de/themes/Icons/summer2020/car_left.svg",
-                            "ctl00$hidMarkerCar_Right": "https://my.dpd.de/themes/Icons/summer2020/car_right.svg",
-                            "ctl00$hidMarkerNeighbour": "https://my.dpd.de/themes/Icons/summer2020/neighbour.svg",
-                            "ctl00$hidAudio_Car": "https://my.dpd.de/themes/Sounds/summer2020/car.mp3",
-                            "ctl00$hidAudio_House": "https://my.dpd.de/themes/Sounds/summer2020/house.mp3",
-                            "ctl00$hidScaleFactorHouse": "100",
-                            "ctl00$hidScaleFactorShop": "100",
-                            "ctl00$hidScaleFactorCar": "100",
-                            "ctl00$hidScaleFactorNeighbour": "100",
-                            "ctl00$ContentPlaceHolder1$modShopFinder$hidPermissionError": "Bitte+aktivieren+Sie+die+Standortermittlung+in+den+Systemeinstellungen.",
                             "ctl00$ContentPlaceHolder1$modShopFinder$txtShopSearch": result["latitude"]
                             + ","
                             + result["longitude"],
-                            "ctl00$ContentPlaceHolder1$modShopFinder$hidShopFindMoreShopsBTN": "weitere+Paketshops",
-                            "ctl00$ContentPlaceHolder1$modShopFinder$hidDistanceUnit": "Entfernung+!VALUE!+km",
                             "__EVENTTARGET": "ctl00$ContentPlaceHolder1$modShopFinder$btnShopSearch",
+                            "__VIEWSTATE": view_state,
+                            "__VIEWSTATEGENERATOR": state_generator,
+                            "__EVENTVALIDATION": event_validation,
                         }
 
                         rq = FormRequest.from_response(
