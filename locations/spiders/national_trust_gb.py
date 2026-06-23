@@ -1,6 +1,6 @@
 from scrapy import Spider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -18,6 +18,6 @@ class NationalTrustGBSpider(Spider):
             item["ref"] = data["id"]["value"]
             item["image"] = data["imageUrl"]
 
-            apply_category({"tourism": "attraction"}, item)
+            apply_category(Categories.TOURISM_ATTRACTION, item)
 
             yield item

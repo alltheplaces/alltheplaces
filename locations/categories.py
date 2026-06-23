@@ -351,7 +351,6 @@ class Categories(Enum):
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
-    POST_PARTNER = {"post_office": "post_partner"}
     PREP_SCHOOL = {"amenity": "prep_school"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
@@ -476,10 +475,7 @@ def apply_category(category: Mapping | Enum, item: Feature | dict) -> None:
         item["extras"] = {}
 
     for key, value in tags.items():
-        if key in Feature.fields.keys():
-            item[key] = value
-        else:
-            item["extras"][key] = value
+        item.set_tag(key, value)
 
 
 def add_list(key: str, value: str, item: Feature) -> None:
@@ -487,8 +483,7 @@ def add_list(key: str, value: str, item: Feature) -> None:
         raise Exception("keys must be strings")
     if not isinstance(value, str):
         raise Exception("list values must be strings")
-    existing_value = item.get(key) if key in Feature.fields.keys() else item["extras"].get(key)
-    if existing_value:
+    if existing_value := item.get_tag(key):
         if not isinstance(existing_value, str):
             raise Exception("list values must be strings")
         existing_values = existing_value.split(";")
@@ -497,11 +492,7 @@ def add_list(key: str, value: str, item: Feature) -> None:
     if value not in existing_values:
         existing_values.append(value)
     existing_values.sort()
-
-    if key in Feature.fields.keys():
-        item[key] = ";".join(existing_values)
-    else:
-        item["extras"][key] = ";".join(existing_values)
+    item.set_tag(key, ";".join(existing_values))
 
 
 top_level_tags = [
@@ -895,7 +886,8 @@ def apply_yes_no(attribute: str | Enum, item: Feature | dict, state: bool, apply
         tag_key, tag_value = tag_key.split("=")
     else:
         tag_value = "yes" if state else "no"
-    apply_category({tag_key: tag_value}, item)
+
+    item.set_tag(tag_key, tag_value)
 
 
 class Clothes(Enum):

@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.licenses import Licenses
@@ -103,7 +103,8 @@ class NprPPTjenesterNOSpider(Spider):
 
         # Category: PP-tjenesten is a municipal/county government educational-psychological service
         # that supports schools and kindergartens with special education needs assessment
-        apply_category({"office": "government", "government": "education"}, item)
+        apply_category({"office": "government"}, item)
+        item.set_tag("government", "education")
 
         yield item
 

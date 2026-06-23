@@ -55,9 +55,10 @@ class SylinderSpider(Spider):
                 case "ZPROPN":
                     apply_yes_no(Fuel.PROPANE, item, True)
                 case code if brand := self.shop_service_post_partners.get(code):
-                    apply_category({"post_office": "post_partner", "post_office:brand": brand}, item)
+                    item.set_tag("post_office", "post_partner")
+                    item.set_tag("post_office:brand", brand)
                 case code if brand := self.shop_service_parcel_pickup.get(code):
-                    apply_category({"post_office:parcel_pickup": brand}, item)
+                    item.set_tag("post_office:parcel_pickup", brand)
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         if self.base_url is None and self.warn_if_no_base_url:

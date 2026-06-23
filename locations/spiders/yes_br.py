@@ -3,7 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -28,5 +28,5 @@ class YesBRSpider(JSONBlobSpider):
         item["street_address"] = feature.get("street1")
         item["street"] = feature.get("street2")
         item["branch"] = item.pop("name").replace("YES! ", "")
-        apply_category({"amenity": "language_school"}, item)
+        apply_category(Categories.LANGUAGE_SCHOOL, item)
         yield item

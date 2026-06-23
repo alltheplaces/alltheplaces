@@ -28,8 +28,8 @@ class MelbourneCityCouncilToiletsAUSpider(JSONBlobSpider):
         ]
 
         apply_category(Categories.TOILETS, item)
-        apply_category({"access": "yes"}, item)
-        apply_category({"fee": "no"}, item)
+        apply_yes_no("access", item, True)
+        apply_yes_no("fee", item, False, True)
         if feature["st_accessible"] and feature["st_accessible"] in ["Yes", "No"]:
             apply_yes_no(Extras.WHEELCHAIR, item, feature["st_accessible"] == "Yes", False)
         if feature["st_baby"] and feature["st_baby"] in ["Yes", "No"]:

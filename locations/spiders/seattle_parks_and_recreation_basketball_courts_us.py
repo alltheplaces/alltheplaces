@@ -24,10 +24,10 @@ class SeattleParksAndRecreationBasketballCourtsUSSpider(ArcGISFeatureServerSpide
                 apply_category(Categories.LEISURE_PITCH, item)
                 match feature.get("TYPE"):
                     case "Full":
-                        item["extras"]["hoops"] = 2
+                        item.set_tag("hoops", "2")
                     case "Half":
-                        item["extras"]["hoops"] = 1
+                        item.set_tag("hoops", "1")
                     case _:
                         self.logger.warning("Unknown court type: {}".format(feature["TYPE"]))
-        apply_category({"sport": "basketball"}, item)
+        item.set_tag("sport", "basketball")
         yield item

@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
-from locations.categories import Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -18,7 +18,7 @@ class EnglishHeritageGBSpider(JSONBlobSpider):
         item["website"] = response.urljoin(location["Path"])
         item["image"] = response.urljoin(location["ImagePath"])
 
-        apply_category({"tourism": "attraction"}, item)
+        apply_category(Categories.TOURISM_ATTRACTION, item)
 
         # FACILITIES location["SelectedFacilityList"]
         # 172 cafe/restaurant
