@@ -26,24 +26,21 @@ class CrackerBarrelSpider(SitemapSpider):
 
         hours = OpeningHours()
         for day in DAYS_FULL:
-            start_time = data[f"{day}_Open"]["value"]
-            end_time = data[f"{day}_Close"]["value"]
-            hours.add_range(day[:2], start_time, end_time, "%I:%M %p")
+            hours.add_range(day, data[f"{day}_Open"]["value"], data[f"{day}_Close"]["value"], "%I:%M %p")
 
         properties = {
             "ref": data["Store Number"]["value"],
             "lat": data["Latitude"]["value"],
             "lon": data["Longitude"]["value"],
             "website": response.url,
-            "name": data["Alternate Name"]["value"],
+            "branch": data["Alternate Name"]["value"],
             "street_address": data["Address 1"]["value"],
             "city": data["City"]["value"],
             "state": data["State"]["value"],
             "postcode": data["Zip"]["value"],
             "country": data["Country"]["value"],
             "phone": data["Phone"]["value"],
-            "opening_hours": hours.as_opening_hours(),
+            "opening_hours": hours,
         }
         apply_category(Categories.RESTAURANT, properties)
-        apply_category({"cuisine": "american"}, properties)
         yield Feature(**properties)
