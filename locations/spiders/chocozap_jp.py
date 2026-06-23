@@ -27,12 +27,12 @@ class ChocozapJPSpider(Spider):
         data = response.json()
         for location in data["list"]:
             item = Feature()
-            item["ref"] = location["topics_id"]
+            item["ref"] = location["hacomono_studio_id"]
             item["branch"] = location["name"]
             item["addr_full"] = location["address"]
             item["lat"] = location["coords"]["gmap_y"]
             item["lon"] = location["coords"]["gmap_x"]
-            item["website"] = f"https://chocozap.jp/studios/{location['topics_id']}"
+            item["website"] = f"https://chocozap.jp/studios/{location['hacomono_studio_id']}"
             apply_category(Categories.GYM, item)
             yield item
 
