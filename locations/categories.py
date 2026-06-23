@@ -895,6 +895,7 @@ def apply_yes_no(attribute: str | Enum, item: Feature | dict, state: bool, apply
     else:
         item["extras"][tag_key] = tag_value
 
+
 class Clothes(Enum):
     """
     Clothing categories per https://wiki.openstreetmap.org/wiki/Key:clothes
