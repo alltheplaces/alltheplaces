@@ -25,10 +25,7 @@ class ZiraatBankasiTRSpider(Spider):
         }
 
         # Detail endpoints exist, but require one request per POI; with the project download delay that is a multi-hour crawl.
-        for location_type, category, list_method, width in [
-            ("branch", Categories.BANK, "GetAllSubeText", 8),
-            ("atm", Categories.ATM, "GetAllAtmText", 7),
-        ]:
+        for location_type, list_method, width in [("branch", "GetAllSubeText", 8), ("atm", "GetAllAtmText", 7)]:
             yield JsonRequest(
                 url=f"https://www.ziraatbank.com.tr/tr/_layouts/15/Ziraat/SubeATM/Ajax.aspx/{list_method}",
                 data={},
@@ -37,14 +34,13 @@ class ZiraatBankasiTRSpider(Spider):
                     "X-Requested-With": "XMLHttpRequest",
                 },
                 callback=self.parse_location_list,
-                cb_kwargs={"location_type": location_type, "category": category, "states": states, "width": width},
+                cb_kwargs={"location_type": location_type, "states": states, "width": width},
             )
 
     def parse_location_list(
         self,
         response: Response,
         location_type: str,
-        category: dict[str, str],
         states: dict[str, str],
         width: int,
     ) -> Any:
@@ -68,13 +64,13 @@ class ZiraatBankasiTRSpider(Spider):
                 lon=fields[2].replace(",", "."),
                 state=state,
             )
-            apply_category(category, item)
 
-            if category == Categories.BANK:
-                apply_yes_no(Extras.WHEELCHAIR, item, fields[4] == "1")
+            apply_yes_no(Extras.WHEELCHAIR, item, fields[4] == "1")
+            if location_type == "branch":
+                apply_category(Categories.BANK, item)
             else:
                 apply_yes_no(Extras.CASH_IN, item, fields[3] == "2")
                 apply_yes_no(Extras.CASH_OUT, item, fields[3] == "1")
-                apply_yes_no(Extras.WHEELCHAIR, item, fields[4] == "1")
+                apply_category(Categories.ATM, item)
 
             yield item
