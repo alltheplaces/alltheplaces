@@ -18,7 +18,7 @@ class SeattleParksAndRecreationFootballFieldsUSSpider(ArcGISFeatureServerSpider)
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature.get("OBJECTID"))
         apply_category(Categories.LEISURE_PITCH, item)
-        apply_category({"sport": "american_football"}, item)
+        item.set_tag("sport", "american_football")
         if lit := feature.get("E_LIGHTS"):
             if lit == "Yes":
                 item["extras"]["lit"] = "yes"

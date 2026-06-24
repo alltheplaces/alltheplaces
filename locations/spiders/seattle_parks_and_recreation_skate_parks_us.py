@@ -19,5 +19,5 @@ class SeattleParksAndRecreationSkateParksUSSpider(ArcGISFeatureServerSpider):
         item["ref"] = feature.get("PMAID")
         item["name"] = feature["ALT_NAME"]
         apply_category(Categories.LEISURE_PITCH, item)
-        apply_category({"sport": "skateboard"}, item)
+        item.set_tag("sport", "skateboard")
         yield item

@@ -2,7 +2,7 @@ import json
 
 from scrapy import FormRequest, Selector, Spider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.google_url import extract_google_position
 
@@ -46,5 +46,5 @@ class UptimeBRSpider(Spider):
         item["street_address"] = item.pop("addr_full")
         item["phone"] = "; ".join(filter(None, [branch.get("phone1"), branch.get("phone2")]))
         extract_google_position(item, Selector(text=branch["map"]))
-        apply_category({"amenity": "language_school"}, item)
+        apply_category(Categories.LANGUAGE_SCHOOL, item)
         yield item

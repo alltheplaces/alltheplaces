@@ -20,7 +20,7 @@ class SeattleParksAndRecreationSoccerFieldsUSSpider(ArcGISFeatureServerSpider):
             return
         item["ref"] = str(feature.get("OBJECTID"))
         apply_category(Categories.LEISURE_PITCH, item)
-        apply_category({"sport": "soccer"}, item)
+        item.set_tag("sport", "soccer")
         if lit := feature.get("E_LIGHTS"):
             if lit == "Yes":
                 item["extras"]["lit"] = "yes"

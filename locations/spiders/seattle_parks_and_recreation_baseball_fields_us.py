@@ -22,7 +22,7 @@ class SeattleParksAndRecreationBaseballFieldsUSSpider(ArcGISFeatureServerSpider)
                 apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
             else:
                 apply_category(Categories.LEISURE_PITCH, item)
-        apply_category({"sport": "baseball;softball"}, item)
+        item.set_tag("sport", "baseball;softball")
         if lit := feature.get("E_LIGHTS"):
             if lit == "Yes":
                 item["extras"]["lit"] = "yes"

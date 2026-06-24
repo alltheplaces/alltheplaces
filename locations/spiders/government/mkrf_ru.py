@@ -164,6 +164,6 @@ class MkrfRUSpider(Spider):
             if types := poi_attributes.get("extraFields", {}).get("types"):
                 for type in types:
                     if value := MUSEUM_TYPES.get(type):
-                        apply_category({"museum": value}, item)
+                        item.set_tag("museum", value)
                     else:
                         self.crawler.stats.inc_value(f"atp/{self.name}/museum_types/failed/{type}")

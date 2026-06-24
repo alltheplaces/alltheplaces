@@ -22,18 +22,18 @@ class PudoTRSpider(scrapy.Spider):
             # if no neighborhood, address text only contains ilçe and il
             if neighborhood:
                 d["addr_full"] = f"{item['addressText']} {item['county']} {item['city']}"
-                apply_category({"addr:neighborhood": neighborhood}, d)  # mahalle in Turkish
+                d.set_tag("addr:neighborhood", neighborhood)  # mahalle in Turkish
             else:
                 d["addr_full"] = item["addressText"]
 
             if addr_desc and addr_desc != neighborhood:
-                apply_category({"addr:desc": addr_desc}, d)
+                d.set_tag("addr:desc", addr_desc)
 
             apply_category(Categories.PARCEL_LOCKER, d)
 
             # some of these boxes are in private areas (such as apartment complexes) and not accessible to public
             if item["isPrivate"]:
-                apply_category({"access": "private"}, d)
+                d.set_tag("access", "private")
 
             # all boxes are accessible 24/7
             d["opening_hours"] = "24/7"
