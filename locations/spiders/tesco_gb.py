@@ -3,6 +3,8 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -25,7 +27,7 @@ def set_located_in(brand: {}, item):
         item["located_in_wikidata"] = brand.get("brand_wikidata")
 
 
-class TescoGBSpider(SitemapSpider, StructuredDataSpider):
+class TescoGBSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "tesco_gb"
     TESCO = {"brand": "Tesco", "brand_wikidata": "Q487494"}
     TESCO_EXTRA = {"brand": "Tesco Extra", "brand_wikidata": "Q25172225"}
@@ -34,7 +36,7 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
     TESCO_METRO = {"brand": "Tesco Metro", "brand_wikidata": "Q57551648"}
     item_attributes = TESCO
     sitemap_urls = ["https://www.tesco.com/store-locator/sitemap.xml"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
     requires_proxy = True
     strip_names = [
         "Tesco Café",
