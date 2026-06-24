@@ -32,7 +32,7 @@ class LuminorLTSpider(Spider):
             # Source map settings nest coordinates and town names, so DictParser cannot map the useful fields.
             item = Feature(
                 ref=ref,
-                branch=self.clean_branch(location.get("title")),
+                name=self.clean_branch(location.get("title")),
                 lat=location.get("geolocation", {}).get("lat"),
                 lon=location.get("geolocation", {}).get("lng"),
                 street_address=location.get("address"),
@@ -40,6 +40,7 @@ class LuminorLTSpider(Spider):
             )
 
             if has_branch:
+                item["branch"] = item.pop("name")
                 apply_yes_no(Extras.ATM, item, has_atm)
                 apply_category(Categories.BANK, item)
             else:
