@@ -2,7 +2,7 @@ from typing import Any, AsyncIterator
 from uuid import uuid4
 
 from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy.http import Response, JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -12,28 +12,29 @@ from locations.items import Feature
 class GarantiBbvaTRSpider(Spider):
     name = "garanti_bbva_tr"
     item_attributes = {"brand": "Garanti Bankası", "brand_wikidata": "Q322962"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}  # API host robots.txt returns HTTP 500
 
     async def start(self) -> AsyncIterator[Request]:
-        yield Request(
+        yield JsonRequest(
             url="https://customers.garantibbva.com.tr/digital-public/public-atm-branch-ch/v0/branches",
             headers=self.api_headers(),
-            cb_kwargs={"ref_prefix": "branch", "category": Categories.BANK},
+            cb_kwargs={"ref_prefix": "branch"},
         )
-        yield Request(
+        yield JsonRequest(
             url="https://customers.garantibbva.com.tr/digital-public/public-atm-branch-ch/v0/atms",
             headers=self.api_headers(),
-            cb_kwargs={"ref_prefix": "atm", "category": Categories.ATM},
+            cb_kwargs={"ref_prefix": "atm"},
         )
 
-    def parse(self, response: Response, ref_prefix: str, category: dict[str, str], **kwargs: Any) -> Any:
+    def parse(self, response: Response, ref_prefix: str, **kwargs: Any) -> Any:
         for location in response.json():
             item = self.parse_location(location, ref_prefix)
-            apply_category(category, item)
 
-            if category == Categories.ATM:
+            if ref_prefix == "atm":
                 apply_yes_no(Extras.CASH_IN, item, bool(location.get("deposit")))
                 apply_yes_no(Extras.CASH_OUT, item, bool(location.get("withdraw")))
+                apply_category(Categories.ATM, item)
+            else:
+                apply_category(Categories.BANK, item)
 
             if "orthopedic" in location.get("accessible", []):
                 apply_yes_no(Extras.WHEELCHAIR, item, True)
