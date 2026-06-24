@@ -2,7 +2,7 @@ from typing import Any, AsyncIterator
 from uuid import uuid4
 
 from scrapy import Request, Spider
-from scrapy.http import Response, JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
