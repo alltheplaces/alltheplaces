@@ -13,5 +13,4 @@ class BelkSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow=r"\/store\/.+\/?StoreID=\d+$"), callback="parse_sd")]
     # source JSON is malformed, use json5
     json_parser = "json5"
-    requires_proxy = True
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
