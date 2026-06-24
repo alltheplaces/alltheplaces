@@ -24,22 +24,20 @@ class WorkmanJPSpider(SitemapSpider, StructuredDataSpider):
 
         # Determine brand from store name in JSON-LD
         if store_name.startswith("Workman Colors"):
-            item["brand"] = "Workman Colors"
-            item["brand_wikidata"] = "Q11351660"
-            branch = store_name.removeprefix("Workman Colors").strip()
+            item["branch"] = store_name.removeprefix("Workman Colors").strip()
+            item["name"] = "Workman Colors"
+        elif store_name.startswith("WORKMAN Pro"):
+            item["branch"] = store_name.removeprefix("WORKMAN Pro").strip()
+            item["name"] = "Workman Pro"
         elif "ワークマンプラス2" in store_name:
-            item["brand"] = "ワークマンプラス2"
-            item["brand_wikidata"] = "Q11351660"
-            branch = re.sub(r"ワークマンプラス2\s*", "", store_name).strip()
+            item["branch"] = re.sub(r"ワークマンプラス2\s*", "", store_name).strip()
+            item["name"] = "ワークマンプラス2"
         elif "ワークマンプラス" in store_name:
-            item["brand"] = "ワークマンプラス"
-            item["brand_wikidata"] = "Q11351660"
-            branch = re.sub(r"ワークマンプラス\s*", "", store_name).strip()
+            item["branch"] = re.sub(r"ワークマンプラス\s*", "", store_name).strip()
+            item["name"] = "ワークマンプラス"
         else:
-            branch = re.sub(r"^ワークマン\s*", "", store_name).strip()
-
-        item["branch"] = branch if branch else None
-        item["name"] = None
+            item["branch"] = re.sub(r"^ワークマン\s*", "", store_name).strip()
+            item["name"] = "ワークマン"
 
         # Extract opening hours from the DL address block
         hours_text = (
@@ -58,7 +56,7 @@ class WorkmanJPSpider(SitemapSpider, StructuredDataSpider):
                 item["opening_hours"] = oh
 
         # Remove shared brand logos/placeholder images
-        if "store_photos" not in item["image"]:
+        if "store_photos" not in item.get("image", ""):
             item["image"] = None
 
         apply_category(Categories.SHOP_CLOTHES, item)
