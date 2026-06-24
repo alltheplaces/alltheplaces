@@ -109,6 +109,10 @@ class IccuITSpider(JSONBlobSpider):
 
         self.add_contacts(item, location)
 
+        if website := item.get("website"):
+            if not website.startswith("http") and "://" not in website:
+                item["website"] = "https://{}".format(website)
+
         yield item
 
     def add_contacts(self, item, location: dict):
