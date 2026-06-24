@@ -9,15 +9,6 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
-SHARED_LOGOS = [
-    "i_shop_workman",
-    "i_shop_workmanplus",
-    "i_shop_workmancolors",
-    "plusshop.png",
-    "plusshop-1200",
-    "wp_tenpo-29",
-]
-
 
 class WorkmanJPSpider(SitemapSpider, StructuredDataSpider):
     name = "workman_jp"
@@ -67,7 +58,7 @@ class WorkmanJPSpider(SitemapSpider, StructuredDataSpider):
                 item["opening_hours"] = oh
 
         # Remove shared brand logos/placeholder images
-        if item.get("image") and any(kw in item["image"] for kw in SHARED_LOGOS):
+        if "store_photos" not in item["image"]:
             item["image"] = None
 
         apply_category(Categories.SHOP_CLOTHES, item)
