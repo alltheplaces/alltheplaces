@@ -67,7 +67,7 @@ class DodoPizzaSpider(Spider):
                             open_time=f"{hour.get('WorkingTimeStart') // 3600:02}:{hour.get('WorkingTimeStart') % 3600 // 60:02}",
                             close_time=f"{hour.get('WorkingTimeEnd') // 3600:02}:{hour.get('WorkingTimeEnd') % 3600 // 60:02}",
                         )
-                    item["opening_hours"] = oh.as_opening_hours()
+                    item["opening_hours"] = oh
 
                 except:
                     self.crawler.stats.inc_value("failed_to_parse_hours")

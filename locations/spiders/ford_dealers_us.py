@@ -94,7 +94,6 @@ class FordDealersUSSpider(PlaywrightSpider):
                     oh.set_closed(day)
                 else:
                     oh.add_range(day=day, open_time=day_time.get("open"), close_time=day_time.get("close"))
-            if oh.as_opening_hours():
-                return oh
+            return oh
         except Exception as e:
             self.logger.warning("Error parsing {} {}".format(hours, e))

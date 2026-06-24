@@ -58,7 +58,7 @@ class CalvinKleinSpider(Spider):
                 if rule["status"] == "OPEN":
                     for period in rule["times"]:
                         oh.add_range(rule["day"], period["from"], period["to"])
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item
 

@@ -25,7 +25,7 @@ class RonaSpider(SitemapSpider):
             open_time, close_time = open_close.split("-")
             opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store(self, response):
         phone_text = response.xpath('normalize-space(//div[@itemprop="telephone"]//text())').extract_first()

@@ -75,7 +75,7 @@ class RosselkhozbankRUSpider(Spider):
             oh = OpeningHours()
             _handle_weekday_hours(oh, work_schedule)
             _handle_saturday_hours(oh, work_schedule)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
         except Exception as e:
             self.logger.warning(f"Failed to parse hours: {e}, {work_schedule}")
             self.crawler.stats.inc_value("atp/hours/failed")

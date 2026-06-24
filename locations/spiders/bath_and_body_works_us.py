@@ -32,6 +32,6 @@ class BathAndBodyWorksUSSpider(scrapy.Spider):
                     f'{end_hour.zfill(2)}:{end_minutes or "00"} {end_am_pm}',
                     time_format="%I:%M %p",
                 )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

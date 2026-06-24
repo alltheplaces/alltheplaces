@@ -92,7 +92,7 @@ class PapaJohnsStorefinderSpider(Spider):
                 self.delimiters,
             )
             if (
-                item["opening_hours"].as_opening_hours == ""
+                item["opening_hours"].as_opening_hours() == ""
                 and location.get("hours_text", {}).get(self.hours_language) is not None
             ):
                 self.logger.warning(f"Error parsing hours: {location.get('hours_text', {}).get(self.hours_language)}")

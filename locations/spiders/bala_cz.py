@@ -55,8 +55,7 @@ class BalaCZSpider(Spider):
             item["email"] = contact.get("email1")
             if web := contact.get("web"):
                 item["website"] = f"http://{web}" if not web.startswith("http") else web
-            if oh.as_opening_hours():
-                item["opening_hours"] = oh
+            item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item

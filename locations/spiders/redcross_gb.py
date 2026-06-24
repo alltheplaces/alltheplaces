@@ -58,8 +58,7 @@ class RedcrossGBSpider(SitemapSpider):
             if not day or not value:
                 continue
             hours.add_ranges_from_string(f"{day} {value}")
-        if hours:
-            item["opening_hours"] = hours.as_opening_hours()
+        item["opening_hours"] = hours
 
         # Attributes
         shop_info = response.xpath('//h2[@id="shop-information"]/following::ul[1]/li/text()').getall()

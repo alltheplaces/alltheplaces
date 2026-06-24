@@ -87,5 +87,5 @@ class ZoraBGSpider(SitemapSpider):
                         else:
                             [start_time, end_time] = hours.split("-")
                             opening_hours.add_range(day, start_time, end_time)
-                item["opening_hours"] = opening_hours.as_opening_hours()
+                item["opening_hours"] = opening_hours
             yield item

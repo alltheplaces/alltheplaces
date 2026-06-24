@@ -30,5 +30,5 @@ class MuffinBreakAUSpider(scrapy.Spider):
             .replace("8:300pm", "8:30pm")
         )
         oh.add_ranges_from_string(hours_raw)
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
         yield item

@@ -42,7 +42,7 @@ class BnpParibasBankPLSpider(scrapy.Spider):
                 start_time, end_time = times.split("-")
                 oh.add_range(DAYS[int(day) - 2], start_time, end_time)
 
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
             apply_category(Categories.BANK, item)
             yield item
 

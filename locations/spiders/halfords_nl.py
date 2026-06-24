@@ -55,5 +55,5 @@ class HalfordsNLSpider(Spider):
         for day, hour in zip(days, hours):
             if "-" in hour:
                 oh.add_ranges_from_string(ranges_string=day + " " + hour, days=DAYS_NL, delimiters=" - ")
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
         return item

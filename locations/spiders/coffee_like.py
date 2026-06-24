@@ -25,7 +25,7 @@ class CoffeeLikeSpider(scrapy.Spider):
                 for day in working_time:
                     if day.get("begin") and day.get("end"):
                         oh.add_range(DAYS[day.get("weekday")], day.get("begin"), day.get("end"), "%H:%M:%S")
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Fail to parse hours: {working_time}, {e}")
             apply_category(Categories.CAFE, item)

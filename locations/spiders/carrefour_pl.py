@@ -91,5 +91,5 @@ class CarrefourPLSpider(Spider):
                     except ValueError:
                         # The opening hours are hot garbage, so we'll just skip the most problematic ones
                         pass
-            item["opening_hours"] = opening_hours.as_opening_hours()
+            item["opening_hours"] = opening_hours
             yield item

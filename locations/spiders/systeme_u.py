@@ -53,7 +53,7 @@ class SystemeUSpider(SitemapSpider):
                     time_format="%H:%M",
                 )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_stores(self, response):
         properties = {
@@ -88,11 +88,7 @@ class SystemeUSpider(SitemapSpider):
             properties.update(self.brands[category_name])
 
         try:
-            hours = response.xpath(hours_xpath)
-            h = self.parse_hours(hours)
-
-            if h:
-                properties["opening_hours"] = h
+            properties["opening_hours"] =self.parse_hours(response.xpath(hours_xpath))
         except:
             pass
         yield Feature(**properties)

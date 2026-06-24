@@ -27,7 +27,7 @@ class HannafordSpider(SitemapSpider, StructuredDataSpider):
                     close_time=str(halfday.get("end")).zfill(4),
                     time_format="%H%M",
                 )
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item

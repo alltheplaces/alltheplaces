@@ -141,7 +141,7 @@ class ZurichTourismCHSpider(Spider):
     _RE_OPENING_HOURS = re.compile(r"^([A-Za-z,]+)\s+(\d{2}:\d{2}:\d{2})-(\d{2}:\d{2}:\d{2})$")
 
     @staticmethod
-    def parse_opening_hours(item: dict[str, Any]) -> str | None:
+    def parse_opening_hours(item: dict[str, Any]) -> OpeningHours | None:
         hours = item.get("openingHours")
         if isinstance(hours, str):
             hours = [hours]
@@ -156,7 +156,7 @@ class ZurichTourismCHSpider(Spider):
                     close_time=m.group(3),
                     time_format="%H:%M:%S",
                 )
-        return oh.as_opening_hours() or None
+        return oh
 
     @staticmethod
     def parse_names(item: dict[str, Any]) -> dict[str, str]:

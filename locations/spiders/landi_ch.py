@@ -133,7 +133,7 @@ class LandiCHSpider(SitemapSpider):
             if day := DAYS_DE.get(entry.split("</dt>")[0]):
                 for open_time, close_time in re.findall(r"<dd>(\d\d:\d\d) - (\d\d:\d\d)</dd>", entry):
                     hours.add_range(day, open_time, close_time)
-        return hours.as_opening_hours()
+        return hours
 
     @staticmethod
     def parse_phone(response):

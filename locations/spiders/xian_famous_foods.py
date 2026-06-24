@@ -230,7 +230,7 @@ class XianFamousFoodsSpider(scrapy.Spider):
         opening_hours.set_closed(["Sa", "Su"])
         return True
 
-    def _parse_hours(self, hours: Optional[str]) -> Optional[str]:
+    def _parse_hours(self, hours: Optional[str]) -> Optional[OpeningHours]:
         """Parse hours string into standardized opening hours format."""
         if not hours:
             return None
@@ -252,5 +252,4 @@ class XianFamousFoodsSpider(scrapy.Spider):
             self.logger.warning(f"Could not parse hours: {hours}")
             return None
 
-        # Return the formatted opening hours string
-        return opening_hours.as_opening_hours() if opening_hours else None
+        return opening_hours

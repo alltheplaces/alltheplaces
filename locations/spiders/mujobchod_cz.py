@@ -72,8 +72,7 @@ class MujobchodCZSpider(Spider):
             item["postcode"] = postcode
             item["country"] = "CZ"
             item["website"] = website
-            if oh.as_opening_hours():
-                item["opening_hours"] = oh
+            item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item

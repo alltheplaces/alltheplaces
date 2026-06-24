@@ -44,4 +44,4 @@ class FiestaMartUSSpider(scrapy.Spider):
                         close_time=re.split(" - |-", opening_hours)[1],
                         time_format="%I:%M %p",
                     )
-        return oh.as_opening_hours()
+        return oh
