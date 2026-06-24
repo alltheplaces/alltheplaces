@@ -36,7 +36,7 @@ class SouthernRailwayGBSpider(Spider):
             return
 
         item = Feature()
-        item["ref"] = station["stationInfo"]["crs"]
+        item["ref"] = item["extras"]["ref:crs"] = station["stationInfo"]["crs"]
         item["name"] = station["stationInfo"]["name"]
         item["lat"] = station["stationInfo"]["latitude"]
         item["lon"] = station["stationInfo"]["longitude"]
