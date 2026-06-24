@@ -8,14 +8,15 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class StayokayNLSpider(SitemapSpider, StructuredDataSpider):
     name = "stayokay_nl"
-    item_attributes = {"brand": "Stayokay", "brand_wikidata": "Q732984", "country": "NL"}
+    item_attributes = {"brand": "Stayokay", "brand_wikidata": "Q732984"}
     sitemap_urls = ["https://www.stayokay.com/sitemaps/en.xml"]
     sitemap_rules = [(r"/en/hostel/[^/]+$", "parse_sd")]
     wanted_types = ["Hostel"]
     drop_attributes = {"image"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name", None)
+        item["branch"] = item.pop("name").removeprefix("Stayokay ")
+
         # Address fields are at top-level in the microdata (not nested in PostalAddress)
         if not item.get("street_address") and ld_data.get("streetAddress"):
             item["street_address"] = ld_data["streetAddress"].strip().rstrip(",").strip()
@@ -23,5 +24,7 @@ class StayokayNLSpider(SitemapSpider, StructuredDataSpider):
             item["city"] = ld_data["addressLocality"]
         if not item.get("postcode") and ld_data.get("postalCode"):
             item["postcode"] = ld_data["postalCode"]
+
         apply_category(Categories.TOURISM_HOSTEL, item)
+
         yield item
