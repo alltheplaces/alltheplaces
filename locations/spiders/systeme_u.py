@@ -88,7 +88,7 @@ class SystemeUSpider(SitemapSpider):
             properties.update(self.brands[category_name])
 
         try:
-            properties["opening_hours"] =self.parse_hours(response.xpath(hours_xpath))
+            properties["opening_hours"] = self.parse_hours(response.xpath(hours_xpath))
         except:
             pass
         yield Feature(**properties)
