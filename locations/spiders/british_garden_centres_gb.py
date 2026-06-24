@@ -15,9 +15,8 @@ class BritishGardenCentresGBSpider(JSONBlobSpider):
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
-        if not item["website"].startswith("http"):
-            item["website"] = "https://www.britishgardencentres.com" + item["website"]
         item["name"] = feature["store"]
+        item["website"] = feature["permalink"]
         item["street_address"] = item.pop("addr_full")
         apply_category(Categories.SHOP_GARDEN_CENTRE, item)
 
