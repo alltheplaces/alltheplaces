@@ -22,7 +22,6 @@ class FoussierFRSpider(Spider):
                 response.xpath('//*[contains(text(),"codePostal")]').get().replace("\\", ""),
             ).group(1)
         ):
-            print(location)
             item = Feature()
             item["ref"] = location["id"]
             item["branch"] = location["libelle"].removeprefix("Foussier ")
