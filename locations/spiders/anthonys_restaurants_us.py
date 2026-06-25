@@ -5,6 +5,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -24,4 +25,5 @@ class AnthonysRestaurantsUSSpider(Spider):
             item = DictParser.parse(location)
             item["name"] = item["name"].replace("|", "-")
             item["ref"] = location["index"]
+            apply_category(Categories.RESTAURANT, item)
             yield item
