@@ -1,11 +1,11 @@
 import json
+import re
 from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -16,9 +16,13 @@ class FoussierFRSpider(Spider):
     start_urls = ["https://www.foussier.fr/magasins-foussier-en-france"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in DictParser.get_nested_key(
-            json.loads(response.xpath('//script[@type="application/json"][@id="__NEXT_DATA__"]/text()').get()), "stores"
-        )["entries"]:
+        for location in json.loads(
+            re.search(
+                r"data\":(\[.*\]),\"dataUpdateCount",
+                response.xpath('//*[contains(text(),"codePostal")]').get().replace("\\", ""),
+            ).group(1)
+        ):
+            print(location)
             item = Feature()
             item["ref"] = location["id"]
             item["branch"] = location["libelle"].removeprefix("Foussier ")
