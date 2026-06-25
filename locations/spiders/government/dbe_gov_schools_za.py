@@ -78,12 +78,8 @@ class DbeGovSchoolsZASpider(Spider):
             item["extras"]["ref:ZA:emis"] = location["NatEmis"]
 
             # Normalise column names
-            if location["Province"] in ["GT"]:
-                location["GIS_Latitude"] = location.get("GIS_Lat")
-                location["GIS_Longitude"] = location.get("GIS_Long")
-
-            item["lat"] = location.get("GIS_Latitude")
-            item["lon"] = location.get("GIS_Longitude")
+            item["lat"] = location.get("GIS_Lat")
+            item["lon"] = location.get("GIS_Long")
 
             # Coordinates are reversed in the data for most locations
             if (
@@ -130,7 +126,8 @@ class DbeGovSchoolsZASpider(Spider):
                 .replace(" I/S", " Intermediate School")
             )
 
-            item["phone"] = location["Telephone"]
+            if location.get("Telephone") not in [None, 99]:
+                item["phone"] = str(location.get("Telephone"))
 
             apply_yes_no(Extras.FEE, item, location["NoFeeSchool"] in ["Fee Charging"], True)
 
