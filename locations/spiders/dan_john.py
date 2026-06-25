@@ -3,6 +3,7 @@ import re
 import scrapy
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -27,4 +28,5 @@ class DanJohnSpider(Spider):
                 item["street_address"] = merge_address_lines([location.get("address2"), item["street_address"]])
             item["branch"] = item.pop("name").replace("Dan John", "")
             item["state"] = location["province"]["name"]
+            apply_category(Categories.SHOP_CLOTHES, item)
             yield item
