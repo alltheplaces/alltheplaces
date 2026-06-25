@@ -22,7 +22,7 @@ class TescoEUSpider(SitemapSpider, StructuredDataSpider):
         (r"/(prodejny|aruhazak)/[^/]+/[^/]+/?$", "parse_sd"),
         (r"/obchody/[^/]+/[^/]+/[^/]+/?$", "parse_sd"),
     ]
-    requires_proxy = True
+    requires_proxy = "CZ"
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if "Extra" in item["name"].title():
