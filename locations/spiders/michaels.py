@@ -12,6 +12,7 @@ class MichaelsSpider(SitemapSpider):
     name = "michaels"
     item_attributes = {"brand": "Michaels", "brand_wikidata": "Q6835667"}
     sitemap_urls = ["https://locations.michaels.com/sitemap.xml.gz", "https://locationsca.michaels.com/sitemap.xml.gz"]
+
     sitemap_rules = [(r"https://\w+\.michaels\.com/[^/]+/[^/]+/\d+/$", "parse")]
     requires_proxy = True
 
