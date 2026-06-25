@@ -3,18 +3,21 @@ import re
 from typing import Any, AsyncIterator
 
 from chompjs import parse_js_object
-from scrapy import FormRequest, Selector, Spider
+from scrapy import FormRequest, Selector
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import extract_email
 
 
-class HobbytownUSSpider(Spider):
+class HobbytownUSSpider(PlaywrightSpider):
     name = "hobbytown_us"
     item_attributes = {"brand": "HobbyTown", "brand_wikidata": "Q5874921"}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[Any]:
         yield FormRequest(
