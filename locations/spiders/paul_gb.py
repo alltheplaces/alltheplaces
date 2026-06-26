@@ -27,7 +27,7 @@ class PaulGBSpider(JSONBlobSpider):
         return list(json.loads(response.xpath('//script[@id="find-paul-store-list"]/text()').get()).values())
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["branch"] = feature.get("title", "").replace("PAUL", "").replace("PAUL Express", "").strip()
+        item["branch"] = item.pop("name").removeprefix("PAUL ")
         item["ref"] = feature.get("axaptaId")
         item["website"] = self.websites.get(item["ref"])
         info = Selector(text=feature["info"])
