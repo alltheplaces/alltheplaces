@@ -36,7 +36,7 @@ class HobbytownUSSpider(PlaywrightSpider):
             item["lon"] = location[1]
             item["ref"] = location[3]
             item["website"] = response.urljoin(
-                response.xpath('//div[@data-store-id="{}"]//a[@title="Store Profile"]/@href'.format(item["ref"])).get()
+                response.xpath('//*[@data-store-id="{}"]//a[@title="Store Profile"]/@href'.format(item["ref"])).get()
             )
 
             sel = Selector(text=html.unescape(location[2]))
