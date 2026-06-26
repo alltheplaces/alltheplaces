@@ -13,6 +13,7 @@ class VpzGBSpider(UberallSpider):
     key = "GTKUBZglSKHUX6xr99T8FQfxPyHfa5"
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        item["image"] = None
         item["ref"] = location.get("id")
         apply_category(Categories.SHOP_E_CIGARETTE, item)
         yield item
