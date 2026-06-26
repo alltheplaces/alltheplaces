@@ -42,7 +42,7 @@ class HobbytownUSSpider(PlaywrightSpider):
             sel = Selector(text=html.unescape(location[2]))
             item["branch"] = sel.xpath("//strong/text()").get().removeprefix("HobbyTown ")
             addr = sel.xpath("//body/text()").getall()
-            item["street_address"] = merge_address_lines(addr[:2])
+            item["addr_full"] = merge_address_lines(addr[:2])
             if len(addr) == 3:
                 item["phone"] = addr[2]
 
