@@ -21,6 +21,7 @@ class MichaelsSpider(SitemapSpider):
             "response"
         ]
         item = DictParser.parse(raw_data)
+        item["email"] = None
         item["lat"] = raw_data["coords_latitude"]
         item["lon"] = raw_data["coords_longitude"]
         item["branch"] = raw_data["michaels_store_name"]
