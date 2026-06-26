@@ -1,17 +1,18 @@
-from locations.storefinders.storemapper import StoremapperSpider
+from typing import Iterable
+
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.uberall import UberallSpider
 
 
-class VpzGBSpider(StoremapperSpider):
+class VpzGBSpider(UberallSpider):
     name = "vpz_gb"
     item_attributes = {"brand": "VPZ", "brand_wikidata": "Q107300487"}
-    company_id = "14072-3UOwEWhgZ0NnwVEo"
+    key = "GTKUBZglSKHUX6xr99T8FQfxPyHfa5"
 
-    def parse_item(self, item, location):
-        for custom_field in location["store_custom_fields"]:
-            if custom_field["custom_field_id"] == 42770:
-                item["city"] = custom_field["value"]
-            if custom_field["custom_field_id"] == 42771:
-                item["state"] = custom_field["value"]
-        item.pop("website")
-        item.pop("email")
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        item["ref"] = location.get("id")
+        apply_category(Categories.SHOP_E_CIGARETTE, item)
         yield item
