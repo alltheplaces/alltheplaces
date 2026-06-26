@@ -17,7 +17,6 @@ class RalphLaurenSpider(scrapy.Spider):
         "DOWNLOAD_DELAY": 10,
         "USER_AGENT": BROWSER_DEFAULT,
     }
-    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for country in filter(
