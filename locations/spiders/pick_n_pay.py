@@ -23,15 +23,30 @@ class PickNPaySpider(scrapy.Spider):
             store.update(address)
             item = DictParser.parse(store)
 
-            item["branch"] = (
-                item.pop("name")
-                .removeprefix("Boxer ")
-                .removeprefix("BP @ ")
-                .removeprefix("BP ")
-                .removeprefix("Clothing ")
-                .removeprefix("PnP ")
-                .removeprefix("PnP")
-            )
+            if item.get("name"):
+                item["branch"] = (
+                    item.pop("name")
+                    .removeprefix("Boxer ")
+                    .removeprefix("BP @ ")
+                    .removeprefix("BP ")
+                    .removeprefix("Clothing ")
+                    .removeprefix("PnP ")
+                    .removeprefix("PnP")
+                )
+
+            # Multiple phone numbers are entered like "016 362 3760/1/2"
+            if item.get("phone") and "/" in item.get("phone"):
+                phone_parts = [part.strip() for part in item["phone"].split("/")]
+                base_number = phone_parts[0]
+
+                results = [base_number]
+
+                for part in phone_parts[1:]:
+                    part = part.strip()
+                    full_number = f"{base_number[:-len(part)]}{part}"
+                    results.append(full_number)
+
+                item["phone"] = ";".join(results)
 
             item["opening_hours"] = OpeningHours()
             for day in store.get("tradingHours", []):
