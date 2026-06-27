@@ -30,7 +30,7 @@ class WalmartUSSpider(SitemapSpider):
         "DOWNLOAD_TIMEOUT": 210,
     }
 
-    async def start(self) -> AsyncIterator[Any]:
+    async def start(self):
         for url in self.sitemap_urls:
             yield Request(url, self._parse_sitemap, meta={"zyte_api": dict(SITEMAP_ZYTE_API_PARAMS)})
 
@@ -54,7 +54,6 @@ class WalmartUSSpider(SitemapSpider):
             self.logger.warning(f"Could not parse __NEXT_DATA__ JSON from {response.url}")
             return
 
-        # Navigate to node detail
         node = (
             next_data.get("props", {})
             .get("pageProps", {})
@@ -83,10 +82,8 @@ class WalmartUSSpider(SitemapSpider):
             website=response.url,
         )
 
-        # Set branch name (location-specific name like "Willmar Supercenter")
         item["branch"] = node.get("displayName", "").split(",")[0].strip()
 
-        # Parse store type and apply category
         store_type = node.get("name", "")
         if store_type == "Walmart Supercenter":
             item["name"] = "Walmart Supercenter"
@@ -100,7 +97,6 @@ class WalmartUSSpider(SitemapSpider):
             item["name"] = "Walmart"
             apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
 
-        # Parse opening hours
         hours = node.get("operationalHours", [])
         if hours:
             item["opening_hours"] = self.parse_hours(hours)
