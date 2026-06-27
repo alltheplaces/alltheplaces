@@ -32,9 +32,4 @@ class RingerHutJPSpider(CanlySpider):
 
         apply_category(Categories.FAST_FOOD, item)
 
-        oh = OpeningHours()
-        for day_hours in feature.get("businessHours", []):
-            oh.add_range(day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
-        item["opening_hours"] = oh
-
         yield item

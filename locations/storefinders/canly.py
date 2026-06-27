@@ -4,6 +4,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -29,6 +30,11 @@ class CanlySpider(Spider):
             item = DictParser.parse(feature)
             item["addr_full"] = feature.get("address")
             item["ref"] = feature.get("storeCode")
+            
+            oh = OpeningHours()
+            for day_hours in feature.get("businessHours", []):
+                oh.add_range(day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
+            item["opening_hours"] = oh
 
             yield from self.post_process_item(item, response, feature) or []
 
