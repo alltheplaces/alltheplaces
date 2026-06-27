@@ -34,7 +34,6 @@ class LittleFreeLibrarySpider(Spider):
                 "state": library.get("State_Province_Region__c"),
                 "postcode": library.get("Postal_Zip_Code__c"),
                 "country": library.get("Country__c"),
-                "image": library.get("primary_image"),
                 "website": f"https://map.littlefreelibrary.org/{library.get('Official_Charter_Number__c')}",
                 # These fields could potentially be considered
                 # personal/private information and don't add much value
