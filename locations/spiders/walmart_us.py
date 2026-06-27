@@ -14,7 +14,12 @@ class WalmartUSSpider(SitemapSpider):
     name = "walmart_us"
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}
     allowed_domains = ["www.walmart.com"]
-    sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
+    sitemap_urls = [
+        "https://www.walmart.com/sitemap_store_main_supercenter.xml.gz",
+        "https://www.walmart.com/sitemap_store_main_neighborhood.xml.gz",
+        "https://www.walmart.com/sitemap_store_main_discount.xml.gz",
+        "https://www.walmart.com/sitemap_store_main_other.xml.gz",
+    ]
     sitemap_rules = [(r"/store/\d+-", "parse")]
     requires_proxy = True
     custom_settings = {
@@ -76,6 +81,8 @@ class WalmartUSSpider(SitemapSpider):
             apply_category(Categories.SHOP_SUPERMARKET, item)
         elif "Neighborhood Market" in store_type:
             item["name"] = "Walmart Neighborhood Market"
+            item["brand"] = "Walmart Neighborhood Market"
+            item["brand_wikidata"] = "Q7963529"
             apply_category(Categories.SHOP_SUPERMARKET, item)
         else:
             item["name"] = "Walmart"
