@@ -1,13 +1,12 @@
 import json
 from typing import Any
 
-from scrapy.http import Response
+from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class WalmartUSSpider(SitemapSpider):
@@ -21,16 +20,23 @@ class WalmartUSSpider(SitemapSpider):
         "https://www.walmart.com/sitemap_store_main_other.xml.gz",
     ]
     sitemap_rules = [(r"/store/\d+-", "parse")]
-    requires_proxy = True
     custom_settings = {
-        "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
+        "DOWNLOAD_TIMEOUT": 210,
     }
 
+    async def start(self) -> AsyncIterator[Any]:
+        for url in self.sitemap_urls:
+            yield Request(url, self._parse_sitemap, meta={"zyte_api": dict(self.zyte_api_params)})
+
+    def _parse_sitemap(self, response: Response) -> Iterable[Request]:
+        for request in super()._parse_sitemap(response):
+            request.meta["zyte_api"] = dict(self.zyte_api_params)
+            yield request
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        # Extract data from __NEXT_DATA__ script tag
         script_data = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         if not script_data:
             self.logger.warning(f"Could not find __NEXT_DATA__ in {response.url}")
