@@ -10,6 +10,8 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
+ZYTE_API_PARAMS = {"httpResponseBody": True, "geolocation": "US"}
+
 
 class WalmartUSSpider(SitemapSpider):
     name = "walmart_us"
@@ -31,11 +33,11 @@ class WalmartUSSpider(SitemapSpider):
 
     async def start(self) -> AsyncIterator[Any]:
         for url in self.sitemap_urls:
-            yield Request(url, self._parse_sitemap, meta={"zyte_api": dict(self.zyte_api_params)})
+            yield Request(url, self._parse_sitemap, meta={"zyte_api": dict(ZYTE_API_PARAMS)})
 
     def _parse_sitemap(self, response: Response) -> Iterable[Request]:
         for request in super()._parse_sitemap(response):
-            request.meta["zyte_api"] = dict(self.zyte_api_params)
+            request.meta["zyte_api"] = dict(ZYTE_API_PARAMS)
             yield request
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
