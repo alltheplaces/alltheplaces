@@ -19,7 +19,7 @@ class ValorJPSpider(CanlySpider):
         # Skip any non-open locations
         if feature.get("businessStatus") != "OPEN":
             return
-        
+
         item["branch"] = feature.get("nameKanji").removeprefix("スーパーマーケットバロー").strip()
         item["website"] = f"https://stores.valor.jp/detail/{feature.get('storeCode')}/"
 
