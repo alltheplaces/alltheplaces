@@ -1,8 +1,5 @@
 from locations.spiders.texcycle_bg import TexcycleBGSpider
 
-from locations.items import Feature
-
-
 
 class TexcycleROSpider(TexcycleBGSpider):
     name = "texcycle_ro"
