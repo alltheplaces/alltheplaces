@@ -4,6 +4,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.google_url import url_to_coords
 from locations.hours import DAYS_BG, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -19,13 +20,10 @@ class ZoraBGSpider(SitemapSpider):
     sitemap_rules = [("/page/store-", "parse_stores"), ("/page/stores-", "parse_stores")]
     custom_settings = {"DOWNLOAD_DELAY": 3}  # Requested by robots.txt
     no_refs = True
+    opening_hours_pattern = re.compile(r"([а-я]+)-?([а-я]+)?\s*:\s*([\d:]+-[\d:]+|почивен)")
 
     def parse_stores(self, response: Response, **kwargs: Any) -> Any:
-        stores = response.xpath("//iframe[@allowfullscreen]")
-        coords_pattern = re.compile(r"(\d+\.\d+),\s*(\d+\.\d+)")
-        opening_hours_pattern = re.compile(r"([а-я]+)-?([а-я]+)?\s*:\s*([\d:]+-[\d:]+|почивен)")
-
-        for store in stores:
+        for store in response.xpath("//iframe[@allowfullscreen]"):
             item = Feature()
 
             columns = store.xpath(".//../../following-sibling::div")
@@ -43,12 +41,8 @@ class ZoraBGSpider(SitemapSpider):
             else:
                 item["street_address"] = middle_section_text[1]
 
-            coords = coords_pattern.match(middle_section_text[-1])
-            if coords:
-                # Coordinates are not always present...
-                lat, lon = coords.groups()
-                item["lat"] = lat
-                item["lon"] = lon
+            if map_url := store.xpath("./@src").get():
+                item["lat"], item["lon"] = url_to_coords(map_url)
 
             last_section = columns[1]  # contains opening hours
             last_section_text = last_section.xpath(".//text()").getall()
@@ -68,24 +62,22 @@ class ZoraBGSpider(SitemapSpider):
                     .replace(" :", ":")
                     .strip()
                 )
-                groups = opening_hours_pattern.findall(opening_hours_raw)
+                groups = self.opening_hours_pattern.findall(opening_hours_raw)
 
-                opening_hours = OpeningHours()
+                item["opening_hours"] = OpeningHours()
                 for group in groups:
                     [day1, day2, hours] = group
                     if day1 and day2:
-                        days_range = opening_hours.days_in_day_range([day1, day2], DAYS_BG)
+                        days_range = item["opening_hours"].days_in_day_range([day1, day2], DAYS_BG)
                         if hours == "почивен":
-                            opening_hours.set_closed(days_range)
+                            item["opening_hours"].set_closed(days_range)
                         else:
                             [start_time, end_time] = hours.split("-")
-                            opening_hours.add_days_range(days_range, start_time, end_time)
-                    elif day1:
-                        day = sanitise_day(day1, DAYS_BG)
+                            item["opening_hours"].add_days_range(days_range, start_time, end_time)
+                    elif day := sanitise_day(day1, DAYS_BG):
                         if hours == "почивен":
-                            opening_hours.set_closed(day)
+                            item["opening_hours"].set_closed(day)
                         else:
                             [start_time, end_time] = hours.split("-")
-                            opening_hours.add_range(day, start_time, end_time)
-                item["opening_hours"] = opening_hours.as_opening_hours()
+                            item["opening_hours"].add_range(day, start_time, end_time)
             yield item
