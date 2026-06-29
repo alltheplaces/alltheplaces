@@ -17,7 +17,7 @@ class ZoraBGSpider(SitemapSpider):
     }
     sitemap_urls = ["https://zora.bg/sitemap/page/1.xml"]
     sitemap_rules = [("/page/store-", "parse_stores"), ("/page/stores-", "parse_stores")]
-
+    custom_settings = {"DOWNLOAD_DELAY": 3}  # Requested by robots.txt
     no_refs = True
 
     def parse_stores(self, response: Response, **kwargs: Any) -> Any:
