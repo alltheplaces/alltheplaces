@@ -17,7 +17,7 @@ class WaffleHouseUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = response.url.rstrip("/").rsplit("-", 1)[-1]
-        item["name"] = None
+        item["name"] = item["image"] = None
         apply_category(Categories.RESTAURANT, item)
 
         yield item
