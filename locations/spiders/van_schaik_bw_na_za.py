@@ -2,6 +2,7 @@ from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -55,5 +56,7 @@ class VanSchaikBWNAZASpider(JSONBlobSpider):
             item["opening_hours"] = OpeningHours()
             for line in feature.get("business_hours").split("\n"):
                 item["opening_hours"].add_ranges_from_string(line.replace("& Public Holidays", ""))
+
+        apply_category(Categories.SHOP_BOOKS, item)
 
         yield item
