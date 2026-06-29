@@ -3,7 +3,6 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.canly import CanlySpider
 
@@ -31,10 +30,5 @@ class RingerHutJPSpider(CanlySpider):
         item["website"] = f"https://shop.ringerhut.jp/detail/{feature.get('storeCode')}/"
 
         apply_category(Categories.FAST_FOOD, item)
-
-        oh = OpeningHours()
-        for day_hours in feature.get("businessHours", []):
-            oh.add_range(day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
-        item["opening_hours"] = oh
 
         yield item
