@@ -18,7 +18,11 @@ class AllstateInsuranceAgentsSpider(SitemapSpider, StructuredDataSpider, Playwri
     sitemap_rules = [(r"https://agents\.allstate\.com/[^/]+\.html$", "parse_sd")]
 
     wanted_types = ["InsuranceAgency"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DOWNLOAD_TIMEOUT": 60,
+    }
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace(": Allstate Insurance", "")
