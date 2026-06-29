@@ -62,17 +62,11 @@ PREFECTURES = [
 
 class SeventeenIceJPSpider(Spider):
     name = "seventeen_ice_jp"
-    item_attributes = {
-        "brand": "セブンティーンアイス",
-        "brand_wikidata": "Q11314427",
-    }
+    item_attributes = {"brand": "セブンティーンアイス", "brand_wikidata": "Q11314427"}
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "COOKIES_ENABLED": True,
-        "ROBOTSTXT_OBEY": False,
     }
-
-    _seen_refs: set[str] = set()
 
     async def start(self) -> AsyncIterator[Request]:
         # Visit the homepage first to establish a Laravel session cookie, then
@@ -97,9 +91,8 @@ class SeventeenIceJPSpider(Spider):
 
         for loc in locations:
             ref = loc.get("id")
-            if not ref or ref in self._seen_refs:
+            if not ref:
                 continue
-            self._seen_refs.add(ref)
 
             item = Feature()
             item["ref"] = ref
