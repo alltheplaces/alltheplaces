@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -26,4 +27,5 @@ class AllstateInsuranceAgentsSpider(SitemapSpider, StructuredDataSpider, Playwri
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace(": Allstate Insurance", "")
+        apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
