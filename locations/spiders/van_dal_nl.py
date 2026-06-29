@@ -1,20 +1,25 @@
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class VanDalNLSpider(SitemapSpider, StructuredDataSpider):
+class VanDalNLSpider(CrawlSpider, StructuredDataSpider):
     name = "van_dal_nl"
     item_attributes = {"brand": "Van Dal", "brand_wikidata": "Q125580449"}
-    sitemap_urls = ["https://www.vdal.nl/robots.txt"]
-    sitemap_follow = ["branches"]
-    sitemap_rules = [(r"winkels/(\d+)/van-dal-[^\.]+\.html$", "parse")]
-    wanted_types = ["Store"]
+    start_urls = ["https://www.vdal.nl/winkels/"]
+    rules = [
+        Rule(
+            LinkExtractor(
+                allow=r"/tabletop/store-locator/detail/\w+$",
+            ),
+            callback="parse_sd",
+        ),
+    ]
+    json_parser = "chompjs"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Van Dal ")
-        item["extras"]["website:nl"] = response.xpath('//link[@rel="alternate"][@hreflang="nl-NL"]/@href').get()
-        item["extras"]["website:de"] = response.xpath('//link[@rel="alternate"][@hreflang="de-DE"]/@href').get()
-        # item["extras"]["website:nl"] = response.xpath('//link[@rel="alternate"][hreflang="nl-BE"]/@href').get()
+        item["website"] = response.url
 
         yield item
