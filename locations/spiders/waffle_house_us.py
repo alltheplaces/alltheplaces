@@ -12,8 +12,10 @@ class WaffleHouseUSSpider(SitemapSpider, StructuredDataSpider):
     name = "waffle_house_us"
     item_attributes = {"brand": "Waffle House", "brand_wikidata": "Q1701206"}
     sitemap_urls = ["https://locations.wafflehouse.com/sitemap.xml"]
-    sitemap_rules = [(r"/[a-z0-9-]+-[a-z]{2}-(\d+)/$", "parse_sd")]
+    sitemap_rules = [(r"/[a-z0-9-]+-[a-z]{2}-(\d+)/$", "parse")]
     wanted_types = ["Restaurant"]
+    search_for_facebook = False
+    search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = response.url.rstrip("/").rsplit("-", 1)[-1]
