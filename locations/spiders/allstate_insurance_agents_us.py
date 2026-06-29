@@ -11,8 +11,8 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class AllstateInsuranceAgentsSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
-    name = "allstate_insurance_agents"
+class AllstateInsuranceAgentsUSSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
+    name = "allstate_insurance_agents_us"
     item_attributes = {"brand": "Allstate", "brand_wikidata": "Q2645636"}
     allowed_domains = ["agents.allstate.com"]
     sitemap_urls = ["https://agents.allstate.com/sitemap.xml"]
