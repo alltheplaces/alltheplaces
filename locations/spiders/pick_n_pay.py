@@ -1,15 +1,18 @@
-import scrapy
+from typing import Any
 
-from locations.categories import Categories
+from scrapy import Spider
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-class PickNPaySpider(scrapy.Spider):
+class PickNPaySpider(Spider):
     name = "pick_n_pay"
     start_urls = ["https://api.pnp.co.za/stores/v2"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             if (
                 store["storeType"] in ("", "ONLINE", "NO_FORMAT", "WHOLESALE")
@@ -46,7 +49,7 @@ class PickNPaySpider(scrapy.Spider):
                     full_number = f"{base_number[:-len(part)]}{part}"
                     results.append(full_number)
 
-                item["phone"] = ";".join(results)
+                item["phone"] = "; ".join(results)
 
             item["opening_hours"] = OpeningHours()
             for day in store.get("tradingHours", []):
@@ -59,92 +62,37 @@ class PickNPaySpider(scrapy.Spider):
                 # "LOCAL", "MINI" appear to be branded as normal PnP supermarkets
                 # "FAMILY", "SUPER" are standard PnP supermarkets
                 # "MARKET" probably should be shown as PnP supermarket. Township location stores and numbers have dropped significantly in recent years
-                item.update(
-                    {
-                        "brand": "Pick n Pay",
-                        "brand_wikidata": "Q7190735",
-                        "extras": Categories.SHOP_SUPERMARKET.value,
-                    }
-                )
+                item.update({"brand": "Pick n Pay", "brand_wikidata": "Q7190735"})
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif store["storeType"] == "HYPER":
-                item.update(
-                    {
-                        "brand": "Pick n Pay Hyper",
-                        "brand_wikidata": "Q128791977",
-                    }
-                )
+                item.update({"brand": "Pick n Pay Hyper", "brand_wikidata": "Q128791977"})
             elif store["storeType"] == "CLOTHING":
-                item.update(
-                    {
-                        "brand": "Pick n Pay Clothing",
-                        "brand_wikidata": "Q122964352",
-                        "extras": Categories.SHOP_CLOTHES.value,
-                    }
-                )
+                item.update({"brand": "Pick n Pay Clothing", "brand_wikidata": "Q122964352"})
+                apply_category(Categories.SHOP_CLOTHES, item)
             elif store["storeType"] == "LIQUOR":
-                item.update(
-                    {
-                        "brand": "Pick n Pay Liquor",
-                        "brand_wikidata": "Q122764458",
-                        "extras": Categories.SHOP_ALCOHOL.value,
-                    }
-                )
+                item.update({"brand": "Pick n Pay Liquor", "brand_wikidata": "Q122764458"})
+                apply_category(Categories.SHOP_ALCOHOL, item)
             elif store["storeType"] in ("EXPRESS", "BPFORECOURT"):
-                item.update(
-                    {
-                        "brand": "Pick n Pay Express",
-                        "brand_wikidata": "Q122764443",
-                        "extras": Categories.SHOP_CONVENIENCE.value,
-                    }
-                )
+                item.update({"brand": "Pick n Pay Express", "brand_wikidata": "Q122764443"})
+                apply_category(Categories.SHOP_CONVENIENCE, item)
             elif store["storeType"] in ("BOXER", "BOXER PUNCH", "BOXER SUPERSTOR"):
-                item.update(
-                    {
-                        "brand": "Boxer",
-                        "brand_wikidata": "Q116586275",
-                        "extras": Categories.SHOP_SUPERMARKET.value,
-                    }
-                )
+                item.update({"brand": "Boxer", "brand_wikidata": "Q116586275"})
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             elif store["storeType"] == "BOXER LIQUOR":
-                item.update(
-                    {
-                        "brand": "Boxer Liquors",
-                        "brand_wikidata": "Q122766666",
-                        "extras": Categories.SHOP_ALCOHOL.value,
-                    }
-                )
+                item.update({"brand": "Boxer Liquors", "brand_wikidata": "Q122766666"})
+                apply_category(Categories.SHOP_ALCOHOL, item)
             elif store["storeType"] == "BOXER BUILD":
-                item.update(
-                    {
-                        "brand": "Boxer Build",
-                        "brand_wikidata": "Q122766671",
-                        "extras": Categories.SHOP_DOITYOURSELF.value,
-                    }
-                )
+                item.update({"brand": "Boxer Build", "brand_wikidata": "Q122766671"})
+                apply_category(Categories.SHOP_DOITYOURSELF, item)
             elif store["storeType"] == "DC":  # Distribution Centre
-                item.update(
-                    {
-                        "extras": Categories.INDUSTRIAL_WAREHOUSE.value,
-                        "operator": "Pick n Pay",
-                        "operator_wikidata": "Q7190735",
-                    }
-                )
+                item.update({"operator": "Pick n Pay", "operator_wikidata": "Q7190735"})
+                apply_category(Categories.INDUSTRIAL_WAREHOUSE, item)
             elif store["storeType"] == "REGIONAL OFFICE":
-                item.update(
-                    {
-                        "extras": Categories.OFFICE_COMPANY.value,
-                        "brand": "Pick n Pay",
-                        "brand_wikidata": "Q7190735",
-                    }
-                )
+                item.update({"brand": "Pick n Pay", "brand_wikidata": "Q7190735"})
+                apply_category(Categories.OFFICE_COMPANY, item)
             else:
-                item.update(
-                    {
-                        "brand": "Pick n Pay",
-                        "brand_wikidata": "Q7190735",
-                        "extras": Categories.SHOP_SUPERMARKET.value,
-                    }
-                )
+                item.update({"brand": "Pick n Pay", "brand_wikidata": "Q7190735"})
+                apply_category(Categories.SHOP_SUPERMARKET, item)
             # Unhandled:
             # "DAILY" was two stores, but both marked as incomplete in the data
 
