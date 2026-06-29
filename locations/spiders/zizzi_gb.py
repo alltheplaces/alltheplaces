@@ -1,25 +1,34 @@
-import scrapy
+from typing import Iterable
 
-from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import clean_address
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class ZizziGBSpider(scrapy.Spider):
+class ZizziGBSpider(SitemapSpider, StructuredDataSpider):
     name = "zizzi_gb"
     item_attributes = {"brand": "Zizzi", "brand_wikidata": "Q8072944"}
-    start_urls = ["https://www.zizzi.co.uk/wp-json/locations/get_venues"]
+    sitemap_urls = ["https://www.zizzi.co.uk/sitemap.xml"]
+    sitemap_rules = [
+        (r"/italian-restaurants/((?!.*/(?:poi|offers|news|menus)(?:/|$))[^/]+/[^/]+(?:/[^/]+)?)$", "parse")
+    ]
+    wanted_types = ["Restaurant"]
 
-    def parse(self, response):
-        for store in response.json()["data"]:
-            item = DictParser.parse(store)
-            item["addr_full"] = clean_address(store["address"].split("\r\n"))
-            item["image"] = store["featured_image"]
-            item["website"] = store["link"]
-            item["branch"] = item.pop("name")
-            if store["region"] == "Ireland":
-                item.pop("state")
-                item["country"] = "IE"
-            else:
-                item["country"] = "GB"
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        # Each page carries two Restaurant blocks, skip the "#restaurant" duplicate.
+        if ld_data.get("@id", "").endswith("#restaurant"):
+            return
 
-            yield item
+        item["branch"] = item.pop("name")
+
+        # The site reports every location as GB, so correct Republic of Ireland.
+        if response.url.split("/italian-restaurants/", 1)[1].split("/", 1)[0] == "ireland":
+            item["country"] = "IE"
+            item.pop("state", None)
+
+        apply_category(Categories.RESTAURANT, item)
+
+        yield item
