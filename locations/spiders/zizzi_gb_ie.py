@@ -8,8 +8,8 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ZizziGBSpider(SitemapSpider, StructuredDataSpider):
-    name = "zizzi_gb"
+class ZizziGBIESpider(SitemapSpider, StructuredDataSpider):
+    name = "zizzi_gb_ie"
     item_attributes = {"brand": "Zizzi", "brand_wikidata": "Q8072944"}
     sitemap_urls = ["https://www.zizzi.co.uk/sitemap.xml"]
     sitemap_rules = [
