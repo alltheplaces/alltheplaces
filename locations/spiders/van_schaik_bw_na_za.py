@@ -1,8 +1,6 @@
-import json
 from typing import AsyncIterator, Iterable
 
-from scrapy import Request
-from scrapy.http import TextResponse
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -12,26 +10,17 @@ from locations.pipelines.address_clean_up import clean_address
 
 class VanSchaikBWNAZASpider(JSONBlobSpider):
     name = "van_schaik_bw_na_za"
-    start_urls = ["https://app.vanschaik.com/storefront/api?shop=vanschaik.myshopify.com"]
-    item_attributes = {
-        "brand": "Van Schaik",
-        "brand_wikidata": "Q116741158",
-    }
+    item_attributes = {"brand": "Van Schaik", "brand_wikidata": "Q116741158"}
     locations_key = ["data", "metaobjects", "nodes"]
 
-    async def start(self) -> AsyncIterator[Request]:
-        payload = {
-            "query": '{ metaobjects(type:"store_location",first:100){nodes{id,fields{key,value}}}}',
-            "variables": {},
-        }
-
-        for url in self.start_urls:
-            yield Request(
-                url=url,
-                method="POST",
-                body=json.dumps(payload),
-                callback=self.parse,
-            )
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            url="https://app.vanschaik.com/storefront/api?shop=vanschaik.myshopify.com",
+            data={
+                "query": '{ metaobjects(type:"store_location",first:100){nodes{id,fields{key,value}}}}',
+                "variables": {},
+            },
+        )
 
     def pre_process_data(self, feature: dict) -> None:
         flattened_fields = {field["key"]: field["value"] for field in feature.pop("fields")}
