@@ -48,7 +48,11 @@ class LittleFreeLibrarySpider(Spider):
                 properties["name"] = library.get("List_As_Name__c")
             else:
                 properties["name"] = library.get("Name")
+            if images := library.get("image_urls"):
+                properties["image"] = images[0]
+
             apply_category(Categories.PUBLIC_BOOKCASE, properties)
+
             yield Feature(**properties)
 
         if "&page=" not in response.url:
