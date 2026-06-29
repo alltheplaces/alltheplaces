@@ -62,22 +62,18 @@ class ZoraBGSpider(SitemapSpider):
                     .replace(" :", ":")
                     .strip()
                 )
-                groups = self.opening_hours_pattern.findall(opening_hours_raw)
 
                 item["opening_hours"] = OpeningHours()
-                for group in groups:
-                    [day1, day2, hours] = group
+                for day1, day2, hours in self.opening_hours_pattern.findall(opening_hours_raw):
                     if day1 and day2:
-                        days_range = item["opening_hours"].days_in_day_range([day1, day2], DAYS_BG)
+                        days_range = OpeningHours.days_in_day_range([day1, day2], DAYS_BG)
                         if hours == "почивен":
                             item["opening_hours"].set_closed(days_range)
                         else:
-                            [start_time, end_time] = hours.split("-")
-                            item["opening_hours"].add_days_range(days_range, start_time, end_time)
+                            item["opening_hours"].add_days_range(days_range, *hours.split("-"))
                     elif day := sanitise_day(day1, DAYS_BG):
                         if hours == "почивен":
                             item["opening_hours"].set_closed(day)
                         else:
-                            [start_time, end_time] = hours.split("-")
-                            item["opening_hours"].add_range(day, start_time, end_time)
+                            item["opening_hours"].add_range(day, *hours.split("-"))
             yield item
