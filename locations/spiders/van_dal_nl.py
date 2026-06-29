@@ -1,6 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.google_url import url_to_coords
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -22,5 +23,7 @@ class VanDalNLSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Van Dal ")
         item["website"] = response.url
+        if map_url := ld_data.get("hasMap"):
+            item["lat"], item["lon"] = url_to_coords(map_url)
 
         yield item
