@@ -3,7 +3,7 @@ from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, TextResponse
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
@@ -25,18 +25,12 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
                 "operationName": "GetStoresByFilters",
                 "variables": {
                     "input": {"latitude": f"{city['latitude']}", "longitude": f"{city['longitude']}"},
-                    "occasionType": "CARRYOUT",
-                    "carryoutType": None,
-                    "withTimeSlots": True,
                 },
-                "extensions": {"clientLibrary": {"name": "@apollo/client", "version": "4.1.9"}},
-                "query": """query GetStoresByFilters($input: StoresByCoordinateInput!, $occasionType: OccasionType!, $carryoutType: CarryoutType, $withTimeSlots: Boolean!) {
+                "extensions": {"clientLibrary": {"name": "@apollo/client", "version": "4.2.3"}},
+                "query": """query GetStoresByFilters($input: StoresByCoordinateInput!) {
               storesByCoordinate(input: $input) {
-                formattedDistance
                 store {
-                  storeNumber
                   name
-                  shortName
                   displayName
                   brand
                   address {
@@ -53,14 +47,19 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
                   }
                   amenities {
                     key
-                    value
                     isEnabled
                   }
-                  storeOpenHours
-                  carryoutHours
-                  curbsideHours
-                  deliveryHours
-                  carwashHours
+                  amenityGroups {
+                    code
+                    amenities {
+                      code
+                      value {
+                        ... on BooleanAmenityValue {
+                          value
+                        }
+                      }
+                    }
+                  }
                   locationUrl
                   hours {
                     type
@@ -72,41 +71,80 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
                       }
                     }
                   }
-                  timeZoneId
-                  availableTimeSlots(occasionType: $occasionType, carryoutType: $carryoutType) @include(if: $withTimeSlots) {
-                    displayText
-                    option
-                    enabled
-                    timeSlots {
-                      displayText
-                      value
-                    }
-                  }
-                  onlineOrdering
-                  onlineOrderingTemporarilyUnavailable
-                  deliveryDisruption
                 }
               }
             }""",
             }
 
-            yield JsonRequest(
-                url=url,
-                method="POST",
-                data=payload,
-                callback=self.parse,
-            )
+            yield JsonRequest(url=url, data=payload)
 
     def parse(self, response: TextResponse, **kwargs):
         for location in json.loads(response.xpath("//pre//text()").get())["data"]["storesByCoordinate"]:
             location.update(location.pop("store"))
             item = DictParser.parse(location)
-            item.pop("name")
+            item["ref"] = item.pop("name")
             item["branch"] = location["displayName"]
-            item["website"] = item["ref"] = response.urljoin(item["website"])
-            oh = OpeningHours()
-            for day_time in location["storeOpenHours"]:
-                oh.add_ranges_from_string(day_time)
-            item["opening_hours"] = oh
-            apply_category(Categories.SHOP_CONVENIENCE, item)
-            yield item
+            item["name"] = location["brand"]
+            item["website"] = response.urljoin(location["locationUrl"])
+            item["phone"] = location["address"]["phoneNumber"]
+            item["state"] = location["address"]["stateAbbreviation"]
+
+            depts = self.parse_departments(location["amenityGroups"])
+            amenities = [amenity["key"] if amenity["isEnabled"] else None for amenity in location["amenities"]]
+            hours = {h["type"]: self.parse_opening_hours(h["hours"]) for h in location["hours"]}
+
+            if depts.get("fuel") and location["brand"] == "Casey's":
+                fuel = item.deepcopy()
+                fuel["ref"] = "{}_fuel".format(item["ref"])
+                if "PUMPHOURS" in hours:
+                    fuel["opening_hours"] = hours["PUMPHOURS"]
+                if "has_24hourpayatpump" in depts["fuel"]:
+                    fuel["opening_hours"] = "24/7"
+                apply_yes_no(Fuel.DIESEL, fuel, "has_diesel" in depts["fuel"])
+                apply_yes_no(Fuel.KEROSENE, fuel, "has_kerosene" in depts["fuel"])
+                apply_yes_no(Fuel.OCTANE_88, fuel, "has_unleaded_88" in depts["fuel"])
+                apply_yes_no(Extras.CAR_WASH, fuel, "carwash" in amenities)
+
+                # has_def/DEF
+                # has_flex_fuel/Flex fuel
+                # has_midgrade/Midgrade
+                # has_midgrade_no_ethanol/Midgrade no ethanol
+                # has_premium/Premium
+                # has_premium_diesel/Premium diesel
+                # has_premium_no_ethanol/Premium no ethanol
+                # has_racing_fuel/Racing fuel
+                # has_red_dyed_diesel/Red dyed diesel
+                # has_regular/Regular
+
+                apply_category(Categories.FUEL_STATION, fuel)
+                yield fuel
+
+            if depts.get("store"):
+                store = item.deepcopy()
+                store["ref"] = "{}_store".format(item["ref"])
+                if "STOREOPEN" in hours:
+                    store["opening_hours"] = hours["STOREOPEN"]
+                if "has_24_hours" in depts["store"]:
+                    store["opening_hours"] = "24/7"
+                apply_yes_no("sells:alcohol", store, "has_alcohol" in depts["store"])
+                apply_yes_no(Extras.ATM, store, "has_atm" in depts["store"])
+
+                apply_category(Categories.SHOP_CONVENIENCE, store)
+                yield store
+
+    def parse_departments(self, amenity_groups: list[dict]) -> dict:
+        result = {}
+        for group in amenity_groups:
+            result[group["code"]] = set()
+            for amenity in group["amenities"]:
+                if amenity["value"]["value"] is True:
+                    result[group["code"]].add(amenity["code"])
+
+        return result
+
+    def parse_opening_hours(self, hours: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in hours:
+            for times in rule["blocks"]:
+                oh.add_range(rule["dayOfWeek"], times["openDateTime"], times["closeDateTime"], "%Y-%m-%dT%H:%M:%SZ")
+        return oh
