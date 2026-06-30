@@ -3,6 +3,7 @@ from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
@@ -107,4 +108,5 @@ class CaseysGeneralStoreSpider(PlaywrightSpider):
             for day_time in location["storeOpenHours"]:
                 oh.add_ranges_from_string(day_time)
             item["opening_hours"] = oh
+            apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item
