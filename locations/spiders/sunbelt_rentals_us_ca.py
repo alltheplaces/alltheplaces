@@ -43,7 +43,7 @@ class SunbeltRentalsUSCASpider(Spider):
                 close = o[1]
                 opening_hours.add_range(day=day, open_time=open, close_time=close, time_format="%I:%M %p")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]["pcList"]:
@@ -52,9 +52,7 @@ class SunbeltRentalsUSCASpider(Spider):
             item["street_address"] = item.pop("street", None)
             item["ref"] = store["pc"]
 
-            hours = self.parse_hours(store["operatingHours"])
-            if hours:
-                item["opening_hours"] = hours
+            item["opening_hours"] = self.parse_hours(store["operatingHours"])
 
             apply_category(Categories.SHOP_PLANT_HIRE, item)
             yield item

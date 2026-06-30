@@ -67,7 +67,7 @@ class WaterstonesSpider(CrawlSpider):
                 end = ends[i].replace(".", ":")
                 if day and start and end:
                     o.add_range(day, start, end)
-            return o.as_opening_hours()
+            return o
         except IndexError:
             # No opening hours provided
             pass

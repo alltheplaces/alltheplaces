@@ -49,4 +49,4 @@ class VallartaUSSpider(SitemapSpider):
         else:
             return None
 
-        return opening_hours.as_opening_hours()
+        return opening_hours

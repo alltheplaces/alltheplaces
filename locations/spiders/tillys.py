@@ -46,7 +46,7 @@ class TillysSpider(scrapy.Spider):
                 "state": data.get("stateCode"),
                 "phone": data.get("phone"),
                 "country": data.get("countryCode"),
-                "opening_hours": oh.as_opening_hours(),
+                "opening_hours": oh,
                 "lat": data.get("latitude"),
                 "lon": data.get("longitude"),
             }

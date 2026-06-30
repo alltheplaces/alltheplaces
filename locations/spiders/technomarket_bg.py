@@ -52,6 +52,6 @@ class TechnomarketBGSpider(scrapy.Spider):
                 from_str, to_str = store["wh"][2].split(" до ")
                 oh.add_range(day, from_str.strip(), to_str.strip(), "%H:%M")
 
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

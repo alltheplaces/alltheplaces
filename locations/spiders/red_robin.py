@@ -39,7 +39,7 @@ class RedRobinSpider(scrapy.Spider):
             "postcode": data["address"]["postalCode"],
             "country": data["address"]["addressCountry"]["name"],
             "phone": data["telephone"],
-            "opening_hours": hours.as_opening_hours(),
+            "opening_hours": hours,
             "website": response.url,
         }
         return Feature(**properties)

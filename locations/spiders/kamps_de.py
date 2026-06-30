@@ -37,7 +37,7 @@ class KampsDESpider(SitemapSpider):
                         range_start, range_end = map(str.strip, time.split("-"))
                         oh.add_range(DAYS_DE[day_de], range_start, range_end)
 
-        properties["opening_hours"] = oh.as_opening_hours()
+        properties["opening_hours"] = oh
 
         extract_google_position(properties, response)
 

@@ -44,6 +44,6 @@ class EightyfourLumberUSSpider(scrapy.Spider):
                 "state": row["State"],
                 "postcode": row["Zip"],
                 "phone": row["Phone"],
-                "opening_hours": opening_hours.as_opening_hours(),
+                "opening_hours": opening_hours,
             }
             yield Feature(**properties)

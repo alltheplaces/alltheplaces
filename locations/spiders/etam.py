@@ -24,6 +24,7 @@ class EtamSpider(WoosmapSpider):
                     else:
                         continue
                 oh.add_range(DAYS[int(day) - 1], start, end)
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
+
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item

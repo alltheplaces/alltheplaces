@@ -63,6 +63,6 @@ class LeonidasSpider(scrapy.Spider):
                     ),
                     "lat": attributes.get("field_shop_address_latitude"),
                     "lon": attributes.get("field_shop_address_longitude"),
-                    "opening_hours": opening_hours.as_opening_hours(),
+                    "opening_hours": opening_hours,
                 }
             )

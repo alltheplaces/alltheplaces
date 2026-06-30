@@ -155,7 +155,7 @@ class MkrfRUSpider(Spider):
                 oh = OpeningHours()
                 for k, v in working_schedule.items():
                     oh.add_range(DAYS[int(k)], v.get("from"), v.get("to"), "%H:%M:%S")
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except:
                 self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
 

@@ -17,10 +17,9 @@ class A1BGSpider(scrapy.Spider):
             item["opening_hours"] = self.get_opening_hours(store)
             yield item
 
-    def get_opening_hours(self, store):
+    def get_opening_hours(self, store) -> OpeningHours:
         oh = OpeningHours()
         for rule in store["worktime"]:
             rule_str = f"{rule['workday']} {rule['hour_from']}-{rule['hour_to']}"
             oh.add_ranges_from_string(rule_str, DAYS_BG)
-
-        return oh.as_opening_hours()
+        return oh

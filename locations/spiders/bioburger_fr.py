@@ -44,7 +44,7 @@ class BioburgerFRSpider(SitemapSpider, StructuredDataSpider):
                     if period.get("isClosed"):
                         continue
                     oh.add_range(DAY_MAP[day_key], period["openTime"], period["closeTime"])
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
         apply_category(Categories.FAST_FOOD, item)
         yield item

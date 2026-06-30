@@ -58,6 +58,6 @@ class MagnitRUSpider(Spider):
             try:
                 oh = OpeningHours()
                 oh.add_days_range(DAYS, poi.get("openingHours"), poi.get("closingHours"))
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Failed to parse hours: {e}, {poi}")

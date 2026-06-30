@@ -30,5 +30,5 @@ class OfficeworksAUSpider(scrapy.Spider):
             oh = OpeningHours()
             for day in store["openingHours"]:
                 oh.add_range(day["dayOfWeek"], day["open"], day["close"], "%I%p")
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
             yield item

@@ -191,7 +191,7 @@ class StarbucksUSSpider(Spider):
                             close_time=hours[1],
                             time_format="%I:%M %p",
                         )
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Failed to parse hours for {schedule}: {e}")
                 self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")

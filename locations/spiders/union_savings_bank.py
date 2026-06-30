@@ -31,7 +31,7 @@ class UnionSavingsBankSpider(SitemapSpider):
             "ref": list(filter(None, response.url.split("/")))[-1],
             "website": response.url,
             "name": response.css("#address_c h4::text").get(),
-            "opening_hours": oh.as_opening_hours(),
+            "opening_hours": oh,
             "phone": response.css(".contact_numbers_c a::text").get(),
             "street_address": response.css("#address_c .address::text").get(),
             "city": city,

@@ -80,7 +80,7 @@ class RotpunktApothekenCHSpider(CrawlSpider):
             day = DAYS_DE.get(t.strip(), day)
             for open_h, close_h in re.findall(r"(\d\d:\d\d) – (\d\d:\d\d)", t):
                 oh.add_range(day, open_h, close_h)
-        return oh.as_opening_hours()
+        return oh
 
     def parse_phone(self, response):
         if match := re.search(r'"tel:([\d\s]+)"', response.text):
