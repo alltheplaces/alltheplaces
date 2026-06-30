@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.ampm_us import AmpmUSSpider
-from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
+from locations.spiders.caseys_general_store_us import CaseysGeneralStoreUSSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import COSTCO_SHARED_ATTRIBUTES
@@ -48,7 +48,7 @@ class AllpointSpider(Spider):
         "Kroger": KROGER_BRANDS["https://www.kroger.com/"],
         "Racetrac": RaceTracUSSpider.item_attributes,
         "RaceTrac": RaceTracUSSpider.item_attributes,
-        "Casey's": CaseysGeneralStoreSpider.item_attributes,
+        "Casey's": CaseysGeneralStoreUSSpider.item_attributes,
         "Heb": HEBUSSpider.item_attributes,
         "H-E-B": HEBUSSpider.item_attributes,
         "Circle K": CircleKSpider.CIRCLE_K,
