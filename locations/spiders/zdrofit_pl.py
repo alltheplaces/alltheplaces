@@ -5,16 +5,19 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ZdrofitPLSpider(SitemapSpider, StructuredDataSpider):
+class ZdrofitPLSpider(SitemapSpider, PlaywrightSpider, StructuredDataSpider):
     name = "zdrofit_pl"
     item_attributes = {"brand": "Zdrofit", "brand_wikidata": "Q113457353"}
     time_format = "%H:%M:%S"
     sitemap_urls = ["https://zdrofit.pl/sitemaps/clubs-1.xml"]
     sitemap_rules = [(r"https://zdrofit.pl/kluby-fitness/[a-z0-9-]+/$", "parse_sd")]
-    proxy_required = True
+    requires_proxy = "PL"
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
