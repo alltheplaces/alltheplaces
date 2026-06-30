@@ -1,4 +1,4 @@
-﻿import re
+import re
 from typing import Any, AsyncIterator
 
 from scrapy import Request, Spider
@@ -6,7 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_EN, DAYS_FROM_SUNDAY, OpeningHours
 
 
 class MizrahiTefahotILSpider(Spider):
@@ -14,6 +14,7 @@ class MizrahiTefahotILSpider(Spider):
     item_attributes = {"brand": "מזרחי טפחות", "brand_wikidata": "Q2777129"}
 
     async def start(self) -> AsyncIterator[Any]:
+        # GET query URLs are disallowed by robots.txt and JSON POST returns 500.
         yield Request(
             url="https://www.mizrahi-tefahot.co.il/umbraco/api/searchBranches/GetCurrentLocationBranches",
             method="POST",
@@ -69,13 +70,17 @@ class MizrahiTefahotILSpider(Spider):
         if not value:
             return []
         value = value.split("&", 1)[0].upper()
-        day_map = {"SUN": "Su", "MON": "Mo", "MUN": "Mo", "TUE": "Tu", "WED": "We", "THU": "Th", "FRI": "Fr"}
-        days = [day_map[day] for day in re.findall(r"SUN|MON|MUN|TUE|WED|THU|FRI", value)]
+        days = [
+            DAYS_EN["Mon" if day == "MUN" else day.title()] for day in re.findall(r"SUN|MON|MUN|TUE|WED|THU|FRI", value)
+        ]
         if "-" in value and len(days) >= 2:
-            israel_week = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-            start = israel_week.index(days[0])
-            end = israel_week.index(days[-1])
-            return israel_week[start : end + 1] if start <= end else israel_week[start:] + israel_week[: end + 1]
+            start = DAYS_FROM_SUNDAY.index(days[0])
+            end = DAYS_FROM_SUNDAY.index(days[-1])
+            return (
+                DAYS_FROM_SUNDAY[start : end + 1]
+                if start <= end
+                else DAYS_FROM_SUNDAY[start:] + DAYS_FROM_SUNDAY[: end + 1]
+            )
         return list(dict.fromkeys(days))
 
     def parse_time_ranges(self, value: str | None) -> list[tuple[str, str]]:
