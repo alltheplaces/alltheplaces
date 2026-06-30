@@ -1,17 +1,19 @@
 from typing import Any, AsyncIterator
 
-from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class CaseysGeneralStoreSpider(Spider):
+class CaseysGeneralStoreSpider(PlaywrightSpider):
     name = "caseys_general_store"
     item_attributes = {"brand": "Casey's General Store", "brand_wikidata": "Q2940968"}
     requires_proxy = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[Any]:
         url = "https://www.caseys.com/api/graphql"
