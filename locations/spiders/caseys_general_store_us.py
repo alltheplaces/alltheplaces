@@ -29,17 +29,10 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
                 "extensions": {"clientLibrary": {"name": "@apollo/client", "version": "4.2.3"}},
                 "query": """query GetStoresByFilters($input: StoresByCoordinateInput!) {
               storesByCoordinate(input: $input) {
-                formattedDistance
                 store {
-                  storeNumber
                   name
-                  shortName
                   displayName
                   brand
-                  brandLogo {
-                    url
-                    altText
-                  }
                   address {
                     id
                     line1
@@ -54,17 +47,12 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
                   }
                   amenities {
                     key
-                    value
                     isEnabled
                   }
                   amenityGroups {
                     code
-                    displayName
-                    displayOrder
                     amenities {
-                      displayName
                       code
-                      displayOrder
                       value {
                         ... on BooleanAmenityValue {
                           value
@@ -72,11 +60,6 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
                       }
                     }
                   }
-                  storeOpenHours
-                  carryoutHours
-                  curbsideHours
-                  deliveryHours
-                  carwashHours
                   locationUrl
                   hours {
                     type
