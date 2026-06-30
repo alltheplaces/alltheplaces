@@ -11,7 +11,7 @@ class SteigerStiftungAedSpider(CSVFeedSpider):
     name = "steiger_stiftung_aed"
     item_attributes = {
         "operator": "Steiger-Stiftung",
-        "operator_wikidata": "Q112899405",
+        "operator_wikidata": "Q879521",
         "nsi_id": "N/A",
     }
     start_urls = ["https://www.steiger-stiftung.de/download/page/maps/data/aeds.csv"]
