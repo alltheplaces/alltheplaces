@@ -11,8 +11,8 @@ from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class CaseysGeneralStoreSpider(PlaywrightSpider):
-    name = "caseys_general_store"
+class CaseysGeneralStoreUSSpider(PlaywrightSpider):
+    name = "caseys_general_store_us"
     item_attributes = {"brand": "Casey's General Store", "brand_wikidata": "Q2940968"}
     requires_proxy = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
