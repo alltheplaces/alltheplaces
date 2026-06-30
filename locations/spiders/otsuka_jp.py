@@ -10,7 +10,7 @@ from locations.dict_parser import DictParser
 class OtsukaJPSpider(Spider):
     name = "otsuka_jp"
 
-    start_urls = ["https://shop-eql.otsuka.co.jp/api/points/xn7"]
+    start_urls = ["https://shop-eql.otsuka.co.jp/api/points"]
     allowed_domains = ["shop-eql.otsuka.co.jp"]
     country_code = "JP"
     SKIP_BRANDS = [
@@ -33,7 +33,7 @@ class OtsukaJPSpider(Spider):
             item = DictParser.parse(store)
             item["ref"] = store["key"]
             item["website"] = f"https://shop-eql.otsuka.co.jp/map/{store['key']}"
-            if store["markers"]["ja"] == 1:
+            if store["markers"]["ja"] == "1":
                 apply_category(Categories.PHARMACY, item)
                 item["extras"]["dispensing"] = "yes"
             else:
