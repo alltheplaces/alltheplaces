@@ -26,6 +26,7 @@ class AutoNationUSSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
         item["lat"] = store_info.get("latitude")
         item["lon"] = store_info.get("longitude")
         item["ref"] = store_info.get("hyperionId")
+        item.pop("image", None)  # Same brand logo on every location, not per-location
         # ld_data has opening hours of sales and services all merged, difficult to differentiate.
         item["opening_hours"] = self.parse_opening_hours(store_info.get("detailedHours") or [])
         departments = [department.get("name") for department in store_info.get("departments", [])]
