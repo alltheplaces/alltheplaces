@@ -49,7 +49,7 @@ class VodafoneDESpider(scrapy.Spider):
                 "website": response.url,
                 "lat": response.xpath('//meta[contains(@itemprop, "latitude")]/@content').get(),
                 "lon": response.xpath('//meta[contains(@itemprop, "longitude")]/@content').get(),
-                "opening_hours": oh.as_opening_hours(),
+                "opening_hours": oh,
             }
 
             yield Feature(**properties)

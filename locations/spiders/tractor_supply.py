@@ -46,7 +46,7 @@ class TractorSupplySpider(Spider):
             except Exception:
                 continue
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse(self, response):
         data = response.json()
@@ -65,8 +65,6 @@ class TractorSupplySpider(Spider):
                 "lon": store["longitude"],
             }
 
-            hours = self.parse_hours(store["storeHours"])
-            if hours:
-                properties["opening_hours"] = hours
+            properties["opening_hours"] = self.parse_hours(store["storeHours"])
 
             yield Feature(**properties)

@@ -35,7 +35,7 @@ class YermolinoRUSpider(Spider):
                 oh.add_ranges_from_string(
                     hours, days=DAYS_RU, named_day_ranges=NAMED_DAY_RANGES_RU, named_times=NAMED_TIMES_RU
                 )
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Failed to parse hours: {hours}, {e}")
                 self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")

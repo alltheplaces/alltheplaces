@@ -38,6 +38,6 @@ class BqSpider(scrapy.Spider):
                 if not rule.get("opens"):
                     continue
                 oh.add_range(rule["dayOfWeek"], rule["opens"][:5], rule["closes"][:5])
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

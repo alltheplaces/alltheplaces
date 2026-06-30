@@ -64,12 +64,11 @@ class SlovenskaPostaSKSpider(Spider):
         if phones := location.get("phones"):
             item["phone"] = "; ".join(phones)
 
-        if opening_hours := self.parse_opening_hours(location.get("oh", [])):
-            item["opening_hours"] = opening_hours
+        item["opening_hours"] = self.parse_opening_hours(location.get("oh", []))
 
         return item
 
-    def parse_opening_hours(self, days: list[dict[str, Any]]) -> str | None:
+    def parse_opening_hours(self, days: list[dict[str, Any]]) -> OpeningHours | None:
         try:
             day_hours = {}
             for day in days:
@@ -82,7 +81,7 @@ class SlovenskaPostaSKSpider(Spider):
             for day, hours in day_hours.items():
                 for open_seconds, close_seconds in hours:
                     opening_hours.add_range(day, self.format_seconds(open_seconds), self.format_seconds(close_seconds))
-            return opening_hours.as_opening_hours() or None
+            return opening_hours
         except (KeyError, TypeError, ValueError):
             return None
 

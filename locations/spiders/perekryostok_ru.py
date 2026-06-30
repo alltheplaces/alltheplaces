@@ -58,6 +58,6 @@ class PerekryostokRUSpider(scrapy.Spider):
             try:
                 open, close = sanitize_time(schedule).split("-")
                 oh.add_days_range(DAYS, open, close)
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Failed to parse hours: {schedule}, {e}")

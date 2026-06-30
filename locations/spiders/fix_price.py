@@ -48,6 +48,6 @@ class FixPriceSpider(Spider):
                 if schedule:
                     open, close = schedule.split("-")
                     oh.add_days_range(NAMED_DAY_RANGES_EN[day] if day == "Weekdays" else [day], open, close)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
         except Exception as e:
             self.logger.warning(f"Failed to parse hours: {schedule_data}, {e}")

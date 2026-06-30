@@ -7,7 +7,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 
@@ -46,8 +46,7 @@ class CsobSKSpider(Spider):
         if branch := self.clean_branch(address.get("locationDescr")):
             item["branch"] = branch
 
-        if opening_hours := self.parse_opening_hours(properties.get("open", {}).get("days")):
-            item["opening_hours"] = opening_hours
+        item["opening_hours"] = self.parse_opening_hours(properties.get("open", {}).get("days"))
 
         return item
 
@@ -68,27 +67,19 @@ class CsobSKSpider(Spider):
         return branch or None
 
     @staticmethod
-    def parse_opening_hours(days: dict[str, Any] | None) -> str | None:
+    def parse_opening_hours(days: dict[str, Any] | None) -> OpeningHours | None:
         if not days:
             return None
 
         try:
             oh = OpeningHours()
-            for day_name in (
-                "MONDAY",
-                "TUESDAY",
-                "WEDNESDAY",
-                "THURSDAY",
-                "FRIDAY",
-                "SATURDAY",
-                "SUNDAY",
-            ):
+            for day_name in map(str.upper, DAYS_FULL):
                 for section in days.get(day_name, {}).get("sections") or []:
                     start_time = CsobSKSpider.normalise_time(section.get("from"))
                     end_time = CsobSKSpider.normalise_time(section.get("to"), end=True)
                     if start_time and end_time:
-                        oh.add_range(DAYS_EN[day_name.title()], start_time, end_time)
-            return oh.as_opening_hours() or None
+                        oh.add_range(day_name, start_time, end_time)
+            return oh
         except (AttributeError, KeyError, TypeError, ValueError):
             return None
 

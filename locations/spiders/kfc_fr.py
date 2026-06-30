@@ -31,15 +31,17 @@ class KfcFRSpider(scrapy.Spider):
                 set_closed(item)
             else:
                 item["opening_hours"] = self.parse_hours(location["operatingHours"])
-                item["extras"]["opening_hours:drive_through"] = self.parse_hours(location["driveThruOperatingHours"])
+                item["extras"]["opening_hours:drive_through"] = self.parse_hours(
+                    location["driveThruOperatingHours"]
+                ).as_opening_hours()
 
             yield item
 
-    def parse_hours(self, hours: list) -> str:
+    def parse_hours(self, hours: list) -> OpeningHours:
         opening_hours = OpeningHours()
         for rule in hours:
             day = DAYS[rule["dayOfWeek"] - 1]
             opening_hours.add_range(
                 day, rule["start"], rule["end"], time_format="%H:%M" if len(rule["end"]) == 5 else "%H:%M:%S"
             )
-        return opening_hours.as_opening_hours()
+        return opening_hours

@@ -1,11 +1,12 @@
 import scrapy
+from scrapy import Spider
 
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
-class CexSpider(scrapy.Spider):
+class CexSpider(Spider):
     name = "cex"
     item_attributes = {"brand": "CeX", "brand_wikidata": "Q5055676", "country": "GB"}
     allowed_domains = ["wss2.cex.uk.webuy.io"]
@@ -38,21 +39,9 @@ class CexSpider(scrapy.Spider):
         item["image"] = ";".join(store["storeImageUrls"])
 
         oh = OpeningHours()
-        for day in [
-            "monday",
-            "tuesday",
-            "wednesday",
-            "thursday",
-            "friday",
-            "saturday",
-            "sunday",
-        ]:
-            oh.add_range(
-                day[:2].title(),
-                store["timings"]["open"][day],
-                store["timings"]["close"][day],
-            )
+        for day in map(str.lower, DAYS_FULL):
+            oh.add_range(day, store["timings"]["open"][day], store["timings"]["close"][day])
 
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
 
         yield item

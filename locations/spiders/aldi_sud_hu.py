@@ -28,7 +28,7 @@ class AldiSudHUSpider(Spider):
                 day = sanitise_day(rule["day"], DAYS_HU)
                 if not rule.get("closed", False):
                     oh.add_range(day, rule["openFormatted"], rule["closeFormatted"])
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_SUPERMARKET, item)
 

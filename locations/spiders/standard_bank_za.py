@@ -157,4 +157,4 @@ class StandardBankZASpider(scrapy.Spider):
                         return None
             except:
                 pass
-        return oh.as_opening_hours()
+        return oh
