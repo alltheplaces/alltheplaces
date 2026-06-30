@@ -16,8 +16,8 @@ class KenyaCommercialBankKESpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.BANK, item)
 
-        item.pop("email")
-        item.pop("phone")
+        item.pop("email", None)
+        item.pop("phone", None)
 
         item["branch"] = item.pop("name").removeprefix("KCB ")
 
@@ -32,7 +32,9 @@ class KenyaCommercialBankKESpider(JSONBlobSpider):
             return None
         opening_hours = OpeningHours()
         for rule in hours.split("\n"):
-            day, times = rule.split(":")
+            if ":" not in rule:
+                continue
+            day, times = rule.split(":", 1)
 
             day = day.lower().replace("and public holidays", "")
             times = times.replace("noon", "pm")
