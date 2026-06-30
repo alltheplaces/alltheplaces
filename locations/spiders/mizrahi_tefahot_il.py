@@ -45,7 +45,9 @@ class MizrahiTefahotILSpider(Spider):
             if opening_hours := self.parse_opening_hours(location):
                 item["opening_hours"] = opening_hours
 
-            apply_yes_no(Extras.ATM, item, location.get("kaspon") == "1")
+            # The locator renders shekel ATMs when kaspon == "0"; FX ATMs use 1/2/9 currency codes.
+            has_atm = location.get("kaspon") == "0" or location.get("kasponMatach") in {"1", "2", "9"}
+            apply_yes_no(Extras.ATM, item, has_atm)
             apply_yes_no(Extras.WHEELCHAIR, item, location.get("gishaN") == "1")
             apply_category(Categories.BANK, item)
             yield item
