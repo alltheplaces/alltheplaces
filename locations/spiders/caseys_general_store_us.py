@@ -87,6 +87,7 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
             item["name"] = location["brand"]
             item["website"] = response.urljoin(location["locationUrl"])
             item["phone"] = location["address"]["phoneNumber"]
+            item["state"] = location["address"]["stateAbbreviation"]
 
             depts = self.parse_departments(location["amenityGroups"])
             amenities = [amenity["key"] if amenity["isEnabled"] else None for amenity in location["amenities"]]
