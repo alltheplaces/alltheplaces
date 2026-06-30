@@ -1,3 +1,4 @@
+import json
 from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, TextResponse
@@ -96,7 +97,7 @@ class CaseysGeneralStoreSpider(PlaywrightSpider):
             )
 
     def parse(self, response: TextResponse, **kwargs):
-        for location in response.json()["data"]["storesByCoordinate"]:
+        for location in json.loads(response.xpath("//pre//text()").get())["data"]["storesByCoordinate"]:
             location.update(location.pop("store"))
             item = DictParser.parse(location)
             item.pop("name")
