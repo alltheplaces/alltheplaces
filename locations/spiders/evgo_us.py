@@ -16,6 +16,7 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
     sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Request]:
         # Route the sitemap fetch through Playwright to bypass the Vercel security checkpoint
