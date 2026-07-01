@@ -1,5 +1,5 @@
 from locations.brand_utils import extract_located_in
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.spiders.eatn_park_us import EatnParkUSSpider
 from locations.spiders.exxon_mobil import ExxonMobilSpider
 from locations.spiders.food_lion_us import FoodLionUSSpider
@@ -36,12 +36,12 @@ class FirstNationalBankUSSpider(YextAnswersSpider):
 
     def parse_item(self, location, item):
         if location["type"] == "atm":
-            apply_category(Categories.ATM, item)
+            item["category"] = Categories.ATM
             item["located_in"], item["located_in_wikidata"] = extract_located_in(
                 item.get("branch", ""), self.LOCATED_IN_MAPPINGS, self
             )
         elif location["type"] == "location":
-            apply_category(Categories.BANK, item)
+            item["category"] = Categories.BANK
             if amenities := location.get("c_branchFilters"):
                 apply_yes_no(Extras.ATM, item, "ATM" in amenities, False)
                 apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-Thru" in amenities, False)
