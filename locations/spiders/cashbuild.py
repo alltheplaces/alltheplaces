@@ -34,8 +34,8 @@ class CashbuildSpider(Spider):
         raw_data = re.search(r"stores\":(\[.*\]),\"stores_list_html", response.text).group(1)
         for location in json.loads(raw_data):
 
-            if not location["active"] or not location["storeActive"]:
-                return
+            if not location["active"]:
+                continue
             item = DictParser.parse(location)
 
             item["ref"] = str(location["id_store"])
