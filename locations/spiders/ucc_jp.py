@@ -12,7 +12,7 @@ class UccJPSpider(LocationCloudSpider):
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
 
-        if "kaigai" in source_feature.get("ref"):
+        if "kaigai" in source_feature["code"]:
             return  # remove overseas locations with fake coordinates
 
         match source_feature["categories"][0]["code"]:
