@@ -7,7 +7,7 @@ from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -46,7 +46,7 @@ class CashbuildSpider(Spider):
             item["opening_hours"] = OpeningHours()
             hours_text = ""
             for day_index, day_hours in enumerate(location["hoursArray"]):
-                hours_text = "{} {}: {}".format(hours_text, DAYS_FROM_SUNDAY[day_index], day_hours["text"])
+                hours_text = "{} {}: {}".format(hours_text, DAYS[day_index], day_hours["text"])
             item["opening_hours"].add_ranges_from_string(hours_text)
 
             apply_category(Categories.SHOP_DOITYOURSELF, item)
