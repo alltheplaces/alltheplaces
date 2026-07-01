@@ -8,7 +8,6 @@ from locations.items import Feature
 class DavidLloydGBSpider(Spider):
     name = "david_lloyd_gb"
     item_attributes = {"brand": "David Lloyd Clubs", "brand_wikidata": "Q5236716"}
-    requires_proxy = True
     start_urls = ["https://mobile-app-back.davidlloyd.co.uk/clubs/locations"]
 
     def parse(self, response, **kwargs):
