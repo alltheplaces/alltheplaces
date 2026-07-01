@@ -19,12 +19,20 @@ class UccJPSpider(LocationCloudSpider):
                 item["branch"] = source_feature["name"].removeprefix("上島珈琲店　")
                 if ruby := source_feature.get("ruby"):
                     item["extras"]["branch:ja-Hira"] = ruby.removeprefix("UESHIMA COFFEE ")
-            case _:
+                apply_category(Categories.COFFEE_SHOP, item)
+            case "04" | "05" | "08" | "09" | "16":
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["branch"] = source_feature.get("name")
                 if ruby := source_feature.get("ruby"):
                     item["extras"]["branch:ja-Hira"] = ruby
-
-        apply_category(Categories.COFFEE_SHOP, item)
+                apply_category(Categories.COFFEE_SHOP, item)
+            case "11" | "12":
+                item["brand"] = source_feature["categories"][0]["name"]
+                item["branch"] = source_feature.get("name")
+                if ruby := source_feature.get("ruby"):
+                    item["extras"]["branch:ja-Hira"] = ruby
+                apply_category(Categories.SHOP_COFFEE, item)
+            case _:
+                return
 
         yield item
