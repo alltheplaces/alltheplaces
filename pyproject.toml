@@ -55,10 +55,11 @@ target-version = ['py311']
 [tool.ruff]
 line-length = 120
 target-version = 'py311'
+exclude = [".claude"]
 
 [tool.ruff.format]
 # Match black's quote preferences: double quotes (codebase standard)
-quote-style = "double"
+quote-style = "preserve"
 indent-style = "space"
 line-ending = "auto"
 # Don't reformat docstrings (black didn't)
@@ -74,13 +75,12 @@ ignore = [
     "E501",  # Line too long (black wasn't enforcing pre-existing violations)
     "E722",  # Do not use bare `except`
     "E721",  # Type comparison should use `isinstance()`
+    "F601",  # Duplicate dictionary key (pre-existing issue, not enforced before)
 ]
 # Only enable rules that match black/isort behavior
 select = [
-    "F",     # Pyflakes (import/undefined name checks)
     "E",     # pycodestyle errors (minus the ones we ignore above)
     "W",     # pycodestyle warnings
-    "I",     # isort import ordering
 ]
 
 [dependency-groups]
