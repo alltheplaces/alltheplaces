@@ -3,22 +3,19 @@ import re
 from typing import Any, AsyncIterator
 
 from scrapy.http import FormRequest, Response
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class CashbuildSpider(PlaywrightSpider):
+class CashbuildSpider(Spider):
     name = "cashbuild"
     item_attributes = {"brand": "Cashbuild", "brand_wikidata": "Q116474606"}
     allowed_domains = ["www.cashbuild.co.za"]
     start_urls = ["https://www.cashbuild.co.za/module/radiusdelivery/StoreSelectorAjax"]
-    requires_proxy = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[FormRequest]:
         for country_code in ["BW", "LS", "MW", "NA", "SZ", "ZA"]:
