@@ -52,6 +52,37 @@ url = "https://pypi.python.org/simple"
 line-length = 120
 target-version = ['py311']
 
+[tool.ruff]
+line-length = 120
+target-version = 'py311'
+
+[tool.ruff.format]
+# Match black's quote preferences: double quotes (codebase standard)
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+# Don't reformat docstrings (black didn't)
+docstring-code-format = false
+
+[tool.ruff.lint]
+# Match black/isort behavior: formatting + basic checks, not aggressive linting
+# Disabled rules would require widespread codebase changes:
+# - E501: line too long (widespread in existing code, black wasn't enforcing)
+# - E722: bare except (126 instances in existing code, not enforced before)
+# - E721: type comparisons (style issue, not enforced before)
+ignore = [
+    "E501",  # Line too long (black wasn't enforcing pre-existing violations)
+    "E722",  # Do not use bare `except`
+    "E721",  # Type comparison should use `isinstance()`
+]
+# Only enable rules that match black/isort behavior
+select = [
+    "F",     # Pyflakes (import/undefined name checks)
+    "E",     # pycodestyle errors (minus the ones we ignore above)
+    "W",     # pycodestyle warnings
+    "I",     # isort import ordering
+]
+
 [dependency-groups]
 dev = [
     "autoflake8",
