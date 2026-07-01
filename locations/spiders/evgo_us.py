@@ -1,4 +1,4 @@
-from typing import Any, Iterable, Iterator
+from typing import Any, AsyncIterator, Iterable, Iterator
 
 from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -15,9 +15,9 @@ class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
     name = "evgo_us"
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
     sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
-    def start_requests(self) -> Iterable[Request]:
+    async def start(self) -> AsyncIterator[Request]:
         # Route the sitemap fetch through Playwright to bypass the Vercel security checkpoint
         for url in self.sitemap_urls:
             yield Request(
