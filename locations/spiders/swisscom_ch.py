@@ -1,5 +1,4 @@
-import json
-from typing import Any, Iterable
+from typing import Iterable
 
 from scrapy.http import Response, TextResponse
 from scrapy.spiders import SitemapSpider
