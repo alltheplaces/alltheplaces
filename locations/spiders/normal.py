@@ -39,4 +39,5 @@ class NormalSpider(Spider):
                 if opening_hours:
                     item["opening_hours"] = opening_hours
 
+            item["street_address"] = item.pop("addr_full", None)
             yield item
