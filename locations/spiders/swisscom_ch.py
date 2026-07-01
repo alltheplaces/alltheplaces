@@ -1,23 +1,29 @@
 import json
-from typing import Any
+from typing import Any, Iterable
 
-from scrapy.http import Response
+from scrapy.http import Response, TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class SwisscomCHSpider(SitemapSpider):
+class SwisscomCHSpider(SitemapSpider, StructuredDataSpider):
     name = "swisscom_ch"
     item_attributes = {"brand": "Swisscom", "brand_wikidata": "Q644324"}
     sitemap_urls = ["https://swisscomshops.swisscom.ch/en/sitemap.xml"]
     sitemap_rules = [(r"/en/[^/]+/[^/]+$", "parse")]
+    wanted_types = ["LocalBusiness"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        ld = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').get())
-        item = LinkedDataParser.parse_ld(ld["itemListElement"][0])
-        if (name := item.pop("name")) and " - " in name:
-            item["branch"] = name.split(" - ", 1)[1]
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        for ld_obj in LinkedDataParser.iter_linked_data(response, self.json_parser):
+            if ld_obj.get("@type") == "ItemList":
+                yield from ld_obj["itemListElement"]
+
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        if item["name"].startswith("Swisscom Shop"):
+            item["branch"] = item.pop("name").removeprefix("Swisscom Shop").strip(" -")
         apply_category(Categories.SHOP_TELECOMMUNICATION, item)
         yield item
