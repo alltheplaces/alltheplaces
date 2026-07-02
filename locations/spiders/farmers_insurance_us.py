@@ -8,10 +8,9 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class FarmersInsuranceUSSpider(SitemapSpider, StructuredDataSpider):
+class FarmersInsuranceUSSpider(SitemapSpider):
     name = "farmers_insurance_us"
     item_attributes = {"brand": "Farmers Insurance", "brand_wikidata": "Q1396863"}
     allowed_domains = ["agents.farmers.com"]
