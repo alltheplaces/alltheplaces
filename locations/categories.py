@@ -882,6 +882,8 @@ def apply_yes_no(attribute: str | Enum, item: Feature | dict, state: bool, apply
         tag_key = attribute.value
     else:
         raise TypeError("string or Enum required")
+    if "extras" not in item:
+        item["extras"] = {}
     if not state and "=" in tag_key:
         return
 

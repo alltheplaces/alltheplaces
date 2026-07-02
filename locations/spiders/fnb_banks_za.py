@@ -2,7 +2,7 @@ import string
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.http import Request, Response, FormRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
@@ -18,11 +18,9 @@ class FnbBanksZASpider(Spider):
         # Single letter searches return no results, so doing this instead
         letter_pairs = [i + j for i in string.ascii_lowercase for j in string.ascii_lowercase]
         for pair in letter_pairs:
-            yield Request(
+            yield FormRequest(
                 url="https://www.fnb.co.za/Controller?nav=locators.BranchLocatorSearch",
-                body="nav=locators.BranchLocatorSearch&branchName=" + pair,
-                headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
-                method="POST",
+                formdata={"nav": "locators.BranchLocatorSearch", "branchName": pair},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -32,7 +30,7 @@ class FnbBanksZASpider(Spider):
         for link in links:
             yield Request(url="https://www.fnb.co.za" + link, callback=self.parse_item)
 
-    def parse_item(self, response):
+    def parse_item(self, response: Response, **kwargs: Any) -> Any:
         # from scrapy.shell import inspect_response
         # inspect_response(response, self)
         properties = {
