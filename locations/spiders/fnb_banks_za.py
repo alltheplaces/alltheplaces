@@ -2,7 +2,7 @@ import string
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Request, Response, FormRequest
+from scrapy.http import FormRequest, Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
