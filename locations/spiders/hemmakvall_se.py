@@ -1,26 +1,39 @@
 import re
-from html import unescape
+from typing import Iterable
 
-from scrapy import Selector
+from scrapy import Selector, Spider
+from scrapy.http import JsonRequest, TextResponse
 
-from locations.hours import DAYS_SE, OpeningHours
-from locations.storefinders.store_locator_plus_self import StoreLocatorPlusSelfSpider
+from locations.items import Feature
 
 
-class HemmakvallSESpider(StoreLocatorPlusSelfSpider):
+class HemmakvallSESpider(Spider):
     name = "hemmakvall_se"
     item_attributes = {"brand": "Hemmakväll", "brand_wikidata": "Q10521791"}
     allowed_domains = ["www.hemmakvall.se"]
-    iseadgg_countries_list = ["SE"]
-    search_radius = 200
-    max_results = 75
+    start_urls = ["https://www.hemmakvall.se/hitta-butik/"]
+    no_refs = True
 
-    def parse_item(self, item, location):
-        item.pop("website", None)
-        hours_string = " ".join(Selector(text=unescape(location["hours"])).xpath("//text()").getall())
-        hours_string = re.sub(r"\s+", " ", hours_string)
-        hours_string = re.sub(r"(?<=\d) ?- ?(?=\d)", "-", hours_string)
-        hours_string = re.sub(r"(?<![\d:])(?: | ?- ?)(?=\d)", ": ", hours_string)
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_SE)
-        yield item
+    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
+        if url_key := re.search(
+            r"ajaxurl\":\"([a-z\/:\.-]+)\",\"nonce\":\"(.+)\"};",
+            response.xpath('//*[@id="pinmeto-ajax-search-js-extra"]//text()').get(),
+        ):
+            yield JsonRequest(
+                url=url_key.group(1),
+                method="POST",
+                body=f"action=pinmeto_search_locations&nonce={url_key.group(2)}",
+                headers={"content-type": "application/x-www-form-urlencoded; charset=UTF-8"},
+                callback=self.parse_details,
+            )
+
+    def parse_details(self, response):
+        html_data = Selector(text=response.json()["data"])
+        for data in html_data.xpath('//*[@class="row row-collapse align-center"]'):
+            item = Feature()
+            item["branch"] = data.xpath(".//h4/text()").get().removeprefix("Hemmakväll - ")
+            text_data = data.xpath('.//*[@class="icon-box-text last-reset"]/p//text()').getall()
+            item["addr_full"] = text_data[0]
+            item["phone"] = text_data[1]
+            item["email"] = text_data[2]
+            yield item
