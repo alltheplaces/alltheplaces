@@ -5,18 +5,22 @@ from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMet
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
+
 
 # We can get the first 250 from the API, but can't find a way to get the next 250 :(
 # So instead get the ids from the sitemap and call the individual api endpoint
 # "https://www.exxon.com/en/api/locator/Locations?DataSource=RetailGasStations",
 
 
-# This data is also in Microsofts Virtual Earth, but we don't have a key with read access :(
+# This data is also in Microsoft's Virtual Earth, but we don't have a key with read access :(
 # dataset_id = "5857976ca2ae4a8c9a546777ed33c1cd"
 # dataset_name = "WEP2_Retail_PROD/RetailGasStations"
 
 
-class ExxonMobilSpider(SitemapSpider):
+class ExxonMobilSpider(SitemapSpider, PlaywrightSpider):
     name = "exxon_mobil"
     sitemap_urls = [
         "https://www.esso.co.uk/robots.txt",
@@ -39,7 +43,7 @@ class ExxonMobilSpider(SitemapSpider):
         "https://www.esso.nl/robots.txt",
     ]
     sitemap_rules = [(r"/find-station/.+-\d+$", "parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}| DEFAULT_PLAYWRIGHT_SETTINGS
 
     brands = {
         "Exxon": {"brand": "Exxon", "brand_wikidata": "Q109675651"},
