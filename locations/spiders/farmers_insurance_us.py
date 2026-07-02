@@ -1,10 +1,13 @@
-from typing import Any, Iterable
+import json
+import re
+from typing import Any
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -13,14 +16,22 @@ class FarmersInsuranceUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Farmers Insurance", "brand_wikidata": "Q1396863"}
     allowed_domains = ["agents.farmers.com"]
     sitemap_urls = ["https://agents.farmers.com/sitemap.xml"]
-    sitemap_rules = [(r"https://agents\.farmers\.com/\w{2}/[-\w]+/[-\w]+/?$", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
+    sitemap_rules = [(r"https://agents\.farmers\.com/\w{2}/[-\w]+/[-\w]+/?$", "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
-        item["ref"] = response.url.rstrip("/").split("/")[-1]
-        # Name from JSON-LD is "Agent Name - Street Address" — use agent name as branch
-        if " - " in (item.get("name") or ""):
-            item["branch"] = item.pop("name").split(" - ")[0].strip()
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        data = re.search(r"\{.*\}", response.xpath('//comment()[contains(., "LocalBusiness")]').get(), re.S).group(0)
+        item = DictParser.parse(json.loads(data))
+        item["ref"] = item["website"] = response.url
+        try:
+            oh = OpeningHours()
+            for day_time in json.loads(data)["openingHoursSpecification"]:
+                day = day_time["dayOfWeek"][0]
+                open_time = day_time["opens"]
+                close_time = day_time["closes"]
+                oh.add_range(day, open_time, close_time)
+            item["opening_hours"] = oh
+        except:
+            pass
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
