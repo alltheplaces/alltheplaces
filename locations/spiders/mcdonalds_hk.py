@@ -11,6 +11,7 @@ class McdonaldsHKSpider(Spider):
     name = "mcdonalds_hk"
     item_attributes = McdonaldsSpider.item_attributes
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[FormRequest]:
         url = "https://www.mcdonalds.com.hk/wp-admin/admin-ajax.php?action=get_restaurants"
