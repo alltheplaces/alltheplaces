@@ -1,16 +1,17 @@
 import re
 
 from scrapy import Request, Spider
+from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class HealthhubSGSpider(Spider):
     name = "healthhub_sg"
     start_urls = [
-        "https://eservices.healthhub.sg/healthhubng/public/services/directory/56",
-        "https://eservices.healthhub.sg/healthhubng/public/services/directory/58",
+        "https://eservices.healthhub.sg/public/directory",
     ]
 
     def parse(self, response, **kwargs):
@@ -20,23 +21,42 @@ class HealthhubSGSpider(Spider):
             yield Request(url_for_api_key, callback=self.parse_api_key)
 
     def parse_api_key(self, response, **kwargs):
-        for m in re.findall(r'''VITE_REACT_APP_API_KEY:\s*"([^"\s\n]+)"''', response.text):
-            api_key = m
-
+        api_key = re.search(r"VITE_REACT_GREEN_APP_API_KEY:\s*\"(.+)\",VITE_REACT_GREEN", response.text).group(1)
         if api_key:
-            locations_urls = [
-                "https://api.healthhub.sg/healthhub/prod/v2/Directory/LocationList?pageNum=1&pageSize=100&categoryId=56",
-                "https://api.healthhub.sg/healthhub/prod/v2/Directory/LocationList?pageNum=1&pageSize=100&categoryId=58",
-            ]
-            for url in locations_urls:
-                yield Request(url, callback=self.parse_locations, headers={"X-Api-Key": api_key})
+            yield self.make_request(1, api_key)
+
+    def make_request(self, page: int, key: str) -> JsonRequest:
+        return JsonRequest(
+            url="https://api.hcc.healthhub.sg/active/v1/public/directory/locations",
+            data={"PageNumber": page, "Language": "en"},
+            method="POST",
+            callback=self.parse_locations,
+            headers={"x-api-key": key},
+            cb_kwargs={"key": key},
+        )
 
     def parse_locations(self, response, **kwargs):
-        for location in response.json().get("Results", []):
-            item = DictParser.parse(location)
-            if location.get("Open24H") == "Y":
-                item["opening_hours"] = "Mo-Su 00:00-24:00"
+        for location in response.json().get("Result", []).get("Locations", []):
+            yield JsonRequest(
+                url="https://api.hcc.healthhub.sg/active/v1/public/directory/locationdetails",
+                data={"DirectoryLocationId": location.get("DirectoryLocationId"), "Language": "en"},
+                method="POST",
+                callback=self.parse_details,
+                headers={"x-api-key": kwargs["key"]},
+            )
+        if response.json().get("Result").get("CurrentPageNumber") <= response.json().get("Result").get("TotalPages"):
+            yield self.make_request(response.json().get("Result").get("CurrentPageNumber") + 1, kwargs["key"])
 
-            apply_category(Categories.HOSPITAL, item)
-
-            yield item
+    def parse_details(self, response):
+        data = response.json().get("Result", []).get("LocationDetails", [])
+        data.pop("NearestLocations")
+        item = DictParser.parse(data)
+        item["ref"] = data.get("DirectoryLocationId")
+        item["postcode"] = str(item["postcode"])
+        if item.get("website"):
+            item["website"] = ["https://" + item["website"] if "https://" not in item["website"] else item["website"]]
+        oh = OpeningHours()
+        oh.add_ranges_from_string(data.get("OperatingHour", ""))
+        item["opening_hours"] = oh
+        apply_category(Categories.HOSPITAL, item)
+        yield item
