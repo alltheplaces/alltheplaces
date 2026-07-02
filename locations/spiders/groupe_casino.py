@@ -8,9 +8,11 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class GroupeCasinoSpider(Spider):
+class GroupeCasinoSpider(PlaywrightSpider):
     name = "groupe_casino"
     brands = {
         "30837": ("Casino PauseDéj", "Q89029249", Categories.SHOP_CONVENIENCE),
@@ -22,6 +24,7 @@ class GroupeCasinoSpider(Spider):
         "30847": ("Vival", "Q7937525", Categories.SHOP_CONVENIENCE),
     }
     requires_proxy = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
