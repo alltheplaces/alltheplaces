@@ -2,7 +2,7 @@ import re
 from typing import Iterable
 
 from scrapy import Selector, Spider
-from scrapy.http import JsonRequest, TextResponse
+from scrapy.http import FormRequest, TextResponse
 
 from locations.items import Feature
 
@@ -19,11 +19,9 @@ class HemmakvallSESpider(Spider):
             r"ajaxurl\":\"([a-z\/:\.-]+)\",\"nonce\":\"(.+)\"};",
             response.xpath('//*[@id="pinmeto-ajax-search-js-extra"]//text()').get(),
         ):
-            yield JsonRequest(
+            yield FormRequest(
                 url=url_key.group(1),
-                method="POST",
-                body=f"action=pinmeto_search_locations&nonce={url_key.group(2)}",
-                headers={"content-type": "application/x-www-form-urlencoded; charset=UTF-8"},
+                formdata={"action": "pinmeto_search_locations", "nonce": url_key.group(2)},
                 callback=self.parse_details,
             )
 
