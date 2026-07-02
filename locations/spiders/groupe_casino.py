@@ -21,6 +21,7 @@ class GroupeCasinoSpider(Spider):
         "30845": ("Spar", "Q610492", Categories.SHOP_SUPERMARKET),
         "30847": ("Vival", "Q7937525", Categories.SHOP_CONVENIENCE),
     }
+    requires_proxy = True
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
