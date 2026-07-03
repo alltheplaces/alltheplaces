@@ -1,52 +1,25 @@
-import json
-from typing import AsyncIterator
+from typing import Iterable
+from urllib.parse import urljoin
 
-from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import TextResponse
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, day_range
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class EdibleArrangementsSpider(Spider):
+class EdibleArrangementsSpider(JSONBlobSpider):
     name = "edible_arrangements"
     item_attributes = {"brand": "Edible Arrangements", "brand_wikidata": "Q5337996"}
     allowed_domains = ["www.ediblearrangements.com"]
+    start_urls = ["https://www.ediblearrangements.com/api/stores/store-finder/get-stores?latitude=0&longitude=0"]
+    locations_key = "storeData"
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        yield FormRequest(
-            "https://www.ediblearrangements.com/stores/store-locator.aspx/GetStoresByCurrentLocation",
-            method="POST",
-            headers={
-                "accept": "application/json, text/javascript, */*; q=0.01",
-                "accept-language": "en-US,en;q=0.9",
-                "content-type": "application/json; charset=UTF-8",
-                "origin": "https://www.ediblearrangements.com",
-                "referer": "https://www.ediblearrangements.com/stores/store-locator.aspx",
-                "x-requested-with": "XMLHttpRequest",
-            },
-            body="{'Latitude' : '37.09024' , 'Longitude': '-95.712891','Distance':'5000'}",
-            callback=self.parse,
-        )
-
-    def parse(self, response):
-        d = json.loads(response.json()["d"])
-        for shop in d["_Data"]:
-            item = DictParser.parse(shop)
-            oh = OpeningHours()
-            for day_time in shop["TimingsShort"]:
-                day = day_time["Days"]
-                time = day_time["Timing"]
-                if time == "Closed":
-                    oh.set_closed(day)
-                else:
-                    start_day, end_day = day.split("-") if "-" in day else (day, day)
-                    open_time, close_time = time.split("-")
-                    oh.add_days_range(
-                        day_range(start_day, end_day),
-                        open_time=open_time.strip(),
-                        close_time=close_time.strip(),
-                        time_format="%I:%M %p",
-                    )
-                item["opening_hours"] = oh
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["website"] = urljoin("https://www.ediblearrangements.com/stores/", feature.get("pageFriendlyUrl"))
+        oh = OpeningHours()
+        for day_time in feature["timingsShort"]:
+            day_time_text = " ".join(list(day_time.values()))
+            oh.add_ranges_from_string(day_time_text)
+        item["opening_hours"] = oh
+        yield item
