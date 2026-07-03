@@ -1,12 +1,10 @@
-import re
 from copy import deepcopy
 from typing import Any
 
-import chompjs
-from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -14,48 +12,36 @@ from locations.json_blob_spider import JSONBlobSpider
 class MitsubishiCHSpider(JSONBlobSpider):
     name = "mitsubishi_ch"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
-    start_urls = ["https://www.mitsubishi-motors.ch/haendler/"]
-
-    def extract_json(self, response: Response) -> list[dict]:
-        return [
-            chompjs.parse_js_object(location)
-            for location in re.findall(
-                r"locations\[\d+\]\s*=\s*(.+?}\));",
-                response.xpath('//script[contains(text(), "locationData")]/text()').get(""),
-                re.DOTALL,
-            )
-        ]
-
-    def pre_process_data(self, feature: dict) -> None:
-        feature.update(feature.pop("marker", {}) | feature.pop("locationData", {}))
-        feature["id"] = feature.get("externalId")
+    start_urls = ["https://dealcore.slapwl.ch/de/mitsubishi/ch/corporate/dealer-list?filter=all"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Any:
-        item["street_address"] = item.pop("addr_full", None)
-        item["name"] = feature.get("organisation")
-        item["website"] = response.urljoin(feature.get("www"))
+        mitsubishi = next((brand for brand in feature.get("brands", []) if brand.get("code") == "MIT"), None)
+        if not mitsubishi:
+            return
 
-        # hasSales, hasService fields are always false. Hence, we need to determine category from the POI pages.
+        item["website"] = "https://www.mitsubishi-motors.ch/de/haendler/" + feature["slug"]
+        opening_hours = feature.get("dealerOpenings", {}).get("openingHours", {})
 
-        yield Request(url=item["website"], callback=self.parse_location, cb_kwargs=dict(item=item))
-
-    def parse_location(self, response: Response, item: Feature) -> Any:
-        location_type = (
-            response.xpath('//*[@class="haendler-heading-details"]//*[@class="haendler-icon-text"]').get("").lower()
-        )
-
-        has_sales = "verkauf" in location_type
-        has_service = "service" in location_type
-
-        if has_sales:
+        if mitsubishi.get("sell"):
             sales_item = deepcopy(item)
             sales_item["ref"] = f"{item['ref']}-sales"
             apply_category(Categories.SHOP_CAR, sales_item)
-            apply_yes_no(Extras.CAR_REPAIR, sales_item, has_service)
+            apply_yes_no(Extras.CAR_REPAIR, sales_item, mitsubishi.get("service", False))
+            sales_item["opening_hours"] = self.parse_hours(opening_hours.get("sales"))
             yield sales_item
 
-        if has_service:
+        if mitsubishi.get("service"):
             service_item = deepcopy(item)
             service_item["ref"] = f"{item['ref']}-service"
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            service_item["opening_hours"] = self.parse_hours(opening_hours.get("service"))
             yield service_item
+
+    @staticmethod
+    def parse_hours(rules: list[dict] | None) -> OpeningHours | None:
+        if not rules:
+            return None
+        oh = OpeningHours()
+        for rule in rules:
+            oh.add_range(rule["openDay"], rule["openTime"], rule["closeTime"])
+        return oh
