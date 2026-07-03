@@ -22,7 +22,7 @@ class ForeverNewAUNZSpider(JSONBlobSpider, PlaywrightSpider):
     requires_proxy = True
 
     def extract_json(self, response: TextResponse):
-        data = json.loads(response.xpath("//pre/text()").get())["results"]["results"]
+        data = response.json()["results"]["results"]
         return data
 
     def post_process_item(self, item, response, location):

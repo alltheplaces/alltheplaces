@@ -1,4 +1,8 @@
-from scrapy.http import JsonRequest
+from typing import Any, Iterable
+
+from chompjs import chompjs
+from scrapy import Request
+from scrapy.http import JsonRequest, Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
@@ -68,7 +72,7 @@ class ExxonMobilSpider(SitemapSpider, PlaywrightSpider):
     }
 
     # Rewrite the request to the API
-    def _parse_sitemap(self, response):
+    def _parse_sitemap(self, response: Response) -> Iterable[Request]:
         for request in super()._parse_sitemap(response):
             if request.callback == self.parse:
                 domain = request.url.split("/")[2]
@@ -82,8 +86,9 @@ class ExxonMobilSpider(SitemapSpider, PlaywrightSpider):
 
             yield request
 
-    def parse(self, response, **kwargs):
-        for location in response.json()["Locations"]:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # Extract JSON content wrapped in an HTML body
+        for location in chompjs.parse_js_object(response.text)["Locations"]:
             if location["Brand"] == "Mobilcard":
                 continue  # 170 NZ POIs that seem to third party ones that accept there loyalty cards
 

@@ -1,4 +1,3 @@
-import json
 from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
@@ -39,7 +38,7 @@ class RadissonHotelsSpider(PlaywrightSpider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for hotel in json.loads(response.xpath("//pre/text()").get())["hotels"]:
+        for hotel in response.json()["hotels"]:
             hotel.update(hotel.pop("contactInfo"))
             item = DictParser.parse(hotel)
             item["ref"] = hotel.get("code")

@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 import scrapy
@@ -19,7 +18,7 @@ class Motel6Spider(scrapy.Spider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for hotel_id in json.loads(response.xpath("//pre/text()").get()).keys():  # JSON embedded within HTML
+        for hotel_id in response.json().keys():
             try:
                 url = "https://www.motel6.com/bin/g6/propertydata.{}.json".format(int(hotel_id))
                 yield scrapy.Request(url, callback=self.parse_hotel)
@@ -27,7 +26,7 @@ class Motel6Spider(scrapy.Spider):
                 continue
 
     def parse_hotel(self, response: Response, **kwargs: Any) -> Any:
-        data = json.loads(response.xpath("//pre/text()").get())
+        data = response.json()
         if not data:
             return
         data.update(data.pop("address", {}))

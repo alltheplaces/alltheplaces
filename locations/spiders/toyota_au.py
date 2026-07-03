@@ -1,4 +1,3 @@
-import json
 from typing import Iterable
 
 from scrapy.http import Response, TextResponse
@@ -30,7 +29,7 @@ class ToyotaAUSpider(JSONBlobSpider, PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def extract_json(self, response: TextResponse) -> list[dict]:
-        return json.loads(response.xpath("//pre/text()").get())["results"]
+        return response.json()["results"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["lat"] = feature["refY"]

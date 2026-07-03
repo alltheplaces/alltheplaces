@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 import chompjs
@@ -44,7 +43,7 @@ class HornbachSpider(PlaywrightSpider):
             )
 
     def parse_locations(self, response: TextResponse) -> Any:
-        for store in json.loads(response.xpath("//pre/text()").get()):
+        for store in response.json():
             item = DictParser.parse(store)
             item["street_address"] = item.pop("street")
             item["branch"] = item.pop("name", "").removeprefix("BODENHAUS ").removeprefix("HORNBACH ").strip()

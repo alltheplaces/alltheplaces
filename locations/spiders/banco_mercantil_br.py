@@ -1,20 +1,18 @@
-import json
 from typing import Any, AsyncIterator
 
-from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.geo import city_locations
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import FIREFOX_LATEST
 
 
-class BancoMercantilBRSpider(Spider):
+class BancoMercantilBRSpider(PlaywrightSpider):
     name = "banco_mercantil_br"
     item_attributes = {"brand": "Banco Mercantil do Brasil", "brand_wikidata": "Q9645252"}
-    is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": FIREFOX_LATEST, "ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Any]:
@@ -35,7 +33,7 @@ class BancoMercantilBRSpider(Spider):
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = json.loads(response.xpath("//pre/text()").get()).get("d", {}).get("agencias") or []
+        locations = response.json().get("d", {}).get("agencias") or []
         for location in locations:
             item = Feature()
             item["branch"] = location["nomeAgencia"]
