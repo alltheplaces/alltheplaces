@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class EdibleArrangementsSpider(JSONBlobSpider):
+class EdibleArrangementsUSSpider(JSONBlobSpider):
     name = "edible_arrangements"
     item_attributes = {"brand": "Edible Arrangements", "brand_wikidata": "Q5337996"}
     allowed_domains = ["www.ediblearrangements.com"]
