@@ -1,95 +1,48 @@
-import binascii
-import os
-from typing import AsyncIterator
+import json
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import TextResponse
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
-from locations.spiders.carrefour_fr import (
-    CARREFOUR_EXPRESS,
-    CARREFOUR_MARKET,
-    CARREFOUR_SUPERMARKET,
-    parse_brand_and_category_from_mapping,
-)
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.spiders.carrefour_fr import CARREFOUR_EXPRESS, CARREFOUR_MARKET, CARREFOUR_SUPERMARKET
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class CarrefourPLSpider(Spider):
+class CarrefourPLSpider(JSONBlobSpider, PlaywrightSpider):
     name = "carrefour_pl"
-    # Taken from mobile app
-    start_urls = ["https://c4webservice.carrefour.pl:8080/MobileWebService/v3/Bootstrap.svc/App/Bootstrap"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    start_urls = ["https://www.carrefour.pl/sklepy"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     brands = {
-        "Express (Zielony)": CARREFOUR_EXPRESS,
-        "Express (Pomarańczowy)": CARREFOUR_EXPRESS,
+        "Carrefour Express Zielony ": CARREFOUR_EXPRESS,
+        "Carrefour Express": CARREFOUR_EXPRESS,
         "Hipermarket": CARREFOUR_SUPERMARKET,
-        "Market": CARREFOUR_MARKET,
-        "Globi": {"brand": "Globi", "category": Categories.SHOP_CONVENIENCE},
+        "Carrefour Market": CARREFOUR_MARKET,
+        "Supermarket Franczyzowy": CARREFOUR_MARKET,
+        "Globi": {"brand": "Globi", "brand_wikidata": "Q11751761", "category": Categories.SHOP_CONVENIENCE},
+        "Carrefour": CARREFOUR_SUPERMARKET,
     }
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(
-            self.start_urls[0],
-            headers={
-                # random 16 hex
-                "device-key": binascii.b2a_hex(os.urandom(8)).decode("utf-8"),
-                "customerid": "-1",
-                "os-type-id": "1",
-                "version-name": "3.7.2616",
-                "version-number": "309616001",
-            },
-            method="POST",
+    def extract_json(self, response: TextResponse) -> list[dict]:
+        return DictParser.get_nested_key(
+            json.loads(response.xpath('//script[@id="__NEXT_DATA__"]//text()').get()), "shops"
         )
 
-    def parse(self, response):
-        brand_ids_to_brands = {}
-        for brand in response.json()["shopTypes"]:
-            brand_ids_to_brands[str(brand["shopTypeForMobile"])] = brand["displayName"]
-
-        for location in response.json()["shops"]:
-            item = DictParser.parse(location)
-
-            brand_key = brand_ids_to_brands.get(str(location["shopTypeForMobile"]))
-            if not parse_brand_and_category_from_mapping(item, brand_key, self.brands):
-                continue  # bad brand
-
-            item.pop("street")
-            item["ref"] = location["shopId"]
-            item["street_address"] = location["street"]
-            opening_hours = OpeningHours()
-            for day in DAYS_EN:
-                if ("shop" + day) not in location:
-                    continue
-                opening_str = location["shop" + day]
-
-                opening_str = (
-                    opening_str.strip()
-                    .replace(",", "")
-                    .replace(".", ":")
-                    .replace("-:", "-")
-                    .replace(":-", "-")
-                    .replace("- ", "-")
-                    .replace(" -", "-")
-                    .split(" ")[0]
-                )
-                if opening_str.lower() in ["nieczynny", "nieczynne", "zamkniete", "nd"]:
-                    continue
-                elif opening_str.lower() in ["24h", "całodobowy"]:
-                    opening_hours.add_range(day=day, open_time="00:00", close_time="23:59")
-                else:
-                    segments = opening_str.split("-")
-                    # add :00 if missing
-                    segments = [segment + ":00" if ":" not in segment else segment for segment in segments]
-                    # cap at 5 characters
-                    segments = [segment[:5] for segment in segments]
-                    try:
-                        opening_hours.add_range(day=day, open_time=segments[0], close_time=segments[1])
-                    except ValueError:
-                        # The opening hours are hot garbage, so we'll just skip the most problematic ones
-                        pass
-            item["opening_hours"] = opening_hours
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["uuid"]
+        item.pop("name", None)
+        for brand_key in self.brands:
+            if feature["displayName"].startswith(brand_key):
+                brand_info = self.brands[brand_key]
+                item["brand"] = brand_info["brand"]
+                item["brand_wikidata"] = brand_info["brand_wikidata"]
+                apply_category(brand_info["category"], item)
+                break
+        item["website"] = f'https://www.carrefour.pl/sklep/{feature["slug"].strip("/")}'
+        yield item
