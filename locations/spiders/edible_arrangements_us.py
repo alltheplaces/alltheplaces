@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 
 class EdibleArrangementsUSSpider(JSONBlobSpider):
-    name = "edible_arrangements"
+    name = "edible_arrangements_us"
     item_attributes = {"brand": "Edible Arrangements", "brand_wikidata": "Q5337996"}
     allowed_domains = ["www.ediblearrangements.com"]
     start_urls = ["https://www.ediblearrangements.com/api/stores/store-finder/get-stores?latitude=0&longitude=0"]
