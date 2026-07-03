@@ -8,8 +8,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class BipaATSpider(JSONBlobSpider):
-    name = "bipa_at"
+class BipaATGBSpider(JSONBlobSpider):
+    name = "bipa_at_gb"
     item_attributes = {"brand": "Bipa", "brand_wikidata": "Q864933"}
     start_urls = ["https://www.bipa.at/bff/stores"]
 
