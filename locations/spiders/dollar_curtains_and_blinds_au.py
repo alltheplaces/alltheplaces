@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from scrapy.http import Response
@@ -19,7 +18,7 @@ class DollarCurtainsAndBlindsAUSpider(PlaywrightSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre/text()").get("")):
+        for location in response.json():
             location.update(location.pop("map_location"))
             item = DictParser.parse(location)
             item["branch"] = item.pop("name").removeprefix("dollar curtains + blinds ")

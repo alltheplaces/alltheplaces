@@ -1,4 +1,3 @@
-import json
 from typing import Any, Iterable
 
 import scrapy
@@ -33,7 +32,7 @@ class InditexSpider(PlaywrightSpider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        config = json.loads(response.xpath("//pre/text()").get())["seoParamMap"]
+        config = response.json()["seoParamMap"]
         for store_id, country in config["storeId"].items():
             for brand in config["brandId"].values():
                 if brand == "dutti":
@@ -49,7 +48,7 @@ class InditexSpider(PlaywrightSpider):
                 yield scrapy.http.JsonRequest(url, callback=self.parse_stores, cb_kwargs=dict(brand=brand))
 
     def parse_stores(self, response: Response, brand: str) -> Iterable[Feature]:
-        for store in json.loads(response.xpath("//pre/text()").get())["stores"]:
+        for store in response.json()["stores"]:
             item = DictParser.parse(store)
             item["website"] = "https://www.{}.com/".format(brand) + item["country"].lower()
             item.update(self.my_brands.get(brand))
