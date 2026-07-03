@@ -5,6 +5,7 @@ from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.playwright_spider import PlaywrightSpider
@@ -44,5 +45,21 @@ class CarrefourPLSpider(JSONBlobSpider, PlaywrightSpider):
                 item["brand_wikidata"] = brand_info["brand_wikidata"]
                 apply_category(brand_info["category"], item)
                 break
+
         item["website"] = f'https://www.carrefour.pl/sklep/{feature["slug"].strip("/")}'
+
+        if opening_times := feature.get("openTimes", {}):
+            try:
+                item["opening_hours"] = self.parse_opening_hours(opening_times)
+            except Exception as e:
+                self.logger.error(f"Error parsing opening hours: {opening_times} {e}")
+
         yield item
+
+    def parse_opening_hours(self, opening_times: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day, hours in opening_times.items():
+            start_time = f'{hours["startHour"]:02d}:{hours["startMinute"]:02d}'
+            end_time = f'{hours["endHour"]:02d}:{hours["endMinute"]:02d}'.replace("00:00", "23:59")
+            opening_hours.add_range(day, start_time, end_time)
+        return opening_hours
