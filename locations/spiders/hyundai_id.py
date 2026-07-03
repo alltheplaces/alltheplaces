@@ -6,10 +6,12 @@ from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.spiders.hyundai_kr import HYUNDAI_SHARED_ATTRIBUTES
 
 
 class HyundaiIDSpider(Spider):
     name = "hyundai_id"
+    item_attributes = HYUNDAI_SHARED_ATTRIBUTES
     allowed_domains = ["www.hyundai.com"]
     start_urls = ["https://www.hyundai.com/wsvc/template_en/spa/common/dealer/list.html"]
 
