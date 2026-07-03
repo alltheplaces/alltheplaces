@@ -1,20 +1,24 @@
-from scrapy import Spider
-from scrapy.http import Response
+from typing import Iterable
 
-from locations.dict_parser import DictParser
+from scrapy.http import TextResponse
+
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class BipaATSpider(Spider):
+class BipaATSpider(JSONBlobSpider):
     name = "bipa_at"
     item_attributes = {"brand": "Bipa", "brand_wikidata": "Q864933"}
-    start_urls = ["https://www.bipa.at/stores"]
+    start_urls = ["https://www.bipa.at/bff/stores"]
 
-    def parse(self, response: Response):
-        for store in response.json():
-            feature = DictParser.parse(store)
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if feature["latitude"]:
+            item["branch"] = item.pop("name").replace("BIPA Filiale ", "")
             opening_hours = OpeningHours()
-            for day, range in store["storeHours"].items():
+            for day, range in feature["storeHours"].items():
                 opening_hours.add_ranges_from_string(f"{day}: {range}")
-            feature["opening_hours"] = opening_hours
-            yield feature
+                item["opening_hours"] = opening_hours
+            apply_category(Categories.SHOP_CHEMIST, item)
+            yield item
