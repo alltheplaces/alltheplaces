@@ -23,7 +23,7 @@ class CanlySpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         if self.api_endpoint == "" and self.brand_key != "":
-           yield JsonRequest(url=f"https://g9ey9rioe.api.hp.can-ly.com/v2/companies/{self.brand_key}/shops/search") 
+            yield JsonRequest(url=f"https://g9ey9rioe.api.hp.can-ly.com/v2/companies/{self.brand_key}/shops/search")
         else:
             yield JsonRequest(url=self.api_endpoint)
 
