@@ -17,11 +17,15 @@ class CanlySpider(Spider):
     locator which is hosted by Can-ly. Brand keys are numerical.
     """
 
+    api_endpoint: str = ""
     dataset_attributes: dict = {"source": "api", "api": "can-ly.com"}
-    brand_key: str
+    brand_key: str = ""
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url=f"https://g9ey9rioe.api.hp.can-ly.com/v2/companies/{self.brand_key}/shops/search")
+        if self.api_endpoint == "" and self.brand_key != "":
+           yield JsonRequest(url=f"https://g9ey9rioe.api.hp.can-ly.com/v2/companies/{self.brand_key}/shops/search") 
+        else:
+            yield JsonRequest(url=self.api_endpoint)
 
     def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature]:
         for feature in response.json()["shops"]:
