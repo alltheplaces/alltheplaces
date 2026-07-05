@@ -16,11 +16,11 @@ class GogaStoreLocatorSpider(Spider):
     "https://map.beisia.co.jp/api/points".
 
     Optionally, provide a list of geohashes if the base URL does not return all locations.
-    
+
     Also, you can provide a website formatter, which should be needed for most chains.
     Some of them will provide their own URLs in the JSON response.
-    """   
-    
+    """
+
     dataset_attributes: dict = {"source": "api"}
 
     start_urls: list[str] = []
@@ -32,7 +32,9 @@ class GogaStoreLocatorSpider(Spider):
             yield Request(url=self.start_urls[0])
         elif len(self.start_urls) == 1 and len(self.geohashes) != 0:
             for geohash in self.geohashes:
-                yield Request(url=f"{self.start_urls[0]}/{geohash}") # make sure to leave out trailing slash on start_urls
+                yield Request(
+                    url=f"{self.start_urls[0]}/{geohash}"
+                )  # make sure to leave out trailing slash on start_urls
         else:
             raise ValueError("Specify one URL in the start_urls list attribute.")
             return
