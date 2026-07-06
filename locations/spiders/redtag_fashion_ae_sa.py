@@ -11,6 +11,7 @@ from locations.hours import OpeningHours
 class RedtagFashionAESASpider(Spider):
     name = "redtag_fashion_ae_sa"
     item_attributes = {"brand": "Red Tag", "brand_wikidata": "Q132891092"}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Request]:
         countries = ["Saudi Arabia", "UAE"]
