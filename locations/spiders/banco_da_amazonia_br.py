@@ -23,8 +23,6 @@ class BancoDaAmazoniaBRSpider(Spider):
             .replace('""', '"')
             .replace('":",', '":"",')
         )
-        # print(json.loads(raw_data))
-        print(re.search(r"agencies\":(\[.+\]),\"animation", raw_data).group(1)[49430:49450])
         for location in json.loads(re.search(r"agencies\":(\[.+\]),\"animation", raw_data).group(1)):
             item = DictParser.parse(location)
             item["addr_full"] = clean_address(item["addr_full"].replace("Bairro:", ",").replace("CEP: ", ","))
