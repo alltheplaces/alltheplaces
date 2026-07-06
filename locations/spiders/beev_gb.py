@@ -11,6 +11,7 @@ class BeevGBSpider(Spider):
     name = "beev_gb"
     item_attributes = {"brand": "Be.EV", "brand_wikidata": "Q118263083"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
