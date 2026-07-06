@@ -28,7 +28,7 @@ class HealthhubSGSpider(Spider):
     def make_request(self, page: int, key: str) -> JsonRequest:
         return JsonRequest(
             url="https://api.hcc.healthhub.sg/active/v1/public/directory/locations",
-            data={"PageNumber": page, "Language": "en"},
+            data={"Filter": [58, 56], "PageNumber": page, "Language": "en"},
             method="POST",
             callback=self.parse_locations,
             headers={"x-api-key": key},
