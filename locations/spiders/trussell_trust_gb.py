@@ -5,7 +5,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request, Response
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -38,7 +38,7 @@ class TrussellTrustGBSpider(Spider):
                     if food_bank[i] == "null":
                         food_bank[i] = None
                     else:
-                        food_bank[i] = unescape(food_bank[i].replace("u0026#", "&#"))
+                        food_bank[i] = unescape(food_bank[i].replace("u0026", "&"))
 
                 item = Feature()
                 item["name"] = food_bank[0]
