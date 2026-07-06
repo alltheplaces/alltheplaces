@@ -5,7 +5,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class HindustanPetroleumINSpider(SitemapSpider, StructuredDataSpider):
-    name = "hindustanpetroleum_in"
+    name = "hindustan_petroleum_in"
     item_attributes = {"brand": "Hindustan Petroleum", "brand_wikidata": "Q1619375"}
     sitemap_urls = ["https://petrolpump.hpretail.in/files/enterprise/sitemap/google/96681/locations.xml"]
     sitemap_rules = [("/Home", "parse_sd")]
