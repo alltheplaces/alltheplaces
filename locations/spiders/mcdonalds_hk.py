@@ -21,6 +21,7 @@ class McdonaldsHKSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for index, store in enumerate(response.json()["restaurants"]):
             item = DictParser.parse(store)
-            item["name"] = "McDonald's " + store["title"]
+            item["branch"] = store["title"]
+            item["name"] = self.item_attributes["brand"]
             item["ref"] = index
             yield item
