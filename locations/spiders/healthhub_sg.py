@@ -10,9 +10,7 @@ from locations.hours import OpeningHours
 
 class HealthhubSGSpider(Spider):
     name = "healthhub_sg"
-    start_urls = [
-        "https://eservices.healthhub.sg/public/directory",
-    ]
+    start_urls = ["https://eservices.healthhub.sg/public/directory"]
 
     def parse(self, response, **kwargs):
         url_for_api_key = response.xpath("//script[@type='module']/@src").get()
@@ -29,7 +27,6 @@ class HealthhubSGSpider(Spider):
         return JsonRequest(
             url="https://api.hcc.healthhub.sg/active/v1/public/directory/locations",
             data={"Filter": [58, 56], "PageNumber": page, "Language": "en"},
-            method="POST",
             callback=self.parse_locations,
             headers={"x-api-key": key},
             cb_kwargs={"key": key},
@@ -54,7 +51,7 @@ class HealthhubSGSpider(Spider):
         item["ref"] = data.get("DirectoryLocationId")
         item["postcode"] = str(item["postcode"])
         if item.get("website"):
-            item["website"] = ["https://" + item["website"] if "https://" not in item["website"] else item["website"]]
+            item["website"] = "https://" + item["website"] if "https://" not in item["website"] else item["website"]
         oh = OpeningHours()
         oh.add_ranges_from_string(data.get("OperatingHour", ""))
         item["opening_hours"] = oh
