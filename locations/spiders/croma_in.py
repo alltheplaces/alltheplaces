@@ -23,6 +23,7 @@ class CromaINSpider(JSONBlobSpider):
             feature["city"] = city["name"].title()
         if country := feature.get("country"):
             feature["country"] = country["isocode"]
+        feature.pop("email", None)
         feature["ref"] = feature.pop("name")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
@@ -30,8 +31,6 @@ class CromaINSpider(JSONBlobSpider):
         item["image"] = feature.get("storeImageUrl")
         if url := feature.get("url"):
             item["website"] = "https://www.croma.com" + url.split("?")[0]
-        if item.get("email") == "customersupport@croma.com":
-            item["email"] = None
         if isinstance(item.get("state"), dict):
             item["state"] = item["state"].get("name").title()
         if opening_hours := feature.get("openingHours"):
