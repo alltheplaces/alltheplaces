@@ -1,3 +1,4 @@
+import json
 from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
@@ -19,7 +20,7 @@ class BeevGBSpider(PlaywrightSpider):
         )
 
     def parse(self, response, **kwargs):
-        for location in response.json():
+        for location in json.loads(response.xpath("//pre//text()").get()):
             if location["status"] == 4:
                 continue  # Upcoming
 
