@@ -13,5 +13,6 @@ class AldiSudHUSpider(UberallSpider):
     key = "rDCKKjdtbi2w0Qx3Cq1axERNtccFqZ"
 
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
+        item["name"] = None
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
