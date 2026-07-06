@@ -5,13 +5,14 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class BeevGBSpider(Spider):
+class BeevGBSpider(PlaywrightSpider):
     name = "beev_gb"
     item_attributes = {"brand": "Be.EV", "brand_wikidata": "Q118263083"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-    requires_proxy = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
