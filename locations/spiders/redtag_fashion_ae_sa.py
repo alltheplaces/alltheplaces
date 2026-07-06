@@ -10,16 +10,13 @@ from locations.hours import OpeningHours
 
 class RedtagFashionAESASpider(Spider):
     name = "redtag_fashion_ae_sa"
-    item_attributes = {
-        "brand": "Red Tag",
-        "brand_wikidata": "Q132891092",
-    }
+    item_attributes = {"brand": "Red Tag", "brand_wikidata": "Q132891092"}
 
     async def start(self) -> AsyncIterator[Request]:
         countries = ["Saudi Arabia", "UAE"]
         for country in countries:
             yield Request(
-                url=f"https://redtagfashion.com/locations/locations.php?country={country}",
+                url=f"https://www.redtagfashion.com/locations/locations.php?country={country}",
                 meta={"country": country},
             )
 
