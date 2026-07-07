@@ -10,7 +10,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class JockeyINSpider(SitemapSpider, StructuredDataSpider):
     name = "jockey_in"
-    item_attributes = {"brand": "Jockey", "brand_wikidata": "Q534235"}
+    item_attributes = {"name": "Jockey", "brand": "Jockey"}
     sitemap_urls = ["https://stores.jockey.in/sitemaps/v1/google/index-10001.xml"]
     sitemap_rules = [(r"jockey-exclusive-store-[\w\-/]+/home", "parse_sd")]
     time_format = "%I:%M %p"
