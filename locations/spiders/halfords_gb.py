@@ -1,7 +1,6 @@
 import json
 from typing import Any
 
-import scrapy
 from scrapy import Spider
 from scrapy.http import Response
 
