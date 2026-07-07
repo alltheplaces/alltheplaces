@@ -2,6 +2,7 @@ from typing import Any, Iterable
 
 from scrapy.http import JsonRequest, TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -31,4 +32,5 @@ class ScoutsSpider(JSONBlobSpider):
         if item.get("postcode") is not None and item["postcode"].lower() == "null":
             item.pop("postcode")
         item["website"] = f"https://www.scouts.org.uk/groups/{feature['Id']}?slug={feature['Slug']}"
+        apply_category(Categories.CLUB_SCOUT, item)
         yield item
