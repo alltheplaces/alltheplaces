@@ -13,6 +13,7 @@ class PatheNLSpider(Spider):
     item_attributes = {"brand": "Pathé", "brand_wikidata": "Q3060526"}
     start_urls = ["https://www.pathe.nl/api/cinemas"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}  # the API returns HTTP 403 to non-browser user agents
+    requires_proxy = "NL"  # Akamai also blocks data-centre IPs (CI fetch gets HTTP 403); needs a NL proxy
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for cinema in response.json():
