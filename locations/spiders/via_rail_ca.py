@@ -18,6 +18,7 @@ class ViaRailCASpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
         item["name"] = response.xpath("//title/text()").get().replace(" | VIA Rail", "")
+        item["phone"] = None
         extract_google_position(item, response)
         apply_category(Categories.TRAIN_STATION, item)
         yield item
