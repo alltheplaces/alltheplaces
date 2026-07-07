@@ -1,6 +1,5 @@
 from scrapy import Spider
 
-from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -11,26 +10,16 @@ class CoenMarketsUSSpider(Spider):
     start_urls = ["https://www.coenmarkets.com/locations/?location_city=10000&zip_radius=10000"]
 
     def parse(self, response):
-        markers = {}
-        for marker in response.xpath('//div[contains(@class, "js-map-marker")]'):
-            marker_id = marker.xpath(".//@data-title").get()
-            markers[marker_id] = {}
-            markers[marker_id]["lat"] = marker.xpath(".//@data-lat").get()
-            markers[marker_id]["lon"] = marker.xpath(".//@data-lng").get()
-            markers[marker_id]["ref"] = (
-                marker.xpath('.//h4[contains(@class, "location-title")]/text()').get().split(" ", 1)[0]
+        for marker in response.xpath(
+            '//*[@class = "location-archive-map"]//*[contains(@class, "acf-map-list-item acf-map-list-item")]'
+        ):
+            item = Feature()
+            item["name"] = marker.xpath(".//h5/text()").get()
+            item["lat"] = marker.xpath('.//*[@class = "location-lat"]/text()').get()
+            item["lon"] = marker.xpath('.//*[@class = "location-long"]/text()').get()
+            item["ref"] = marker.xpath(".//@data-id").get()
+            item["street_address"] = marker.xpath('.//p[contains(@class, "location-address")]/text()').get()
+            item["addr_full"] = (
+                marker.xpath('.//p[contains(@class, "location-address")]').xpath("normalize-space()").get()
             )
-            markers[marker_id]["name"] = " ".join(
-                marker.xpath('.//h4[contains(@class, "location-title")]/text()').get().split(" ")[2:]
-            )
-            markers[marker_id]["street_address"] = marker.xpath(
-                './/p[contains(@class, "location-address")]/text()'
-            ).get()
-        for marker in response.xpath('.//div[contains(@class, "acf-map-popup")]'):
-            marker_id = marker.xpath(".//@data-title").get()
-            markers[marker_id]["phone"] = marker.xpath('.//h6[contains(@class, "phone")]/text()').get()
-            hours_string = "Mon - Sun: " + marker.xpath('.//h6[contains(@class, "hours")]/text()').get()
-            markers[marker_id]["opening_hours"] = OpeningHours()
-            markers[marker_id]["opening_hours"].add_ranges_from_string(hours_string)
-        for marker in markers.values():
-            yield Feature(**marker)
+            yield item
