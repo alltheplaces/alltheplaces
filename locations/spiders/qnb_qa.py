@@ -18,7 +18,7 @@ INFO_WINDOW_RE = re.compile(r"locationsDetail\s*=\s*'(<div class=\"info-window-c
 class QnbQASpider(Spider):
     name = "qnb_qa"
     item_attributes = {"brand": "QNB", "brand_wikidata": "Q1136759"}
-    requires_proxy = True  # Cloudflare 403s datacenter IPs (confirmed in CI)
+    requires_proxy = "QA"  # Qatar-only site; other-country IPs can't reach it (Zyte returns 421)
 
     async def start(self) -> AsyncIterator[Any]:
         yield FormRequest(
