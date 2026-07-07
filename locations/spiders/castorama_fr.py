@@ -15,6 +15,7 @@ class CastoramaFRSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(restrict_xpaths='//*[@data-testid="html"]//li', allow=r"/store/\d+"), callback="parse_sd")
     ]
     time_format = "%H:%M:%S Europe/Paris"
+    wanted_types = ["HardwareStore"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
