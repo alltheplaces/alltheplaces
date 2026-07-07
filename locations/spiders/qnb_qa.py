@@ -55,6 +55,8 @@ class QnbQASpider(Spider):
                 )
 
     def parse_locations(self, response: Response, city: str, location_type: str, **kwargs: Any) -> Any:
+        # The endpoint returns HTML with coordinates in inline JavaScript and details in separate HTML
+        # blocks (no JSON API), so fields are extracted individually and DictParser does not apply.
         text = response.text
         latitudes = [(m.start(), m.group(1)) for m in LATITUDE_RE.finditer(text)]
         longitudes = [(m.start(), m.group(1)) for m in LONGITUDE_RE.finditer(text)]
