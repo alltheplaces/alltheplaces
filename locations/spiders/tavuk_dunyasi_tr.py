@@ -21,8 +21,10 @@ class TavukDunyasiTRSpider(Spider):
                 item["branch"] = name.strip()
             item["ref"] = location["code"]
             item["street_address"] = item.pop("addr_full")
-            item["lat"] = location["latitude"].replace(",", ".")
-            item["lon"] = location["longitude"].replace(",", ".")
+            if latitude := (location["latitude"] or "").strip(", "):
+                item["lat"] = latitude.replace(",", ".")
+            if longitude := (location["longitude"] or "").strip(", "):
+                item["lon"] = longitude.replace(",", ".")
             item["extras"]["addr:district"] = location["district"]
 
             if times := re.findall(r"\d{1,2}:\d{2}", location.get("workingHour") or ""):
