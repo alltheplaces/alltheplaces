@@ -17,5 +17,7 @@ class JockeyINSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
         item["name"] = None
+        if "stores.jockey.in" in item["facebook"] or "com/jockeyindia" in item["facebook"]:
+            item["facebook"] = None
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
