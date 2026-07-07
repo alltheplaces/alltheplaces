@@ -21,6 +21,7 @@ class MilestonesCASpider(CrawlSpider, StructuredDataSpider):
     search_for_facebook = False
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["image"] = None
         item["branch"] = item.pop("name")
 
         oh = OpeningHours()
