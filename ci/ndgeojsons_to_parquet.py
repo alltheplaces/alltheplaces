@@ -33,6 +33,20 @@ def duckdb_memory_limit() -> str:
     return f"{duckdb_gb}GB"
 
 
+# ST_Hilbert() returns a UINTEGER (32-bit) curve position. Used to split the
+# table into spatially-contiguous batches so no single ORDER BY has to sort/
+# materialize the whole dataset at once.
+HILBERT_RANGE = 2**32
+
+# Sorting and writing the whole table in one COPY holds the full row set
+# (geometry + properties + dataset_attributes) in memory during the sort. On
+# a ~43M row dataset that has been observed to exceed the container's memory
+# limit and get silently OOM-killed (see #14341/#16158). Splitting into
+# batches of roughly this many rows keeps each sort's peak memory bounded
+# regardless of total dataset size.
+TARGET_ROWS_PER_BATCH = 2_000_000
+
+
 def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
     output_file_path.parent.mkdir(parents=True, exist_ok=True)
     if output_file_path.exists():
@@ -95,34 +109,61 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
             geom_types = [t[0] for t in geom_types_raw if t and t[0] is not None]
             logger.info(f"Found geometry types: {geom_types}")
 
+            row_count = con.execute("SELECT count(*) FROM geojson_data").fetchone()[0]
+            num_batches = max(1, math.ceil(row_count / TARGET_ROWS_PER_BATCH))
+            logger.info(f"Table has {row_count:,} rows; writing in {num_batches} spatial batch(es)")
+
+            if num_batches > 1:
+                # Bucket rows into spatially-contiguous ranges of the Hilbert curve so each
+                # batch can be sorted and written independently, without needing the whole
+                # table's rows in memory at once. Buckets won't be perfectly balanced (data
+                # is denser in some regions than others), but this bounds the *typical* peak
+                # memory of any single sort to a small fraction of the full dataset.
+                con.execute("ALTER TABLE geojson_data ADD COLUMN batch_id INTEGER")
+                con.execute(f"""
+                    UPDATE geojson_data
+                    SET batch_id = LEAST(
+                        CAST(FLOOR(ST_Hilbert(geom) / ({HILBERT_RANGE} / {num_batches})) AS INTEGER),
+                        {num_batches - 1}
+                    )
+                """)
+
             # write parquet with a larger row group size (target 64-256 MB). 128MB chosen here.
             row_group_size = 134217728
 
-            logger.info(f"Writing parquet file with row group size {row_group_size}...")
-            con.execute(f"""
-            COPY (
-                SELECT
-                    id,
-                    type,
-                    dataset_attributes,
-                    properties,
-                    geom,
-                    {{
-                        'xmin': ST_XMin(geom),
-                        'ymin': ST_YMin(geom),
-                        'xmax': ST_XMax(geom),
-                        'ymax': ST_YMax(geom)
-                    }} as bbox
-                FROM geojson_data
-                ORDER BY ST_Hilbert(geom)
-            ) TO '{str(output_file_path)}'
-            (FORMAT PARQUET, COMPRESSION 'ZSTD', ROW_GROUP_SIZE {row_group_size});
-            """)
-            logger.info("Parquet file written successfully")
+            batch_paths = []
+            for batch_num in range(num_batches):
+                batch_path = Path(temp_dir) / f"batch_{batch_num}.parquet"
+                where_clause = f"WHERE batch_id = {batch_num}" if num_batches > 1 else ""
+                logger.info(f"Writing batch {batch_num + 1}/{num_batches} to {batch_path}...")
+                con.execute(f"""
+                COPY (
+                    SELECT
+                        id,
+                        type,
+                        dataset_attributes,
+                        properties,
+                        geom,
+                        {{
+                            'xmin': ST_XMin(geom),
+                            'ymin': ST_YMin(geom),
+                            'xmax': ST_XMax(geom),
+                            'ymax': ST_YMax(geom)
+                        }} as bbox
+                    FROM geojson_data
+                    {where_clause}
+                    ORDER BY ST_Hilbert(geom)
+                ) TO '{str(batch_path)}'
+                (FORMAT PARQUET, COMPRESSION 'ZSTD', ROW_GROUP_SIZE {row_group_size});
+                """)
+                batch_paths.append(batch_path)
+            logger.info("All batches written successfully")
 
-        # DuckDB connection is now closed; release its memory before loading with pyarrow
-        logger.info("Adding GeoParquet metadata...")
-        table = pq.read_table(str(output_file_path))
+        # DuckDB connection is now closed, releasing its memory before pyarrow runs.
+        # Merge the batch files into the final output one row group at a time so we
+        # never need to hold the full dataset in memory (unlike a read_table/write_table
+        # round trip over the whole file, which was itself a prior OOM risk).
+        logger.info("Merging batches into final parquet file with GeoParquet metadata...")
 
         if bbox_res is None:
             xmin, ymin, xmax, ymax = None, None, None, None
@@ -131,18 +172,41 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
         geo_meta = {
             "version": "1.1.0",
             "primary_column": "geom",
-            "columns": {"geom": {"encoding": "WKB", "geometry_types": geom_types or ["Unknown"], "crs": "EPSG:4326"}},
+            # No "crs" key: per the GeoParquet spec, omitting it means the default of
+            # OGC:CRS84 (WGS84, lon/lat axis order), which matches our WKB geometries.
+            # "EPSG:4326" would be wrong here - that CRS formally specifies lat/lon axis
+            # order, the opposite of what's actually stored, which readers (e.g. DuckDB)
+            # correctly reject.
+            "columns": {"geom": {"encoding": "WKB", "geometry_types": geom_types or ["Unknown"]}},
             "bbox": [xmin, ymin, xmax, ymax],
         }
 
-        existing_md = table.schema.metadata or {}
-        new_md = dict(existing_md)
-        new_md[b"geo"] = json.dumps(geo_meta, ensure_ascii=False).encode("utf-8")
+        writer = None
+        try:
+            for batch_path in batch_paths:
+                parquet_file = pq.ParquetFile(str(batch_path))
+                for row_group_idx in range(parquet_file.num_row_groups):
+                    row_group_table = parquet_file.read_row_group(row_group_idx)
+                    if writer is None:
+                        schema = row_group_table.schema.with_metadata(
+                            {
+                                **(row_group_table.schema.metadata or {}),
+                                b"geo": json.dumps(geo_meta, ensure_ascii=False).encode("utf-8"),
+                            }
+                        )
+                        writer = pq.ParquetWriter(str(output_file_path), schema, compression="ZSTD")
+                    writer.write_table(row_group_table)
 
-        table = table.replace_schema_metadata(new_md)
-
-        logger.info("Writing final parquet file with metadata...")
-        pq.write_table(table, str(output_file_path), compression="ZSTD")
+            if writer is None:
+                # No rows in any batch (empty dataset) - still emit a valid, empty parquet
+                # file with the right schema and GeoParquet metadata rather than nothing.
+                schema = pq.ParquetFile(str(batch_paths[0])).schema_arrow.with_metadata(
+                    {b"geo": json.dumps(geo_meta, ensure_ascii=False).encode("utf-8")}
+                )
+                writer = pq.ParquetWriter(str(output_file_path), schema, compression="ZSTD")
+        finally:
+            if writer is not None:
+                writer.close()
 
     file_size = output_file_path.stat().st_size
     logger.info(f"✓ Created {output_file_path} ({file_size:,} bytes)")
