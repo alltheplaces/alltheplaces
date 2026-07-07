@@ -45,13 +45,18 @@ class BankHapoalimILSpider(Spider):
     def parse_location(self, location: dict[str, Any]) -> Feature | None:
         address = (location.get("geographicAddress") or [{}])[0] or {}
         coordinates = address.get("geographicCoordinate") or {}
-        if not (coordinates.get("geoCoordinateX") and coordinates.get("geoCoordinateY")):
+        try:
+            lon, lat = float(coordinates["geoCoordinateX"]), float(coordinates["geoCoordinateY"])
+        except (KeyError, TypeError, ValueError):
+            return None
+        # Some records carry Israeli ITM grid values (or garbage) instead of WGS84; drop those.
+        if not (34.0 < lon < 36.0 and 29.0 < lat < 33.6):
             return None
 
         item = DictParser.parse(location)
         item["ref"] = str(location.get("branchNumber"))
-        item["lon"] = coordinates.get("geoCoordinateX")
-        item["lat"] = coordinates.get("geoCoordinateY")
+        item["lon"] = lon
+        item["lat"] = lat
         item["street_address"] = self.build_street_address(address)
         item["city"] = address.get("cityName")
 
