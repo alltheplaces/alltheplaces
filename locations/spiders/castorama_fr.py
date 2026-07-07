@@ -16,6 +16,8 @@ class CastoramaFRSpider(CrawlSpider, StructuredDataSpider):
     ]
     time_format = "%H:%M:%S Europe/Paris"
     wanted_types = ["HardwareStore"]
+    search_for_facebook = False
+    search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
