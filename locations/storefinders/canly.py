@@ -36,8 +36,9 @@ class CanlySpider(Spider):
             item["ref"] = feature.get("storeCode")
 
             oh = OpeningHours()
-            for day_hours in feature.get("businessHours", []):
-                oh.add_range(day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
+            if item_hours := feature.get("businessHours"):
+                for day_hours in item_hours:
+                    oh.add_range(day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
             item["opening_hours"] = oh
 
             yield from self.post_process_item(item, response, feature) or []
