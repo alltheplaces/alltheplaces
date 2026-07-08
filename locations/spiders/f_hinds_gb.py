@@ -5,6 +5,7 @@ import scrapy
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -44,4 +45,7 @@ class FHindsGBSpider(Spider):
         )
         oh.add_ranges_from_string(hours_text)
         item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_JEWELRY, item)
+
         yield item
