@@ -12,7 +12,6 @@ class OliveGardenSpider(JSONBlobSpider):
     name = "olive_garden"
     item_attributes = {"brand": "Olive Garden", "brand_wikidata": "Q3045312"}
     allowed_domains = ["olivegarden.com"]
-    requires_proxy = True
     locations_key = "restaurants"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
