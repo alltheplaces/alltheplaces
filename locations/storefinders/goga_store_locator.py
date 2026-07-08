@@ -46,6 +46,7 @@ class GogaStoreLocatorSpider(Spider):
             if self.website_formatter:
                 item["website"] = self.website_formatter.format(location.get("key"))
             item["ref"] = location.get("key")
+            item["phone"] = location.get("電話番号")
 
             yield from self.post_process_feature(item, location)
 

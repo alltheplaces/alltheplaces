@@ -42,7 +42,6 @@ class DictParser:
         "BranchID",
         "branchID",
         "branch-code",
-        "key",
         # ES
         "id-tienda",
         "ID-tienda",
@@ -234,8 +233,6 @@ class DictParser:
         "branch-telephone",
         # ES
         "telefono",  # "phone"
-        # JP
-        "電話番号",
     ]
 
     lat_keys = [
@@ -305,8 +302,6 @@ class DictParser:
         # IT
         "orario",
         "orari",
-        # JP
-        "営業時間",
     ]
 
     twitter_keys = [
