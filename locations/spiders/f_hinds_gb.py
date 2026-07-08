@@ -30,6 +30,9 @@ class FHindsGBSpider(Spider):
         item["addr_full"] = merge_address_lines(
             response.xpath('//*[@class="container store-details-template"]/div/div/div/div/p[1]/text()').getall()
         )
+        item["phone"] = response.xpath(
+            '//*[@class="container store-details-template"]//span[contains(text(), "Phone")]/span/text()'
+        ).get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
         oh = OpeningHours()
