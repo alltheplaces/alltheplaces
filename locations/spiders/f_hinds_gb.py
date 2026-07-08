@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class FHindsGBSpider(Spider):
@@ -26,10 +27,9 @@ class FHindsGBSpider(Spider):
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["branch"] = response.xpath("//h1/text()").get().replace("F.Hinds the Jewellers, ", "")
-        item["street_address"] = response.xpath('//*[@class="container store-details-template"]//p/text()').get()
-        item["city"] = response.xpath('//*[@class="container store-details-template"]//p/text()[2]').get()
-        item["state"] = response.xpath('//*[@class="container store-details-template"]//p/text()[3]').get()
-        item["postcode"] = response.xpath('//*[@class="container store-details-template"]//p/text()[5]').get()
+        item["addr_full"] = merge_address_lines(
+            response.xpath('//*[@class="container store-details-template"]/div/div/div/div/p[1]/text()').getall()
+        )
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
         oh = OpeningHours()
