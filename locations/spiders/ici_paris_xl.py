@@ -18,7 +18,6 @@ class IciParisXlSpider(JSONBlobSpider, PlaywrightSpider):
     name = "ici_paris_xl"
     item_attributes = {"brand": "ICI PARIS XL", "brand_wikidata": "Q769749"}
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": FIREFOX_LATEST}
-    locations_key = "stores"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for country in ["be", "nl", "lu"]:
@@ -27,7 +26,6 @@ class IciParisXlSpider(JSONBlobSpider, PlaywrightSpider):
             )
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
-        print(response.text)
         json_data = json.loads(response.xpath("//pre//text()").get())["stores"]
         return json_data
 
