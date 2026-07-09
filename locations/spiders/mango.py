@@ -8,6 +8,7 @@ from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import (
+    DAYS_AR,
     DAYS_BG,
     DAYS_CN,
     DAYS_CZ,
@@ -30,6 +31,7 @@ from locations.hours import (
     DAYS_SE,
     DAYS_TH,
     DAYS_TR,
+    DAYS_UA,
     OpeningHours,
     sanitise_day,
 )
@@ -45,6 +47,7 @@ class MangoSpider(Spider):
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     LANGUAGE_DAYS_MAP = {
+        "AR": DAYS_AR,
         "BG": DAYS_BG,
         "CS": DAYS_CZ,
         "DE": DAYS_DE,
@@ -65,6 +68,7 @@ class MangoSpider(Spider):
         "SV": DAYS_SE,
         "TH": DAYS_TH,
         "TR": DAYS_TR,
+        "UK": DAYS_UA,
         "ZH": DAYS_CN,
     }
 
