@@ -2,21 +2,20 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.hours import OpeningHours,DAYS  
-from locations.items import Feature
 from locations.categories import Categories
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+
 
 class ChangingPlacesGBSpiderr(JSONBlobSpider):
     name = "changing_places_gb"
     item_attributes = {
-        "brand": "Changing Places", 
+        "brand": "Changing Places",
         "brand_wikidata": "Q104870811",
         "extras": Categories.TOILETS.value,
     }
-    start_urls = [
-        "https://www.changing-places.org/api/getToilets"
-    ]
+    start_urls = ["https://www.changing-places.org/api/getToilets"]
     locations_key = "toilets"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
@@ -24,7 +23,7 @@ class ChangingPlacesGBSpiderr(JSONBlobSpider):
         item["lon"] = feature.get("lo")
         item["name"] = "Changing Places"
         item["branch"] = feature.get("n")
-        item["street_address"] = ', '.join(filter(None, (feature.get("a1"), feature.get("a2"))))
+        item["street_address"] = ", ".join(filter(None, (feature.get("a1"), feature.get("a2"))))
         item["city"] = feature.get("c")
         item["postcode"] = feature.get("p")
         item["website"] = "https://www.changing-places.org/find?toilet=" + str(item["ref"])
