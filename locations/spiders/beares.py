@@ -31,6 +31,7 @@ class BearesSpider(JSONBlobSpider):
         feature.pop("email", None)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = item.pop("addr_full")
         item["branch"] = item.pop("name").removeprefix("Beares ")
         item["country"] = feature.get("country_id")
 
