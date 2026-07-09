@@ -26,7 +26,6 @@ class BancoDaAmazoniaBRSpider(JSONBlobSpider):
             return
 
         item.pop("name")
-        item["country"] = "BR"
         item["addr_full"] = clean_address(item["addr_full"].replace("Bairro:", ",").replace("CEP: ", ","))
 
         apply_category(Categories.BANK, item)
