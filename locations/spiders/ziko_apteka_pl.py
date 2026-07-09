@@ -1,34 +1,44 @@
 import re
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_PL, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ZikoAptekaPLSpider(Spider):
+class ZikoAptekaPLSpider(JSONBlobSpider):
     name = "ziko_apteka_pl"
     item_attributes = {"brand": "Ziko Apteka", "brand_wikidata": "Q63432892"}
     allowed_domains = ["zikoapteka.pl"]
     start_urls = ["https://zikoapteka.pl/wp-admin/admin-ajax.php?action=get_pharmacies"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
-            yield JsonRequest(url=url)
+            # The endpoint returns 403 unless a same-site Referer is supplied.
+            yield JsonRequest(url=url, headers={"Referer": "https://zikoapteka.pl/apteki"})
 
-    def parse(self, response):
-        for location in response.json().values():
-            item = DictParser.parse(location)
-            item["ref"] = location["mypostid"]
-            item["city"] = location["city_name"][0]
-            item.pop("state", None)
-            if location.get("link"):
-                item["website"] = "https://zikoapteka.pl/apteki" + location["link"] + "/"
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(
-                re.sub(r"\s+", " ", location["hours"].replace(".", "")), days=DAYS_PL
-            )
-            item["street_address"] = item.pop("addr_full", None)
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
+        item["ref"] = location["mypostid"]
+        item["city"] = location["city_name"][0]
+        item.pop("state", None)
+        if location.get("link"):
+            item["website"] = "https://zikoapteka.pl/apteki" + location["link"] + "/"
+        item["opening_hours"] = OpeningHours()
+        # drop the qualifier so "niedziela" is read as Sunday.
+        item["opening_hours"].add_ranges_from_string(
+            re.sub(
+                r"\s+",
+                " ",
+                re.sub(r"niehandlowa|handlowa", "", location["mp_pharmacy_hours"].replace("<br>", " ")).replace(
+                    ".", ""
+                ),
+            ),
+            days=DAYS_PL,
+        )
+        item["street_address"] = item.pop("addr_full", None)
+        apply_category(Categories.PHARMACY, item)
+        yield item
