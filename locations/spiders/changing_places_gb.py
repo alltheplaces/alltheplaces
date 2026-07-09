@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class ChangingPlacesGBSpiderr(JSONBlobSpider):
+class ChangingPlacesGBSpider(JSONBlobSpider):
     name = "changing_places_gb"
     item_attributes = {
         "brand": "Changing Places",
