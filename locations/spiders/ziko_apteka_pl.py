@@ -21,6 +21,12 @@ class ZikoAptekaPLSpider(JSONBlobSpider):
             # The endpoint returns 403 unless a same-site Referer is supplied.
             yield JsonRequest(url=url, headers={"Referer": "https://zikoapteka.pl/apteki"})
 
+    def pre_process_data(self, location: dict) -> None:
+        # Some records use a comma as the decimal separator in coordinates.
+        for key in ("lat", "lng"):
+            if isinstance(location.get(key), str):
+                location[key] = location[key].replace(",", ".")
+
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         item["ref"] = location["mypostid"]
         item["city"] = location["city_name"][0]
