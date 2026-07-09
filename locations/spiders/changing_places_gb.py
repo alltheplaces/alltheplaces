@@ -25,10 +25,10 @@ class ChangingPlacesGBSpider(JSONBlobSpider):
         item["website"] = "https://www.changing-places.org/find?toilet=" + str(item["ref"])
         item["extras"]["location_type"] = feature.get("bt")
         item["opening_hours"] = OpeningHours()
-        for i in range(6):
-            if feature["ds"] == 1:
+        for i in range(7):
+            if feature["ds"][i] == 1:
                 item["opening_hours"].add_range(DAYS[i], "00:00", "24:00")
-            elif feature["ds"] == 2:
+            elif feature["ds"][i] == 2:
                 item["opening_hours"].set_closed(DAYS[i])
             else:
                 item["opening_hours"].add_range(DAYS[i], feature["do"][i], feature["dc"][i])
