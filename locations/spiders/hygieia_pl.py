@@ -5,6 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class HygieiaPLSpider(Spider):
@@ -18,9 +19,8 @@ class HygieiaPLSpider(Spider):
         for store in response.xpath('//*[contains(@class," mfn-module-wrapper mfn-wrapper-for-wraps")]'):
             if title := store.xpath(".//h4/text()").get():
                 item = Feature()
-                item["name"] = self.item_attributes["brand"]
-                item["branch"] = title
-                item["street_address"] = store.xpath(".//p/text()").get()
+                item["street_address"] = title
+                item["addr_full"] = merge_address_lines([item["street_address"], store.xpath(".//p/text()").get()])
                 item["phone"] = store.xpath('.//*[contains(@href,"tel:")]/@href').get().replace("tel:", "")
                 item["email"] = store.xpath('.//*[contains(@href,"mailto:")]/@href').get().replace("mailto:", "")
                 apply_category(Categories.PHARMACY, item)
