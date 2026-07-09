@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -10,11 +10,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class ChangingPlacesGBSpider(JSONBlobSpider):
     name = "changing_places_gb"
-    item_attributes = {
-        "brand": "Changing Places",
-        "brand_wikidata": "Q104870811",
-        "extras": Categories.TOILETS.value,
-    }
+    item_attributes = {"brand": "Changing Places", "brand_wikidata": "Q104870811"}
     start_urls = ["https://www.changing-places.org/api/getToilets"]
     locations_key = "toilets"
 
@@ -36,4 +32,7 @@ class ChangingPlacesGBSpider(JSONBlobSpider):
                 item["opening_hours"].set_closed(DAYS[i])
             else:
                 item["opening_hours"].add_range(DAYS[i], feature["do"][i], feature["dc"][i])
+
+        apply_category(Categories.TOILETS, item)
+
         yield item
