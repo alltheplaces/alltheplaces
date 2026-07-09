@@ -1,10 +1,10 @@
+import json
 from typing import Any, Iterable
 
 import chompjs
 from scrapy import Request
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import (
@@ -36,15 +36,17 @@ from locations.hours import (
     sanitise_day,
 )
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.react_server_components import parse_rsc
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MangoSpider(Spider):
+class MangoSpider(PlaywrightSpider):
     name = "mango"
     item_attributes = {"brand": "Mango", "brand_wikidata": "Q136503"}
     start_urls = ["https://api.shop.mango.com/cs/online-configuration/v1/country?channelId=shop"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     LANGUAGE_DAYS_MAP = {
         "AR": DAYS_AR,
@@ -73,7 +75,7 @@ class MangoSpider(Spider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for country in response.json()["countries"]:
+        for country in json.loads(response.xpath("//pre/text()").get())["countries"]:
             if not country.get("hasOnlineAccess"):  # Skip countries with no available stores
                 continue
             country_code = country.get("mangoIso")
