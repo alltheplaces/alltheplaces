@@ -19,7 +19,7 @@ class MitsubishiCHSpider(JSONBlobSpider):
         if not mitsubishi:
             return
 
-        item["website"] = "https://www.mitsubishi-motors.ch/de/haendler/" + feature["slug"]
+        item["website"] = "https://www.mitsubishi-motors.ch/de/haendler/" + feature.get("slug", "")
         opening_hours = feature.get("dealerOpenings", {}).get("openingHours", {})
 
         if mitsubishi.get("sell"):
