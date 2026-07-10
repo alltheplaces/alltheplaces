@@ -16,6 +16,7 @@ from locations.categories import (
 )
 from locations.items import Feature
 
+
 def test_multiple_allowed_top_level_tags():
     # OSM sometimes allows multiple top level tagging schemes to be used at
     # once, generally during planned transition from one top level tagging
@@ -43,6 +44,7 @@ def test_multiple_allowed_top_level_tags():
     assert item["extras"]["healthcare"] == "clinic"
     nsi_preferred_top_level_tag = get_category_tags(item)
     assert nsi_preferred_top_level_tag == {"amenity": "clinic"}
+
 
 def test_apply_yes_no():
     item = Feature()

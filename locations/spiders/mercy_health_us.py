@@ -40,7 +40,10 @@ HEALTHCARE_CATEGORIES = {
     "Maternity and Birthing Centers": (Categories.BIRTHING_CENTRE, []),
     "Medical Centers and Clinics": (Categories.CLINIC, []),
     "Dialysis and Kidney Care": (Categories.CLINIC, [HealthcareSpecialities.NEPHROLOGY]),
-    "Neurology and Neurosurgery": (Categories.CLINIC, [HealthcareSpecialities.NEUROLOGY, HealthcareSpecialities.NEUROSURGERY]),
+    "Neurology and Neurosurgery": (
+        Categories.CLINIC,
+        [HealthcareSpecialities.NEUROLOGY, HealthcareSpecialities.NEUROSURGERY],
+    ),
     "Occupational Health": (Categories.CLINIC, [HealthcareSpecialities.OCCUPATIONAL]),
     "Orthopedics and Sports Medicine": (Categories.CLINIC, [HealthcareSpecialities.ORTHOPAEDICS]),
     "Other Locations": (Categories.CLINIC, []),
@@ -86,7 +89,7 @@ class MercyHealthUSSpider(Spider):
             if category := HEALTHCARE_CATEGORIES.get(facility_type):
                 for top_level_category, specialities in category:
                     apply_category(top_level_category, item)
-                    if specialities:    
+                    if specialities:
                         apply_healthcare_specialities(specialities, item)
                 if facility_type == "Home Health Care":
                     apply_yes_no("home_visit", item, True)

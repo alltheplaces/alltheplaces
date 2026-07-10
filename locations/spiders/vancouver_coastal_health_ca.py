@@ -13,19 +13,19 @@ class VancouverCoastalHealthCASpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     _category_map = {
-        "0": (Categories.HOSPITAL, []), # Hospitals
-        "1": (Categories.CLINIC_URGENT, []), # Urgent & primary care centres
-        "2": (Categories.CLINIC, [HealthcareSpecialities.COMMUNITY]), # Community health centres
-        "3": (Categories.NURSING_HOME, []), # Long term care homes
-        "4": (Categories.ASSISTED_LIVING, []), # Assisted living
-        "5": (Categories.HOSPICE, []), # Hospices
-        "7": (Categories.CLINIC, [HealthcareSpecialities.PSYCHIATRY]), # Mental health clinics
-        "8": (Categories.HOSPITAL, [HealthcareSpecialities.PSYCHIATRY]), # Crisis intervention facilities
-        "9": (Categories.OFFICE_HEALTHCARE, []), # Home health & support
-        "10": (Categories.VACCINATION_CENTRE, []), # Travel clinics
-        "11": (Categories.OFFICE_SUPERVISED_INJECTION_SITE, []), # Harm reduction site
-        "12": (Categories.OFFICE_HEALTHCARE, []), # Environmental health & inspections offices
-        "13": (Categories.CLINIC, []), # Other
+        "0": (Categories.HOSPITAL, []),  # Hospitals
+        "1": (Categories.CLINIC_URGENT, []),  # Urgent & primary care centres
+        "2": (Categories.CLINIC, [HealthcareSpecialities.COMMUNITY]),  # Community health centres
+        "3": (Categories.NURSING_HOME, []),  # Long term care homes
+        "4": (Categories.ASSISTED_LIVING, []),  # Assisted living
+        "5": (Categories.HOSPICE, []),  # Hospices
+        "7": (Categories.CLINIC, [HealthcareSpecialities.PSYCHIATRY]),  # Mental health clinics
+        "8": (Categories.HOSPITAL, [HealthcareSpecialities.PSYCHIATRY]),  # Crisis intervention facilities
+        "9": (Categories.OFFICE_HEALTHCARE, []),  # Home health & support
+        "10": (Categories.VACCINATION_CENTRE, []),  # Travel clinics
+        "11": (Categories.OFFICE_SUPERVISED_INJECTION_SITE, []),  # Harm reduction site
+        "12": (Categories.OFFICE_HEALTHCARE, []),  # Environmental health & inspections offices
+        "13": (Categories.CLINIC, []),  # Other
         # 14 - unused / unspecified
         # 15 - "Service": ignore, generally not physical features
         # 16 - "Program": ignore, generally not physical features
@@ -54,6 +54,5 @@ class VancouverCoastalHealthCASpider(Spider):
                 continue
             else:
                 self.logger.warning("Unknown category code: {}".format(location["type"]["id"]))
-                pass
 
             yield item

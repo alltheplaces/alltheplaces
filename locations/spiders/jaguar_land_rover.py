@@ -212,7 +212,7 @@ class JaguarLandRoverSpider(Spider):
                 apply_category(Categories.SHOP_CAR, sales_item)
                 apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, location["approvedPreOwned"])
                 yield sales_item
-            
+
             if location["authorisedRepairer"] or location["bodyshop"]:
                 service_item = deepcopy(item)
                 service_item["ref"] = "{}-service".format(service_item["ref"])

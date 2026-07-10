@@ -563,6 +563,7 @@ nsi_preferred_top_level_tag_mapping = [
     (("healthcare", "pharmacy"), ("amenity", "pharmacy")),
 ]
 
+
 def remap_category_tags_to_nsi_preferred(source: Feature | Enum | Mapping) -> dict:
     """
     For some types of features, OSM allows and sometimes prefers multiple top
@@ -591,6 +592,7 @@ def remap_category_tags_to_nsi_preferred(source: Feature | Enum | Mapping) -> di
                 remapped_tags[remapping_pair[1][0]] = remapping_pair[1][1]
 
     return remapped_tags
+
 
 def get_category_tags(source: Feature | Enum | Mapping) -> dict:
     """

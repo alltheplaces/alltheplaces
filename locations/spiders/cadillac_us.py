@@ -3,7 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS, OpeningHours

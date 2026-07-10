@@ -19,7 +19,14 @@ class AscensionUSSpider(Spider):
         "Audiology": (Categories.AUDIOLOGIST, []),
         "Birthing center": (Categories.BIRTHING_CENTRE, []),
         "Cancer care": (Categories.CLINIC, [HealthcareSpecialities.ONCOLOGY]),
-        "Cardiac and pulmonary rehab": (Categories.CLINIC, [HealthcareSpecialities.REHABILITATION, HealthcareSpecialities.CARDIOLOGY, HealthcareSpecialities.PULMONOLOGY]),
+        "Cardiac and pulmonary rehab": (
+            Categories.CLINIC,
+            [
+                HealthcareSpecialities.REHABILITATION,
+                HealthcareSpecialities.CARDIOLOGY,
+                HealthcareSpecialities.PULMONOLOGY,
+            ],
+        ),
         "Cardiology": (Categories.CLINIC, [HealthcareSpecialities.CARDIOLOGY]),
         "Cosmetic and plastic surgery": (Categories.CLINIC, [HealthcareSpecialities.PLASTIC_SURGERY]),
         "CT": (Categories.MEDICAL_IMAGING, [HealthcareSpecialities.DIAGNOSTIC_RADIOLOGY]),
@@ -27,7 +34,10 @@ class AscensionUSSpider(Spider):
         "DEXA scan": (Categories.MEDICAL_IMAGING, [HealthcareSpecialities.DIAGNOSTIC_RADIOLOGY]),
         "Ear, nose and throat care": (Categories.CLINIC, [HealthcareSpecialities.OTOLARYNGOLOGY]),
         "Emergency care": (Categories.HOSPITAL, [HealthcareSpecialities.EMERGENCY]),
-        "Emergency care - pediatrics": (Categories.HOSPITAL, [HealthcareSpecialities.EMERGENCY, HealthcareSpecialities.PAEDIATRICS]),
+        "Emergency care - pediatrics": (
+            Categories.HOSPITAL,
+            [HealthcareSpecialities.EMERGENCY, HealthcareSpecialities.PAEDIATRICS],
+        ),
         "Endocrinology": (Categories.CLINIC, [HealthcareSpecialities.ENDOCRINOLOGY]),
         "Express or urgent care": (Categories.CLINIC_URGENT, []),
         "Gastroenterology": (Categories.CLINIC, [HealthcareSpecialities.GASTROENTEROLOGY]),
@@ -37,7 +47,10 @@ class AscensionUSSpider(Spider):
         "Hospital/Medical Center": (Categories.HOSPITAL, []),
         "Imaging": (Categories.MEDICAL_IMAGING, [HealthcareSpecialities.DIAGNOSTIC_RADIOLOGY]),
         "Independent living": (Categories.OFFICE_HEALTHCARE, [HealthcareSpecialities.GERIATRICS]),
-        "Infeious disease": (Categories.CLINIC, [HealthcareSpecialities.INFECTIOUS_DISEASES]), # Typo exists in source data
+        "Infeious disease": (
+            Categories.CLINIC,
+            [HealthcareSpecialities.INFECTIOUS_DISEASES],
+        ),  # Typo exists in source data
         "Infectious disease": (Categories.CLINIC, [HealthcareSpecialities.INFECTIOUS_DISEASES]),
         "Inpatient rehabilitation": (Categories.CLINIC, [HealthcareSpecialities.REHABILITATION]),
         "Kidney health": (Categories.CLINIC, [HealthcareSpecialities.NEPHROLOGY]),
@@ -49,7 +62,10 @@ class AscensionUSSpider(Spider):
         "Neurology": (Categories.CLINIC, [HealthcareSpecialities.NEUROLOGY]),
         "Neurosurgery": (Categories.CLINIC, [HealthcareSpecialities.NEUROSURGERY]),
         "Occupational Therapy": (Categories.CLINIC, [HealthcareSpecialities.OCCUPATIONAL]),
-        "Occupational Therapy - Pediatrics": (Categories.CLINIC, [HealthcareSpecialities.OCCUPATIONAL, HealthcareSpecialities.PAEDIATRICS]),
+        "Occupational Therapy - Pediatrics": (
+            Categories.CLINIC,
+            [HealthcareSpecialities.OCCUPATIONAL, HealthcareSpecialities.PAEDIATRICS],
+        ),
         "Ophthalmology": (Categories.CLINIC, [HealthcareSpecialities.OPHTHALMOLOGY]),
         "Orthopedics": (Categories.CLINIC, [HealthcareSpecialities.ORTHOPAEDICS]),
         "PACE": (Categories.NURSING_HOME, []),

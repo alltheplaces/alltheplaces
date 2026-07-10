@@ -5,9 +5,9 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
-from locations.hours import OpeningHours, DAYS_FROM_SUNDAY
-from locations.items import Feature
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
+from locations.items import Feature
 
 
 class MedicalCityHealthcareSpider(Spider):
@@ -37,7 +37,9 @@ class MedicalCityHealthcareSpider(Spider):
 
     def parse(self, response: Response) -> Iterable[Feature]:
         next_data = loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-        features = next_data["props"]["pageProps"]["layoutData"]["sitecore"]["route"]["placeholders"]["body"][0]["placeholders"]["col-top"][0]["fields"]["defaultResponse"]["results"]
+        features = next_data["props"]["pageProps"]["layoutData"]["sitecore"]["route"]["placeholders"]["body"][0][
+            "placeholders"
+        ]["col-top"][0]["fields"]["defaultResponse"]["results"]
         for feature in features:
             item = DictParser.parse(feature)
             item["name"] = feature.get("facilityName")

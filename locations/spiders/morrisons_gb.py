@@ -167,7 +167,9 @@ class MorrisonsGBSpider(Spider):
 
         return hours
 
-    def create_department_poi(self, store_item: Feature, dept_data: dict, poi_type: str, name_suffix: str, category: Categories) -> Feature | None:
+    def create_department_poi(
+        self, store_item: Feature, dept_data: dict, poi_type: str, name_suffix: str, category: Categories
+    ) -> Feature | None:
         """Create separate POI for a department (pharmacy, café, etc.)
 
         Returns None if department doesn't have valid opening hours.

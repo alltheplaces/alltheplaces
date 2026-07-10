@@ -26,7 +26,10 @@ class NorthsideHospitalUSSpider(CamoufoxSpider):
         "Radiation Therapy": (Categories.HOSPITAL, [HealthcareSpecialities.NUCLEAR]),
         "Rehabilitation Services": (Categories.CLINIC, [HealthcareSpecialities.REHABILITATION]),
         "Specialty Care": (Categories.CLINIC, []),
-        "Spine and Pain Management": (Categories.CLINIC, [HealthcareSpecialities.CHIROPRATIC, HealthcareSpecialities.PAIN_MEDICINE]),
+        "Spine and Pain Management": (
+            Categories.CLINIC,
+            [HealthcareSpecialities.CHIROPRATIC, HealthcareSpecialities.PAIN_MEDICINE],
+        ),
         "Surgery Center": (Categories.HOSPITAL, [HealthcareSpecialities.SURGERY]),
         "Urgent Care": (Categories.CLINIC_URGENT, []),
         "Vascular Surgery": (Categories.HOSPITAL, [HealthcareSpecialities.VASCULAR_SURGERY]),

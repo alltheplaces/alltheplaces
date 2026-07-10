@@ -31,7 +31,10 @@ class MercySpider(Spider):
         "Surgery": (Categories.HOSPITAL, [HealthcareSpecialities.SURGERY]),
         "Mission and Ministry": (Categories.SOCIAL_CENTRE, []),
         "Cancer Treatment Center": (Categories.CLINIC, [HealthcareSpecialities.ONCOLOGY]),
-        "Hearing and Vision": (Categories.CLINIC, [HealthcareSpecialities.OPHTHALMOLOGY, HealthcareSpecialities.OTOLARYNGOLOGY]),
+        "Hearing and Vision": (
+            Categories.CLINIC,
+            [HealthcareSpecialities.OPHTHALMOLOGY, HealthcareSpecialities.OTOLARYNGOLOGY],
+        ),
         "Infusion": (Categories.CLINIC, []),
         "Mercy Kids": (Categories.HOSPITAL, [HealthcareSpecialities.PAEDIATRICS]),
         "Women's Health": (Categories.CLINIC, [HealthcareSpecialities.GYNAECOLOGY]),
