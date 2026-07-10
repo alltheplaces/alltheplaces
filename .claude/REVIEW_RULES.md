@@ -141,6 +141,7 @@
   `apply_category(Categories.X, item)` in the parse method (or `post_process_item`) instead of
   embedding `{"extras": Categories.X.value}` in `item_attributes`. Push a fixup commit if seen.
 - **`name` vs `branch`** - when `brand` is set in `item_attributes` and the source provides a per-location store name that differs from the brand (e.g. an operator's store name like `Cellular Sales Bellingham Meridian St`), that value belongs in `branch`, not `name`. The brand name from `item_attributes` will serve as the feature name.
+- **Prefer primary sources over aggregators** — favor spiders that crawl each individual brand's own site/API over a third-party aggregator that combines multiple brands. Exception: government open-data aggregators are fine when they live in the repo's dedicated government-data spider folder — those are expected to coexist with per-brand primary-source spiders rather than replace them, since they typically carry a narrower field set (e.g. price/location only, no opening hours/phone/services) that per-brand spiders can still improve on. Before treating a per-brand spider as "superseded" by a new aggregator PR (or vice versa), verify the two actually pull the same data — check the per-brand spider's source domain and fields against the aggregator's; don't take a contributor's offer to close their own PR at face value without checking.
 
 ## Data Quality - Fields
 These apply to both new spiders and fixes. Sample the CI output GeoJSON before approving.
