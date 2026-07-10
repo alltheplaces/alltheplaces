@@ -19,18 +19,25 @@ class FarmersInsuranceUSSpider(SitemapSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = re.search(r"\{.*\}", response.xpath('//comment()[contains(., "LocalBusiness")]').get(), re.S).group(0)
-        item = DictParser.parse(json.loads(data))
+        comment = response.xpath('//comment()[contains(., "LocalBusiness")]').get()
+        if not comment:
+            return
+        match = re.search(r"\{.*\}", comment, re.S)
+        if not match:
+            return
+        data = json.loads(match.group(0))
+        item = DictParser.parse(data)
         item["ref"] = item["website"] = response.url
         try:
             oh = OpeningHours()
-            for day_time in json.loads(data)["openingHoursSpecification"]:
-                day = day_time["dayOfWeek"][0]
-                open_time = day_time["opens"]
-                close_time = day_time["closes"]
-                oh.add_range(day, open_time, close_time)
-            item["opening_hours"] = oh
-        except:
+            for day_time in data.get("openingHoursSpecification", []):
+                days = day_time.get("dayOfWeek", [])
+                if not days:
+                    continue
+                oh.add_range(days[0], day_time.get("opens"), day_time.get("closes"))
+            if oh.days:
+                item["opening_hours"] = oh
+        except (KeyError, IndexError, ValueError, TypeError):
             pass
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
