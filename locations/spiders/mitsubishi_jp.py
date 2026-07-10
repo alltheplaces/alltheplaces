@@ -55,8 +55,7 @@ class MitsubishiJPSpider(CrawlSpider):
 
         if sales_available:
             sales_item = self.build_sales_item(item)
-            apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
-            apply_yes_no(Extras.USED_CAR_SALES, sales_item, "中古車" in services)
+            apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, "中古車" in services)
             apply_yes_no(Extras.WIFI, sales_item, "WiFi" in services)
             yield sales_item
 

@@ -33,11 +33,11 @@ class VolkswagenSpider(JSONBlobSpider):
         "L": VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES,
     }
     EXTRAS_MAPPING = {
-        "MOT": "service:vehicle:inspection",
-        "USED_PC": Extras.USED_CAR_SALES,
-        "USED_CV": Extras.USED_CAR_SALES,
+        "MOT": Extras.VEHICLE_INSPECTION_SERVICES,
+        "USED_PC": Extras.VEHICLE_USED_CAR_SALES,
+        "USED_CV": Extras.VEHICLE_USED_CAR_SALES,
         "FCWASH": Extras.CAR_WASH,
-        "PARTS": Extras.CAR_PARTS,
+        "PARTS": Extras.VEHICLE_CAR_PARTS_SALES,
     }
     SERVICE_ATTRIBUTES = [
         "SERVICE",

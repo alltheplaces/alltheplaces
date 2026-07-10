@@ -3,7 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -20,5 +20,5 @@ class GreatWolfResortsUSSpider(SitemapSpider, StructuredDataSpider):
         item.pop("twitter")
         item["branch"] = item.pop("name").removeprefix("Great Wolf Lodge ")
 
-        apply_category({"leisure": "water_park"}, item)
+        apply_category(Categories.LEISURE_WATER_PARK, item)
         yield item

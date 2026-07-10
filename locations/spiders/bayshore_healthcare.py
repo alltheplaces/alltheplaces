@@ -55,7 +55,7 @@ class BayshoreHealthcareSpider(Spider):
             elif (
                 "home care" in properties.get("name", "").lower() or "home health" in properties.get("name", "").lower()
             ):
-                apply_category({"office": "healthcare"}, properties)
+                apply_category(Categories.OFFICE_HEALTHCARE, properties)
             else:
                 apply_category(Categories.CLINIC, properties)
 

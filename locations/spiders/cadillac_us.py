@@ -53,19 +53,31 @@ class CadillacUSSpider(Spider):
             item["name"] = data.get("dealerName")
             item["website"] = data.get("dealerUrl")
             item["phone"] = data.get("generalContact", {}).get("phone1")
-            oh = OpeningHours()
+            item["opening_hours"] = OpeningHours()
             for value in data.get("generalOpeningHour"):
                 for day in value.get("dayOfWeek"):
-                    oh.add_range(
+                    item["opening_hours"].add_range(
                         day=DAYS[day - 1],
                         open_time=value.get("openFrom"),
                         close_time=value.get("openTo"),
                         time_format="%I:%M %p",
                     )
-            item["opening_hours"] = oh
 
-            apply_category(Categories.SHOP_CAR, item)
             departments = [dept.get("name") for dept in data.get("departments", [])]
-            apply_yes_no(Extras.CAR_PARTS, item, "Parts" in departments)
-            apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments)
-            yield item
+
+            sales_item = item.deepcopy()
+            sales_item["ref"] = "{}-sales".format(sales_item["ref"])
+            apply_category(Categories.SHOP_CAR, sales_item)
+            yield sales_item
+
+            if "Service" in departments:
+                service_item = item.deepcopy()
+                service_item["ref"] = "{}-service".format(service_item["ref"])
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                yield service_item
+
+            if "Parts" in departments:
+                parts_item = item.deepcopy()
+                parts_item["ref"] = "{}-parts".format(parts_item["ref"])
+                apply_category(Categories.SHOP_CAR_PARTS, parts_item)
+                yield parts_item

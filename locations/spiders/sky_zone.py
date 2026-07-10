@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -22,5 +22,5 @@ class SkyZoneSpider(Spider):
             item["branch"] = location["store"].removeprefix("DEFY ").removeprefix("Sky Zone ")
             item["website"] = location["park_url"]
 
-            apply_category({"leisure": "trampoline_park"}, item)
+            apply_category(Categories.LEISURE_TRAMPOLINE_PARK, item)
             yield item

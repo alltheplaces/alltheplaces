@@ -29,13 +29,23 @@ class AutoNationUSSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
         item.pop("image", None)  # Same brand logo on every location, not per-location
         # ld_data has opening hours of sales and services all merged, difficult to differentiate.
         item["opening_hours"] = self.parse_opening_hours(store_info.get("detailedHours") or [])
+
         departments = [department.get("name") for department in store_info.get("departments", [])]
+
         if "Sales" in departments:
-            apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, "Service" in departments or "Collision" in departments)
-        else:
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        yield item
+            sales_item = item.deepcopy()
+            sales_item["ref"] = "{}-sales".format(sales_item["ref"])
+            apply_category(Categories.SHOP_CAR, sales_item)
+            yield sales_item
+
+        if "Service" in departments or "Collision" in departments:
+            service_item = item.deepcopy()
+            service_item["ref"] = "{}-service".format(service_item["ref"])
+            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            yield service_item
+
+        if "Sales" not in departments and "Service" not in departments and "Collision" not in departments:
+            self.logger.warning("Unknown feature type from provided departments: {}".format(departments.join(";")))
 
     def parse_opening_hours(self, rules: list) -> OpeningHours:
         oh = OpeningHours()

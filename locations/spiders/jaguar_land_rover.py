@@ -206,13 +206,17 @@ class JaguarLandRoverSpider(Spider):
             self.add_contact(item, location["services"], "fax")
             self.add_contact(item, location["services"], "phone")
 
-            # Decide on a category. If it's a dealer, use that, then say if it
-            # also offers repairs. Otherwise it's a car repair.
             if location["dealer"] or location["approvedPreOwned"]:
-                apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, location["authorisedRepairer"] or location["bodyshop"])
-            elif location["authorisedRepairer"] or location["bodyshop"]:
+                sales_item = deepcopy(item)
+                sales_item["ref"] = "{}-sales".format(sales_item["ref"])
+                apply_category(Categories.SHOP_CAR, sales_item)
+                apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, location["approvedPreOwned"])
+                yield sales_item
+            
+            if location["authorisedRepairer"] or location["bodyshop"]:
+                service_item = deepcopy(item)
+                service_item["ref"] = "{}-service".format(service_item["ref"])
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
-            apply_yes_no(Extras.USED_CAR_SALES, item, location["approvedPreOwned"])
+                yield service_item
 
             yield item

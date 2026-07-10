@@ -25,14 +25,17 @@ class MitsubishiBRSpider(scrapy.Spider):
                 sales_item = deepcopy(item)
                 sales_item["ref"] = f"{item['ref']}-sales"
                 apply_category(Categories.SHOP_CAR, sales_item)
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, dealer.get("postSalesServices"))
-                apply_yes_no(Extras.USED_CAR_SALES, sales_item, dealer.get("nearlyNewCars"))
-                apply_yes_no(Extras.CAR_PARTS, sales_item, dealer.get("kitCarParts"))
+                apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, dealer.get("nearlyNewCars"))
                 yield sales_item
 
             if dealer.get("postSalesServices"):
                 service_item = deepcopy(item)
                 service_item["ref"] = f"{item['ref']}-service"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-                apply_yes_no(Extras.CAR_PARTS, service_item, dealer.get("kitCarParts"))
                 yield service_item
+
+            if dealer.get("kitCarParts"):
+                parts_item = deepcopy(item)
+                parts_item["ref"] = f"{item['ref']}-parts"
+                apply_category(Categories.SHOP_CAR_PARTS, parts_item)
+                yield parts_item

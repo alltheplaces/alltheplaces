@@ -1,6 +1,6 @@
 import json
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -20,6 +20,6 @@ class RonJonSurfShopUSSpider(PlaywrightSpider):
             item["branch"] = item.pop("name")
             item["website"] = response.urljoin(data["url"])
 
-            apply_category({"shop": "surf"}, item)
+            apply_category(Categories.SHOP_SURF, item)
 
             yield item

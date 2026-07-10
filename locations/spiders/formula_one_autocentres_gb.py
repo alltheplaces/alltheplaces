@@ -30,16 +30,16 @@ class FormulaOneAutocentresGBSpider(CrawlSpider, StructuredDataSpider):
 
         services = response.xpath('//div[@class="services"]//div[@class="columns"]/text()').getall()
 
-        apply_yes_no("service:vehicle:air_conditioning", item, "Air Conditioning" in services)
-        apply_yes_no("service:vehicle:batteries", item, "Batteries" in services)
-        apply_yes_no("service:vehicle:brakes", item, "Brakes" in services)
-        apply_yes_no("service:vehicle:tyres", item, "Car Tyres" in services)
-        # apply_yes_no("", item, "Clutches" in services)
-        # apply_yes_no("", item, "Exhausts" in services)
-        apply_yes_no("service:vehicle:mot", item, "MOT" in services)
-        apply_yes_no("service:vehicle:tyres_repair", item, "Puncture Repair" in services)
-        # apply_yes_no("", item, "Servicing" in services)
-        # apply_yes_no("", item, "Suspension & Shock Absorbers" in services)
-        # apply_yes_no("", item, "Wheel Alignment" in services)
+        apply_yes_no(Extras.VEHICLE_AIR_CONDITIONING_SERVICES, item, "Air Conditioning" in services)
+        apply_yes_no(Extras.VEHICLE_BATTERY_SERVICES, item, "Batteries" in services)
+        apply_yes_no(Extras.VEHICLE_BRAKE_SERVICES, item, "Brakes" in services)
+        apply_yes_no(Extras.VEHICLE_TYRE_SERVICES, item, "Car Tyres" in services)
+        apply_yes_no(Extras.VEHICLE_CLUTCH_SERVICES, item, "Clutches" in services)
+        apply_yes_no(Extras.VEHICLE_EXHAUST_SERVICES, item, "Exhausts" in services)
+        apply_yes_no(Extras.VEHICLE_INSPECTION_SERVICES, item, "MOT" in services)
+        apply_yes_no(Extras.VEHICLE_TYRE_REPAIR_SERVICES, item, "Puncture Repair" in services)
+        apply_yes_no(Extras.VEHICLE_PLANNED_MAINTENANCE_SERVICES, item, "Servicing" in services)
+        apply_yes_no(Extras.VEHICLE_SUSPENSION_SERVICES, item, "Suspension & Shock Absorbers" in services)
+        apply_yes_no(Extras.VEHICLE_WHEEL_ALIGNMENT_SERVICES, item, "Wheel Alignment" in services)
 
         yield item

@@ -31,7 +31,7 @@ BOTH_SERVICES_MAPPING = {
 }
 STATION_SERVICES_MAPPING = {
     "carwash": Extras.CAR_WASH,
-    "servicebay": Extras.CAR_REPAIR,
+    "servicebay": Extras.VEHICLE_CAR_REPAIR_SERVICES,
     "truckstop": Access.HGV,
     "diesel": Fuel.DIESEL,
     "charge": Fuel.ELECTRIC,

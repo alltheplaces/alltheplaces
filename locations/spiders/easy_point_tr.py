@@ -67,7 +67,7 @@ class EasyPointTRSpider(Spider):
                 d["extras"]["post_office:parcel_pickup"] = parse_parcel_from(item)
 
             elif bool(int(item["isMalKabul"])):
-                apply_category({"amenity": "delivery_area"}, d)
+                apply_category(Categories.SHOP_OUTPOST, d)
 
             else:
                 apply_category(Categories.GENERIC_POI, d)

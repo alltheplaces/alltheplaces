@@ -6,10 +6,10 @@ from locations.items import Feature
 
 SERVICES_MAPPING = {
     "автомойка": Extras.CAR_WASH,
-    "автосервис": Extras.CAR_REPAIR,
+    "автосервис": Extras.VEHICLE_CAR_REPAIR_SERVICES,
     "диагностика": None,
     "доп. оборудование": None,
-    "шиномонтаж": Extras.TYRE_SERVICES,
+    "шиномонтаж": Extras.VEHICLE_TYRE_SERVICES,
 }
 
 

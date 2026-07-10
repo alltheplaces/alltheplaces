@@ -106,8 +106,7 @@ class BmwGroupSpider(Spider):
             shop_item = deepcopy(item)
             shop_item["ref"] = f"{item['ref']}-SHOP"
             apply_category(Categories.SHOP_CAR, shop_item)
-            apply_yes_no(Extras.USED_CAR_SALES, shop_item, "G" in distribution_branches)
-            apply_yes_no(Extras.CAR_REPAIR, shop_item, "T" in distribution_branches or "CCRC" in distribution_branches)
+            apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, shop_item, "G" in distribution_branches)
             yield shop_item
 
         if "T" in distribution_branches or "CCRC" in distribution_branches:

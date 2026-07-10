@@ -1,7 +1,7 @@
 from scrapy.http import JsonRequest
 
 from locations.camoufox_spider import CamoufoxSpider
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
@@ -16,32 +16,20 @@ class NorthsideHospitalUSSpider(CamoufoxSpider):
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
     handle_httpstatus_list = [403]
 
-    categories = {
-        "Cancer Services": {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "oncology"},
-        "Colorectal Surgery": {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "proctology"},
-        "Hospital": Categories.HOSPITAL,
-        "Imaging Center": {
-            "amenity": "clinic",
-            "healthcare": "clinic",
-            "healthcare:speciality": "diagnostic_radiology",
-        },
-        "Outpatient": Categories.CLINIC,
-        "Primary Care": Categories.DOCTOR_GP,
-        "Radiation Therapy": {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "radiotherapy"},
-        "Rehabilitation Services": {"amenity": "clinic", "healthcare": "rehabilitation"},
-        "Specialty Care": Categories.CLINIC,
-        "Spine and Pain Management": {
-            "amenity": "clinic",
-            "healthcare": "clinic",
-            "healthcare:speciality": "chiropractic",
-        },
-        "Surgery Center": {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"},
-        "Urgent Care": Categories.CLINIC_URGENT,
-        "Vascular Surgery": {
-            "amenity": "hospital",
-            "healthcare": "hospital",
-            "healthcare:speciality": "vascular_surgery",
-        },
+    _category_map = {
+        "Cancer Services": (Categories.HOSPITAL, [HealthcareSpecialities.ONCOLOGY]),
+        "Colorectal Surgery": (Categories.HOSPITAL, [HealthcareSpecialities.PROCTOLOGY]),
+        "Hospital": (Categories.HOSPITAL, []),
+        "Imaging Center": (Categories.MEDICAL_IMAGING, [HealthcareSpecialities.DIAGNOSTIC_RADIOLOGY]),
+        "Outpatient": (Categories.CLINIC, []),
+        "Primary Care": (Categories.DOCTOR_GP, []),
+        "Radiation Therapy": (Categories.HOSPITAL, [HealthcareSpecialities.NUCLEAR]),
+        "Rehabilitation Services": (Categories.CLINIC, [HealthcareSpecialities.REHABILITATION]),
+        "Specialty Care": (Categories.CLINIC, []),
+        "Spine and Pain Management": (Categories.CLINIC, [HealthcareSpecialities.CHIROPRATIC, HealthcareSpecialities.PAIN_MEDICINE]),
+        "Surgery Center": (Categories.HOSPITAL, [HealthcareSpecialities.SURGERY]),
+        "Urgent Care": (Categories.CLINIC_URGENT, []),
+        "Vascular Surgery": (Categories.HOSPITAL, [HealthcareSpecialities.VASCULAR_SURGERY]),
     }
 
     def parse(self, response, **kwargs):
@@ -54,9 +42,11 @@ class NorthsideHospitalUSSpider(CamoufoxSpider):
             item["phone"] = location["phone_1"]
             item["website"] = location["listing_url"]
 
-            if cat := self.categories.get(location["category"]):
-                apply_category(cat, item)
+            if cat := self._category_map.get(location["category"]):
+                apply_category(cat[0], item)
+                apply_healthcare_specialities(cat[1], item)
             else:
+                self.logger.warning("Unknown category: {}".format(location["category"]))
                 apply_category(Categories.CLINIC, item)
 
             yield item

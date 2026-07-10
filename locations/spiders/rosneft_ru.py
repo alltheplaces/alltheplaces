@@ -36,9 +36,9 @@ class RosneftRUSpider(scrapy.Spider):
         "qrpay": None,
         "chemistry": None,  # They mean pharmacy
         "wash": Extras.CAR_WASH,
-        "tire": "service:vehicle:tyres",
+        "tire": Extras.VEHICLE_TYRE_SERVICES,
         "hotel": None,
-        "electro": "fuel:electricity",
+        "electro": Fuel.ELECTRIC,
         "cash": PaymentMethods.CASH,
         "finmarket": None,
     }

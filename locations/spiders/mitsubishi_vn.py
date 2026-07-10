@@ -77,9 +77,7 @@ class MitsubishiVNSpider(JSONBlobSpider):
             sales_item["phone"] = "; ".join(filter(None, phone_sales)) or phone
             sales_item["opening_hours"] = self.parse_hours(service_hours.get("Bán hàng", []))
             apply_category(Categories.SHOP_CAR, sales_item)
-            apply_yes_no(Extras.CAR_REPAIR, sales_item, SERVICE_AND_PARTS in services)
-            apply_yes_no(Extras.CAR_PARTS, sales_item, SERVICE_AND_PARTS in services)
-            apply_yes_no(Extras.USED_CAR_SALES, sales_item, USED_CAR_SALES in services)
+            apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, USED_CAR_SALES in services)
             yield sales_item
 
         if SERVICE_AND_PARTS in services:
@@ -88,5 +86,11 @@ class MitsubishiVNSpider(JSONBlobSpider):
             service_item["phone"] = "; ".join(filter(None, phone_services)) or phone
             service_item["opening_hours"] = self.parse_hours(service_hours.get("Dịch vụ", []))
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-            apply_yes_no(Extras.CAR_PARTS, service_item, True)
             yield service_item
+
+            parts_item = deepcopy(item)
+            parts_item["ref"] = f"{item['ref']}-parts"
+            parts_item["phone"] = "; ".join(filter(None, phone_services)) or phone
+            parts_item["opening_hours"] = self.parse_hours(service_hours.get("Dịch vụ", []))
+            apply_category(Categories.SHOP_CAR_PARTS, parts_item)
+            yield parts_item

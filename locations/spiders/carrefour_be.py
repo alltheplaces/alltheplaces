@@ -37,7 +37,7 @@ class CarrefourBESpider(scrapy.Spider):
             if not parse_brand_and_category_from_mapping(item, brand_slug, self.brands):
                 self.crawler.stats.inc_value(f"atp/carrefour_be/unknown_brand/{brand_slug}")
                 # Default to supermarket if brand match failed
-                apply_category(item, Categories.SHOP_SUPERMARKET)
+                apply_category(Categories.SHOP_SUPERMARKET, item)
 
             if brand_slug == "drive-2":
                 apply_yes_no(Extras.DRIVE_THROUGH, item, True)

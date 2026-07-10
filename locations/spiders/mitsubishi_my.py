@@ -23,17 +23,28 @@ class MitsubishiMYSpider(JSONBlobSpider):
         item["image"] = feature.get("featured_img_url")
 
         services = feature.get("centre_type")
-        if not services:  # Doesn't look a branded location
-            return
+
         if "showroom" in services:
-            apply_category(Categories.SHOP_CAR, item)
-        elif "service" in services:
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-        elif services == ["parts-stockist"]:
-            apply_category(Categories.SHOP_CAR_PARTS, item)
-        elif services == ["body-paint"]:
-            apply_category({"shop": "car_painting"}, item)
-        apply_yes_no(Extras.CAR_PARTS, item, "parts-stockist" in services)
-        apply_yes_no("service:vehicle:glass", item, "windscreen-replacement" in services)
-        apply_yes_no("service:vehicle:painting", item, "body-paint" in services)
-        yield item
+            sales_item = item.deepcopy(item)
+            sales_item["ref"] = "{}-sales".format(sales_item["ref"])
+            apply_category(Categories.SHOP_CAR, sales_item)
+            yield sales_item
+
+        if "service" in services or "windscreen-replacement" in services:
+            service_item = item.deepcopy(item)
+            service_item["ref"] = "{}-service".format(service_item["ref"])
+            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            apply_yes_no(Extras.VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES, item, "windscreen-replacement" in services)
+            yield service_item
+
+        if "parts-stockist" in services:
+            parts_item = item.deepcopy(item)
+            parts_item["ref"] = "{}-parts".format(service_item["ref"])
+            apply_cateogry(Categories.SHOP_CAR_PARTS, parts_item)
+            yield parts_item
+
+        if "body-paint" in services:
+            painter_item = item.deepcopy(item)
+            painter_item["ref"] = "{}-paint".format(painter_item["ref"])
+            apply_category(Categories.CRAFT_CAR_PAINTER, painter_item)
+            yield painter_item
