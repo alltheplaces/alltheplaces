@@ -236,7 +236,7 @@ class MaesDkvSpider(scrapy.Spider):
         "BENZINOL": {"brand": "Benzinol"},
         "BK": {"brand": "BK"},
         "BOGONI": {"brand": "Bogoni"},
-        "BONAREA": {"brand": "Bonarea"},
+        "BONAREA": {"brand": "BonÀrea", "brand_wikidata": "Q11924743"},
         "BONETT": {"brand": "Bonett"},
         "BONUS": {"brand": "Bonus"},
         "BRAND OIL": {"brand": "Brand Oil"},
