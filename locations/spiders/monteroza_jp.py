@@ -15,7 +15,9 @@ class MonterozaJPSpider(CanlySpider):
         if feature.get("businessStatus") != "OPEN":
             return
 
-        brand = feature.get("selectBrand").get("selectBrand").get("selected").get("item").get("brand").get("label")
+        brand = feature.get("selectBrand", {}).get("selectBrand", {}).get("selected", {}).get("item", {}).get("brand", {}).get("label")
+        if not brand:
+            return
         match brand:
             case "白木屋":
                 item["brand_wikidata"] = "Q489746"
