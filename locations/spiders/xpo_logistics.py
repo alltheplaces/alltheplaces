@@ -1,30 +1,24 @@
-import ast
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
 
 
-class XpoLogisticsSpider(scrapy.Spider):
+class XpoLogisticsSpider(ArcGISFeatureServerSpider):
     name = "xpo_logistics"
     item_attributes = {"brand": "XPO Logistics", "brand_wikidata": "Q8042415"}
-    allowed_domains = ["www.xpo.com"]
-    start_urls = ("https://www.xpo.com/global-locations/",)
+    host = "maps.xpo.com"
+    context_path = "ltlbisvc"
+    service_id = "ServiceMap/PRODUCTION_Service_Map_SIC"
+    server_type = "MapServer"
+    layer_id = "0"
 
-    def parse(self, response):
-        script = response.xpath('//script[@id="globalLocations"]/text()').extract_first()
-        data = ast.literal_eval(script)
-
-        for store in data:
-            yield Feature(
-                lat=float(store["latitude"]),
-                lon=float(store["longitude"].replace(",", "")),
-                phone=store["telephone"],
-                ref=f"{store['office_name']}-{store['postal_code']}",
-                addr_full=store["street"],
-                city=store["city"],
-                state=store["state"],
-                postcode=store["postal_code"],
-                country=store["country"],
-                name=store["office_name"],
-            )
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature.get("sic_cd")
+        item["name"] = feature.get("terminal_nm")
+        item["phone"] = feature.get("terminal_phone")
+        apply_category(Categories.OFFICE_COURIER, item)
+        yield item
