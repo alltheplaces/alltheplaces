@@ -15,6 +15,9 @@ class UccJPSpider(LocationCloudSpider):
         if "kaigai" in source_feature["code"]:
             return  # remove overseas locations with fake coordinates
 
+        if not source_feature.get("categories"):
+            return
+
         match source_feature["categories"][0]["code"]:
             case "01":
                 item["brand"] = "上島珈琲店"
