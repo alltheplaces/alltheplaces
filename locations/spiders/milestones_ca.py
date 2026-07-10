@@ -21,6 +21,7 @@ class MilestonesCASpider(StructuredDataSpider):
         item["branch"] = item.pop("name")
         item.pop("twitter", None)
         item.pop("facebook", None)
+        item.pop("image", None)
 
         item["opening_hours"] = OpeningHours()
         for rule in ld_data.get("openingHoursSpecification") or []:
