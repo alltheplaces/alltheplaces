@@ -31,7 +31,8 @@ class EvoenergyAUSpider(RosettaAPRSpider):
             properties = {
                 "ref": feature["Name"],
                 "name": feature["Name"],
-                "geometry": feature["geometry"],
+                "lat": feature["geometry"]["coordinates"][0][1],
+                "lon": feature["geometry"]["coordinates"][0][0],
             }
             items.append(properties)
         next_data_file = RosettaAPRDataFile(
@@ -85,7 +86,8 @@ class EvoenergyAUSpider(RosettaAPRSpider):
             properties = {
                 "ref": feature["Name"],
                 "name": feature["Name"],
-                "geometry": feature["geometry"],
+                "lat": feature["geometry"]["coordinates"][0][1],
+                "lon": feature["geometry"]["coordinates"][0][0],
             }
             apply_category(Categories.SUBSTATION_TRANSMISSION, properties)
             items.append(Feature(**properties))
