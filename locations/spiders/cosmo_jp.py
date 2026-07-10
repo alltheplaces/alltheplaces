@@ -27,7 +27,7 @@ class CosmoJPSpider(Spider):
             item["ref"] = store.get("key")
             apply_yes_no("full_service", item, store.get("フル"))
             apply_yes_no("self_service", item, store.get("セルフ"))
-            apply_yes_no(Extras.VEHICLE_INSPECTION, item, store.get("車検"))
+            apply_yes_no(Extras.VEHICLE_INSPECTION_SERVICES, item, store.get("車検"))
             apply_yes_no(Extras.CAR_WASH, item, store.get("洗車"))
             apply_yes_no(Fuel.ELECTRIC, item, store.get("EV急速充電器"))
             apply_yes_no("sells:food", item, store.get("セブン-イレブン複合店"))

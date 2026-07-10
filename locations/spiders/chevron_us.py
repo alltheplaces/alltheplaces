@@ -37,7 +37,7 @@ STATION_SERVICES_MAPPING = {
     "charge": Fuel.ELECTRIC,
     "fullsvcarwash": Extras.CAR_WASH,
     "cvxreward": "fuel:discount:chevron",
-    "hydrogen": "fuel:H2",
+    "hydrogen": Fuel.H70,
     "e85": Fuel.E85,
     "cngas": Fuel.CNG,
     "propane": Fuel.PROPANE,

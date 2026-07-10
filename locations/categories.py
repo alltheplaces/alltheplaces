@@ -662,7 +662,7 @@ class Fuel(Enum):
     OCTANE_99 = "fuel:octane_99"
     OCTANE_100 = "fuel:octane_100"
     OCTANE_102 = "fuel:octane_102"
-    # Formulas
+    # Ethanol blends
     E5 = "fuel:e5"
     E10 = "fuel:e10"
     E15 = "fuel:e15"
@@ -672,6 +672,7 @@ class Fuel(Enum):
     E88 = "fuel:e88"
     ETHANOL = "fuel:ethanol"
     ETHANOL_FREE = "fuel:ethanol_free"
+    # Other fuels
     METHANOL = "fuel:methanol"
     BIOGAS = "fuel:biogas"
     GASOLINE = "fuel:gasoline"
@@ -680,7 +681,12 @@ class Fuel(Enum):
     LNG = "fuel:lng"
     PROPANE = "fuel:propane"
     BUTANE = "fuel:butane"
+    KEROSENE = "fuel:kerosene"
+    # Hydrogen fuels
     LH2 = "fuel:LH2"
+    H35 = "fuel:h35"
+    H50 = "fuel:h50"
+    H70 = "fuel:h70"
     # Additives
     ADBLUE = "fuel:adblue"
     ENGINE_OIL = "fuel:engineoil"
@@ -693,7 +699,6 @@ class Fuel(Enum):
     ALKYLATE = "fuel:alkylate"  # https://de.wikipedia.org/wiki/Alkylatbenzin
 
     HEATING_OIL = "fuel:heating_oil"
-    KEROSENE = "fuel:kerosene"
 
     ELECTRIC = "fuel:electricity"  # Electric vehicle charger
 
