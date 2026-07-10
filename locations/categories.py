@@ -584,7 +584,7 @@ def remap_category_tags_to_nsi_preferred(source: Feature | Enum | Mapping) -> di
     elif isinstance(source, Mapping):
         tags = source
 
-    remapped_tags = tags
+    remapped_tags = dict(tags)
     for remapping_pair in nsi_preferred_top_level_tag_mapping:
         if remapping_pair[0][0] in tags.keys():
             if tags[remapping_pair[0][0]] == remapping_pair[0][1]:
