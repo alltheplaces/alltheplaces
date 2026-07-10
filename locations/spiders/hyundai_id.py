@@ -43,11 +43,11 @@ class HyundaiIDSpider(Spider):
         for data in response.json():
             item = Feature()
             item["ref"] = data.get("dealer_seq")
-            item["branch"] = data.get("dealer_name").removeprefix("Hyundai ")
+            item["branch"] = data.get("dealer_name", "").removeprefix("Hyundai ")
             item["lat"] = data.get("latitude")
             item["lon"] = data.get("longtitude")
             item["addr_full"] = data.get("dealer_address")
-            item["postcode"] = data.get("dealer_post_code").removesuffix(".0")
+            item["postcode"] = data.get("dealer_post_code", "").removesuffix(".0")
             item["phone"] = data.get("dealer_phone1", "").removeprefix("Tel ")
             services = data.get("dealer_service_nm", "")
             has_showroom = "Sales" in services
