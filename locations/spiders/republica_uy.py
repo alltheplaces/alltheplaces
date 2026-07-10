@@ -25,7 +25,7 @@ class RepublicaUYSpider(ArcGISFeatureServerSpider):
         item["state"] = feature.get("DEPARTAMENTO")
         # LOCAL is prefixed with an internal point number (e.g. "001-AIGUA", "179 - AG..."); keep the label.
         item["name"] = re.sub(r"^\d+\s*-\s*", "", feature.get("LOCAL") or "").strip() or None
-        if "SUC" in feature["TIPO"]:
+        if "SUC" in feature.get("TIPO", ""):
             item["branch"] = item.pop("name")  # branch label belongs in branch; NSI supplies the brand name
             apply_category(Categories.BANK, item)
         else:  # self-service ATM island keeps its location label as name
