@@ -35,7 +35,7 @@ class FarmersInsuranceUSSpider(SitemapSpider):
                 if not days:
                     continue
                 oh.add_range(days[0], day_time.get("opens"), day_time.get("closes"))
-            if oh.days:
+            if oh:
                 item["opening_hours"] = oh
         except (KeyError, IndexError, ValueError, TypeError):
             pass
