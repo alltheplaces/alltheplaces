@@ -16,7 +16,7 @@ class AeropostaleUSSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = item["name"] = None
         item["branch"] = (
-            response.xpath('//h1[@class="Hero-title Hero-title--aeropostale"]/text()')
+            response.xpath('//h1[contains(@class, "Hero-title Hero-title--aeropostale")]/text()')
             .get()
             .removeprefix("Aeropostale ")
             .split(",", 1)[0]

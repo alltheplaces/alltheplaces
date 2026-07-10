@@ -1,45 +1,43 @@
-from typing import AsyncIterator
+import json
+import re
+from typing import Any
+from urllib.parse import unquote
 
-from scrapy import Selector, Spider
-from scrapy.http import FormRequest
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.geo import point_locations
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
-class PetsAtHomeGBSpider(Spider):
+class PetsAtHomeGBSpider(SitemapSpider):
     name = "pets_at_home_gb"
     item_attributes = {"brand": "Pets at Home", "brand_wikidata": "Q7179258"}
-    wanted_types = ["PetStore"]
+    sitemap_urls = ["https://www.petsathome.com/find-us/sitemap.xml"]
+    sitemap_rules = [(r"/find-us/locations/[^/]+/[^/]+$", "parse")]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        for lat, lon in point_locations("eu_centroids_20km_radius_country.csv", "UK"):
-            yield FormRequest(
-                url="https://community.petsathome.com/models/utils.cfc",
-                formdata={
-                    "method": "functionhandler",
-                    "returnFormat": "json",
-                    "event": "webproperty.storelocator",
-                    "lat": str(lat),
-                    "lng": str(lon),
-                    "radius": "50000",
-                    "companyID": "E25254CF-02A9-4666-9722-C6CC3E6DD402",
-                    "active": "true",
-                },
-                headers={"X-Requested-With": "XMLHttpRequest"},
-            )
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        if not (match := re.search(r'JSON\.parse\(decodeURIComponent\("(.+?)"\)\)', response.text, re.DOTALL)):
+            return
+        document = json.loads(unquote(match.group(1)))["document"]
 
-    def parse(self, response):
-        for node in response.json()["data"]:
-            ld = MicrodataParser.convert_to_graph(MicrodataParser.extract_microdata(Selector(text=node["microdata"])))
-            item = LinkedDataParser.parse_ld(ld)
+        item = DictParser.parse(document)
+        item["branch"] = item.pop("name", "").removeprefix("Pets at Home ")
+        item["website"] = response.url
+        item["opening_hours"] = self.parse_opening_hours(document.get("hours"))
+        apply_category(Categories.SHOP_PET, item)
 
-            item["ref"] = item["website"] = f'https://community.petsathome.com{node["slug"]}'
-            item["lat"] = node["lat"]
-            item["lon"] = node["lng"]
-            item["branch"] = item.pop("name")
-            item["addr_full"] = node["formattedaddress"]
-            # TODO: opentimes
+        yield item
 
-            yield item
+    def parse_opening_hours(self, hours: dict | None) -> OpeningHours:
+        oh = OpeningHours()
+        for day, rule in (hours or {}).items():
+            if not isinstance(rule, dict) or day == "holidayHours":
+                continue
+            if rule.get("isClosed"):
+                oh.set_closed(day)
+                continue
+            for interval in rule.get("openIntervals", []):
+                oh.add_range(day, interval["start"], interval["end"])
+        return oh
