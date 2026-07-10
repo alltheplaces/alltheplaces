@@ -51,7 +51,7 @@ class IciParisXlSpider(JSONBlobSpider, PlaywrightSpider):
                             rule.get("closingTime", {}).get("formattedHour"),
                             "%I:%M %p",
                         )
-        except:
+        except Exception:
             pass
         apply_category(Categories.SHOP_PERFUMERY, item)
         yield item
