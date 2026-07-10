@@ -1,4 +1,3 @@
-import re
 from typing import Any
 
 from scrapy.http import Response
@@ -26,12 +25,6 @@ class PitaPitCASpider(SitemapSpider):
             response.xpath('//div[contains(concat(" ", @class, " "), " fusion-text-1 ")]//text()').getall()
         )
         item["phone"] = response.xpath('//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:") or None
-
-        maps_link = response.xpath('//a[contains(@href, "/maps")]/@href').get("")
-        if coords := re.search(r"!1d(-?\d+\.\d+)!2d(-?\d+\.\d+)", maps_link):
-            item["lon"], item["lat"] = coords.groups()
-        elif coords := re.search(r"/@(-?\d+\.\d+),(-?\d+\.\d+)", maps_link):
-            item["lat"], item["lon"] = coords.groups()
 
         item["extras"]["website:en"] = response.url
         item["extras"]["website:fr"] = response.xpath('//a[@title="Switch to FR"]/@href').get()
