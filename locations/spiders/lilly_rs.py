@@ -15,7 +15,6 @@ class LillyRSSpider(Spider):
     allowed_domains = ["www.lilly.rs"]
     start_urls = ["https://www.lilly.rs/locations/index/index?name="]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = "RS"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
