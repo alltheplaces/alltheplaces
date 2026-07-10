@@ -13,8 +13,9 @@ class RosneftRUSpider(scrapy.Spider):
     brands = {
         "rosneft": {"brand_wikidata": "Q1141123"},
         "tnk": {"brand_wikidata": "Q2298901"},
-        "slavneft": {"brand_wikidata": "Q3486584"},
+        "slavneft": {"name": "Slavneft", "brand": "Slavneft", "brand_wikidata": "Q3486584"},
         "ptk": {"brand_wikidata": "Q4360193"},
+        "bashneft": {"brand": "Башнефть", "brand_wikidata": "Q809985"},
     }
     fuel_types = {
         "ai98": Fuel.OCTANE_98,
@@ -49,7 +50,6 @@ class RosneftRUSpider(scrapy.Spider):
                 continue
             item = DictParser.parse(poi)
             item.pop("state")
-            item["branch"] = poi.get("number")
             item["lat"] = poi["coordinate"]["lat"]
             item["lon"] = poi["coordinate"]["lng"]
             self.parse_brand(item, poi)
@@ -63,6 +63,7 @@ class RosneftRUSpider(scrapy.Spider):
         if brand:
             brand = brand.lower()
             if brand in self.brands:
+                item["name"] = None
                 item.update(self.brands[brand])
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{brand}")

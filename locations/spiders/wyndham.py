@@ -17,7 +17,7 @@ BRANDS = {
     "hawthorn-extended-stay": ["Hawthorn Suites", "Q5685511"],
     "hojo": ["Howard Johnson", "Q5919997"],
     "laquinta": ["La Quinta Inn", "Q6464734"],
-    "microtel": ["Microtel Inns & Suites", "Q6840402"],
+    "microtel": ["Microtel Inn & Suites", "Q6840402"],
     "ramada": ["Ramada", "Q1502859"],
     "registry-collection": ["Registry Collection", None],
     "super-8": ["Super 8", "Q5364003"],
