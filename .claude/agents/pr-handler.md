@@ -138,7 +138,21 @@ gh pr checks <N>
   ```bash
   gh pr merge <N> --squash --delete-branch
   ```
-- **Branch is behind master** → update it once (`gh pr update-branch <N>`), which triggers a fresh CI run and resets required checks to pending. Do not wait for that run to finish — report `BLOCKED_ON_CI`; the caller will re-check and merge later.
+- **Merge is rejected as not mergeable** → check *why* before reaching for `update-branch`:
+  ```bash
+  gh pr view <N> --json mergeable,mergeStateStatus
+  ```
+  - `mergeable: "UNKNOWN"` is **not** a conflict — GitHub is still computing mergeability
+    (common right after other PRs merged to master recently, e.g. during a batch-merge session).
+    Wait a few seconds and retry the merge; do not run `update-branch` for this.
+    `alltheplaces/alltheplaces` does not require branches to be up-to-date with master to merge
+    (`required_status_checks.strict = false`), so a merely-stale branch is never a blocker on its own.
+  - Only run `gh pr update-branch <N>` when `mergeable` resolves to `"CONFLICTING"` — an actual
+    file-level conflict. This triggers a fresh CI run and resets required checks to pending. Do not
+    wait for that run to finish — report `BLOCKED_ON_CI`; the caller will re-check and merge later.
+  - **When batch-merging many PRs in one session**, don't treat transient `UNKNOWN` as a rebase
+    signal on sight — needlessly running `update-branch` resets CI (and clogs the pre-commit.ci
+    queue) on PRs that never had a real conflict.
 - **A required check is `pending`/`queued`** (not failed, not passed) → **stop immediately** and return verdict `BLOCKED_ON_CI` with the PR number. Do NOT loop, sleep, poll repeatedly, or spawn a background wait-and-merge task of your own — this burns large amounts of time and tokens idling on a single PR. The caller is responsible for a single later sweep across all `BLOCKED_ON_CI` PRs.
 - **A required check genuinely fails** → return `HOLD` with the failure reason.
 
