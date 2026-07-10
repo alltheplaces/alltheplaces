@@ -1,32 +1,22 @@
-import re
 from typing import Iterable
 
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class YesBRSpider(JSONBlobSpider):
+class YesBRSpider(SitemapSpider, StructuredDataSpider):
     name = "yes_br"
     item_attributes = {"brand": "Yes! Idiomas", "brand_wikidata": "Q121365811"}
-    start_urls = [
-        "https://yes.com.br/site_novo/index.php?hcs=locatoraid&hca=search%3Asearch%2F%2Fproduct%2F",
-    ]
-    locations_key = "results"
+    sitemap_urls = ["https://www.yes.com.br/sitemap.xml"]
+    sitemap_rules = [(r"/escolas/[^/]+$", "parse")]
+    wanted_types = ["LanguageSchool"]
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["addr_full"] = feature.get("address").replace("<br>\n", ",")
-        if phone := feature.get("phone"):
-            all_numbers = re.search(r">(.*)<", phone).group(1)
-            if "/" in all_numbers:
-                item["phone"] = all_numbers.split("/")[0].lstrip()
-            else:
-                item["phone"] = all_numbers.replace("Telefone ", "")
-        item["website"] = feature.get("website_url")
-        item["street_address"] = feature.get("street1")
-        item["street"] = feature.get("street2")
-        item["branch"] = item.pop("name").replace("YES! ", "")
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace("YES! ", "").title()
+        item["website"] = response.url
         apply_category(Categories.LANGUAGE_SCHOOL, item)
         yield item

@@ -1,6 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HungryHorseGBSpider(SitemapSpider, StructuredDataSpider):
@@ -9,6 +10,8 @@ class HungryHorseGBSpider(SitemapSpider, StructuredDataSpider):
     allowed_domains = ["www.hungryhorse.co.uk"]
     sitemap_urls = ["https://www.hungryhorse.co.uk/sitemap.xml"]
     sitemap_rules = [(r"\/pubs\/[\w\-]+\/[\w\-]+$", "parse_sd")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    wanted_types = ["LocalBusiness"]
 
     def post_process_item(self, item, response, ld_data):
         item["ref"] = response.url
