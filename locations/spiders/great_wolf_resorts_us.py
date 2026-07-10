@@ -22,7 +22,9 @@ class GreatWolfResortsUSSpider(SitemapSpider):
         item["street_address"] = response.xpath('//*[@class="footer-v2__direction"]/text()').get()
         item["addr_full"] = response.xpath('//*[@class="footer-v2__direction"]').xpath("normalize-space()").get()
         item["ref"] = item["website"] = response.url
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/@href').get().replace("tel:", "")
+        phone = response.xpath('//*[contains(@href,"tel:")]/@href').get()
+        if phone:
+            item["phone"] = phone.replace("tel:", "")
         extract_google_position(item, response)
         apply_category({"leisure": "water_park"}, item)
         yield item
