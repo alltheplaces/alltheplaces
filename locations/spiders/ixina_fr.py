@@ -16,5 +16,6 @@ class IxinaFRSpider(SitemapSpider, StructuredDataSpider):
     ]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").replace("Magasin ixina ", "")
-        yield item
+        if item.get("name", ""):
+            item["branch"] = item.pop("name").replace("Magasin ixina ", "")
+            yield item
