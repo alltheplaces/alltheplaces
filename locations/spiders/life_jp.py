@@ -15,7 +15,7 @@ class LifeJPSpider(CanlySpider):
         if feature.get("businessStatus") != "OPEN":
             return
 
-        brand = feature.get("selectBrand").get("selectBrand").get("selected").get("item").get("brand").get("label")
+        brand = feature.get("selectBrand", {}).get("selectBrand", {}).get("selected", {}).get("item", {}).get("brand", {}).get("label")
         match brand:
             case "ライフ":
                 item["brand_wikidata"] = "Q11346476"
