@@ -207,14 +207,14 @@ class JaguarLandRoverSpider(Spider):
             self.add_contact(item, location["services"], "phone")
 
             if location["dealer"] or location["approvedPreOwned"]:
-                sales_item = deepcopy(item)
+                sales_item = item.deepcopy()
                 sales_item["ref"] = "{}-sales".format(sales_item["ref"])
                 apply_category(Categories.SHOP_CAR, sales_item)
                 apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, location["approvedPreOwned"])
                 yield sales_item
 
             if location["authorisedRepairer"] or location["bodyshop"]:
-                service_item = deepcopy(item)
+                service_item = item.deepcopy()
                 service_item["ref"] = "{}-service".format(service_item["ref"])
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
                 yield service_item

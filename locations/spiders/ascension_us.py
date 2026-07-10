@@ -117,7 +117,7 @@ class AscensionUSSpider(Spider):
                 item["image"] = response.urljoin(thumb)
 
             if location_type_tags := location.get("LocationTypeTags"):
-                feature_type = location["LocationTypeTags"][0].strip()
+                feature_type = location_type_tags[0].strip()
                 if cat := self._category_map.get(feature_type):
                     apply_category(cat[0], item)
                     apply_healthcare_specialities(cat[1], item)

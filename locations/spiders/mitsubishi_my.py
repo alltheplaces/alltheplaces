@@ -25,26 +25,26 @@ class MitsubishiMYSpider(JSONBlobSpider):
         services = feature.get("centre_type")
 
         if "showroom" in services:
-            sales_item = item.deepcopy(item)
+            sales_item = item.deepcopy()
             sales_item["ref"] = "{}-sales".format(sales_item["ref"])
             apply_category(Categories.SHOP_CAR, sales_item)
             yield sales_item
 
         if "service" in services or "windscreen-replacement" in services:
-            service_item = item.deepcopy(item)
+            service_item = item.deepcopy()
             service_item["ref"] = "{}-service".format(service_item["ref"])
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
             apply_yes_no(Extras.VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES, item, "windscreen-replacement" in services)
             yield service_item
 
         if "parts-stockist" in services:
-            parts_item = item.deepcopy(item)
+            parts_item = item.deepcopy()
             parts_item["ref"] = "{}-parts".format(service_item["ref"])
-            apply_cateogry(Categories.SHOP_CAR_PARTS, parts_item)
+            apply_category(Categories.SHOP_CAR_PARTS, parts_item)
             yield parts_item
 
         if "body-paint" in services:
-            painter_item = item.deepcopy(item)
+            painter_item = item.deepcopy()
             painter_item["ref"] = "{}-paint".format(painter_item["ref"])
             apply_category(Categories.CRAFT_CAR_PAINTER, painter_item)
             yield painter_item

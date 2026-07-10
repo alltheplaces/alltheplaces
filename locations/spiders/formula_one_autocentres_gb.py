@@ -5,7 +5,7 @@ from scrapy.http import TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
