@@ -20,4 +20,8 @@ class KieserTrainingSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("Kieser ", "")
+        # Remove placeholder images (Fallback_Studios is a generic fallback used by many locations)
+        image = item.get("image")
+        if image and "Fallback" in image:
+            item.pop("image", None)
         yield item
