@@ -16,6 +16,33 @@ from locations.categories import (
 )
 from locations.items import Feature
 
+def test_multiple_allowed_top_level_tags():
+    # OSM sometimes allows multiple top level tagging schemes to be used at
+    # once, generally during planned transition from one top level tagging
+    # scheme to another. See 'nsi_preferred_top_level_tag_mapping' within
+    # categories.py for a list of known cases where multiple top level tagging
+    # schemes may be used at once.
+
+    # NSI picks only one top level tagging scheme to use (either old or new
+    # scheme during transition periods). ATP uses
+    # 'nsi_preferred_top_level_tag_mapping' within categories.py to decide
+    # which top level tagging scheme to use when matching features to NSI.
+    # ATP is still able to output multiple top level tags which are supported
+    # or encouraged by OSM during transition periods.
+
+    item = Feature()
+    apply_category(Categories.SCHOOL, item)
+    assert item["extras"]["amenity"] == "school"
+    assert item["extras"]["education"] == "school"
+    nsi_preferred_top_level_tag = get_category_tags(item)
+    assert nsi_preferred_top_level_tag == {"amenity": "school"}
+
+    item = Feature()
+    apply_category(Categories.CLINIC, item)
+    assert item["extras"]["amenity"] == "clinic"
+    assert item["extras"]["healthcare"] == "clinic"
+    nsi_preferred_top_level_tag = get_category_tags(item)
+    assert nsi_preferred_top_level_tag == {"amenity": "clinic"}
 
 def test_apply_yes_no():
     item = Feature()
