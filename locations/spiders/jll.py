@@ -1,43 +1,34 @@
-from typing import AsyncIterator
+import re
+from typing import Any
 
-from scrapy import Request, Spider
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
 class JllSpider(Spider):
     name = "jll"
     item_attributes = {"brand": "JLL", "brand_wikidata": "Q1703389"}
-    allowed_domains = ["jll.com"]
+    start_urls = ["https://www.jll.com/en-in/locations?sort_by_relevance=relevance&location_page=1"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    async def start(self) -> AsyncIterator[Request]:
-        base_url = "https://www.us.jll.com/bin/jll/search?q=locations&currentPage=/content/jll-dot-com/countries/amer/us/en/locations&top=100&p={page}&contentTypes=Location"
-        pages = ["1", "2", "3", "4"]
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        key = re.search(r"subscriptionIdentifier:\s*\"(.*)\",", response.text).group(1)
+        yield JsonRequest(
+            url="https://www.jll.com/api/search/template",
+            headers={"subscription-key": key.strip()},
+            data={
+                "id": "jll_location_search_template_v3",
+                "params": {"size": 500, "from": 0, "countries": ["United States"], "language": "en-US"},
+            },
+            method="POST",
+            callback=self.parse_location,
+        )
 
-        for page in pages:
-            url = base_url.format(page=page)
-            yield Request(url=url, callback=self.parse)
-
-    def parse(self, response):
-        data = response.json()
-
-        for place in data["azureSearch"]["value"]:
-            properties = {
-                "ref": place["id"],
-                "name": place["title"],
-                "street_address": place["streetAddress"],
-                "city": place["city"],
-                "state": place["stateProvince"],
-                "postcode": place["postalCode"],
-                "lat": place["latitude"],
-                "lon": place["longitude"],
-                "phone": place["telephoneNumber"],
-                "website": place["cityPageLink"],
-            }
-
-            if properties["website"].startswith("https://www.google.com"):
-                properties.pop("website")
-            elif properties["website"].startswith("https://www.us.jll.com/en/locations"):
-                properties["country"] = "US"
-
-            yield Feature(**properties)
+    def parse_location(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["hits"]["hits"]:
+            location.update(location.pop("_source"))
+            item = DictParser.parse(location)
+            item["ref"] = location["_id"]
+            yield item
