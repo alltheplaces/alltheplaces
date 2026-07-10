@@ -14,7 +14,11 @@ class JllSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        key = re.search(r"subscriptionIdentifier:\s*\"(.*)\",", response.text).group(1)
+        key_match = re.search(r"subscriptionIdentifier:\s*\"(.*)\",", response.text)
+        if not key_match:
+            self.logger.error("Could not find subscription key in response")
+            return
+        key = key_match.group(1)
         yield JsonRequest(
             url="https://www.jll.com/api/search/template",
             headers={"subscription-key": key.strip()},
