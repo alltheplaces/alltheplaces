@@ -1,37 +1,27 @@
-import re
-from typing import AsyncIterator
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
-
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 
 
-class KiplingUSSpider(Spider):
+class KiplingUSSpider(SitemapSpider):
     name = "kipling_us"
     item_attributes = {"brand": "Kipling", "brand_wikidata": "Q6414641"}
-    allowed_domains = ["www.kipling-usa.com"]
-    start_urls = [
-        "https://www.kipling-usa.com/on/demandware.store/Sites-kip-Site/default/Stores-GetNearestStores?&countryCode=US&onlyCountry=true&retailstores=true&outletstores=true"
-    ]
+    sitemap_urls = ["https://locations.kipling.com/sitemap.xml"]
+    sitemap_rules = [(r"https://locations.kipling.com/us/[^/]+/[^/]+/[^/]+$", "parse")]
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json().values():
-            if (
-                "STORE CLOSED" in location.get("storeHours", "").upper()
-                or "STORE IS CLOSED" in location.get("storeHours", "").upper()
-            ):
-                continue
-            item = DictParser.parse(location)
-            item["ref"] = location["storeID"]
-            item["street_address"] = clean_address([location.get("address1"), location.get("address2")])
-            hours_string = re.sub(r"\s+", " ", location.get("storeHours")).strip()
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
-            yield item
+    def parse(self, response: TextResponse, **kwargs):
+        item = Feature()
+        item["name"] = self.item_attributes["brand"]
+        item["branch"] = response.xpath("//h1/text()").get()
+        item["street_address"] = response.xpath('//*[@property="business:contact_data:street_address"]/@content').get()
+        item["city"] = response.xpath('//*[@property="business:contact_data:locality"]/@content').get()
+        item["state"] = response.xpath('//*[@property="business:contact_data:region"]/@content').get()
+        item["postcode"] = response.xpath('//*[@property="business:contact_data:postal_code"]/@content').get()
+        item["phone"] = response.xpath('//*[@property="business:contact_data:phone_number"]/@content').get()
+        item["lat"] = response.xpath('//*[@property="place:location:latitude"]/@content').get()
+        item["lon"] = response.xpath('//*[@property="place:location:longitude"]/@content').get()
+        item["ref"] = item["website"] = response.url
+        apply_category(Categories.SHOP_BAG, item)
+        yield item
