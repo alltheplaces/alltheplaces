@@ -10,8 +10,8 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class FifthThirdBankSpider(CrawlSpider):
-    name = "fifth_third_bank"
+class FifthThirdBankUSSpider(CrawlSpider):
+    name = "fifth_third_bank_us"
     item_attributes = {
         "brand": "Fifth Third Bank",
         "brand_wikidata": "Q1411810",
@@ -50,7 +50,7 @@ class FifthThirdBankSpider(CrawlSpider):
         if atm_info := response.xpath('//*[@class="atm-num"]//text()').get():
             apply_yes_no(Extras.ATM, item, True if "ATM" in atm_info else False)
         oh = OpeningHours()
-        for day, time in json.loads(response.xpath("//@data-days").get()).items():
+        for day, time in json.loads(response.xpath("//@data-days").get() or "{}").items():
             day = day.replace("Hours", "")
             if time:
                 if time == "false":
