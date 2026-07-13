@@ -123,6 +123,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.count_brands.CountBrandsPipeline": 810,
     "locations.pipelines.count_operators.CountOperatorsPipeline": 820,
     "locations.pipelines.count_located_in.CountLocatedInPipeline": 830,
+    "locations.pipelines.tag_duplicator.TagDuplicatorPipeline": 900,
 }
 
 LOG_FORMATTER = "locations.logformatter.DebugDuplicateLogFormatter"
