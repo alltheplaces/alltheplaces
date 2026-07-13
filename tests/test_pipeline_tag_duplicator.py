@@ -1,8 +1,6 @@
 from scrapy.utils.test import get_crawler
 
-from locations.categories import apply_category
 from locations.items import Feature
-from locations.pipelines import apply_nsi_categories
 from locations.pipelines.apply_nsi_categories import ApplyNSICategoriesPipeline
 from locations.pipelines.tag_duplicator import TagDuplicatorPipeline
 from locations.spiders.boots_gb import BootsGBSpider
