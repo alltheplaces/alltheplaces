@@ -32,7 +32,7 @@ dependencies = [
     "reverse-geocoder",
     "scrapy>=2.16.0",
     "scrapy-camoufox @ git+https://github.com/iandees/scrapy-camoufox.git",
-    "scrapy-playwright>=0.0.47",
+    "scrapy-playwright>=0.0.48",
     "scrapy-zyte-api>=0.35.0",
     "shapely",
     "twisted[http2]",
