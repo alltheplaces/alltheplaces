@@ -7,10 +7,10 @@ from scrapy.http import Response
 from locations.items import Feature
 
 
-class KookaiAUSpider(Spider):
-    name = "kookai_au"
+class KookaiAUNZSpider(Spider):
+    name = "kookai_au_nz"
     item_attributes = {"brand": "Kookaï", "brand_wikidata": "Q1783759"}
-    start_urls = ["https://www.kookai.com.au/pages/boutique-locator"]
+    start_urls = ["https://www.kookai.com.au/pages/boutique-locator", "https://www.kookai.co.nz/pages/boutique-locator"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         stores = re.findall(
@@ -24,7 +24,10 @@ class KookaiAUSpider(Spider):
         )
         for index, name, address, phone, lat, lon in stores:
             item = Feature()
-            item["ref"] = index
+            if ".co.nz" in response.url:
+                item["ref"] = index + "NZ"
+            else:
+                item["ref"] = index + "AU"
             item["branch"] = name.replace("Kookai ", "")
             item["addr_full"] = address.encode().decode("unicode_escape").replace("<p>", "").replace("<\\/p>", ",")
             item["phone"] = phone
