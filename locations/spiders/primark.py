@@ -35,7 +35,6 @@ class PrimarkSpider(SitemapSpider, StructuredDataSpider):
         (r"/en-us/stores/[^/]+/[^/]+$", "parse"),
     ]
     custom_settings = {"USER_AGENT": FIREFOX_LATEST}
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
