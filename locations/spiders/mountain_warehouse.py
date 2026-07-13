@@ -8,6 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.react_server_components import parse_rsc
 
 
@@ -24,21 +25,15 @@ class MountainWarehouseSpider(Spider):
         data = dict(parse_rsc(rsc))
 
         for store in DictParser.get_nested_key(data, "AllStores"):
-            item = Feature()
+            store = {key: (None if value == "$undefined" else value) for key, value in store.items()}
+            item = DictParser.parse(store)
             item["ref"] = store["Code"]
-            item["lat"] = store["Lat"]
-            item["lon"] = store["Long"]
-            item["branch"] = store["StoreName"]
-            item["street_address"] = store["Address1"]
-            if (addr2 := store.get("Address2")) and addr2 != "$undefined":
-                item["street_address"] += ", " + addr2
-            item["city"] = store.get("City")
-            item["postcode"] = store.get("PostCode")
-            item["phone"] = store.get("Phone")
+            item["branch"] = item.pop("name")
+            item["street_address"] = merge_address_lines([store.get("Address1"), store.get("Address2")])
             item["website"] = f"https://www.mountainwarehouse.com/stores/{store['Url']}/"
 
             item["opening_hours"] = OpeningHours()
-            for hours in store.get("OpeningHours", []):
+            for hours in store.get("OpeningHours") or []:
                 item["opening_hours"].add_ranges_from_string(
                     f"{hours['DayName']} {hours['OpenTime']}-{hours['CloseTime']}"
                 )
