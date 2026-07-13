@@ -12,7 +12,6 @@ from locations.hours import OpeningHours, sanitise_day
 class HEBUSSpider(Spider):
     name = "h_e_b_us"
     item_attributes = {"brand": "H-E-B", "brand_wikidata": "Q830621"}
-    proxy_required = True
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
