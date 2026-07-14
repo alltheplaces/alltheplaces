@@ -33,8 +33,14 @@ class BubbakoosBurritosUSSpider(JSONBlobSpider):
                 self.find_locations(value, locations)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
-        item["ref"] = feature["id"]
-        item.pop("name", None)
+        item["branch"] = (
+            item.pop("name")
+            .removesuffix("Bubbakoo's Burritos")
+            .removesuffix("Bubbakoo’s Burritos")
+            .removesuffix("Bubbakoo's Burrito's")
+            .strip(" -")
+        )
+        item["street_address"] = item.pop("addr_full")
 
         item["opening_hours"] = OpeningHours()
         for calendar in feature.get("calendars") or []:
@@ -43,7 +49,9 @@ class BubbakoosBurritosUSSpider(JSONBlobSpider):
             for rule in calendar.get("ranges") or []:
                 item["opening_hours"].add_range(rule["weekday"], rule["start"].split(" ")[1], rule["end"].split(" ")[1])
 
-        apply_yes_no(Extras.DELIVERY, item, feature.get("supportsDelivery"), False)
+        # item["website"]  = "https://locations.bubbakoos.com/location-directory/{}/{}/{}".format("", feature["slug"], feature["location_slug"])
+
+        apply_yes_no(Extras.DELIVERY, item, feature.get("supportsDelivery"))
         apply_category(Categories.FAST_FOOD, item)
 
         yield item
