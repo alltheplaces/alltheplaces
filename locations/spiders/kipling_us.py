@@ -13,7 +13,6 @@ class KiplingUSSpider(SitemapSpider):
 
     def parse(self, response: TextResponse, **kwargs):
         item = Feature()
-        item["name"] = self.item_attributes["brand"]
         item["branch"] = response.xpath("//h1/text()").get()
         item["street_address"] = response.xpath('//*[@property="business:contact_data:street_address"]/@content').get()
         item["city"] = response.xpath('//*[@property="business:contact_data:locality"]/@content').get()
@@ -23,5 +22,7 @@ class KiplingUSSpider(SitemapSpider):
         item["lat"] = response.xpath('//*[@property="place:location:latitude"]/@content').get()
         item["lon"] = response.xpath('//*[@property="place:location:longitude"]/@content').get()
         item["ref"] = item["website"] = response.url
+
         apply_category(Categories.SHOP_BAG, item)
+
         yield item
