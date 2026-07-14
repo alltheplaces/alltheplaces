@@ -16,9 +16,7 @@ class FatburgerSpider(JSONBlobSpider):
     start_urls = ["https://www.fatburger.com/locations/"]
 
     def extract_json(self, response: Response) -> list[dict]:
-        return chompjs.parse_js_object(
-            re.search(r"mapLocations\s*=\s*(\[.*?\]);", response.text, re.DOTALL).group(1)
-        )
+        return chompjs.parse_js_object(re.search(r"mapLocations\s*=\s*(\[.*?\]);", response.text, re.DOTALL).group(1))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
         item.pop("name", None)
