@@ -1,39 +1,47 @@
 import re
-from typing import Any
+from typing import Any, Iterable
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 
-class GodfathersPizzaSpider(scrapy.Spider):
+class GodfathersPizzaSpider(Spider):
     name = "godfathers_pizza"
     item_attributes = {"brand": "Godfather's Pizza", "brand_wikidata": "Q5576353"}
-    # start_urls = ["https://godfathers.orderexperience.net/_nuxt/dbf11b2.js"]
-    start_urls = [
-        "https://godfathers.orderexperience.net/locations?_gl=1*wnu5aw*_gcl_au*MjAzNTAxNDc1OC4xNzYxODMwODU1*_ga*MjEwODI5ODM0My4xNzYxODMwODU1*_ga_TG5PXZSCYT*czE3NjE4MzA4NTUkbzEkZzEkdDE3NjE4MzA4NTgkajU3JGwwJGgw"
-    ]
+    start_urls = ["https://godfathers.orderexperience.net/locations"]
 
-    def parse(self, response):
-        yield scrapy.Request(
-            url="https://godfathers.orderexperience.net" + response.xpath("/html/body/script[4]/@src").get(),
-            callback=self.parse_token,
-        )
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
+        if bundle_path := response.xpath('//script[contains(@src, "/_nuxt/")]/@src').get():
+            yield response.follow(bundle_path, callback=self.parse_token)
 
-    def parse_token(self, response: Response, **kwargs: Any) -> Any:
-        key = re.search(r"apiKey:\s*\"(\w+)\"", response.text).group(1)
+    def parse_token(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
+        key = re.search(r'key:"([a-f0-9]{40})"', response.text).group(1)
         yield JsonRequest(
-            url="https://oxb.pxsweb.com/api/v1/apps/restaurants/66abfd6ce1b9d093ee0ab75d?key={}".format(key),
-            callback=self.parse_store,
+            url=f"https://oxb.pxsweb.com/api/v1/apps/restaurants/66abfd6ce1b9d093ee0ab75d?key={key}",
+            callback=self.parse_stores,
         )
 
-    def parse_store(self, response):
+    def parse_stores(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for store in response.json():
+            if store.get("hide_from_picker") or not store.get("loc"):
+                continue
             item = DictParser.parse(store)
-            if store["loc"]:
-                item["lat"] = store["loc"][0]
-                item["lon"] = store["loc"][1]
-            if item.get("addr_full"):
-                item["street_address"] = item.pop("addr_full")
+            if item["name"].startswith("Godfathers Pizza Express") or item["name"].startswith(
+                "Godfather's Pizza Express"
+            ):
+                item["branch"] = item.pop("name").removeprefix("Godfathers Pizza Express").strip(" -")
+                item["name"] = "Godfather's Pizza Express"
+            elif item["name"].startswith("Godfathers Pizza") or item["name"].startswith("Godfather's Pizza"):
+                item["branch"] = (
+                    item.pop("name").removeprefix("Godfathers Pizza").removeprefix("Godfather's Pizza").strip(" -")
+                )
+                item["name"] = "Godfather's Pizza"
+
+            item["lat"], item["lon"] = store["loc"]
+            item["street_address"] = item.pop("addr_full", None)
+            apply_category(Categories.RESTAURANT, item)
             yield item
