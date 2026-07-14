@@ -4,7 +4,7 @@ from chompjs import chompjs
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.react_server_components import parse_rsc
@@ -41,9 +41,7 @@ class BubbakoosBurritosUSSpider(JSONBlobSpider):
             if calendar.get("type") != "business":
                 continue
             for rule in calendar.get("ranges") or []:
-                item["opening_hours"].add_range(
-                    DAYS_EN[rule["weekday"]], rule["start"].split(" ")[1], rule["end"].split(" ")[1]
-                )
+                item["opening_hours"].add_range(rule["weekday"], rule["start"].split(" ")[1], rule["end"].split(" ")[1])
 
         apply_yes_no(Extras.DELIVERY, item, feature.get("supportsDelivery"), False)
         apply_category(Categories.FAST_FOOD, item)
