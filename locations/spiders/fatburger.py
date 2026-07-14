@@ -5,7 +5,7 @@ import chompjs
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -25,11 +25,9 @@ class FatburgerSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         for rule in feature.get("business_hours", []):
             if rule.get("closed"):
-                item["opening_hours"].set_closed(DAYS_EN[rule["day"]])
+                item["opening_hours"].set_closed(rule["day"])
             else:
-                item["opening_hours"].add_range(
-                    DAYS_EN[rule["day"]], rule["open"], rule["close"], time_format="%I:%M %p"
-                )
+                item["opening_hours"].add_range(rule["day"], rule["open"], rule["close"], time_format="%I:%M %p")
 
         apply_yes_no(Extras.DELIVERY, item, feature.get("has_delivery"), False)
         apply_category(Categories.FAST_FOOD, item)
