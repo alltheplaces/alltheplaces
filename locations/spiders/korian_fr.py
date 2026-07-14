@@ -14,3 +14,4 @@ class KorianFRSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         )
     ]
+    requires_proxy = True
