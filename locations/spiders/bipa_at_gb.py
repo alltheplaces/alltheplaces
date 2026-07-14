@@ -15,7 +15,7 @@ class BipaATGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         if feature["latitude"]:
-            item["branch"] = item.pop("name").replace("BIPA Filiale ", "")
+            item["name"] = None
             opening_hours = OpeningHours()
             for day, range in feature["storeHours"].items():
                 opening_hours.add_ranges_from_string(f"{day}: {range}")
