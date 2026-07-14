@@ -22,5 +22,6 @@ class KorianFRSpider(CrawlSpider, StructuredDataSpider):
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["name"] = item["name"].removeprefix("Korian ")
         apply_category(Categories.SOCIAL_FACILITY, item)
         yield item
