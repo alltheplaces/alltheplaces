@@ -1,21 +1,51 @@
-import chompjs
-from scrapy.spiders import SitemapSpider
+from typing import Any, Iterable
 
-from locations.structured_data_spider import StructuredDataSpider
+from chompjs import chompjs
+from scrapy.http import Response
+
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS_EN, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.react_server_components import parse_rsc
 
 
-class BubbakoosBurritosUSSpider(SitemapSpider, StructuredDataSpider):
+class BubbakoosBurritosUSSpider(JSONBlobSpider):
     name = "bubbakoos_burritos_us"
     item_attributes = {"brand": "Bubbakoo's Burritos", "brand_wikidata": "Q114619751"}
-    sitemap_urls = ["https://locations.bubbakoos.com/sitemap.xml"]
-    sitemap_rules = [(r"^https://locations\.bubbakoos\.com/locations/[a-z]{2}/[\w-]+$", "parse")]
-    wanted_types = ["Restaurant"]
+    start_urls = ["https://locations.bubbakoos.com/location-directory"]
 
-    def parse(self, response):
-        for nextjs_script in response.xpath(
-            "//script[starts-with(text(), 'self.__next_f.push([1,\"{\\\"@context')]/text()"
-        ).getall():
-            script_el = response.selector.root.makeelement("script", {"type": "application/ld+json"})
-            script_el.text = chompjs.parse_js_object(nextjs_script)[1]
-            response.selector.root.append(script_el)
-        yield from super().parse(response)
+    def extract_json(self, response: Response) -> list[dict]:
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        rsc = "".join(s for _, s in (chompjs.parse_js_object(script) for script in scripts) if isinstance(s, str))
+        locations = {}
+        self.find_locations(dict(parse_rsc(rsc.encode())), locations)
+        return list(locations.values())
+
+    def find_locations(self, node: Any, locations: dict) -> None:
+        if isinstance(node, dict):
+            if "latitude" in node and "id" in node:
+                locations[node["id"]] = node
+            for value in node.values():
+                self.find_locations(value, locations)
+        elif isinstance(node, list):
+            for value in node:
+                self.find_locations(value, locations)
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["ref"] = feature["id"]
+        item.pop("name", None)
+
+        item["opening_hours"] = OpeningHours()
+        for calendar in feature.get("calendars") or []:
+            if calendar.get("type") != "business":
+                continue
+            for rule in calendar.get("ranges") or []:
+                item["opening_hours"].add_range(
+                    DAYS_EN[rule["weekday"]], rule["start"].split(" ")[1], rule["end"].split(" ")[1]
+                )
+
+        apply_yes_no(Extras.DELIVERY, item, feature.get("supportsDelivery"), False)
+        apply_category(Categories.FAST_FOOD, item)
+
+        yield item
