@@ -17,6 +17,7 @@ class HiltonSpider(Spider):
     start_urls = ["https://www.hilton.com/en/locations/hilton-hotels/"]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "User-Agent": CHROME_LATEST,
