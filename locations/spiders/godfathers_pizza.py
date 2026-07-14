@@ -30,7 +30,17 @@ class GodfathersPizzaSpider(Spider):
             if store.get("hide_from_picker") or not store.get("loc"):
                 continue
             item = DictParser.parse(store)
-            item["branch"] = item.pop("name").removeprefix("Godfather's Pizza").strip(" -")
+            if item["name"].startswith("Godfathers Pizza Express") or item["name"].startswith(
+                "Godfather's Pizza Express"
+            ):
+                item["branch"] = item.pop("name").removeprefix("Godfathers Pizza Express").strip(" -")
+                item["name"] = "Godfather's Pizza Express"
+            elif item["name"].startswith("Godfathers Pizza") or item["name"].startswith("Godfather's Pizza"):
+                item["branch"] = (
+                    item.pop("name").removeprefix("Godfathers Pizza").removeprefix("Godfather's Pizza").strip(" -")
+                )
+                item["name"] = "Godfather's Pizza"
+
             item["lat"], item["lon"] = store["loc"]
             item["street_address"] = item.pop("addr_full", None)
             apply_category(Categories.RESTAURANT, item)
