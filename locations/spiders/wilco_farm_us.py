@@ -10,8 +10,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class WilcoFarmSpider(JSONBlobSpider):
-    name = "wilco_farm"
+class WilcoFarmUSSpider(JSONBlobSpider):
+    name = "wilco_farm_us"
     item_attributes = {"brand": "Wilco", "brand_wikidata": "Q8000290"}
     allowed_domains = ["farmstore.com"]
     start_urls = ["https://www.farmstore.com/locations/"]
