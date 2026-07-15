@@ -2,7 +2,7 @@ import math
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -30,15 +30,15 @@ class BankOfNewZealandNZSpider(Spider):
     seed_half_span_km = 24  # matches the 24 km grid so seed cells tile the country
     min_radius_km = 0.25  # hard floor so the recursion always terminates
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
+    async def start(self) -> AsyncIterator[Request]:
         for lat, lon in country_iseadgg_centroids(["NZ"], 24):
             dlat = self.seed_half_span_km / 111.0
             dlon = self.seed_half_span_km / (111.0 * math.cos(math.radians(lat)))
             yield self.nearest_request((lat + dlat, lat - dlat, lon - dlon, lon + dlon))
 
-    def nearest_request(self, bbox: tuple[float, float, float, float]) -> JsonRequest:
+    def nearest_request(self, bbox: tuple[float, float, float, float]) -> Request:
         lat1, lat2, lon1, lon2 = bbox
-        return JsonRequest(
+        return Request(
             url="https://www.bnz.co.nz/find/api/locations/nearest?lat={}&long={}".format(
                 (lat1 + lat2) / 2, (lon1 + lon2) / 2
             ),
