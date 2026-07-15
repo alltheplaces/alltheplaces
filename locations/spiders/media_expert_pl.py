@@ -4,7 +4,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_FROM_SUNDAY, DAYS_FULL, OpeningHours
+from locations.hours import DAYS, OpeningHours
 
 
 class MediaExpertPLSpider(Spider):
@@ -27,17 +27,11 @@ class MediaExpertPLSpider(Spider):
             item = DictParser.parse(branch)
             if not item.get("housenumber"):
                 item["street_address"] = item.pop("street")
+
             item["website"] = urljoin("https://www.mediaexpert.pl", branch["slug"])
             try:
-                oh = OpeningHours()
-                for day_time in branch["open_hours"]:
-                    oh.add_range(
-                        day=DAYS_FROM_SUNDAY[day_time["week_day"]],
-                        open_time=day_time["open_hour_from"],
-                        close_time=day_time["open_hour_to"],
-                    )
-                item["opening_hours"] = oh
-            except:
+                item["opening_hours"] = self.parse_opening_hours(branch["open_hours"])
+            except Exception:
                 pass
             else:
                 for day_time in branch["open_hours"]:
@@ -49,3 +43,9 @@ class MediaExpertPLSpider(Spider):
                 item["opening_hours"] = oh
 
             yield item
+
+    def parse_opening_hours(self, open_hours: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for day_time in open_hours:
+            oh.add_range(DAYS[day_time["week_day"] - 1], day_time["open_hour_from"], day_time["open_hour_to"])
+        return oh
