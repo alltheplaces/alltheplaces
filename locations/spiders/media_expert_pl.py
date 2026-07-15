@@ -1,47 +1,49 @@
 from urllib.parse import urljoin
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
+from locations.hours import DAYS_FROM_SUNDAY, DAYS_FULL, OpeningHours
 
 
 class MediaExpertPLSpider(Spider):
     name = "media_expert_pl"
 
-    custom_settings = {
-        # somehow this actually seems to work
-        "RETRY_HTTP_CODES": [403],
-        "USER_AGENT": BROWSER_DEFAULT,
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     requires_proxy = True  # Cloudflare geoblocking in use
 
     item_attributes = {"brand": "Media Expert", "brand_wikidata": "Q11776794"}
 
-    start_urls = ["https://sklepy.mediaexpert.pl/data/getshops"]
-    base_url = "https://sklepy.mediaexpert.pl"
+    start_urls = ["https://www.mediaexpert.pl/sklepy"]
 
     def parse(self, response: Response):
+        state_url = response.xpath('//*[@id="state"]/text()').get()
+        yield JsonRequest(url=f"https://www.mediaexpert.pl/spark-state/{state_url}", callback=self.parse_location)
 
-        for branch in response.json():
+    def parse_location(self, response: Response):
+        for branch in response.json()["Stores.StoresService.state"]["storesList"]:
             item = DictParser.parse(branch)
+            item["website"] = urljoin("https://www.mediaexpert.pl", branch["slug"])
+            try:
+                oh = OpeningHours()
+                for day_time in branch["open_hours"]:
+                    oh.add_range(
+                        day=DAYS_FROM_SUNDAY[day_time["week_day"]],
+                        open_time=day_time["open_hour_from"],
+                        close_time=day_time["open_hour_to"],
+                    )
+                item["opening_hours"] = oh
+            except:
+                pass
+            else:
+                for day_time in branch["open_hours"]:
+                    oh.add_range(
+                        day=DAYS_FULL[day_time["week_day"] - 1],
+                        open_time=day_time["open_hour_from"],
+                        close_time=day_time["open_hour_to"],
+                    )
+                item["opening_hours"] = oh
 
-            item["ref"] = branch["code"]
-
-            item["street_address"] = item["addr_full"]
-            item["addr_full"] = f'{item["street_address"]}, {item["postcode"]} {item["city"]}'
-
-            # sometimes a branch has 2 phone numbers listed, this doesn't get processed properly
-            if item.get("phone"):
-                item["phone"] = item["phone"].split("\n")[0]
-
-            hour_string = ", ".join(f"{day}: " + branch[f"open_{day.lower()}"] for day in DAYS)
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hour_string)
-
-            # "URL" is just a slug
-            item["website"] = urljoin(self.base_url, item["website"])
             yield item
