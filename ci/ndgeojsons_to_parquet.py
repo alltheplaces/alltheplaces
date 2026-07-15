@@ -24,8 +24,35 @@ logging.basicConfig(
 )
 
 
+def cgroup_memory_limit_bytes() -> int | None:
+    # psutil.virtual_memory().total reads the host/VM's physical memory, which on
+    # Fargate can be larger than the memory actually allocated to the task - the
+    # container is still capped by the cgroup limit below. Without this, DuckDB
+    # gets configured with a limit bigger than what the container can actually
+    # use and is silently OOM-killed by the container runtime.
+    for path in (
+        Path("/sys/fs/cgroup/memory.max"),  # cgroup v2
+        Path("/sys/fs/cgroup/memory/memory.limit_in_bytes"),  # cgroup v1
+    ):
+        try:
+            raw = path.read_text().strip()
+        except OSError:
+            continue
+        if raw == "max":
+            continue
+        try:
+            limit = int(raw)
+        except ValueError:
+            continue
+        # An unset cgroup v1 limit reads as a very large sentinel value rather than "max".
+        if limit >= psutil.virtual_memory().total:
+            continue
+        return limit
+    return None
+
+
 def duckdb_memory_limit() -> str:
-    total_bytes = psutil.virtual_memory().total
+    total_bytes = cgroup_memory_limit_bytes() or psutil.virtual_memory().total
     # Reserve 2 GB for Python, pyarrow, and OS overhead
     reserved_bytes = 2 * 1024**3
     duckdb_bytes = max(total_bytes - reserved_bytes, reserved_bytes)
@@ -66,10 +93,11 @@ def to_parquet(input_dir_path: Path, output_file_path: Path) -> None:
             logger.info("Spatial extension loaded successfully")
 
             logger.info("Configuring DuckDB settings...")
+            cgroup_limit = cgroup_memory_limit_bytes()
             memory_limit = duckdb_memory_limit()
-            logger.info(
-                f"Setting DuckDB memory limit to {memory_limit} (total system RAM: {psutil.virtual_memory().total / 1024**3:.1f} GB)"
-            )
+            source = "cgroup limit" if cgroup_limit is not None else "total system RAM"
+            detected_bytes = cgroup_limit if cgroup_limit is not None else psutil.virtual_memory().total
+            logger.info(f"Setting DuckDB memory limit to {memory_limit} ({source}: {detected_bytes / 1024**3:.1f} GB)")
             con.execute(f"SET temp_directory='{temp_dir}'")
             con.execute(f"SET memory_limit='{memory_limit}'")
             con.execute("SET threads=2")
