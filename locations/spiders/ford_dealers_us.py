@@ -1,4 +1,3 @@
-import json
 import re
 from copy import deepcopy
 
@@ -47,7 +46,7 @@ class FordDealersUSSpider(PlaywrightSpider):
                 )
 
     def parse_details(self, response: Response, **kwargs):
-        if data := json.loads(response.xpath("//pre/text()").get()).get("Response").get("Dealer"):
+        if data := response.json().get("Response").get("Dealer"):
             for dealer in data:
                 item = DictParser.parse(dealer)
                 item["ref"] = f"{dealer.get('PACode')}-{kwargs['brand']}"

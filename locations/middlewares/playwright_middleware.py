@@ -1,3 +1,4 @@
+from scrapy import Selector
 from scrapy.crawler import Crawler
 from scrapy.http import Request, Response, TextResponse
 from scrapy.spiders import SitemapSpider, XMLFeedSpider
@@ -86,15 +87,19 @@ class PlaywrightMiddleware:
             # middleware and do nothing to the response.
             return response
 
-        if isinstance(response, TextResponse):
-            # Response object is JSON format and therefore doesn't need to be
+        if not isinstance(response, TextResponse):
+            # Skip binary responses such as .gz sitemaps, ZIP archives etc.
+            return response
+
+        if Selector(response).type not in ("html", "xml"):
+            # Response object is JSON format in general, and therefore doesn't need to be
             # processed further.
             return response
 
         # If a Playwright or Camoufox request is for a plaintext-type file
         # (for ATP, this is mostly JSON files), the browser may internally
         # render this plaintext-type file using a lightweight HTML wrapper.
-        # Thus Scrapy's Response.body would contain HTML not plaintext/JSON
+        # Thus, Scrapy's Response.body would contain HTML not plaintext/JSON
         # data that was requested. We have to strip the HTML wrapping and
         # return the raw plaintext in Response.body.
         #
@@ -106,7 +111,7 @@ class PlaywrightMiddleware:
             plaintext = response.xpath("//body/pre/text()").get("")
             return response.replace(body=plaintext.encode("utf-8"))
 
-        # If a Playwright or Camoufox request is for a XML document (for ATP,
+        # If a Playwright or Camoufox request is for an XML document (for ATP,
         # this is mostly sitemap.xml for websites) and this XML document
         # contains a <?xml-stylesheet type="text/xsl" href="//style.xsl"?>
         # type of XML comment, the browser may attempt to transform the XML
@@ -129,8 +134,4 @@ class PlaywrightMiddleware:
                     setattr(self.crawler.spider, "_last_observed_xml_document", None)
                     return response.replace(body=xml_document.encode("utf-8"))
 
-        # At this point the response should be a HTML document or binary
-        # file which has been downloaded by the browser (for example, ZIP
-        # archive) and both HTML and binary files should be returned as-is
-        # without modification.
         return response
