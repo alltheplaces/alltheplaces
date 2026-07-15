@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
 
 # operatingHours "dow" is 0=Sunday .. 6=Saturday.
@@ -18,18 +19,22 @@ class BankOfNewZealandNZSpider(Spider):
     allowed_domains = ["www.bnz.co.nz"]
     requires_proxy = "NZ"  # Akamai bot protection blocks non-NZ / datacentre IPs
 
-    # The locator only exposes a "nearest to a point" endpoint (~10 results, unbounded
-    # distance), so New Zealand is covered with an adaptive quadtree seeded from the
-    # country bbox. A cell is split only when its response is truncated (>= cap) AND the
-    # farthest returned site is nearer than the cell's own corner -- meaning sites in the
-    # cell's outer ring may be missing. When the results already reach the corner (dense
-    # cell fully covered, or sparse area where the nearest sites are far), the cell stops,
-    # so empty/ocean cells do not recurse. Overlaps are removed by the ref-based dedupe.
+    # The locator only exposes a "nearest to a point" endpoint that returns the sites
+    # near the point capped at ~10 results. It is seeded with a country-wide 24 km grid
+    # so every region is probed (a single seed would only see one neighbourhood), then a
+    # cell that hits the cap is split into quarters until the farthest returned site
+    # reaches the cell's own corner (i.e. the cell is fully covered) -- this densifies
+    # metros where more than the cap sit within one grid cell. Overlaps between cells and
+    # grid points are removed by the ref-based dedupe.
     cap = 10
+    seed_half_span_km = 24  # matches the 24 km grid so seed cells tile the country
     min_radius_km = 0.25  # hard floor so the recursion always terminates
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield self.nearest_request((-34.0, -47.5, 166.0, 179.0))
+        for lat, lon in country_iseadgg_centroids(["NZ"], 24):
+            dlat = self.seed_half_span_km / 111.0
+            dlon = self.seed_half_span_km / (111.0 * math.cos(math.radians(lat)))
+            yield self.nearest_request((lat + dlat, lat - dlat, lon - dlon, lon + dlon))
 
     def nearest_request(self, bbox: tuple[float, float, float, float]) -> JsonRequest:
         lat1, lat2, lon1, lon2 = bbox
