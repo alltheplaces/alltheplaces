@@ -4,15 +4,19 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class LululemonCAUSSpider(SitemapSpider):
+class LululemonCAUSSpider(SitemapSpider, PlaywrightSpider):
     name = "lululemon_ca_us"
     item_attributes = {"brand": "Lululemon", "brand_wikidata": "Q6702957"}
-    sitemap_urls = ("https://shop.lululemon.com/sitemap.xml",)
+    sitemap_urls = ["https://shop.lululemon.com/sitemap/Store_Sitemap_en_US.xml"]
     sitemap_rules = [
         (r"^https://shop.lululemon.com/stores/[^/]+/[^/]+/[^/]+$", "parse_store"),
     ]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse_store(self, response):
         data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())
