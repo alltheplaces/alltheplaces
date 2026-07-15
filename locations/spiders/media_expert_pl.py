@@ -29,6 +29,10 @@ class MediaExpertPLSpider(Spider):
                 item["street_address"] = item.pop("street")
 
             item["website"] = urljoin("https://www.mediaexpert.pl", branch["slug"])
+            item["image"] = urljoin(
+                "https://prod-api.mediaexpert.pl/api/images/filemanager_original/thumbnails/", branch["photo_path"]
+            )
+
             try:
                 item["opening_hours"] = self.parse_opening_hours(branch["open_hours"])
             except Exception:
