@@ -31,7 +31,7 @@ class GscaltexKRSpider(Spider):
             apply_yes_no(PaymentMethods.NAVER_PAY, item, location["naverPayYn"] == "Y")
             apply_yes_no(PaymentMethods.PAYCO, item, location["paycoYn"] == "Y")
             apply_yes_no(PaymentMethods.ZERO_PAY, item, location["zeroPayYn"] == "Y")
-            
+
             apply_category(Categories.FUEL_STATION, item)
 
             # TODO: location["siteSxnCd"]
