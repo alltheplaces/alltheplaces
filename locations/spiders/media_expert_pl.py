@@ -25,6 +25,8 @@ class MediaExpertPLSpider(Spider):
     def parse_location(self, response: Response):
         for branch in response.json()["Stores.StoresService.state"]["storesList"]:
             item = DictParser.parse(branch)
+            if not item.get("housenumber"):
+                item["street_address"] = item.pop("street")
             item["website"] = urljoin("https://www.mediaexpert.pl", branch["slug"])
             try:
                 oh = OpeningHours()
