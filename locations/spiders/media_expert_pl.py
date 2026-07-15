@@ -37,14 +37,8 @@ class MediaExpertPLSpider(Spider):
                 item["opening_hours"] = self.parse_opening_hours(branch["open_hours"])
             except Exception:
                 pass
-            else:
-                for day_time in branch["open_hours"]:
-                    oh.add_range(
-                        day=DAYS_FULL[day_time["week_day"] - 1],
-                        open_time=day_time["open_hour_from"],
-                        close_time=day_time["open_hour_to"],
-                    )
-                item["opening_hours"] = oh
+
+            apply_category(Categories.SHOP_ELECTRONICS, item)
 
             yield item
 
