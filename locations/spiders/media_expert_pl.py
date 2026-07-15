@@ -3,24 +3,23 @@ from urllib.parse import urljoin
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
 class MediaExpertPLSpider(Spider):
     name = "media_expert_pl"
-
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    requires_proxy = True  # Cloudflare geoblocking in use
-
     item_attributes = {"brand": "Media Expert", "brand_wikidata": "Q11776794"}
-
     start_urls = ["https://www.mediaexpert.pl/sklepy"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    # requires_proxy = True  # Cloudflare geoblocking in use
 
     def parse(self, response: Response):
-        state_url = response.xpath('//*[@id="state"]/text()').get()
-        yield JsonRequest(url=f"https://www.mediaexpert.pl/spark-state/{state_url}", callback=self.parse_location)
+        yield JsonRequest(
+            url="https://www.mediaexpert.pl/spark-state/{}".format(response.xpath('//*[@id="state"]/text()').get()),
+            callback=self.parse_location,
+        )
 
     def parse_location(self, response: Response):
         for branch in response.json()["Stores.StoresService.state"]["storesList"]:
