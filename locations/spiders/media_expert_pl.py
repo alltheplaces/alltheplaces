@@ -13,7 +13,7 @@ class MediaExpertPLSpider(Spider):
     item_attributes = {"brand": "Media Expert", "brand_wikidata": "Q11776794"}
     start_urls = ["https://www.mediaexpert.pl/sklepy"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    # requires_proxy = True  # Cloudflare geoblocking in use
+    requires_proxy = True  # Cloudflare geoblocking in use
 
     def parse(self, response: Response):
         yield JsonRequest(
