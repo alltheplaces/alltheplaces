@@ -26,6 +26,7 @@ class WashWorldSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("Wash World ", "")
+        item["image"] = None
         item["addr_full"] = item.pop("street_address")
         apply_category(Categories.CAR_WASH, item)
         yield item
