@@ -28,10 +28,7 @@ class BeobankBESpider(CrawlSpider, StructuredDataSpider):
         if ld_data.get("geo"):
             return
         item["branch"] = (
-            item.pop("name")
-            .removeprefix("BEOBANK AG ")
-            .removeprefix("BEOBANK BR ")
-            .removeprefix("BEOBANK PRO CENTER ")
+            item.pop("name").removeprefix("BEOBANK AG ").removeprefix("BEOBANK BR ").removeprefix("BEOBANK PRO CENTER ")
         )
         item["ref"] = response.url
         item["country"] = "BE"
