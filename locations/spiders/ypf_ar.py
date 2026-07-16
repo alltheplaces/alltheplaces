@@ -25,8 +25,8 @@ class YpfARSpider(Spider):
         for location in response.json():
             if location.get("ESTADO_DE_LA_BOCA") != "ACTIVA":
                 continue  # inactive / closed station
-            if location.get("TIPO_ESTABLECIMIENTO") == "PUNTO ELECTRICO":
-                continue  # EV-only point, not a fuel station
+            if not location.get("ES_ESTACION"):
+                continue  # not a fuel station (EV-only point or standalone Full shop)
 
             item = DictParser.parse(location)  # maps DIRECCION -> addr_full
             item["ref"] = str(location["APIES"])
