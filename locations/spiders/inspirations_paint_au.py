@@ -1,6 +1,5 @@
 from typing import Iterable
 
-from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -25,8 +24,12 @@ class InspirationsPaintAUSpider(SitemapSpider):
         # Maps page via Google Place ID.
         properties = {
             "ref": response.url,
-            "addr_full": merge_address_lines(response.xpath('//div[contains(@class, "store-address")]/span[@class="address"]/text()').getall()),
-            "phone": response.xpath('//div[contains(@class, "store-contact")]/a[contains(@href, "tel:")]/@href').get().removeprefix("tel:"),
+            "addr_full": merge_address_lines(
+                response.xpath('//div[contains(@class, "store-address")]/span[@class="address"]/text()').getall()
+            ),
+            "phone": response.xpath('//div[contains(@class, "store-contact")]/a[contains(@href, "tel:")]/@href')
+            .get()
+            .removeprefix("tel:"),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
