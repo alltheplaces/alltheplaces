@@ -26,20 +26,21 @@ class BeobankBESpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if ld_data.get("geo"):
-            item["branch"] = (
-                item.pop("name")
-                .removeprefix("BEOBANK AG ")
-                .removeprefix("BEOBANK BR ")
-                .removeprefix("BEOBANK PRO CENTER ")
-            )
-            item["ref"] = response.url
-            item["country"] = "BE"
+            return
+        item["branch"] = (
+            item.pop("name")
+            .removeprefix("BEOBANK AG ")
+            .removeprefix("BEOBANK BR ")
+            .removeprefix("BEOBANK PRO CENTER ")
+        )
+        item["ref"] = response.url
+        item["country"] = "BE"
 
-            services_text = " ".join(response.xpath("//table[@role='presentation']//p/text()").getall())
+        services_text = " ".join(response.xpath("//table[@role='presentation']//p/text()").getall())
 
-            apply_yes_no(Extras.ATM, item, "opname" in services_text.lower() or "retrait" in services_text.lower())
-            apply_yes_no(Extras.CASH_IN, item, "storting" in services_text.lower() or "dépôt" in services_text.lower())
-            apply_yes_no("parking", item, "parking" in services_text.lower())
+        apply_yes_no(Extras.ATM, item, "opname" in services_text.lower() or "retrait" in services_text.lower())
+        apply_yes_no(Extras.CASH_IN, item, "storting" in services_text.lower() or "dépôt" in services_text.lower())
+        apply_yes_no("parking", item, "parking" in services_text.lower())
 
-            apply_category(Categories.BANK, item)
-            yield item
+        apply_category(Categories.BANK, item)
+        yield item
