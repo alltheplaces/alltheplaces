@@ -1,7 +1,11 @@
 import re
+from typing import Any, Iterable
+from urllib.parse import urlsplit
 
 from scrapy import Spider
+from scrapy.http import Response
 
+from locations.categories import apply_category
 from locations.items import Feature
 
 
@@ -10,7 +14,7 @@ class KoerperformenSpider(Spider):
     item_attributes = {"brand": "Körperformen", "brand_wikidata": "Q117455940"}
     start_urls = ["https://www.körperformen.com/studiosuche/"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         re_address = re.compile(r"(.*) I (.*?) (.*)")
         for shop in response.xpath('//div[@class="studio-row"]'):
             addr_raw = ", ".join(
@@ -18,15 +22,18 @@ class KoerperformenSpider(Spider):
             )
             street, postcode, city = re_address.match(addr_raw).groups()
             website = shop.xpath("a/@href").get()
-            yield Feature(
+            host = urlsplit(website).netloc
+            item = Feature(
                 {
                     "ref": website.split("/")[-2],
-                    "name": shop.xpath("descendant::h3/text()").get(),
+                    "branch": shop.xpath("descendant::h3/text()").get().removeprefix("Körperformen").strip(),
                     "street_address": street,
                     "postcode": postcode,
                     "city": city,
-                    "website": website,
-                    "lat": float(shop.xpath('span[@class="studio-koordination"]/text()').get()),
-                    "lon": float(shop.xpath('span[@class="studio-koordinaten_longitude"]/text()').get()),
+                    "website": website.replace(host, host.encode().decode("idna")),
+                    "lat": shop.xpath('span[@class="studio-koordination"]/text()').get(),
+                    "lon": shop.xpath('span[@class="studio-koordinaten_longitude"]/text()').get(),
                 }
             )
+            apply_category({"leisure": "fitness_centre"}, item)
+            yield item
