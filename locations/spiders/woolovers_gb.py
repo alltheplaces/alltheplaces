@@ -17,7 +17,8 @@ class WooloversGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["addr_full"] = item.pop("street_address")
-        item["website"] = "https://" + item["website"]
+        if website := item.get("website"):
+            item["website"] = website if website.startswith("http") else "https://" + website
         item["lat"], item["lon"] = feature["loc_lat"], feature["loc_long"]
         item["branch"] = item.pop("name")
         oh = OpeningHours()
