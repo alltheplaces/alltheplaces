@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -35,5 +35,5 @@ class KoerperformenSpider(Spider):
                     "lon": shop.xpath('span[@class="studio-koordinaten_longitude"]/text()').get(),
                 }
             )
-            apply_category({"leisure": "fitness_centre"}, item)
+            apply_category(Categories.GYM, item)
             yield item
