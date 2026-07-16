@@ -10,10 +10,9 @@ from locations.dict_parser import DictParser
 class YpfARSpider(Spider):
     name = "ypf_ar"
     item_attributes = {"brand": "YPF", "brand_wikidata": "Q2006989"}
-    # mapa.ypf.com loads every service station from this endpoint. EV chargers
-    # (CARGADOR_ELECTRICO, 32 stations) are left for a dedicated charging-station spider,
-    # and the YPF Full shop (TIPO_FULL) is intentionally not tagged shop=convenience --
-    # that top-level tag isn't in YPF's amenity=fuel NSI entry and would break the match.
+    # mapa.ypf.com loads every service station from this endpoint. The YPF Full shop
+    # (TIPO_FULL) is intentionally not tagged shop=convenience -- that top-level tag isn't
+    # in YPF's amenity=fuel NSI entry and would break the match.
 
     async def start(self) -> AsyncIterator[Request]:
         # The endpoint returns "Acceso Denegado" unless the mapa.ypf.com referer is sent.
@@ -42,5 +41,6 @@ class YpfARSpider(Spider):
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.CNG, item, location.get("TIPO_DESPACHO") in ("DUAL", "GNC"))
             apply_yes_no(Fuel.ADBLUE, item, location.get("AZUL32") is True)  # "Azul 32" = AdBlue (AUS 32)
+            apply_yes_no(Fuel.ELECTRIC, item, location.get("CARGADOR_ELECTRICO") == "SI")
 
             yield item
