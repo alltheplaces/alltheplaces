@@ -31,7 +31,9 @@ class CenexSpider(JSONBlobSpider):
         if "GasStation" not in types and "PremiumDiesel" not in types:
             return  # Bulk lubricant/propane co-op dealers, not fuel stations
 
+        item["operator"] = item.pop("name")
         item["country"] = "US"
+
         amenities = [a["Name"] for a in feature["Amenities"]]
 
         apply_category(Categories.FUEL_STATION, item)
