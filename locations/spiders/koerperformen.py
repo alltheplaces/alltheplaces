@@ -16,7 +16,7 @@ class KoerperformenSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         re_address = re.compile(r"(.*) I (.*?) (.*)")
-        for shop in response.xpath('//div[@class="studio-row"]'):
+        for shop in response.xpath('//div[@class="studios-suche-wrapper"]//div[@class="studio-row"]'):
             addr_raw = ", ".join(
                 addr for addr in map(str.strip, shop.xpath('div[@class="studio-row-con"]/text()').getall()) if addr
             )
