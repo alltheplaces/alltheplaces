@@ -4,6 +4,7 @@ from typing import Any
 import scrapy
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -28,10 +29,13 @@ class ErieInsuranceUSSpider(scrapy.Spider):
                     callback=self.parse_details,
                 )
 
-    def parse_details(self, response):
-        agency_data = response.json()["AgenciesByCityAndStateResponse"]["GetAgenciesByCityAndStateResult"][
+    def parse_details(self, response: Response, **kwargs: Any) -> Any:
+        backing_field = response.json()["AgenciesByCityAndStateResponse"]["GetAgenciesByCityAndStateResult"][
             "_x003C_AgentInformation_x003E_k__BackingField"
-        ]["AgentInformation"]
+        ]
+        if not isinstance(backing_field, dict):
+            return
+        agency_data = backing_field["AgentInformation"]
 
         if isinstance(agency_data, dict):
             agency_data = [agency_data]
@@ -44,23 +48,15 @@ class ErieInsuranceUSSpider(scrapy.Spider):
                 for day_time in json.loads(agency["AgencyInfo"]["BusinessHoursOperationDescription"]).get(
                     "HoursOfOperation", ""
                 ):
-                    day = day_time["DayName"]
-                    start_time = day_time["StartTime"]
-                    end_time = day_time["EndTime"]
-                    if (start_time not in ["Closed", None]) and (end_time is not None):
+                    if day_time["StartTime"] and day_time["EndTime"]:
                         item["opening_hours"].add_range(
-                            day=day,
-                            open_time=start_time.strip()
-                            .replace("p.m.", "pm")
-                            .replace("a.m.", "am")
-                            .replace("a.m", "am"),
-                            close_time=end_time.strip()
-                            .replace("p.m.", "pm")
-                            .replace("a.m.", "am")
-                            .replace("p.m", "pm"),
+                            day=day_time["DayName"],
+                            open_time=day_time["StartTime"].strip().replace(".", ""),
+                            close_time=day_time["EndTime"].strip().replace(".", ""),
                             time_format="%I:%M %p",
                         )
-            except:
-                item["opening_hours"] = ""
+            except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+                item["opening_hours"] = None
 
+            apply_category(Categories.OFFICE_INSURANCE, item)
             yield item
