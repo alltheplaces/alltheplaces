@@ -10,7 +10,6 @@ from locations.structured_data_spider import StructuredDataSpider
 class BeobankBESpider(CrawlSpider, StructuredDataSpider):
     name = "beobank_be"
     item_attributes = {"brand": "Beobank", "brand_wikidata": "Q14911971"}
-    # allowed_domains = ["www.beobank.be"]
     start_urls = ["https://www.beobank.be/fr/agences/regions.html"]
     rules = [
         Rule(LinkExtractor(restrict_xpaths='//*[@class="ei_richlinkmenuitem"]')),
