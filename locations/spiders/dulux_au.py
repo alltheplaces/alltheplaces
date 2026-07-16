@@ -12,6 +12,7 @@ BRANDS = {
     "paintspot": {"brand": "Paint Spot", "brand_wikidata": "Q117852598"},
 }
 
+
 class DuluxAUSpider(JSONBlobSpider):
     name = "dulux_au"
     allowed_domains = ["www.duluxtrade.com.au"]
@@ -41,7 +42,12 @@ class DuluxAUSpider(JSONBlobSpider):
             if day_hours["closed"]:
                 item["opening_hours"].set_closed(day_hours["weekDay"])
                 continue
-            item["opening_hours"].add_range(day_hours["weekDay"], day_hours["openingTime"]["formattedHour"], day_hours["closingTime"]["formattedHour"], "%I:%M %p")
+            item["opening_hours"].add_range(
+                day_hours["weekDay"],
+                day_hours["openingTime"]["formattedHour"],
+                day_hours["closingTime"]["formattedHour"],
+                "%I:%M %p",
+            )
 
         apply_category(Categories.SHOP_PAINT, item)
 
