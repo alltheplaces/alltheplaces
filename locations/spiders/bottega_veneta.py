@@ -1,15 +1,20 @@
+import json
+
 import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class BottegaVenetaSpider(scrapy.Spider):
+class BottegaVenetaSpider(PlaywrightSpider):
     name = "bottega_veneta"
     item_attributes = {"brand": "Bottega Veneta", "brand_wikidata": "Q894874"}
     allowed_domains = ["bottegaveneta.com"]
     start_urls = ["https://www.bottegaveneta.com/de-de/storelocator"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
         countries = response.xpath('//select[@id="country"]/option/@value').extract()
@@ -18,7 +23,7 @@ class BottegaVenetaSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.store_parse)
 
     def store_parse(self, response):
-        for store in response.json()["storesData"]["stores"]:
+        for store in json.loads(response.xpath("//pre//text()").get())["storesData"]["stores"]:
             item = DictParser.parse(store)
             item["website"] = store.get("detailsUrl")
             item["branch"] = item.pop("name")
