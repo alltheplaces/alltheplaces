@@ -746,6 +746,7 @@ class PaymentMethods(Enum):
     HUAWEI_PAY = "payment:huawei_pay"
     ID = "payment:id"
     JCB = "payment:jcb"
+    KAKAO_PAY = "payment:kakaopay"
     KUSTERS = "payment:kusters"
     LINE_PAY = "payment:line_pay"
     MAES = "payment:maes"
@@ -763,8 +764,10 @@ class PaymentMethods(Enum):
     MIR = "payment:mir"
     MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
+    NAVER_PAY = "payment:naver_pay"
     NOTES = "payment:notes"
     OCTA_PLUS = "payment:octa_plus"
+    PAYCO = "payment:payco"
     PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
     POWERCARD = "payment:powercard"
@@ -792,6 +795,7 @@ class PaymentMethods(Enum):
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
     XXIMO = "payment:xximo"
+    ZERO_PAY = "payment:zero_pay"
 
 
 payment_method_aliases = {
