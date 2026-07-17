@@ -1,12 +1,14 @@
 import json
 from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Request
 from scrapy.http import Response
 
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.big_c_th import BigCTHSpider
 from locations.spiders.lotuss_th import LotussTHSpider
 from locations.spiders.makro_th import MakroTHSpider
@@ -14,10 +16,11 @@ from locations.spiders.ptt_th import PttTHSpider
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
 
-class KasikornBankTHSpider(Spider):
+class KasikornBankTHSpider(PlaywrightSpider):
     name = "kasikorn_bank_th"
     item_attributes = {"brand_wikidata": "Q276557"}
     requires_proxy = "TH"
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     LOCATED_IN_MAPPINGS = [
         (["7-11", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
