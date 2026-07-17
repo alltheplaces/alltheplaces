@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -35,6 +36,8 @@ class TherapieClinicSpider(Spider):
                     item["opening_hours"].add_range(rule["openDay"], "00:00", "24:00")
                 else:
                     item["opening_hours"].add_range(rule["openDay"], rule["openTime"], rule["closeTime"])
+
+            apply_category(Categories.SHOP_BEAUTY, item)
 
             yield item
 
