@@ -1,6 +1,5 @@
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
@@ -8,11 +7,11 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CircleKDKSpider(CrawlSpider, StructuredDataSpider):
+class CircleKDKSpider(SitemapSpider, StructuredDataSpider):
     name = "circle_k_dk"
     item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
-    start_urls = ["https://www.circlek.dk/stations"]
-    rules = [Rule(LinkExtractor(allow="/station/circle"), callback="parse_sd")]
+    sitemap_urls = ["https://www.circlek.dk/sitemaps/stations/sitemap.xml"]
+    sitemap_rules = [(r"/station/(?!ingo-)[-\w]+", "parse_sd")]
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         rules = ld_data.get("openingHours") or []
