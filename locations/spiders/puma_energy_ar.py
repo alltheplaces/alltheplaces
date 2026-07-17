@@ -42,8 +42,8 @@ class PumaEnergyARSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
-            item = DictParser.parse(location)  # maps id -> ref, name, lat/lon, address -> addr_full
-            item["branch"] = item.pop("name", None)  # station location label; NSI supplies name=Puma
+            item = DictParser.parse(location)  # maps id -> ref, lat/lon, address -> addr_full
+            item.pop("name", None)  # API "name" is the street address (kept in addr_full); NSI supplies name=Puma
 
             apply_category(Categories.FUEL_STATION, item)
             if "24hs" in (location.get("schedule") or ""):
