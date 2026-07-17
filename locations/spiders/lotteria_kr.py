@@ -21,6 +21,8 @@ class LotteriaKRSpider(Spider):
         for store in data["content"]:
             if store["storeNm"].startswith("홈서비스"):
                 continue  # Delivery-only virtual entries with no physical store
+            if "테스트" in store["storeNm"]:
+                continue  # In-house test records, placed on remote islands
             item = Feature()
             item["ref"] = store["storecd"]
             item["branch"] = store["storeNm"]
