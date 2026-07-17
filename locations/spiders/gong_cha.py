@@ -11,6 +11,9 @@ class GongChaSpider(StorepointSpider):
     key = "166d1c54519253"
 
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
+        if result := reverse_geocoder.get((float(item["lat"]), float(item["lon"])), mode=1, verbose=False):
+            if result["cc"] == "KR":
+                return  # South Korean locations are covered by the gong_cha_kr spider
         item["website"] = f"https://www.gong-cha.com/store-finder?l={location['id']}"
         item["branch"] = item.pop("name").removeprefix("Gong Cha ").removeprefix("Gong cha ")
         apply_category(Categories.CAFE, item)
