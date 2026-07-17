@@ -36,7 +36,7 @@ class GongChaKRSpider(Spider):
         store = response.json()["data"]
 
         item = Feature()
-        item["ref"] = store["content_no"]
+        item["ref"] = store["seq"]
         item["branch"] = store["title"]
         item["addr_full"] = store["addr"]
         item["state"] = store["sido"]
