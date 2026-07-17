@@ -37,7 +37,6 @@ class PumaEnergyARSpider(Spider):
                 "puma_pris": 0,
                 "chargebox": 0,
             },
-            callback=self.parse,
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
