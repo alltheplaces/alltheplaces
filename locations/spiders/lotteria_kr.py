@@ -35,9 +35,11 @@ class LotteriaKRSpider(Spider):
                 item["postcode"] = postcode
 
             if (open_time := store["operInfo"]["openTime"]) and (close_time := store["operInfo"]["closingTime"]):
+                open_time = open_time.strip()
+                close_time = close_time.strip().replace("2400", "0000")  # midnight expressed as end-of-day
                 try:
                     item["opening_hours"] = OpeningHours()
-                    item["opening_hours"].add_days_range(DAYS, open_time.strip(), close_time.strip(), "%H%M")
+                    item["opening_hours"].add_days_range(DAYS, open_time, close_time, "%H%M")
                 except ValueError:
                     self.logger.debug(f"Couldn't parse opening hours: {open_time} - {close_time}")
 
