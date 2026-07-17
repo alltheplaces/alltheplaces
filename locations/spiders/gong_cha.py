@@ -1,5 +1,7 @@
 from typing import Iterable
 
+import reverse_geocoder
+
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.storepoint import StorepointSpider
