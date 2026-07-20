@@ -23,17 +23,17 @@ class CircleKNOSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if item["name"].startswith("CIRCLE K AUTOMAT "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K AUTOMAT ")
+        elif item["name"].startswith("CIRCLE K BILVASK "):
+            item["branch"] = item.pop("name").removeprefix("CIRCLE K BILVASK ")
+            apply_category(Categories.CAR_WASH, item)
         elif item["name"].startswith("CIRCLE K TRUCK "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K TRUCK ")
             item["name"] = "Circle K Truck"
         elif item["name"].startswith("CIRCLE K LADER "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K LADER ")
-            item["name"] = "Circle K"
+            item["name"] = "Circle K Lader"
         elif item["name"].startswith("CIRCLE K "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K ")
-        else:
-            item["branch"] = item.pop("name")
-            item["name"] = "Circle K"
 
         extract_google_position(item, response)
 
@@ -44,7 +44,7 @@ class CircleKNOSpider(SitemapSpider, StructuredDataSpider):
         charging_station = response.xpath('//img[contains(@src, "FeatureEVCharger")]/@src').get()
         if not fuels and charging_station:
             apply_category(Categories.CHARGING_STATION, item)
-        else:
+        elif fuels:
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.ELECTRIC, item, bool(charging_station))
 
