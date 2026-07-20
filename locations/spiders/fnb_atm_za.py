@@ -2,7 +2,7 @@ from typing import Any, AsyncIterator
 
 from scrapy import Selector, Spider
 from scrapy.downloadermiddlewares.retry import get_retry_request
-from scrapy.http import Request, Response
+from scrapy.http import FormRequest, Request, Response
 
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -62,11 +62,9 @@ class FnbAtmZASpider(Spider):
 
     async def start(self) -> AsyncIterator[Request]:
         for province in ZA_PROVINCES:
-            yield Request(
+            yield FormRequest(
                 url="https://www.fnb.co.za/Controller?nav=locators.ATMLocatorSearch",
-                body="nav=locators.ATMLocatorSearch&atmName=" + province,
-                headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
-                method="POST",
+                formdata={"nav": "locators.ATMLocatorSearch", "atmName": province},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -76,9 +74,7 @@ class FnbAtmZASpider(Spider):
         for link in links:
             yield Request(url="https://www.fnb.co.za" + link, callback=self.parse_item)
 
-    def parse_item(self, response):
-        # from scrapy.shell import inspect_response
-        # inspect_response(response, self)
+    def parse_item(self, response: Response, **kwargs: Any) -> Any:
         try:
             details = response.xpath('.//p[@class="      "]').getall()
             deposits = Selector(text=details[2]).xpath(".//strong/text()").get().strip()
