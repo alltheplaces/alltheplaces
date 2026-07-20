@@ -52,6 +52,6 @@ class RosticsRUSpider(Spider):
                     oh.add_range(
                         DAYS_EN.get(day.get("weekDayName")), day.get("timeFrom"), day.get("timeTill"), "%H:%M:%S"
                     )
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except:
                 self.logger.info(f"Bad format for opening hours {hours}")

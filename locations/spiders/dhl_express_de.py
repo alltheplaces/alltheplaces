@@ -35,7 +35,7 @@ class DhlExpressDESpider(scrapy.Spider):
         oh = OpeningHours()
         for day in data.get("openingHours", {}).get("openingHours"):
             oh.add_range(day=day.get("dayOfWeek"), open_time=day.get("openingTime"), close_time=day.get("closingTime"))
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
 
         apply_category(Categories.POST_OFFICE, item)
 

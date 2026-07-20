@@ -1,19 +1,23 @@
 import html
+from typing import Iterable
 
-from scrapy.spiders import SitemapSpider
+from scrapy.http import TextResponse
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import apply_yes_no
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FormulaOneAutocentresGBSpider(SitemapSpider, StructuredDataSpider):
+class FormulaOneAutocentresGBSpider(CrawlSpider, StructuredDataSpider):
     name = "formula_one_autocentres_gb"
     item_attributes = {"brand": "Formula One Autocentres", "brand_wikidata": "Q79239635"}
-    sitemap_urls = ["https://www.f1autocentres.co.uk/sitemap.xml"]
-    sitemap_rules = [("/branch/", "parse_sd")]
+    start_urls = ["https://www.f1autocentres.co.uk/find-a-centre"]
+    rules = [Rule(LinkExtractor(allow=r"/branch/"), callback="parse_sd")]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["website"] = item["ref"] = response.url
         item["image"] = None
 

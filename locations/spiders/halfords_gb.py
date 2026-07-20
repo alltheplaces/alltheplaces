@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -9,8 +9,12 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
+HALFORDS_AUTOCENTRE = {"brand": "Halfords Autocentre", "brand_wikidata": "Q5641894"}
+NATIONAL_TYRES = {"brand": "National Tyres and Autocare", "brand_wikidata": "Q6979055"}
+HALFORDS = {"brand": "Halfords", "brand_wikidata": "Q3398786"}
 
-class HalfordsGBSpider(scrapy.Spider):
+
+class HalfordsGBSpider(Spider):
     name = "halfords_gb"
     start_urls = ["https://www.halfords.com/locations"]
 
@@ -33,6 +37,7 @@ class HalfordsGBSpider(scrapy.Spider):
                     continue
 
                 item = DictParser.parse(data)
+                item["branch"] = item.pop("name")
                 item["street_address"] = merge_address_lines([item.pop("street_address"), data.get("address2")])
                 item["website"] = "https://www.halfords.com/locations/" + data["storeDetailsLink"]
 
@@ -48,14 +53,20 @@ class HalfordsGBSpider(scrapy.Spider):
                 item["opening_hours"] = oh
 
                 if data["storePrefix"] == "Halfords Autocentre":
-                    item["brand_wikidata"] = "Q5641894"
+                    item.update(HALFORDS_AUTOCENTRE)
+                    apply_category(Categories.SHOP_CAR_REPAIR, item)
                 elif data["storePrefix"] == "Halfords Garage Services":
-                    item["brand_wikidata"] = "Q130270919"
+                    item.update(HALFORDS)
+                    apply_category(Categories.SHOP_CAR_PARTS, item)
+                    item["name"] = "Halfords Garage Services"
                     apply_category(Categories.SHOP_CAR_REPAIR, item)
                 elif data["storePrefix"] == "National Tyres and Autocare":
-                    item["brand_wikidata"] = "Q6979055"
+                    item.update(NATIONAL_TYRES)
+                    apply_category(Categories.SHOP_CAR_REPAIR, item)
                 elif data["storePrefix"] == "Halfords Store":
-                    item["brand_wikidata"] = "Q3398786"
+                    item.update(HALFORDS)
+                    apply_category(Categories.SHOP_CAR_PARTS, item)
                 else:
-                    item["brand_wikidata"] = "Q5641894"
+                    item.update(HALFORDS_AUTOCENTRE)
+                    apply_category(Categories.SHOP_CAR_REPAIR, item)
                 yield item

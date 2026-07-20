@@ -1,4 +1,3 @@
-from scrapy import Spider
 from scrapy.crawler import Crawler
 from scrapy.http import Request, Response, TextResponse
 from scrapy.spiders import SitemapSpider, XMLFeedSpider
@@ -75,11 +74,11 @@ class PlaywrightMiddleware:
                     "response"
                 ] = "detect_xml_document_from_playwright_response"
 
-    def process_response(self, request: Request, response: Response, spider: Spider) -> Response:
+    def process_response(self, request: Request, response: Response) -> Response:
         if (
-            not issubclass(type(spider), CamoufoxSpider)
-            and not issubclass(type(spider), PlaywrightSpider)
-            and not getattr(spider, "is_playwright_spider", False)
+            not issubclass(type(self.crawler.spider), CamoufoxSpider)
+            and not issubclass(type(self.crawler.spider), PlaywrightSpider)
+            and not getattr(self.crawler.spider, "is_playwright_spider", False)
         ):
             # TODO: remove "is_playwright_spider" check once fully deprecated
             # and removed from all ATP spiders.
@@ -123,11 +122,11 @@ class PlaywrightMiddleware:
         # element can be added to the DOM, then a click on this link is
         # simulated, causing the browser to download the XML document instead
         # of rendering it (and using XSL stylesheets to do so).
-        if last_scrapy_request_url := getattr(spider, "_last_scrapy_request_url", None):
+        if last_scrapy_request_url := getattr(self.crawler.spider, "_last_scrapy_request_url", None):
             if last_scrapy_request_url == response.url:
-                if xml_document := getattr(spider, "_last_observed_xml_document", None):
-                    setattr(spider, "_last_scrapy_request_url", None)
-                    setattr(spider, "_last_observed_xml_document", None)
+                if xml_document := getattr(self.crawler.spider, "_last_observed_xml_document", None):
+                    setattr(self.crawler.spider, "_last_scrapy_request_url", None)
+                    setattr(self.crawler.spider, "_last_observed_xml_document", None)
                     return response.replace(body=xml_document.encode("utf-8"))
 
         # At this point the response should be a HTML document or binary

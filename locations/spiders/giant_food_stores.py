@@ -34,7 +34,7 @@ class GiantFoodStoresSpider(SitemapSpider):
             "city": main.css("[itemprop=addressLocality]").attrib["content"],
             "state": main.css("[itemprop=addressRegion]::text").get(),
             "postcode": main.css("[itemprop=postalCode]::text").get(),
-            "opening_hours": hours.as_opening_hours(),
+            "opening_hours": hours,
         }
 
         apply_category(Categories.SHOP_SUPERMARKET, properties)

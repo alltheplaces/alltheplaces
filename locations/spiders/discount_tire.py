@@ -56,7 +56,6 @@ class DiscountTireSpider(SitemapSpider):
                     opening_time.get("formattedHour"),
                     closing_time.get("formattedHour"),
                     "%H:%M %p",
-                )
-            item["opening_hours"] = oh.as_opening_hours()
+                ).as_opening_hours()
         except Exception:
             pass

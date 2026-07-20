@@ -31,7 +31,7 @@ class NewYorkPublicLibraryUSSpider(scrapy.Spider):
             else:
                 continue
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse(self, response):
         for location in response.json()["locations"]:

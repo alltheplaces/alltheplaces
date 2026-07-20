@@ -141,9 +141,7 @@ class ElSuperUSSpider(SitemapSpider):
                 self._extract_hours_from_js(response, oh)
 
         # Add opening hours to item if we found any
-        opening_hours = oh.as_opening_hours()
-        if opening_hours:
-            item["opening_hours"] = opening_hours
+        item["opening_hours"] = oh
 
     def _extract_hours_from_list(self, response: Response, oh: OpeningHours) -> bool:
         hours_elements = response.xpath(

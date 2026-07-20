@@ -45,7 +45,7 @@ class NlbSISpider(Spider):
                     open_time = r["from"].replace(".", ":").zfill(5)
                     close_time = r["to"].replace(".", ":").zfill(5)
                     oh.add_range(day, open_time, close_time)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             kind = poi.get("kind")
             if kind == "atm":

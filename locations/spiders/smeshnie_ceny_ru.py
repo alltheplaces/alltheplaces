@@ -26,6 +26,6 @@ class SmeshnieCenyRUSpider(SitemapSpider):
         if hours := response.xpath('//table[@class="table"]/tbody/tr[th/text()="График"]/td/text()').get():
             oh = OpeningHours()
             oh.add_ranges_from_string(hours, DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item

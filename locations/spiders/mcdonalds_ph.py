@@ -48,7 +48,7 @@ class McdonaldsPHSpider(scrapy.Spider):
                 if "Open 24 hours" in hours:
                     hours = "00:00-24:00"
                 oh.add_ranges_from_string("Mo-Su" + " " + hours)
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
         except Exception as e:
             self.logger.warning(f"Failed to parse hours: {e}")
             self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")

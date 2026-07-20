@@ -47,7 +47,7 @@ class AlphaBankGRSpider(Spider):
                 oh = OpeningHours()
                 days = day_range(DAYS_GR[hours[0].capitalize()], DAYS_GR[hours[2].capitalize()])
                 oh.add_days_range(days, hours[3].split("-")[0], hours[3].split("-")[1])
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception:
                 pass
 

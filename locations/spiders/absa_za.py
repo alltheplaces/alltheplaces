@@ -81,5 +81,5 @@ class AbsaZASpider(JSONBlobSpider):
                     oh.set_closed(day)
                 else:
                     oh.add_ranges_from_string(day_times)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
         yield item

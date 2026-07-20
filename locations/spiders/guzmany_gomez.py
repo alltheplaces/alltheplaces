@@ -23,7 +23,7 @@ class GuzmanyGomezSpider(scrapy.Spider):
                         open_time=period["openTime"],
                         close_time=period["endTime"],
                     )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             item["website"] = data["orderLink"]
             apply_yes_no(Extras.WHEELCHAIR, item, any("Wheelchair accessible" == t["tag"] for t in data["tags"]), False)

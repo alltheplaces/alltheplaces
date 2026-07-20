@@ -62,7 +62,7 @@ class CadillacUSSpider(Spider):
                         close_time=value.get("openTo"),
                         time_format="%I:%M %p",
                     )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_CAR, item)
             departments = [dept.get("name") for dept in data.get("departments", [])]

@@ -169,4 +169,4 @@ class RuralKingUSSpider(Spider):
                     except Exception as e:
                         self.logger.warning(f"Error parsing hours {hours_value} for {day_name}: {e}")
 
-        return oh.as_opening_hours()
+        return oh

@@ -53,7 +53,7 @@ class PotbellySandwichShopSpider(Spider):
             "lon": store["longitude"],
             "name": store["name"],
             "street_address": store["streetaddress"],
-            "opening_hours": oh.as_opening_hours(),
+            "opening_hours": oh,
             "city": store["city"],
             "state": store["state"],
             "postcode": store["zip"],

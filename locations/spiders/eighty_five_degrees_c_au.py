@@ -1,17 +1,19 @@
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class EightyFiveDegreesCAUSpider(Spider):
+class EightyFiveDegreesCAUSpider(PlaywrightSpider):
     name = "eighty_five_degrees_c_au"
     item_attributes = {"brand": "85°C Bakery Cafe", "brand_wikidata": "Q4644852"}
     start_urls = ["https://www.85cafe.com.au/store-finder/"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath("//div[@class='card mb-2']"):

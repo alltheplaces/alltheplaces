@@ -4,6 +4,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -16,11 +17,15 @@ class CanlySpider(Spider):
     locator which is hosted by Can-ly. Brand keys are numerical.
     """
 
+    api_endpoint: str = ""
     dataset_attributes: dict = {"source": "api", "api": "can-ly.com"}
-    brand_key: str
+    brand_key: str = ""
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url=f"https://g9ey9rioe.api.hp.can-ly.com/v2/companies/{self.brand_key}/shops/search")
+        if self.api_endpoint == "" and self.brand_key != "":
+            yield JsonRequest(url=f"https://g9ey9rioe.api.hp.can-ly.com/v2/companies/{self.brand_key}/shops/search")
+        else:
+            yield JsonRequest(url=self.api_endpoint)
 
     def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature]:
         for feature in response.json()["shops"]:
@@ -29,6 +34,12 @@ class CanlySpider(Spider):
             item = DictParser.parse(feature)
             item["addr_full"] = feature.get("address")
             item["ref"] = feature.get("storeCode")
+
+            oh = OpeningHours()
+            if item_hours := feature.get("businessHours"):
+                for day_hours in item_hours:
+                    oh.add_range(day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
+            item["opening_hours"] = oh
 
             yield from self.post_process_item(item, response, feature) or []
 

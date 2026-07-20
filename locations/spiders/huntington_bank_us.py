@@ -26,7 +26,7 @@ class HuntingtonBankUSSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpid
             hours.add_range(day, row["opens"], row["closes"], "%H:%M:%S")
 
         item["ref"] = response.xpath("//@data-branch-id").get()
-        item["opening_hours"] = hours.as_opening_hours()
+        item["opening_hours"] = hours
         item["extras"]["fax"] = ld_data.get("faxNumber")
 
         apply_category(Categories.BANK, item)

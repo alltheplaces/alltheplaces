@@ -75,4 +75,4 @@ class VictoriassecretSpider(Spider):
                 close_time=close_time,
                 time_format="%H:%M %p",
             )
-        return opening_hours.as_opening_hours()
+        return opening_hours

@@ -24,7 +24,7 @@ class JuicelandSpider(scrapy.Spider):
                 continue
             opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store(self, response):
         long = response.xpath('//script[contains(text(), "lng")]/text()').re_first(r'lng":"([\d\.\-]+)"')
@@ -46,10 +46,9 @@ class JuicelandSpider(scrapy.Spider):
             "lon": long,
         }
 
-        hours = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@content').extract())
-
-        if hours:
-            properties["opening_hours"] = hours
+        properties["opening_hours"] = self.parse_hours(
+            response.xpath('//*[@itemprop="openingHours"]/@content').extract()
+        )
         yield Feature(**properties)
 
     def parse(self, response):

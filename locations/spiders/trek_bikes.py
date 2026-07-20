@@ -51,7 +51,7 @@ class TrekBikesSpider(scrapy.Spider):
             "city": data["storeaddresstown"],
             "postcode": data["storeaddresspostalCode"],
             "country": data["storeaddresscountryname"],
-            "opening_hours": opening_hours.as_opening_hours(),
+            "opening_hours": opening_hours,
             "website": response.xpath('//*[contains(.,"Retailer website")]/@href').get(response.url),
             "phone": phone,
         }

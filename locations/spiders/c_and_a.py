@@ -76,7 +76,7 @@ class CAndASpider(scrapy.Spider):
                 "name": store.xpath('./div[@class="addressBox"]/p[@class="store"]/text()').get(),
                 "phone": phone.replace("Tel: ", "") if phone else None,
                 "country": country,
-                "opening_hours": opening_hours.as_opening_hours(),
+                "opening_hours": opening_hours,
                 "street_address": address[0],
                 "postcode": postcode,
                 "city": city,

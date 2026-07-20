@@ -49,4 +49,4 @@ class GreggsGBSpider(Spider):
                 r["openingTime"][-9:-4],
                 r["closingTime"][-9:-4],
             )
-        return oh.as_opening_hours()
+        return oh

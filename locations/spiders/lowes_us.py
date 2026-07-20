@@ -39,7 +39,7 @@ class LowesUSSpider(SitemapSpider):
                 close_time=close_time_formatted,
             )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store(self, response):
         script_content = response.xpath('//script[contains(text(),"storeHours")]/text()').extract_first()

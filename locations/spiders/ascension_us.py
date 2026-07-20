@@ -60,7 +60,7 @@ class AscensionUSSpider(Spider):
             if location["LocationTypeTags"] and (cat := self.categories.get(location["LocationTypeTags"][0])):
                 apply_category(cat, item)
             else:
-                apply_category({"amenity": "clinic", "healthcare": "clinic"}, item)
+                apply_category(Categories.CLINIC, item)
 
             yield item
 

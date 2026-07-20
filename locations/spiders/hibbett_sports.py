@@ -30,6 +30,6 @@ class HibbettSportsSpider(scrapy.Spider):
                     close_time=closetime if len(closetime) == (5 or 6) else f"{closetime[:1]}:00{closetime[-2:]}",
                     time_format="%I:%M%p",
                 )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

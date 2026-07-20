@@ -41,7 +41,7 @@ class MarcsSpider(CrawlSpider):
             "lat": self.find_between(lmjson, "lat = '", "';").strip(),
             "lon": self.find_between(lmjson, "lng = '", "';").strip(),
             "website": response.url,
-            "opening_hours": oh.as_opening_hours(),
+            "opening_hours": oh,
         }
 
         item = Feature(**properties)

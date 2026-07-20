@@ -65,6 +65,6 @@ class SpotlightSpider(scrapy.Spider):
             if day[1].upper() == "12:00am" and day[2].upper() == "12:00am":
                 continue
             oh.add_range(DAYS_EN[day[0]], day[1].upper(), day[2].upper(), "%I:%M%p")
-        properties["opening_hours"] = oh.as_opening_hours()
+        properties["opening_hours"] = oh
 
         yield Feature(**properties)

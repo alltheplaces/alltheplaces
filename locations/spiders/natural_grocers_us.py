@@ -58,4 +58,4 @@ class NaturalGrocersUSSpider(Spider):
             for day in days:
                 o.add_range(day, *hours.split("-"), "%I:%M %p")
 
-        return o.as_opening_hours()
+        return o

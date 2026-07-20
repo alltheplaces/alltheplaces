@@ -1,15 +1,18 @@
 import re
+from html import unescape
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TrussellTrustGBSpider(Spider):
     name = "trussell_trust_gb"
-    item_attributes = {"operator_wikidata": "Q15621299"}
+    item_attributes = {"operator": "The Trussell Trust", "operator_wikidata": "Q15621299"}
     start_urls = ["https://www.trussell.org.uk/emergency-food/i-have-a-food-voucher/choose-a-foodbank?lat=&lng=&page=1"]
 
     def make_request(self, page: int) -> Request:
@@ -30,6 +33,13 @@ class TrussellTrustGBSpider(Spider):
                 r"\"groupTitle\":\"([^\"]+)\".*?\"domain\":\"([^\"]+)\".*?\"title\":\"([^\"]+)\".*?\"address01\":\"([^\"]+)\".*?\"address02\":\"?(null|[^\"]+)\"?.*?\"county\":\"?(null|[^\"]+)\"?.*?\"town\":\"?(null|[^\"]+)\"?.*?\"postcode\":\"(null|[^\"]+)\".*?\"email\":\"([^\"]+)\".*?\"telephone\":\"([^\"]+)\".*?\"uuid\":\"([^\"]+)\".*?\"coordinates\":\[\s*(-?\d+\.\d+),\s*(-?\d+\.\d+)\s*\]"
             )
             for food_bank in re.findall(pattern, raw_data):
+                food_bank = list(food_bank)
+                for i in range(len(food_bank)):
+                    if food_bank[i] == "null":
+                        food_bank[i] = None
+                    else:
+                        food_bank[i] = unescape(food_bank[i].replace("u0026", "&"))
+
                 item = Feature()
                 item["name"] = food_bank[0]
                 item["website"] = "https://" + food_bank[1]
@@ -40,13 +50,12 @@ class TrussellTrustGBSpider(Spider):
                 item["ref"] = food_bank[10]
                 item["lat"] = food_bank[-1]
                 item["lon"] = food_bank[-2]
-                item["street"] = food_bank[3]
-                if food_bank[5] != "null":
-                    item["state"] = food_bank[5]
-                if food_bank[6] != "null":
-                    item["city"] = food_bank[6]
-                if food_bank[4] != "null":
-                    item["street_address"] = ",".join([food_bank[3], food_bank[4]])
+                item["state"] = food_bank[5]
+                item["city"] = food_bank[6]
+                item["street_address"] = merge_address_lines([food_bank[3], food_bank[4]])
+
+                apply_category(Categories.SOCIAL_FACILITY, item)
+
                 yield item
             next_page = kwargs["page"] + 1
             yield self.make_request(next_page)

@@ -3,7 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -28,13 +28,13 @@ class SuzukiMarineAUSpider(JSONBlobSpider):
             if "0" in services_list:
                 apply_category(Categories.SHOP_BOAT, item)
                 if "1" in services_list:
-                    apply_category({"boat:repair": "yes"}, item)
+                    apply_yes_no("boat:repair", item, True)
                 if "2" in services_list:
-                    apply_category({"boat:parts": "yes"}, item)
+                    apply_yes_no("boat:parts", item, True)
             elif "1" in services_list:
                 apply_category(Categories.SHOP_BOAT_REPAIR, item)
                 if "2" in services_list:
-                    apply_category({"boat:parts": "yes"}, item)
+                    apply_yes_no("boat:parts", item, True)
             elif "2" in services_list:
                 apply_category(Categories.SHOP_BOAT_PARTS, item)
 

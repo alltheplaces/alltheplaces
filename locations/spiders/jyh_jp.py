@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class JyhJPSpider(SitemapSpider):
     name = "jyh_jp"
-    item_attributes = {"brand": "Japan Youth Hostel", "brand_wikidata": "Q11441965", "country": "JP"}
+    item_attributes = {"brand": "Japan Youth Hostel", "brand_wikidata": "Q11507007"}
     sitemap_urls = ["https://jyh.jp/sitemap.xml"]
     sitemap_rules = [(r"/info\.php\?jyhno=\d+$", "parse")]
 
@@ -56,6 +56,7 @@ class JyhJPSpider(SitemapSpider):
         item = Feature()
         item["ref"] = ref
         item["name"] = name_en or name_ja
+        item["extras"]["name:en"] = name_en
         item["extras"]["name:ja"] = name_ja
         item["lat"] = lat
         item["lon"] = lon

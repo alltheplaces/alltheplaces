@@ -69,4 +69,4 @@ class DutchBrosSpider(scrapy.Spider):
 
             for idx in range(DAY_IDX[sday], DAY_IDX[eday] + 1):
                 o.add_range(DAYS[idx][:2], shour, ehour, "%I:%M%p")
-        return o.as_opening_hours()
+        return o

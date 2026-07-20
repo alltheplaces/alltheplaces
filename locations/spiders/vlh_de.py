@@ -46,7 +46,7 @@ class VlhDESpider(SitemapSpider, StructuredDataSpider):
                     day = day.replace(":", "")
                     oh.add_range(DAYS_DE.get(day.title()), open_time.strip(), close_time.strip())
 
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
         except Exception as e:
             self.logger.warning(f'Failed to parse opening hours for {item["ref"]}, {e}')

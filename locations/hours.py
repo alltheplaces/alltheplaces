@@ -797,6 +797,36 @@ DAYS_IS = {
     "Sunnudagur": "Su",
 }
 
+DAYS_AR = {
+    "الاثنين": "Mo",
+    "الإثنين": "Mo",
+    "الثلاثاء": "Tu",
+    "الأربعاء": "We",
+    "الاربعاء": "We",
+    "الخميس": "Th",
+    "الجمعة": "Fr",
+    "السبت": "Sa",
+    "الأحد": "Su",
+    "الاحد": "Su",
+}
+
+DAYS_UA = {
+    "понеділок": "Mo",
+    "Понеділок": "Mo",
+    "вівторок": "Tu",
+    "Вівторок": "Tu",
+    "середа": "We",
+    "Середа": "We",
+    "четвер": "Th",
+    "Четвер": "Th",
+    "п’ятниця": "Fr",
+    "П’ятниця": "Fr",
+    "субота": "Sa",
+    "Субота": "Sa",
+    "неділя": "Su",
+    "Неділя": "Su",
+}
+
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
 # A list ordered by languages most frequently used for web content as of January 2024, by share of websites.
 # See WPStoreLocator for example usage.

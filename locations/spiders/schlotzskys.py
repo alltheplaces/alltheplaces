@@ -21,7 +21,7 @@ class SchlotzskysSpider(scrapy.Spider):
             open_time, close_time = times.split("-")
 
             oh.add_range(dow, open_time, close_time)
-        return oh.as_opening_hours()
+        return oh
 
     def parse(self, response):
         links = response.xpath('//a[@class="Directory-listLink"]')

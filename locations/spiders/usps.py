@@ -40,7 +40,7 @@ class UspsSpider(Spider):
                 postcode = store["zip5"]
             properties = {
                 "ref": store["locationID"],
-                "name": store["locationName"],
+                "branch": store["locationName"],
                 "street_address": store["address1"],
                 "city": store["city"],
                 "state": store["state"],
@@ -49,6 +49,7 @@ class UspsSpider(Spider):
                 "lat": store["latitude"],
                 "lon": store["longitude"],
                 "phone": store["phone"],
+                "website": "https://tools.usps.com/locations/details/{}".format(store["locationID"]),
             }
             for service in store["locationServiceHours"]:
                 if service["name"] == "BUSINESS":

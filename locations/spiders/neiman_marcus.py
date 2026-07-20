@@ -39,6 +39,6 @@ class NeimanMarcusSpider(CrawlSpider):
                     close_time=helfday.strip().split(" - ")[1],
                     time_format="%I%p",
                 )
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
 
         yield item

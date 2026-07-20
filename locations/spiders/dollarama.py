@@ -35,14 +35,9 @@ class DollaramaSpider(Spider):
             if hour == "Closed":
                 continue
             open_time, close_time = hour.split("-")
-            opening_hours.add_range(
-                day=day,
-                open_time=open_time,
-                close_time=close_time,
-                time_format="%I:%M%p",
-            )
+            opening_hours.add_range(day, open_time, close_time, "%I:%M%p")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse(self, response):
         data = response.json()
@@ -63,8 +58,7 @@ class DollaramaSpider(Spider):
 
             if opening_hours := row["ExtraData"].get("Hours of operations"):
                 try:
-                    hours = self.parse_hours(opening_hours)
-                    properties["opening_hours"] = hours
+                    properties["opening_hours"] = self.parse_hours(opening_hours)
                 except Exception as e:
                     self.logger.warning(f"Failed to parse opening hours for {opening_hours}, {e}")
                     self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")

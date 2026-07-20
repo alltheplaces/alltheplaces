@@ -32,7 +32,7 @@ class DeutscheBankBESpider(scrapy.Spider):
                     "website": website.get("fr"),
                     "lat": store.get("lat"),
                     "lon": store.get("long"),
-                    "opening_hours": oh.as_opening_hours(),
+                    "opening_hours": oh,
                     "extras": Categories.BANK.value,
                 }
             )

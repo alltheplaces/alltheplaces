@@ -40,6 +40,6 @@ class MegafonRUSpider(scrapy.Spider):
             try:
                 oh = OpeningHours()
                 oh.add_ranges_from_string(worktime, DAYS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, DELIMITERS_RU)
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Failed to parse opening hours: {worktime}, {item['ref']}, {e}")

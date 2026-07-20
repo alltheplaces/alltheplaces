@@ -21,7 +21,7 @@ class NswAmbulanceAUSpider(ArcGISFeatureServerSpider):
         item["state"] = "NSW"
         if " HEADQUARTERS" in item["name"]:
             apply_category({"office": "government"}, item)
-            apply_category({"government": "emergency"}, item)
+            item.set_tag("government", "emergency")
         elif " HELO AMBULANCE STATION" in item["name"]:
             apply_category({"emergency": "air_rescue_service"}, item)
         elif " CFR" in item["name"] or " VAO" in item["name"]:

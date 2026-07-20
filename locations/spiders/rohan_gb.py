@@ -48,6 +48,6 @@ class RohanGBSpider(Spider):
                         location["node"]["operatingHours"][day.lower()]["opening"],
                         location["node"]["operatingHours"][day.lower()]["closing"],
                     )
-            item["opening_hours"] = opening_hours.as_opening_hours()
+            item["opening_hours"] = opening_hours
 
             yield item

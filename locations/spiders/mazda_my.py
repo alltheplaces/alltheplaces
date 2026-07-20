@@ -19,7 +19,6 @@ class MazdaMYSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(item["ref"])
-        item["branch"] = item.pop("name", None)
         item["addr_full"] = merge_address_lines([feature["addressOne"], feature["addressTwo"]])
         if item["email"]:
             item["email"] = item["email"].split()[0]

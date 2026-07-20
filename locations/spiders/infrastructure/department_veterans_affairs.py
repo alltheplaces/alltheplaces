@@ -105,4 +105,4 @@ class DepartmentVeteransAffairsSpider(Spider):
             except:
                 continue
 
-        return opening_hours.as_opening_hours()
+        return opening_hours

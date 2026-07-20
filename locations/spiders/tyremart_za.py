@@ -1,6 +1,6 @@
 from scrapy import Selector
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -18,5 +18,5 @@ class TyremartZASpider(JSONBlobSpider):
             Selector(text=branch["meta"]["dealer-call"]).xpath('//a[contains(@href, "tel:")]/@href').getall()
         )
         item["website"] = branch["meta"]["dealer-promo-url"]
-        apply_category({"shop": "tyres"}, item)
+        apply_category(Categories.SHOP_TYRES, item)
         yield item

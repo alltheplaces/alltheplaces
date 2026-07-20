@@ -1,16 +1,18 @@
+import json
 from typing import AsyncIterator
 
-from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class BeevGBSpider(Spider):
+class BeevGBSpider(PlaywrightSpider):
     name = "beev_gb"
     item_attributes = {"brand": "Be.EV", "brand_wikidata": "Q118263083"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
@@ -18,7 +20,7 @@ class BeevGBSpider(Spider):
         )
 
     def parse(self, response, **kwargs):
-        for location in response.json():
+        for location in json.loads(response.xpath("//pre//text()").get()):
             if location["status"] == 4:
                 continue  # Upcoming
 

@@ -2,7 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
+from locations.spiders.caseys_general_store_us import CaseysGeneralStoreUSSpider
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import CostcoCAGBUSSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
@@ -39,7 +39,7 @@ class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
         (["CVS"], CVS_BRANDS["CVS Pharmacy"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
         (["TARGET"], TargetUSSpider.item_attributes),
-        (["CASEY"], CaseysGeneralStoreSpider.item_attributes),
+        (["CASEY"], CaseysGeneralStoreUSSpider.item_attributes),
         (["COSTCO"], CostcoCAGBUSSpider.item_attributes),
         (["WALMART", "WAL-MART"], WalmartUSSpider.item_attributes),
         (["KROGER"], KROGER_BRANDS["https://www.kroger.com/"]),

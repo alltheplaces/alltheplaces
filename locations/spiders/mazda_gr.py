@@ -50,7 +50,7 @@ class MazdaGRSpider(Spider):
 
     def _make_item(self, dealer: dict) -> Feature:
         item = Feature()
-        item["branch"] = dealer.get("Title")
+        item["name"] = dealer.get("Title")
         item["lat"] = dealer.get("Latitude")
         item["lon"] = dealer.get("Longitude")
         item["addr_full"] = dealer.get("Address")

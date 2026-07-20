@@ -66,4 +66,4 @@ class PostaSISpider(scrapy.Spider):
             if times["OtherTimeFrom"]:
                 opening_hours.add_range(day=day, open_time=times["OtherTimeFrom"], close_time=times["OtherTimeTo"])
 
-        return opening_hours.as_opening_hours()
+        return opening_hours

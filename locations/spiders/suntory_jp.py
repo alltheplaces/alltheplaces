@@ -1,6 +1,6 @@
 from scrapy.spiders import CSVFeedSpider
 
-from locations.categories import Categories, Vending, apply_category
+from locations.categories import Categories, Vending, add_vending, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -38,7 +38,7 @@ class SuntoryJPSpider(CSVFeedSpider):
             i["lat"] = row["lat"]
             i["lon"] = row["lon"]
             apply_category(Categories.VENDING_MACHINE, i)
-            apply_category(Vending.DRINKS, i)
+            add_vending(Vending.DRINKS, i)
             return i
         except:
             return i

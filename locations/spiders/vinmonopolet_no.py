@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_NO, OpeningHours
+from locations.hours import DAYS_NO, OpeningHours, day_range, sanitise_day
 
 
 class VinmonopoletNOSpider(Spider):
@@ -26,16 +26,21 @@ class VinmonopoletNOSpider(Spider):
             item["addr_full"] = location["address"].get("formattedAddress")
             item["website"] = "https://www.vinmonopolet.no/butikk/" + item["ref"]
 
-            item["opening_hours"] = OpeningHours()
-            for day_hours in location.get("openingTimes"):
-                if day_hours["closed"]:
-                    item["opening_hours"].set_closed(DAYS_NO[day_hours["weekDay"]])
-                else:
-                    item["opening_hours"].add_range(
-                        DAYS_NO[day_hours["weekDay"]],
-                        day_hours["openingTime"]["formattedHour"],
-                        day_hours["closingTime"]["formattedHour"],
-                    )
-
+            oh = OpeningHours()
+            try:
+                for day_hours in location.get("openingHours").get("weekDayOpeningList"):
+                    day = day_hours["day"]["formattedValue"]
+                    if "–" in day:
+                        start_day, end_day = day.split("–")
+                        start_day = sanitise_day(start_day, DAYS_NO)
+                        end_day = sanitise_day(end_day, DAYS_NO)
+                    else:
+                        start_day = end_day = sanitise_day(day, DAYS_NO)
+                    open_time = day_hours["hours"]["openingHour"]
+                    close_time = day_hours["hours"]["closingHour"]
+                    oh.add_days_range(day_range(start_day, end_day), open_time, close_time)
+                item["opening_hours"] = oh
+            except:
+                pass
             apply_category(Categories.SHOP_ALCOHOL, item)
             yield item

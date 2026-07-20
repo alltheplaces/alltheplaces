@@ -50,9 +50,7 @@ class FoodCitySoutheastUSSpider(Spider):
             for location_hours in store_listing.xpath(".//*[@class='hours']"):
                 h2 = location_hours.xpath("./h2/text()").get()
                 if h2 == "Store Hours":
-                    item["opening_hours"] = self.parse_opening_hours(
-                        location_hours.xpath("./p/text()").getall()
-                    ).as_opening_hours()
+                    item["opening_hours"] = self.parse_opening_hours(location_hours.xpath("./p/text()").getall())
                 if h2 == "Pharmacy Hours":
                     item["extras"]["opening_hours:pharmacy"] = self.parse_opening_hours(
                         location_hours.xpath("./p/text()").getall()

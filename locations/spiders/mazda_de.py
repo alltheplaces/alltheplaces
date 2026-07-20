@@ -31,8 +31,7 @@ class MazdaDESpider(Spider):
                     continue
                 feature["contact"]["phoneNumber"] = feature["contact"]["phoneNumber"]["e164"]
                 item = DictParser.parse(feature["contact"])
-                item["branch"] = feature_group["name"]
-                item.pop("name", None)
+                item["name"] = feature_group["name"]
                 match feature["name"]:
                     case "Car Sales":
                         apply_category(Categories.SHOP_CAR, item)
@@ -64,6 +63,6 @@ class MazdaDESpider(Spider):
                 yield from self.post_process_item(item, feature, feature_group)
 
     def post_process_item(self, item: Feature, feature: dict, feature_group: dict) -> Iterable[Feature]:
-        if "Test & Training" in item["branch"]:
+        if "Test & Training" in item["name"]:
             return
         yield item

@@ -1,36 +1,22 @@
-import re
 from typing import Iterable
 
-from scrapy.http import TextResponse
-from scrapy.spiders import SitemapSpider
-
 from locations.categories import Categories, apply_category
-from locations.items import Feature, set_closed
-from locations.structured_data_spider import StructuredDataSpider
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.storefinders.stockist import StockistSpider
 
 
-class LakelandGBSpider(SitemapSpider, StructuredDataSpider):
+class LakelandGBSpider(StockistSpider):
     name = "lakeland_gb"
     item_attributes = {"brand": "Lakeland", "brand_wikidata": "Q16256199"}
-    sitemap_urls = ["https://www.lakeland.co.uk/export/sitemap/retail-outlets.xml"]
-    search_for_twitter = False
-    search_for_facebook = False
+    key = "map_83pxe5j3"
 
-    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["name"] = None
-        # Lakeland uses addressRegion for city (should be addressLocality)
-        item["city"] = item.pop("state", None)
-        item["branch"] = response.xpath("//h1/text()").get()
-        item["ref"] = response.url.split("/")[-1]
-
-        maps_link = response.xpath('//a[contains(@href, "daddr=")]/@href').get("")
-        if coords := re.search(r"daddr=([-\d.]+),([-\d.]+)", maps_link):
-            item["lat"] = coords.group(1)
-            item["lon"] = coords.group(2)
-        else:
-            # Closed shop
-            set_closed(item)
-
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Lakeland ")
+        item["image"] = location["image_url"]
+        item["opening_hours"] = OpeningHours()
+        for field in location["custom_fields"]:
+            open_time, close_time = field["value"].split(" - ")
+            item["opening_hours"].add_range(field["name"], open_time, close_time)
         apply_category(Categories.SHOP_HOUSEWARE, item)
-
         yield item

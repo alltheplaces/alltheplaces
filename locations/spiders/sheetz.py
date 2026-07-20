@@ -86,7 +86,7 @@ class SheetzSpider(scrapy.Spider):
         if features.get("open24x7"):
             oh = OpeningHours()
             oh.add_days_range(DAYS, "00:00", "23:59")
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
     # TODO: Below method is not active yet.
     #       At some point we will change it and make it yield a separate item for charging station.

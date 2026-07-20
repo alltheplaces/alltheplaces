@@ -27,6 +27,6 @@ class KfcSGSpider(scrapy.Spider):
             )
             oh = OpeningHours()
             oh.add_ranges_from_string(opening_hours)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

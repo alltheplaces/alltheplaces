@@ -21,15 +21,17 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
+    LEFT_LUGGAGE = {"amenity": "left_luggage"}
+    LUGGAGE_LOCKER = {"amenity": "luggage_locker"}
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
 
-    KINDERGARTEN = {"amenity": "kindergarten", "education": "kindergarten"}
-    SCHOOL = {"amenity": "school", "education": "school"}
-    COLLEGE = {"amenity": "college", "education": "college"}
-    UNIVERSITY = {"amenity": "university", "education": "university"}
-    LANGUAGE_SCHOOL = {"amenity": "school", "education": "language_school"}
-    NATURE_SCHOOL = {"amenity": "school", "education": "nature_school"}
+    KINDERGARTEN = {"amenity": "kindergarten"}
+    SCHOOL = {"amenity": "school"}
+    COLLEGE = {"amenity": "college"}
+    UNIVERSITY = {"amenity": "university"}
+    LANGUAGE_SCHOOL = {"amenity": "language_school"}
+    NATURE_SCHOOL = {"education": "nature_school"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -349,7 +351,6 @@ class Categories(Enum):
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
-    POST_PARTNER = {"post_office": "post_partner"}
     PREP_SCHOOL = {"amenity": "prep_school"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
@@ -485,8 +486,7 @@ def add_list(key: str, value: str, item: Feature) -> None:
         raise Exception("keys must be strings")
     if not isinstance(value, str):
         raise Exception("list values must be strings")
-    existing_value = item.get(key) if key in Feature.fields.keys() else item["extras"].get(key)
-    if existing_value:
+    if existing_value := item.get_tag(key):
         if not isinstance(existing_value, str):
             raise Exception("list values must be strings")
         existing_values = existing_value.split(";")
@@ -495,11 +495,7 @@ def add_list(key: str, value: str, item: Feature) -> None:
     if value not in existing_values:
         existing_values.append(value)
     existing_values.sort()
-
-    if key in Feature.fields.keys():
-        item[key] = ";".join(existing_values)
-    else:
-        item["extras"][key] = ";".join(existing_values)
+    item.set_tag(key, ";".join(existing_values))
 
 
 top_level_tags = [
@@ -558,11 +554,11 @@ def get_category_tags(source: Feature | Enum | Mapping) -> dict:
     if len(categories.keys()) > 1 and categories.get("shop") == "yes":
         categories.pop("shop")
     if "amenity" in categories.keys() and "education" in categories.keys():
-        # amenity=school is being replaced within OSM by education=*
-        # Whilst ATP still sets amenity=school for backwards compatibility
-        # it is "education" not "amenity" which is the intended top level
+        # Some education tags are being augmented with education=* in OSM
+        # ATP still uses the more common amenity=*
+        # It is "amenity" not "education" which is the intended top level
         # category.
-        categories.pop("amenity")
+        categories.pop("education")
     return categories
 
 
@@ -750,6 +746,7 @@ class PaymentMethods(Enum):
     HUAWEI_PAY = "payment:huawei_pay"
     ID = "payment:id"
     JCB = "payment:jcb"
+    KAKAO_PAY = "payment:kakaopay"
     KUSTERS = "payment:kusters"
     LINE_PAY = "payment:line_pay"
     MAES = "payment:maes"
@@ -767,8 +764,10 @@ class PaymentMethods(Enum):
     MIR = "payment:mir"
     MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
+    NAVER_PAY = "payment:naver_pay"
     NOTES = "payment:notes"
     OCTA_PLUS = "payment:octa_plus"
+    PAYCO = "payment:payco"
     PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
     POWERCARD = "payment:powercard"
@@ -796,6 +795,7 @@ class PaymentMethods(Enum):
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
     XXIMO = "payment:xximo"
+    ZERO_PAY = "payment:zero_pay"
 
 
 payment_method_aliases = {
@@ -886,6 +886,8 @@ def apply_yes_no(attribute: str | Enum, item: Feature | dict, state: bool, apply
         tag_key = attribute.value
     else:
         raise TypeError("string or Enum required")
+    if "extras" not in item:
+        item["extras"] = {}
     if not state and "=" in tag_key:
         return
 
@@ -893,7 +895,11 @@ def apply_yes_no(attribute: str | Enum, item: Feature | dict, state: bool, apply
         tag_key, tag_value = tag_key.split("=")
     else:
         tag_value = "yes" if state else "no"
-    apply_category({tag_key: tag_value}, item)
+
+    if tag_key in Feature.fields.keys():
+        item[tag_key] = tag_value
+    else:
+        item["extras"][tag_key] = tag_value
 
 
 class Clothes(Enum):

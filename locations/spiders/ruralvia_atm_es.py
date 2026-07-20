@@ -27,6 +27,7 @@ BRAND_MAPPING = {
     "CAJA RURAL DE SORIA": ("Caja Rural de Soria", "Q118719955"),
     "CAJA RURAL DE NAVARRA": ("Caja Rural de Navarra", "Q73399877"),
     "CAJA RURAL DE ARAGON": ("Caja Rural de Aragón", "Q5719155"),
+    "CAJA RURAL DE ONDA": ("Caja Rural Onda", "Q118720002"),
 }
 
 

@@ -27,11 +27,11 @@ class NswNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
         item.pop("twitter", None)
         if "/campgrounds/" in response.url:
             apply_category(Categories.TOURISM_CAMP_SITE, item)
-            apply_category({"reservation": "required"}, item)
+            apply_yes_no("reservation=required", item, True)
             for campground_detail in response.xpath('//table[contains(@class, "itemDetails")]/tr'):
                 if campground_detail.xpath('./th[contains(text(), "Number of campsites")]'):
                     capacity = campground_detail.xpath("./td/text()").get()
-                    apply_category({"capacity:pitches": capacity}, item)
+                    item.set_tag("capacity:pitches", capacity)
                 elif campground_detail.xpath('./th[contains(text(), "Camping type")]'):
                     camping_types = campground_detail.xpath("./td/text()").get().lower()
                     apply_yes_no(
@@ -78,6 +78,6 @@ class NswNationalParksAndWildlifeServiceAUSpider(SitemapSpider, StructuredDataSp
             # tagging standards of OSM, an attempt is not yet made
             # to capture details about these other accommodation
             # types.
-            apply_category({"tourism": "yes"}, item)
-            apply_category({"reservation": "required"}, item)
+            apply_category(Categories.GENERIC_POI, item)
+            apply_yes_no("reservation=required", item, True)
         yield item

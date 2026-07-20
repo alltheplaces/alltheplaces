@@ -48,5 +48,5 @@ class HelzbergDiamondsUSSpider(SitemapSpider):
                         close_time=re.findall(r"[0-9]+.+", day)[0].split(" - ")[1],
                         time_format="%I:%M%p",
                     )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
             yield item

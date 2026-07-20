@@ -1,27 +1,28 @@
+from typing import Iterable
+
+from scrapy.http import Request, Response
+
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
-from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import clean_address
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.storefinders.go_review_api import GoReviewApiSpider
 
 
-class MtnZASpider(JSONBlobSpider):
+class MtnZASpider(GoReviewApiSpider):
     name = "mtn_za"
     item_attributes = {"brand": "MTN", "brand_wikidata": "Q1813361"}
-    start_urls = [
-        "https://www.mtn.co.za/api/cms/v1/store-location/1725724280978268358/coverage-map-store-app?storeCount=10000&latitude=-29&longitude=24"
-    ]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+    domain = "stores.mtn.co.za"
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
+        item["branch"] = item.pop("name").removeprefix("MTN ")
+        item["website"] = "https://stores.mtn.co.za/" + feature["slug"]
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
-        item["branch"] = item.pop("name").replace("MTN Store - ", "").replace("MTN Lite - ", "")
-        item["street_address"] = clean_address([location["addressExtra"], location["streetAndNumber"]])
-        item["website"] = "https://www.mtn.co.za/home/coverage/store/" + location["slug"]
+        yield Request(url=item["website"], meta={"item": item}, callback=self.parse_opening_hours)
 
+    def parse_opening_hours(self, response: Response) -> Iterable[Feature]:
+        item = response.meta["item"]
+        hours_string = " ".join(response.xpath('//div[contains(@class, "operating-hours")]//text()').getall())
+        hours_string = hours_string.replace("|", "-").replace("day ", ":")
         item["opening_hours"] = OpeningHours()
-        for day_hours in location["openingHours"]:
-            if day_hours["closed"]:
-                item["opening_hours"].set_closed(DAYS[day_hours["dayOfWeek"] - 1])
-            item["opening_hours"].add_range(DAYS[day_hours["dayOfWeek"] - 1], day_hours["from1"], day_hours["to1"])
-
+        item["opening_hours"].add_ranges_from_string(hours_string)
         yield item

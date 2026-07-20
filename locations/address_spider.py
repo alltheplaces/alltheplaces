@@ -19,7 +19,7 @@ class AddressSpider(Spider):
                 "locations.pipelines.clean_strings.CleanStringsPipeline": 354,
                 "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": None,
                 "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": None,
-                "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
+                "locations.pipelines.address_clean_up.AddressCleanUpPipeline": None,
                 "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": None,
                 "locations.pipelines.email_clean_up.EmailCleanUpPipeline": None,
                 "locations.pipelines.geojson_geometry_reprojection.GeoJSONGeometryReprojectionPipeline": None,

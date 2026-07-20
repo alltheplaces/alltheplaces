@@ -45,6 +45,6 @@ class FreedomFurnitureSpider(Spider):
                     if ":" not in close_time:
                         close_time = close_time.replace(" AM", ":00 AM").replace(" PM", ":00 PM")
                     oh.add_range(DAYS_EN[day["weekDay"]], open_time, close_time, "%I:%M %p")
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
 
             yield item

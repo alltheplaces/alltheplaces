@@ -10,7 +10,6 @@ from locations.storefinders.algolia import AlgoliaSpider
 
 class Sport2000FRSpider(AlgoliaSpider):
     name = "sport2000_fr"
-    item_attributes = {"brand": "Sport 2000", "brand_wikidata": "Q262394", "extras": Categories.SHOP_SPORTS.value}
     api_key = "f173a66037574432c7fedd51e22e7715"
     app_id = "604535R4DX"
     index_name = "stores"

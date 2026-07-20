@@ -169,7 +169,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             "amenity": amenity,
             "after_school": "yes",
             "name": name.split("(")[0].strip().removesuffix(" MoT"),
-            "opening_hours": oh.as_opening_hours(),
+            "opening_hours": oh,
         }
 
     bench_models = {
@@ -281,7 +281,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
                         else:
                             oh.add_range(DAYS_DE[day], open_am, close_pm, time_format="%H.%M")
                         break
-        return oh.as_opening_hours()
+        return oh
 
     def parse_park(self, p):
         tags = {"leisure": "park"}

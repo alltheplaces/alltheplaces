@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 
@@ -19,8 +19,8 @@ class RemaxESSpider(Spider):
         for url in self.start_urls:
             yield JsonRequest(url=url, headers={"X-Requested-With": "XMLHttpRequest"})
 
-    def parse(self, response):
-        for location in response.json():
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json().values():
             item = DictParser.parse(location)
             item["ref"] = location["id_oficina_anaconda"]
             item["name"] = location["headline"]

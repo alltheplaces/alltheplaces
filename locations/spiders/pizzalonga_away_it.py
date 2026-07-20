@@ -39,7 +39,8 @@ class PizzalongaAwayITSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         apply_category(Categories.FAST_FOOD, item)
-        apply_category({"cuisine": "pizza", "takeaway": "only"}, item)
+        item.set_tag("cuisine", "pizza")
+        item.set_tag("takeaway", "only")
         item["city"] = item["branch"] = item.pop("name")
 
         item["opening_hours"] = OpeningHours()

@@ -49,6 +49,6 @@ class GStarRawSpider(scrapy.Spider):
                         ),
                     )
 
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
 
                 yield item

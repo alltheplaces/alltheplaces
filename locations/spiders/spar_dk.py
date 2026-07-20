@@ -53,7 +53,7 @@ class SparDKSpider(Spider):
                 "ref": location["id"],
                 "street_address": location["tm_X3b_en_address_line1"][0],
                 "city": location["tm_X3b_en_locality"][0],
-                "opening_hours": opening_hours.as_opening_hours(),
+                "opening_hours": opening_hours,
                 "postcode": location["tm_X3b_en_postal_code"][0],
                 "phone": location["ss_field_store_phone"],
                 "lat": location["fts_lat"],

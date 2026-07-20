@@ -22,7 +22,7 @@ class SeattleParksAndRecreationTennisCourtsUSSpider(ArcGISFeatureServerSpider):
                 apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
             else:
                 apply_category(Categories.LEISURE_PITCH, item)
-        apply_category({"sport": "tennis"}, item)
+        item.set_tag("sport", "tennis")
         if lit := feature.get("LIGHTS"):
             if lit == "Yes":
                 item["extras"]["lit"] = "yes"

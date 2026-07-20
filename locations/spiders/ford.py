@@ -87,8 +87,7 @@ class FordSpider(Spider):
                 if opening_time := data.get(f"Sales{day}OpenTime"):
                     closing_time = data.get(f"Sales{day}CloseTime")
                     oh.add_range(day=day, open_time=opening_time, close_time=closing_time, time_format="%H%M")
-            if oh.as_opening_hours():
-                return oh
+            return oh
         except:
             return None
 

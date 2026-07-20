@@ -21,6 +21,6 @@ class GrimaldisPizzeriaSpider(SitemapSpider, StructuredDataSpider):
                 close_time=day.xpath("./td[2]/text()").get().split(" - ")[1],
                 time_format="%I:%M %p",
             )
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
 
         yield item

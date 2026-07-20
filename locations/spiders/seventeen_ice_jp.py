@@ -62,17 +62,11 @@ PREFECTURES = [
 
 class SeventeenIceJPSpider(Spider):
     name = "seventeen_ice_jp"
-    item_attributes = {
-        "brand": "セブンティーンアイス",
-        "brand_wikidata": "Q11314427",
-    }
+    item_attributes = {"brand": "セブンティーンアイス", "brand_wikidata": "Q11314427"}
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "COOKIES_ENABLED": True,
-        "ROBOTSTXT_OBEY": False,
     }
-
-    _seen_refs: set[str] = set()
 
     async def start(self) -> AsyncIterator[Request]:
         # Visit the homepage first to establish a Laravel session cookie, then
@@ -96,14 +90,15 @@ class SeventeenIceJPSpider(Spider):
         locations = json.loads(json.loads(match.group(1)))
 
         for loc in locations:
-            ref = loc.get("shop_code")
-            if not ref or ref in self._seen_refs:
+            ref = loc.get("id")
+            if not ref:
                 continue
-            self._seen_refs.add(ref)
 
             item = Feature()
             item["ref"] = ref
+            item["website"] = f"https://seventeenice-map.glico.com/spot/{ref}"
             item["branch"] = loc.get("location_name")
+            item["extras"]["branch:ja-Hira"] = loc.get("location_name_read") or None
             item["lat"] = loc.get("latitude")
             item["lon"] = loc.get("longitude")
             item["postcode"] = loc.get("postal_code")
@@ -111,7 +106,7 @@ class SeventeenIceJPSpider(Spider):
             item["phone"] = loc.get("phone") or None
             item["extras"]["addr:province"] = loc.get("pref")
             item["city"] = loc.get("city")
-            item["street_address"] = loc.get("street_address")
+            # item["street_address"] = loc.get("street_address") # this has bad data, do not use
 
             apply_category(Categories.VENDING_MACHINE, item)
             item["extras"]["vending"] = "ice_cream"

@@ -48,7 +48,7 @@ class BciCLSpider(Spider):
             elif location.get("type") == "centros-empresarios":
                 apply_category(Categories.OFFICE_COMPANY, item)
             elif location.get("type") == "centros-nace":
-                apply_category({"office": "coworking"}, item)
+                apply_category(Categories.OFFICE_COWORKING, item)
             yield item
 
         if page < response.json()["meta"]["total_pages"]:

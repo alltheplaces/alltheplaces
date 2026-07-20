@@ -43,11 +43,12 @@ class McdonaldsPremierCapitalSpider(Spider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        token = response.xpath('//script[@id="locate-js-extra"]/text()').re_first('"ajax_nonce":"(.+?)",')
         yield FormRequest(
             url=f"https://{self.domain}/wp-admin/admin-ajax.php",
             formdata={
                 "action": "get_locations",
-                "token": response.xpath('//script[@id="locate-js-extra"]/text()').re_first('"ajax_nonce":"(.+?)",'),
+                "token": token or "",
             },
             callback=self.parse_api,
         )

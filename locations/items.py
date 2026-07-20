@@ -5,7 +5,7 @@
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Iterable
+from typing import Any, Iterable
 
 import pycountry
 import scrapy
@@ -53,6 +53,18 @@ class Feature(scrapy.Item):
         super().__init__(*args, **kwargs)
         if not self._values.get("extras"):
             self.__setitem__("extras", {})
+
+    def set_tag(self, key: str, value: str):
+        if key in Feature.fields.keys():
+            self[key] = value
+        else:
+            self["extras"][key] = value
+
+    def get_tag(self, key: str) -> Any:
+        if key in Feature.fields.keys():
+            return self.get(key)
+        else:
+            return self["extras"].get(key)
 
     def has_valid_country_code(self) -> bool:
         """

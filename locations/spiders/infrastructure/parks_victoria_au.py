@@ -1,7 +1,7 @@
 from chompjs import parse_js_object
 from scrapy import Spider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -17,7 +17,7 @@ class ParksVictoriaAUSpider(Spider):
         for location in parse_js_object(js_blob):
             item = DictParser.parse(location)
             apply_category(Categories.TOURISM_CAMP_SITE, item)
-            apply_category({"reservation": "required"}, item)
+            apply_yes_no("reservation=required", item, True)
             item["ref"] = item["website"] = location["url"].replace("http://", "https://")
             item["image"] = "https://www.parks.vic.gov.au" + location["mapImage"]
             yield item

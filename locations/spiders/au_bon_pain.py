@@ -35,7 +35,7 @@ class AuBonPainSpider(scrapy.Spider):
                 close_time=close_time,
                 time_format="%I:%M %p",
             )
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store(self, response):
         ref = re.findall(r"[^(\/)]+$", response.url)[0]

@@ -40,7 +40,7 @@ class LidsSpider(Spider):
                 time_format=TIME_FORMAT,
             )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse(self, response):
         ldata = response.json()
@@ -67,9 +67,6 @@ class LidsSpider(Spider):
             except KeyError:
                 pass
 
-            hours = self.parse_hours(row)
-
-            if hours:
-                properties["opening_hours"] = hours
+            properties["opening_hours"] = self.parse_hours(row)
 
             yield Feature(**properties)

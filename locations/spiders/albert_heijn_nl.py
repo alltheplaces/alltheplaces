@@ -84,4 +84,4 @@ class AlbertHeijnNLSpider(PlaywrightSpider):
                     open = openingHours.get("openFrom")
                     close = openingHours.get("openUntil")
                     oh.add_range(day, open, close)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
