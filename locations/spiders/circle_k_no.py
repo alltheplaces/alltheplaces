@@ -1,18 +1,24 @@
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.spiders.circle_k_dk import CircleKDKSpider
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CircleKNOSpider(CircleKDKSpider):
+class CircleKNOSpider(SitemapSpider, StructuredDataSpider):
     name = "circle_k_no"
     item_attributes = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
-    start_urls = ["https://www.circlek.no/stations"]
-    rules = [Rule(LinkExtractor(allow="/station/circle"), callback="parse")]
+    sitemap_urls = ["https://www.circlek.no/sitemaps/stations/sitemap.xml"]
+    sitemap_rules = [(r"/station/[-\w]+", "parse_sd")]
+
+    def pre_process_data(self, ld_data: dict, **kwargs):
+        rules = ld_data.get("openingHours") or []
+        for idx, rule in enumerate(rules):
+            if len(rule) == 2:
+                rules[idx] = "{} 00:00-24:00".format(rule)
+        ld_data["openingHours"] = rules
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if item["name"].startswith("CIRCLE K AUTOMAT "):
@@ -22,8 +28,12 @@ class CircleKNOSpider(CircleKDKSpider):
             item["name"] = "Circle K Truck"
         elif item["name"].startswith("CIRCLE K LADER "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K LADER ")
+            item["name"] = "Circle K"
         elif item["name"].startswith("CIRCLE K "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K ")
+        else:
+            item["branch"] = item.pop("name")
+            item["name"] = "Circle K"
 
         extract_google_position(item, response)
 
