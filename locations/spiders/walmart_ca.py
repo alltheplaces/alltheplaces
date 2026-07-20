@@ -21,6 +21,7 @@ class WalmartCASpider(Spider):
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 5,
+        "DOWNLOAD_TIMEOUT": 60,
         "ROBOTSTXT_OBEY": False,
     }
     base_url = "https://www.walmart.ca/orchestra/graphql/storeFinderNearbyNodesQuery"
