@@ -1,7 +1,7 @@
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
