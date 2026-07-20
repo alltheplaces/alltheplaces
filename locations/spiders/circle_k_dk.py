@@ -1,7 +1,7 @@
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
@@ -30,8 +30,8 @@ class CircleKDKSpider(SitemapSpider, StructuredDataSpider):
         elif item["name"].startswith("CIRCLE K MOTORVEJSCENTER "):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K MOTORVEJSCENTER ")
             item["name"] = "Circle K Motorvejscenter"
-        elif item["name"].startswith("CIRCLE K EV"):
-            item["branch"] = item.pop("name").removeprefix("CIRCLE K EV")
+        elif item["name"].startswith("CIRCLE K EV "):
+            item["branch"] = item.pop("name").removeprefix("CIRCLE K EV ")
             item["name"] = "Circle K"
             category = Categories.CHARGING_STATION
         elif item["name"].startswith("CIRCLE K "):
@@ -40,4 +40,29 @@ class CircleKDKSpider(SitemapSpider, StructuredDataSpider):
         extract_google_position(item, response)
 
         apply_category(category, item)
+
+        fuels = [
+            fuel.strip("/").rsplit("/", 1)[-1].removeprefix("Feature").removeprefix("Fuel")
+            for fuel in response.xpath('//*[@class="field-fuel-list"][1]//img/@src').getall()
+        ]
+
+        apply_yes_no(Fuel.ADBLUE, item, "AdBlue" in fuels)
+        apply_yes_no(Fuel.OCTANE_95, item, "Miles95" in fuels)
+        apply_yes_no(Fuel.OCTANE_95, item, "MilesPlus95" in fuels)
+        apply_yes_no(Fuel.DIESEL, item, "MilesDiesel" in fuels)
+        apply_yes_no(Fuel.DIESEL, item, "MilesPlusDiesel" in fuels)
+        apply_yes_no(Fuel.BIODIESEL, item, "HVO100" in fuels)
+        apply_yes_no(Fuel.ELECTRIC, item, "EVCharger" in fuels and category != Categories.CHARGING_STATION)
+
+        services = [
+            service.split("?")[0].rsplit("/", 1)[-1].removeprefix("Feature")
+            for service in response.xpath('//*[@itemprop="makesOffer"]//img/@src').getall()
+        ]
+
+        apply_yes_no(Extras.WIFI, item, "Wifi" in services)
+        apply_yes_no(Extras.CAR_WASH, item, "CarWash" in services or "CarWashJetWash" in services)
+        apply_yes_no(Extras.VACUUM_CLEANER, item, "VacuumCleaner" in services)
+        apply_yes_no(Extras.SHOWERS, item, "Shower" in services)
+        apply_yes_no(Extras.TOILETS, item, "ToiletsBoth" in services)
+
         yield item
