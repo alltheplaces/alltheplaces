@@ -1,27 +1,36 @@
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BeobankBESpider(SitemapSpider, StructuredDataSpider):
+class BeobankBESpider(CrawlSpider, StructuredDataSpider):
     name = "beobank_be"
     item_attributes = {"brand": "Beobank", "brand_wikidata": "Q14911971"}
-    allowed_domains = ["www.beobank.be"]
-    sitemap_urls = ["https://www.beobank.be/fr/sitemap.xml"]
-    sitemap_rules = [
-        (r"/nl/kantoor/vlaams-gewest/.+/\d+\.html$", "parse_sd"),
-        (r"/fr/agence/region-wallonne/.+/\d+\.html$", "parse_sd"),
-        (r"/fr/agence/region-de-bruxelles-capitale/.+/\d+\.html$", "parse_sd"),
+    start_urls = ["https://www.beobank.be/fr/agences/regions.html"]
+    rules = [
+        Rule(LinkExtractor(restrict_xpaths='//*[@class="ei_richlinkmenuitem"]')),
+        Rule(
+            LinkExtractor(
+                allow=r"https://www.beobank.be/fr/agences/ResultatsRechercheGeographique.aspx?inseeCode=\d+&postalCode=\d+"
+            )
+        ),
+        Rule(
+            LinkExtractor(allow=r"https://www.beobank.be/fr/agence/region-[^/]+/[^/]+/\d+\.html$"), callback="parse_sd"
+        ),
     ]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        if ld_data.get("geo"):
+            return
         item["branch"] = (
             item.pop("name").removeprefix("BEOBANK AG ").removeprefix("BEOBANK BR ").removeprefix("BEOBANK PRO CENTER ")
         )
-        item["ref"] = response.url.split("/")[-1].replace(".html", "")
+        item["ref"] = response.url
         item["country"] = "BE"
 
         services_text = " ".join(response.xpath("//table[@role='presentation']//p/text()").getall())

@@ -8,21 +8,26 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class HarrisScarfeAUSpider(SitemapSpider):
+class HarrisScarfeAUSpider(SitemapSpider, PlaywrightSpider):
     name = "harris_scarfe_au"
     item_attributes = {"brand": "Harris Scarfe", "brand_wikidata": "Q5665029"}
     sitemap_urls = ["https://www.harrisscarfe.com.au/sitemap/store/store-sitemap.xml"]
-    sitemap_rules = [
-        ("/store/", "parse"),
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    sitemap_rules = [("/store/", "parse")]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "ref": response.xpath('//div[@id="maps_canvas"]/@data-storeid').get(),
-            "name": response.xpath('//div[@id="maps_canvas"]/@data-storename').get(),
+            "branch": response.xpath('//div[@id="maps_canvas"]/@data-storename')
+            .get("")
+            .removeprefix("Harris Scarfe ")
+            .removesuffix(" (Homewares, Manchester & Apparel)")
+            .removesuffix(" (Homewares & Manchester)")
+            .strip(),
             "lat": response.xpath('//div[@id="maps_canvas"]/@data-latitude').get(),
             "lon": response.xpath('//div[@id="maps_canvas"]/@data-longitude').get(),
             "addr_full": re.sub(

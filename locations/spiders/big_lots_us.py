@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -17,13 +18,17 @@ class BigLotsUSSpider(JSONBlobSpider):
     drop_attributes = {"website", "name"}
 
     def pre_process_data(self, location: dict) -> None:
-        location.update(location.pop("place"))
+        if place := location.pop("place", None):
+            location.update(place)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if not feature.get("placeId"):
+            return
         if feature.get("photo"):
             item["image"] = feature["photo"]["url"]
         item["extras"]["ref:google:place_id"] = feature["placeId"]
         item["opening_hours"] = self.parse_opening_hours(feature)
+        apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
         yield item
 
     def parse_opening_hours(self, location: dict) -> OpeningHours:

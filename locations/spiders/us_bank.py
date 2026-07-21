@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlsplit, urlunsplit
 
 from scrapy.spiders import SitemapSpider
 
@@ -16,6 +17,11 @@ class UsBankSpider(SitemapSpider):
     ]
     sitemap_rules = [("/locations/([a-z-]*)/([.a-z-]*)/([.0-9a-z-]*)/", "parse_store_info")]
 
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            entry["loc"] = urlunsplit(urlsplit(entry["loc"])._replace(netloc="www.usbank.com"))
+            yield entry
+
     def opening_hours(self, hours):
         opening_hours = OpeningHours()
 
@@ -26,7 +32,7 @@ class UsBankSpider(SitemapSpider):
 
             opening_hours.add_range(day=day, open_time=start, close_time=end, time_format="%H:%M:%S")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store_info(self, response):
         data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())
@@ -44,16 +50,6 @@ class UsBankSpider(SitemapSpider):
         item["ref"] = branch_detail.get("branchNumber")
         item["located_in"] = branch_detail.get("inStoreNm")
         item["extras"]["fax"] = branch_detail.get("faxNumber")
-
-        imagesData = data["props"]["pageProps"].get("branchImagesData")
-        if imagesData is not None:
-            images = imagesData.get("entities", [])
-            if len(images) > 0:
-                links = images[0].get("links", [])
-                if len(links) > 0:
-                    item["image"] = links[0].get("href")
-                    if item["image"].endswith(".json"):
-                        item["image"] = item["image"][:-5]
 
         apply_yes_no(
             Extras.ATM, item, branch_detail.get("numberOfWalkUpATMs", 0) + branch_detail.get("numberOfDriveUpATMs", 0)

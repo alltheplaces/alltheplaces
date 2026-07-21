@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -9,25 +9,20 @@ from locations.dict_parser import DictParser
 
 class AedJPSpider(Spider):
     name = "aed_jp"
-
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield self.get_page(1)
-
-    def get_page(self, n):
-        return Request(
-            f"https://www.qqzaidanmap.jp/api/aed/list?limit=200&page={n}",
-            meta={"page": n},
+    def make_request(self, rank: str, page: int, limit: int = 200) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://www.qqzaidanmap.jp/api/aed/list?aed[install_prefecture_id]=&aed[install_address]=&aed[install_location_name]=&aed[rank]={rank}&limit={limit}&aed[install_type_id][]=&page={page}",
+            cb_kwargs=dict(rank=rank, page=page),
         )
 
-    def parse(self, response):
-        data = response.json()
-        aeds = data["aeds"]
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for rank in ["A", "B", "C", "D"]:
+            yield self.make_request(rank, 1)
 
-        for aed in aeds:
-            if aed["rank"] == "E":  # removes AEDs older than 8 years.
-                continue
+    def parse(self, response: Response, rank: str, page: int) -> Any:
+        for aed in response.json()["aeds"]:
             item = DictParser.parse(aed)
             item["ref"] = aed["id"]
             item["lat"] = aed["location"]["latitude"]
@@ -43,5 +38,5 @@ class AedJPSpider(Spider):
 
             yield item
 
-        if data["pages"]["current_page"] < data["pages"]["total_pages"]:
-            yield self.get_page(1 + response.meta["page"])
+        if page < response.json()["pages"]["total_pages"]:
+            yield self.make_request(rank, page + 1)

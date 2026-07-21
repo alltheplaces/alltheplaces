@@ -1,34 +1,36 @@
 import json
-import re
-from typing import Any
+from typing import Any, Iterable
 from urllib.parse import urljoin
 
 from scrapy.http import Response
-from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_PL, OpeningHours
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class NeonetPLSpider(Spider):
+class NeonetPLSpider(JSONBlobSpider):
     name = "neonet_pl"
     item_attributes = {"brand": "Neonet", "brand_wikidata": "Q11790622"}
     start_urls = ["https://www.neonet.pl/kontakt"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        raw_data = json.loads(re.search(r"salons\":(\[.+\]),\"navigation", response.text).group(1))
-        for location in raw_data:
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
-            item["street_address"] = merge_address_lines(location["address"]["lines"])
-            item["website"] = urljoin("https://www.neonet.pl/kontakt/", location["safetyName"])
+    def extract_json(self, response: Response) -> Any:
+        marker = "window.__INITIAL_STATE__['app'] = "
+        start = response.text.index(marker) + len(marker)
+        return json.JSONDecoder().raw_decode(response.text[start:])[0].get("salons", [])
 
-            oh = OpeningHours()
-            oh.add_ranges_from_string(merge_address_lines(location["openHours"]), DAYS_PL)
-            item["opening_hours"] = oh
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["street_address"] = ", ".join(feature["address"].get("lines") or [])
+        item["website"] = urljoin("https://www.neonet.pl/kontakt/", feature["safetyName"])
 
-            apply_category(Categories.SHOP_ELECTRONICS, item)
+        item["opening_hours"] = OpeningHours()
+        for rule in feature.get("openHoursStructured") or []:
+            for day_of_week in rule.get("dayOfWeek") or []:
+                item["opening_hours"].add_range(
+                    DAYS[day_of_week - 1], rule["openHour"], rule["closeHour"], time_format="%H:%M:%S"
+                )
 
-            yield item
+        apply_category(Categories.SHOP_ELECTRONICS, item)
+        yield item

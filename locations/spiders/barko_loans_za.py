@@ -1,23 +1,10 @@
-from typing import Iterable
+from typing import Any, Iterable
 
-from chompjs import parse_js_object
 from scrapy.http import Response
 
-from locations.dict_parser import DictParser
-from locations.google_url import url_to_coords
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-
-PROVINCES = {
-    "MPUMALANGA": "Mpumalanga",
-    "GAUTENG": "Gauteng",
-    "LIMPOPO": "Limpopo",
-    "FREE_STATE": "Free State",
-    "WESTERN_CAPE": "Western Cape",
-    "NORTHWEST": "North West",
-    "KWAZULU_NATAL": "KwaZulu-Natal",
-    "NORTHERN_CAPE": "Northern Cape",
-}
 
 
 class BarkoLoansZASpider(JSONBlobSpider):
@@ -26,28 +13,19 @@ class BarkoLoansZASpider(JSONBlobSpider):
         "brand": "Barko Loans",
         "brand_wikidata": "Q118185897",
     }
-    start_urls = ["https://www.barko.co.za/Barkomap.js.txt"]
+    start_urls = ["https://www.barko.co.za/Home/GetAllBranches"]
     no_refs = True
 
-    def extract_json(self, response):
-        return parse_js_object(response.text)
-
-    def parse_feature_dict(self, response: Response, feature_dict: dict) -> Iterable[Feature]:
-        for province, feature_list in feature_dict.items():
-            province_name = PROVINCES.get(province)
-            if province_name is None:
-                province_name = province
-                self.crawler.stats.inc_value(f"atp/{self.name}/unknown_province/{province}")
-            for feature in feature_list:
-                self.pre_process_data(feature)
-                item = DictParser.parse(feature)
-                item["state"] = province_name
-                yield from self.post_process_item(item, response, feature) or []
-
-    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        item["street_address"] = location["officeAddress"]
-        item["phone"] = location.get("officeNumber")
-        item["lat"], item["lon"] = url_to_coords(location.get("googleOfficeAddress"))
+        item["street_address"] = feature["branchOfficeAddress"]
+        item["city"] = feature["branchTown"]
+        item["state"] = feature["branchProvince"]
+        item["phone"] = feature.get("branchOfficeNumber")
+        item["email"] = feature.get("branchEmail")
+        item["lat"] = feature.get("branchLatitude")
+        item["lon"] = feature.get("branchLongitude")
+
+        apply_category(Categories.SHOP_MONEY_LENDER, item)
 
         yield item

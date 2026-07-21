@@ -5,7 +5,6 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class KokoroGBSpider(Spider):
@@ -14,11 +13,13 @@ class KokoroGBSpider(Spider):
     start_urls = ["https://kokorouk.com/locations/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath('//div[contains(@class, "wp-block-group-is-layout-flex")]'):
+        for location in response.xpath('//*[@class="location-collapse-list"]'):
             item = Feature()
-            item["ref"] = item["branch"] = location.xpath("h2/text()").get()
-            item["addr_full"] = merge_address_lines(location.xpath("p/text()").getall())
-
+            item["branch"] = item["ref"] = location.xpath('.//*[@class="body-1"]/text()').get()
+            item["addr_full"] = location.xpath('.//*[@class="body-3"]/text()').get()
+            item["lat"], item["lon"] = (
+                response.xpath('//*[@class="location"]/text()').get().replace("{", "").replace("}", "").split(",")
+            )
             apply_category(Categories.FAST_FOOD, item)
 
             yield item

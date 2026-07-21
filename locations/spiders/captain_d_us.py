@@ -1,25 +1,25 @@
-from typing import Any
+from typing import Any, Iterable
 
 import chompjs
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CaptainDUSSpider(SitemapSpider):
+class CaptainDUSSpider(SitemapSpider, StructuredDataSpider):
     name = "captain_d_us"
     item_attributes = {"brand": "Captain D's", "brand_wikidata": "Q5036616"}
-    sitemap_urls = ["https://locations.captainds.com/sitemap_index.xml"]
-    sitemap_rules = [(r"https://locations.captainds.com/ll/[^/]+/[^/]+/[^/]+/[a-z-0-9]+/$", "parse")]
+    sitemap_urls = ["https://locations.captainds.com/sitemap.xml"]
+    sitemap_rules = [(r"/[a-z]{2}/[^/]+/[^/]+/[^/]+$", "parse_sd")]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        raw_data = chompjs.parse_js_object(response.xpath('//*[@type="application/ld+json"][2]/text()').get().strip())
-        item = DictParser.parse(raw_data)
-        item["ref"] = item["website"] = response.url
-        oh = OpeningHours()
-        for day_time in response.xpath('//*[@itemprop="openingHours"]/@content').getall():
-            oh.add_ranges_from_string(day_time)
-        item["opening_hours"] = oh
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["ref"] = response.url
+        for block in response.xpath('//script[@type="application/ld+json"]/text()').getall():
+            if geo := chompjs.parse_js_object(block).get("credentialSubject", {}).get("geo"):
+                item["lat"] = geo.get("latitude")
+                item["lon"] = geo.get("longitude")
+        apply_category(Categories.FAST_FOOD, item)
         yield item

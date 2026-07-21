@@ -29,13 +29,13 @@ class Categories(Enum):
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
 
-    KINDERGARTEN = {"education": "kingergarten", "amenity": "kindergarten"}
-    SCHOOL = {"education": "school", "amenity": "school"}
-    COLLEGE = {"education": "college", "amenity": "college"}
-    UNIVERSITY = {"education": "university", "amenity": "university"}
-    LANGUAGE_SCHOOL = {"education": "language_school", "amenity": "language_school"}
+    KINDERGARTEN = {"amenity": "kindergarten"}
+    SCHOOL = {"amenity": "school"}
+    COLLEGE = {"amenity": "college"}
+    UNIVERSITY = {"amenity": "university"}
+    LANGUAGE_SCHOOL = {"amenity": "language_school"}
     NATURE_SCHOOL = {"education": "nature_school"}
-    TRAINING = {"education": "training", "amenity": "training"}
+    TRAINING = {"amenity": "training"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -314,18 +314,18 @@ class Categories(Enum):
     CHARGING_STATION = {"amenity": "charging_station"}
     CHILD_CARE = {"amenity": "childcare"}
     CINEMA = {"amenity": "cinema"}
-    CLINIC = {"amenity": "clinic", "healthcare": "clinic"}
-    CLINIC_URGENT = {"amenity": "clinic", "healthcare": "clinic", "healthcare:speciality": "urgent"}
+    CLINIC = {"amenity": "clinic"}
+    CLINIC_URGENT = {"amenity": "clinic", "healthcare:speciality": "urgent"}
     COFFEE_SHOP = {"amenity": "cafe", "cuisine": "coffee_shop"}
     COMMUNITY_CENTRE = {"amenity": "community_centre"}
     COMPRESSED_AIR = {"amenity": "compressed_air"}
     CONFERENCE_CENTRE = {"amenity": "conference_centre"}
     COURTHOUSE = {"amenity": "courthouse"}
     DEFIBRILLATOR = {"emergency": "defibrillator"}
-    DENTIST = {"amenity": "dentist", "healthcare": "dentist"}
+    DENTIST = {"amenity": "dentist"}
     DIALYSIS = {"healthcare": "dialysis"}
     DISASTER_HELP_POINT = {"emergency": "disaster_help_point"}
-    DOCTOR_GP = {"amenity": "doctors", "healthcare": "doctor", "healthcare:speciality": "general"}
+    DOCTOR_GP = {"amenity": "doctors", "healthcare:speciality": "community"}
     DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     EVENTS_VENUE = {"amenity": "events_venue"}
@@ -336,7 +336,7 @@ class Categories(Enum):
     GRIT_BIN = {"amenity": "grit_bin"}
     HIGHWAY_SERVICES = {"highway": "services"}
     HOSPICE = {"healthcare": "hospice"}
-    HOSPITAL = {"amenity": "hospital", "healthcare": "hospital"}
+    HOSPITAL = {"amenity": "hospital"}
     HOTEL = {"tourism": "hotel"}
     INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
@@ -362,7 +362,7 @@ class Categories(Enum):
     OPTOMETRIST = {"healthcare": "optometrist"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
     PAYMENT_CENTRE = {"amenity": "payment_centre"}
-    PHARMACY = {"amenity": "pharmacy", "healthcare": "pharmacy"}
+    PHARMACY = {"amenity": "pharmacy"}
     PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
     PLACE_OF_WORSHIP = {"amenity": "place_of_worship"}
@@ -834,6 +834,7 @@ class PaymentMethods(Enum):
     HUAWEI_PAY = "payment:huawei_pay"
     ID = "payment:id"
     JCB = "payment:jcb"
+    KAKAO_PAY = "payment:kakaopay"
     KUSTERS = "payment:kusters"
     LINE_PAY = "payment:line_pay"
     MAES = "payment:maes"
@@ -851,8 +852,10 @@ class PaymentMethods(Enum):
     MIR = "payment:mir"
     MPESA = "payment:mpesa"
     NANACO = "payment:nanaco"
+    NAVER_PAY = "payment:naver_pay"
     NOTES = "payment:notes"
     OCTA_PLUS = "payment:octa_plus"
+    PAYCO = "payment:payco"
     PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
     POWERCARD = "payment:powercard"
@@ -880,6 +883,7 @@ class PaymentMethods(Enum):
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
     XXIMO = "payment:xximo"
+    ZERO_PAY = "payment:zero_pay"
 
 
 payment_method_aliases = {
