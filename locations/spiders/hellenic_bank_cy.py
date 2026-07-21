@@ -1,17 +1,19 @@
 from typing import Any
 
 import chompjs
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class HellenicBankCYSpider(Spider):
+class HellenicBankCYSpider(PlaywrightSpider):
     name = "hellenic_bank_cy"
     item_attributes = {"brand_wikidata": "Q5707160"}
     start_urls = ["https://www.hellenicbank.com/el/personal/locations"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
