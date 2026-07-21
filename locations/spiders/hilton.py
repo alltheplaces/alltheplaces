@@ -5,10 +5,9 @@ import requests
 from chompjs import parse_js_object
 from scrapy.http import Response
 
-from locations.playwright_spider import PlaywrightSpider
-
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import CHROME_LATEST
 
