@@ -17,6 +17,7 @@ class KingPieZASpider(SuperStoreFinderSpider):
 
     def parse_item(self, item: Feature, location: Selector) -> Iterable[Feature]:
         item["branch"] = item.pop("name", None)
+        item.pop("phone", None)
 
         if hours := location.xpath("./operatingHours/text()").get():
             item["opening_hours"] = OpeningHours()
