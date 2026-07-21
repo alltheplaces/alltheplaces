@@ -12,7 +12,7 @@ class CityOfCanningTreesAUSpider(ArcGISFeatureServerSpider):
     item_attributes = {"operator": "City of Canning", "operator_wikidata": "Q56477868", "state": "WA"}
     host = "services-ap1.arcgis.com"
     context_path = "rpSo5yFb78UOvPOG/ArcGIS"
-    service_id = "GreenSpace_Public_View"
+    service_id = "Tree_Establishment_-__Primary_Data_view"
     layer_id = "0"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
