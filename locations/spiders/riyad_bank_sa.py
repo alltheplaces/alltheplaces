@@ -39,15 +39,17 @@ class RiyadBankSASpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["locations"]:
-            item = DictParser.parse(location)  # maps Latitude/Longitude -> lat/lon, Phone -> phone
+            item = DictParser.parse(location)  # maps Latitude/Longitude -> lat/lon
             item["ref"] = location["_id"]
             # Arabic branch name (strip the occasional leading branch-code prefix); NSI supplies name=بنك الرياض
             item["branch"] = re.sub(r"^[\d٠-٩]+\.?\s+", "", location["Title_Name_AR"])
             item["addr_full"] = location["Address_AR"]  # free-form "street, city, region"
             item["city"] = (location.get("BranchLocationCity") or {}).get("ar")
             item.pop("state", None)  # "Region" is a coarse bank grouping (e.g. Hail -> Eastern); leave state to coords
-            if (item.get("phone") or "").replace("-", "").startswith("800"):
-                item.pop("phone")  # shared call-centre number, not the branch's own line
+            # Phone may hold several <br/>-separated numbers; drop "NA" and the shared 800 call-centre line.
+            phones = [p.strip() for p in re.split(r"<br\s*/?>", location.get("Phone") or "")]
+            phones = [p for p in phones if p and p.upper() != "NA" and not p.replace("-", "").startswith("800")]
+            item["phone"] = "; ".join(phones) or None
             item["opening_hours"] = self.parse_hours(location.get("OpeningHours"))
 
             apply_category(Categories.BANK, item)
