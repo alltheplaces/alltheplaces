@@ -21,8 +21,7 @@ class WestpacNZSpider(CamoufoxSpider):
             "branches"
         ]:
             item = DictParser.parse(location)
-            if "0800 400 600" in (item.get("phone") or ""):
-                item["phone"] = None
+            item["phone"] = None
             if location["siteName"].startswith("Community Banking - "):
                 item["branch"] = location["siteName"].removeprefix("Community Banking - ")
                 item["name"] = "Westpac Community Banking"
