@@ -51,16 +51,6 @@ class UsBankSpider(SitemapSpider):
         item["located_in"] = branch_detail.get("inStoreNm")
         item["extras"]["fax"] = branch_detail.get("faxNumber")
 
-        imagesData = data["props"]["pageProps"].get("branchImagesData")
-        if imagesData is not None:
-            images = imagesData.get("entities", [])
-            if len(images) > 0:
-                links = images[0].get("links", [])
-                if len(links) > 0:
-                    item["image"] = links[0].get("href")
-                    if item["image"].endswith(".json"):
-                        item["image"] = item["image"][:-5]
-
         apply_yes_no(
             Extras.ATM, item, branch_detail.get("numberOfWalkUpATMs", 0) + branch_detail.get("numberOfDriveUpATMs", 0)
         )
