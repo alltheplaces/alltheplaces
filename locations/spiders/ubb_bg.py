@@ -13,7 +13,6 @@ class UbbBGSpider(Spider):
     name = "ubb_bg"
     item_attributes = {"brand": "ОББ", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
