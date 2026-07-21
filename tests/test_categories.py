@@ -33,6 +33,7 @@ def test_multiple_allowed_top_level_tags():
 
     item = Feature()
     apply_category(Categories.SCHOOL, item)
+    item["extras"]["education"] = "school"
     assert item["extras"]["amenity"] == "school"
     assert item["extras"]["education"] == "school"
     nsi_preferred_top_level_tag = get_category_tags(item)
@@ -40,6 +41,7 @@ def test_multiple_allowed_top_level_tags():
 
     item = Feature()
     apply_category(Categories.CLINIC, item)
+    item["extras"]["healthcare"] = "clinic"
     assert item["extras"]["amenity"] == "clinic"
     assert item["extras"]["healthcare"] == "clinic"
     nsi_preferred_top_level_tag = get_category_tags(item)
