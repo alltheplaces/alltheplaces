@@ -14,8 +14,8 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class AcmaRrlAUSpider(Spider):
     name = "acma_rrl_au"
-    allowed_domains = ["web.acma.gov.au"]
-    start_urls = ["https://web.acma.gov.au/rrl-updates/spectra_rrl.zip"]
+    allowed_domains = ["cdn.acma.gov.au"]
+    start_urls = ["https://cdn.acma.gov.au/rrl/spectra_rrl.zip"]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DOWNLOAD_TIMEOUT": 120,
