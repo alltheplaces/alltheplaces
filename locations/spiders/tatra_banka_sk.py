@@ -1,19 +1,22 @@
+import json
 from typing import Any, AsyncIterator
 
-from scrapy import FormRequest, Spider
+from scrapy import FormRequest
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class TatraBankaSKSpider(Spider):
+class TatraBankaSKSpider(PlaywrightSpider):
     name = "tatra_banka_sk"
     item_attributes = {"brand": "Tatra banka", "brand_wikidata": "Q1718069"}
     requires_proxy = True
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Any]:
         yield FormRequest(
@@ -46,7 +49,7 @@ class TatraBankaSKSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json().get("places", []):
+        for location in json.loads(response.xpath("//pre//text()").get()).get("places", []):
             if not location.get("active", True) or location.get("temporarilyClosed"):
                 continue
 
