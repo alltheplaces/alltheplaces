@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlsplit, urlunsplit
 
 from scrapy.spiders import SitemapSpider
 
@@ -16,6 +17,11 @@ class UsBankSpider(SitemapSpider):
     ]
     sitemap_rules = [("/locations/([a-z-]*)/([.a-z-]*)/([.0-9a-z-]*)/", "parse_store_info")]
 
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            entry["loc"] = urlunsplit(urlsplit(entry["loc"])._replace(netloc="www.usbank.com"))
+            yield entry
+
     def opening_hours(self, hours):
         opening_hours = OpeningHours()
 
@@ -26,7 +32,7 @@ class UsBankSpider(SitemapSpider):
 
             opening_hours.add_range(day=day, open_time=start, close_time=end, time_format="%H:%M:%S")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store_info(self, response):
         data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())
