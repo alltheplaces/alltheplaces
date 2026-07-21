@@ -3,8 +3,9 @@ from typing import Any
 
 import requests
 from chompjs import parse_js_object
-from scrapy import Spider
 from scrapy.http import Response
+
+from locations.playwright_spider import PlaywrightSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -12,10 +13,9 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import CHROME_LATEST
 
 
-class HiltonSpider(Spider):
+class HiltonSpider(PlaywrightSpider):
     name = "hilton"
     start_urls = ["https://www.hilton.com/en/locations/hilton-hotels/"]
-    is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
         "ROBOTSTXT_OBEY": False,
