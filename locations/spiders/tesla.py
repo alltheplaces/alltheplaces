@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Dict, Iterable, List
+from typing import AsyncIterator, Iterable
 
 import chompjs
 from scrapy import Spider
@@ -28,9 +28,9 @@ class TeslaSpider(Spider):
     def parse_json_subrequest(self, response: Response) -> Iterable[Request]:
         json_data = self.extract_json(response)
         locations = self.select_locations(json_data["data"]["data"])
-        for slug, types in list(locations.items())[:100]:
+        for slug, types in locations.items():
             yield Request(
-                url=f"https://www.tesla.com/api/findus/get-location-details?locationSlug={slug}&functionTypes={types}&locale=en_US&isInHkMoTw=false",
+                url=f"https://www.tesla.com/api/findus/get-location-details?locationSlug={slug}&functionTypes={','.join(types)}&locale=en_US&isInHkMoTw=false",
                 callback=self.parse_location,
             )
 
@@ -44,7 +44,7 @@ class TeslaSpider(Spider):
         if data.get("supercharger_function"):
             yield self.build_supercharger(data)
 
-    def extract_json(self, response: Response) -> dict | List[dict]:
+    def extract_json(self, response: Response) -> dict | list[dict]:
         # For some reason, the scrapy_zyte_api library doesn't detect this as a ScrapyTextResponse, so we have to do the text encoding ourselves.
         # Throws an error when caching is enabled.
         try:
@@ -63,6 +63,9 @@ class TeslaSpider(Spider):
         sales = next((f for f in location["functions"] if f["name"] == "Tesla_Center_Sales"), None)
         if sales:
             item["name"] = sales["customer_facing_name"]
+        else:
+            gallery = next((f for f in location["functions"] if f["name"] == "Tesla_Center_Gallery"), None)
+            item["name"] = gallery["customer_facing_name"]
         sales_func = location["sales_function"]
         if email := self.parse_email(sales_func.get("store_email")):
             item["email"] = email
@@ -81,9 +84,8 @@ class TeslaSpider(Spider):
             item["website"] = self.parse_url("service", item["ref"])
         else:
             collision = next((f for f in location["functions"] if f["name"] == "Tesla_Center_Collision"), None)
-            if collision:
-                item["name"] = collision["customer_facing_name"]
-                item["website"] = self.parse_url("bodyshop", item["ref"])
+            item["name"] = collision["customer_facing_name"]
+            item["website"] = self.parse_url("bodyshop", item["ref"])
         service_func = location["service_function"]
         if email := self.parse_email(service_func.get("service_center_email")):
             item["email"] = email
@@ -144,15 +146,18 @@ class TeslaSpider(Spider):
     # Skip if "Coming Soon" - no content to capture yet
     # Selection only those in categories list
     # Merge same slugs into one entry, combining types
-    def select_locations(self, locations: List[dict]) -> Dict[str, str]:
-        categories = {"sales", "service", "bodyshop", "supercharger", "nacs", "party"}
+    def select_locations(self, locations: list[dict]) -> dict[str, list[str]]:
+        categories = {"sales", "service", "bodyshop", "gallery", "supercharger", "nacs", "party"}
         slug_mapping: dict[str, list[str]] = {}
         for loc in locations:
             if not isinstance(loc, dict):
                 continue
             slug = loc.get("location_url_slug")
-            loc_types = loc.get("location_type", [])
-            if not slug or not categories.intersection(loc_types):
+            matched = [c for c in loc.get("location_type", []) if c in categories]
+            if not matched or not slug:
                 continue
-            slug_mapping.setdefault(slug, []).extend(loc_types)
-        return {slug: ",".join(types) for slug, types in slug_mapping.items()}
+            existing = slug_mapping.setdefault(slug, [])
+            for category in matched:
+                if category not in existing:
+                    existing.append(category)
+        return slug_mapping
