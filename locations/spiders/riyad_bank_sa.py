@@ -1,3 +1,4 @@
+import re
 from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
@@ -39,7 +40,8 @@ class RiyadBankSASpider(Spider):
         for location in response.json()["locations"]:
             item = DictParser.parse(location)  # maps Latitude/Longitude -> lat/lon, Phone -> phone
             item["ref"] = location["_id"]
-            item["branch"] = location["Title_Name_AR"]  # Arabic branch name; NSI supplies name=بنك الرياض
+            # Arabic branch name (strip the occasional leading branch-code prefix); NSI supplies name=بنك الرياض
+            item["branch"] = re.sub(r"^[\d٠-٩]+\.?\s+", "", location["Title_Name_AR"])
             item["addr_full"] = location["Address_AR"]  # free-form "street, city, region"
             item["city"] = (location.get("BranchLocationCity") or {}).get("ar")
             item.pop("state", None)  # "Region" is a coarse bank grouping (e.g. Hail -> Eastern); leave state to coords
