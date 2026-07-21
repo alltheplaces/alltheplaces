@@ -1,21 +1,20 @@
 import json
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
 
-class WestpacNZSpider(Spider):
+class WestpacNZSpider(CamoufoxSpider):
     name = "westpac_nz"
     item_attributes = {"brand": "Westpac", "brand_wikidata": "Q2031726"}
     start_urls = ["https://www.westpac.co.nz/contact-us/branch-finder/"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = "NZ"
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(response.xpath('//div[@class="js-branch-finder-map container"]/@data-props').get())[
@@ -52,7 +51,13 @@ class WestpacNZSpider(Spider):
                     pass
                 else:
                     open_time, closed_time = location[hours_key].split(" - ")
-                    item["opening_hours"].add_range(day, open_time, closed_time, "%H:%M%p")
+                    item["opening_hours"].add_range(day, open_time, closed_time, "%I:%M%p")
+
+            if isinstance(item["opening_hours"], OpeningHours) and not item["opening_hours"].day_hours:
+                # Community banking sites list every day as closed, then give
+                # their fortnightly visiting schedule as free text in "note".
+                # Emitting "Mo-Su closed" would wrongly state they never open.
+                item["opening_hours"] = None
 
             match location["locationType"]:
                 case "Branch":
