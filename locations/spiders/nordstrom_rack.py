@@ -1,9 +1,6 @@
-import re
 from typing import Iterable
-from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 
-from scrapy import Selector, Spider
-from scrapy.http import Response, TextResponse
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
