@@ -10,3 +10,4 @@ class VerticheMXSpider(WPStoreLocatorSpider):
     search_radius = 24
     max_results = 25
     days = DAYS_ES
+    requires_proxy = True
