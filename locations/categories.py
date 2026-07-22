@@ -546,53 +546,6 @@ top_level_tags = [
     "waterway",
 ]
 
-nsi_preferred_top_level_tag_mapping = [
-    (("education", "college"), ("amenity", "college")),
-    (("education", "driving_school"), ("amenity", "driving_school")),
-    (("education", "kindergarten"), ("amenity", "kindergarten")),
-    (("education", "language_school"), ("amenity", "language_school")),
-    (("education", "music_school"), ("amenity", "music_school")),
-    (("education", "prep_school"), ("amenity", "prep_school")),
-    (("education", "school"), ("amenity", "school")),
-    (("education", "training"), ("amenity", "training")),
-    (("education", "university"), ("amenity", "university")),
-    (("healthcare", "clinic"), ("amenity", "clinic")),
-    (("healthcare", "dentist"), ("amenity", "dentist")),
-    (("healthcare", "doctor"), ("amenity", "doctors")),
-    (("healthcare", "hospital"), ("amenity", "hospital")),
-    (("healthcare", "pharmacy"), ("amenity", "pharmacy")),
-]
-
-
-def remap_category_tags_to_nsi_preferred(source: Feature | Enum | Mapping) -> dict:
-    """
-    For some types of features, OSM allows and sometimes prefers multiple top
-    level tagging schemes be used at the same time. NSI however selects a
-    single top level tag to use for matching purposes. This function will
-    remap OSM top level tags to NSI preferred top level tags, allowing NSI
-    matching to occur.
-    :param source: Either a Feature, Enum or dictionary which contains
-                   categories (such as "amenity": "pub").
-    :return dictionary of tags where OSM top level tags have been remapped
-            to NSI preferred top level tags. Other tags which are not top
-            level tags are retained by this function.
-    """
-    if isinstance(source, Feature):
-        tags = source.get("extras", {})
-    elif isinstance(source, Enum):
-        tags = source.value
-    elif isinstance(source, Mapping):
-        tags = source
-
-    remapped_tags = dict(tags)
-    for remapping_pair in nsi_preferred_top_level_tag_mapping:
-        if remapping_pair[0][0] in tags.keys():
-            if tags[remapping_pair[0][0]] == remapping_pair[0][1]:
-                remapped_tags.pop(remapping_pair[0][0])
-                remapped_tags[remapping_pair[1][0]] = remapping_pair[1][1]
-
-    return remapped_tags
-
 
 def get_category_tags(source: Feature | Enum | Mapping) -> dict:
     """
@@ -603,9 +556,10 @@ def get_category_tags(source: Feature | Enum | Mapping) -> dict:
 
     Note: OSM allows and sometimes prefers multiple top level tagging schemes
     be used at the same time for individual features. NSI however selects only
-    one tagging scheme to use for matching. If the supplied set of tags uses
-    multiple top level tagging schemes, this function will only return the NSI
-    preferred top level tag.
+    one tagging scheme to use for matching. Whilst this function will return
+    `amenity=clinic` and `healthcare=clinic` as two duplicative top level
+    tags, ATP internally intends to follow NSI in selecting only one top level
+    tag to use per feature.
 
     :param source: Either a Feature, Enum or dictionary which
                    contains categories (such as "amenity": "pub").
@@ -620,11 +574,9 @@ def get_category_tags(source: Feature | Enum | Mapping) -> dict:
     elif isinstance(source, Mapping):
         tags = source
 
-    nsi_preferred_tags = remap_category_tags_to_nsi_preferred(tags)
-
     categories = {}
     for top_level_tag in top_level_tags:
-        if v := nsi_preferred_tags.get(top_level_tag):
+        if v := tags.get(top_level_tag):
             categories[top_level_tag] = v
 
     if len(categories.keys()) > 1 and categories.get("shop") == "yes":
