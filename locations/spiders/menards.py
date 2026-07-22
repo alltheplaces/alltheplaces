@@ -19,7 +19,6 @@ class MenardsSpider(JSONBlobSpider, CamoufoxSpider):
         "CAMOUFOX_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script", "xhr", "fetch"],
         "CAMOUFOX_DEFAULT_NAVIGATION_TIMEOUT": 120000,
     }
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
