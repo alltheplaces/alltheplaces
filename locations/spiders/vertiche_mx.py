@@ -7,7 +7,7 @@ class VerticheMXSpider(WPStoreLocatorSpider):
     item_attributes = {"brand": "Vertiche", "brand_wikidata": "Q113215945"}
     allowed_domains = ["vertiche.mx"]
     iseadgg_countries_list = ["MX"]
-    search_radius = 24
-    max_results = 25
+    search_radius = 315
+    max_results = 100
     days = DAYS_ES
     requires_proxy = True
