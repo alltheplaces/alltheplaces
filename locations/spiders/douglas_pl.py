@@ -25,7 +25,7 @@ class DouglasPLSpider(PlaywrightSpider):
             item = DictParser.parse(data)
             item["phone"] = None
             item["ref"] = item.pop("name")
-            item["branch"] = data["displayName"]
+            item["branch"] = data.get("displayName")
             item["website"] = response.urljoin(data.get("url"))
 
             apply_category(Categories.SHOP_PERFUMERY, item)
