@@ -7,12 +7,14 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class BpsPLSpider(Spider):
     name = "bps_pl"
     item_attributes = {"brand": "Bank Polskiej Spółdzielczości", "brand_wikidata": "Q9165001"}
     start_urls = ["https://mojbank.pl/znajdz-placowke"]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         token = json.loads(response.xpath('//script[@type="application/json"]/text()').get()).get("csrf.token")

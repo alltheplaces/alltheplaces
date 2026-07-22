@@ -1,26 +1,21 @@
+import json
 from typing import Any
 
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
-from locations.items import Feature
+from locations.dict_parser import DictParser
 
 
-class CornerstoneHealthcareGroupUSSpider(CrawlSpider):
+class CornerstoneHealthcareGroupUSSpider(Spider):
     name = "cornerstone_healthcare_group_us"
     item_attributes = {"brand": "Cornerstone Healthcare Group"}
-    start_urls = ["https://cornerstonehospitals.com/locations"]
-    rules = [Rule(LinkExtractor(r"/locations/[^/]+/[^/]+$"), callback="parse")]
+    start_urls = ["https://www.cornerstonehospitals.com/locations"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["name"] = self.item_attributes["brand"]
-        item["branch"] = response.xpath("//h1//text()").get()
-        item["addr_full"] = response.xpath('//*[@class="cmp-text"]//p//text()').get().replace("|", "")
-        item["website"] = item["ref"] = response.url
-        extract_google_position(item, response)
-        apply_category(Categories.HOSPITAL, item)
-        yield item
+        for location in json.loads(response.xpath("//@data-markers-list").get()):
+            item = DictParser.parse(location)
+            item["website"] = item["ref"] = location["locationPagePath"]
+            apply_category(Categories.HOSPITAL, item)
+            yield item

@@ -1,11 +1,12 @@
 import json
 from typing import Any
 
-from scrapy import Request
+from scrapy import FormRequest, Request
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -47,11 +48,31 @@ class CircleKPLSpider(Spider):
     start_urls = ["https://www.circlek.pl/wyszukaj-stacje"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = json.loads(response.xpath('//script[@data-drupal-selector="drupal-settings-json"]/text()').get())
+        form_build_id = response.xpath('//*[@name="form_build_id"]/@value').get()
+        form_id = response.xpath('//*[@name="form_id"]/@value').get()
+        page_library = json.loads(response.xpath('//*[@type="application/json"]/text()').get())["ajaxPageState"][
+            "libraries"
+        ]
+        yield FormRequest(
+            url="https://www.circlek.pl/wyszukaj-stacje?ajax_form=1&_wrapper_format=drupal_ajax",
+            formdata={
+                "ajax_page_state[libraries]": page_library,
+                "form_build_id": form_build_id,
+                "form_id": form_id,
+                "_triggering_element_value": "Szukaj",
+                "_triggering_element_name": "op",
+            },
+            headers={
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "accept": "application/json, text/javascript, */*; q=0.01",
+            },
+            method="POST",
+            callback=self.parse_locations,
+        )
 
-        for location in data["ck_sim_search"]["station_results"].values():
-            if location["/sites/{siteId}"]["status"] != "Active":
-                continue
+    def parse_locations(self, response):
+        data = DictParser.get_nested_key(response.json(), "station_results")
+        for location in data.values():
             item = Feature()
             item["ref"] = str(location["/sites/{siteId}"]["id"])
             item["lat"] = location["/sites/{siteId}/location"]["lat"]

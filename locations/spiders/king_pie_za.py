@@ -1,26 +1,29 @@
 import re
+from typing import Iterable
 
+from parsel import Selector
+
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
-from locations.json_blob_spider import JSONBlobSpider
+from locations.items import Feature
+from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 
 
-# A variant on the SuperStoreFinder plugin
-class KingPieZASpider(JSONBlobSpider):
+class KingPieZASpider(SuperStoreFinderSpider):
     name = "king_pie_za"
     item_attributes = {"brand": "King Pie", "brand_wikidata": "Q116619039"}
-    start_urls = ["https://www.kingpie.co.za/wp-content/uploads/ssf-wp-uploads/ssf-data.json"]
-    locations_key = "item"
+    allowed_domains = ["kingpie.co.za"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def post_process_item(self, item, response, location):
-        if item["website"] == "https://www.kingpie.co.za/":
-            item.pop("website")
+    def parse_item(self, item: Feature, location: Selector) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", None)
+        item.pop("phone", None)
 
-        if item["phone"] and item["phone"].replace(" ", "") == "0823350236":
-            item.pop("phone")
+        if hours := location.xpath("./operatingHours/text()").get():
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(
+                re.sub(r"<[^>]*>|&nbsp;", " ", hours).replace("24hrs", "00:00 - 23:59")
+            )
 
-        item["opening_hours"] = oh = OpeningHours()
-        oh.add_ranges_from_string(
-            re.sub(r"<[^>]*>|&nbsp;", " ", location["operatingHours"]).replace("24hrs", "00:00 - 23:59")
-        )
+        apply_category(Categories.FAST_FOOD, item)
         yield item
