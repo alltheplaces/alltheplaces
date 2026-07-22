@@ -21,6 +21,8 @@ class VolksbankATSpider(scrapy.Spider):
         for data in response.json()[0].get("all"):
             for store in data.get("filialen").get("all"):
                 if "volksbank" in store.get("bankname").lower():
+                    if not store.get("breitengrad") or not store.get("laengengrad"):
+                        continue
                     item = Feature()
                     item["branch"] = store.get("filialname")
                     item["street_address"] = store.get("strasse")
