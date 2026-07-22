@@ -1,13 +1,16 @@
-from locations.storefinders.sweetiq import SweetIQSpider
+from locations.categories import Categories, apply_category
+from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 
 
-class QuesadaCASpider(SweetIQSpider):
+class QuesadaCASpider(SuperStoreFinderSpider):
     name = "quesada_ca"
     item_attributes = {"brand": "Quesada", "brand_wikidata": "Q66070360"}
-    start_urls = ["https://locations.quesada.ca/"]
-    custom_settings = {"DOWNLOAD_DELAY": 2}
+    allowed_domains = ["locations.quesada.ca"]
 
-    def parse_item(self, item, location, **kwargs):
-        item.pop("email")
-        item.pop("website")
+    def parse_item(self, item, location):
+        item.pop("email", None)
+        item.pop("website", None)
+        if name := item.pop("name", None):
+            item["branch"] = name.removeprefix("Quesada - ")
+        apply_category(Categories.FAST_FOOD, item)
         yield item
