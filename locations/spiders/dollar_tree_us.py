@@ -11,6 +11,7 @@ class DollarTreeUSSpider(YextAnswersSpider):
     api_key = "7a860787290ef5396ebe3ffe229d96c3"
     experience_key = "pages-locator-usa-only"
     feature_type = "dollar-tree-usa"
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         item.pop("facebook", None)
