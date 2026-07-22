@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
+from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
 from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -15,7 +15,8 @@ class FreseniusKidneyCareUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("image", None)  # Generic brand image, not per-location
-        apply_category({"amenity": "clinic", "healthcare": "dialysis", "healthcare:speciality": "nephrology"}, item)
+        apply_category(Categories.DIALYSIS, item)
+        apply_healthcare_specialities(HealthcareSpecialities.NEPHROLOGY, item)
 
         if item["name"].endswith("- Closed") or item["name"].endswith(" (Closed)"):
             set_closed(item)

@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -22,6 +22,6 @@ class DeHypotheekshopNLSpider(JSONBlobSpider):
         for rule in feature.get("meet_times", []):
             for time in rule["times"]:
                 item["opening_hours"].add_range(DAYS[rule["day"] - 1], time["from"], time["to"], time_format="%H:%M:%S")
-        apply_category({"office": "mortgage"}, item)
+        apply_category(Categories.OFFICE_MORTGAGE, item)
 
         yield item

@@ -41,7 +41,7 @@ class VolkswagenBESpider(Spider):
                 shop_item = deepcopy(item)
                 shop_item["ref"] = f"{item['ref']}-SHOP"
                 apply_category(Categories.SHOP_CAR, shop_item)
-                apply_yes_no(Extras.USED_CAR_SALES, item, item["brand"] == "My Way")
+                apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, item, item["brand"] == "My Way")
                 yield shop_item
             if location.get("APRESVENTE"):  # After Sale
                 service_item = deepcopy(item)

@@ -29,5 +29,5 @@ class LovesUSSpider(scrapy.Spider):
             elif "countrystore" in store["mapPinUrl"].lower():
                 apply_category(Categories.FUEL_STATION, item)
             else:
-                apply_category({"highway": "services"}, item)
+                apply_category(Categories.HIGHWAY_SERVICES, item)
             yield item

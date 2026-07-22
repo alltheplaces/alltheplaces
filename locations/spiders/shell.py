@@ -55,7 +55,7 @@ class ShellSpider(GeoMeSpider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
         if "charging" in amenities or "electric_charging_other" in fuels or "shell_recharge" in fuels:
-            apply_yes_no("fuel:electricity", item, True)
+            apply_yes_no(Fuel.ELECTRIC, item, True)
 
         apply_yes_no(Extras.TOILETS, item, any("toilet" in a for a in amenities))
         apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, "wheelchair_accessible_toilet" in amenities)

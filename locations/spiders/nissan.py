@@ -79,8 +79,7 @@ class NissanSpider(scrapy.Spider):
                 sales_item = item.deepcopy()
                 sales_item["ref"] = f"{item['ref']}-sales"
                 apply_category(Categories.SHOP_CAR, sales_item)
-                apply_yes_no(Extras.USED_CAR_SALES, sales_item, self.is_used_car_sales(services))
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, self.is_car_service(services))
+                apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, self.is_used_car_sales(services))
                 yield sales_item
 
             if self.is_car_service(services):
