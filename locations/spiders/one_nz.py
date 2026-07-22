@@ -21,7 +21,8 @@ class OneNZSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["lat"], item["lon"] = feature["latlng"]["latitude"], feature["latlng"]["longitude"]
+        if latlng := feature.get("latlng"):
+            item["lat"], item["lon"] = latlng["latitude"], latlng["longitude"]
         item["branch"] = item.pop("name").removeprefix("One NZ ")
         item["street_address"] = feature["address"]["addressLines"][0]
         item["ref"] = feature["storeCode"]
