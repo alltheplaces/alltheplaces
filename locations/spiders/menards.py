@@ -16,8 +16,10 @@ class MenardsSpider(JSONBlobSpider, CamoufoxSpider):
     item_attributes = {"brand": "Menards", "brand_wikidata": "Q1639897"}
     start_urls = ["https://www.menards.com/store-details/locator.html"]
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {
-        "CAMOUFOX_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script", "xhr", "fetch"]
+        "CAMOUFOX_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "script", "xhr", "fetch"],
+        "CAMOUFOX_DEFAULT_NAVIGATION_TIMEOUT": 120000,
     }
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
