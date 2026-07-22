@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 from locations.microdata_parser import MicrodataParser
 
@@ -18,4 +19,6 @@ class NordstromRackSpider(SitemapSpider):
 
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)
-        return LinkedDataParser.parse(response, "ClothingStore")
+        if item := LinkedDataParser.parse(response, "Organization"):
+            apply_category(Categories.SHOP_CLOTHES, item)
+            yield item
