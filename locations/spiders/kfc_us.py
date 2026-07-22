@@ -1,10 +1,10 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, apply_yes_no
 from locations.items import set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
-KFC_SHARED_ATTRIBUTES = {"brand": "KFC", "brand_wikidata": "Q524757", "extras": Categories.FAST_FOOD.value}
+KFC_SHARED_ATTRIBUTES = {"brand": "KFC", "brand_wikidata": "Q524757", "category": Categories.FAST_FOOD}
 
 
 class KfcUSSpider(SitemapSpider, StructuredDataSpider):
@@ -26,7 +26,5 @@ class KfcUSSpider(SitemapSpider, StructuredDataSpider):
         apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in services)
         # apply_yes_no(, item, "Gift Cards" in services)
         apply_yes_no(Extras.WIFI, item, "WiFi" in services)
-
-        apply_category(Categories.FAST_FOOD, item)
 
         yield item
