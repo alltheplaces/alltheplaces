@@ -26,8 +26,7 @@ class OneNZSpider(JSONBlobSpider):
         item["branch"] = item.pop("name").removeprefix("One NZ ")
         item["street_address"] = feature["address"]["addressLines"][0]
         item["ref"] = feature["storeCode"]
-        if feature["phoneNumber"] == "0800 800 021":
-            item["phone"] = ""
+        item.pop("phone", None)
         try:
             item["opening_hours"] = self.parse_opening_hours(feature["regularHours"])
         except ValueError:
