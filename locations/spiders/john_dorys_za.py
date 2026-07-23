@@ -14,7 +14,7 @@ class JohnDorysZASpider(scrapy.Spider):
     start_urls = ["https://www.johndorys.com/za/restaurants/all"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        url_key = re.findall(r"\"modifiedOn\":\d+},(\d+),", response.xpath('//*[@id="__NUXT_DATA__"]/text()').get())
+        url_key = re.findall(r",\"(\d+)\",\"jd", response.xpath('//*[@id="__NUXT_DATA__"]/text()').get())
         for key in url_key:
             yield JsonRequest(
                 url="https://www.johndorys.com/api/gostore", data={"key": f"{key}"}, callback=self.parse_details
