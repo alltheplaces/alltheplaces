@@ -51,7 +51,12 @@ class MorrisonsGBSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for day_abbrev, day_hours in location["openingTimes"].items():
-                item["opening_hours"].add_range(day_abbrev, day_hours["open"], day_hours["close"], "%H:%M:%S")
+                if day_hours["open"] == day_hours["close"] == "00:00:00":
+                    item["opening_hours"].set_closed(day_abbrev)
+                elif day_hours["open"] == day_hours["close"] == "00:00:01":
+                    item["opening_hours"].add_range(day_abbrev, "00:00", "24:00")
+                else:
+                    item["opening_hours"].add_range(day_abbrev, day_hours["open"], day_hours["close"], "%H:%M:%S")
 
             if location["storeFormat"] == "supermarket" and location["category"] == "Supermarket":
                 item.update(self.MORRISONS)
