@@ -38,11 +38,10 @@ class OfficeSpider(SitemapSpider):
             if m := re.search(r"(\w+): (\d{1,2}:\d\d) - (\d\d:\d\d)", rule):
                 item["opening_hours"].add_range(*m.groups())
 
-        if latlng := re.search(
-            r"LatLng\((-?\d+\.\d+),\s?(-?\d+\.\d+)\),",
-            response.xpath('//script[contains(text(), "google.maps.LatLng(")]/text()').get(),
+        if (lat := re.search(r"lat: (-?\d+\.\d+)", response.text)) and (
+            lng := re.search(r"lng: (-?\d+\.\d+)", response.text)
         ):
-            item["lat"], item["lon"] = latlng.groups()
+            item["lat"], item["lon"] = lat.group(1), lng.group(1)
 
         apply_category(Categories.SHOP_SHOES, item)
 
