@@ -51,8 +51,6 @@ class SportsDirectSpider(JSONBlobSpider):
         "SK",
     ]
 
-    seen_refs = set()
-
     async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = """
         query getStoresByLocation($countryCode: String!, $distanceUnit: DistanceUnit!, $latitude: String!, $longitude: String!, $maxDistance: Int!, $storeKey: String!) {
@@ -96,10 +94,6 @@ class SportsDirectSpider(JSONBlobSpider):
                 )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if feature["code"] in self.seen_refs:
-            return
-        self.seen_refs.add(feature["code"])
-
         item["ref"] = feature["code"]
         item["branch"] = (
             item.pop("name", "").removesuffix(" SD").removesuffix(" LW").removesuffix(" SW").removesuffix(" DK")
