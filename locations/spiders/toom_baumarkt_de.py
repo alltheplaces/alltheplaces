@@ -20,7 +20,7 @@ class ToomBaumarktDESpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs: Any) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        item["street_address"] = location["street"]
+        item["street_address"] = item.pop("street")
         item["website"] = "https://toom.de/" + location["link"]
 
         item["opening_hours"] = OpeningHours()
