@@ -36,12 +36,15 @@ class BringDKSpider(Spider):
                 item["extras"]["post_office"] = "post_partner"
                 item["extras"]["post_office:brand"] = "Bring"
 
-            for rules in attributes["apningstider"]:
+            for rules in attributes["apningstider"] or []:
                 if rules["type"] != 1000:
                     continue
                 oh = OpeningHours()
                 for day, rule in rules["perDay"].items():
-                    oh.add_range(day, *rule["content"].split("–"), time_format="%H.%M")
+                    if rule["content"] == "open24H":
+                        oh.add_range(day, "00:00", "24:00")
+                    else:
+                        oh.add_range(day, *rule["content"].split("–"), time_format="%H.%M")
                 item["opening_hours"] = oh
                 break
 
