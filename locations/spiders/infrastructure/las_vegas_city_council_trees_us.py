@@ -31,16 +31,18 @@ class LasVegasCityCouncilTreesUSSpider(ArcGISFeatureServerSpider):
             item["extras"]["species"] = taxon
         if common_name := feature.get("SPP_COM"):
             item["extras"]["taxon:en"] = common_name
-        if height_range_ft := feature.get("HEIGHT").strip():
-            if height_range_ft != "---" and height_range_ft != "0":
+        if height_range_ft := feature.get("HEIGHT"):
+            height_range_ft = height_range_ft.strip()
+            if height_range_ft and height_range_ft != "---" and height_range_ft != "0":
                 if height_range_ft.startswith(">"):
                     min_height_ft = height_range_ft.removeprefix(">").strip()
                     item["extras"]["height"] = f"{min_height_ft} '"
                 else:
                     min_height_ft, max_height_ft = height_range_ft.split("-", 1)
                     item["extras"]["height:range"] = f"{min_height_ft} - {max_height_ft}'"
-        if dbh_range_ft := feature.get("DBH").strip():
-            if dbh_range_ft != "---" and dbh_range_ft != "0":
+        if dbh_range_ft := feature.get("DBH"):
+            dbh_range_ft = dbh_range_ft.strip()
+            if dbh_range_ft and dbh_range_ft != "---" and dbh_range_ft != "0":
                 if dbh_range_ft.startswith(">"):
                     min_dbh_ft = dbh_range_ft.removeprefix(">").strip()
                     item["extras"]["diameter"] = f"{min_dbh_ft} '"
