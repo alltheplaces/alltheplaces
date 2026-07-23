@@ -1,23 +1,26 @@
 import re
+from typing import Any
 
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
+from locations.settings import USER_AGENT
 
 
 class TalbotsCAUSSpider(Spider):
     name = "talbots_ca_us"
     item_attributes = {"brand": "Talbots", "brand_wikidata": "Q7679064"}
     allowed_domains = ["www.talbots.com"]
-    custom_settings = {"USER_AGENT": "Mozilla/5.0"}
     start_urls = [
         "https://www.talbots.com/on/demandware.store/Sites-talbotsus-Site/default/Stores-GetNearestStores?latitude=-37.8159&longitude=144.9669&countryCode=US&distanceUnit=mi&maxdistance=15000&filterType=PRODUCT-LINE&filterValue=ALL"
     ]
+    custom_settings = {"USER_AGENT": USER_AGENT.removeprefix("Mozilla/5.0 (X11; Linux x86_64) ")}
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store_id, store_details in response.json()["stores"].items():
             item = DictParser.parse(store_details)
             item["ref"] = store_id
