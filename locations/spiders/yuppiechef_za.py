@@ -15,6 +15,7 @@ class YuppiechefZASpider(PlaywrightSpider):
     start_urls = ["https://www.yuppiechef.com/store-directory.htm"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
     no_refs = True
+    requires_proxy = "ZA"
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
