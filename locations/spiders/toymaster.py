@@ -15,6 +15,10 @@ class ToymasterSpider(JSONBlobSpider):
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
+        if not feature["Mainshop"] and not feature["Shop"]:
+            return
+        if feature["Branding"] == "Garden Centre":
+            return
         item["street_address"] = merge_address_lines(
             [feature.get("Address1"), feature.get("Address2"), feature.get("Address3"), feature.get("Address4")]
         )
