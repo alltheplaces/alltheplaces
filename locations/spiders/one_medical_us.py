@@ -2,6 +2,7 @@ import json
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -34,4 +35,5 @@ class OneMedicalUSSpider(scrapy.Spider):
             oh.add_ranges_from_string(location["hours"])
             item["opening_hours"] = oh
 
+            apply_category(Categories.CLINIC, item)
             yield item

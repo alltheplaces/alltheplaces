@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
@@ -28,4 +29,5 @@ class BrookdaleUSSpider(Spider):
             item["postcode"] = location["zip_postal_code"]
             item["phone"] = location["phone_main"]
             item["email"] = location["community_contact_email"]
+            apply_category(Categories.SOCIAL_FACILITY, item)
             yield item

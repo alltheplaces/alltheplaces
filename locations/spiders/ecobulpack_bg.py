@@ -5,6 +5,7 @@ import re
 import pdfplumber
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 # Disable pdfplumber logging to avoid cluttering the output
@@ -57,4 +58,6 @@ class EcobulpackBGSpider(Spider):
                     "lat": coords[0],
                     "lon": coords[1],
                 }
-                yield Feature(**item)
+                item = Feature(**item)
+                apply_category(Categories.RECYCLING, item)
+                yield item
