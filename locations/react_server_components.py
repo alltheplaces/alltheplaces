@@ -41,6 +41,8 @@ def parse_rsc(data_raw: Iterable[int]) -> Iterator[tuple[int, Any]]:
         else:
             row_str = row_data.decode()
 
+            if not row_str:
+                continue
             if row_tag == "H":
                 yield row_id, (row_str[0], json.loads(row_str[1:]))
             elif row_tag == "T":
