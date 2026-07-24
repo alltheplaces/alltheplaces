@@ -3,15 +3,7 @@ import re
 
 import scrapy
 
-from locations.categories import apply_category
 from locations.items import Feature
-
-category_mapping = {
-    "neurological": {"healthcare": "centre", "healthcare:speciality": "neurology"},
-    "mental health and wellbeing": {"healthcare": "centre", "healthcare:speciality": "psychiatry"},
-    "learning disabilities & autism": {"amenity": "social_facility", "social_facility:for": "disabled"},
-    "children & education": {"amenity": "social_facility", "social_facility:for": "disabled"},
-}
 
 
 class ElysiumHealthcareSpider(scrapy.Spider):
@@ -99,10 +91,17 @@ class ElysiumHealthcareSpider(scrapy.Spider):
                 "website": response.url,
             }
 
-            if divisions := response.xpath('//div[contains(@class, "button-division-location")]'):
-                for division in divisions:
-                    specialty = division.xpath(".//a/text()").get().lower()
-                    apply_category(category_mapping[specialty], properties)
-            else:
-                apply_category({"healthcare": "centre"}, properties)
+            # No clear categories can be extracted without a rewrite of this
+            # spider to visit every location page. Each location page lists
+            # the service(s) provided e.g.
+            # - "Specialist inpatient eating disorder service"
+            # - "Acute mental health service"
+            # - "Neurological Rehabilitation and Complex Care"
+            # Each location page also advises whether the services are
+            # provided for children or adults.
+            # Most locations are inpatient rehabilitation centres.
+            # Just set generic "healthcare=yes" for the timebeing due to the
+            # difficulty in extracting useful categories.
+            properties["extras"]["healthcare"] = "yes"
+
             yield Feature(**properties)

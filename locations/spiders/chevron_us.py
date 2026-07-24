@@ -31,13 +31,13 @@ BOTH_SERVICES_MAPPING = {
 }
 STATION_SERVICES_MAPPING = {
     "carwash": Extras.CAR_WASH,
-    "servicebay": Extras.CAR_REPAIR,
+    "servicebay": Extras.VEHICLE_CAR_REPAIR_SERVICES,
     "truckstop": Access.HGV,
     "diesel": Fuel.DIESEL,
     "charge": Fuel.ELECTRIC,
     "fullsvcarwash": Extras.CAR_WASH,
     "cvxreward": "fuel:discount:chevron",
-    "hydrogen": "fuel:H2",
+    "hydrogen": Fuel.H70,
     "e85": Fuel.E85,
     "cngas": Fuel.CNG,
     "propane": Fuel.PROPANE,

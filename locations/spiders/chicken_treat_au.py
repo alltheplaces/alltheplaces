@@ -1,63 +1,53 @@
 from typing import Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ChickenTreatAUSpider(Spider):
+class ChickenTreatAUSpider(JSONBlobSpider):
     name = "chicken_treat_au"
     item_attributes = {"brand": "Chicken Treat", "brand_wikidata": "Q5096274"}
-    allowed_domains = ["d3c377j0gjsips.cloudfront.net"]
     start_urls = ["https://d3c377j0gjsips.cloudfront.net/ct_all_store_sync.json"]
+    locations_key = "data"
 
-    def parse(self, response: Response) -> Iterable[Feature]:
-        for location in response.json()["data"]:
-            if not location["attributes"]["isEnabledForTrading"]:
-                continue
-            if not location["attributes"]["isCollectionEnabled"] and not location["attributes"]["isDeliveryEnabled"]:
-                continue
-            item = Feature()
-            item["ref"] = location["id"]
-            item["branch"] = location["attributes"]["storeName"]
-            item["phone"] = location["attributes"]["storePhone"]
-            # Closed stores have no address
-            if address_data := location["relationships"].get("storeAddress"):
-                address_fields = address_data["data"]["attributes"]["addressComponents"]
-                item["lat"] = address_fields["latitude"]["value"]
-                item["lon"] = address_fields["longitude"]["value"]
-                item["street_address"] = address_fields["streetName"]["value"]
-                if address_fields["unit"]["value"]:
-                    item["unit"] = address_fields["unit"]["value"]
-                if address_fields["floor"]["value"]:
-                    item["extras"]["addr:floor"] = address_fields["floor"]["value"]
-                item["housenumber"] = address_fields["streetNumber"]["value"]
-                item["city"] = address_fields["suburb"]["value"]
-                item["state"] = address_fields["state"]["value"]
-                item["postcode"] = address_fields["postcode"]["value"]
-                item["website"] = (
-                    "https://www.chickentreat.com.au/locations/"
-                    + location["relationships"]["slug"]["data"]["attributes"]["slug"]
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("attributes"))
+        if address := feature["relationships"].get("storeAddress"):
+            for key, component in address["data"]["attributes"]["addressComponents"].items():
+                feature[key] = (component or {}).get("value")
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if not feature.get("isEnabledForTrading"):
+            return
+        if not feature.get("isCollectionEnabled") and not feature.get("isDeliveryEnabled"):
+            return
+        if not feature["relationships"].get("storeAddress"):  # closed stores have no address
+            return
+
+        item["branch"] = item.pop("name", None)
+        item["street_address"] = item.pop("street", None)
+        if feature.get("floor"):
+            item["extras"]["addr:floor"] = feature["floor"]
+        item["website"] = (
+            "https://www.chickentreat.com.au/locations/"
+            + feature["relationships"]["slug"]["data"]["attributes"]["slug"]
+        )
+
+        item["opening_hours"] = OpeningHours()
+        for day_hours in feature["relationships"]["collection"]["data"]["attributes"]["collectionTimes"]:
+            for period in day_hours["collectionTimePeriods"]:
+                item["opening_hours"].add_range(
+                    day_hours["dayOfWeek"], period["openTime"], period["closeTime"], "%H:%M:%S"
                 )
-                item["opening_hours"] = OpeningHours()
-                for day_hours in location["relationships"]["collection"]["data"]["attributes"]["collectionTimes"]:
-                    for time_period in day_hours["collectionTimePeriods"]:
-                        item["opening_hours"].add_range(
-                            day_hours["dayOfWeek"], time_period["openTime"], time_period["closeTime"], "%H:%M:%S"
-                        )
-                apply_category(Categories.FAST_FOOD, item)
-                apply_yes_no(
-                    Extras.TOILETS,
-                    item,
-                    location["relationships"]["amenities"]["data"]["attributes"]["haveToilet"],
-                    False,
-                )
-                apply_yes_no(
-                    Extras.WIFI, item, location["relationships"]["amenities"]["data"]["attributes"]["haveWifi"], False
-                )
-                apply_yes_no(Extras.DELIVERY, item, location["attributes"]["isDeliveryEnabled"], False)
-                apply_yes_no(Extras.TAKEAWAY, item, location["attributes"]["isCollectionEnabled"], False)
-                yield item
+
+        amenities = feature["relationships"]["amenities"]["data"]["attributes"]
+        apply_yes_no(Extras.TOILETS, item, amenities["haveToilet"], False)
+        apply_yes_no(Extras.WIFI, item, amenities["haveWifi"], False)
+        apply_yes_no(Extras.DELIVERY, item, feature.get("isDeliveryEnabled"), False)
+        apply_yes_no(Extras.TAKEAWAY, item, feature.get("isCollectionEnabled"), False)
+        apply_category(Categories.FAST_FOOD, item)
+        yield item

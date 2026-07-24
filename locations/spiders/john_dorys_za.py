@@ -1,4 +1,4 @@
-import re
+import json
 from typing import Any
 
 import scrapy
@@ -14,11 +14,15 @@ class JohnDorysZASpider(scrapy.Spider):
     start_urls = ["https://www.johndorys.com/za/restaurants/all"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        url_key = re.findall(r"\"modifiedOn\":\d+},(\d+),", response.xpath('//*[@id="__NUXT_DATA__"]/text()').get())
-        for key in url_key:
-            yield JsonRequest(
-                url="https://www.johndorys.com/api/gostore", data={"key": f"{key}"}, callback=self.parse_details
-            )
+        payload = json.loads(response.xpath('//script[@id="__NUXT_DATA__"]/text()').get())
+        store_keys = {"api_id", "latitude", "longitude", "contact_number", "displayName"}
+        for node in payload:
+            if isinstance(node, dict) and store_keys <= node.keys():
+                yield JsonRequest(
+                    url="https://www.johndorys.com/api/gostore",
+                    data={"key": payload[node["api_id"]]},
+                    callback=self.parse_details,
+                )
 
     def parse_details(self, response):
         if data := response.json().get("res").get("store"):

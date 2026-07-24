@@ -15,20 +15,22 @@ class VolksbankATSpider(scrapy.Spider):
     }
     start_urls = ["https://www.volksbank.at/m101/volksbank/DownloadServlet?action=vb_finder_ajax"]
     no_refs = True
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
         for data in response.json()[0].get("all"):
             for store in data.get("filialen").get("all"):
                 if "volksbank" in store.get("bankname").lower():
+                    if not store.get("breitengrad") or not store.get("laengengrad"):
+                        continue
                     item = Feature()
-                    item["name"] = store.get("filialname")
+                    item["branch"] = store.get("filialname")
                     item["street_address"] = store.get("strasse")
                     item["lat"] = store.get("breitengrad")
                     item["lon"] = store.get("laengengrad")
                     item["city"] = store.get("ort")
                     item["phone"] = store.get("telefon")
                     item["postcode"] = store.get("plz")
-                    item["email"] = store.get("email")
                     branch = store.get("branch").replace("internet_p_", "").strip()
 
                     if url := store.get("url"):

@@ -3,7 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
@@ -26,5 +26,5 @@ class GreatWolfResortsUSSpider(SitemapSpider):
         if phone:
             item["phone"] = phone.replace("tel:", "")
         extract_google_position(item, response)
-        apply_category({"leisure": "water_park"}, item)
+        apply_category(Categories.LEISURE_WATER_PARK, item)
         yield item
