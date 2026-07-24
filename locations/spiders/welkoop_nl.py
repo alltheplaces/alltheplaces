@@ -5,7 +5,6 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class WelkoopNLSpider(Spider):
@@ -24,10 +23,16 @@ class WelkoopNLSpider(Spider):
                 if location["_type"] != "store":
                     continue
                 item = DictParser.parse(location)
+                item["branch"] = item.pop("name").removeprefix("Welkoop ").removeprefix("WELKOOP ")
                 item["street_address"] = None
                 item["street"] = location.get("address1")
                 item["housenumber"] = location.get("address2")
-                item["branch"] = item.pop("name").replace("Welkoop ", "")
+                if img := location.get("image"):
+                    if img not in (
+                        "https://www.welkoop.nl/on/demandware.static/-/Sites/default/dw1fb3abe8/Winkel_Algemeen.jpg"
+                    ):
+                        item["image"] = img
+
                 oh = OpeningHours()
                 for hours_data in json.loads(location.get("store_hours")):
                     day = sanitise_day(list(hours_data.get("day").values())[0], DAYS_NL)
