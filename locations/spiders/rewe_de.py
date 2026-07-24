@@ -13,6 +13,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class ReweDESpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "rewe_de"
     item_attributes = {"name": "Rewe", "brand": "Rewe", "brand_wikidata": "Q16968817"}
+    NAHKAUF = {"brand": "Nahkauf", "brand_wikidata": "Q57515238"}
     allowed_domains = ["www.rewe.de"]
     sitemap_urls = ["https://www.rewe.de/sitemaps/sitemap-maerkte.xml"]
     sitemap_rules = [(r"/marktseite/[^/]+/(\d+)/[^/]+/$", "parse_sd")]
@@ -27,6 +28,9 @@ class ReweDESpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
         if item.get("street_address"):
             item["street_address"] = item["street_address"].removesuffix(" null")
         item.pop("image", None)
+
+        if "/nahkauf-" in response.url:
+            item.update(self.NAHKAUF)
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
