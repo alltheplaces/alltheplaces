@@ -24,7 +24,9 @@ class WelkoopNLSpider(Spider):
                 if location["_type"] != "store":
                     continue
                 item = DictParser.parse(location)
-                item["street_address"] = merge_address_lines([location.get("address2"), location.get("address1")])
+                item["street_address"] = None
+                item["street"] = location.get("address1")
+                item["housenumber"] = location.get("address2")
                 item["branch"] = item.pop("name").replace("Welkoop ", "")
                 oh = OpeningHours()
                 for hours_data in json.loads(location.get("store_hours")):
