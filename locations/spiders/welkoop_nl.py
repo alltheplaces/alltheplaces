@@ -3,6 +3,7 @@ import json
 from requests import Response
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 
@@ -38,6 +39,8 @@ class WelkoopNLSpider(Spider):
                     item["opening_hours"] = self.parse_opening_hours(location["store_hours"])
                 except Exception:
                     pass
+
+                apply_category(Categories.SHOP_GARDEN_CENTRE, item)
 
                 yield item
 
