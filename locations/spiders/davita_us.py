@@ -33,6 +33,5 @@ class DavitaUSSpider(Spider):
                 " ", "-"
             )
             apply_category(Categories.CLINIC, item)
-            apply_category(Categories.DIALYSIS, item)
             apply_healthcare_specialities(HealthcareSpecialities.NEPHROLOGY, item)
             yield item
