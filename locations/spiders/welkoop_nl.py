@@ -14,11 +14,11 @@ class WelkoopNLSpider(scrapy.Spider):
     start_urls = ["https://www.welkoop.nl/winkels"]
 
     def parse(self, response: Response, **kwargs):
-        data = json.loads(response.xpath('//*[@type="application/json"]/text()').get())["__PRELOADED_STATE__"][
-            "__reactQuery"
-        ]["queries"]
-        for location_data in data:
-            if data := location_data.get("state").get("data").get("data"):
+        queries = json.loads(
+            response.xpath('//script[@type="application/json"][contains(text(), "__PRELOADED_STATE__")]/text()').get()
+        )["__PRELOADED_STATE__"]["__reactQuery"]["queries"]
+        for query in queries:
+            if data := query.get("state").get("data").get("data"):
                 for location in data:
                     item = DictParser.parse(location)
                     item["street_address"] = merge_address_lines([location.get("address2"), location.get("address1")])
