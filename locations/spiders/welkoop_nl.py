@@ -22,28 +22,32 @@ class WelkoopNLSpider(Spider):
             for location in query["state"]["data"]["data"]:
                 if location["_type"] != "store":
                     continue
+
                 item = DictParser.parse(location)
                 item["branch"] = item.pop("name").removeprefix("Welkoop ").removeprefix("WELKOOP ")
-                item["street_address"] = None
-                item["street"] = location.get("address1")
-                item["housenumber"] = location.get("address2")
-                if img := location.get("image"):
-                    if img not in (
-                        "https://www.welkoop.nl/on/demandware.static/-/Sites/default/dw1fb3abe8/Winkel_Algemeen.jpg"
-                    ):
-                        item["image"] = img
+                item["street_address"] = item["state"] = None
+                item["street"] = location["address1"]
+                item["housenumber"] = location["address2"]
+                if location.get("image") not in (
+                    None,
+                    "https://www.welkoop.nl/on/demandware.static/-/Sites/default/dw1fb3abe8/Winkel_Algemeen.jpg",
+                ):
+                    item["image"] = location["image"]
 
-                oh = OpeningHours()
-                for hours_data in json.loads(location.get("store_hours")):
-                    day = sanitise_day(list(hours_data.get("day").values())[0], DAYS_NL)
-                    open_close_time_data = hours_data.get("hours")
-                    if open_close_time_data == "Gesloten":
-                        oh.set_closed(day)
-                    else:
-                        for open_close_time in open_close_time_data:
-                            open_time = open_close_time.get("open")
-                            close_time = open_close_time.get("close")
-                            oh.add_range(day=day, open_time=open_time, close_time=close_time)
-                item["opening_hours"] = oh
+                try:
+                    item["opening_hours"] = self.parse_opening_hours(location["store_hours"])
+                except Exception:
+                    pass
 
                 yield item
+
+    def parse_opening_hours(self, store_hours: str) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in json.loads(store_hours):
+            day = sanitise_day(rule["day"]["nl-NL"], DAYS_NL)
+            if rule["hours"] == "Gesloten":
+                oh.set_closed(day)
+            else:
+                for period in rule["hours"]:
+                    oh.add_range(day, period["open"], period["close"])
+        return oh
