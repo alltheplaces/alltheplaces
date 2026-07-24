@@ -31,7 +31,6 @@ class WelkoopNLSpider(scrapy.Spider):
                             oh.set_closed(day)
                         else:
                             for open_close_time in open_close_time_data:
-                                print(open_close_time)
                                 open_time = open_close_time.get("open")
                                 close_time = open_close_time.get("close")
                                 oh.add_range(day=day, open_time=open_time, close_time=close_time)
