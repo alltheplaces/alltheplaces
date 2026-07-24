@@ -10,7 +10,9 @@ class BricoOkITSpider(XMLFeedSpider):
 
     def parse_node(self, response, selector):
         item = Feature()
-        item["name"] = selector.xpath("location/text()").get()
+        item["branch"] = (
+            selector.xpath("location/text()").get().removeprefix("Brico OK").strip(" -").replace(" & #39;", "&#39;")
+        )
         item["addr_full"] = selector.xpath("address/text()").get()
         item["lat"] = selector.xpath("latitude/text()").get()
         item["lon"] = selector.xpath("longitude/text()").get()
