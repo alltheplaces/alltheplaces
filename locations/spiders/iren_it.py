@@ -1,6 +1,6 @@
 import chompjs
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -15,9 +15,7 @@ class IrenITSpider(JSONBlobSpider):
         return chompjs.parse_js_object(response.xpath('//div[@id="store-pin"]/@data-store').get())
 
     def post_process_item(self, item, response, location):
-        # TODO: Category... door? Shopfront?
-        #  'categoria': 'Sportello'
-        apply_category({"office": "energy_supplier"}, item)
+        apply_category(Categories.OFFICE_ENERGY_SUPPLIER, item)
 
         # Parse hours where possible. This is a widely varied string
         if location["orario"] is not None:

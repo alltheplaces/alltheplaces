@@ -1,14 +1,18 @@
-from locations.storefinders.sweetiq import SweetIQSpider
+from typing import Iterable
+
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.uberall import UberallSpider
 
 
-class ThePaperStoreUSSpider(SweetIQSpider):
+class ThePaperStoreUSSpider(UberallSpider):
     name = "the_paper_store_us"
     item_attributes = {"brand": "The Paper Store", "brand_wikidata": "Q65068381"}
-    start_urls = ["https://locations.thepaperstore.com/"]
+    key = "wdUDImqKHklW8zG0VfFBHTJ9JFZ4Nz"
 
-    def parse_item(self, item, location):
-        item.pop("name")
-        item.pop("email")
-        if item["website"] == "https://www.thepaperstore.com":
-            item.pop("website")
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        item.pop("name", None)
+        apply_category(Categories.SHOP_GIFT, item)
         yield item

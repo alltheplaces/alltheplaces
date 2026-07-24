@@ -3,7 +3,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -33,6 +33,6 @@ class SosBRSpider(Spider):
             item["state"] = location["Endereco"]["EstadoNome"]
             item["lat"] = location["Coordenadas"]["Latitude"]
             item["lon"] = location["Coordenadas"]["Longitude"]
-            apply_category({"amenity": "training"}, item)
+            apply_category(Categories.TRAINING, item)
 
             yield item

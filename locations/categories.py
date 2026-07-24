@@ -18,11 +18,14 @@ class Categories(Enum):
 
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
+    BICYCLE_RENTAL_CARGO = {"amenity": "bicycle_rental", "rental": "cargo_bike"}
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
+    CAR_SHARING = {"amenity": "car_sharing"}
     KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
     LEFT_LUGGAGE = {"amenity": "left_luggage"}
     LUGGAGE_LOCKER = {"amenity": "luggage_locker"}
+    MOTORCYCLE_RENTAL = {"amenity": "motorcycle_rental"}
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
 
@@ -32,6 +35,7 @@ class Categories(Enum):
     UNIVERSITY = {"amenity": "university"}
     LANGUAGE_SCHOOL = {"amenity": "language_school"}
     NATURE_SCHOOL = {"education": "nature_school"}
+    TRAINING = {"amenity": "training"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -53,6 +57,7 @@ class Categories(Enum):
 
     CLUB_SCOUT = {"club": "scout"}
 
+    CRAFT_CAR_PAINTER = {"craft": "car_painter"}
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CATERER = {"craft": "caterer"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
@@ -85,6 +90,8 @@ class Categories(Enum):
     LEISURE_SLIPWAY = {"leisure": "slipway"}
     LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
     LEISURE_SWIMMING_POOL = {"leisure": "swimming_pool"}
+    LEISURE_TRAMPOLINE_PARK = {"leisure": "trampoline_park"}
+    LEISURE_WATER_PARK = {"leisure": "water_park"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -143,6 +150,7 @@ class Categories(Enum):
     SHOP_ELECTRICAL = {"shop": "electrical"}
     SHOP_ELECTRONICS = {"shop": "electronics"}
     SHOP_EROTIC = {"shop": "erotic"}
+    SHOP_FABRIC = {"shop": "fabric"}
     SHOP_FASHION_ACCESSORIES = {"shop": "fashion_accessories"}
     SHOP_FISHING = {"shop": "fishing"}
     SHOP_FLOORING = {"shop": "flooring"}
@@ -217,6 +225,7 @@ class Categories(Enum):
     SHOP_STATIONERY = {"shop": "stationery"}
     SHOP_STORAGE_RENTAL = {"shop": "storage_rental"}
     SHOP_SUPERMARKET = {"shop": "supermarket"}
+    SHOP_SURF = {"shop": "surf"}
     SHOP_SWIMMING_POOL = {"shop": "swimming_pool"}
     SHOP_TAILOR = {"shop": "tailor"}
     SHOP_TATTOO = {"shop": "tattoo"}
@@ -247,12 +256,17 @@ class Categories(Enum):
     OFFICE_CONSULTING = {"office": "consulting"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_COWORKING = {"office": "coworking"}
+    OFFICE_ENERGY_SUPPLIER = {"office": "energy_supplier"}
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_FINANCIAL_ADVISOR = {"office": "financial_advisor"}
+    OFFICE_HEALTHCARE = {"office": "healthcare"}
     OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
+    OFFICE_MORTGAGE = {"office": "mortgage"}
+    OFFICE_SUPERVISED_INJECTION_SITE = {"office": "supervised_injection_site"}
+    OFFICE_TUTORING = {"office": "tutoring"}
 
     TOURISM_ARTWORK = {"tourism": "artwork"}
     TOURISM_APARTMENT = {"tourism": "apartment"}
@@ -272,9 +286,11 @@ class Categories(Enum):
 
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
+    AIRCRAFT_FUELLING_STATION = {"aeroway": "fuel"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
     ARCHIVE = {"amenity": "archive"}
     ARTS_CENTRE = {"amenity": "arts_centre"}
+    ASSISTED_LIVING = {"amenity": "social_facility", "social_facility": "assisted_living"}
     ATM = {"amenity": "atm"}
     AUDIOLOGIST = {"healthcare": "audiologist"}
     BANK = {"amenity": "bank"}
@@ -282,6 +298,7 @@ class Categories(Enum):
     BARBECUE = {"amenity": "bbq"}
     BENCH = {"amenity": "bench"}
     BICYCLE_REPAIR_STATION = {"amenity": "bicycle_repair_station"}
+    BINGO_VENUE = {"amenity": "gambling", "gambling": "bingo"}
     BIRTHING_CENTRE = {"healthcare": "birthing_centre"}
     BLOOD_BANK = {"healthcare": "blood_bank"}
     BLOOD_DONATION = {"healthcare": "blood_donation"}
@@ -317,12 +334,14 @@ class Categories(Enum):
     FUEL_STATION = {"amenity": "fuel"}
     GRAVE = {"cemetery": "grave"}
     GRIT_BIN = {"amenity": "grit_bin"}
+    HIGHWAY_SERVICES = {"highway": "services"}
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital"}
     HOTEL = {"tourism": "hotel"}
     INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
     LIBRARY = {"amenity": "library"}
+    MAILROOM = {"amenity": "mailroom"}
     MANHOLE = {"man_made": "manhole"}
     MARKETPLACE = {"amenity": "marketplace"}
     MEDICAL_IMAGING = {
@@ -534,6 +553,14 @@ def get_category_tags(source: Feature | Enum | Mapping) -> dict:
     dict. All top level tags can exist on their own and do not
     require the presence of other tags. If the Feature, Enum or dict
     supplied contains other tags, these are ignored.
+
+    Note: OSM allows and sometimes prefers multiple top level tagging schemes
+    be used at the same time for individual features. NSI however selects only
+    one tagging scheme to use for matching. Whilst this function will return
+    `amenity=clinic` and `healthcare=clinic` as two duplicative top level
+    tags, ATP internally intends to follow NSI in selecting only one top level
+    tag to use per feature.
+
     :param source: Either a Feature, Enum or dictionary which
                    contains categories (such as "amenity": "pub").
     :return: dictionary of OpenStreetMap top level tags, if any
@@ -551,14 +578,10 @@ def get_category_tags(source: Feature | Enum | Mapping) -> dict:
     for top_level_tag in top_level_tags:
         if v := tags.get(top_level_tag):
             categories[top_level_tag] = v
+
     if len(categories.keys()) > 1 and categories.get("shop") == "yes":
         categories.pop("shop")
-    if "amenity" in categories.keys() and "education" in categories.keys():
-        # Some education tags are being augmented with education=* in OSM
-        # ATP still uses the more common amenity=*
-        # It is "amenity" not "education" which is the intended top level
-        # category.
-        categories.pop("education")
+
     return categories
 
 
@@ -591,7 +614,7 @@ class Fuel(Enum):
     OCTANE_99 = "fuel:octane_99"
     OCTANE_100 = "fuel:octane_100"
     OCTANE_102 = "fuel:octane_102"
-    # Formulas
+    # Ethanol blends
     E5 = "fuel:e5"
     E10 = "fuel:e10"
     E15 = "fuel:e15"
@@ -601,6 +624,7 @@ class Fuel(Enum):
     E88 = "fuel:e88"
     ETHANOL = "fuel:ethanol"
     ETHANOL_FREE = "fuel:ethanol_free"
+    # Other fuels
     METHANOL = "fuel:methanol"
     BIOGAS = "fuel:biogas"
     GASOLINE = "fuel:gasoline"
@@ -609,7 +633,12 @@ class Fuel(Enum):
     LNG = "fuel:lng"
     PROPANE = "fuel:propane"
     BUTANE = "fuel:butane"
+    KEROSENE = "fuel:kerosene"
+    # Hydrogen fuels
     LH2 = "fuel:LH2"
+    H35 = "fuel:h35"
+    H50 = "fuel:h50"
+    H70 = "fuel:h70"
     # Additives
     ADBLUE = "fuel:adblue"
     ENGINE_OIL = "fuel:engineoil"
@@ -622,7 +651,6 @@ class Fuel(Enum):
     ALKYLATE = "fuel:alkylate"  # https://de.wikipedia.org/wiki/Alkylatbenzin
 
     HEATING_OIL = "fuel:heating_oil"
-    KEROSENE = "fuel:kerosene"
 
     ELECTRIC = "fuel:electricity"  # Electric vehicle charger
 
@@ -636,11 +664,8 @@ class Extras(Enum):
     BARBECUES = "bbq"
     BREAKFAST = "breakfast"
     BRUNCH = "brunch"
-    BODY_REPAIR = "service:vehicle:body_repair"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
-    CAR_PARTS = "service:vehicle:car_parts"
-    CAR_REPAIR = "service:vehicle:car_repair"
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
     CASH_OUT = "cash_out"
@@ -668,8 +693,6 @@ class Extras(Enum):
     MOTOR_VEHICLES = "motor_vehicle"
     USED_MOTORCYCLE_SALES = "motorcycle:sales=used"
     MOTORCYCLE_REPAIR = "motorcycle:repair"
-    NEW_CAR_SALES = "service:vehicle:new_car_sales"
-    OIL_CHANGE = "service:vehicle:oil_change"
     OUTDOOR_SEATING = "outdoor_seating"
     PARCEL_MAIL_IN = "parcel_mail_in"
     PARCEL_PICKUP = "parcel_pickup"
@@ -692,12 +715,29 @@ class Extras(Enum):
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
-    TYRE_SERVICES = "service:vehicle:tyres"
     UNISEX = "unisex"
-    USED_CAR_SALES = "service:vehicle:used_car_sales"
     VACUUM_CLEANER = "vacuum_cleaner"
     VEGAN = "diet:vegan"
     VEGETARIAN = "diet:vegetarian"
+    VEHICLE_AIR_CONDITIONING_SERVICES = "service:vehicle:air_conditioning"
+    VEHICLE_BATTERY_SERVICES = "service:vehicle:batteries"
+    VEHICLE_BODY_REPAIR_SERVICES = "service:vehicle:body_repair"
+    VEHICLE_BRAKE_SERVICES = "service:vehicle:brakes"
+    VEHICLE_CAR_PARTS_SALES = "service:vehicle:car_parts"
+    VEHICLE_CAR_REPAIR_SERVICES = "service:vehicle:car_repair"
+    VEHICLE_CLUTCH_SERVICES = "service:vehicle:clutches"
+    VEHICLE_EXHAUST_SERVICES = "service:vehicle:exhausts"
+    VEHICLE_INSPECTION_SERVICES = "service:vehicle:inspection"
+    VEHICLE_NEW_CAR_SALES = "service:vehicle:new_car_sales"
+    VEHICLE_OIL_CHANGE_SERVICES = "service:vehicle:oil_change"
+    VEHICLE_PAINTING_SERVICES = "service:vehicle:painting"
+    VEHICLE_PLANNED_MAINTENANCE_SERVICES = "service:vehicle:servicing"
+    VEHICLE_SUSPENSION_SERVICES = "service:vehicle:suspension"
+    VEHICLE_TYRE_SERVICES = "service:vehicle:tyres"
+    VEHICLE_TYRE_REPAIR_SERVICES = "service:vehicle:tyres_repair"
+    VEHICLE_USED_CAR_SALES = "service:vehicle:used_car_sales"
+    VEHICLE_WHEEL_ALIGNMENT_SERVICES = "service:vehicle:alignment"
+    VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES = "service:vehicle:glass"
     WHEELCHAIR = "wheelchair"
     WHEELCHAIR_LIMITED = "wheelchair=limited"
     WIFI = "internet_access=wlan"

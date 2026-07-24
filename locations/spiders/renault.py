@@ -44,10 +44,6 @@ class RenaultSpider(Spider):
 
             activities = [activity["birId"] for activity in location["dealerActivities"]]
 
-            apply_yes_no("second_hand", item, "03" in activities)
-            apply_yes_no("service:vehicle:car_parts", item, "10" in activities)
-            apply_yes_no("service:vehicle:mot", item, "17" in activities)
-
             # TODO?
             # 00 "Main Service"
             # 02 "Renault Business Center"
@@ -78,20 +74,27 @@ class RenaultSpider(Spider):
                 if location.get(key) and not location[key]["blacklisted"]:
                     is_dealer = "01" in activities
                     is_service = "04" in activities
+                    is_parts = "10" in activities
                     if is_dealer:
-                        yield self.create_shop_item(item, key, brand, is_service)
+                        sales_item = self.create_shop_item(item, key, brand)
+                        apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, "03" in activities)
+                        yield sales_item
                     if is_service:
-                        yield self.create_service_item(item, key, brand)
+                        service_item = self.create_service_item(item, key, brand)
+                        apply_yes_no(Extras.VEHICLE_INSPECTION_SERVICES, service_item, "17" in activities)
+                        yield service_item
+                    if is_parts:
+                        parts_item = self.create_parts_item(item, key, brand)
+                        yield parts_item
 
         if response.json()["currentPage"] < response.json()["totalPages"]:
             yield self.make_request(response.url, response.json()["currentPage"] + 1)
 
-    def create_shop_item(self, item: Feature, key: str, brand: dict, has_service: bool) -> Feature:
+    def create_shop_item(self, item: Feature, key: str, brand: dict) -> Feature:
         shop = item.deepcopy()
         shop["ref"] = "{}-{}".format(item["ref"], key)
         shop.update(brand)
         apply_category(Categories.SHOP_CAR, shop)
-        apply_yes_no(Extras.CAR_REPAIR, shop, has_service)
         return shop
 
     def create_service_item(self, item: Feature, key: str, brand: dict) -> Feature:
@@ -100,3 +103,10 @@ class RenaultSpider(Spider):
         service.update(brand)
         apply_category(Categories.SHOP_CAR_REPAIR, service)
         return service
+
+    def create_parts_item(self, item: Feature, key: str, brand: dict) -> Feature:
+        parts = item.deepcopy()
+        parts["ref"] = "{}-{}_parts".format(item["ref"], key)
+        parts.update(brand)
+        apply_category(Categories.SHOP_CAR_PARTS, parts)
+        return parts

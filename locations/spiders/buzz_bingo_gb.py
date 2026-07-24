@@ -3,7 +3,7 @@ from typing import AsyncIterator
 
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -41,5 +41,5 @@ class BuzzBingoGBSpider(StructuredDataSpider):
         item["phone"] = contact.get("telephone")
         item["email"] = contact.get("email")
         item["website"] = response.url
-        apply_category({"amenity": "gambling"}, item)
+        apply_category(Categories.BINGO_VENUE, item)
         yield item

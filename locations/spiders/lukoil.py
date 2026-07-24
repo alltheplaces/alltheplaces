@@ -82,7 +82,7 @@ SERVICES = {
     "Wi-Fi": Extras.WIFI,
     "air tower": Extras.COMPRESSED_AIR,
     "handicap accessible restroom": Extras.TOILETS_WHEELCHAIR,
-    "Oil Change": Extras.OIL_CHANGE,
+    "Oil Change": Extras.VEHICLE_OIL_CHANGE_SERVICES,
     "Vacuum": Extras.VACUUM_CLEANER,
     # Russian language services
     "Выдача наличных": Extras.ATM,  # Cash withdrawal
