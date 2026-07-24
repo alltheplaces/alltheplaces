@@ -16,9 +16,10 @@ class HaymesPaintShopAUSpider(Spider):
     start_urls = ["https://www.haymespaint.com.au/pages/find-a-store"]
     _api_endpoint: str = "https://www.haymespaint.com.au/api/2025-01/graphql.json"
 
-
     @staticmethod
-    def _request_graphql_page(api_endpoint: str, storefront_api_token: str, callback_function: Callable, cursor: str | None = None) -> JsonRequest:
+    def _request_graphql_page(
+        api_endpoint: str, storefront_api_token: str, callback_function: Callable, cursor: str | None = None
+    ) -> JsonRequest:
         graphql_query = """
 query getStoreLocations($type: String!, $after: String, $first: Int!) {
     metaobjects(type: $type, after: $after, first: $first) {
@@ -43,13 +44,24 @@ query getStoreLocations($type: String!, $after: String, $first: Int!) {
             "query": graphql_query,
             "variables": graphql_variables,
         }
-        yield JsonRequest(url=api_endpoint, headers={"X-Shopify-Storefront-Access-Token": storefront_api_token}, data=data, method="POST", callback=callback_function, dont_filter=True)
+        yield JsonRequest(
+            url=api_endpoint,
+            headers={"X-Shopify-Storefront-Access-Token": storefront_api_token},
+            data=data,
+            method="POST",
+            callback=callback_function,
+            dont_filter=True,
+        )
 
     def parse(self, response: Response) -> Iterable[JsonRequest]:
         js_blob = response.xpath('//script[contains(text(), "STOREFRONT_API_TOKEN")]/text()').get()
         if m := re.search(r"STOREFRONT_API_TOKEN\s*=\s*'([a-f0-9]{32})'", js_blob):
             storefront_api_token = m.group(1)
-            yield from self._request_graphql_page(api_endpoint=self._api_endpoint, storefront_api_token=storefront_api_token, callback_function=self.parse_graphql_response)
+            yield from self._request_graphql_page(
+                api_endpoint=self._api_endpoint,
+                storefront_api_token=storefront_api_token,
+                callback_function=self.parse_graphql_response,
+            )
 
     def parse_graphql_response(self, response: JsonResponse) -> Iterable[Feature | JsonRequest]:
         for store in response.json()["data"]["metaobjects"]["nodes"]:
@@ -68,15 +80,17 @@ query getStoreLocations($type: String!, $after: String, $first: Int!) {
                 "website": "https://www.haymespaint.com.au/pages/stores/" + store["handle"],
                 "opening_hours": OpeningHours(),
             }
-            hours_string = ", ".join([
-                attributes.get("googlehoursmonday"),
-                attributes.get("googlehourstuesday"),
-                attributes.get("googlehourswednesday"),
-                attributes.get("googlehoursthursday"),
-                attributes.get("googlehoursfriday"),
-                attributes.get("googlehourssaturday"),
-                attributes.get("googlehourssunday"),
-            ])
+            hours_string = ", ".join(
+                [
+                    attributes.get("googlehoursmonday"),
+                    attributes.get("googlehourstuesday"),
+                    attributes.get("googlehourswednesday"),
+                    attributes.get("googlehoursthursday"),
+                    attributes.get("googlehoursfriday"),
+                    attributes.get("googlehourssaturday"),
+                    attributes.get("googlehourssunday"),
+                ]
+            )
             properties["opening_hours"].add_ranges_from_string(hours_string)
             apply_category(Categories.SHOP_PAINT, properties)
             yield Feature(**properties)
@@ -84,4 +98,9 @@ query getStoreLocations($type: String!, $after: String, $first: Int!) {
         if response.json()["data"]["metaobjects"]["pageInfo"]["hasNextPage"]:
             storefront_api_token = response.request.headers["X-Shopify-Storefront-Access-Token"]
             cursor = response.json()["data"]["metaobjects"]["pageInfo"]["endCursor"]
-            yield from self._request_graphql_page(api_endpoint=self._api_endpoint, storefront_api_token=storefront_api_token, callback_function=self.parse_graphql_response, cursor=cursor)
+            yield from self._request_graphql_page(
+                api_endpoint=self._api_endpoint,
+                storefront_api_token=storefront_api_token,
+                callback_function=self.parse_graphql_response,
+                cursor=cursor,
+            )
