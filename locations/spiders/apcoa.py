@@ -2,6 +2,7 @@ from scrapy.http import TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
@@ -78,4 +79,5 @@ class ApcoaSpider(CrawlSpider):
         item["addr_full"] = response.xpath('//*[@class="main"]//span[2]/text()').get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
+        apply_category(Categories.PARKING, item)
         yield item

@@ -3,6 +3,7 @@ from typing import Any, AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -62,4 +63,6 @@ class BaylorScottWhiteHealthUSSpider(Spider):
 
             properties["opening_hours"] = oh
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.HOSPITAL, item)
+            yield item
