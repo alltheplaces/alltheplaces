@@ -1,3 +1,4 @@
+import html
 from typing import AsyncIterator
 
 from scrapy import Selector, Spider
@@ -26,15 +27,17 @@ class FibankBGSpider(Spider):
                 item = Feature()
                 item["ref"] = location["id"]
                 item["lat"], item["lon"] = location["coords"].split(",")
-                item["name"] = location["name"]
+                item["name"] = html.unescape(html.unescape(location["name"]))
                 item["addr_full"] = location["address"]
 
                 if location["type"] == 1:
+                    if item["name"].startswith("клон ") or item["name"].startswith("Клон "):
+                        item["branch"] = item.pop("name").removeprefix("клон ").removeprefix("Клон")
                     apply_category(Categories.BANK, item)
 
                     textResponse = Selector(text=location["text"])
                     item["phone"] = (
-                        textResponse.xpath("//div[contains(@class, 'phones')]/text()").get().replace("/", "")
+                        textResponse.xpath("//div[contains(@class, 'phones')]/text()").get("").replace("/", "")
                     )
                     worktime = textResponse.xpath("//div[contains(@class, 'worktime')]/text()").get()
                     isUnparsable = "зимен" in worktime or "и " in worktime or "събота" in worktime or ", " in worktime
@@ -43,6 +46,7 @@ class FibankBGSpider(Spider):
                         worktime = worktime.replace("ч.", "")
                         item["opening_hours"].add_ranges_from_string(worktime, days=DAYS_BG)
                 else:
+                    item["name"] = item["name"].removeprefix("Fibank ATM - ").removeprefix("ПИБ").strip("- ")
                     apply_category(Categories.ATM, item)
                     apply_yes_no("authentication:contactless", item, "atm_filter_contactless" in location["features"])
                     apply_yes_no(Extras.CASH_IN, item, "atm_filter_deposit" in location["features"])
