@@ -10,7 +10,7 @@ class AlicePizzaSpider(scrapy.Spider):
     name = "alice_pizza"
     item_attributes = {
         "brand": "Alice Pizza",
-        "brand_wikidata": "Q107481541",  # Known wikidata ID for Alice Pizza if it matches, otherwise we can just omit it
+        "brand_wikidata": "Q113973272",  # Known wikidata ID for Alice Pizza if it matches, otherwise we can just omit it
     }
     start_urls = ["https://www.alicepizza.it/pizzerie/"]
 
