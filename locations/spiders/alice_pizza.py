@@ -1,5 +1,6 @@
 import chompjs
 import scrapy
+
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
 from locations.items import Feature
@@ -41,7 +42,7 @@ class AlicePizzaSpider(scrapy.Spider):
             item["ref"] = properties.get("url") or properties.get("name")
             item["name"] = properties.get("name")
             item["street_address"] = properties.get("address")
-            
+
             # The city_name is often set to 'Italia' in some objects, but it's safe to use if populated correctly
             city = properties.get("city_name")
             if city and city.lower() != "italia":
