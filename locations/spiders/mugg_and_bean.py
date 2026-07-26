@@ -29,7 +29,6 @@ class MuggAndBeanSpider(SitemapSpider):
         )
         item["addr_full"] = response.xpath('//*[@id="location"]//p/text()').get()
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]//text()').get()
-        item["email"] = response.xpath('//*[contains(@href,"mailto:")]//text()').get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
         oh = OpeningHours()
