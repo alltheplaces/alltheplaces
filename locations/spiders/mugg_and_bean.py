@@ -3,7 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Extras, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -52,4 +52,5 @@ class MuggAndBeanSpider(SitemapSpider):
         apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in attributes)
         apply_yes_no(Extras.BREAKFAST, item, "Breakfast" in attributes)
         apply_yes_no(Extras.BRUNCH, item, "Brunch" in attributes)
+        apply_category(Categories.CAFE, item)
         yield item
