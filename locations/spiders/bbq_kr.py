@@ -92,7 +92,7 @@ class BbqKRSpider(Spider):
         return len(parts) >= 2 and all(part.strip("0") == "" for part in parts[1:])
 
     @staticmethod
-    def parse_opening_hours(schedule: dict) -> OpeningHours | None:
+    def parse_opening_hours(schedule: dict) -> OpeningHours:
         # TODO: "closeScheduleList" and "tempCloseSchedule" carry regular and
         # temporary closures, but every sampled branch left both empty.
         ranges = [
@@ -103,4 +103,4 @@ class BbqKRSpider(Spider):
         for days, open_time, close_time in ranges:
             if open_time and close_time:
                 oh.add_days_range(days, open_time, close_time)
-        return oh if oh.as_opening_hours() else None
+        return oh
