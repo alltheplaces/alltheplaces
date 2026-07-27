@@ -41,7 +41,7 @@ class SamsClubSpider(Spider):
                 yield fuel_station
 
             club_attrs = store.get("clubAttributes", {})
-            apply_yes_no(Extras.TYRE_SERVICES, item, "tires_&_batteries" in services)
+            apply_yes_no(Extras.VEHICLE_TYRE_SERVICES, item, "tires_&_batteries" in services)
             apply_yes_no(Extras.SELF_CHECKOUT, item, club_attrs.get("isScanNGo"))
             apply_yes_no(Extras.DELIVERY, item, club_attrs.get("isClubEnabledForRegularDelivery"))
             item["opening_hours"] = self.parse_hours(store.get("operationalHours", {}))

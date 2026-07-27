@@ -102,7 +102,7 @@ class GulfARSpider(Spider):
                 apply_yes_no(Fuel.CNG, item, service_present(entry.get("GNC")))
                 apply_yes_no(Extras.CAR_WASH, item, service_present(entry.get("Lavadero")))
                 apply_yes_no(Extras.ATM, item, service_present(entry.get("Cajero Automático")))
-                apply_yes_no(Extras.TYRE_SERVICES, item, service_present(entry.get("Gomería")))
+                apply_yes_no(Extras.VEHICLE_TYRE_SERVICES, item, service_present(entry.get("Gomería")))
                 # NB: the on-site "Gulf Store" is deliberately NOT tagged shop=convenience.
                 # That is a top-level category tag, and NSI only matches a brand when the
                 # item's categories are a subset of the brand's; Gulf's NSI entry is
