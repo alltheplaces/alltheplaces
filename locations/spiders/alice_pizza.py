@@ -8,11 +8,9 @@ from locations.items import Feature
 
 class AlicePizzaSpider(scrapy.Spider):
     name = "alice_pizza"
-    item_attributes = {
-        "brand": "Alice Pizza",
-        "brand_wikidata": "Q113973272",  # Known wikidata ID for Alice Pizza if it matches, otherwise we can just omit it
-    }
+    item_attributes = {"brand": "Alice Pizza", "brand_wikidata": "Q113973272"}
     start_urls = ["https://www.alicepizza.it/pizzerie/"]
+    skip_auto_cc_domain = True
 
     def parse(self, response):
         script_content = response.xpath('//script[contains(text(), "var storeListData")]/text()').get()
@@ -56,8 +54,7 @@ class AlicePizzaSpider(scrapy.Spider):
             apply_category(Categories.FAST_FOOD, item)
             item["extras"]["cuisine"] = "pizza"
 
-            timetable = properties.get("timetable")
-            if timetable:
+            if timetable := properties.get("timetable"):
                 try:
                     oh = OpeningHours()
                     oh.add_ranges_from_string(
