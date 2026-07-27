@@ -67,7 +67,7 @@ class AlicePizzaSpider(scrapy.Spider):
                         named_times=NAMED_TIMES_IT,
                         closed=CLOSED_IT,
                     )
-                    item["opening_hours"] = oh.as_opening_hours()
+                    item["opening_hours"] = oh
                 except Exception:
                     pass
 
