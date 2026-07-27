@@ -24,8 +24,7 @@ class AuntieAnnesSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
         item["branch"] = (
-            response.xpath('//meta[@property="og:title"]/@content')
-            .get()
+            (response.xpath('//meta[@property="og:title"]/@content').get() or "")
             .split(" | ")[0]
             .replace("Auntie Anne's", "")
             .strip(" /")
