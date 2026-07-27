@@ -1,5 +1,8 @@
+from typing import Any
+
 import chompjs
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_IT, DAYS_IT, NAMED_DAY_RANGES_IT, NAMED_TIMES_IT, OpeningHours
@@ -12,7 +15,7 @@ class AlicePizzaSpider(scrapy.Spider):
     start_urls = ["https://www.alicepizza.it/pizzerie/"]
     skip_auto_cc_domain = True
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         script_content = response.xpath('//script[contains(text(), "var storeListData")]/text()').get()
         if not script_content:
             return
@@ -37,8 +40,8 @@ class AlicePizzaSpider(scrapy.Spider):
                 continue
 
             item = Feature()
-            item["ref"] = properties.get("url") or properties.get("name")
-            item["name"] = properties.get("name")
+            item["ref"] = properties.get("url")
+            item["branch"] = properties.get("name").removeprefix("Alice Pizza ").removeprefix("Alice ")
             item["street_address"] = properties.get("address")
 
             # The city_name is often set to 'Italia' in some objects, but it's safe to use if populated correctly
