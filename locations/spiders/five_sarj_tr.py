@@ -12,6 +12,7 @@ class FiveSarjTRSpider(Spider):
     name = "five_sarj_tr"
     item_attributes = {"brand": "5 Şarj", "brand_wikidata": "Q135753392"}
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest("https://5sarj.com/api/locations/map-pins")
