@@ -14,6 +14,7 @@ class ModernMarketUSSpider(AgileStoreLocatorSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").split("-", 1)[0].strip()
         item["website"] = "https://modernmarket.com/stores/{}/".format(feature["slug"])
         apply_category(Categories.RESTAURANT, item)
         yield item
