@@ -38,9 +38,7 @@ def _write_complete_geojson(path: Path, features: list[dict]) -> None:
         for f in features
     )
     path.write_text(
-        '{"type":"FeatureCollection","dataset_attributes":{"@spider":"example"},"features":[\n'
-        + body
-        + "\n]}\n",
+        '{"type":"FeatureCollection","dataset_attributes":{"@spider":"example"},"features":[\n' + body + "\n]}\n",
         encoding="utf-8",
     )
 
@@ -131,9 +129,7 @@ def test_no_usable_features_leaves_geojson_alone(tmp_path: Path, caplog):
         '{"type":"FeatureCollection","dataset_attributes":{},"features":[\n',
         encoding="utf-8",
     )
-    ndgeojson_path.write_text(
-        '{"type":"Feature","id":"a","properties":{}, "geom', encoding="utf-8"
-    )
+    ndgeojson_path.write_text('{"type":"Feature","id":"a","properties":{}, "geom', encoding="utf-8")
 
     original = geojson_path.read_bytes()
     repair_spider_output(geojson_path, ndgeojson_path)
@@ -150,9 +146,7 @@ def test_repair_directory_processes_every_spider(tmp_path: Path):
         '{"type":"FeatureCollection","dataset_attributes":{},"features":[\n',
         encoding="utf-8",
     )
-    _write_ndgeojson(
-        tmp_path / "broken.ndgeojson", [json.dumps(FEATURE_A), json.dumps(FEATURE_B)]
-    )
+    _write_ndgeojson(tmp_path / "broken.ndgeojson", [json.dumps(FEATURE_A), json.dumps(FEATURE_B)])
 
     repair_directory(tmp_path)
 
