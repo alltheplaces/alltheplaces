@@ -10,5 +10,5 @@ class KarweiNLSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     item_attributes = {"brand": "Karwei", "brand_wikidata": "Q2097480"}
     sitemap_urls = ["https://sitemap.karwei.nl/stores.xml"]
     wanted_types = ["HardwareStore"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS 
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     requires_proxy = True
