@@ -51,7 +51,9 @@ class LombardAUSpider(Spider):
                             None,
                             map(
                                 str.strip,
-                                store.xpath('./td[contains(@class, "party-shop-finder-trading-hours")]//text()').getall(),
+                                store.xpath(
+                                    './td[contains(@class, "party-shop-finder-trading-hours")]//text()'
+                                ).getall(),
                             ),
                         )
                     )
