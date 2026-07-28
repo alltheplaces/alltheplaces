@@ -15,6 +15,7 @@ class StateFarmUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.statefarm.com/sitemap-agents.xml"]
     sitemap_rules = [(r"/agent/us/\w\w/[^/]+/[^/]+$", "parse_sd")]
     wanted_types = ["InsuranceAgency"]
+    requires_proxy = True
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DOWNLOAD_DELAY": 2,
