@@ -26,6 +26,7 @@ class StateFarmUSSpider(SitemapSpider, StructuredDataSpider):
     }
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["name"] = item["image"] = None
         item["ref"] = response.url.rsplit("/", 1)[1]
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
