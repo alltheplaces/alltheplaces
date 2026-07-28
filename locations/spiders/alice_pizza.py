@@ -11,7 +11,7 @@ from locations.items import Feature
 
 class AlicePizzaSpider(scrapy.Spider):
     name = "alice_pizza"
-    item_attributes = {"brand": "Alice Pizza", "brand_wikidata": "Q113973272"}
+    item_attributes = {"brand": "Alice", "brand_wikidata": "Q113973272"}
     start_urls = ["https://www.alicepizza.it/pizzerie/"]
     skip_auto_cc_domain = True
 
