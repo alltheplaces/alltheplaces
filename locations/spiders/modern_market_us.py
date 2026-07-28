@@ -1,42 +1,20 @@
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
-class ModernMarketUSSpider(Spider):
+class ModernMarketUSSpider(AgileStoreLocatorSpider):
     name = "modern_market_us"
     item_attributes = {"brand": "Modern Market", "brand_wikidata": "Q123370165"}
     allowed_domains = ["modernmarket.com"]
-    start_urls = ["https://modernmarket.com/api/restaurants"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response):
-        for location in response.json()["restaurants"]:
-            if "COMING SOON" in location["name"].upper():
-                continue
-            item = DictParser.parse(location)
-            item["street_address"] = clean_address([location.get("streetaddress"), location.get("streetaddress2")])
-            apply_yes_no(Extras.DELIVERY, item, location.get("candeliver"), False)
-            apply_yes_no(Extras.DRIVE_THROUGH, item, location.get("supportsdrivethru"), False)
-            item["opening_hours"] = OpeningHours()
-            for calendar in location.get("calendar"):
-                if calendar["type"] == "business":
-                    if len(calendar["ranges"]) >= 7:
-                        for i in range(0, 6, 1):
-                            item["opening_hours"].add_range(
-                                calendar["ranges"][i]["weekday"],
-                                calendar["ranges"][i]["start"].split(" ", 1)[1],
-                                calendar["ranges"][i]["end"].split(" ", 1)[1],
-                            )
-                    break
-            apply_category(Categories.RESTAURANT, item)
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").split("-", 1)[0].strip()
+        item["website"] = "https://modernmarket.com/stores/{}/".format(feature["slug"])
+        apply_category(Categories.RESTAURANT, item)
+        yield item
