@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -23,6 +23,8 @@ class TopsPizzaGBSpider(Spider):
             item["branch"] = item.pop("name")
             item["postcode"] = item["postcode"]["postcode"]
             item["website"] = "https://topspizza.co.uk/{}".format(location["nickname"])
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield JsonRequest(
                 url="https://topspizza.co.uk/api/stores/search?store_id={}".format(item["ref"]),
