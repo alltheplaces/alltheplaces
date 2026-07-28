@@ -14,6 +14,7 @@ class KirklandsUSSpider(JSONBlobSpider):
     start_urls = ["https://www.kirklands.com/store-locator/stores.json"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
         item["ref"] = feature.get("store")
         item["street_address"] = item.pop("addr_full")
         oh = OpeningHours()
