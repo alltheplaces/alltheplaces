@@ -13,7 +13,6 @@ from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
-
 # We can get the first 250 from the API, but can't find a way to get the next 250 :(
 # So instead get the ids from the sitemap and call the individual api endpoint
 # "https://www.exxon.com/en/api/locator/Locations?DataSource=RetailGasStations",
