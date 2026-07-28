@@ -16,7 +16,7 @@ class MountainWarehouseSpider(Spider):
     name = "mountain_warehouse"
     item_attributes = {"brand": "Mountain Warehouse", "brand_wikidata": "Q6925414"}
     allowed_domains = ["www.mountainwarehouse.com"]
-    start_urls = ["https://www.mountainwarehouse.com/stores/results/?search=all&lat=0&lng=0"]
+    start_urls = ["https://www.mountainwarehouse.com/stores/store-locator/?search=all&lat=0&lng=0"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
