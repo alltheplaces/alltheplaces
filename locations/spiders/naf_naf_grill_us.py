@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -19,5 +20,7 @@ class NafNafGrillUSSpider(Spider):
             item["addr_full"] = location.xpath("p/text()").get()
 
             item["website"] = "https://www.nafnafgrill.com/locations/#{}".format(item["ref"])
+
+            apply_category(Categories.RESTAURANT, item)
 
             yield item
