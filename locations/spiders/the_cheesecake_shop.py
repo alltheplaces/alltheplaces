@@ -38,7 +38,13 @@ class TheCheesecakeShopSpider(Spider):
             item["website"] = response.urljoin("/store-locations/{}".format(location["storeIdentifier"]))
 
             if facebook := location.get("storeFacebook"):
-                set_social_media(item, SocialMedia.FACEBOOK, facebook)
+                if not facebook.startswith("http"):
+                    facebook = "https://{}".format(facebook)
+                set_social_media(
+                    item,
+                    SocialMedia.FACEBOOK,
+                    facebook.replace("business.facebook.com", "www.facebook.com").split("?business_id", 1)[0],
+                )
             if instagram := location.get("storeInstagram"):
                 set_social_media(item, SocialMedia.INSTAGRAM, instagram)
 
