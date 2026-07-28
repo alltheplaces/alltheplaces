@@ -1,6 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -17,4 +17,5 @@ class BiogroupFRSpider(SitemapSpider, StructuredDataSpider):
         # alias to "fr"), so apply the category directly rather than relying
         # on NSI location matching.
         apply_category(Categories.MEDICAL_LABORATORY, item)
+        apply_yes_no(HealthcareSpecialities.BIOLOGY, item, True)
         yield item
