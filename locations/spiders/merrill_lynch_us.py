@@ -13,5 +13,6 @@ class MerrillLynchUSSpider(YextAnswersSpider):
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
+        item["email"] = None
         apply_category(Categories.OFFICE_FINANCIAL_ADVISOR, item)
         yield item
