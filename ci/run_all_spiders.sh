@@ -83,6 +83,14 @@ if [ ! $retval -eq 0 ]; then
 fi
 (>&2 echo "Done running spiders")
 
+# A spider process killed mid-crawl (OOM, timeout, crash) never gets to write
+# its GeoJSON trailer, leaving output/*.geojson invalid and output/*.ndgeojson
+# with a malformed trailing line - the latter breaks the parquet build for
+# every spider, not just the one that was killed, since it's read in one
+# batch below. Repair before anything downstream consumes these files.
+(>&2 echo "Repairing any GeoJSON output left incomplete by a killed spider")
+uv run python ci/repair_truncated_geojson.py --directory "${SPIDER_RUN_DIR}/output"
+
 OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
 
