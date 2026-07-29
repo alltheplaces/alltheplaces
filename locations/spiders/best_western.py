@@ -1,6 +1,8 @@
-import html
 import json
+from typing import Any, Iterable
 
+from scrapy import Request
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -43,21 +45,25 @@ class BestWesternSpider(SitemapSpider, PlaywrightSpider):
     }
 
     sitemap_urls = ["https://www.bestwestern.com/etc/seo/bestwestern/hotels-details.xml"]
-    sitemap_rules = [(r"/en_US/book/[-\w]+/[-\w]+/propertyCode\.\d+\.html$", "parse_hotel")]
+    sitemap_rules = [(r"/en_US/book/[^/]+/[^/]+/propertyCode\.\d+\.html$", "parse")]
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
-        "DOWNLOAD_DELAY": 4,
+        "CONCURRENT_REQUESTS": 1,
     } | DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse_hotel(self, response):
-        hotel_details = response.xpath('//div[@id="hotel-details-info"]/@data-hoteldetails').get()
+    def _parse_sitemap(self, response: Response) -> Iterable[Request]:
+        for request in super()._parse_sitemap(response):
+            if request.callback == self.parse:
+                # Extract the hotel ID from the sitemap URL and request the summary API endpoint instead of the hotel page to avoid spider blockage.
+                hotel_id = request.url.split("propertyCode.")[1].removesuffix(".html")
+                yield Request(
+                    url=f"https://public-services.bestwestern.com/resort/{hotel_id}/summary",
+                    meta={"website": request.url},
+                )
 
-        if not hotel_details:
-            return
-
-        hotel = json.loads(html.unescape(hotel_details))
-        summary = hotel["summary"]
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        summary = json.loads(response.xpath("//pre/text()").get())
         brand = self.BRANDS_MAPPING.get(summary["resortCategory"])
         if not brand:
             self.crawler.stats.inc_value(f"{self.name}/unmapped_brand/{summary['resortCategory']}")
@@ -65,18 +71,8 @@ class BestWesternSpider(SitemapSpider, PlaywrightSpider):
         item = DictParser.parse(summary)
         item["brand"], item["brand_wikidata"] = brand
         item["street_address"] = summary["address1"]
-        item["website"] = response.url
         item["ref"] = summary["resort"]
+        item["website"] = response.meta["website"]
         item["extras"]["fax"] = summary["faxNumber"]
-        try:
-            # It's a big hotel chain, worth a bit of work to get the imagery.
-            image_path = hotel["imageCatalog"]["Media"][0]["ImagePath"]
-            item["image"] = "https://images.bestwestern.com/bwi/brochures/{}/photos/1024/{}".format(
-                summary["resort"], image_path
-            )
-        except IndexError:
-            pass
-
         apply_category(Categories.HOTEL, item)
-
         yield item
