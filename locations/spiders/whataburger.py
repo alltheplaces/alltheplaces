@@ -30,15 +30,15 @@ class WhataburgerSpider(SitemapSpider, StructuredDataSpider):
                     oh.set_closed(day)
                 else:
                     for times in theme.xpath('.//span[@class="StoreHours-intervals-instance"]'):
-                        if times.xpath('./text()').get() == "24 hr":
-                            oh.add_range(day, "00:00","23:59")
+                        if times.xpath("./text()").get() == "24 hr":
+                            oh.add_range(day, "00:00", "23:59")
                         else:
                             oh.add_range(
-                            day,
-                            times.xpath('.//span[@class="StoreHours-intervals-instance-open"]/text()').get(),
-                            times.xpath('.//span[@class="StoreHours-intervals-instance-close"]/text()').get(),
-                            "%I:%M%p",
-                        )
+                                day,
+                                times.xpath('.//span[@class="StoreHours-intervals-instance-open"]/text()').get(),
+                                times.xpath('.//span[@class="StoreHours-intervals-instance-close"]/text()').get(),
+                                "%I:%M%p",
+                            )
         return oh
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
