@@ -9,8 +9,8 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class SimonmedSpider(JSONBlobSpider):
-    name = "simonmed"
+class SimonmedUSSpider(JSONBlobSpider):
+    name = "simonmed_us"
     item_attributes = {"brand": "SimonMed"}
     start_urls = ["https://simonmed.com/wp-json/brandpie/v1/locations"]
 
