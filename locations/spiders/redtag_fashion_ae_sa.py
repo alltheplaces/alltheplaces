@@ -25,6 +25,7 @@ class RedtagFashionAESASpider(Spider):
         for store in response.json():
             item = DictParser.parse(store)
             item["email"] = None
+            item["branch"] = item.pop("name").removeprefix("REDTAG ").removeprefix("RT").strip(" -")
             item["ref"] = f"{response.meta['country']}_{store['storecode']}"
             item["street_address"] = item.pop("addr_full")
 
