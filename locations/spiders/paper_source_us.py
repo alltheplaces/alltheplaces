@@ -25,6 +25,7 @@ class PaperSourceUSSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
+        item["website"] = "https://www.papersource.com/a/stores/store/{}".format(item["ref"])
         item["opening_hours"] = OpeningHours()
         for rule in feature.get("hoursList") or []:
             if not (day := sanitise_day(rule["dayName"])):
