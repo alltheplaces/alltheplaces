@@ -8,7 +8,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -52,7 +52,7 @@ class BestWesternSpider(SitemapSpider, PlaywrightSpider):
         "ROBOTSTXT_OBEY": False,
         "CONCURRENT_REQUESTS": 1,
         "RETRY_HTTP_CODES": [403],
-    } | DEFAULT_PLAYWRIGHT_SETTINGS
+    } | DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
     def _parse_sitemap(self, response: Response) -> Iterable[Request]:
         for request in super()._parse_sitemap(response):
