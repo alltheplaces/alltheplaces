@@ -1,25 +1,31 @@
+from typing import Iterable
+
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours, day_range
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
-from locations.structured_data_spider import StructuredDataSpider
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class KirklandsUSSpider(CrawlSpider, StructuredDataSpider):
+class KirklandsUSSpider(JSONBlobSpider):
     name = "kirklands_us"
-    item_attributes = {
-        "brand": "Kirkland's",
-        "brand_wikidata": "Q6415714",
-    }
-    start_urls = ["https://www.kirklands.com/custserv/locate_store.cmd"]
-    rules = [Rule(LinkExtractor(allow="/store.jsp?"), callback="parse_sd")]
-    time_format = "%I %p"
+    item_attributes = {"brand": "Kirkland's", "brand_wikidata": "Q6415714"}
+    start_urls = ["https://www.kirklands.com/store-locator/stores.json"]
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        if isinstance(item.get("city"), list):  # e.g. ['Suite A-1', 'Huntsville']
-            item["street_address"] = merge_address_lines([item["street_address"], item["city"][0]])
-            item["city"] = item["city"][-1]
+        item["ref"] = feature.get("store")
+        item["street_address"] = item.pop("addr_full")
+        oh = OpeningHours()
+        for key, value in feature.get("hours").items():
+            if "_" in key:
+                start_day, end_day = key.split("_")
+            else:
+                start_day = end_day = key
+            oh.add_days_range(day_range(start_day, end_day), *value.split("-"), time_format="%I%p")
+        item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_INTERIOR_DECORATION, item)
+
         yield item
