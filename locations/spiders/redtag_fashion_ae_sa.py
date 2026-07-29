@@ -24,6 +24,7 @@ class RedtagFashionAESASpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
+            item["email"] = None
             item["ref"] = f"{response.meta['country']}_{store['storecode']}"
             item["street_address"] = item.pop("addr_full")
 
