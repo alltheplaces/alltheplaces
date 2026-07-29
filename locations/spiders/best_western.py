@@ -41,6 +41,7 @@ class BestWesternSpider(SitemapSpider, PlaywrightSpider):
         "WHEL": ("WorldHotels", "Q135246666"),  # WorldHotels Elite
         "WHLX": ("WorldHotels", "Q135246666"),  # WorldHotels Luxury
         "WHCC": ("WorldHotels", "Q135246666"),  # WorldHotels Crafted
+        "WHBD": ("WorldHotels", "Q135246666"),  # WorldHotels Backdrop
         "HMBW": ("@HOME", "Q135249100"),
     }
 
