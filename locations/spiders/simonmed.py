@@ -1,87 +1,40 @@
-import re
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class SimonmedSpider(Spider):
+class SimonmedSpider(JSONBlobSpider):
     name = "simonmed"
     item_attributes = {"brand": "SimonMed"}
-    allowed_domains = ["www.simonmed.com"]
-    start_urls = ("https://www.simonmed.com/locations/getLocations",)
+    start_urls = ["https://simonmed.com/wp-json/brandpie/v1/locations"]
 
-    def parse_times(self, hour):
-        if re.search("PM$", hour):
-            hour = re.sub("PM", "", hour).strip()
-            hour_min = hour.split(":")
-            if int(hour_min[0]) < 12:
-                hour_min[0] = str(12 + int(hour_min[0]))
-            return ":".join(hour_min)
-
-        if re.search("AM$", hour):
-            hour = re.sub("AM", "", hour).strip()
-            hour_min = hour.split(":")
-            if len(hour_min[0]) < 2:
-                hour_min[0] = hour_min[0].zfill(2)
-            else:
-                hour_min[0] = str(12 + int(hour_min[0]))
-            return ":".join(hour_min)
-
-    def parse(self, response):
-        data = response.json()
-        for store in data:
-            opening_hours = []
-
-            for day_hour in store["Days"]:
-                opening_hours.append(
-                    day_hour["Day"][:2]
-                    + " "
-                    + self.parse_times(day_hour["Open"])
-                    + "-"
-                    + self.parse_times(day_hour["Close"])
-                )
-
-            properties = {
-                "addr_full": store["Street1"] + " " + store["Street2"],
-                "phone": store["PhoneNumber"],
-                "city": store["City"],
-                "state": store["State"],
-                "postcode": store["ZipCode"],
-                "name": store["Name"],
-                "ref": store["id"],
-                "website": "https://www.simonmed.com/locations",
-                "lat": store["Latitude"],
-                "lon": store["Longitude"],
-                "opening_hours": "; ".join(opening_hours),
-            }
-
-            yield Feature(**properties)
-
-    async def start(self) -> AsyncIterator[FormRequest]:
-        headers = {
-            "Accept-Language": "en-US,en;q=0.8,ru;q=0.6",
-            "Origin": "www.simonmed.com",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept": "*/*",
-            "Referer": "https://www.simonmed.com/locations",
-            "Connection": "keep-alive",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": BROWSER_DEFAULT,
-        }
-        form_data = {
-            "location": "85251",
-            "miles": "1000000",
-            "location_lat": "33.4986286",
-            "location_lng": "-111.9224398",
-        }
-
-        yield FormRequest(
-            self.start_urls[0],
-            method="POST",
-            formdata=form_data,
-            headers=headers,
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("sm-location_address_group", None) or {})
+        feature.update(feature.pop("sm-latitude_longitude", None) or {})
+        feature["street_address"] = merge_address_lines(
+            [feature.pop("street_address_1", None), feature.pop("street_address_2", None)]
         )
+        feature["phone"] = (feature.get("sm-contact_numbers") or {}).get("phone_number")
+        feature["website"] = feature.pop("link", None)
+        feature["ref"] = feature.pop("ID", None)
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["opening_hours"] = OpeningHours()
+        for day_name, rule in (feature.get("sm-timing") or {}).items():
+            if not (day := sanitise_day(day_name)) or not isinstance(rule, dict):
+                continue
+            if rule.get("show_time"):
+                item["opening_hours"].add_ranges_from_string(
+                    f'{day} {rule.get("opening_time")} - {rule.get("closing_time")}'
+                )
+            elif not rule.get("closed_text"):
+                item["opening_hours"].set_closed(day)
+        apply_category(Categories.MEDICAL_IMAGING, item)
+        yield item
