@@ -11,7 +11,6 @@ class FranprixFRSpider(SitemapSpider, StructuredDataSpider):
     name = "franprix_fr"
     sitemap_urls = ["https://www.franprix.fr/sitemap.xml"]
     sitemap_rules = [(r"/magasins/\d+$", "parse_sd")]
-    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["name"].lower().startswith("franprix "):
