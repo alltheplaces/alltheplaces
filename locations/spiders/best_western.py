@@ -51,6 +51,7 @@ class BestWesternSpider(SitemapSpider, PlaywrightSpider):
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
         "CONCURRENT_REQUESTS": 1,
+        "RETRY_HTTP_CODES": [403],
     } | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def _parse_sitemap(self, response: Response) -> Iterable[Request]:
