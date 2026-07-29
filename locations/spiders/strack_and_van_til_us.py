@@ -21,8 +21,12 @@ class StrackAndVanTilUSSpider(JSONBlobSpider):
         item["ref"] = feature["uniqueName"]
         item["branch"] = item.pop("name")
         item["street_address"] = item.pop("street", None)
+        item["website"] = "https://www.strackandvantil.com/location/?store={}".format(item["ref"])
+
         item["opening_hours"] = OpeningHours()
         for rule in feature.get("operatingHours") or []:
             item["opening_hours"].add_ranges_from_string(f"{rule['day']}: {rule['hours']}")
+
         apply_category(Categories.SHOP_SUPERMARKET, item)
+
         yield item
