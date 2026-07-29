@@ -6,7 +6,7 @@ from locations.items import Feature
 
 class ZabkaCZSpider(scrapy.Spider):
     name = "zabka_cz"
-    item_attributes = {"brand": "Żabka", "brand_wikidata": "Q133445159"}
+    item_attributes = {"brand": "Žabka", "brand_wikidata": "Q133445159"}
     start_urls = ["https://izabka.cz/prodejny/"]
     no_refs = True
 
