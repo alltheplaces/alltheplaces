@@ -12,15 +12,16 @@ class SendiksUSSpider(FreshopSpider):
     app_key = "sendiks"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name")
         if hours_md := location.get("hours_md"):
             if hours_md.endswith("Daily"):
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string("Daily " + hours_md.removesuffix("Daily"))
-        if item["branch"].endswith("Fresh2GO"):
-            item["branch"] = item["branch"].removesuffix(" Fresh2GO")
-            item["brand"] = "Sendik's Fresh2GO"
+        if item["name"].endswith("Fresh2GO"):
+            item["branch"] = item["name"].removesuffix(" Fresh2GO")
+            item["name"] = "Sendik's Fresh2GO"
             apply_category(Categories.SHOP_CONVENIENCE, item)
         else:
+            item["branch"] = item["name"]
+            item["name"] = "Sendik's"
             apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
