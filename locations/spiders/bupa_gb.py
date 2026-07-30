@@ -21,7 +21,6 @@ class BupaGBSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
             LinkExtractor(r"/browse-by-region/[-\w]+$"),
         ),
     ]
-    time_format = "%I:%M %p"
     requires_proxy = True
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
