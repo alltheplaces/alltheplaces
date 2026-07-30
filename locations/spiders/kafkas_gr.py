@@ -1,11 +1,15 @@
 from locations.categories import Categories, apply_category
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.storefinders.lighthouse import LighthouseSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class KafkasGRSpider(LighthouseSpider):
+class KafkasGRSpider(LighthouseSpider, PlaywrightSpider):
     name = "kafkas_gr"
     item_attributes = {"brand_wikidata": "Q68201770"}
     start_urls = ["https://www.kafkas.gr/about-us/katastimata/"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse_item(self, item, location):
         item["ref"] = item["lat"]
