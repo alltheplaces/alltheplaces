@@ -1,6 +1,7 @@
 import scrapy
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
@@ -27,6 +28,11 @@ class EuromasterFRSpider(StructuredDataSpider):
             yield scrapy.Request(url=shop, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        # NSI has exactly one Euromaster entry (only covering "fx", the
+        # legacy code for Metropolitan France that the location matcher does
+        # not alias to "fr"), so apply the category directly rather than
+        # relying on NSI location matching.
+        apply_category(Categories.SHOP_CAR_REPAIR, item)
         item["website"] = response.url
         oh = OpeningHours()
         for day_time in ld_data["openingHoursSpecification"]:

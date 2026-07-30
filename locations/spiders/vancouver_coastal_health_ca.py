@@ -54,5 +54,9 @@ class VancouverCoastalHealthCASpider(Spider):
                 continue
             else:
                 self.logger.warning("Unknown category code: {}".format(location["type"]["id"]))
+                # NSI has a single, subdivision-scoped entry for this operator, so
+                # unrecognised type codes still need an explicit category applied
+                # here rather than relying on NSI to fill it in.
+                apply_category(Categories.CLINIC, item)
 
             yield item

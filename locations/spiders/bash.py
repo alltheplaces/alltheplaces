@@ -34,7 +34,7 @@ BASH_BRANDS = {
     "FOS": {"brand": "Foschini", "brand_wikidata": "Q116391780"},
     "G-STAR RAW": {"brand": "G-Star Raw", "brand_wikidata": "Q1484081"},
     "G-STAR": {"brand": "G-Star Raw", "brand_wikidata": "Q1484081"},
-    "HI": {"brand": "hi", "brand_wikidata": "Q116431177", "extras": Categories.SHOP_CLOTHES.value},
+    "HI": {"brand": "hi", "brand_wikidata": "Q116431177", "extras": Categories.SHOP_MOBILE_PHONE.value},
     "@HOME LIVINGSPACE": {"brand": "@Home Livingspace", "brand_wikidata": "Q117406343"},
     "@HOME": {"brand": "@home", "brand_wikidata": "Q116429887"},
     "LUELLA": {"brand": "Luella", "brand_wikidata": "Q117406783", "extras": Categories.SHOP_VARIETY_STORE.value},

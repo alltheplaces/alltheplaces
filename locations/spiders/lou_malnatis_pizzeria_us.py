@@ -1,9 +1,10 @@
-from html import unescape
-from typing import AsyncIterator
+import re
+from typing import Any
 
-from scrapy import Selector, Spider
-from scrapy.http import FormRequest
+from scrapy import Request, Spider
+from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -11,72 +12,43 @@ from locations.items import Feature
 class LouMalnatisPizzeriaUSSpider(Spider):
     name = "lou_malnatis_pizzeria_us"
     item_attributes = {"brand": "Lou Malnati's Pizzeria", "brand_wikidata": "Q6685628"}
-    allowed_domains = ["www.loumalnatis.com"]
-    start_urls = ["https://www.loumalnatis.com/resources/js/ajax_php/locatorAJAX.php"]
+    start_urls = ["https://www.loumalnatis.com/locations"]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        regions = [
-            ("1", "Phoenix, AZ, USA", 33.4483771, -112.0740373),
-            ("2", "Rockford, IL, USA", 42.2711311, -89.0939952),
-            ("3", "Milwaukee, WI, USA", 43.0389025, -87.9064736),
-            ("4", "Indianapolis, IN, USA", 39.768403, -86.158068),
-        ]
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        for region in regions:
-            formdata = {
-                "action": "getLocations",
-                "latLng": "({},{})".format(region[2], region[3]),
-                "distance": "100000",
-                "locationName": region[1],
-                "selectedFiltersArr": "",
-                "region_id": region[0],
-            }
-            yield FormRequest(url=self.start_urls[0], formdata=formdata, headers=headers, method="POST")
-
-    def parse(self, response):
-        markers = {}
-        markers_js = (
-            Selector(text=response.json()["locatorNewJSHolder"]["jContentReturn"]).xpath("//script/text()").get()
-        )
-        for marker_js in markers_js.split("var newMarker = new Array();")[1:]:
-            marker_html = Selector(text=marker_js.split('newMarker["html"] = "', 1)[1].split('";', 1)[0])
-            marker_ref = marker_html.xpath('.//div[contains(@class, "sideBar_MapOrder")]/a/@href').get().split("/")[-1]
-            marker_lat = marker_js.split('newMarker["lat"] = ', 1)[1].split(";", 1)[0]
-            marker_lon = marker_js.split('newMarker["lng"] = ', 1)[1].split(";", 1)[0]
-            markers[marker_ref] = (marker_lat, marker_lon)
-
-        locations = Selector(text=response.json()["locatorMapList"]["jContentReturn"])
-        for location in locations.xpath('//div[contains(@class, "sideBar_MapListAddress")]'):
-            properties = {
-                "ref": location.xpath('.//div[contains(@class, "sideBar_MapOrder")]/a/@href').get().split("/")[-1],
-                "name": unescape(
-                    location.xpath(
-                        './/div[contains(@class, "sideBar_MapAddressElementClickable desktop-only")]/text()'
-                    ).get()
-                ).replace(" - Now Open!", ""),
-                "addr_full": ", ".join(
-                    filter(
-                        None,
-                        location.xpath('(.//div[@class="sideBar_MapAddressElement"]/text())[position() < 3]').getall(),
-                    )
-                ),
-                "phone": location.xpath('.//div[@class="sideBar_MapAddressElement"]/a[contains(@href, "tel:")]/@href')
-                .get()
-                .replace("tel:", ""),
-                "website": location.xpath('.//div[contains(@class, "sideBar_MapMoreDetails")]/a/@href').get(),
-            }
-            if properties["ref"] in markers.keys():
-                properties["lat"], properties["lon"] = markers[properties["ref"]]
-            hours_string = " ".join(
-                filter(
-                    None,
-                    location.xpath('(.//div[@class="sideBar_MapAddressElement"]/text())[position() >= 4]').getall(),
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for region in response.xpath('//a[substring(@href, string-length(@href) - 10) = "/locations/"]/@href').getall():
+            yield response.follow(region, callback=self.parse)
+        for card in response.xpath(
+            '//div[contains(@class, "kadence-column")][.//a[contains(@href, "maps/dir/")]]'
+            '[not(descendant::div[contains(@class, "kadence-column")][.//a[contains(@href, "maps/dir/")]])]'
+        ):
+            directions = card.xpath('.//a[contains(@href, "maps/dir/")]/@href').get("")
+            website = card.xpath('.//a[contains(@href, "loumalnatis.com")][not(contains(@href, "maps"))]/@href').get()
+            if not website:
+                continue
+            if match := re.search(r"(-?\d{1,2}\.\d{4,}),(-?\d{1,3}\.\d{4,})", directions):
+                yield Request(
+                    url=website,
+                    meta={"lat": match.group(1), "lon": match.group(2)},
+                    callback=self.parse_location,
                 )
+
+    def parse_location(self, response: Response) -> Any:
+        branch = response.xpath("//h1//text()").get("").strip()
+        if "coming" in branch.lower():
+            return
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["lat"] = response.meta["lat"]
+        item["lon"] = response.meta["lon"]
+        item["branch"] = re.sub(r"^Lou Malnati['\u2019]s\s*[-\u2013]\s*", "", branch)
+        item["addr_full"] = response.xpath(
+            '//span[contains(@class, "wp-block-kadence-advancedheading")]/text()'
+        ).re_first(r".+, [A-Z]{2} \d{5}(?:-\d{4})?")
+        item["phone"] = response.xpath('//span[@class="kb-adv-text-inner"]/text()').re_first(r"\(\d{3}\) \d{3}-\d{4}")
+        item["opening_hours"] = OpeningHours()
+        for row in response.xpath('(//table[@class="locations-hours-table"])[1]/tbody/tr'):
+            item["opening_hours"].add_ranges_from_string(
+                f'{row.xpath("td[1]/text()").get("")} {row.xpath("td[2]/text()").get("")}'
             )
-            properties["opening_hours"] = OpeningHours()
-            properties["opening_hours"].add_ranges_from_string(hours_string)
-            yield Feature(**properties)
+        apply_category(Categories.RESTAURANT, item)
+        yield item

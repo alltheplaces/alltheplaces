@@ -39,7 +39,7 @@ class MitsubishiMYSpider(JSONBlobSpider):
 
         if "parts-stockist" in services:
             parts_item = item.deepcopy()
-            parts_item["ref"] = "{}-parts".format(service_item["ref"])
+            parts_item["ref"] = "{}-parts".format(parts_item["ref"])
             apply_category(Categories.SHOP_CAR_PARTS, parts_item)
             yield parts_item
 

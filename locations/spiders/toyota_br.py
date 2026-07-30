@@ -58,7 +58,7 @@ class ToyotaBRSpider(JSONBlobSpider):
 
         shop_item = deepcopy(item)
         apply_category(Categories.SHOP_CAR, shop_item)
-        apply_yes_no(Extras.TYRE_SERVICES, shop_item, "Menu de pneus" in services)
+        apply_yes_no(Extras.VEHICLE_TYRE_SERVICES, shop_item, "Menu de pneus" in services)
         yield shop_item
 
         if "Revisões periódicas" in services or "Servicio de mantenimiento" in services:
