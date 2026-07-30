@@ -3,6 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
@@ -21,4 +22,5 @@ class FoodlandGroceryUSSpider(AgileStoreLocatorSpider):
         if website := item.pop("website"):
             if m := re.search(r"store-locations/([^/]+)/$", website):
                 item["website"] = "https://www.foodlandgrocery.com/store-locations/{}/".format(m.group(1))
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
