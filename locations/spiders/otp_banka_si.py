@@ -21,7 +21,7 @@ class OtpBankaSISpider(Spider):
             # DictParser maps id->ref, title->name, address->addr_full, zip->postcode, city, lat/lng->lat/lon
             item = DictParser.parse(office)
             item["street_address"] = item.pop("addr_full", None)
-            item["branch"] = item.pop("name")  # "POSLOVALNICA <city>" label
+            item["branch"] = item.pop("name").removeprefix("POSLOVALNICA ")
             apply_category(Categories.BANK, item)
             yield item
         for atm in data["atms"]:
