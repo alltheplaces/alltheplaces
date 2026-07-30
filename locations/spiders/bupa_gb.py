@@ -22,7 +22,11 @@ class BupaGBSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
         ),
     ]
     requires_proxy = True
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
+    } | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if "Total Dental Care" in item["name"]:
