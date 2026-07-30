@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -11,10 +12,12 @@ class CousinsSubsUSSpider(SitemapSpider):
 
     def parse(self, response, **kwargs):
         item = Feature()
+        item["name"] = self.item_attributes["brand"]
         item["branch"] = response.xpath("//main//h1/text()").get()
         item["addr_full"] = response.xpath(
             '//*[@class="LocationDirectory_location_details_visit_address__w7TcQ"]/text()'
         ).get()
         item["ref"] = item["website"] = response.url
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        apply_category(Categories.FAST_FOOD, item)
         yield item
