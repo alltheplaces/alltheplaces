@@ -46,7 +46,7 @@ class RitualsSpider(Spider):
                     day = day_time.get("name")
                     open_time = day_time.get("openingTime")
                     close_time = day_time.get("closingTime")
-                    if open_time == None and close_time == None:
+                    if open_time is None and close_time is None:
                         oh.set_closed(day)
                     else:
                         oh.add_range(
