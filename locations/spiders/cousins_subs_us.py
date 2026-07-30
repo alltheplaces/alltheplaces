@@ -1,16 +1,20 @@
-from scrapy import Spider
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.items import Feature
 
 
-class CousinsSubsUSSpider(Spider):
+class CousinsSubsUSSpider(SitemapSpider):
     name = "cousins_subs_us"
     item_attributes = {"brand": "Cousins Subs", "brand_wikidata": "Q5178843"}
-    start_urls = ["https://www.cousinssubs.com/api/restaurant/"]
+    sitemap_urls = ["https://www.cousinssubs.com/sitemap.xml"]
+    sitemap_rules = [(r"https://www.cousinssubs.com/locations-directory/[^/]+/[^/]+/[^/]+$", "parse")]
 
     def parse(self, response, **kwargs):
-        for location in response.json():
-            location["website"] = f'https://www.cousinssubs.com/order/{location["slug"]}'
-            location["street_address"] = location.pop("street")
-
-            yield DictParser.parse(location)
+        item = Feature()
+        item["branch"] = response.xpath("//main//h1/text()").get()
+        item["addr_full"] = response.xpath(
+            '//*[@class="LocationDirectory_location_details_visit_address__w7TcQ"]/text()'
+        ).get()
+        item["ref"] = item["website"] = response.url
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        yield item
