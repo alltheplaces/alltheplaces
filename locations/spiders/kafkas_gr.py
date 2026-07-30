@@ -7,7 +7,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class KafkasGRSpider(LighthouseSpider, PlaywrightSpider):
     name = "kafkas_gr"
-    item_attributes = {"brand_wikidata": "Q68201770"}
+    item_attributes = {"brand": "Καυκάς", "brand_wikidata": "Q68201770"}
     start_urls = ["https://www.kafkas.gr/about-us/katastimata/"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
