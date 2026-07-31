@@ -13,7 +13,6 @@ class UdropSpider(Spider):
     name = "udrop"
     item_attributes = {"brand": "uDrop"}
     start_urls = ["https://udrop.lt/"]
-    requires_proxy = "EE"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(
