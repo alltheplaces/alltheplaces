@@ -1,78 +1,34 @@
-from json import dumps, loads
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
-DAY_MAPPING = {2: "Mo", 3: "Tu", 4: "We", 5: "Th", 6: "Fr", 7: "Sa", 1: "Su"}
 
-
-class VictoriassecretSpider(Spider):
+class VictoriassecretSpider(SitemapSpider, StructuredDataSpider):
     name = "victoriassecret"
     item_attributes = {"brand": "Victoria's Secret", "brand_wikidata": "Q332477"}
-    allowed_domains = ["victoriassecret.com"]
-    start_urls = [
-        "https://www.victoriassecret.com/store-locator#storeList/US",
-    ]
+    allowed_domains = ["stores.victoriassecret.com"]
+    sitemap_urls = ["https://stores.victoriassecret.com/sitemap.xml"]
+    sitemap_rules = [(r"/[a-z-]+-[a-z]?\d+\.html$", "parse")]
+    wanted_types = ["ClothingStore"]
+    search_for_facebook = False
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        template = "https://api.victoriassecret.com/stores/v1/search?countryCode=US"
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        # Delist stores that are present in the sitemap but serves their parent city or region page.
+        if not (card := response.xpath('//div[contains(@class, "location-card-wrap")]')):
+            return
 
-        headers = {
-            "Accept": "application/json",
-        }
+        item["ref"] = card.xpath(".//*[@data-fid]/@data-fid").get()
+        item["name"] = None
+        branch = card.xpath("./preceding-sibling::h2[1]/text()").get()
+        if not branch.startswith("Victoria's Secret"):
+            item["branch"] = branch.removesuffix(" VS")
 
-        yield FormRequest(url=template, method="GET", headers=headers, callback=self.parse)
+        apply_category(Categories.SHOP_CLOTHES, item)
+        apply_clothes([Clothes.UNDERWEAR, Clothes.WOMEN], item)
 
-    def parse(self, response):
-        jsonresponse = response.json()
-        for stores in jsonresponse:
-            store = dumps(stores)
-            store_data = loads(store)
-            properties = {}
-
-            if store_data["latitudeDegrees"] == "":
-                properties["lat"] = float(0)
-                properties["lon"] = float(0)
-
-            else:
-                properties = {
-                    "name": store_data["name"],
-                    "ref": store_data["storeId"],
-                    "addr_full": store_data["address"]["streetAddress1"],
-                    "city": store_data["address"]["city"],
-                    "state": store_data["address"]["region"],
-                    "postcode": store_data["address"]["postalCode"],
-                    "country": "US",
-                    "phone": store_data["address"]["phone"],
-                    "lat": float(store_data["latitudeDegrees"]),
-                    "lon": float(store_data["longitudeDegrees"]),
-                }
-
-            hours = store_data["hours"]
-
-            if hours:
-                properties["opening_hours"] = self.process_hours(hours)
-
-            yield Feature(**properties)
-
-    def process_hours(self, hours):
-        opening_hours = OpeningHours()
-
-        for hour in hours:
-            hr = dumps(hour)
-            hrs = loads(hr)
-            day = hrs["day"]
-            open_time = hrs["open"]
-            close_time = hrs["close"]
-
-            opening_hours.add_range(
-                day=DAY_MAPPING[day],
-                open_time=open_time,
-                close_time=close_time,
-                time_format="%H:%M %p",
-            )
-        return opening_hours
+        yield item
