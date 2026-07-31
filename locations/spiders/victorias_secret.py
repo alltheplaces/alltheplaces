@@ -8,8 +8,8 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class VictoriassecretSpider(SitemapSpider, StructuredDataSpider):
-    name = "victoriassecret"
+class VictoriasSecretSpider(SitemapSpider, StructuredDataSpider):
+    name = "victorias_secret"
     item_attributes = {"brand": "Victoria's Secret", "brand_wikidata": "Q332477"}
     allowed_domains = ["stores.victoriassecret.com"]
     sitemap_urls = ["https://stores.victoriassecret.com/sitemap.xml"]
