@@ -11,6 +11,9 @@ class LiquorlandNZSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://www.liquorland.co.nz/store-locations/[^/]+", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["addr_full"] = item.pop("street_address")
+        item["branch"] = item.pop("name").replace("Liquorland ", "")
+        item["website"] = response.url
         oh = OpeningHours()
         oh.add_ranges_from_string(",".join(ld_data.get("openingHours")))
         item["opening_hours"] = oh
