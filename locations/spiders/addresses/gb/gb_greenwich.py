@@ -10,7 +10,8 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbGreenwichSpider(OwenBaseSpider):
-    name = "gb_greenwich"
+    # Upstream Greenwich archive was withdrawn after a Geoplace claim; the Google Drive id now returns 404.
+    name = None
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0."
         + " Contains OS data © Crown copyright and database right 2025."
