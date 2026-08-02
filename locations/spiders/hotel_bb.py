@@ -13,7 +13,7 @@ class HotelBbSpider(SitemapSpider, StructuredDataSpider):
     name = "hotel_bb"
     BB_HOTELS = {"brand": "B&B Hotels", "brand_wikidata": "Q794939"}
     sitemap_urls = ["https://www.hotel-bb.com/sitemap.xml"]
-    sitemap_rules = [("/en/hotel/", "parse_sd")]
+    sitemap_rules = [(r"/[a-z]{2}/hotel/[^/]+$", "parse_sd")]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
