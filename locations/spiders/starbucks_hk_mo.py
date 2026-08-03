@@ -1,4 +1,4 @@
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
@@ -25,6 +25,7 @@ class StarbucksHKMOSpider(JSONBlobSpider):
         item["extras"]["addr:full:zh"] = location["address1_cn"]
         item["addr_full"] = item["extras"]["addr:full:zh"] + " " + item["extras"]["addr:full:en"]
 
+        apply_category(Categories.COFFEE_SHOP, item)    
         apply_yes_no(Extras.WIFI, item, location["is_free_wifi"] == "1")
         apply_yes_no(Extras.TAKEAWAY, item, location["has_starbucks_take_away"] == "1")
 
