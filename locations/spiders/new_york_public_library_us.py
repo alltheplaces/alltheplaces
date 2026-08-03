@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 
@@ -45,4 +46,5 @@ class NewYorkPublicLibraryUSSpider(scrapy.Spider):
             if hours := location.get("hours"):
                 item["opening_hours"] = self.parse_hours(hours)
 
+            apply_category(Categories.LIBRARY, item)
             yield item
