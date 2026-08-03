@@ -11,7 +11,6 @@ class VueCinemasSpider(SitemapSpider):
     item_attributes = {"brand": "Vue", "brand_wikidata": "Q2535134"}
     sitemap_urls = ["https://www.myvue.com/sitemap.xml"]
     sitemap_rules = [(r"/whats-on$", "parse")]
-    requires_proxy = "GB"
 
     def parse(self, response, **kwargs):
         item = Feature()
