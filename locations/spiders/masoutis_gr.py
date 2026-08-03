@@ -1,26 +1,32 @@
-from typing import Any, AsyncIterator
+from typing import Any
 
+from requests_cache import Iterable
 from scrapy import Spider
-from scrapy.http import FormRequest, Response
+from scrapy.http import JsonRequest, Response, TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 
 class MasoutisGRSpider(Spider):
     name = "masoutis_gr"
     item_attributes = {"brand_wikidata": "Q6783887"}
-    allowed_domains = ["www.masoutis.gr"]
+    start_urls = ["https://www.masoutis.gr/api/eshop/GetCred"]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        yield FormRequest(
-            url="https://www.masoutis.gr/api/masoutis/GetAllStoresEnabledLinks", method="POST", formdata={}
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
+        api_data = response.json()
+        yield JsonRequest(
+            url="https://www.masoutis.gr/api/masoutis/GetAllStoresEnabledLinks",
+            method="POST",
+            headers={"key": api_data.get("Key"), "usl": api_data.get("Usl"), "uid": api_data.get("Uid")},
+            callback=self.parse_details,
         )
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse_details(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["ref"] = location["Storeid"]
+            item["street_address"] = location.get("StoreDescr")
             item["image"] = location["PhotoData"]
             item["lat"] = location["Langitude"]
             item["lon"] = location["Longitude"]
