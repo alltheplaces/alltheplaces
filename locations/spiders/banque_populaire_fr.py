@@ -19,11 +19,7 @@ class BanquePopulaireFRSpider(SitemapSpider, StructuredDataSpider):
         apply_yes_no(
             Extras.ATM,
             item,
-            (
-                True
-                if "Distributeur automatique de billets"
-                in response.xpath('//*[contains(@data-testid,"service-card")]//text()').getall()
-                else False
-            ),
+            "Distributeur automatique de billets"
+            in response.xpath('//*[contains(@data-testid,"service-card")]//text()').getall(),
         )
         yield item
