@@ -8,7 +8,6 @@ import pycountry
 import tldextract
 from unidecode import unidecode
 
-
 _DATA_DIR = Path(__file__).resolve().parent / "data"
 NSI_FILE_PATH = _DATA_DIR / "nsi.json"
 WIKIDATA_FILE_PATH = _DATA_DIR / "nsi-wikidata.json"
