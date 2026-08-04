@@ -1,36 +1,49 @@
-import json
-from typing import Any
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy import Request, Spider
+from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.geo import country_iseadgg_centroids
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
 class PagueMenosBRSpider(Spider):
     name = "pague_menos_br"
     item_attributes = {"brand": "Pague Menos", "brand_wikidata": "Q7124466"}
-    start_urls = ["https://www.paguemenos.com.br/nossas-lojas"]
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        # Collect cookies
-        yield JsonRequest(
-            "https://pmenos.paguemenos.com.br/wp-json/wp/v2/lojas?per_page=9999&page=1&order=asc",
-            callback=self.parse_api,
+    def request(self, latitude: float, longitude: float, page: int) -> Request:
+        return Request(
+            url=f"https://www.paguemenos.com.br/api/checkout/pub/pickup-points"
+            f"?geoCoordinates={longitude};{latitude}&pageSize=100&page={page}",
+            meta={"latitude": latitude, "longitude": longitude, "page": page},
         )
 
-    def parse_api(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//text()").get()):
-            item = Feature()
-            item["ref"] = location["meta_box"]["id_loja"]
-            item["website"] = location["link"]
-            item["phone"] = location["meta_box"]["telefone"].split("/")[0]
-            item["street_address"] = location["meta_box"]["endereco"]
-            item["city"] = location["meta_box"]["cidade"]
-            item["state"] = location["meta_box"]["uf"]
-            item["postcode"] = location["meta_box"]["cep"]
+    async def start(self) -> AsyncIterator[Request]:
+        for latitude, longitude in country_iseadgg_centroids("BR", 48):
+            yield self.request(latitude, longitude, 1)
 
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Request | Feature]:
+        data = response.json()
+        for entry in data["items"]:
+            location = entry["pickupPoint"]
+            if not location.get("isActive") or "Locker" in (location.get("friendlyName") or ""):
+                continue
+            location.update(location.pop("address"))
+            location["longitude"], location["latitude"] = location["geoCoordinates"]
+            location["street-number"] = location.get("number")
+            item = DictParser.parse(location)
+            item["opening_hours"] = OpeningHours()
+            for rule in location.get("businessHours") or []:
+                item["opening_hours"].add_range(
+                    self.days[rule["DayOfWeek"]], rule["OpeningTime"][:5], rule["ClosingTime"][:5]
+                )
+            apply_category(Categories.PHARMACY, item)
             yield item
+
+        if response.meta["page"] < data["paging"]["pages"]:
+            yield self.request(response.meta["latitude"], response.meta["longitude"], response.meta["page"] + 1)
