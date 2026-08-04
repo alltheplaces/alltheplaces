@@ -10,7 +10,6 @@ class LornaJaneAUNZSpider(JSONBlobSpider):
         "https://s3.ap-southeast-2.amazonaws.com/cdn.folkal.com/json_response/v2/872cf56f-7317-11f0-8758-0aa8e15148ab.json",
         "https://s3.ap-southeast-2.amazonaws.com/cdn.folkal.com/json_response/v2/3e70ca1c-98d0-11f0-ae0c-0aa8e15148ab.json",
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
     locations_key = "locations"
 
     def post_process_item(self, item, response, feature):
