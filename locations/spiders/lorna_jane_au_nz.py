@@ -18,10 +18,10 @@ class LornaJaneAUNZSpider(JSONBlobSpider):
         item["street_address"] = merge_address_lines([item.pop("street"), item.pop("housenumber")])
 
         oh = OpeningHours()
-        for day_time in feature.get("timetable"):
-            day = day_time.get("dayOfWeek")
-            open_time = day_time.get("openTime")
-            close_time = day_time.get("closeTime")
-            oh.add_range(day=day, open_time=open_time, close_time=close_time)
+        for rule in feature["timetable"]:
+            if rule["isClosed"] is True:
+                oh.set_closed(rule["dayOfWeek"])
+            else:
+                oh.add_range(rule["dayOfWeek"], rule["openTime"], rule["closeTime"])
         item["opening_hours"] = oh
         yield item
