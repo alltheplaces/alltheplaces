@@ -18,12 +18,7 @@ class BunBurgersSpider(AgileStoreLocatorSpider):
         if addr := item.get("street_address"):
             item["street_address"] = unescape(addr)
         item["branch"] = (
-            item.pop("name", "")
-            .strip()
-            .removeprefix("Bun Burgers - ")
-            .removeprefix("Bun Burgers ")
-            .strip()
-            or None
+            item.pop("name", "").strip().removeprefix("Bun Burgers - ").removeprefix("Bun Burgers ").strip() or None
         )
         item["website"] = "https://bunburgers.com/dove-siamo/"
         item.pop("state", None)
