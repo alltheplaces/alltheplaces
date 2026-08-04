@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -24,4 +25,7 @@ class LornaJaneAUNZSpider(JSONBlobSpider):
             else:
                 oh.add_range(rule["dayOfWeek"], rule["openTime"], rule["closeTime"])
         item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_CLOTHES, item)
+
         yield item
