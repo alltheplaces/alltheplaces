@@ -37,16 +37,6 @@ class NSI(metaclass=Singleton):
         self.wikidata_json: dict = {}
         self.nsi_json: dict = {}
 
-    @staticmethod
-    def _request_file(file: str) -> dict:
-        resp = requests.get(
-            "https://cdn.jsdelivr.net/npm/name-suggestion-index@7/dist/{}".format(file),
-            headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
-        )
-        if not resp.status_code == 200:
-            raise Exception("NSI load failure")
-        return resp.json()
-
     def _ensure_loaded(self):
         if not self.loaded:
             self.wikidata_json = json.load(open(WIKIDATA_FILE_PATH))["wikidata"]
