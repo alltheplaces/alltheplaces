@@ -16,5 +16,6 @@ class MarcsSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow="store-finder/"), callback="parse_sd")]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Marc's ")
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
