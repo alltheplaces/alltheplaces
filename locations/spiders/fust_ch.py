@@ -7,6 +7,7 @@ from locations.hours import DAYS_DE, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class FustCHSpider(JSONBlobSpider):
@@ -17,6 +18,8 @@ class FustCHSpider(JSONBlobSpider):
         "country": "CH",
     }
     start_urls = ["https://www.fust.ch/store-finder"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def extract_json(self, response: Response) -> list[dict]:
         scripts = response.xpath('//script[contains(text(), "pointOfService")]/text()').getall()
