@@ -1,14 +1,15 @@
 import json
 from typing import Any, AsyncIterator
 
-from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 GAMESTOP_SHARED_ATTRIBUTES = {
@@ -18,14 +19,15 @@ GAMESTOP_SHARED_ATTRIBUTES = {
 }
 
 
-class GamestopUSSpider(Spider):
+class GamestopUSSpider(CamoufoxSpider):
     name = "gamestop_us"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
     allowed_domains = ["www.gamestop.com"]
     start_urls = [
         "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?hasCondition=false&hasVariantsAvailableForLookup=false&hasVariantsAvailableForPickup=false&source=plp&showMap=false&products=undefined:1"
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
