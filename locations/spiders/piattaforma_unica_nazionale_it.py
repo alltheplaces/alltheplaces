@@ -160,10 +160,15 @@ class PiattaformaUnicaNazionaleITSpider(scrapy.Spider):
 
     def parse_map_search(self, response):
         data = response.json()
-        content = data.get("content", [])
+        if isinstance(data, list):
+            content = data
+            total_pages = 1
+        else:
+            content = data.get("content", [])
+            total_pages = data.get("totalPages", 0)
+
         creds = response.meta["creds"]
         page = response.meta["page"]
-        total_pages = data.get("totalPages", 0)
 
         evse_ids = [item["evse_id"] for item in content if "evse_id" in item]
 
