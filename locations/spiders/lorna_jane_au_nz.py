@@ -1,5 +1,6 @@
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class LornaJaneAUNZSpider(JSONBlobSpider):
@@ -14,6 +15,8 @@ class LornaJaneAUNZSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, feature):
         item["branch"] = item.pop("name").replace("Lorna Jane ", "")
+        item["street_address"] = merge_address_lines([item.pop("street"), item.pop("housenumber")])
+
         oh = OpeningHours()
         for day_time in feature.get("timetable"):
             day = day_time.get("dayOfWeek")
