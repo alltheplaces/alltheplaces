@@ -5,11 +5,9 @@ from typing import Iterable
 from urllib.parse import urlparse
 
 import pycountry
-import requests
 import tldextract
 from unidecode import unidecode
 
-from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 _DATA_DIR = Path(__file__).resolve().parent / "data"
 NSI_FILE_PATH = _DATA_DIR / "nsi.json"
