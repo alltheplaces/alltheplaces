@@ -25,7 +25,7 @@ class StarbucksHKMOSpider(JSONBlobSpider):
         item["extras"]["addr:full:zh"] = location["address1_cn"]
         item["addr_full"] = item["extras"]["addr:full:zh"] + " " + item["extras"]["addr:full:en"]
 
-        apply_category(Categories.COFFEE_SHOP, item)    
+        apply_category(Categories.COFFEE_SHOP, item)
         apply_yes_no(Extras.WIFI, item, location["is_free_wifi"] == "1")
         apply_yes_no(Extras.TAKEAWAY, item, location["has_starbucks_take_away"] == "1")
 
