@@ -13,7 +13,6 @@ from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 class StarbucksTHSpider(Spider):
     name = "starbucks_th"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
-    requires_proxy = True
 
     def make_request(self, page: int, limit: int = 100) -> Request:
         return Request(
