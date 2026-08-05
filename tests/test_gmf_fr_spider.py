@@ -54,25 +54,40 @@ def test_parse_retries_when_name_missing():
     assert results[0].url == request.url
 
 
-def test_parse_sitemap_skips_multi_agency_city_pages():
-    # "assurance-paris"/"assurance-lyon"/etc. are disambiguation pages for
-    # cities with more than one GMF agency, not agency records themselves -
-    # confirmed permanent (not a rendering fluke) by inspecting them
-    # directly, so they should never even be requested, unlike a genuine
-    # agency page such as "assurance-agen".
+def test_parse_sitemap_requests_agency_pages_via_browser_html():
     body = """<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
         <url><loc>https://www.gmf.fr/agences-gmf/assurance-agen</loc></url>
-        <url><loc>https://www.gmf.fr/agences-gmf/assurance-paris</loc></url>
-        <url><loc>https://www.gmf.fr/agences-gmf/assurance-lyon</loc></url>
         <url><loc>https://www.gmf.fr/agences-gmf/assurances-Aube-10</loc></url>
     </urlset>"""
     response = XmlResponse(url="https://www.gmf.fr/accueil.sitemap.xml", body=body, encoding="utf-8")
 
     requests = list(make_spider()._parse_sitemap(response))
 
+    # "assurances-Aube-10" (plural, a department page) is excluded by
+    # sitemap_rules itself, before _parse_sitemap even runs.
     assert [r.url for r in requests] == ["https://www.gmf.fr/agences-gmf/assurance-agen"]
     assert requests[0].meta["zyte_api"]["browserHtml"] is True
+
+
+def test_parse_drops_multi_agency_city_pages_without_retry():
+    # "assurance-paris"/"assurance-lyon"/etc. are disambiguation pages for
+    # cities with more than one GMF agency, not agency records themselves -
+    # confirmed permanent (not a rendering fluke) by inspecting several
+    # directly. They're large, fully-rendered pages (observed ~76-180KB on a
+    # full crawl) that simply never contain h1.geo-title, unlike a
+    # genuinely incomplete render of a real agency page (always well under
+    # 10KB in the same crawl) - so a big body with no heading should be
+    # dropped outright, not retried.
+    filler = "<!-- padding to exceed NOT_AN_AGENCY_PAGE_SIZE, like a real disambiguation page -->"
+    body = "<html><head></head><body>" + filler * 1000 + "</body></html>"
+    assert len(body) > GmfFRSpider.NOT_AN_AGENCY_PAGE_SIZE
+    request = Request("https://www.gmf.fr/agences-gmf/assurance-paris")
+    response = HtmlResponse(url=request.url, body=body, encoding="utf-8", request=request)
+
+    results = list(make_spider().parse(response))
+
+    assert results == []
 
 
 def test_parse_retries_when_geometry_missing():
