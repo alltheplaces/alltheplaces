@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 SALE_DEPARTMENT = re.compile(
     r"\b(?:sales|motorrad|motorräder|motoren|motocross|motorfietsen|motos|scooters|salg"
-    f"|verkauf|verkoop|vendita|vendas|venda|ventas|vente"
+    r"|verkauf|verkoop|vendita|vendas|venda|ventas|vente"
     r"|ventes|händler|venta|prodej|predaj|sprzedaż|försäljning|értékesítés)\b",
     re.IGNORECASE,
 )
