@@ -9,8 +9,8 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
-class SnarfsSpider(Spider):
-    name = "snarfs"
+class SnarfsUSSpider(Spider):
+    name = "snarfs_us"
     item_attributes = {"brand": "Snarf's Sandwiches", "brand_wikidata": "Q113900887"}
     start_urls = ["https://www.eatsnarfs.com/services/location/get_all_stores.php"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
