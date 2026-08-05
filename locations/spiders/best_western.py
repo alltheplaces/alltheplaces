@@ -51,6 +51,8 @@ class BestWesternSpider(SitemapSpider, PlaywrightSpider):
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
         "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_DELAY": 5,
+        "RETRY_TIMES": 5,
         "RETRY_HTTP_CODES": [403],
     } | DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
