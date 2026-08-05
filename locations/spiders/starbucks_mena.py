@@ -1,65 +1,40 @@
-from typing import Any, AsyncIterator, Iterable
+import json
 
-from scrapy import Request
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.categories import Extras, apply_yes_no
-from locations.items import Feature, get_merged_item
-from locations.storefinders.yext_search import YextSearchSpider
-
-AMENITIES_MAP = {"Drive Through": Extras.DRIVE_THROUGH, "WiFi": Extras.WIFI}
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class StarbucksMenaSpider(YextSearchSpider):
-    name = name = "starbucks_mena"
+class StarbucksMenaSpider(SitemapSpider, StructuredDataSpider):
+    name = "starbucks_mena"
     item_attributes = {"brand": "ستاربكس", "brand_wikidata": "Q37158"}
-    stored_items = {}
+    sitemap_urls = [
+        "https://locations.starbucks.ae/robots.txt",
+        "https://locations.starbucks.qa/sitemap.xml",
+        "https://locations.starbucks.sa/sitemap.xml",
+        "https://locations.starbucks.eg/sitemap.xml",
+        "https://locations.starbucks.com.bh/sitemap.xml",
+        "https://locations.starbucks.com.kw/sitemap.xml",
+        "https://locations.starbucks.com.lb/sitemap.xml",
+        "https://locations.starbucks.com.om/sitemap.xml",
+    ]
+    sitemap_rules = [
+        (r"https://locations.starbucks.com.\w+/[a-z-]+/[a-z-]+$", "parse_sd"),
+        (r"https://locations.starbucks.\w+/[a-z-]+/[a-z-]+$", "parse_sd"),
+        (r"https://locations.starbucks.\w+/fr/[a-z-]+/[a-z-]+$", "parse_sd"),
+        (r"https://locations.starbucks.\w+/ar/[a-z-]+/[a-z-]+$", "parse_sd"),
+    ]
 
-    async def start(self) -> AsyncIterator[Request]:
-        offset = 0
-        yield JsonRequest(
-            url=f"https://locations.starbucks.eg/index.html?search&r=250000&per={self.page_size}&offset={offset}"
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["image"] = None
+        item["branch"] = item.pop("name").removeprefix("Starbucks ")
+        ld_data = (
+            json.loads(response.xpath('//*[@type="application/ld+json"][2]//text()').get())
+            .get("credentialSubject")
+            .get("geo")
         )
-        yield JsonRequest(
-            url=f"https://locations.starbucks.eg/ar?search&r=250000&per={self.page_size}&offset={offset}&l=ar"
-        )
-
-    def request_next_page(self, response: Response, **kwargs: Any) -> Any:
-        pager = response.json()["queryParams"]
-        offset = int(pager["offset"][0])
-        page_size = int(pager["per"][0])
-        if offset + page_size < response.json()["response"]["count"]:
-            if "/ar?" in response.url:
-                yield JsonRequest(
-                    url=f"https://locations.starbucks.eg/ar?search&r=250000&per={self.page_size}&offset={offset + page_size}&l=ar"
-                )
-            else:
-                yield JsonRequest(
-                    url=f"https://locations.starbucks.eg/index.html?search&r=250000&per={self.page_size}&offset={offset + page_size}"
-                )
-
-    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
-        profile = location["profile"]
-        if profile["address"]["countryCode"] == "TR":  # Covered by starbucks_eu
-            return
-        if amenities := profile.get("c_storeAmenities"):
-            for amenity in amenities:
-                if tag := AMENITIES_MAP.get(amenity):
-                    apply_yes_no(tag, item, True)
-                else:
-                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_amenity/{amenity}")
-        item["branch"] = profile.get("c_siteLocation")
-        if item["branch"] is None:
-            item["branch"] = profile.get("c_storeNameInternal")
-        if item["ref"] in self.stored_items:
-            other_item = self.stored_items.pop(item["ref"])
-            if profile["address"]["countryCode"] == "MA":
-                other_language = "fr"
-            else:
-                other_language = "en"
-            if profile["meta"]["language"] == "ar":
-                yield get_merged_item({other_language: other_item, "ar": item}, "ar")
-            else:
-                yield get_merged_item({other_language: item, "ar": other_item}, "ar")
-        else:
-            self.stored_items[item["ref"]] = item
+        item["lat"] = ld_data.get("latitude")
+        item["lon"] = ld_data.get("longitude")
+        yield item
