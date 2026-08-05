@@ -14,6 +14,7 @@ class AcquaSaponeITSpider(Spider):
     item_attributes = {"brand": "Acqua & Sapone", "brand_wikidata": "Q51079044"}
     start_urls = ["https://www.acquaesapone.it/puntivendita-filtri/"]
     security_key = ""
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         self.security_key = chompjs.parse_js_object(
