@@ -29,6 +29,7 @@ class StarbucksMenaSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
+        item["website"] = response.url
         item["branch"] = item.pop("name").removeprefix("Starbucks ")
         apply_category(Categories.CAFE, item)
         yield item
