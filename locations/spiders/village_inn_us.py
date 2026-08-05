@@ -5,8 +5,8 @@ from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class VillageInnSpider(CrawlSpider, StructuredDataSpider):
-    name = "village_inn"
+class VillageInnUSSpider(CrawlSpider, StructuredDataSpider):
+    name = "village_inn_us"
     item_attributes = {"brand": "Village Inn", "brand_wikidata": "Q7930659"}
     # allowed_domains = ["www.villageinn.com"]
     start_urls = ("https://www.villageinn.com/Locations",)
