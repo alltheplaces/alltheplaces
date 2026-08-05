@@ -106,9 +106,8 @@ class PlaywrightMiddleware:
         # Note this is probably browser specific for how a text document is
         # rendered by a browser as HTML. The list of cases below may need to
         # be expanded to accomodate different browsers.
-        if response.xpath('//link[@href="resource://content-accessible/plaintext.css"]').get():
-            # Rendering by Firefox-based web browsers
-            plaintext = response.xpath("//body/pre/text()").get("")
+        plaintext = response.xpath("//body/pre/text()").get()
+        if plaintext:
             return response.replace(body=plaintext.encode("utf-8"))
 
         # If a Playwright or Camoufox request is for an XML document (for ATP,
