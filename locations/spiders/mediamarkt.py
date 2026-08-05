@@ -39,23 +39,15 @@ class MediamarktSpider(SitemapSpider, StructuredDataSpider):
     ]
     sitemap_rules = [("/store/", "parse_sd")]
 
-    brands = {
-        "www.mediamarkt.at": MEDIAMARKT,
-        "www.mediamarkt.be": MEDIAMARKT,
-        "www.mediamarkt.ch": MEDIAMARKT,
-        "www.mediamarkt.de": MEDIAMARKT,
-        "www.mediamarkt.es": MEDIAMARKT,
-        "www.mediamarkt.hu": MEDIAMARKT,
-        "www.mediamarkt.nl": MEDIAMARKT,
-        "www.mediaworld.it": MEDIAWORLD,
-        "mediamarkt.pl": MEDIAMARKT,
-        "www.saturn.de": SATURN,
-    }
-
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.split("/")[-1]
         host = response.url.split("/")[2]
-        item.update(self.brands[host])
+        if "mediamarkt" in host:
+            item.update(MEDIAMARKT)
+        elif "mediaworld" in host:
+            item.update(MEDIAWORLD)
+        elif "saturn" in host:
+            item.update(SATURN)
         item["branch"] = item.pop("name", "").replace(f"{item['brand']} ", "")
         item["name"] = item["brand"]
         if phone := item.get("phone"):
