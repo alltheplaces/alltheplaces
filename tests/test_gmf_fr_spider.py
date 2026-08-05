@@ -1,5 +1,5 @@
 from scrapy import Request
-from scrapy.http import HtmlResponse
+from scrapy.http import HtmlResponse, XmlResponse
 from scrapy.utils.test import get_crawler
 
 from locations.spiders.gmf_fr import GmfFRSpider
@@ -52,6 +52,27 @@ def test_parse_retries_when_name_missing():
     assert len(results) == 1
     assert isinstance(results[0], Request)
     assert results[0].url == request.url
+
+
+def test_parse_sitemap_skips_multi_agency_city_pages():
+    # "assurance-paris"/"assurance-lyon"/etc. are disambiguation pages for
+    # cities with more than one GMF agency, not agency records themselves -
+    # confirmed permanent (not a rendering fluke) by inspecting them
+    # directly, so they should never even be requested, unlike a genuine
+    # agency page such as "assurance-agen".
+    body = """<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <url><loc>https://www.gmf.fr/agences-gmf/assurance-agen</loc></url>
+        <url><loc>https://www.gmf.fr/agences-gmf/assurance-paris</loc></url>
+        <url><loc>https://www.gmf.fr/agences-gmf/assurance-lyon</loc></url>
+        <url><loc>https://www.gmf.fr/agences-gmf/assurances-Aube-10</loc></url>
+    </urlset>"""
+    response = XmlResponse(url="https://www.gmf.fr/accueil.sitemap.xml", body=body, encoding="utf-8")
+
+    requests = list(make_spider()._parse_sitemap(response))
+
+    assert [r.url for r in requests] == ["https://www.gmf.fr/agences-gmf/assurance-agen"]
+    assert requests[0].meta["zyte_api"]["browserHtml"] is True
 
 
 def test_parse_retries_when_geometry_missing():
