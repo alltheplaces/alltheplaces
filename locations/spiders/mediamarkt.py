@@ -12,6 +12,7 @@ SATURN = {"brand": "Saturn", "brand_wikidata": "Q2543504"}
 
 class MediamarktSpider(SitemapSpider, StructuredDataSpider):
     name = "mediamarkt"
+    requires_proxy = True
     allowed_domains = [
         "www.mediamarkt.at",
         "www.mediamarkt.be",
@@ -33,8 +34,8 @@ class MediamarktSpider(SitemapSpider, StructuredDataSpider):
         "https://www.mediamarkt.hu/sitemaps/sitemap-marketpages.xml",
         "https://www.mediamarkt.nl/sitemaps/sitemap-marketpages.xml",
         "https://www.mediaworld.it/sitemaps/sitemap-marketpages.xml",
-        "https://www.saturn.de/sitemaps/sitemap-marketpages.xml",
         "https://mediamarkt.pl/sitemaps/sitemap-marketpages.xml",
+        "https://www.saturn.de/sitemaps/sitemap-marketpages.xml",
     ]
     sitemap_rules = [("/store/", "parse_sd")]
 
