@@ -19,6 +19,6 @@ class BipaATGBSpider(JSONBlobSpider):
             opening_hours = OpeningHours()
             for day, range in feature["storeHours"].items():
                 opening_hours.add_ranges_from_string(f"{day}: {range}")
-                item["opening_hours"] = opening_hours
+            item["opening_hours"] = opening_hours
             apply_category(Categories.SHOP_CHEMIST, item)
             yield item
