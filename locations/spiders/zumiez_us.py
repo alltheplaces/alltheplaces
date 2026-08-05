@@ -21,6 +21,7 @@ class ZumiezUSSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
+        item["street_address"] = item.pop("street")
         if feature.get("has_store_page"):
             item["website"] = f"https://www.zumiez.com/stores/{feature.get('identifier')}"
         try:
