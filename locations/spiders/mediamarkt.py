@@ -6,7 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 MEDIAMARKT = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
-MEDIAWORLD = {"brand": "MediaWorld", "brand_wikidata": "Q125054068"}
+MEDIAWORLD = {"brand": "MediaWorld", "brand_wikidata": "Q2381223"}
 SATURN = {"brand": "Saturn", "brand_wikidata": "Q2543504"}
 
 
@@ -49,7 +49,6 @@ class MediamarktSpider(SitemapSpider, StructuredDataSpider):
         elif "saturn" in host:
             item.update(SATURN)
         item["branch"] = item.pop("name", "").replace(f"{item['brand']} ", "")
-        item["name"] = item["brand"]
         if phone := item.get("phone"):
             item["phone"] = re.sub(r"[^0-9+]", "", phone)
         apply_category(Categories.SHOP_ELECTRONICS, item)
