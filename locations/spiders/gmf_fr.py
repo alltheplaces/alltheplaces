@@ -22,6 +22,52 @@ class GmfFRSpider(SitemapSpider):
     # "-" in this pattern deliberately excludes those, since "assurances-"
     # never matches "assurance-" followed by a literal hyphen.
     sitemap_rules = [(r"/agences-gmf/assurance-([\w-]+)$", "parse")]
+    # A handful of "assurance-<slug>" URLs match the pattern above but are
+    # not agency pages at all - for a city served by more than one GMF
+    # agency, the bare city-name slug (e.g. "assurance-paris",
+    # "assurance-lyon") is a disambiguation/search-results page listing
+    # every agency in that city (each with its own, separately-sitemapped
+    # suffixed slug, e.g. "paris-bastille"), not an agency record itself.
+    # Confirmed by inspecting these pages directly: no h1.geo-title, no
+    # .geo-agency container, GA tag "etape_1.1_resultat_recherche" (search
+    # result) instead of the single-agency page's "etape_1.2_fiche_agence_*".
+    # This is permanent, not a rendering fluke - retrying gets the exact
+    # same listing page every time - so on a full crawl these are excluded
+    # upfront rather than silently burning 5 retries and an ERROR log entry
+    # each for a page that will never turn into an agency record. Full list
+    # confirmed empirically against a complete crawl of the 325 sitemap
+    # URLs on 2026-08-05 (every non-matching URL in that crawl belonged to
+    # this set, bar one unrelated single Zyte ban - see SPECS.md).
+    NON_AGENCY_SLUGS = frozenset(
+        {
+            "avignon",
+            "besancon",
+            "bordeaux",
+            "brest",
+            "clermont-ferrand",
+            "dijon",
+            "le-lamentin",
+            "lille",
+            "limoges",
+            "lyon",
+            "marseille",
+            "montpellier",
+            "nancy",
+            "nantes",
+            "nice",
+            "nimes",
+            "orleans",
+            "paris",
+            "perpignan",
+            "poitiers",
+            "rennes",
+            "rouen",
+            "saint-etienne",
+            "strasbourg",
+            "toulon",
+            "toulouse",
+        }
+    )
     # Site is behind DataDome (confirmed via "x-datadome: protected" response
     # header on agency pages - the sitemap itself is not blocked). A direct
     # Zyte API test initially succeeded with plain httpResponseBody automap,
@@ -48,6 +94,8 @@ class GmfFRSpider(SitemapSpider):
 
     def _parse_sitemap(self, response):
         for request in super()._parse_sitemap(response):
+            if request.url.rsplit("/", 1)[-1].removeprefix("assurance-") in self.NON_AGENCY_SLUGS:
+                continue
             request.meta["zyte_api"] = {
                 "browserHtml": True,
                 "geolocation": "FR",
