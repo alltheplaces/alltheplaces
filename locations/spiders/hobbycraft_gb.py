@@ -3,6 +3,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HobbycraftGBSpider(CrawlSpider, StructuredDataSpider):
@@ -10,6 +11,7 @@ class HobbycraftGBSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Hobbycraft", "brand_wikidata": "Q16984508"}
     start_urls = ["https://www.hobbycraft.co.uk/storelist/"]
     rules = [Rule(LinkExtractor(allow="/stores/"), callback="parse_sd")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
