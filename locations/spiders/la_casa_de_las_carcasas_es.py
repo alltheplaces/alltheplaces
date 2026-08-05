@@ -1,27 +1,21 @@
-from typing import Any
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
-
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.storefinders.storemapper import StoremapperSpider
 
 
-class LaCasaDeLasCarcasasESSpider(Spider):
+class LaCasaDeLasCarcasasESSpider(StoremapperSpider):
     name = "la_casa_de_las_carcasas_es"
     item_attributes = {"brand": "La Casa de las Carcasas", "brand_wikidata": "Q127275290"}
-    start_urls = ["https://lacasadelascarcasas.es/storefinder?ajax=1&all=1"]
+    company_id = "33747-4AsOaVgWvn2ItT2p"
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("//marker"):
-            item = Feature()
-            item["ref"] = location.xpath("@id_store").get()
-            item["lat"] = location.xpath("@lat").get()
-            item["lon"] = location.xpath("@lng").get()
-            item["branch"] = location.xpath("@name").get()
-            item["addr_full"] = location.xpath("@addressNoHtml").get()
-            item["website"] = location.xpath("@link").get()
-            item["phone"] = location.xpath("@phone").get()
-            item["email"] = location.xpath("@email").get()
-            item["extras"]["fax"] = location.xpath("@fax").get()
-
-            yield item
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace("LA CASA DE LAS CARCASAS ", "")
+        oh = OpeningHours()
+        for day_time in location.get("store_business_hours"):
+            open_time = day_time.get("open_time")
+            close_time = day_time.get("close_time")
+            oh.add_range(day=DAYS_FULL[int(day_time.get("week_day")) - 1], open_time=open_time, close_time=close_time)
+        item["opening_hours"] = oh
+        yield item
