@@ -1,38 +1,22 @@
-from scrapy.http import JsonRequest
+from typing import Any, Iterable
 
-from locations.categories import Categories
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class VodacomTZSpider(JSONBlobSpider):
     name = "vodacom_tz"
-    item_attributes = item_attributes = {
-        "brand": "Vodacom Tanzania",
-        "brand_wikidata": "Q7939274",
-        "extras": Categories.SHOP_MOBILE_PHONE.value,
-    }
-    start_urls = ["https://myvodacom.vodacom.co.tz/app/myvodacom/web/vodacom/shop/get-region"]
+    item_attributes = {"brand": "Vodacom Tanzania", "brand_wikidata": "Q7939274"}
+    locations_key = "data"
+    start_urls = ["https://myvodacom.vodacom.co.tz/app/digital-service-engine/api/v1/web/vodacom-shop-form/stores"]
 
-    async def start(self):
-        for url in self.start_urls:
-            yield JsonRequest(url=url, callback=self.parse_regions)
-
-    def parse_regions(self, response):
-        for region in response.json():
-            yield JsonRequest(
-                url=f"https://myvodacom.vodacom.co.tz/app/myvodacom/web/vodacom/shop/get-district/{region['regionId']}",
-                callback=self.parse_districts,
-            )
-
-    def parse_districts(self, response):
-        for district in response.json():
-            yield JsonRequest(
-                url=f"https://myvodacom.vodacom.co.tz/app/myvodacom/web/vodacom/shop/get-store/{district['districtId']}",
-                callback=self.parse,
-            )
-
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs: Any) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("Vodashop ", "")
-        item["addr_full"] = location.get("location")
-        item["phone"] = location["contacts"]
+        item["addr_full"] = location["location"]
+        if not (-90 <= float(item["lat"]) <= 90 and -180 <= float(item["lon"]) <= 180):
+            item["lat"] = item["lon"] = None
+        apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
