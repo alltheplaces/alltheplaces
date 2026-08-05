@@ -1,5 +1,6 @@
 import re
 from typing import Any, Iterable
+from urllib.parse import urlparse
 
 from scrapy import Selector, Spider
 from scrapy.http import Response
@@ -20,6 +21,8 @@ class SvetoforRUSpider(Spider):
             item = Feature()
             item["lat"], item["lon"] = coords.split(",")
             item["addr_full"] = balloon.split("<br")[0].strip()
-            item["ref"] = item["website"] = response.urljoin(Selector(text=balloon).xpath("//a/@href").get(""))
+            item["ref"] = url = response.urljoin(Selector(text=balloon).xpath("//a/@href").get(""))
+            if (host := urlparse(url).hostname) and host.replace(".", "").replace("-", "").isalnum():
+                item["website"] = url
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
