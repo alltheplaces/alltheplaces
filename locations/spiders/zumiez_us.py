@@ -10,8 +10,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class ZumiezSpider(JSONBlobSpider):
-    name = "zumiez"
+class ZumiezUSSpider(JSONBlobSpider):
+    name = "zumiez_us"
     item_attributes = {"brand": "Zumiez", "brand_wikidata": "Q8075252"}
     start_urls = ['https://www.zumiez.com/graphql?hash=3361022132&storeId_1="default"']
     custom_settings = {"ROBOTSTXT_OBEY": False}
