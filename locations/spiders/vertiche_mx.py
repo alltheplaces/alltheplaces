@@ -5,6 +5,7 @@ from scrapy.http import TextResponse
 from locations.hours import DAYS_ES
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class VerticheMXSpider(WPStoreLocatorSpider):
@@ -15,6 +16,7 @@ class VerticheMXSpider(WPStoreLocatorSpider):
     search_radius = 315
     max_results = 100
     days = DAYS_ES
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", None)
