@@ -41,14 +41,18 @@ class MediamarktSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.split("/")[-1]
+
         host = response.url.split("/")[2]
         if "mediamarkt" in host:
             item.update(MEDIAMARKT)
+            item["branch"] = item.pop("name", "").removeprefix("MediaMarkt ")
         elif "mediaworld" in host:
             item.update(MEDIAWORLD)
+            item["branch"] = item.pop("name", "").removeprefix("MediaWorld ").removeprefix("Mediaworld ")
         elif "saturn" in host:
             item.update(SATURN)
-        item["branch"] = item.pop("name", "").replace(f"{item['brand']} ", "")
+            item["branch"] = item.pop("name", "").removeprefix("Saturn ")
+
         if phone := item.get("phone"):
             item["phone"] = re.sub(r"[^0-9+]", "", phone)
         apply_category(Categories.SHOP_ELECTRONICS, item)
