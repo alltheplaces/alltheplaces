@@ -1,4 +1,5 @@
 import html
+from typing import Iterable
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
@@ -6,19 +7,22 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_PT, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider):
+class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "mcdonalds_pt"
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.pt"]
     sitemap_urls = ["https://www.mcdonalds.pt/sitemap"]
     sitemap_rules = [("/restaurantes/", "parse_sd")]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = html.unescape(item.pop("name")).removeprefix("McDonald's ")
 
         services = response.xpath("//div/@data-content").getall()
@@ -27,14 +31,6 @@ class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider):
         apply_yes_no(Extras.WIFI, item, "Wi-Fi" in services)
         apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "Fraldário" in services)
         apply_yes_no(Extras.TAKEAWAY, item, "Takeaway" in services)
-
-        if "McCafé" in services:
-            mccafe = item.deepcopy()
-            mccafe["ref"] = "{}-mccafe".format(item["ref"])
-            mccafe["brand"] = "McCafé"
-            mccafe["brand_wikidata"] = "Q3114287"
-            apply_category(Categories.CAFE, mccafe)
-            yield mccafe
 
         item["opening_hours"] = self.parse_opening_hours(
             response.xpath(
@@ -46,6 +42,14 @@ class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider):
                 '//div[contains(@class, "swiper-slide restaurantSchedule__service")][contains(., "McDrive")]//li'
             )
         ).as_opening_hours()
+
+        if "McCafé" in services:
+            mccafe = item.deepcopy()
+            mccafe["ref"] = "{}-mccafe".format(item["ref"])
+            mccafe["brand"] = "McCafé"
+            mccafe["brand_wikidata"] = "Q3114287"
+            apply_category(Categories.CAFE, mccafe)
+            yield mccafe
 
         yield item
 
