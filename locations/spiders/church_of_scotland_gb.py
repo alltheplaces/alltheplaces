@@ -28,8 +28,11 @@ class ChurchOfScotlandGBSpider(Spider):
             item = DictParser.parse(church)
             if email := item.get("email"):
                 item["email"] = email.replace("|", ";")
+            if website := item.get("website"):
+                if not website.startswith("http"):
+                    item["website"] = "https://{}".format(website)
             item["name"] = church["church_name"]
-            item.pop("website")
+
             apply_category(Categories.PLACE_OF_WORSHIP, item)
             item["extras"]["religion"] = "christian"
             item["extras"]["denomination"] = "presbyterian"
