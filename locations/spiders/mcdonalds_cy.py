@@ -19,13 +19,14 @@ class McdonaldsCYSpider(PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for i in re.findall(
-            r"var McDonald_s_\w+\s*=\s*(.*)",
-            response.xpath('//script[contains(text(), "function distance(lat1, lng1, lat2, lng2)")]/text()').get(),
-        ):
+        script = response.xpath('//script[contains(text(), "function distance(lat1, lng1, lat2, lng2)")]/text()').get()
+        if not script:
+            return
+
+        for i in re.findall(r"var McDonald_s_\w+\s*=\s*(.*)", script):
             location = chompjs.parse_js_object(i)
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name", "").removeprefix("McDonald's ")
+            item["branch"] = (item.pop("name", None) or "").removeprefix("McDonald's ")
             item["ref"] = location["key"]
 
             services = location["services_listed"]
