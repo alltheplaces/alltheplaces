@@ -14,7 +14,7 @@ class WellGBSpider(SitemapSpider, StructuredDataSpider):
         item["website"] = response.url
         item["image"] = item["email"] = None
         item["twitter"] = None
-        item["branch"] = item.pop("name").replace("Well Pharmacy  ", "")
+        item["branch"] = item.pop("name").replace("Well Pharmacy", "").strip()
 
         if postcode := item.get("postcode"):
             if " " not in postcode:
