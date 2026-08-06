@@ -6,6 +6,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_IT, OpeningHours
 from locations.spiders.virgin_active_bw_na_za import VIRGIN_ACTIVE_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
@@ -37,4 +38,5 @@ class VirginActiveITSpider(CrawlSpider, StructuredDataSpider):
                 item["opening_hours"].add_ranges_from_string(
                     f"{unescape(day)} {spec['opens']}-{spec['closes']}", DAYS_IT
                 )
+        apply_category(Categories.GYM, item)
         yield item
