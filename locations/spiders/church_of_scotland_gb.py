@@ -22,13 +22,14 @@ class ChurchOfScotlandGBSpider(Spider):
 
     def parse(self, response, **kwargs):
         data = xmltodict.parse(response.text, attr_prefix="").get("churches", []).get("church", [])
-        if data:
-            for church in data:
-                item = DictParser.parse(church)
-                item["name"] = church["church_name"]
-                item.pop("website")
-                apply_category(Categories.PLACE_OF_WORSHIP, item)
-                item["extras"]["religion"] = "christian"
-                item["extras"]["denomination"] = "presbyterian"
-                yield item
-            yield self.make_request(kwargs["offset"] + 50)
+        if not data:
+            return
+        for church in data:
+            item = DictParser.parse(church)
+            item["name"] = church["church_name"]
+            item.pop("website")
+            apply_category(Categories.PLACE_OF_WORSHIP, item)
+            item["extras"]["religion"] = "christian"
+            item["extras"]["denomination"] = "presbyterian"
+            yield item
+        yield self.make_request(kwargs["offset"] + 50)
