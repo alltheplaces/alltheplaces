@@ -1,6 +1,4 @@
-import html
 import json
-import re
 from typing import Any, Iterable
 
 from scrapy import Request, Spider
@@ -20,7 +18,7 @@ class PommesfreundeATDESpider(Spider):
         yield Request("https://pommesfreunde.de/standorte", callback=self.parse_markers, meta={"stores": stores})
 
     def parse_markers(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        markers = json.loads(html.unescape(re.search(r'data-markers="(.*?)"', response.text, re.DOTALL).group(1)))
+        markers = json.loads(response.xpath("//@data-markers").get())
         for marker in markers:
             if not (store := response.meta["stores"].get(marker["id"])):
                 continue
