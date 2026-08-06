@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -17,4 +18,5 @@ class StarbucksAESpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         item["branch"] = response.xpath("//h1/text()").get("").removeprefix("Starbucks ")
         item["website"] = response.url
+        apply_category(Categories.CAFE, item)
         yield item
