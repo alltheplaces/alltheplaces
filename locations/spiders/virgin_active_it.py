@@ -3,6 +3,7 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.virgin_active_bw_na_za import VIRGIN_ACTIVE_SHARED_ATTRIBUTES
 
@@ -22,4 +23,5 @@ class VirginActiveITSpider(CrawlSpider):
         item["lat"] = re.search(r"latitude\":\s*(\d+,\d+)", response.text).group(1).replace(",", ".")
         item["lon"] = re.search(r"longitude\":\s*(\d+,\d+)", response.text).group(1).replace(",", ".")
         item["website"] = item["ref"] = response.url
+        apply_category(Categories.GYM, item)
         yield item
