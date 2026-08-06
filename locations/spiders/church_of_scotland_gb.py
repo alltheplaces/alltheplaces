@@ -26,6 +26,7 @@ class ChurchOfScotlandGBSpider(Spider):
             for church in data:
                 item = DictParser.parse(church)
                 item["name"] = church["church_name"]
+                item.pop("website")"
                 apply_category(Categories.PLACE_OF_WORSHIP, item)
                 item["extras"]["religion"] = "christian"
                 item["extras"]["denomination"] = "presbyterian"
