@@ -12,6 +12,7 @@ class PommesfreundeATDESpider(Spider):
     name = "pommesfreunde_at_de"
     item_attributes = {"brand": "Pommesfreunde", "brand_wikidata": "Q117083946"}
     start_urls = ["https://pommesfreunde.de/wp-json/wp/v2/lieferservice?per_page=100&_fields=id,title,link"]
+    skip_auto_cc_domain = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
         stores = {store["id"]: store for store in response.json()}
