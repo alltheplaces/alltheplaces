@@ -24,10 +24,7 @@ class ToyotaMXSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
         item["ref"] = str(feature["dealerCode"])
-        item["branch"] = item.pop("name").removeprefix("Toyota ")
         item["addr_full"] = feature["address"]["plaintext"]
         item["state"] = feature["state"]
-        if not (-90 <= float(item["lat"]) <= 90 and -180 <= float(item["lon"]) <= 180):
-            item["lat"] = item["lon"] = None
         apply_category(Categories.SHOP_CAR, item)
         yield item
