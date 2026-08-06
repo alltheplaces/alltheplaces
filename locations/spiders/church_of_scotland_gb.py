@@ -26,6 +26,8 @@ class ChurchOfScotlandGBSpider(Spider):
             return
         for church in data:
             item = DictParser.parse(church)
+            if email := item.get("email"):
+                item["email"] = email.replace("|", ";")
             item["name"] = church["church_name"]
             item.pop("website")
             apply_category(Categories.PLACE_OF_WORSHIP, item)
