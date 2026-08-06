@@ -14,6 +14,8 @@ class MinistopJPSpider(JSONBlobSpider):
     locations_key = "shops"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature["openStatus"] != "IS_ALREADY_OPEN":
+            return
 
         if feature["nameKanji"].startswith("ミニストップ"):
             item["branch"] = feature["nameKanji"].removeprefix("ミニストップ").strip()  # "Ministop"
