@@ -20,8 +20,10 @@ class StarbucksMenaSpider(SitemapSpider, StructuredDataSpider):
         "https://locations.starbucks.com.om/robots.txt",
     ]
     sitemap_rules = [
-        (r"https://locations.starbucks.com.\w+/[a-z-]+/[a-z-]+$", "parse_sd"),
-        (r"https://locations.starbucks.\w+/[a-z-]+/[a-z-]+$", "parse_sd"),
+        (
+            r"https://locations\.starbucks(?:\.com)?\.\w+/[a-z-]+/[a-z-]+$",
+            "parse_sd",
+        )
     ]
     wanted_types = ["Restaurant"]
 
