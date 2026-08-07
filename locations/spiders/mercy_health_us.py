@@ -87,10 +87,10 @@ class MercyHealthUSSpider(Spider):
             else:
                 facility_type = location.get("FacilityType", {}).get("Name")
             if category := HEALTHCARE_CATEGORIES.get(facility_type):
-                for top_level_category, specialities in category:
-                    apply_category(top_level_category, item)
-                    if specialities:
-                        apply_healthcare_specialities(specialities, item)
+                top_level_category, specialities = category
+                apply_category(top_level_category, item)
+                if specialities:
+                    apply_healthcare_specialities(specialities, item)
                 if facility_type == "Home Health Care":
                     apply_yes_no("home_visit", item, True)
             else:
