@@ -8,7 +8,7 @@ class Take5USSpider(SitemapSpider, StructuredDataSpider):
     name = "take_5_us"
     item_attributes = {"brand": "Take 5", "brand_wikidata": "Q112359190"}
     sitemap_urls = ["https://www.take5.com/sitemap.xml"]
-    sitemap_rules = [(r"/locations/oil-change", "parse_sd"), (r"/locations/car-wash", "parse_sd")]
+    sitemap_rules = [(r"/locations/[a-z-]+/[a-z0-9-]+/\d+/?$", "parse_sd")]
     wanted_types = ["AutoRepair", "AutoWash"]
     search_for_facebook = False
     search_for_twitter = False
