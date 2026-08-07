@@ -29,7 +29,6 @@ class HiltonSpider(PlaywrightSpider):
         "DOWNLOAD_DELAY": 5,
         "RETRY_TIMES": 5,
     }
-    requires_proxy = "US"
 
     # More details about brand codes is in filters section of https://www.hilton.com/en/locations/hilton-hotels/
     BRANDS_MAPPING = {
