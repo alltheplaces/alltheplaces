@@ -30,6 +30,7 @@ class SportscraftSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
         item.pop("email", None)
+        item.pop("phone", None)
         item.pop("country", None)
         item.pop("name", None)
         item["ref"] = feature["key"]
