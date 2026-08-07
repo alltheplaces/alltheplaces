@@ -10,14 +10,10 @@ class BarbequesGaloreAUSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Barbeques Galore", "brand_wikidata": "Q4859570"}
     allowed_domains = ["www.barbequesgalore.com.au"]
     start_urls = ["https://www.barbequesgalore.com.au/stores/franchises.html"]
-    rules = [
-        Rule(
-            LinkExtractor(allow=r".*/stores/[a-z\-]+"),
-            callback="parse_sd",
-        ),
-    ]
+    rules = [Rule(LinkExtractor(allow=r".*/stores/[a-z\-]+"), callback="parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["branch"] = item.pop("name")
         item.pop("facebook")
         item["ref"] = response.xpath('//div[contains(@class, "store-details")]/@data-store-id').extract_first()
         item["opening_hours"] = OpeningHours()
@@ -37,5 +33,5 @@ class BarbequesGaloreAUSpider(CrawlSpider, StructuredDataSpider):
         for day in hours_raw:
             if day[1] == "0:00am" and day[2] == "0:00am":
                 continue
-            item["opening_hours"].add_range(DAYS_EN[day[0]], day[1].upper(), day[2].upper(), "%I:%M%p")
+            item["opening_hours"].add_range(day[0], day[1].upper(), day[2].upper(), "%I:%M%p")
         yield item
