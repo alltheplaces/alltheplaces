@@ -19,7 +19,6 @@ class MitsubishiMASpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = str(feature["id"])
-        item["branch"] = item.pop("name")
         item["street_address"] = item.pop("addr_full")
         item.pop("phone", None)
 
