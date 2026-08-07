@@ -21,5 +21,6 @@ class HelzbergDiamondsUSSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         item["branch"] = item.pop("name")
         item["website"] = response.url
+        item.pop("image", None)
         apply_category(Categories.SHOP_JEWELRY, item)
         yield item
