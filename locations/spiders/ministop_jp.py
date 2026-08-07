@@ -1,6 +1,6 @@
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy.http import Request, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -10,20 +10,11 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class MinistopJPSpider(JSONBlobSpider):
     name = "ministop_jp"
-    allowed_domains = ["map.ministop.co.jp"]
-    start_urls = ["https://map.ministop.co.jp/"]
-    locations_key = ["pageProps", "allShopsData", "shops"]
-
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(url=self.start_urls[0], callback=self.parse_nextjs_build_id)
-
-    def parse_nextjs_build_id(self, response: Response) -> Iterable[Request]:
-        nextjs_build_manifest = response.xpath('//script[contains(@src, "/_buildManifest.js")]/@src').get()
-        nextjs_build_id = nextjs_build_manifest.split("/static/", 1)[1].split("/_buildManifest.js", 1)[0]
-        yield Request(url=f"https://map.ministop.co.jp/_next/data/{nextjs_build_id}/map.json")
+    start_urls = ["https://api.site.can-ly.com/v2/directories/94/shops/search"]
+    locations_key = "shops"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if feature["businessStatus"] != "OPEN":
+        if feature["openStatus"] != "IS_ALREADY_OPEN":
             return
 
         if feature["nameKanji"].startswith("ミニストップ"):

@@ -1,25 +1,27 @@
-from scrapy.spiders import SitemapSpider
+import json
+import re
+from typing import Any
 
-from locations.items import SocialMedia, get_social_media, set_social_media
-from locations.structured_data_spider import StructuredDataSpider
+from requests import Response
+
+from locations.storefinders.stockinstore import DictParser, Spider
 
 
-class LasikPlusUSSpider(SitemapSpider, StructuredDataSpider):
+class LasikPlusUSSpider(Spider):
     name = "lasik_plus_us"
     item_attributes = {"brand": "LasikPlus", "brand_wikidata": "Q126111242"}
-    sitemap_urls = ["https://www.lasikplus.com/robots.txt"]
-    sitemap_follow = ["lasik_location.xml"]
-    sitemap_rules = [(r"/location/([^/]+-lasik-center)/$", "parse")]
-    requires_proxy = True
+    start_urls = ["https://www.lasikplus.com/locations/"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = response.url
-
-        if get_social_media(item, SocialMedia.FACEBOOK) == "https://www.facebook.com/LasikPlus/":
-            return  # SEO spam
-
-        yelp, fb, *_ = get_social_media(item, SocialMedia.FACEBOOK).split(", ")
-        set_social_media(item, SocialMedia.YELP, yelp)
-        set_social_media(item, SocialMedia.FACEBOOK, fb)
-
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        json_data = json.loads(
+            re.search(
+                r"locationsData\s*=\s*(\[.+\]);\s*\/\/",
+                response.xpath('//*[@ id="meta-locations-map-js-extra"]/text()').get(),
+            ).group(1)
+        )
+        for location in json_data:
+            item = DictParser.parse(location)
+            item["street_address"] = item.pop("addr_full")
+            item["branch"] = item.pop("name")
+            item["website"] = location.get("link")
+            yield item
