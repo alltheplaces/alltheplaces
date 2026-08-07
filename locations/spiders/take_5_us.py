@@ -21,5 +21,6 @@ class Take5USSpider(SitemapSpider, StructuredDataSpider):
         if ld_data["@type"] == "AutoWash":
             apply_category(Categories.CAR_WASH, item)
         else:
+            item["ref"] = item.pop("name").removeprefix("Take 5 #")
             apply_category(Categories.SHOP_CAR_REPAIR, item)
         yield item
