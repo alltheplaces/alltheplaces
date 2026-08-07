@@ -1,4 +1,4 @@
-import json
+import chompjs
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
@@ -11,12 +11,11 @@ class BevmoUSSpider(JSONBlobSpider):
 
     start_urls = ["https://bevmo.com/pages/store-locator"]
 
+    requires_proxy = True
+
     def extract_json(self, response):
-        script = response.xpath("//script[@defer='defer']/text()").get()
-        starter = "const locations = "
-        begin = script.find(starter) + len(starter)
-        end = script.find('";', begin + 1) + 1
-        return json.loads(json.loads(script[begin:end]))
+        script = response.xpath("//script[contains(text(), 'const locations')]/text()").get()
+        return chompjs.parse_js_object(script)
 
     def post_process_item(self, item, response, feature):
         item["street_address"] = feature["address_1"]
