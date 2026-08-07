@@ -9,16 +9,11 @@ class BarbequesGaloreAUSpider(CrawlSpider, StructuredDataSpider):
     name = "barbeques_galore_au"
     item_attributes = {"brand": "Barbeques Galore", "brand_wikidata": "Q4859570"}
     allowed_domains = ["www.barbequesgalore.com.au"]
-    start_urls = ["https://www.barbequesgalore.com.au/stores"]
+    start_urls = ["https://www.barbequesgalore.com.au/stores/franchises.html"]
     rules = [
-        Rule(
-            LinkExtractor(allow=r".*/stores/(?:act|nsw|nt|qld|sa|tas|vic|wa)/all-stores-in.*"),
-            follow=True,
-        ),
         Rule(
             LinkExtractor(allow=r".*/stores/[a-z\-]+"),
             callback="parse_sd",
-            follow=False,
         ),
     ]
 
