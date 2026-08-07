@@ -1,39 +1,48 @@
-from typing import AsyncIterator
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
 
-class SportscraftSpider(Spider):
+class SportscraftSpider(JSONBlobSpider):
     name = "sportscraft"
     item_attributes = {"brand": "Sportscraft", "brand_wikidata": "Q7579966"}
-    allowed_domains = ["www.sportscraft.com.au"]
-    start_urls = ["https://www.sportscraft.com.au/custom_api/commercetools/channels"]
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    async def start(self) -> Any:
+        yield JsonRequest(
+            url="https://sportscraft-apgnext.frontastic.live/frontastic/action/apg-storelocator/getStoresList",
+            data={"skus": [], "cartId": None},
+            headers={
+                "x-frontastic-access-token": "APIKEY",
+                "frontastic-locale": "en_AU@AUD",
+                "frontastic-currency": "AUD",
+            },
+        )
 
-    def parse(self, response):
-        for location in response.json():
-            item = DictParser.parse(location)
-            item.pop("email", None)
-            item["ref"] = location["key"]
-            item["name"] = item["name"].split("(", 1)[0].strip()
-            item["street_address"] = clean_address([location["address1"].strip(), location["address2"].strip()])
-            if city := item.get("city"):
-                item["city"] = city.strip()
-            item["website"] = "https://www.sportscraft.com.au/store-locator/store-details?id=" + location["key"]
-            item["opening_hours"] = OpeningHours()
-            hours_string = ""
-            for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
-                if f"hours_{day}_open" in location.keys() and f"hours_{day}_close" in location.keys():
-                    hours_string = (
-                        f"{hours_string} {day}: " + location[f"hours_{day}_open"] + "-" + location[f"hours_{day}_close"]
-                    )
-            item["opening_hours"].add_ranges_from_string(hours_string)
-            yield item
+    def pre_process_data(self, feature: dict) -> None:
+        coordinates = feature.get("coordinates") or {}
+        feature["latitude"], feature["longitude"] = coordinates.get("lat"), coordinates.get("lng")
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
+        item.pop("email", None)
+        item.pop("country", None)
+        item.pop("name", None)
+        item["ref"] = feature["key"]
+        item["branch"] = feature["storeName"].split("(", 1)[0].strip()
+        item["street_address"] = clean_address([feature.get("address1"), feature.get("address2")])
+        item["website"] = "https://www.sportscraft.com.au/store-locator/store-details?id=" + feature["key"]
+
+        item["opening_hours"] = OpeningHours()
+        for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
+            if feature.get(f"hours_{day}_open") and feature.get(f"hours_{day}_close"):
+                item["opening_hours"].add_ranges_from_string(
+                    f"{day}: {feature[f'hours_{day}_open']}-{feature[f'hours_{day}_close']}"
+                )
+
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item
