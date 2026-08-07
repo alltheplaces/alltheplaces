@@ -12,7 +12,7 @@ class MontessoriSchoolSpider(SitemapSpider, StructuredDataSpider):
     name = "montessori_school"
     item_attributes = {"brand": "Montessori School"}
     sitemap_urls = ["https://www.montessori.com/sitemaps/www-montessori-com-schools.xml"]
-    wanted_types = ["LocalBusiness", "ChildCare", "Preschool"]
+    wanted_types = ["LocalBusiness"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         item.pop("phone", None)
