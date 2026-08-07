@@ -1,7 +1,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
