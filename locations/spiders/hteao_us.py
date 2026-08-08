@@ -10,7 +10,7 @@ from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class HTeaOUSSpider(SitemapSpider):
+class HteaoUSSpider(SitemapSpider):
     name = "hteao_us"
     item_attributes = {"brand": "HTeaO", "brand_wikidata": "Q129814206"}
     sitemap_urls = ["https://hteao.com/wpsl_stores-sitemap.xml"]
