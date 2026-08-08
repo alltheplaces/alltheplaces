@@ -1,4 +1,5 @@
 import html
+import re
 
 import chompjs
 from scrapy.http import Response
@@ -15,12 +16,12 @@ class HteaoUSSpider(SitemapSpider):
     item_attributes = {"brand": "HTeaO", "brand_wikidata": "Q129814206"}
     sitemap_urls = ["https://hteao.com/wpsl_stores-sitemap.xml"]
     sitemap_rules = [(r"/locations/[^/]+/$", "parse")]
+    locations_regex = re.compile(r'"locations":\s*(\[.*?\])\s*,\s*"mapOptions"', re.DOTALL)
 
     def parse(self, response: Response):
-        js_blob = response.xpath('//script[contains(., "CONFIGURATION")]/text()').re_first(
-            r'"locations":\s*(\[.*?\])\s*,\s*"mapOptions"'
-        )
+        js_blob = response.xpath('//script[contains(., "CONFIGURATION")]/text()').re_first(self.locations_regex)
         if not js_blob:
+            self.logger.warning(f"No location data found on {response.url}")
             return
         location = chompjs.parse_js_object(js_blob)[0]
         if "on wheels" in location["title"].lower():
@@ -29,9 +30,11 @@ class HteaoUSSpider(SitemapSpider):
 
         item = DictParser.parse(location)
         item["ref"] = item["website"] = response.url
-        item["name"] = html.unescape(location["title"])
+        item.pop("name", None)
+        item["branch"] = html.unescape(location["title"])
         item.pop("addr_full", None)
-        item["street_address"] = merge_address_lines([location.get("address1"), location.get("address2")])
+        if street_address := merge_address_lines([location.get("address1"), location.get("address2")]):
+            item["street_address"] = street_address
 
         item["opening_hours"] = OpeningHours()
         for row in response.xpath('//table[contains(@class, "wpsl-opening-hours")]/tr'):
