@@ -21,8 +21,9 @@ class TorchysTacosUSSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         # JSON-LD "name" is the location name only, e.g. "Kyle" / "88th & Wads".
         item["branch"] = item.pop("name")
-        item["ref"] = response.url.removesuffix("/order").rsplit("/", 1)[-1]
+        source_url = next(iter(response.meta.get("redirect_urls", ())), response.url)
+        item["ref"] = source_url.removesuffix("/order").rsplit("/", 1)[-1]
         apply_category(Categories.FAST_FOOD, item)
-        item["extras"]["cuisine"] = "tex-mex"
+        apply_category({"cuisine": "tex-mex"}, item)
         apply_yes_no(Extras.TAKEAWAY, item, True)
         yield item
