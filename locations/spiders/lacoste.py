@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from locations.items import Feature
@@ -36,7 +37,8 @@ class LacosteSpider(YextAnswersSpider):
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         # websiteUrl is missing on some stores and malformed on others ("//us/", utm
         # parameters), so build the URL from the slug and localise it by country.
-        path = location["slug"].strip("/").removeprefix("us/stores/")
+        # Most slugs are "us/stores/<path>", a few are "stores/en_us/<path>".
+        path = re.sub(r"^(us/)?stores/(en_us/)?", "", location["slug"].strip("/"))
         market = LOCALISED_MARKETS.get(item["country"], "us")
         item["website"] = f"https://www.lacoste.com/{market}/stores/{path}"
         item["extras"]["@source_uri"] = item["website"]
