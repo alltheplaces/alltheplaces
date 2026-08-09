@@ -1,15 +1,14 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-import re
+from locations.structured_data_spider import StructuredDataSpider
+
 
 class AccordBioFrSpider(SitemapSpider, StructuredDataSpider):
     name = "accord_bio_fr"
-    item_attributes = {
-        "brand": "Accord Bio",
-        "brand_wikidata": "Q140930088"
-    }
+    item_attributes = {"brand": "Accord Bio", "brand_wikidata": "Q140930088"}
     allowed_domains = ["accord-bio.fr"]
     sitemap_urls = ["https://www.accord-bio.fr/robots.txt"]
     sitemap_rules = [
@@ -34,10 +33,14 @@ class AccordBioFrSpider(SitemapSpider, StructuredDataSpider):
 
         if item["phone"] is not None:
             # Format phone number with French prefix
-            item["phone"] = re.sub(r'^(0|\+33 )', "+33", item["phone"].replace("%20"," "))
+            item["phone"] = re.sub(r"^(0|\+33 )", "+33", item["phone"].replace("%20", " "))
 
         # Look for a street name in the address
-        streetSearch = re.search(r'([\w\s]*)((?:route|impasse|rue|boulevard|allée|avenue|place)[^,]*)', item["street_address"], flags=re.IGNORECASE)
+        streetSearch = re.search(
+            r"([\w\s]*)((?:route|impasse|rue|boulevard|allée|avenue|place)[^,]*)",
+            item["street_address"],
+            flags=re.IGNORECASE,
+        )
         if streetSearch is not None:
             item["housenumber"] = streetSearch[1].strip()
             item["street"] = streetSearch[2].strip()
