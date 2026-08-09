@@ -6,7 +6,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class AccordBioFrSpider(SitemapSpider, StructuredDataSpider):
+class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
     name = "accord_bio_fr"
     item_attributes = {"brand": "Accord Bio", "brand_wikidata": "Q140930088"}
     allowed_domains = ["accord-bio.fr"]
