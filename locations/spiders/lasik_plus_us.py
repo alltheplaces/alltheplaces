@@ -28,6 +28,7 @@ class LasikPlusUSSpider(JSONBlobSpider):
         item["ref"] = str(feature["id"])
         item["branch"] = item.pop("name")
         item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address_2")])
+        item["addr_full"] = None
         item["website"] = feature.get("link")
         apply_category(Categories.CLINIC, item)
         apply_healthcare_specialities([HealthcareSpecialities.OPHTHALMOLOGY], item)
