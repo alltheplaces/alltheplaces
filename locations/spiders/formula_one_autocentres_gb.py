@@ -1,19 +1,23 @@
 import html
+from typing import Iterable
 
-from scrapy.spiders import SitemapSpider
+from scrapy.http import TextResponse
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FormulaOneAutocentresGBSpider(SitemapSpider, StructuredDataSpider):
+class FormulaOneAutocentresGBSpider(CrawlSpider, StructuredDataSpider):
     name = "formula_one_autocentres_gb"
     item_attributes = {"brand": "Formula One Autocentres", "brand_wikidata": "Q79239635"}
-    sitemap_urls = ["https://www.f1autocentres.co.uk/sitemap.xml"]
-    sitemap_rules = [("/branch/", "parse_sd")]
+    start_urls = ["https://www.f1autocentres.co.uk/find-a-centre"]
+    rules = [Rule(LinkExtractor(allow=r"/branch/"), callback="parse_sd")]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["website"] = item["ref"] = response.url
         item["image"] = None
 
@@ -26,16 +30,16 @@ class FormulaOneAutocentresGBSpider(SitemapSpider, StructuredDataSpider):
 
         services = response.xpath('//div[@class="services"]//div[@class="columns"]/text()').getall()
 
-        apply_yes_no("service:vehicle:air_conditioning", item, "Air Conditioning" in services)
-        apply_yes_no("service:vehicle:batteries", item, "Batteries" in services)
-        apply_yes_no("service:vehicle:brakes", item, "Brakes" in services)
-        apply_yes_no("service:vehicle:tyres", item, "Car Tyres" in services)
-        # apply_yes_no("", item, "Clutches" in services)
-        # apply_yes_no("", item, "Exhausts" in services)
-        apply_yes_no("service:vehicle:mot", item, "MOT" in services)
-        apply_yes_no("service:vehicle:tyres_repair", item, "Puncture Repair" in services)
-        # apply_yes_no("", item, "Servicing" in services)
-        # apply_yes_no("", item, "Suspension & Shock Absorbers" in services)
-        # apply_yes_no("", item, "Wheel Alignment" in services)
+        apply_yes_no(Extras.VEHICLE_AIR_CONDITIONING_SERVICES, item, "Air Conditioning" in services)
+        apply_yes_no(Extras.VEHICLE_BATTERY_SERVICES, item, "Batteries" in services)
+        apply_yes_no(Extras.VEHICLE_BRAKE_SERVICES, item, "Brakes" in services)
+        apply_yes_no(Extras.VEHICLE_TYRE_SERVICES, item, "Car Tyres" in services)
+        apply_yes_no(Extras.VEHICLE_CLUTCH_SERVICES, item, "Clutches" in services)
+        apply_yes_no(Extras.VEHICLE_EXHAUST_SERVICES, item, "Exhausts" in services)
+        apply_yes_no(Extras.VEHICLE_INSPECTION_SERVICES, item, "MOT" in services)
+        apply_yes_no(Extras.VEHICLE_TYRE_REPAIR_SERVICES, item, "Puncture Repair" in services)
+        apply_yes_no(Extras.VEHICLE_PLANNED_MAINTENANCE_SERVICES, item, "Servicing" in services)
+        apply_yes_no(Extras.VEHICLE_SUSPENSION_SERVICES, item, "Suspension & Shock Absorbers" in services)
+        apply_yes_no(Extras.VEHICLE_WHEEL_ALIGNMENT_SERVICES, item, "Wheel Alignment" in services)
 
         yield item

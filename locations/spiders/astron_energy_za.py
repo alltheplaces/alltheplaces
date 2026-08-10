@@ -72,6 +72,9 @@ class AstronEnergyZASpider(JSONBlobSpider):
         else:
             item["opening_hours"].add_ranges_from_string("Mo-Su " + location["workingHours"])
 
+        if item.get("phone") and item.get("phone").replace(" ", "") == "0860300860":
+            item.pop("phone")
+
         apply_category(Categories.FUEL_STATION, item)
 
         yield item

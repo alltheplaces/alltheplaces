@@ -32,7 +32,7 @@ class PostenNOSpider(Spider):
             item["website"] = item["extras"]["website:no"] = "https://www.posten.no/kart?ID={}".format(item["ref"])
             item["extras"]["website:en"] = "https://www.posten.no/en/map?ID={}".format(item["ref"])
 
-            for rules in attributes["apningstider"]:
+            for rules in attributes.get("apningstider") or []:
                 if rules["name"] != "openingHoursLabel":
                     continue
 
@@ -65,7 +65,7 @@ class PostenNOSpider(Spider):
     def parse_opening_hours(self, rules: dict) -> OpeningHours:
         oh = OpeningHours()
         for day, rule in rules["perDay"].items():
-            if rule["ErDognApent"] is True:
+            if rule["content"] == "open24H":
                 oh.add_range(day, "00:00", "24:00")
             else:
                 for times in rule["content"].split(", "):

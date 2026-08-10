@@ -46,6 +46,6 @@ class RomansPizzaSpider(Spider):
             oh = OpeningHours()
             for i in range(7):
                 oh.add_ranges_from_string(location["day_" + str(i)])
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

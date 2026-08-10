@@ -6,10 +6,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class FairpriceSGSpider(JSONBlobSpider):
     name = "fairprice_sg"
-    item_attributes = {
-        "brand": "NTUC Fairprice",
-        "brand_wikidata": "Q6955519",
-    }
+    item_attributes = {"brand": "NTUC FairPrice", "brand_wikidata": "Q6955519"}
     start_urls = ["https://public-api.omni.fairprice.com.sg/stores"]
 
     def extract_json(self, response):

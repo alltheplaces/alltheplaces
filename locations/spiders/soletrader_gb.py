@@ -39,6 +39,6 @@ class SoletraderGBSpider(Spider):
                     close_time=close_time,
                 )
 
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

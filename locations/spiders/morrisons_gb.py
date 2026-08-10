@@ -5,6 +5,7 @@ from scrapy import Request, Spider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.central_england_cooperative import set_operator
 
@@ -50,7 +51,12 @@ class MorrisonsGBSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for day_abbrev, day_hours in location["openingTimes"].items():
-                item["opening_hours"].add_range(day_abbrev, day_hours["open"], day_hours["close"], "%H:%M:%S")
+                if day_hours["open"] == day_hours["close"] == "00:00:00":
+                    item["opening_hours"].set_closed(day_abbrev)
+                elif day_hours["open"] == day_hours["close"] == "00:00:01":
+                    item["opening_hours"].add_range(day_abbrev, "00:00", "24:00")
+                else:
+                    item["opening_hours"].add_range(day_abbrev, day_hours["open"], day_hours["close"], "%H:%M:%S")
 
             if location["storeFormat"] == "supermarket" and location["category"] == "Supermarket":
                 item.update(self.MORRISONS)
@@ -166,7 +172,9 @@ class MorrisonsGBSpider(Spider):
 
         return hours
 
-    def create_department_poi(self, store_item, dept_data, poi_type, name_suffix, category):
+    def create_department_poi(
+        self, store_item: Feature, dept_data: dict, poi_type: str, name_suffix: str, category: Categories
+    ) -> Feature | None:
         """Create separate POI for a department (pharmacy, café, etc.)
 
         Returns None if department doesn't have valid opening hours.

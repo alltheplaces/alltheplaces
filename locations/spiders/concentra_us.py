@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from scrapy import Selector, Spider
 from scrapy.http import Request
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 # Concentra is using a Sitecode SXA Search Service as documented at
@@ -36,6 +37,7 @@ class ConcentraUSSpider(Spider):
             item["postcode"] = html.xpath('//span[@class="field-zipcode"]/text()').get().strip()
             item["phone"] = " ".join(html.xpath('//span[@class="field-mainphone"]/text()').getall()).strip()
             item["website"] = "https://www.concentra.com" + location["Url"]
+            apply_category(Categories.CLINIC, item)
             yield item
 
             if response.meta["offset"] < response.json()["Count"]:

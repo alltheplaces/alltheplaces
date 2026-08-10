@@ -3,7 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import FormRequest
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -27,10 +27,10 @@ class YazigiBRSpider(Spider):
             item["branch"] = poi["Unidade"].get("NomeFantasia")
             item["phone"] = poi["Unidade"].get("Telefone")
             address = poi["Unidade"]["Endereco"]
-            item["addr_full"] = address.get("Logradouro")
+            item["street_address"] = address.get("Logradouro")
             item["city"] = address.get("CidadeNome")
             item["state"] = address.get("EstadoNome")
             item["postcode"] = address.get("CEP")
-            apply_category({"amenity": "language_school"}, item)
+            apply_category(Categories.LANGUAGE_SCHOOL, item)
 
             yield item

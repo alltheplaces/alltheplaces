@@ -15,7 +15,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class UnicreditBankITSpider(CrawlSpider):
     name = "unicredit_bank_it"
-    item_attributes = {"brand": "UniCredit Bank", "brand_wikidata": "Q45568"}
+    item_attributes = {"brand": "UniCredit", "brand_wikidata": "Q45568"}
     start_urls = ["https://www.unicredit.it/it/contatti-e-agenzie/lista-agenzie.html"]
     rules = [
         Rule(LinkExtractor(allow=r"/contatti-e-agenzie/lista-agenzie/[a-z]{2}\.html$")),

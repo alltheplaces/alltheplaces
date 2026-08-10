@@ -11,6 +11,7 @@ class ImoSpider(Spider):
     name = "imo"
     item_attributes = {"brand_wikidata": "Q1654122"}
     start_urls = ["https://www.imocarwash.com/umbraco/api/location/get"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Markers"]:

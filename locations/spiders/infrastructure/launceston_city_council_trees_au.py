@@ -11,15 +11,15 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 class LauncestonCityCouncilTreesAUSpider(ArcGISFeatureServerSpider):
     name = "launceston_city_council_trees_au"
     item_attributes = {"operator": "Launceston City Council", "operator_wikidata": "Q132860984"}
-    host = "mapping.launceston.tas.gov.au"
-    context_path = "arcgis"
-    service_id = "Public/ParksAndRecreation"
+    host = "services.arcgis.com"
+    context_path = "yeXpdyjk3azbqItW/ArcGIS"
+    service_id = "ParksAndRecreation"
     layer_id = "1"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = str(feature["gisassetid"])
+        item["ref"] = str(feature["GISAssetID"])
         apply_category(Categories.NATURAL_TREE, item)
-        if species := feature.get("genusspecies"):
+        if species := feature.get("GenusSpecies"):
             species = species.strip()
             if species:
                 item["extras"]["species"] = species
@@ -28,7 +28,7 @@ class LauncestonCityCouncilTreesAUSpider(ArcGISFeatureServerSpider):
             if taxon_en:
                 item["extras"]["taxon:en"] = taxon_en
         item["extras"]["protected"] = "yes"
-        if planted_unix_timestamp := feature.get("planteddate"):
+        if planted_unix_timestamp := feature.get("PlantedDate"):
             planted_date = datetime.fromtimestamp(int(float(planted_unix_timestamp) / 1000), UTC)
             item["extras"]["start_date"] = planted_date.strftime("%Y-%m-%d")
         yield item

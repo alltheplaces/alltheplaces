@@ -39,7 +39,7 @@ class CarinosSpider(scrapy.Spider):
 
         item = DictParser.parse(data)
         item["website"] = response.url
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
 
         item["street_address"] = item.pop("addr_full", None)
         yield item

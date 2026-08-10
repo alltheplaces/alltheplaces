@@ -28,10 +28,12 @@ class WaterstonesSpider(CrawlSpider):
         except IndexError:
             # No bookshop
             return
+        branch, name = self.get_meta_property(response, "og:title").split(" | ")
 
         properties = {
             "ref": ref,
-            "name": self.get_meta_property(response, "og:title"),
+            "name": name,
+            "branch": branch.replace("Bookshop in ", ""),
             "street_address": self.get_meta_property(response, "business:contact_data:street_address"),
             "city": self.get_meta_property(response, "business:contact_data:locality"),
             "postcode": self.get_meta_property(response, "business:contact_data:postal_code"),
@@ -65,7 +67,7 @@ class WaterstonesSpider(CrawlSpider):
                 end = ends[i].replace(".", ":")
                 if day and start and end:
                     o.add_range(day, start, end)
-            return o.as_opening_hours()
+            return o
         except IndexError:
             # No opening hours provided
             pass

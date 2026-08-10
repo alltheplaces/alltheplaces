@@ -2,7 +2,7 @@ import json
 
 from scrapy import Spider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -17,5 +17,5 @@ class NationalTrustScotlandGBSpider(Spider):
         for location in jsondata:
             item = DictParser.parse(location)
             item["lat"], item["lon"] = location["_geoloc"]["lat"], location["_geoloc"]["lng"]
-            apply_category({"tourism": "attraction"}, item)
+            apply_category(Categories.TOURISM_ATTRACTION, item)
             yield item

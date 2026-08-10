@@ -1,47 +1,21 @@
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Request
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.location_cloud import LocationCloudSpider
 
-from locations.dict_parser import DictParser
 
-
-class AcomJPSpider(Spider):
+class AcomJPSpider(LocationCloudSpider):
     name = "acom_jp"
+    item_attributes = {"brand": "アコム", "brand_wikidata": "Q4674469"}
+    api_endpoint = "https://store.acom.co.jp/acomnavi/api/proxy2/shop/list"
+    website_formatter = "https://store.acom.co.jp/acomnavi/spot/detail?code={}"
 
-    item_attributes = {
-        "brand": "アコム",
-        "brand_wikidata": "Q4674469",
-        "extras": {
-            "brand:en": "Acom",
-            "shop": "money_lender",
-        },
-    }
+    def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield self.get_page(0)
+        item["branch"] = source_feature["name"].removesuffix("むじんくんコーナー")
+        item["extras"]["branch:ja-Hira"] = source_feature.get("ruby")
 
-    def get_page(self, n):
-        return Request(
-            f"https://store.acom.co.jp/acomnavi/api/proxy2/shop/list?limit=500&offset={n}",
-            meta={"offset": n},
-        )
+        apply_category(Categories.SHOP_MONEY_LENDER, item)
 
-    def parse(self, response):
-        data = response.json()
-        stores = data["items"]
-
-        for store in stores:
-            item = DictParser.parse(store)
-            item["name"] = "アコム"
-            item["branch"] = store["name"]
-            item["ref"] = store["code"]
-            item["lat"] = store["coord"]["lat"]
-            item["lon"] = store["coord"]["lon"]
-            item["extras"]["branch:ja-Hira"] = store["ruby"]
-            item["addr_full"] = store["address_name"]
-            item["website"] = f"https://store.acom.co.jp/acomnavi/spot/detail?code={store['code']}"
-            yield item
-
-        if data["count"]["limit"] == len(data["items"]):
-            yield self.get_page(data["count"]["limit"] + response.meta["offset"])
+        yield item

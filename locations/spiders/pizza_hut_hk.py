@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
@@ -24,4 +25,5 @@ class PizzaHutHKSpider(scrapy.Spider):
                         start_time = day_time.get("startTime")
                         close_time = day_time.get("endTime")
                         item["opening_hours"].add_range(day=DAYS_FULL[day], open_time=start_time, close_time=close_time)
+            apply_category(Categories.RESTAURANT, item)
             yield item

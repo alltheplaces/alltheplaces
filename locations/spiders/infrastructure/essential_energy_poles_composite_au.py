@@ -12,11 +12,11 @@ class EssentialEnergyPolesCompositeAUSpider(ArcGISFeatureServerSpider):
     item_attributes = {"operator": "Essential Energy", "operator_wikidata": "Q17003842"}
     host = "services-ap1.arcgis.com"
     context_path = "3o0vFs4fJRsuYuBO/ArcGIS"
-    service_id = "pole_composite__PCOM_"
-    layer_id = "46"
+    service_id = "pole_composite_PCOM_"
+    layer_id = "0"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["WACS_ID_A"]
+        item["ref"] = str(feature["WACS_ID_A"])
         item.pop("state", None)
         apply_category(Categories.POWER_POLE, item)
         item["extras"]["alt_ref"] = feature["W_LABEL_A"]

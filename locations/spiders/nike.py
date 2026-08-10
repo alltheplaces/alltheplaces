@@ -1,19 +1,22 @@
 import datetime
 import re
+from typing import Any
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
-class NikeSpider(scrapy.Spider):
+class NikeSpider(Spider):
     name = "nike"
-    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915", "extras": Categories.SHOP_CLOTHES.value}
-    start_urls = ["https://storeviews-cdn.risedomain-prod.nikecloud.com/store-locations-static.json"]
+    item_attributes = {"brand": "Nike", "brand_wikidata": "Q483915"}
+    start_urls = ["https://nslp-directory.nike.com/store-locations-static.json"]
 
-    def extract_image(self, item, store):
+    def extract_image(self, item: Feature, store: dict) -> None:
         placeholders = [
             "2e8d9338-b43d-4ef5-96e1-7fdcfd838f8e",
             "d2f5c06a-629d-4f20-a092-9e56315a80b3",
@@ -32,44 +35,20 @@ class NikeSpider(scrapy.Spider):
 
             item["image"] = store["imageURL"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         all_stores = response.json()["stores"]
         for store in all_stores.values():
             item = DictParser.parse(store)
+            item["name"] = self.item_attributes["brand"]
+            item["opening_hours"] = self.parse_opening_hours(DictParser.get_nested_key(store, "regularHours"))
 
-            days = DictParser.get_nested_key(store, "regularHours")
-            opening_hours = OpeningHours()
-            for day in days:
-                if not days.get(day):
-                    continue
-
-                oh = days.get(day)[0]
-                opening = oh.get("startTime")
-                closing = oh.get("duration")
-
-                closing_h = closing.split("H")[0].replace("PT", "") if "H" in closing else "0"
-                closing_m = closing[len(closing) - 3 :].replace("M", "") if "M" in closing else "0"
-                closing_m = closing_m.replace("H", "")  # needed for 1 digit minutes
-
-                start = opening.split(":")
-                closing_time = str(
-                    datetime.timedelta(hours=int(start[0]), minutes=int(start[1]))
-                    + datetime.timedelta(hours=int(closing_h), minutes=int(closing_m))
-                )
-                if "day" in closing_time:
-                    closing_time = "00:00"
-                else:
-                    split_closing_time = closing_time.split(":")
-                    closing_time = "".join(split_closing_time[0] + ":" + split_closing_time[1])
-
-                opening_hours.add_range(day[0:2].title(), opening, closing_time)
-
-            item["opening_hours"] = opening_hours.as_opening_hours()
             if re.match(r"^[A-Za-z0-9_-]+$", store["slug"]):
                 item["website"] = "https://www.nike.com/retail/s/" + store["slug"]
             else:
                 item["website"] = None
+
             self.extract_image(item, store)
+
             item["extras"] = {"owner:type": store["facilityType"]}
             if store["businessConcept"] == "FACTORY":
                 item["brand"] = "Nike Factory Store"
@@ -79,4 +58,34 @@ class NikeSpider(scrapy.Spider):
                 item["brand"] = "Nike Community Store"
             else:
                 item["extras"]["type"] = store["businessConcept"]
+
+            apply_category(Categories.SHOP_CLOTHES, item)
             yield item
+
+    def parse_opening_hours(self, hours: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day in hours:
+            if not hours.get(day):
+                continue
+
+            oh = hours.get(day)[0]
+            opening = oh.get("startTime")
+            closing = oh.get("duration")
+
+            closing_h = closing.split("H")[0].replace("PT", "") if "H" in closing else "0"
+            closing_m = closing[len(closing) - 3 :].replace("M", "") if "M" in closing else "0"
+            closing_m = closing_m.replace("H", "")  # needed for 1 digit minutes
+
+            start = opening.split(":")
+            closing_time = str(
+                datetime.timedelta(hours=int(start[0]), minutes=int(start[1]))
+                + datetime.timedelta(hours=int(closing_h), minutes=int(closing_m))
+            )
+            if "day" in closing_time:
+                closing_time = "00:00"
+            else:
+                split_closing_time = closing_time.split(":")
+                closing_time = "".join(split_closing_time[0] + ":" + split_closing_time[1])
+
+            opening_hours.add_range(day[0:2].title(), opening, closing_time)
+        return opening_hours

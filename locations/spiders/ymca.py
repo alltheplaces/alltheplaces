@@ -74,4 +74,4 @@ class YmcaSpider(SitemapSpider):
                     time_format="%I:%M%p",
                 )
 
-        return opening_hours.as_opening_hours()
+        return opening_hours

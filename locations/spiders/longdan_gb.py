@@ -1,6 +1,7 @@
 import html
 import re
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.storefinders.storelocatorwidgets import StoreLocatorWidgetsSpider
 
@@ -20,4 +21,5 @@ class LongdanGBSpider(StoreLocatorWidgetsSpider):
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_raw)
         item.pop("website")
+        apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item

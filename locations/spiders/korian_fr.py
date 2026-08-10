@@ -1,6 +1,11 @@
+from typing import Iterable
+
+from scrapy.http import TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,3 +19,9 @@ class KorianFRSpider(CrawlSpider, StructuredDataSpider):
             callback="parse_sd",
         )
     ]
+    requires_proxy = True
+
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["name"] = item["name"].removeprefix("Korian ")
+        apply_category(Categories.SOCIAL_FACILITY, item)
+        yield item

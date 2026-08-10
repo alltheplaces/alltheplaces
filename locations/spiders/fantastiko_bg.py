@@ -22,14 +22,18 @@ class FantastikoBGSpider(SitemapSpider, StructuredDataSpider):
         ).extract_first()
         opening_hours = (
             response.xpath('//p[@itemprop="openingHours"]/text()')
-            .extract_first()
+            .extract_first("")
+            .lower()
             .replace("ч.", "")
-            .replace("от ", "")
+            .replace("часа", "")
+            .replace("от", "")
             .replace(" до ", "-")
             .replace(".", ":")
             .strip()
             .split("-")
         )
+        if len(opening_hours) != 2:
+            return item
         open_time = ":".join([time_item.zfill(2) for time_item in opening_hours[0].split(":")])
         close_time = ":".join([time_item.zfill(2) for time_item in opening_hours[1].split(":")])
         item["opening_hours"] = f"{open_time}-{close_time}"

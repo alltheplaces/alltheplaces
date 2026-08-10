@@ -11,7 +11,6 @@ class OreillyAutoSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"autoparts-([0-9]+).html$", "parse_sd")]
     wanted_types = ["AutoPartsStore"]
     search_for_twitter = False
-    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None

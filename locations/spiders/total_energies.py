@@ -1,3 +1,5 @@
+import re
+
 import reverse_geocoder
 
 from locations.categories import (
@@ -41,8 +43,8 @@ class TotalEnergiesSpider(WoosmapSpider):
         "dyn": {"brand": "Dyneff", "brand_wikidata": "Q16630266"},
         "gul": {"brand": "Gulf", "brand_wikidata": "Q5617505"},
         "filt": {"brand": "Filoil", "brand_wikidata": None},
+        "freie": {"brand": "Freie Tankstelle", "brand_wikidata": "Q1009104"},
         #    159 "eos"
-        #    151 "freie"
         #     32 "totfa"
         #     25 "sup"
         #     20 "wei"
@@ -74,6 +76,7 @@ class TotalEnergiesSpider(WoosmapSpider):
         "sp95": Fuel.OCTANE_95,
         "sp98": Fuel.OCTANE_98,
         "dieseldetruck": Fuel.HGV_DIESEL,
+        "diesel": Fuel.DIESEL,
         # TODO: Other fuels: gasoil super superethanole85 excellium95e10 gasoline92_eg regulargasoline
         # happyfuel sp95_lb supereffimax dieseleffimax dieselb10 adbluecar
         # Payment methods
@@ -113,8 +116,8 @@ class TotalEnergiesSpider(WoosmapSpider):
         "freewifi": Extras.WIFI,
         "accessibility": Extras.WHEELCHAIR,
         "truckfriendly": Access.HGV,
-        "oilchange": Extras.OIL_CHANGE,
-        "carglass": "service:vehicle:glass",
+        "oilchange": Extras.VEHICLE_OIL_CHANGE_SERVICES,
+        "carglass": Extras.VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES,
         "generator": Extras.BACKUP_GENERATOR,
     }
     FOOD_TAGS = [
@@ -178,12 +181,11 @@ class TotalEnergiesSpider(WoosmapSpider):
 
         if brand := self.BRANDS.get(feature["properties"]["user_properties"]["brand"]):
             item.update(brand)
+            item["branch"] = re.sub(re.escape(item["brand"]), "", item.pop("name"), flags=re.IGNORECASE).strip()
         else:
             self.crawler.stats.inc_value(
                 f'atp/{self.name}/unknown_brand/{feature["properties"]["user_properties"]["brand"]}'
             )
-
-        item["branch"] = item.pop("name")
 
         yield item
 

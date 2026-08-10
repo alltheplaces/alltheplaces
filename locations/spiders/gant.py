@@ -1,72 +1,53 @@
-from typing import AsyncIterator
+import json
+import re
+from typing import Any
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Response
 
-from locations.hours import (
-    DAYS_DE,
-    DAYS_DK,
-    DAYS_EN,
-    DAYS_ES,
-    DAYS_FI,
-    DAYS_FR,
-    DAYS_IT,
-    DAYS_NL,
-    DAYS_SE,
-    OpeningHours,
-)
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class GantSpider(Spider):
     name = "gant"
-    item_attributes = {
-        "brand": "GANT",
-        "brand_wikidata": "Q1493667",
-    }
+    item_attributes = {"brand": "GANT", "brand_wikidata": "Q1493667"}
     start_urls = [
-        ("https://www.gant.be/stores", DAYS_NL),
-        ("https://dk.gant.com/stores", DAYS_DK),
-        ("https://fi.gant.com/stores", DAYS_FI),
-        ("https://fr.gant.com/stores", DAYS_FR),
-        ("https://de.gant.com/stores", DAYS_DE),
-        ("https://it.gant.com/stores", DAYS_IT),
-        ("https://nl.gant.com/stores", DAYS_NL),
-        ("https://pt.gant.com/stores", DAYS_ES),
-        ("https://www.gant.es/stores", DAYS_ES),
-        ("https://www.gant.se/stores", DAYS_SE),
-        ("https://ch.gant.com/stores", DAYS_DE),
-        ("https://www.gant.co.uk/stores", DAYS_EN),
+        "https://www.gant.dk/store-locator",
+        "https://www.gant.be/nl-be/store-locator",
+        "https://www.gant.at/store-locator",
+        "https://www.gant.fr/store-locator",
+        "https://www.gant.co.uk/store-locator",
+        "https://www.gant.pt/store-locator",
+        "https://www.gant.es/store-locator",
     ]
 
-    async def start(self) -> AsyncIterator[Request]:
-        for url, language in self.start_urls:
-            yield Request(url=url, callback=self.parse, cb_kwargs={"language": language})
-
-    def parse(self, response, language):
-        if (part_url := response.xpath("//*[@data-lat]/@data-action-url").get()) is not None:
-            complete_url = response.url.replace("/stores", "") + part_url
-            yield Request(url=complete_url, callback=self.parse_website, cb_kwargs={"language": language})
-
-    def parse_website(self, response, language):
-        stores = response.json()["stores"]
-        for store in stores:
-            item = Feature()
-            item["ref"] = store.get("ID", None)
-            item["name"] = store.get("name", None)
-            item["city"] = store.get("city", None)
-            item["lat"] = store.get("latitude", None)
-            item["lon"] = store.get("longitude", None)
-            item["phone"] = store.get("phone", None)
-            item["country"] = store.get("countryCode", None)
-            item["postcode"] = store.get("postalCode", None)
-            item["email"] = store.get("email", None)
-            item["street_address"] = clean_address([store.get("address1"), store.get("address2")])
-            oh = OpeningHours()
-            for opening_hour in store["storeHours"]:
-                oh.add_ranges_from_string(
-                    ranges_string=opening_hour["day"] + " " + opening_hour["hours"], days=language, delimiters=" - "
-                )
-            item["opening_hours"] = oh.as_opening_hours()
-            yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        raw_data = json.loads(re.search(r"data\":(\[.*?\]),\"offset", response.text).group(1))
+        if raw_data:
+            for location in raw_data:
+                item = DictParser.parse(location)
+                if location.get("address2"):
+                    item["street_address"] = merge_address_lines(
+                        [
+                            location.get("address2"),
+                            item["street_address"],
+                        ]
+                    )
+                try:
+                    oh = OpeningHours()
+                    for day, time in json.loads(location["storeHours"]).items():
+                        if day == "holidayHours":
+                            continue
+                        if time.get("isClosed"):
+                            oh.set_closed(day)
+                        else:
+                            for open_close_time in time["openIntervals"]:
+                                open_time = open_close_time["start"]
+                                close_time = open_close_time["end"]
+                                oh.add_range(day=day, open_time=open_time, close_time=close_time)
+                    item["opening_hours"] = oh
+                except:
+                    pass
+                yield item

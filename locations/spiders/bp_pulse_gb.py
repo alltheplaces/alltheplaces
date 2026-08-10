@@ -1,36 +1,13 @@
-from typing import AsyncIterator
-
-from scrapy import Spider
-from scrapy.http import JsonRequest
-
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.storefinders.uberall import UberallSpider
 
 
-class BpPulseGBSpider(Spider):
+class BpPulseGBSpider(UberallSpider):
     name = "bp_pulse_gb"
     item_attributes = {"brand_wikidata": "Q39057719"}
+    key = "Ngy4Zpj26HVGztRS6HikqkGY8AEUZ2"
 
-    @staticmethod
-    def make_request(page: int) -> JsonRequest:
-        return JsonRequest(
-            url=f"https://chargevision4.com/api/polar-plus/posts?page={page}",
-            headers={"API_KEY": "6147-f93fad682f5a-2a927fe95546-2d31"},
-            meta={"page": page},
-        )
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield self.make_request(1)
-
-    def parse(self, response, **kwargs):
-        for ref, location in response.json()["data"].items():
-            item = Feature()
-
-            item["lat"] = location[0]
-            item["lon"] = location[1]
-            item["ref"] = ref
-            apply_category(Categories.CHARGING_STATION, item)
-            yield item
-
-        if response.json()["per_page"] * response.meta["page"] < response.json()["total"]:
-            yield self.make_request(response.meta["page"] + 1)
+    def post_process_item(self, item, response, location):
+        item["name"] = item["phone"] = None
+        apply_category(Categories.CHARGING_STATION, item)
+        yield item

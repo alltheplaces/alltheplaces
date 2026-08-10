@@ -9,6 +9,7 @@ class WaxingTheCityUSSpider(Spider):
     name = "waxing_the_city_us"
     item_attributes = {"brand": "Waxing the City", "brand_wikidata": "Q120599883"}
     start_urls = ["https://www.waxingthecity.com/wp-json/anytime/v1/map-locations"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
         for location in response.json():
@@ -17,6 +18,7 @@ class WaxingTheCityUSSpider(Spider):
 
             item = DictParser.parse(location)
             item["ref"] = location["number"]
+            item["branch"] = item.pop("name", None)
 
             item["opening_hours"] = OpeningHours()
             for rule in location["hours"]:

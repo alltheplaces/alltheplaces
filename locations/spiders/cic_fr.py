@@ -3,7 +3,7 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -14,19 +14,10 @@ class CicFRSpider(CrawlSpider):
     start_urls = ["https://www.cic.fr/fr/agences-et-distributeurs/Regions.aspx"]
     allowed_domains = ["cic.fr"]
     rules = [
-        Rule(
-            LinkExtractor(allow=r"/Departements\.aspx\?regionId="),
-        ),
-        Rule(
-            LinkExtractor(allow=r"/Localites\.aspx\?regionId="),
-        ),
-        Rule(
-            LinkExtractor(allow=r"/ResultatsRechercheGeographique\.aspx\?inseeCode="),
-        ),
-        Rule(
-            LinkExtractor(allow=r"/fr/agence/"),
-            callback="parse",
-        ),
+        Rule(LinkExtractor(allow=r"/Departements\.aspx\?regionId=")),
+        Rule(LinkExtractor(allow=r"/Localites\.aspx\?regionId=")),
+        Rule(LinkExtractor(allow=r"/ResultatsRechercheGeographique\.aspx\?inseeCode=")),
+        Rule(LinkExtractor(allow=r"/fr/agence/"), callback="parse"),
     ]
 
     def parse(self, response):
@@ -51,5 +42,7 @@ class CicFRSpider(CrawlSpider):
                 else:
                     open_time, close_time = time.replace("h", ":").split(" - ")
                     item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time)
+        has_atm = bool(response.css(".ei_rogi_picto_withdrawal_bills_eur").get())
+        apply_yes_no(Extras.ATM, item, has_atm)
         apply_category(Categories.BANK, item)
         yield item

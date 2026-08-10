@@ -24,11 +24,13 @@ class HdfcBankINSpider(Spider):
 
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
+            if not location:
+                continue
             item = DictParser.parse(location)
             item["branch"] = item.pop("name").replace("_", " ").removesuffix(" ATM")
             item["state"] = location.get("geographicalState").replace("_", " ")
             item["city"] = item["city"].replace("_", " ")
-            item["addr_full"] = location.get("branchAddress")
+            item["street_address"] = location.get("branchAddress")
             item["postcode"] = location.get("pincode")
             slug = location.get("pagePath").split("/branch-locator/")[-1].removesuffix(".html")
             item["website"] = f"https://www.hdfc.bank.in/branch-locator/{slug}"

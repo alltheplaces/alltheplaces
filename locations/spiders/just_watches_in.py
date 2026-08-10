@@ -1,20 +1,31 @@
-import re
+from typing import Iterable
+from urllib.parse import urljoin
 
-from locations.hours import DAYS, OpeningHours
-from locations.storefinders.metizsoft import MetizsoftSpider
+import scrapy
+from scrapy import Spider
+from scrapy.http import TextResponse
+
+from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class JustWatchesINSpider(MetizsoftSpider):
+class JustWatchesINSpider(Spider):
     name = "just_watches_in"
     item_attributes = {"brand": "Just Watches", "brand_wikidata": "Q117822349"}
-    shopify_url = "justwatchesstore.myshopify.com"
+    start_urls = ["https://stores.justwatches.com/"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse_item(self, item, location):
-        if "ALL DAYS" in location["hour_of_operation"]:
-            if m := re.match(r"(\d{2})\.(\d{2}) ([AP])\.M - (\d{2})\.(\d{2}) ([AP])\.M", location["hour_of_operation"]):
-                start_time = m.group(1) + ":" + m.group(2) + m.group(3) + "M"
-                end_time = m.group(4) + ":" + m.group(5) + m.group(6) + "M"
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_days_range(DAYS, start_time, end_time, "%I:%M%p")
-        item.pop("email")
-        yield item
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
+        for location in response.xpath('//*[@class="store_outlet_01__item store-info-box"]'):
+            item = Feature()
+            item["city"] = location.xpath('.//*[@id="business_city"]/@value').get()
+            item["state"] = location.xpath('.//*[@id="state"]/@value').get()
+            item["phone"] = location.xpath('.//*[@id="phone"]/@value').get()
+            item["email"] = location.xpath('.//*[@id="business_email"]/@value').get()
+            item["addr_full"] = location.xpath('.//*[@id="address"]/@value').get()
+            item["lat"] = location.xpath('.//*[@class="outlet-latitude"]/@value').get()
+            item["lon"] = location.xpath('.//*[@class="outlet-longitude"]/@value').get()
+            item["ref"] = item["website"] = location.xpath(".//h2//@href").get()
+            yield item
+        if page_url := response.xpath('//*[@class="next"]'):
+            yield scrapy.Request(url=urljoin(response.url, page_url.xpath(".//@href").get()), callback=self.parse)

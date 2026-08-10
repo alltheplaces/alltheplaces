@@ -5,6 +5,7 @@ from locations.categories import (
     HealthcareSpecialities,
     PaymentMethods,
     Vending,
+    add_list,
     add_vending,
     apply_category,
     apply_clothes,
@@ -37,7 +38,7 @@ def test_apply_yes_no():
 
 def test_shop_tag_sanity():
     for cat in Categories:
-        if cat == Categories.SHOP_E_CIGARETTE:
+        if cat in {Categories.SHOP_E_CIGARETTE, Categories.SHOP_BEAUTY_SPA}:
             continue
         if cat.name.startswith("SHOP_"):
             shop_name = cat.name.split("_", 1)[1].lower()
@@ -46,15 +47,15 @@ def test_shop_tag_sanity():
 
 def test_cuisine_multiple():
     item = Feature()
-    apply_category({"cuisine": "coffee_shop"}, item)
+    add_list("cuisine", "coffee_shop", item)
     assert item["extras"]["cuisine"] == "coffee_shop"
 
-    apply_category({"cuisine": "coffee_shop"}, item)
-    apply_category({"cuisine": "coffee_shop"}, item)
+    add_list("cuisine", "coffee_shop", item)
+    add_list("cuisine", "coffee_shop", item)
     assert item["extras"]["cuisine"] == "coffee_shop"
 
-    apply_category({"cuisine": "coffee_shop"}, item)
-    apply_category({"cuisine": "pizza"}, item)
+    add_list("cuisine", "coffee_shop", item)
+    add_list("cuisine", "pizza", item)
     assert item["extras"]["cuisine"] == "coffee_shop;pizza"
 
 

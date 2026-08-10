@@ -22,10 +22,17 @@ class BpSpider(GeoMeSpider):
         "aral": {"brand": "Aral", "brand_wikidata": "Q565734"},
         "amoco": {"brand": "Amoco", "brand_wikidata": "Q465952"},
         "aral_pulse": {"brand": "Aral pulse", "operator": "Aral", "operator_wikidata": "Q565734"},
+        "esso": {"brand": "Esso", "brand_wikidata": "Q867662"},
+        "petro": {"brand": "Petro", "brand_wikidata": "Q64051305"},
+        "ta": {"brand": "TA", "brand_wikidata": "Q7835892"},
+        "ta_express": {"brand": "TA Express", "brand_wikidata": "Q7835892"},
+        "thorntons": {"brand": "Thorntons", "brand_wikidata": "Q7796584"},
     }
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
-        if brand := self.brands.get(location["site_brand"]):
+        if location.get("name", "").upper().startswith("ESSO"):
+            item.update(self.brands["esso"])
+        elif brand := self.brands.get(location["site_brand"]):
             item.update(brand)
         else:
             item.update(self.brands["bp"])
@@ -46,7 +53,7 @@ class BpSpider(GeoMeSpider):
             apply_yes_no("food", item, True)
 
         if "electric_charging" in facilities or "electricity" in products:
-            apply_yes_no("fuel:electricity", item, True)
+            apply_yes_no(Fuel.ELECTRIC, item, True)
 
         apply_yes_no(Extras.TOILETS, item, any("toilet" in a for a in facilities))
         apply_yes_no(Extras.SHOWERS, item, "shower" in facilities)

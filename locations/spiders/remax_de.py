@@ -31,7 +31,7 @@ class RemaxDESpider(scrapy.Spider):
                         open_time=days.get("opens"),
                         close_time=days.get("closes"),
                     )
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item
 

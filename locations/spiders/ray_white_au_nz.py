@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -12,6 +13,7 @@ class RayWhiteAUNZSpider(Spider):
     item_attributes = {"brand": "Ray White", "brand_wikidata": "Q81077729"}
     allowed_domains = ["raywhiteapi.ep.dynamics.net"]
     start_urls = ["https://raywhiteapi.ep.dynamics.net/v1/organisations?apiKey=6625c417-067a-4a8e-8c1d-85c812d0fb25"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         data = {
@@ -56,7 +58,10 @@ class RayWhiteAUNZSpider(Spider):
             item = DictParser.parse(location["value"])
             item["lat"] = location["value"]["address"]["location"]["lat"]
             item["lon"] = location["value"]["address"]["location"]["lon"]
-            item["website"] = location["value"]["webSite"]
+            if website := re.sub(r"^(?:https?://)+", "", location["value"]["webSite"], flags=re.IGNORECASE):
+                if "http" not in website:
+                    item["website"] = f"https://{website}" if website else None
+
             for phone_number in location["value"].get("phones", []):
                 if phone_number["typeCode"] == "FIX":  # Fixed phone number
                     item["phone"] = phone_number["internationalizedNumber"]

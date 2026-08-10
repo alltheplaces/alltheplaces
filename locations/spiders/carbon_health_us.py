@@ -40,7 +40,7 @@ class CarbonHealthUSSpider(Spider):
 
             address = location["address"]
             item["street_address"] = merge_address_lines([address["firstLine"], address["secondLine"]])
-            item["extras"]["addr:unit"] = address["aptNumber"]
+            item["unit"] = address["aptNumber"]
             item["lat"] = address["latitude"]
             item["lon"] = address["longitude"]
 

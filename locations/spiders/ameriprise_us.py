@@ -38,5 +38,5 @@ class AmeripriseUSSpider(Spider):
             for location in advisor.get("locations", []):
                 item = DictParser.parse(location)
                 item.pop("name")
-                item["ref"] = item["addr_full"] = merge_address_lines([location["address1"], location["address2"]])
+                item["ref"] = item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
                 yield item

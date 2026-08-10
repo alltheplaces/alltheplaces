@@ -12,6 +12,7 @@ class CrustAUSpider(Spider):
     name = "crust_au"
     item_attributes = {"brand": "Crust", "brand_wikidata": "Q100792715"}
     allowed_domains = ["www.crust.com.au"]
+    requires_proxy = True
     start_urls = ["https://www.crust.com.au/stores/stores_for_map_markers.json?catering_active=false"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -20,6 +21,8 @@ class CrustAUSpider(Spider):
 
     def parse(self, response):
         for location in response.json():
+            if "test" in location["name"].lower():
+                continue
             item = DictParser.parse(location)
             item["lat"], item["lon"] = location["location"].split(",", 1)
             item.pop("addr_full", None)
@@ -39,24 +42,20 @@ class CrustAUSpider(Spider):
         )
         item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
         item["email"] = response.xpath('//a[contains(@href, "mailto:")]/@href').get("").replace("mailto:", "")
-        days_list = list(
-            map(
-                lambda x: x.split(",", 1)[0],
-                filter(
-                    None,
-                    map(
-                        str.strip, response.xpath('//div[@class="opening-hours"]/table/tbody/tr/td[1]/text()').getall()
-                    ),
-                ),
-            )
-        )
-        hours_list = list(
-            map(str.strip, response.xpath('//div[@class="opening-hours"]/table/tbody/tr/td[3]/text()').getall())
-        )
-        day_hours_array = list(zip(days_list, hours_list))
-        hours_string = ""
-        for day_hours in day_hours_array:
-            hours_string = f"{hours_string} {day_hours[0]}: {day_hours[1]}"
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
+        try:
+            self._parse_hours(response, item)
+        except Exception:
+            self.logger.warning("Failed to parse hours for %s", item.get("name"))
         yield item
+
+    @staticmethod
+    def _parse_hours(response, item):
+        for row in response.xpath('//div[@class="opening-hours"]/table/tbody/tr'):
+            day = row.xpath("td[1]/text()").get("").strip().split(",", 1)[0]
+            lunch = row.xpath("td[2]/text()").get("").strip()
+            dinner = row.xpath("td[3]/text()").get("").strip()
+            for time_range in [lunch, dinner]:
+                if not time_range or time_range == "N/A":
+                    continue
+                item["opening_hours"].add_ranges_from_string(f"{day}: {time_range}")

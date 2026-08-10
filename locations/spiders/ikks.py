@@ -38,7 +38,7 @@ class IkksSpider(scrapy.Spider):
                             open_time=day.get("pmBegin") or day.get("amBegin"),
                             close_time=day.get("pmEnd"),
                         )
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
 
                 yield item
 

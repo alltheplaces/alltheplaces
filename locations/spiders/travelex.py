@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -75,5 +76,5 @@ class TravelexSpider(Spider):
                     item["website"] = url_format.format(row["storeUrl"])
                 else:
                     item["website"] = None
-
+                apply_category(Categories.BUREAU_DE_CHANGE, item)
                 yield item

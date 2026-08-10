@@ -32,26 +32,70 @@ class VolkswagenSpider(JSONBlobSpider):
         "N": VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES,
         "L": VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES,
     }
-    EXTRAS_MAPPING = {
-        "MOT": "service:vehicle:inspection",
-        "USED_PC": Extras.USED_CAR_SALES,
-        "USED_CV": Extras.USED_CAR_SALES,
-        "FCWASH": Extras.CAR_WASH,
-        "PARTS": Extras.CAR_PARTS,
+    SHOP_EXTRAS_MAPPING = {
+        "USED_PC": Extras.VEHICLE_USED_CAR_SALES,
+        "USED_CV": Extras.VEHICLE_USED_CAR_SALES,
+        "STANDARD_USED_PC": Extras.VEHICLE_USED_CAR_SALES,
+        "CPO_PC": Extras.VEHICLE_USED_CAR_SALES,
+        "CV_CPO": Extras.VEHICLE_USED_CAR_SALES,
+        "PARTS": Extras.VEHICLE_CAR_PARTS_SALES,
+        "ACCESSORIES": Extras.VEHICLE_CAR_PARTS_SALES,
     }
+    SERVICE_EXTRAS_MAPPING = {
+        "MOT": Extras.VEHICLE_INSPECTION_SERVICES,
+        "FCWASH": Extras.CAR_WASH,
+        "PARTS": Extras.VEHICLE_CAR_PARTS_SALES,
+        "ACCESSORIES": Extras.VEHICLE_CAR_PARTS_SALES,
+        "COLLISION_CENTER": Extras.VEHICLE_BODY_REPAIR_SERVICES,
+        "KLZ": Extras.VEHICLE_BODY_REPAIR_SERVICES,
+    }
+    SALES_ATTRIBUTES = [
+        "GENERAL",
+        "NEW_PC",
+        "USED_PC",
+        "STANDARD_USED_PC",
+        "TRADE_IN",
+        "USED_CV",
+        "NEW_CV",
+        "NEW_CV_COMMERCIAL",
+        "NEW_CV_PASSENGER",
+        "CPO_PC",
+        "CPO",
+        "CV_CPO",
+        "IDBUZZ_PEOPLE_VENDITA",  # "vendita" = sales (IT); only sales signal on those dealers
+        "E_SALES",
+        "DIRECT_SALES",
+        "FLEET_SALES",
+        "SALES",
+        "SALES_ONLY",
+        "INVENTORY",
+        "GSL",
+    ]
     SERVICE_ATTRIBUTES = [
         "SERVICE",
-        "COLLISION_REPAIR",
-        "COLLISION_CENTER",
-        "EXPRESS_SERVICE",
-        "ECONOMY_SERVICE",
-        "WORKSHOP",
         "VEHICLESERVICES",
-        "COLLISION",
-        "ACCES_CNFG",
-        "DCC_ONLY",
+        "WORKSHOP",
+        "CV_WORKSHOP",
+        "COLLISION_CENTER",
+        "COLLISION_REPAIR",
+        "BODYWORK_SERVICE",
         "PAINT_SHOP",
+        "SHTSRV",
+        "EXPRESS_SERVICE",
+        "EXPRESS_SERVICES",
+        "EXPRESS_CUSTOMER_SERVICE",
+        "ECS_STANDALONE_1",  # standalone Express Customer Service site
+        "ECS_STANDALONE_2",
+        "ECONOMY_SERVICE",
+        "E_SERVICE",
+        "FLEET_SERVICE",
+        "SERVICE_CV",
+        "SERVICE_ONLY",
+        "SERVICE_PLUS",
+        "CV_SERVICE_PLUS",
         "SRVONLY",
+        "MOT",
+        "KLZ",
     ]
     countries = {}
     # Some countries use a different language parameter than the one returned by get_locale.
@@ -132,19 +176,29 @@ class VolkswagenSpider(JSONBlobSpider):
         if "businessHours" in feature and len(feature["businessHours"]) > 0:
             self.parse_hours(feature["businessHours"], item)
         services = feature.get("rawServices", []) + feature.get("features", [])
-        if services:
+        is_sale = any(service in self.SALES_ATTRIBUTES for service in services)
+        is_service = any(service in self.SERVICE_ATTRIBUTES for service in services)
+
+        if is_sale:
             shop_item = deepcopy(item)
             shop_item["ref"] = f"{item['ref']}-SHOP"
             apply_category(Categories.SHOP_CAR, shop_item)
             for service in services:
-                if match := self.EXTRAS_MAPPING.get(service):
+                if match := self.SHOP_EXTRAS_MAPPING.get(service):
                     apply_yes_no(match, shop_item, True)
             yield shop_item
-        if any(service in self.SERVICE_ATTRIBUTES for service in services):
+
+        if is_service:
             service_item = deepcopy(item)
             service_item["ref"] = f"{item['ref']}-SERVICE"
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            for service in services:
+                if match := self.SERVICE_EXTRAS_MAPPING.get(service):
+                    apply_yes_no(match, service_item, True)
             yield service_item
+
+        if not is_sale and not is_service:
+            self.logger.warning(f"Unknown services: {feature}")
 
     # can be used in seat and skoda spiders
     @staticmethod

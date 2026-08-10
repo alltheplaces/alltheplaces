@@ -5,6 +5,7 @@ from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMet
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 # We can get the first 250 from the API, but can't find a way to get the next 250 :(
 # So instead get the ids from the sitemap and call the individual api endpoint
@@ -39,7 +40,12 @@ class ExxonMobilSpider(SitemapSpider):
         "https://www.esso.nl/robots.txt",
     ]
     sitemap_rules = [(r"/find-station/.+-\d+$", "parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "RETRY_HTTP_CODES": [403],  # Sometimes server blocks and sometimes allows
+        "RETRY_TIMES": 5,
+    }
 
     brands = {
         "Exxon": {"brand": "Exxon", "brand_wikidata": "Q109675651"},

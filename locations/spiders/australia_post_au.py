@@ -12,6 +12,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class AustraliaPostAUSpider(Spider):
     name = "australia_post_au"
     item_attributes = {"brand": "Australia Post", "brand_wikidata": "Q1142936"}
+    custom_settings = {"DOWNLOAD_DELAY": 2}  # Rate limiting appears to be used
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in [
@@ -47,7 +48,8 @@ class AustraliaPostAUSpider(Spider):
                     item["opening_hours"].add_range(day, open_time.strip(), close_time.strip())
 
             if store["type"] == "C_SPB":
-                apply_category(Categories.POST_BOX.value | {"priority": "yes"}, item)
+                apply_category(Categories.POST_BOX, item)
+                item["extras"]["priority"] = "yes"
             elif store["type"] == "DC":
                 apply_category(Categories.POST_DEPOT, item)
             elif store["type"] == "PO":

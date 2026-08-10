@@ -1,18 +1,26 @@
-from scrapy.spiders import SitemapSpider
+from typing import Iterable
+
+from scrapy.http import TextResponse
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
-class FireAndRescueNswAUSpider(SitemapSpider):
+class FireAndRescueNswAUSpider(CrawlSpider):
     name = "fire_and_rescue_nsw_au"
     item_attributes = {"operator": "Fire and Rescue NSW", "operator_wikidata": "Q5451532"}
     allowed_domains = ["www.fire.nsw.gov.au"]
-    sitemap_urls = ["https://www.fire.nsw.gov.au/feeds/sitemap.xml"]
-    sitemap_rules = [(r"^https:\/\/www\.fire\.nsw\.gov\.au\/page\.php\?id=9210&station=\d+", "parse")]
+    start_urls = ["https://www.fire.nsw.gov.au/contact/contact-details/locations/station-index"]
+    rules = [
+        Rule(
+            LinkExtractor(allow=r"^https:\/\/www\.fire\.nsw\.gov\.au\/contact\/fire-station\/\d{3}$"), callback="parse"
+        )
+    ]
 
-    def parse(self, response):
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
         properties = {
             "ref": response.url,
             "name": response.xpath("//main//h1/text()").get().strip(),

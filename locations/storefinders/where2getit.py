@@ -74,8 +74,8 @@ class Where2GetItSpider(Spider):
     custom_settings: dict = {"ROBOTSTXT_OBEY": False}
 
     api_endpoint: str | None = None
-    api_brand_name: str
-    api_key: str | list[str]
+    api_brand_name: str = ""
+    api_key: str = ""
     api_filter: dict = {}
     # api_filter_admin_level:
     #   0 = no filtering
@@ -114,36 +114,30 @@ class Where2GetItSpider(Spider):
         url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist"
         if self.api_endpoint:
             url = self.api_endpoint
-        if not isinstance(self.api_key, list):
-            self.api_key = [self.api_key]
-        for key in self.api_key:
-            yield JsonRequest(
-                url=url,
-                data={
-                    "request": {
-                        "appkey": key,
-                        "formdata": {"objectname": "Locator::Store", "limit": self.api_limit, "where": where_clause},
-                    }
-                },
-                callback=self.parse_locations,
-                dont_filter=True,
-            )
+        yield JsonRequest(
+            url=url,
+            data={
+                "request": {
+                    "appkey": self.api_key,
+                    "formdata": {"objectname": "Locator::Store", "limit": self.api_limit, "where": where_clause},
+                }
+            },
+            callback=self.parse_locations,
+            dont_filter=True,
+        )
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         if self.api_filter_admin_level > 0:
             url = f"https://hosted.where2getit.com/{self.api_brand_name}/rest/getlist"
             if self.api_endpoint:
                 url = self.api_endpoint
-            if not isinstance(self.api_key, list):
-                self.api_key = [self.api_key]
-            for key in self.api_key:
-                yield JsonRequest(
-                    url=url,
-                    data={"request": {"appkey": key, "formdata": {"objectname": "Account::Country"}}},
-                    method="POST",
-                    callback=self.parse_country_list,
-                    dont_filter=True,
-                )
+            yield JsonRequest(
+                url=url,
+                data={"request": {"appkey": self.api_key, "formdata": {"objectname": "Account::Country"}}},
+                method="POST",
+                callback=self.parse_country_list,
+                dont_filter=True,
+            )
         else:
             for request in self.make_request():
                 yield request

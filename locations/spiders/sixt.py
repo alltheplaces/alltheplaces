@@ -19,7 +19,11 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
     skip_auto_cc_domain = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["country"] = item.pop("state")
+        country = item.pop("state")
+        # Map obsolete country codes used by Sixt
+        country = {"CS": "RS", "YU": "RS"}.get(country, country)
+        item["country"] = country
+
         if m := re.match(r"^Car hire (.+)\|? (?:SIXT rent a car|SIXT Car Rental|SIXT)$", item["name"], re.IGNORECASE):
             item["branch"] = m.group(1)
             item["name"] = None

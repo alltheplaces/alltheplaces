@@ -26,5 +26,5 @@ class BigBoyUSSpider(SitemapSpider):
             (" ".join(response.xpath("//main/section/div[2]/div[2]/div[11]/div[3]/p/text()").getall())).split()
         )
         oh.add_ranges_from_string(hours_raw)
-        properties["opening_hours"] = oh.as_opening_hours()
+        properties["opening_hours"] = oh
         yield Feature(**properties)

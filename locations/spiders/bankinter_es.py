@@ -41,7 +41,7 @@ class BankinterESSpider(Spider):
             item["postcode"] = data_addr["cpostal"]
             item["lat"] = data["centCordBean"]["coordY"]
             item["lon"] = data["centCordBean"]["coordX"]
-            item["phone"] = data_addr["telefono1"]
+            item["phone"] = data_addr.get("telefono1")
             apply_category(Categories.BANK, item)
             yield item
 
@@ -55,6 +55,6 @@ class BankinterESSpider(Spider):
             item["postcode"] = data["codigoPostal"]
             item["lat"] = data["latitud"]
             item["lon"] = data["longitud"]
-            item["phone"] = data["telefono"]
+            item["phone"] = data.get("telefono")
             apply_category(Categories.ATM, item)
             yield item

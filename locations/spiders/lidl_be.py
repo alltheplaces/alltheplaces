@@ -37,6 +37,6 @@ class LidlBESpider(VirtualEarthSpider):
             elif start_day:
                 oh.add_range(start_day, start_time, end_time)
 
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
 
         yield item

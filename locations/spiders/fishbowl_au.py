@@ -1,29 +1,26 @@
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from typing import Iterable
 
+from scrapy.http import TextResponse
+
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class FishbowlAUSpider(Spider):
+class FishbowlAUSpider(JSONBlobSpider):
     name = "fishbowl_au"
     item_attributes = {"brand": "Fishbowl", "brand_wikidata": "Q110785465"}
-    allowed_domains = ["fishbowl.com.au", "api.mapbox.com"]
-    start_urls = ["https://fishbowl.com.au/assets/js/main.js"]
+    start_urls = ["https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/38415-rW5LvC1Cy7c6N3Jf/stores.js"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    locations_key = "stores"
 
-    def parse(self, response):
-        features_url = response.text.split('const t="', 1)[1].split('"', 1)[0]
-        yield JsonRequest(url=features_url, callback=self.parse_locations)
-
-    def parse_locations(self, response):
-        for location in response.json()["features"]:
-            properties = {
-                "ref": location["id"],
-                "name": location["properties"]["title"],
-                "addr_full": location["properties"]["place_name"],
-                "lat": location["geometry"]["coordinates"][1],
-                "lon": location["geometry"]["coordinates"][0],
-                "state": location["properties"]["state"].upper(),
-                "image": location["properties"]["img"],
-            }
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace("FISHBOWL - ", "")
+        oh = OpeningHours()
+        for day_time in feature.get("store_business_hours", []):
+            day = DAYS_FULL[int(day_time.get("week_day")) - 1]
+            open_time = day_time.get("open_time")
+            close_time = day_time.get("close_time")
+            oh.add_range(day=day, open_time=open_time, close_time=close_time)
+        item["opening_hours"] = oh
+        yield item

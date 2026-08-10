@@ -3,6 +3,7 @@ from typing import AsyncIterator, Iterable
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature, set_closed
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -22,10 +23,12 @@ class AnzSpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         item["ref"] = feature["uuid"]
         item["street_address"] = item.pop("street")
+        self.parse_opening_hours(item, feature)
         item["email"] = (
             (item.get("email") or "")
             .replace("Pacopscallcentre1@anz.com", "")
             .replace("(Samoa Help Desk) ccsamoa@anz.com", "")
+            .replace("SamoaCallCentre@anz.com", "")
             .strip(" /")
         )
 
@@ -39,3 +42,34 @@ class AnzSpider(JSONBlobSpider):
             apply_category(Categories.ATM, item)
 
         yield item
+
+    def parse_opening_hours(self, item: Feature, feature: dict) -> None:
+        item["opening_hours"] = OpeningHours()
+        for days in DAYS_3_LETTERS:
+            if rule := feature["openhours_" + days.lower()]:
+                if "closed" in rule.lower():
+                    item["opening_hours"].set_closed(days)
+                elif "24 hours" in rule.lower():
+                    item["opening_hours"].add_range(days, "00:00", "24:00")
+                elif rule == "24-Jul":
+                    # gibberish value, do nothing
+                    pass
+                else:
+                    rule = rule.replace(" - ", "-").replace(" am", "am").replace("am - ", "am-")
+                    if len(rule.split("-")) == 2:
+                        try:
+                            open_time, close_time = rule.split("-")
+                            if "." not in open_time and ":" not in open_time:
+                                # 12h hour value and am/pm, i.e. 9am-5pm
+                                item["opening_hours"].add_range(days, open_time, close_time, "%I%p")
+                            elif "am" not in open_time.lower() and ":" in open_time:
+                                # 24h hour and minute value, i.e. 9:30-13:30
+                                item["opening_hours"].add_range(days, open_time, close_time, "%H:%M")
+                            elif "am" in open_time.lower() and "." in open_time:
+                                item["opening_hours"].add_range(days, open_time, close_time, "%I.%M%p")
+                            else:
+                                self.logger.warning("didn't parse: {}".format(rule))
+                        except ValueError:
+                            self.logger.warning("Error parsing opening hours: {}".format(rule))
+                    else:
+                        self.log("rule not made of 2 components: {}".format(rule))

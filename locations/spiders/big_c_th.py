@@ -19,6 +19,7 @@ def decode_phones(data_item: dict) -> list[str]:
 class BigCTHSpider(scrapy.Spider):
     name = "big_c_th"
     item_attributes = {"brand": "Big C", "brand_wikidata": "Q858665"}
+    requires_proxy = True
     start_urls = ["https://corporate.bigc.co.th/include/get_store.php"]
 
     def parse(self, response, **kwargs):

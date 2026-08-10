@@ -1,16 +1,16 @@
+import json
 from typing import Any, AsyncIterator
 
-from chompjs import parse_js_object
-from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class RadissonHotelsSpider(Spider):
+class RadissonHotelsSpider(PlaywrightSpider):
     name = "radisson_hotels"
     allowed_domains = ["www.radissonhotels.com"]
     brand_mapping = {
@@ -27,11 +27,10 @@ class RadissonHotelsSpider(Spider):
         "ri": ["Radisson Individuals", None],
         "pis": ["Park Inn & Suites by Radisson", None],
     }
-    is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
-        "DOWNLOAD_TIMEOUT": 300,
+        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 300 * 1000,
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -40,7 +39,7 @@ class RadissonHotelsSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for hotel in parse_js_object(response.text)["hotels"]:
+        for hotel in json.loads(response.xpath("//pre/text()").get())["hotels"]:
             hotel.update(hotel.pop("contactInfo"))
             item = DictParser.parse(hotel)
             item["ref"] = hotel.get("code")

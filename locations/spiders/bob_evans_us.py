@@ -9,9 +9,7 @@ from locations.hours import DAYS, OpeningHours
 class BobEvansUSSpider(SitemapSpider):
     name = "bob_evans_us"
     item_attributes = {"brand": "Bob Evans", "brand_wikidata": "Q4932386"}
-    sitemap_urls = [
-        "https://www.bobevans.com/sitemap.xml",
-    ]
+    sitemap_urls = ["https://www.bobevans.com/sitemap.xml"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def sitemap_filter(self, entries):
@@ -44,4 +42,4 @@ class BobEvansUSSpider(SitemapSpider):
             start_time = start.strftime("%H:%M")
             end_time = end.strftime("%H:%M")
             oh.add_range(day, start_time, end_time)
-        return oh.as_opening_hours()
+        return oh

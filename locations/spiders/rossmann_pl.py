@@ -31,7 +31,7 @@ class RossmannPLSpider(Spider):
                 "city": shop["address"]["city"],
                 "postcode": shop["address"]["postCode"],
                 "country": "PL",
-                "opening_hours": hours.as_opening_hours(),
+                "opening_hours": hours,
                 "lat": shop["shopLocation"]["latitude"],
                 "lon": shop["shopLocation"]["longitude"],
                 "website": "https://www.rossmann.pl/drogerie" + shop["navigateUrlV2"],

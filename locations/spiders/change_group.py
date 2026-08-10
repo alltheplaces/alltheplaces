@@ -1,31 +1,43 @@
-import json
-from typing import Any
+from typing import Iterable
 
-from scrapy.http import Response
-from scrapy.spiders import Spider
+from scrapy.http import TextResponse
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.categories import Extras, apply_yes_no
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class ChangeGroupSpider(Spider):
+class ChangeGroupSpider(JSONBlobSpider):
     name = "change_group"
     item_attributes = {"brand": "Change Group", "brand_wikidata": "Q5071758"}
-    """
-        The following Javascript file has the actual API details, being used.
-        https://uk.changegroup.com/.resources/ProsegurWebCorpModule/resources/changegroup/branch-locator/main.js
-    """
-    start_urls = ["https://uksw.changegroup.com/slatwall/?slatAction=changeGroup:main.globalBranchData"]
+    start_urls = ["https://uk.changegroup.com/dam/changegroup-mdm/branches.json"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = response.text.encode("utf-8")
-        for country in json.loads(data)["countries"]:
-            for region in country["regions"]:
-                for location in region["branches"]:
-                    item = DictParser.parse(location)
-                    item["street_address"] = merge_address_lines(
-                        [location["address"].pop("streetAddress"), location["address"].pop("streetAddress2")]
-                    )
-                    apply_category(Categories.BUREAU_DE_CHANGE, item)
-                    yield item
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("Forex"))
+        feature.update(feature.pop("Localizacion")[0])
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["codBranch"]
+        item["street_address"] = feature["direccion1"]
+        item["postcode"] = feature["codPostal"]
+
+        if hours := feature.get("Horario"):
+            try:
+                item["opening_hours"] = self.parse_opening_hours(hours[0])
+            except:
+                self.logger.error("Failed to parse opening hours {}".format(hours))
+
+        apply_yes_no(Extras.ATM, item, feature.get("Servicios", {}).get("ATM"))
+        yield item
+
+    def parse_opening_hours(self, rules: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day in DAYS_FULL:
+            open_time, close_time = [
+                rules[f"{day.lower()}{t}"].replace(".", ":").replace("h", ":").strip() for t in ["Open", "Close"]
+            ]
+            if any(hours_text in open_time for hours_text in ["24 Hours", "Open 24H", "Öppet i sa"]):
+                open_time, close_time = ("00:00", "23:59")
+            opening_hours.add_range(day, open_time, close_time)
+        return opening_hours

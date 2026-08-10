@@ -20,7 +20,7 @@ class EasyLocatorSpider(JSONBlobSpider):
 
     dataset_attributes: dict = {"source": "api", "api": "easylocator.net"}
     api_brand_name: str
-    loations_key: str | list[str] = "physical"
+    locations_key: str | list[str] = "physical"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
@@ -28,7 +28,6 @@ class EasyLocatorSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["postcode"] = feature["properties"]["zip_postal_code"]
         yield from self.parse_item(item, feature) or []
 
     def parse_item(self, item: Feature, feature: dict) -> Iterable[Feature]:

@@ -26,6 +26,8 @@ class AudiSpider(JSONBlobSpider):
 
     def request_market_data(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
         for market in response.json()["data"]["marketInfo"]["markets"]:
+            if market["market"] == "A-ATA":
+                continue
             yield JsonRequest(
                 url=self.graphql_url,
                 method="POST",
@@ -34,6 +36,10 @@ class AudiSpider(JSONBlobSpider):
                     "query": "query DealersByMarket($market: Market!) { dealersByMarket(market: $market) { dealers { country name region street houseNumber city dealerId brand services latitude longitude phone fax email url zipCode openingHours { openingHoursNote openingHoursFormatted departments { departmentName departmentOpeningHoursNote id openingHours { id open timeRanges { closeTime openTime } } } } } } }",
                 },
             )
+
+    def pre_process_data(self, feature: dict) -> None:
+        if feature.get("street") == "Test" or feature.get("url") == "test.com":
+            feature["services"] = ["test"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["dealerId"]
@@ -59,6 +65,9 @@ class AudiSpider(JSONBlobSpider):
                 self.logger.warning("Error parsing {} {}".format(feature.get("openingHours"), e))
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
             yield service_item
+
+        if "test" in feature["services"]:
+            self.logger.info("Test data {}".format(feature))
 
     def parse_hours(self, hours: dict, department_ids: list[str]) -> OpeningHours:
         oh = OpeningHours()

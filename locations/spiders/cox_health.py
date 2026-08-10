@@ -1,84 +1,47 @@
 import scrapy
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.dict_parser import DictParser
+
+LOCATION_TYPE_MAP = {
+    "Clinic": Categories.CLINIC,
+    "Emergency Department": Categories.EMERGENCY_WARD,
+    "Facility": None,
+    "Fitness Center": Categories.GYM,
+    "Hospital": Categories.HOSPITAL,
+    "Laboratory": Categories.MEDICAL_LABORATORY,
+    "Pharmacy": Categories.PHARMACY,
+    "Urgent & Walk In": Categories.CLINIC_URGENT,
+}
 
 
 class CoxHealthSpider(scrapy.Spider):
     name = "cox_health"
     item_attributes = {"brand": "CoxHealth", "brand_wikidata": "Q5179867"}
-    allowed_domains = ["coxhealth.com"]
-    start_urls = ("https://www.coxhealth.com/our-hospitals-and-clinics/our-locations/",)
-
-    categories = [
-        ("Hospital", Categories.HOSPITAL),
-        ("Urgent Care", Categories.CLINIC_URGENT),
-        ("Clinic", Categories.CLINIC),
-        ("Surgery", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "surgery"}),
-        ("Pharmacy", Categories.PHARMACY),
-        ("Dialysis", {"healthcare": "dialysis"}),
-        ("Fitness Center", Categories.GYM),
-        ("Center", {"healthcare": "centre"}),
-        ("Gift", Categories.SHOP_GIFT),
-        ("Hotel", Categories.HOTEL),
-        ("Rehab", Categories.REHABILITATION),
-        ("Diabetes", {"healthcare": "centre", "healthcare:speciality": "endocrinology"}),
-        ("Emergency", {"amenity": "hospital", "healthcare": "hospital", "healthcare:speciality": "emergency"}),
-    ]
+    start_urls = ["https://www.coxhealth.com/api/locations/"]
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="card-action"]//a/@href').extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_loc)
+        for location in response.json()["data"]:
+            item = DictParser.parse(location)
+            item["ref"] = location["uid"]
+            item["street"] = None
+            address = location.get("address") or {}
+            item["street_address"] = ", ".join(filter(None, [address.get("street"), address.get("street2")]))
+            item["lat"] = address.get("latitude")
+            item["lon"] = address.get("longitude")
+            item["phone"] = location.get("kyruus_phone")
+            item["website"] = response.urljoin(location["uri"]) if location.get("uri") else None
 
-    def parse_loc(self, response):
-        name = response.xpath('//h2[@class="section-title"]/text()').extract_first()
-        address = response.xpath('//div[@class="default-x-spacing reg-background module-card-new"]//p/text()').extract()
-        x = response.xpath('//div[@class="map"]').extract()
-        xy = x[0].split('"')
-        address = " ".join(address)
-        address = address.replace("\r", "").replace("\n", "")
-        address = " ".join(address.split())
-        address = address.split(" ")
-        x = len(address) - 3
-        add = " ".join(address)
-        address1 = address[:x]
-        address1 = " ".join(address1)
-        city = address[x].replace(",", "")
-        state = address[x + 1]
-        zip = address[x + 2]
-        if city == address[x].replace(",", "") == "West":
-            x = len(address) - 4
-            address1 = address[:x]
-            address1 = " ".join(address1)
-            city = address[x].replace(",", "") + " " + address[x + 1].replace(",", "")
-            state = address[x + 2]
-            zip = address[x + 3]
-        elif city == address[x].replace(",", "") == "Ave.":
-            address1 = "3555 S National Ave"
-            address1 = " ".join(address1)
-            city = "Springfield"
-            state = "MO"
-            zip = "65807"
-        else:
-            pass
-        phone = response.xpath('//a[@class="phone"]/text()').extract()
-        properties = {
-            "ref": add,
-            "name": name,
-            "street_address": address1,
-            "city": city,
-            "state": state,
-            "postcode": zip,
-            "country": "US",
-            "phone": phone[0],
-            "lat": float(xy[5].strip(",")),
-            "lon": float(xy[3].strip(",")),
-        }
+            categorised = False
+            for location_type in location.get("locationType") or []:
+                if cat := LOCATION_TYPE_MAP.get(location_type):
+                    apply_category(cat, item)
+                    categorised = True
+                    break
+                elif location_type not in LOCATION_TYPE_MAP:
+                    self.crawler.stats.inc_value(f"atp/cox_health/unmapped_category/{location_type}")
 
-        for label, cat in self.categories:
-            if label in properties.get("name"):
-                apply_category(cat, properties)
-                break
+            if not categorised and "Gift" in item.get("name", ""):
+                apply_category(Categories.SHOP_GIFT, item)
 
-        yield Feature(**properties)
+            yield item

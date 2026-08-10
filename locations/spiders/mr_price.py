@@ -50,6 +50,6 @@ class MrPriceSpider(Spider):
                 for day in DAYS_FULL:
                     if location.get(day.lower() + "s") is not None:
                         oh.add_ranges_from_string(day + " " + location.get(day.lower() + "s"))
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

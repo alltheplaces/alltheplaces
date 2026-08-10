@@ -25,9 +25,11 @@ class SalvatoreCASpider(CrawlSpider, StructuredDataSpider):
         )
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name")
-        item["lat"], item["lon"] = item["lon"], item["lat"]
-
+        item["branch"] = (
+            response.xpath('//h1[starts-with(text(), "Pizza Salvatoré ")]/text()')
+            .get("")
+            .removeprefix("Pizza Salvatoré ")
+        )
         item["website"] = response.xpath('//link[@rel="canonical"]/@href').get()
         item["extras"]["website:fr"] = response.xpath('//link[@rel="alternate"][@hreflang="fr"]/@href').get()
         item["extras"]["website:en"] = response.xpath('//link[@rel="alternate"][@hreflang="en"]/@href').get()

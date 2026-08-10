@@ -16,7 +16,7 @@ class CitroenSpider(scrapy.Spider):
         "https://www.citroen.nl/apps/atomic/DealersServlet?distance=300&latitude=52.36993&longitude=4.90787&maxResults=40&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvbmV0aGVybGFuZHMvbmw=&searchType=latlong",
         "https://www.citroen.se/apps/atomic/DealersServlet?distance=300&latitude=59.33257&longitude=18.06682&maxResults=40&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvc3dlZGVuL3Nl&searchType=latlong",
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1}
 
     def parse(self, response, **kwargs):
         for store in response.json().get("payload").get("dealers"):

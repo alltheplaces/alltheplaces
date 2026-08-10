@@ -1,35 +1,13 @@
-import scrapy
-
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_DE, OpeningHours, sanitise_day
+from locations.storefinders.uberall import UberallSpider
 
 
-class AldiSudDESpider(scrapy.Spider):
+class AldiSudDESpider(UberallSpider):
     name = "aldi_sud_de"
-    item_attributes = {"name": "Aldi Süd", "brand": "Aldi Süd", "brand_wikidata": "Q41171672"}
-    start_urls = [
-        "https://www.aldi-sued.de/de/de/.get-stores-in-radius.json?latitude=44.721772724757756&longitude=18.98679905523246&radius=2500000"
-    ]
+    item_attributes = {"brand": "Aldi", "brand_wikidata": "Q41171672"}
+    key = "gqNws2nRfBBlQJS9UrA8zV9txngvET"
 
-    def parse(self, response):
-        for store in response.json()["stores"]:
-            item = DictParser.parse(store)
-            item["name"] = None
-            if store["storeType"] == "N":
-                continue  # AldiNordDESpider
-            if item["country"] != "DE":
-                continue
-
-            item["website"] = store.get("url")
-
-            oh = OpeningHours()
-            for rule in store["openUntilSorted"]["openingHours"]:
-                day = sanitise_day(rule["day"], DAYS_DE)
-                if not rule.get("closed", False):
-                    oh.add_range(day, rule["openFormatted"], rule["closeFormatted"])
-            item["opening_hours"] = oh.as_opening_hours()
-
-            apply_category(Categories.SHOP_SUPERMARKET, item)
-
-            yield item
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["name"] = item["phone"] = None
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+        yield item

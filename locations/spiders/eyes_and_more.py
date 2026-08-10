@@ -1,10 +1,14 @@
 import json
+import re
+from typing import Any
 from urllib.parse import urljoin
 
-from scrapy import Selector, Spider
+from scrapy import Request, Selector, Spider
+from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_DE, DAYS_NL, OpeningHours, sanitise_day
+from locations.hours import OpeningHours
 from locations.structured_data_spider import extract_phone
 
 
@@ -18,24 +22,38 @@ class EyesAndMoreSpider(Spider):
         "https://www.eyesandmore.nl/opticiens/",
         # "https://www.eyesandmore.se/",  # 1 store, no store finder ATM
     ]
-    DAYS = DAYS_NL | DAYS_DE
 
-    def parse(self, response, **kwargs):
-        for location in json.loads(response.xpath("//@data-locations").get()):
-            item = DictParser.parse(location)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        seen = set()
+        for blob in response.xpath("//@data-locations").getall():
+            for location in json.loads(blob):
+                if location["id"] in seen:
+                    continue
+                seen.add(location["id"])
+                item = DictParser.parse(location)
+                item["branch"] = re.sub(r"^eyes\s*(\+|and)\s*more\s*", "", item.pop("name"), flags=re.I).strip() or None
 
-            selector = Selector(text=location["infoWindowHtml"])
-            item["addr_full"] = selector.xpath('//div[@class="address"]/text()').get()
-            item["website"] = urljoin(response.url, selector.xpath('//a[@class="button"]/@href').get())
-            extract_phone(item, selector)
+                selector = Selector(text=location["mapMarkerInfoWindowHTML"])
+                item["addr_full"] = selector.xpath('//div[@class="address"]/text()').get()
+                item["website"] = urljoin(
+                    response.url, selector.xpath('//a[@class="address-buttons__link"]/@href').get()
+                )
+                extract_phone(item, selector)
+                apply_category(Categories.SHOP_OPTICIAN, item)
+                yield Request(url=item["website"], callback=self.parse_store, cb_kwargs={"item": item})
 
-            item["opening_hours"] = OpeningHours()
-            for rule in location["formatDetails"]["openingTimes"]:
-                if day := sanitise_day(rule["label"], self.DAYS):
-                    if times := rule["times"]:
-                        if times in ["Geschlossen", "Gesloten"]:
-                            continue
-                        start_time, end_time = times.split(" - ")
-                        item["opening_hours"].add_range(day, start_time, end_time)
-
-            yield item
+    def parse_store(self, response: Response, item: dict) -> Any:
+        for ld_data in response.xpath('//script[@type="application/ld+json"]/text()').getall():
+            for entry in json.loads(ld_data):
+                if entry.get("@type") != "Store":
+                    continue
+                if address := entry.get("address"):
+                    item.pop("addr_full", None)
+                    item["street_address"] = address.get("streetAddress")
+                    item["city"] = address.get("addressLocality")
+                    item["postcode"] = address.get("postalCode")
+                if specs := entry.get("openingHoursSpecification"):
+                    item["opening_hours"] = OpeningHours()
+                    for spec in specs:
+                        item["opening_hours"].add_range(spec["dayOfWeek"], spec["opens"], spec["closes"])
+        yield item

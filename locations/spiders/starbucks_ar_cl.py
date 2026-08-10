@@ -42,7 +42,7 @@ class StarbucksARCLSpider(Spider):
                 day = datetime.strptime(rule.get("date").split(".")[0], "%Y-%m-%dT%H:%M:%S").weekday()
                 if rule.get("openTime") and rule.get("closeTime"):
                     oh.add_range(DAYS[day], rule["openTime"], rule["closeTime"], "%H:%M:%S")
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
             item["website"] = response.url.replace("/api/getStores", "/stores")
 
             if services := store.get("features", {}).get("feature"):

@@ -1,20 +1,22 @@
+import json
 from typing import Any
 
 import chompjs
-from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.geo import city_locations
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SantanderBRSpider(Spider):
+class SantanderBRSpider(PlaywrightSpider):
     name = "santander_br"
-    item_attributes = {"brand": "Banco Santander", "brand_wikidata": "Q2882087"}
+    item_attributes = {"brand": "Banco Santander", "brand_wikidata": "Q6496310"}
     start_urls = ["https://www.santander.com.br/agencias"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         app_key = chompjs.parse_js_object(
@@ -28,7 +30,7 @@ class SantanderBRSpider(Spider):
             )
 
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
-        if locations := response.json().get("agencias"):
+        if locations := json.loads(response.xpath("//pre/text()").get()).get("agencias"):
             for location in locations:
                 item = Feature()
                 item["ref"] = location.get("codigo")

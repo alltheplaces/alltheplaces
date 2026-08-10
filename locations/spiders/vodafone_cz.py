@@ -34,5 +34,5 @@ class VodafoneCZSpider(scrapy.Spider):
             for key, values in location["opening_hours"].items():
                 for value in values:
                     oh.add_range(value["day"], value["from"], value["till"])
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
             yield item

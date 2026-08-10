@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -21,4 +22,6 @@ class McdonaldsJPSpider(scrapy.Spider):
                 "lon": data["longitude"],
             }
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.FAST_FOOD, item)
+            yield item

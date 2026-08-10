@@ -26,12 +26,12 @@ class YardHouseSpider(Spider):
             item = DictParser.parse(location["contactDetail"]["address"])
             item["ref"] = location["restaurantNumber"]
             item["branch"] = location["restaurantName"]
-            item["phone"] = location["contactDetail"]["phoneDetail"][0]["phoneNumber"]
+            item["phone"] = location["contactDetail"]["phoneDetail"][0].get("phoneNumber")
             item["street_address"] = merge_address_lines(
                 [location["contactDetail"]["address"]["street1"], location["contactDetail"]["address"].get("street2")]
             )
             item["country"] = location["contactDetail"]["address"]["country"]
-            item["extras"]["start_date"] = location["restaurantOpenDate"]
+            item["extras"]["start_date"] = location.get("restaurantOpenDate")
             # Opening hours are only today's
 
             apply_yes_no(

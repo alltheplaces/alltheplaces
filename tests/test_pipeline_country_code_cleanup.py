@@ -6,7 +6,7 @@ from locations.items import Feature
 from locations.pipelines.country_code_clean_up import CountryCodeCleanUpPipeline
 
 
-def get_objects(spider_name: str) -> (Feature, CountryCodeCleanUpPipeline, Spider):
+def get_objects(spider_name: str) -> tuple[Feature, CountryCodeCleanUpPipeline, Spider]:
     crawler = get_crawler(DefaultSpider)
     crawler.spider = crawler._create_spider()
     crawler.spider.name = spider_name

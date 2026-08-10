@@ -6,7 +6,6 @@ from locations.hours import OpeningHours
 from locations.items import set_closed
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.bjs_wholesale import BjsWholesaleSpider
-from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.walgreens import WalgreensSpider
 
 
@@ -23,7 +22,6 @@ class TdBankSpider(JSONBlobSpider):
 
     LOCATED_IN_MAPPINGS = [
         (["WALGREENS"], WalgreensSpider.WALGREENS),
-        (["RITE AID", "RITEAID"], RiteAidUSSpider.item_attributes),
         (["BJ'S", "BJS"], BjsWholesaleSpider.item_attributes),
     ]
 

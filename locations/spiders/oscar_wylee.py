@@ -25,17 +25,19 @@ class OscarWyleeSpider(CrawlSpider):
     ]
 
     def parse(self, response):
+        addr_full = unescape(
+            re.sub(r"\s+", " ", " ".join(filter(None, response.xpath('//p[@class="short-content"]//text()').getall())))
+        ).strip()
+        # Skip locations that are closed/moving (address field contains a message instead)
+        if any(phrase in addr_full for phrase in ["is moving", "is closed", "will reopen", "has moved"]):
+            return
         properties = {
             "ref": response.url,
             "name": response.xpath('//h1[@class="static-location-header"]/text()')
             .get()
             .replace("Optometrist", "")
             .strip(),
-            "addr_full": unescape(
-                re.sub(
-                    r"\s+", " ", " ".join(filter(None, response.xpath('//p[@class="short-content"]//text()').getall()))
-                )
-            ).strip(),
+            "addr_full": addr_full,
             "website": response.url,
         }
         if ".com.au" in response.url:

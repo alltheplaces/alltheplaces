@@ -15,5 +15,6 @@ class UniformDestinationUSSpider(StorepointSpider):
 
         item["branch"] = location.get("description")
         item["addr_full"] = location.get("streetaddress")
+        item["website"] = None
 
         yield item

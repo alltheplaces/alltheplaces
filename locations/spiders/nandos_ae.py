@@ -31,6 +31,6 @@ class NandosAESpider(Spider):
                 oh = OpeningHours()
                 for day in hours:
                     oh.add_range(DAYS_EN[day["openDay"].capitalize()], day.get("openTime"), day.get("closeTime"))
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception:
                 self.crawler.stats.inc_value("failed_to_parse_hours")
