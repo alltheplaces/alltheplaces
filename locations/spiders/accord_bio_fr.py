@@ -38,7 +38,7 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
 
         # Look for a street name in the address
         street_match = re.match(
-            r'(?P<housenumber>\d[\w\s-]*?)?\s*,?\s*(?P<street>(?:route|impasse|rue|boulevard|allée|avenue|place)\b[^,]*)',
+            r"(?P<housenumber>\d[\w\s-]*?)?\s*,?\s*(?P<street>(?:route|impasse|rue|boulevard|allée|avenue|place)\b[^,]*)",
             item["street_address"] or "",
             flags=re.IGNORECASE,
         )
@@ -51,7 +51,7 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
             # Wrong email detected because none was given, let's remove it
             item["email"] = ""
 
-        if item["facebook"] == "https://www.facebook.com/accordbio":
+        if "facebook.com/accordbio" in item["facebook"]:
             # Wrong fb page detected because none was given, let's remove it
             item["facebook"] = ""
 
