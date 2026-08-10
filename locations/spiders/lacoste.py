@@ -47,5 +47,4 @@ class LacosteSpider(YextAnswersSpider):
         path = location["slug"].strip("/").removeprefix("us/stores/")
         market = LOCALISED_MARKETS.get(item["country"], "us")
         item["website"] = f"https://www.lacoste.com/{market}/stores/{path}"
-        item["extras"]["@source_uri"] = item["website"]
         yield item
