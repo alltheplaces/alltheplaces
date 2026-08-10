@@ -18,7 +18,8 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if "épicerie" in ld_data["description"] or "proximité" in ld_data["description"]:
+        description = (ld_data.get("description") or "").casefold()
+        if "épicerie" in description or "proximité" in description:
             # Deduce the category from the keywords used
             apply_category(Categories.SHOP_CONVENIENCE, item)
         else:
@@ -54,6 +55,6 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
             item["facebook"] = ""
 
         # The delivery information is only given in the description
-        apply_yes_no(Extras.DELIVERY, item, "livraison" in ld_data["description"])
+        apply_yes_no(Extras.DELIVERY, item, "livraison" in description)
 
         yield item
