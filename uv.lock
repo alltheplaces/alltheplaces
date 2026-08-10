@@ -246,19 +246,20 @@ wheels = [
 
 [[package]]
 name = "awscli"
-version = "1.45.64"
+version = "1.46.0"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
-    { name = "botocore" },
     { name = "colorama" },
     { name = "docutils" },
+    { name = "jmespath" },
+    { name = "python-dateutil" },
     { name = "pyyaml" },
     { name = "rsa" },
-    { name = "s3transfer" },
+    { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/be/af/a83d35fe817b60aacf973cce7578a755987e430c3ac352241846edc77bdb/awscli-1.45.64.tar.gz", hash = "sha256:ec8517a5e62eb1baefef77d3dbcfb67bb1e85b15c86e3f2a18939a7d31515b30", size = 1903081, upload-time = "2026-08-04T20:12:39.093Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d9/d7/74b718d668537d85ecef9f908f951827a95f7b1eb32f254bf3b1813edf9e/awscli-1.46.0.tar.gz", hash = "sha256:5c1bd660bd3f967f5754a2267fb54e81edf379374faa27973671561888d39bf6", size = 16777783, upload-time = "2026-08-05T05:23:24.302Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/77/3282fae24e10501a5fb4db25208f7ac81b2b430c1d2127729bd2e3c4a5ec/awscli-1.45.64-py3-none-any.whl", hash = "sha256:9409c2e1d11f53f7a0d557d10a150818f93fb296e7f82c4bacb92e514822e5f7", size = 4667102, upload-time = "2026-08-04T20:12:35.961Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/13/775b5b79cb686dc9f9133f1f73079102e312866500556c1b604f72e7b68b/awscli-1.46.0-py3-none-any.whl", hash = "sha256:0aa98754c23c7eff4c7d970cb619670dc9b0214ee451bb3fe88e74e4a9a03a90", size = 20231511, upload-time = "2026-08-05T05:23:20.803Z" },
 ]
 
 [[package]]
