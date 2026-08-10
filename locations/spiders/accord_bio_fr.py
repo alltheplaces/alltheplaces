@@ -37,7 +37,7 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
             item["phone"] = re.sub(r"^(0|\+33 )", "+33", item["phone"].replace("%20", " "))
 
         # Look for a street name in the address
-        street_match = re.match(
+        street_match = re.search(
             r"(?P<housenumber>\d[\w\s-]*?)?\s*,?\s*(?P<street>(?:route|impasse|rue|boulevard|allée|avenue|place)\b[^,]*)",
             item["street_address"] or "",
             flags=re.IGNORECASE,
