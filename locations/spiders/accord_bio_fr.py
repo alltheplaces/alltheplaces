@@ -49,11 +49,11 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
 
         if item["email"] == "contact@accord-bio.fr":
             # Wrong email detected because none was given, let's remove it
-            item["email"] = ""
+            item.pop("email")
 
         if "facebook.com/accordbio" in item["facebook"]:
             # Wrong fb page detected because none was given, let's remove it
-            item["facebook"] = ""
+            item.pop("facebook")
 
         # The delivery information is only given in the description
         apply_yes_no(Extras.DELIVERY, item, "livraison" in description)
