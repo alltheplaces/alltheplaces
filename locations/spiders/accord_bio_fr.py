@@ -37,14 +37,15 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
             item["phone"] = re.sub(r"^(0|\+33 )", "+33", item["phone"].replace("%20", " "))
 
         # Look for a street name in the address
-        streetSearch = re.search(
-            r"([\w\s]*)((?:route|impasse|rue|boulevard|allée|avenue|place)[^,]*)",
-            item["street_address"],
+        street_match = re.match(
+            r'(?P<housenumber>\d[\w\s-]*?)?\s*,?\s*(?P<street>(?:route|impasse|rue|boulevard|allée|avenue|place)\b[^,]*)',
+            item["street_address"] or "",
             flags=re.IGNORECASE,
         )
-        if streetSearch is not None:
-            item["housenumber"] = streetSearch[1].strip()
-            item["street"] = streetSearch[2].strip()
+        if street_match is not None:
+            if housenumber := street_match["housenumber"].strip():
+                item["housenumber"] = housenumber
+            item["street"] = street_match["street"].strip()
 
         if item["email"] == "contact@accord-bio.fr":
             # Wrong email detected because none was given, let's remove it
