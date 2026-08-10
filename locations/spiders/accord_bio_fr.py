@@ -43,8 +43,8 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
             flags=re.IGNORECASE,
         )
         if street_match is not None:
-            if housenumber := street_match["housenumber"].strip():
-                item["housenumber"] = housenumber
+            if street_match.group("housenumber") is not None:
+                item["housenumber"] = street_match["housenumber"].strip()
             item["street"] = street_match["street"].strip()
 
         if item["email"] == "contact@accord-bio.fr":
