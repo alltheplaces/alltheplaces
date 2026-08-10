@@ -3,6 +3,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 
@@ -10,6 +11,7 @@ from locations.geo import city_locations
 class SamsClubMXSpider(Spider):
     name = "sams_club_mx"
     item_attributes = {"brand": "Sam's Club", "brand_wikidata": "Q1972120"}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("MX", 55000):
@@ -51,4 +53,5 @@ class SamsClubMXSpider(Spider):
             for location in data["nodes"]:
                 item = DictParser.parse(location)
                 item["branch"] = item.pop("name", "").removeprefix("Sam's Club ")
+                apply_category(Categories.SHOP_WHOLESALE, item)
                 yield item
