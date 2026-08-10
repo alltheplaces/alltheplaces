@@ -1,5 +1,6 @@
 from typing import Iterable
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.yext_answers import YextAnswersSpider
 
@@ -34,6 +35,7 @@ class LacosteSpider(YextAnswersSpider):
     locale = "en-US"
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_CLOTHES, item)
         # c_liveOnPages marks stores that have no page on lacoste.com; both their
         # websiteUrl and their slug point at URLs that do not exist.
         if not location.get("c_liveOnPages"):
