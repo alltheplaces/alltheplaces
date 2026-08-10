@@ -8,6 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.structured_data_spider import extract_facebook
 
 
 class HteaoUSSpider(SitemapSpider):
@@ -31,6 +32,7 @@ class HteaoUSSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         item["branch"] = item.pop("name", None)
         item["street_address"] = merge_address_lines([location.get("address1"), location.get("address2")])
+        extract_facebook(item, response)
 
         item["opening_hours"] = OpeningHours()
         for row in response.xpath('//table[contains(@class, "wpsl-opening-hours")]/tr'):
