@@ -24,6 +24,4 @@ class TorchysTacosUSSpider(SitemapSpider, StructuredDataSpider):
         source_url = next(iter(response.meta.get("redirect_urls", ())), response.url)
         item["ref"] = source_url.removesuffix("/order").rsplit("/", 1)[-1]
         apply_category(Categories.FAST_FOOD, item)
-        apply_category({"cuisine": "tex-mex"}, item)
-        apply_yes_no(Extras.TAKEAWAY, item, True)
         yield item
