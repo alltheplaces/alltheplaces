@@ -22,7 +22,7 @@ class PutkaPLSpider(StructuredDataSpider):
             yield response.follow(bakery["details"]["bakery_link"], callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
-        item["branch"] = item.pop("name")
+        item["name"] = None
         item["website"] = response.url
         apply_category(Categories.SHOP_BAKERY, item)
         yield item
