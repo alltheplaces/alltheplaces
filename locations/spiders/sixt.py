@@ -3,6 +3,7 @@ import re
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import apply_category, Categories
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
@@ -25,7 +26,7 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
         item["country"] = country
 
         if m := re.match(r"^Car hire (.+)\|? (?:SIXT rent a car|SIXT Car Rental|SIXT)$", item["name"], re.IGNORECASE):
-            item["branch"] = m.group(1)
+            item["branch"] = m.group(1).strip(" |")
             item["name"] = None
 
         if (oh := item.get("opening_hours")) is not None:
@@ -39,5 +40,7 @@ class SixtSpider(SitemapSpider, StructuredDataSpider):
                 if isinstance(rule, dict) and rule.get("opens") == rule.get("closes") == "00:00":
                     for day in rule.get("dayOfWeek") or []:
                         oh.add_range(day, "00:00", "24:00")
+
+        apply_category(Categories.CAR_RENTAL, item)
 
         yield item
