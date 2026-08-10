@@ -39,14 +39,15 @@ class WienerschnitzelUSSpider(StructuredDataSpider):
             yield Request(
                 url=place["location"]["redirect_custom_link"],
                 callback=self.parse_sd,
-                meta={"lat": place["location"]["lat"], "lon": place["location"]["lng"]},
+                meta={"place": place},
             )
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
         item["ref"] = response.xpath('//span[@class="ws-store-hero__storeid"]/text()').re_first(r"Store ID:\s*(\S+)")
         item["name"] = None
-        item["lat"] = response.meta["lat"]
-        item["lon"] = response.meta["lon"]
+        item["lat"] = response.meta["place"]["location"]["lat"]
+        item["lon"] = response.meta["place"]["location"]["lng"]
+        item["addr_full"] = response.meta["place"]["address"]
 
         item["opening_hours"] = OpeningHours()
         for rule in response.xpath('//div[@class="location-hours"]//meta[@itemprop="openingHours"]/@content').getall():
