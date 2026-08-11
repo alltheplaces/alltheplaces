@@ -33,17 +33,6 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
             # Format phone number with French prefix
             item["phone"] = re.sub(r"^(0|\+33 )", "+33", item["phone"].replace("%20", " "))
 
-        # Look for a street name in the address
-        street_match = re.search(
-            r"(?P<housenumber>\d[\w\s-]*?)?\s*,?\s*(?P<street>(?:route|impasse|rue|boulevard|allée|avenue|place)\b[^,]*)",
-            item["street_address"] or "",
-            flags=re.IGNORECASE,
-        )
-        if street_match is not None:
-            if street_match.group("housenumber") is not None:
-                item["housenumber"] = street_match["housenumber"].strip()
-            item["street"] = street_match["street"].strip()
-
         if item["email"] == "contact@accord-bio.fr":
             # Wrong email detected because none was given, let's remove it
             item.pop("email")
