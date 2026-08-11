@@ -1,10 +1,8 @@
-from collections import Counter
 from typing import Any, Iterable
 
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.country_utils import CountryUtils
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
