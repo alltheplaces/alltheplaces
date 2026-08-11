@@ -1,5 +1,5 @@
 from typing import Iterable
- 
+
 from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
