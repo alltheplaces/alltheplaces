@@ -32,7 +32,9 @@ class EconoFoodsZASpider(JSONBlobSpider):
 
         item["opening_hours"] = OpeningHours()
         for day, times in (feature.get("hours") or {}).items():
-            if times and "-" in times:
+            if times == "Closed":
+                item["opening_hours"].set_closed(DAYS_EN[day])
+            elif times and "-" in times:
                 start, end = times.split("-", 1)
                 item["opening_hours"].add_range(DAYS_EN[day], start.strip(), end.strip())
 
