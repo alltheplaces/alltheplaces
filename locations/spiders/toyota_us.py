@@ -24,15 +24,17 @@ class ToyotaUSSpider(SitemapSpider, JSONBlobSpider):
         for entry in entries:
             if match := re.search(self.zipcode_match, entry["loc"]):
                 """
-                Dealer location sitemap URLs do not provide coordinates; therefore, API is used.
-                The resultsMax=1 parameter limits each request to a single location, preventing duplicate results.
+                Dealer location sitemap URLs do not provide coordinates, so the API is used instead.
+                The resultsMax=10 parameter ensures that multiple dealer locations sharing the same ZIP code are retrieved.
                 """
                 yield {
-                    "loc": f"https://dealers.prod.webservices.toyota.com/v1/dealers?resultsMax=1&zipcode={match.group(1)}"
+                    "loc": f"https://dealers.prod.webservices.toyota.com/v1/dealers?resultsMax=10&zipcode={match.group(1)}",
                 }
 
-    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+    def pre_process_data(self, feature: dict) -> None:
         feature.pop("region", None)
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["dealerId"]
 
         # All locations appear to offer both sales and service.
