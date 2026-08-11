@@ -1,10 +1,20 @@
-from locations.storefinders.where2getit import Where2GetItSpider
+from typing import Iterable
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class MuchoBurritoSpider(Where2GetItSpider):
+class MuchoBurritoSpider(YextAnswersSpider):
     name = "mucho_burrito"
-    item_attributes = {
-        "brand_wikidata": "Q65148332",
-        "brand": "Mucho Burrito",
-    }
-    api_key = "F18F9C0C-3871-11EE-9ED6-49504A66C4B2"
+    item_attributes = {"brand": "Mucho Burrito", "brand_wikidata": "Q65148332"}
+    api_key = "207b6ad55fc7f257ee5c6e77d1107ec3"
+    experience_key = "locator-search"
+    feature_type = "location"
+    locale = "en-CA"
+
+    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
+        if "Head Office" in (location.get("name") or ""):
+            return
+        apply_category(Categories.FAST_FOOD, item)
+        yield item
