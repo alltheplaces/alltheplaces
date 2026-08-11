@@ -26,7 +26,7 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.SHOP_SUPERMARKET, item)
 
         # All shops from this network are organic only
-        apply_category({"organic": "only"}, item)
+        item["extras"]["organic"] = "only"
 
         if item["name"].isupper():
             # Lower the upper case names
