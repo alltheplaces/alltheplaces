@@ -8,12 +8,9 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
     name = "accord_bio_fr"
-    item_attributes = {"brand": "Accord Bio", "brand_wikidata": "Q140930088"}
     allowed_domains = ["accord-bio.fr"]
     sitemap_urls = ["https://www.accord-bio.fr/robots.txt"]
-    sitemap_rules = [
-        (r"magasin-bio/[^/]+/[^/]+/", "parse_sd"),
-    ]
+    sitemap_rules = [(r"magasin-bio/[^/]+/[^/]+/", "parse_sd")]
     wanted_types = ["LocalBusiness"]
     drop_attributes = {"image"}
 
