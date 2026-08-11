@@ -4,7 +4,6 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
 
 HAMLEYS_SHARED_ATTRIBUTES = {"brand": "Hamleys", "brand_wikidata": "Q60299"}
 
@@ -19,7 +18,8 @@ class HamleysSpider(CrawlSpider):
     # TODO: global stores: https://www.hamleys.com/our-stores-global but only addresses and no other info
     item_attributes = HAMLEYS_SHARED_ATTRIBUTES
     rules = [Rule(LinkExtractor(allow="/stores/"), callback="parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     def parse(self, response):
         if location_js := response.xpath("//div/@data-locations").get():
