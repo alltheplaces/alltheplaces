@@ -60,17 +60,17 @@ class ToyotaHawaiiTerritoriesUSSpider(Spider):
                     item["website"] = parse_contacts(socials, "Website")
                     item["email"] = parse_contacts(socials, "Email")
 
-                self.parse_hours(item, feature["hoursOfOperation"][0]["daysOfWeek"])
-
                 if department_name == "Main Dealer":
-                    yield self.build_shop(item)
+                    yield self.build_shop(feature, item)
 
                 elif department_name == "Service":
-                    yield self.build_service(item)
+                    yield self.build_service(feature, item)
+
+                elif department_name == "Parts":
+                    yield self.build_parts(feature, item)
 
     def parse_hawaii(self, response: Response, **kwargs: Any) -> Any:
-        dealers = response.xpath("//label[@class='mb-4 radioLabel']")
-        for dealer in dealers:
+        for dealer in response.xpath("//label[@class='mb-4 radioLabel']"):
             item = Feature()
             item["ref"] = dealer.xpath(".//input/@value").get()
             item["name"] = dealer.xpath(".//input/@data-storename").get()
@@ -79,30 +79,52 @@ class ToyotaHawaiiTerritoriesUSSpider(Spider):
             item["addr_full"] = dealer.xpath(".//a[contains(@class, 'dealer-info')][1]/text()").get()
             item["phone"] = dealer.xpath(".//a[contains(@class, 'dealer-info')][2]/text()").get()
             item["website"] = dealer.xpath(".//span[@class='store-links']/a/@href").get()
-            yield self.build_shop(item)
+            # All locations appear to offer both sales and service.
+            shop_item = deepcopy(item)
+            shop_item["ref"] = f"{item['ref']}-SHOP"
+            apply_category(Categories.SHOP_CAR, shop_item)
+            yield shop_item
+            service_item = deepcopy(item)
+            service_item["ref"] = f"{item['ref']}-SERVICE"
+            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            yield service_item
 
-    def build_shop(self, item: Feature) -> Feature:
+    def build_shop(self, feature: dict, item: Feature) -> Feature:
         shop_item = deepcopy(item)
         shop_item["ref"] = f"{item['ref']}-SHOP"
+        self.parse_hours(shop_item, feature, "Sales")
         apply_category(Categories.SHOP_CAR, shop_item)
         return shop_item
 
-    def build_service(self, item: Feature) -> Feature:
+    def build_service(self, feature: dict, item: Feature) -> Feature:
         service_item = deepcopy(item)
         service_item["ref"] = f"{item['ref']}-SERVICE"
+        self.parse_hours(service_item, feature, "Service")
         apply_category(Categories.SHOP_CAR_REPAIR, service_item)
         return service_item
 
-    def parse_hours(self, item, hours_type):
+    def build_parts(self, feature: dict, item: Feature) -> Feature:
+        parts_item = deepcopy(item)
+        parts_item["ref"] = f"{item['ref']}-PARTS"
+        self.parse_hours(parts_item, feature, "Parts")
+        apply_category(Categories.SHOP_CAR_PARTS, parts_item)
+        return parts_item
+
+    def parse_hours(self, item: Feature, feature: dict, location_type: str) -> None:
         try:
             oh = OpeningHours()
-            for day_times in hours_type:
+            hours_list = []
+            for hours_type in feature.get("hoursOfOperation", []):
+                if hours_type["hoursTypeCode"] == location_type:
+                    hours_list = hours_type["daysOfWeek"]
+                    break
+            for day_times in hours_list:
                 if "availabilityStartTimeMeasure" in day_times:
                     units_start = day_times["availabilityStartTimeMeasure"]["unitCode"]
                     units_end = day_times["availabilityEndTimeMeasure"]["unitCode"]
                     if units_start == "MINUTE" and units_end == "MINUTE":
                         oh.add_range(
-                            day_times["dayOfWeekCode"][:2],
+                            day_times["dayOfWeekCode"],
                             str(timedelta(minutes=day_times["availabilityStartTimeMeasure"]["value"])),
                             str(timedelta(minutes=day_times["availabilityEndTimeMeasure"]["value"])),
                             time_format="%H:%M:%S",
