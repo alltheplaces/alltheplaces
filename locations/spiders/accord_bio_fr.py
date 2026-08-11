@@ -1,5 +1,3 @@
-import re
-
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -31,7 +29,7 @@ class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
 
         if item["phone"] is not None:
             # Format phone number with French prefix
-            item["phone"] = re.sub(r"^(0|\+33 )", "+33", item["phone"].replace("%20", " "))
+            item["phone"] = item["phone"].replace("%20", " ")
 
         if item["email"] == "contact@accord-bio.fr":
             # Wrong email detected because none was given, let's remove it
