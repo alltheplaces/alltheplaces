@@ -5,8 +5,8 @@ from locations.items import Feature
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class MuchoBurritoSpider(YextAnswersSpider):
-    name = "mucho_burrito"
+class MuchoBurritoCASpider(YextAnswersSpider):
+    name = "mucho_burrito_ca"
     item_attributes = {"brand": "Mucho Burrito", "brand_wikidata": "Q65148332"}
     api_key = "207b6ad55fc7f257ee5c6e77d1107ec3"
     experience_key = "locator-search"
