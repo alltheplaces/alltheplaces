@@ -1,34 +1,35 @@
 import json
-from typing import Any
+import re
+from typing import Any, AsyncIterator, Iterable
 
-from requests import Response
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
+
+STOREFRONTS = {
+    "cobs-ca-live.myshopify.com": "ecd008b16986e30af1fa2964c12a9955",
+    "cobs-us-live.myshopify.com": "ccbe49c160d1245033d1483b1a2c2c6f",
+}
 
 
 class CobsBreadSpider(Spider):
     name = "cobs_bread"
     item_attributes = {"brand": "COBS Bread", "brand_wikidata": "Q116771375"}
-    start_urls = [
-        "https://www.cobsbread.com/pages/bakeries/leaside-bakery",
-        "https://usa.cobsbread.com/pages/store-locator",
-    ]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        token = response.xpath("//@data-storefront-access-token").get()
-        domain = response.xpath("//@data-shop-domain").get()
-        version = response.xpath("//@data-storefront-api-version").get()
-        yield JsonRequest(
-            url=f"https://{domain}/api/{version}/graphql.json",
-            headers={
-                # 'Content-Type': 'application/json',
-                "X-Shopify-Storefront-Access-Token": token,
-            },
-            data={
-                "query": """
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for domain, token in STOREFRONTS.items():
+            yield JsonRequest(
+                url=f"https://{domain}/api/2025-10/graphql.json",
+                headers={
+                    "X-Shopify-Storefront-Access-Token": token,
+                },
+                data={
+                    "query": """
                 query getLocations($first: Int!, $after: String) {
                   locations(first: $first, after: $after) {
                     pageInfo {
@@ -76,34 +77,31 @@ class CobsBreadSpider(Spider):
                   }
                 }
             """,
-                "variables": {"first": 250},
-            },
-            callback=self.parse_details,
-        )
+                    "variables": {"first": 250},
+                },
+                callback=self.parse_details,
+            )
 
-    def parse_details(self, response, **kwargs):
+    def parse_details(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        website_root = "https://usa.cobsbread.com" if "-us-" in response.url else "https://www.cobsbread.com"
         for location in response.json()["data"]["locations"]["edges"]:
             location.update(location.pop("node"))
             location.update(location.pop("address"))
             item = DictParser.parse(location)
-            item["addr_full"] = ",".join(location["formatted"])
-            oh = OpeningHours()
-            for details in location["metafields"]:
-                if details is not None:
-                    if details.get("key") == "public_store_name":
-                        item["name"] = details["value"]
-                    elif details.get("key") == "opening_hours":
-                        opening_hours_data = json.loads(details["value"])
-                        for day, time in opening_hours_data.items():
-                            open_time = time["open"]
-                            close_time = time["close"]
-                            if open_time != "null":
-                                oh.add_range(day, open_time, close_time)
-                    else:
-                        continue
-            item["opening_hours"] = oh
-            if "-us-" in response.url:
-                item["website"] = "https://usa.cobsbread.com/pages/bakeries/" + item["name"].replace(" ", "-")
-            elif "-ca-" in response.url:
-                item["website"] = "https://www.cobsbread.com/pages/bakeries/" + item["name"].replace(" ", "-")
+            item.pop("name")
+            item["addr_full"] = merge_address_lines(location["formatted"])
+
+            # Unrequested metafields are returned as null
+            metafields = {field["key"]: field["value"] for field in location["metafields"] if field}
+            store_name = metafields["public_store_name"]
+            item["branch"] = store_name.removesuffix(" Bakery")
+
+            # Shopify page handles drop apostrophes and collapse other punctuation into hyphens
+            handle = re.sub(r"[^a-z0-9]+", "-", store_name.replace("'", "").lower())
+            item["website"] = f"{website_root}/pages/bakeries/{handle}"
+
+            item["opening_hours"] = OpeningHours()
+            for day, times in json.loads(metafields["opening_hours"]).items():
+                item["opening_hours"].add_range(day, times["open"], times["close"])
+            apply_category(Categories.SHOP_BAKERY, item)
             yield item
