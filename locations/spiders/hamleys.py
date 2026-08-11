@@ -2,6 +2,7 @@ from chompjs import parse_js_object
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -27,7 +28,7 @@ class HamleysSpider(CrawlSpider):
         else:
             return
         item = DictParser.parse(location)
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").removeprefix("Hamleys ")
         item["street_address"] = item.pop("addr_full")
         item["website"] = response.url
         item["ref"] = item["website"]
@@ -37,5 +38,7 @@ class HamleysSpider(CrawlSpider):
 
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(response.xpath('string(.//ul[@class="opening-hours"])').get())
+
+        apply_category(Categories.SHOP_TOYS, item)
 
         yield item
