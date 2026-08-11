@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, AsyncIterator, Iterable
+from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
@@ -16,30 +16,14 @@ STOREFRONTS = {
     "cobs-us-live.myshopify.com": "ccbe49c160d1245033d1483b1a2c2c6f",
 }
 
-
-class CobsBreadSpider(Spider):
-    name = "cobs_bread"
-    item_attributes = {"brand": "COBS Bread", "brand_wikidata": "Q116771375"}
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for domain, token in STOREFRONTS.items():
-            yield JsonRequest(
-                url=f"https://{domain}/api/2025-10/graphql.json",
-                headers={
-                    "X-Shopify-Storefront-Access-Token": token,
-                },
-                data={
-                    "query": """
+LOCATIONS_QUERY = """
                 query getLocations($first: Int!, $after: String) {
                   locations(first: $first, after: $after) {
                     pageInfo {
                       hasNextPage
-                      hasPreviousPage
-                      startCursor
                       endCursor
                     }
                     edges {
-                      cursor
                       node {
                         id
                         name
@@ -76,15 +60,38 @@ class CobsBreadSpider(Spider):
                     }
                   }
                 }
-            """,
-                    "variables": {"first": 250},
-                },
-                callback=self.parse_details,
-            )
+            """
 
-    def parse_details(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+
+class CobsBreadSpider(Spider):
+    name = "cobs_bread"
+    item_attributes = {"brand": "COBS Bread", "brand_wikidata": "Q116771375"}
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for domain, token in STOREFRONTS.items():
+            yield self.query_locations(domain, token)
+
+    def query_locations(self, domain: str, token: str, after: str | None = None) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://{domain}/api/2025-10/graphql.json",
+            headers={
+                "X-Shopify-Storefront-Access-Token": token,
+            },
+            data={
+                "query": LOCATIONS_QUERY,
+                "variables": {"first": 250, "after": after},
+            },
+            callback=self.parse_details,
+            cb_kwargs={"domain": domain, "token": token},
+        )
+
+    def parse_details(self, response: Response, domain: str, token: str) -> Iterable[Feature | JsonRequest]:
+        locations = response.json()["data"]["locations"]
+        if locations["pageInfo"]["hasNextPage"]:
+            yield self.query_locations(domain, token, locations["pageInfo"]["endCursor"])
+
         website_root = "https://usa.cobsbread.com" if "-us-" in response.url else "https://www.cobsbread.com"
-        for location in response.json()["data"]["locations"]["edges"]:
+        for location in locations["edges"]:
             location.update(location.pop("node"))
             location.update(location.pop("address"))
             item = DictParser.parse(location)
