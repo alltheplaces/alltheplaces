@@ -16,5 +16,6 @@ class MuchoBurritoSpider(YextAnswersSpider):
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         if "Head Office" in (location.get("name") or ""):
             return
+        item["name"] = None
         apply_category(Categories.FAST_FOOD, item)
         yield item
