@@ -3,7 +3,7 @@ from typing import AsyncIterator
 from scrapy.http import JsonRequest
 
 from locations.geo import city_locations
-from locations.spiders.starbucks_us import HEADERS, STORELOCATOR, StarbucksUSSpider
+from locations.spiders.starbucks_us import API_SERVER_REACH_MILES, HEADERS, STORELOCATOR, StarbucksUSSpider
 
 
 class StarbucksPESpider(StarbucksUSSpider):
@@ -16,5 +16,5 @@ class StarbucksPESpider(StarbucksUSSpider):
             yield JsonRequest(
                 url=STORELOCATOR.format(city["latitude"], city["longitude"]),
                 headers=HEADERS,
-                meta={"distance": 1},
+                meta={"half_width_miles": API_SERVER_REACH_MILES, "depth_level": 0},
             )
