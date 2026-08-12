@@ -1,70 +1,50 @@
-from typing import AsyncIterator
+import json
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.geo import point_locations
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class TractorSupplySpider(Spider):
+class TractorSupplySpider(SitemapSpider):
     name = "tractor_supply"
     item_attributes = {"brand": "Tractor Supply Company", "brand_wikidata": "Q15109925"}
-    allowed_domains = ["tractorsupply.com"]
-    custom_settings = {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "ROBOTSTXT_OBEY": False,
-        "DOWNLOAD_DELAY": 1.5,
-        "USER_AGENT": BROWSER_DEFAULT,
-    }
+    sitemap_urls = ["https://www.tractorsupply.com/sitemap_stores.xml"]
+    sitemap_rules = [(r"/tsc/store_.+_(\d+)$", "parse")]
+    requires_proxy = "US"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    async def start(self) -> AsyncIterator[Request]:
-        base_url = "https://www.tractorsupply.com/wcs/resources/store/10151/zipcode/fetchstoredetails?responseFormat=json&latitude={lat}&longitude={lng}"
-
-        for lat, lon in point_locations("us_centroids_25mile_radius.csv"):
-            url = base_url.format(lat=lat, lng=lon)
-            yield Request(url=url, callback=self.parse)
-
-    def parse_hours(self, hours):
-        day_hour = hours.split("|")
-
-        opening_hours = OpeningHours()
-
-        for dh in day_hour:
-            try:
-                dh_left, dh_right = dh.split("=")
-                day = dh_left[:2]
-                open_time, close_time = dh_right.split("-")
-                opening_hours.add_range(
-                    day=day,
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%I:%M %p",
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        ref = response.url.rsplit("_", 1)[-1]
+        for query in data["props"]["pageProps"]["dehydratedState"]["queries"]:
+            for entry in ((query.get("state") or {}).get("data") or {}).get("StoreList", []):
+                store = entry["value"]
+                if store.get("storenum") != ref:
+                    continue
+                store["street_address"] = ", ".join(
+                    filter(None, [store.get("address1"), store.get("address2"), store.get("address3")])
                 )
-            except Exception:
+                store["postcode"] = store.get("zipcode")
+                store["phone"] = store.get("phone1")
+                item = DictParser.parse(store)
+                item["ref"] = store["storenum"]
+                item["branch"] = store.get("store_name")
+                item["name"] = None
+                item["website"] = response.url
+                item["opening_hours"] = self.parse_hours(store.get("operating_hours"))
+                yield item
+                return
+
+    def parse_hours(self, raw: str | None) -> OpeningHours:
+        oh = OpeningHours()
+        for day, value in json.loads(raw or "{}").items():
+            if " - " not in value:
                 continue
-
-        return opening_hours
-
-    def parse(self, response):
-        data = response.json()
-        store_data = data["storesList"]
-
-        for store in store_data:
-            properties = {
-                "ref": store["stlocId"],
-                "name": store["storeName"],
-                "addr_full": store["addressLine"],
-                "city": store["city"],
-                "state": store["state"],
-                "postcode": store["zipCode"],
-                "phone": store["phoneNumber"],
-                "lat": store["latitude"],
-                "lon": store["longitude"],
-            }
-
-            properties["opening_hours"] = self.parse_hours(store["storeHours"])
-
-            yield Feature(**properties)
+            open_time, close_time = (t.strip() for t in value.split(" - "))
+            oh.add_range(day, open_time, close_time, time_format="%I:%M %p")
+        return oh
