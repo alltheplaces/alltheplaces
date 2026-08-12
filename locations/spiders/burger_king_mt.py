@@ -14,9 +14,14 @@ class BurgerKingMTSpider(Spider):
     start_urls = ["https://burgerking.com.mt/stores"]
 
     def parse(self, response):
-        raw_data = json.loads(re.search(r"locations\":(\[.+\]),\"locations_catering", response.text).group(1))
+        match = re.search(r"locations\":(\[.+\]),\"locations_catering", response.text)
+        if not match:
+            self.logger.error("Could not extract locations from response")
+            return
+        raw_data = json.loads(match.group(1))
         for location in raw_data:
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name").replace("BURGER KING ", "")
+            if "name" in item:
+                item["branch"] = item.pop("name").replace("BURGER KING ", "")
             apply_category(Categories.FAST_FOOD, item)
             yield item
