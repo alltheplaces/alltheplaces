@@ -59,6 +59,24 @@
 - Always include `Closes #N` when the PR resolves an existing issue or deletion PR
 - Include a brief summary of the CI output (count, warnings, any issues noted)
 
+## Code Verbosity (comments, tests)
+This is about the code itself, not the PR description (see "PR Descriptions" above, which
+should stay detailed) — the spider source should be lean.
+- **Flag excessive code comments.** LLM-assisted spiders in particular tend to over-comment —
+  a comment restating what the next line obviously does (e.g. `# extract the store name` above
+  `name = response.css(...)`) adds noise, not clarity. One line max per comment, and only where
+  the *why* isn't obvious from the code (a workaround, a non-obvious API quirk, a subtle
+  ordering requirement). Don't block a merge over this alone, but call it out as review feedback
+  so the author can trim it, either before merge or as a quick follow-up.
+- **Don't add a test file per spider.** This repo's convention is not to write an individual
+  test file for each spider — the shared test suite (`test_item_attributes`, structural checks,
+  etc.) already covers spiders generically. A per-spider test file is unnecessary and should be
+  flagged for removal.
+- Confirmed 2026-08-07 re: #17626 (`maaf_fr` spider) — Cj-Malone called the PR "excessively
+  verbose"; iandees's own follow-up feedback was "Claude added too many comments and we don't
+  need tests for every spider." The contributor opened a fast-follow PR (#17694) to trim
+  comments to one line each and delete the per-spider test file.
+
 ## Spider Fix PRs
 - Verify CI checks pass (pytest + pre-commit; AWS CodeBuild run is informational)
 - Check the diff size and scope - prefer small, focused changes
