@@ -1,58 +1,38 @@
-from typing import AsyncIterator, Iterable
+import json
+from typing import Iterable
 
-from scrapy import Selector
-from scrapy.http import FormRequest, Request, Response
+from scrapy.http import Response
 
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
-from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class PaperSourceUSSpider(AmastyStoreLocatorSpider):
+class PaperSourceUSSpider(JSONBlobSpider):
     name = "paper_source_us"
     item_attributes = {"brand": "Paper Source", "brand_wikidata": "Q25000269"}
-    start_urls = ["https://www.papersource.com/amlocator/index/ajax/"]
+    start_urls = ["https://www.papersource.com/a/stores"]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        formdata = {
-            "lat": "0",
-            "lng": "0",
-            "radius": "",
-            "product": "0",
-            "category": "0",
-            "attributes[0][name]": "3",
-            "attributes[0][value]": "",
-            "attributes[1][name]": "6",
-            "attributes[1][value]": "",
-            "sortByDistance": "1",
-        }
-        for url in self.start_urls:
-            yield FormRequest(url=url, formdata=formdata, headers={"X-Requested-With": "XMLHttpRequest"}, method="POST")
+    def extract_json(self, response: Response) -> list[dict]:
+        data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+        return data["props"]["pageProps"]["stores"]["content"]
 
-    def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Request]:
-        item["website"] = popup_html.xpath('//a[contains(@class, "amlocator-link")]/@href').get()
-        yield Request(url=item["website"], meta={"item": item}, callback=self.parse_location_details)
+    def pre_process_data(self, feature: dict) -> None:
+        for key in ["description", "facebookLink", "instagramLink", "twitterLink"]:
+            feature.pop(key, None)
+        feature["lon"], feature["lat"] = feature.pop("location")
 
-    def parse_location_details(self, response: Response) -> Iterable[Feature]:
-        item = response.meta["item"]
-        item["ref"] = response.xpath(
-            '//div[contains(@data-amlocator-js, "location-attributes")]/div[2]/div[3]/div/span/text()'
-        ).get()
-        item["street_address"] = response.xpath(
-            '//div[contains(@class, "amlocator-location-info")]/div[4]/span[2]/text()'
-        ).get()
-        item["city"] = response.xpath('//div[contains(@class, "amlocator-location-info")]/div[3]/span[2]/text()').get()
-        item["postcode"] = response.xpath(
-            '//div[contains(@class, "amlocator-location-info")]/div[1]/span[2]/text()'
-        ).get()
-        item["phone"] = response.xpath(
-            '//div[contains(@class, "amlocator-location-info")]/div[contains(@class, "-contact")]/div[1]/a/text()'
-        ).get()
-        item["email"] = response.xpath(
-            '//div[contains(@class, "amlocator-location-info")]/div[contains(@class, "-contact")]/div[2]/a/text()'
-        ).get()
-        item["image"] = response.xpath('//a[contains(@data-amlocator-js, "location-image")]/@href').get()
-        hours_string = " ".join(response.xpath('//div[contains(@class, "amlocator-schedule-table")]//text()').getall())
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["website"] = "https://www.papersource.com/a/stores/store/{}".format(item["ref"])
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
+        for rule in feature.get("hoursList") or []:
+            if not (day := sanitise_day(rule["dayName"])):
+                continue
+            close_hour, _, close_minute = rule["closeTime"].partition(":")
+            if int(close_hour) < 12:  # Source times are 12-hour without meridiem; closing times are PM
+                close_hour = str(int(close_hour) + 12)
+            item["opening_hours"].add_range(day, rule["openTime"], f"{close_hour}:{close_minute}")
+        apply_category(Categories.SHOP_STATIONERY, item)
         yield item

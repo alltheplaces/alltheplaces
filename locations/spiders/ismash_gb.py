@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -26,6 +27,8 @@ class IsmashGBSpider(Spider):
             item["branch"] = location["name"]
             if location["yelpID"]:
                 item["extras"]["contact:yelp"] = urljoin("https://www.yelp.co.uk/biz/", location["yelpID"])
+
+            apply_category(Categories.CRAFT_ELECTRONICS_REPAIR, item)
 
             item["opening_hours"] = OpeningHours()
             if "-" in location.get("mon_fri"):

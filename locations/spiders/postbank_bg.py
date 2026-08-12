@@ -1,63 +1,73 @@
-import re
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
-from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy import Request
+from scrapy.http import TextResponse
+from scrapy_camoufox.page import PageMethod
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
+from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+
+# Fetched from within the locator page so that the request carries the
+# browser's own origin, cookies and headers.
+LOCATIONS_FETCH_JS = """async () => {
+    const response = await fetch("/en/api/locations/locations", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+        },
+        body: "contextItemPath=" + encodeURIComponent("/sitecore/content/postbank/home"),
+    });
+    if (!response.ok) throw new Error("locations API returned HTTP " + response.status);
+    return await response.json();
+}"""
 
 
-class PostbankBGSpider(Spider):
+class PostbankBGSpider(JSONBlobSpider, CamoufoxSpider):
     name = "postbank_bg"
     item_attributes = {"brand": "Пощенска банка", "brand_wikidata": "Q7234083", "country": "BG"}
-    allowed_domains = ["www.postbank.bg"]
-    start_urls = ["https://www.postbank.bg/bg-BG/api/locations/locations"]
+    allowed_domains = ["content.postbank.bg"]
     no_refs = True
-    requires_proxy = True
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {
+        "CAMOUFOX_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "fetch"]
+    }
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        yield FormRequest(
-            "https://www.postbank.bg/bg-BG/api/locations/locations",
-            formdata={"contextItemPath": "/sitecore/content/postbank/home"},
+    async def start(self) -> AsyncIterator[Request]:
+        # Akamai rejects a bare request to the API, so load the locator page in
+        # the browser first and call the API from that page.
+        yield Request(
+            "https://content.postbank.bg/Contacts/Network",
+            meta={"camoufox_page_methods": [PageMethod("evaluate", LOCATIONS_FETCH_JS)]},
             callback=self.parse,
         )
 
-    def parse(self, response):
-        for city in response.json():
-            for location in city["branches"]:
-                # ignore temporarily closed locations
-                if "временно" in location["worktime"].lower() or "временно" in location["address"].lower():
-                    continue
+    def extract_json(self, response: TextResponse) -> list[dict]:
+        return [
+            dict(branch, city=city["city"])
+            for city in response.meta["camoufox_page_methods"][0].result
+            for branch in city["branches"]
+        ]
 
-                item = Feature()
-                item["name"] = location["name"]
-                item["addr_full"] = location["address"]
-                item["lat"] = location["branchCoords"]["lat"]
-                item["lon"] = location["branchCoords"]["lng"]
-                item["phone"] = location["phone"]
+    def pre_process_data(self, feature: dict) -> None:
+        feature["coords"] = feature.pop("branchCoords")
 
-                item["opening_hours"] = OpeningHours()
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        closed_markers = " ".join(filter(None, [feature["worktime"], feature["workhours"], feature["address"]])).lower()
+        if "временно" in closed_markers or "temporar" in closed_markers:
+            return
 
-                if location["worktime"] is not None:
-                    # ; needs to be replaced for a single item only..
-                    for worktime in location["worktime"].replace(" : ", " ").replace(";", ":").split("<br/>"):
-                        if worktime == "":
-                            continue
-                        match = re.match(r"([а-я]+\s?\-?\s?[а-я]+)+[\s:]+(\d{2}:\d{2})-(\d{2}:\d{2})", worktime.lower())
-                        if match:
-                            days = [sanitise_day(day, DAYS_BG) for day in match.group(1).replace(" ", "").split("-")]
-                            hours = [match.group(2), match.group(3)]
-                            if len(days) == 2:
-                                item["opening_hours"].add_days_range(day_range(days[0], days[1]), hours[0], hours[1])
-                            else:
-                                item["opening_hours"].add_range(days[0], hours[0], hours[1])
+        item["opening_hours"] = OpeningHours()
+        if feature["worktime"] is not None:
+            item["opening_hours"].add_ranges_from_string(feature["worktime"].replace(";", ":").replace("<br/>", "; "))
 
-                if location["isATM"]:
-                    apply_category(Categories.ATM, item)
-                    apply_yes_no(Extras.CASH_IN, item, location["isATMWithDeposit"])
-                elif location["isBranch"]:
-                    apply_category(Categories.BANK, item)
-                    apply_yes_no("self_service", item, location["isSelfServiceZone"])
-                yield item
+        if feature["isATM"]:
+            apply_category(Categories.ATM, item)
+            apply_yes_no(Extras.CASH_IN, item, feature["isATMWithDeposit"])
+        elif feature["isBranch"]:
+            apply_category(Categories.BANK, item)
+            apply_yes_no("self_service", item, feature["isSelfServiceZone"])
+        yield item

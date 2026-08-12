@@ -2,7 +2,7 @@ from typing import Any, AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, TextResponse
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -32,5 +32,5 @@ class UrbanAirSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = (item.pop("name", None) or "").split(",", 1)[0].strip() or None
-        apply_category({"leisure": "trampoline_park"}, item)
+        apply_category(Categories.LEISURE_TRAMPOLINE_PARK, item)
         yield item

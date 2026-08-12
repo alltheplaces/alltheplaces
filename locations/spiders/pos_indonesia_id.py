@@ -31,7 +31,7 @@ class PosIndonesiaIDSpider(Spider):
             if item["city"].startswith("KAB."):
                 item["state"] = item.pop("city").removeprefix("KAB. ")
             if location_type == "MR":
-                apply_category({"amenity": "mailroom"}, item)
+                apply_category(Categories.MAILROOM, item)
             else:
                 apply_category(Categories.POST_OFFICE, item)
             yield JsonRequest(

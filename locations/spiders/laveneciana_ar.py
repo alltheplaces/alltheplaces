@@ -1,7 +1,10 @@
+from typing import Any, Iterable
+
 import chompjs
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS_ES, DELIMITERS_ES, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -10,17 +13,21 @@ class LavenecianaARSpider(JSONBlobSpider):
     name = "laveneciana_ar"
     item_attributes = {"brand": "La Veneciana"}
     allowed_domains = ["laveneciana.com.ar"]
-    start_urls = ("http://laveneciana.com.ar/sucursales/",)
+    start_urls = ["https://laveneciana.com.ar/nuestras-sucursales/"]
 
-    def extract_json(self, response):
-        # var php_vars = {"markerIcon":"http:\/\/laveneciana.com.ar\/wp-content\/uploads\/2017\/09\/Pin_Logo_WhiteBorder-e1505163277731.png","sucursales":
+    def extract_json(self, response: Response) -> Any:
         data = response.xpath('//script[contains(text(), "var php_vars =")]/text()').get().split("var php_vars = ")[1]
         return chompjs.parse_js_object(data)["sucursales"]
 
-    def pre_process_data(self, location):
-        # {'id': '31', 'nombre': 'Lomitas Street', 'direccion': 'Italia 459 | Lomas de Zamora | Buenos Aires', 'latitud': '-34.76602000', 'longitud': '-58.40212900', 'telefono': '7529 - 8791', 'email': '-', 'facebook': None, 'google_map_single': None, 'imagen': '800', 'filtro': 'buenosaires', 'wifi': '1', 'estacionamiento': '1', 'activo': '1'}
-        location["nombre"] = location["nombre"].replace(" | ", ", ")
+    def pre_process_data(self, feature: dict) -> None:
+        feature["direccion"] = feature["direccion"].replace(" | ", ", ")
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(
+            feature.get("dias_horarios") or "", days=DAYS_ES, delimiters=DELIMITERS_ES
+        )
+        apply_yes_no(Extras.WIFI, item, feature.get("wifi") == "si")
         apply_category(Categories.ICE_CREAM, item)
         yield item

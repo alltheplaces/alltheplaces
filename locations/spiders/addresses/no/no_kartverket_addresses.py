@@ -80,9 +80,9 @@ class NoKartverketAddressesSpider(AddressSpider):
         if tilleggsnavn := self._strip_value(row.get("adressetilleggsnavn")):
             item["extras"]["addr:place"] = tilleggsnavn
 
-        # Address type (Vegadresse or Matrikkeladresse)
-        if objtype := self._strip_value(row.get("objtype")):
-            item["extras"]["addr:type"] = objtype
+        # Address type (vegadresse or matrikkeladresse)
+        if address_type := self._strip_value(row.get("adressetype")):
+            item["extras"]["addr:type"] = address_type
 
         # Matrikkel references for cadastral addresses
         if gardsnummer := self._strip_value(row.get("gardsnummer")):
@@ -93,10 +93,6 @@ class NoKartverketAddressesSpider(AddressSpider):
             item["extras"]["ref:NO:festenummer"] = festenummer
         if undernummer := self._strip_value(row.get("undernummer")):
             item["extras"]["ref:NO:undernummer"] = undernummer
-
-        # Unit numbers (apartments)
-        if bruksenhetsnummer := self._strip_value(row.get("bruksenhetsnummer")):
-            item["extras"]["unit"] = bruksenhetsnummer
 
         return item
 

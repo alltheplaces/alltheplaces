@@ -48,7 +48,8 @@ class AustraliaPostAUSpider(Spider):
                     item["opening_hours"].add_range(day, open_time.strip(), close_time.strip())
 
             if store["type"] == "C_SPB":
-                apply_category(Categories.POST_BOX.value | {"priority": "yes"}, item)
+                apply_category(Categories.POST_BOX, item)
+                item["extras"]["priority"] = "yes"
             elif store["type"] == "DC":
                 apply_category(Categories.POST_DEPOT, item)
             elif store["type"] == "PO":

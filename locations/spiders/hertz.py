@@ -45,6 +45,7 @@ class HertzSpider(Spider):
 
             country_name = shop["country_name"].replace(" ", "")
             city_name = shop["city"].replace(" ", "")
+            item["branch"] = item.pop("name")
             item["website"] = "/".join(
                 ["https://www.hertz.com/us/en/location", country_name, city_name, shop["extendedOAGCode"]]
             )

@@ -1,4 +1,4 @@
-from json import loads
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -23,28 +23,17 @@ class SuzukiMarineAUSpider(JSONBlobSpider):
         if feature.get("Link"):
             item["website"] = "https://www.suzukimarine.com.au" + feature["Link"]
 
-        if services_string := feature.get("Services"):
-            services_list = loads(services_string)
-            if "0" in services_list:
-                apply_category(Categories.SHOP_BOAT, item)
-                if "1" in services_list:
-                    apply_yes_no("boat:repair", item, True)
-                if "2" in services_list:
-                    apply_yes_no("boat:parts", item, True)
-            elif "1" in services_list:
-                apply_category(Categories.SHOP_BOAT_REPAIR, item)
-                if "2" in services_list:
-                    apply_yes_no("boat:parts", item, True)
-            elif "2" in services_list:
-                apply_category(Categories.SHOP_BOAT_PARTS, item)
+        services = feature.get("Services") or []
+        if "Boat Package" in services:
+            apply_category(Categories.SHOP_BOAT, item)
+            apply_yes_no("boat:repair", item, "Service" in services or "Repower" in services)
+        elif "Service" in services or "Repower" in services:
+            apply_category(Categories.SHOP_BOAT_REPAIR, item)
 
-            if feature.get("ServicesHours"):
-                item["opening_hours"] = OpeningHours()
+        if hours := feature.get("ServiceHours"):
+            hours = re.sub(r"<[^>]+>", " ", hours)
+            hours = re.sub(r"(\d)\.(\d{2})", r"\1:\2", hours)
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours)
 
-                # Example opening hours string in source data:
-                # "ServiceHours": "<p>Mon - Fri: 8:00am - 5:00pm<br>Sat: 8:00am - 12:00pm<br>Sun: Closed</p>",
-                item["opening_hours"].add_ranges_from_string(
-                    feature["ServiceHours"].replace("<br>", ", ").replace("<p>", "").replace("</p>", "")
-                )
-
-            yield item
+        yield item

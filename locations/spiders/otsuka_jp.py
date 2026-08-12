@@ -28,8 +28,7 @@ class OtsukaJPSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["items"]:
             if any(i in store["name"] for i in self.SKIP_BRANDS):
-                item = {}
-                yield item
+                continue
             item = DictParser.parse(store)
             item["ref"] = store["key"]
             item["website"] = f"https://shop-eql.otsuka.co.jp/map/{store['key']}"

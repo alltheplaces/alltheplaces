@@ -49,6 +49,7 @@ class JyskSpider(scrapy.Spider):
         store["tel"] = store.pop("store_phone")
         store["house_number"] = store.pop("house")
         item = DictParser.parse(store)
+        item["branch"] = item.pop("name")
         item["image"] = store.get("image")
         item["website"] = locator_url + "?storeId=" + store["shop_id"]
         item["ref"] = store["shop_id"]

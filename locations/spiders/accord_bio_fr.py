@@ -1,0 +1,45 @@
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.structured_data_spider import StructuredDataSpider
+
+
+class AccordBioFRSpider(SitemapSpider, StructuredDataSpider):
+    name = "accord_bio_fr"
+    allowed_domains = ["accord-bio.fr"]
+    sitemap_urls = ["https://www.accord-bio.fr/robots.txt"]
+    sitemap_rules = [(r"magasin-bio/[^/]+/[^/]+/", "parse_sd")]
+    wanted_types = ["LocalBusiness"]
+    drop_attributes = {"image"}
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        description = (ld_data.get("description") or "").casefold()
+        if "épicerie" in description or "proximité" in description:
+            # Deduce the category from the keywords used
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        else:
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+
+        # All shops from this network are organic only
+        item["extras"]["organic"] = "only"
+
+        if item["name"].isupper():
+            # Lower the upper case names
+            item["name"] = item["name"].title()
+
+        if item["phone"] is not None:
+            # Format phone number with French prefix
+            item["phone"] = item["phone"].replace("%20", " ")
+
+        if item["email"] == "contact@accord-bio.fr":
+            # Wrong email detected because none was given, let's remove it
+            item.pop("email")
+
+        if "facebook.com/accordbio" in item["facebook"]:
+            # Wrong fb page detected because none was given, let's remove it
+            item.pop("facebook")
+
+        # The delivery information is only given in the description
+        apply_yes_no(Extras.DELIVERY, item, "livraison" in description)
+
+        yield item

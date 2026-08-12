@@ -3,18 +3,47 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
 
 class DodoPizzaSpider(Spider):
     name = "dodo_pizza"
-    item_attributes = {"brand_wikidata": "Q61949318"}
+    item_attributes = {"brand": "Додо Пицца", "brand_wikidata": "Q61949318"}
     allowed_domains = ["publicapi.dodois.io"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    # TODO: update list of countries in 2024
-    countries = ["RU", "BY", "GB", "VN", "DE", "KZ", "CN", "KG", "LT", "NG", "PL", "RO", "SI", "TJ", "UZ", "EE", "US"]
+    countries = [
+        "AE",
+        "AM",
+        "AZ",
+        "BG",
+        "BY",
+        "CY",
+        "EE",
+        "ES",
+        "GE",
+        "HR",
+        "ID",
+        "IQ",
+        "KG",
+        "KZ",
+        "LT",
+        "MD",
+        "ME",
+        "MN",
+        "NG",
+        "PL",
+        "QA",
+        "RO",
+        "RS",
+        "RU",
+        "SI",
+        "TJ",
+        "TR",
+        "UZ",
+        "VN",
+    ]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for country in self.countries:
@@ -34,8 +63,9 @@ class DodoPizzaSpider(Spider):
         # Type 1 is a restaurant, State 1 is restaurant is open
         if poi.get("Type") == 1 and poi.get("State") == 1:
             item = DictParser.parse(poi)
+            item["name"] = None
             item["ref"] = poi.get("UUId")
-            item["name"] = poi.get("Alias")
+            item["branch"] = poi.get("Alias")
             item["country"] = country
             item["street_address"] = poi.get("Address")
             # 'State' is not a state, but a state of the restaurant
@@ -52,6 +82,9 @@ class DodoPizzaSpider(Spider):
             apply_yes_no(Extras.DELIVERY, item, poi.get("DeliveryEnabled"))
             apply_yes_no(PaymentMethods.CARDS, item, poi.get("CardPaymentPickup"))
             self.parse_hours(item, poi)
+            if country == "GE":
+                item["brand"] = "დოდო პიცა"
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def parse_hours(self, item, poi):

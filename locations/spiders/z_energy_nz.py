@@ -45,7 +45,7 @@ class ZEnergyNZSpider(Spider):
             item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
 
             if location["type_slug"] == "airstop":
-                apply_category({"aeroway": "fuel"}, item)
+                apply_category(Categories.AIRCRAFT_FUELLING_STATION, item)
             elif location["type_slug"] == "service-station":
                 apply_category(Categories.FUEL_STATION, item)
             elif location["type_slug"] == "truck-stop":

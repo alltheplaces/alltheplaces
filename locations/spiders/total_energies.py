@@ -116,8 +116,8 @@ class TotalEnergiesSpider(WoosmapSpider):
         "freewifi": Extras.WIFI,
         "accessibility": Extras.WHEELCHAIR,
         "truckfriendly": Access.HGV,
-        "oilchange": Extras.OIL_CHANGE,
-        "carglass": "service:vehicle:glass",
+        "oilchange": Extras.VEHICLE_OIL_CHANGE_SERVICES,
+        "carglass": Extras.VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES,
         "generator": Extras.BACKUP_GENERATOR,
     }
     FOOD_TAGS = [

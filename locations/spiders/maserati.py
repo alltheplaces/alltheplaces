@@ -36,7 +36,7 @@ class MaseratiSpider(scrapy.Spider):
                 sales_item = item.deepcopy()
                 sales_item["ref"] = f"{item['ref']}-sales"
                 apply_category(Categories.SHOP_CAR, sales_item)
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, is_service)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, is_service)
                 self.parse_hours(sales_item, row.get("opening_hours", []))
                 yield sales_item
 
@@ -44,7 +44,7 @@ class MaseratiSpider(scrapy.Spider):
                 service_item = item.deepcopy()
                 service_item["ref"] = f"{item['ref']}-service"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-                apply_yes_no(Extras.BODY_REPAIR, service_item, row.get("autoBodyShop") == "true")
+                apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, service_item, row.get("autoBodyShop") == "true")
                 self.parse_hours(service_item, row.get("service_opening_hours", []))
                 yield service_item
 

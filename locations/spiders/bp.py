@@ -53,7 +53,7 @@ class BpSpider(GeoMeSpider):
             apply_yes_no("food", item, True)
 
         if "electric_charging" in facilities or "electricity" in products:
-            apply_yes_no("fuel:electricity", item, True)
+            apply_yes_no(Fuel.ELECTRIC, item, True)
 
         apply_yes_no(Extras.TOILETS, item, any("toilet" in a for a in facilities))
         apply_yes_no(Extras.SHOWERS, item, "shower" in facilities)

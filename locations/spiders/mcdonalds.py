@@ -1,6 +1,6 @@
+import json
 from typing import AsyncIterator, Iterable
 
-from scrapy import Spider
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -9,16 +9,19 @@ from locations.geo import city_locations, country_iseadgg_centroids
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsSpider(Spider):
+class McdonaldsSpider(PlaywrightSpider):
     name = "mcdonalds"
     item_attributes = {
         "brand": "McDonald's",
         "brand_wikidata": "Q38076",
-        "extras": Categories.FAST_FOOD.value,
     }
     allowed_domains = ["www.mcdonalds.com"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     ISEADGG_COUNTRIES = {"AU", "CA", "NZ", "US"}
 
@@ -73,7 +76,7 @@ class McdonaldsSpider(Spider):
     def parse_major_api(self, response: Response, country: str, locale: str) -> Iterable[Feature]:
         if len(response.body) == 0:
             return
-        stores = response.json()["features"]
+        stores = json.loads(response.xpath("//pre/text()").get())["features"]
         for store in stores:
             properties = store["properties"]
             store_identifier = properties["identifierValue"]

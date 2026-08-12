@@ -1,18 +1,23 @@
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CastoramaFRSpider(SitemapSpider, StructuredDataSpider):
+class CastoramaFRSpider(CrawlSpider, StructuredDataSpider):
     name = "castorama_fr"
     item_attributes = {"brand": "Castorama", "brand_wikidata": "Q966971"}
-    sitemap_urls = ["https://www.castorama.fr/robots.txt"]
-    sitemap_follow = ["sitemap-magasins.xml"]
-    sitemap_rules = [(r"/store/\d+", "parse_sd")]
+    start_urls = ["https://www.castorama.fr/magasin"]
+    rules = [
+        Rule(LinkExtractor(restrict_xpaths='//*[@data-testid="html"]//li', allow=r"/store/\d+"), callback="parse_sd")
+    ]
     time_format = "%H:%M:%S Europe/Paris"
+    wanted_types = ["HardwareStore"]
+    search_for_facebook = False
+    search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None

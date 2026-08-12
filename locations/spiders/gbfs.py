@@ -258,9 +258,9 @@ BRAND_MAPPING = {
 
 FORM_FACTOR_MAP = {
     "bicycle": Categories.BICYCLE_RENTAL.value,
-    "cargo_bicycle": {"amenity": "bicycle_rental", "rental": "cargo_bike"},
-    "car": {"amenity": "car_sharing"},
-    "moped": {"amenity": "motorcycle_rental"},
+    "cargo_bicycle": Categories.BICYCLE_RENTAL_CARGO.value,
+    "car": Categories.CAR_SHARING.value,
+    "moped": Categories.MOTORCYCLE_RENTAL.value,
     "scooter_standing": Categories.KICK_SCOOTER_RENTAL.value,
     "scooter_seated": Categories.KICK_SCOOTER_RENTAL.value,
 }

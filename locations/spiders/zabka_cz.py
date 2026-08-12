@@ -1,11 +1,12 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
 class ZabkaCZSpider(scrapy.Spider):
     name = "zabka_cz"
-    item_attributes = {"brand": "Żabka", "brand_wikidata": "Q2589061"}
+    item_attributes = {"brand": "Žabka", "brand_wikidata": "Q133445159"}
     start_urls = ["https://izabka.cz/prodejny/"]
     no_refs = True
 
@@ -16,4 +17,5 @@ class ZabkaCZSpider(scrapy.Spider):
             item["lat"] = store.attrib["data-lat"]
             item["lon"] = store.attrib["data-long"]
             item["addr_full"] = store.xpath('.//span[@class="shop-address"]/text()').get()
+            apply_category(Categories.SHOP_CONVENIENCE, item)
             yield item

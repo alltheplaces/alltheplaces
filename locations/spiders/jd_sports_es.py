@@ -12,4 +12,3 @@ class JdSportsESSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow="store-locator/", deny="-soon"), callback="parse_sd")]
     is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-    requires_proxy = True

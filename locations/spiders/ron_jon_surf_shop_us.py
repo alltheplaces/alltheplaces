@@ -1,5 +1,3 @@
-import json
-
 from locations.categories import apply_category
 from locations.dict_parser import DictParser
 from locations.playwright_spider import PlaywrightSpider
@@ -15,7 +13,7 @@ class RonJonSurfShopUSSpider(PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
-        for data in json.loads(response.xpath("//pre/text()").get())["results"]:
+        for data in response.json()["results"]:
             item = DictParser.parse(data)
             item["branch"] = item.pop("name")
             item["website"] = response.urljoin(data["url"])
