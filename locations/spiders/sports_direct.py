@@ -7,7 +7,6 @@ from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.spiders.sport_master_dk import SportMasterDKSpider
 
 
 class SportsDirectSpider(JSONBlobSpider):
@@ -17,7 +16,7 @@ class SportsDirectSpider(JSONBlobSpider):
     BRANDS = {
         "Sports Direct": {"brand": "Sports Direct", "brand_wikidata": "Q7579661"},
         "Sports World": {"brand": "Sports World"},
-        "Sportmaster": SportMasterDKSpider.item_attributes,
+        "Sportmaster": {"brand": "Sportmaster", "brand_wikidata": "Q61062124"},
         "Lillywhites": {"brand": "Lillywhites", "brand_wikidata": "Q6548397"},
     }
 

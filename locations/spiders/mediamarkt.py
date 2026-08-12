@@ -1,16 +1,16 @@
-import json
 import re
 
+from scrapy.spiders import SitemapSpider
+
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.structured_data_spider import StructuredDataSpider
 
 MEDIAMARKT = {"brand": "MediaMarkt", "brand_wikidata": "Q2381223"}
-MEDIAWORLD = {"brand": "MediaWorld", "brand_wikidata": "Q125054068"}
+MEDIAWORLD = {"brand": "MediaWorld", "brand_wikidata": "Q2381223"}
 SATURN = {"brand": "Saturn", "brand_wikidata": "Q2543504"}
 
 
-class MediamarktSpider(StructuredDataSpider):
+class MediamarktSpider(SitemapSpider, StructuredDataSpider):
     name = "mediamarkt"
     requires_proxy = True
     allowed_domains = [
@@ -25,49 +25,34 @@ class MediamarktSpider(StructuredDataSpider):
         "mediamarkt.pl",
         "www.saturn.de",
     ]
-    start_urls = [
-        "https://www.mediamarkt.at/de/store/store-finder",
-        "https://www.mediamarkt.be/fr/store/store-finder",
-        "https://www.mediamarkt.ch/de/store/store-finder",
-        "https://www.mediamarkt.de/de/store/store-finder",
-        "https://www.mediamarkt.es/es/store/store-finder",
-        "https://www.mediamarkt.hu/hu/store/store-finder",
-        "https://www.mediamarkt.nl/nl/store/store-finder",
-        "https://www.mediaworld.it/it/store/store-finder",
-        "https://mediamarkt.pl/pl/store/store-finder",
-        "https://www.saturn.de/de/store/store-finder",
+    sitemap_urls = [
+        "https://www.mediamarkt.at/sitemaps/sitemap-marketpages.xml",
+        "https://www.mediamarkt.be/sitemaps/fr/sitemap-marketpages.xml",
+        "https://www.mediamarkt.ch/sitemaps/fr/sitemap-marketpages.xml",
+        "https://www.mediamarkt.de/sitemaps/sitemap-marketpages.xml",
+        "https://www.mediamarkt.es/sitemaps/sitemap-marketpages.xml",
+        "https://www.mediamarkt.hu/sitemaps/sitemap-marketpages.xml",
+        "https://www.mediamarkt.nl/sitemaps/sitemap-marketpages.xml",
+        "https://www.mediaworld.it/sitemaps/sitemap-marketpages.xml",
+        "https://mediamarkt.pl/sitemaps/sitemap-marketpages.xml",
+        "https://www.saturn.de/sitemaps/sitemap-marketpages.xml",
     ]
-    brands = {
-        "www.mediamarkt.at": MEDIAMARKT,
-        "www.mediamarkt.be": MEDIAMARKT,
-        "www.mediamarkt.ch": MEDIAMARKT,
-        "www.mediamarkt.de": MEDIAMARKT,
-        "www.mediamarkt.es": MEDIAMARKT,
-        "www.mediamarkt.hu": MEDIAMARKT,
-        "www.mediamarkt.nl": MEDIAMARKT,
-        "www.mediaworld.it": MEDIAWORLD,
-        "mediamarkt.pl": MEDIAMARKT,
-        "www.saturn.de": SATURN,
-    }
-
-    def parse(self, response, **kwargs):
-        base_path = response.url.rsplit("/", 1)[0]
-
-        script = response.xpath('//script[contains(text(), "storeName")]/text()').get()
-
-        if json_match := re.search(r'JSON\.parse\("(.+?)"\)', script):
-            data = json.loads(json.loads(f'"{json_match.group(1)}"'))
-
-            for stores in DictParser.iter_matching_keys(data, "regionStores"):
-                for store in stores:
-                    if (uid := store.get("uid")) and uid != "store-finder":
-                        yield response.follow(f"{base_path}/{uid}", callback=self.parse_sd)
+    sitemap_rules = [("/store/", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.split("/")[-1]
+
         host = response.url.split("/")[2]
-        item.update(self.brands[host])
-        item["branch"] = item.get("name", "").removeprefix(f"{item['brand']} ")
+        if "mediamarkt" in host:
+            item.update(MEDIAMARKT)
+            item["branch"] = item.pop("name", "").removeprefix("MediaMarkt ")
+        elif "mediaworld" in host:
+            item.update(MEDIAWORLD)
+            item["branch"] = item.pop("name", "").removeprefix("MediaWorld ").removeprefix("Mediaworld ")
+        elif "saturn" in host:
+            item.update(SATURN)
+            item["branch"] = item.pop("name", "").removeprefix("Saturn ")
+
         if phone := item.get("phone"):
             item["phone"] = re.sub(r"[^0-9+]", "", phone)
         apply_category(Categories.SHOP_ELECTRONICS, item)

@@ -29,7 +29,7 @@ class JuicePressUSSpider(Spider):
             item["image"] = store["image"]
             item["ref"] = store["selector"]
 
-            if float(item["lon"]) > 0:
+            if item.get("lon") and float(item["lon"]) > 0:
                 item["lon"] = float(item["lon"]) * -1
 
             if "Equinox" in item["street_address"]:

@@ -1,89 +1,46 @@
-import re
+import json
 from typing import Any, AsyncIterator
 
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import padding
-from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.user_agents import CHROME_LATEST
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class BurgerKingRUSpider(Spider):
+class BurgerKingRUSpider(PlaywrightSpider):
     name = "burger_king_ru"
     item_attributes = {"brand": "Бургер Кинг", "brand_wikidata": "Q177054"}
     allowed_domains = ["orderapp.burgerkingrus.ru"]
-    api_url = "https://orderapp.burgerkingrus.ru/api/v3/restaurant/list"
-    custom_settings = {"USER_AGENT": CHROME_LATEST}
+    api_url = "https://orderapp.burgerkingrus.ru/gateway/restaurant-composition/api/v7/restaurants/search?lon=37.621202&lat=55.753544&limit=2000"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url=self.api_url)
+        yield JsonRequest(url=self.api_url, cookies={"spid": "", "spsc": ""})
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        if "PRIVATE KEY" in response.text:  # set cookies using the response received if expected JSON is not there
-            sp_id = ""
-            rsa_key_pem = ""
-            encrypted_text = ""
-            if match := re.search(r"\"spid=(\w+)\"", response.text):
-                sp_id = match.group(1)
-            if match := re.search(
-                r"(-+BEGIN (RSA)?\s*PRIVATE KEY-+.+?-+END (RSA)?\s*PRIVATE KEY-+)", response.text, re.DOTALL
-            ):
-                rsa_key_pem = match.group(1)
-            if match := re.search(r"crypto.Cipher.decrypt\(\"(\w+)\",", response.text):
-                encrypted_text = match.group(1)
-
-            private_key_pem = rsa_key_pem.encode("utf-8")
-
-            # Encrypted ciphertext (as bytes)
-            encrypted_text = bytes.fromhex(encrypted_text)
-
-            # Load the private key
-            private_key = serialization.load_pem_private_key(
-                private_key_pem,
-                password=None,
-            )
-
-            # Decrypt the ciphertext
-            decrypted_text = private_key.decrypt(encrypted_text, padding.PKCS1v15())
-
-            sp_sc = decrypted_text.decode("utf-8")
-
-            yield JsonRequest(
-                url=self.api_url,
-                cookies={
-                    "spid": sp_id,
-                    "spsc": sp_sc,
-                },
-                callback=self.parse_locations,
-                dont_filter=True,
-            )
-
-        else:
-            yield from self.parse_locations(response)
-
-    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["response"]["list"]:
-            if location["status"] != 1:
-                continue
-            address_info = location.pop("name")  # name contains address info
+        for location in json.loads(response.xpath("//pre/text()").get())["response"]:
             item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full", None) or address_info
-            item["opening_hours"] = OpeningHours()
-            for day_number, day_name in enumerate(DAYS):
-                day_hours = location["timetable"]["hall"][day_number]
-                if not day_hours["isActive"]:
-                    continue
-                if day_hours["isAllTime"]:
-                    start_time = "00:00"
-                    end_time = "23:59"
-                else:
-                    start_time = day_hours["timeFrom"]
-                    end_time = day_hours["timeTill"]
-                item["opening_hours"].add_range(day_name, start_time, end_time)
-            apply_yes_no(Extras.WIFI, item, location["wifi"], False)
-            apply_yes_no(Extras.DRIVE_THROUGH, item, location["king_drive"] and location["king_drive_enabled"], False)
+            item["street_address"] = item.pop("name", None)
+            item["city"] = location["city"]["city_name"]
+            try:
+                item["opening_hours"] = self.parse_opening_hours(location.get("timetable", []))
+            except Exception as e:
+                self.logger.error(f'Failed to parse opening hours:{location.get("timetable", [])} {e}')
+
+            if location.get("features"):
+                apply_yes_no(Extras.DRIVE_THROUGH, item, location["features"].get("king_drive") is True, False)
             yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day_number, day_name in enumerate(DAYS):
+            day_hours = rules[day_number]
+            if not day_hours["active"]:
+                opening_hours.set_closed(day_name)
+                continue
+            opening_hours.add_range(day_name, day_hours["time_from"], day_hours["time_to"])
+        return opening_hours
