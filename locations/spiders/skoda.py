@@ -5,7 +5,7 @@ import reverse_geocoder
 from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.spiders.volkswagen import VolkswagenSpider
 
@@ -71,7 +71,9 @@ class SkodaSpider(Spider):
         # TODO: check how to get country ids dynamically
         for country_id, country in self.available_countries_skoda_api.items():
             yield JsonRequest(
-                url="https://retailers.skoda-auto.com/api/{}/{}/Dealers/GetDealers".format(country_id, country[0]),
+                url="https://www.skoda-auto.de/apps/retailers/api/{}/{}/DealersV2/GetDealers".format(
+                    country_id, country[0]
+                ),
                 meta={"country_code": country[1]},
                 callback=self.parse_skoda_api,
             )
@@ -84,12 +86,11 @@ class SkodaSpider(Spider):
             )
 
     def parse_skoda_api(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json().get("Items"):
-            store.update(store.pop("Address"))
+        for store in response.json():
+            store.update(store.pop("address", {}))
             item = DictParser.parse(store)
             item["street_address"] = item.pop("street")
-            item["ref"] = store["GlobalId"]
-            item["state"] = store["District"]
+            item["ref"] = store["globalId"]
             item["country"] = response.meta["country_code"]
             # Some coordinates in TR have lat and lon switched and are usually bad.
             # Locations in ME have country property equal to RS
@@ -99,12 +100,18 @@ class SkodaSpider(Spider):
                     item["lat"] = None
                 elif item["country"] != result["cc"] and item["country"] == "RS":
                     item["country"] = result["cc"]
-            if store.get("HasSales"):
+            facilities = [
+                facility.get("code", "").lower()
+                for department in ["sales", "services"]
+                for facility in store.get(department, [])
+            ]
+            if "sales" in facilities or "usedcarsales" in facilities:
                 shop_item = deepcopy(item)
                 shop_item["ref"] = f"{item['ref']}-SHOP"
                 apply_category(Categories.SHOP_CAR, shop_item)
+                apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, shop_item, "usedcarsales" in facilities)
                 yield shop_item
-            if store.get("HasServices"):
+            if "service" in facilities:
                 service_item = deepcopy(item)
                 service_item["ref"] = f"{item['ref']}-SERVICE"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_item)
