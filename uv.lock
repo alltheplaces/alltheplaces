@@ -691,14 +691,14 @@ wheels = [
 
 [[package]]
 name = "geonamescache"
-version = "3.0.1"
+version = "3.0.2"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3b/7d/d523711001643b85e2185f70de9fb5cb8f82631459ebece08327f039032c/geonamescache-3.0.1.tar.gz", hash = "sha256:b13fa9ef846304961e623e08938177a72bfb6e02f681060cd3078dd89bf3e962", size = 30675247, upload-time = "2026-03-25T20:00:26.485Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/f7/1ca0ac4ca0b7a0f21f6628094a0e4fbfb836508370e8e835294ca125536f/geonamescache-3.0.2.tar.gz", hash = "sha256:1cc7007a7a14637f665c7bd7934dc5a04a973daf4d962d789651047aa1a00cb1", size = 33569006, upload-time = "2026-07-28T11:58:32.578Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/30/8c/525a746d0e861873d871044ba67c9f0cd922f5dc7897f4bac4463d31485f/geonamescache-3.0.1-py3-none-any.whl", hash = "sha256:959d9d850d822f3c16eb7272d476415e42074aa33f1ea85bc2b7cb43b6751c84", size = 31965686, upload-time = "2026-03-25T19:59:57.483Z" },
+    { url = "https://files.pythonhosted.org/packages/48/c2/52f1b29de8839b4b55cd2641dfd722a6a94953d74fa82514e26084a92318/geonamescache-3.0.2-py3-none-any.whl", hash = "sha256:b830e8942f2d58c7e68782dcf4dff2ffe8c4104a35ee881ed1ad4023cefcdba4", size = 35000667, upload-time = "2026-07-28T11:53:11.865Z" },
 ]
 
 [[package]]
