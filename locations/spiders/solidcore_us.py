@@ -15,7 +15,8 @@ class SolidcoreUSSpider(JSONBlobSpider):
     locations_key = "Locations"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Iterable[Feature]:
-        if feature.get("Address") in (None, "Coming soon"):
+        address = feature.get("Address")
+        if not address or address.strip().casefold() == "coming soon":
             return
         item["ref"] = f"{feature['SiteID']}-{feature['Id']}"
         item["branch"] = re.sub(r"^[A-Z]{2}, ", "", item.pop("name"))
