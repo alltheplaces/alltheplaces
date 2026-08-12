@@ -24,9 +24,10 @@ class MazdaCASpider(scrapy.Spider):
             item = DictParser.parse(dealer)
             item["ref"] = dealer["dealer_code"]
             item["street_address"] = merge_address_lines([dealer["address_line_1"], dealer["address_line_2"]])
-            item["email"] = dealer["oca_email"]
+            item["email"] = dealer["oca_email"].removesuffix("ï¿½")
             item["state"] = dealer["province"]["province_code"]
-
+            if item.get("website"):
+                item["website"] = "https://" + item["website"] if "https://" not in item["website"] else item["website"]
             if dealer.get("hours").get("sales"):
                 shop = deepcopy(item)
                 self.parse_hours(shop, dealer["hours"]["sales"])
