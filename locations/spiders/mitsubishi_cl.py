@@ -35,14 +35,14 @@ class MitsubishiCLSpider(scrapy.Spider):
             if has_sales:
                 sales_item = deepcopy(item)
                 apply_category(Categories.SHOP_CAR, sales_item)
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, has_service)
-                apply_yes_no(Extras.CAR_PARTS, sales_item, has_parts)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, has_service)
+                apply_yes_no(Extras.VEHICLE_CAR_PARTS_SALES, sales_item, has_parts)
                 yield sales_item
 
             if has_service:
                 service_item = deepcopy(item)
                 apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-                apply_yes_no(Extras.CAR_PARTS, service_item, has_parts)
+                apply_yes_no(Extras.VEHICLE_CAR_PARTS_SALES, service_item, has_parts)
                 yield service_item
 
             if has_parts:
