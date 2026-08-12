@@ -1,13 +1,12 @@
 import re
 from copy import deepcopy
-from typing import Any, AsyncIterator
+from typing import Any
 
 import scrapy
-from scrapy.http import JsonRequest
+from requests import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
 from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
@@ -16,14 +15,11 @@ from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 class MazdaCASpider(scrapy.Spider):
     name = "mazda_ca"
     item_attributes = MAZDA_SHARED_ATTRIBUTES
+    start_urls = [
+        "https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=5000&minlng=-108.39093695&maxlng=-50.38312445&minlat=17.221564893644988&maxlat=62.061166901212395"
+    ]
 
-    async def start(self) -> AsyncIterator[Any]:
-        for city in city_locations("CA", 0):
-            yield JsonRequest(
-                url=f'https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=1000&keyword={city["name"]}'
-            )
-
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for dealer in response.json()["data"]:
             item = DictParser.parse(dealer)
             item["ref"] = dealer["dealer_code"]
@@ -36,7 +32,7 @@ class MazdaCASpider(scrapy.Spider):
                 self.parse_hours(shop, dealer["hours"]["sales"])
                 apply_category(Categories.SHOP_CAR, shop)
                 if dealer["hours"]["service"]:
-                    apply_yes_no(Extras.CAR_REPAIR, shop, True)
+                    apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, shop, True)
                 yield shop
 
             if dealer.get("hours").get("service"):
