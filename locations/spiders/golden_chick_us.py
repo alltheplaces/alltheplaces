@@ -37,7 +37,6 @@ class GoldenChickUSSpider(Where2GetItSpider):
         item["opening_hours"] = oh
 
         apply_category(Categories.FAST_FOOD, item)
-        item["extras"]["cuisine"] = "chicken"
 
         yield item
 
