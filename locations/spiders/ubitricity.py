@@ -1,31 +1,28 @@
-from typing import AsyncIterator
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class UbitricitySpider(Spider):
+class UbitricitySpider(JSONBlobSpider):
     name = "ubitricity"
     item_attributes = {"brand": "ubitricity", "brand_wikidata": "Q113699692"}
+    api_url = "https://api.shell.com/ubitricity/direct-access/api/direct-access/locations"
+    start_urls = [f"{api_url}?pageNumber=1&pageSize=200"]
+    locations_key = "data"
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(
-            url="https://portal-api.mobilstrom.de/v1/external_ssos/search?sso_types%5B%5D=ubitricity&bounds=-90,-180,90,180",
-            headers={"X-API-TOKEN": "WEB_1049d590-d150-4f39-8240-3484a64dcc4c"},
-        )
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest | Feature]:
+        yield from super().parse(response)
+        data = response.json()
+        if data["currentPage"] < data["totalPages"]:
+            yield JsonRequest(url=f"{self.api_url}?pageNumber={data['currentPage'] + 1}&pageSize=200")
 
-    def parse(self, response, **kwargs):
-        for location in response.json():
-            location["location"] = location["address"].pop("location")
-            location["address"]["street_address"] = merge_address_lines(
-                [location["address"].pop("street"), location["address"].pop("street2")]
-            )
-            location["ref"] = location["ssoId"]
-
-            item = DictParser.parse(location)
-            apply_category(Categories.CHARGING_STATION, item)
-            yield item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if not feature.get("coordinates"):
+            return
+        item["ref"] = feature["cpoLocationId"]
+        apply_category(Categories.CHARGING_STATION, item)
+        yield item
