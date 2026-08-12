@@ -43,8 +43,9 @@ class TractorSupplySpider(SitemapSpider):
     def parse_hours(self, raw: str | None) -> OpeningHours:
         oh = OpeningHours()
         for day, value in json.loads(raw or "{}").items():
-            if " - " not in value:
-                continue
-            open_time, close_time = (t.strip() for t in value.split(" - "))
-            oh.add_range(day, open_time, close_time, time_format="%I:%M %p")
+            if " - " in value:
+                open_time, close_time = value.split(" - ")
+                oh.add_range(day, open_time.strip(), close_time.strip(), time_format="%I:%M %p")
+            elif "close" in value.lower():
+                oh.set_closed(day)
         return oh
