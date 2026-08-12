@@ -1,41 +1,17 @@
-from copy import deepcopy
-from typing import Any
+from typing import Iterable
 
-import scrapy
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class MitsubishiBRSpider(scrapy.Spider):
+class MitsubishiBRSpider(StructuredDataSpider):
     name = "mitsubishi_br"
     item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
-    start_urls = ["https://api.mitsubishimotors.com.br/search/api/dealer/v1.0/nearest?page=0&size=1000"]
+    start_urls = ["https://www.mitsubishimotors.com.br/concessionarias"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for dealer in response.json().get("results", []):
-            item = DictParser.parse(dealer)
-            item["branch"] = item.pop("name")
-            website = dealer.get("website")
-            if website and not website.startswith("https"):
-                item["website"] = "https://" + website.strip()
-
-            if dealer.get("newCars"):
-                sales_item = deepcopy(item)
-                sales_item["ref"] = f"{item['ref']}-sales"
-                apply_category(Categories.SHOP_CAR, sales_item)
-                apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, dealer.get("nearlyNewCars"))
-                yield sales_item
-
-            if dealer.get("postSalesServices"):
-                service_item = deepcopy(item)
-                service_item["ref"] = f"{item['ref']}-service"
-                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-                yield service_item
-
-            if dealer.get("kitCarParts"):
-                parts_item = deepcopy(item)
-                parts_item["ref"] = f"{item['ref']}-parts"
-                apply_category(Categories.SHOP_CAR_PARTS, parts_item)
-                yield parts_item
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_CAR, item)
+        yield item
