@@ -15,7 +15,7 @@ BRANDS = {
 
 class ErciyesAnadoluHoldingTRSpider(scrapy.Spider):
     name = "erciyes_anadolu_holding_tr"
-    custom_settings = {"DOWNLOAD_DELAY": 3}
+    custom_settings = {"DOWNLOAD_DELAY": 2}
     start_urls = ["https://brandapi.erciyes.com/api/ContactApi/GetCities"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -31,11 +31,12 @@ class ErciyesAnadoluHoldingTRSpider(scrapy.Spider):
         brand = BRANDS[kwargs["brand"]]
         for details in response.json():
             details["city"] = details.pop("Province")
-            details["name"] = details.pop("FirmName")
             details["address"] = details.pop("Adres")
             ref = f"{brand['brand']}-{details['Coordinates']}"
+            branch = details.pop("FirmName")
             item = DictParser.parse(details)
             item.update(brand)
+            item["branch"] = branch
             item["ref"] = ref
             apply_category(Categories.SHOP_FURNITURE, item)
             yield item
