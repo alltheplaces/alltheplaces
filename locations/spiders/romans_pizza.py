@@ -4,6 +4,7 @@ from typing import Any, AsyncIterator, Iterable
 from scrapy import Request
 from scrapy.http import JsonRequest, Response, TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -41,6 +42,7 @@ class RomansPizzaSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Request]:
         item["branch"] = re.sub(r"^Roman[`'’]?s Pizza\s*", "", item.pop("name") or "").strip()
         item["website"] = f"https://romanspizza.co.za/store-locator/{item['ref']}"
+        apply_category(Categories.FAST_FOOD, item)
         yield Request(
             url=f"{API_ROOT}/api/customer/store/withDetails/{item['ref']}",
             headers=TENANT_HEADERS,
