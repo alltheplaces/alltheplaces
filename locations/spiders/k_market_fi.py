@@ -6,6 +6,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import FIREFOX_LATEST
 
 K_CITYMARKET = {"brand": "K-Citymarket", "brand_wikidata": "Q11868561"}
 K_MARKET = {"brand": "K-Market", "brand_wikidata": "Q11868562"}
@@ -18,7 +19,7 @@ class KMarketFISpider(SitemapSpider, StructuredDataSpider):
     sitemap_follow = ["stores-"]
     sitemap_rules = [("/kauppa/", "parse")]
     wanted_types = ["GroceryStore"]
-    requires_proxy = True
+    custom_settings = {"USER_AGENT": FIREFOX_LATEST, "DEFAULT_REQUEST_HEADERS": {"Alt-Used": "www.k-ruoka.fi"}}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if "/kauppa/k-citymarket-" in response.url:
