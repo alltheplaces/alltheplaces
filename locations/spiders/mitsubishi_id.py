@@ -45,15 +45,15 @@ class MitsubishiIDSpider(JSONBlobSpider):
                 shop_item = deepcopy(item)
                 shop_item["ref"] = f"{item['ref']}-shop"
                 apply_category(Categories.SHOP_CAR, shop_item)
-                apply_yes_no(Extras.CAR_REPAIR, shop_item, has_service)
-                apply_yes_no(Extras.CAR_PARTS, shop_item, has_parts)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, shop_item, has_service)
+                apply_yes_no(Extras.VEHICLE_CAR_PARTS_SALES, shop_item, has_parts)
                 yield shop_item
 
             if has_service:
                 repair_item = deepcopy(item)
                 repair_item["ref"] = f"{item['ref']}-repair"
                 apply_category(Categories.SHOP_CAR_REPAIR, repair_item)
-                apply_yes_no(Extras.CAR_PARTS, repair_item, has_parts)
+                apply_yes_no(Extras.VEHICLE_CAR_PARTS_SALES, repair_item, has_parts)
                 yield repair_item
 
             if has_parts:
