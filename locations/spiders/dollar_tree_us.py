@@ -8,6 +8,7 @@ from locations.storefinders.yext_answers import YextAnswersSpider
 class DollarTreeUSSpider(YextAnswersSpider):
     name = "dollar_tree_us"
     item_attributes = {"brand": "Dollar Tree", "brand_wikidata": "Q5289230"}
+    endpoint = "https://prod-cdn.us.yextapis.com/v2/accounts/me/search/vertical/query"
     api_key = "7a860787290ef5396ebe3ffe229d96c3"
     experience_key = "pages-locator-usa-only"
     feature_type = "dollar-tree-usa"
