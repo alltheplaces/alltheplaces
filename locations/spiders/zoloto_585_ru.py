@@ -18,7 +18,7 @@ class Zoloto585RUSpider(JSONBlobSpider):
         feature["ref"] = feature.pop("xmlId", None)
         feature.pop("name", None)
         feature["street_address"] = feature.pop("address", None)
-        feature["addr_full"] = feature.pop("addressFull", None)
+        feature.pop("addressFull", None)
         feature["city"] = (feature.pop("city", None) or {}).get("name")
         feature.pop("phone", None)
         if email := feature.pop("email", None):
