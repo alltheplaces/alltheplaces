@@ -23,7 +23,7 @@ class SofiaUrbanMobilityCenterBGSpider(JSONBlobSpider):
         feature["name_en"] = names.get("en")
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name")
+        item["extras"]["branch:bg"] = item["branch"] = item.pop("name")
         if feature.get("name_en"):
             item["extras"]["branch:en"] = feature["name_en"]
 
