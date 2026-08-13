@@ -50,12 +50,8 @@ class SsangyongAUSpider(JSONBlobSpider):
             service_item["phone"] = feature.get(f"{prefix}Telephone")
             service_item["email"] = feature.get(f"{prefix}Email")
             service_item["opening_hours"] = OpeningHours()
-            service_item["opening_hours"].add_ranges_from_string(
-                "Mon-Fri: {}, Sat: {}, Sun: {}".format(
-                    feature.get(f"{prefix}OpenMonFri") or "closed",
-                    feature.get(f"{prefix}OpenSaturday") or "closed",
-                    feature.get(f"{prefix}OpenSunday") or "closed",
-                )
-            )
+            for days, key in [("Mon-Fri", "OpenMonFri"), ("Sat", "OpenSaturday"), ("Sun", "OpenSunday")]:
+                if hours := feature.get(f"{prefix}{key}"):
+                    service_item["opening_hours"].add_ranges_from_string(f"{days}: {hours}")
             apply_category(category, service_item)
             yield service_item
