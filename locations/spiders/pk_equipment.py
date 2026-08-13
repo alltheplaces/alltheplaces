@@ -1,29 +1,21 @@
 import re
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
 
-from locations.structured_data_spider import StructuredDataSpider
+from locations.hours import DAYS_EN
+from locations.items import Feature
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class PkEquipmentSpider(StructuredDataSpider):
+class PkEquipmentSpider(WPStoreLocatorSpider):
     name = "pk_equipment"
     item_attributes = {"brand": "P&K Equipment", "extras": {"shop": "tractor"}}
-    allowed_domains = ["pkequipment.com"]
-    start_urls = ("https://www.pkequipment.com/about-us/locations/",)
+    allowed_domains = ["www.pkequipment.com"]
+    days = DAYS_EN
 
-    def parse(self, response):
-        urls = response.xpath('//div[@class="li-text"]/h2/a/@href').extract()
-
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_sd)
-
-    def post_process_item(self, item, response, ld_data):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        mapdata = response.xpath('//div[@class="clearfix map_equipment"]/script[2]').extract_first()
-        lat = re.search(r'(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata).group(1)
-        lon = re.search(r'(?:lat":)(-?\d+\.\d+),.*(?:long":)(-?\d*.\d*)', mapdata).group(2)
-        item["ref"] = ref
-        item["lat"] = float(lat)
-        item["lon"] = float(lon)
-
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        slug = re.sub(r"[^a-z0-9]+", "-", feature["store"].lower()).strip("-")
+        item["website"] = f"https://www.pkequipment.com/{slug}/"
         yield item
