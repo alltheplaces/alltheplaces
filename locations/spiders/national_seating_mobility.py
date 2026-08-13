@@ -18,5 +18,6 @@ class NationalSeatingMobilitySpider(SitemapSpider, StructuredDataSpider):
         item["lat"] = ld_data.get("latitude")
         item["lon"] = ld_data.get("longitude")
         item.pop("name", None)
+        item.pop("image", None)
         apply_category(Categories.SHOP_MEDICAL_SUPPLY, item)
         yield item
