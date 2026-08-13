@@ -6,7 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.react_server_components import parse_rsc
 from locations.spiders.mcdonalds import McdonaldsSpider
@@ -27,6 +27,8 @@ class McdonaldsHKSpider(Spider):
 
         for store in DictParser.get_nested_key(data, "restaurants"):
             item = DictParser.parse(store)
+            # DictParser maps the feed's region onto state
+            item.pop("state", None)
             item["ref"] = store["rid"]
             item["branch"] = item.pop("name")
             item["website"] = "https://www.mcdonalds.com.hk/en/find-a-restaurant/{}/".format(store["storeNo"])
@@ -36,9 +38,9 @@ class McdonaldsHKSpider(Spider):
                 for rule in schedule["hours"]:
                     if rule["start"] == "00:00" and rule["end"] == "00:00":
                         # The website renders this range as "Open 24 Hours", not as a closed day.
-                        item["opening_hours"].add_range(DAYS_EN[rule["day"]], "00:00", "24:00")
+                        item["opening_hours"].add_range(rule["day"], "00:00", "24:00")
                     elif "$undefined" not in (rule["start"], rule["end"]):
-                        item["opening_hours"].add_range(DAYS_EN[rule["day"]], rule["start"], rule["end"])
+                        item["opening_hours"].add_range(rule["day"], rule["start"], rule["end"])
 
             apply_category(Categories.FAST_FOOD, item)
 
