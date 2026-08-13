@@ -18,6 +18,7 @@ class KMarketFISpider(SitemapSpider, StructuredDataSpider):
     sitemap_follow = ["stores-"]
     sitemap_rules = [("/kauppa/", "parse")]
     wanted_types = ["GroceryStore"]
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if "/kauppa/k-citymarket-" in response.url:
