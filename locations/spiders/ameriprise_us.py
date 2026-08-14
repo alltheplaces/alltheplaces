@@ -4,6 +4,7 @@ import scrapy
 from scrapy.http import JsonRequest
 from scrapy.spiders import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -39,4 +40,5 @@ class AmeripriseUSSpider(Spider):
                 item = DictParser.parse(location)
                 item.pop("name")
                 item["ref"] = item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
+                apply_category(Categories.OFFICE_FINANCIAL_ADVISOR, item)
                 yield item
