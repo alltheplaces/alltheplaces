@@ -11,6 +11,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 DEUTSCHE_POST = {"brand": "Deutsche Post", "brand_wikidata": "Q157645"}
 
+
 class DeutschePostDESpider(Spider):
     name = "deutsche_post_de"
     allowed_domains = ["www.deutschepost.de"]
