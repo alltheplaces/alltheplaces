@@ -35,6 +35,7 @@ class BiocoopFRSpider(XMLFeedSpider):
         item["website"] = selector.xpath("external_link/text()").get()
         if item["website"] == "" or item["website"] == "null":
             item["website"] = selector.xpath("store_url/text()").get()
+        item["extras"]["organic"] = "only"
 
         return item
 
