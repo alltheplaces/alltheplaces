@@ -10,7 +10,6 @@ class MindGBSpider(JSONBlobSpider):
     name = "mind_gb"
     item_attributes = {"brand": "Mind", "brand_wikidata": "Q3314763"}
     start_urls = ["https://www.mind.org.uk/mind-charity-shops/find-our-local-mind-shops/"]
-    requires_proxy = True
 
     def parse(self, response):
         match = re.search(r"const locations = ([^\n]+)", response.text)
