@@ -6,7 +6,7 @@ from scrapy_camoufox.page import PageMethod
 
 from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
@@ -79,7 +79,7 @@ class FullersGBSpider(CamoufoxSpider):
             for day in (information["timesData"] or {}).get("openingTimes", []):
                 for times in day["values"]:
                     if times == "Closed":
-                        item["opening_hours"].set_closed(DAYS_EN[day["label"]])
+                        item["opening_hours"].set_closed(day["label"])
                     else:
                         item["opening_hours"].add_range(day["label"], *times.split("-"))
 
