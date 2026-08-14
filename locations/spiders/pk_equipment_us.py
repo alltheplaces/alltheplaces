@@ -8,8 +8,8 @@ from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class PkEquipmentSpider(WPStoreLocatorSpider):
-    name = "pk_equipment"
+class PkEquipmentUSSpider(WPStoreLocatorSpider):
+    name = "pk_equipment_us"
     item_attributes = {"brand": "P&K Equipment", "extras": {"shop": "tractor"}}
     allowed_domains = ["www.pkequipment.com"]
     days = DAYS_EN
