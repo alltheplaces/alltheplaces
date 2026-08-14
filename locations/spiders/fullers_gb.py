@@ -1,89 +1,66 @@
-import re
 from typing import AsyncIterator, Iterable
 
-from scrapy.http import FormRequest, JsonRequest, Request, Response
+from scrapy import Request, Spider
+from scrapy.http import FormRequest, Response
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
-from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
+FEED_URL = "https://www.fullers.co.uk/api/main/pubs/feed"
+INFORMATION_URL = "https://www.fullers.co.uk/api/main/pubs/information?pubId={}"
 
-class FullersGBSpider(JSONBlobSpider, StructuredDataSpider):
+
+class FullersGBSpider(Spider):
     name = "fullers_gb"
-    item_attributes = {
-        "brand": "Fuller's",
-        "brand_wikidata": "Q5253950",
-    }
+    item_attributes = {"brand": "Fuller's", "brand_wikidata": "Q5253950"}
+    allowed_domains = ["fullers.co.uk"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
 
-    custom_settings = {
-        "COOKIES_ENABLED": True,
-        "USER_AGENT": BROWSER_DEFAULT,
-    }
-    locations_key = ["items"]
-    wanted_types = ["restaurant"]
-    requires_proxy = True
-
-    def make_request(self, page: int) -> FormRequest:
+    def feed_request(self, page: int) -> FormRequest:
         return FormRequest(
-            url="https://www.fullers.co.uk/api/main/pubs/feed",
-            formdata={
-                "pageNumber": str(page),
-                "latitude": "0",
-                "longitude": "0",
-                "categories": [],
-                "area": "",
-            },
-            method="POST",
-            headers={
-                "Host": "www.fullers.co.uk",
-                "Accept": "application/json",
-            },
+            FEED_URL,
+            formdata={"pageNumber": str(page), "latitude": "0", "longitude": "0", "area": ""},
+            callback=self.parse_feed,
         )
 
     async def start(self) -> AsyncIterator[FormRequest]:
-        yield self.make_request(1)
+        # Page count is only known from a response, so start at the first page
+        # and let parse_feed request the rest.
+        yield self.feed_request(1)
 
-    def parse(self, response: Response) -> Iterable[Feature]:
-        features = self.extract_json(response)
-        for feature in features:
-            if feature["link"]:
-                yield Request(url=feature["link"], meta={"ref": feature["pubId"]}, callback=self.parse_sd)
-            else:
-                if feature is None:
-                    continue
-                feature["id"] = feature["pubId"]
-                item = DictParser.parse(feature)
-                if feature["subTitle"]:
-                    item["addr_full"] = feature["subTitle"]
-                if feature["link"]:
-                    item["website"] = feature["link"]
-                yield JsonRequest(
-                    url="https://www.fullers.co.uk/api/main/pubs/information?pubId=" + feature["pubId"],
-                    cb_kwargs={"item": item},
-                    headers={
-                        "Host": "www.fullers.co.uk",
-                        "Accept": "application/json",
-                        "Content-Type": "application/json",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0",
-                    },
-                    callback=self.post_process_item_json,
-                )
+    def parse_feed(self, response: Response) -> Iterable[Request]:
+        feed = response.json()
+        for pub in feed["items"]:
+            # Coordinates and opening hours are only on the information endpoint.
+            yield Request(INFORMATION_URL.format(pub["pubId"]), callback=self.parse_pub, cb_kwargs={"pub": pub})
+        if feed["currentPage"] < feed["totalPages"]:
+            yield self.feed_request(feed["currentPage"] + 1)
 
-        if response.json()["totalPages"] > response.json()["currentPage"]:
-            yield self.make_request(int(response.json()["currentPage"]) + 1)
+    def parse_pub(self, response: Response, pub: dict) -> Iterable[Feature]:
+        information = response.json()
 
-    def post_process_item_json(self, response, item):
-        item["lat"] = response.json()["googleMaps"]["coords"]["lat"]
-        item["lon"] = response.json()["googleMaps"]["coords"]["lng"]
-        item["phone"] = response.json()["socials"]["phoneNumber"]["value"]
-        item["email"] = response.json()["socials"]["email"]["value"]
-        yield item
+        item = Feature()
+        item["ref"] = pub["pubId"]
+        item["addr_full"] = pub["subTitle"]
+        item["lat"] = information["googleMaps"]["coords"]["lat"]
+        item["lon"] = information["googleMaps"]["coords"]["lng"]
+        item["phone"] = information["socials"]["phoneNumber"]["value"]
+        item["email"] = information["socials"]["email"]["value"]
+        item["website"] = information["socials"]["website"]["link"]
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if "data-marker-lat" in response.text:
-            item["lat"] = re.search(r'data-marker-lat="(-?\d+\.\d+)"', response.text).group(1)
-            item["lon"] = re.search(r'data-marker-lng="(-?\d+\.\d+)"', response.text).group(1)
-        item["ref"] = response.meta["ref"]
+        # Titles append the locality, eg "The Willow, Bourton-on-the-Water". Split from the
+        # right as some pub names contain a comma, eg "The Lock, Stock & Barrel, Newbury".
+        item["branch"] = pub["title"].rsplit(",", 1)[0]
+
+        item["opening_hours"] = OpeningHours()
+        for day in (information["timesData"] or {}).get("openingTimes", []):
+            for times in day["values"]:
+                if times == "Closed":
+                    item["opening_hours"].set_closed(DAYS_EN[day["label"]])
+                else:
+                    item["opening_hours"].add_range(day["label"], *times.split("-"))
+
+        apply_category(Categories.PUB, item)
         yield item
