@@ -69,11 +69,13 @@ class LidlSpider(Spider):
             item["lon"] = location["address"]["longitude"]
             item["ref"] = location["objectNumber"]
 
+            item["country"] = country
             if country == "BG":
                 item["brand_wikidata"] = "Q108169047"
             elif country == "RS":
                 item["brand_wikidata"] = "Q114509929"
-            item["country"] = country
+            elif country == "NI":
+                item["country"] = "GB"
 
             features = [x["name"] for x in location["marketingData"]["infoIcons"]]
             apply_yes_no("cash_withdrawal", item, "cashBack" in features)
