@@ -1,66 +1,80 @@
 from typing import AsyncIterator, Iterable
 
-from scrapy import Request, Spider
-from scrapy.http import FormRequest, Response
+from scrapy import Request
+from scrapy.http import Response
+from scrapy_camoufox.page import PageMethod
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
-FEED_URL = "https://www.fullers.co.uk/api/main/pubs/feed"
-INFORMATION_URL = "https://www.fullers.co.uk/api/main/pubs/information?pubId={}"
+PUB_FINDER_URL = "https://www.fullers.co.uk/pubs/pub-finder"
+PUBS_FETCH_JS = """async () => {
+    const BATCH = 30;
+    const fetchJson = async (url, init) => {
+        const response = await fetch(url, init);
+        if (!response.ok) throw new Error(url + " returned HTTP " + response.status);
+        return await response.json();
+    };
+    const feedPage = (page) => fetchJson("/api/main/pubs/feed", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: "pageNumber=" + page + "&latitude=0&longitude=0&area=",
+    });
+
+    const firstPage = await feedPage(1);
+    const remaining = [];
+    for (let page = 2; page <= firstPage.totalPages; page++) remaining.push(feedPage(page));
+
+    const pubs = [...firstPage.items];
+    for (const feed of await Promise.all(remaining)) pubs.push(...feed.items);
+
+    for (let i = 0; i < pubs.length; i += BATCH) {
+        await Promise.all(pubs.slice(i, i + BATCH).map(async (pub) => {
+            pub.information = await fetchJson("/api/main/pubs/information?pubId=" + pub.pubId);
+        }));
+    }
+    return pubs;
+}"""
 
 
-class FullersGBSpider(Spider):
+class FullersGBSpider(CamoufoxSpider):
     name = "fullers_gb"
     item_attributes = {"brand": "Fuller's", "brand_wikidata": "Q5253950"}
     allowed_domains = ["fullers.co.uk"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "DEFAULT_REQUEST_HEADERS": {"Accept": "application/json"}}
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {
+        "CAMOUFOX_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "fetch"]
+    }
 
-    def feed_request(self, page: int) -> FormRequest:
-        return FormRequest(
-            FEED_URL,
-            formdata={"pageNumber": str(page), "latitude": "0", "longitude": "0", "area": ""},
-            callback=self.parse_feed,
-        )
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(PUB_FINDER_URL, meta={"camoufox_page_methods": [PageMethod("evaluate", PUBS_FETCH_JS)]})
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        # Page count is only known from a response, so start at the first page
-        # and let parse_feed request the rest.
-        yield self.feed_request(1)
+    def parse(self, response: Response) -> Iterable[Feature]:
+        for pub in response.meta["camoufox_page_methods"][0].result:
+            information = pub["information"]
 
-    def parse_feed(self, response: Response) -> Iterable[Request]:
-        feed = response.json()
-        for pub in feed["items"]:
-            # Coordinates and opening hours are only on the information endpoint.
-            yield Request(INFORMATION_URL.format(pub["pubId"]), callback=self.parse_pub, cb_kwargs={"pub": pub})
-        if feed["currentPage"] < feed["totalPages"]:
-            yield self.feed_request(feed["currentPage"] + 1)
+            item = Feature()
+            item["ref"] = pub["pubId"]
+            item["addr_full"] = pub["subTitle"]
+            item["lat"] = information["googleMaps"]["coords"]["lat"]
+            item["lon"] = information["googleMaps"]["coords"]["lng"]
+            item["phone"] = information["socials"]["phoneNumber"]["value"]
+            item["email"] = information["socials"]["email"]["value"]
+            item["website"] = information["socials"]["website"]["link"]
 
-    def parse_pub(self, response: Response, pub: dict) -> Iterable[Feature]:
-        information = response.json()
+            # Titles append the locality, eg "The Willow, Bourton-on-the-Water". Split from the
+            # right as some pub names contain a comma, eg "The Lock, Stock & Barrel, Newbury".
+            item["branch"] = pub["title"].rsplit(",", 1)[0]
 
-        item = Feature()
-        item["ref"] = pub["pubId"]
-        item["addr_full"] = pub["subTitle"]
-        item["lat"] = information["googleMaps"]["coords"]["lat"]
-        item["lon"] = information["googleMaps"]["coords"]["lng"]
-        item["phone"] = information["socials"]["phoneNumber"]["value"]
-        item["email"] = information["socials"]["email"]["value"]
-        item["website"] = information["socials"]["website"]["link"]
+            item["opening_hours"] = OpeningHours()
+            for day in (information["timesData"] or {}).get("openingTimes", []):
+                for times in day["values"]:
+                    if times == "Closed":
+                        item["opening_hours"].set_closed(DAYS_EN[day["label"]])
+                    else:
+                        item["opening_hours"].add_range(day["label"], *times.split("-"))
 
-        # Titles append the locality, eg "The Willow, Bourton-on-the-Water". Split from the
-        # right as some pub names contain a comma, eg "The Lock, Stock & Barrel, Newbury".
-        item["branch"] = pub["title"].rsplit(",", 1)[0]
-
-        item["opening_hours"] = OpeningHours()
-        for day in (information["timesData"] or {}).get("openingTimes", []):
-            for times in day["values"]:
-                if times == "Closed":
-                    item["opening_hours"].set_closed(DAYS_EN[day["label"]])
-                else:
-                    item["opening_hours"].add_range(day["label"], *times.split("-"))
-
-        apply_category(Categories.PUB, item)
-        yield item
+            apply_category(Categories.PUB, item)
+            yield item
