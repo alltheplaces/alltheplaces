@@ -10,35 +10,6 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
-PUB_FINDER_URL = "https://www.fullers.co.uk/pubs/pub-finder"
-PUBS_FETCH_JS = """async () => {
-    const BATCH = 30;
-    const fetchJson = async (url, init) => {
-        const response = await fetch(url, init);
-        if (!response.ok) throw new Error(url + " returned HTTP " + response.status);
-        return await response.json();
-    };
-    const feedPage = (page) => fetchJson("/api/main/pubs/feed", {
-        method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: "pageNumber=" + page + "&latitude=0&longitude=0&area=",
-    });
-
-    const firstPage = await feedPage(1);
-    const remaining = [];
-    for (let page = 2; page <= firstPage.totalPages; page++) remaining.push(feedPage(page));
-
-    const pubs = [...firstPage.items];
-    for (const feed of await Promise.all(remaining)) pubs.push(...feed.items);
-
-    for (let i = 0; i < pubs.length; i += BATCH) {
-        await Promise.all(pubs.slice(i, i + BATCH).map(async (pub) => {
-            pub.information = await fetchJson("/api/main/pubs/information?pubId=" + pub.pubId);
-        }));
-    }
-    return pubs;
-}"""
-
 
 class FullersGBSpider(CamoufoxSpider):
     name = "fullers_gb"
@@ -49,7 +20,43 @@ class FullersGBSpider(CamoufoxSpider):
     }
 
     async def start(self) -> AsyncIterator[Request]:
-        yield Request(PUB_FINDER_URL, meta={"camoufox_page_methods": [PageMethod("evaluate", PUBS_FETCH_JS)]})
+        yield Request(
+            "https://www.fullers.co.uk/pubs/pub-finder",
+            meta={
+                "camoufox_page_methods": [
+                    PageMethod(
+                        "evaluate",
+                        """async () => {
+                                    const BATCH = 30;
+                                    const fetchJson = async (url, init) => {
+                                        const response = await fetch(url, init);
+                                        if (!response.ok) throw new Error(url + " returned HTTP " + response.status);
+                                        return await response.json();
+                                    };
+                                    const feedPage = (page) => fetchJson("/api/main/pubs/feed", {
+                                        method: "POST",
+                                        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                                        body: "pageNumber=" + page + "&latitude=0&longitude=0&area=",
+                                    });
+
+                                    const firstPage = await feedPage(1);
+                                    const remaining = [];
+                                    for (let page = 2; page <= firstPage.totalPages; page++) remaining.push(feedPage(page));
+
+                                    const pubs = [...firstPage.items];
+                                    for (const feed of await Promise.all(remaining)) pubs.push(...feed.items);
+
+                                    for (let i = 0; i < pubs.length; i += BATCH) {
+                                        await Promise.all(pubs.slice(i, i + BATCH).map(async (pub) => {
+                                            pub.information = await fetchJson("/api/main/pubs/information?pubId=" + pub.pubId);
+                                        }));
+                                    }
+                                    return pubs;
+                                }""",
+                    )
+                ]
+            },
+        )
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for pub in response.meta["camoufox_page_methods"][0].result:
