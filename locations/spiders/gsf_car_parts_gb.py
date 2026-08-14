@@ -18,6 +18,7 @@ class GsfCarPartsGBSpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow=r"/branches/[^/]+$"), callback="parse_sd")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_DELAY": 2}
     wanted_types = ["Organization"]
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("GSF Car Parts - ")
