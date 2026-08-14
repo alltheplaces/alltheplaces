@@ -73,7 +73,7 @@ class FullersGBSpider(CamoufoxSpider):
 
             # Titles append the locality, eg "The Willow, Bourton-on-the-Water". Split from the
             # right as some pub names contain a comma, eg "The Lock, Stock & Barrel, Newbury".
-            item["branch"] = pub["title"].rsplit(",", 1)[0]
+            item["name"] = pub["title"].rsplit(",", 1)[0]
 
             item["opening_hours"] = OpeningHours()
             for day in (information["timesData"] or {}).get("openingTimes", []):
