@@ -9,16 +9,17 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class GsfCarPartsGBSpider(CrawlSpider, StructuredDataSpider):
+class GsfCarPartsGBSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
     name = "gsf_car_parts_gb"
     item_attributes = {"brand": "GSF Car Parts", "brand_wikidata": "Q80963064"}
     start_urls = ["https://www.gsfcarparts.com/branches"]
     rules = [Rule(LinkExtractor(allow=r"/branches/[^/]+$"), callback="parse_sd")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_DELAY": 2}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_DELAY": 2}
     wanted_types = ["Organization"]
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("GSF Car Parts - ")
