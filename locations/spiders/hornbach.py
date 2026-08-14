@@ -29,12 +29,13 @@ class HornbachSpider(PlaywrightSpider):
         "https://www.hornbach.sk",
     ]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True  # Helps to skip anti bot protection
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         client_config = chompjs.parse_js_object(
-            response.xpath('//script[contains(text(), "OIDC_CLIENT_CONFIG")]/text()').get()
+            response.xpath('//script[contains(text(), "companyCode")]/text()').get()
         )
-        locale = client_config.get("ui_locales")
+        locale = client_config.get("locale")
         company_code = client_config.get("companyCode")
         if locale and company_code:
             yield JsonRequest(
