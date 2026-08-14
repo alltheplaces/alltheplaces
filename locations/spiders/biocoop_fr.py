@@ -3,8 +3,8 @@ import json
 from scrapy.spiders import XMLFeedSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class BiocoopFRSpider(XMLFeedSpider):
@@ -13,15 +13,10 @@ class BiocoopFRSpider(XMLFeedSpider):
 
     # their server is quite slow, can take more than 15s to answer in peak hours
     start_urls = ["https://www.biocoop.fr//rest/V1/searchstores/query/all"]
-    custom_settings = {
-        "DOWNLOAD_TIMEOUT": 40
-    }
-    
+    custom_settings = {"DOWNLOAD_TIMEOUT": 40}
+
     itertag = "item"
-    item_attributes = {
-        "brand": "Biocoop",
-        "brand_wikidata": "Q2904039"
-    }
+    item_attributes = {"brand": "Biocoop", "brand_wikidata": "Q2904039"}
 
     def parse_node(self, response, selector):
         item = Feature()
@@ -37,7 +32,7 @@ class BiocoopFRSpider(XMLFeedSpider):
         item["lon"] = selector.xpath("longitude/text()").get()
         item["phone"] = selector.xpath("telephone/text()").get()
         item["opening_hours"] = self.decode_hours(json.loads(selector.xpath("openinghours_json/text()").get()))
-        item["website"] = selector.xpath("external_link/text()").get() 
+        item["website"] = selector.xpath("external_link/text()").get()
         if item["website"] == "" or item["website"] == "null":
             item["website"] = selector.xpath("store_url/text()").get()
 
@@ -54,21 +49,9 @@ class BiocoopFRSpider(XMLFeedSpider):
             # am_start and pm_end have a non-empty value
             if opening_hours[day]["am_end"] == "" and opening_hours[day]["pm_start"] == "":
                 # Open all day or closed all day
-                oh.add_range(
-                    day,
-                    opening_hours[day]["am_start"],
-                    opening_hours[day]["pm_end"]
-                )
+                oh.add_range(day, opening_hours[day]["am_start"], opening_hours[day]["pm_end"])
             else:
                 # Open for half a day or with a lunch break
-                oh.add_range(
-                    day,
-                    opening_hours[day]["am_start"],
-                    opening_hours[day]["am_end"]
-                )
-                oh.add_range(
-                    day,
-                    opening_hours[day]["pm_start"],
-                    opening_hours[day]["pm_end"]
-                )
+                oh.add_range(day, opening_hours[day]["am_start"], opening_hours[day]["am_end"])
+                oh.add_range(day, opening_hours[day]["pm_start"], opening_hours[day]["pm_end"])
         return oh
