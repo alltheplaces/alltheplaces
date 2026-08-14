@@ -13,7 +13,6 @@ class AmeripriseUSSpider(Spider):
     name = "ameriprise_us"
     item_attributes = {"brand": "Ameriprise Financial", "brand_wikidata": "Q2843129"}
     start_urls = ["https://www.ameripriseadvisors.com/find-a-financial-advisor-by-state/"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response):
         # Extract list of states
