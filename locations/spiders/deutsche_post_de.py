@@ -46,13 +46,12 @@ class DeutschePostDESpider(Spider):
         for hour in hours:
             if not hour["type"] == "OPENINGHOUR":
                 continue
-            if ":" not in hour["timefrom"]:
+            time_from, time_to = hour.get("timeFrom", ""), hour.get("timeTo", "")
+            if ":" not in time_from or ":" not in time_to:
                 continue
-            if hour["timefrom"] == "24:00":
-                hour["timefrom"] = "23:59"
-            opening_hours.add_range(
-                day=DAYS[hour["weekday"] - 1], open_time=hour["timefrom"], close_time=hour["timeto"]
-            )
+            if time_from == "24:00":
+                time_from = "23:59"
+            opening_hours.add_range(day=DAYS[hour["weekday"] - 1], open_time=time_from, close_time=time_to)
         return opening_hours
 
     def parse(self, response, **kwargs):
