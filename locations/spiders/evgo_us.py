@@ -124,6 +124,7 @@ def state_codes(sitemap_body: str) -> list[str]:
     """State codes linked from states-sitemap.xml, in file order."""
     return list(dict.fromkeys(STATE_URL.findall(sitemap_body)))
 
+
 class EvgoUSSpider(PlaywrightSpider):
     name = "evgo_us"
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
@@ -151,9 +152,7 @@ class EvgoUSSpider(PlaywrightSpider):
     def parse_states(self, response: Response) -> Iterable[Request]:
         codes = state_codes(response.text)
         if not codes:
-            self.logger.error(
-                "states-sitemap.xml held no state pages. First 300 chars: {}".format(response.text[:300])
-            )
+            self.logger.error("states-sitemap.xml held no state pages. First 300 chars: {}".format(response.text[:300]))
             self.crawler.stats.inc_value(f"atp/{self.name}/states_sitemap_empty")
             yield from self.fallback_states()
             return
@@ -164,7 +163,9 @@ class EvgoUSSpider(PlaywrightSpider):
             yield self._browser_request(f"{BASE}/find-a-charger/{code}/", self.parse_state)
 
     def states_failed(self, failure) -> Iterable[Request]:
-        self.logger.error("states-sitemap.xml unreachable ({}), falling back to the built-in state list".format(failure.value))
+        self.logger.error(
+            "states-sitemap.xml unreachable ({}), falling back to the built-in state list".format(failure.value)
+        )
         self.crawler.stats.inc_value(f"atp/{self.name}/states_sitemap_unreachable")
         yield from self.fallback_states()
 
