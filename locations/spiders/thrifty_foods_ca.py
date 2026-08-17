@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class ThriftyFoodsCASpider(SitemapSpider, StructuredDataSpider):
@@ -17,6 +18,7 @@ class ThriftyFoodsCASpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/stores/\d+-", "parse_sd")]
     wanted_types = ["GroceryStore"]
     requires_proxy = True
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
         item["ref"] = response.url.rsplit("/", 1)[-1].split("-", 1)[0]
