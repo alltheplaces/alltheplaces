@@ -20,7 +20,7 @@ class GoldwagenSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["name"] = response.xpath('//h1[@class="entry-title"]/text()').get()
+        item["name"] = response.xpath('//h1[@class="entry-title"]/text()').get("")
         if item["name"].startswith("Goldwagen"):
             item["branch"] = item.pop("name").removeprefix("Goldwagen").strip(" –")
 
