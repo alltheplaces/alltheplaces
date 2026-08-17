@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.licenses import Licenses
 from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
@@ -41,11 +41,11 @@ class NationalRegisterOfHistoricPlacesSpider(ArcGISFeatureServerSpider):
     # and "structure" each span too much (battlefields, landscapes and ruins;
     # bridges, dams and ships) for a more specific tag to be correct.
     resource_types = {
-        "building": {"historic": "building"},
-        "district": {"historic": "district"},
-        "object": {"historic": "monument"},
-        "site": {"historic": "yes"},
-        "structure": {"historic": "yes"},
+        "building": Categories.HISTORIC_BUILDING,
+        "district": Categories.HISTORIC_DISTRICT,
+        "object": Categories.MONUMENT,
+        "site": Categories.GENERIC_HISTORIC,
+        "structure": Categories.GENERIC_HISTORIC,
     }
 
     # The register covers US states and territories, a handful of properties in
@@ -99,7 +99,7 @@ class NationalRegisterOfHistoricPlacesSpider(ArcGISFeatureServerSpider):
         else:
             self.logger.warning("Unknown NRHP resource type `{}`.".format(feature["ResType"]))
             self.crawler.stats.inc_value("atp/{}/unhandled_resource_type/{}".format(self.name, feature["ResType"]))
-            apply_category({"historic": "yes"}, item)
+            apply_category(Categories.GENERIC_HISTORIC, item)
 
         # https://wiki.openstreetmap.org/wiki/Key:heritage - the National
         # Register is a national level designation, as is the National Historic

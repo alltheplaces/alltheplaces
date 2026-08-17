@@ -13,6 +13,7 @@ from locations.items import Feature
 # of lots of string bashing. If ever NSI / ATP were to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
+    GENERIC_HISTORIC = {"historic": "yes"}
     GENERIC_POI = {"amenity": "yes"}
     GENERIC_SHOP = {"shop": "yes"}
 
@@ -335,6 +336,8 @@ class Categories(Enum):
     GRAVE = {"cemetery": "grave"}
     GRIT_BIN = {"amenity": "grit_bin"}
     HIGHWAY_SERVICES = {"highway": "services"}
+    HISTORIC_BUILDING = {"historic": "building"}
+    HISTORIC_DISTRICT = {"historic": "district"}
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital"}
     HOTEL = {"tourism": "hotel"}
