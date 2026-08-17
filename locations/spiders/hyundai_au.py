@@ -39,6 +39,7 @@ class HyundaiAUSpider(JSONBlobSpider):
             return
 
         item["name"] = feature.get("tradingName") or feature.get("dealerCode")
+        item["street_address"] = item.pop("street")
         item["email"] = next(
             (address for address in self.email_addresses(feature) if address.lower() in self.dealer_addresses), None
         )
