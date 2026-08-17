@@ -38,7 +38,7 @@ class HyundaiAUSpider(JSONBlobSpider):
         if feature.get("closed"):
             return
 
-        item["branch"] = feature.get("tradingName") or feature.get("dealerCode")
+        item["name"] = feature.get("tradingName") or feature.get("dealerCode")
         item["email"] = next(
             (address for address in self.email_addresses(feature) if address.lower() in self.dealer_addresses), None
         )
