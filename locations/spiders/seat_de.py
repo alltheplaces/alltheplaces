@@ -19,7 +19,7 @@ class SeatDESpider(scrapy.Spider):
             item["ref"] = data.get("NUMMER")
             item["name"] = data.get("NAME1")
             item["phone"] = data.get("TELEFON")
-            item["street"] = data.get("STRA\u00dfE")
+            item["street_address"] = data.get("STRA\u00dfE")
             item["city"] = data.get("ORT")
             item["postcode"] = data.get("PLZ")
             item["lat"] = data.get("XPOS")
