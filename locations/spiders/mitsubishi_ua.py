@@ -52,7 +52,7 @@ class MitsubishiUASpider(JSONBlobSpider):
                 oh.add_ranges_from_string(f'{rule["day"]} {rule["workhours"]}', days=DAYS_RU)
             sales_item["opening_hours"] = oh
             apply_category(Categories.SHOP_CAR, sales_item)
-            apply_yes_no(Extras.CAR_REPAIR, sales_item, SERVICE in departments)
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, SERVICE in departments)
             yield sales_item
 
         if SERVICE in departments:

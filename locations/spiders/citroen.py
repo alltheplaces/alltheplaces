@@ -61,7 +61,7 @@ class CitroenSpider(scrapy.Spider):
             car_repair = re.findall("'type': 'service'", services)
             if len(car_dealer) > 0 and len(car_repair) > 0:
                 apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, True)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, item, True)
             elif car_dealer:
                 apply_category(Categories.SHOP_CAR, item)
             elif car_repair:
