@@ -4,7 +4,6 @@ from typing import Any
 
 from scrapy import Selector
 from scrapy.http import Response
-
 from scrapy.spiders import XMLFeedSpider
 
 from locations.categories import Categories, apply_category
