@@ -1,4 +1,9 @@
 import json
+import re
+from typing import Any
+
+from scrapy import Selector
+from scrapy.http import Response
 
 from scrapy.spiders import XMLFeedSpider
 
@@ -9,22 +14,18 @@ from locations.items import Feature
 
 class BiocoopFRSpider(XMLFeedSpider):
     name = "biocoop_fr"
-    allowed_domains = ["www.biocoop.fr"]
-
-    # their server is quite slow, can take more than 15s to answer in peak hours
-    start_urls = ["https://www.biocoop.fr//rest/V1/searchstores/query/all"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 40}
-
-    itertag = "item"
     item_attributes = {"brand": "Biocoop", "brand_wikidata": "Q2904039"}
+    allowed_domains = ["www.biocoop.fr"]
+    start_urls = ["https://www.biocoop.fr//rest/V1/searchstores/query/all"]
+    itertag = "item"
+    custom_settings = {
+        "DOWNLOAD_TIMEOUT": 60  # their server is quite slow, can take more than 15s to answer in peak hours
+    }
 
-    def parse_node(self, response, selector):
+    def parse_node(self, response: Response, selector: Selector) -> Any:
         item = Feature()
-
-        apply_category(Categories.SHOP_SUPERMARKET, item)
         item["ref"] = selector.xpath("code/text()").get()
-        item["name"] = selector.xpath("name/text()").get()
-        item["branch"] = item["name"].removeprefix("BIOCOOP ")
+        item["branch"] = re.sub(r"BIOCOOP", "", selector.xpath("name/text()").get(""), flags=re.IGNORECASE)
         item["street_address"] = selector.xpath("street/text()").get()
         item["city"] = selector.xpath("city/text()").get()
         item["postcode"] = selector.xpath("postcode/text()").get()
@@ -36,6 +37,8 @@ class BiocoopFRSpider(XMLFeedSpider):
         if item["website"] == "" or item["website"] == "null":
             item["website"] = selector.xpath("store_url/text()").get()
         item["extras"]["organic"] = "only"
+
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
         return item
 
