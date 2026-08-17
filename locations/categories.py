@@ -994,6 +994,7 @@ class Vending(Enum):
     COIN_CHANGE_MACHINE = "coin_change_machine"
     DRINKS = "drinks"
     FOOD = "food"
+    ICE_CUBES = "ice_cubes"
     KEYS = "key"
     LAUNDRY = "laundry"
     PARKING_TICKETS = "parking_tickets"
