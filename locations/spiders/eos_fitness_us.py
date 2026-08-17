@@ -17,7 +17,7 @@ class EosFitnessUSSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        if "Coming Soon" in response.xpath("//head/title/text()").get():
+        if "Coming Soon" in response.xpath("//head/title/text()").get(""):
             return
         apply_category(Categories.GYM, item)
         yield item
