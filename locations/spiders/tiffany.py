@@ -14,6 +14,8 @@ class TiffanySpider(YextAnswersSpider):
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         if location.get("closed") or location.get("comingSoon"):
             return
+
+        item["email"] = None
         item["branch"] = location["address"].get("extraDescription")
         if website := item.get("website"):
             item["website"] = website.split("?", 1)[0]
