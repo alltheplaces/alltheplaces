@@ -17,6 +17,7 @@ class VerticheMXSpider(WPStoreLocatorSpider):
     max_results = 100
     days = DAYS_ES
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", None)
