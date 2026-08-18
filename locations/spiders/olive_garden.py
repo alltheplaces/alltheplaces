@@ -6,13 +6,17 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class OliveGardenSpider(JSONBlobSpider):
+class OliveGardenSpider(JSONBlobSpider, PlaywrightSpider):
     name = "olive_garden"
     item_attributes = {"brand": "Olive Garden", "brand_wikidata": "Q3045312"}
     allowed_domains = ["olivegarden.com"]
     locations_key = "restaurants"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.olivegarden.com/api/restaurants", headers={"X-Source-Channel": "WEB"})
