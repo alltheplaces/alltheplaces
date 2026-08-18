@@ -16,7 +16,8 @@ class OliveGardenSpider(JSONBlobSpider, PlaywrightSpider):
     item_attributes = {"brand": "Olive Garden", "brand_wikidata": "Q3045312"}
     allowed_domains = ["olivegarden.com"]
     locations_key = "restaurants"
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.olivegarden.com/api/restaurants", headers={"X-Source-Channel": "WEB"})
