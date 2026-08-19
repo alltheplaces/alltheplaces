@@ -1,7 +1,6 @@
-import json
 from typing import Any
 
-from requests_cache import Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -20,7 +19,7 @@ class LillyRSSpider(PlaywrightSpider):
     requires_proxy = "RS"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre//text()").get()):
+        for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = item.pop("name").removeprefix("Apoteka ")
             item["street_address"] = item.pop("addr_full")
