@@ -15,7 +15,7 @@ class TalismanHireSpider(WPStoreLocatorSpider):
     name = "talisman_hire"
     item_attributes = {"brand": "Talisman Hire", "brand_wikidata": "Q120885726"}
     allowed_domains = ["www.talisman.co.za"]
-    drop_attributes = {"facebook"}
+    drop_attributes = {"email", "facebook"}
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = re.sub(r"\s*\(in(?:side)? .+?\)$", "", item.pop("name"))
