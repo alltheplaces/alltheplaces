@@ -1,4 +1,3 @@
-import json
 from typing import Any, Iterable
 
 import chompjs
@@ -6,6 +5,7 @@ from scrapy import Request
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import (
     DAYS_AR,
@@ -75,7 +75,7 @@ class MangoSpider(PlaywrightSpider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for country in json.loads(response.xpath("//pre/text()").get())["countries"]:
+        for country in response.json()["countries"]:
             if not country.get("hasOnlineAccess"):  # Skip countries with no available stores
                 continue
             country_code = country.get("mangoIso")
@@ -114,6 +114,8 @@ class MangoSpider(PlaywrightSpider):
                 item["opening_hours"] = self.parse_opening_hours(store.get("timeSchedule", []), language)
             except Exception as e:
                 self.logger.error(f'Failed to parse opening hours:{store.get("timeSchedule")} {e}')
+
+            apply_category(Categories.SHOP_CLOTHES, item)
             yield item
 
     def parse_opening_hours(self, rules: list[dict], language: str) -> OpeningHours:
