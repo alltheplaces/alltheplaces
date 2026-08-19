@@ -13,5 +13,5 @@ class BureauValleeFRSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://magasins.bureau-vallee.fr/sitemap_pois.xml"]
     sitemap_rules = [(r"https://magasins\.bureau-vallee\.fr/fr/france-FR/[^/]+/[^/]+/[^/]+$", "parse_sd")]
-    wanted_types = ["LocalBusiness", "OfficeEquipmentStore"] 
+    wanted_types = ["LocalBusiness", "OfficeEquipmentStore"]
     drop_attributes = {"image", "twitter"}
