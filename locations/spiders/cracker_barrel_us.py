@@ -28,6 +28,7 @@ class CrackerBarrelUSSpider(SitemapSpider, JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("addr_full", None)
         item["branch"] = item.pop("name", "").split(",")[0].strip().title()
+        item["website"] = response.url
         item["opening_hours"] = self.parse_opening_hours(feature.get("storeHours", {}).get("business"))
         apply_category(Categories.RESTAURANT, item)
         yield item
