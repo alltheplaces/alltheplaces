@@ -1,22 +1,19 @@
 from typing import Any
 
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
 
 
-class LillyRSSpider(PlaywrightSpider):
+class LillyRSSpider(Spider):
     name = "lilly_rs"
     item_attributes = {"brand": "Lilly", "brand_wikidata": "Q111764460"}
     allowed_domains = ["www.lilly.rs"]
     start_urls = ["https://www.lilly.rs/locations/index/index?name="]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = "RS"
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
