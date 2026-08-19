@@ -22,7 +22,7 @@ class Motel6Spider(SitemapSpider, StructuredDataSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_DELAY": 5}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        if "Studio 6 " in item["name"]:
+        if item["name"].startswith("Studio 6 "):
             item["name"] = "Studio 6"
             item.update(self.BRANDS[item["name"]])
         else:
