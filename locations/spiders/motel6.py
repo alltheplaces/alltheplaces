@@ -1,44 +1,32 @@
-from typing import Any
+from typing import Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
-BRANDS = {"MS": "Motel 6", "SS": "Studio 6", "HS": "Hotel 6"}
 
-
-class Motel6Spider(scrapy.Spider):
+class Motel6Spider(SitemapSpider, StructuredDataSpider):
     name = "motel6"
-    item_attributes = {"brand": "Motel 6", "brand_wikidata": "Q2188884"}
-    start_urls = ["https://www.motel6.com/content/g6-cache/property-summary.1.json"]
+    BRANDS = {
+        "Studio 6": {"brand": "Studio 6", "brand_wikidata": "Q115793950"},
+        "Motel 6": {"brand": "Motel 6", "brand_wikidata": "Q2188884"},
+    }
+    sitemap_urls = ["https://www.motel6.com/sitemap.xml"]
+    sitemap_rules = [("/property/", "parse_sd")]
     is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_DELAY": 5}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for hotel_id in response.json().keys():
-            try:
-                url = "https://www.motel6.com/bin/g6/propertydata.{}.json".format(int(hotel_id))
-                yield scrapy.Request(url, callback=self.parse_hotel)
-            except ValueError:
-                continue
-
-    def parse_hotel(self, response: Response, **kwargs: Any) -> Any:
-        data = response.json()
-        if not data:
-            return
-        data.update(data.pop("address", {}))
-        item = DictParser.parse(data)
-        item["name"] = None
-        item["ref"] = data["property_id"]
-        item["street_address"] = data.get("address_line_0")
-        item["website"] = "https://www.motel6.com/en/home/motels.{}.{}.{}.html".format(
-            data["state"].lower(),
-            data["city"].lower().replace(" ", "-"),
-            data["property_id"],
-        )
-        item["image"] = "https://www.motel6.com/bin/g6/image.g6PropertyDetailSlider.jpg" + data["lead_image_path"]
-        item["brand"] = BRANDS[data["brand_id"]]
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        if "Studio 6 " in item["name"]:
+            item["name"] = "Studio 6"
+            item.update(self.BRANDS[item["name"]])
+        else:
+            item["name"] = "Motel 6"
+            item.update(self.BRANDS[item["name"]])
+        apply_category(Categories.MOTEL, item)
         yield item
