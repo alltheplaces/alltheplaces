@@ -1,41 +1,47 @@
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+import re
+from typing import Iterable
 
+from scrapy.http import TextResponse
+
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.spiders.buco_na_za import BucoNAZASpider
 from locations.spiders.builders import BuildersSpider
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class TalismanHireSpider(SitemapSpider, StructuredDataSpider):
+class TalismanHireSpider(WPStoreLocatorSpider):
     name = "talisman_hire"
     item_attributes = {"brand": "Talisman Hire", "brand_wikidata": "Q120885726"}
     allowed_domains = ["www.talisman.co.za"]
-    sitemap_urls = ["https://www.talisman.co.za/googlesitemap"]
-    sitemap_rules = [(r"talisman\.co\.za/[-\w]+/[-\w]+/talisman-hire-[-\w]+$", "parse_sd")]
-    skip_auto_cc_spider_name = True
-    skip_auto_cc_domain = True
-    drop_attributes = {"facebook", "twitter"}
+    drop_attributes = {"facebook"}
 
-    def pre_process_data(self, ld_data: dict, **kwargs):
-        ld_data.get("address", {}).pop("addressCountry", None)  # It's always ZA, which isn't true
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = re.sub(r"\s*\(in(?:side)? .+?\)$", "", item.pop("name"))
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(
+            "; ".join(
+                f"{days}: {feature[key]}"
+                for days, key in [("Mo-Fr", "hours_weekdays"), ("Sa", "hours_saturday"), ("Su", "hours_sunday")]
+                if feature.get(key)
+            )
+        )
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("Talisman Hire ")
-        if item.get("state") == "Mpumalanga":  # country wrongly reverse geocoded as SZ
-            item["country"] = "ZA"
+        if host := re.search(r"-in(?:side)?-(.+)$", item["website"].rstrip("/").rsplit("/", 1)[-1]):
+            match host.group(1):
+                case "builders":
+                    item["located_in"] = BuildersSpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = BuildersSpider.item_attributes["brand_wikidata"]
+                case "builders-express":
+                    item["located_in"] = "Builders Express"
+                    item["located_in_wikidata"] = BuildersSpider.item_attributes["brand_wikidata"]
+                case "buco":
+                    item["located_in"] = BucoNAZASpider.item_attributes["brand"]
+                    item["located_in_wikidata"] = BucoNAZASpider.item_attributes["brand_wikidata"]
+                case _:
+                    item["located_in"] = host.group(1).replace("-", " ").title()
 
-        if "inside-" in response.url:
-            located_in_location = response.url.split("inside-")[-1].strip("/")
-            if located_in_location == "buco":
-                item["located_in"] = BucoNAZASpider.item_attributes["brand"]
-                item["located_in_wikidata"] = BucoNAZASpider.item_attributes["brand_wikidata"]
-            elif located_in_location == "builders":
-                item["located_in"] = BuildersSpider.item_attributes["brand"]
-                item["located_in_wikidata"] = BuildersSpider.item_attributes["brand_wikidata"]
-            elif located_in_location == "builders-express":
-                item["located_in"] = located_in_location.replace("-", " ").title()
-                item["located_in_wikidata"] = BuildersSpider.item_attributes["brand_wikidata"]
-            else:
-                item["located_in"] = located_in_location.replace("-", " ").title()
+        apply_category(Categories.SHOP_TOOL_HIRE, item)
+
         yield item
