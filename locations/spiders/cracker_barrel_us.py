@@ -29,7 +29,8 @@ class CrackerBarrelUSSpider(SitemapSpider, JSONBlobSpider):
         item["street_address"] = item.pop("addr_full", None)
         item["branch"] = item.pop("name", "").split(",")[0].strip().title()
         item["website"] = response.url
-        item["opening_hours"] = self.parse_opening_hours(feature.get("storeHours", {}).get("business"))
+        store_hours = (feature.get("storeHours") or {}).get("business") or []
+        item["opening_hours"] = self.parse_opening_hours(store_hours)
         apply_category(Categories.RESTAURANT, item)
         yield item
 
