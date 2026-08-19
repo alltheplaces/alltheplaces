@@ -1,4 +1,3 @@
-import re
 from typing import Any
 
 import scrapy
@@ -15,26 +14,9 @@ class NandosSGSpider(scrapy.Spider):
     start_urls = ["https://www.nandos.com.sg/restaurants/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        urls = response.xpath('//div[@class="restaurant col-xs-12 col-sm-6 col-md-4"]/a/@href').extract()
-
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse_store)
-
-    def parse_store(self, response):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        restaurant_data = response.xpath(
-            '//div[@class="restaurant-details-wrapper"]/script[contains(text(),"var restaurant")]'
-        ).extract_first()
-        lat, lon = re.search(r"var restaurant = {.*: (.*), .*: (.*)}", restaurant_data).groups()
-
-        properties = {
-            "ref": ref,
-            "name": response.xpath('//div[@class="promo-pane-title"]/h2/text()').extract_first(),
-            "addr_full": response.xpath('//div[@class="copy"]/h5/text()').extract_first(),
-            "country": "SG",
-            "lat": lat,
-            "lon": lon,
-            "website": response.url,
-        }
-
-        yield Feature(**properties)
+        for location in response.xpath('//*[contains(@class,"flex flex-col gap-3 ")]'):
+            item = Feature()
+            item["branch"] = item["ref"] = location.xpath("./h3/text()").get()
+            item["addr_full"] = location.xpath(".//p/text()").get()
+            item["phone"] = location.xpath('.//*[contains(@href,"tel:")]/text()').get()
+            yield item
