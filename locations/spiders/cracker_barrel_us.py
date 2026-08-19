@@ -15,7 +15,7 @@ class CrackerBarrelUSSpider(SitemapSpider, JSONBlobSpider):
     name = "cracker_barrel_us"
     item_attributes = {"brand": "Cracker Barrel", "brand_wikidata": "Q4492609"}
     allowed_domains = ["crackerbarrel.com"]
-    sitemap_urls = ["https://www.crackerbarrel.com/robots.txt"]
+    sitemap_urls = ["https://www.crackerbarrel.com/sitemap-locations.xml"]
     sitemap_rules = [(r"/locations/states/\w{2}/[-\w]+/\d+$", "parse")]
 
     def extract_json(self, response: TextResponse) -> list[dict]:
