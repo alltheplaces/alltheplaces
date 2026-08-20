@@ -16,6 +16,9 @@ class BankSinopacTWSpider(JSONBlobSpider):
     ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if item["lat"] and item["lon"] and abs(float(item["lat"])) > 90:
+            item["lat"], item["lon"] = item["lon"], item["lat"]
+
         if "Branch" in response.url:
             item["addr_full"] = feature["vicinity"]
             item["branch"] = item.pop("name", None)
