@@ -7,8 +7,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class BankSinopacSpider(JSONBlobSpider):
-    name = "bank_sinopac"
+class BankSinopacTWSpider(JSONBlobSpider):
+    name = "bank_sinopac_tw"
     item_attributes = {"brand": "永豐商業銀行", "brand_wikidata": "Q11132721"}
     start_urls = [
         "https://bank.sinopac.com/search/BranchListJson.ashx?callback=callForJsonp5",
@@ -18,8 +18,10 @@ class BankSinopacSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if "Branch" in response.url:
             item["addr_full"] = feature["vicinity"]
+            item["branch"] = item.pop("name", None)
             apply_category(Categories.BANK, item)
         elif "ATM" in response.url:
-            item["street"] = feature["location"]
+            item.pop("name", None)
+            item["branch"] = feature.get("location")
             apply_category(Categories.ATM, item)
         yield item
