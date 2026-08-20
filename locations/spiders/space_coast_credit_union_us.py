@@ -1,4 +1,5 @@
 import html
+import json
 import re
 from typing import Any, AsyncIterator, Iterable
 
@@ -97,6 +98,11 @@ class SpaceCoastCreditUnionUSSpider(CamoufoxSpider):
             item["ref"] = href.rstrip("/").rsplit("/", 1)[-1]
             item["branch"] = link.xpath("normalize-space(.)").get()
             item["website"] = response.urljoin(href)
+
+            if geo := card.xpath("./ancestor::*[@data-location][1]/@data-location").get():
+                position = json.loads(geo).get("position") or {}
+                item["lat"] = position.get("lat")
+                item["lon"] = position.get("lng")
 
             lines = [line.strip() for line in card.xpath(".//address/text()").getall() if line.strip()]
             for line in lines:
