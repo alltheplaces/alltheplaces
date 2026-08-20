@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class CityaSpider(SitemapSpider, StructuredDataSpider):
@@ -19,6 +19,6 @@ class CityaSpider(SitemapSpider, StructuredDataSpider):
 
         if item["email"] in ["qualite@citya.com", "rgpd@citya.com"]:
             item.pop("email", None)
-        
+
         apply_category(Categories.OFFICE_ESTATE_AGENT, item)
         yield item
