@@ -1,11 +1,7 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.uberall import UberallSpider
 
 
-class NettoLesMousquetairesSpider(SitemapSpider, StructuredDataSpider):
+class NettoLesMousquetairesSpider(UberallSpider):
     name = "netto_les_mousquetaires"
     item_attributes = {"brand": "Netto", "brand_wikidata": "Q2720988"}
-    sitemap_urls = ["https://magasin.netto.fr/sitemap.xml"]
-    sitemap_follow = ["locationsitemap"]
-    sitemap_rules = [("", "parse_sd")]
+    key = "OWc3zgl9ql555j9wvYm0ecrD94vaeK"
