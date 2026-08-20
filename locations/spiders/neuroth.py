@@ -13,6 +13,7 @@ class NeurothSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.neuroth.com/robots.txt"]
     sitemap_rules = [(r".+/filialen|lokacije|poslovnice|/[^/]+/$", "parse_sd")]
     time_format = "%H:%M:%S"
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item.pop("name")
