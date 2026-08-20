@@ -12,7 +12,7 @@ class CityaSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://www.citya.com/sitemap.agences.xml"]
     sitemap_rules = [(r"/agences-immobilieres/.*/[0-9]*$", "parse_sd")]
-
+    wanted_types = ["RealEstateAgent"]
     drop_attributes = {"image", "twitter", "facebook"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
