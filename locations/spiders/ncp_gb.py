@@ -31,6 +31,7 @@ class NcpGBSpider(SitemapSpider):
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
         "DOWNLOAD_DELAY": 2,
+        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 60 * 1000,
     }
 
     def parse_pois(self, response):
