@@ -17,7 +17,7 @@ class CityaSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
 
-        if item["email"] in ["qualite@citya.com", "rgpd@citya.com"]:
+        if item.get("email") in ["qualite@citya.com", "rgpd@citya.com"]:
             item.pop("email", None)
 
         apply_category(Categories.OFFICE_ESTATE_AGENT, item)
