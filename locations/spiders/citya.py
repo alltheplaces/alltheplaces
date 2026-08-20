@@ -13,10 +13,7 @@ class CityaSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.citya.com/sitemap.agences.xml"]
     sitemap_rules = [(r"/agences-immobilieres/.*/[0-9]*$", "parse_sd")]
 
-
-
     drop_attributes = {"image", "twitter", "facebook"}
-    # wanted_types = ["GroceryStore"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
 
@@ -24,5 +21,4 @@ class CityaSpider(SitemapSpider, StructuredDataSpider):
             item.pop("email", None)
         
         apply_category(Categories.OFFICE_ESTATE_AGENT, item)
-
         yield item
