@@ -526,6 +526,7 @@ top_level_tags = [
     "club",
     "craft",
     "dark_store",
+    "disused:amenity",
     "education",
     "emergency",
     "healthcare",
