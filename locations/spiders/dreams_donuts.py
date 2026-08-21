@@ -1,8 +1,10 @@
+import json
+
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
-from locations.json_blob_spider import JSONBlobSpider
 from locations.items import set_closed
-import json
+from locations.json_blob_spider import JSONBlobSpider
+
 
 class DreamsDonutsSpider(JSONBlobSpider):
     name = "dreams_donuts"
@@ -27,7 +29,6 @@ class DreamsDonutsSpider(JSONBlobSpider):
 
         if location.get("businessStatus") == "CLOSED_PERMANENTLY":
             set_closed(item)
-
 
         item["opening_hours"] = OpeningHours()
 
