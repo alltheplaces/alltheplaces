@@ -379,6 +379,8 @@ class Categories(Enum):
     REHABILITATION = {"healthcare": "rehabilitation"}
     RESCUE_BUOY = {"emergency": "rescue_buoy"}
     RESTAURANT = {"amenity": "restaurant"}
+    RESTAURANT_PIZZA = {"amenity": "restaurant", "cuisine": "pizza"}
+
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SHARPS_WASTE_BASKET = {"amenity": "waste_basket", "waste": "sharps"}
     SOCIAL_CENTRE = {"amenity": "social_centre"}

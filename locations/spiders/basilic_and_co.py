@@ -16,14 +16,12 @@ class BasilicAndCoSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"/restaurant-pizza-terroir/", "parse_sd"),
     ]
-    drop_attributes = {"image", "facebook"}
+    drop_attributes = {"image", "facebook", "name"}
     wanted_types = ["Restaurant"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category(Categories.RESTAURANT, item)
-        item["name"] = "Basilic & Co"
-        item["extras"]["cuisine"] = "pizza"
-        
+        apply_category(Categories.RESTAURANT_PIZZA, item)
+
         try:
             oh = OpeningHours()
             opening_hours_data = json.loads(response.css("display-schedule::attr(data-information)").get())["hours"]
