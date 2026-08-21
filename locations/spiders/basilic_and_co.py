@@ -1,9 +1,10 @@
+import json
+
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
-import json
-from locations.hours import OpeningHours, DAYS_FR
+from locations.hours import DAYS_FR, OpeningHours
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class BasilicAndCoSpider(SitemapSpider, StructuredDataSpider):
@@ -26,10 +27,9 @@ class BasilicAndCoSpider(SitemapSpider, StructuredDataSpider):
             oh = OpeningHours()
             opening_hours_data = json.loads(response.css("display-schedule::attr(data-information)").get())["hours"]
             for day in opening_hours_data:
-                oh.add_ranges_from_string(day["formattedHour"].replace("h",":"), days=DAYS_FR)
+                oh.add_ranges_from_string(day["formattedHour"].replace("h", ":"), days=DAYS_FR)
 
             item["opening_hours"] = oh
             yield item
         except:
             yield item
-
