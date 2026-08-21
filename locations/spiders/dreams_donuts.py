@@ -1,5 +1,5 @@
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, DAYS
 from locations.json_blob_spider import JSONBlobSpider
 from locations.items import set_closed
 import json
@@ -46,17 +46,11 @@ class DreamsDonutsSpider(JSONBlobSpider):
                     openMinutes = day.get("openTime").get("minutes") or "00"
                     closeMinutes = day.get("closeTime").get("minutes") or "00"
 
-                    item["opening_hours"].add_ranges_from_string(
-                        day.get("openDay")
-                        + " "
-                        + str(day.get("openTime").get("hours"))
-                        + ":"
-                        + str(openMinutes)
-                        + "-"
-                        + str(day.get("closeTime").get("hours"))
-                        + ":"
-                        + str(closeMinutes)
-                    )
+                    item["opening_hours"].add_range(
+                        day.get("openDay"),
+                        str(day.get("openTime").get("hours")) + ":" + str(openMinutes),
+                        str(day.get("closeTime").get("hours")) + ":" + str(closeMinutes))
+
 
         apply_category(Categories.SHOP_PASTRY, item)
         yield item
