@@ -1,6 +1,6 @@
 import json
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, DAYS
 from locations.items import set_closed
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -50,6 +50,12 @@ class DreamsDonutsSpider(JSONBlobSpider):
                         day.get("openDay"),
                         str(day.get("openTime").get("hours")) + ":" + str(openMinutes),
                         str(day.get("closeTime").get("hours")) + ":" + str(closeMinutes))
+
+            # the front end of the website explicitly displays  days that do not have openingHours in the API.
+            for day in DAYS:
+                if day not in item["opening_hours"].day_hours:
+                    item["opening_hours"].set_closed(day)
+            return hours
 
 
         apply_category(Categories.SHOP_PASTRY, item)
