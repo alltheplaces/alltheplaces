@@ -17,16 +17,18 @@ class DreamsDonutsSpider(JSONBlobSpider):
 
         oh = OpeningHours()
 
-        if(location.get("openingHours") is not None ):
+        if location.get("openingHours") is not None:
             for day in location["openingHours"]:
-                if(day.get("openDay") is not None 
-                    and day.get("openTime") is not None 
+                if (
+                    day.get("openDay") is not None
+                    and day.get("openTime") is not None
                     and day.get("closeTime") is not None
-                    and day.get("openTime").get("hours") is not None 
-                    and day.get("closeTime").get("hours") is not None):
+                    and day.get("openTime").get("hours") is not None
+                    and day.get("closeTime").get("hours") is not None
+                ):
 
-                    openMinutes= day.get("openTime").get("minutes") or '00'
-                    closeMinutes= day.get("closeTime").get("minutes") or '00'
+                    openMinutes = day.get("openTime").get("minutes") or "00"
+                    closeMinutes = day.get("closeTime").get("minutes") or "00"
 
                     oh.add_ranges_from_string(
                         day.get("openDay")
