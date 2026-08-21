@@ -1,7 +1,6 @@
 from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import OpeningHours
-
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class DreamsDonutsSpider(JSONBlobSpider):
@@ -11,31 +10,39 @@ class DreamsDonutsSpider(JSONBlobSpider):
         "brand_wikidata": "Q141142873",
     }
     start_urls = ["https://boutiques.dreamsdonuts.com/_next/data/0fZaY95cqqjf19_M8VcLX/index.json"]
-    locations_key = ["pageProps","data","stores"]
+    locations_key = ["pageProps", "data", "stores"]
 
     def post_process_item(self, item, response, location):
         item["name"] = "Dreams Donuts"
 
         oh = OpeningHours()
 
-        if(location.get("openingHours") != None ):
+        if location.get("openingHours") != None:
             print(str(location.get("openingHours")))
 
             for day in location["openingHours"]:
-                if(day.get("openDay") != None 
-                and day.get("openTime") != None 
-                and day.get("closeTime") != None
-                and day.get("openTime").get("hours") != None 
-                and day.get("closeTime").get("hours") != None):
+                if (
+                    day.get("openDay") != None
+                    and day.get("openTime") != None
+                    and day.get("closeTime") != None
+                    and day.get("openTime").get("hours") != None
+                    and day.get("closeTime").get("hours") != None
+                ):
 
-                    openMinutes= day.get("openTime").get("minutes") or '00'
-                    closeMinutes= day.get("openTime").get("minutes") or '00'
+                    openMinutes = day.get("openTime").get("minutes") or "00"
+                    closeMinutes = day.get("openTime").get("minutes") or "00"
 
-                    oh.add_ranges_from_string(day.get("openDay") 
-                    + " " 
-                    + str(day.get("openTime").get("hours")) + ":" + str(openMinutes)  
-                    + "-" 
-                    + str(day.get("closeTime").get("hours"))+":" + str(closeMinutes))
+                    oh.add_ranges_from_string(
+                        day.get("openDay")
+                        + " "
+                        + str(day.get("openTime").get("hours"))
+                        + ":"
+                        + str(openMinutes)
+                        + "-"
+                        + str(day.get("closeTime").get("hours"))
+                        + ":"
+                        + str(closeMinutes)
+                    )
 
         print(oh.as_opening_hours())
         item["opening_hours"] = oh
