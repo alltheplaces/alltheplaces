@@ -1,8 +1,10 @@
 import json
+
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import set_closed
 from locations.json_blob_spider import JSONBlobSpider
+
 
 class DreamsDonutsSpider(JSONBlobSpider):
     name = "dreams_donuts"
@@ -29,7 +31,7 @@ class DreamsDonutsSpider(JSONBlobSpider):
             set_closed(item)
 
         if location.get("slug") is not None:
-            item["website"] = "https://boutiques.dreamsdonuts.com/"+location.get("slug")
+            item["website"] = "https://boutiques.dreamsdonuts.com/" + location.get("slug")
 
         item["opening_hours"] = OpeningHours()
 
@@ -49,8 +51,8 @@ class DreamsDonutsSpider(JSONBlobSpider):
                     item["opening_hours"].add_range(
                         day.get("openDay"),
                         str(day.get("openTime").get("hours")) + ":" + str(openMinutes),
-                        str(day.get("closeTime").get("hours")) + ":" + str(closeMinutes))
-
+                        str(day.get("closeTime").get("hours")) + ":" + str(closeMinutes),
+                    )
 
         apply_category(Categories.SHOP_PASTRY, item)
         yield item
