@@ -23,13 +23,28 @@ class BasilicAndCoSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.RESTAURANT_PIZZA, item)
 
-        try:
-            oh = OpeningHours()
-            opening_hours_data = json.loads(response.css("display-schedule::attr(data-information)").get())["hours"]
-            for day in opening_hours_data:
-                oh.add_ranges_from_string(day["formattedHour"].replace("h", ":"), days=DAYS_FR)
+        data = response.css("display-schedule::attr(data-information)").get()
+        if data:
+            opening_hours_data = json.loads(data).get("hours")
+            if isinstance(opening_hours_data, list):
+                for day in opening_hours_data:
+                    if not isinstance(day, dict):
+                        continue
+                    
+                    cur_day = day.get("day")
+                    if cur_day is None:
+                        continue
 
-            item["opening_hours"] = oh
-            yield item
-        except:
-            yield item
+                    periods = day.get("periods")
+                    if not isinstance(periods, list):
+                        continue
+
+                    for period in periods:
+                        openTime = period.get("openTime")
+                        closeTime = period.get("closeTime")
+                        if(period.get("isClosed")):
+                            item["opening_hours"].set_closed(cur_day)
+                        elif openTime is not None and closeTime is not None:
+                            item["opening_hours"].add_range(cur_day, openTime.replace(" ",""), closeTime.replace(" ",""))
+
+        yield item
