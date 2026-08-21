@@ -1,8 +1,7 @@
-import chompjs
 
 from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import OpeningHours
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class ApmMonacoSpider(JSONBlobSpider):
