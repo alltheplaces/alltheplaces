@@ -4,7 +4,7 @@ from chompjs import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Extras, Fuel, PaymentMethods, apply_yes_no, map_payment
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.react_server_components import parse_rsc
@@ -17,8 +17,8 @@ class TeboilFISpider(Spider):
     start_urls = ["https://www.teboil.fi/asemat-ja-palvelut/asemat"]
 
     FUELS = {
-        "95 E10": [Fuel.OCTANE_95, Fuel.E10],
-        "98 E5": [Fuel.OCTANE_98, Fuel.E5],
+        "95 E10": [Fuel.E10],
+        "98 E5": [Fuel.E5],
         "Diesel": [Fuel.DIESEL],
         "Green+ Uusiutuva Diesel": [Fuel.BIODIESEL],  # HVO100 renewable diesel
         "AdBlue® -liuos": [Fuel.ADBLUE],
@@ -30,16 +30,6 @@ class TeboilFISpider(Spider):
         "Pesu": Extras.CAR_WASH,
         "Sähköautojen latauspiste": Fuel.ELECTRIC,
         "Inva-WC": Extras.TOILETS_WHEELCHAIR,
-    }
-    PAYMENTS = {
-        "Visa": PaymentMethods.VISA,
-        "MasterCard": PaymentMethods.MASTER_CARD,
-        "American Express": PaymentMethods.AMERICAN_EXPRESS,
-        "Diners Club": PaymentMethods.DINERS_CLUB,
-        "Pankkikortti": PaymentMethods.DEBIT_CARDS,
-        "Käteinen": PaymentMethods.CASH,
-        "Lähimaksu": PaymentMethods.CONTACTLESS,
-        "DKV-kortti": FuelCards.DKV,
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
@@ -61,16 +51,13 @@ class TeboilFISpider(Spider):
             if not isinstance(content, dict):
                 continue
 
-            item = Feature()
+            item = DictParser.parse(content)  # latitude/longitude -> lat/lon, street_address, city, zip_code, phone
             item["ref"] = story.get("uuid")
             item["branch"] = story.get("name")
             item["website"] = "https://www.teboil.fi/" + story["full_slug"]
-            item["lat"] = content.get("latitude")
-            item["lon"] = content.get("longitude")
-            item["street_address"] = content.get("street_address")
-            item["city"] = content.get("city")
-            item["postcode"] = content.get("zip_code") or None
-            apply_category(Categories.FUEL_STATION, item)
+            # Lukoil-owned Teboil ceased trading in Finland from late 2025 under US sanctions;
+            # the stations are shut, so tag them as disused rather than an operating amenity.
+            item["extras"]["disused:amenity"] = "fuel"
 
             for fuel in content.get("fuels") or []:
                 grade = fuel.split(" (")[0]  # drop availability qualifiers, e.g. "(vain D-automaatista)"
@@ -85,7 +72,6 @@ class TeboilFISpider(Spider):
                     apply_yes_no(tag, item, True)
 
             for payment in content.get("payment_methods") or []:
-                if tag := self.PAYMENTS.get(payment):
-                    apply_yes_no(tag, item, True)
+                map_payment(item, payment, PaymentMethods)
 
             yield item
