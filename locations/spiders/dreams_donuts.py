@@ -1,8 +1,8 @@
-from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS
-from locations.json_blob_spider import JSONBlobSpider
-from locations.items import set_closed
 import json
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
+from locations.items import set_closed
+from locations.json_blob_spider import JSONBlobSpider
 
 class DreamsDonutsSpider(JSONBlobSpider):
     name = "dreams_donuts"
