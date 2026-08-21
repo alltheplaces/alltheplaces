@@ -332,6 +332,7 @@ class Categories(Enum):
     FAST_FOOD = {"amenity": "fast_food"}
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
+    DISUSED_FUEL_STATION = {"disused:amenity": "fuel"}
     GRAVE = {"cemetery": "grave"}
     GRIT_BIN = {"amenity": "grit_bin"}
     HIGHWAY_SERVICES = {"highway": "services"}

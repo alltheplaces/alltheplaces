@@ -4,7 +4,7 @@ from chompjs import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Extras, Fuel, PaymentMethods, apply_yes_no, map_payment
+from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no, map_payment
 from locations.dict_parser import DictParser
 from locations.items import Feature
 from locations.react_server_components import parse_rsc
@@ -57,7 +57,7 @@ class TeboilFISpider(Spider):
             item["website"] = "https://www.teboil.fi/" + story["full_slug"]
             # Lukoil-owned Teboil ceased trading in Finland from late 2025 under US sanctions;
             # the stations are shut, so tag them as disused rather than an operating amenity.
-            item["extras"]["disused:amenity"] = "fuel"
+            apply_category(Categories.DISUSED_FUEL_STATION, item)
 
             for fuel in content.get("fuels") or []:
                 grade = fuel.split(" (")[0]  # drop availability qualifiers, e.g. "(vain D-automaatista)"
