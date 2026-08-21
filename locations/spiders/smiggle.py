@@ -16,6 +16,7 @@ class SmiggleSpider(JSONBlobSpider):
     start_urls = ["https://www.smiggle.co.uk/shop/en/smiggleuk/stores"]
     drop_attributes = {"facebook", "twitter"}
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def extract_json(self, response: Response) -> Any:
         js_blob = "[" + response.text.split("const storeData = [", 1)[1].split("]", 1)[0] + "]"
