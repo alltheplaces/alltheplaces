@@ -30,6 +30,6 @@ class KikoMilanoSpider(JSONBlobSpider):
             split_hours = location["openingHours"][i].split(",")
             for hours in split_hours:
                 hour = hours.split("-")
-                if(len(hour) == 2):
-                    item["opening_hours"].add_range(DAYS[i], hour[0].replace(" ",""), hour[1].replace(" ",""))
+                if len(hour) == 2:
+                    item["opening_hours"].add_range(DAYS[i], hour[0].replace(" ", ""), hour[1].replace(" ", ""))
         yield item
