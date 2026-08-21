@@ -22,6 +22,7 @@ class BasilicAndCoSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.RESTAURANT, item)
         item["name"] = "Basilic & Co"
+        item["extras"]["cuisine"] = "pizza"
         
         try:
             oh = OpeningHours()
