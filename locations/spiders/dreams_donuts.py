@@ -28,6 +28,8 @@ class DreamsDonutsSpider(JSONBlobSpider):
         if location.get("businessStatus") == "CLOSED_PERMANENTLY":
             set_closed(item)
 
+        if location.get("slug") is not None:
+            item["website"] = "https://boutiques.dreamsdonuts.com/"+location.get("slug")
 
         item["opening_hours"] = OpeningHours()
 
