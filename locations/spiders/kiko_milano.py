@@ -2,9 +2,9 @@ from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
 
+from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
-from locations.hours import OpeningHours, DAYS
 
 
 class KikoMilanoSpider(JSONBlobSpider):
