@@ -31,4 +31,5 @@ class MauboussinSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         apply_category(Categories.SHOP_JEWELRY, item)
+        item["name"] = "Mauboussin"
         yield item
