@@ -25,10 +25,9 @@ class KikoMilanoSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item, response, location):
-
         item["opening_hours"] = OpeningHours()
         for i in range(len(location["openingHours"])):
-            hours = location["openingHours"][i]
-            oh.add_ranges_from_string(DAYS[i] + " " + hours)
-
+            hours = location["openingHours"][i].split("-")
+            if(len(hours) == 2):
+                item["opening_hours"].add_range(DAYS[i], hours[0], hours[1])
         yield item
