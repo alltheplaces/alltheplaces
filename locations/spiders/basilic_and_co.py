@@ -3,7 +3,6 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_FR, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -30,7 +29,7 @@ class BasilicAndCoSpider(SitemapSpider, StructuredDataSpider):
                 for day in opening_hours_data:
                     if not isinstance(day, dict):
                         continue
-                    
+
                     cur_day = day.get("day")
                     if cur_day is None:
                         continue
@@ -42,9 +41,11 @@ class BasilicAndCoSpider(SitemapSpider, StructuredDataSpider):
                     for period in periods:
                         openTime = period.get("openTime")
                         closeTime = period.get("closeTime")
-                        if(period.get("isClosed")):
+                        if period.get("isClosed"):
                             item["opening_hours"].set_closed(cur_day)
                         elif openTime is not None and closeTime is not None:
-                            item["opening_hours"].add_range(cur_day, openTime.replace(" ",""), closeTime.replace(" ",""))
+                            item["opening_hours"].add_range(
+                                cur_day, openTime.replace(" ", ""), closeTime.replace(" ", "")
+                            )
 
         yield item
