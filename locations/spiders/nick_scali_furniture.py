@@ -30,5 +30,5 @@ class NickScaliFurnitureSpider(Spider):
             item["branch"] = item.pop("name")
             item["name"] = self.item_attributes["brand"]
             item["website"] = response.urljoin(store.get("redirectUrl"))
-            apply_category(Categories.SHOP_FURNITURE,item)
+            apply_category(Categories.SHOP_FURNITURE, item)
             yield item
