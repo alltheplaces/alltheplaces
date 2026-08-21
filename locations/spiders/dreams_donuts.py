@@ -1,7 +1,6 @@
 from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import OpeningHours
-
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class DreamsDonutsSpider(JSONBlobSpider):
@@ -11,7 +10,7 @@ class DreamsDonutsSpider(JSONBlobSpider):
         "brand_wikidata": "Q141142873",
     }
     start_urls = ["https://boutiques.dreamsdonuts.com/_next/data/0fZaY95cqqjf19_M8VcLX/index.json"]
-    locations_key = ["pageProps","data","stores"]
+    locations_key = ["pageProps", "data", "stores"]
 
     def post_process_item(self, item, response, location):
         item["name"] = "Dreams Donuts"
@@ -19,8 +18,6 @@ class DreamsDonutsSpider(JSONBlobSpider):
         oh = OpeningHours()
 
         if(location.get("openingHours") is not None ):
-            print(str(location.get("openingHours")))
-
             for day in location["openingHours"]:
                 if(day.get("openDay") is not None 
                     and day.get("openTime") is not None 
@@ -31,11 +28,17 @@ class DreamsDonutsSpider(JSONBlobSpider):
                     openMinutes= day.get("openTime").get("minutes") or '00'
                     closeMinutes= day.get("closeTime").get("minutes") or '00'
 
-                    oh.add_ranges_from_string(day.get("openDay") 
-                    + " " 
-                    + str(day.get("openTime").get("hours")) + ":" + str(openMinutes)  
-                    + "-" 
-                    + str(day.get("closeTime").get("hours"))+":" + str(closeMinutes))
+                    oh.add_ranges_from_string(
+                        day.get("openDay")
+                        + " "
+                        + str(day.get("openTime").get("hours"))
+                        + ":"
+                        + str(openMinutes)
+                        + "-"
+                        + str(day.get("closeTime").get("hours"))
+                        + ":"
+                        + str(closeMinutes)
+                    )
 
         item["opening_hours"] = oh
         apply_category(Categories.SHOP_PASTRY, item)
