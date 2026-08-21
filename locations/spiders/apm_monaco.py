@@ -1,4 +1,3 @@
-
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
@@ -15,11 +14,10 @@ class ApmMonacoSpider(JSONBlobSpider):
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
     }
-    
+
     def post_process_item(self, item, response, location):
         apply_category(Categories.SHOP_JEWELRY, item)
         item["name"] = "APM Monaco"
-
 
         fields = [
             location.get("custom_field_1") or "",
