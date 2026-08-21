@@ -30,6 +30,6 @@ class KikoMilanoSpider(JSONBlobSpider):
         for i in range(len(location["openingHours"])):
             hours = location["openingHours"][i]
             oh.add_ranges_from_string(DAYS[i] + " " + hours)
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
 
         yield item
