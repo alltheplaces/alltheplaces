@@ -18,18 +18,18 @@ class DreamsDonutsSpider(JSONBlobSpider):
 
         oh = OpeningHours()
 
-        if(location.get("openingHours") != None ):
+        if(location.get("openingHours") is not None ):
             print(str(location.get("openingHours")))
 
             for day in location["openingHours"]:
-                if(day.get("openDay") != None 
-                and day.get("openTime") != None 
-                and day.get("closeTime") != None
-                and day.get("openTime").get("hours") != None 
-                and day.get("closeTime").get("hours") != None):
+                if(day.get("openDay") is not None 
+                    and day.get("openTime") is not None 
+                    and day.get("closeTime") is not None
+                    and day.get("openTime").get("hours") is not None 
+                    and day.get("closeTime").get("hours") is not None):
 
                     openMinutes= day.get("openTime").get("minutes") or '00'
-                    closeMinutes= day.get("openTime").get("minutes") or '00'
+                    closeMinutes= day.get("closeTime").get("minutes") or '00'
 
                     oh.add_ranges_from_string(day.get("openDay") 
                     + " " 
@@ -37,7 +37,6 @@ class DreamsDonutsSpider(JSONBlobSpider):
                     + "-" 
                     + str(day.get("closeTime").get("hours"))+":" + str(closeMinutes))
 
-        print(oh.as_opening_hours())
         item["opening_hours"] = oh
         apply_category(Categories.SHOP_PASTRY, item)
         yield item
