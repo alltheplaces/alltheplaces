@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest
 
 from locations.json_blob_spider import JSONBlobSpider
 from locations.user_agents import BROWSER_DEFAULT
+from locations.hours import OpeningHours, DAYS
 
 
 class KikoMilanoSpider(JSONBlobSpider):
@@ -22,3 +23,13 @@ class KikoMilanoSpider(JSONBlobSpider):
                 "Referer": "https://kiko-stores.kikocosmetics.com/",
             },
         )
+
+    def post_process_item(self, item, response, location):
+
+        oh = OpeningHours()
+        for i in range(len(location["openingHours"])):
+            hours = location["openingHours"][i]
+            oh.add_ranges_from_string(DAYS[i] + " " + hours)
+        item["opening_hours"] = oh.as_opening_hours()
+
+        yield item
