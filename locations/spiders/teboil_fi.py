@@ -17,13 +17,13 @@ class TeboilFISpider(Spider):
     start_urls = ["https://www.teboil.fi/asemat-ja-palvelut/asemat"]
 
     FUELS = {
-        "95 E10": [Fuel.E10],
-        "98 E5": [Fuel.E5],
-        "Diesel": [Fuel.DIESEL],
-        "Green+ Uusiutuva Diesel": [Fuel.BIODIESEL],  # HVO100 renewable diesel
-        "AdBlue® -liuos": [Fuel.ADBLUE],
-        "Moottoripolttoöljy": [Fuel.UNTAXED_DIESEL],  # dyed light fuel oil for off-road engines
-        "Automaatti 24h": [],  # an unattended-pump flag, not a fuel grade
+        "95 E10": Fuel.E10,
+        "98 E5": Fuel.E5,
+        "Diesel": Fuel.DIESEL,
+        "Green+ Uusiutuva Diesel": Fuel.BIODIESEL,  # HVO100 renewable diesel
+        "AdBlue® -liuos": Fuel.ADBLUE,
+        "Moottoripolttoöljy": Fuel.UNTAXED_DIESEL,  # dyed light fuel oil for off-road engines
+        "Automaatti 24h": None,  # an unattended-pump flag, not a fuel grade
     }
     # "Nestekaasu" (bottled LPG for sale, not vehicle autogas) is intentionally not mapped.
     SERVICES = {
@@ -62,7 +62,7 @@ class TeboilFISpider(Spider):
             for fuel in content.get("fuels") or []:
                 grade = fuel.split(" (")[0]  # drop availability qualifiers, e.g. "(vain D-automaatista)"
                 if grade in self.FUELS:
-                    for tag in self.FUELS[grade]:
+                    if tag := self.FUELS[grade]:
                         apply_yes_no(tag, item, True)
                 else:
                     self.crawler.stats.inc_value("atp/{}/unmapped_fuel/{}".format(self.name, fuel))

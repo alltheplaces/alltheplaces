@@ -852,6 +852,10 @@ payment_method_aliases = {
     "PostFinance Card": PaymentMethods.POSTFINANCE_CARD,
     "PowerCard": PaymentMethods.POWERCARD,
     "UnionPay": PaymentMethods.UNIONPAY,
+    # Finnish aliases (useful for spiders dealing with the Finnish language)
+    "Käteinen": PaymentMethods.CASH,
+    "Lähimaksu": PaymentMethods.CONTACTLESS,
+    "Pankkikortti": PaymentMethods.DEBIT_CARDS,
 }
 
 
