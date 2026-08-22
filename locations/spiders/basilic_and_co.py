@@ -8,6 +8,8 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class BasilicAndCoSpider(SitemapSpider, StructuredDataSpider):
     name = "basilic_and_co"
+    # "co" here is short for "& Co", not the ISO country code for Colombia.
+    skip_auto_cc_spider_name_check = True
     item_attributes = {
         "brand": "Basilic & Co",
         "brand_wikidata": "Q130248490",
