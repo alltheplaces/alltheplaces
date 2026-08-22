@@ -30,6 +30,7 @@ class JimmyFairlySpider(JSONBlobSpider):
 
 
     def post_process_item(self, item, response, location):
+        apply_category(Categories.SHOP_OPTICIAN, item)
         if location.get("url") is not None:
             item["website"] = "https://www.jimmyfairly.com" + location["url"]
 
