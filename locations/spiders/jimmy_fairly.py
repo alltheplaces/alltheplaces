@@ -1,10 +1,9 @@
-import chompjs
+import json
+
 
 from locations.categories import Categories, apply_category
-from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import DAYS, OpeningHours
-
-import json
+from locations.json_blob_spider import JSONBlobSpider
 
 
 class JimmyFairlySpider(JSONBlobSpider):
@@ -20,14 +19,13 @@ class JimmyFairlySpider(JSONBlobSpider):
 
         if not data:
             raise ValueError("data not found")
-        
+
         data = json.loads(data)
         extract = []
         for f in data["features"]:
             extract.append(f["properties"])
 
         return extract
-
 
     def post_process_item(self, item, response, location):
         apply_category(Categories.SHOP_OPTICIAN, item)
@@ -38,20 +36,20 @@ class JimmyFairlySpider(JSONBlobSpider):
 
         if location.get("opening_hours") is not None:
             item["opening_hours"] = OpeningHours()
-            for day,time in location["opening_hours"].items():
+            for day, time in location["opening_hours"].items():
                 day = day[:2].capitalize()
-                if(day not in DAYS):
+                if day not in DAYS:
                     continue
-        
-                if(time == ""):
+
+                if time == "":
                     item["opening_hours"].set_closed(day)
                 else:
                     midday_break = time.split("|")
                     for time in midday_break:
                         hours = time.split("-")
-                        if(len(hours) == 2):
+                        if len(hours) == 2:
                             openinghour = hours[0][:2] + ":" + hours[0][2:]
                             closinghour = hours[1][:2] + ":" + hours[1][2:]
-                            item["opening_hours"].add_range(day,openinghour,closinghour)
+                            item["opening_hours"].add_range(day, openinghour, closinghour)
 
         yield item
