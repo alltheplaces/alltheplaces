@@ -34,7 +34,7 @@ class MoltonBrownSpider(JSONBlobSpider):
                                 times["close_time"],
                                 time_format="%I:%M %p",
                             )
-                    except:
+                    except ValueError:
                         continue
                     item["opening_hours"] = oh
             apply_category(Categories.SHOP_BEAUTY, item)
