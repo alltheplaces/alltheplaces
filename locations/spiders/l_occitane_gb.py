@@ -26,7 +26,6 @@ class LOccitaneGBSpider(JSONBlobSpider):
     needs_json_request = True
     requires_proxy = True
 
-
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         item["website"] = "https://uk.loccitane.com/store?id=" + item["ref"]
