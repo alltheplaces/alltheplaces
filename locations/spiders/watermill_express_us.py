@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import TextResponse
 
 from locations.categories import Categories, PaymentMethods, Vending, add_vending, apply_category, apply_yes_no
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
@@ -10,6 +11,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 class WatermillExpressUSSpider(WPStoreLocatorSpider):
     name = "watermill_express_us"
     item_attributes = {"brand": "Watermill Express", "brand_wikidata": "Q126195259"}
+    drop_attributes = ["phone"]
     allowed_domains = ["watermillexpress.com"]
     iseadgg_countries_list = ["US"]
     search_radius = 500
@@ -20,7 +22,8 @@ class WatermillExpressUSSpider(WPStoreLocatorSpider):
         item["branch"] = feature["nickname"]
         item["country"] = "US"
         item["website"] = feature["permalink"]
-        item["opening_hours"] = "24/7"
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_days_range(DAYS, "00:00", "23:59")
 
         apply_category(Categories.VENDING_MACHINE, item)
         add_vending(Vending.WATER, item)
