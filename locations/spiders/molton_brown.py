@@ -28,12 +28,13 @@ class MoltonBrownSpider(JSONBlobSpider):
                         if times["open_24hrs"] is not False:
                             oh.add_range(DAYS_FULL[int(times["week_day"]) - 1], "00:00", "23:59")
                         else:
-                            oh.add_range(
-                                DAYS_FULL[int(times["week_day"]) - 1],
-                                times["open_time"],
-                                times["close_time"],
-                                time_format="%I:%M %p",
-                            )
+                            if 1 <= times["week_day"] <= len(DAYS_FULL):
+                                oh.add_range(
+                                    DAYS_FULL[int(times["week_day"]) - 1],
+                                    times["open_time"],
+                                    times["close_time"],
+                                    time_format="%I:%M %p",
+                                )
                     except (KeyError, TypeError, ValueError, IndexError):
                         continue
                     item["opening_hours"] = oh
