@@ -1,21 +1,20 @@
+from typing import Iterable
+
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
-from locations.json_blob_spider import JSONBlobSpider
+from locations.items import Feature
+from locations.storefinders.storemapper import StoremapperSpider
 
 
-class ApmMonacoSpider(JSONBlobSpider):
+class ApmMonacoSpider(StoremapperSpider):
     name = "apm_monaco"
     item_attributes = {
         "brand": "APM Monaco",
         "brand_wikidata": "Q85738954",
     }
-    start_urls = ["https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/12892/stores.js"]
-    locations_key = "stores"
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-    }
+    company_id = "12892"
 
-    def post_process_item(self, item, response, location):
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         apply_category(Categories.SHOP_JEWELRY, item)
         item["name"] = "APM Monaco"
 
