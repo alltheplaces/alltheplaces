@@ -1,50 +1,68 @@
-import scrapy
+from typing import Any, AsyncIterator
 
-from locations.hours import DAYS_FULL, OpeningHours
+from scrapy.http import JsonRequest, Response
+
+from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class EccoSpider(scrapy.Spider):
+class EccoSpider(PlaywrightSpider):
     name = "ecco"
     item_attributes = {"brand": "Ecco", "brand_wikidata": "Q1280255"}
-    start_urls = [
-        "https://se.ecco.com/api/store/search?latitudeMin=-90&longitudeMin=-180&latitudeMax=90&longitudeMax=180"
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response):
-        for store in response.json():
-            if store["t"] in [
-                # 0,  # PARTNER # Just sell the stock?
-                1,  # ECCO
-                2,  # Outlet
-                4,  # Large store?
-                5,  # One store in France
-            ]:
-                yield scrapy.Request(
-                    url="https://se.ecco.com/api/store/finder/" + store["i"], callback=self.parse_store
-                )
+    def make_request(self, offset: int, limit: int = 500) -> JsonRequest:
+        return JsonRequest(
+            url=f'https://api.europe-west1.gcp.commercetools.com/ecco-eap-prod/stores?offset={offset}&limit={limit}&expand=custom.fields.store_CF_OperatingHours&where=custom(fields(store_CF_StoreLocator=true AND store_CF_Deleted=false AND store_CF_Ownership="ECCO"))',
+            # TODO: Implement dynamic access-token generation via:
+            # https://us.ecco.com/api/auth/session
+            # This endpoint itself requires a valid session token, so implementing the
+            # complete token-generation flow does not currently appear feasible.
+            # For now, a token with an approximate one-month lifetime is hardcoded.
+            headers={"authorization": "Bearer qubSH5SiQ3HTJM2p1Tu_-mpmDaKBgMtE"},
+            cb_kwargs=dict(offset=offset, limit=limit),
+        )
 
-    def parse_store(self, response):
-        store = response.json()
-        if store["StoreType"] == "FullPrice":
-            return  # Online/virtual store
-        item = Feature()
-        item["ref"] = store["StoreId"]
-        item["name"] = store["Name"]
-        item["street_address"] = store["Street"]
-        item["housenumber"] = store["HouseNr"]
-        item["city"] = store["City"]
-        item["postcode"] = store["PostalCode"]
-        item["phone"] = store["Phone"]
-        item["country"] = store["CountryCode"]
-        item["email"] = store["Email"]
-        item["lat"] = store["Latitude"]
-        item["lon"] = store["Longitude"]
-        item["extras"]["store_type"] = store["StoreType"]
-        oh = OpeningHours()
-        for day in DAYS_FULL:
-            oh.add_range(day, store[f"{day}Open"], store[f"{day}Close"], time_format="%H:%M:%S")
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_request(0)
 
-        item["opening_hours"] = oh
-        yield item
+    def parse(self, response: Response, offset: int, limit: int) -> Any:
+        for result in response.json()["results"]:
+            if store := result.get("custom", {}).get("fields", {}):
+                if store.get("store_CF_Street1") or store.get("store_CF_Latitude"):
+                    item = Feature()
+                    item["ref"] = result["id"]
+                    item["name"] = store.get("store_CF_Name1", {}).get("en")
+                    item["street_address"] = merge_address_lines(
+                        [store.get("store_CF_Street1", {}).get("en"), store.get("store_CF_Street2", {}).get("en")]
+                    )
+                    item["city"] = store.get("store_CF_City", {}).get("en")
+                    item["state"] = store.get("store_CF_Region")
+                    item["postcode"] = store.get("store_CF_PostalCode")
+                    item["phone"] = store.get("store_CF_Telephone")
+                    item["country"] = store.get("store_CF_Country")
+                    item["email"] = store.get("store_CF_Email")
+                    item["lat"] = store.get("store_CF_Latitude")
+                    item["lon"] = store.get("store_CF_Longitude")
+                    item["extras"]["store_type"] = store.get("store_CF_StoreType")
+
+                    try:
+                        if hours := store.get("store_CF_OperatingHours", {}).get("obj", {}).get("value"):
+                            item["opening_hours"] = self.parse_opening_hours(hours)
+                    except Exception as e:
+                        self.logger.error(f"Failed to parse opening hours: {e}")
+
+                    yield item
+
+        if response.json()["total"] > offset + limit:
+            yield self.make_request(offset + limit)
+
+    def parse_opening_hours(self, rules: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day, hours in rules.items():
+            opening_hours.add_range(day, hours["open"], hours["close"], "%H:%M:%S")
+        return opening_hours
