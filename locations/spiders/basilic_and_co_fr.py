@@ -25,7 +25,6 @@ class BasilicAndCoFRSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.RESTAURANT_PIZZA, item)
         item["branch"] = item.pop("name", "").removeprefix("Basilic & Co - pizzas de terroirs - ")
 
-
         data = response.css("display-schedule::attr(data-information)").get()
         if data:
             opening_hours_data = json.loads(data).get("hours")
