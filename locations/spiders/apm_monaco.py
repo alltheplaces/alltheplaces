@@ -24,11 +24,8 @@ class ApmMonacoSpider(StoremapperSpider):
             location.get("custom_field_3") or "",
         ]
 
+        item["opening_hours"] = OpeningHours()
         if any(fields):
-            oh = OpeningHours()
-            oh.add_ranges_from_string(" ".join(fields))
-            item["opening_hours"] = oh
-        else:
-            item["opening_hours"] = None
+            item["opening_hours"].add_ranges_from_string(" ".join(fields))
 
         yield item
