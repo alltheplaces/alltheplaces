@@ -5,6 +5,7 @@ from scrapy.http import TextResponse
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.categories import Categories, apply_category
 
 
 class MoltonBrownSpider(JSONBlobSpider):
@@ -36,5 +37,5 @@ class MoltonBrownSpider(JSONBlobSpider):
                     except:
                         continue
                     item["opening_hours"] = oh
-
+            apply_category(Categories.SHOP_BEAUTY, item)
             yield item
