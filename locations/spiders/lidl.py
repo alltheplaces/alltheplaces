@@ -101,15 +101,23 @@ class LidlSpider(Spider):
         oh = OpeningHours()
         for rule in rules["items"]:
             day = DAYS[datetime.fromisoformat(rule["date"]).weekday()]
-            if rule["reason"] == "PERMANENT_CLOSING":
+            if rule["reason"] in ["PERMANENT_CLOSING", "CLOSED"]:
                 oh.set_closed(day)
             elif rule["reason"] in ["REGULAR", "SUNDAY_REPEAT"]:
                 for time in rule["timeRanges"]:
                     oh.add_range(day, time["from"].split("T", 1)[1], time["to"].split("T", 1)[1], "%H:%M:%S")
-            elif rules["reason"] == "SPECIAL_DAY":
-                raise Exception()
+            elif rule["reason"] in [
+                "SPECIAL_DAY",
+                "SUNDAY_PERIOD",
+                "SUNDAY_SPECIFIC_DAY",
+                "TEMPORARY_CLOSING",
+                "HOLIDAY",
+            ]:
+                # One-off exceptions to the regular weekly schedule; skip this day
+                # rather than discarding the rest of the store's opening hours.
+                continue
             else:
-                self.logger.error("Unexpected opening hours reason: {}".format(rules["reason"]))
-                raise Exception()
+                self.logger.error("Unexpected opening hours reason: {}".format(rule["reason"]))
+                continue
 
         return oh
