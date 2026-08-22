@@ -18,11 +18,13 @@ class BasilicAndCoFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"/restaurant-pizza-terroir/", "parse_sd"),
     ]
-    drop_attributes = {"image", "facebook", "name"}
+    drop_attributes = {"image", "facebook"}
     wanted_types = ["Restaurant"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.RESTAURANT_PIZZA, item)
+        item["branch"] = item.pop("name", "").removeprefix("Basilic & Co - pizzas de terroirs - ")
+
 
         data = response.css("display-schedule::attr(data-information)").get()
         if data:
