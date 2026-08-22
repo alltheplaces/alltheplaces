@@ -36,5 +36,5 @@ class MoltonBrownSpider(JSONBlobSpider):
                     except:
                         continue
                     item["opening_hours"] = oh
-                
+
             yield item
