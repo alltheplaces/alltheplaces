@@ -21,17 +21,19 @@ class MoltonBrownSpider(JSONBlobSpider):
         if feature["tag_ids"] in [["25269"], ["25270"], ["24837"]]:
             item["branch"] = item.pop("name").replace("Molton Brown", "").strip()
             if feature["store_business_hours"]:
-                print(feature["store_business_hours"])
-                oh = OpeningHours()
-                for times in feature["store_business_hours"]:
-                    if times["open_24hrs"] is not False:
-                        oh.add_range(DAYS_FULL[int(times["week_day"]) - 1], "00:01", "23:59")
-                    else:
-                        oh.add_range(
-                            DAYS_FULL[int(times["week_day"]) - 1],
-                            times["open_time"],
-                            times["close_time"],
-                            time_format="%I:%M %p",
-                        )
-                item["opening_hours"] = oh
+                try:
+                    oh = OpeningHours()
+                    for times in feature["store_business_hours"]:
+                        if times["open_24hrs"] is not False:
+                            oh.add_range(DAYS_FULL[int(times["week_day"]) - 1], "00:01", "23:59")
+                        else:
+                            oh.add_range(
+                                DAYS_FULL[int(times["week_day"]) - 1],
+                                times["open_time"],
+                                times["close_time"],
+                                time_format="%I:%M %p",
+                            )
+                    item["opening_hours"] = oh
+                except:
+                    continue
             yield item
