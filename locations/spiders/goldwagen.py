@@ -12,8 +12,8 @@ from locations.structured_data_spider import extract_phone
 class GoldwagenSpider(SitemapSpider):
     name = "goldwagen"
     item_attributes = {"brand": "Goldwagen", "brand_wikidata": "Q129485065"}
-    sitemap_urls = ["https://www.goldwagen.com/robots.txt"]
-    sitemap_follow = ["sitemap-posts-stores"]
+    sitemap_urls = ["https://www.goldwagen.com/sitemap_index.xml"]
+    sitemap_follow = ["stores-sitemap"]
     sitemap_rules = [("/store/", "parse")]
     custom_settings = {"DOWNLOAD_DELAY": 3}  # Requested by robots.txt
 
