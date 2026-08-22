@@ -9,8 +9,8 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-class NextcareSpider(scrapy.Spider):
-    name = "nextcare"
+class NextcareUSSpider(scrapy.Spider):
+    name = "nextcare_us"
     item_attributes = {"brand": "NextCare Urgent Care", "brand_wikidata": "Q139994485"}
     allowed_domains = ["nextcare.com"]
     start_urls = ("https://nextcare.com/find-your-location/",)
@@ -26,6 +26,7 @@ class NextcareSpider(scrapy.Spider):
             if location.get("brand") == "NextCare Urgent Care":
                 item = DictParser.parse(location)
                 item["branch"] = item.pop("name")
+                item["name"] = self.item_attributes["brand"]
                 item["ref"] = location.get("post_id")
                 item["housenumber"] = location.get("aptsuit")
                 item["street_address"] = item.pop("street")
