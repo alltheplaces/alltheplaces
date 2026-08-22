@@ -1,4 +1,3 @@
-import json
 from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, TextResponse
@@ -79,7 +78,7 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
             yield JsonRequest(url=url, data=payload)
 
     def parse(self, response: TextResponse, **kwargs):
-        for location in json.loads(response.xpath("//pre//text()").get())["data"]["storesByCoordinate"]:
+        for location in response.json()["data"]["storesByCoordinate"]:
             location.update(location.pop("store"))
             item = DictParser.parse(location)
             item["ref"] = item.pop("name")

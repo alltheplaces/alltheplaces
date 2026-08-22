@@ -1,25 +1,42 @@
-import re
-from typing import Any
+import json
+from typing import Any, Iterable
 
+from scrapy import Spider
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class TangerSpider(SitemapSpider):
+class TangerSpider(Spider):
     name = "tanger"
     item_attributes = {"brand": "Tanger Outlets", "brand_wikidata": "Q7682888"}
-    sitemap_urls = ["https://www.tanger.com/robots.txt"]
-    sitemap_rules = [(r"/location$", "parse")]
+    start_urls = ["https://www.tanger.com/find-a-tanger"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["ref"] = item["website"] = response.url
-        item["branch"] = response.xpath('//li[@class="nav-item centerLink"]/a/text()').get()
-        if lat := re.search(r"centerLatitude = (-?\d+\.\d+);", response.text):
-            item["lat"] = lat.group(1)
-        if lon := re.search(r"centerLongitude = (-?\d+\.\d+);", response.text):
-            item["lon"] = lon.group(1)
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        for center in json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())["props"]["pageProps"][
+            "centers"
+        ]:
+            for address in center["fullAddressCS"]:
+                item = DictParser.parse({**center, **address})
+                item["street_address"] = merge_address_lines([address["address1"], address["address2"]])
+                item["phone"] = center["centerPhoneNumber"] or center["contactTelephoneNumber"]
+                item.pop("name")
+                if len(center["fullAddressCS"]) > 1:
+                    item["branch"] = address["addressLabel"].removeprefix("Tanger ")
+                    item["ref"] = "{}-{}".format(center["slug"], item["branch"].lower().replace(" ", "-"))
+                else:
+                    item["branch"] = center["name"]
+                    item["ref"] = center["slug"]
+                item["website"] = response.urljoin("/{}".format(center["slug"]))
 
-        yield item
+                item["opening_hours"] = OpeningHours()
+                for rule in center["hours"]:
+                    item["opening_hours"].add_range(DAYS[rule["day_index"]], rule["open"], rule["close"])
+
+                apply_category(Categories.SHOP_MALL, item)
+
+                yield item

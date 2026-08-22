@@ -13,6 +13,7 @@ from locations.items import Feature
 # of lots of string bashing. If ever NSI / ATP were to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
+    GENERIC_HISTORIC = {"historic": "yes"}
     GENERIC_POI = {"amenity": "yes"}
     GENERIC_SHOP = {"shop": "yes"}
 
@@ -332,9 +333,12 @@ class Categories(Enum):
     FAST_FOOD = {"amenity": "fast_food"}
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
+    DISUSED_FUEL_STATION = {"disused:amenity": "fuel"}
     GRAVE = {"cemetery": "grave"}
     GRIT_BIN = {"amenity": "grit_bin"}
     HIGHWAY_SERVICES = {"highway": "services"}
+    HISTORIC_BUILDING = {"historic": "building"}
+    HISTORIC_DISTRICT = {"historic": "district"}
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital"}
     HOTEL = {"tourism": "hotel"}
@@ -525,6 +529,7 @@ top_level_tags = [
     "club",
     "craft",
     "dark_store",
+    "disused:amenity",
     "education",
     "emergency",
     "healthcare",
@@ -850,6 +855,10 @@ payment_method_aliases = {
     "PostFinance Card": PaymentMethods.POSTFINANCE_CARD,
     "PowerCard": PaymentMethods.POWERCARD,
     "UnionPay": PaymentMethods.UNIONPAY,
+    # Finnish aliases (useful for spiders dealing with the Finnish language)
+    "Käteinen": PaymentMethods.CASH,
+    "Lähimaksu": PaymentMethods.CONTACTLESS,
+    "Pankkikortti": PaymentMethods.DEBIT_CARDS,
 }
 
 
