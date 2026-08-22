@@ -19,6 +19,14 @@ class TeslaSpider(Spider):
     requires_proxy = True
     custom_settings = {"DOWNLOAD_TIMEOUT": 60, "USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
+    DEALER_CATEGORIES = {"sales", "service", "bodyshop", "gallery"}
+    CHARGER_CATEGORIES = {"supercharger", "nacs", "party"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.expected_dealers: set[str] = set()
+        self.scraped_dealers: set[str] = set()
+
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
             "https://www.tesla.com/api/findus/get-locations?country=US&view=map",
@@ -29,12 +37,17 @@ class TeslaSpider(Spider):
         json_data = self.extract_json(response)
         locations = self.select_locations(json_data["data"]["data"])
         for slug, types in locations.items():
-            yield Request(
-                url=f"https://www.tesla.com/api/findus/get-location-details?locationSlug={slug}&functionTypes={','.join(types)}&locale=en_US&isInHkMoTw=false",
-                callback=self.parse_location,
-            )
+            # Scraping only dealers and chargers within dealers,
+            # since the spider gets blocked after attempting to scrape every charger.
+            if bool(self.DEALER_CATEGORIES.intersection(types)):
+                self.expected_dealers.add(slug)
+                yield Request(
+                    url=f"https://www.tesla.com/api/findus/get-location-details?locationSlug={slug}&functionTypes={','.join(types)}&locale=en_US&isInHkMoTw=false",
+                    callback=self.parse_location,
+                    cb_kwargs={"slug": slug},
+                )
 
-    def parse_location(self, response: Response) -> Iterable[Feature]:
+    def parse_location(self, response: Response, slug: str) -> Iterable[Feature]:
         location = self.extract_json(response)
         data = location.get("data", {})
         if data.get("sales_function"):
@@ -43,6 +56,8 @@ class TeslaSpider(Spider):
             yield self.build_service(data)
         if data.get("supercharger_function"):
             yield self.build_supercharger(data)
+        if data.get("sales_function") or data.get("service_function"):
+            self.scraped_dealers.add(slug)
 
     def extract_json(self, response: Response) -> dict | list[dict]:
         # For some reason, the scrapy_zyte_api library doesn't detect this as a ScrapyTextResponse, so we have to do the text encoding ourselves.
@@ -147,7 +162,7 @@ class TeslaSpider(Spider):
     # Selection only those in categories list
     # Merge same slugs into one entry, combining types
     def select_locations(self, locations: list[dict]) -> dict[str, list[str]]:
-        categories = {"sales", "service", "bodyshop", "gallery", "supercharger", "nacs", "party"}
+        categories = self.DEALER_CATEGORIES | self.CHARGER_CATEGORIES
         slug_mapping: dict[str, list[str]] = {}
         for loc in locations:
             if not isinstance(loc, dict):
@@ -161,3 +176,18 @@ class TeslaSpider(Spider):
                 if category not in existing:
                     existing.append(category)
         return slug_mapping
+
+    def closed(self, reason: str) -> None:
+        expected, scraped = len(self.expected_dealers), len(self.scraped_dealers)
+        missing = sorted(self.expected_dealers - self.scraped_dealers)
+        stats = self.crawler.stats
+        stats.set_value(f"atp/{self.name}/dealers_expected", expected)
+        stats.set_value(f"atp/{self.name}/dealers_scraped", scraped)
+        stats.set_value(f"atp/{self.name}/dealers_missing", len(missing))
+        if missing:
+            self.logger.warning(
+                f"Dealer coverage incomplete ({reason}): {scraped}/{expected} scraped, "
+                f"{len(missing)} missing, first 20: {', '.join(missing[:20])}"
+            )
+        else:
+            self.logger.info(f"Dealer coverage complete: {expected}/{expected} scraped")
