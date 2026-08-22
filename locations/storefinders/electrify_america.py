@@ -29,7 +29,7 @@ class ElectrifyAmericaSpider(JSONBlobSpider):
 
         station_type = feature.get("type")
         if station_type == "PUBLIC":
-            item["extras"]["access"] = "public"
+            item["extras"]["access"] = "yes"
         elif station_type == "COMMERCIAL":
             item["extras"]["access"] = "customers"
         elif station_type == "COMING_SOON":
@@ -54,7 +54,7 @@ class ElectrifyAmericaSpider(JSONBlobSpider):
 
         station_type = response.json().get("type")
         if station_type == "PUBLIC":
-            parent["extras"]["access"] = "public"
+            parent["extras"]["access"] = "yes"
         elif station_type == "COMMERCIAL":
             parent["extras"]["access"] = "customers"
 
