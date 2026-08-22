@@ -27,8 +27,10 @@ class GoldwagenSpider(SitemapSpider):
         item["addr_full"] = merge_address_lines(
             response.xpath('//div[contains(@class, "store_locator_single_address")]/text()').getall()
         )
-        item["lat"] = response.xpath("//@data-lat").get()
-        item["lon"] = response.xpath("//@data-lng").get()
+        if lat := response.xpath("//@data-lat").get():
+            item["lat"] = lat
+        if lon := response.xpath("//@data-lng").get():
+            item["lon"] = lon
 
         extract_phone(item, response)
         apply_category(Categories.SHOP_CAR_PARTS, item)
