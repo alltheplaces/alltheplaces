@@ -6,6 +6,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -51,7 +52,7 @@ class EvgoUSSpider(SitemapSpider):
     name = "evgo_us"
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
     sitemap_urls = ["https://www.evgo.com/find-a-charger/sites-sitemap.xml"]
-    requires_proxy = True
+    requires_proxy = "US"  # Vercel security checkpoint blocks datacentre IPs
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Iterator[Feature]:
@@ -68,6 +69,8 @@ class EvgoUSSpider(SitemapSpider):
             item["extras"]["capacity"] = capacity
         for socket in site["sockets"]:
             item["extras"][socket] = "yes"
+
+        extract_google_position(item, response)
 
         apply_category(Categories.CHARGING_STATION, item)
         yield item
