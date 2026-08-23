@@ -60,7 +60,7 @@ class ApinaJPSpider(Spider):
         if hours_html := details.get("営業時間"):
             item["opening_hours"] = self._parse_hours(hours_html)
 
-        apply_category(Categories.LEISURE_AMUSEMENT_ARCADE, item)
+        apply_category(Categories.AMUSEMENT_ARCADE, item)
 
         if map_href := response.css("a.btn-map::attr(href)").get():
             yield response.follow(
@@ -84,7 +84,6 @@ class ApinaJPSpider(Spider):
     @staticmethod
     def _clean_text(html: str) -> str:
         return re.sub(r"<[^>]+>", " ", html).replace("\xa0", " ").strip()
-        # collapse runs of whitespace left behind by stripped tags
 
     def _parse_phone(self, html: str) -> str | None:
         # Occasionally the phone and fax numbers are both listed here,
