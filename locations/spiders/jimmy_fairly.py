@@ -68,13 +68,15 @@ class JimmyFairlySpider(JSONBlobSpider):
                         hours = time.split("-")
                         if len(hours) == 2:
                             openinghour = self.format_hour(hours[0])
-                            closinghour = self.format_hour(hours[1])    
-                            if openinghour is None or closinghour is None: #the syntax is invalid, skipping the opening hours for this shop
+                            closinghour = self.format_hour(hours[1])
+                            if (
+                                openinghour is None or closinghour is None
+                            ):  # the syntax is invalid, skipping the opening hours for this shop
                                 invalid = True
                                 break
-                            
-                            item["opening_hours"].add_range(day,openinghour,closinghour)
-                        else: #the syntax is invalid, skipping the opening hours for this shop
+
+                            item["opening_hours"].add_range(day, openinghour, closinghour)
+                        else:  # the syntax is invalid, skipping the opening hours for this shop
                             invalid = True
                             break
 
@@ -83,5 +85,3 @@ class JimmyFairlySpider(JSONBlobSpider):
                     break
 
         yield item
-
-
