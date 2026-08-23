@@ -11,7 +11,11 @@ from locations.items import Feature
 
 class DonQuijoteJPSpider(scrapy.Spider):
     name = "don_quijote_jp"
-    item_attributes = {"brand": "Don Quijote", "brand_wikidata": "Q1185381"}
+    # NSI registers two distinct brand strings under this Wikidata QID depending
+    # on store format: the Japanese "ドン・キホーテ" name (used here as the
+    # default for JP/Hawaii stores) and "Don Don Donki" for the SG/MY/GU
+    # regional format (set explicitly per-item in parse_dondondonki_*).
+    item_attributes = {"brand": "ドン・キホーテ", "brand_wikidata": "Q1185381"}
     start_urls = ["https://www.donki.com/store/shop_list.php?bsns=0"]
 
     # The store locator at donki.com/store/shop_list.php is shared by many
@@ -155,6 +159,7 @@ class DonQuijoteJPSpider(scrapy.Spider):
             item_fields = {
                 "ref": f"dondon-{country}-{ref}",
                 "name": name,
+                "brand": "Don Don Donki",
                 "addr_full": addr_full,
                 "phone": phone,
                 "country": country,
