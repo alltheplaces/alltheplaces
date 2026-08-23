@@ -12,7 +12,7 @@ class PfgFRSpider(StructuredDataSpider, CamoufoxSpider):
     item_attributes = {"brand": "PFG", "brand_wikidata": "Q3396087"}
     allowed_domains = ["www.pfg.fr"]
     start_urls = ["https://www.pfg.fr/nos-agences"]
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 1}
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 4}
 
     def parse(self, response: Response, **kwargs):
         # Department index page links to one page per department.
