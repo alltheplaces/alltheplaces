@@ -13,10 +13,13 @@ class ApmMonacoSpider(StoremapperSpider):
         "brand_wikidata": "Q85738954",
     }
     company_id = "12892"
+    drop_attributes = {"website"}
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         apply_category(Categories.SHOP_JEWELRY, item)
-        item["name"] = "APM Monaco"
+        item["branch"] = location.get("name", "").removeprefix("APM ")
+        if "APM" in item["branch"]: #shops that do prefix their branch with "APM"
+            item["branch"] = None
 
         fields = [
             location.get("custom_field_1") or "",
