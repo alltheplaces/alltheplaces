@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class NamcoJPSpider(SitemapSpider, StructuredDataSpider):
     name = "namco_jp"
-    item_attributes = {"brand": "namco", "brand_wikidata": "Q111516144"}
+    item_attributes = {"brand": "NAMCO", "brand_wikidata": "Q111516144"}
     sitemap_urls = ["https://bandainamco-am.co.jp/sitemap_game_center.xml"]
     sitemap_rules = [(r"^https://bandainamco-am\.co\.jp/game_center/loc/([\w-]+)/$", "parse_sd")]
     wanted_types = ["EntertainmentBusiness"]
