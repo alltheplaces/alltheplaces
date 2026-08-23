@@ -8,8 +8,8 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
-from locations.hours import OpeningHours
+from locations.geo import country_iseadgg_centroids
+from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
 
 
@@ -18,9 +18,15 @@ class CulversUSSpider(scrapy.Spider):
     item_attributes = {"brand": "Culver's", "brand_wikidata": "Q1143589"}
 
     async def start(self) -> Iterable[Request]:
-        for city in city_locations("US", 100000):
+        # The API silently caps each response at 100 results, regardless of the
+        # "limit" parameter, so a query radius must be small enough that no
+        # single query point has more than 100 real locations within it, even
+        # in Culver's densest area (Milwaukee/Chicago). 94km ISEADGG spacing
+        # empirically stays under that cap there (~74 results) while still
+        # using far fewer query points than one per 100k+ population city.
+        for lat, lon in country_iseadgg_centroids("US", 94):
             yield JsonRequest(
-                url=f'https://www.culvers.com/api/locator/getLocations?lat={city["latitude"]}&long={city["longitude"]}&radius=600000&limit=10000'
+                url=f"https://www.culvers.com/api/locator/getLocations?lat={lat}&long={lon}&radius=94000&limit=10000"
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -70,7 +76,7 @@ class CulversUSSpider(scrapy.Spider):
             return None
 
         oh = OpeningHours()
-        for day in ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]:
+        for day in DAYS:
             open_time = hours.get(f"{day}O")
             close_time = hours.get(f"{day}C")
             if not open_time or not close_time or open_time == "n/a" or close_time == "n/a":
