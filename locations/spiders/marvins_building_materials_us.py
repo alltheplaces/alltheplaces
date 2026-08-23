@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -12,7 +12,6 @@ class MarvinsBuildingMaterialsUSSpider(scrapy.Spider):
     item_attributes = {
         "brand": "Marvin's Building Materials",
         "brand_wikidata": "Q109395525",
-        "extras": Categories.SHOP_DOITYOURSELF.value,
     }
     start_urls = ["https://www.marvinsbuildingmaterials.com/locations"]
 
@@ -51,5 +50,7 @@ class MarvinsBuildingMaterialsUSSpider(scrapy.Spider):
                 hours_text = hours_text.replace("M-Sat", "Mon-Sat").replace("\n", " ")
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(hours_text)
+
+            apply_category(Categories.SHOP_DOITYOURSELF, item)
 
             yield item
