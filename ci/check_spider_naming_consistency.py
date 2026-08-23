@@ -143,7 +143,7 @@ COUNTRYCODE_COMPONENTS = {
 }
 
 
-def snake_to_camel(snake_str: str) -> str:
+def snake_to_camel(snake_str: str, skip_auto_cc: bool = False) -> str:
     components = snake_str.split("_")
 
     # If the first component is a number, spell it out
@@ -154,12 +154,13 @@ def snake_to_camel(snake_str: str) -> str:
     for i, component in enumerate(components):
         components[i] = component.capitalize()
 
-    # Allow consecutive country codes at the end of the spider name
-    for i in range(len(components) - 1, 0, -1):
-        if components[i].upper() not in COUNTRYCODE_COMPONENTS:
-            break
+    if not skip_auto_cc:
+        # Allow consecutive country codes at the end of the spider name
+        for i in range(len(components) - 1, 0, -1):
+            if components[i].upper() not in COUNTRYCODE_COMPONENTS:
+                break
 
-        components[i] = components[i].upper()
+            components[i] = components[i].upper()
 
     return "".join(components)
 
@@ -242,17 +243,18 @@ def check_file(file_path: Path) -> Tuple[Path, List[str]]:
         if isinstance(node, ast.ClassDef):
             class_name = node.name
             spider_name = None
+            skip_auto_cc_spider_name = False
 
-            # Look for an assignment to the spider_name variable
+            # Look for an assignment to the spider_name or skip_auto_cc_spider_name variable
             for item in node.body:
                 if isinstance(item, ast.Assign):
                     for target in item.targets:
                         if isinstance(target, ast.Name) and target.id == "name":
                             if isinstance(item.value, ast.Constant):
                                 spider_name = item.value.value
-                            break
-                    if spider_name:
-                        break
+                        elif isinstance(target, ast.Name) and target.id == "skip_auto_cc_spider_name":
+                            if isinstance(item.value, ast.Constant) and item.value.value is True:
+                                skip_auto_cc_spider_name = True
 
             if spider_name:
                 # Spider names should be lowercase or digits and only use underscores.
@@ -262,13 +264,21 @@ def check_file(file_path: Path) -> Tuple[Path, List[str]]:
                     )
 
                 expected_class_name = snake_to_camel(spider_name) + "Spider"
+                expected_class_name_no_cc = snake_to_camel(spider_name, skip_auto_cc=True) + "Spider"
                 expected_file_name = spider_name
 
-                if class_name != expected_class_name:
-                    errors.append(
-                        f"Spider name '{spider_name}' should use class name '{expected_class_name}' instead "
-                        f"of '{class_name}'"
-                    )
+                if skip_auto_cc_spider_name:
+                    if class_name not in (expected_class_name, expected_class_name_no_cc):
+                        errors.append(
+                            f"Spider name '{spider_name}' should use class name '{expected_class_name}' or "
+                            f"'{expected_class_name_no_cc}' instead of '{class_name}'"
+                        )
+                else:
+                    if class_name != expected_class_name:
+                        errors.append(
+                            f"Spider name '{spider_name}' should use class name '{expected_class_name}' instead "
+                            f"of '{class_name}'"
+                        )
 
                 if file_name != expected_file_name:
                     errors.append(
