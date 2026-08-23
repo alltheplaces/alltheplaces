@@ -1,21 +1,20 @@
 import re
-from typing import Any, AsyncIterator
+from typing import Any, Iterable
 
 import scrapy
-from scrapy import Request
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class HowardHannaSpider(PlaywrightSpider):
+class HowardHannaSpider(Spider):
     name = "howard_hanna"
     item_attributes = {"brand": "Howard Hanna", "brand_wikidata": "Q119573413"}
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+    requires_proxy = "US"
+    custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -26,7 +25,7 @@ class HowardHannaSpider(PlaywrightSpider):
         },
     }
 
-    async def start(self) -> AsyncIterator[Request]:
+    def start_requests(self) -> Iterable[Request]:
         url = "https://www.howardhanna.com/Office/MapOffices"
         formdata = {
             "SouthLat": "10.236576558188718",
