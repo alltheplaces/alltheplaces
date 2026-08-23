@@ -284,6 +284,7 @@ class Categories(Enum):
     TOURISM_GALLERY = {"tourism": "gallery"}
     TOURISM_HOSTEL = {"tourism": "hostel"}
     TOURISM_INFORMATION = {"tourism": "information"}
+    TOURISM_THEME_PARK = {"tourism": "theme_park"}
     TOURISM_VIEWPOINT = {"tourism": "viewpoint"}
     TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
     TOURISM_ZOO = {"tourism": "zoo"}
