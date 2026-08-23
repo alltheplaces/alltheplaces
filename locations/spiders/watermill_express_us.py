@@ -11,7 +11,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 class WatermillExpressUSSpider(WPStoreLocatorSpider):
     name = "watermill_express_us"
     item_attributes = {"brand": "Watermill Express", "brand_wikidata": "Q126195259"}
-    drop_attributes = ["phone"]
+    drop_attributes = {"phone"}
     allowed_domains = ["watermillexpress.com"]
     iseadgg_countries_list = ["US"]
     search_radius = 500
