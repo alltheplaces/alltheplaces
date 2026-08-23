@@ -84,6 +84,6 @@ class AdoresJPSpider(Spider):
             oh.add_days_range(DAYS, hours_match.group(1), hours_match.group(2))
             item["opening_hours"] = oh
 
-        apply_category(Categories.LEISURE_AMUSEMENT_ARCADE, item)
+        apply_category(Categories.AMUSEMENT_ARCADE, item)
 
         yield item
