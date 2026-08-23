@@ -17,6 +17,7 @@ class FustCHSpider(JSONBlobSpider):
         "country": "CH",
     }
     start_urls = ["https://www.fust.ch/store-finder"]
+    requires_proxy = "CH"  # DataDome blocks data-centre IP ranges
 
     def extract_json(self, response: Response) -> list[dict]:
         scripts = response.xpath('//script[contains(text(), "pointOfService")]/text()').getall()
