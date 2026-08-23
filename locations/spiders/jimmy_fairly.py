@@ -1,6 +1,5 @@
 import json
 
-
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
@@ -51,17 +50,17 @@ class JimmyFairlySpider(JSONBlobSpider):
             item["opening_hours"] = OpeningHours()
             invalid = False
 
-            for day,time in location["opening_hours"].items():
+            for day, time in location["opening_hours"].items():
                 day = day[:2].capitalize()
                 if day not in DAYS:
                     continue
-        
-                if(time == "" or time.lower() == "closed"):
+
+                if time == "" or time.lower() == "closed":
                     item["opening_hours"].set_closed(day)
                 else:
                     midday_break = time.split("|")
-                    
-                    if len(midday_break) > 2: #the syntax is invalid, skipping the opening hours for this shop
+
+                    if len(midday_break) > 2:  # the syntax is invalid, skipping the opening hours for this shop
                         invalid = True
                         break
 
@@ -78,7 +77,7 @@ class JimmyFairlySpider(JSONBlobSpider):
                         else: #the syntax is invalid, skipping the opening hours for this shop
                             invalid = True
                             break
-            
+
                 if invalid:
                     item["opening_hours"] = None
                     break
