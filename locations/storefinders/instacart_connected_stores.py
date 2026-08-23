@@ -87,7 +87,7 @@ class InstacartConnectedStoresSpider(Spider):
         if not hasattr(self, "_seen_location_ids"):
             self._seen_location_ids: set[str] = set()
 
-        payload = response.json()
+        payload = json.loads(response.body)
         for error in payload.get("errors") or []:
             self.logger.warning("GraphQL error from %s: %s", response.url, error.get("message"))
 
