@@ -27,6 +27,19 @@ class JimmyFairlySpider(JSONBlobSpider):
 
         return extract
 
+    @staticmethod
+    def format_hour(value):
+        if not value.isdigit() or len(value) != 4:
+            return None
+
+        hour = int(value[:2])
+        minute = int(value[2:])
+
+        if not (0 <= hour <= 23 and 0 <= minute <= 59):
+            return None
+
+        return f"{hour:02d}:{minute:02d}"
+
     def post_process_item(self, item, response, location):
         apply_category(Categories.SHOP_OPTICIAN, item)
         if location.get("url") is not None:
@@ -55,8 +68,12 @@ class JimmyFairlySpider(JSONBlobSpider):
                     for time in midday_break:
                         hours = time.split("-")
                         if len(hours) == 2:
-                            openinghour = hours[0][:2] + ":" + hours[0][2:]
-                            closinghour = hours[1][:2] + ":" + hours[1][2:]
+                            openinghour = self.format_hour(hours[0])
+                            closinghour = self.format_hour(hours[1])    
+                            if openinghour is None or closinghour is None: #the syntax is invalid, skipping the opening hours for this shop
+                                invalid = True
+                                break
+                            
                             item["opening_hours"].add_range(day,openinghour,closinghour)
                         else: #the syntax is invalid, skipping the opening hours for this shop
                             invalid = True
@@ -67,3 +84,5 @@ class JimmyFairlySpider(JSONBlobSpider):
                     break
 
         yield item
+
+
