@@ -14,6 +14,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class GraingerUSSpider(PlaywrightSpider):
     name = "grainger_us"
     item_attributes = {"brand": "Grainger", "brand_wikidata": "Q1627894"}
+    requires_proxy = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
