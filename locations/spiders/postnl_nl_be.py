@@ -23,9 +23,9 @@ PARCEL_LOCKER_TYPE_ID = 405
 class PostnlNLBESpider(Spider):
     name = "postnl_nl_be"
     allowed_domains = ["productprijslokatie.postnl.nl"]
-    # ~20,000 locations, each needing its own detail request; the API has shown no rate limiting or
-    # bot protection in testing, so the default politeness delay is relaxed to keep the crawl tractable.
-    custom_settings = {"DOWNLOAD_DELAY": 0.05, "CONCURRENT_REQUESTS": 32, "CONCURRENT_REQUESTS_PER_DOMAIN": 32}
+    # ~20,000 locations, each needing its own detail request. Moderately relaxed from the repo
+    # default to keep the crawl tractable, without hammering a small postal API's backend.
+    custom_settings = {"DOWNLOAD_DELAY": 0.25, "CONCURRENT_REQUESTS": 8, "CONCURRENT_REQUESTS_PER_DOMAIN": 8}
 
     def bbox_request(self, lat: float, lon: float) -> JsonRequest:
         # The search endpoint returns every location within a fixed ~35-40km radius of the requested
