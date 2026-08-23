@@ -23,6 +23,7 @@ class StratcoAUSpider(SitemapSpider, StructuredDataSpider, CamoufoxSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
+        item["name"] = self.item_attributes["brand"]
         if item.get("phone") and item["phone"].replace(" ", "") == self.GENERIC_PHONE:
             item["phone"] = None
         apply_category(Categories.SHOP_HARDWARE, item)
