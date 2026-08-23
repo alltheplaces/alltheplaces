@@ -106,10 +106,12 @@ class PlaywrightMiddleware:
             return
         if not os.environ.get("ZYTE_API_KEY"):
             return
-        requires_proxy = getattr(self.crawler.spider, "requires_proxy", False)
+        if not (spider := self.crawler.spider):
+            return
+        requires_proxy = getattr(spider, "requires_proxy", False)
         if not requires_proxy:
             return
-        if not (country_code := get_proxy_location(requires_proxy, self.crawler.spider.name)):
+        if not (country_code := get_proxy_location(requires_proxy, spider.name)):
             return
 
         context_kwargs = request.meta.setdefault(context_kwargs_meta_key, {})
