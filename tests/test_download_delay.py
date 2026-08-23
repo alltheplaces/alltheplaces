@@ -29,6 +29,7 @@ def test_spiders_do_not_use_lower_download_delay_than_default():
     ALLOWED_LOW_DOWNLOAD_DELAY = set(
         [
             "usps_collection_boxes",  # Need to be faster to complete within time limits
+            "rivian_us",  # Crawls a large grid of public vector map tiles; needs to be faster to complete within time limits
         ]
     )
 
