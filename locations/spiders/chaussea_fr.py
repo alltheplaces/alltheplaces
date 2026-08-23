@@ -11,6 +11,7 @@ class ChausseaFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.chaussea.com/modules/chssitemap/sitemaps/fr-fr-magasins.xml"]
     sitemap_rules = [(r"/fr/magasin/[^/]+$", "parse_sd")]
     wanted_types = ["Store"]
+    requires_proxy = "FR"
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
