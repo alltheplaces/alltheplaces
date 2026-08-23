@@ -17,7 +17,7 @@ class ApmMonacoSpider(StoremapperSpider):
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         apply_category(Categories.SHOP_JEWELRY, item)
-        item["branch"] = location.get("name", "").removeprefix("APM ")
+        item["branch"] = item.pop("name", "").removeprefix("APM ")
         if "APM" in item["branch"]:  # shops that do prefix their branch with "APM"
             item["branch"] = None
 
