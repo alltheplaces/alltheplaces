@@ -12,6 +12,7 @@ class CadenceBankUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://cadencebank.com/sitemap.xml"]
     sitemap_rules = [("/find-a-location/", "parse_sd")]
     time_format = "%H:%M:%S"
+    requires_proxy = "US"  # Cloudflare WAF blocks datacentre IPs on every path, including robots.txt
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         apply_category(Categories.BANK, item)
