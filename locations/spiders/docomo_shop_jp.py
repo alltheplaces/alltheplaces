@@ -16,7 +16,7 @@ HOURS_RE = re.compile(r"(午前|午後)(\d{1,2})時(?:(\d{1,2})分)?[~〜～-](�
 
 class DocomoShopJPSpider(SitemapSpider):
     name = "docomo_shop_jp"
-    item_attributes = {"brand": "ドコモショップ", "brand_wikidata": "Q853958"}
+    item_attributes = {"brand": "NTT docomo", "brand_wikidata": "Q853958"}
     sitemap_urls = ["https://shop.smt.docomo.ne.jp/sitemap.xml"]
     # The sitemap also lists info/service pages and secondary per-shop pages
     # (e.g. "0300304163300/02.html"); only the shop's primary page is wanted.
