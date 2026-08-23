@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class LaforetImmobilierFRSpider(SitemapSpider, StructuredDataSpider):
     name = "laforet_immobilier_fr"
-    item_attributes = {"brand": "Laforêt Immobilier", "brand_wikidata": "Q56310946"}
+    item_attributes = {"brand": "Laforêt", "brand_wikidata": "Q56310946"}
     sitemap_urls = ["https://www.laforet.com/storage/sitemaps/agences-immobilieres.xml"]
     sitemap_rules = [("/agence-immobiliere/", "parse_sd")]
 
