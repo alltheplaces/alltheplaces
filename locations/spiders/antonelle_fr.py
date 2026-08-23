@@ -1,6 +1,5 @@
 import json
 
-
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_FR, DAYS_FR, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
