@@ -1,3 +1,5 @@
+import os
+
 from scrapy import Selector
 from scrapy.crawler import Crawler
 from scrapy.http import Request, Response, TextResponse
@@ -6,6 +8,7 @@ from scrapy_camoufox.page import PageMethod
 
 from locations.camoufox_spider import CamoufoxSpider
 from locations.captcha_solvers import click_solver
+from locations.middlewares.zyte_api_by_country import get_proxy_location
 from locations.playwright_spider import PlaywrightSpider
 
 
@@ -20,7 +23,9 @@ class PlaywrightMiddleware:
         return cls(crawler)
 
     def process_request(self, request: Request) -> None:
+        context_kwargs_meta_key = None
         if issubclass(type(self.crawler.spider), CamoufoxSpider):
+            context_kwargs_meta_key = "camoufox_context_kwargs"
             if "camoufox" not in request.meta:
                 request.meta["camoufox"] = True
             if "camoufox_page_event_handlers" not in request.meta.keys():
@@ -38,6 +43,7 @@ class PlaywrightMiddleware:
         ):
             # TODO: remove "is_playwright_spider" check once fully deprecated
             # and removed from all ATP spiders.
+            context_kwargs_meta_key = "playwright_context_kwargs"
             if "playwright" not in request.meta:
                 request.meta["playwright"] = True
             if "playwright_page_event_handlers" not in request.meta.keys():
@@ -46,6 +52,8 @@ class PlaywrightMiddleware:
             # Spider does not want Camoufox/Playwright to be used. Skip this
             # middleware and do nothing to the request.
             return
+
+        self._apply_zyte_proxy_geolocation(request, context_kwargs_meta_key)
 
         if issubclass(type(self.crawler.spider), SitemapSpider) or issubclass(type(self.crawler.spider), XMLFeedSpider):
             # Workaround for Firefox always wanting to transform XML documents
@@ -74,6 +82,39 @@ class PlaywrightMiddleware:
                 request.meta["playwright_page_event_handlers"][
                     "response"
                 ] = "detect_xml_document_from_playwright_response"
+
+    def _apply_zyte_proxy_geolocation(self, request: Request, context_kwargs_meta_key: str | None) -> None:
+        """
+        When a spider sets `requires_proxy`, PlaywrightSpider.update_settings()
+        (see locations/playwright_spider.py) has already pointed
+        PLAYWRIGHT_LAUNCH_OPTIONS/CAMOUFOX_LAUNCH_OPTIONS at Zyte API's
+        proxy-mode endpoint. That only selects a Zyte-managed IP; to ask Zyte
+        for an IP in a specific country, a "Zyte-Geolocation" request header
+        also needs to be sent (see
+        https://docs.zyte.com/zyte-api/usage/proxy-mode.html). We inject it
+        via the browser context's extra_http_headers, using the same country
+        resolution logic (spider name suffix, e.g. "_us") as
+        ZyteApiByCountryMiddleware uses for non-browser requests.
+
+        NOTE: this is unverified against a real Zyte account (no credentials
+        in dev sandboxes) — if Zyte doesn't honour this header for
+        proxy-mode/CONNECT-tunnelled traffic, this becomes a no-op and Zyte
+        will just pick whatever IP it considers best, same as
+        `requires_proxy = True` with no resolvable country today.
+        """
+        if not context_kwargs_meta_key:
+            return
+        if not os.environ.get("ZYTE_API_KEY"):
+            return
+        requires_proxy = getattr(self.crawler.spider, "requires_proxy", False)
+        if not requires_proxy:
+            return
+        if not (country_code := get_proxy_location(requires_proxy, self.crawler.spider.name)):
+            return
+
+        context_kwargs = request.meta.setdefault(context_kwargs_meta_key, {})
+        extra_http_headers = context_kwargs.setdefault("extra_http_headers", {})
+        extra_http_headers["Zyte-Geolocation"] = country_code.upper()
 
     def process_response(self, request: Request, response: Response) -> Response:
         if (

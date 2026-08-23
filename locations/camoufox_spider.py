@@ -9,6 +9,9 @@ from locations.playwright_spider import PlaywrightSpider
 
 
 class CamoufoxSpider(PlaywrightSpider):
+    # See PlaywrightSpider._apply_zyte_proxy_launch_options().
+    _proxy_launch_options_setting = "CAMOUFOX_LAUNCH_OPTIONS"
+
     @staticmethod
     async def click_solver(page: Page, request: Request, spider: Spider) -> None:
         """

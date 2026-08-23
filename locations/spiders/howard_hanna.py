@@ -5,26 +5,20 @@ import scrapy
 from scrapy import Request
 from scrapy.http import Response
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 
-class HowardHannaSpider(PlaywrightSpider):
+class HowardHannaSpider(CamoufoxSpider):
     name = "howard_hanna"
     item_attributes = {"brand": "Howard Hanna", "brand_wikidata": "Q119573413"}
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "DEFAULT_REQUEST_HEADERS": {
-            "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "X-Requested-With": "XMLHttpRequest",
-            "Origin": "https://www.howardhanna.com",
-            "Referer": "https://www.howardhanna.com/Office/Map",
-            "User-Agent": BROWSER_DEFAULT,
-        },
-    }
+    captcha_type = "cloudflare_turnstile"
+    captcha_selector_indicating_success = '//link[@href="resource://content-accessible/plaintext.css"]'
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
+    handle_httpstatus_list = [403]
+    requires_proxy = "US"
 
     async def start(self) -> AsyncIterator[Request]:
         url = "https://www.howardhanna.com/Office/MapOffices"
