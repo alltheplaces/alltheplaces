@@ -1,7 +1,15 @@
+import re
+
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
+
+# The generic national customer-service line, embedded in every page's
+# structured data rather than a branch-specific number. Compared digits-only
+# since the raw phone string's formatting varies before PhoneCleanUpPipeline
+# normalizes it.
+NATIONAL_HOTLINE_DIGITS = "420212812811"
 
 
 class BenuCZSpider(SitemapSpider, StructuredDataSpider):
@@ -25,9 +33,7 @@ class BenuCZSpider(SitemapSpider, StructuredDataSpider):
             return
 
         item["country"] = "CZ"
-        # This is a generic national customer-service line embedded in every
-        # page's structured data, not a branch-specific number.
-        if item.get("phone") == "+420 212 812 811":
+        if re.sub(r"\D", "", item.get("phone") or "").endswith(NATIONAL_HOTLINE_DIGITS):
             item["phone"] = None
         apply_category(Categories.PHARMACY, item)
         yield item
