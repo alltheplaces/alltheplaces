@@ -42,6 +42,7 @@ class Categories(Enum):
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
     TRAIN_STATION = {"railway": "station"}
 
+    AMUSEMENT_ARCADE = {"leisure": "amusement_arcade"}
     BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
     SAUNA = {"leisure": "sauna"}
