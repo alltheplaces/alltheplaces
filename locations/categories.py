@@ -26,6 +26,7 @@ class Categories(Enum):
     KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
     LEFT_LUGGAGE = {"amenity": "left_luggage"}
     LUGGAGE_LOCKER = {"amenity": "luggage_locker"}
+    MOTORCYCLE_PARKING = {"amenity": "motorcycle_parking"}
     MOTORCYCLE_RENTAL = {"amenity": "motorcycle_rental"}
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
