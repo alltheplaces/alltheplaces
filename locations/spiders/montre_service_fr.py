@@ -9,7 +9,7 @@ class MontreServiceFrSpider(CrawlSpider, StructuredDataSpider):
     name = "montre_service_fr"
     item_attributes = {
         "brand": "Montre Service",
-        "brand_wikidata": "None",
+        "brand_wikidata": "Q141155781",
     }
     allowed_domains = ["montreservice.fr"]
     start_urls = ["https://montreservice.fr/fr/boutiques"]
@@ -25,7 +25,7 @@ class MontreServiceFrSpider(CrawlSpider, StructuredDataSpider):
     drop_attributes = {"facebook"}
 
     def post_process_item(self, item, response, ld_data):
-        if(item.get("street_address") == None): #shops for which the structured data spider cannot extract street_address are invalid
+        if not item.get("street_address"): # Shops without a street address are invalid.
             return
 
         item["branch"] = item.pop("name", "").removeprefix("Horlogerie à ").removesuffix(" : MONTRE SERVICE")
