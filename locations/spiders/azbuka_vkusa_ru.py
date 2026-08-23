@@ -16,6 +16,7 @@ class AzbukaVkusaRUSpider(JSONBlobSpider):
         "brand_wikidata": "Q4058209",
     }
     locations_key = "data"
+    requires_proxy = "RU"
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item.pop("name")
