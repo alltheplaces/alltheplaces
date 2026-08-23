@@ -25,5 +25,9 @@ class BenuCZSpider(SitemapSpider, StructuredDataSpider):
             return
 
         item["country"] = "CZ"
+        # This is a generic national customer-service line embedded in every
+        # page's structured data, not a branch-specific number.
+        if item.get("phone") == "+420 212 812 811":
+            item["phone"] = None
         apply_category(Categories.PHARMACY, item)
         yield item
