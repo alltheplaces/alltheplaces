@@ -9,6 +9,10 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.hyundai_kr import HYUNDAI_SHARED_ATTRIBUTES
 
+# The national corporate support hotline, repeated identically across ~47 of
+# 109 locations rather than a branch-specific number.
+NATIONAL_HOTLINE_DIGITS = "16661"
+
 
 class HyundaiEGSpider(Spider):
     name = "hyundai_eg"
@@ -36,7 +40,9 @@ class HyundaiEGSpider(Spider):
                 item["lat"] = location.get("lat")
                 item["lon"] = location.get("lng")
                 item["addr_full"] = extra_fields.get("detailed-address")
-                item["phone"] = extra_fields.get("phone")
+                phone = extra_fields.get("phone")
+                if phone and re.sub(r"\D", "", phone) != NATIONAL_HOTLINE_DIGITS:
+                    item["phone"] = phone
 
                 # The single "categories" entry present on every location
                 # indicates whether it's a showroom/dealer, a service
