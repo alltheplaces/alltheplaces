@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class BabyWalzDESpider(Spider):
@@ -18,6 +19,8 @@ class BabyWalzDESpider(Spider):
     name = "baby_walz_de"
     item_attributes = {"brand": "baby-walz", "brand_wikidata": "Q108004413"}
     start_urls = ["https://www.baby-walz.de/filialen/"]
+    requires_proxy = "DE"  # Vercel security checkpoint blocks datacentre IPs
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
     # RSC pattern: lat, lon, "email@domain", "https://maps.url", ...
     _STORE_RE = re.compile(
