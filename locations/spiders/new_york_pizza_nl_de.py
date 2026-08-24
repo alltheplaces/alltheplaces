@@ -42,7 +42,10 @@ class NewYorkPizzaNLDESpider(Spider):
             item["postcode"], item["city"] = store["address_line_2"].split(maxsplit=1)
             item["country"] = top_level_domain.upper()
             item["website"] = response.urljoin(store["details_url"])
-            item["opening_hours"] = self.convert_opening_hours(store)
+            try:
+                item["opening_hours"] = self.convert_opening_hours(store)
+            except Exception:
+                pass
             yield item
 
     @staticmethod
