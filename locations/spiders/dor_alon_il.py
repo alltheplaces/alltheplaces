@@ -65,6 +65,6 @@ class DorAlonILSpider(Spider):
                         oh.set_closed(day)
                     elif hours := re.match(r"^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$", value):
                         oh.add_range(day, hours.group(1), hours.group(2))
-                except ValueError:
+                except (TypeError, ValueError):  # non-string or unparseable value
                     self.crawler.stats.inc_value("atp/{}/hours/failed".format(self.name))
         return oh
