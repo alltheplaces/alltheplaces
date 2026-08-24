@@ -23,7 +23,7 @@ class NewYorkPizzaNLDESpider(Spider):
     def parse_auth_token(self, response: Response, top_level_domain: str = None) -> Iterable[FormRequest]:
         auth_token = response.xpath('//input[@id="completeAntiForgeryToken"]/@value').get()
         yield FormRequest(
-            url=f"https://www.newyorkpizza.{top_level_domain}/General/GetFilteredStores/",
+            url=f"https://www.newyorkpizza.{top_level_domain}/General/GetFilteredStores",
             formdata={"includeSliceStores": "false", "storeIds": ""},
             headers={"RequestVerificationToken": auth_token},
             callback=self.parse,
