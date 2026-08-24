@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BigmatBESpider(SitemapSpider, StructuredDataSpider):
+class BigmatSpider(SitemapSpider, StructuredDataSpider):
     name = "bigmat"
     item_attributes = {"brand": "BigMat", "brand_wikidata": "Q101851862"}
     sitemap_urls = ["https://magasins.bigmat.be/sitemap.xml", "https://magasins.bigmat.fr/sitemap.xml"]
