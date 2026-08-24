@@ -8,6 +8,11 @@ from locations.structured_data_spider import StructuredDataSpider
 class OzoneBGSpider(CrawlSpider, StructuredDataSpider):
     name = "ozone_bg"
     item_attributes = {"brand": "Ozone.bg", "brand_wikidata": "Q120717332"}
+    # CI's datacenter IP gets a Cloudflare 403 even though the site has no
+    # challenge/fingerprint check locally (plain curl/Scrapy both work
+    # unproxied) — an IP-reputation block, which requires_proxy fixes since
+    # this is a plain (non-browser) spider.
+    requires_proxy = "BG"
     start_urls = ["https://www.ozone.bg/our-shops/"]
     rules = [
         Rule(
