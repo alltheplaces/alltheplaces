@@ -55,9 +55,11 @@ class JimmyFairlySpider(JSONBlobSpider):
                 if day not in DAYS:
                     continue
 
-                if time == "" or time.lower() == "closed":
+                if not isinstance(time, str):
+                    invalid = True
+                elif time == "" or time.lower() == "closed":
                     item["opening_hours"].set_closed(day)
-                else:
+                elif not invalid:
                     midday_break = time.split("|")
 
                     if len(midday_break) > 2:  # the syntax is invalid, skipping the opening hours for this shop
