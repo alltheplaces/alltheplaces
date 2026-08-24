@@ -58,7 +58,7 @@ class OSMExporter(XmlItemExporter):
         assert isinstance(value, str)
         return value
 
-    def _get_serialized_fields(self, item, default_value=None, include_empty=None):
+    def get_serialized_fields(self, item, default_value=None, include_empty=None):
         yield from item_to_properties(item).items()
 
     def _export_xml_field(self, name, serialized_value, depth):
