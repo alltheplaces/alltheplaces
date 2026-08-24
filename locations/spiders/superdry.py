@@ -13,7 +13,7 @@ class SuperdrySpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Superdry", "brand_wikidata": "Q1684445"}
     sitemap_urls = ["https://stores.superdry.com/sitemap.xml"]
     wanted_types = ["ClothingStore"]
-    drop_attributes = {"image"}
+    drop_attributes = {"image", "email"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Superdry").strip().removeprefix("™").strip()
