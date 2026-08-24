@@ -29,6 +29,7 @@ class ReznictviRabbitCZSpider(Spider):
         item = Feature()
         item["ref"] = item["website"] = response.url
         item["country"] = "CZ"
+        item["name"] = self.item_attributes["brand"]
 
         item["branch"] = response.xpath('//li[@class="last"]/text()').get("").strip()
 
