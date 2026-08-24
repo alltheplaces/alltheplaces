@@ -36,6 +36,7 @@ class NextraAUSpider(WPStoreLocatorSpider):
         for prefix, brand_attributes in BRANDS.items():
             if branch_name and branch_name.lower().startswith(prefix):
                 item.update(brand_attributes)
+                item["name"] = brand_attributes["brand"]
                 item["branch"] = branch_name[len(prefix) :].strip()
                 break
         else:
