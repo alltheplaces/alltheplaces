@@ -13,7 +13,7 @@ class DuPareilAuMemeSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://boutiques.dpam.com/sitemap_pois.xml"]
     wanted_types = ["ClothingStore"]
     sitemap_rules = [
-        (r"", "parse_sd"),
+        (r"/en/", "parse_sd"),
     ]
     drop_attributes = ["image", "facebook"]
 
