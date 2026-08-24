@@ -18,6 +18,10 @@ MAP_COORDS_RE = re.compile(r"!2d(?P<lon>[\d.\-]+)!3d(?P<lat>[\d.\-]+)")
 
 POSTCODE_ADDRESS_RE = re.compile(r"〒(?P<postcode>\d{3}-\d{4})\s*(?P<addr_full>.+)")
 
+# area "label" looks like "東京都足立区" (prefecture + city/ward); pull just
+# the prefecture (ending in 都/道/府/県) off the front for item["state"].
+PREFECTURE_RE = re.compile(r"^(?P<state>.+?[都道府県])")
+
 HOURS_RE = re.compile(r"(?P<open>\d{1,2}:\d{2})\s*[~～]\s*(?P<close>\d{1,2}:\d{2})")
 
 
@@ -38,25 +42,32 @@ class SummitJPSpider(Spider):
                 continue
 
             slug = store["slug"]
-            area = store.get("area", {}).get("value", "")
+            area = store.get("area", {})
+            area_value = area.get("value", "")
             # area "value" looks like "01000_tokyo_adachi"; the store detail
             # page URL uses the prefecture romaji segment, e.g. "tokyo".
-            prefecture = area.split("_")[1] if area.count("_") >= 1 else ""
+            prefecture = area_value.split("_")[1] if area_value.count("_") >= 1 else ""
+
+            state = None
+            if m := PREFECTURE_RE.match(area.get("label", "")):
+                state = m.group("state")
 
             yield JsonRequest(
                 url=self.DETAIL_URL.format(slug),
                 callback=self.parse_store,
-                cb_kwargs={"slug": slug, "prefecture": prefecture},
+                cb_kwargs={"slug": slug, "prefecture": prefecture, "state": state},
             )
 
-    def parse_store(self, response: Response, slug: str, prefecture: str) -> Iterable[Feature]:
+    def parse_store(self, response: Response, slug: str, prefecture: str, state: Optional[str]) -> Iterable[Feature]:
         store = response.json()
 
         item = Feature()
         item["ref"] = slug
+        item["name"] = self.item_attributes["brand"]
         item["branch"] = store.get("title")
         item["website"] = f"https://www.summitstore.co.jp/store/{prefecture}/post/?id={slug}"
         item["country"] = "JP"
+        item["state"] = state
 
         if address := store.get("address"):
             if m := POSTCODE_ADDRESS_RE.match(address):
