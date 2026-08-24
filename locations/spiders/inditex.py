@@ -51,11 +51,11 @@ class InditexSpider(PlaywrightSpider):
     def parse_stores(self, response: Response, brand: str) -> Iterable[Feature]:
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
-            if brand != "bershka":
+            if brand == "bershka":
                 # Bershka's per-store URLs 404, only a generic landing page exists.
-                item["website"] = "https://www.{}.com/".format(brand) + item["country"].lower()
-            else:
                 item["website"] = None
+            else:
+                item["website"] = "https://www.{}.com/".format(brand) + item["country"].lower()
             item.update(self.my_brands.get(brand))
             item["phone"] = store.get("phones", [None])[0]
             item["branch"] = item.pop("name")
