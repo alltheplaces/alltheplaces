@@ -4,6 +4,7 @@ from typing import AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import FormRequest, Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 
@@ -46,6 +47,9 @@ class NewYorkPizzaNLDESpider(Spider):
                 item["opening_hours"] = self.convert_opening_hours(store)
             except Exception:
                 pass
+
+            apply_category(Categories.FAST_FOOD, item)
+
             yield item
 
     @staticmethod
