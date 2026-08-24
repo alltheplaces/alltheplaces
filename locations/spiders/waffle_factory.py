@@ -17,7 +17,8 @@ class WaffleFactorySpider(SitemapSpider, StructuredDataSpider):
     search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["name"] = item["image"] = None
+        item["branch"] = item["name"].removeprefix(f"{self.item_attributes['brand']} - ").strip()
+        item["image"] = None
         apply_category(Categories.FAST_FOOD, item)
 
         yield item
