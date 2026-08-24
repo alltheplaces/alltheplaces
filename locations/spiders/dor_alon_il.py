@@ -34,7 +34,10 @@ class DorAlonILSpider(Spider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        for station in chompjs.parse_js_object(response.text[response.text.find("var stations =") :]):
+        if (start := response.text.find("var stations =")) == -1:
+            self.logger.error("Dor Alon: station data not found")
+            return
+        for station in chompjs.parse_js_object(response.text[start:]):
             item = DictParser.parse(station)  # id -> ref, title -> name, lat/lng, address -> addr_full
             item["ref"] = str(item["ref"])
             item["branch"] = item.pop("name", None)  # the brand name comes from NSI
@@ -50,18 +53,18 @@ class DorAlonILSpider(Spider):
 
     def parse_hours(self, station: dict) -> OpeningHours:
         oh = OpeningHours()
-        try:
-            for field, days in self.HOURS.items():
-                value = station.get(field)
-                if not value or value == "None":
-                    continue
-                for day in days:
+        for field, days in self.HOURS.items():
+            value = station.get(field)
+            if not value or value == "None":
+                continue
+            for day in days:
+                try:
                     if value == "24":
                         oh.add_range(day, "00:00", "24:00")
                     elif value == "סגור":  # closed
                         oh.set_closed(day)
                     elif hours := re.match(r"^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$", value):
                         oh.add_range(day, hours.group(1), hours.group(2))
-        except Exception:
-            self.crawler.stats.inc_value("atp/{}/hours/failed".format(self.name))
+                except ValueError:
+                    self.crawler.stats.inc_value("atp/{}/hours/failed".format(self.name))
         return oh
