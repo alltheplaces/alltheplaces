@@ -4,7 +4,6 @@ from urllib.parse import parse_qs, urlsplit
 import scrapy
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position, url_to_coords
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -95,26 +94,17 @@ class DonQuijoteJPSpider(scrapy.Spider):
             detail.xpath('.//dt[contains(text(),"定休日")]/following-sibling::dd[1]//text()').getall()
         ).strip()
 
-        item_fields = {
-            "ref": f"jp-{shop_id}",
-            "name": name,
-            "addr_full": addr_text,
-            "postcode": postcode,
-            "phone": phone,
-            "country": "JP",
-            "website": detail_url,
-        }
-
-        map_url = f"https://www.donki.com/store/map.php?shop_id={shop_id}"
-        yield scrapy.Request(
-            map_url,
-            callback=self.parse_jp_map,
-            cb_kwargs={"item_fields": item_fields, "hours_text": hours_text, "closed_text": closed_text},
+        item = Feature(
+            ref=f"jp-{shop_id}",
+            name=name,
+            addr_full=addr_text,
+            postcode=postcode,
+            phone=phone,
+            country="JP",
+            website=detail_url,
         )
-
-    def parse_jp_map(self, response, item_fields, hours_text, closed_text):
-        item = Feature(**item_fields)
-        extract_google_position(item, response)
+        # No non-Google coordinate source exists for these stores; yield
+        # without lat/lon rather than deriving them from a Google Maps link.
         self.apply_jp_hours(item, hours_text, closed_text)
         apply_category(Categories.SHOP_VARIETY_STORE, item)
         yield item
@@ -135,7 +125,7 @@ class DonQuijoteJPSpider(scrapy.Spider):
             oh.add_days_range(DAYS, m.group(1), m.group(2))
         else:
             return
-        item["opening_hours"] = oh.as_opening_hours()
+        item["opening_hours"] = oh
 
     def parse_dondondonki_country(self, response, country):
         for li in response.xpath('//div[@id="storeinfoBox"]//li[@id]'):
@@ -156,41 +146,20 @@ class DonQuijoteJPSpider(scrapy.Spider):
             )
             phone = li.xpath('.//dt[contains(text(),"PHONE NUMBER")]/following-sibling::dd[1]//text()').get()
 
-            item_fields = {
-                "ref": f"dondon-{country}-{ref}",
-                "name": name,
-                "brand": "Don Don Donki",
-                "addr_full": addr_full,
-                "phone": phone,
-                "country": country,
-                "website": response.url,
-            }
-
-            map_href = li.xpath('.//div[@class="storeinfo_map"]/a/@href').get()
-            if map_href:
-                yield scrapy.Request(
-                    response.urljoin(map_href),
-                    callback=self.parse_dondondonki_map,
-                    cb_kwargs={"item_fields": item_fields},
-                )
-            else:
-                item = Feature(**item_fields)
-                apply_category(Categories.SHOP_VARIETY_STORE, item)
-                yield item
-
-    def parse_dondondonki_map(self, response, item_fields):
-        item = Feature(**item_fields)
-        # The "GoogleMap View" link is usually a bit.ly/maps.app.goo.gl short
-        # link which redirects straight to a Google Maps URL, rather than to
-        # a page that itself embeds a map (so check the final response URL,
-        # not just links found within the page body).
-        lat, lon = url_to_coords(response.url)
-        if lat is not None:
-            item["lat"], item["lon"] = lat, lon
-        else:
-            extract_google_position(item, response)
-        apply_category(Categories.SHOP_VARIETY_STORE, item)
-        yield item
+            # No non-Google coordinate source exists for these stores (the
+            # source site's only map link is a Google Maps short link); yield
+            # without lat/lon rather than deriving them from it.
+            item = Feature(
+                ref=f"dondon-{country}-{ref}",
+                name=name,
+                brand="Don Don Donki",
+                addr_full=addr_full,
+                phone=phone,
+                country=country,
+                website=response.url,
+            )
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
+            yield item
 
     def parse_hawaii_store(self, response):
         item = Feature()
@@ -206,8 +175,9 @@ class DonQuijoteJPSpider(scrapy.Spider):
         if "24 hours" in hours_text.lower():
             oh = OpeningHours()
             oh.add_days_range(DAYS, "00:00", "23:59")
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
-        extract_google_position(item, response)
+        # No non-Google coordinate source exists for these stores; yield
+        # without lat/lon rather than deriving them from a Google Maps link.
         apply_category(Categories.SHOP_VARIETY_STORE, item)
         yield item
