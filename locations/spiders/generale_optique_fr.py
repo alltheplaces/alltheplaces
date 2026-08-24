@@ -36,12 +36,7 @@ class GeneraleOptiqueFRSpider(SitemapSpider, StructuredDataSpider):
 
         if data:
             data = json.loads(data)
-            store_data = (
-                data.get("props", {})
-                    .get("initialProps", {})
-                    .get("pageProps", {})
-                    .get("storeData")
-            )
+            store_data = data.get("props", {}).get("initialProps", {}).get("pageProps", {}).get("storeData")
 
             if store_data:
                 lat = store_data.get("lat")
@@ -50,5 +45,5 @@ class GeneraleOptiqueFRSpider(SitemapSpider, StructuredDataSpider):
                 if lat is not None and lon is not None:
                     item["lat"] = str(lat)
                     item["lon"] = str(lon)
-            
+
         yield item
