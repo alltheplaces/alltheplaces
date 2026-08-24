@@ -30,5 +30,6 @@ class OlliesBargainOutletSpider(Spider):
         for location in json.loads(response.json())["locations"]:
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
+            item["state"] = location["StateAbbr"]
             apply_category(Categories.SHOP_VARIETY_STORE, item)
             yield item
