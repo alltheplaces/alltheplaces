@@ -1,8 +1,9 @@
+
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
-import json
+from locations.structured_data_spider import StructuredDataSpider
+
 
 class DuPareilAuMemeSpider(SitemapSpider, StructuredDataSpider):
     name = "du_pareil_au_meme"
