@@ -29,6 +29,7 @@ class BarriqueDENLSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Barrique ").strip()
+        item["name"] = self.item_attributes["brand"]
         item["website"] = response.url
         item["country"] = "NL" if "Nederland" in item["addr_full"] else "DE"
         apply_category(Categories.SHOP_WINE, item)
