@@ -5,10 +5,10 @@ from locations.categories import Categories, apply_category
 
 
 
-class AdoptSpider(SitemapSpider, StructuredDataSpider):
-    name = "adopt"
+class AdoptParfumsSpider(SitemapSpider, StructuredDataSpider):
+    name = "adopt_parfums"
     item_attributes = {
-        "brand": "Adopt'",
+        "brand": "Adopt Parfums",
         "brand_wikidata": "Q104649177",
     }
     sitemap_urls = ["https://www.adopt.com/en/sitemap/sitemap.xml"]
