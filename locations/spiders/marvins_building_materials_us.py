@@ -53,4 +53,6 @@ class MarvinsBuildingMaterialsUSSpider(scrapy.Spider):
 
             apply_category(Categories.SHOP_DOITYOURSELF, item)
 
+            item["name"] = self.item_attributes["brand"]
+
             yield item
