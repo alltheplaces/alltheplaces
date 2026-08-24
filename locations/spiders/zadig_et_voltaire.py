@@ -19,7 +19,10 @@ class ZadigEtVoltaireSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.SHOP_CLOTHES, item)
         item["branch"] = (
-            (item.pop("name", "") or "").removeprefix("Zadig&Voltaire ").removeprefix("Zadig & Voltaire ").removeprefix("- ")
+            (item.pop("name", "") or "")
+            .removeprefix("Zadig&Voltaire ")
+            .removeprefix("Zadig & Voltaire ")
+            .removeprefix("- ")
         )
 
         if clean_facebook(item.get("facebook")) == "https://www.facebook.com/zadigvoltaire":
