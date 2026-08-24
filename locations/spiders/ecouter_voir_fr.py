@@ -15,8 +15,13 @@ class EcouterVoirFrSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = ["image"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category(Categories.SHOP_OPTICIAN, item)
-        item.pop("name","")
+        name = item.pop("name","")
+        if "audition" in name.lower():
+            apply_category(Categories.SHOP_HEARING_AIDS, item)
+        else:
+            apply_category(Categories.SHOP_OPTICIAN, item)
+            
+        
 
         if(clean_facebook(item.get("facebook")) == "https://www.facebook.com/ecoutervoir.officiel/"):
             item["facebook"] = None
