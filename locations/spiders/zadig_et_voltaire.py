@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider, clean_facebook
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider, clean_facebook
 
 
 class ZadigEtVoltaireSpider(SitemapSpider, StructuredDataSpider):
@@ -18,10 +18,11 @@ class ZadigEtVoltaireSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.SHOP_CLOTHES, item)
-        item["branch"] = (item.pop("name", "") or "").removeprefix("Zadig&Voltaire ").removeprefix("Zadig & Voltaire ").removeprefix("- ")
+        item["branch"] = (
+            (item.pop("name", "") or "").removeprefix("Zadig&Voltaire ").removeprefix("Zadig & Voltaire ").removeprefix("- ")
+        )
 
         if clean_facebook(item.get("facebook")) == "https://www.facebook.com/zadigvoltaire":
             item["facebook"] = None
-
 
         yield item
