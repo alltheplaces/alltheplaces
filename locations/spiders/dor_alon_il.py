@@ -13,9 +13,10 @@ from locations.items import Feature
 
 class DorAlonILSpider(Spider):
     name = "dor_alon_il"
-    item_attributes = {"brand": "Dor Alon", "brand_wikidata": "Q16130352"}
+    item_attributes = {"brand": "דור אלון", "brand_wikidata": "Q16130352"}
     allowed_domains = ["www.doralon.co.il"]
     start_urls = ["https://www.doralon.co.il/station/"]
+    requires_proxy = True  # doralon.co.il is unreachable from the crawl datacenter without an Israel exit
 
     # station flag (value "1") -> tag
     SERVICES = {
