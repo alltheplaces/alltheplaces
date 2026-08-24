@@ -43,6 +43,7 @@ class HyundaiUYSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", None)
+        item["name"] = self.item_attributes["brand"]
 
         if item.get("email") in (None, "", BLANK_PLACEHOLDER, "<br>"):
             item["email"] = None
