@@ -26,6 +26,7 @@ class Categories(Enum):
     KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
     LEFT_LUGGAGE = {"amenity": "left_luggage"}
     LUGGAGE_LOCKER = {"amenity": "luggage_locker"}
+    MOTORCYCLE_PARKING = {"amenity": "motorcycle_parking"}
     MOTORCYCLE_RENTAL = {"amenity": "motorcycle_rental"}
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
@@ -42,6 +43,7 @@ class Categories(Enum):
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
     TRAIN_STATION = {"railway": "station"}
 
+    AMUSEMENT_ARCADE = {"leisure": "amusement_arcade"}
     BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
     SAUNA = {"leisure": "sauna"}
@@ -104,6 +106,7 @@ class Categories(Enum):
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BATHROOM_FURNISHING = {"shop": "bathroom_furnishing"}
     SHOP_BEAUTY = {"shop": "beauty"}
+    SHOP_BEAUTY_LASER_HAIR_REMOVAL = {"shop": "beauty", "beauty": "laser_hair_removal"}
     SHOP_BEAUTY_SPA = {"shop": "beauty", "beauty": "spa"}
     SHOP_BED = {"shop": "bed"}
     SHOP_BEVERAGES = {"shop": "beverages"}
@@ -257,6 +260,7 @@ class Categories(Enum):
     OFFICE_CONSULTING = {"office": "consulting"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_COWORKING = {"office": "coworking"}
+    OFFICE_EMPLOYMENT_AGENCY = {"office": "employment_agency"}
     OFFICE_ENERGY_SUPPLIER = {"office": "energy_supplier"}
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
@@ -281,6 +285,7 @@ class Categories(Enum):
     TOURISM_GALLERY = {"tourism": "gallery"}
     TOURISM_HOSTEL = {"tourism": "hostel"}
     TOURISM_INFORMATION = {"tourism": "information"}
+    TOURISM_THEME_PARK = {"tourism": "theme_park"}
     TOURISM_VIEWPOINT = {"tourism": "viewpoint"}
     TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
     TOURISM_ZOO = {"tourism": "zoo"}
