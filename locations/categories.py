@@ -23,6 +23,7 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     CAR_SHARING = {"amenity": "car_sharing"}
+    VEHICLE_INSPECTION = {"amenity": "vehicle_inspection"}
     KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
     LEFT_LUGGAGE = {"amenity": "left_luggage"}
     LUGGAGE_LOCKER = {"amenity": "luggage_locker"}
