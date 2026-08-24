@@ -4,7 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
 import json
 
-class GeneraleOptiqueFrSpider(SitemapSpider, StructuredDataSpider):
+class GeneraleOptiqueFRSpider(SitemapSpider, StructuredDataSpider):
     name = "generale_optique_fr"
     item_attributes = {
         "brand": "Générale d'Optique",
@@ -22,11 +22,23 @@ class GeneraleOptiqueFrSpider(SitemapSpider, StructuredDataSpider):
 
         data = response.xpath("//script[contains(@id, '__NEXT_DATA__')]/text()").get()
 
-        item["branch"] = " ".join(item.pop("name","").split()).lower().removeprefix("opticien ").removeprefix("et audioprothésiste ").removeprefix("indépendant ").removesuffix(" générale d'optique").removeprefix("générale d'optique ")
+        item["branch"] = " ".join(item.pop("name","").split()).lower().removeprefix("opticien ").removeprefix("et audioprothésiste ").removeprefix("indépendant ").removesuffix(" générale d'optique").removeprefix("générale d'optique ").removesuffix(" opticien")
 
         if data:
             data = json.loads(data)
-            item["lat"] = str(data["props"]["initialProps"]["pageProps"]["storeData"]["lat"])
-            item["lon"] = str(data["props"]["initialProps"]["pageProps"]["storeData"]["lon"])
+            store_data = (
+                data.get("props", {})
+                    .get("initialProps", {})
+                    .get("pageProps", {})
+                    .get("storeData")
+            )
 
+            if store_data:
+                lat = store_data.get("lat")
+                lon = store_data.get("lon")
+
+                if lat is not None and lon is not None:
+                    item["lat"] = str(lat)
+                    item["lon"] = str(lon)
+            
         yield item
