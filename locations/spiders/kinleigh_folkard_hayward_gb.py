@@ -14,7 +14,7 @@ class KinleighFolkardHaywardGBSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         branch = response.xpath("//h1/text()").get()
         item["branch"] = (branch or "").removesuffix(" Estate Agents") or None
-        item["name"] = None
+        item["name"] = self.item_attributes["brand"]
         item["street_address"] = None
         item["addr_full"] = ld_data.get("address", {}).get("streetAddress")
 
