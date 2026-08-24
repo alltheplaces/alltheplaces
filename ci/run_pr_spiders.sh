@@ -338,9 +338,20 @@ do
             fi
             continue
         else
+            # A missing stats file usually means the spider was force-killed
+            # (e.g. a closespider_timeout that didn't leave enough time for a
+            # Playwright/Camoufox browser to shut down cleanly) before the
+            # LOGSTATS_FILE extension could write it on spider close. The
+            # geojson output is left truncated in that case too, but each
+            # line of the ndgeojson output is still valid on its own, so
+            # count those lines to avoid reporting a blank item count for a
+            # run that actually produced items.
             (>&2 echo "${spider} has no stats file")
             STATS_WARNINGS=""
             STATS_ERRORS=""
+            if [ -f "${NDGEOJSON}" ]; then
+                FEATURE_COUNT=$(wc -l < "${NDGEOJSON}" | tr -d ' ')
+            fi
         fi
 
         PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
