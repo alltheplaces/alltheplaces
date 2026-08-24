@@ -140,6 +140,7 @@ class GodotEtFilsFRSpider(Spider):
 
             item = Feature()
             item["ref"] = ref
+            item["name"] = self.item_attributes["brand"]
             item["branch"] = name.removeprefix("GODOT & FILS ").strip()
             item["addr_full"] = addr_full
             item["phone"] = phone or None
