@@ -11,7 +11,6 @@ from locations.items import Feature
 TILE_URL = "https://api.rivianservices.com/map-chargers/tiles/chrg2/{}/{}/{}"
 SEARCH_ZOOM = 7
 BOUNDING_BOX = (-170.0, 18.0, -52.0, 72.0)
-DETAIL_ZOOM = 13
 NETWORKS = ["Rivian Adventure Network", "Rivian Waypoints Network"]
 
 
@@ -128,7 +127,7 @@ class RivianUSSpider(Spider):
     """
 
     name = "rivian_us"
-    custom_settings = {"DOWNLOAD_DELAY": 0}
+    custom_settings = {"CONCURRENT_REQUESTS_PER_DOMAIN": 1}
     item_attributes = {"operator": "Rivian", "operator_wikidata": "Q7338847"}
     allowed_domains = ["api.rivianservices.com"]
     seen_refs: set[str] = set()
@@ -143,7 +142,7 @@ class RivianUSSpider(Spider):
                     cb_kwargs={"x": x, "y": y},
                 )
 
-    def parse_tile(self, response: Response, x: int, y: int, **kwargs: Any) -> Iterable[Request]:
+    def parse_tile(self, response: Response, x: int, y: int, **kwargs: Any) -> Iterable[Feature]:
         if not response.body:
             return
 
@@ -154,48 +153,23 @@ class RivianUSSpider(Spider):
                 continue
             self.seen_refs.add(properties["id"])
 
-            detail_x, detail_y = tile_x(longitude, DETAIL_ZOOM), tile_y(latitude, DETAIL_ZOOM)
-            yield Request(
-                url=TILE_URL.format(DETAIL_ZOOM, detail_x, detail_y),
-                callback=self.parse_detail_tile,
-                cb_kwargs={
-                    "properties": properties,
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "x": detail_x,
-                    "y": detail_y,
-                },
-                dont_filter=True,
-            )
+            item = Feature()
+            item["ref"] = properties["id"]
+            item["branch"] = properties.get("name")
+            item["lat"] = latitude
+            item["lon"] = longitude
+            item["country"] = "US"
+            self.parse_address(item, properties["address"])
 
-    def parse_detail_tile(
-        self, response: Response, properties: dict, latitude: float, longitude: float, x: int, y: int, **kwargs: Any
-    ) -> Iterable[Feature]:
-        if response.body:
-            for layer, detail, detail_latitude, detail_longitude in decode_vector_tile_points(
-                response.body, DETAIL_ZOOM, x, y
-            ):
-                if layer == "Charger" and detail.get("id") == properties["id"]:
-                    latitude, longitude = detail_latitude, detail_longitude
-                    break
+            item["extras"]["brand"] = properties["network"]
+            item["extras"]["capacity"] = str(properties["count"])
+            item["extras"]["motorcar"] = "yes"
+            item["extras"]["charging_station:output"] = "{} kW".format(properties["maxkw"])
+            item["extras"]["access"] = "customers" if properties.get("rivianonly") else "yes"
 
-        item = Feature()
-        item["ref"] = properties["id"]
-        item["branch"] = properties.get("name")
-        item["lat"] = latitude
-        item["lon"] = longitude
-        item["country"] = "US"
-        self.parse_address(item, properties["address"])
+            apply_category(Categories.CHARGING_STATION, item)
 
-        item["extras"]["brand"] = properties["network"]
-        item["extras"]["capacity"] = str(properties["count"])
-        item["extras"]["motorcar"] = "yes"
-        item["extras"]["charging_station:output"] = "{} kW".format(properties["maxkw"])
-        item["extras"]["access"] = "customers" if properties.get("rivianonly") else "yes"
-
-        apply_category(Categories.CHARGING_STATION, item)
-
-        yield item
+            yield item
 
     def parse_address(self, item: Feature, address: str) -> None:
         """Split a "street, city, state postcode, country" formatted address."""
