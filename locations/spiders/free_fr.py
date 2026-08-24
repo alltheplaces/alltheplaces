@@ -15,5 +15,8 @@ class FreeFRSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name").removeprefix("Boutique Free ")
         item["name"] = self.item_attributes["brand"]
+        # The only "telephone" present is the generic national hotline (3244), shared by
+        # every boutique, not a branch specific number.
+        item["phone"] = None
         apply_category(Categories.SHOP_TELECOMMUNICATION, item)
         yield item
