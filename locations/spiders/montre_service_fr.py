@@ -5,7 +5,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MontreServiceFrSpider(CrawlSpider, StructuredDataSpider):
+class MontreServiceFRSpider(CrawlSpider, StructuredDataSpider):
     name = "montre_service_fr"
     item_attributes = {
         "brand": "Montre Service",
