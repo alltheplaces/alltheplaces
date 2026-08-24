@@ -47,16 +47,16 @@ class MisterDonutJPSpider(Spider):
         if tel := data.get("tel"):
             item["phone"] = "+81 " + tel
 
-        # The site's own JS data (and the store list page) expose store
-        # coordinates in the old Tokyo Datum, ~300-400m away from their
-        # true location. The corrected WGS84 coordinates are only found
-        # in this page's schema.org GeoCoordinates microdata.
-        item["lat"] = response.xpath(
-            '//div[@itemtype="https://schema.org/GeoCoordinates"]/meta[@itemprop="latitude"]/@content'
-        ).get()
-        item["lon"] = response.xpath(
-            '//div[@itemtype="https://schema.org/GeoCoordinates"]/meta[@itemprop="longitude"]/@content'
-        ).get()
+        # Despite the "Tky" suffix the site applies to these fields in its
+        # schema.org markup (latitudeTky/longitudeTky), window.infoJSON's
+        # plain latitude/longitude values are already correct WGS84 and
+        # match real store addresses/landmarks closely. The page's
+        # schema.org/GeoCoordinates microdata is the one that's wrong: it
+        # applies a spurious Tokyo Datum correction to already-WGS84 data,
+        # landing stores ~300-400m away (verified against several stores'
+        # real-world addresses), so it must not be used.
+        item["lat"] = data.get("latitude")
+        item["lon"] = data.get("longitude")
 
         if (open_time := data.get("open_time")) and (close_time := data.get("close_time")):
             # close_time occasionally has a trailing free-text exception note
