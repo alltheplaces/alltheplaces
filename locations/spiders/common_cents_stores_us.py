@@ -46,6 +46,7 @@ class CommonCentsStoresUSSpider(Spider):
 
             item = Feature()
             item["ref"] = str(store["store_number"])
+            item["name"] = self.item_attributes["brand"]
             item["branch"] = store["hs_name"]
             item["lat"] = store.get("latitude")
             item["lon"] = store.get("longitude")
