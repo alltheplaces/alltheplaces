@@ -3,7 +3,7 @@ import re
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -15,7 +15,6 @@ class UwCreditUnionUSSpider(SitemapSpider):
     item_attributes = {
         "brand": "UW Credit Union",
         "brand_wikidata": "Q7876156",
-        "extras": Categories.BANK.value,
     }
     sitemap_urls = ["https://www.uwcu.org/sitemap.xml"]
     sitemap_rules = [(r"/branches-and-atms/(?!find-an-atm$)[^/]+$", "parse")]
@@ -48,6 +47,8 @@ class UwCreditUnionUSSpider(SitemapSpider):
             oh.add_ranges_from_string(drive_up_text)
             if oh.as_opening_hours():
                 item["extras"]["opening_hours:drive_through"] = oh.as_opening_hours()
+
+        apply_category(Categories.BANK, item)
 
         yield item
 
