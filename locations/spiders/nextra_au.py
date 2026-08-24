@@ -41,6 +41,7 @@ class NextraAUSpider(WPStoreLocatorSpider):
                 break
         else:
             self.logger.warning("Could not determine brand for store name '%s'", branch_name)
+            item["name"] = branch_name
             item["branch"] = branch_name
 
         item.pop("addr_full", None)
