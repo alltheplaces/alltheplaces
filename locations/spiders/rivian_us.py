@@ -127,7 +127,7 @@ class RivianUSSpider(Spider):
     """
 
     name = "rivian_us"
-    custom_settings = {"DOWNLOAD_DELAY": 0.3, "CONCURRENT_REQUESTS_PER_DOMAIN": 1}
+    custom_settings = {"CONCURRENT_REQUESTS_PER_DOMAIN": 1}
     item_attributes = {"operator": "Rivian", "operator_wikidata": "Q7338847"}
     allowed_domains = ["api.rivianservices.com"]
     seen_refs: set[str] = set()
