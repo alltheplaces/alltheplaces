@@ -40,6 +40,11 @@ class PncBankUSSpider(PlaywrightSpider):
             for hours_dict in location.get("branchHourlyServices"):
                 if hours_dict.get("branchServiceName") == "Drive Up Hours":
                     for day_time in hours_dict.get("branchServiceHours"):
-                        oh.add_range(day_time.get("dayOrHolidayName"), day_time.get("openTime"), day_time.get("closeTime"), "%H:%M:%S")
+                        oh.add_range(
+                            day_time.get("dayOrHolidayName"),
+                            day_time.get("openTime"),
+                            day_time.get("closeTime"),
+                            "%H:%M:%S",
+                        )
             item["opening_hours"] = oh
             yield item
