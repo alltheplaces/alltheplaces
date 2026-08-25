@@ -22,7 +22,7 @@ class BasilicAndCoFRSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Restaurant"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category(Categories.RESTAURANT_PIZZA, item)
+        apply_category(Categories.RESTAURANT, item)
         item["branch"] = item.pop("name", "").removeprefix("Basilic & Co - pizzas de terroirs - ")
 
         data = response.css("display-schedule::attr(data-information)").get()
