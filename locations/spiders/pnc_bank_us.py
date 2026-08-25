@@ -21,7 +21,7 @@ class PncBankUSSpider(PlaywrightSpider):
         yield JsonRequest(url="https://locator.pnc.com/dmx-ma-locator-search-ui/configmaps/env.json")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        api_key = json.loads(response.xpath("//pre/text()").get()).get("apikey")
+        api_key = response.json().get("apikey")
         for city in city_locations("US", 90000):
             yield JsonRequest(
                 url=f"https://api-gw.pnc.com/locator/api/v1/locations?latitude={city['latitude']}&longitude={city['longitude']}&locationType=BRANCH",
@@ -30,7 +30,7 @@ class PncBankUSSpider(PlaywrightSpider):
             )
 
     def parse_locations(self, response: Response):
-        for location in json.loads(response.xpath("//pre/text()").get()).get("data").get("locations"):
+        for location in response.json().get("data").get("locations"):
             location.update(location.pop("branchLocationManagement"))
             location.update(location.pop("branchAddress"))
             item = DictParser.parse(location)
