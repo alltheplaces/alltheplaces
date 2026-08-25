@@ -33,15 +33,13 @@ class PncBankUSSpider(PlaywrightSpider):
             location.update(location.pop("branchLocationManagement"))
             location.update(location.pop("branchAddress"))
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["ref"] = location.get("mbdBranchIdentifier")
             apply_category(Categories.BANK, item)
             oh = OpeningHours()
             for hours_dict in location.get("branchHourlyServices"):
                 if hours_dict.get("branchServiceName") == "Drive Up Hours":
                     for day_time in hours_dict.get("branchServiceHours"):
-                        day = day_time.get("dayOrHolidayName")
-                        open_time = day_time.get("openTime")
-                        close_time = day_time.get("closeTime")
-                        oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
+                        oh.add_range(day_time.get("dayOrHolidayName"), day_time.get("openTime"), day_time.get("closeTime"), "%H:%M:%S")
             item["opening_hours"] = oh
             yield item
