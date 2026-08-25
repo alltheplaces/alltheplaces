@@ -6,18 +6,11 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class BasilicAndCoFRSpider(SitemapSpider, StructuredDataSpider):
-    name = "basilic_and_co_fr"
-    # "co" here is short for "& Co", not the ISO country code for Colombia.
-    skip_auto_cc_spider_name_check = True
-    item_attributes = {
-        "brand": "Basilic & Co",
-        "brand_wikidata": "Q130248490",
-    }
+class BasilicAndCompanyFRSpider(SitemapSpider, StructuredDataSpider):
+    name = "basilic_and_company_fr"
+    item_attributes = {"brand": "Basilic & Co", "brand_wikidata": "Q130248490"}
     sitemap_urls = ["https://pizzerias.basilic-and-co.com/robots.txt"]
-    sitemap_rules = [
-        (r"/restaurant-pizza-terroir/", "parse_sd"),
-    ]
+    sitemap_rules = [(r"/fr/restaurant-pizza-terroir/([^/]+)/$", "parse_sd")]
     drop_attributes = {"image", "facebook"}
     wanted_types = ["Restaurant"]
 
