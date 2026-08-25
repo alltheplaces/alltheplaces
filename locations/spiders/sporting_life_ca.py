@@ -15,6 +15,7 @@ class SportingLifeCASpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://locations\.sportinglife\.ca/[-\w]+$", "parse")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["image"] = item["email"] = None
         if "closed" in item["name"].lower():
             set_closed(item)
         apply_category(Categories.SHOP_SPORTS, item)
