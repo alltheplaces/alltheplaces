@@ -2,7 +2,7 @@ from typing import Any
 
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import set_closed
@@ -37,10 +37,20 @@ class AdidasSpider(PlaywrightSpider):
                 )
                 item["country"] = country
 
+                name = item.pop("name", "").title()
+
+                if "Originals" in name:
+                    item["name"] = "Adidas Originals"
+                elif "Outlet" in name:
+                    item["name"] = "Adidas Outlet"
+                else:
+                    item["name"] = "Adidas"
+
                 if opening_hours := store.get("opening_hours"):
                     item["opening_hours"] = self.parse_opening_hours(opening_hours)
 
                 apply_category(Categories.SHOP_SPORTS, item)
+                apply_yes_no("factory_outlet", item, "Factory Outlet" in name)
 
                 if store["status"] == "CLOSED":
                     set_closed(item)
