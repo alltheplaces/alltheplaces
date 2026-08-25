@@ -1,9 +1,8 @@
 from typing import Iterable
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.stockist import StockistSpider
-from locations.categories import Categories, apply_category
-
 
 
 class Devernois(StockistSpider):
