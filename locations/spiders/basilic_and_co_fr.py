@@ -42,13 +42,23 @@ class BasilicAndCoFRSpider(SitemapSpider, StructuredDataSpider):
                         continue
 
                     for period in periods:
-                        openTime = period.get("openTime")
-                        closeTime = period.get("closeTime")
+                        if not isinstance(period, dict):
+                            continue
+
                         if period.get("isClosed"):
                             item["opening_hours"].set_closed(cur_day)
-                        elif openTime is not None and closeTime is not None:
-                            item["opening_hours"].add_range(
-                                cur_day, openTime.replace(" ", ""), closeTime.replace(" ", "")
-                            )
+                            continue
+
+                        openTime = period.get("openTime")
+                        closeTime = period.get("closeTime")
+
+                        if not isinstance(openTime, str) or not isinstance(closeTime, str):
+                            continue
+
+                        item["opening_hours"].add_range(
+                            cur_day,
+                            openTime.replace(" ", ""),
+                            closeTime.replace(" ", ""),
+                        )
 
         yield item
