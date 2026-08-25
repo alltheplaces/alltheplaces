@@ -28,7 +28,7 @@ class MontreServiceFRSpider(CrawlSpider, StructuredDataSpider):
         if not item.get("street_address"):  # Shops without a street address are invalid.
             return
 
-        item["branch"] = (item.pop("name", "") or '').removeprefix("Horlogerie à ").removesuffix(" : MONTRE SERVICE")
+        item["branch"] = (item.pop("name", "") or "").removeprefix("Horlogerie à ").removesuffix(" : MONTRE SERVICE")
         if "MONTRE SERVICE" in item["branch"]:  # the name format is not cleaned properly
             item["branch"] = None
 
