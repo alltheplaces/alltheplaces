@@ -11,7 +11,8 @@ class RepettoSpider(JSONBlobSpider):
     start_urls = ["https://xnkosumdt5.execute-api.eu-west-3.amazonaws.com/prod/getStoreLocators"]
 
     def post_process_item(self, item, response, location):
-        item["ref"] = item.pop("name", "")
+        item["ref"] = item.get("name")
+        item["branch"] = item.pop("name", "")
         apply_category(Categories.SHOP_CLOTHES, item)
 
         yield item
