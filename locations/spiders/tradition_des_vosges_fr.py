@@ -2,18 +2,19 @@
 from typing import Iterable
 
 from scrapy.http import Response
-# from unidecode import unidecode
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.uberall import UberallSpider
+
+# from unidecode import unidecode
 
 
 class TraditionDesVosgesFR(UberallSpider):
     name = "tradition_des_vosges_fr"
     item_attributes = {"brand": "Tradition des Vosges", "brand_wikidata": "Q141176147"}
     key = "xP2cflp47Y6iCF9r4vY35cJ99UvjpH"
-    drop_attributes = ["image","name"]
+    drop_attributes = ["image", "name"]
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         ### The website is broken, the link is correct but cannot be accessed directly, only from the store locator page
