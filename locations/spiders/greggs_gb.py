@@ -9,6 +9,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 
+
 class GreggsGBSpider(Spider):
     name = "greggs_gb"
     item_attributes = {"brand": "Greggs", "brand_wikidata": "Q3403981"}
