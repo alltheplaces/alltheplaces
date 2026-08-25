@@ -10,15 +10,12 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
-# from locations.items import Feature
 
-
-class AudikaSpider(CrawlSpider):
+class AudikaGBSpider(CrawlSpider):
     name = "audika_gb"
     item_attributes = {"brand": "Audika", "brand_wikidata": "Q2870745"}
     start_urls = ["https://www.audika.co.uk/hearing-aids-centre/all-clinics"]
     rules = [Rule(LinkExtractor(allow=r"/hearing-aids-centre/[a-z-]+/audika-"), callback="parse")]
-    # rules = [Rule(LinkExtractor(allow=r"/hearing-aids-centre/aberdeenshire/audika-"), callback="parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_data = json.loads(response.xpath('//*[@type="application/ld+json"][@class="clinic-schema"]/text()').get())
