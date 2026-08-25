@@ -3,6 +3,7 @@ import json
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -15,43 +16,24 @@ class BasilicAndCompanyFRSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["Restaurant"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category(Categories.RESTAURANT, item)
         item["branch"] = item.pop("name", "").removeprefix("Basilic & Co - pizzas de terroirs - ")
 
-        data = response.css("display-schedule::attr(data-information)").get()
-        if data:
-            opening_hours_data = json.loads(data).get("hours")
-            if isinstance(opening_hours_data, list):
-                for day in opening_hours_data:
-                    if not isinstance(day, dict):
-                        continue
+        if data := response.css("display-schedule::attr(data-information)").get():
+            try:
+                item["opening_hours"] = self.parse_opening_hours(data)
+            except Exception:
+                pass
 
-                    cur_day = day.get("day")
-                    if cur_day is None:
-                        continue
-
-                    periods = day.get("periods")
-                    if not isinstance(periods, list):
-                        continue
-
-                    for period in periods:
-                        if not isinstance(period, dict):
-                            continue
-
-                        if period.get("isClosed"):
-                            item["opening_hours"].set_closed(cur_day)
-                            continue
-
-                        openTime = period.get("openTime")
-                        closeTime = period.get("closeTime")
-
-                        if not isinstance(openTime, str) or not isinstance(closeTime, str):
-                            continue
-
-                        item["opening_hours"].add_range(
-                            cur_day,
-                            openTime.replace(" ", ""),
-                            closeTime.replace(" ", ""),
-                        )
+        apply_category(Categories.RESTAURANT, item)
 
         yield item
+
+    def parse_opening_hours(self, data: str) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in json.loads(data)["hours"]:
+            for period in rule["periods"]:
+                if period.get("isClosed"):
+                    oh.set_closed(rule["day"])
+                else:
+                    oh.add_range(rule["day"], period["openTime"].replace(" ", ""), period["closeTime"].replace(" ", ""))
+        return oh
