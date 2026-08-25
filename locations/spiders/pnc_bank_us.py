@@ -14,7 +14,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class PncBankUSSpider(PlaywrightSpider):
     name = "pnc_bank_us"
     item_attributes = {"brand": "PNC Bank", "brand_wikidata": "Q38928"}
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY":False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(url="https://locator.pnc.com/dmx-ma-locator-search-ui/configmaps/env.json")
