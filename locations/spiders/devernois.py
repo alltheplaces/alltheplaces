@@ -8,7 +8,7 @@ from locations.categories import Categories, apply_category
 
 class Devernois(StockistSpider):
     name = "devernois"
-    item_attributes = {"brand": "Devernois", "brand_wikidata": ""}
+    item_attributes = {"brand": "Devernois", "brand_wikidata": "Q98778444"}
     key = "u15973"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
