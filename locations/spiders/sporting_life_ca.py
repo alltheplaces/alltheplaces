@@ -18,5 +18,7 @@ class SportingLifeCASpider(SitemapSpider, StructuredDataSpider):
         item["image"] = item["email"] = None
         if "closed" in item["name"].lower():
             set_closed(item)
+        else:
+            item["branch"] = item.pop("name").removeprefix("Sporting Life - ")
         apply_category(Categories.SHOP_SPORTS, item)
         yield item
