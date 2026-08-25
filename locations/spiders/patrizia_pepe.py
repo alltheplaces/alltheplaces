@@ -1,12 +1,12 @@
-import chompjs
+from datetime import datetime
 from typing import AsyncIterator
+
 from scrapy import Request
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.hours import DAYS, OpeningHours
-from datetime import datetime
 
 
 class PatriziaPepeSpider(JSONBlobSpider):
@@ -17,29 +17,26 @@ class PatriziaPepeSpider(JSONBlobSpider):
     }
     locations_key = "stores"
     custom_settings = {"ROBOTSTXT_OBEY": False}
-        
+
     start_url = "https://www.patriziapepe.com/it/en/stores"
     json_url = "https://www.patriziapepe.com/on/demandware.store/Sites-patriziapepe_EU-Site/en_IT/Stores-All"
-
-
 
     async def start(self) -> AsyncIterator[Request | JsonRequest]:
         yield Request(
             self.start_url,
             callback=self.parse_stores_page,
         )
-    
+
     def parse_stores_page(self, response: TextResponse):
         csrf_token = response.css(
-            'form[name="storelocator__all-stores"] '
-            'input[name="csrf_token"]::attr(value)'
+            'form[name="storelocator__all-stores"] ' 'input[name="csrf_token"]::attr(value)'
         ).get()
 
         if not csrf_token:
             raise ValueError("Could not extract Patrizia Pepe CSRF token")
 
         yield JsonRequest(
-            self.json_url+"?csrf_token="+csrf_token,
+            self.json_url + "?csrf_token=" + csrf_token,
             callback=self.parse,
         )
 
@@ -63,8 +60,7 @@ class PatriziaPepeSpider(JSONBlobSpider):
         slug = item.pop("website")
         if slug:
             item["website"] = "https://www.patriziapepe.com" + slug
-              
-        
+
         item["opening_hours"] = OpeningHours()
         hours = location.get("hours")
         if hours:
@@ -85,7 +81,9 @@ class PatriziaPepeSpider(JSONBlobSpider):
                 if start == "closed" or end == "closed":
                     item["opening_hours"].set_closed(day)
                 elif start and end:
-                    item["opening_hours"].add_range(day, self.normalize_time(start.replace(".",":")), self.normalize_time(end.replace(".",":")))
+                    item["opening_hours"].add_range(
+                        day, self.normalize_time(start.replace(".", ":")), self.normalize_time(end.replace(".", ":"))
+                    )
 
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
