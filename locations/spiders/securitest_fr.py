@@ -1,5 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -20,4 +21,5 @@ class SecuritestFRSpider(SitemapSpider, StructuredDataSpider):
             .removeprefix("autosecurite ")
             .removeprefix("automobile ")
         )
+        apply_category(Categories.VEHICLE_INSPECTION, item)
         yield item
