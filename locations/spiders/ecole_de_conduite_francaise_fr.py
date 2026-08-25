@@ -49,9 +49,9 @@ class EcoleDeConduiteFrancaiseFRSpider(CrawlSpider, StructuredDataSpider):
                                     slug = slug.removeprefix("auto-ecole-").removeprefix("ecf-")
                                     slug = "ecf-llerena-ecf-" + slug
 
-                                if "ecf-ariege-" in slug:
+                                if slug.startswith("ecf-ariege-"):
                                     slug = slug.replace("ecf-ariege-", "ecf-drive-formation-")
-
+                                
                                 yield scrapy.Request(
                                     "https://www.ecf.asso.fr/agence/" + slug,
                                     callback=self.parse_sd,
