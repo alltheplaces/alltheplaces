@@ -23,7 +23,6 @@ class AmplifonSpider(SitemapSpider, StructuredDataSpider):
         "https://www.amplifon.com/hu/sitemap_store.xml",
         "https://www.amplifon.com/pl/sitemap_store.xml",
         "https://www.amplifon.com/de-ch/sitemap_store.xml",
-        "https://www.amplifon.com/uk/sitemap_store.xml",
         "https://www.amplifon.com/in/sitemap_store.xml",
         "https://www.amplifon.com/au/sitemap_store.xml",
         "https://www.beterhoren.nl/sitemap_store.xml",
