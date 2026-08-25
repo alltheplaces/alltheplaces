@@ -27,8 +27,16 @@ class AudikaGBSpider(CrawlSpider, StructuredDataSpider):
         item["ref"] = json.loads(response.xpath('//script[@class="clinicPageConfiguration"]/text()').get())["olb"][
             "clinic"
         ]["ExternalClinicCode"]
+
+        if image := item.get("image"):
+            if "retail/shared/images/clinic" in image:
+                item["image"] = None
+            else:
+                item["image"] = image.replace("https://www.audika.co.ukhttps://www.audika.co.ukhttps", "https")
+
         if item.get("email") in ["info@audika.co.uk"]:
             del item["email"]
+
         item["opening_hours"] = OpeningHours()
         for str in raw_data.get("openingHours"):
             item["opening_hours"].add_ranges_from_string(str)
