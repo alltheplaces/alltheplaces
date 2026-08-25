@@ -32,16 +32,15 @@ class EcoleDeConduiteFrancaiseFRSpider(CrawlSpider, StructuredDataSpider):
                             title = elem["title"]
                             if title != "":
                                 slug = "-".join(
-                                    title
-                                    .lower()
-                                    .replace("\u00e9","e")
-                                    .replace("\u00ea","e")
-                                    .replace(" - ","-")
-                                    .replace(" / "," ")
-                                    .replace(" + "," ")
-                                    .replace("/","")
-                                    .replace("'","")
-                                    .replace(",","")
+                                    title.lower()
+                                    .replace("\u00e9", "e")
+                                    .replace("\u00ea", "e")
+                                    .replace(" - ", "-")
+                                    .replace(" / ", " ")
+                                    .replace(" + ", " ")
+                                    .replace("/", "")
+                                    .replace("'", "")
+                                    .replace(",", "")
                                     .strip()
                                     .split(" ")
                                 )
@@ -51,7 +50,7 @@ class EcoleDeConduiteFrancaiseFRSpider(CrawlSpider, StructuredDataSpider):
 
                                 if slug.startswith("ecf-ariege-"):
                                     slug = slug.replace("ecf-ariege-", "ecf-drive-formation-")
-                                
+
                                 yield scrapy.Request(
                                     "https://www.ecf.asso.fr/agence/" + slug,
                                     callback=self.parse_sd,
