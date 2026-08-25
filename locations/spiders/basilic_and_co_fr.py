@@ -7,7 +7,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class BasilicAndCoFRSpider(SitemapSpider, StructuredDataSpider):
-    name = "basilic_and_co"
+    name = "basilic_and_co_fr"
     # "co" here is short for "& Co", not the ISO country code for Colombia.
     skip_auto_cc_spider_name_check = True
     item_attributes = {
