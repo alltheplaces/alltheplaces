@@ -1,4 +1,5 @@
 import json
+import re
 
 import scrapy
 
@@ -39,8 +40,9 @@ class IonnaUSSpider(scrapy.Spider):
         json_data = json.loads(locations)
 
         for location_id, location in json_data.items():
-            # Skip locations that are coming soon. They indicate this with "Coming Soon" in the note field.
-            if "Coming Soon" in location["note"]:
+            # Skip locations that are not yet open. They indicate this with "Coming Soon" or
+            # "Opening Soon" in the note field.
+            if "Coming Soon" in location["note"] or "Opening Soon" in location["note"]:
                 continue
 
             item = Feature(
@@ -68,12 +70,17 @@ class IonnaUSSpider(scrapy.Spider):
             # "<div class="find_map_info_specs"><strong>Connectors</strong>4 NACS | 6 CCS</div>"
             specs = extract_text_between(location["specs"], "<strong>Connectors</strong>", "</div>")
             if specs:
-                nacs_text, ccs_text = specs.split(" | ")
-                nacs_count = nacs_text.rstrip(" NACS")
-                ccs_count = ccs_text.rstrip(" CCS")
+                nacs_count = 0
+                ccs_count = 0
+                for part in specs.split(" | "):
+                    part = part.strip()
+                    if m := re.match(r"(\d+)\s*NACS", part):
+                        nacs_count = int(m.group(1))
+                    elif m := re.match(r"(\d+)\s*CCS", part):
+                        ccs_count = int(m.group(1))
 
-                item["extras"]["socket:type1_combo"] = ccs_count
-                item["extras"]["socket:nacs"] = nacs_count
-                item["extras"]["capacity"] = str(int(ccs_count) + int(nacs_count))
+                item["extras"]["socket:type1_combo"] = str(ccs_count)
+                item["extras"]["socket:nacs"] = str(nacs_count)
+                item["extras"]["capacity"] = str(ccs_count + nacs_count)
             apply_category(Categories.CHARGING_STATION, item)
             yield item

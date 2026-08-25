@@ -12,6 +12,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class GroupeCasinoSpider(Spider):
     name = "groupe_casino"
+    requires_proxy = "FR"  # Wangsu BotGuard WAF blocks all direct requests, including robots.txt, with a static 403
     brands = {
         "30837": ("Casino PauseDéj", "Q89029249", Categories.SHOP_CONVENIENCE),
         "30838": ("Casino Shop", "Q89029601", Categories.SHOP_CONVENIENCE),
