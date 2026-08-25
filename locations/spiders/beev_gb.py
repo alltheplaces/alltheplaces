@@ -1,4 +1,3 @@
-import json
 from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
@@ -20,7 +19,7 @@ class BeevGBSpider(PlaywrightSpider):
         )
 
     def parse(self, response, **kwargs):
-        for location in json.loads(response.xpath("//pre//text()").get()):
+        for location in response.json():
             if location["status"] == 4:
                 continue  # Upcoming
 
@@ -28,10 +27,10 @@ class BeevGBSpider(PlaywrightSpider):
             item["ref"] = location["siteId"]
             item["lat"] = location["coordinates"]["lat"]
             item["lon"] = location["coordinates"]["long"]
-            item["name"] = location["name"]
+            item["branch"] = location["name"]
             item["postcode"] = location["formattedAddress"]["postCode"]
 
-            apply_yes_no(Extras.FEE, item, location["tariff"]["amount"] == "0.00", False)
+            apply_yes_no(Extras.FEE, item, location["tariff"]["amount"] != "0.00", False)
             item["extras"]["charge"] = "{} {}/kWh".format(location["tariff"]["amount"], location["tariff"]["currency"])
 
             apply_category(Categories.CHARGING_STATION, item)
