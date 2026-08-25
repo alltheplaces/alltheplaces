@@ -82,7 +82,6 @@ class PatriziaPepeSpider(JSONBlobSpider):
                 start = hours.get(start_key)
                 end = hours.get(end_key)
 
-                print(day,start,"e", end)
                 if start == "closed" or end == "closed":
                     item["opening_hours"].set_closed(day)
                 elif start and end:
