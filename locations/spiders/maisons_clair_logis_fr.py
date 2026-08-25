@@ -16,12 +16,7 @@ class MaisonsClairLogisFRSpider(SitemapSpider, StructuredDataSpider):
     ]
     drop_attributes = ["facebook", "image"]
 
-
-    # wanted_types = ["GroceryStore"]
-
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.CRAFT_BUILDER, item)
         item["branch"] = item.pop("name", "").removeprefix("Maisons Clair Logis ")
-
-         
         yield item
