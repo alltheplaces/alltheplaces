@@ -4,7 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
 
 
-class SecuritestFrSpider(SitemapSpider, StructuredDataSpider):
+class SecuritestFRSpider(SitemapSpider, StructuredDataSpider):
     name = "securitest_fr"
     item_attributes = {
         "brand": "Sécuritest",
