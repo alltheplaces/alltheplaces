@@ -1,7 +1,6 @@
 from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
-from locations.categories import Categories, apply_category
 
 
 class SecuritestFRSpider(SitemapSpider, StructuredDataSpider):
@@ -18,5 +17,12 @@ class SecuritestFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = ["facebook"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name", "").lower().removeprefix("sécuritest ").removeprefix("contrôle technique ").removeprefix("autosecurite ").removeprefix("automobile ")
+        item["branch"] = (
+            item.pop("name", "")
+            .lower()
+            .removeprefix("sécuritest ")
+            .removeprefix("contrôle technique ")
+            .removeprefix("autosecurite ")
+            .removeprefix("automobile ")
+        )
         yield item
