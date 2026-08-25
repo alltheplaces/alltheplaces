@@ -16,7 +16,6 @@ class InvitroRUSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["MedicalBusiness"]
     json_parser = "chompjs"
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 300, "RETRY_TIMES": 5}
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for link in LinkExtractor(allow=r"/offices/[-\w]+/clinic.php\?ID=\d+$").extract_links(response):

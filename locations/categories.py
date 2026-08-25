@@ -13,6 +13,7 @@ from locations.items import Feature
 # of lots of string bashing. If ever NSI / ATP were to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
+    GENERIC_HISTORIC = {"historic": "yes"}
     GENERIC_POI = {"amenity": "yes"}
     GENERIC_SHOP = {"shop": "yes"}
 
@@ -22,9 +23,11 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     CAR_SHARING = {"amenity": "car_sharing"}
+    VEHICLE_INSPECTION = {"amenity": "vehicle_inspection"}
     KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
     LEFT_LUGGAGE = {"amenity": "left_luggage"}
     LUGGAGE_LOCKER = {"amenity": "luggage_locker"}
+    MOTORCYCLE_PARKING = {"amenity": "motorcycle_parking"}
     MOTORCYCLE_RENTAL = {"amenity": "motorcycle_rental"}
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
@@ -41,6 +44,7 @@ class Categories(Enum):
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
     TRAIN_STATION = {"railway": "station"}
 
+    AMUSEMENT_ARCADE = {"leisure": "amusement_arcade"}
     BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
     SAUNA = {"leisure": "sauna"}
@@ -103,6 +107,7 @@ class Categories(Enum):
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BATHROOM_FURNISHING = {"shop": "bathroom_furnishing"}
     SHOP_BEAUTY = {"shop": "beauty"}
+    SHOP_BEAUTY_LASER_HAIR_REMOVAL = {"shop": "beauty", "beauty": "laser_hair_removal"}
     SHOP_BEAUTY_SPA = {"shop": "beauty", "beauty": "spa"}
     SHOP_BED = {"shop": "bed"}
     SHOP_BEVERAGES = {"shop": "beverages"}
@@ -256,6 +261,7 @@ class Categories(Enum):
     OFFICE_CONSULTING = {"office": "consulting"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_COWORKING = {"office": "coworking"}
+    OFFICE_EMPLOYMENT_AGENCY = {"office": "employment_agency"}
     OFFICE_ENERGY_SUPPLIER = {"office": "energy_supplier"}
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
@@ -280,6 +286,7 @@ class Categories(Enum):
     TOURISM_GALLERY = {"tourism": "gallery"}
     TOURISM_HOSTEL = {"tourism": "hostel"}
     TOURISM_INFORMATION = {"tourism": "information"}
+    TOURISM_THEME_PARK = {"tourism": "theme_park"}
     TOURISM_VIEWPOINT = {"tourism": "viewpoint"}
     TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
     TOURISM_ZOO = {"tourism": "zoo"}
@@ -335,6 +342,8 @@ class Categories(Enum):
     GRAVE = {"cemetery": "grave"}
     GRIT_BIN = {"amenity": "grit_bin"}
     HIGHWAY_SERVICES = {"highway": "services"}
+    HISTORIC_BUILDING = {"historic": "building"}
+    HISTORIC_DISTRICT = {"historic": "district"}
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital"}
     HOTEL = {"tourism": "hotel"}

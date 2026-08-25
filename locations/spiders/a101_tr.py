@@ -24,7 +24,6 @@ def distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 class A101TRSpider(Spider):
     name = "a101_tr"
     item_attributes = {"brand": "A101", "brand_wikidata": "Q6034496"}
-    requires_proxy = True
     custom_settings = {
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 2,

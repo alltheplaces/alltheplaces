@@ -1,17 +1,9 @@
-from scrapy.spiders import SitemapSpider
-
-from locations.structured_data_spider import StructuredDataSpider
+from locations.storefinders.yext import YextSpider
 
 
-class MadewellUSSpider(SitemapSpider, StructuredDataSpider):
+class MadewellUSSpider(YextSpider):
     name = "madewell_us"
     item_attributes = {"brand": "Madewell", "brand_wikidata": "Q64026213"}
-    sitemap_urls = ["https://stores.madewell.com/robots.txt"]
-    sitemap_rules = [(r"^https://stores\.madewell\.com/\w\w/\w\w/[-.\w]+/[-.'\w]+$", "parse")]
-    drop_attributes = {"image"}
-
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = item.pop("name")
-        item["phone"] = response.xpath('//div[@id="phone-main"]/a/@href').get()
-
-        yield item
+    api_key = "c0963a72b0de0906e149ff1daac427d0"
+    api_version = "20240514"
+    search_filter = '{"$and":[{"c_storeChannel":{"$eqAny":["Madewell"]}},{"closed":{"$eq":false}}]}'

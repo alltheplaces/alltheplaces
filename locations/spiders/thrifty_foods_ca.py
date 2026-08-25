@@ -1,68 +1,33 @@
-import re
+from typing import Any, Iterable
 
-import scrapy
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class ThriftyFoodsCASpider(scrapy.Spider):
+class ThriftyFoodsCASpider(SitemapSpider, StructuredDataSpider):
     name = "thrifty_foods_ca"
-    item_attributes = {"brand": "Thirty Foods", "brand_wikidata": "Q7798140"}
+    item_attributes = {"brand": "Thrifty Foods", "brand_wikidata": "Q7798140"}
     allowed_domains = ["www.thriftyfoods.com"]
-    start_urls = (
-        "https://www.thriftyfoods.com/api/en/Store/get?Latitude=48.45423&Longitude=-123.359205&Skip=0&Max=60000",
-    )
+    sitemap_urls = ["https://www.thriftyfoods.com/sitemap/stores/sitemap.xml"]
+    sitemap_rules = [(r"/stores/\d+-", "parse_sd")]
+    wanted_types = ["GroceryStore"]
+    requires_proxy = True
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    def store_hours(self, store_hours):
-        store_hours = (
-            store_hours.replace("Monday", "Mo")
-            .replace("Tuesday", "Tu")
-            .replace("Wednesday", "We")
-            .replace("Thursday", "Th")
-            .replace("Friday", "Fr")
-            .replace("Saturday", "Sa")
-            .replace("Sunday", "Su")
-        )
-        if "Open 24 hours" in store_hours:
-            return store_hours.replace("Open 24 hours", "00:00-24:00")
-        else:
-            hours = ""
-            match = re.search(r"(\d{1,2}):(\d{2}) (A|P)M - (\d{1,2}):(\d{2}) (A|P)M", store_hours)
-            if match:
-                f_hr, f_min, f_ampm, t_hr, t_min, t_ampm = match.groups()
-                f_hr = int(f_hr)
-                if f_ampm == "P":
-                    f_hr += 12
-                elif f_ampm == "A" and f_hr == 12:
-                    f_hr = 0
-                t_hr = int(t_hr)
-                if t_ampm == "P":
-                    t_hr += 12
-                elif t_ampm == "A" and t_hr == 12:
-                    t_hr = 0
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["ref"] = response.url.rsplit("/", 1)[-1].split("-", 1)[0]
+        item["branch"] = item.pop("name").removeprefix("Thrifty Foods").strip()
 
-                hours = "{:02d}:{}-{:02d}:{}".format(
-                    f_hr,
-                    f_min,
-                    t_hr,
-                    t_min,
-                )
-            return store_hours[:2] + " " + hours
+        item["opening_hours"] = OpeningHours()
+        for rule in ld_data["openingHoursSpecification"]:
+            item["opening_hours"].add_ranges_from_string(rule)
 
-    def parse(self, response):
-        results = response.json()
-        for store in results["Data"]:
-            properties = {
-                "ref": store["Number"],
-                "name": store["Name"],
-                "lat": store["Coordinates"]["Latitude"],
-                "lon": store["Coordinates"]["Longitude"],
-                "addr_full": store["AddressMain"]["Line"],
-                "city": store["AddressMain"]["City"],
-                "state": store["AddressMain"]["Province"],
-                "postcode": store["AddressMain"]["PostalCode"],
-                "phone": store["PhoneNumberHome"]["Number"],
-                "opening_hours": self.store_hours(store["OpeningHours"]),
-            }
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
-            yield Feature(**properties)
+        yield item

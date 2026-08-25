@@ -1,4 +1,3 @@
-import json
 from typing import Any, AsyncIterator
 
 from scrapy import FormRequest
@@ -25,7 +24,7 @@ class LietuvosPastasLTSpider(PlaywrightSpider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre/text()").get()):
+        for location in response.json():
             item = DictParser.parse(location)
             item["housenumber"] = location["addressDetails"]["houseNumber"]
             item["street"] = location["addressDetails"]["streetName"]

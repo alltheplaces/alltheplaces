@@ -17,6 +17,7 @@ class ProperJobGBSpider(SitemapSpider):
     item_attributes = {"brand": "Proper Job", "brand_wikidata": "Q83741810"}
     sitemap_urls = ["https://www.properjob.biz/wpsl_stores-sitemap.xml"]
     sitemap_rules = [(r"/stores/[^/]+/$", "parse")]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         location = chompjs.parse_js_object(response.text[response.text.index("wpslMap_0") :])["locations"][0]

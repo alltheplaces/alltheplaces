@@ -5,7 +5,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GBWestSuffolkSpider(OwenBaseSpider):
-    name = "gb_west_suffolk"
+    # name = "gb_west_suffolk"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "© West Suffolk Council, 2026. Contains public sector information licensed under the Open Government Licence v3.0."  # address strings
         + " Contains OS data © Crown copyright and database right 2025."  # OS Open UPRN, coords

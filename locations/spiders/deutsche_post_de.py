@@ -9,11 +9,12 @@ from locations.geo import point_locations
 from locations.hours import DAYS, OpeningHours
 from locations.user_agents import BROWSER_DEFAULT
 
+DEUTSCHE_POST = {"brand": "Deutsche Post", "brand_wikidata": "Q157645"}
+
 
 class DeutschePostDESpider(Spider):
     name = "deutsche_post_de"
     allowed_domains = ["www.deutschepost.de"]
-    item_attributes = {"brand": "Deutsche Post", "brand_wikidata": "Q157645"}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     cats = {
@@ -25,7 +26,6 @@ class DeutschePostDESpider(Spider):
         "STATEMENT_PRINTER": None,
         "POSTBANK_FINANCE_CENTER": None,
         "RETAIL_OUTLET": Categories.POST_OFFICE,
-        "PAKETSHOP": None,
         "SELLING_POINT": None,
         "BULK_ACCEPTANCE_OFFICE": None,
         "BUSINESS_MAIL_ACCEPTANCE_POINT": None,
@@ -46,13 +46,12 @@ class DeutschePostDESpider(Spider):
         for hour in hours:
             if not hour["type"] == "OPENINGHOUR":
                 continue
-            if ":" not in hour["timefrom"]:
+            time_from, time_to = hour.get("timeFrom", ""), hour.get("timeTo", "")
+            if ":" not in time_from or ":" not in time_to:
                 continue
-            if hour["timefrom"] == "24:00":
-                hour["timefrom"] = "23:59"
-            opening_hours.add_range(
-                day=DAYS[hour["weekday"] - 1], open_time=hour["timefrom"], close_time=hour["timeto"]
-            )
+            if time_from == "24:00":
+                time_from = "23:59"
+            opening_hours.add_range(day=DAYS[hour["weekday"] - 1], open_time=time_from, close_time=time_to)
         return opening_hours
 
     def parse(self, response, **kwargs):
@@ -65,7 +64,11 @@ class DeutschePostDESpider(Spider):
             item["opening_hours"] = self.parse_hours(location["pfTimeinfos"])
 
             if cat := self.cats.get(location["locationType"]):
+                item.update(DEUTSCHE_POST)
                 apply_category(cat, item)
+            elif location["locationType"] == "PAKETSHOP":
+                item["extras"]["post_office"] = "post_partner"
+                apply_category(Categories.GENERIC_POI, item)
             else:
                 item["extras"]["type"] = location["locationType"]
                 self.crawler.stats.inc_value(f'atp/deutsche_post_de/unmapped_category/{location["locationType"]}')

@@ -44,6 +44,7 @@ class UberallSpider(Spider):
             oh = OpeningHours()
             for rule in feature["openingHours"]:
                 if rule.get("closed"):
+                    oh.set_closed(DAYS[rule["dayOfWeek"] - 1])
                     continue
                 # I've only seen from1 and from2, but I guess it could any length
                 for i in range(1, 3):

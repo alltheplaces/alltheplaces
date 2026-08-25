@@ -1,33 +1,28 @@
-from typing import Any
+import re
+from typing import Any, Iterable
+from urllib.parse import urlparse
 
-import scrapy
-from chompjs import chompjs
+from scrapy import Selector, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class SvetoforRUSpider(scrapy.Spider):
+class SvetoforRUSpider(Spider):
     name = "svetofor_ru"
     item_attributes = {"brand_wikidata": "Q61875920"}
     start_urls = ["https://svetoforonline.ru/shops/"]
-    requires_proxy = True  # Cloudflare blockage
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = response.xpath('//script[@type="text/javascript" and contains(text(), "var myPlacemark")]').get()
-        for line in data.split(";"):
-            if line.startswith("var myPlacemark"):
-                poi = chompjs.parse_js_objects(line)
-                item = Feature()
-                for attribute in poi:
-                    if isinstance(attribute, list):
-                        item["lat"], item["lon"] = attribute
-                    elif isinstance(attribute, dict) and attribute.get("balloonContent"):
-                        balloon = attribute["balloonContent"]
-                        item["addr_full"] = balloon.split("<br />")[0]
-                        item["ref"] = item["website"] = "https:" + scrapy.Selector(text=balloon).xpath("//a/@href").get(
-                            default=""
-                        )
-                apply_category(Categories.SHOP_SUPERMARKET, item)
-                yield item
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        for coords, balloon in re.findall(
+            r'ymaps\.Placemark\(\[([\d.,-]+)\],\s*\{balloonContent:"(.*?)"\}', response.text
+        ):
+            item = Feature()
+            item["lat"], item["lon"] = coords.split(",")
+            item["addr_full"] = balloon.split("<br")[0].strip()
+            item["ref"] = url = response.urljoin(Selector(text=balloon).xpath("//a/@href").get(""))
+            if (host := urlparse(url).hostname) and host.replace(".", "").replace("-", "").isalnum():
+                item["website"] = url
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+            yield item

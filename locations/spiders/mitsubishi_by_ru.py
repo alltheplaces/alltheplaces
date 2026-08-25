@@ -32,7 +32,7 @@ class MitsubishiBYRUSpider(JSONBlobSpider):
         if is_shop:
             shop_item = item.deepcopy()
             apply_category(Categories.SHOP_CAR, shop_item)
-            apply_yes_no(Extras.CAR_REPAIR, shop_item, is_repair)
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, shop_item, is_repair)
             yield shop_item
 
         if is_repair:

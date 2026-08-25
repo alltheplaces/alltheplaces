@@ -55,7 +55,7 @@ class HyundaiTHSpider(JSONBlobSpider):
             sales_item = deepcopy(item)
             sales_item["ref"] = f"{item['ref']}-sales"
             apply_category(Categories.SHOP_CAR, sales_item)
-            apply_yes_no(Extras.CAR_REPAIR, sales_item, has_service)
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, has_service)
             yield sales_item
 
         if has_service:

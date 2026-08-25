@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy import Selector
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
@@ -18,4 +19,5 @@ class LeylandSdmGBSpider(AmastyStoreLocatorSpider):
         item["postcode"] = popup_html.xpath("//text()[6]").get().replace("Postcode:", "")
         item["phone"] = popup_html.xpath("//text()[7]").get()
         item["website"] = popup_html.xpath("//@href").get().replace("Maida Vale/", "Maida%20Vale/")
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item

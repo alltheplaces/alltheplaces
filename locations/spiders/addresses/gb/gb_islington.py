@@ -5,7 +5,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbIslingtonSpider(OwenBaseSpider):
-    name = "gb_islington"
+    # name = "gb_islington"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Council tax data, (c) Islington Council, 2025. This information is licensed under the terms of the Open Government Licence."
         + " Contains OS data © Crown copyright and database right 2025."
