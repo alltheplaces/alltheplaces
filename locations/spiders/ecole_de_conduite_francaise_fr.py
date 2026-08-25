@@ -31,8 +31,8 @@ class EcoleDeConduiteFrancaiseFRSpider(CrawlSpider, StructuredDataSpider):
                                 slug = "-".join(
                                     title
                                     .lower()
-                                    # .replace("\u00e9","e")
-                                    # .replace("\u00ea","e")
+                                    .replace("\u00e9","e")
+                                    .replace("\u00ea","e")
                                     .replace(" - ","-")
                                     .replace(" / "," ")
                                     .replace(" + "," ")
