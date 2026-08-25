@@ -5,7 +5,7 @@ from locations.items import Feature
 from locations.storefinders.stockist import StockistSpider
 
 
-class Devernois(StockistSpider):
+class DevernoisSpider(StockistSpider):
     name = "devernois"
     item_attributes = {"brand": "Devernois", "brand_wikidata": "Q98778444"}
     key = "u15973"
