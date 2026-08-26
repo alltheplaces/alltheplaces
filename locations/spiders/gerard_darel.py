@@ -20,8 +20,6 @@ class GerardDarelSpider(SitemapSpider, StructuredDataSpider):
     def _parse_sitemap(self, response):
         """
         The Sitemap of this website is buggy, we need to add "/en" between the domain and the page.
-        https://boutiques.gerarddarel.com/en/spain/pontevedra/vigo/gerard-darel-el-corte-ingles-vigo
-        https://boutiques.gerarddarel.com/en/united-arab-emirates
         """
         for request in super()._parse_sitemap(response):
             # Modify the URL before the request is sent
@@ -32,6 +30,6 @@ class GerardDarelSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.SHOP_CLOTHES, item)
         apply_clothes(Clothes.WOMEN, item)
 
-        item["branch"] = item.pop("name").removeprefix("Gerard Darel ")
+        item["branch"] = (item.pop("name") or "").removeprefix("Gerard Darel ")
 
         yield item
