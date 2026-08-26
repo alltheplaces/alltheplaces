@@ -1,4 +1,4 @@
-from locations.categories import Clothes, apply_clothes
+from locations.categories import Clothes, apply_clothes, apply_category, Categories
 from locations.json_blob_spider import JSONBlobSpider
 from locations.hours import OpeningHours, DAYS_FULL
 
@@ -12,8 +12,11 @@ class DarjeelingFRSpider(JSONBlobSpider):
     locations_key = "stores"
 
     def post_process_item(self, item, response, location):
+        apply_category(Categories.SHOP_CLOTHES, item)
         apply_clothes(Clothes.UNDERWEAR, item)
-        item["branch"] = item.pop("name","").removeprefix("Darjeeling").removeprefix(" ")
+
+        name = item.pop("name", "") or ""
+        item["branch"] = name.removeprefix("Darjeeling").removeprefix(" ")
         item["opening_hours"] = self.parse_hours(location.get("hours"))
         yield item
 
@@ -23,10 +26,13 @@ class DarjeelingFRSpider(JSONBlobSpider):
             return
 
         oh = OpeningHours()
-        for day in map(str.lower, DAYS_FULL):
-            if hours[day].get("isClosed") is True:
-                oh.set_closed(day)
-            else:
-                for time in hours[day]["openIntervals"]:
-                    oh.add_range(day, time["start"], time["end"])
+        try:
+            for day in map(str.lower, DAYS_FULL):
+                if hours[day].get("isClosed") is True:
+                    oh.set_closed(day)
+                else:
+                    for time in hours[day]["openIntervals"]:
+                        oh.add_range(day, time["start"], time["end"])
+        except KeyError:
+            pass
         return oh
