@@ -28,7 +28,7 @@ class RegisSalonSpider(SitemapSpider):
         item["website"] = item["ref"] = response.url
         oh = OpeningHours()
         for time_text in response.xpath(
-                '//*[@class="col sqs-col-5 span-5"]//*[@class="sqs-html-content"]//p//text()'
+            '//*[@class="col sqs-col-5 span-5"]//*[@class="sqs-html-content"]//p//text()'
         ).getall():
             oh.add_ranges_from_string(time_text)
         item["opening_hours"] = oh
