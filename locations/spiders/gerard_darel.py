@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.structured_data_spider import StructuredDataSpider
-from locations.categories import Categories, apply_category, apply_clothes, Clothes
 
 
 class GerardDarelSpider(SitemapSpider, StructuredDataSpider):
@@ -26,7 +26,7 @@ class GerardDarelSpider(SitemapSpider, StructuredDataSpider):
         for request in super()._parse_sitemap(response):
             # Modify the URL before the request is sent
             url_fragment = request.url.split("gerarddarel.com")
-            yield request.replace(url=url_fragment[0]+ "gerarddarel.com/en"+url_fragment[1])
+            yield request.replace(url=url_fragment[0] + "gerarddarel.com/en" + url_fragment[1])
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.SHOP_CLOTHES, item)
