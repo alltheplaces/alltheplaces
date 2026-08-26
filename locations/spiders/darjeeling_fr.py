@@ -1,0 +1,36 @@
+import chompjs
+
+from locations.categories import Clothes, apply_clothes
+from locations.json_blob_spider import JSONBlobSpider
+from locations.hours import OpeningHours, DAYS_FULL
+
+
+
+class DarjeelingFRSpider(JSONBlobSpider):
+    name = "darjeeling_fr"
+    item_attributes = {
+        "brand": "Darjeeling",
+        "brand_wikidata": "Q3016203",
+    }
+    start_urls = ["https://cdn.new.darjeeling.fr/yext/stores.json"]
+    locations_key = "stores"
+
+    def post_process_item(self, item, response, location):
+        apply_clothes(Clothes.UNDERWEAR, item)
+        item["branch"] = item.pop("name","").removeprefix("Darjeeling").removeprefix(" ")
+        item["opening_hours"] = self.parse_hours(location.get("hours"))
+        yield item
+
+    @staticmethod
+    def parse_hours(hours: dict) -> OpeningHours:
+        if hours is None:
+            return
+
+        oh = OpeningHours()
+        for day in map(str.lower, DAYS_FULL):
+            if hours[day].get("isClosed") is True:
+                oh.set_closed(day)
+            else:
+                for time in hours[day]["openIntervals"]:
+                    oh.add_range(day, time["start"], time["end"])
+        return oh
