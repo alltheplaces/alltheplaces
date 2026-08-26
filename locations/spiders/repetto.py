@@ -14,5 +14,4 @@ class RepettoSpider(JSONBlobSpider):
         item["ref"] = item.get("name")
         item["branch"] = item.pop("name", "")
         apply_category(Categories.SHOP_CLOTHES, item)
-
         yield item
