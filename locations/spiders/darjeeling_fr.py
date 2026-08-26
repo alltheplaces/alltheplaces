@@ -1,6 +1,7 @@
 from locations.categories import Clothes, apply_clothes, apply_category, Categories
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.hours import OpeningHours, DAYS_FULL
+
 
 class DarjeelingFRSpider(JSONBlobSpider):
     name = "darjeeling_fr"
