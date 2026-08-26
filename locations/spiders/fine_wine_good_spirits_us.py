@@ -18,7 +18,6 @@ class FineWineGoodSpiritsUSSpider(SitemapSpider):
     item_attributes = {"brand": "Fine Wine & Good Spirits", "brand_wikidata": "Q64514776"}
     sitemap_urls = ["https://www.finewineandgoodspirits.com/productSitemap.xml"]
     sitemap_rules = [(r"/product/store-\d+", "parse")]
-    requires_proxy = "US"  # Akamai Bot Manager blocks datacentre IPs
 
     def parse(self, response: Response) -> Iterable[Feature]:
         location = next(
