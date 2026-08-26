@@ -1,4 +1,3 @@
-import json
 from typing import Any, AsyncIterator
 
 from scrapy import FormRequest
@@ -49,7 +48,7 @@ class TatraBankaSKSpider(PlaywrightSpider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre//text()").get()).get("places", []):
+        for location in response.json().get("places", []):
             if not location.get("active", True) or location.get("temporarilyClosed"):
                 continue
 
@@ -84,9 +83,9 @@ class TatraBankaSKSpider(PlaywrightSpider):
         item["lon"] = location.get("positionE")
         item["city"] = location.get("city", {}).get("name")
         item.pop("website", None)
-
-        if branch := item.pop("name", None):
-            item["branch"] = branch
+        item.pop("name", None)
+        item["phone"] = None
+        item["email"] = None
 
         return item
 

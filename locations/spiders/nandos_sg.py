@@ -1,40 +1,8 @@
-import re
-from typing import Any
-
-import scrapy
-from scrapy.http import Response
-
-from locations.items import Feature
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
+from locations.spiders.nandos_my import NandosMYSpider
 
 
-class NandosSGSpider(scrapy.Spider):
+class NandosSGSpider(NandosMYSpider):
     name = "nandos_sg"
-    item_attributes = NANDOS_SHARED_ATTRIBUTES
-    allowed_domains = ["nandos.com.sg"]
-    start_urls = ["https://www.nandos.com.sg/restaurants/"]
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        urls = response.xpath('//div[@class="restaurant col-xs-12 col-sm-6 col-md-4"]/a/@href').extract()
-
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse_store)
-
-    def parse_store(self, response):
-        ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-        restaurant_data = response.xpath(
-            '//div[@class="restaurant-details-wrapper"]/script[contains(text(),"var restaurant")]'
-        ).extract_first()
-        lat, lon = re.search(r"var restaurant = {.*: (.*), .*: (.*)}", restaurant_data).groups()
-
-        properties = {
-            "ref": ref,
-            "name": response.xpath('//div[@class="promo-pane-title"]/h2/text()').extract_first(),
-            "addr_full": response.xpath('//div[@class="copy"]/h5/text()').extract_first(),
-            "country": "SG",
-            "lat": lat,
-            "lon": lon,
-            "website": response.url,
-        }
-
-        yield Feature(**properties)
+    item_attributes = NANDOS_SHARED_ATTRIBUTES | {"country": "SG"}
+    start_urls = ["https://www.nandos.com.sg/restaurants/__data.json"]

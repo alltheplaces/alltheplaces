@@ -69,5 +69,11 @@ class VendorDataCommand(ScrapyCommand):
         data = json.load(open(file, encoding="utf-8"))
         print(f"{file.stem.upper()} version: {data['_meta']['version']}")
 
+    def _fr_replacement_overrides(self, nsi: dict):
+        for tree in nsi["nsi"].values():
+            for entry in tree["items"]:
+                if "include" in entry["locationSet"] and "fx" in entry["locationSet"]["include"]:
+                    entry["locationSet"]["include"].append("fr")
+
     _wikidata_overrides = []
-    _nsi_overrides = []
+    _nsi_overrides = [_fr_replacement_overrides]
