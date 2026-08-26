@@ -1,6 +1,7 @@
 from locations.categories import Clothes, apply_clothes
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.hours import OpeningHours, DAYS_FULL
+
 
 class DarjeelingFRSpider(JSONBlobSpider):
     name = "darjeeling_fr"
@@ -13,7 +14,7 @@ class DarjeelingFRSpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         apply_clothes(Clothes.UNDERWEAR, item)
-        item["branch"] = item.pop("name","").removeprefix("Darjeeling").removeprefix(" ")
+        item["branch"] = item.pop("name", "").removeprefix("Darjeeling").removeprefix(" ")
         item["opening_hours"] = self.parse_hours(location.get("hours"))
         yield item
 
