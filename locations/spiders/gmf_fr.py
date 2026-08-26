@@ -21,19 +21,32 @@ class GmfFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/agences-gmf/assurance-([\w-]+)$", "parse")]
     # A handful of matching URLs aren't agency pages at all; see NOT_AN_AGENCY_PAGE_SIZE below.
     #
-    # Site is behind DataDome (the sitemap itself isn't blocked). requires_proxy alone isn't
-    # enough; browserHtml is needed to reliably get through (same fix as maaf_fr.py).
+    # Site is behind DataDome. requires_proxy is not set: it would route every request through
+    # Zyte's automap unconditionally, clashing with the explicit zyte_api meta the agency-page
+    # requests already carry below (scrapy_zyte_api raises on that combination). Without it,
+    # only requests we explicitly give zyte_api meta go through Zyte - robots.txt and the
+    # sitemap fetch are covered separately, see ROBOTSTXT_OBEY and start() below.
     custom_settings = {
         # Default concurrency got banned on almost every request; a lower concurrency and a
         # delay between requests got a full crawl to 100% success.
         "DOWNLOAD_DELAY": 3,
         "CONCURRENT_REQUESTS_PER_DOMAIN": 2,
+        # Sidesteps the direct-connection issue above for robots.txt specifically, same as
+        # many other anti-bot-protected spiders in this project.
+        "ROBOTSTXT_OBEY": False,
     }
 
     # A real agency page's JSON-LD sits at a near-constant ~9KB offset into the document; a
     # full crawl found a clean gap in body sizes between incomplete renders (<10KB) and
     # disambiguation pages (>75KB, see parse() below). 60KB sits safely in that gap.
     NOT_AN_AGENCY_PAGE_SIZE = 60_000
+
+    async def start(self):
+        # Same reasoning as _parse_sitemap below: without explicit zyte_api meta, this falls
+        # back to a plain connection. httpResponseBody is enough - it's XML, not a page to render.
+        async for request in super().start():
+            request.meta["zyte_api"] = {"httpResponseBody": True, "geolocation": "FR"}
+            yield request
 
     def _parse_sitemap(self, response):
         for request in super()._parse_sitemap(response):
