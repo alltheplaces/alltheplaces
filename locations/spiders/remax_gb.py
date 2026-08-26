@@ -3,16 +3,14 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RemaxGBSpider(Spider):
     name = "remax_gb"
-    item_attributes = {
-        "brand": "RE/MAX",
-        "brand_wikidata": "Q965845",
-    }
+    item_attributes = {"brand": "RE/MAX", "brand_wikidata": "Q965845"}
     start_urls = ["https://remax.co.uk/re-max-offices/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -24,4 +22,5 @@ class RemaxGBSpider(Spider):
                 location.xpath('.//*[@class="profileaddrdetails"]//text()').getall()
             )
             item["website"] = item["ref"] = response.urljoin(location.xpath(".//a/@href").get())
+            apply_category(Categories.OFFICE_ESTATE_AGENT, item)
             yield item
