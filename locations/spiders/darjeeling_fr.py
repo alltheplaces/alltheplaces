@@ -1,4 +1,4 @@
-from locations.categories import Clothes, apply_clothes, apply_category, Categories
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
