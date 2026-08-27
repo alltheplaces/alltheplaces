@@ -47,12 +47,19 @@ class LaPosteFRSpider(Spider):
         payload = response.json()
 
         for location in payload["results"]:
+            # The dataset is refreshed monthly and its schema could shift, so
+            # skip anything without the fields that make a location usable
+            # rather than losing the rest of the page to a KeyError.
+            if not location.get("identifiant_a"):
+                self.crawler.stats.inc_value("atp/la_poste_fr/no_ref")
+                continue
             if not location.get("latitude") or not location.get("longitude"):
+                self.crawler.stats.inc_value("atp/la_poste_fr/no_coordinates")
                 continue
 
             item = Feature()
             item["ref"] = location["identifiant_a"]
-            item["branch"] = location["libelle_du_site"]
+            item["branch"] = location.get("libelle_du_site")
             item["street_address"] = location.get("adresse")
             item["postcode"] = location.get("code_postal")
             item["city"] = location.get("localite")
@@ -63,7 +70,9 @@ class LaPosteFRSpider(Spider):
 
             item["extras"]["ref:INSEE"] = location.get("code_insee")
 
-            if location["caracteristique_du_site"] in POST_OFFICES:
+            # An unrecognised or absent characteristic falls through to the
+            # partner tagging, which claims less than amenity=post_office does.
+            if location.get("caracteristique_du_site") in POST_OFFICES:
                 apply_category(Categories.POST_OFFICE, item)
                 item.update(LA_POSTE)
             else:
