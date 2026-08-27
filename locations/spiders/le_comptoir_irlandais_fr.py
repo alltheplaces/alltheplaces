@@ -21,7 +21,7 @@ class LeComptoirIrlandaisFRSpider(Spider):
         stores = response.xpath("//markers//marker")
 
         for store in stores:
-            item = Feature()
+            item = Feature(**self.item_attributes)
             apply_category(Categories.SHOP_DELI, item)
 
             item["ref"] = store.attrib.get("id_store")
