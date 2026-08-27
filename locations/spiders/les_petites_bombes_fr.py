@@ -36,7 +36,7 @@ class LesPetitesBombesFRSpider(Spider):
             if city:
                 parts = city.split("\xa0")
                 if len(parts) == 2:
-                    item["postcode"], item["city"] = parts
+                    item["postcode"], item["city"] = (part.strip() for part in parts)
 
             item["country"] = store.css(".map-place-list__modal-country::text").get()
 
@@ -48,9 +48,9 @@ class LesPetitesBombesFRSpider(Spider):
             for day in store.css(".map-place-list__modal-store-opening-hours::text").getall():
                 if "définitivement" in day:  # the shop is permanently closed
                     permanently_closed = True
-
-                item["opening_hours"].add_ranges_from_string(day, DAYS_FR, delimiters=DELIMITERS_FR ,closed=CLOSED_FR)
-                print(day)
+                    break
+                else:
+                    item["opening_hours"].add_ranges_from_string(day, DAYS_FR, delimiters=DELIMITERS_FR ,closed=CLOSED_FR)
 
             if not permanently_closed:
                 yield item
