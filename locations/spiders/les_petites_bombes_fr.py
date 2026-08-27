@@ -49,7 +49,7 @@ class LesPetitesBombesFRSpider(Spider):
                 if "définitivement" in day:  # the shop is permanently closed
                     permanently_closed = True
 
-                item["opening_hours"].add_ranges_from_string(day, DAYS_FR, delimiters=DELIMITERS_FR ,closed=CLOSED_FR)
+                item["opening_hours"].add_ranges_from_string(day, DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR)
                 print(day)
 
             if not permanently_closed:
