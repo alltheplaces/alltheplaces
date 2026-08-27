@@ -39,7 +39,7 @@ class LeComptoirIrlandaisFRSpider(Spider):
 
             match = re.search(r"\b\d{5}\b", store.attrib.get("address"))
             item["postcode"] = match.group() if match else None
-            item["country"] = "France"
+            item["country"] = "FR"
 
             item["phone"] = store.attrib.get("phone")
             item["website"] = store.attrib.get("link")
