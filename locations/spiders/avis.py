@@ -17,6 +17,7 @@ class AvisSpider(SitemapSpider, StructuredDataSpider):
             item["branch"] = item.pop("name").removeprefix("Avis ")
         item.pop("facebook", None)
         item.pop("twitter", None)
+        item.pop("image", None)
         oh = OpeningHours()
         for day_time in ld_data["openingHours"]:
             if "24 hrs" in day_time:
