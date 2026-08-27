@@ -8,7 +8,6 @@ class MaisonsClairLogisFRSpider(SitemapSpider, StructuredDataSpider):
     name = "maisons_clair_logis_fr"
     item_attributes = {
         "brand": "Maisons Clair Logis",
-        "brand_wikidata": "Q141175303",
     }
     sitemap_urls = ["https://www.maisonsclairlogis.fr/agence-sitemap.xml"]
     sitemap_rules = [
