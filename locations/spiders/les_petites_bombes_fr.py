@@ -50,7 +50,9 @@ class LesPetitesBombesFRSpider(Spider):
                     permanently_closed = True
                     break
                 else:
-                    item["opening_hours"].add_ranges_from_string(day, DAYS_FR, delimiters=DELIMITERS_FR ,closed=CLOSED_FR)
+                    item["opening_hours"].add_ranges_from_string(
+                        day, DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR
+                    )
 
             if not permanently_closed:
                 yield item
