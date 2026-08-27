@@ -9,12 +9,14 @@ class AvisSpider(SitemapSpider, StructuredDataSpider):
     name = "avis"
     item_attributes = {"brand": "Avis", "brand_wikidata": "Q791136"}
     sitemap_urls = ["https://www.avis.com/sitemap.xml"]
-    sitemap_rules = [(r"https://www.avis.com/en/locations/[^/]+/[^/]+/[^/]+/[^/]+$", "parse_sd")]
+    sitemap_rules = [(r"https://www.avis.com/en/locations/[^/]+/[^/]+/[^/]+/[^/]+(?:/[^/]+)?$", "parse_sd")]
     wanted_types = ["AutoRental"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item.get("name"):
             item["branch"] = item.pop("name").removeprefix("Avis ")
+        item.pop("facebook", None)
+        item.pop("twitter", None)
         oh = OpeningHours()
         for day_time in ld_data["openingHours"]:
             if "24 hrs" in day_time:
