@@ -27,12 +27,10 @@ class LesPetitesBombesFRSpider(Spider):
 
             branch = store.css(".map-place-list__modal-store-name::text").get()
             item["branch"] = branch.removeprefix("LPB ") if branch else None
-            
-            
+
             item["addr_full"] = store.css(".map-place-list__modal-address::text").get()
             item["lat"] = store.attrib.get("latitude")
             item["lon"] = store.attrib.get("longitude")
-
 
             city = store.css(".map-place-list__modal-city::text").get()
             if city:
