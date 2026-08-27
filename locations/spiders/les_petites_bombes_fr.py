@@ -24,12 +24,22 @@ class LesPetitesBombesFRSpider(Spider):
             apply_clothes(Clothes.WOMEN, item)
 
             item["ref"] = store.attrib.get("name")
-            item["branch"] = store.css(".map-place-list__modal-store-name::text").get().removeprefix("LPB ")
-            item["addr_full"] = store.css(".map-place-list__modal-address::text").get()
 
+            branch = store.css(".map-place-list__modal-store-name::text").get()
+            item["branch"] = branch.removeprefix("LPB ") if branch else None
+            
+            
+            item["addr_full"] = store.css(".map-place-list__modal-address::text").get()
             item["lat"] = store.attrib.get("latitude")
             item["lon"] = store.attrib.get("longitude")
-            item["postcode"], item["city"] = store.css(".map-place-list__modal-city::text").get().split("\xa0")
+
+
+            city = store.css(".map-place-list__modal-city::text").get()
+            if city:
+                parts = city.split("\xa0")
+                if len(parts) == 2:
+                    item["postcode"], item["city"] = parts
+
             item["country"] = store.css(".map-place-list__modal-country::text").get()
 
             item["phone"] = store.css('a[href^="callto:"]::text').get()
@@ -40,3 +50,9 @@ class LesPetitesBombesFRSpider(Spider):
                 item["opening_hours"].add_ranges_from_string(day, DAYS_FR)
 
             yield item
+
+
+
+
+
+
