@@ -1,16 +1,13 @@
 from scrapy import Spider
-from locations.categories import Categories, apply_category, apply_clothes, Clothes
-from locations.items import Feature
-from locations.hours import DAYS_FR, OpeningHours
 
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
+from locations.hours import DAYS_FR, OpeningHours
+from locations.items import Feature
 
 
 class LesPetitesBombesFRSpider(Spider):
     name = "les_petites_bombes_fr"
-    item_attributes = {
-        "brand": "Les Petites Bombes", 
-        "brand_wikidata": "Q141190957"
-    }
+    item_attributes = {"brand": "Les Petites Bombes", "brand_wikidata": "Q141190957"}
 
     allowed_domains = ["lespetitesbombes.com"]
 
@@ -26,9 +23,8 @@ class LesPetitesBombesFRSpider(Spider):
             apply_category(Categories.SHOP_CLOTHES, item)
             apply_clothes(Clothes.WOMEN, item)
 
-
             item["ref"] = store.attrib.get("name")
-            item["branch"] = store.css(".map-place-list__modal-store-name::text").get().removeprefix("LPB ")        
+            item["branch"] = store.css(".map-place-list__modal-store-name::text").get().removeprefix("LPB ")
             item["addr_full"] = store.css(".map-place-list__modal-address::text").get()
 
             item["lat"] = store.attrib.get("latitude")
@@ -43,5 +39,4 @@ class LesPetitesBombesFRSpider(Spider):
             for day in store.css(".map-place-list__modal-store-opening-hours::text").getall():
                 item["opening_hours"].add_ranges_from_string(day, DAYS_FR)
 
-            yield item 
-            
+            yield item
