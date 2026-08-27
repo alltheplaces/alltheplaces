@@ -1,7 +1,7 @@
 from scrapy import Spider
 
 from locations.categories import Categories, Clothes, apply_category, apply_clothes
-from locations.hours import DAYS_FR, OpeningHours
+from locations.hours import DAYS_FR, OpeningHours, CLOSED_FR
 from locations.items import Feature
 
 
@@ -45,11 +45,18 @@ class LesPetitesBombesFRSpider(Spider):
             item["phone"] = store.css('a[href^="callto:"]::text').get()
             item["email"] = store.css('a[href^="mailto:"]::text').get()
 
+            permanently_closed = False
             item["opening_hours"] = OpeningHours()
             for day in store.css(".map-place-list__modal-store-opening-hours::text").getall():
-                item["opening_hours"].add_ranges_from_string(day, DAYS_FR)
+                if("définitivement" in day): #the shop is permanently closed
+                    permanently_closed = True
 
-            yield item
+                item["opening_hours"].add_ranges_from_string(day, DAYS_FR, closed=CLOSED_FR)
+                print(day)
+
+
+            if not permanently_closed:
+                yield item
 
 
 
