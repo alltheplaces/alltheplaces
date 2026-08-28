@@ -17,5 +17,6 @@ class SaveFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = (item.pop("name") or "").removeprefix("Save").strip()
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
