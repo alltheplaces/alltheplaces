@@ -1,4 +1,5 @@
-from typing import Any, AsyncIterator, Iterable
+from collections.abc import AsyncIterator, Iterable
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -20,7 +21,7 @@ class LocationCloudSpider(Spider):
 
     def _get_page(self, offset: int):
         return Request(
-            "{}?datum=wgs84&limit=500{}&offset={}".format(self.api_endpoint, self.additional_args, offset),
+            f"{self.api_endpoint}?datum=wgs84&limit=500{self.additional_args}&offset={offset}",
             meta={"offset": offset},
         )
 
@@ -44,3 +45,6 @@ class LocationCloudSpider(Spider):
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
         yield item
+
+    def parse_detail_page(self):
+        pass
