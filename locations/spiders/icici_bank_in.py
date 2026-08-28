@@ -27,6 +27,7 @@ class IciciBankINSpider(Spider):
         for branch in json.loads(response.text)["branch"]:
             item = DictParser.parse(branch)
             item["street_address"] = item.pop("addr_full", None)
+            item.pop("phone", None)
             item["branch"] = branch.get("branchName")
             item["name"] = None
             item["ref"] = branch.get("ifsc")
