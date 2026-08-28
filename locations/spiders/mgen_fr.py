@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class MGENFRSpider(SitemapSpider, StructuredDataSpider):
+class MgenFRSpider(SitemapSpider, StructuredDataSpider):
     name = "mgen_fr"
     item_attributes = {"brand": "MGEN", "brand_wikidata": "Q3331039"}
     sitemap_urls = ["https://proximite.mgen.fr/locationsitemap1.xml"]
