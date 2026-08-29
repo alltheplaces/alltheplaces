@@ -14,13 +14,20 @@ PAGE_SIZE = 10000
 LA_POSTE = {"operator": "La Poste", "operator_wikidata": "Q373724"}
 
 # Sites operated by La Poste or by a local authority on its behalf are post
-# offices in their own right. The rest are shops (bakers, tobacconists, …)
-# offering postal services, so they only get the post_partner tag.
+# offices in their own right.
 POST_OFFICES = {
     "Bureau de Poste",
     "Agence postale",
     "Agence postale communale",
     "Agence postale intercommunale",
+}
+
+# Shops (bakers, tobacconists, …) hosting a postal counter. Their own trade is
+# not published, so they get amenity=yes like other post partners in ATP.
+POST_PARTNERS = {
+    "Agence postale ou Relais poste",
+    "Point partenaire",
+    "Relais poste",
 }
 
 COUNTRIES = {"FRANCE": "FR", "ANDORRE": "AD"}
@@ -72,10 +79,14 @@ class LaPosteFRSpider(Spider):
 
             # An unrecognised or absent characteristic falls through to the
             # partner tagging, which claims less than amenity=post_office does.
-            if location.get("caracteristique_du_site") in POST_OFFICES:
+            characteristic = location.get("caracteristique_du_site")
+            if characteristic in POST_OFFICES:
                 apply_category(Categories.POST_OFFICE, item)
                 item.update(LA_POSTE)
             else:
+                if characteristic not in POST_PARTNERS:
+                    self.logger.error("Unexpected characteristic: {}".format(characteristic))
+                apply_category(Categories.GENERIC_POI, item)
                 item["extras"]["post_office"] = "post_partner"
                 item["extras"]["post_office:brand"] = "La Poste"
                 item["extras"]["post_office:brand:wikidata"] = "Q373724"
