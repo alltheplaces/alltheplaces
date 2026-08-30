@@ -68,7 +68,7 @@ class OliveYoungKRSpider(Spider):
             address_parts = item["addr_full"].split(maxsplit=2)
             if address_parts:
                 item["state"] = address_parts[0]
-            if len(address_parts) > 1:
+            if len(address_parts) > 1 and address_parts[1].endswith(("시", "군", "구")):
                 item["city"] = address_parts[1]
 
             yield item
