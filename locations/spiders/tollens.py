@@ -11,10 +11,11 @@ TOLLENS = {"brand": "Tollens", "brand_wikidata": "Q127515008"}
 ZOLPAN = {"brand": "Zolpan", "brand_wikidata": "Q126875048"}
 
 
-class TollensFRSpider(SitemapSpider, StructuredDataSpider):
-    name = "tollens_fr"
+class TollensSpider(SitemapSpider, StructuredDataSpider):
+    name = "tollens"
     # tollens.com lists the whole Cromology retail network: Tollens and Zolpan
-    # branded stores, plus some co-branded "Tollens Zolpan" ones.
+    # branded stores (plus co-branded "Tollens Zolpan" ones), mostly in France
+    # but also in Poland, Luxembourg, Monaco and the French overseas departments.
     item_attributes = TOLLENS
     sitemap_urls = ["https://www.tollens.com/sitemap.xml"]
     sitemap_rules = [(r"/nos-magasins/[^/]+/[^/]+$", "parse_sd")]
@@ -23,7 +24,11 @@ class TollensFRSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        name = item.pop("name").removeprefix("Magasin de Peinture ")
+        name = item.pop("name", None)
+        if not isinstance(name, str) or not name.strip():
+            return
+        name = name.removeprefix("Magasin de Peinture ")
+
         lowered = name.lower()
         if "zolpan" in lowered and "tollens" not in lowered:
             item.update(ZOLPAN)
