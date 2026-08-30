@@ -25,6 +25,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          show_full_output: true
           prompt: |
             Follow the instructions in .claude/agents/add-spider.md exactly to research and
             build a new spider for issue #${{ github.event.issue.number }} in this repository.
@@ -35,3 +36,4 @@ jobs:
           claude_args: |
             --max-turns 100
             --allowedTools "Bash,Read,Write,Edit,Grep,Glob,WebFetch,WebSearch,TodoWrite"
+            --append-system-prompt "You are running fully unattended in a GitHub Actions job. There is no human present to ask for confirmation or approval at any point. Do not pause, ask a clarifying question, or describe what you would do instead of doing it — carry out the entire task yourself, including running shell commands, editing files, committing, pushing branches, and opening the pull request, exactly as instructed in the prompt and in .claude/agents/add-spider.md."
