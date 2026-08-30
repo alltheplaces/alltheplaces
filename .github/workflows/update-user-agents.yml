@@ -33,6 +33,6 @@ jobs:
           title: "[Core] Update browser user agents"
           branch: action/update-user-agents
           body: |
-            Refreshes the pinned browser user agent strings in `locations/user_agents.py` from https://www.useragents.me/.
+            Refreshes the pinned browser user agent strings in `locations/user_agents.py` from Mozilla's (https://product-details.mozilla.org/1.0/firefox_versions.json) and Google's (https://versionhistory.googleapis.com) official version APIs.
 
             ${{ env.output }}
