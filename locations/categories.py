@@ -61,6 +61,7 @@ class Categories(Enum):
 
     CLUB_SCOUT = {"club": "scout"}
 
+    CRAFT_BUILDER = {"craft": "builder"}
     CRAFT_CAR_PAINTER = {"craft": "car_painter"}
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CATERER = {"craft": "caterer"}
