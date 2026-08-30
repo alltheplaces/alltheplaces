@@ -2,7 +2,6 @@ import scrapy
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TudorsBiscuitWorldUSSpider(scrapy.Spider):
@@ -23,8 +22,13 @@ class TudorsBiscuitWorldUSSpider(scrapy.Spider):
             item["lat"], item["lon"] = addr[0].xpath("@href").get().removeprefix("geo:").split(",")
             if not item["lon"].startswith("-"):
                 item["lon"] = "-" + item["lon"]
-            item["addr_full"] = merge_address_lines([a.xpath(".//text()").get() for a in addr])
             item["street_address"] = addr[0].xpath(".//text()").get()
+            if len(addr) > 1 and (city_state_zip := addr[1].xpath(".//text()").get()):
+                city, _, rest = city_state_zip.strip().partition(",")
+                state, _, postcode = rest.strip().rpartition(" ")
+                item["city"] = city.strip()
+                item["state"] = state.strip()
+                item["postcode"] = postcode.strip()
             item["phone"] = inner.xpath(".//a[starts-with(@href, 'tel:')]/@href").get().removeprefix("tel:")
 
             oh = OpeningHours()
