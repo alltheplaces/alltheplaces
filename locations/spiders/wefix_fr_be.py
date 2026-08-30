@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class WeFixFRBESpider(SitemapSpider, StructuredDataSpider):
+class WefixFRBESpider(SitemapSpider, StructuredDataSpider):
     name = "wefix_fr_be"
     item_attributes = {"brand": "WeFix", "brand_wikidata": "Q121543865"}
     sitemap_urls = ["https://boutique.wefix.net/locationsitemap1.xml"]
