@@ -2,7 +2,7 @@ name: Add spider from issue
 
 on:
   issues:
-    types: [opened]
+    types: [opened, labeled]
 
 permissions:
   contents: write
@@ -12,7 +12,9 @@ permissions:
 
 jobs:
   add-spider:
-    if: contains(github.event.issue.labels.*.name, 'new-spider')
+    if: |
+      contains(github.event.issue.labels.*.name, 'new-spider') &&
+      (github.event.action == 'opened' || github.event.label.name == 'new-spider')
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
