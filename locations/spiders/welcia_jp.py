@@ -17,33 +17,31 @@ class WelciaJPSpider(LocationCloudSpider):
     """
     example:
     {
-	"0": {
-		"code": "1001D",
-		"name": "ウエルシア春日部一ノ割店",
-		"ruby": "ウエルシアカスカベイチノワリテン",
-		"phone": "048-735-4739",
-		"address_name": "埼玉県春日部市一ノ割1-11-20",
-		"address_code": "11214", // municipality code / 11214 === 埼玉県春日部市
-		                         // ref. 市区町村コードから探す(市区町村) | 政府統計の総合窓口 - https://www.e-stat.go.jp/municipalities/cities/areacodesearch?date_year=2026&date_month=8&date_day=29&ht=11214&op=search&keyword_kd=code&item%5B%5D=htCode&item%5B%5D=todoNm&item%5B%5D=parentCityNm&item%5B%5D=parentCityKana&item%5B%5D=selfCityNm&item%5B%5D=selfCityKana&item%5B%5D=htCodeSDate&item%5B%5D=jiyuId&sort%5B%5D=htCode-asc&choices_to_show%5B%5D=cityType&choices_to_show%5B%5D=kasoFlg&choices_to_show%5B%5D=htCodeKokujiDate&choices_to_show%5B%5D=htCodeKokujiNo&choices_to_show%5B%5D=htCodeEDate&choices_to_sort%5B%5D=kasoFlg&choices_to_sort%5B%5D=htCodeSDate&choices_to_sort%5B%5D=htCodeEDate&choices_to_sort%5B%5D=htCodeKokujiDate&choices_to_sort%5B%5D=htCodeKokujiNo&choices_to_sort_value%5B%5D=htCode-desc&choices_to_sort_value%5B%5D=kasoFlg-asc&choices_to_sort_value%5B%5D=kasoFlg-desc&choices_to_sort_value%5B%5D=htCodeSDate-asc&choices_to_sort_value%5B%5D=htCodeSDate-desc&choices_to_sort_value%5B%5D=htCodeEDate-asc&choices_to_sort_value%5B%5D=htCodeEDate-desc&choices_to_sort_value%5B%5D=htCodeKokujiDate-asc&choices_to_sort_value%5B%5D=htCodeKokujiDate-desc&choices_to_sort_value%5B%5D=htCodeKokujiNo-asc&choices_to_sort_value%5B%5D=htCodeKokujiNo-desc&form_id=city_areacode_search_form&source=setup&page=
-		"postal_code": "3440031",
-		"coord": {
-			"lon": 139.768752,
-			"lat": 35.960414
-		},
-		"status": "normal",
-		"list_no": 0, // unknown
-		"external_code": "1001D", // external_code === code for all first 500 shops
-		"categories": [ // always array.length === 1
-			{
-				"code": "01", // STRING! 4 codes, corresponding to next 'name'
-				"name": "ウエルシア", // alias for code
-				"level": "large", // always 'large'
-				"last_update": "2023-10-12T20:22:57+09:00"
-			}
-		],
-		"last_update": "2026-08-21T16:34:05+09:00"
-	}
-}
+        "code": "1001D",
+        "name": "ウエルシア春日部一ノ割店",
+        "ruby": "ウエルシアカスカベイチノワリテン", // 822 stores have non-empty ruby / 2144 has no 'ruby' key
+        "phone": "048-735-4739",
+        "address_name": "埼玉県春日部市一ノ割1-11-20",
+        "address_code": "11214", // municipality code / 11214 === 埼玉県春日部市
+                                 // ref. 市区町村コードから探す(市区町村) | 政府統計の総合窓口 - https://www.e-stat.go.jp/municipalities/cities/areacodesearch?date_year=2026&date_month=8&date_day=29&ht=11214&op=search&keyword_kd=code&item%5B%5D=htCode&item%5B%5D=todoNm&item%5B%5D=parentCityNm&item%5B%5D=parentCityKana&item%5B%5D=selfCityNm&item%5B%5D=selfCityKana&item%5B%5D=htCodeSDate&item%5B%5D=jiyuId&sort%5B%5D=htCode-asc&choices_to_show%5B%5D=cityType&choices_to_show%5B%5D=kasoFlg&choices_to_show%5B%5D=htCodeKokujiDate&choices_to_show%5B%5D=htCodeKokujiNo&choices_to_show%5B%5D=htCodeEDate&choices_to_sort%5B%5D=kasoFlg&choices_to_sort%5B%5D=htCodeSDate&choices_to_sort%5B%5D=htCodeEDate&choices_to_sort%5B%5D=htCodeKokujiDate&choices_to_sort%5B%5D=htCodeKokujiNo&choices_to_sort_value%5B%5D=htCode-desc&choices_to_sort_value%5B%5D=kasoFlg-asc&choices_to_sort_value%5B%5D=kasoFlg-desc&choices_to_sort_value%5B%5D=htCodeSDate-asc&choices_to_sort_value%5B%5D=htCodeSDate-desc&choices_to_sort_value%5B%5D=htCodeEDate-asc&choices_to_sort_value%5B%5D=htCodeEDate-desc&choices_to_sort_value%5B%5D=htCodeKokujiDate-asc&choices_to_sort_value%5B%5D=htCodeKokujiDate-desc&choices_to_sort_value%5B%5D=htCodeKokujiNo-asc&choices_to_sort_value%5B%5D=htCodeKokujiNo-desc&form_id=city_areacode_search_form&source=setup&page=
+        "postal_code": "3440031",
+        "coord": {
+            "lon": 139.768752,
+            "lat": 35.960414
+        },
+        "status": "normal", // always "normal". purpose is unknown
+        "list_no": 0, // always 0. purpose is unknown
+        "external_code": "1001D", // external_code === code for all first 500 shops
+        "categories": [ // always array.length === 1
+            {
+                "code": "01", // STRING! 21 brand codes, corresponding to next 'name'
+                "name": "ウエルシア", // alias for code
+                "level": "large", // always 'large'
+                "last_update": "2023-10-12T20:22:57+09:00"
+            }
+        ],
+        "last_update": "2026-08-21T16:34:05+09:00"
+    }
     """
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
