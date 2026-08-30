@@ -39,6 +39,7 @@ class Categories(Enum):
     LANGUAGE_SCHOOL = {"amenity": "language_school"}
     NATURE_SCHOOL = {"education": "nature_school"}
     TRAINING = {"amenity": "training"}
+    DRIVING_SCHOOL = {"amenity": "driving_school"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
