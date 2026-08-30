@@ -269,6 +269,7 @@ class Categories(Enum):
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_FINANCIAL_ADVISOR = {"office": "financial_advisor"}
+    OFFICE_GOVERNMENT = {"office": "government"}
     OFFICE_HEALTHCARE = {"office": "healthcare"}
     OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
