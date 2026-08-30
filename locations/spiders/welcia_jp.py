@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 
 from locations.categories import Categories, apply_category
+from locations.geo import postal_regions
 from locations.items import Feature
 from locations.storefinders.location_cloud import LocationCloudSpider
 
@@ -51,6 +52,15 @@ class WelciaJPSpider(LocationCloudSpider):
         """
         if phone := source_feature.get("phone"):
             item["phone"] = f"+81 {phone}"
+
+        if postal_code := source_feature.get("postal_code"):
+            if region := POSTAL_LOOKUP.get(postal_code):
+                item["extras"]["addr:province"] = region["province:ja"]
+                item["city"] = region["city:ja"]
+                if quarter := region.get("quarter:ja"):
+                    item["extras"]["addr:quarter"] = quarter
+                elif neighbourhood := region.get("neighbourhood:ja"):
+                    item["extras"]["addr:neighbourhood"] = neighbourhood
 
         match source_feature["categories"][0]["code"]:
             case "01":  # ウエルシア
@@ -234,3 +244,17 @@ class WelciaJPSpider(LocationCloudSpider):
     def parse_detail_page(self):
         # TODO: check `seims_jp.py` for detailed pharmacy-related tags
         pass
+
+
+def _build_postal_lookup() -> dict[str, dict]:
+    """Map each JP postcode to its region dict.
+
+    Scans the 124K row JP postcode dataset only once at import time to avoid rescanning.
+    """
+    lookup = {}
+    for region in postal_regions("JP"):
+        lookup.setdefault(region["postal_region"], region)
+    return lookup
+
+
+POSTAL_LOOKUP = _build_postal_lookup()
