@@ -18,13 +18,13 @@ class NoriskoFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         apply_category(Categories.VEHICLE_INSPECTION, item)
-        
+
         generic_facebook_urls = (
             "https://www.facebook.com/dekra.norisko.officiel/",
-            "https://www.facebook.com/dekra.automotive"
+            "https://www.facebook.com/dekra.automotive",
         )
-        
+
         if item.get("facebook") in generic_facebook_urls:
             item.pop("facebook", None)
-            
+
         yield item
