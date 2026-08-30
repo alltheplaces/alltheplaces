@@ -14,7 +14,7 @@ class LesPetitsChaperonsRougesFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.lpcr.fr/sitemap.xml"]
     sitemap_rules = [(r"https://www\.lpcr\.fr/.*creches/.+$", "parse_sd")]
     wanted_types = ["ChildCare"]
-    drop_attributes = {"image"}
+    drop_attributes = {"image","facebook"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         apply_category(Categories.KINDERGARTEN, item)
