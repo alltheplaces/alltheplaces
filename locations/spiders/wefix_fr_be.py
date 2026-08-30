@@ -19,6 +19,6 @@ class WeFixFRBESpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         if item.get("phone") == "+33 1 76 50 76 50":
-        	item.pop("phone", None)
-            
+            item.pop("phone", None)
+
         yield item
