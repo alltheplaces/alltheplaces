@@ -3,6 +3,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class AllsaintsSpider(CrawlSpider, StructuredDataSpider):
@@ -18,7 +19,7 @@ class AllsaintsSpider(CrawlSpider, StructuredDataSpider):
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "Host": "www.allsaints.com",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0",
+            "User-Agent": BROWSER_DEFAULT,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "upgrade-insecure-requests": "1",
             "Referer": "https://www.allsaints.com/",
