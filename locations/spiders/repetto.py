@@ -37,6 +37,10 @@ class RepettoSpider(JSONBlobSpider):
         item["ref"] = item.get("name")
         item["branch"] = item.pop("name", "")
 
+        # Skip items without coordinates
+        if not item.get("lat") or not item.get("lon"):
+            return
+
         # Map French country names to ISO codes
         if "country" in item:
             item["country"] = self.COUNTRY_MAPPING.get(item["country"], item["country"])
