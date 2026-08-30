@@ -58,9 +58,9 @@ class WelciaJPSpider(LocationCloudSpider):
         match source_feature["categories"][0]["code"]:
             case "01":  # ウエルシア
                 if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("ウエルシア")
+                    item["branch"] = name.removeprefix("ウエルシア").removeprefix("薬局")
                 if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ウエルシア")
+                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ウエルシア").removeprefix("薬局")
             case "02":  # ハックドラッグ (HAC drug)
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
@@ -72,7 +72,7 @@ class WelciaJPSpider(LocationCloudSpider):
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
                 if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("ダックス")
+                    item["branch"] = name.removeprefix("薬局ダックス").removeprefix("ダックス")
                 if ruby := source_feature.get("ruby"):
                     item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ダックス")
             case "04":  # ハッピードラッグ
@@ -170,7 +170,7 @@ class WelciaJPSpider(LocationCloudSpider):
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q119380891"
                 if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("ふく薬品").removeprefix("ふく薬局")
+                    item["branch"] = name.removeprefix("ふく薬品").removeprefix("ふく薬局").strip()
             case "18":  # Zoomore
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
@@ -188,16 +188,19 @@ class WelciaJPSpider(LocationCloudSpider):
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q11273556"
                 if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("とをしや")
+                    item["branch"] = name.removeprefix("とをしや").removesuffix("とをしや薬局")
             case "21":  # ウェルパーク
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q11288610"
                 if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("ウェルパーク")
+                    item["branch"] = name.removeprefix("ウェルパーク").removeprefix("薬局")
                 if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ウェルパーク")
+                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ウェルパーク").removeprefix("薬局")
             case _:
                 return
+
+        if branch := item.get("branch"):
+            item["branch"] = branch.removesuffix(" (調剤薬局)").removesuffix("(調剤薬局)").strip()
 
         yield item
 
