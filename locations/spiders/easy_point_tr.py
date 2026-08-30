@@ -51,7 +51,6 @@ class EasyPointTRSpider(Spider):
             d["state"] = item["city"]  # province/il in Turkish
             d["city"] = item["district"]  # district/ilçe in Turkish
             d["street_address"] = item["muhaberatAddress1"]
-            d["addr_full"] = f"{item['muhaberatAddress1']} {item['district']} {item['city']}"
             d["extras"]["addr:neighborhood"] = item["region"]  # mahalle in Turkish
             d["extras"]["addr:desc"] = item["pointAddressDefinition"]
 
