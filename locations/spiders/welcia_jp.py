@@ -8,7 +8,7 @@ from locations.storefinders.location_cloud import LocationCloudSpider
 class WelciaJPSpider(LocationCloudSpider):
     name = "welcia_jp"
     item_attributes = {
-        "brand": "ウエルシア薬局",
+        "brand": "welcia",
         "brand_wikidata": "Q11288687",
     }
     api_endpoint = "https://store.welcia.co.jp/welcia/api/proxy2/shop/list"
@@ -63,7 +63,7 @@ class WelciaJPSpider(LocationCloudSpider):
                     item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ウエルシア").removeprefix("薬局")
             case "02":  # ハックドラッグ (HAC drug)
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("ハックドラッグ")
@@ -71,7 +71,7 @@ class WelciaJPSpider(LocationCloudSpider):
                     item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ハックドラッグ")
             case "03":  # ダックス
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("薬局ダックス").removeprefix("ダックス")
@@ -91,7 +91,7 @@ class WelciaJPSpider(LocationCloudSpider):
                     item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ハッピードラッグ")
             case "05":  # カラースタジオ
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("カラースタジオ")
@@ -107,7 +107,7 @@ class WelciaJPSpider(LocationCloudSpider):
                     item["extras"]["branch:ja-Hira"] = ruby.removeprefix("カネミツヤッキョク")
             case "07":  # マサヤ
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("マサヤ ")
@@ -125,7 +125,7 @@ class WelciaJPSpider(LocationCloudSpider):
                     item["branch"] = name.removeprefix("マルエドラッグ").removeprefix("マルエ薬局")
             case "10":  # アリエールLAUNDRY PRO
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 apply_category(Categories.SHOP_COUNTRY_STORE, item)
                 if name := source_feature.get("name"):
@@ -144,7 +144,7 @@ class WelciaJPSpider(LocationCloudSpider):
                     )
             case "12":  # NARCIS
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 apply_category(Categories.SHOP_COSMETICS, item)
                 if name := source_feature.get("name"):
@@ -168,13 +168,13 @@ class WelciaJPSpider(LocationCloudSpider):
                     )
             case "14":  # アルビオンドレッサー
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("アルビオンドレッサー")
             case "15":  # アトリエアルビオン
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("アトリエアルビオン")
@@ -186,7 +186,7 @@ class WelciaJPSpider(LocationCloudSpider):
                     item["branch"] = name.removeprefix("ふく薬品").removeprefix("ふく薬局").strip()
             case "18":  # Zoomore
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 apply_category(Categories.SHOP_PET, item)
                 if name := source_feature.get("name"):
@@ -195,7 +195,7 @@ class WelciaJPSpider(LocationCloudSpider):
                     item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ズーモア")
             case "19":  # コスメテリア
                 item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
+                item["brand_wikidata"] = None
                 item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("コスメテリア")
