@@ -1,0 +1,35 @@
+name: Add spider from issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  add-spider:
+    if: contains(github.event.issue.labels.*.name, 'new-spider')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Follow the instructions in .claude/agents/add-spider.md exactly to research and
+            build a new spider for issue #${{ github.event.issue.number }} in this repository.
+            This checkout is exclusively yours for this run, so the worktree step in that file
+            is unnecessary here — work directly in the checked-out repo.
+            Open a pull request when you're done. If no clean data source exists, say so clearly
+            in the workflow log instead of forcing a broken spider.
+          claude_args: |
+            --max-turns 100
+            --allowedTools "Bash,Read,Write,Edit,Grep,Glob,WebFetch,WebSearch,TodoWrite"
