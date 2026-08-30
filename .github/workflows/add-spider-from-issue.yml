@@ -31,9 +31,17 @@ jobs:
             build a new spider for issue #${{ github.event.issue.number }} in this repository.
             This checkout is exclusively yours for this run, so the worktree step in that file
             is unnecessary here — work directly in the checked-out repo.
+
+            Do this yourself, in this single session — do NOT use the Agent/Task tool to
+            delegate any part of it to a subagent. There is no process left running to receive
+            a "task complete" notification once this job's turn ends, so a backgrounded
+            subagent's work is silently lost when the job finishes. Read the file's contents
+            and carry out its steps directly with your own Bash/Read/Write/Edit tool calls.
+
             Open a pull request when you're done. If no clean data source exists, say so clearly
             in the workflow log instead of forcing a broken spider.
           claude_args: |
             --max-turns 100
             --allowedTools "Bash,Read,Write,Edit,Grep,Glob,WebFetch,WebSearch,TodoWrite"
-            --append-system-prompt "You are running fully unattended in a GitHub Actions job. There is no human present to ask for confirmation or approval at any point. Do not pause, ask a clarifying question, or describe what you would do instead of doing it — carry out the entire task yourself, including running shell commands, editing files, committing, pushing branches, and opening the pull request, exactly as instructed in the prompt and in .claude/agents/add-spider.md."
+            --disallowedTools "Agent,Task"
+            --append-system-prompt "You are running fully unattended in a GitHub Actions job, in a single non-interactive session with no event loop after this turn ends. There is no human present to ask for confirmation or approval. Do not pause, ask a clarifying question, or describe what you would do instead of doing it. Do not delegate any part of the task to a subagent (Agent/Task tool) — a backgrounded subagent never gets its result back to you or anyone else once this run ends, so its work is wasted. Carry out the entire task yourself with your own tool calls, including running shell commands, editing files, committing, pushing branches, and opening the pull request, exactly as instructed in the prompt and in .claude/agents/add-spider.md."
