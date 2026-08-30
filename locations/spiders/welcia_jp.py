@@ -147,7 +147,6 @@ BRANDS = {
 
 class WelciaJPSpider(LocationCloudSpider):
     name = "welcia_jp"
-    item_attributes = {"extras": {"shop": "chemist"}}
     api_endpoint = "https://store.welcia.co.jp/welcia/api/proxy2/shop/list"
     website_formatter = "https://store.welcia.co.jp/welcia/spot/detail?code={}"
 
@@ -209,6 +208,8 @@ class WelciaJPSpider(LocationCloudSpider):
             item["brand_wikidata"] = brand["brand_wikidata"]
         if category := brand.get("category"):
             apply_category(category, item)
+        else:
+            apply_category(Categories.SHOP_CHEMIST, item)
 
         self._apply_branch_and_ruby(item, source_feature, brand)
 
