@@ -54,7 +54,8 @@ class WelciaJPSpider(LocationCloudSpider):
         ハックドラッグ (HAC drug) was a brand by CFS corporation, which was merged by Welcia, but those 12 store keep the old brand name.
         ref. ウエルシア薬局 - Wikipedia - https://ja.wikipedia.org/wiki/%E3%82%A6%E3%82%A8%E3%83%AB%E3%82%B7%E3%82%A2%E8%96%AC%E5%B1%80#%E6%8C%81%E6%A0%AA%E4%BC%9A%E7%A4%BE%E3%81%AE%E8%A8%AD%E7%AB%8B%E5%BE%8C
         """
-        item["phone"] = f"+81 {source_feature['phone']}"
+        if phone := source_feature.get("phone"):
+            item["phone"] = f"+81 {phone}"
 
         match source_feature["categories"][0]["code"]:
             case "01":  # ウエルシア
