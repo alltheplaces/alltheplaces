@@ -52,7 +52,11 @@ class BoulangerieLouiseFRSpider(SitemapSpider):
 
         item["opening_hours"] = OpeningHours()
         for row in response.xpath('//table[contains(@class, "table-striped")]//tr'):
-            day, hours = row.xpath("./td//text()").getall()[:2]
+            cells = row.xpath("./td")
+            if len(cells) < 2:
+                continue
+            day = " ".join(cells[0].xpath(".//text()").getall())
+            hours = " ".join(cells[1].xpath(".//text()").getall())
             if not (day := sanitise_day(day.strip(), DAYS_FR)):
                 continue
             hours = hours.strip()
