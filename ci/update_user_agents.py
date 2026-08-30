@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
 Refresh the pinned browser user agent strings in locations/user_agents.py
-using real-world data from https://www.useragents.me/.
+using official version data from Mozilla and Google.
 
-Only ever moves a pinned version forward (never downgrades it), since the
-source site's snapshot can lag behind what is already pinned.
+Only ever moves a pinned version forward (never downgrades it), since these
+services occasionally serve a staged/rolled-back version.
 """
 
 import re
@@ -12,88 +12,45 @@ import sys
 from pathlib import Path
 
 import requests
-from parsel import Selector
 
 USER_AGENTS_PATH = Path(__file__).parent.parent / "locations" / "user_agents.py"
-SOURCE_URL = "https://www.useragents.me/"
 
-# The "Latest Linux Desktop Useragents" table lists browsers by OS in the same
-# style (X11; Linux x86_64) already pinned in user_agents.py. Firefox usually
-# appears at two distinct versions there: the current stable release, and a
-# noticeably older one that lines up with the current Firefox ESR release.
-LINUX_TABLE_HEADING_ID = "latest-linux-desktop-useragents"
-
-LABEL_RE = re.compile(r"^(Chrome|Firefox)\s+(\d+)")
-
-# The existing pinned strings are a plain, distro-less 64-bit Linux UA. The
-# source site lists several Linux flavours (generic, Ubuntu, Fedora, i686)
-# per version; prefer a matching plain "X11; Linux x86_64" string, falling
-# back to any 64-bit variant, so we don't end up pinning a 32-bit UA.
-GENERIC_LINUX_X64_RE = re.compile(r"\(X11; Linux x86_64[;)]")
-X64_RE = re.compile(r"x86_64")
-
-
-def _linux_variant_rank(ua: str) -> int:
-    if GENERIC_LINUX_X64_RE.search(ua):
-        return 0
-    if X64_RE.search(ua):
-        return 1
-    return 2
-
+FIREFOX_VERSIONS_URL = "https://product-details.mozilla.org/1.0/firefox_versions.json"
+CHROME_VERSIONS_URL = (
+    "https://versionhistory.googleapis.com/v1/chrome/platforms/linux/channels/stable/versions/all/releases"
+    "?filter=endtime=none"
+)
 
 FETCH_USER_AGENT = (
     "AllThePlacesBot (+https://github.com/alltheplaces/alltheplaces; +https://alltheplaces.xyz/) python-requests"
 )
 
+FIREFOX_UA_TEMPLATE = "Mozilla/5.0 (X11; Linux x86_64; rv:{major}.0) Gecko/20100101 Firefox/{major}.0"
+CHROME_UA_TEMPLATE = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{major}.0.0.0 Safari/537.36"
+)
 
-def fetch_linux_user_agents() -> dict[str, list[tuple[int, str]]]:
-    resp = requests.get(SOURCE_URL, headers={"User-Agent": FETCH_USER_AGENT}, timeout=30)
+
+def major_version(version: str) -> int:
+    return int(re.match(r"\d+", version).group())
+
+
+def fetch_firefox_majors() -> tuple[int, int]:
+    """Returns (latest, esr) major versions."""
+    resp = requests.get(FIREFOX_VERSIONS_URL, headers={"User-Agent": FETCH_USER_AGENT}, timeout=30)
     resp.raise_for_status()
-
-    selector = Selector(text=resp.text)
-    rows = selector.xpath(
-        f'//h2[@id="{LINUX_TABLE_HEADING_ID}"]'
-        '/following-sibling::div[contains(@class, "table-responsive")][1]'
-        "//tbody/tr"
-    )
-    if not rows:
-        raise RuntimeError(f"Could not find any rows under #{LINUX_TABLE_HEADING_ID} on {SOURCE_URL}")
-
-    candidates: dict[tuple[str, int], list[str]] = {}
-    for row in rows:
-        label = " ".join(row.xpath("./td[1]//text()").getall()).strip()
-        ua = row.xpath(".//textarea/text()").get()
-        if not label or not ua:
-            continue
-        match = LABEL_RE.match(label)
-        if not match:
-            continue
-        browser, major = match.group(1), int(match.group(2))
-        candidates.setdefault((browser, major), []).append(ua.strip())
-
-    by_browser: dict[str, list[tuple[int, str]]] = {"Chrome": [], "Firefox": []}
-    for (browser, major), uas in candidates.items():
-        best = min(uas, key=_linux_variant_rank)
-        by_browser[browser].append((major, best))
-
-    return by_browser
+    data = resp.json()
+    return major_version(data["LATEST_FIREFOX_VERSION"]), major_version(data["FIREFOX_ESR"])
 
 
-def pick_latest_and_esr(
-    firefox_versions: list[tuple[int, str]],
-) -> tuple[tuple[int, str] | None, tuple[int, str] | None]:
-    distinct = sorted(set(firefox_versions), key=lambda v: v[0], reverse=True)
-    if not distinct:
-        return None, None
-    latest = distinct[0]
-    esr = None
-    for major, ua in distinct[1:]:
-        # ESR tracks lag well behind stable; a handful of versions apart is
-        # the expected gap, not noise from two nearby point releases.
-        if latest[0] - major >= 3:
-            esr = (major, ua)
-            break
-    return latest, esr
+def fetch_chrome_major() -> int:
+    resp = requests.get(CHROME_VERSIONS_URL, headers={"User-Agent": FETCH_USER_AGENT}, timeout=30)
+    resp.raise_for_status()
+    data = resp.json()
+    releases = data.get("releases", [])
+    if not releases:
+        raise RuntimeError(f"No Chrome releases returned from {CHROME_VERSIONS_URL}")
+    return major_version(releases[0]["version"])
 
 
 def current_pinned_version(content: str, constant_prefix: str) -> int | None:
@@ -117,30 +74,29 @@ def replace_constant_block(
 
 
 def main() -> int:
-    by_browser = fetch_linux_user_agents()
-
-    chrome_latest = max(by_browser["Chrome"], key=lambda v: v[0], default=None)
-    firefox_latest, firefox_esr = pick_latest_and_esr(by_browser["Firefox"])
+    firefox_latest, firefox_esr = fetch_firefox_majors()
+    chrome_latest = fetch_chrome_major()
 
     content = USER_AGENTS_PATH.read_text()
     changes = []
 
-    if chrome_latest:
-        content, changed = replace_constant_block(content, "CHROME", "CHROME_LATEST", *chrome_latest)
-        if changed:
-            changes.append(f"Chrome -> {chrome_latest[0]}")
+    content, changed = replace_constant_block(
+        content, "CHROME", "CHROME_LATEST", chrome_latest, CHROME_UA_TEMPLATE.format(major=chrome_latest)
+    )
+    if changed:
+        changes.append(f"Chrome -> {chrome_latest}")
 
-    if firefox_latest:
-        content, changed = replace_constant_block(content, "FIREFOX", "FIREFOX_LATEST", *firefox_latest)
-        if changed:
-            changes.append(f"Firefox -> {firefox_latest[0]}")
+    content, changed = replace_constant_block(
+        content, "FIREFOX", "FIREFOX_LATEST", firefox_latest, FIREFOX_UA_TEMPLATE.format(major=firefox_latest)
+    )
+    if changed:
+        changes.append(f"Firefox -> {firefox_latest}")
 
-    if firefox_esr:
-        content, changed = replace_constant_block(content, "FIREFOX_ESR", "FIREFOX_ESR_LATEST", *firefox_esr)
-        if changed:
-            changes.append(f"Firefox ESR -> {firefox_esr[0]}")
-    else:
-        print("Could not identify a distinct Firefox ESR version this run; leaving FIREFOX_ESR_LATEST untouched.")
+    content, changed = replace_constant_block(
+        content, "FIREFOX_ESR", "FIREFOX_ESR_LATEST", firefox_esr, FIREFOX_UA_TEMPLATE.format(major=firefox_esr)
+    )
+    if changed:
+        changes.append(f"Firefox ESR -> {firefox_esr}")
 
     if not changes:
         print("No user agent constants needed updating.")
