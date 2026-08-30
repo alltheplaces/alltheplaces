@@ -17,5 +17,5 @@ class LesPetitsChaperonsRougesFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        apply_category(Categories.KINDERGARTEN, item)       
+        apply_category(Categories.KINDERGARTEN, item)
         yield item
