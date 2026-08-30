@@ -64,6 +64,7 @@ class WelciaJPSpider(LocationCloudSpider):
             case "02":  # ハックドラッグ (HAC drug)
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("ハックドラッグ")
                 if ruby := source_feature.get("ruby"):
@@ -71,6 +72,7 @@ class WelciaJPSpider(LocationCloudSpider):
             case "03":  # ダックス
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("薬局ダックス").removeprefix("ダックス")
                 if ruby := source_feature.get("ruby"):
@@ -78,6 +80,7 @@ class WelciaJPSpider(LocationCloudSpider):
             case "04":  # ハッピードラッグ
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q11368084"
+                item["name"] = item["brand"]  # qid not in NSI database
                 if name := source_feature.get("name"):
                     item["branch"] = (
                         name.removeprefix("ハッピー・ドラッグ")
@@ -89,6 +92,7 @@ class WelciaJPSpider(LocationCloudSpider):
             case "05":  # カラースタジオ
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("カラースタジオ")
                 if ruby := source_feature.get("ruby"):
@@ -96,6 +100,7 @@ class WelciaJPSpider(LocationCloudSpider):
             case "06":  # 金光薬品
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q11646466"
+                item["name"] = item["brand"]  # qid not in NSI database
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("金光薬品").removeprefix("金光薬局")
                 if ruby := source_feature.get("ruby"):
@@ -103,21 +108,25 @@ class WelciaJPSpider(LocationCloudSpider):
             case "07":  # マサヤ
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("マサヤ ")
             case "08":  # よどやドラッグ
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q11281187"
+                item["name"] = item["brand"]  # qid not in NSI database
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("よどやドラッグ")
             case "09":  # マルエドラッグ
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q11298666"
+                item["name"] = item["brand"]  # qid not in NSI database
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("マルエドラッグ").removeprefix("マルエ薬局")
             case "10":  # アリエールLAUNDRY PRO
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 apply_category(Categories.SHOP_COUNTRY_STORE, item)
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("アリエールLAUNDRY PRO ")
@@ -136,6 +145,7 @@ class WelciaJPSpider(LocationCloudSpider):
             case "12":  # NARCIS
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 apply_category(Categories.SHOP_COSMETICS, item)
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("NARCIS")
@@ -159,21 +169,25 @@ class WelciaJPSpider(LocationCloudSpider):
             case "14":  # アルビオンドレッサー
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("アルビオンドレッサー")
             case "15":  # アトリエアルビオン
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("アトリエアルビオン")
             case "16":  # ふく薬品
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q119380891"
+                item["name"] = item["brand"]  # qid not in NSI database
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("ふく薬品").removeprefix("ふく薬局").strip()
             case "18":  # Zoomore
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 apply_category(Categories.SHOP_PET, item)
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("Zoomore")
@@ -182,11 +196,13 @@ class WelciaJPSpider(LocationCloudSpider):
             case "19":  # コスメテリア
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = ""
+                item["name"] = item["brand"]
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("コスメテリア")
             case "20":  # とをしや薬局
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["brand_wikidata"] = "Q11273556"
+                item["name"] = item["brand"]  # qid not in NSI database
                 if name := source_feature.get("name"):
                     item["branch"] = name.removeprefix("とをしや").removesuffix("とをしや薬局")
             case "21":  # ウェルパーク
