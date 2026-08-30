@@ -32,9 +32,9 @@ class HyundaiBWLSNASZZASpider(JSONBlobSpider):
             shop = deepcopy(item)
             apply_category(Categories.SHOP_CAR, shop)
             if feature.get("Service") or feature.get("CommercialService"):
-                apply_yes_no(Extras.CAR_REPAIR, shop, True)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, shop, True)
             if feature.get("Parts") or feature.get("CommercialParts"):
-                apply_yes_no(Extras.CAR_PARTS, shop, True)
+                apply_yes_no(Extras.VEHICLE_CAR_PARTS_SALES, shop, True)
             yield shop
 
         if feature.get("Service") or feature.get("CommercialService"):
@@ -42,7 +42,7 @@ class HyundaiBWLSNASZZASpider(JSONBlobSpider):
             service["ref"] = f"{item['ref']}_service"
             apply_category(Categories.SHOP_CAR_REPAIR, service)
             if feature.get("Parts") or feature.get("CommercialParts"):
-                apply_yes_no(Extras.CAR_PARTS, service, True)
+                apply_yes_no(Extras.VEHICLE_CAR_PARTS_SALES, service, True)
             yield service
 
         if feature.get("Parts") or feature.get("CommercialParts"):

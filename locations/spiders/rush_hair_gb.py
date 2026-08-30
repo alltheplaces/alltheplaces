@@ -5,6 +5,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -28,5 +29,7 @@ class RushHairGBSpider(CrawlSpider):
 
         if m := re.search(r"LatLng\((-?\d+\.\d+),\s?(-?\d+\.\d+)\)", response.text):
             item["lat"], item["lon"] = m.groups()
+
+        apply_category(Categories.SHOP_HAIRDRESSER, item)
 
         yield item

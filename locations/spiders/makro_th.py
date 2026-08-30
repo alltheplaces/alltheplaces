@@ -27,13 +27,16 @@ class MakroTHSpider(scrapy.Spider):
     def parse_store(self, response):
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["state"] = response.xpath(
-            '//div[contains(@class, "contact-data-wrap")]/p[@class="txt-black txt-25"]/text()'
+        item["branch"] = response.xpath(
+            '//div[contains(@class, "contact-data-wrap")]/h2[@class="txt-black txt-25"]/text()'
         ).get()
         item["addr_full"] = response.xpath(
             '//div[contains(@class, "contact-data-wrap")]/p[@class="txt-black txt-18 f-normal"]/text()'
         ).get()
+        if phone := response.xpath(
+            '//div[@class="contact-info"]/a[.//img[contains(@src, "icn-tel-")]]/span/text()'
+        ).get():
+            item["phone"] = phone.replace(",", ";")
         extract_google_position(item, response.xpath('//div[@id="mag-gg"]'))
         apply_category(Categories.SHOP_WHOLESALE, item)
-        # TODO: phone
         yield item

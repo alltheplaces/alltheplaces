@@ -5,7 +5,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbStaffordshireMoorlandsSpider(OwenBaseSpider):
-    name = "gb_staffordshire_moorlands"
+    # name = "gb_staffordshire_moorlands"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Contains public sector information provided by Staffordshire Moorlands District Council and licensed under the Open Government Licence v3.0."  # address strings
         + " Contains OS data © Crown copyright and database right 2025."  # OS Open UPRN, coords

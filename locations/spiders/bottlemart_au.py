@@ -1,20 +1,17 @@
-import json
-
 import scrapy
-from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class BottlemartAUSpider(Spider):
+class BottlemartAUSpider(PlaywrightSpider):
     name = "bottlemart_au"
     item_attributes = {"brand": "Bottlemart", "brand_wikidata": "Q102863175"}
-    is_playwright_spider = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self):
@@ -27,18 +24,17 @@ class BottlemartAUSpider(Spider):
             )
 
     def parse(self, response, **kwargs):
-        if response.xpath("//pre/text()").get():
-            for city in json.loads(response.xpath("//pre/text()").get()):
-                yield JsonRequest(
-                    url=f"https://bottlemart.com.au/api/members/search/{city['locality']}/{city['postal_code']}/{city['lat']}/{city['lon']}?maxDistance=200",
-                    headers={
-                        "tenant": "BM",
-                    },
-                    callback=self.parse_details,
-                )
+        for city in response.json():
+            yield JsonRequest(
+                url=f"https://bottlemart.com.au/api/members/search/{city['locality']}/{city['postal_code']}/{city['lat']}/{city['lon']}?maxDistance=200",
+                headers={
+                    "tenant": "BM",
+                },
+                callback=self.parse_details,
+            )
 
     def parse_details(self, response):
-        for location in json.loads(response.xpath("//pre/text()").get()):
+        for location in response.json():
             item = DictParser.parse(location)
             item["ref"] = location["store_number"]
             item["state"] = location["address"].get("administrative_area")
