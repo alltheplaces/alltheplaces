@@ -1,0 +1,38 @@
+name: Update browser user agents
+
+on:
+  schedule:
+    - cron: "23 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-user-agents:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Update user agent constants
+        id: update
+        run: |
+          output=$(uv run python ci/update_user_agents.py)
+          echo "$output"
+          echo "output<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "[Core] Update browser user agents"
+          title: "[Core] Update browser user agents"
+          branch: action/update-user-agents
+          body: |
+            Refreshes the pinned browser user agent strings in `locations/user_agents.py` from https://www.useragents.me/.
+
+            ${{ env.output }}
