@@ -17,5 +17,5 @@ class VogCoiffureFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image", "twitter"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        apply_category(Categories.SHOP_HAIRDRESSER, item)  
+        apply_category(Categories.SHOP_HAIRDRESSER, item)
         yield item
