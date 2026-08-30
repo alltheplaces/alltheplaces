@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -84,4 +85,6 @@ class MarinerFinanceSpider(scrapy.Spider):
         properties["lat"] = lat
         properties["lon"] = lon
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.SHOP_MONEY_LENDER, item)
+        yield item
