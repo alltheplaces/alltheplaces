@@ -5,10 +5,149 @@ from locations.geo import postal_regions
 from locations.items import Feature
 from locations.storefinders.location_cloud import LocationCloudSpider
 
+BRANDS = {
+    "01": {
+        "brand": "welcia",
+        "brand_wikidata": "Q11288687",
+        "name": "ウエルシア薬局",
+        "branch_prefixes": ["ウエルシア", "薬局"],
+        "ruby_prefixes": ["ウエルシア", "薬局"],
+    },
+    "02": {
+        "brand": "ハックドラッグ",
+        "brand_wikidata": "",
+        "branch_prefixes": ["ハックドラッグ"],
+        "ruby_prefixes": ["ハックドラッグ"],
+    },
+    "03": {
+        "brand": "ダックス",
+        "brand_wikidata": "",
+        "branch_prefixes": ["薬局ダックス", "ダックス"],
+        "ruby_prefixes": ["ダックス"],
+    },
+    "04": {
+        "brand": "ハッピードラッグ",
+        "brand_wikidata": "Q11368084",
+        "branch_prefixes": ["ハッピー・ドラッグ", "ハッピー調剤薬局", "ハッピードラッグ"],
+        "ruby_prefixes": ["ハッピードラッグ"],
+    },
+    "05": {
+        "brand": "カラースタジオ",
+        "brand_wikidata": "",
+        "category": Categories.SHOP_COSMETICS,
+        "branch_prefixes": ["カラースタジオ"],
+        "ruby_prefixes": ["カラースタジオ"],
+    },
+    "06": {
+        "brand": "金光薬品",
+        "brand_wikidata": "Q11646466",
+        "branch_prefixes": ["金光薬品", "金光薬局"],
+        "ruby_prefixes": ["カネミツヤッキョク"],
+    },
+    "07": {
+        "brand": "マサヤ",
+        "brand_wikidata": "",
+        "category": Categories.SHOP_COSMETICS,
+        "branch_prefixes": ["マサヤ "],
+    },
+    "08": {
+        "brand": "よどやドラッグ",
+        "brand_wikidata": "Q11281187",
+        "branch_prefixes": ["よどやドラッグ"],
+    },
+    "09": {
+        "brand": "マルエドラッグ",
+        "brand_wikidata": "Q11298666",
+        "branch_prefixes": ["マルエドラッグ", "マルエ薬局"],
+    },
+    "10": {
+        "brand": "アリエールLAUNDRY PRO",
+        "brand_wikidata": "",
+        "category": Categories.SHOP_COUNTRY_STORE,
+        "branch_prefixes": ["アリエールLAUNDRY PRO "],
+        "ruby_prefixes": ["アリエールランドリープロ"],
+    },
+    "11": {
+        "brand": "ププレひまわり",
+        "brand_wikidata": "Q119871972",
+        "branch_prefixes": [
+            "スーパードラッグひまわり",
+            "フード＆ドラッグひまわり",
+            "ププレひまわり薬局",
+            "ププレひまわり",
+        ],
+    },
+    "12": {
+        "brand": "NARCIS",
+        "brand_wikidata": "",
+        "category": Categories.SHOP_COSMETICS,
+        "branch_prefixes": ["NARCIS"],
+        "ruby_prefixes": ["ナルシス"],
+    },
+    "13": {
+        "brand": "コクミン",
+        "brand_wikidata": "Q11301923",
+        "branch_prefixes": [
+            "KoKuMiN",
+            "コクミンドラッグ",
+            "コクミン薬局",
+            "コクミン",
+            "FamilyMart+コクミンドラッグ",
+            "AIRPORT＋DRUG",
+            "AIRPORT+DRUG ",
+            "CityDrug ",
+            "KeiyoDrug ",
+        ],
+    },
+    "14": {
+        "brand": "アルビオンドレッサー",
+        "brand_wikidata": "",
+        "category": Categories.SHOP_COSMETICS,
+        "branch_prefixes": ["アルビオンドレッサー"],
+    },
+    "15": {
+        "brand": "アトリエアルビオン",
+        "brand_wikidata": "",
+        "category": Categories.SHOP_COSMETICS,
+        "branch_prefixes": ["アトリエアルビオン"],
+    },
+    "16": {
+        "brand": "ふく薬品",
+        "brand_wikidata": "Q119380891",
+        "branch_prefixes": ["ふく薬品", "ふく薬局"],
+        "strip": True,
+    },
+    "18": {
+        "brand": "Zoomore",
+        "brand_wikidata": "",
+        "category": Categories.SHOP_PET,
+        "branch_prefixes": ["Zoomore"],
+        "ruby_prefixes": ["ズーモア"],
+    },
+    "19": {
+        "brand": "コスメテリア",
+        "brand_wikidata": "",
+        "category": Categories.SHOP_COSMETICS,
+        "branch_prefixes": ["コスメテリア"],
+    },
+    "20": {
+        "brand": "とをしや薬局",
+        "brand_wikidata": "Q11273556",
+        "branch_prefixes": ["とをしや"],
+        "removesuffix": "とをしや薬局",
+    },
+    "21": {
+        "brand": "ウェルパーク",
+        "brand_wikidata": "Q11288610",
+        "branch_prefixes": ["ウェルパーク", "薬局"],
+        "ruby_prefixes": ["ウェルパーク", "薬局"],
+    },
+}
+
 
 class WelciaJPSpider(LocationCloudSpider):
     name = "welcia_jp"
-    item_attributes = {"brand": "welcia", "brand_wikidata": "Q11288687", "extras": {"shop": "chemist"}}
+    item_attributes = {"extras": {"shop": "chemist"}}
     api_endpoint = "https://store.welcia.co.jp/welcia/api/proxy2/shop/list"
     website_formatter = "https://store.welcia.co.jp/welcia/spot/detail?code={}"
 
@@ -54,183 +193,52 @@ class WelciaJPSpider(LocationCloudSpider):
             item["phone"] = f"+81 {phone}"
 
         if postal_code := source_feature.get("postal_code"):
-            if region := POSTAL_LOOKUP.get(postal_code):
-                item["extras"]["addr:province"] = region["province:ja"]
-                item["city"] = region["city:ja"]
-                if quarter := region.get("quarter:ja"):
-                    item["extras"]["addr:quarter"] = quarter
-                elif neighbourhood := region.get("neighbourhood:ja"):
-                    item["extras"]["addr:neighbourhood"] = neighbourhood
+            self._apply_postal_address(item, postal_code)
 
-        match source_feature["categories"][0]["code"]:
-            case "01":  # ウエルシア
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("ウエルシア").removeprefix("薬局")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ウエルシア").removeprefix("薬局")
-            case "02":  # ハックドラッグ (HAC drug)
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("ハックドラッグ")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ハックドラッグ")
-            case "03":  # ダックス
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("薬局ダックス").removeprefix("ダックス")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ダックス")
-            case "04":  # ハッピードラッグ
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q11368084"
-                item["name"] = item["brand"]  # qid not in NSI database
-                if name := source_feature.get("name"):
-                    item["branch"] = (
-                        name.removeprefix("ハッピー・ドラッグ")
-                        .removeprefix("ハッピー調剤薬局")
-                        .removeprefix("ハッピードラッグ")
-                    )
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ハッピードラッグ")
-            case "05":  # カラースタジオ
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                apply_category(Categories.SHOP_COSMETICS, item)
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("カラースタジオ")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("カラースタジオ")
-            case "06":  # 金光薬品
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q11646466"
-                item["name"] = item["brand"]  # qid not in NSI database
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("金光薬品").removeprefix("金光薬局")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("カネミツヤッキョク")
-            case "07":  # マサヤ
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                apply_category(Categories.SHOP_COSMETICS, item)
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("マサヤ ")
-            case "08":  # よどやドラッグ
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q11281187"
-                item["name"] = item["brand"]  # qid not in NSI database
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("よどやドラッグ")
-            case "09":  # マルエドラッグ
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q11298666"
-                item["name"] = item["brand"]  # qid not in NSI database
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("マルエドラッグ").removeprefix("マルエ薬局")
-            case "10":  # アリエールLAUNDRY PRO
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                apply_category(Categories.SHOP_COUNTRY_STORE, item)
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("アリエールLAUNDRY PRO ")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("アリエールランドリープロ")
-            case "11":  # ププレひまわり
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q119871972"
-                if name := source_feature.get("name"):
-                    item["branch"] = (
-                        name.removeprefix("スーパードラッグひまわり")
-                        .removeprefix("フード＆ドラッグひまわり")
-                        .removeprefix("ププレひまわり薬局")
-                        .removeprefix("ププレひまわり")
-                    )
-            case "12":  # NARCIS
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                apply_category(Categories.SHOP_COSMETICS, item)
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("NARCIS")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ナルシス")
-            case "13":  # コクミン
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q11301923"
-                if name := source_feature.get("name"):
-                    item["branch"] = (
-                        name.removeprefix("KoKuMiN")
-                        .removeprefix("コクミンドラッグ")
-                        .removeprefix("コクミン薬局")
-                        .removeprefix("コクミン")
-                        .removeprefix("FamilyMart+コクミンドラッグ")
-                        .removeprefix("AIRPORT＋DRUG")
-                        .removeprefix("AIRPORT+DRUG ")
-                        .removeprefix("CityDrug ")
-                        .removeprefix("KeiyoDrug ")
-                    )
-            case "14":  # アルビオンドレッサー
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                apply_category(Categories.SHOP_COSMETICS, item)
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("アルビオンドレッサー")
-            case "15":  # アトリエアルビオン
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                apply_category(Categories.SHOP_COSMETICS, item)
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("アトリエアルビオン")
-            case "16":  # ふく薬品
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q119380891"
-                item["name"] = item["brand"]  # qid not in NSI database
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("ふく薬品").removeprefix("ふく薬局").strip()
-            case "18":  # Zoomore
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                apply_category(Categories.SHOP_PET, item)
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("Zoomore")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ズーモア")
-            case "19":  # コスメテリア
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = ""
-                item["name"] = item["brand"]
-                apply_category(Categories.SHOP_COSMETICS, item)
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("コスメテリア")
-            case "20":  # とをしや薬局
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q11273556"
-                item["name"] = item["brand"]  # qid not in NSI database
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("とをしや").removesuffix("とをしや薬局")
-            case "21":  # ウェルパーク
-                item["brand"] = source_feature["categories"][0]["name"]
-                item["brand_wikidata"] = "Q11288610"
-                if name := source_feature.get("name"):
-                    item["branch"] = name.removeprefix("ウェルパーク").removeprefix("薬局")
-                if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("ウェルパーク").removeprefix("薬局")
-            case _:
-                return
+        brand = BRANDS.get(source_feature["categories"][0]["code"])
+        if brand is None:
+            return
+
+        if brand_name := brand.get("brand"):
+            item["brand"] = brand_name
+            if brand.get("name"):
+                item["name"] = brand["name"]
+            else:
+                item["name"] = brand_name
+        if "brand_wikidata" in brand:
+            item["brand_wikidata"] = brand["brand_wikidata"]
+        if category := brand.get("category"):
+            apply_category(category, item)
+
+        self._apply_branch_and_ruby(item, source_feature, brand)
 
         if branch := item.get("branch"):
             item["branch"] = branch.removesuffix(" (調剤薬局)").removesuffix("(調剤薬局)").strip()
 
         yield item
+
+    def _apply_postal_address(self, item: Feature, postal_code: str) -> None:
+        if region := POSTAL_LOOKUP.get(postal_code):
+            item["extras"]["addr:province"] = region["province:ja"]
+            item["city"] = region["city:ja"]
+            if quarter := region.get("quarter:ja"):
+                item["extras"]["addr:quarter"] = quarter
+            elif neighbourhood := region.get("neighbourhood:ja"):
+                item["extras"]["addr:neighbourhood"] = neighbourhood
+
+    def _apply_branch_and_ruby(self, item: Feature, source_feature: dict, brand: dict) -> None:
+        if name := source_feature.get("name"):
+            item["branch"] = name
+            for prefix in brand.get("branch_prefixes", []):
+                item["branch"] = item["branch"].removeprefix(prefix)
+            if brand.get("strip"):
+                item["branch"] = item["branch"].strip()
+            if suffix := brand.get("removesuffix"):
+                item["branch"] = item["branch"].removesuffix(suffix)
+        if ruby := source_feature.get("ruby"):
+            item["extras"]["branch:ja-Hira"] = ruby
+            for prefix in brand.get("ruby_prefixes", []):
+                item["extras"]["branch:ja-Hira"] = item["extras"]["branch:ja-Hira"].removeprefix(prefix)
 
     # TODO: update LocationCloudSpider
     # optional fetching detail page to fill opening hours etc.
