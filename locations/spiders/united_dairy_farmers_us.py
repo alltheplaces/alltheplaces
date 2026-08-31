@@ -1,61 +1,25 @@
-import re
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class UnitedDairyFarmersUSSpider(scrapy.Spider):
+class UnitedDairyFarmersUSSpider(StructuredDataSpider):
     name = "united_dairy_farmers_us"
     item_attributes = {"brand": "United Dairy Farmers", "brand_wikidata": "Q7887677"}
-    allowed_domains = ["udfinc.com"]
-    start_urls = ("https://www.udfinc.com/wp-sitemap-posts-wpsl_stores-1.xml",)
+    start_urls = ["https://www.udfinc.com/our-stores"]
+    time_format = "%H:%M:%S"
+    wanted_types = ["AutoDealer"]
+    search_for_facebook = False
+    search_for_twitter = False
+    search_for_email = False
+    requires_proxy = True
+    no_refs = True
 
-    def parse(self, response):
-        urls = response.xpath("//text()").extract()
-        for url in urls:
-            yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
-
-    def parse_store(self, response):
-        rawdata = response.xpath('//script[@type="text/javascript" and contains(text(), "locations")]/text()').extract()
-        store_text = rawdata[0]
-        json_prelim = re.search('store":(.*)', store_text).group()
-        json_data = json_prelim.replace("[", "")
-        json_data = json_data.replace("]", "")
-        json_data = json_data.replace("'", "")
-        json_data = json_data.replace("}", "")
-        json_data = json_data.replace(";", "")
-        json_data = json_data.replace('"', "")
-        data = json_data.split(",")
-        phone = response.xpath('//div[@class="wpsl-contact-details"]//*/a/@href').extract()
-        try:
-            properties = {
-                "ref": data[9].split(":")[1],
-                "name": "United Dairy Farmers",
-                "street_address": data[1].split(":")[1],
-                "city": data[3].split(":")[1],
-                "state": data[4].split(":")[1],
-                "postcode": data[5].split(":")[1],
-                "country": data[6].split(":")[1],
-                "phone": phone[0].split(":")[1],
-                "lat": float(data[7].split(":")[1]),
-                "lon": float(data[8].split(":")[1]),
-            }
-
-        except Exception:
-            properties = {
-                "ref": data[9].split(":")[1],
-                "name": "United Dairy Farmers",
-                "addr_full": data[1].split(":")[1],
-                "city": data[3].split(":")[1],
-                "state": data[4].split(":")[1],
-                "postcode": data[5].split(":")[1],
-                "country": data[6].split(":")[1],
-                "phone": "",
-                "lat": float(data[7].split(":")[1]),
-                "lon": float(data[8].split(":")[1]),
-            }
-
-        apply_category(Categories.FUEL_STATION, properties)
-        yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").split("-")[0]
+        apply_category(Categories.FUEL_STATION, item)
+        yield item

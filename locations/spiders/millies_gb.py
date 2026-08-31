@@ -19,6 +19,7 @@ class MilliesGBSpider(Spider):
         for location in response.json()["catalog"]:
             item = DictParser.parse(location)
             item.pop("website")
+            item["branch"] = item.pop("name")
 
             # Opening hours parsing is difficult because the next 3
             # months of opening times on each day is provided. Some

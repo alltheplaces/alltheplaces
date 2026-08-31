@@ -2,7 +2,7 @@ import re
 
 import scrapy
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -39,7 +39,7 @@ class CompletudeSpider(scrapy.Spider):
                 "website": response.url,
             }
 
-            apply_category({"office": "tutoring"}, properties)
+            apply_category(Categories.OFFICE_TUTORING, properties)
             yield Feature(**properties)
         except:
             pass

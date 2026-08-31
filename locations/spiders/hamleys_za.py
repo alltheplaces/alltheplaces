@@ -1,40 +1,35 @@
-import phonenumbers
-from phonenumbers import NumberParseException
-from scrapy import Spider
+from typing import Iterable
 
-from locations.google_url import extract_google_position
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.hamleys import HAMLEYS_SHARED_ATTRIBUTES
-from locations.structured_data_spider import extract_email, extract_phone
 
 
-class HamleysZASpider(Spider):
+class HamleysZASpider(JSONBlobSpider):
     name = "hamleys_za"
-    start_urls = ["https://hamleys.co.za/stores/"]
     item_attributes = HAMLEYS_SHARED_ATTRIBUTES
+    start_urls = ["https://stockist.co/api/v1/map_93g828pq/locations/all"]
 
-    def parse(self, response):
-        for location in response.xpath('.//div[@data-widget_type="image-box.default"]'):
-            if "hidden" in location.xpath("ancestor::section[@class][position()=1]/@class").get():
-                continue
-            item = Feature()
-            item["ref"] = location.xpath("@data-id").get()
-            item["branch"] = location.xpath(".//h3/a/text()").get()
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
 
-            address_lines = location.xpath('.//p[@class="elementor-image-box-description"]/text()').getall()
-            for line in address_lines:
-                if "@" in line:
-                    address_lines.remove(line)
-                try:
-                    ph = phonenumbers.parse(line, "ZA")
-                    if phonenumbers.is_valid_number(ph):
-                        address_lines.remove(line)
-                except NumberParseException:
-                    pass
-            item["addr_full"] = clean_address(address_lines)
+        oh = OpeningHours()
+        for field in feature.get("custom_fields", []):
+            if field.get("name") == "Hours":
+                oh = self.parse_hours(field.get("value") or "")
 
-            extract_google_position(item, location)
-            extract_email(item, location)
-            extract_phone(item, location)
-            yield item
+        item["opening_hours"] = oh
+        apply_category(Categories.SHOP_TOYS, item)
+
+        yield item
+
+    def parse_hours(self, hours_string: str) -> OpeningHours:
+        oh = OpeningHours()
+        oh.add_ranges_from_string(
+            hours_string.replace("h", ":").replace("and Public Holidays", "").replace("Public Holidays", "")
+        )
+        return oh

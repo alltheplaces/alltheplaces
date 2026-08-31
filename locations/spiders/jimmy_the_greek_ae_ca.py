@@ -9,5 +9,5 @@ class JimmyTheGreekAECASpider(StoreRocketSpider):
     storerocket_id = "BrJq9MkJqE"
 
     def parse_item(self, item: Feature, location: dict, **kwargs):
-        apply_category(Categories.FAST_FOOD.value | {"cuisine": "greek", "takeaway": "yes"}, item)
+        apply_category(Categories.FAST_FOOD, item)
         yield item

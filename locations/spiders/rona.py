@@ -14,7 +14,7 @@ class RonaSpider(SitemapSpider):
     sitemap_urls = ["https://www.rona.ca/sitemap-stores-en.xml"]
     sitemap_rules = [("/store/", "parse_store")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
+    requires_proxy = "CA"
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
@@ -25,7 +25,7 @@ class RonaSpider(SitemapSpider):
             open_time, close_time = open_close.split("-")
             opening_hours.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M")
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse_store(self, response):
         phone_text = response.xpath('normalize-space(//div[@itemprop="telephone"]//text())').extract_first()

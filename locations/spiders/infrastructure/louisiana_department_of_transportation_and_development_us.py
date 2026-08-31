@@ -1,12 +1,11 @@
-from locations.storefinders.traveliq import TravelIQSpider
+from locations.storefinders.traveliq_web_cameras import TravelIQWebCamerasSpider
 
 
-class LouisianaDepartmentOfTransportationAndDevelopmentUSSpider(TravelIQSpider):
+class LouisianaDepartmentOfTransportationAndDevelopmentUSSpider(TravelIQWebCamerasSpider):
     name = "louisiana_department_of_transportation_and_development_us"
     item_attributes = {
         "operator": "Louisiana Department of Transportation & Development",
         "operator_wikidata": "Q2400783",
         "state": "LA",
     }
-    api_endpoint = "https://511la.org/api/v2/"
-    api_key = "7a43f543af71472db8ff3c01c84aea45"
+    allowed_domains = ["511la.org"]

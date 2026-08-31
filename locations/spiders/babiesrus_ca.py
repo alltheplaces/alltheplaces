@@ -1,21 +1,25 @@
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class BabiesrusCASpider(Spider):
+class BabiesrusCASpider(SitemapSpider):
     name = "babiesrus_ca"
     item_attributes = {"brand": "Babies R Us", "brand_wikidata": "Q17232036"}
-    start_urls = ["https://www.babiesrus.ca/en/stores-findstores?batch=100&showMap=false&radius=25000"]
+    sitemap_urls = ["https://www.babiesrus.ca/robots.txt"]
+    sitemap_rules = [("ca/storelocator/", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["stores"]:
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
-            item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
-
-            yield item
+        item = Feature()
+        item["branch"] = response.xpath("//h1/text()").get().removeprefix("Toy Store in ")
+        item["street_address"] = response.xpath('//*[@class="sidebar-section"]//p/text()').get()
+        item["addr_full"] = merge_address_lines(
+            [item["street_address"], response.xpath('//*[@class="sidebar-section"]//p[2]/text()').get()]
+        )
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        item["ref"] = item["website"] = response.url
+        yield item

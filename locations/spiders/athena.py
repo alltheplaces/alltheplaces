@@ -7,13 +7,12 @@ from locations.spiders.ampm_us import AmpmUSSpider
 from locations.spiders.bp import BpSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
-from locations.spiders.citgo import CitgoSpider
 from locations.spiders.exxon_mobil import ExxonMobilSpider
 from locations.spiders.giant_eagle_us import GiantEagleUSSpider
 from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.phillips_66_conoco_76 import Phillips66Conoco76Spider
 from locations.spiders.quality_dairy_us import QualityDairyUSSpider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.shell import ShellSpider
 from locations.spiders.sinclair_us import SinclairUSSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
@@ -44,8 +43,8 @@ class AthenaSpider(StoreRocketSpider):
         (["VALERO"], ValeroSpider.item_attributes),
         (["CONOCO"], Phillips66Conoco76Spider.BRANDS["CON"]),
         (["SINCLAIR"], SinclairUSSpider.item_attributes),
-        (["CITGO"], CitgoSpider.item_attributes),
-        (["7 ELEVEN", "7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["CITGO"], {"brand": "Citgo", "brand_wikidata": "Q2974437"}),
+        (["7 ELEVEN", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["PHILLIPS 66"], Phillips66Conoco76Spider.BRANDS["P66"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
         (["AMOCO"], BpSpider.brands["amoco"]),
@@ -60,6 +59,8 @@ class AthenaSpider(StoreRocketSpider):
         item.pop("name", None)
         item.pop("facebook", None)
         item["extras"].pop("contact:instagram", None)
+        if item.get("phone") == "-4844":
+            item["phone"] = None
 
         for field in location.get("fields", {}):
             if field["name"] == "Located Inside:":

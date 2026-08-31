@@ -23,7 +23,7 @@ class MarksAndSpencerSpider(scrapy.Spider):
     def parse_stores(self, response):
         stores = response.json()
         for store in stores["results"]:
-            if store.get("locationTypeName") in [None, "Applegreen", "LondonRetailPartner", "Event", "Compass UK"]:
+            if store.get("locationTypeName") in [None, "Applegreen", "Event"]:
                 continue
 
             properties = {
@@ -77,6 +77,14 @@ class MarksAndSpencerSpider(scrapy.Spider):
             elif store["locationTypeName"] in ["Full Line", "Ireland - Full Line"]:
                 properties["name"] = "Marks & Spencer"
                 apply_category(Categories.SHOP_DEPARTMENT_STORE, properties)
+            elif store["locationTypeName"] == "Compass UK":
+                properties["operator"] = "Compass Group"
+                properties["operator_wikidata"] = "Q1074937"
+                properties["name"] = "M&S Food"
+                apply_category(Categories.SHOP_CONVENIENCE, properties)
+            elif store["locationTypeName"] == "LondonRetailPartner":
+                properties["name"] = "M&S Simply Food"
+                apply_category(Categories.SHOP_CONVENIENCE, properties)
             else:
                 if name.endswith("foodhall") or name.endswith(" fh"):
                     properties["name"] = "M&S Foodhall"

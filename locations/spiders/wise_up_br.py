@@ -3,7 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -28,5 +28,5 @@ class WiseUpBRSpider(Spider):
             item["branch"] = item.pop("name")
             item["street_address"] = school.get("addressLine")
             item["housenumber"] = school.get("addressNumber")
-            apply_category({"amenity": "language_school"}, item)
+            apply_category(Categories.LANGUAGE_SCHOOL, item)
             yield item

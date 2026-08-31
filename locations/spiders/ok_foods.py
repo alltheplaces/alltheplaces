@@ -95,7 +95,7 @@ class OkFoodsSpider(Spider):
                         oh.set_closed(day)
                 # Fully undefined opening hours should not be treated as closed
                 if "".join([location[day].strip() for day in DAYS_FULL]) != "":
-                    item["opening_hours"] = oh.as_opening_hours()
+                    item["opening_hours"] = oh
             except Exception:
                 pass
 

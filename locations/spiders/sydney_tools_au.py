@@ -31,5 +31,5 @@ class SydneyToolsAUSpider(Spider):
             oh = OpeningHours()
             for day_name, day_hours in store["node"]["hours"].items():
                 oh.add_range(DAYS_EN[day_name.title()], day_hours["open"], day_hours["close"], "%H:%M")
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
             yield item

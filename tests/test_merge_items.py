@@ -1,7 +1,7 @@
-from locations.items import merge_items
+from locations.items import Feature, merge_items
 
 
-def return_first_merged(language_dict, main_language) -> dict:
+def return_first_merged(language_dict, main_language) -> Feature:
     return [item for item in merge_items(language_dict, main_language)][0]
 
 

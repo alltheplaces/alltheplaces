@@ -74,7 +74,8 @@ class SparAspiagSpider(Spider):
             item["website"] = item["ref"] = base_url + poi.get("pageUrl")
 
             if image_url := poi.get("image"):
-                if "defaultlocationbanner.jpg" not in image_url:
+                # Filter known placeholder images (defaultlocationbanner or generic rendition hash)
+                if "defaultlocationbanner.jpg" not in image_url and "1b87d3c7cc00920d" not in image_url:
                     item["image"] = base_url + image_url
 
             name, brand, category = BRANDS.get(poi.get("plantType").get("name", "").upper())

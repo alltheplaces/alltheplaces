@@ -8,8 +8,8 @@ from locations.structured_data_spider import StructuredDataSpider
 class DennsBiomarktDESpider(SitemapSpider, StructuredDataSpider):
     name = "denns_biomarkt_de"
     DENNS_BIO_MARKT = {"brand": "Denns BioMarkt", "brand_wikidata": "Q48883773"}
-    sitemap_urls = ["https://www.biomarkt.de/robots.txt"]
-    sitemap_rules = [(r"de/([^/]+)/marktseite$", "parse_sd")]
+    sitemap_urls = ["https://www.biomarkt.de/sitemap-index.xml"]
+    sitemap_rules = [(r"de/([^/]+)/marktseite/$", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["name"].startswith("Denns BioMarkt"):

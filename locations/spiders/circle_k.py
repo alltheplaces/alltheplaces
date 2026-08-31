@@ -1,4 +1,3 @@
-import re
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
@@ -6,70 +5,59 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CircleKSpider(Spider):
     name = "circle_k"
     CIRCLE_K = {"brand": "Circle K", "brand_wikidata": "Q3268010"}
-    allowed_domains = ["www.circlek.com"]
-    start_urls = ["https://www.circlek.com/stores_master.php?lat=0&lng=0&page=0"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     brands = {
-        "Car Wash Cleanfreak": ({"name": "Clean Freak Car Wash", "brand": "Clean Freak Car Wash"}, Categories.CAR_WASH),
-        "Circle K": (CIRCLE_K, None),
-        "Corner Store": ({"name": "Corner Store", "brand": "Corner Store"}, Categories.SHOP_CONVENIENCE),
-        "Couche-Tard": ({"brand": "Couche-Tard", "brand_wikidata": "Q2836957"}, None),
-        "Holiday Station": ({"brand": "Holiday", "brand_wikidata": "Q5880490"}, None),
-        "Kangaroo Express": ({"brand": "Kangaroo Express", "brand_wikidata": "Q61747408"}, Categories.SHOP_CONVENIENCE),
-        "Mac's": ({"name": "Mac's", "brand": "Mac's", "brand_wikidata": "Q4043527"}, Categories.SHOP_CONVENIENCE),
-        "On the Run": ({"brand": "On the Run", "brand_wikidata": "Q16931259"}, Categories.SHOP_CONVENIENCE),
-        "Rainstorm Car Wash": ({"name": "Rainstorm Car Wash", "brand": "Rainstorm Car Wash"}, Categories.CAR_WASH),
+        "CIRCLEK": (CIRCLE_K, Categories.SHOP_CONVENIENCE),
+        "COUCHE_TARD": ({"brand": "Couche-Tard", "brand_wikidata": "Q2836957"}, Categories.SHOP_CONVENIENCE),
+        "HOLIDAY": ({"brand": "Holiday", "brand_wikidata": "Q5880490"}, Categories.SHOP_CONVENIENCE),
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url, meta={"page": 0})
+        for country in ["US", "CA"]:
+            for lat_lon in [
+                (-125.0, 49.0, -115.0, 42.0),
+                (-115.0, 49.0, -105.0, 42.0),
+                (-105.0, 49.0, -95.0, 42.0),
+                (-95.0, 49.0, -85.0, 42.0),
+                (-85.0, 49.0, -75.0, 42.0),
+                (-125.0, 42.0, -115.0, 35.0),
+                (-115.0, 42.0, -105.0, 35.0),
+                (-105.0, 42.0, -95.0, 35.0),
+                (-95.0, 42.0, -85.0, 35.0),
+                (-180.0, 90.0, 180.0, -90.0),
+            ]:
+                yield JsonRequest(
+                    url=f"https://api.circlek.com/us/ngrp-store-locator/v1/stations?bottomRightLongitude={lat_lon[2]}&bottomRightLatitude={lat_lon[3]}&topLeftLongitude={lat_lon[0]}&topLeftLatitude={lat_lon[1]}&maxResults=2000&country={country}&brand=CIRCLEK,COUCHE_TARD,HOLIDAY",
+                )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        if response.json()["count"] == 0:
-            # crawl completed
-            return
-
-        for location_id, location in response.json()["stores"].items():
-            if location["op_status"] == "PLANNED":
-                continue
+        for location in response.json():
             item = DictParser.parse(location)
-            item["ref"] = location_id
-            item["street_address"] = item.pop("addr_full")
-            item["website"] = response.urljoin(location["url"])
-
-            services = [service["name"] for service in location["services"]]
-            apply_yes_no(Extras.ATM, item, "atm" in services)
-            apply_yes_no(Extras.TOILETS, item, "public_restrooms" in services)
-            apply_yes_no(Extras.CAR_WASH, item, "car_wash" in services)
-            apply_yes_no(Fuel.DIESEL, item, "diesel" in services)
-            apply_yes_no(Fuel.ELECTRIC, item, "ev_charger" in services)
-
-            brand, cat = self.brands.get(location["display_brand"], (None, None))
+            item["street_address"] = item.pop("street")
+            item["branch"] = location["businessUnit"]
+            item["addr_full"] = merge_address_lines(location["address"].values())
+            services = [service["displayName"] for service in location["services"]]
+            fuels = [fuels["displayName"] for fuels in location["fuels"]]
+            apply_yes_no(Extras.ATM, item, "ATM" in services)
+            apply_yes_no(Extras.TOILETS, item, "Public Restrooms" in services)
+            apply_yes_no(Extras.CAR_WASH, item, "Car wash" in services)
+            apply_yes_no(Fuel.ELECTRIC, item, "EV Charging" in services)
+            apply_yes_no(Fuel.DIESEL, item, "Diesel" in fuels)
+            apply_yes_no(Fuel.GASOLINE, item, "Gas" in fuels)
+            brand, cat = self.brands.get(location["brand"], (None, None))
             if brand:
                 item.update(brand)
-            else:
-                self.crawler.stats.inc_value("x/{}".format(location["franchise_brand"]))
-            if cat:
                 apply_category(cat, item)
+                item["name"] = brand.get("brand")
             else:
-                if "gas" in services or "diesel" in services:
+                if "Gas" in fuels or "Diesel" in fuels:
                     apply_category(Categories.FUEL_STATION, item)
                 else:
                     apply_category(Categories.SHOP_CONVENIENCE, item)
-
             yield item
-
-        if response.json()["count"] < 10:
-            # crawl completed
-            return
-
-        next_page = response.meta["page"] + 1
-        next_url = re.sub(r"\d+$", str(next_page), response.url)
-        yield JsonRequest(url=next_url, meta={"page": next_page})

@@ -1,7 +1,4 @@
-from typing import Any
-
-import scrapy
-from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.google_url import extract_google_position
@@ -9,17 +6,14 @@ from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class CrelanBESpider(scrapy.Spider):
+class CrelanBESpider(SitemapSpider):
     name = "crelan_be"
     item_attributes = {"brand": "Crelan", "brand_wikidata": "Q389872"}
     start_urls = ["https://www.crelan.be/nl/particulieren/json/agencies"]
+    sitemap_urls = ["https://www.crelan.be/sitemap.xml"]
+    sitemap_rules = [(r"https://www.crelan.be/nl/kantoor/[a-z-0-9]+$", "parse")]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location_url in (response.json()).values():
-            if url := location_url.get("nl"):
-                yield scrapy.Request(url="https://www.crelan.be" + url, callback=self.parse_details)
-
-    def parse_details(self, response):
+    def parse(self, response, **kwargs):
         item = Feature()
         item["branch"] = response.xpath("//h1/text()").get()
         item["street_address"] = response.xpath(

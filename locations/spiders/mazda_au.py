@@ -11,7 +11,6 @@ class MazdaAUSpider(Spider):
     item_attributes = MAZDA_SHARED_ATTRIBUTES
     allowed_domains = ["www.mazda.com.au"]
     start_urls = ["https://www.mazda.com.au/api/dealers"]
-    requires_proxy = True
 
     def parse(self, response):
         for location in response.json():

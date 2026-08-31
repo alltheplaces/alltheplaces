@@ -1,36 +1,49 @@
-from scrapy import Spider
+from typing import AsyncIterator, Iterable
+
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class GameZASpider(Spider):
+class GameZASpider(JSONBlobSpider):
     name = "game_za"
-    item_attributes = {"brand": "Game", "brand_wikidata": "Q129263113"}
-    start_urls = ["https://www.game.co.za/occ/v2/game/stores?fields=FULL"]
+    item_attributes = {"brand": "Game", "brand_wikidata": "Q126811048"}
+    locations_key = "stores"
 
-    def parse(self, response):
-        for location in response.xpath("//stores"):
-            item = Feature()
-            item["name"] = location.xpath(".//displayName/text()").get()
-            item["street_address"] = location.xpath(".//address//streetAddress/text()").get()
-            item["city"] = location.xpath(".//town/text()").get()
-            item["postcode"] = location.xpath(".//postalCode/text()").get()
-            item["phone"] = location.xpath(".//phone/text()").get()
-            item["addr_full"] = location.xpath(".//formattedAddress/text()").get()
-            item["email"] = location.xpath(".//email/text()").get()
-            item["lat"] = location.xpath(".//geoPoint/latitude/text()").get()
-            item["lon"] = location.xpath(".//geoPoint/longitude/text()").get()
-            item["ref"] = location.xpath(".//id/text()").get()
-            apply_category(Categories.SHOP_SUPERMARKET, item)
-            item["website"] = "https://www.game.co.za/"
-            item["opening_hours"] = OpeningHours()
-            for day_time in location.xpath(".//openingHours//weekDayOpeningList"):
-                day = day_time.xpath(".//weekDay/text()").get()
-                open_time = day_time.xpath(".//openingTime/formattedHour/text()").get()
-                close_time = day_time.xpath(".//closingTime/formattedHour/text()").get()
-                item["opening_hours"].add_range(
-                    day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p"
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest("https://www.game.co.za/occ/v2/game/stores?fields=FULL")
+
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("address"))
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = feature["displayName"].removeprefix("Game ")
+        item["name"] = None
+        item["state"] = feature["region"]["isocodeShort"]
+        item["website"] = None
+        item["addr_full"] = item.pop("street_address")
+
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+
+        if oh_data := feature.get("openingHours"):
+            item["opening_hours"] = self.parse_opening_hours(oh_data)
+
+        yield item
+
+    def parse_opening_hours(self, opening_hours: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in opening_hours.get("weekDayOpeningList", []):
+            day = rule.get("weekDay")
+            if rule.get("closed"):
+                oh.set_closed(day)
+            elif rule.get("openingTime") and rule.get("closingTime"):
+                oh.add_range(
+                    day,
+                    rule["openingTime"]["formattedHour"],
+                    rule["closingTime"]["formattedHour"],
+                    "%I:%M %p",
                 )
-            yield item
+        return oh

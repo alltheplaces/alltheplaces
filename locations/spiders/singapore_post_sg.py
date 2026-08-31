@@ -37,7 +37,7 @@ class SingaporePostSGSpider(Spider):
             item["phone"] = location["phoneNumber"]
             item["housenumber"] = location["houseBlockNumber"]
             item["extras"]["addr:housename"] = location["buildingName"]
-            item["extras"]["addr:unit"] = location["unitNumber"]
+            item["unit"] = location["unitNumber"]
             item["street"] = location["streetName"]
             item["city"] = location["city"]
             item["postcode"] = location["postCode"]

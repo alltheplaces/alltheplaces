@@ -12,6 +12,10 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class AustraliaPostAUSpider(Spider):
     name = "australia_post_au"
     item_attributes = {"brand": "Australia Post", "brand_wikidata": "Q1142936"}
+    custom_settings = {
+        "DOWNLOAD_DELAY": 2,  # Rate limiting appears to be used
+        "DOWNLOAD_TIMEOUT": 60,  # Responses reach several megabytes
+    }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for lat, lon in [
@@ -37,17 +41,16 @@ class AustraliaPostAUSpider(Spider):
             )
             item["opening_hours"] = OpeningHours()
             for i in store["hours"]:
-                if i["type"] in ["CLOSED", "SPECIAL_CLOSED", "Closed", "SPECIAL_LUNCH", "", None]:
+                if i["type"] != "HOURS":
                     continue
-                day = DAYS[int(i["weekday"])]
-                open_time = i["start_time"]
                 close_time = i["end_time"]
                 if close_time == "23:59:59":
                     close_time = "23:59"
-                    item["opening_hours"].add_range(day, open_time.strip(), close_time.strip())
+                item["opening_hours"].add_range(DAYS[int(i["weekday"])], i["start_time"].strip(), close_time.strip())
 
             if store["type"] == "C_SPB":
-                apply_category(Categories.POST_BOX.value | {"priority": "yes"}, item)
+                apply_category(Categories.POST_BOX, item)
+                item["extras"]["priority"] = "yes"
             elif store["type"] == "DC":
                 apply_category(Categories.POST_DEPOT, item)
             elif store["type"] == "PO":

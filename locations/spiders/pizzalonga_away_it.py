@@ -33,21 +33,21 @@ class PizzalongaAwayITSpider(JSONBlobSpider):
         return chompjs.parse_js_object(pois)
 
     def pre_process_data(self, location):
-        location["lat"], location["lon"] = re.findall(r"(\d+\.\d+)", location["position"])
         location["address"] = location.pop("caddress")
         location["phone"] = location.pop("cphone")
 
     def post_process_item(self, item, response, location):
         apply_category(Categories.FAST_FOOD, item)
-        apply_category({"cuisine": "pizza", "takeaway": "only"}, item)
+        item.set_tag("cuisine", "pizza")
+        item.set_tag("takeaway", "only")
         item["city"] = item["branch"] = item.pop("name")
 
         item["opening_hours"] = OpeningHours()
-        hours = location["copenings"].replace("<br/>", " ").replace("|", ",")
+        hours = re.sub(r"<br\s*/?>", " ", location["copenings"]).replace("|", ",")
         add_it_ranges(item["opening_hours"], hours)
 
         deliver = OpeningHours()
-        delivery = location["cdelivery"].replace("<br/>", " ").replace("|", ",")
+        delivery = re.sub(r"<br\s*/?>", " ", location["cdelivery"]).replace("|", ",")
         add_it_ranges(deliver, delivery)
         if deliver:
             item["extras"]["delivery"] = deliver.as_opening_hours()

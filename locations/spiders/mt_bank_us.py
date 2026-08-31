@@ -2,7 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
+from locations.spiders.caseys_general_store_us import CaseysGeneralStoreUSSpider
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import CostcoCAGBUSSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
@@ -12,7 +12,7 @@ from locations.spiders.giant_food_stores import GiantFoodStoresSpider
 from locations.spiders.giant_food_us import GiantFoodUSSpider
 from locations.spiders.kroger_us import BRANDS as KROGER_BRANDS
 from locations.spiders.safeway import SafewaySpider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.stop_and_shop_us import StopAndShopUSSpider
 from locations.spiders.target_us import TargetUSSpider
@@ -33,13 +33,13 @@ class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
 
     LOCATED_IN_MAPPINGS = [
         (["STOP & SHOP", "STOP AND SHOP"], StopAndShopUSSpider.item_attributes),
-        (["7ELEVEN", "7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["7ELEVEN", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["WALGREENS"], WalgreensSpider.WALGREENS),
         (["DUANE READE"], WalgreensSpider.DUANE_READE),
         (["CVS"], CVS_BRANDS["CVS Pharmacy"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
         (["TARGET"], TargetUSSpider.item_attributes),
-        (["CASEY"], CaseysGeneralStoreSpider.item_attributes),
+        (["CASEY"], CaseysGeneralStoreUSSpider.item_attributes),
         (["COSTCO"], CostcoCAGBUSSpider.item_attributes),
         (["WALMART", "WAL-MART"], WalmartUSSpider.item_attributes),
         (["KROGER"], KROGER_BRANDS["https://www.kroger.com/"]),
@@ -66,11 +66,11 @@ class MtBankUSSpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.BANK, item)
             apply_yes_no(Extras.ATM, item, cat == "Branch & ATM")
 
-            if not item.get("name") or not item["name"].startswith("M&T Bank in "):
+            if not item.get("name") or not item["name"].startswith("M&T Bank Branch & ATM: "):
                 # Duplicates, eg:
                 # https://locations.mtb.com/ma/agawam/bank-branches-and-atms-agawam-ma-8422.html
                 # https://locations.mtb.com/ma/agawam/bank-branches-and-atms-agawam-ma-sa7000.html
                 return
-            item["branch"] = item.pop("name").removeprefix("M&T Bank in ")
+            item["branch"] = item.pop("name").removeprefix("M&T Bank Branch & ATM: ")
 
         yield item

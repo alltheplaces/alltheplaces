@@ -11,7 +11,7 @@ class BakkerBartNLSpider(CrawlSpider, StructuredDataSpider):
     name = "bakker_bart_nl"
     item_attributes = {"brand": "Bakker Bart", "brand_wikidata": "Q2177445"}
     start_urls = ["https://www.bakkerbart.nl/vestigingen"]
-    rules = [Rule(LinkExtractor(allow="/vestigingen/"), callback="parse_sd")]
+    rules = [Rule(LinkExtractor(allow=r"/Store/Details\?storeName="), callback="parse_sd")]
     search_for_facebook = False
     search_for_twitter = False
 

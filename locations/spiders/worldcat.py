@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
@@ -46,9 +47,10 @@ class WorldcatSpider(JSONBlobSpider):
 
         item["street_address"] = clean_address([location.get("street1"), location.get("street2")])
 
-        if "emails" in location:
-            item["email"] = "; ".join(location["emails"])
-        if "homePageUrl" in location:
-            item["website"] = location["homePageUrl"]
+        if emails := location.get("emails"):
+            if address := re.search(r"[-\w.+]+@[-\w]+\.[-\w.]+", emails[0]):
+                item["email"] = address.group(0)
+        if website := location.get("homePageUrl"):
+            item["website"] = re.sub(r"^(https?):/(?!/)", r"\1://", website)
 
         yield item

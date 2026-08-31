@@ -50,4 +50,4 @@ class TheFragranceShopGBSpider(Spider):
                 open, close = times.split("-")
                 oh.add_range(day, open, close)
                 i = i + 1
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh

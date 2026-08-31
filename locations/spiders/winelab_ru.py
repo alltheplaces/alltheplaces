@@ -27,5 +27,5 @@ class WinelabRUSpider(scrapy.Spider):
                         opening = open.get("formattedHour")
                         close = hour.get("closingTime", {}).get("formattedHour")
                         oh.add_range(DAYS_RU[hour["weekDay"]], opening, close)
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             yield item

@@ -1,39 +1,14 @@
-import json
+from scrapy import Request
 
-import scrapy
-
-from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class SbarroSpider(scrapy.Spider):
+class SbarroSpider(StructuredDataSpider):
     name = "sbarro"
     item_attributes = {"brand": "Sbarro", "brand_wikidata": "Q2589409"}
     allowed_domains = ["sbarro.com"]
     start_urls = ["https://sbarro.com/locations/?user_search=78749&radius=50000&count=5000"]
-
-    def parse_store(self, response):
-        try:
-            data = json.loads(
-                response.xpath(
-                    '//script[@type="application/ld+json" and contains(text(), "PostalAddress")]/text()'
-                ).extract_first(),
-                strict=False,
-            )
-            properties = {
-                "ref": response.meta["ref"],
-                "name": response.xpath('//*[@class="location-name "]/text()').extract_first(),
-                "addr_full": data["address"]["streetAddress"],
-                "city": data["address"]["addressLocality"],
-                "state": data["address"]["addressRegion"],
-                "postcode": data["address"]["postalCode"],
-                "lat": response.meta["lat"],
-                "lon": response.meta["lon"],
-                "website": response.url,
-            }
-
-            yield Feature(**properties)
-        except:
-            pass
+    wanted_types = ["Restaurant"]
 
     def parse(self, response):
         store_urls = response.xpath('//*[@class="location-name "]/a/@href').extract()
@@ -43,8 +18,16 @@ class SbarroSpider(scrapy.Spider):
 
         for store_url, id, lat, long in zip(store_urls, ids, lats, longs):
             store_url = "https://sbarro.com" + store_url + "/"
-            yield scrapy.Request(
+            yield Request(
                 response.urljoin(store_url),
-                callback=self.parse_store,
+                callback=self.parse_sd,
                 meta={"lat": lat, "lon": long, "ref": id},
             )
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = response.meta["ref"]
+        item["branch"] = response.xpath('//*[@class="location-name "]/text()').get()
+        item["name"] = None
+        item["lat"] = response.meta["lat"]
+        item["lon"] = response.meta["lon"]
+        yield item

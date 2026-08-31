@@ -43,6 +43,6 @@ class QuestDiagnosticsSpider(SitemapSpider):
                 except ValueError:
                     pass
 
-        properties["opening_hours"] = oh.as_opening_hours()
+        properties["opening_hours"] = oh
 
         yield Feature(**properties)

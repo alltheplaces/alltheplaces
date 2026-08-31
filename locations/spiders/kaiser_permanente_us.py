@@ -195,7 +195,7 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
 
         # "Affiliated" locations are not KP-branded
         if response.xpath("//@data-affiliated").get() != "true":
-            apply_category({"brand": "Kaiser Permanente", "brand:wikidata": "Q1721601"}, item)
+            item.update({"brand": "Kaiser Permanente", "brand_wikidata": "Q1721601"})
 
         cat = response.xpath("//@data-type").get()
         if cat in CATEGORY_MAP:

@@ -1,26 +1,80 @@
-import scrapy
+from typing import Any, AsyncIterator
 
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
+
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.geo import country_iseadgg_centroids
+from locations.hours import DAYS, OpeningHours
 
-
-class DiaARSpider(scrapy.Spider):
-    name = "dia_ar"
-    item_attributes = {"brand": "Dia", "brand_wikidata": "Q925132"}
-    custom_settings = {
-        "DEFAULT_REQUEST_HEADERS": {
-            "REST-Range": "resources=0-4999",
+GRAPHQL_QUERY = """
+query {
+    getStores(latitude: %s, longitude: %s) {
+        items {
+            id
+            name
+            isActive
+            address {
+                house_number: number
+                street
+                neighborhood
+                city
+                state
+                postalCode
+                country
+                location {
+                    latitude
+                    longitude
+                }
+            }
+            businessHours {
+                dayOfWeek
+                openingTime
+                closingTime
+            }
         }
     }
-    start_urls = [
-        "https://diaonline.supermercadosdia.com.ar/api/dataentities/TI/search?_fields=active,address,bajaTemporal,city,geo,hours,id,name,new,province,service,tipo,whitelabel"
-    ]
+}"""
 
-    def parse(self, response):
-        for store in response.json():
+
+class DiaARSpider(Spider):
+    name = "dia_ar"
+    item_attributes = {"brand": "Dia", "brand_wikidata": "Q925132"}
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for lat, lon in country_iseadgg_centroids("AR", 158):
+            yield JsonRequest(
+                url="https://diaonline.supermercadosdia.com.ar/_v/private/graphql/v1",
+                data={"query": GRAPHQL_QUERY % (lat, lon)},
+            )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.json()["data"]["getStores"]["items"]:
+            if not store.get("isActive"):
+                continue
+
+            store["location"] = store.get("address", {}).get("location", {})
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
-            item["street_address"] = item.pop("addr_full")
-            if store.get("geo") != "0":
-                item["lon"], item["lat"] = store["geo"].split(",")
-            item["extras"] = {"type": store["tipo"]}
+            item["country"] = "AR"
+
+            try:
+                item["opening_hours"] = self.parse_opening_hours(store.get("businessHours", []))
+            except Exception:
+                self.logger.warning("Failed to parse opening hours for %s", store["id"])
+
+            apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
+
+    @staticmethod
+    def parse_opening_hours(business_hours: list) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in business_hours:
+            oh.add_range(
+                DAYS[rule["dayOfWeek"] - 1],
+                rule["openingTime"],
+                rule["closingTime"],
+                time_format="%H:%M:%S",
+            )
+        return oh

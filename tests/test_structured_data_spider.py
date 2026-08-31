@@ -1,8 +1,10 @@
+from scrapy import Selector
 from scrapy.utils.test import get_crawler
 
 from locations.categories import PaymentMethods
 from locations.items import Feature
 from locations.spiders.albertsons import AlbertsonsSpider
+from locations.structured_data_spider import clean_twitter, extract_twitter
 
 
 def get_objects():
@@ -63,3 +65,64 @@ def test_payments_messy_string():
     assert item["extras"][PaymentMethods.CASH.value] == "yes"
     assert item["extras"][PaymentMethods.CREDIT_CARDS.value] == "yes"
     assert item["extras"][PaymentMethods.DEBIT_CARDS.value] == "yes"
+
+
+def test_clean_twitter_url():
+    assert clean_twitter("https://twitter.com/exampleuser") == "exampleuser"
+    assert clean_twitter("https://www.twitter.com/exampleuser") == "exampleuser"
+    assert clean_twitter("http://twitter.com/exampleuser") == "exampleuser"
+    assert clean_twitter("https://twitter.co.uk/exampleuser") == "exampleuser"
+
+
+def test_clean_twitter_x_url():
+    assert clean_twitter("https://x.com/exampleuser") == "exampleuser"
+    assert clean_twitter("https://www.x.com/exampleuser") == "exampleuser"
+    assert clean_twitter("http://x.com/exampleuser") == "exampleuser"
+
+
+def test_clean_twitter_handle():
+    assert clean_twitter("@exampleuser") == "exampleuser"
+    assert clean_twitter("exampleuser") == "exampleuser"
+
+
+def test_clean_twitter_strips_query_params():
+    assert clean_twitter("https://twitter.com/exampleuser?ref=website") == "exampleuser"
+    assert clean_twitter("https://x.com/exampleuser?ref=website") == "exampleuser"
+
+
+def test_extract_twitter_from_meta():
+    item = Feature()
+    selector = Selector(text='<html><head><meta name="twitter:site" content="@exampleuser"></head></html>')
+    extract_twitter(item, selector)
+    assert item["twitter"] == "exampleuser"
+
+
+def test_extract_twitter_from_twitter_link():
+    item = Feature()
+    selector = Selector(text='<html><body><a href="https://twitter.com/exampleuser">Twitter</a></body></html>')
+    extract_twitter(item, selector)
+    assert item["twitter"] == "exampleuser"
+
+
+def test_extract_twitter_from_x_link():
+    item = Feature()
+    selector = Selector(text='<html><body><a href="https://x.com/exampleuser">X</a></body></html>')
+    extract_twitter(item, selector)
+    assert item["twitter"] == "exampleuser"
+
+
+def test_extract_twitter_meta_takes_precedence():
+    item = Feature()
+    selector = Selector(
+        text='<html><head><meta name="twitter:site" content="@metauser"></head>'
+        '<body><a href="https://twitter.com/linkuser">Twitter</a></body></html>'
+    )
+    extract_twitter(item, selector)
+    assert item["twitter"] == "metauser"
+
+
+def test_extract_twitter_no_twitter():
+    item = Feature()
+    selector = Selector(text='<html><body><a href="https://netflix.com/movie">No social links</a></body></html>')
+    extract_twitter(item, selector)
+    assert item.get("twitter") is None

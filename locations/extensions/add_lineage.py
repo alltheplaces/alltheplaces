@@ -15,8 +15,32 @@ class Lineage(Enum):
     Infrastructure = "S_ATP_INFRASTRUCTURE"
     Unknown = "S_?"
 
+    @property
+    def group(self) -> str:
+        return _LINEAGE_TO_GROUP.get(self, "brands")
 
-def spider_class_to_lineage(spider: Spider) -> Lineage:
+
+_LINEAGE_TO_GROUP = {
+    Lineage.Addresses: "addresses",
+    Lineage.Aggregators: "aggregators",
+    Lineage.Brands: "brands",
+    Lineage.Governments: "government",
+    Lineage.Infrastructure: "infrastructure",
+    Lineage.Unknown: "brands",
+}
+
+_GROUP_TO_LINEAGE = {v: k for k, v in _LINEAGE_TO_GROUP.items() if k != Lineage.Unknown}
+
+VALID_GROUPS = set(_GROUP_TO_LINEAGE.keys())
+
+
+def lineage_for_group(group: str) -> "Lineage":
+    if group not in _GROUP_TO_LINEAGE:
+        raise ValueError(f"Unknown group: {group!r}. Valid groups: {sorted(VALID_GROUPS)}")
+    return _GROUP_TO_LINEAGE[group]
+
+
+def spider_class_to_lineage(spider: Spider | type[Spider]) -> Lineage:
     """
     Provide an indication of the origin of the spider.
     :param spider: the spider

@@ -1,20 +1,25 @@
+from typing import Iterable
+
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class WrenKitchensGBSpider(CrawlSpider, StructuredDataSpider):
+class WrenKitchensGBSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
     name = "wren_kitchens_gb"
     item_attributes = {"brand": "Wren Kitchens", "brand_wikidata": "Q8037744"}
     allowed_domains = ["wrenkitchens.com"]
     start_urls = ["https://www.wrenkitchens.com/showrooms/"]
     rules = [Rule(LinkExtractor(allow=r"https:\/\/www\.wrenkitchens\.com\/showrooms\/([-\w]+)$"), callback="parse_sd")]
     wanted_types = ["HomeAndConstructionBusiness"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         item["website"] = response.url  # Some URLs redirect
         yield item

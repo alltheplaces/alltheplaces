@@ -66,8 +66,8 @@ class VestisUniformServicesUSSpider(Spider):
             def add_tags(item):
                 apply_category(Categories.SHOP_LAUNDRY, item)
                 apply_yes_no("laundry_service", item, True)
-                apply_category({"rental": "clothes"}, item)
-                apply_category({"access": "private"}, item)
+                item.set_tag("rental", "clothes")
+                item.set_tag("access", "private")
 
             if "Cleanroom Services" in item["name"].title():
                 item["brand"] = "Vestis Cleanroom Services"

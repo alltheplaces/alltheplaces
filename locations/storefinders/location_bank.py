@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -71,11 +71,12 @@ class LocationBankSpider(Spider):
             )
 
             item["opening_hours"] = OpeningHours()
-            for day in location["regularHours"]:
-                if day["isOpen"]:
-                    item["opening_hours"].add_range(day["openDay"], day["openTime"], day["closeTime"])
-                else:
-                    item["opening_hours"].set_closed(day["openDay"])
+            for rule in location["regularHours"]:
+                if day := sanitise_day(rule["openDay"]):
+                    if rule["isOpen"]:
+                        item["opening_hours"].add_range(day, rule["openTime"], rule["closeTime"])
+                    else:
+                        item["opening_hours"].set_closed(day)
 
             if self.include_images:
                 image_root = "https://api.locationbank.net/storelocator/StoreLocatorAPI/locationImage"

@@ -126,6 +126,7 @@ class NedbankZASpider(JSONBlobSpider):
             if "Wheel Chair Friendly with Staff Assistance*" in facilities:
                 item["extras"]["wheelchair:description"] = "With staff assistance"
             item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()
+            item.pop("phone")
             yield Request(
                 url=f"https://api.nedsecure.co.za/nedbank/channeldistribution/v2/branches/{item['ref']}",
                 headers={"Authorization": f"Bearer {response.meta['auth_token']}"},

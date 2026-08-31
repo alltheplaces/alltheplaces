@@ -2,7 +2,7 @@ import json
 
 from scrapy import Selector, Spider
 
-from locations.categories import apply_category
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -17,5 +17,5 @@ class RightAtHomeGBSpider(Spider):
             location["url"] = response.urljoin(location["url"])
             location["address"] = merge_address_lines(Selector(text=location["address"]).xpath("//text()").getall())
             item = DictParser.parse(location)
-            apply_category({"office": "company"}, item)
+            apply_category(Categories.OFFICE_COMPANY, item)
             yield item

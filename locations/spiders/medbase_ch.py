@@ -68,7 +68,7 @@ class MedbaseCHSpider(scrapy.Spider):
                 for day in self.parse_days(m.group(1)):
                     for open_time, close_time in self.parse_hours(m.group(2)):
                         oh.add_range(day, open_time, close_time)
-        feature["opening_hours"] = oh.as_opening_hours()
+        feature["opening_hours"] = oh
 
     def parse_days(self, days):
         result = set()

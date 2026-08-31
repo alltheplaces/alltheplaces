@@ -55,7 +55,7 @@ class UnderArmourAESASpider(Spider):
                     end = day_data.get("end")
                     if day and start and end:
                         oh.add_range(day, start, end)
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_CLOTHES, item)
 

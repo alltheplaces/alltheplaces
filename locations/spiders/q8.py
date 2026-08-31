@@ -12,8 +12,6 @@ from locations.spiders.q8_italia import Q8ItaliaSpider
 # AKA Q8 NWE https://www.q8.be/nl/stations
 class Q8Spider(JSONBlobSpider):
     name = "q8"
-    start_urls = ["https://www.q8.be/fr/get/stations.json"]
-
     BRANDS = {
         "Q8Easy": {"brand": "Q8 Easy", "brand_wikidata": "Q1806948"},
         "Q8": Q8ItaliaSpider.item_attributes,
@@ -28,7 +26,7 @@ class Q8Spider(JSONBlobSpider):
                     "latitude": 50.46192477912935,
                     "longitude": 4.469899999999987,
                     "radius": 600000,
-                    "take": 2000,
+                    "take": 1500,
                     "hasFueling": True,
                     "locationTypes": ["Q8", "Q8Easy"],
                     "serviceCodes": [],

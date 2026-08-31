@@ -10,7 +10,7 @@ from locations.spiders.ampm_us import AmpmUSSpider
 from locations.spiders.bashas_us import BashasUSSpider
 from locations.spiders.brookshires_us import BrookshiresUSSpider
 from locations.spiders.cardenas_us import CardenasUSSpider
-from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
+from locations.spiders.caseys_general_store_us import CaseysGeneralStoreUSSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import CostcoCAGBUSSpider
@@ -38,11 +38,10 @@ from locations.spiders.piggly_wiggly_us import PigglyWigglyUSSpider
 from locations.spiders.quickchek_us import QuickchekUSSpider
 from locations.spiders.race_trac_us import RaceTracUSSpider
 from locations.spiders.recipe_unlimited import RecipeUnlimitedSpider
-from locations.spiders.rite_aid_us import RiteAidUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
 from locations.spiders.safeway import SafewaySpider
 from locations.spiders.schnucks_us import SchnucksUSSpider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.shell import ShellSpider
 from locations.spiders.shoprite_us import ShopriteUSSpider
 from locations.spiders.sobeys_ca import SobeysCASpider
@@ -60,7 +59,7 @@ from locations.spiders.winn_dixie_us import WinnDixieUSSpider
 from locations.storefinders.where2getit import Where2GetItSpider
 
 LOCATION_MAPPINGS = [
-    (["7-ELEVEN", "ALON 7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+    (["7-ELEVEN", "ALON 7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
     (["ACME", "ACME MARKETS"], AlbertsonsSpider.brands["acmemarkets"]),
     (["ALBERTSON'S", "ALBERTSONS"], AlbertsonsSpider.brands["albertsons"]),
     (["AMPM", "AM/PM", "AM PM"], AmpmUSSpider.item_attributes),
@@ -69,7 +68,7 @@ LOCATION_MAPPINGS = [
     (["BASHAS", "BASHAS'"], BashasUSSpider.item_attributes),
     (["BROOKSHIRES", "BROOKSHIRE'S"], BrookshiresUSSpider.item_attributes),
     (["CARDENAS", "CARDENAS MARKET"], CardenasUSSpider.item_attributes),
-    (["CASEY'S", "CASEYS"], CaseysGeneralStoreSpider.item_attributes),
+    (["CASEY'S", "CASEYS"], CaseysGeneralStoreUSSpider.item_attributes),
     (["CHEVRON"], CHEVRON_BRANDS["Chevron"][0]),
     (["CIRCLE K", "IRVING - CIRCLE K"], CircleKSpider.CIRCLE_K),
     (["CERTIFIED", "CERTIFIED OIL"], EgAmericaUSSpider.brands[17]),
@@ -117,7 +116,6 @@ LOCATION_MAPPINGS = [
     (["RANDALLS"], AlbertsonsSpider.brands["randalls"]),
     (["RALPHS"], KROGER_BRANDS["https://www.ralphs.com/"]),
     (["ROYAL FARMS"], RoyalFarmsSpider.item_attributes),
-    (["RITE AID"], RiteAidUSSpider.item_attributes),
     (["RUTTERS", "RUTTER'S"], {"brand": "Rutter's", "brand_wikidata": "Q7383544"}),
     (["SAFEWAY"], SafewaySpider.item_attributes),
     (["SHAWS", "SHAW'S"], AlbertsonsSpider.brands["shaws"]),
