@@ -46,7 +46,7 @@ class ArkenZooSESpider(StructuredDataSpider):
     def post_process_item(self, item, response: Response, ld_item: dict, **kwargs):
         item["lat"] = response.meta.get("lat")
         item["lon"] = response.meta.get("lon")
-        item["branch"] = item["name"].removeprefix("Arken Zoo").strip()
+        item["branch"] = item.pop("name").removeprefix("Arken Zoo").strip()
         if re.sub(r"\D", "", item.get("phone") or "").endswith(NATIONAL_HOTLINE_DIGITS):
             item["phone"] = None
         if item.get("email") == NATIONAL_EMAIL:
