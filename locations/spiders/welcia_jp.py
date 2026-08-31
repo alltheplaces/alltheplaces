@@ -301,10 +301,26 @@ class WelciaJPSpider(LocationCloudSpider):
             yield item
             return
         detail_json = parse_js_object(blob.split("var spotDetailBean = ", 1)[1])
+        detail_fields = self.detail_fields(detail_json)
 
         self._apply_payment_methods(item, detail_json)
 
+        if fax := detail_fields.get("00040"):
+            if value := fax.get("value"):
+                item["extras"]["fax"] = value
+
         yield item
+
+    @staticmethod
+    def detail_fields(detail_json: dict) -> dict[str, dict]:
+        """Flatten all detailColumns sections into a code -> entry lookup."""
+        fields = {}
+        for section in detail_json.get("detailColumns", []):
+            for entries in section.get("columns", {}).values():
+                for entry in entries:
+                    if isinstance(entry, dict) and entry.get("code"):
+                        fields[entry["code"]] = entry
+        return fields
 
     def _apply_payment_methods(self, item: Feature, detail_json: dict) -> None:
         flags = detail_json["flags"]
