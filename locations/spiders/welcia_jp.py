@@ -1,4 +1,7 @@
+import json
 from collections.abc import Iterable
+
+from chompjs import parse_js_object
 
 from locations.categories import Categories, apply_category
 from locations.geo import postal_regions
@@ -241,18 +244,16 @@ class WelciaJPSpider(LocationCloudSpider):
             for prefix in brand.get("ruby_prefixes", []):
                 item["extras"]["branch:ja-Hira"] = item["extras"]["branch:ja-Hira"].removeprefix(prefix)
 
-    # TODO: update LocationCloudSpider
-    # optional fetching detail page to fill opening hours etc.
-    #
-    # draft:
-    # if parse_detail_page defined
-    #   parse() yield new Request for detailPage with callback parse_detail_page()
-    #     parse_detail_page() adds extra tags from detail page
-    #
-    # note: some info is written in natural language
-    def parse_detail_page(self):
-        # TODO: check `seims_jp.py` for detailed pharmacy-related tags
-        pass
+    def parse_detail_page(self, response, item, source_feature):
+        # `spotDetailBean` is a JS object embedded on the detail page containing all details information
+        # such as flags (services/payment) and shop data (opening hours, pharmacy options etc.).
+        blob = response.xpath('//script[contains(text(), "var spotDetailBean")]/text()').get()
+        if not blob:
+            yield item
+            return
+        detail_json = parse_js_object(blob.split("var spotDetailBean = ", 1)[1])
+
+        yield item
 
 
 def _build_postal_lookup() -> dict[str, dict]:
