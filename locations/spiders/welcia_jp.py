@@ -1,9 +1,11 @@
+import json
 from collections.abc import Iterable
 
 from chompjs import parse_js_object
 
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.geo import postal_regions
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.storefinders.location_cloud import LocationCloudSpider
 
@@ -208,6 +210,8 @@ FLAG_DEDICATED_PHARMACY = "00077"  # 調剤専門店
 FLAG_PHARMACY_PHONE = "00114"  # 調剤薬局電話番号
 FLAG_PHARMACY_FAX = "00110"  # 調剤薬局Fax番号
 FLAG_UBER_EATS = "00228"  # Uber Eats デリバリー
+FLAG_STORE_HOURS = "00007"  # 営業時間
+FLAG_PHARMACY_HOURS = "00112"  # 調剤薬局営業時間
 
 
 class WelciaJPSpider(LocationCloudSpider):
@@ -340,6 +344,7 @@ class WelciaJPSpider(LocationCloudSpider):
 
         self._apply_dispensing(item, detail_json, detail_fields)
         self._apply_other_services(item, detail_json)
+        self._apply_opening_hours(item, detail_fields)
 
         yield item
 
@@ -365,6 +370,61 @@ class WelciaJPSpider(LocationCloudSpider):
                 item["extras"]["delivery"] = "yes"
                 item["extras"]["delivery:partner"] = "Uber Eats"
                 item["extras"]["delivery:partner:wikidata"] = "Q21462723"
+
+    def _apply_opening_hours(self, item: Feature, detail_fields: dict) -> None:
+        for field_code, key in ((FLAG_STORE_HOURS, "opening_hours"), (FLAG_PHARMACY_HOURS, "opening_hours:pharmacy")):
+            if entry := detail_fields.get(field_code):
+                if value := entry.get("value"):
+                    hours = self._parse_hours(value)
+                    if hours:
+                        if key == "opening_hours":
+                            item["opening_hours"] = hours
+                        else:
+                            item["extras"][key] = hours
+
+    def _parse_hours(self, value: str) -> str | None:
+        """Parse the per-day opening hours JSON into an opening_hours value.
+
+        The source is a JSON object keyed by lowercase day names (``sunday`` ..
+        ``saturday``) plus ``holiday``. A value is a list of [open, close]
+        ranges, the string ``"allday"`` (open 24h), or the string ``"closed"``
+        (closed that day). Weekday ranges go through the OpeningHours helper.
+        """
+        try:
+            day_hours = json.loads(value)
+        except (TypeError, json.JSONDecodeError):
+            return None
+        if not isinstance(day_hours, dict):
+            return None
+
+        oh = OpeningHours()
+        for day, ranges in day_hours.items():
+            if day == "holiday":
+                continue
+            self._add_day_hours(oh, sanitise_day(day), ranges)
+
+        result = oh.as_opening_hours()
+
+        if holiday_ranges := day_hours.get("holiday"):
+            result += self._holiday_suffix(holiday_ranges)
+
+        return result or None
+
+    @staticmethod
+    def _add_day_hours(oh: OpeningHours, day_code: str | None, ranges) -> None:
+        if ranges == "allday":
+            oh.add_range(day_code, "00:00", "24:00")
+        elif ranges == "closed":
+            oh.set_closed(day_code)
+        elif ranges:
+            for open_time, close_time in ranges:
+                oh.add_range(day_code, open_time, close_time)
+
+    @staticmethod
+    def _holiday_suffix(holiday_ranges) -> str:
+        if holiday_ranges == "closed":
+            return "; PH off"
+        return "; PH " + ",".join(f"{open_time}-{close_time}" for open_time, close_time in holiday_ranges)
 
     @staticmethod
     def detail_fields(detail_json: dict) -> dict[str, dict]:
