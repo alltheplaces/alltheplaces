@@ -31,7 +31,9 @@ class GroupamaFRSpider(StructuredDataSpider):
             yield response.follow(url, self.parse_sd)
 
     def post_process_item(self, item, response: Response, ld_data: dict, **kwargs):
-        item["ref"] = ld_data["@id"].rpartition("location-")[2]
-        item["branch"] = item.pop("name").removeprefix("Agence Groupama").removeprefix(" De ").strip(" -")
+        if isinstance(ld_data.get("@id"), str) and "location-" in ld_data["@id"]:
+            item["ref"] = ld_data["@id"].rpartition("location-")[2]
+        branch = (item.pop("name", None) or "").removeprefix("Agence Groupama").removeprefix(" De ").strip(" -")
+        item["branch"] = branch or None
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
