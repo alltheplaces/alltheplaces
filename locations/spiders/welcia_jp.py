@@ -303,6 +303,10 @@ class WelciaJPSpider(LocationCloudSpider):
         detail_json = parse_js_object(blob.split("var spotDetailBean = ", 1)[1])
         detail_fields = self.detail_fields(detail_json)
 
+        if flag := detail_json["flags"].get("00147"):
+            if flag.get("value") == "true":
+                return
+
         self._apply_payment_methods(item, detail_json)
 
         if fax := detail_fields.get("00040"):
