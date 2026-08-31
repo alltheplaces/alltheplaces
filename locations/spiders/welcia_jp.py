@@ -326,7 +326,7 @@ class WelciaJPSpider(LocationCloudSpider):
         flags = detail_json["flags"]
         for code, payment in PAYMENT_METHODS.items():
             if flag := flags.get(code):
-                apply_yes_no(payment, item, flag.get("value") == "true")
+                apply_yes_no(payment, item, flag.get("value") == "true", apply_positive_only=False)
 
 
 def _build_postal_lookup() -> dict[str, dict]:
