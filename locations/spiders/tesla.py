@@ -26,6 +26,7 @@ class TeslaSpider(Spider):
         super().__init__(*args, **kwargs)
         self.expected_dealers: set[str] = set()
         self.scraped_dealers: set[str] = set()
+        self.location_discovery_succeeded: bool = False
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
@@ -36,6 +37,8 @@ class TeslaSpider(Spider):
     def parse_json_subrequest(self, response: Response) -> Iterable[Request]:
         json_data = self.extract_json(response)
         locations = self.select_locations(json_data["data"]["data"])
+        if locations:
+            self.location_discovery_succeeded = True
         for slug, types in locations.items():
             # Scraping only dealers and chargers within dealers,
             # since the spider gets blocked after attempting to scrape every charger.
@@ -184,7 +187,9 @@ class TeslaSpider(Spider):
         stats.set_value(f"atp/{self.name}/dealers_expected", expected)
         stats.set_value(f"atp/{self.name}/dealers_scraped", scraped)
         stats.set_value(f"atp/{self.name}/dealers_missing", len(missing))
-        if missing:
+        if not self.location_discovery_succeeded:
+            self.logger.error("Dealer coverage unavailable: location discovery failed")
+        elif missing:
             self.logger.warning(
                 f"Dealer coverage incomplete ({reason}): {scraped}/{expected} scraped, "
                 f"{len(missing)} missing, first 20: {', '.join(missing[:20])}"
