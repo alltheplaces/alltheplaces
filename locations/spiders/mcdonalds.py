@@ -1,24 +1,28 @@
 from typing import AsyncIterator, Iterable
 
-from scrapy import Spider
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
+from locations.geo import city_locations, country_iseadgg_centroids
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsSpider(Spider):
+class McdonaldsSpider(PlaywrightSpider):
     name = "mcdonalds"
     item_attributes = {
         "brand": "McDonald's",
         "brand_wikidata": "Q38076",
-        "extras": Categories.FAST_FOOD.value,
     }
     allowed_domains = ["www.mcdonalds.com"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+
+    ISEADGG_COUNTRIES = {"AU", "CA", "NZ", "US"}
 
     async def start(self) -> AsyncIterator[Request]:
         template = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={}&longitude={}&radius=50&maxResults=250&country={}&language={}&showClosed="
@@ -26,6 +30,7 @@ class McdonaldsSpider(Spider):
             "en-au",
             "en-ca",
             "en-gb",
+            "en-nz",
             "fi-fi",
             "en-ie",
             "en-us",
@@ -47,16 +52,25 @@ class McdonaldsSpider(Spider):
             "hr-hr",
         ]:
             country = locale.split("-")[1]
-            for city in city_locations(country.upper(), 20000):
-                if country == "sa":
-                    url = template.format(city["latitude"], city["longitude"], "sar", "en")
-                else:
-                    url = template.format(city["latitude"], city["longitude"], country, locale)
-                yield Request(
-                    url,
-                    self.parse_major_api,
-                    cb_kwargs=dict(country=country, locale=locale),
-                )
+            if country.upper() in self.ISEADGG_COUNTRIES:
+                for lat, lon in country_iseadgg_centroids(country.upper(), 48):
+                    url = template.format(lat, lon, country, locale)
+                    yield Request(
+                        url,
+                        self.parse_major_api,
+                        cb_kwargs=dict(country=country, locale=locale),
+                    )
+            else:
+                for city in city_locations(country.upper(), 20000):
+                    if country == "sa":
+                        url = template.format(city["latitude"], city["longitude"], "sar", "en")
+                    else:
+                        url = template.format(city["latitude"], city["longitude"], country, locale)
+                    yield Request(
+                        url,
+                        self.parse_major_api,
+                        cb_kwargs=dict(country=country, locale=locale),
+                    )
 
     def parse_major_api(self, response: Response, country: str, locale: str) -> Iterable[Feature]:
         if len(response.body) == 0:
@@ -66,7 +80,19 @@ class McdonaldsSpider(Spider):
             properties = store["properties"]
             store_identifier = properties["identifierValue"]
             store_url = None
-            if locale in ["en-ca", "en-gb", "en-ie", "en-us", "fi-fi", "fr-ch", "hu-hu", "sv-se", "zh-tw", "hr-hr"]:
+            if locale in [
+                "en-ca",
+                "en-gb",
+                "en-ie",
+                "en-nz",
+                "en-us",
+                "fi-fi",
+                "fr-ch",
+                "hu-hu",
+                "sv-se",
+                "zh-tw",
+                "hr-hr",
+            ]:
                 # Individual store site pages in these locale's have a common pattern.
                 store_url = "https://www.mcdonalds.com/{}/{}/location/{}.html".format(country, locale, store_identifier)
             elif locale in ["de-de"]:

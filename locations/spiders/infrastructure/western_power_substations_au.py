@@ -12,14 +12,15 @@ class WesternPowerSubstationsAUSpider(ArcGISFeatureServerSpider):
     item_attributes = {"operator": "Western Power", "operator_wikidata": "Q7988180"}
     host = "services2.arcgis.com"
     context_path = "tBLxde4cxSlNUxsM/ArcGIS"
-    service_id = "NCMT_Data_2024_gdb"
-    layer_id = "7"
+    service_id = "NCMT_Data_2025_gdb"
+    layer_id = "10"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature.get("OWNER") != "WP":
             # Privately owned substation (typically at a factory or mine).
             return
         item["ref"] = feature["SUB_ABBRV"]
+        item["name"] = feature["SUB_NAME"]
         item["state"] = "WA"
         if feature.get("DESCRIP") == "Current Western Power Terminal/Power Station":
             apply_category(Categories.SUBSTATION_TRANSMISSION, item)

@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from scrapy.http import Response
+from scrapy.http import Response, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -27,14 +27,17 @@ class ToyotaAUSpider(JSONBlobSpider, PlaywrightSpider):
         "https://www.toyota.com.au/main/api/v1/toyotaforms/info/dealersbystate/WA?dealerOptIn=false",
     ]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS | {"USER_AGENT": BROWSER_DEFAULT}
-    locations_key = "results"
+
+    def extract_json(self, response: TextResponse) -> list[dict]:
+        return response.json()["results"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["lat"] = feature["refY"]
         item["lon"] = feature["refX"]
         item["state"] = feature["state"]
         item["street_address"] = item.pop("addr_full", None)
-        item["website"] = feature["webSite"]
+        if website := feature.get("webSite"):
+            item["website"] = website if website.startswith("http") else f"https://{website}"
 
         if feature.get("sales"):
             sales = item.deepcopy()

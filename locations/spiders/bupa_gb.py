@@ -1,19 +1,32 @@
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature, set_closed
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 BUPA = {"brand": "Bupa", "brand_wikidata": "Q931628"}
 
 
-class BupaGBSpider(SitemapSpider, StructuredDataSpider):
+class BupaGBSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
     name = "bupa_gb"
-    sitemap_urls = ["https://www.bupa.co.uk/robots.txt"]
-    sitemap_rules = [(r"/practices/([-\w]+)$", "parse_sd")]
-    time_format = "%I:%M %p"
+    start_urls = ["https://www.bupa.co.uk/dental/dental-care/practices"]
+    rules = [
+        Rule(LinkExtractor(r"/practices/([-\w]+)$"), "parse_sd"),
+        Rule(
+            LinkExtractor(r"/browse-by-region/[-\w]+$"),
+        ),
+    ]
     requires_proxy = True
+    custom_settings = {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
+    } | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if "Total Dental Care" in item["name"]:

@@ -1,90 +1,103 @@
-import re
+from typing import Any, AsyncIterator
 
-import scrapy
-from scrapy.http import JsonRequest
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.geo import point_locations
+from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
+from locations.spiders.speedway_us import SpeedwayUSSpider
 
 FUEL_TYPES_MAPPING = {
     "DEF": Fuel.ADBLUE,
     "Diesel": Fuel.DIESEL,
+    "E85": Fuel.E85,
+    "Kerosene": Fuel.KEROSENE,
+    "Kersonse": Fuel.KEROSENE,
+    "Mid-grade": Fuel.OCTANE_89,
     "Mid-Grade": Fuel.OCTANE_89,
     "Regular": Fuel.OCTANE_87,
     "Premium": Fuel.OCTANE_91,
 }
 
-FEATURES_MAPPING = {
-    "ATM": Extras.ATM,
-    "Car Wash": Extras.CAR_WASH,
-    "Delivery": Extras.DELIVERY,
-    "Diesel": Fuel.DIESEL,
-    "Hot Foods": Extras.FAST_FOOD,
-    "Propane": Fuel.PROPANE,
-    "Wi-Fi": Extras.WIFI,
-}
+STRIPES = {"brand": "Stripes", "brand_wikidata": "Q7624135"}
 
 
-# SitemapSpider no longer works properly for US, getting identified as a bot and served with a page without data
-class SevenElevenCAUSSpider(scrapy.Spider):
+class SevenElevenCAUSSpider(Spider):
     name = "seven_eleven_ca_us"
-    item_attributes = SEVEN_ELEVEN_SHARED_ATTRIBUTES
-    start_urls = [
-        "https://www.7-eleven.com/locations/tx/frisco/11065-fm-720-33117"  # Get access token from any store page
-    ]
-    api = "https://api.7-eleven.com/v4/stores"
-    token = ""
-    offset = 0
-    page_size = 500
+    api = "https://www.7-eleven.com/api/v5/stores/search"
+    search_radius = 100
+    max_results = 1000
+    searchable_points_files = ["us_centroids_100mile_radius_state.csv", "ca_centroids_100mile_radius.csv"]
 
-    def next_request(self) -> JsonRequest:
-        return JsonRequest(
-            url=f"{self.api}?offset={self.offset}&limit={self.page_size}",
-            headers={"Authorization": f"Bearer {self.token}"},
-            callback=self.parse_stores,
-        )
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self.seen_ids: set[int] = set()
 
-    def parse(self, response):  # parse token
-        token = re.search(r"access_token\\\":\\\"(.+?)\\\"", response.text).group(1)
-        self.token = token
-        yield self.next_request()
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for lat, lon in point_locations(self.searchable_points_files):
+            yield JsonRequest(
+                url=self.api,
+                data={"token": "", "lat": lat, "lon": lon, "radius": self.search_radius, "limit": self.max_results},
+                callback=self.parse_stores,
+            )
 
-    def parse_stores(self, response):
-        for store in response.json()["results"]:
-            store["street-address"] = store.pop("address", "")
-            item = DictParser.parse(store)
-            item["website"] = store.get("seo_web_url")
+    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["results"]:
+            if location["id"] in self.seen_ids:
+                continue
+            self.seen_ids.add(location["id"])
 
-            if "Fuel" in store.get("features_display", []):
-                apply_category(Categories.FUEL_STATION, item)
-                self.parse_fuel_types(item, store)
+            item = DictParser.parse(location)
+            item["name"] = None
+            item["street_address"] = item.pop("addr_full")
+            item["website"] = location.get("seo_web_url")
+
+            hours = location.get("hours") or {}
+            if hours.get("message") == "Open 24/7":
+                item["opening_hours"] = "24/7"
+            elif rules := hours.get("operating"):
+                item["opening_hours"] = OpeningHours()
+                for rule in rules:
+                    item["opening_hours"].add_ranges_from_string("{} {}".format(rule["key"], rule["detail"]))
+
+            apply_yes_no(Extras.ATM, item, "ATM" in location.get("features_display", []))
+            apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in location.get("features_display", []))
+            apply_yes_no(Extras.WIFI, item, "Wi-Fi" in location.get("features_display", []))
+
+            brand = location.get("brand_info") or {}
+            shop = item.deepcopy()
+            shop["ref"] = "{}_SHOP".format(shop["ref"])
+            if brand.get("title") == "stripes":
+                shop.update(STRIPES)
+            elif brand.get("title") == "7-eleven":
+                shop.update(SEVEN_ELEVEN_SHARED_ATTRIBUTES)
+            elif brand.get("title") == "speedway" or location.get("name") == "Speedway Store":
+                shop.update(SpeedwayUSSpider.item_attributes)
             else:
-                apply_category(Categories.SHOP_CONVENIENCE, item)
+                shop.update(SEVEN_ELEVEN_SHARED_ATTRIBUTES)
 
-            self.parse_features(item, store)
-            yield item
+            apply_category(Categories.SHOP_CONVENIENCE, shop)
 
-        if len(response.json()["results"]) == self.page_size:
-            self.offset += self.page_size
-            yield self.next_request()
+            yield shop
 
-    def parse_fuel_types(self, item, store):
-        if fuel_data := store.get("fuel_data", {}):
+            if "Fuel" in location.get("features_display", []):
+                apply_category(Categories.FUEL_STATION, item)
+                self.parse_fuel_types(item, location)
+
+                yield item
+
+    def parse_fuel_types(self, item: Feature, store: dict) -> None:
+        apply_yes_no(Fuel.DIESEL, item, "Diesel" in store.get("features_display", []))
+        apply_yes_no(Fuel.PROPANE, item, "Propane" in store.get("features_display", []))
+        if fuel_data := store.get("fuel_data") or {}:
             if grades := fuel_data.get("grades", []):
                 for grade in grades:
                     fuel_name = grade.get("name")
                     if tag := FUEL_TYPES_MAPPING.get(fuel_name):
                         apply_yes_no(tag, item, True)
                     else:
-                        # self.logger.warning(f"Unknown fuel type: {fuel_name}")
                         self.crawler.stats.inc_value(f"atp/7_11/fuel/failed/{fuel_name}")
-
-    def parse_features(self, item, store):
-        if features := store.get("features_display", []):
-            for feature in features:
-                if tag := FEATURES_MAPPING.get(feature):
-                    apply_yes_no(tag, item, True)
-                else:
-                    # self.logger.warning(f"Unknown feature: {feature}")
-                    self.crawler.stats.inc_value(f"atp/7_11/feature/failed/{feature}")

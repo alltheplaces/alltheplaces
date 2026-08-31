@@ -18,7 +18,7 @@ class EastOfEnglandCoopGBSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
-        item["branch"] = response.xpath("//h2/text()").get()
+        item["branch"] = response.xpath("//h1/text()").get()
         item["street_address"] = response.xpath('//*[@class="flex flex-col gap-1"]/span/text()').get()
         item["city"] = response.xpath('//*[@class="flex flex-col gap-1"]/span[2]/text()').get()
         item["postcode"] = response.xpath('//*[@class="flex flex-col gap-1"]/span[3]/text()').get()
@@ -45,15 +45,21 @@ class EastOfEnglandCoopGBSpider(SitemapSpider):
             item.update(self.EAST_OF_ENGLAND_COOP)
             apply_category(Categories.SHOP_FUNERAL_DIRECTORS, item)
 
+        try:
+            item["opening_hours"] = self.parse_opening_hours(response)
+        except Exception:
+            pass
+
+        yield item
+
+    def parse_opening_hours(self, response: Response) -> OpeningHours:
         oh = OpeningHours()
-        for day_time in response.xpath('//*[@class="flex flex-col items-center gap-1.5"]//li'):
-            day = day_time.xpath(".//span[1]/text()").get()
-            time = day_time.xpath(".//span[2]").xpath("normalize-space()").get()
+        for rule in response.xpath('//h3[contains(text(), "Opening times")]/parent::div//li'):
+            day = rule.xpath("./div/span/text()").get()
+            time = rule.xpath("./span/text()").get()
             if time == "Closed":
                 oh.set_closed(day)
             else:
-                open_time, close_time = time.split(" - ")
-                oh.add_range(day=day, open_time=open_time, close_time=close_time)
-        item["opening_hours"] = oh
-
-        yield item
+                open_time, close_time = time.split(" – ")
+                oh.add_range(day, open_time, close_time)
+        return oh

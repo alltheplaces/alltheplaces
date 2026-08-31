@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 DAY_MAPPING = {"Lunes": "Mo", "Sábados": "Sa", "Domingos": "Su"}
@@ -108,4 +109,6 @@ class LagenovesaSpider(scrapy.Spider):
             if hours:
                 properties["opening_hours"] = hours
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+            yield item

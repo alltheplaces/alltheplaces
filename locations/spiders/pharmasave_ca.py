@@ -5,7 +5,7 @@ import scrapy
 from scrapy.http import Response
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 
 
 class PharmasaveCASpider(scrapy.Spider):
@@ -26,7 +26,9 @@ class PharmasaveCASpider(scrapy.Spider):
         item = response.meta["item"]
         oh = OpeningHours()
         for day_time in response.xpath('//*[@class="store-hours-row"]'):
-            day = day_time.xpath('.//*[@class="store-hours-day"]/text()').get()
+            day = sanitise_day(day_time.xpath('.//*[@class="store-hours-day"]/text()').get())
+            if not day:
+                continue
             time = day_time.xpath('.//*[@class="store-hours-time"]/text()').get()
             if time == "Closed":
                 oh.set_closed(day)

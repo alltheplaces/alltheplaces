@@ -31,13 +31,13 @@ BOTH_SERVICES_MAPPING = {
 }
 STATION_SERVICES_MAPPING = {
     "carwash": Extras.CAR_WASH,
-    "servicebay": Extras.CAR_REPAIR,
+    "servicebay": Extras.VEHICLE_CAR_REPAIR_SERVICES,
     "truckstop": Access.HGV,
     "diesel": Fuel.DIESEL,
     "charge": Fuel.ELECTRIC,
     "fullsvcarwash": Extras.CAR_WASH,
     "cvxreward": "fuel:discount:chevron",
-    "hydrogen": "fuel:H2",
+    "hydrogen": Fuel.H70,
     "e85": Fuel.E85,
     "cngas": Fuel.CNG,
     "propane": Fuel.PROPANE,
@@ -60,7 +60,7 @@ def slugify(s):
 class ChevronUSSpider(JSONBlobSpider):
     name = "chevron_us"
     start_urls = [
-        "https://apis.chevron.com/api/StationFinder/alongtheway?clientid=A67B7471&geoLoc=((90%2C-180)%2C(-90%2C-180))&oLat=1&oLng=1"
+        "https://apis.chevron.com/api/StationFinder/nearby?clientid=A67B7471&geoLoc=((90%2C-180)%2C(-90%2C-180))&oLat=1&oLng=1"
     ]
     locations_key = "stations"
 

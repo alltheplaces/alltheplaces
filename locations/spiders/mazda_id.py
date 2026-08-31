@@ -23,7 +23,7 @@ class MazdaIDSpider(Spider):
         dealers = {}
         variable_map = {
             "dealerId": "ref",
-            "dealerName": "branch",
+            "dealerName": "name",
             "dealerAddress": "address",
             "dealerPhone": "phone",
             "dealersalesOperationalHour": "hours_sales",
@@ -56,7 +56,6 @@ class MazdaIDSpider(Spider):
 
         for dealer in dealers.values():
             item = DictParser.parse(dealer)
-            item["branch"] = dealer["branch"].removeprefix("Mazda ")
             hours_sales_text = " ".join(Selector(text=dealer["hours_sales"]).xpath("//text()").getall())
             hours_service_text = " ".join(Selector(text=dealer["hours_service"]).xpath("//text()").getall())
             if hours_sales_text:

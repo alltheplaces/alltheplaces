@@ -1,5 +1,10 @@
+from typing import Any, Iterable
+
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
@@ -15,6 +20,8 @@ class AllianzDESpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     sitemap_rules = [("", "parse_sd")]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
-    def post_process_item(self, item, response, ld_data):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["name"] = None
         item["phone"] = ld_data.get("telePhone", None)
+        apply_category(Categories.OFFICE_INSURANCE, item)
         yield item

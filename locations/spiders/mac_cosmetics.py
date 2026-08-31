@@ -5,6 +5,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 
@@ -12,7 +13,8 @@ from locations.hours import DAYS_EN, OpeningHours
 class MacCosmeticsSpider(Spider):
     name = "mac_cosmetics"
     item_attributes = {"brand": "MAC Cosmetics", "brand_wikidata": "Q2624442"}
-    allowed_domains = ["maccosmetics.com"]
+    allowed_domains = ["maccosmetics.ca"]
+    requires_proxy = True
     only_hour = re.compile(r"^(\d\d?)([ap]m)", re.IGNORECASE)
     colon_missing = re.compile(r"^(\d?\d)(\d\d[ap]m)", re.IGNORECASE)
     am_missing = re.compile(r"^(\d?\d(:\d\d)?)$")
@@ -45,7 +47,7 @@ class MacCosmeticsSpider(Spider):
             }
         ]
         yield FormRequest(
-            "https://www.maccosmetics.com/rpc/jsonrpc.tmpl?dbgmethod=locator.doorsandevents",
+            "https://www.maccosmetics.ca/rpc/jsonrpc.tmpl?dbgmethod=locator.doorsandevents",
             method="POST",
             formdata={"JSONRPC": dumps(jsonrpc)},
         )
@@ -72,6 +74,8 @@ class MacCosmeticsSpider(Spider):
                 any_open, opening_hours = self.parse_opening_hours(feature)
                 item["opening_hours"] = opening_hours
             if any_open and not item["name"].endswith("- Closed"):
+                item["branch"] = item.pop("name").replace("M·A·C ", "").replace("MAC Cosmetics at ", "")
+                apply_category(Categories.SHOP_COSMETICS, item)
                 yield item
 
     def parse_opening_hours(self, feature):

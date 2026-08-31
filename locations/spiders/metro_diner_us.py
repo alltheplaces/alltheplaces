@@ -12,4 +12,5 @@ class MetroDinerUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         extract_google_position(item, response)
+        item.pop("image", None)  # Generic brand image, not per-location
         yield item

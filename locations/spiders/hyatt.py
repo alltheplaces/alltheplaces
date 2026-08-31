@@ -3,6 +3,7 @@ from typing import AsyncIterator
 
 from scrapy import Request, Spider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -44,7 +45,9 @@ class HyattSpider(Spider):
             "website": response.url,
         }
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.HOTEL, item)
+        yield item
 
     def parse(self, response):
         urls = response.xpath('//li[contains(@class, "property")]/a/@href').extract()

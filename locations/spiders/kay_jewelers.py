@@ -4,6 +4,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import DAYS, OpeningHours
@@ -27,6 +28,7 @@ class KayJewelersSpider(Spider):
             for poi in data:
                 poi_addr = poi["ExtraData"]["Address"]
                 item = DictParser.parse(poi)
+                item["name"] = None
                 item["street_address"] = item.pop("addr_full", None)
                 item["state"] = poi_addr.get("Region")
                 item["country"] = poi_addr.get("CountryCode")
@@ -38,6 +40,8 @@ class KayJewelersSpider(Spider):
                 item["lon"], item["lat"] = coords[0], coords[1]
 
                 self.opening_hours(poi["ExtraData"].get("HoursOfOpStruct"), item)
+                apply_category(Categories.SHOP_JEWELRY, item)
+
                 yield item
 
     def opening_hours(self, hours, item):

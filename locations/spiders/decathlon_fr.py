@@ -16,6 +16,7 @@ class DecathlonFRSpider(WoosmapSpider):
     def parse_item(self, item, feature):
         slug = re.sub(r"[^\w]+", " ", unidecode(item["name"].lower()).strip()).replace(" ", "-")
         item["website"] = self.website_template.format(slug=slug, ref=item["ref"])
+        item["branch"] = item.pop("name")
         props = feature["properties"]["user_properties"]
         publish_on_website = props["publishOnEcommerce"]
         if publish_on_website:

@@ -1,23 +1,27 @@
 import json
 from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
+from scrapy import Request
 from scrapy.http import Response
 
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.big_c_th import BigCTHSpider
 from locations.spiders.lotuss_th import LotussTHSpider
 from locations.spiders.makro_th import MakroTHSpider
 from locations.spiders.ptt_th import PttTHSpider
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class KasikornBankTHSpider(Spider):
+class KasikornBankTHSpider(PlaywrightSpider):
     name = "kasikorn_bank_th"
     item_attributes = {"brand_wikidata": "Q276557"}
     requires_proxy = "TH"
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     LOCATED_IN_MAPPINGS = [
         (["7-11", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
@@ -47,7 +51,7 @@ class KasikornBankTHSpider(Spider):
             headers={
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
                 "referer": "https://www.kasikornbank.com/th/branch/",
-                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+                "user-agent": BROWSER_DEFAULT,
             },
         )
 

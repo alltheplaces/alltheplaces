@@ -16,16 +16,20 @@ class AustinParksAndRecreationDepartmentTreesUSSpider(ArcGISFeatureServerSpider)
     }
     host = "services.arcgis.com"
     context_path = "0L95CJ0VTaxqcmED/ArcGIS"
-    service_id = "Public_PARD_Tree_Inventory_View"
-    layer_id = "0"
+    service_id = "BIOTA_APR_TreeInventory_PublicView"
+    layer_id = "2"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature.get("ASSET_STATUS") == "Removed":
+            return
+
         item.pop("name", None)
-        item["ref"] = str(feature["GlobalID"])
+        item["ref"] = str(feature["ASSET_MGMT_ID"])
         apply_category(Categories.NATURAL_TREE, item)
         item["extras"]["protected"] = "yes"
         item["extras"]["species"] = feature["SCIENTIFIC_NAME"]
-        item["extras"]["taxon:en"] = feature["SPECIES_NAME"]
+        item["extras"]["taxon:en"] = feature["COMMON_NAME"]
         if dbh_in := feature.get("DBH"):
             item["extras"]["diameter"] = f"{dbh_in} in"
+
         yield item

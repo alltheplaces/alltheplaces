@@ -1,32 +1,25 @@
-import re
-from typing import Any
-from urllib.parse import urljoin
+from typing import Any, Iterable
 
-import scrapy
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class TegutDESpider(scrapy.Spider):
+class TegutDESpider(StructuredDataSpider):
     name = "tegut_de"
     item_attributes = {"brand": "tegut", "brand_wikidata": "Q1547993"}
     allowed_domains = ["www.tegut.com"]
-    start_urls = [
-        "https://www.tegut.com/maerkte/marktsuche.html?mktegut%5Baddress%5D=Stuttgart&mktegut%5Bradius%5D=2000&mktegut%5Bsubmit%5D=Markt+suchen"
-    ]
+    start_urls = ["https://www.tegut.com/maerkte/maerkteliste.html"]
+    wanted_types = ["GroceryStore"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for lat, lon, popup in re.findall(
-            r"L\.Marker\(\[(-?\d+\.\d+), (-?\d+\.\d+)], {.+?(bindPopup\(\".+?\"\);)", response.text, re.DOTALL
-        ):
-            # TODO: Decode popup
-            item = Feature()
-            item["lat"] = lat
-            item["lon"] = lon
-            item["ref"] = item["website"] = urljoin(
-                "https://www.tegut.com/maerkte/markt/",
-                re.search(r"([^/]+\.html)", popup).group(1),
-            )
+        for href in set(response.xpath('//a[contains(@href, "/maerkte/markt/")]/@href').getall()):
+            yield response.follow(href, callback=self.parse_sd)
 
-            yield item
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item.pop("name", None)
+        item.pop("image", None)
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+        yield item

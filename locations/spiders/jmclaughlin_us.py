@@ -73,6 +73,6 @@ class JmclaughlinUSSpider(Spider):
                     start_time = f"{start_hour}:{start_min} {start_am_pm}"
                     end_time = f"{end_hour}:{end_min} {end_am_pm}"
                     oh.add_range(day, start_time, end_time, time_format="%I:%M %p")
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
             yield item

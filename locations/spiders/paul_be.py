@@ -27,7 +27,6 @@ class PaulBESpider(Spider):
             item["postcode"] = location.xpath('.//span[@class="postal-code"]/text()').get()
             item["country"] = location.xpath('.//span[@class="country"]/text()').get()
 
-            item["image"] = "https://www.paul-belgium.be/" + response.xpath('.//div[@itemprop="image"]/img/@src').get()
             item["phone"] = location.xpath('.//a[contains(@href, "tel:")]/@href').get()
 
             item["opening_hours"] = OpeningHours()

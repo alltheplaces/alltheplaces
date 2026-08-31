@@ -1,23 +1,27 @@
-from scrapy import Spider
+import re
+from typing import Any, Iterable
 
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class PokawaSpider(Spider):
+class PokawaSpider(SitemapSpider, StructuredDataSpider):
     name = "pokawa"
     item_attributes = {"brand": "Pokawa", "brand_wikidata": "Q123018553"}
-    start_urls = ["https://restaurants.pokawa.com/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php"]
+    sitemap_urls = ["https://restaurants.pokawa.com/sitemap.xml"]
+    sitemap_rules = [(r"https://restaurants\.pokawa\.com/[^/]+/[^/]+/[^/]+/[^/]+/[^/]+$", "parse_sd")]
+    wanted_types = ["LocalBusiness"]
 
-    def parse(self, response, **kwargs):
-        for location in response.xpath("/locator/store/item"):
-            item = Feature()
-            item["name"] = location.xpath("location/text()").get()
-            item["addr_full"] = location.xpath("address/text()").get()
-            item["lat"] = location.xpath("latitude/text()").get()
-            item["lon"] = location.xpath("longitude/text()").get()
-            item["website"] = location.xpath("exturl/text()").get()
-            item["ref"] = location.xpath("storeId/text()").get()
-            item["country"] = location.xpath("country/text()").get()
-            item["image"] = location.xpath("storeimage/text()").get()
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["ref"] = response.url.rstrip("/").rsplit("/", 1)[-1]
+        if match := re.search(r'lat\\":(-?\d+\.\d+).{0,40}?lng\\":(-?\d+\.\d+)', response.text):
+            item["lat"], item["lon"] = match.groups()
+        if match := re.search(r'shortName\\":\\"([^"\\]+)', response.text):
+            item.pop("name", None)
+            item["branch"] = match.group(1)
+        apply_category(Categories.FAST_FOOD, item)
+        yield item

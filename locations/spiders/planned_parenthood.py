@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -42,4 +43,6 @@ class PlannedParenthoodSpider(SitemapSpider):
                 properties["lat"] = float(match.group(1))
                 properties["lon"] = float(match.group(2))
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.CLINIC, item)
+        yield item

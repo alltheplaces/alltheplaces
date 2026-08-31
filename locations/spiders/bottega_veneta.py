@@ -1,18 +1,19 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class BottegaVenetaSpider(scrapy.Spider):
+class BottegaVenetaSpider(PlaywrightSpider):
     name = "bottega_veneta"
-    item_attributes = {
-        "brand": "Bottega Veneta",
-        "brand_wikidata": "Q894874",
-    }
+    item_attributes = {"brand": "Bottega Veneta", "brand_wikidata": "Q894874"}
     allowed_domains = ["bottegaveneta.com"]
     start_urls = ["https://www.bottegaveneta.com/de-de/storelocator"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
         countries = response.xpath('//select[@id="country"]/option/@value').extract()
@@ -24,14 +25,13 @@ class BottegaVenetaSpider(scrapy.Spider):
         for store in response.json()["storesData"]["stores"]:
             item = DictParser.parse(store)
             item["website"] = store.get("detailsUrl")
+            item["branch"] = item.pop("name")
             oh = OpeningHours()
             for day, hour in store.get("openingHours").items():
                 if hour.get("openFromTo") == "NO DATA":
                     continue
-                oh.add_range(
-                    day=day,
-                    open_time=hour.get("openFromTo").split(" - ")[0],
-                    close_time=hour.get("openFromTo").split(" - ")[1],
-                )
-            item["opening_hours"] = oh.as_opening_hours()
+                oh.add_range(day, hour.get("openFromTo").split(" - ")[0], hour.get("openFromTo").split(" - ")[1])
+            item["opening_hours"] = oh
+
+            apply_category(Categories.SHOP_FASHION_ACCESSORIES, item)
             yield item

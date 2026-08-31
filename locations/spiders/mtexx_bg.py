@@ -1,8 +1,9 @@
+import json
 import re
 
-import chompjs
-from scrapy import Request, Spider
+from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -11,19 +12,22 @@ class MtexxBGSpider(Spider):
     item_attributes = {"operator": "M-Texx", "operator_wikidata": "Q122947768"}
     allowed_domains = ["m-texx.com"]
     start_urls = ["https://m-texx.com/locations"]
-    no_refs = True
 
     def parse(self, response, **kwargs):
-        url = re.search(r"(static/chunks/app/\(website\)/locations/page-\w+\.js)", response.text)
-        yield Request("https://m-texx.com/_next/" + url.group(1), callback=self.parse_locations)
-
-    def parse_locations(self, response, **kwargs):
-        locations = chompjs.parse_js_objects(re.search(r"exports=\[({city:.+}])}", response.text).group(1))
-        for location in locations:
-            properties = {
-                "city": location["city"],
-                "addr_full": location["popUp"],
-                "lat": location["geocode"][0],
-                "lon": location["geocode"][1],
-            }
-            yield Feature(**properties)
+        data_regex = r"<script>self\.__next_f\.push\((.+)?\)<\/script>"
+        data_raw = re.search(data_regex, response.text, re.IGNORECASE).group(1)
+        data_raw = re.sub(r"\\\"", '"', data_raw)
+        cities_raw = re.search(r"\"initialCities\":(.+)?}\],\[", data_raw, re.IGNORECASE).group(1)
+        cities = json.loads(cities_raw)
+        for city in cities:
+            city_name = city["name"]
+            for location in city["locations"]:
+                properties = {
+                    "ref": location["id"],
+                    "city": city_name,
+                    "addr_full": location["address"],
+                    "lat": location["coordinates"][0],
+                    "lon": location["coordinates"][1],
+                }
+                apply_category(Categories.RECYCLING, properties)
+                yield Feature(**properties)

@@ -103,7 +103,8 @@ class NprPPTjenesterNOSpider(Spider):
 
         # Category: PP-tjenesten is a municipal/county government educational-psychological service
         # that supports schools and kindergartens with special education needs assessment
-        apply_category({"office": "government", "government": "education"}, item)
+        apply_category({"office": "government"}, item)
+        item.set_tag("government", "education")
 
         yield item
 

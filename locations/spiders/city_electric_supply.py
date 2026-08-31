@@ -15,7 +15,7 @@ class CityElectricSupplySpider(Spider):
         if data := re.search(r"var jsonAllBranches = (\[.+\]);", response.text):
             for location in json.loads(data.group(1)):
                 item = DictParser.parse(location)
-                item["extras"]["addr:unit"] = location["Address2"]
+                item["unit"] = location["Address2"]
                 item["name"] = location["BranchName"]
                 item["ref"] = location["BranchId"]
                 item["website"] = response.urljoin(f'/branch/{location["BranchId"]}')

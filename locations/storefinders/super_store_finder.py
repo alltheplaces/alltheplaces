@@ -2,7 +2,8 @@ import re
 from html import unescape
 from typing import AsyncIterator, Iterable
 
-from scrapy import Selector, Spider
+from parsel import Selector
+from scrapy import Spider
 from scrapy.http import Request, TextResponse
 
 from locations.hours import OpeningHours
@@ -53,7 +54,7 @@ class SuperStoreFinderSpider(Spider):
                 "name": location.xpath("./location/text()").get(),
                 "lat": location.xpath("./latitude/text()").get(),
                 "lon": location.xpath("./longitude/text()").get(),
-                "addr_full": unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get())),
+                "addr_full": unescape(re.sub(r"\s+", " ", location.xpath("./address/text()").get(""))),
                 "phone": location.xpath("./telephone/text()").get(),
                 "email": location.xpath("./email/text()").get(),
                 "website": location.xpath("./website/text()").get(),
@@ -66,13 +67,15 @@ class SuperStoreFinderSpider(Spider):
             if not properties["ref"]:
                 properties["ref"] = location.xpath("./sortord/text()").get()
 
+            item = Feature(**properties)
+
             hours_string = location.xpath("./operatingHours/text()").get()
             if hours_string:
                 hours_string = hours_string.replace("<div>", " ").replace("</div>", " ").strip()
-                properties["opening_hours"] = OpeningHours()
-                properties["opening_hours"].add_ranges_from_string(hours_string)
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(hours_string)
 
-            yield from self.parse_item(Feature(**properties), location) or []
+            yield from self.parse_item(item, location) or []
 
     def parse_item(self, item: Feature, location: Selector) -> Iterable[Feature]:
         yield item

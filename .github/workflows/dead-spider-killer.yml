@@ -1,0 +1,43 @@
+name: Dead Spider Killer
+
+on:
+  schedule:
+    - cron: "0 6 * * 3"  # Weekly on Wednesday at 6 AM UTC
+  workflow_dispatch:
+    inputs:
+      max_prs:
+        description: "Max removal PRs to create"
+        default: "5"
+        type: string
+      max_issues:
+        description: "Max investigation issues to create"
+        default: "10"
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  kill-dead-spiders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Run dead spider killer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          uv run python ci/dead_spider_killer.py \
+            --max-prs ${{ inputs.max_prs || '5' }} \
+            --max-issues ${{ inputs.max_issues || '10' }}

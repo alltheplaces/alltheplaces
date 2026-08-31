@@ -3,6 +3,7 @@ from scrapy.spiders import CSVFeedSpider
 
 from locations.categories import apply_category
 from locations.items import Feature, set_closed
+from locations.licenses import Licenses
 
 CATEGORIES = {
     "balloonport": None,
@@ -16,7 +17,10 @@ CATEGORIES = {
 
 class OurAirportsSpider(CSVFeedSpider):
     name = "our_airports"
-    dataset_attributes = {"license": "Public Domain", "license:wikidata": "Q19652"}
+    dataset_attributes = Licenses.UNLICENSE.value | {
+        "attribution:website": "https://davidmegginson.github.io/ourairports-data/",
+        "attribution:name": "OurAirports Data",
+    }
     start_urls = ["https://davidmegginson.github.io/ourairports-data/airports.csv"]
 
     def parse_row(self, response: Response, row: dict):

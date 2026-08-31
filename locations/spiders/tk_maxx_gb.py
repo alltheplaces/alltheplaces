@@ -9,7 +9,7 @@ class TkMaxxGBSpider(YextAnswersSpider):
     name = "tk_maxx_gb"
     STORE_TYPES = {
         "TKMAXX": {"brand": "TK Maxx", "brand_wikidata": "Q23823668"},
-        "HOMESENSE": {"brand": "Homesense", "brand_wikidata": "Q16844433"},
+        "HOMESENSE": {"brand": "HomeSense", "brand_wikidata": "Q16844433"},
     }
     api_key = "ce8e33e14f7f6706a1a86e05e440d1a0"
     experience_key = "tk-maxx-search-experience"

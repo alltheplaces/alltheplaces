@@ -14,7 +14,9 @@ class SuperHotelJPSpider(Spider):
 
     def make_request(self, offset: int, count: int = 100) -> JsonRequest:
         return JsonRequest(
-            "https://pkg.navitime.co.jp/superhotel-map/api/proxy2/shop/list?offset={}&limit={}".format(offset, count)
+            "https://pkg.navitime.co.jp/superhotel-map/api/proxy2/shop/list?datum=wgs84&offset={}&limit={}".format(
+                offset, count
+            )
         )
 
     async def start(self) -> AsyncIterator[JsonRequest]:

@@ -1,14 +1,16 @@
 import json
+from typing import Iterable
 
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class FonehouseGBSpider(CrawlSpider):
+class FonehouseGBSpider(CrawlSpider, StructuredDataSpider):
     name = "fonehouse_gb"
     item_attributes = {
         "brand": "fonehouse",
@@ -17,36 +19,35 @@ class FonehouseGBSpider(CrawlSpider):
     }
 
     start_urls = ["https://www.fonehouse.co.uk/store-finder"]
-    rules = [Rule(LinkExtractor(allow=r"/stores/([^/]+)$"), callback="parse")]
-    # wanted_types = ["LocalBusiness"]
+    rules = [Rule(LinkExtractor(allow=r"/stores/([^/]+)$"), callback="parse_sd")]
+    wanted_types = ["LocalBusiness"]
 
-    def parse(self, response):
-        ldjson = response.xpath('//script[@type="application/ld+json"]/text()[contains(.,\'"LocalBusiness"\')]').get()
-        data = json.decoder.JSONDecoder(strict=False).raw_decode(ldjson, ldjson.index("{"))[0]
-        oh = OpeningHours()
-        hours = data.get("openingHoursSpecification")
-        for day in hours:
-            if day["opens"] == day["closes"]:
+    def iter_linked_data(self, response: Response) -> Iterable[dict]:
+        # The ld+json blob has a stray trailing comma after the JSON object, which
+        # breaks strict JSON (and json5/chompjs) parsing, so decode just the object.
+        for text in response.xpath('//script[@type="application/ld+json"]//text()').getall():
+            try:
+                ld_obj, _ = json.decoder.JSONDecoder(strict=False).raw_decode(text, text.index("{"))
+            except (ValueError, json.JSONDecodeError):
                 continue
-            oh.add_range(day.get("dayOfWeek")[0][:2].capitalize(), day.get("opens"), day.get("closes"))
 
-        properties = {
-            "ref": response.url,
-            "name": data.get("name"),
-            "branch": data.pop("name").removeprefix("Fonehouse").strip(),
-            "phone": data.get("telephone"),
-            "email": data.get("email"),
-            "street_address": data.get("address", {}).get("streetAddress"),
-            "city": data.get("address", {}).get("addressLocality"),
-            "state": data.get("address", {}).get("addressCountry"),
-            "country": "GB",
-            "postcode": data.get("address", {}).get("postalCode"),
-            "lat": data.get("geo", {}).get("latitude"),
-            "lon": data.get("geo", {}).get("longitude"),
-            "image": data.get("image"),
-            "website": response.url,
-            "opening_hours": oh,
-        }
-        item = Feature(**properties)
+            types = ld_obj.get("@type")
+            if not types:
+                continue
+            if not isinstance(types, list):
+                types = [types]
+            types = [LinkedDataParser.clean_type(t) for t in types]
+
+            for wanted_types in self.wanted_types:
+                if isinstance(wanted_types, list):
+                    if all(wanted in types for wanted in wanted_types):
+                        yield ld_obj
+                elif wanted_types in types:
+                    yield ld_obj
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = item["website"] = response.url
+        item["branch"] = item.pop("name").removeprefix("Fonehouse").strip()
+        item["country"] = "GB"
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item

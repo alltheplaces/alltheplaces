@@ -1,13 +1,18 @@
 import json
+from typing import Iterable
 
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-def apply_category_from_ld(item, ld_data: {}):
+def apply_category_from_ld(item: Feature, ld_data: dict) -> None:
     if ld_data["@type"] == "Pharmacy":
         apply_category(Categories.PHARMACY, item)
     elif ld_data["@type"] == "GasStation":
@@ -16,7 +21,7 @@ def apply_category_from_ld(item, ld_data: {}):
         apply_category(Categories.CAFE, item)
 
 
-def set_located_in(brand: {}, item):
+def set_located_in(brand: dict, item: Feature) -> None:
     if brand.get("located_in") or brand.get("located_in_wikidata"):
         item["located_in"] = brand.get("located_in")
         item["located_in_wikidata"] = brand.get("located_in_wikidata")
@@ -25,7 +30,7 @@ def set_located_in(brand: {}, item):
         item["located_in_wikidata"] = brand.get("brand_wikidata")
 
 
-class TescoGBSpider(SitemapSpider, StructuredDataSpider):
+class TescoGBSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "tesco_gb"
     TESCO = {"brand": "Tesco", "brand_wikidata": "Q487494"}
     TESCO_EXTRA = {"brand": "Tesco Extra", "brand_wikidata": "Q25172225"}
@@ -34,7 +39,11 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
     TESCO_METRO = {"brand": "Tesco Metro", "brand_wikidata": "Q57551648"}
     item_attributes = TESCO
     sitemap_urls = ["https://www.tesco.com/store-locator/sitemap.xml"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "ROBOTSTXT_OBEY": False,
+    }
     requires_proxy = True
     strip_names = [
         "Tesco Café",
@@ -56,7 +65,7 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
                 for hours in ld_data["openingHours"]
             ]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         apply_category_from_ld(item, ld_data)
         if ld_data["@type"] in ["Pharmacy", "GasStation", "CafeOrCoffeeShop"]:
             self.set_located_in(item)
@@ -90,7 +99,7 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider):
 
         yield item
 
-    def set_located_in(self, item):
+    def set_located_in(self, item: Feature) -> None:
         if "Express" in item["name"]:
             set_located_in(self.TESCO_EXPRESS, item)
         elif "Superstore" in item["name"]:

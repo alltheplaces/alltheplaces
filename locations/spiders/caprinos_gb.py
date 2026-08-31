@@ -12,6 +12,7 @@ from locations.pipelines.address_clean_up import clean_address
 class CaprinosGBSpider(Spider):
     name = "caprinos_gb"
     item_attributes = {"brand": "Caprinos", "brand_wikidata": "Q125623745"}
+    requires_proxy = True
     start_urls = ["https://www.caprinospizza.co.uk/api/get_restaurant_urls"]  # No API provides addresses
     custom_settings = {"ROBOTSTXT_OBEY": False}
 

@@ -11,7 +11,7 @@ from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.ampm_us import AmpmUSSpider
 from locations.spiders.brookshires_us import BrookshiresUSSpider
 from locations.spiders.capital_one import CapitalOneSpider
-from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
+from locations.spiders.caseys_general_store_us import CaseysGeneralStoreUSSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import COSTCO_SHARED_ATTRIBUTES
@@ -34,7 +34,7 @@ from locations.spiders.quickchek_us import QuickchekUSSpider
 from locations.spiders.race_trac_us import RaceTracUSSpider
 from locations.spiders.royal_farms import RoyalFarmsSpider
 from locations.spiders.safeway import SafewaySpider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.sheetz import SheetzSpider
 from locations.spiders.speedway_us import SpeedwayUSSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
@@ -120,13 +120,13 @@ class CitiSpider(Spider):
         (["SHEETZ"], SheetzSpider.item_attributes),
         (["UDF"], UnitedDairyFarmersUSSpider.item_attributes),
         (["QUICKCHEK"], QuickchekUSSpider.item_attributes),
-        (["7ELEVEN", "7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["7ELEVEN", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["WALGREENS"], WalgreensSpider.WALGREENS),
         (["CVS"], CVS_BRANDS["CVS Pharmacy"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
         (["SPEEDWAY"], SpeedwayUSSpider.item_attributes),
         (["TARGET"], TargetUSSpider.item_attributes),
-        (["CASEY"], CaseysGeneralStoreSpider.item_attributes),
+        (["CASEY"], CaseysGeneralStoreUSSpider.item_attributes),
         (["COSTCO"], {"brand": "Costco", "brand_wikidata": COSTCO_SHARED_ATTRIBUTES["brand_wikidata"]}),
         (["AMPM"], AmpmUSSpider.item_attributes),
         (["MAPCO"], MapcoUSSpider.item_attributes),

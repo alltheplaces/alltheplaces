@@ -4,6 +4,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -31,5 +32,5 @@ class EcopackBGSpider(Spider):
                     item["street_address"] = container.get("formatted_address")
                     item["lat"] = container.get("lat")
                     item["lon"] = container.get("lon")
-
+                    apply_category(Categories.RECYCLING, item)
                     yield item

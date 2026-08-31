@@ -5,11 +5,8 @@ from typing import Iterable
 from urllib.parse import urlparse
 
 import pycountry
-import requests
 import tldextract
 from unidecode import unidecode
-
-from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 _DATA_DIR = Path(__file__).resolve().parent / "data"
 NSI_FILE_PATH = _DATA_DIR / "nsi.json"
@@ -34,18 +31,8 @@ class NSI(metaclass=Singleton):
 
     def __init__(self):
         self.loaded: bool = False
-        self.wikidata_json: dict = None
-        self.nsi_json: dict = None
-
-    @staticmethod
-    def _request_file(file: str) -> dict:
-        resp = requests.get(
-            "https://cdn.jsdelivr.net/npm/name-suggestion-index@7/dist/{}".format(file),
-            headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
-        )
-        if not resp.status_code == 200:
-            raise Exception("NSI load failure")
-        return resp.json()
+        self.wikidata_json: dict = {}
+        self.nsi_json: dict = {}
 
     def _ensure_loaded(self):
         if not self.loaded:

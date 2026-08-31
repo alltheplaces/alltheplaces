@@ -1,37 +1,22 @@
-import re
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
 
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class ShoneysSpider(scrapy.Spider):
+class ShoneysSpider(StructuredDataSpider):
     name = "shoneys"
     item_attributes = {"brand": "Shoney's", "brand_wikidata": "Q7500392"}
     allowed_domains = ["shoneys.com"]
-    start_urls = ("https://www.shoneys.com/wp-json/wp/v2/locations",)
+    start_urls = ["https://www.shoneys.com/locations"]
+    wanted_types = ["Restaurant"]
 
-    def parse(self, response):
-        for row in response.json():
-            try:
-                hours = OpeningHours()
-                for day, interval in row["acf"]["working_hours"].items():
-                    if interval in ("", "CLOSED"):
-                        continue
-                    open_time, close_time = re.split(" ?- ?", interval.replace("to", "-"))
-                    hours.add_range(day[:2].capitalize(), open_time.strip(), close_time.strip(), "%I:%M%p")
-            except:
-                self.logger.error("Failed to parse opening hours:  {}".format(row["acf"]["working_hours"].items()))
-
-            properties = {
-                "ref": row["id"],
-                "lat": row["acf"]["address"]["lat"],
-                "lon": row["acf"]["address"]["lng"],
-                "website": row["link"],
-                "name": row["title"]["rendered"],
-                "addr_full": row["acf"]["address"]["address"],
-                "phone": row["acf"]["phone"],
-                "opening_hours": hours.as_opening_hours(),
-            }
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["ref"] = item["lat"] = ld_data["latitude"]
+        item["lon"] = ld_data["longitude"]
+        item["image"] = None
+        apply_category(Categories.RESTAURANT, item)
+        yield item

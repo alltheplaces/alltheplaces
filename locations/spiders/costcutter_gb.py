@@ -1,21 +1,30 @@
-import scrapy
+import re
+from typing import Iterable
 
-from locations.linked_data_parser import LinkedDataParser
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CostcutterGBSpider(scrapy.spiders.SitemapSpider):
+class CostcutterGBSpider(SitemapSpider, StructuredDataSpider):
     name = "costcutter_gb"
-    item_attributes = {
-        "brand": "Costcutter",
-        "brand_wikidata": "Q5175072",
-        "country": "GB",
-    }
+    item_attributes = {"brand": "Costcutter", "brand_wikidata": "Q5175072"}
     allowed_domains = ["costcutter.co.uk"]
     sitemap_urls = ["https://store-locator.costcutter.co.uk/sitemap.xml"]
-    sitemap_rules = [("/costcutter-*", "parse_store")]
+    sitemap_rules = [(r"uk/en-gb/[-\w]+/[-\w/]+/(\d+)$", "parse")]
+    wanted_types = ["FoodEstablishment"]
     drop_attributes = {"image"}
+    search_for_facebook = False
+    search_for_twitter = False
 
-    def parse_store(self, response):
-        item = LinkedDataParser.parse(response, "ConvenienceStore")
-        if item and "closed" not in item["name"].lower():
-            return item
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        if img := response.xpath('//source[contains(@srcset, "api.mapbox.com")]/@srcset').get():
+            if m := re.search(r"\((-?\d+\.\d+),(-?\d+\.\d+)\)", img):
+                item["lon"], item["lat"] = m.groups()
+
+        apply_category(Categories.SHOP_CONVENIENCE, item)
+
+        yield item

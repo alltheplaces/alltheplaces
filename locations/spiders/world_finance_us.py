@@ -1,43 +1,32 @@
-from typing import Any
+from typing import Iterable
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class WorldFinanceUSSpider(Spider):
+class WorldFinanceUSSpider(SitemapSpider, StructuredDataSpider):
     name = "world_finance_us"
     item_attributes = {"brand": "World Finance", "brand_wikidata": "Q3569971"}
-    start_urls = ["https://www.loansbyworld.com/find-a-branch"]
+    sitemap_urls = ["https://www.loansbyworld.com/sitemap.xml"]
+    sitemap_rules = [("/branches/", "parse_sd")]
 
-    def parse(self, response: Response) -> Any:
-        for location in response.xpath('//div[@class="branch-data"]'):
-            properties = {
-                "ref": location.xpath(".//@data-branch-id").get(),
-                "lat": location.xpath(".//@data-branch-lat").get(),
-                "lon": location.xpath(".//@data-branch-lng").get(),
-                "addr_full": location.xpath(".//@data-branch-address").get(),
-                "street_address": clean_address(
-                    [location.xpath(".//@data-branch-line1").get(), location.xpath(".//@data-branch-line2").get()]
-                ),
-                "city": location.xpath(".//@data-branch-city").get(),
-                "state": location.xpath(".//@data-branch-state").get(),
-                "postcode": location.xpath(".//@data-branch-zip").get(),
-                "phone": location.xpath(".//@data-branch-phone").get(),
-                "website": "https://www.loansbyworld.com/branches/branch-" + location.xpath(".//@data-branch-id").get(),
-            }
-            yield Request(
-                url=properties["website"], callback=self.parse_opening_hours, meta={"item": Feature(**properties)}
-            )
-
-    def parse_opening_hours(self, response: Response) -> Any:
-        item = response.meta["item"]
-        hours_string = " ".join(
-            filter(None, map(str.strip, response.xpath('//div[@class="dates_list"]//text()').getall()))
-        )
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item.pop("name")
+        try:
+            oh = OpeningHours()
+            for day_time in ld_data.get("openingHoursSpecification"):
+                day = day_time.get("dayOfWeek")
+                time = day_time.get("opens")
+                if time == "Closed":
+                    oh.set_closed(day)
+                elif time:
+                    open_time, close_time = time.split("-")
+                    oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M%p")
+            item["opening_hours"] = oh
+        except:
+            pass
         yield item

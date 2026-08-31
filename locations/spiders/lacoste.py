@@ -1,32 +1,52 @@
-import html
 from typing import Iterable
 
-from scrapy.http import Response
-
+from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import FIREFOX_LATEST
+from locations.storefinders.yext_answers import YextAnswersSpider
+
+# Markets lacoste.com serves a localised site for, mapped from the store's country.
+# Anything else keeps the default /us site.
+LOCALISED_MARKETS = {
+    "AT": "at",
+    "BE": "be",
+    "BR": "br",
+    "CH": "ch",
+    "DE": "de",
+    "DK": "dk",
+    "ES": "es",
+    "FR": "fr",
+    "IT": "it",
+    "KR": "kr",
+    "MC": "fr",
+    "MX": "mx",
+    "NL": "nl",
+    "PT": "pt",
+    "SE": "se",
+}
 
 
-class LacosteSpider(JSONBlobSpider):
+class LacosteSpider(YextAnswersSpider):
     name = "lacoste"
     item_attributes = {"brand": "Lacoste", "brand_wikidata": "Q309031"}
-    start_urls = ["https://www.lacoste.com/us/stores?country=&city=&json=true"]
-    custom_settings = {"USER_AGENT": FIREFOX_LATEST}
-    requires_proxy = True
+    api_key = "838385fd3ca042db80e71cce34e3d417"
+    api_version = "20220511"
+    environment = "PRODUCTION"
+    experience_key = "locator-search-eu"
+    locale = "en-US"
 
-    def extract_json(self, response: Response) -> list:
-        return response.json()["stores"]
+    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_CLOTHES, item)
+        # c_liveOnPages marks stores that have no page on lacoste.com; both their
+        # websiteUrl and their slug point at URLs that do not exist.
+        if not location.get("c_liveOnPages"):
+            item["website"] = None
+            yield item
+            return
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["street_address"] = item.pop("addr_full")
-        item["website"] = f'https://www.lacoste.com/us/stores{feature["url"]}'
-        item["name"] = html.unescape(item["name"]).strip()
-        country = feature["url"].split("/")[1]
-        if "taiwan" in country:
-            item["country"] = "TW"
-        elif country.startswith("china"):
-            item["country"] = "CN"
-        else:
-            item["country"] = country.title()
+        # websiteUrl is unusable even for live stores: absent on some, and elsewhere
+        # pointing at /us with utm parameters and sometimes a doubled slash. Build the
+        # URL from the slug instead and localise it by country.
+        path = location["slug"].strip("/").removeprefix("us/stores/")
+        market = LOCALISED_MARKETS.get(item["country"], "us")
+        item["website"] = f"https://www.lacoste.com/{market}/stores/{path}"
         yield item

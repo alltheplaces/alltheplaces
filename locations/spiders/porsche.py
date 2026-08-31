@@ -28,7 +28,6 @@ class PorscheSpider(Spider):
             shop_info = dealer.get("dealer", {})
             item = DictParser.parse(shop_info)
             item["country"] = country
-            item["branch"] = item.pop("name")
             item["street_address"] = item.pop("street")
             item["phone"] = shop_info.get("contactDetails", {}).get("phoneNumber")
             item["email"] = shop_info.get("contactDetails", {}).get("emailAddress")

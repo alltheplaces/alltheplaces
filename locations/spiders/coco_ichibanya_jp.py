@@ -1,7 +1,7 @@
-from typing import Any
+from typing import AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -10,20 +10,20 @@ from locations.dict_parser import DictParser
 class CocoIchibanyaJPSpider(Spider):
     name = "coco_ichibanya_jp"
 
-    start_urls = ["https://tenpo.ichibanya.co.jp/api/point/xn/"]
-    allowed_domains = ["tenpo.ichibanya.co.jp"]
-    country_code = "JP"
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for points in ["w", "xj", "xn", "xp", "z"]:
+            yield JsonRequest(url=f"https://tenpo.ichibanya.co.jp/api/point/{points}/")
 
     item_attributes = {
         "brand_wikidata": "Q5986105",
     }
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response):
         for store in response.json()["items"]:
 
             item = DictParser.parse(store)
             item["ref"] = store["key"]
-            item["website"] = f"https://tenpo.ichibanya.co.jp/map/{store['key']}"
+            item["website"] = f"https://tenpo.ichibanya.co.jp/map/{store['key']}/"
             item["extras"]["addr:province"] = store["extra_fields"]["住所(都道府県)"]
             item["city"] = store["extra_fields"]["住所(市町村区郡)"]
             item["street_address"] = store["extra_fields"]["住所(その他)"]

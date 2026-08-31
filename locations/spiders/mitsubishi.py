@@ -40,7 +40,6 @@ class MitsubishiSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         countries = list(GeonamesCache().get_countries().keys())
-        countries.remove("BE")  # mitsubishi_be_lu
         for country in countries:
             locale = get_locale(country)
             language = locale.split("-")[0] if locale else "en"
@@ -216,7 +215,7 @@ class MitsubishiSpider(Spider):
         if sales_available:
             sales_item = self.build_sales_item(item)
             sales_item["opening_hours"] = self.parse_hours(sales_hours, item["country"])
-            apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, service_available)
             yield sales_item
 
         if service_available:

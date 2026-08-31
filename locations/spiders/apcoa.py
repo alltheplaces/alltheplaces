@@ -2,6 +2,7 @@ from scrapy.http import TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
@@ -39,22 +40,22 @@ class ApcoaSpider(CrawlSpider):
         Rule(
             LinkExtractor(
                 allow=[
-                    r"/kurzparken|einmal-parken/standorte/[a-z-]+$",  # Austria, Germany
+                    r"/(?:kurzparken|einmal-parken)/standorte/[a-z-]+$",  # Austria, Germany
                     r"/find-en-p-plads/lokationer/[a-z-]+$",  # Denmark
                     r"/location-overview/location/[a-z-]+$",  # Ireland
                     r"/sosta-breve/sedi/[a-z-]+$",  # Italy
                     r"/kort-parkeren/locaties/[a-z-]+$",  # Netherland
-                    "/finn-parkering/lokasjoner/[a-z-]+$",  # Norway
-                    "/hitta-parkering/parkering/[a-z-]+$",  # Sweden
-                    "/find-parking/locations/[a-z-]+$",  # UK
-                    "/en/short-term-parking|short-stay-parking/locations/[a-z-]+$",  # Poland, Switzerland
+                    r"/finn-parkering/lokasjoner/[a-z-]+$",  # Norway
+                    r"/hitta-parkering/parkering/[a-z-]+$",  # Sweden
+                    r"/find-parking/locations/[a-z-]+$",  # UK
+                    r"/en/(?:short-term-parking|short-stay-parking)/locations/[a-z-]+$",  # Poland, Switzerland
                 ]
             )
         ),
         Rule(
             LinkExtractor(
                 allow=[
-                    r"/kurzparken|einmal-parken/standorte/[a-z-]+/[a-z-0-9]+$",  # Austria, Germany
+                    r"/(?:kurzparken|einmal-parken)/standorte/[a-z-]+/[a-z-0-9]+$",  # Austria, Germany
                     r"/find-en-p-plads/lokationer/[a-z-]+/[a-z-0-9]+$",  # Denmark
                     r"/location-overview/location/[a-z-]+/[a-z-0-9]+$",  # Ireland
                     r"/kort-parkeren/locaties/[a-z-]+/[a-z-0-9]+$",  # Netherland
@@ -62,12 +63,13 @@ class ApcoaSpider(CrawlSpider):
                     r"/finn-parkering/lokasjoner/[a-z-]+/[a-z-0-9]+$",  # Norway
                     r"/hitta-parkering/parkering/[a-z-]+/[a-z-0-9]+$",  # Sweden
                     r"/find-parking/locations/[a-z-]+/[a-z-0-9]+$",  # UK
-                    r"/en/short-term-parking|short-stay-parking/locations/[a-z-]+/[a-z-0-9]+$",
+                    r"/en/(?:short-term-parking|short-stay-parking)/locations/[a-z-]+/[a-z-0-9]+$",
                 ]
             ),
             callback="parse",
         ),
     ]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def parse(self, response: TextResponse, **kwargs):
         item = Feature()
@@ -77,4 +79,5 @@ class ApcoaSpider(CrawlSpider):
         item["addr_full"] = response.xpath('//*[@class="main"]//span[2]/text()').get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)
+        apply_category(Categories.PARKING, item)
         yield item

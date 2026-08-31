@@ -114,7 +114,7 @@ class BernCHSpider(Spider):
         item = self.parse_feature(f)
         apply_category(Categories.HIGHWAY_RESIDENTIAL, item)
         apply_yes_no("bicycle_road", item, True)
-        return item
+        return Feature(**item)
 
     def parse_bicycle_shop(self, f):
         item, props = self.parse_feature(f), f["properties"]

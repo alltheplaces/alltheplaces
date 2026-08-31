@@ -15,6 +15,8 @@ class BenAndJerrysSpider(Where2GetItSpider):
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
+        if not location.get("jsonshopinfo"):
+            return
         item["lat"] = location["latitude"]
         item["lon"] = location["longitude"]
         item["branch"] = item.pop("name").replace(self.item_attributes["brand"], "").strip()

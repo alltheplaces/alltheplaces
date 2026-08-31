@@ -1,50 +1,71 @@
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
-from scrapy import Selector, Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class Arb4x4AccessoriesSpider(Spider):
+class Arb4x4AccessoriesSpider(JSONBlobSpider):
     name = "arb_4x4_accessories"
-    item_attributes = {"brand": "ARB 4×4 Accessories", "brand_wikidata": "Q126166453"}
-    allowed_domains = ["www.arb.com.au"]
-    start_urls = ["https://www.arb.com.au/wp-content/themes/arb_2017/assets/inc/json/stores.json"]
+    item_attributes = {"brand": "ARB 4×4 Accessories", "name": "ARB 4×4 Accessories", "brand_wikidata": "Q126166453"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    locations_key = ["data", "searchAmStoreLocations", "items"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+        yield JsonRequest(
+            # url="https://edge-graph.adobe.io/api/6bec9e1a-58fc-44a6-bc1a-2d8377b1a4d2/graphql",
+            # Using more stable url
+            url="https://mcprod.arb.com.au/graphql",
+            data={"query": """
+                    query SearchAmStoreLocations {
+                      searchAmStoreLocations(
+                        pageSize: 1000,
+                        filter: {
+                          attributes: [
+                            { name: "4", value: "1" }   # ARB Store
+                          ]
+                        }
+                      ) {
+                        items {
+                          street_address: address
+                          name
+                          zip
+                          today_schedule
+                          lat
+                          lng
+                          id
+                          identifier
+                          distance
+                          country
+                          attributes {
+                            attribute_code
+                            attribute_id
+                            entity_id
+                            frontend_input
+                            frontend_label
+                            option_title
+                            value
+                          }
+                        }
+                      }
+                    }
+                    """},
+        )
 
-    def parse(self, response):
-        for location in response.json():
-            if not location.get("is_arb_store") and not location.get("is_arb_corporate_store"):
-                continue  # Ignore resellers.
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("ARB ").removeprefix("Accessories ").removeprefix("4x4 ")
+        item["website"] = f'https://www.arb.com.au/arb-stores/{feature["name"]}'.lower().replace(" ", "-")
+        item["opening_hours"] = self.parse_opening_hours(feature["attributes"])
+        apply_category(Categories.SHOP_CAR_PARTS, item)
+        yield item
 
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full", None)
-
-            if (
-                item["website"]
-                and not item["website"].startswith("www.")
-                and not item["website"].startswith("https://")
-                and not item["website"].startswith("http://")
-            ):
-                item["website"] = "https://www.arb.com.au" + item["website"]
-            elif item["website"].startswith("www."):
-                item["website"] = "https://" + item["website"]
-
-            if item["name"].startswith("ARB 4×4 Accessories "):
-                item["branch"] = item["name"].replace("ARB 4×4 Accessories ", "")
-
-            hours_string = " ".join(
-                filter(None, map(str.strip, Selector(text=location.get("opening_hours")).xpath("//text()").getall()))
-            )
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
-
-            apply_category(Categories.SHOP_CAR_PARTS, item)
-
-            yield item
+    def parse_opening_hours(self, location_attributes: list[dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for attribute in location_attributes:
+            if "_schedule" in attribute["attribute_code"]:
+                days = attribute["attribute_code"].split("_schedule")[0].replace("weekday", "Monday-Friday")
+                opening_hours.add_ranges_from_string(f'{days} {attribute["value"]}')
+        return opening_hours

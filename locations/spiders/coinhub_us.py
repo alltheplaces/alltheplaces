@@ -12,8 +12,8 @@ class CoinhubUSSpider(StorepointSpider):
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         item["ref"] = str(item["ref"])
-        if " inside: " in item["name"]:
-            item["located_in"] = item["name"].split(" inside: ", 1)[1]
+        if " - Inside " in item["name"]:
+            item["located_in"] = item["name"].split(" - Inside ", 1)[1]
         item.pop("name", None)
         item.pop("phone", None)
         item.pop("email", None)

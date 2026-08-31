@@ -1,23 +1,44 @@
-import re
+from typing import Any
 
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.spiders import Spider
 
-from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 
 
-class HuwsGrayGBSpider(SitemapSpider, StructuredDataSpider):
+class HuwsGrayGBSpider(Spider):
     name = "huws_gray_gb"
     item_attributes = {"brand": "Huws Gray", "brand_wikidata": "Q16965780"}
-    sitemap_urls = ["https://www.huwsgray.co.uk/robots.txt"]
-    sitemap_rules = [(r"/storefinder/store/.+-(\d+)$", "parse")]
+    start_urls = ["https://www.huwsgray.co.uk/branch/ajax/stores"]
+    requires_proxy = True
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name")
-        item["city"] = None
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for ref, location in response.json()["response"].items():
+            item = DictParser.parse(location)
+            item["ref"] = ref
+            item["street_address"] = item.pop("street")
+            item["website"] = location["infoLink"]
 
-        if m := re.search(r"storeFinder24\.InitMap\(\d+, (-?\d+\.\d+), (-?\d+\.\d+)\);", response.text):
-            item["lat"], item["lon"] = m.groups()
+            if item["name"].startswith("Huws Gray "):
+                item["branch"] = item.pop("name").removeprefix("Huws Gray ")
 
-        yield item
+            item["opening_hours"] = OpeningHours()
+            for day in DAYS_3_LETTERS:
+                time = (
+                    location["opening_hours_{}".format(day.lower())]
+                    .replace("-1:00", "-13:00")
+                    .replace("-4:30", "-16:30")
+                    .replace("-4:45", "-16:45")
+                    .replace("-5:00", "-17:00")
+                    .replace("-5:15", "-17:15")
+                )
+                if time == "Closed":
+                    item["opening_hours"].set_closed(day)
+                else:
+                    item["opening_hours"].add_range(day, *time.split("-"))
+
+            apply_category(Categories.SHOP_TRADE, item)
+
+            yield item

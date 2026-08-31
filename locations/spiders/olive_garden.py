@@ -1,49 +1,47 @@
-import re
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from scrapy.spiders import SitemapSpider
+from scrapy.http import JsonRequest, TextResponse
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class OliveGardenSpider(SitemapSpider):
+class OliveGardenSpider(JSONBlobSpider):
     name = "olive_garden"
     item_attributes = {"brand": "Olive Garden", "brand_wikidata": "Q3045312"}
     allowed_domains = ["olivegarden.com"]
-    sitemap_urls = [
-        "https://www.olivegarden.com/en-locations-sitemap.xml",
-    ]
-    sitemap_rules = [(r"[0-9]+$", "parse")]
     requires_proxy = True
+    locations_key = "restaurants"
 
-    def _parse_sitemap(self, response):
-        for row in super()._parse_sitemap(response):
-            store_id = re.findall(r"[0-9]+$", row.url)[0]
-            url = f"https://www.olivegarden.com/web-api/restaurant/{store_id}?locale=en_US&restNumFlag=true&restaurantNumber={store_id}"
-            yield scrapy.Request(
-                url=url, callback=self.parse_store, cb_kwargs={"store_id": store_id, "website": row.url}
-            )
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(url="https://www.olivegarden.com/api/restaurants", headers={"X-Source-Channel": "WEB"})
 
-    def parse_store(self, response, store_id, website):
-        data = response.json().get("successResponse", {}).get("restaurantDetails", {})
-        item = DictParser.parse(data.get("address"))
-        item["ref"] = store_id
-        item["name"] = data.get("restaurantName")
-        item["phone"] = data.get("restPhoneNumber")[0].get("Phone")
-        if lat_lon_txt := data.get("address", {}).get("longitudeLatitude"):
-            item["lat"], item["lon"] = lat_lon_txt.split(",")
-        item["website"] = website
-        if hours := data.get("weeklyHours"):
-            days = [day for day in hours if day.get("hourCode") == "OP"]
-            oh = OpeningHours()
-            for day in days:
-                oh.add_range(
-                    day=DAYS[day.get("dayOfWeek") - 1],
-                    open_time=day.get("startTime"),
-                    close_time=day.get("endTime"),
-                    time_format="%I:%M%p",
-                )
-            item["opening_hours"] = oh
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature["contactDetail"].pop("address", {}))
+        feature.pop("countryCode", None)  # internal numeric code; "country" holds the real value
 
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["restaurantNumber"]
+        item["branch"] = feature.get("restaurantName")
+        item["street_address"] = feature.get("street1")
+        if phones := feature["contactDetail"].get("phoneDetail"):
+            item["phone"] = phones[0].get("phoneNumber")
+
+        item["opening_hours"] = OpeningHours()
+        for day in feature.get("restaurantHours", []):
+            if day.get("isRestaurantClosed"):
+                item["opening_hours"].set_closed(day["day"])
+                continue
+            for hours_info in day.get("hoursInfo", []):
+                if hours_info["name"] == "Hours of Operations":
+                    item["opening_hours"].add_range(
+                        day=day["day"],
+                        open_time=hours_info["startTime"],
+                        close_time=hours_info["endTime"],
+                        time_format="%I:%M %p",
+                    )
+
+        apply_category(Categories.RESTAURANT, item)
         yield item

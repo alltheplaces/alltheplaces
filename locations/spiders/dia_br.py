@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import apply_yes_no
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -38,5 +38,7 @@ class DiaBRSpider(Spider):
             services = [s["name"] for s in store["services"]]
             apply_yes_no("parking_facility", item, "Estacionamento" in services)
             apply_yes_no("food", item, "Padaria" in services)
+
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item

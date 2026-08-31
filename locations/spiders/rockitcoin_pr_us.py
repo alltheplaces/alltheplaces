@@ -11,14 +11,13 @@ from locations.spiders.ampm_us import AmpmUSSpider
 from locations.spiders.bp import BpSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
-from locations.spiders.citgo import CitgoSpider
 from locations.spiders.cvs_us import PHARMACY_BRANDS as CVS_BRANDS
 from locations.spiders.eg_america_us import EgAmericaUSSpider
 from locations.spiders.exxon_mobil import ExxonMobilSpider
 from locations.spiders.gulf_pr_us import GulfPRUSSpider
 from locations.spiders.marathon_petroleum_us import MarathonPetroleumUSSpider
 from locations.spiders.phillips_66_conoco_76 import Phillips66Conoco76Spider
-from locations.spiders.seven_eleven_ca_us import SevenElevenCAUSSpider
+from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 from locations.spiders.shell import ShellSpider
 from locations.spiders.sunoco_us import SunocoUSSpider
 from locations.spiders.valero import ValeroSpider
@@ -46,11 +45,11 @@ class RockitcoinPRUSSpider(JSONBlobSpider):
         (["TEXACO"], CHEVRON_BRANDS["Texaco"][0]),
         (["VALERO"], ValeroSpider.item_attributes),
         (["SUNOCO"], SunocoUSSpider.item_attributes),
-        (["CITGO"], CitgoSpider.item_attributes),
+        (["CITGO"], {"brand": "Citgo", "brand_wikidata": "Q2974437"}),
         (["76 GAS", "76"], Phillips66Conoco76Spider.BRANDS["76"]),
         (["CIRCLE K", "CIRCLEK"], CircleKSpider.CIRCLE_K),
         (["PHILLIPS 66"], Phillips66Conoco76Spider.BRANDS["P66"]),
-        (["7-ELEVEN", "7ELEVEN", "ALON / 7-ELEVEN"], SevenElevenCAUSSpider.item_attributes),
+        (["7-ELEVEN", "7ELEVEN", "ALON / 7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["AMPM", "AM/PM"], AmpmUSSpider.item_attributes),
         (["AMOCO"], BpSpider.brands["amoco"]),
         (["RACEWAY"], {"brand": "RaceWay", "brand_wikidata": "Q73039084"}),
