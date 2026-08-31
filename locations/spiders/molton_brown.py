@@ -13,14 +13,16 @@ class MoltonBrownSpider(JSONBlobSpider):
     item_attributes = {"brand": "Molton Brown", "brand_wikidata": "Q17100584"}
     start_urls = ["https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/37309-rKZWijOqKgXVKbyF/stores.js"]
     locations_key = ["stores"]
-
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-    }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         if feature["tag_ids"] in [["25269"], ["25270"], ["24837"]]:
-            item["branch"] = item.pop("name").replace("Molton Brown", "").strip()
+            if (item.get("name") or "").startswith("Molton Brown Outlet"):
+                item["branch"] = item.pop("name").replace("Molton Brown Outlet", "").strip(" -")
+                item["name"] = "Molton Brown Outlet"
+            else:
+                item["branch"] = item.pop("name").replace("Molton Brown ", "").strip(" -")
+                item["name"] = "Molton Brown"
             if feature["store_business_hours"]:
                 oh = OpeningHours()
                 for times in feature["store_business_hours"]:
