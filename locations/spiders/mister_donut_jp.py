@@ -1,13 +1,12 @@
-import json
 import re
 from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.storefinders.mapion import MapionSpider
 
 # The store list is served from a single wide "tile" (x=63&y=18) which
 # encompasses the whole of Japan, rather than needing to be paginated
@@ -15,34 +14,18 @@ from locations.items import Feature
 LIST_URL = "https://md.mapion.co.jp/b/misterdonut/attr/?t=attr_con&x=63&y=18&start={}"
 
 
-class MisterDonutJPSpider(Spider):
+class MisterDonutJPSpider(MapionSpider):
     name = "mister_donut_jp"
     item_attributes = {"brand": "ミスタードーナツ", "brand_wikidata": "Q1065819"}
     allowed_domains = ["md.mapion.co.jp"]
-    start_urls = [LIST_URL.format(1)]
+    list_url = LIST_URL
 
-    def parse(self, response: Response) -> Iterable[Request]:
-        if m := re.search(r'pager-num">\d+/(\d+)', response.text):
-            if response.url == self.start_urls[0]:
-                for page in range(2, int(m.group(1)) + 1):
-                    yield Request(LIST_URL.format(page), callback=self.parse)
-
-        for href in response.xpath('//li[@class="list-item"]//a[h2]/@href').getall():
-            yield response.follow(href, callback=self.parse_store)
-
-    def parse_store(self, response: Response) -> Iterable[Feature]:
-        m = re.search(r"window\.infoJSON\s*=\s*(\{.*?\});", response.text)
-        if not m:
-            return
-        data = json.loads(m.group(1))
-
-        item = Feature()
+    def parse_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["ref"] = data.get("id")
         item["name"] = self.item_attributes["brand"]
         item["branch"] = data.get("map_name")
         item["addr_full"] = data.get("full_address")
         item["postcode"] = data.get("zip_code")
-        item["website"] = response.url
 
         if tel := data.get("tel"):
             item["phone"] = "+81 " + tel
@@ -66,7 +49,7 @@ class MisterDonutJPSpider(Spider):
             if close_match := re.match(r"\d{1,2}:\d{2}", close_time):
                 oh = OpeningHours()
                 oh.add_days_range(DAYS, open_time, close_match.group())
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
 
         apply_category(Categories.FAST_FOOD, item)
         item["extras"]["cuisine"] = "donut"
