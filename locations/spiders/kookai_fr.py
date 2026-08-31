@@ -11,8 +11,10 @@ DAYS = r"lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche"
 DAY_RANGE_RE = re.compile(rf"(?:du\s+)?({DAYS})\s+(?:au|à|a)\s+({DAYS})", re.IGNORECASE)
 DAY_RE = re.compile(DAYS, re.IGNORECASE)
 # French times look like "10h", "10h30", "9 h 30"; the optional minutes must not be the
-# hour digits of the next time (e.g. "13h 14h" is 13:00 then 14:00, not 13:14).
-TIME_RE = re.compile(r"(\d{1,2})\s*h(?:\s*([0-5]\d)(?!\s*h))?")
+# hour digits of the next time (e.g. "13h 14h" is 13:00 then 14:00, not 13:14). The last
+# branch accepts a bare hour ("10 à 20h") only when a separator and another "NNh" time
+# follow, so it stays the start of a range and stray digits are ignored.
+TIME_RE = re.compile(r"(\d{1,2})(?:\s*h\s*([0-5]\d)(?!\s*h)|\s*h|(?=\s*(?:[-–—]|à|a)\s*\d{1,2}\s*h))")
 CLOSED_RE = re.compile(r"ferm[ée]", re.IGNORECASE)
 
 
