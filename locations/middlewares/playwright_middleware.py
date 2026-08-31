@@ -91,24 +91,37 @@ class PlaywrightMiddleware:
             # Skip binary responses such as .gz sitemaps, ZIP archives etc.
             return response
 
-        if Selector(response).type not in ("html", "xml"):
-            # Response object is JSON format in general, and therefore doesn't need to be
-            # processed further.
-            return response
-
         # If a Playwright or Camoufox request is for a plaintext-type file
         # (for ATP, this is mostly JSON files), the browser may internally
         # render this plaintext-type file using a lightweight HTML wrapper.
         # Thus, Scrapy's Response.body would contain HTML not plaintext/JSON
         # data that was requested. We have to strip the HTML wrapping and
         # return the raw plaintext in Response.body.
-        #
-        # Note this is probably browser specific for how a text document is
-        # rendered by a browser as HTML. The list of cases below may need to
-        # be expanded to accomodate different browsers.
-        plaintext = response.xpath("//body/pre/text()").get()
-        if plaintext:
-            return response.replace(body=plaintext.encode("utf-8"))
+        # Content-Type might still report the original type (e.g.
+        # application/json) even when this has happened, so we detect the
+        # wrapping by inspecting the body itself rather than trusting the
+        # header. This avoids mistaking a genuine XML/HTML response (which
+        # is correctly declared as such) for a wrapped one.
+        content_type = (response.headers.get("Content-Type") or b"").decode("utf-8", "replace").lower()
+        declared_markup = "html" in content_type or "xml" in content_type
+        body_looks_wrapped = response.body.lstrip().startswith(b"<")
+
+        if not declared_markup and body_looks_wrapped:
+            # Force type="html" explicitly. response.xpath()/Selector(response)
+            # would otherwise infer type="json" from Content-Type and raise
+            # ValueError: Cannot use xpath on a Selector of type 'json'.
+            #
+            # Note this //body/pre/text() extraction is probably browser
+            # specific for how a text document is rendered as HTML. This may
+            # need to be expanded to accommodate different browsers.
+            plaintext = Selector(text=response.text, type="html").xpath("//body/pre/text()").get()
+            if plaintext:
+                return response.replace(body=plaintext.encode("utf-8"))
+
+        if Selector(response).type not in ("html", "xml"):
+            # Response object is JSON format in general, and therefore doesn't need to be
+            # processed further.
+            return response
 
         # If a Playwright or Camoufox request is for an XML document (for ATP,
         # this is mostly sitemap.xml for websites) and this XML document
