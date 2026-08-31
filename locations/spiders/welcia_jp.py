@@ -196,6 +196,7 @@ PAYMENT_METHODS = {
     "00097": "payment:smart_code",
     "00230": "payment:quo_pay",
     "00231": "payment:aeon_pay",
+    "00255": "payment:pitapa",
 }
 
 # service-flag / detail-field code -> meaning (ref. welcia_detail_page.md)
