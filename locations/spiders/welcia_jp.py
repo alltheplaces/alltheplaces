@@ -329,7 +329,7 @@ class WelciaJPSpider(LocationCloudSpider):
 
         if fax := detail_fields.get(FLAG_FAX):
             if value := fax.get("value"):
-                item["extras"]["fax"] = value
+                item["extras"]["fax"] = f"+81 {value}"
 
         if flag := detail_json["flags"].get(FLAG_TOILETS_OSTOMY):
             apply_yes_no("toilets:ostomy", item, flag.get("value") == "true", apply_positive_only=False)
@@ -359,11 +359,11 @@ class WelciaJPSpider(LocationCloudSpider):
 
         if pharmacy_phone := detail_fields.get(FLAG_PHARMACY_PHONE):
             if value := pharmacy_phone.get("value"):
-                item["extras"]["phone:pharmacy"] = value
+                item["extras"]["phone:pharmacy"] = f"+81 {value}"
 
         if pharmacy_fax := detail_fields.get(FLAG_PHARMACY_FAX):
             if value := pharmacy_fax.get("value"):
-                item["extras"]["fax:pharmacy"] = value
+                item["extras"]["fax:pharmacy"] = f"+81 {value}"
 
     def _apply_other_services(self, item: Feature, detail_json: dict) -> None:
         if flag := detail_json["flags"].get(FLAG_UBER_EATS):
