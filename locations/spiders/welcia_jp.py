@@ -1,9 +1,8 @@
-import json
 from collections.abc import Iterable
 
 from chompjs import parse_js_object
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.geo import postal_regions
 from locations.items import Feature
 from locations.storefinders.location_cloud import LocationCloudSpider
@@ -147,6 +146,56 @@ BRANDS = {
     },
 }
 
+# flag code -> OSM payment tag
+PAYMENT_METHODS = {
+    "00010": PaymentMethods.ALIPAY,
+    "00011": PaymentMethods.AMERICAN_EXPRESS,
+    "00012": "payment:bank_pay",
+    "00013": PaymentMethods.DINERS_CLUB,
+    "00014": PaymentMethods.DISCOVER_CARD,
+    "00016": "payment:icoca",
+    "00017": PaymentMethods.JCB,
+    "00018": "payment:j_coin_pay",
+    "00019": "payment:kitaca",
+    "00021": "payment:manaca",
+    "00022": PaymentMethods.MASTER_CARD,
+    "00023": PaymentMethods.MERPAY,
+    "00024": "payment:pasmo",
+    "00025": PaymentMethods.PAYPAY,
+    "00026": PaymentMethods.QUICPAY,
+    "00027": PaymentMethods.EDY,
+    "00028": PaymentMethods.RAKUTEN_PAY,
+    "00029": "payment:sugoca",
+    "00030": "payment:suica",
+    "00031": "payment:toica",
+    "00032": PaymentMethods.UNIONPAY,
+    "00033": PaymentMethods.VISA,
+    "00034": PaymentMethods.WAON,
+    "00035": PaymentMethods.WECHAT,
+    "00036": PaymentMethods.D_BARAI,
+    "00078": PaymentMethods.CREDIT_CARDS,
+    "00079": PaymentMethods.WAON,
+    "00080": PaymentMethods.EDY,
+    "00081": PaymentMethods.UNIONPAY,
+    "00082": "payment:icsf",
+    "00083": PaymentMethods.QUICPAY,
+    "00085": PaymentMethods.ALIPAY,
+    "00086": PaymentMethods.D_BARAI,
+    "00087": PaymentMethods.WECHAT,
+    "00088": PaymentMethods.PAYPAY,
+    "00089": "payment:au_pay",
+    "00090": PaymentMethods.RAKUTEN_PAY,
+    "00091": "payment:resona_wallet",
+    "00092": "payment:yucho_pay",
+    "00093": PaymentMethods.MERPAY,
+    "00094": "payment:j_coin_pay",
+    "00095": "payment:fami_pay",
+    "00096": "payment:bank_pay",
+    "00097": "payment:smart_code",
+    "00230": "payment:quo_pay",
+    "00231": "payment:aeon_pay",
+}
+
 
 class WelciaJPSpider(LocationCloudSpider):
     name = "welcia_jp"
@@ -253,7 +302,15 @@ class WelciaJPSpider(LocationCloudSpider):
             return
         detail_json = parse_js_object(blob.split("var spotDetailBean = ", 1)[1])
 
+        self._apply_payment_methods(item, detail_json)
+
         yield item
+
+    def _apply_payment_methods(self, item: Feature, detail_json: dict) -> None:
+        flags = detail_json["flags"]
+        for code, payment in PAYMENT_METHODS.items():
+            if flag := flags.get(code):
+                apply_yes_no(payment, item, flag.get("value") == "true")
 
 
 def _build_postal_lookup() -> dict[str, dict]:
