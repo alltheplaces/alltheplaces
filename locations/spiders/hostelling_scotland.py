@@ -5,15 +5,14 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class HostellingScotlandSpider(Spider):
     name = "hostelling_scotland"
     item_attributes = {"brand": "Hostelling Scotland", "brand_wikidata": "Q7438052", "country": "GB"}
     start_urls = ["https://www.hostellingscotland.org.uk/inspiration/view-all-hostels/"]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs):
         data_raw = response.xpath('//input[@id="data"]/@value').get("")
