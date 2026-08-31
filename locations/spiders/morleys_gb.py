@@ -17,7 +17,7 @@ class MorleysGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//div[@role="listitem"]'):
             item = Feature()
-            item["branch"] = location.xpath(".//h3/span/text()").get().removeprefix("Morley's ")
+            item["branch"] = location.xpath(".//h3//text()").get().removeprefix("Morley's ")
             item["addr_full"] = merge_address_lines(location.xpath(".//h2/span//text()").getall())
 
             apply_category(Categories.FAST_FOOD, item)

@@ -19,7 +19,7 @@ class NoKartverketAddressesSpider(AddressSpider):
 
     name = "no_kartverket_addresses"
     allowed_domains = ["nedlasting.geonorge.no"]
-    dataset_attributes = Licenses.CC4.value | {
+    dataset_attributes = Licenses.CCBY4.value | {
         "attribution:website": "https://kartkatalog.geonorge.no/metadata/matrikkelen-adresse/f7df7a18-b30f-4745-bd64-d0863812350c",
         "attribution:name": "Contains data from Matrikkelen - Adresse distributed by Kartverket",
     }
@@ -80,9 +80,9 @@ class NoKartverketAddressesSpider(AddressSpider):
         if tilleggsnavn := self._strip_value(row.get("adressetilleggsnavn")):
             item["extras"]["addr:place"] = tilleggsnavn
 
-        # Address type (Vegadresse or Matrikkeladresse)
-        if objtype := self._strip_value(row.get("objtype")):
-            item["extras"]["addr:type"] = objtype
+        # Address type (vegadresse or matrikkeladresse)
+        if address_type := self._strip_value(row.get("adressetype")):
+            item["extras"]["addr:type"] = address_type
 
         # Matrikkel references for cadastral addresses
         if gardsnummer := self._strip_value(row.get("gardsnummer")):
@@ -93,10 +93,6 @@ class NoKartverketAddressesSpider(AddressSpider):
             item["extras"]["ref:NO:festenummer"] = festenummer
         if undernummer := self._strip_value(row.get("undernummer")):
             item["extras"]["ref:NO:undernummer"] = undernummer
-
-        # Unit numbers (apartments)
-        if bruksenhetsnummer := self._strip_value(row.get("bruksenhetsnummer")):
-            item["extras"]["addr:unit"] = bruksenhetsnummer
 
         return item
 

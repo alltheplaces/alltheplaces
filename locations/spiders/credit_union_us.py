@@ -27,6 +27,9 @@ class CreditUnionUSSpider(CSVFeedSpider):
         item = DictParser.parse(row)
         item["country"] = item["country"].strip()
         item["street_address"] = item.pop("addr_full")
+        # For overseas locations the State column is a query artefact, not a real state
+        if item.get("country") != "US":
+            item["state"] = None
 
         item["opening_hours"] = OpeningHours()
         for day in DAYS_3_LETTERS:

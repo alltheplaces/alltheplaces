@@ -1,55 +1,44 @@
-import json
-from typing import Any
+from urllib.parse import urljoin
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.jysk import urljoin
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class DominosPizzaNOSpider(Spider):
+class DominosPizzaNOSpider(JSONBlobSpider):
     name = "dominos_pizza_no"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
-    allowed_domains = ["www.dominos.no"]
-    start_urls = ["https://www.dominos.no/butikker"]
+    start_urls = ["https://www.dominos.no/api/stores"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        location_data = json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get())
-        for store in location_data["props"]["pageProps"]["stores"]:
-            yield self.parse_store(store)
-
-    def parse_store(self, store: dict) -> Feature:
-        item = DictParser.parse(store)
-
+    def post_process_item(self, item: Feature, response: Response, store: dict, **kwargs):
         item["ref"] = store.get("externalId")
         item["branch"] = item.pop("name")
         item["phone"] = store.get("localPhoneNumber")
         item["website"] = urljoin("https://www.dominos.no/no/butikker/", store.get("slug"))
 
-        item["street_address"] = item.pop("street", "")
+        item["street_address"] = item.pop("street")
         item.pop("state")  # Remove invalid state field
 
-        if address := store.get("address"):
-            if location := address.get("location"):
-                item["lat"] = location.get("latitude")
-                item["lon"] = location.get("longitude")
+        if location := (store.get("address") or {}).get("location"):
+            item["lat"] = location.get("latitude")
+            item["lon"] = location.get("longitude")
 
-        delivery_options = store.get("deliveryOptions", {})
-        apply_yes_no(Extras.DELIVERY, item, delivery_options.get("delivery", {}).get("active"))
-        apply_yes_no(Extras.TAKEAWAY, item, delivery_options.get("carryout", {}).get("active"))
+        delivery = store.get("deliveryOptions", {}).get("delivery") or {}
+        carryout = store.get("deliveryOptions", {}).get("carryout") or {}
+        apply_yes_no(Extras.DELIVERY, item, delivery.get("active"))
+        apply_yes_no(Extras.TAKEAWAY, item, carryout.get("active"))
 
-        if carryout_hours := delivery_options.get("carryout", {}).get("hoursOfOperation"):
+        if carryout_hours := carryout.get("hoursOfOperation"):
             item["opening_hours"] = self.parse_hours(carryout_hours)
 
-        if delivery_hours := delivery_options.get("delivery", {}).get("hoursOfOperation"):
-            if oh := self.parse_hours(delivery_hours):
-                item["extras"]["opening_hours:delivery"] = oh.as_opening_hours()
+        if (delivery_hours := delivery.get("hoursOfOperation")) and (oh := self.parse_hours(delivery_hours)):
+            item["extras"]["opening_hours:delivery"] = oh.as_opening_hours()
 
-        return item
+        yield item
 
     @staticmethod
     def parse_hours(hours: list[dict]) -> OpeningHours:

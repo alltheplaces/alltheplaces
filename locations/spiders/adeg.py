@@ -30,5 +30,5 @@ class AdegSpider(Spider):
                 if time:
                     open_time, close_time = time.split(" – ")
                     oh.add_range(day, open_time.strip(), close_time.strip())
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
             yield item

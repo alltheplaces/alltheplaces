@@ -124,9 +124,14 @@ if [ ! $retval -eq 0 ]; then
 fi
 (>&2 echo "Changed files: ${changed_filenames}")
 
-spiders=$(echo "${changed_filenames}" | grep "^locations/spiders/")
+spiders=$(echo "${changed_filenames}" | grep "^locations/spiders/.*\.py$")
 
-spider_count=$(echo "${spiders}" | wc -l)
+if [ -z "${spiders}" ]; then
+    spider_count=0
+else
+    spider_count=$(echo "${spiders}" | wc -l)
+fi
+
 if [ "${spider_count}" -gt 15 ]; then
     (>&2 echo "refusing to run on more than 15 spiders")
     exit 1
@@ -209,7 +214,9 @@ do
 
     if [ -f "${OUTFILE}" ]; then
         upload_file "${OUTFILE}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
-        upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
+        if [ -f "${NDGEOJSON}" ]; then
+            upload_file "${NDGEOJSON}" "ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.ndgeojson"
+        fi
         OUTFILE_URL="https://alltheplaces-data.openaddresses.io/ci/${CODEBUILD_BUILD_ID}/${SPIDER_NAME}/output.geojson"
 
         if [ -f "${STATSFILE}" ]; then
@@ -331,9 +338,20 @@ do
             fi
             continue
         else
+            # A missing stats file usually means the spider was force-killed
+            # (e.g. a closespider_timeout that didn't leave enough time for a
+            # Playwright/Camoufox browser to shut down cleanly) before the
+            # LOGSTATS_FILE extension could write it on spider close. The
+            # geojson output is left truncated in that case too, but each
+            # line of the ndgeojson output is still valid on its own, so
+            # count those lines to avoid reporting a blank item count for a
+            # run that actually produced items.
             (>&2 echo "${spider} has no stats file")
             STATS_WARNINGS=""
             STATS_ERRORS=""
+            if [ -f "${NDGEOJSON}" ]; then
+                FEATURE_COUNT=$(wc -l < "${NDGEOJSON}" | tr -d ' ')
+            fi
         fi
 
         PR_COMMENT_BODY="${PR_COMMENT_BODY}|[\`$spider\`](https://github.com/alltheplaces/alltheplaces/blob/${GITHUB_SHA}/${spider})|[${FEATURE_COUNT} items](${OUTFILE_URL}) ([Map](https://alltheplaces.xyz/preview.html?show=${OUTFILE_URL}))|Resulted in a \`${FAILURE_REASON}\` ([Log](${LOGFILE_URL}))|\\n"
@@ -347,9 +365,9 @@ do
     (>&2 echo "${spider} done")
 done
 
-if [[ ! "$(ls ${RUN_DIR})" ]]; then
+if [[ ! "$(ls ${RUN_DIR} 2>/dev/null)" ]]; then
     echo "Nothing ran. Exiting."
-    echo $EXIT_CODE
+    exit $EXIT_CODE
 fi
 
 if [ "${HAD_TIMEOUT}" = true ]; then

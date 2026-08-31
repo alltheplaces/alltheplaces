@@ -3,14 +3,14 @@ from typing import Any
 from scrapy import Request
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.spiders.fatface import FatfaceSpider
 from locations.structured_data_spider import StructuredDataSpider
 
 
 class FatfaceGBSpider(StructuredDataSpider):
     name = "fatface_gb"
-    item_attributes = FatfaceSpider.item_attributes
+    item_attributes = {"brand": "Fat Face", "brand_wikidata": "Q5437186"}
     start_urls = ["https://www.fatface.com/storelocator/data/stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -26,4 +26,8 @@ class FatfaceGBSpider(StructuredDataSpider):
         item["lat"] = store.get("LT")
         item["lon"] = store.get("LN")
         item["branch"] = item.pop("name").split("-")[0].strip()
+        item["website"] = response.url
+
+        apply_category(Categories.SHOP_CLOTHES, item)
+
         yield item

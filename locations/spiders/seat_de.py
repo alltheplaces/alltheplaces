@@ -1,3 +1,4 @@
+import re
 from copy import deepcopy
 
 import scrapy
@@ -18,12 +19,13 @@ class SeatDESpider(scrapy.Spider):
             item["ref"] = data.get("NUMMER")
             item["name"] = data.get("NAME1")
             item["phone"] = data.get("TELEFON")
-            item["street"] = data.get("STRA\u00dfE")
+            item["street_address"] = data.get("STRA\u00dfE")
             item["city"] = data.get("ORT")
             item["postcode"] = data.get("PLZ")
             item["lat"] = data.get("XPOS")
             item["lon"] = data.get("YPOS")
-            item["website"] = data.get("URL")
+            if website := data.get("URL"):
+                item["website"] = "https://" + re.sub(r"^https?:/*", "", website)
             item["email"] = data.get("EMAIL")
             if data.get("HAENDLERVERTRAG") == "J":
                 shop_item = deepcopy(item)

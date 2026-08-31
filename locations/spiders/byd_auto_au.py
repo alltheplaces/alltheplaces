@@ -42,7 +42,13 @@ class BydAutoAUSpider(Spider):
             item["opening_hours"].add_ranges_from_string(hours_text)
 
             match location["mapBadge"]:
-                case "Experience Centre" | "Flagship Store" | "Megastore" | "Test Drive & Delivery Centre":
+                case (
+                    "Experience Centre"
+                    | "Experience Center"
+                    | "Flagship Store"
+                    | "Megastore"
+                    | "Test Drive & Delivery Centre"
+                ):
                     apply_category(Categories.SHOP_CAR.value, item)
                 case "Service & Repair Centre" | "Service Centre":
                     apply_category(Categories.SHOP_CAR_REPAIR.value, item)

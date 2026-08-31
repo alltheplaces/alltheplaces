@@ -75,7 +75,7 @@ class BambuSpider(Spider):
             item["housenumber"] = street_address.get("number")
             item["street"] = street_address.get("name")
             item["street_address"] = street_address.get("formattedAddressLine")
-            item["extras"]["addr:unit"] = street_address.get("apt")
+            item["unit"] = street_address.get("apt")
             if email := location.get("agentEmail"):
                 if "@" in email:
                     item["email"] = email

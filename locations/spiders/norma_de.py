@@ -68,7 +68,7 @@ class NormaDESpider(Spider):
         except IndexError:
             pass
 
-        return opening_hours.as_opening_hours()
+        return opening_hours
 
     def parse(self, response):
         for store in response.xpath('//div[@class="item"]//div[@class="row"]'):

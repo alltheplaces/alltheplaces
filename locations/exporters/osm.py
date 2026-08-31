@@ -1,4 +1,6 @@
 import logging
+from io import BytesIO, TextIOWrapper
+from typing import Any
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl
 
@@ -15,14 +17,21 @@ class OSMExporter(XmlItemExporter):
     root_element = "osm"
     indent = 2
     export_empty_fields = False
-    fields_to_export = dict(mapping)
+    fields_to_export: dict[str, str] = {k: v for k, v in mapping}
     encoding = "UTF-8"
 
-    def __init__(self, file, **kwargs):
+    def __init__(self, file: BytesIO, **kwargs: Any):
         logging.warning("Deprecated, no not use!")
         if not self.encoding:
             raise RuntimeError("Encoding must be specified for this exporter. Default is 'UTF-8'.")
-        self.xg = XMLGenerator(file, encoding=self.encoding, short_empty_elements=True)
+        self.stream = TextIOWrapper(
+            file,
+            encoding=self.encoding,
+            errors="xmlcharrefreplace",
+            newline="\n",
+            write_through=True,
+        )
+        self.xg = XMLGenerator(self.stream, encoding=self.encoding, short_empty_elements=True)
 
     def start_exporting(self):
         self.xg.startDocument()
@@ -39,7 +48,7 @@ class OSMExporter(XmlItemExporter):
         self.xg.startElement(self.item_element, AttributesImpl(attrs))
         self.next_id -= 1
         self._beautify_newline()
-        for name, value in self._get_serialized_fields(item, default_value=""):
+        for name, value in self.get_serialized_fields(item, default_value=""):
             self._export_xml_field(name, value, depth=2)
         self._beautify_indent(depth=1)
         self.xg.endElement(self.item_element)
@@ -49,7 +58,7 @@ class OSMExporter(XmlItemExporter):
         assert isinstance(value, str)
         return value
 
-    def _get_serialized_fields(self, item, default_value=None, include_empty=None):
+    def get_serialized_fields(self, item, default_value=None, include_empty=None):
         yield from item_to_properties(item).items()
 
     def _export_xml_field(self, name, serialized_value, depth):

@@ -2,11 +2,9 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.spiders.nandos import NANDOS_SHARED_ATTRIBUTES
 from locations.structured_data_spider import StructuredDataSpider
-
-NINO_NANDOS = {"name": "Nino Nando's", "brand": "Nino Nando's", "brand_wikidata": "Q111753283"}
 
 
 class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
@@ -19,8 +17,11 @@ class NandosGBIESpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name")
-        if "our Nino restaurant" in response.text:
-            item.update(NINO_NANDOS)
-            apply_category(Categories.FAST_FOOD, item)
-        if "This restaurant is now closed." not in response.text:
-            yield item
+        item["image"] = None
+
+        if "Closed permanently" in response.text or "Closed for refurb" in response.text:
+            set_closed(item)
+
+        apply_category(Categories.RESTAURANT, item)
+
+        yield item

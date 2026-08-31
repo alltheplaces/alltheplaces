@@ -107,3 +107,47 @@ def test_invalid_geometry():
     pipeline.process_item(item)
     assert item.get("geometry") is None
     assert spider.crawler.stats.get_value("atp/field/geometry/invalid")
+
+
+def test_twitter_field_check():
+    spider, pipeline = get_objects()
+    for good_twitter in (
+        "toysrusmexico",
+        "https://twitter.com/toysrusmexico",
+        "https://x.com/toysrusmexico",
+    ):
+        item = Feature(website=good_twitter)
+        pipeline.process_item(item)
+        assert not spider.crawler.stats.get_value("atp/field/twitter/invalid")
+    for bad_twitter in (
+        "https://example.com/toysrusmexico",
+        "twitter handle with whitespace",
+    ):
+        item = Feature(twitter=bad_twitter)
+        old_val = spider.crawler.stats.get_value("atp/field/twitter/invalid")
+        pipeline.process_item(item)
+        assert spider.crawler.stats.get_value("atp/field/twitter/invalid") != old_val, bad_twitter
+
+
+def test_website_field_check():
+    spider, pipeline = get_objects()
+    for good_url in (
+        "https://www.example.org/foo/bar",
+        "https://www.höfner-markt.ch",
+        "https://用户.example.com/foo?q=b%C3%A4r",
+    ):
+        item = Feature(website=good_url)
+        pipeline.process_item(item)
+        assert not spider.crawler.stats.get_value("atp/field/website/invalid")
+    for bad_url in (
+        "https://%s.example.org/" % ("c" * 8192),  # overlong hostname
+        "ftp://example.org",
+        "https://bad_host!.com",
+        "https://xn--mnchen-3ya.de",  # Punycode
+        "javascript:alert(1)",
+        "mailto:test@example.org",
+    ):
+        item = Feature(website=bad_url)
+        old_val = spider.crawler.stats.get_value("atp/field/website/invalid")
+        pipeline.process_item(item)
+        assert spider.crawler.stats.get_value("atp/field/website/invalid") != old_val, bad_url

@@ -83,7 +83,8 @@ class LawsonJPSpider(Spider):
 
             # TODO: delivery, COL_79
             if row[49] == "1":
-                apply_category(Categories.POST_PARTNER, item)
+                apply_category(Categories.GENERIC_POI, item)
+                item.set_tag("post_office", "post_partner")
                 item["extras"]["post_office:parcel_from"] = "yes"
                 item["extras"]["post_office:service_provider"] = "Smari"
             apply_yes_no(Extras.COPYING, item, row[18] == "1")

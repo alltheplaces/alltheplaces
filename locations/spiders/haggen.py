@@ -15,3 +15,7 @@ class HaggenSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://local.haggen.com/sitemap.xml"]
     sitemap_rules = [("", "parse_sd")]
     wanted_types = ["GroceryStore"]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("image", None)  # Generic brand image, not per-location
+        yield item

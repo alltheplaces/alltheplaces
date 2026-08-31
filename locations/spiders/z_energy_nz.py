@@ -26,10 +26,10 @@ class ZEnergyNZSpider(Spider):
         for location in json.loads(
             response.xpath('//script[contains(text(), "stations")]/text()').re_first(r"({\"stations\":.+});")
         )["stations"]:
-            item = DictParser.parse(location)
-            if "Opens" in location["closed_message"]:
-                # usually means a location that hasn't opened up yet, seen with the U-GO site
+            if location["closed_message"]:
+                # usually means a location that hasn't opened up yet or has temporarily closed
                 continue
+            item = DictParser.parse(location)
             if brand := self.BRANDS.get(response.url.split(".")[1]):
                 item.update(brand)
                 item["branch"] = item.pop("name").removeprefix("Z ").removeprefix("Caltex ").removeprefix("U-GO ")
@@ -45,7 +45,7 @@ class ZEnergyNZSpider(Spider):
             item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
 
             if location["type_slug"] == "airstop":
-                apply_category({"aeroway": "fuel"}, item)
+                apply_category(Categories.AIRCRAFT_FUELLING_STATION, item)
             elif location["type_slug"] == "service-station":
                 apply_category(Categories.FUEL_STATION, item)
             elif location["type_slug"] == "truck-stop":

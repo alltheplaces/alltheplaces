@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations, country_iseadgg_centroids
 
@@ -33,5 +34,7 @@ class ReparkJPSpider(Spider):
             item["extras"]["maxlength"] = loc["length_limit"]
             item["extras"]["maxweight"] = loc["weight_limit"]
             item["website"] = f"https://www.repark.jp/parking_user/time/result/detail/?park={loc['park_code']}"
+
+            apply_category(Categories.PARKING, item)
 
             yield item

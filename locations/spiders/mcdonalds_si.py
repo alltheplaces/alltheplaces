@@ -1,8 +1,10 @@
 import json
 import re
 from datetime import datetime
+from typing import Any
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -10,20 +12,18 @@ from locations.hours import DAYS, OpeningHours
 from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McdonaldsSISpider(scrapy.Spider):
+class McdonaldsSISpider(Spider):
     name = "mcdonalds_si"
     item_attributes = McdonaldsSpider.item_attributes
-    start_urls = ["https://mcdonalds.si/restavracije"]
-    requires_proxy = True
+    start_urls = ["https://www.mcdonalds.si/restavracije"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(re.search(r"docs = (\[.+\])\.map", response.text).group(1)):
+            location.update(location["marker"]["position"])
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["website"] = location["slugs"]
             item["image"] = location["thumbnail"]
-            item["lat"] = location["marker"]["position"]["lat"]
-            item["lon"] = location["marker"]["position"]["lng"]
 
             try:
                 item["opening_hours"] = self.parse_opening_hours(location.get("hours_shop", []))
@@ -43,6 +43,7 @@ class McdonaldsSISpider(scrapy.Spider):
                 apply_category(Categories.CAFE, mccafe)
                 yield mccafe
 
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def parse_opening_hours(self, rules: list) -> OpeningHours:

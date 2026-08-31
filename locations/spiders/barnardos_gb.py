@@ -2,16 +2,19 @@ import re
 from typing import AsyncIterator
 from urllib.parse import unquote
 
-from scrapy import Selector, Spider
+from scrapy import Selector
 from scrapy.http import JsonRequest
 
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class BarnardosGBSpider(Spider):
+class BarnardosGBSpider(PlaywrightSpider):
     name = "barnardos_gb"
     item_attributes = {"brand": "Barnardo's", "brand_wikidata": "Q2884670"}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(

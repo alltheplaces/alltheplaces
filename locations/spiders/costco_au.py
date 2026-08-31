@@ -4,7 +4,7 @@ from urllib.parse import quote, urljoin
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
-from locations.hours import OpeningHours
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -17,18 +17,31 @@ class CostcoAUSpider(JSONBlobSpider):
     allowed_domains = ["www.costco.com.au"]
     locations_key = "stores"
     stores_url = "https://www.costco.com.au/rest/v2/australia/stores?fields=FULL&radius=3000000&returnAllStores=true&pageSize=999"
+    days = DAYS_EN
+    time_format = "%I:%M %p"
 
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(url=self.stores_url)
 
     def pre_process_data(self, feature: dict) -> None:
+        if region_dict := feature["address"].pop("region", None):
+            feature["state"] = region_dict["name"]
+        if country_dict := feature["address"].pop("country", None):
+            feature["country"] = country_dict["name"]
         feature.update(feature.pop("address"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["ref"] = feature["warehouseCode"]
+        if warehouse_code := feature.get("warehouseCode"):
+            item["ref"] = warehouse_code
+        else:
+            # Features without a warehouse code seem to be stubs for announced
+            # but unopened stores.
+            return
         item["branch"] = feature["displayName"]
         item.pop("name", None)
-        item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
+        item["street_address"] = merge_address_lines(
+            [feature.get("line1"), feature.get("line2"), feature.get("line3"), feature.get("line4")]
+        )
         item["website"] = urljoin(response.url, f"/store-finder/{quote(item['branch'])}")
 
         warehouse = item.deepcopy()
@@ -95,13 +108,14 @@ class CostcoAUSpider(JSONBlobSpider):
     def parse_opening_hours(self, opening_hours: list) -> OpeningHours:
         oh = OpeningHours()
         for rule in opening_hours:
+            day_name = self.days[rule["weekDay"].removesuffix(".").title()]
             if rule.get("closed"):
-                oh.set_closed(rule["weekDay"])
+                oh.set_closed(day_name)
             else:
                 oh.add_range(
-                    rule["weekDay"],
+                    day_name,
                     rule["openingTime"]["formattedHour"],
                     rule["closingTime"]["formattedHour"],
-                    "%I:%M %p",
+                    self.time_format,
                 )
         return oh

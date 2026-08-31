@@ -1,15 +1,15 @@
-from typing import Any
+from typing import Iterable
 
-from scrapy.http import Response
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Extras, PaymentMethods, apply_yes_no
-from locations.google_url import extract_google_position
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class MuggAndBeanSpider(SitemapSpider):
+class MuggAndBeanSpider(SitemapSpider, StructuredDataSpider):
     name = "mugg_and_bean"
     item_attributes = {"brand": "Mugg & Bean", "brand_wikidata": "Q6932113"}
     sitemap_urls = [
@@ -18,20 +18,18 @@ class MuggAndBeanSpider(SitemapSpider):
         "https://mauritiuslocations.muggandbean.africa/site-map.xml",
     ]
     sitemap_rules = [("/restaurants-", "parse")]
+    wanted_types = ["Restaurant"]
+    search_for_email = False
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["branch"] = (
-            response.xpath('//*[@id="banner"]//p/text()')
-            .get()
-            .removeprefix("Mugg & Bean On The Move ")
-            .removeprefix("Mugg & Bean ")
-        )
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        if item["name"].startswith("Mugg & Bean On The Move "):
+            item["branch"] = item.pop("name").removeprefix("Mugg & Bean On The Move ")
+            item["name"] = "Mugg & Bean On The Move"
+        elif item["name"].startswith("Mugg & Bean "):
+            item["branch"] = item.pop("name").removeprefix("Mugg & Bean ")
+            item["name"] = "Mugg & Bean"
+        item["image"] = None
         item["addr_full"] = response.xpath('//*[@id="location"]//p/text()').get()
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]//text()').get()
-        item["email"] = response.xpath('//*[contains(@href,"mailto:")]//text()').get()
-        item["ref"] = item["website"] = response.url
-        extract_google_position(item, response)
         oh = OpeningHours()
         for day_time in response.xpath('//*[@class="operating-hours flex py-3"]//*[@class="p-3"]'):
             day = day_time.xpath(".//h3/text()").get().strip()
@@ -53,4 +51,7 @@ class MuggAndBeanSpider(SitemapSpider):
         apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru" in attributes)
         apply_yes_no(Extras.BREAKFAST, item, "Breakfast" in attributes)
         apply_yes_no(Extras.BRUNCH, item, "Brunch" in attributes)
+
+        apply_category(Categories.CAFE, item)
+
         yield item

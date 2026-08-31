@@ -2,7 +2,6 @@ import json
 import re
 from typing import Any
 
-import chompjs
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -16,9 +15,7 @@ class Big4HolidayParksAUSpider(SitemapSpider):
     sitemap_rules = [(r"https://www.big4.com.au/caravan-parks/\w+/[^/]+/[^/]+$", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        raw_data = json.loads(
-            chompjs.parse_js_object(response.xpath('//script[contains(text(), "postalCode")]/text()').get())[1]
-        )
+        raw_data = json.loads(response.xpath('//script[contains(text(), "postalCode")]/text()').get())
         item = LinkedDataParser.parse_ld(raw_data)
         item["website"] = item["ref"] = response.url
 

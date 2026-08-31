@@ -1,16 +1,13 @@
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.spiders.addresses.be.best_addresses_be import BeSTAddressesBESpider
 
 
 class BeSTVlgAddressesBESpider(BeSTAddressesBESpider):
     name = "best_vlg_addresses_be"
-    dataset_attributes = {
-        "attribution": "required",
+    dataset_attributes = Licenses.CCBY4.value | {
         "attribution:name": "Digitaal Vlaanderen",
         "attribution:website": "https://www.vlaanderen.be/digitaal-vlaanderen/onze-diensten-en-platformen/gebouwen-en-adressenregister#het-adressenregister",
-        "license": "Creative Commons Attribution 4.0 International",
-        "license:website": "http://creativecommons.org/licenses/by/4.0/",
-        "license:wikidata": "Q20007257",
         "use:commercial": "permit",
     }
     region_urls = [

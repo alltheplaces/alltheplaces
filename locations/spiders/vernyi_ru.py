@@ -7,7 +7,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class VernyiRUSpider(JSONBlobSpider):
     name = "vernyi_ru"
-    start_urls = ["https://www.verno-info.ru/shops"]
+    start_urls = ["https://verno-info.ru/shops"]
     item_attributes = {"brand_wikidata": "Q110037370"}
 
     def extract_json(self, response):
@@ -36,6 +36,6 @@ class VernyiRUSpider(JSONBlobSpider):
                         continue
                     open, close = time.replace(" ", "").replace("—", "-").replace(".", ":").split("-")
                     oh.add_days_range(days, open, close)
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Couldn't parse opening hours: {time_weekdays} {time_weekends}, {e}")

@@ -18,5 +18,6 @@ class CefGBSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data):
         item["lat"], item["lon"] = url_to_coords(ld_data["hasmap"])
+        item.pop("image", None)  # Generic branch icon, not per-location
 
         yield item

@@ -16,7 +16,7 @@ class CitroenSpider(scrapy.Spider):
         "https://www.citroen.nl/apps/atomic/DealersServlet?distance=300&latitude=52.36993&longitude=4.90787&maxResults=40&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvbmV0aGVybGFuZHMvbmw=&searchType=latlong",
         "https://www.citroen.se/apps/atomic/DealersServlet?distance=300&latitude=59.33257&longitude=18.06682&maxResults=40&orderResults=false&path=L2NvbnRlbnQvY2l0cm9lbi93b3JsZHdpZGUvc3dlZGVuL3Nl&searchType=latlong",
     ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1}
 
     def parse(self, response, **kwargs):
         for store in response.json().get("payload").get("dealers"):
@@ -61,7 +61,7 @@ class CitroenSpider(scrapy.Spider):
             car_repair = re.findall("'type': 'service'", services)
             if len(car_dealer) > 0 and len(car_repair) > 0:
                 apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, True)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, item, True)
             elif car_dealer:
                 apply_category(Categories.SHOP_CAR, item)
             elif car_repair:

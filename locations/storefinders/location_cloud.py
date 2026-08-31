@@ -12,6 +12,7 @@ class LocationCloudSpider(Spider):
     dataset_attributes: dict = {"source": "api"}
 
     api_endpoint: str
+    additional_args: str = ""
     website_formatter: str = ""
 
     async def start(self) -> AsyncIterator[Request]:
@@ -19,12 +20,12 @@ class LocationCloudSpider(Spider):
 
     def _get_page(self, offset: int):
         return Request(
-            "{}?datum=wgs84&limit=500&offset={}".format(self.api_endpoint, offset),
+            "{}?datum=wgs84&limit=500{}&offset={}".format(self.api_endpoint, self.additional_args, offset),
             meta={"offset": offset},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = response.json()
+        data = response.json()  # ty: ignore[unresolved-attribute]
 
         for location in data["items"]:
             item = Feature()
@@ -33,8 +34,8 @@ class LocationCloudSpider(Spider):
             item["ref"] = location["code"]
             item["lat"] = location["coord"]["lat"]
             item["lon"] = location["coord"]["lon"]
-            item["addr_full"] = location["address_name"]
-            item["postcode"] = location["postal_code"]
+            item["addr_full"] = location.get("address_name")
+            item["postcode"] = location.get("postal_code")
 
             yield from self.post_process_feature(item, location)
 

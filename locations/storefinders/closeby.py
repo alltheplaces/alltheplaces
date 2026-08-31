@@ -28,6 +28,7 @@ class ClosebySpider(Spider):
             self.pre_process_data(feature)
 
             item = DictParser.parse(feature)
+            item["lon"], item["lat"], _ = feature["geometry"]["coordinates"]
             item["addr_full"] = feature.get("address_full")
 
             yield from self.post_process_item(item, response, feature) or []

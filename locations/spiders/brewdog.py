@@ -1,34 +1,19 @@
-import json
+from scrapy.spiders import SitemapSpider
 
-import scrapy
-
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.google_url import extract_google_position
+from locations.items import Feature
 
 
-class BrewdogSpider(scrapy.Spider):
+class BrewdogSpider(SitemapSpider):
     name = "brewdog"
     item_attributes = {"brand": "BrewDog", "brand_wikidata": "Q911367"}
-    allowed_domains = ["www.brewdog.com"]
-    start_urls = ["https://www.brewdog.com/uk/bar-locator#ALL"]
+    sitemap_urls = ["https://brewdog.com/sitemap.xml", "https://usa.brewdog.com/sitemap.xml"]
+    sitemap_rules = [("/pages/bars/", "parse")]
 
     def parse(self, response):
-        data = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        data_json = json.loads(data)
-        bars = data_json["props"]["pageProps"]["content"]
-        for bar in bars:
-            item = DictParser.parse(bar["fields"])
-            item["ref"] = bar["sys"]["id"]
-            opening_hours = bar["fields"].get("openingHours")
-            oh = OpeningHours()
-            if opening_hours:
-                for key, value in opening_hours.items():
-                    if key == "exceptions" or value.get("is_open") is False:
-                        continue
-                    oh.add_range(
-                        day=key,
-                        open_time=value.get("open"),
-                        close_time=value.get("close"),
-                    )
-            item["opening_hours"] = oh.as_opening_hours()
-            yield item
+        item = Feature()
+        item["branch"] = response.xpath('//*[@class="bar-detail-hero__title"]//text()').get()
+        item["addr_full"] = response.xpath('//*[@class="bar-detail-hero__address"]//text()').get()
+        item["ref"] = item["website"] = response.url
+        extract_google_position(item, response)
+        yield item

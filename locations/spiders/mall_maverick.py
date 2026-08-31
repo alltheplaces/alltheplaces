@@ -28,6 +28,7 @@ SOCIAL_MEDIA_MAP = {
 class MallMaverickSpider(Spider):
     name = "mall_maverick"
     start_urls = ["https://api.mallmaverick.com/properties/"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():

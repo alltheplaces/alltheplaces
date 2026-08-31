@@ -1,4 +1,4 @@
-from parsel.selector import Selector
+from scrapy.selector import Selector
 
 from locations.microdata_parser import MicrodataParser
 

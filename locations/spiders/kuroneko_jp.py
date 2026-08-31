@@ -82,7 +82,8 @@ class KuronekoJPSpider(Spider):
                         item["branch"] = row[6]
                 else:
                     item["name"] = row[6]
-                apply_category(Categories.POST_PARTNER, item)
+                apply_category(Categories.GENERIC_POI, item)
+                item.set_tag("post_office", "post_partner")
                 item["extras"]["post_office:service_provider"] = "ヤマト運輸"
 
             item["brand"], item["brand_wikidata"] = BRANDS.get(row[3], (None, None))

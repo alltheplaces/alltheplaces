@@ -1,81 +1,79 @@
-import re
-from typing import Any, Iterable
+from typing import AsyncIterator, Iterable
 
-import chompjs
-from scrapy.http import Response, TextResponse
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.geo import country_iseadgg_centroids
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class VerizonUSSpider(CrawlSpider, StructuredDataSpider):
+class VerizonUSSpider(JSONBlobSpider):
     name = "verizon_us"
     item_attributes = {"brand": "Verizon", "brand_wikidata": "Q919641"}
-    start_urls = ["https://www.verizon.com/nextgendigital/nos/storelocator"]
-    rules = [
-        Rule(
-            LinkExtractor(allow=r"/storelocator/[-\w]+$"),
-        ),
-        Rule(LinkExtractor(allow=r"/storelocator/[-\w]+/[-\w]+$"), callback="parse"),
-    ]
-
-    OPERATORS = {
-        "Asurion FSL": {"operator": "Asurion FSL"},
-        "BeMobile": {"operator": "BeMobile"},
-        "Best Buy": {"operator": "Best Buy", "operator_wikidata": "Q533415"},
-        "Best Wireless": {"operator": "Best Wireless"},
-        "Cellular Plus": {"operator": "Cellular Plus"},
-        "Cellular Sales": {"operator": "Cellular Sales", "operator_wikidata": "Q5058345"},
-        "Mobile Generation": {"operator": "Mobile Generation"},
-        "R Wireless": {"operator": "R Wireless"},
-        "Russell Cellular": {"operator": "Russell Cellular", "operator_wikidata": "Q125523800"},
-        "TCC": {"operator": "The Cellular Connection", "operator_wikidata": "Q121336519"},
-        "Team Wireless": {"operator": "Team Wireless"},
-        "Victra": {"operator": "Victra", "operator_wikidata": "Q118402656"},
-        "Wireless Plus": {"operator": "Wireless Plus"},
-        "Wireless World": {"operator": "Wireless World"},
-        "Wireless Zone": {"operator": "Wireless Zone", "operator_wikidata": "Q122517436"},
-        "Your Wireless": {"operator": "Your Wireless"},
+    operators = {
+        "ABC Phones of North Carolina, Inc.": ("Victra", "Q118402656"),
+        "BeMobile, Inc": ("BeMobile", None),
+        "Cellular Sales Management Group LLC via its affili": ("Cellular Sales", "Q5058345"),
+        "Credico (USA) LLC": ("Credico", None),
+        "Cydcor LLC": ("Cydcor", None),
+        "Gee Papa Enterprises, Inc.": ("Team Wireless", None),
+        "LCM Enterprises Inc.": ("Smartmart", None),
+        "Mobile Generation, LLC": ("Mobile Generation", None),
+        "R Wireless Inc": ("R Wireless", None),
+        "Russell Cellular, Inc.": ("Russell Cellular", "Q125523800"),
+        "The Cellular Connection, LLC": ("The Cellular Connection", "Q121336519"),
+        "UNITED TELECOM USA, INC. DBA YOUR WIRELESS": ("Your Wireless", None),
+        "Verizon Wireless": ("Verizon", "Q919641"),
+        "Wireless Plus, Inc.": ("Wireless Plus", None),
+        "Wireless Zone, LLC": ("Wireless Zone", "Q122517436"),
     }
+    locations_key = ["body", "data", "stores"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store_url in re.findall(r'\\"storeUrl\\":\\"(.+?)\\"', response.text):
-            if "/details/" not in store_url:
-                store_url = store_url.replace("/stores/", "/stores/details/")
-            yield response.follow(url=store_url, callback=self.parse_sd)
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for lat, lon in country_iseadgg_centroids("US", 458):
+            yield JsonRequest(
+                url="https://www.verizon.com/digital/nsa/nos/gw/retail/searchresultsdata",
+                data={
+                    "latitude": lat,
+                    "longitude": lon,
+                    "range": 10000,
+                    "noOfStores": 2500,
+                    "excludeIndirect": False,
+                    "retrieveBy": "GEO",
+                },
+            )
 
-    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["website"] = response.url
-        store_data = chompjs.parse_js_object(response.xpath('//script[contains(text(), "storeJSON")]/text()').get())
-        item["ref"] = store_data["storeNumber"]
-        item["name"] = store_data["storeName"]
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["storeNumber"]
+        item["branch"] = item.pop("name", None)
+        if website := item.get("website"):
+            item["website"] = (
+                f'https://www.verizon.com/nextgendigital/nos/storelocator/detail/{website.removeprefix("/stores/")}'
+            )
 
-        if "Authorized Retailer" in store_data["typeOfStore"]:
-            for operator, tags in self.OPERATORS.items():
-                if item["name"].startswith(operator):
-                    item["branch"] = item.pop("name").removeprefix(operator).strip(" -")
-                    item.update(tags)
-                    break
-        else:
-            item["branch"] = item.pop("name")
-            item["operator"] = self.item_attributes["brand"]
-            item["operator_wikidata"] = self.item_attributes["brand_wikidata"]
+        if business_name := feature.get("businessName"):
+            if operator_info := self.operators.get(business_name):
+                item["operator"], item["operator_wikidata"] = operator_info
+                if item["operator"] in ["Victra", "The Cellular Connection"]:  # Covered by Victra & Tcc US Spiders
+                    return
+            else:
+                self.logger.warning(f"Unknown operator for business name: {business_name}")
 
-        if item.get("branch") and "#" in item["branch"]:
-            item["branch"] = item["branch"].split("#")[1].split(" ", 1)[-1]
-
-        #  ld_data hours don't match with Google Maps data, hence skipped.
-        item["opening_hours"] = self.parse_hours(store_data.get("StoreHours"))
-
+        try:
+            item["opening_hours"] = self.parse_opening_hours(feature)
+        except Exception as e:
+            self.logger.error(f"Error parsing opening hours: {e}")
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item
 
-    def parse_hours(self, store_hours: dict) -> OpeningHours:
+    def parse_opening_hours(self, feature: dict) -> OpeningHours:
         opening_hours = OpeningHours()
         for day in DAYS_3_LETTERS:
-            opening_hours.add_range(day, store_hours.get(f"{day}Open"), store_hours.get(f"{day}Close"), "%I:%M %p")
+            if hours := feature.get(f"hours{day}"):
+                if "Closed" in hours:
+                    opening_hours.set_closed(day)
+                    continue
+                opening_hours.add_range(day, *hours.strip().replace("M ", "M-").split("-"), "%I:%M %p")
         return opening_hours

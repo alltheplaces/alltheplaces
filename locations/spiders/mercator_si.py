@@ -14,7 +14,7 @@ class MercatorSISpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.mercator.si/sitemap.xml"]
     sitemap_follow = ["/Store/"]
     sitemap_rules = [(r"^https:\/\/www\.mercator\.si\/prodajna-.*/.*/$", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
+    wanted_types = ["LocalBusiness", "Store"]
     search_for_facebook = False
     search_for_twitter = False
     search_for_email = False
@@ -22,6 +22,8 @@ class MercatorSISpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response: Response, ld_data, **kwargs):
         if item["website"] == "https://www.mercator.si/prodajna-mesta/page-6/":
             return
+
+        item.pop("facebook", None)
 
         if name := item.get("name"):
             label = html.unescape(name).upper()

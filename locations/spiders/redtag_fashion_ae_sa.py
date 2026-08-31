@@ -10,22 +10,22 @@ from locations.hours import OpeningHours
 
 class RedtagFashionAESASpider(Spider):
     name = "redtag_fashion_ae_sa"
-    item_attributes = {
-        "brand": "Red Tag",
-        "brand_wikidata": "Q132891092",
-    }
+    item_attributes = {"brand": "Red Tag", "brand_wikidata": "Q132891092"}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Request]:
         countries = ["Saudi Arabia", "UAE"]
         for country in countries:
             yield Request(
-                url=f"https://redtagfashion.com/locations/locations.php?country={country}",
+                url=f"https://www.redtagfashion.com/locations/locations.php?country={country}",
                 meta={"country": country},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
             item = DictParser.parse(store)
+            item["email"] = None
+            item["branch"] = item.pop("name").removeprefix("REDTAG ").removeprefix("RT").strip(" -")
             item["ref"] = f"{response.meta['country']}_{store['storecode']}"
             item["street_address"] = item.pop("addr_full")
 

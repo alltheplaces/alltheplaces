@@ -61,7 +61,7 @@ class BeSTAddressesBESpider(AddressSpider):
                 # IDs
                 "ref:BE:best_municipality": row.get("municipality_id"),
                 "ref:BE:best_street": row.get("street_id"),
-                "addr:unit": row.get("box_number"),
+                "unit": row.get("box_number"),
                 # Multilingual fields
                 "addr:city:nl": row.get("municipality_name_nl"),
                 "addr:city:fr": row.get("municipality_name_fr"),

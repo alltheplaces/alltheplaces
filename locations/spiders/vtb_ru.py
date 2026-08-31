@@ -46,6 +46,6 @@ class VtbRUSpider(scrapy.Spider):
                     open, close = times.split("-")
                     oh.add_range(day, open, close)
 
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Couldn't parse hours: {hours}, {e}")

@@ -1,4 +1,3 @@
-import json
 from typing import Any
 from urllib.parse import urljoin
 
@@ -19,7 +18,7 @@ class McdonaldsITSpider(PlaywrightSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in json.loads(response.xpath("//pre/text()").get())["sites"]:
+        for store in response.json()["sites"]:
             store["street_address"] = store.pop("address")
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
@@ -49,6 +48,6 @@ class McdonaldsITSpider(PlaywrightSpider):
 
         oh = OpeningHours()
         for rule in rules["days"]:
-            oh.add_range(rule["name"], *rule["times"].split(","))
-
+            if rule.get("times"):
+                oh.add_range(rule["name"], *rule["times"].split(","))
         return oh.as_opening_hours()

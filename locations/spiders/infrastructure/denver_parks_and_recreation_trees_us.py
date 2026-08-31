@@ -24,7 +24,7 @@ class DenverParksAndRecreationTreesUSSpider(ArcGISFeatureServerSpider):
             "_Stump",
         ):
             return
-        item["ref"] = feature["GlobalID"]
+        item["ref"] = str(feature["OBJECTID"])
         item.pop("name", None)
         item.pop("addr_full", None)
         item.pop("street", None)

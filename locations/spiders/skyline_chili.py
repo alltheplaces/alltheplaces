@@ -12,3 +12,7 @@ class SkylineChiliSpider(SitemapSpider, StructuredDataSpider):
     }
 
     sitemap_urls = ["https://locations.skylinechili.com/sitemap.xml"]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item.pop("image", None)  # Generic brand image, not per-location
+        yield item

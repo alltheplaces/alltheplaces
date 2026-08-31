@@ -4,6 +4,7 @@ from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.licenses import Licenses
 from locations.storefinders.opendatasoft_explore import OpendatasoftExploreSpider
 
 # https://www.data.gouv.fr/datasets/adresse-et-geolocalisation-des-etablissements-denseignement-des-premier-et-second-degres
@@ -47,13 +48,14 @@ NATURE_UAI_CATEGORY_MAP = {
 
 class EnseignementPremierSecondDegreFRSpider(OpendatasoftExploreSpider):
     name = "enseignement_premier_second_degre_fr"
-    dataset_attributes = OpendatasoftExploreSpider.dataset_attributes | {
-        "license": "Licence Ouverte / Open Licence version 2.0",
-        "license:website": "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
-        "license:wikidata": "Q29949417",
-        "attribution": "required",
-        "attribution:name": "Ministere de l'Education Nationale - data.education.gouv.fr",
-    }
+    dataset_attributes = (
+        OpendatasoftExploreSpider.dataset_attributes
+        | Licenses.ETALAB2.value
+        | {
+            "attribution:name": "Ministère de l’Éducation Nationale",
+            "attribution:website": "https://data.education.gouv.fr/",
+        }
+    )
     api_endpoint = "https://data.education.gouv.fr/api/explore/v2.1/"
     dataset_id = "fr-en-adresse-et-geolocalisation-etablissements-premier-et-second-degre"
 

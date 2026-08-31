@@ -15,7 +15,6 @@ class BataSpider(JSONBlobSpider):
         "https://www.bata.com/on/demandware.store/Sites-bata-cl-Site/es_CL/Stores-FindStores",
         "https://www.bata.com/on/demandware.store/Sites-bata-cz-sfra-Site/cs_CZ/Stores-FindStores",
         "https://www.bata.com/on/demandware.store/Sites-bata-id-Site/en_ID/Stores-FindStores",
-        "https://www.bata.com/on/demandware.store/Sites-bata-in-Site/en_IN/Stores-FindStores",
         "https://www.bata.com/on/demandware.store/Sites-bata-it-sfra-Site/it_IT/Stores-FindStores",
         "https://www.bata.com/on/demandware.store/Sites-bata-my-Site/en_MY/Stores-FindStores",
         "https://www.bata.com/on/demandware.store/Sites-bata-sk-sfra-Site/sk_SK/Stores-FindStores",

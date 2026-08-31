@@ -20,6 +20,10 @@ class NettoDESpider(SitemapSpider, StructuredDataSpider):
         "DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http2.H2DownloadHandler"},
         "RETRY_EXCEPTIONS": RETRY_EXCEPTIONS + [ProtocolError],
         "USER_AGENT": FIREFOX_LATEST,
+        "DEFAULT_REQUEST_HEADERS": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7",
+        },
     }
 
     categories = {

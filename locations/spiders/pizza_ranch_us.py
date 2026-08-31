@@ -1,28 +1,26 @@
-import json
+from typing import Any
 
-from scrapy import Request
+from chompjs import chompjs
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class PizzaRanchUSSpider(CrawlSpider, StructuredDataSpider):
+class PizzaRanchUSSpider(CrawlSpider):
     name = "pizza_ranch_us"
     item_attributes = {"brand": "Pizza Ranch", "brand_wikidata": "Q7199978"}
     allowed_domains = ["pizzaranch.com"]
-    start_urls = ("https://pizzaranch.com/all-locations",)
-    rules = [
-        Rule(LinkExtractor(allow=r"/all-locations/search-results/"), callback="parse_search_results"),
-    ]
+    start_urls = ["https://pizzaranch.com/all-locations"]
+    rules = [Rule(LinkExtractor(allow=r"/all-locations/[^/]+$"), callback="parse")]
 
-    def parse_search_results(self, response):
-        json_str = response.xpath("//script/text()")[-2].extract()[21:-4]
-        json_data = json.loads(json_str)
-        for store in json_data:
-            if website := store["website"]:
-                yield Request(url=website, callback=self.parse_sd)
-            else:
-                item = DictParser.parse(store)
-                yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in chompjs.parse_js_object(
+            response.xpath('//script[contains(text(), "var locations =")]/text()').get()
+        ):
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
+            apply_category(Categories.RESTAURANT, item)
+            yield item

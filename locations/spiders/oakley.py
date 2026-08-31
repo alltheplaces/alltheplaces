@@ -40,6 +40,11 @@ class OakleySpider(SitemapSpider, StructuredDataSpider):
             item["lat"] = document.get("yextDisplayCoordinate", {}).get("latitude")
             item["lon"] = document.get("yextDisplayCoordinate", {}).get("longitude")
 
+        if (item.get("name") or "").upper() == "OAKLEY VAULT":
+            item["name"] = "Oakley Vault"
+        else:
+            item["name"] = "Oakley"
+
         yield item
 
     def extract_payment_accepted(self, item, response, ld_item):

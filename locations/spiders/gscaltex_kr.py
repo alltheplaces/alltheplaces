@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.items import Feature
 
 
@@ -16,6 +16,7 @@ class GscaltexKRSpider(Spider):
         for location in response.json()["siteList"]:
             item = Feature()
             item["ref"] = location["siteCd"]
+            item["branch"] = location["siteNm"]
             item["phone"] = location["telNo"]
             item["postcode"] = location["zipNo"]
             item["street_address"] = location["detAddr"]
@@ -23,6 +24,14 @@ class GscaltexKRSpider(Spider):
             item["lon"] = location["longi"]
 
             apply_yes_no(Extras.CAR_WASH, item, location["carWashYn"] == "Y")
+            apply_yes_no("self_service", item, location["selfYn"] == "Y")
+            apply_yes_no(Fuel.LPG, item, location["lpgYn"] == "Y")
+
+            apply_yes_no(PaymentMethods.KAKAO_PAY, item, location["kakaoPayYn"] == "Y")
+            apply_yes_no(PaymentMethods.NAVER_PAY, item, location["naverPayYn"] == "Y")
+            apply_yes_no(PaymentMethods.PAYCO, item, location["paycoYn"] == "Y")
+            apply_yes_no(PaymentMethods.ZERO_PAY, item, location["zeroPayYn"] == "Y")
+
             apply_category(Categories.FUEL_STATION, item)
 
             # TODO: location["siteSxnCd"]

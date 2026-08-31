@@ -1,9 +1,13 @@
 import json
 import re
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class FarmersInsuranceUSSpider(SitemapSpider):
@@ -11,52 +15,29 @@ class FarmersInsuranceUSSpider(SitemapSpider):
     item_attributes = {"brand": "Farmers Insurance", "brand_wikidata": "Q1396863"}
     allowed_domains = ["agents.farmers.com"]
     sitemap_urls = ["https://agents.farmers.com/sitemap.xml"]
-    sitemap_rules = [
-        (
-            r"https:\/\/agents\.farmers\.com\/(\w{2})\/([-\w]+)\/([-\w]+)$",
-            "parse_location",
-        )
-    ]
+    sitemap_rules = [(r"https://agents\.farmers\.com/\w{2}/[-\w]+/[-\w]+/?$", "parse")]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def parse_location(self, response):
-        ref = re.search(r".+/(.+)", response.url).group(1)
-        properties = {
-            "ref": ref.strip("/"),
-            "street_address": response.xpath('//meta[@itemprop="streetAddress"]/@content').extract_first(),
-            "city": response.xpath('//meta[@itemprop="addressLocality"]/@content').extract_first(),
-            "state": response.xpath('//abbr[@class="c-address-state"]/text()').extract_first(),
-            "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').extract_first(),
-            "phone": response.xpath('//span[@itemprop="telephone"]/text()').extract_first(),
-            "country": response.xpath(
-                '//abbr[@class="c-address-country-name c-address-country-us"]/text()'
-            ).extract_first(),
-            "lat": float(response.xpath('//meta[@itemprop="latitude"]/@content').extract_first()),
-            "lon": float(response.xpath('//meta[@itemprop="longitude"]/@content').extract_first()),
-            "website": response.url,
-        }
-
-        hours_data = self.parse_hours(
-            response.xpath(
-                '//div[@class="c-location-hours-details-wrapper js-location-hours"]/@data-days'
-            ).extract_first()
-        )
-
-        if hours_data:
-            properties["opening_hours"] = hours_data
-        yield Feature(**properties)
-
-    def parse_hours(self, hours_data):
-        if hours_data is None:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        comment = response.xpath('//comment()[contains(., "LocalBusiness")]').get()
+        if not comment:
             return
-
-        days = json.loads(hours_data)
-        out_hours = []
-
-        for day in days:
-            start_day = day["day"][:2].title()
-            intervals = day["intervals"]
-            hours = ["%04d-%04d" % (interval["start"], interval["end"]) for interval in intervals]
-            if len(intervals):
-                out_hours.append("{} {}".format(start_day, ",".join(hours)))
-        if len(out_hours):
-            return "; ".join(out_hours)
+        match = re.search(r"\{.*\}", comment, re.S)
+        if not match:
+            return
+        data = json.loads(match.group(0))
+        item = DictParser.parse(data)
+        item["ref"] = item["website"] = response.url
+        try:
+            oh = OpeningHours()
+            for day_time in data.get("openingHoursSpecification", []):
+                days = day_time.get("dayOfWeek", [])
+                if not days:
+                    continue
+                oh.add_range(days[0], day_time.get("opens"), day_time.get("closes"))
+            if oh:
+                item["opening_hours"] = oh
+        except (KeyError, IndexError, ValueError, TypeError):
+            pass
+        apply_category(Categories.OFFICE_INSURANCE, item)
+        yield item

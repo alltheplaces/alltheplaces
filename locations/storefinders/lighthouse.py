@@ -3,7 +3,8 @@ from hashlib import sha1
 from html import unescape
 from typing import AsyncIterator, Iterable
 
-from scrapy import Selector, Spider
+from parsel import Selector
+from scrapy import Spider
 from scrapy.http import Request, TextResponse
 
 from locations.categories import Extras, apply_yes_no

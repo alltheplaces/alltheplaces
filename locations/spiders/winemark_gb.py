@@ -4,6 +4,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import FormRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -27,5 +28,7 @@ class WinemarkGBSpider(Spider):
             item["extras"]["branch"] = item.pop("name")
             if url := location["url"]:
                 item["website"] = response.urljoin(url)
+
+            apply_category(Categories.SHOP_WINE, item)
 
             yield item

@@ -24,16 +24,18 @@ class FedexSpider(CrawlSpider):
         "FedEx Self-Service Locker": Categories.PARCEL_LOCKER,
         "FedEx Office Print & Ship Center": Categories.SHOP_COPYSHOP,
         "FedEx Station": Categories.POST_DEPOT,
-        "FedEx OnSite": Categories.POST_PARTNER,
         "Centro de Envío FedEx": Categories.POST_OFFICE,
         "FedEx Ship Center": Categories.POST_OFFICE,
-        "FedEx Authorized ShipCenter": Categories.POST_PARTNER,
         "FedEx Office Ship Center": Categories.POST_OFFICE,
         "FedEx World Service Center": Categories.POST_OFFICE,
     }
     custom_settings = {  # Disable NSI matching
         "ITEM_PIPELINES": ITEM_PIPELINES
         | {"locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None},
+        # Added settings to prevent Cloudflare 403 bans
+        "DOWNLOAD_DELAY": 1.5,
+        "CONCURRENT_REQUESTS_PER_DOMAIN": 2,
+        "AUTOTHROTTLE_ENABLED": True,
     }
     start_urls = ["https://local.fedex.com/en"]
     rules = [
@@ -98,6 +100,9 @@ class FedexSpider(CrawlSpider):
 
             if category := self.CATEGORY_MAP.get(item["name"]):
                 apply_category(category, item)
+            elif item["name"] in ["FedEx OnSite", "FedEx Authorized ShipCenter"]:
+                apply_category(Categories.GENERIC_POI, item)
+                item.set_tag("post_office", "post_partner")
 
             item["opening_hours"] = OpeningHours()
             for rule in location_info.get("hours", {}).get("normalHours", []):

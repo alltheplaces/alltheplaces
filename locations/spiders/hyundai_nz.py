@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.hyundai_kr import HYUNDAI_SHARED_ATTRIBUTES
@@ -38,7 +38,7 @@ class HyundaiNZSpider(JSONBlobSpider):
                 service_feature["ref"] = service_feature["ref"] + "_Service"
                 yield item
                 yield service_feature
-            elif feature["Type"][0] == "Service only agents":
+            elif feature["Type"][0] in ["Service only agents", "Service only"]:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
                 item["ref"] = item["ref"] + "_Service"
                 yield item
@@ -52,10 +52,10 @@ class HyundaiNZSpider(JSONBlobSpider):
                 yield service_feature
             elif feature["Type"][0] == "Marine":
                 apply_category(Categories.SHOP_BOAT, item)
-                apply_category({"boat:repair": "yes"}, item)
-                apply_category({"boat:parts": "yes"}, item)
+                apply_yes_no("boat:repair", item, True)
+                apply_yes_no("boat:parts", item, True)
                 yield item
-            elif feature["Type"][0] == "Sales only":
+            elif feature["Type"][0] in ["Sales", "Sales only", "Passenger sales only"]:
                 apply_category(Categories.SHOP_CAR, item)
                 item["ref"] = item["ref"] + "_Sales"
                 yield item

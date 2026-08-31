@@ -12,20 +12,15 @@ from locations.pipelines.address_clean_up import clean_address
 class EnterpriseSpider(Spider):
     name = "enterprise"
     item_attributes = {"brand": "Enterprise", "brand_wikidata": "Q17085454"}
-    allowed_domains = ["prd.location.enterprise.com", "int1.location.enterprise.com"]
+    allowed_domains = ["prd.location.enterprise.com"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         gc = geonamescache.GeonamesCache()
         countries = gc.get_countries()
         for country_code in countries.keys():
-            # It appears that countries are sharded between two
-            # servers. Other servers are int2, xqa1, xqa2, xqa3
-            # but search of these servers reveals no additional
-            # locations on top of just prd and int1.
-            for subdomain in ["prd", "int1"]:
-                yield JsonRequest(
-                    url=f"https://{subdomain}.location.enterprise.com/enterprise-sls/search/location/enterprise/web/country/{country_code}"
-                )
+            yield JsonRequest(
+                url=f"https://prd.location.enterprise.com/enterprise-sls/search/location/enterprise/web/country/{country_code}"
+            )
 
     def parse(self, response):
         for location in response.json():

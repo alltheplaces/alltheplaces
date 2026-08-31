@@ -11,24 +11,19 @@ from locations.hours import DAYS_FULL, OpeningHours
 class AdairsSpider(Spider):
     name = "adairs"
     item_attributes = {"brand": "Adairs", "brand_wikidata": "Q109626904"}
-    allowed_domains = ["www.adairs.com.au", "www.adairs.co.nz"]
+    allowed_domains = ["www.adairs.com.au"]
     start_urls = [
         "https://www.adairs.com.au/api/store/search-store",
-        "https://www.adairs.co.nz/api/store/search-store",
     ]
+    requires_proxy = "AU"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        data = {
-            "pageId": 665,
-            "pageNumber": 1,
-            "pageSize": 1000,
-        }
-        for url in self.start_urls:
-            if "adairs.com.au" in url:
-                data["marketId"] = "AUS"
-            elif "adairs.co.nz" in url:
-                data["marketId"] = "NEZ"
-            yield JsonRequest(url=url, method="POST", data=data, callback=self.parse)
+        yield JsonRequest(
+            url=self.start_urls[0],
+            method="POST",
+            data={"pageId": 665, "pageNumber": 1, "pageSize": 1000, "marketId": "AUS"},
+            callback=self.parse,
+        )
 
     def parse(self, response):
         if not response.json()["success"]:

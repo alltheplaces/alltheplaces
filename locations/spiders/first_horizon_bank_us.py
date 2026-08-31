@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -13,28 +13,13 @@ class FirstHorizonBankUSSpider(Spider):
     item_attributes = {"brand": "First Horizon Bank", "brand_wikidata": "Q5453875"}
 
     async def start(self) -> AsyncIterator[FormRequest]:
-        payload = {
-            "Latitude": "0",
-            "Longitude": "0",
-            "SearchRadiusInMiles": "50000",
-        }
         yield FormRequest(
-            url="https://www.firsthorizon.com/api/locations/atms", formdata=payload, callback=self.parse_atms
-        )
-        yield FormRequest(
-            url="https://www.firsthorizon.com/api/locations/branches", formdata=payload, callback=self.parse_branch
+            url="https://www.firsthorizon.com/api/locations/branches",
+            formdata={"Latitude": "0", "Longitude": "0", "SearchRadiusInMiles": "50000"},
+            callback=self.parse_branch,
         )
 
-    def parse_atms(self, response):
-        for location in response.json()["ATMs"]:
-            location["street_address"] = location.pop("Street")
-            item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
-            item["ref"] = f'{location.get("Lat")}{location.get("Lng")}'
-            apply_category(Categories.ATM, item)
-            yield item
-
-    def parse_branch(self, response):
+    def parse_branch(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["Branches"]:
             location["street_address"] = location.pop("Street")
             item = DictParser.parse(location)

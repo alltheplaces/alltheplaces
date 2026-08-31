@@ -80,7 +80,7 @@ class SasolZASpider(Spider):
                     if day_times == "00:00 to 00:00" or day_times == "00:00 to 00:01":
                         day_times = "00:00 to 23:59"
                     oh.add_ranges_from_string(days + " " + day_times)
-            item["opening_hours"] = oh.as_opening_hours()
+            item["opening_hours"] = oh
 
         # Products available at https://locator.sasol.com/api/product.json
         apply_category(Categories.FUEL_STATION, item)

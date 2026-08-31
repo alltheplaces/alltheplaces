@@ -74,7 +74,7 @@ else
 fi
 
 (>&2 echo "Running ${SPIDER_COUNT} spiders ${PARALLELISM} at a time")
-xargs -t -L 1 -P "${PARALLELISM}" -a "${SPIDER_RUN_DIR}/commands.txt" -i sh -c "{} || true"
+xargs -P "${PARALLELISM}" -a "${SPIDER_RUN_DIR}/commands.txt" -I CMD sh -c "CMD || true"
 
 retval=$?
 if [ ! $retval -eq 0 ]; then
@@ -82,6 +82,14 @@ if [ ! $retval -eq 0 ]; then
     exit 1
 fi
 (>&2 echo "Done running spiders")
+
+# A spider process killed mid-crawl (OOM, timeout, crash) never gets to write
+# its GeoJSON trailer, leaving output/*.geojson invalid and output/*.ndgeojson
+# with a malformed trailing line - the latter breaks the parquet build for
+# every spider, not just the one that was killed, since it's read in one
+# batch below. Repair before anything downstream consumes these files.
+(>&2 echo "Repairing any GeoJSON output left incomplete by a killed spider")
+uv run python ci/repair_truncated_geojson.py --directory "${SPIDER_RUN_DIR}/output"
 
 OUTPUT_LINECOUNT=$(cat "${SPIDER_RUN_DIR}"/output/*.geojson | wc -l | tr -d ' ')
 (>&2 echo "Generated ${OUTPUT_LINECOUNT} lines")
@@ -95,8 +103,9 @@ tippecanoe --cluster-distance=25 \
            --read-parallel \
            --attribution="<a href=\"https://www.alltheplaces.xyz/\">All the Places</a> ${RUN_TIMESTAMP}" \
            -o "${SPIDER_RUN_DIR}/output.pmtiles" \
-           "${SPIDER_RUN_DIR}"/output/*.geojson
-retval=$?
+           "${SPIDER_RUN_DIR}"/output/*.geojson \
+           2>&1 | grep -v -E '^\s*[0-9]+\.[0-9]+%\s|^Reordering geometry:\s*[0-9]|^Read [0-9]+\.[0-9]+ million features|^Sorting\.\.\.' >&2
+retval=${PIPESTATUS[0]}
 if [ ! $retval -eq 0 ]; then
     (>&2 echo "Couldn't generate pmtiles, won't include in output")
     include_pmtiles=false
@@ -390,34 +399,24 @@ else
     (>&2 echo "Skipping latest/output.parquet redirect because parquet generation failed")
 fi
 
+(>&2 echo "Updating ${SPIDER_COUNT} spider redirects in S3 (50 at a time)...")
+(>&2 echo "Note: R2 redirects skipped - R2 does not support website-redirect-location header")
+
+# Create a simple command file with one S3 cp command per spider
+rm -f "${SPIDER_RUN_DIR}/redirect_commands.txt"
 for spider in $(uv run scrapy list)
 do
-    uv run aws s3 cp \
-        --only-show-errors \
-        --website-redirect="${RUN_URL_PREFIX}/output/${spider}.geojson" \
-        "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
-        "s3://${S3_BUCKET}/runs/latest/output/${spider}.geojson"
-
-    retval=$?
-    if [ ! $retval -eq 0 ]; then
-        (>&2 echo "Couldn't update latest/output/${spider}.geojson redirect in S3")
-    fi
-
-    AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
-    AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
-    uv run aws s3 \
-        --endpoint-url="${R2_ENDPOINT_URL}" \
-        cp \
-        --only-show-errors \
-        --website-redirect"${RUN_URL_PREFIX}/output/${spider}.geojson" \
-        "${SPIDER_RUN_DIR}/latest_placeholder.txt" \
-        "s3://${R2_BUCKET}/runs/latest/output/${spider}.geojson"
-
-    retval=$?
-    if [ ! $retval -eq 0 ]; then
-        (>&2 echo "Couldn't update latest/output/${spider}.geojson redirect in R2")
-    fi
+    echo "uv run aws s3 cp --only-show-errors --website-redirect=\"${RUN_URL_PREFIX}/output/${spider}.geojson\" \"${SPIDER_RUN_DIR}/latest_placeholder.txt\" \"s3://${S3_BUCKET}/runs/latest/output/${spider}.geojson\"" >> "${SPIDER_RUN_DIR}/redirect_commands.txt"
 done
+
+# Run all redirect updates in parallel
+xargs -P 50 -a "${SPIDER_RUN_DIR}/redirect_commands.txt" -I CMD sh -c "CMD || echo 'Failed S3 redirect' >&2"
+
+retval=$?
+if [ ! $retval -eq 0 ]; then
+    (>&2 echo "Some S3 redirect updates failed (exit code ${retval})")
+    # Don't exit - some failures are acceptable for redirects
+fi
 
 (>&2 echo "Done updating latest/ redirects")
 

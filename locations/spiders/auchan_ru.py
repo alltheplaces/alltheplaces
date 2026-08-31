@@ -32,7 +32,7 @@ class AuchanRUSpider(scrapy.Spider):
                     open_time = "00:00" if h["is_around_the_clock"] else h["open_time"]
                     close_time = "23:59" if h["is_around_the_clock"] else h["close_time"]
                     oh.add_days_range(weekdays, open_time, close_time, "%H:%M:%S")
-                item["opening_hours"] = oh.as_opening_hours()
+                item["opening_hours"] = oh
             except Exception as e:
                 self.logger.warning(f"Error parsing hours: {hours}, {e}")
                 self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")

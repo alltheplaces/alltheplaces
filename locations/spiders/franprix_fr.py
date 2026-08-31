@@ -15,12 +15,15 @@ class FranprixFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["name"].lower().startswith("franprix "):
-            item["branch"] = item.pop("name").split(" ", 1)[1]
+            item["name"] = None
             item.update(FRANPRIX)
         elif item["name"].startswith("Marché d'à Côté "):
-            item["branch"] = item.pop("name").removeprefix("Marché d'à Côté ")
+            item["name"] = None
             item.update(MARCHE)
 
         item["ref"] = response.url.split("/")[-1]
+        item["website"] = response.url
+
         apply_category(Categories.SHOP_CONVENIENCE, item)
+
         yield item

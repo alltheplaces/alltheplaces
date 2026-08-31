@@ -10,7 +10,7 @@ from locations.spiders.ampm_us import AmpmUSSpider
 from locations.spiders.bashas_us import BashasUSSpider
 from locations.spiders.brookshires_us import BrookshiresUSSpider
 from locations.spiders.cardenas_us import CardenasUSSpider
-from locations.spiders.caseys_general_store import CaseysGeneralStoreSpider
+from locations.spiders.caseys_general_store_us import CaseysGeneralStoreUSSpider
 from locations.spiders.chevron_us import BRANDS as CHEVRON_BRANDS
 from locations.spiders.circle_k import CircleKSpider
 from locations.spiders.costco_ca_gb_us import CostcoCAGBUSSpider
@@ -68,7 +68,7 @@ LOCATION_MAPPINGS = [
     (["BASHAS", "BASHAS'"], BashasUSSpider.item_attributes),
     (["BROOKSHIRES", "BROOKSHIRE'S"], BrookshiresUSSpider.item_attributes),
     (["CARDENAS", "CARDENAS MARKET"], CardenasUSSpider.item_attributes),
-    (["CASEY'S", "CASEYS"], CaseysGeneralStoreSpider.item_attributes),
+    (["CASEY'S", "CASEYS"], CaseysGeneralStoreUSSpider.item_attributes),
     (["CHEVRON"], CHEVRON_BRANDS["Chevron"][0]),
     (["CIRCLE K", "IRVING - CIRCLE K"], CircleKSpider.CIRCLE_K),
     (["CERTIFIED", "CERTIFIED OIL"], EgAmericaUSSpider.brands[17]),

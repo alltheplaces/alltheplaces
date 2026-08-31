@@ -23,4 +23,6 @@ class BjRestaurantUSSpider(SitemapSpider):
         item["ref"] = restaurant_data["restaurantId"]
         item["branch"] = item.pop("name", None)
         item["website"] = response.urljoin(item["website"])
+        if "/generic-" in (item.get("image") or ""):
+            item.pop("image", None)
         yield item

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 
 class UnderArmourSpider(Spider):
@@ -14,8 +15,11 @@ class UnderArmourSpider(Spider):
     item_attributes = {"brand": "Under Armour", "brand_wikidata": "Q2031485"}
     allowed_domains = ["store-locator.underarmour.com"]
 
-    def start_requests(self):
-        yield JsonRequest(url="https://store-locator.underarmour.com/api/stores/nearby/?lat=0&lng=0&radius=50000")
+    async def start(self) -> AsyncIterator[Any]:
+        yield JsonRequest(
+            url="https://store-locator.underarmour.com/api/stores/nearby/?lat=0&lng=0&radius=50000",
+            headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
+        )
 
     def parse(self, response: Response, **kwargs: Any):
         for store in response.json()["stores"]:

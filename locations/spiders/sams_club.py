@@ -11,7 +11,7 @@ class SamsClubSpider(Spider):
     start_urls = [
         "https://www.samsclub.com/api/node/vivaldi/browse/v2/clubfinder/list?singleLineAddr=USA&distance=50000&nbrOfStores=1000"
     ]
-    custom_settings = {"DOWNLOAD_HANDLERS": {"https": "scrapy.core.downloader.handlers.http.HTTPDownloadHandler"}}
+    requires_proxy = True
 
     def parse(self, response):
         for store in response.json():
@@ -41,7 +41,7 @@ class SamsClubSpider(Spider):
                 yield fuel_station
 
             club_attrs = store.get("clubAttributes", {})
-            apply_yes_no(Extras.TYRE_SERVICES, item, "tires_&_batteries" in services)
+            apply_yes_no(Extras.VEHICLE_TYRE_SERVICES, item, "tires_&_batteries" in services)
             apply_yes_no(Extras.SELF_CHECKOUT, item, club_attrs.get("isScanNGo"))
             apply_yes_no(Extras.DELIVERY, item, club_attrs.get("isClubEnabledForRegularDelivery"))
             item["opening_hours"] = self.parse_hours(store.get("operationalHours", {}))

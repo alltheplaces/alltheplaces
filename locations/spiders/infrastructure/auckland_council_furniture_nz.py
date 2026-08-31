@@ -13,7 +13,7 @@ from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpid
 class AucklandCouncilFurnitureNZ(ArcGISFeatureServerSpider):
     name = "auckland_council_furniture_nz"
     dataset_attributes = (
-        ArcGISFeatureServerSpider.dataset_attributes | Licenses.CC4.value | {"attribution:name": "Auckland Council"}
+        ArcGISFeatureServerSpider.dataset_attributes | Licenses.CCBY4.value | {"attribution:name": "Auckland Council"}
     )
     item_attributes = {"operator": "Auckland Council", "operator_wikidata": "Q758635"}
     host = "services1.arcgis.com"

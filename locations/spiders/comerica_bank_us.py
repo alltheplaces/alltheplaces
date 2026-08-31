@@ -28,7 +28,7 @@ class ComericaBankUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["extras"]["fax"] = ld_data.get("faxNumber")
-        item["extras"]["addr:unit"] = response.xpath("//div[@class='extended-address']/text()").get()
+        item["unit"] = response.xpath("//div[@class='extended-address']/text()").get()
         apply_category(CATEGORY_MAP[ld_data["@type"]], item)
 
         if ld_data["@type"] == "AutomatedTeller":

@@ -45,18 +45,20 @@ class HertzSpider(Spider):
 
             country_name = shop["country_name"].replace(" ", "")
             city_name = shop["city"].replace(" ", "")
+            item["branch"] = item.pop("name")
             item["website"] = "/".join(
                 ["https://www.hertz.com/us/en/location", country_name, city_name, shop["extendedOAGCode"]]
             )
             item["street_address"] = shop.get("streetAddressLine1")
             if shop.get("streetAddressLine2", ""):
-                item["addr_full"] = "".join(
+                raw = "".join(
                     [
                         shop.get("streetAddressLine1", ""),
                         shop.get("streetAddressLine2", ""),
                         shop.get("streetAddressLine3", ""),
                     ]
                 )
+                item["addr_full"] = re.sub(r"<[^>]+>", "", raw).strip()
             item["opening_hours"] = OpeningHours()
             if opening_data := shop.get("hours"):
                 item["opening_hours"].add_ranges_from_string(ranges_string=opening_data)

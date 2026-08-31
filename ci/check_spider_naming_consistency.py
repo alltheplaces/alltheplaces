@@ -84,6 +84,7 @@ COUNTRYCODE_COMPONENTS = {
     "LU",
     "LV",
     "MA",
+    "MD",
     "ME",
     "MK",
     "MN",
@@ -247,7 +248,8 @@ def check_file(file_path: Path) -> Tuple[Path, List[str]]:
                 if isinstance(item, ast.Assign):
                     for target in item.targets:
                         if isinstance(target, ast.Name) and target.id == "name":
-                            spider_name = item.value.value
+                            if isinstance(item.value, ast.Constant):
+                                spider_name = item.value.value
                             break
                     if spider_name:
                         break
