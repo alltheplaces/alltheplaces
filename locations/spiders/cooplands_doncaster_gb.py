@@ -19,7 +19,7 @@ class CooplandsDoncasterGBSpider(scrapy.Spider):
 
         for index, store in enumerate(stores):
             data = store.xpath("ul/li/text()").extract()
-            addr_full = merge_address_lines(data[:-1])
+            addr_full = merge_address_lines(data[:-2])
 
             item = Feature(
                 ref=index,

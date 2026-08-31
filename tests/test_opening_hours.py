@@ -9,6 +9,7 @@ from locations.hours import (
     DAYS_IT,
     DAYS_PL,
     DAYS_RU,
+    DAYS_UA,
     DELIMITERS_ES,
     DELIMITERS_IT,
     DELIMITERS_RU,
@@ -225,6 +226,9 @@ def test_sanitise_days():
     assert sanitise_day("Съб. ", DAYS_DE) is None
     assert sanitise_day("Mo", DAYS_DE) == "Mo"
     assert sanitise_day("Do", DAYS_DE) == "Th"
+    assert sanitise_day("пн", DAYS_UA) == "Mo"
+    assert sanitise_day("Нд.", DAYS_UA) == "Su"
+    assert sanitise_day("середа", DAYS_UA) == "We"
 
 
 def test_opening_hours_closed():
