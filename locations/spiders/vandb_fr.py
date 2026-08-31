@@ -52,7 +52,9 @@ class VandbFRSpider(SitemapSpider, StructuredDataSpider):
                     item["opening_hours"].set_closed(day)
                     continue
                 times = [t.strip().replace("h", ":") for t in hours.split(" - ")]
-                for open_time, close_time in zip(times[0::2], times[1::2]):
+                if len(times) % 2 != 0:
+                    continue  # malformed hours text (odd token count) - skip rather than guess
+                for open_time, close_time in zip(times[0::2], times[1::2], strict=True):
                     item["opening_hours"].add_range(day, open_time, close_time)
 
         yield item
