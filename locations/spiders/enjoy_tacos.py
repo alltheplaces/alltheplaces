@@ -17,5 +17,5 @@ class EnjoyTacosSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        apply_category(Categories.FAST_FOOD, item)    
+        apply_category(Categories.FAST_FOOD, item)
         yield item
