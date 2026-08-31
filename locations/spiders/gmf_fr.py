@@ -79,7 +79,7 @@ class GmfFRSpider(SitemapSpider, StructuredDataSpider):
                 spider=self,
                 max_retry_times=5,
                 reason="no structured data extracted",
-                priority_adjust=random.randint(-20, -1),
+                priority_adjust=random.randint(-20, -1),  # noqa: S311 - retry priority jitter
             ):
                 retry.meta["dont_cache"] = True
                 yield retry
