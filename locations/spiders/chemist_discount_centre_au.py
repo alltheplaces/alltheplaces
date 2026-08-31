@@ -7,20 +7,6 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
-AU_STATES = {
-    "ACT": "ACT",
-    "NSW": "NSW",
-    "NT": "NT",
-    "QLD": "QLD",
-    "QUEENSLAND": "QLD",
-    "SA": "SA",
-    "TAS": "TAS",
-    "TASMANIA": "TAS",
-    "VIC": "VIC",
-    "VICTORIA": "VIC",
-    "WA": "WA",
-}
-
 
 class ChemistDiscountCentreAUSpider(JSONBlobSpider):
     name = "chemist_discount_centre_au"
@@ -35,19 +21,10 @@ class ChemistDiscountCentreAUSpider(JSONBlobSpider):
             if isinstance(shop, dict) and shop.get("Visible") and shop.get("Name") != "Chemist Discount Centre Online"
         ]
 
-    def pre_process_data(self, feature: dict) -> None:
-        feature["ref"] = str(feature.pop("Id"))
-        feature["street_address"] = clean_address([feature.pop("StreerNumber", None), feature.pop("Address", None)])
-        feature["phone"] = feature.pop("ContactNumber1", None)
-
-        # "Suburb" is usually "<suburb> <state>", but is sometimes just the
-        # suburb or, for a few records, only the state.
-        parts = (feature.pop("Suburb", None) or "").split()
-        if parts and parts[-1].upper() in AU_STATES:
-            feature["state"] = AU_STATES[parts.pop().upper()]
-        feature["city"] = " ".join(parts)
-
     def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Any:
         item["branch"] = item.pop("name").removeprefix("Chemist Discount Centre ")
+        item["street_address"] = clean_address([feature.get("StreerNumber"), feature.get("Address")])
+        item["addr_full"] = clean_address([item["street_address"], item.pop("city", None), item.get("postcode")])
+        item["phone"] = feature.get("ContactNumber1")
         apply_category(Categories.PHARMACY, item)
         yield item
