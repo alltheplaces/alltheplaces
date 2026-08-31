@@ -13,7 +13,6 @@ class LaFitnessSpider(Spider):
     name = "la_fitness"
     item_attributes = {"brand": "LA Fitness", "brand_wikidata": "Q6457180"}
     allowed_domains = ["lafitness.com"]
-    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
