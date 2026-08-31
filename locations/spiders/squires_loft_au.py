@@ -10,6 +10,7 @@ from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 HOUR_RANGE = re.compile(r"(\d{1,2}(?::\d{2})?\s*[ap]m)\s*[-–]\s*(\d{1,2}(?::\d{2})?\s*[ap]m)", re.IGNORECASE)
+STATE_PATTERN = re.compile(r",?\s*(NSW|VIC|QLD|WA|SA|TAS|ACT|NT)(?:\s+\d{4})?$")
 
 
 class SquiresLoftAUSpider(SitemapSpider):
@@ -24,6 +25,8 @@ class SquiresLoftAUSpider(SitemapSpider):
         item["branch"] = response.url.rstrip("/").rsplit("/", 1)[-1].replace("-", " ").title()
 
         item["addr_full"] = response.xpath('//div[@class="cntbox loc_add"]//a/text()').get()
+        if item["addr_full"] and (m := STATE_PATTERN.search(item["addr_full"])):
+            item["state"] = m.group(1)
         item["phone"] = response.xpath('//div[@class="cntbox lcon_num"]//a/text()').get()
         item["email"] = response.xpath('//div[@class="cntbox lemail_add"]//a/text()').get()
 
