@@ -196,6 +196,19 @@ PAYMENT_METHODS = {
     "00231": "payment:aeon_pay",
 }
 
+# service-flag / detail-field code -> meaning (ref. welcia_detail_page.md)
+FLAG_CLOSED = "00147"  # 閉店 -> remove from dataset when true
+FLAG_FAX = "00040"  # Fax番号
+FLAG_TOILETS_OSTOMY = "00056"  # オストメイトトイレ
+FLAG_ALCOHOL = "00057"  # お酒
+FLAG_DUTY_FREE = "00062"  # 免税
+FLAG_PARKING = "00065"  # 駐車場
+FLAG_DISPENSING = "00076"  # 調剤受付
+FLAG_DEDICATED_PHARMACY = "00077"  # 調剤専門店
+FLAG_PHARMACY_PHONE = "00114"  # 調剤薬局電話番号
+FLAG_PHARMACY_FAX = "00110"  # 調剤薬局Fax番号
+FLAG_UBER_EATS = "00228"  # Uber Eats デリバリー
+
 
 class WelciaJPSpider(LocationCloudSpider):
     name = "welcia_jp"
@@ -303,26 +316,26 @@ class WelciaJPSpider(LocationCloudSpider):
         detail_json = parse_js_object(blob.split("var spotDetailBean = ", 1)[1])
         detail_fields = self.detail_fields(detail_json)
 
-        if flag := detail_json["flags"].get("00147"):
+        if flag := detail_json["flags"].get(FLAG_CLOSED):
             if flag.get("value") == "true":
                 return
 
         self._apply_payment_methods(item, detail_json)
 
-        if fax := detail_fields.get("00040"):
+        if fax := detail_fields.get(FLAG_FAX):
             if value := fax.get("value"):
                 item["extras"]["fax"] = value
 
-        if flag := detail_json["flags"].get("00056"):
+        if flag := detail_json["flags"].get(FLAG_TOILETS_OSTOMY):
             apply_yes_no("toilets:ostomy", item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get("00057"):
+        if flag := detail_json["flags"].get(FLAG_ALCOHOL):
             apply_yes_no("alcohol", item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get("00062"):
+        if flag := detail_json["flags"].get(FLAG_DUTY_FREE):
             apply_yes_no("duty_free", item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get("00065"):
+        if flag := detail_json["flags"].get(FLAG_PARKING):
             apply_yes_no("parking", item, flag.get("value") == "true", apply_positive_only=False)
 
         self._apply_dispensing(item, detail_json, detail_fields)
@@ -331,23 +344,23 @@ class WelciaJPSpider(LocationCloudSpider):
         yield item
 
     def _apply_dispensing(self, item: Feature, detail_json: dict, detail_fields: dict) -> None:
-        if flag := detail_json["flags"].get("00076"):
+        if flag := detail_json["flags"].get(FLAG_DISPENSING):
             apply_yes_no("dispensing", item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get("00077"):
+        if flag := detail_json["flags"].get(FLAG_DEDICATED_PHARMACY):
             if flag.get("value") == "true":
                 apply_category(Categories.PHARMACY, item)
 
-        if pharmacy_phone := detail_fields.get("00114"):
+        if pharmacy_phone := detail_fields.get(FLAG_PHARMACY_PHONE):
             if value := pharmacy_phone.get("value"):
                 item["extras"]["phone:pharmacy"] = value
 
-        if pharmacy_fax := detail_fields.get("00110"):
+        if pharmacy_fax := detail_fields.get(FLAG_PHARMACY_FAX):
             if value := pharmacy_fax.get("value"):
                 item["extras"]["fax:pharmacy"] = value
 
     def _apply_other_services(self, item: Feature, detail_json: dict) -> None:
-        if flag := detail_json["flags"].get("00228"):
+        if flag := detail_json["flags"].get(FLAG_UBER_EATS):
             if flag.get("value") == "true":
                 item["extras"]["delivery"] = "yes"
                 item["extras"]["delivery:partner"] = "Uber Eats"
