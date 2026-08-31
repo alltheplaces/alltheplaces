@@ -54,6 +54,9 @@ class ChemistDiscountCentreAUSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
+            if not location.get("Visible"):
+                continue
+
             item = Feature()
             item["ref"] = location["Id"]
             item["branch"] = location["Name"].removeprefix("Chemist Discount Centre ")
@@ -84,6 +87,12 @@ class ChemistDiscountCentreAUSpider(Spider):
         for rule in shops_hours:
             if rule["Type"] != 0 or not rule["IsAvailable"]:
                 continue
+            start, end = rule["Start"], rule["End"]
+            if end not in ("00:00:00", "24:00:00") and end < start:
+                # A handful of records have a closing time earlier than the
+                # opening time on the same day, e.g. 09:00-08:00 - a source
+                # data entry error, not a genuine overnight opening span.
+                continue
             day = DAYS_FROM_SUNDAY[rule["Weekday"]]
-            oh.add_range(day, rule["Start"], rule["End"], "%H:%M:%S")
+            oh.add_range(day, start, end, "%H:%M:%S")
         return oh
