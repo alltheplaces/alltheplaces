@@ -309,7 +309,33 @@ class WelciaJPSpider(LocationCloudSpider):
             if value := fax.get("value"):
                 item["extras"]["fax"] = value
 
+        if flag := detail_json["flags"].get("00056"):
+            apply_yes_no("toilets:ostomy", item, flag.get("value") == "true", apply_positive_only=False)
+
+        if flag := detail_json["flags"].get("00057"):
+            apply_yes_no("alcohol", item, flag.get("value") == "true", apply_positive_only=False)
+
+        if flag := detail_json["flags"].get("00062"):
+            apply_yes_no("duty_free", item, flag.get("value") == "true", apply_positive_only=False)
+
+        if flag := detail_json["flags"].get("00065"):
+            apply_yes_no("parking", item, flag.get("value") == "true", apply_positive_only=False)
+
+        self._apply_dispensing(item, detail_json, detail_fields)
+
         yield item
+
+    def _apply_dispensing(self, item: Feature, detail_json: dict, detail_fields: dict) -> None:
+        if flag := detail_json["flags"].get("00076"):
+            apply_yes_no("dispensing", item, flag.get("value") == "true", apply_positive_only=False)
+
+        if pharmacy_phone := detail_fields.get("00114"):
+            if value := pharmacy_phone.get("value"):
+                item["extras"]["phone:pharmacy"] = value
+
+        if pharmacy_fax := detail_fields.get("00110"):
+            if value := pharmacy_fax.get("value"):
+                item["extras"]["fax:pharmacy"] = value
 
     @staticmethod
     def detail_fields(detail_json: dict) -> dict[str, dict]:
