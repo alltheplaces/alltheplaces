@@ -322,12 +322,17 @@ class WelciaJPSpider(LocationCloudSpider):
             apply_yes_no("parking", item, flag.get("value") == "true", apply_positive_only=False)
 
         self._apply_dispensing(item, detail_json, detail_fields)
+        self._apply_other_services(item, detail_json)
 
         yield item
 
     def _apply_dispensing(self, item: Feature, detail_json: dict, detail_fields: dict) -> None:
         if flag := detail_json["flags"].get("00076"):
             apply_yes_no("dispensing", item, flag.get("value") == "true", apply_positive_only=False)
+
+        if flag := detail_json["flags"].get("00077"):
+            if flag.get("value") == "true":
+                apply_category(Categories.PHARMACY, item)
 
         if pharmacy_phone := detail_fields.get("00114"):
             if value := pharmacy_phone.get("value"):
@@ -336,6 +341,13 @@ class WelciaJPSpider(LocationCloudSpider):
         if pharmacy_fax := detail_fields.get("00110"):
             if value := pharmacy_fax.get("value"):
                 item["extras"]["fax:pharmacy"] = value
+
+    def _apply_other_services(self, item: Feature, detail_json: dict) -> None:
+        if flag := detail_json["flags"].get("00228"):
+            if flag.get("value") == "true":
+                item["extras"]["delivery"] = "yes"
+                item["extras"]["delivery:partner"] = "Uber Eats"
+                item["extras"]["delivery:partner:wikidata"] = "Q21462723"
 
     @staticmethod
     def detail_fields(detail_json: dict) -> dict[str, dict]:
