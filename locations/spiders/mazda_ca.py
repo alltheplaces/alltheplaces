@@ -1,13 +1,12 @@
 import re
 from copy import deepcopy
-from typing import Any, AsyncIterator
+from typing import Any
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
 from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
@@ -16,12 +15,9 @@ from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 class MazdaCASpider(Spider):
     name = "mazda_ca"
     item_attributes = MAZDA_SHARED_ATTRIBUTES
-
-    async def start(self) -> AsyncIterator[Any]:
-        for city in city_locations("CA", 0):
-            yield JsonRequest(
-                url=f'https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=1000&keyword={city["name"]}'
-            )
+    start_urls = [
+        "https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=5000&minlng=-125&maxlng=180&minlat=-90&maxlat=90"
+    ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for dealer in response.json()["data"]:
