@@ -75,4 +75,4 @@ class SeicomartJPSpider(Spider):
         open_time, close_time = value.split("～")
         opening_hours = OpeningHours()
         opening_hours.add_days_range(DAYS, open_time, close_time, "%H:%M")
-        item["opening_hours"] = opening_hours.as_opening_hours()
+        item["opening_hours"] = opening_hours
