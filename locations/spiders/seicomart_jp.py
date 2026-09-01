@@ -1,4 +1,4 @@
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
@@ -43,7 +43,7 @@ class SeicomartJPSpider(Spider):
     async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(url=API_ENDPOINT, formdata={"POINT": POINT, "LIMIT": LIMIT})
 
-    def parse(self, response: Response) -> AsyncIterator[Feature]:
+    def parse(self, response: Response) -> Iterable[Feature]:
         for store in response.json()["result"]["data"]:
             # Dropped fields:
             # - `distance_km` (distance from the POINT origin)
