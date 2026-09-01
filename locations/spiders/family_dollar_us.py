@@ -11,7 +11,6 @@ class FamilyDollarUSSpider(YextAnswersSpider):
     api_key = "44e1b47364aeb26451d60b447563b305"
     experience_key = "pages-locator-usa-only"
     feature_type = "family-dollar"
-    requires_proxy = True
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         item.pop("facebook", None)
