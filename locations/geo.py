@@ -17,6 +17,26 @@ EARTH_RADIUS = 6378.1
 # Kilometers per mile
 MILES_TO_KILOMETERS = 1.60934
 
+# Katakana to hiragana map for Japanese postal data
+_KATAKANA = (
+    "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトド"
+    "ナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶー"
+)
+_HIRAGANA = (
+    "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとど"
+    "なにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖー"
+)
+_KATAKANA_TO_HIRAGANA = str.maketrans(_KATAKANA, _HIRAGANA)
+
+
+def _katakana_to_hiragana(text: str) -> str:
+    """
+    Convert a katakana string to hiragana.
+
+    Japan Post ships in katakana but OSM's "ja-Hira" name variant expects in hiragana.
+    """
+    return text.translate(_KATAKANA_TO_HIRAGANA)
+
 
 def vincenty_distance(lat: float, lon: float, distance_km: float, bearing_deg: float) -> tuple[float, float]:
     """
@@ -293,9 +313,9 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
                     "postal_region": row[2],
                     "jis_code": row[0],
                     "province:ja": row[6],
-                    "province:ja-Hira": row[3],
+                    "province:ja-Hira": _katakana_to_hiragana(row[3]),
                     "city:ja": row[7],
-                    "city:ja-Hira": row[4],
+                    "city:ja-Hira": _katakana_to_hiragana(row[4]),
                     "flags": {
                         "one_town_multi_postcode": row[9],
                         "per_subarea_addressing": row[10],
@@ -309,10 +329,10 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
                 if "以下に掲載がない場合" not in row[8]:
                     if region["flags"]["per_subarea_addressing"] == "1":
                         region["quarter:ja"] = row[8]
-                        region["quarter:ja-Hira"] = row[5]
+                        region["quarter:ja-Hira"] = _katakana_to_hiragana(row[5])
                     else:
                         region["neighbourhood:ja"] = row[8]
-                        region["neighbourhood:ja-Hira"] = row[5]
+                        region["neighbourhood:ja-Hira"] = _katakana_to_hiragana(row[5])
                 yield region
     else:
         raise Exception("country code not supported: " + country_code)
