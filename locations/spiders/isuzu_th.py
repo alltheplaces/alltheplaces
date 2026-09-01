@@ -5,6 +5,7 @@ from scrapy.http import Response, TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import CLOSED_TH, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.react_server_components import parse_rsc
@@ -42,6 +43,8 @@ class IsuzuTHSpider(JSONBlobSpider):
                 base_item["ref"] = location_info.get("branch_code")
                 if phone := location_info.get("contact", {}).get("main_contact"):
                     base_item["phone"] = phone[0].get("tel")
+                if hours_info := location_info.get("open_time"):
+                    base_item["opening_hours"] = self.parse_opening_hours(hours_info)
 
                 if location_info.get("active_cv"):
                     # Trucks ("commercial vehicles")
@@ -60,3 +63,11 @@ class IsuzuTHSpider(JSONBlobSpider):
                     apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, pickup_item, location_type == "bp")
                     apply_yes_no(Extras.VEHICLE_PAINTING_SERVICES, pickup_item, location_type == "bp")
                     yield pickup_item
+
+    def parse_opening_hours(self, rules: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        hours_text = "Mon-Fri: {}, Sat: {}, Sun: {}".format(
+            rules.get("hour_mon_fri", ""), rules.get("hour_sat", ""), rules.get("hour_sun", "")
+        )
+        opening_hours.add_ranges_from_string(hours_text, closed=CLOSED_TH)
+        return opening_hours
