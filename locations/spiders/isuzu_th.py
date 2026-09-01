@@ -3,9 +3,8 @@ from typing import Iterable
 import chompjs
 from scrapy.http import Response, TextResponse
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import CLOSED_TH, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.react_server_components import parse_rsc
@@ -17,6 +16,13 @@ class IsuzuTHSpider(JSONBlobSpider):
     item_attributes = ISUZU_SHARED_ATTRIBUTES
     allowed_domains = ["www.isuzu-tis.com"]
     start_urls = ["https://www.isuzu-tis.com/dealer"]
+    SALE_CATEGORIES = {"car": Categories.SHOP_CAR, "truck": Categories.SHOP_TRUCK}
+    SERVICE_CATEGORIES = {"car": Categories.SHOP_CAR_REPAIR, "truck": Categories.SHOP_TRUCK_REPAIR}
+    CATEGORY_MAPPING = {
+        "sale": SALE_CATEGORIES,
+        "aftersale": SERVICE_CATEGORIES,
+        "bp": SERVICE_CATEGORIES,  # Body/Paint Service
+    }
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
         scripts = response.xpath("//script[contains(text(), 'open_time')]/text()").getall()
@@ -26,57 +32,31 @@ class IsuzuTHSpider(JSONBlobSpider):
         return DictParser.get_nested_key(data, "data")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["addr_full"] = feature["mirai"].get("address")
-        item["state"] = feature["mirai"].get("region")
-        item["name"] = item["extras"]["name:th"] = feature["mirai"].get("name_th")
-        item["extras"]["name:en"] = feature["mirai"].get("name_en")
-        item["lat"] = feature.get("sale", {}).get("lat")
-        item["lon"] = feature.get("sale", {}).get("lon")
-        item["opening_hours"] = OpeningHours()
+        for location_type in ["sale", "aftersale", "bp"]:
+            if isinstance(feature.get(location_type), dict):
+                location_info = feature[location_type]
+                base_item = item.deepcopy()
+                base_item["name"] = location_info.get("name_th")
+                base_item["addr_full"] = location_info.get("address")
+                base_item["email"] = location_info.get("email")
+                base_item["ref"] = location_info.get("branch_code")
+                if phone := location_info.get("contact", {}).get("main_contact"):
+                    base_item["phone"] = phone[0].get("tel")
 
-        if feature.get("sale"):
-            sales_item = item.deepcopy()
-            sales_item["email"] = feature["sale"].get("email")
-            if len(feature["sale"].get("showroom_tel", [])) >= 1:
-                sales_item["phone"] = feature["sale"]["showroom_tel"][0].get("tel")
-            hours_text = "Mon-Fri: {}, Sat: {}, Sun: {}".format(
-                feature["sale"].get("showroom_hour_mon_fri", ""),
-                feature["sale"].get("showroom_hour_sat", ""),
-                feature["sale"].get("showroom_hour_sun", ""),
-            )
-            sales_item["opening_hours"].add_ranges_from_string(hours_text, closed=CLOSED_TH)
-            if feature["sale"].get("show_room_cv"):
-                # Trucks ("commercial vehicles") for sale
-                truck_sales_item = sales_item.deepcopy()
-                truck_sales_item["ref"] = "{}_CV_SALES".format(feature["dealer_id"])
-                apply_category(Categories.SHOP_TRUCK, truck_sales_item)
-                yield truck_sales_item
-            if feature["sale"].get("show_room_lcv"):
-                # Pick ups / utes ("light commercial vehicles") for sale
-                pickup_sales_item = sales_item.deepcopy()
-                pickup_sales_item["ref"] = "{}_LCV_SALES".format(feature["dealer_id"])
-                apply_category(Categories.SHOP_CAR, pickup_sales_item)
-                yield pickup_sales_item
+                if location_info.get("active_cv"):
+                    # Trucks ("commercial vehicles")
+                    truck_item = base_item.deepcopy()
+                    truck_item["ref"] = f'{base_item["ref"]}_cv_{location_type}'
+                    apply_category(self.CATEGORY_MAPPING[location_type]["truck"], truck_item)
+                    apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, truck_item, location_type == "bp")
+                    apply_yes_no(Extras.VEHICLE_PAINTING_SERVICES, truck_item, location_type == "bp")
+                    yield truck_item
 
-        if feature.get("aftersale"):
-            service_item = item.deepcopy()
-            if len(feature["aftersale"].get("service_center_tel", [])) >= 1:
-                service_item["phone"] = feature["aftersale"]["service_center_tel"][0].get("tel")
-            hours_text = "Mon-Fri: {}, Sat: {}, Sun: {}".format(
-                feature["aftersale"].get("service_center_hour_mon_fri", ""),
-                feature["aftersale"].get("service_center_hour_sat", ""),
-                feature["aftersale"].get("service_center_hour_sun", ""),
-            )
-            service_item["opening_hours"].add_ranges_from_string(hours_text, closed=CLOSED_TH)
-            if feature["aftersale"].get("service_cv"):
-                # Trucks ("commercial vehicles") serviced
-                truck_service_item = service_item.deepcopy()
-                truck_service_item["ref"] = "{}_CV_SERVICE".format(feature["dealer_id"])
-                apply_category(Categories.SHOP_TRUCK_REPAIR, truck_service_item)
-                yield truck_service_item
-            if feature["aftersale"].get("service_lcv"):
-                # Pick ups / utes ("light commercial vehicles") serviced
-                pickup_service_item = service_item.deepcopy()
-                pickup_service_item["ref"] = "{}_LCV_SERVICE".format(feature["dealer_id"])
-                apply_category(Categories.SHOP_CAR_REPAIR, pickup_service_item)
-                yield pickup_service_item
+                if location_info.get("active_lcv"):
+                    # Pick ups / utes ("light commercial vehicles")
+                    pickup_item = base_item.deepcopy()
+                    pickup_item["ref"] = f'{base_item["ref"]}_lcv_{location_type}'
+                    apply_category(self.CATEGORY_MAPPING[location_type]["car"], pickup_item)
+                    apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, pickup_item, location_type == "bp")
+                    apply_yes_no(Extras.VEHICLE_PAINTING_SERVICES, pickup_item, location_type == "bp")
+                    yield pickup_item
