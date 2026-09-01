@@ -15,7 +15,9 @@ from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 class MazdaCASpider(scrapy.Spider):
     name = "mazda_ca"
     item_attributes = MAZDA_SHARED_ATTRIBUTES
-    start_urls = ["https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=5000"]
+    start_urls = [
+        "https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=5000&minlng=-108.70532875000002&maxlng=-50.69751625000002&minlat=18.135901108008042&maxlat=62.507484507295324"
+    ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for dealer in response.json()["data"]:
