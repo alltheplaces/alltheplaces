@@ -1,30 +1,34 @@
 import re
 from copy import deepcopy
-from typing import Any
+from typing import Any, AsyncIterator
 
-import scrapy
-from requests import Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.geo import city_locations
 from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 
 
-class MazdaCASpider(scrapy.Spider):
+class MazdaCASpider(Spider):
     name = "mazda_ca"
     item_attributes = MAZDA_SHARED_ATTRIBUTES
-    start_urls = [
-        "https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=5000&minlng=-108.70532875000002&maxlng=-50.69751625000002&minlat=18.135901108008042&maxlat=62.507484507295324"
-    ]
+
+    async def start(self) -> AsyncIterator[Any]:
+        for city in city_locations("CA", 0):
+            yield JsonRequest(
+                url=f'https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=1000&keyword={city["name"]}'
+            )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for dealer in response.json()["data"]:
             item = DictParser.parse(dealer)
             item["ref"] = dealer["dealer_code"]
             item["street_address"] = merge_address_lines([dealer["address_line_1"], dealer["address_line_2"]])
-            item["email"] = dealer["oca_email"].removesuffix("ï¿½")
+            item["email"] = dealer["oca_email"].removesuffix("ï¿½").removesuffix("�")
             item["state"] = dealer["province"]["province_code"]
             if item.get("website"):
                 item["website"] = "https://" + item["website"] if "https://" not in item["website"] else item["website"]
