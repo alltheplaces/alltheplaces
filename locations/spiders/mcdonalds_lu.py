@@ -13,6 +13,7 @@ class McdonaldsLUSpider(StructuredDataSpider):
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["mcdonalds.lu"]
     start_urls = ["https://mcdonalds.lu/fr/restaurants/"]
+    requires_proxy = True
 
     def parse(self, response: TextResponse, **kwargs):
         for url in response.xpath(
