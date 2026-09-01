@@ -68,12 +68,12 @@ legend for checkbox:
  - | 00051 | AED | flag | d00076 | AEDあり
  - | 00052 | WAONPOINT | flag | d00077 | WAONPOINT
  - | 00053 | アルカリイオン水 | flag | d00078 | アルカリイオン水あり
- - | 00054 | イオン銀行ATM | flag | d00079 | イオン銀行ATMあり
- - | 00055 | ウエルカフェ | flag | d00080 | ウエルカフェ
+ x | 00054 | イオン銀行ATM | flag | d00079 | イオン銀行ATMあり
+ x | 00055 | ウエルカフェ | flag | d00080 | ウエルカフェ
  x | 00056 | オストメイトトイレ | flag | d00081 | オストメイトトイレあり
  x | 00057 | お酒 | flag | d00082 | お酒取扱
  - | 00058 | コインランドリー | flag | d00083 | コインランドリー
- - | 00059 | その他 銀行ATM | flag | d00084 | その他 銀行ATMあり
+ x | 00059 | その他 銀行ATM | flag | d00084 | その他 銀行ATMあり
  - | 00060 | マルチコピー | flag | d00085 | マルチコピーあり
  - | 00061 | マルチコピー（マイナンバー対応） | flag | d00086 | マルチコピー（マイナンバー対応）あり
  x | 00062 | 免税店 | flag | d00087 | 免税店
@@ -304,7 +304,7 @@ from collections.abc import Iterable
 
 from chompjs import parse_js_object
 
-from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Categories, Drink, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.geo import postal_regions
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
@@ -503,6 +503,9 @@ PAYMENT_METHODS = {
 # service-flag / detail-field code -> OSM tag (partial; payment flags are in PAYMENT_METHODS above)
 FLAG_CLOSED = "00147"  # 閉店 -> remove from dataset when true
 FLAG_FAX = "00040"  # Fax番号 -> fax
+FLAG_ATM_AEON = "00054"  # イオン銀行ATM
+FLAG_COFFEE = "00055"  # ウエルカフェ
+FLAG_ATM_OTHERS = "00059"  # その他 銀行ATM
 FLAG_TOILETS_OSTOMY = "00056"  # オストメイトトイレ -> toilets:ostomy
 FLAG_ALCOHOL = "00057"  # お酒 -> alcohol
 FLAG_DUTY_FREE = "00062"  # 免税 -> duty_free
@@ -624,11 +627,17 @@ class WelciaJPSpider(LocationCloudSpider):
             if value := fax.get("value"):
                 item["extras"]["fax"] = f"+81 {value}"
 
+        if flag := detail_json["flags"].get(FLAG_ATM_AEON) or detail_json["flags"].get(FLAG_ATM_OTHERS):
+            apply_yes_no(Extras.ATM, item, flag.get("value") == "true", apply_positive_only=False)
+
+        if flag := detail_json["flags"].get(FLAG_COFFEE):
+            apply_yes_no(Drink.COFFEE, item, flag.get("value") == "true", apply_positive_only=False)
+
         if flag := detail_json["flags"].get(FLAG_TOILETS_OSTOMY):
             apply_yes_no("toilets:ostomy", item, flag.get("value") == "true", apply_positive_only=False)
 
         if flag := detail_json["flags"].get(FLAG_ALCOHOL):
-            apply_yes_no("alcohol", item, flag.get("value") == "true", apply_positive_only=False)
+            apply_yes_no("sells:alcohol", item, flag.get("value") == "true", apply_positive_only=False)
 
         if flag := detail_json["flags"].get(FLAG_DUTY_FREE):
             apply_yes_no("duty_free", item, flag.get("value") == "true", apply_positive_only=False)
