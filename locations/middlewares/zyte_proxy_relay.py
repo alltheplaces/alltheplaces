@@ -40,15 +40,25 @@ certificate), the browser context also needs `ignore_https_errors=True`
 import asyncio
 import base64
 import logging
+import ssl
 import threading
 from contextlib import suppress
 
 logger = logging.getLogger(__name__)
 
-# Zyte API's proxy-mode endpoint. See
-# https://docs.zyte.com/zyte-api/usage/proxy-mode.html
+# Zyte API's TLS-wrapped proxy-mode endpoint (the "HTTPS proxy interface").
+# See https://docs.zyte.com/zyte-api/usage/proxy-mode.html. Deliberately not
+# the plaintext :8011 endpoint: this relay's Proxy-Authorization header
+# carries the Zyte API key, and :8011 would send it in cleartext over the
+# public internet. :8014 presents a normal, publicly-trusted (Let's
+# Encrypt) certificate for the proxy connection itself -- confirmed with
+# `openssl s_client -connect api.zyte.com:8014` returning "Verify return
+# code: 0 (ok)" against the system trust store -- so no special CA handling
+# is needed here (this is unrelated to the Zyte-CA-signed certificates Zyte
+# presents for *tunnelled* HTTPS traffic once a CONNECT succeeds, which is
+# what ignore_https_errors in playwright_middleware.py deals with).
 ZYTE_API_PROXY_HOST = "api.zyte.com"
-ZYTE_API_PROXY_PORT = 8011
+ZYTE_API_PROXY_PORT = 8014
 
 _RELAY_START_TIMEOUT = 10
 
@@ -136,8 +146,10 @@ class _ZyteProxyRelay:
                 header_lines.append(line)
 
         try:
-            upstream_reader, upstream_writer = await asyncio.open_connection(ZYTE_API_PROXY_HOST, ZYTE_API_PROXY_PORT)
-        except OSError as e:
+            upstream_reader, upstream_writer = await asyncio.open_connection(
+                ZYTE_API_PROXY_HOST, ZYTE_API_PROXY_PORT, ssl=ssl.create_default_context()
+            )
+        except (OSError, ssl.SSLError) as e:
             logger.warning("Local Zyte proxy relay: failed to reach %s: %s", ZYTE_API_PROXY_HOST, e)
             writer.write(b"HTTP/1.1 502 Bad Gateway\r\n\r\n")
             await writer.drain()
@@ -174,10 +186,23 @@ class _ZyteProxyRelay:
                 writer.write(b"HTTP/1.1 200 Connection Established\r\n\r\n")
                 await writer.drain()
 
-            await asyncio.gather(
-                self._pipe(reader, upstream_writer),
-                self._pipe(upstream_reader, writer),
+            # Stop the peer pipe as soon as either direction finishes,
+            # rather than waiting for asyncio.gather() to let both run to
+            # completion -- if the browser closes its end first, the
+            # upstream->browser pipe would otherwise block on
+            # upstream_reader.read() until Zyte itself closes the
+            # connection, leaking a relay task/socket per cancelled
+            # navigation until then.
+            pipes = (
+                asyncio.ensure_future(self._pipe(reader, upstream_writer)),
+                asyncio.ensure_future(self._pipe(upstream_reader, writer)),
             )
+            try:
+                await asyncio.wait(pipes, return_when=asyncio.FIRST_COMPLETED)
+            finally:
+                for pipe in pipes:
+                    pipe.cancel()
+                await asyncio.gather(*pipes, return_exceptions=True)
         finally:
             with suppress(OSError, RuntimeError):
                 upstream_writer.close()
