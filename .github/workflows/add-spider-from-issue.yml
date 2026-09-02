@@ -7,7 +7,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write
   issues: write
 
 jobs:
@@ -24,7 +23,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          BRANCH="add-spider-issue-${{ github.event.issue.number }}"
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          BRANCH="add-spider-issue-${ISSUE_NUMBER}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -33,7 +33,7 @@ jobs:
             git checkout -B "$BRANCH" "origin/$BRANCH"
           else
             git checkout -b "$BRANCH"
-            git commit --allow-empty -m "Start add-spider work for #${{ github.event.issue.number }}"
+            git commit --allow-empty -m "Start add-spider work for #${ISSUE_NUMBER}"
             git push origin "$BRANCH"
           fi
 
@@ -42,37 +42,16 @@ jobs:
           fi
 
           gh pr create --draft \
-            --title "[WIP] Add spider for #${{ github.event.issue.number }}" \
-            --body "Automated add-spider run queued for #${{ github.event.issue.number }}. Waiting on maintainer approval before the agent starts — see the issue for details." \
+            --title "[WIP] Add spider for #${ISSUE_NUMBER}" \
+            --body "Automated add-spider run queued for #${ISSUE_NUMBER}. Waiting on maintainer approval before the agent starts — see the issue for details." \
             --head "$BRANCH" --base master
 
           # anthropics/claude-code-action requires the triggering actor to have repo write
           # access, and 401s otherwise — silently stalling this flow for issues filed by
-          # contributors without write access (e.g. #18419). Rather than dispatching the
-          # agent here, wait for a maintainer to opt in explicitly: GitHub itself only lets
-          # Triage+ users add a label to someone else's issue, so the 'new-spider-approved'
-          # label event below is a trustworthy approval signal regardless of who filed the
-          # issue.
-          gh issue comment "${{ github.event.issue.number }}" --body "🤖 Queued an automated add-spider attempt for this issue (draft PR opened). A maintainer needs to add the \`new-spider-approved\` label to start the agent."
-
-  dispatch:
-    if: |
-      github.event.action == 'labeled' &&
-      github.event.label.name == 'new-spider-approved' &&
-      contains(github.event.issue.labels.*.name, 'new-spider')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dispatch add-spider agent
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          APPROVER: ${{ github.actor }}
-        run: |
-          set -euo pipefail
-          BRANCH="add-spider-issue-${ISSUE_NUMBER}"
-          gh workflow run add-spider-agent.yml \
-            --ref master \
-            -f issue_number="$ISSUE_NUMBER" \
-            -f branch="$BRANCH"
-          gh issue comment "$ISSUE_NUMBER" --body "🤖 Approved by @${APPROVER} — starting the add-spider agent."
+          # contributors without write access (e.g. #18419). We can't auto-dispatch the
+          # agent from here either: workflow_dispatch skips that actor-write-access check,
+          # but claude-code-action separately blocks bot actors outright, and dispatching
+          # via GITHUB_TOKEN makes the run's actor github-actions[bot]. So a maintainer
+          # needs to dispatch it themselves — that's a real user with real write access,
+          # which satisfies the check with no extra config.
+          gh issue comment "$ISSUE_NUMBER" --body "🤖 Queued an automated add-spider attempt for this issue (draft PR opened). A maintainer needs to approve by running \`gh workflow run add-spider-agent.yml -f issue_number=${ISSUE_NUMBER} -f branch=${BRANCH}\` (or via the Actions tab's *Run workflow* button) to start the agent."
