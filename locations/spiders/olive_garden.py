@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterable
+from typing import AsyncIterator, ClassVar, Iterable
 
 from scrapy.http import JsonRequest, TextResponse
 
@@ -10,8 +10,8 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class OliveGardenSpider(JSONBlobSpider):
     name = "olive_garden"
-    item_attributes = {"brand": "Olive Garden", "brand_wikidata": "Q3045312"}
-    allowed_domains = ["olivegarden.com"]
+    item_attributes: ClassVar[dict[str, str]] = {"brand": "Olive Garden", "brand_wikidata": "Q3045312"}
+    allowed_domains: ClassVar[list[str]] = ["olivegarden.com"]
     requires_proxy = True
     locations_key = "restaurants"
 
