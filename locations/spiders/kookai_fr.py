@@ -14,8 +14,6 @@ class KookaiFrSpider(JSONBlobSpider):
     
     locations_key = "stores"
 
-
-
     def post_process_item(self, item, response, location):
         apply_category(Categories.SHOP_CLOTHES, item)
 
@@ -24,12 +22,9 @@ class KookaiFrSpider(JSONBlobSpider):
         item["street_address"] = selector.css(".sl-layout-line--address ::text").get() or ""
         item["addr_full"] = item["street_address"] + ", " + (selector.css(".sl-layout-line--country ::text").get() or "")
         
-
-
         match = re.search(r"\b\d{4,5}\b", item["addr_full"])
         item["postcode"] = match.group() if match else None
         item["country"] = "FR"
-        print("\n\n\n\n==================================")
 
         yield Request(
             "https://kookai.fr/apps/store-locator/stores/info?shop=kookai-amh.myshopify.com&data=detailed&store_id="+str(location["store_id"]),
@@ -37,18 +32,16 @@ class KookaiFrSpider(JSONBlobSpider):
             meta={"item": item},
         )
 
-        # print(location)
-        # print(item)
-
-        # yield item
-
     def parse_store_detail(self, response):
         item = response.meta["item"] 
 
         data = response.json()
-        selector = Selector(text=data["data"])
-        
-        item["phone"] = selector.css(".sl-layout-line--phone ::text").get() or ""
-        item["email"] = selector.css(".sl-layout-line--email ::text").get() or ""
+        try:
+            selector = Selector(text=data["data"])
+            
+            item["phone"] = selector.css(".sl-layout-line--phone ::text").get() or ""
+            item["email"] = selector.css(".sl-layout-line--email ::text").get() or ""
+        except KeyError:
+            pass
 
         yield item
