@@ -160,10 +160,11 @@ class KrispyKremeJPSpider(SitemapSpider, Spider):
 
         result = oh.as_opening_hours()
         # e.g. "Mo-Sa 10:00-21:00; Su 10:00-20:00" -> "...; PH 10:00-20:00"
-        if holiday_ranges and result:
+        if holiday_ranges:
+            parts = [result] if result else []
             for open_time, close_time in holiday_ranges:
-                result += f"; PH {open_time}-{close_time}"
-            return result
+                parts.append(f"PH {open_time}-{close_time}")
+            return "; ".join(parts)
         return result or None
 
     def parse_days(self, token: str) -> tuple[set[str], bool]:
