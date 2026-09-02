@@ -1,7 +1,10 @@
 import re
+from typing import Any, Iterable
 
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 
@@ -14,17 +17,18 @@ class YmcaSpider(SitemapSpider):
         "https://www.ymca.org/sitemap.xml",
     ]
     sitemap_rules = [(r"locations/", "parse_location")]
+    requires_proxy = True
 
-    def sitemap_filter(self, entries):
+    def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
         for entry in entries:
             # To avoid constant redirects
             entry["loc"] = entry["loc"].replace("https://ymca.org/", "https://www.ymca.org/")
             yield entry
 
-    def parse_location(self, response):
+    def parse_location(self, response: Response) -> Iterable[Feature]:
         geo = response.xpath('//div[contains(@class, "geolocation-location")]')
 
-        yield Feature(
+        item = Feature(
             ref=response.url.split("/")[-1],
             name=response.xpath("//h1/text()").extract_first().strip(),
             lat=float(geo.attrib["data-lat"]),
@@ -40,8 +44,11 @@ class YmcaSpider(SitemapSpider):
                 response.xpath('//div[contains(@class, "field--name-field-branch-hours")]//td/text()').getall()
             ),
         )
+        apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
 
-    def parse_hours(self, hours):
+        yield item
+
+    def parse_hours(self, hours: list[str]) -> OpeningHours:
         opening_hours = OpeningHours()
 
         days = hours[0::2]
