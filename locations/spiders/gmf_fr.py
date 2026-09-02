@@ -1,4 +1,5 @@
 import random
+from typing import ClassVar
 
 from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import TextResponse
@@ -26,7 +27,7 @@ class GmfFRSpider(SitemapSpider, StructuredDataSpider):
     # requests already carry below (scrapy_zyte_api raises on that combination). Without it,
     # only requests we explicitly give zyte_api meta go through Zyte - robots.txt and the
     # sitemap fetch are covered separately, see ROBOTSTXT_OBEY and start() below.
-    custom_settings = {
+    custom_settings: ClassVar = {
         # Default concurrency got banned on almost every request; a lower concurrency and a
         # delay between requests got a full crawl to 100% success.
         "DOWNLOAD_DELAY": 3,
@@ -50,11 +51,18 @@ class GmfFRSpider(SitemapSpider, StructuredDataSpider):
 
     def _parse_sitemap(self, response):
         for request in super()._parse_sitemap(response):
-            request.meta["zyte_api"] = {
-                "browserHtml": True,
-                "geolocation": "FR",
-                "javascript": True,
-            }
+            # Nested sitemaps are XML and should not be rendered; agency pages need browserHtml.
+            if request.url.endswith('.xml'):
+                request.meta["zyte_api"] = {
+                    "httpResponseBody": True,
+                    "geolocation": "FR",
+                }
+            else:
+                request.meta["zyte_api"] = {
+                    "browserHtml": True,
+                    "geolocation": "FR",
+                    "javascript": True,
+                }
             yield request
 
     def parse(self, response: TextResponse, **kwargs):
