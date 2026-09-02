@@ -52,7 +52,8 @@ class KrispyKremeJPSpider(SitemapSpider, Spider):
         item["lat"] = store_detail.xpath('.//div[contains(@class, "marker")]/@data-lat').get()
         item["lon"] = store_detail.xpath('.//div[contains(@class, "marker")]/@data-lng').get()
         item["branch"] = info_col.xpath('.//div[contains(@class, "pc_disp")]/h3[1]/text()').get()
-        item["extras"]["branch:en"] = info_col.xpath('.//div[contains(@class, "pc_disp")]/h3[2]/text()').get().strip()
+        if branch_en := info_col.xpath('.//div[contains(@class, "pc_disp")]/h3[2]/text()').get():
+            item["extras"]["branch:en"] = branch_en.strip()
         item["addr_full"] = info_col.xpath('.//dt[text()="住所"]/following-sibling::dd/text()').get()
         item["phone"] = info_col.xpath(
             './/dt[text()="電話番号"]/following-sibling::dd//span[contains(@class, "tel")]/text()'
