@@ -18,20 +18,16 @@ class KrispyKremeJPSpider(SitemapSpider, Spider):
     sitemap_urls = ["https://krispykreme.jp/store-sitemap.xml"]
 
     # third-party delivery providers shown in the 外部サービス block:
-    # page label -> trade name (delivery:partner) and wikidata id
+    # page label -> (trade name for delivery:partner, wikidata id)
+    # Providers with a wikidata id come first so that delivery:partner and
+    # delivery:partner:wikidata pair correctly when zipped positionally;
+    # Rocket Now has no wikidata item and is kept last.
     DELIVERY_PARTNERS = {
-        "Uber Eats": "Uber Eats",
-        "出前館": "Demae-can",
-        "Too Good To Go": "Too Good To Go",
-        "menu": "menu",
-        "Rocket Now": "Rocket Now",
-    }
-    DELIVERY_PARTNERS_WIKIDATA = {
-        "Uber Eats": "Q21462723",
-        "出前館": "Q11395551",
-        "Too Good To Go": "Q85810097",
-        "menu": "Q140478792",
-        # Rocket Now has no wikidata item
+        "Uber Eats": ("Uber Eats", "Q21462723"),
+        "出前館": ("Demae-can", "Q11395551"),
+        "Too Good To Go": ("Too Good To Go", "Q85810097"),
+        "menu": ("menu", "Q140478792"),
+        "Rocket Now": ("Rocket Now", None),
     }
 
     def parse(self, response: Response) -> Iterable[Feature]:
@@ -101,13 +97,17 @@ class KrispyKremeJPSpider(SitemapSpider, Spider):
         delivery_partner_selector = (
             './/dt[contains(text(), "外部サービス")]/following-sibling::dd[1]//p[contains(@class, "button")]/text()'
         )
-        page_providers = [p.strip() for p in info_col.xpath(delivery_partner_selector).getall() if p.strip()]
-        if page_providers:
+        page_provider_labels = {p.strip() for p in info_col.xpath(delivery_partner_selector).getall() if p.strip()}
+        mapped = []
+        for label, (name, qid) in self.DELIVERY_PARTNERS.items():
+            if label in page_provider_labels:
+                mapped.append((name, qid))
+        if mapped:
             apply_yes_no(Extras.DELIVERY, item, True)
-            item["extras"]["delivery:partner"] = ";".join(self.DELIVERY_PARTNERS.get(p, p) for p in page_providers)
-            provider_qids = [q for q in (self.DELIVERY_PARTNERS_WIKIDATA.get(p) for p in page_providers) if q]
-            if provider_qids:
-                item["extras"]["delivery:partner:wikidata"] = ";".join(provider_qids)
+            item["extras"]["delivery:partner"] = ";".join(name for name, _ in mapped)
+            qids = [qid for _, qid in mapped if qid]
+            if qids:
+                item["extras"]["delivery:partner:wikidata"] = ";".join(qids)
 
         yield item
 
