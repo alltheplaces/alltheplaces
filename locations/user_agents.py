@@ -7,11 +7,11 @@ from locations.settings import BOT_NAME
 FIREFOX_ESR_140 = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
 FIREFOX_ESR_LATEST = FIREFOX_ESR_140
 
-FIREFOX_152 = "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0"
-FIREFOX_LATEST = FIREFOX_152
+FIREFOX_154 = "Mozilla/5.0 (X11; Linux x86_64; rv:154.0) Gecko/20100101 Firefox/154.0"
+FIREFOX_LATEST = FIREFOX_154
 
-CHROME_151 = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
-CHROME_LATEST = CHROME_151
+CHROME_152 = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+CHROME_LATEST = CHROME_152
 
 BROWSER_DEFAULT = FIREFOX_ESR_LATEST
 

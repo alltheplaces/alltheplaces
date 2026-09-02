@@ -1,8 +1,9 @@
 import re
 from typing import Any, Iterable
 
-from scrapy import Spider
 from scrapy.http import Request, Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
@@ -14,7 +15,7 @@ DAY_CHARS = {"月": "Mo", "火": "Tu", "水": "We", "木": "Th", "金": "Fr", "�
 DAY_RANGE = re.compile(r"([月火水木金土日])-([月火水木金土日])")
 
 
-class ApinaJPSpider(Spider):
+class ApinaJPSpider(CrawlSpider):
     name = "apina_jp"
     item_attributes = {"brand": "アピナ", "brand_wikidata": "Q55385192"}
     allowed_domains = ["www.kyowa-corp.co.jp"]
@@ -22,13 +23,10 @@ class ApinaJPSpider(Spider):
     # Apina locations are pure bowling alleys or batting centres with no
     # amusement arcade on site, and those are out of scope for this spider.
     start_urls = ["https://www.kyowa-corp.co.jp/am/shop/?s=&howcat%5B%5D=amusement"]
-
-    def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
-        for href in response.css("div.cont-lst a.item::attr(href)").getall():
-            yield response.follow(href, callback=self.parse_store)
-
-        if next_page := response.css("a.nextpostslink::attr(href)").get():
-            yield response.follow(next_page, callback=self.parse)
+    rules = [
+        Rule(LinkExtractor(restrict_css="div.cont-lst a.item"), callback="parse_store"),
+        Rule(LinkExtractor(restrict_css="a.nextpostslink"), follow=True),
+    ]
 
     def parse_store(self, response: Response, **kwargs: Any) -> Iterable[Feature | Request]:
         name = response.css("h2.cont-ttl span::text").get()

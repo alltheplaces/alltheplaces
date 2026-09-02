@@ -39,6 +39,7 @@ class Categories(Enum):
     LANGUAGE_SCHOOL = {"amenity": "language_school"}
     NATURE_SCHOOL = {"education": "nature_school"}
     TRAINING = {"amenity": "training"}
+    DRIVING_SCHOOL = {"amenity": "driving_school"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
@@ -61,6 +62,7 @@ class Categories(Enum):
 
     CLUB_SCOUT = {"club": "scout"}
 
+    CRAFT_BUILDER = {"craft": "builder"}
     CRAFT_CAR_PAINTER = {"craft": "car_painter"}
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CATERER = {"craft": "caterer"}
@@ -267,6 +269,7 @@ class Categories(Enum):
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_FINANCIAL_ADVISOR = {"office": "financial_advisor"}
+    OFFICE_GOVERNMENT = {"office": "government"}
     OFFICE_HEALTHCARE = {"office": "healthcare"}
     OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
