@@ -43,7 +43,9 @@ class PrintempsSpider(PlaywrightSpider):
                     if " " in day_hours:
                         time_ranges = day_hours.split(" ", 1)
                         for time_range in time_ranges:
-                            item["opening_hours"].add_range(DAYS_FR[day_name.title()], *time_range.split("-", 1), "%H:%M")
+                            item["opening_hours"].add_range(
+                                DAYS_FR[day_name.title()], *time_range.split("-", 1), "%H:%M"
+                            )
                     else:
                         item["opening_hours"].add_range(DAYS_FR[day_name.title()], *day_hours.split("-", 1), "%H:%M")
             apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
