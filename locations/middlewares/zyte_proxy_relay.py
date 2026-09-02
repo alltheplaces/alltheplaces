@@ -176,7 +176,25 @@ class _ZyteProxyRelay:
                 if b" 200 " not in status_line and not status_line.startswith(b"HTTP/1.1 200"):
                     # Surface whatever Zyte returned (e.g. an
                     # account-suspended error) to the browser instead of
-                    # hanging.
+                    # hanging. Note this is *not* the same as it reaching the
+                    # browser in any diagnosable form: Firefox collapses any
+                    # failed CONNECT -- for any reason -- into a generic,
+                    # non-specific NS_ERROR_PROXY_CONNECTION_REFUSED, with no
+                    # visibility into the underlying status/headers. This log
+                    # line is the only place the real reason (e.g. an
+                    # invalid/suspended API key or an out-of-credits account)
+                    # is ever observable, so log it before returning.
+                    zyte_error_headers = "".join(
+                        line.decode(errors="replace")
+                        for line in response_header_lines
+                        if line.lower().startswith(b"zyte-")
+                    )
+                    logger.warning(
+                        "Local Zyte proxy relay: upstream CONNECT to %s failed: %s%s",
+                        ZYTE_API_PROXY_HOST,
+                        status_line.decode(errors="replace").strip(),
+                        (" | " + zyte_error_headers.strip()) if zyte_error_headers else "",
+                    )
                     writer.write(status_line)
                     for line in response_header_lines:
                         writer.write(line)
