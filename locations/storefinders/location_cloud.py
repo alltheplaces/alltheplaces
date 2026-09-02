@@ -1,4 +1,5 @@
-from typing import Any, AsyncIterator, Iterable
+from collections.abc import AsyncIterator, Iterable
+from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Request, Response
@@ -20,7 +21,7 @@ class LocationCloudSpider(Spider):
 
     def _get_page(self, offset: int):
         return Request(
-            "{}?datum=wgs84&limit=500{}&offset={}".format(self.api_endpoint, self.additional_args, offset),
+            f"{self.api_endpoint}?datum=wgs84&limit=500{self.additional_args}&offset={offset}",
             meta={"offset": offset},
         )
 
@@ -37,10 +38,24 @@ class LocationCloudSpider(Spider):
             item["addr_full"] = location.get("address_name")
             item["postcode"] = location.get("postal_code")
 
-            yield from self.post_process_feature(item, location)
+            if type(self).parse_detail_page is not LocationCloudSpider.parse_detail_page:
+                yield Request(
+                    item["website"],
+                    callback=self._parse_detail_page,
+                    cb_kwargs={"item": item, "source_feature": location},
+                )
+            else:
+                yield from self.post_process_feature(item, location)
 
         if data["count"]["offset"] + data["count"]["limit"] < data["count"]["total"]:
             yield self._get_page(data["count"]["limit"] + response.meta["offset"])
 
+    def _parse_detail_page(self, response: Response, item: Feature, source_feature: dict) -> Iterable[Feature]:
+        for parsed in self.parse_detail_page(response, item, source_feature):
+            yield from self.post_process_feature(parsed, source_feature)
+
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
         yield item
+
+    def parse_detail_page(self, response: Response, item: Feature, source_feature: dict):
+        pass
