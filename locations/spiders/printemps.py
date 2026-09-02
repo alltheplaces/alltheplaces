@@ -21,7 +21,7 @@ class PrintempsSpider(PlaywrightSpider):
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in json.loads(response.xpath("//pre//text()").get())["magasins_lists"]:
-            item = Feature()
+            item = Feature(**self.item_attributes)
             item["ref"] = location["ID"]
             item["lat"] = location["PR_LAT"]
             item["lon"] = location["PR_LONG"]
@@ -43,8 +43,8 @@ class PrintempsSpider(PlaywrightSpider):
                     if " " in day_hours:
                         time_ranges = day_hours.split(" ", 1)
                         for time_range in time_ranges:
-                            item["opening_hours"].add_range(day_name.title(), *time_range.split("-", 1), "%H:%M")
+                            item["opening_hours"].add_range(DAYS_FR[day_name.title()], *time_range.split("-", 1), "%H:%M")
                     else:
-                        item["opening_hours"].add_range(day_name.title(), *day_hours.split("-", 1), "%H:%M")
+                        item["opening_hours"].add_range(DAYS_FR[day_name.title()], *day_hours.split("-", 1), "%H:%M")
             apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
             yield item
