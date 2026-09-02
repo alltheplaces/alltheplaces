@@ -29,7 +29,7 @@ class KookaiFRSpider(JSONBlobSpider):
         )
 
         match = re.search(r"\b\d{4,5}\b", item["addr_full"])
-        item["postcode"] = match.group() if match else None
+        item["postcode"] = match.group().zfill(5) if match else None
         item["country"] = "FR"
 
         yield Request(
