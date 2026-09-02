@@ -1,0 +1,87 @@
+name: Add spider agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to build a spider for
+        required: true
+      branch:
+        description: Checkpoint branch with the draft PR already open
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  add-spider:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch }}
+
+      - uses: astral-sh/setup-uv@v7
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          show_full_output: true
+          prompt: |
+            Follow the instructions in .claude/agents/add-spider.md exactly to research and
+            build a new spider for issue #${{ inputs.issue_number }} in this repository.
+            This checkout is exclusively yours for this run, so the worktree step in that file
+            is unnecessary here — work directly in the checked-out repo.
+
+            Do this yourself, in this single session — do NOT use the Agent/Task tool to
+            delegate any part of it to a subagent. There is no process left running to receive
+            a "task complete" notification once this job's turn ends, so a backgrounded
+            subagent's work is silently lost when the job finishes. Read the file's contents
+            and carry out its steps directly with your own Bash/Read/Write/Edit tool calls.
+
+            The workflow already created your branch (`${{ inputs.branch }}`, currently
+            checked out) and opened a draft PR for it before invoking you — don't create
+            either yourself, and don't check out a different branch.
+
+            Commit locally, at each meaningful checkpoint, as you go — this protects your work
+            even if you run out of turns. But don't push after every commit: every push
+            re-triggers CI on the open PR, which is noisy and wasteful for WIP commits that
+            aren't finished yet. Push only once, near the end, after your local commits already
+            reflect the finished, verified spider.
+
+            When you're done and have pushed your final commit: update the PR's title and body
+            with the real summary (data source, pattern, verified item count,
+            `closes #${{ inputs.issue_number }}`) via `gh pr edit`, then take it out of
+            draft with `gh pr ready`.
+
+            If no clean data source exists, don't force a broken spider — say so clearly in the
+            workflow log, and close the draft PR with `gh pr close --comment "<why>"` rather than
+            leaving an empty, unexplained draft open.
+
+            As a safety net, the workflow itself will push whatever is committed locally right
+            after you finish, in case you run out of turns before pushing yourself — but don't
+            rely on that as your plan; push your own final commit yourself once verification
+            passes.
+          claude_args: |
+            --max-turns 100
+            --allowedTools "Bash,Read,Write,Edit,Grep,Glob,WebFetch,WebSearch,TodoWrite"
+            --disallowedTools "Agent,Task"
+            --append-system-prompt "You are running fully unattended in a GitHub Actions job, in a single non-interactive session with no event loop after this turn ends. There is no human present to ask for confirmation or approval. Do not pause, ask a clarifying question, or describe what you would do instead of doing it. Do not delegate any part of the task to a subagent (Agent/Task tool) — a backgrounded subagent never gets its result back to you or anyone else once this run ends, so its work is wasted. Carry out the entire task yourself with your own tool calls, including running shell commands, editing files, committing, and opening or finalizing the pull request, exactly as instructed in the prompt and in .claude/agents/add-spider.md. A branch and draft PR already exist for you — commit locally throughout the run to protect your work, but push only once near the end; pushing after every commit spams CI on the open PR. A workflow step pushes a safety-net commit after you finish in case you don't push in time yourself, but treat that as a last resort, not your plan."
+
+      - name: Push safety-net checkpoint
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Automated checkpoint: workflow safety net"
+          fi
+          git push origin "HEAD:${{ inputs.branch }}"
