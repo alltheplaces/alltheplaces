@@ -30,6 +30,6 @@ class ActionLogementFRSpider(CrawlSpider, StructuredDataSpider):
         item["lat"] = response.css('a#open-itinerary::attr(data-lat)').get()            
         item["lon"] = response.css('a#open-itinerary::attr(data-lon)').get()
 
-        item["branch"] = item.pop("name", "").removeprefix("Agence Action Logement ")
+        item["branch"] = (item.pop("name", "") or "").removeprefix("Agence Action Logement ")
 
         yield item
