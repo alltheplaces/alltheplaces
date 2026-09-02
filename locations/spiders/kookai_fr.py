@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 from scrapy import Request, Selector
 
-class KookaiFrSpider(JSONBlobSpider):
+class KookaiFRSpider(JSONBlobSpider):
     name = "kookai_fr"
     item_attributes = {
         "brand": "Kookaï",
