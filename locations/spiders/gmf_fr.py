@@ -52,7 +52,7 @@ class GmfFRSpider(SitemapSpider, StructuredDataSpider):
     def _parse_sitemap(self, response):
         for request in super()._parse_sitemap(response):
             # Nested sitemaps are XML and should not be rendered; agency pages need browserHtml.
-            if request.url.endswith('.xml'):
+            if request.url.endswith(".xml"):
                 request.meta["zyte_api"] = {
                     "httpResponseBody": True,
                     "geolocation": "FR",
