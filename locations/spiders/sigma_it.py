@@ -15,6 +15,7 @@ class SigmaITSpider(JSONBlobSpider, CamoufoxSpider):
     name = "sigma_it"
     item_attributes = {"brand": "Sigma", "brand_wikidata": "Q3977979"}
     allowed_domains = ["www.supersigma.com"]
+    requires_proxy = True
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {
         "CAMOUFOX_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "fetch"],
         "CAMOUFOX_MAX_CONTEXTS": 1,
