@@ -14,7 +14,7 @@ from locations.licenses import Licenses
 # The export endpoint returns every matching record in one response, so there
 # is no pagination to walk (the records endpoint caps out at 10000 anyway).
 DATASET_URL = (
-    "https://api-lannuaire.service-public.fr/api/explore/v2.1/catalog/datasets"
+    "https://api-lannuaire.service-public.gouv.fr/api/explore/v2.1/catalog/datasets"
     "/api-lannuaire-administration/exports/json?where=pivot%20like%20%22france_travail%22"
     "&select=id,nom,pivot,adresse,plage_ouverture,siret"
 )
@@ -23,7 +23,7 @@ DATASET_URL = (
 class FranceTravailFRSpider(Spider):
     name = "france_travail_fr"
     item_attributes = {"brand": "France Travail", "brand_wikidata": "Q8901192"}
-    allowed_domains = ["api-lannuaire.service-public.fr"]
+    allowed_domains = ["api-lannuaire.service-public.gouv.fr"]
     # The portal's robots.txt is the stock Opendatasoft template and blocks
     # /api/ from indexing. data.gouv.fr publishes this API as the dataset's
     # official access channel, under the Etalab 2.0 licence.
