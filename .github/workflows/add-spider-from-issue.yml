@@ -29,12 +29,17 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
-            exit 0
+            git fetch origin "$BRANCH"
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git checkout -b "$BRANCH"
+            git commit --allow-empty -m "Start add-spider work for #${{ github.event.issue.number }}"
+            git push origin "$BRANCH"
           fi
 
-          git checkout -b "$BRANCH"
-          git commit --allow-empty -m "Start add-spider work for #${{ github.event.issue.number }}"
-          git push origin "$BRANCH"
+          if gh pr view "$BRANCH" >/dev/null 2>&1; then
+            exit 0
+          fi
 
           gh pr create --draft \
             --title "[WIP] Add spider for #${{ github.event.issue.number }}" \
@@ -60,11 +65,14 @@ jobs:
       - name: Dispatch add-spider agent
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          APPROVER: ${{ github.actor }}
         run: |
           set -euo pipefail
-          BRANCH="add-spider-issue-${{ github.event.issue.number }}"
+          BRANCH="add-spider-issue-${ISSUE_NUMBER}"
           gh workflow run add-spider-agent.yml \
             --ref master \
-            -f issue_number="${{ github.event.issue.number }}" \
+            -f issue_number="$ISSUE_NUMBER" \
             -f branch="$BRANCH"
-          gh issue comment "${{ github.event.issue.number }}" --body "🤖 Approved by @${{ github.actor }} — starting the add-spider agent."
+          gh issue comment "$ISSUE_NUMBER" --body "🤖 Approved by @${APPROVER} — starting the add-spider agent."
