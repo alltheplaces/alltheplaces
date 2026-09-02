@@ -1,20 +1,21 @@
-from scrapy import Spider
+from scrapy.spiders import SitemapSpider
 
+from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
-class PurAndSimpleCASpider(Spider):
+class PurAndSimpleCASpider(SitemapSpider):
     name = "pur_and_simple_ca"
     item_attributes = {"brand": "Pür & Simple", "brand_wikidata": "Q118558630"}
-    start_urls = ["https://pursimple.com/locations/"]
+    sitemap_urls = ["https://pursimple.com/sitemap_index.xml"]
+    sitemap_rules = [(r"https://pursimple.com/restaurant/[^/]+/$", "parse")]
 
     def parse(self, response, **kwargs):
-        for location in response.xpath('//div[@class="list_item"]'):
+        if address := response.xpath('//*[@class="location-address-content"]//*[@class="p_lead"]/text()').get():
             item = Feature()
-            item["ref"] = item["website"] = location.xpath(".//a/@href").get()
-            item["lat"] = location.xpath("./@data-lat").get()
-            item["lon"] = location.xpath("./@data-lng").get()
-            item["name"] = location.xpath(".//a/text()").get()
-            item["addr_full"] = location.xpath(".//p/text()").get()
-
+            item["branch"] = response.xpath("//h1//text()").get()
+            item["addr_full"] = address
+            item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+            item["website"] = item["ref"] = response.url
+            extract_google_position(item, response)
             yield item
