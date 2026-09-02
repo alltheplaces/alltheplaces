@@ -8,9 +8,10 @@ permissions:
   contents: write
   pull-requests: write
   actions: write
+  issues: write
 
 jobs:
-  add-spider:
+  queue:
     if: |
       contains(github.event.issue.labels.*.name, 'new-spider') &&
       (github.event.action == 'opened' || github.event.label.name == 'new-spider')
@@ -18,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Create checkpoint branch, draft PR, and dispatch agent
+      - name: Create checkpoint branch and draft PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -28,28 +29,42 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
-            git fetch origin "$BRANCH"
-            git checkout -B "$BRANCH" "origin/$BRANCH"
-          else
-            git checkout -b "$BRANCH"
-            git commit --allow-empty -m "Start add-spider work for #${{ github.event.issue.number }}"
-            git push origin "$BRANCH"
+            exit 0
           fi
 
-          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
-            gh pr create --draft \
-              --title "[WIP] Add spider for #${{ github.event.issue.number }}" \
-              --body "Automated add-spider run in progress for #${{ github.event.issue.number }}. A bot will push commits and finalize this PR — or close it — as work completes." \
-              --head "$BRANCH" --base master
-          fi
+          git checkout -b "$BRANCH"
+          git commit --allow-empty -m "Start add-spider work for #${{ github.event.issue.number }}"
+          git push origin "$BRANCH"
 
-          # Dispatched separately (rather than running the agent inline here) because this
-          # job's actor is whoever opened/labeled the issue. anthropics/claude-code-action
-          # requires write access from that actor and 401s otherwise — which silently stalls
-          # this workflow for issues filed by contributors without write access (e.g. #18419).
-          # workflow_dispatch runs are exempt from that actor check, since GitHub itself
-          # requires write access to dispatch a workflow.
+          gh pr create --draft \
+            --title "[WIP] Add spider for #${{ github.event.issue.number }}" \
+            --body "Automated add-spider run queued for #${{ github.event.issue.number }}. Waiting on maintainer approval before the agent starts — see the issue for details." \
+            --head "$BRANCH" --base master
+
+          # anthropics/claude-code-action requires the triggering actor to have repo write
+          # access, and 401s otherwise — silently stalling this flow for issues filed by
+          # contributors without write access (e.g. #18419). Rather than dispatching the
+          # agent here, wait for a maintainer to opt in explicitly: GitHub itself only lets
+          # Triage+ users add a label to someone else's issue, so the 'new-spider-approved'
+          # label event below is a trustworthy approval signal regardless of who filed the
+          # issue.
+          gh issue comment "${{ github.event.issue.number }}" --body "🤖 Queued an automated add-spider attempt for this issue (draft PR opened). A maintainer needs to add the \`new-spider-approved\` label to start the agent."
+
+  dispatch:
+    if: |
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'new-spider-approved' &&
+      contains(github.event.issue.labels.*.name, 'new-spider')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch add-spider agent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          BRANCH="add-spider-issue-${{ github.event.issue.number }}"
           gh workflow run add-spider-agent.yml \
             --ref master \
             -f issue_number="${{ github.event.issue.number }}" \
             -f branch="$BRANCH"
+          gh issue comment "${{ github.event.issue.number }}" --body "🤖 Approved by @${{ github.actor }} — starting the add-spider agent."
