@@ -12,6 +12,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class LibroATSpider(CrawlSpider, StructuredDataSpider):
     name = "libro_at"
     item_attributes = {"brand": "Libro", "brand_wikidata": "Q1823138"}
+    requires_proxy = True
     brands = {
         "libro": {"brand": "Libro", "brand_wikidata": "Q1823138"},
         "pagro": {"brand": "Pagro", "brand_wikidata": "Q57550022"},
