@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider, Spider
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, DAYS_JP, OpeningHours, day_range
 from locations.items import Feature
 
@@ -14,7 +14,7 @@ class KrispyKremeJPSpider(SitemapSpider, Spider):
     name = "krispy_kreme_jp"
     allowed_domains = ["krispykreme.jp"]
     start_urls = ["https://krispykreme.jp"]
-    item_attributes = {"brand": "Krispy Kreme", "brand_wikidata": "Q1192805", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {"brand": "Krispy Kreme", "brand_wikidata": "Q1192805"}
     sitemap_urls = ["https://krispykreme.jp/store-sitemap.xml"]
 
     # third-party delivery providers shown in the 外部サービス block:
@@ -42,6 +42,7 @@ class KrispyKremeJPSpider(SitemapSpider, Spider):
         info_col = store_detail.xpath('.//div[contains(concat(" ", normalize-space(@class), " "), " info_col ")]')
 
         item = Feature()
+        apply_category(Categories.FAST_FOOD, item)
         # no store id found, so use URL parts as ID: pref + '-' + store-name-slug
         #   /store/tokyo/meiji-jingumae.html -> "tokyo-meiji-jingumae"
         #   /store/kanagawa/atre_kawasaki_northgate.html -> "kanagawa-atre-kawasaki-northgate"
