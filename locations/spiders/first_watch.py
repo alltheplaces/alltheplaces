@@ -1,5 +1,5 @@
 import csv
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, ClassVar
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -11,7 +11,7 @@ from locations.searchable_points import open_searchable_points
 
 class FirstWatchSpider(Spider):
     name = "first_watch"
-    item_attributes = {"brand": "First Watch", "brand_wikidata": "Q5454064", "name": "First Watch"}
+    item_attributes: ClassVar = {"brand": "First Watch", "brand_wikidata": "Q5454064", "name": "First Watch"}
     requires_proxy = True  # US-only site, geoblocks non-US IPs
 
     def make_request(self, lat: str, lon: str, page: int) -> JsonRequest:
