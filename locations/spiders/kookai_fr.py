@@ -23,6 +23,7 @@ class KookaiFRSpider(JSONBlobSpider):
 
         selector = Selector(text=location["summary"])
         item["branch"] = (selector.css(".sl-layout-line--name ::text").get() or "").removeprefix("KOOKAI ")
+        item["name"] = "Kookaï"
         item["street_address"] = selector.css(".sl-layout-line--address ::text").get() or ""
         item["addr_full"] = (
             item["street_address"] + ", " + (selector.css(".sl-layout-line--country ::text").get() or "")
