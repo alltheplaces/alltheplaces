@@ -2,15 +2,16 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class WilliamsSonomaUSSpider(JSONBlobSpider, CamoufoxSpider):
+class WilliamsSonomaUSSpider(JSONBlobSpider, PlaywrightSpider):
     name = "williams_sonoma_us"
     allowed_domains = ["www.williams-sonoma.com"]
     start_urls = [
@@ -20,10 +21,11 @@ class WilliamsSonomaUSSpider(JSONBlobSpider, CamoufoxSpider):
         "WS": {"brand": "Williams-Sonoma", "brand_wikidata": "Q2581220"},
         "PB": {"brand": "Pottery Barn", "brand_wikidata": "Q3400126"},
     }
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
     locations_key = ["storeListResponse", "stores"]
 
     def extract_json(self, response: Response) -> dict | list[dict]:
+        print(response.text)
         return super().extract_json(response.replace(body=response.xpath("string(//body)").get()))
 
     def pre_process_data(self, feature: dict) -> None:
