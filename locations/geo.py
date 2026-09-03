@@ -2,6 +2,7 @@ import csv
 import gzip
 import json
 import math
+import zipfile
 from io import TextIOWrapper
 from itertools import groupby
 from typing import Any, Iterable
@@ -15,6 +16,26 @@ from locations.searchable_points import get_searchable_points_path, open_searcha
 EARTH_RADIUS = 6378.1
 # Kilometers per mile
 MILES_TO_KILOMETERS = 1.60934
+
+# Katakana to hiragana map for Japanese postal data
+_KATAKANA = (
+    "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトド"
+    "ナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶー"
+)
+_HIRAGANA = (
+    "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとど"
+    "なにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖー"
+)
+_KATAKANA_TO_HIRAGANA = str.maketrans(_KATAKANA, _HIRAGANA)
+
+
+def _katakana_to_hiragana(text: str) -> str:
+    """
+    Convert a katakana string to hiragana.
+
+    Japan Post ships in katakana but OSM's "ja-Hira" name variant expects in hiragana.
+    """
+    return text.translate(_KATAKANA_TO_HIRAGANA)
 
 
 def vincenty_distance(lat: float, lon: float, distance_km: float, bearing_deg: float) -> tuple[float, float]:
@@ -245,6 +266,74 @@ def postal_regions(country_code: str, min_population: int = 0, consolidate_citie
                     "latitude": row["lat"],
                     "longitude": row["lng"],
                 }
+    elif country_code == "JP":
+        # Japanese postal code data from 日本郵便 (Japan Post):
+        # https://www.post.japanpost.jp/service/search/zipcode/download/utf-zip.html
+        # The utf_ken_all.zip URL always serves the latest nationwide release and is
+        # refreshed monthly.
+        with (
+            zipfile.ZipFile(get_searchable_points_path("postcodes/japostcodes.zip")) as archive,
+            archive.open("utf_ken_all.csv") as points,
+        ):
+            # Columns: [jis_code, old_postcode, postcode, pref_kana, city_kana,
+            #  town_kana, pref, city, town, *flags]
+            #
+            # flags are '0'/'1' booleans except the last two:
+            #   one_town_multi_postcode   town area spans >=2 postcodes
+            #   per_subarea_addressing    addresses numbered per 小字
+            #   has_chome                 town area has 丁目
+            #   one_postcode_multi_town   one postcode covers >=2 town areas
+            #   update_status             0 unchanged / 1 changed / 2 retired
+            #   change_reason             0 none / 1 municipal reorg /
+            #                             2 address implementation / 3 land
+            #                             readjustment / 4 postal-area
+            #                             adjustment / 5 correction / 6 retired
+            #
+            # Example for postal_region "1000001":
+            # {
+            #   'postal_region': '1000001',
+            #   'jis_code': '13101',
+            #   'province:ja': '東京都',
+            #   'province:ja-Hira': 'トウキョウト',
+            #   'city:ja': '千代田区',
+            #   'city:ja-Hira': 'チヨダク',
+            #   'neighbourhood:ja': '千代田',
+            #   'neighbourhood:ja-Hira': 'チヨダ',
+            #   'flags': {
+            #     'one_town_multi_postcode': '0',
+            #     'per_subarea_addressing': '0',
+            #     'has_chome': '0',
+            #     'one_postcode_multi_town': '0',
+            #     'update_status': '0',
+            #     'change_reason': '0'
+            #   }
+            # }
+            for row in csv.reader(TextIOWrapper(points, encoding="utf-8")):
+                region = {
+                    "postal_region": row[2],
+                    "jis_code": row[0],
+                    "province:ja": row[6],
+                    "province:ja-Hira": _katakana_to_hiragana(row[3]),
+                    "city:ja": row[7],
+                    "city:ja-Hira": _katakana_to_hiragana(row[4]),
+                    "flags": {
+                        "one_town_multi_postcode": row[9],
+                        "per_subarea_addressing": row[10],
+                        "has_chome": row[11],
+                        "one_postcode_multi_town": row[12],
+                        "update_status": row[13],
+                        "change_reason": row[14],
+                    },
+                }
+                # if city columns has "以下に掲載がない場合" special marks, it means a whole-municipality catch-all postcode
+                if "以下に掲載がない場合" not in row[8]:
+                    if region["flags"]["per_subarea_addressing"] == "1":
+                        region["quarter:ja"] = row[8]
+                        region["quarter:ja-Hira"] = _katakana_to_hiragana(row[5])
+                    else:
+                        region["neighbourhood:ja"] = row[8]
+                        region["neighbourhood:ja-Hira"] = _katakana_to_hiragana(row[5])
+                yield region
     else:
         raise Exception("country code not supported: " + country_code)
 
