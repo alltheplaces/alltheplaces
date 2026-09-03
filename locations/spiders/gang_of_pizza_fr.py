@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class GangOfPizzaFRSpider(SitemapSpider, StructuredDataSpider):
@@ -15,9 +15,12 @@ class GangOfPizzaFRSpider(SitemapSpider, StructuredDataSpider):
         (r"/gang-of-pizza-", "parse_sd"),
     ]
     wanted_types = ["FoodEstablishment"]
-    drop_attributes = ["facebook", "image",]
+    drop_attributes = [
+        "facebook",
+        "image",
+    ]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.VENDING_MACHINE, item)
-        item["branch"] = (item.pop("name","") or '').removeprefix("Gang Of Pizza ")
+        item["branch"] = (item.pop("name", "") or "").removeprefix("Gang Of Pizza ")
         yield item
