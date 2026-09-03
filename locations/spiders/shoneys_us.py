@@ -8,8 +8,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class ShoneysSpider(JSONBlobSpider):
-    name = "shoneys"
+class ShoneysUSSpider(JSONBlobSpider):
+    name = "shoneys_us"
     item_attributes = {"brand": "Shoney's", "brand_wikidata": "Q7500392"}
     allowed_domains = ["shoneys.com"]
     locations_key = ["data", "restaurant", "locations"]
