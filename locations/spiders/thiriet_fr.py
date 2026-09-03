@@ -12,7 +12,9 @@ class ThirietFRSpider(StructuredDataSpider):
             yield response.follow(url, callback=self.parse_sd)
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = item["ref"] = response.url # The parameters are important as they base64-encode the ID for the shop
+        item["website"] = item["ref"] = (
+            response.url
+        )  # The parameters are important as they base64-encode the ID for the shop
         item["name"] = None
         apply_category(Categories.SHOP_FROZEN_FOOD, item)
         yield item
