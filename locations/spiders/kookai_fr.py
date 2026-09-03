@@ -44,13 +44,13 @@ class KookaiFRSpider(JSONBlobSpider):
     def parse_store_detail(self, response):
         item = response.meta["item"]
 
-        data = response.json()
         try:
+            data = response.json()
             selector = Selector(text=data["data"])
 
             item["phone"] = selector.css(".sl-layout-line--phone ::text").get() or ""
             item["email"] = selector.css(".sl-layout-line--email ::text").get() or ""
-        except KeyError:
+        except (KeyError, ValueError):
             pass
 
         yield item
