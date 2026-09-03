@@ -25,6 +25,7 @@ class SephoraMESpider(Spider):
     name = "sephora_me"
     item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = "AE"
 
     async def start(self) -> AsyncIterator[Request]:
         for cc, coords in COUNTRIES.items():
