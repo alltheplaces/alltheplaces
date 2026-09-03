@@ -10,10 +10,6 @@ class NorthsideHospitalUSSpider(Spider):
     name = "northside_hospital_us"
     item_attributes = {"brand": "Northside Hospital", "brand_wikidata": "Q7059745"}
     start_urls = ["https://locations-api-prod.northside.com/api/LocationsSearch?&Page=1&PageSize=10"]
-    # captcha_type = "cloudflare_turnstile"
-    # captcha_selector_indicating_success = '//link[@href="resource://content-accessible/plaintext.css"]'
-    # custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
-    handle_httpstatus_list = [403]
 
     _category_map = {
         "Cancer Services": (Categories.HOSPITAL, [HealthcareSpecialities.ONCOLOGY]),
