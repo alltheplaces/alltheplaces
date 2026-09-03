@@ -10,47 +10,25 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 SHOPRITE_BRANDS = {
-    "Checkers": {"brand": "Checkers", "brand_wikidata": "Q5089126", "category": Categories.SHOP_SUPERMARKET},
-    "Checkers Hyper": {
-        "brand": "Checkers Hyper",
-        "brand_wikidata": "Q116518886",
-        "category": Categories.SHOP_SUPERMARKET,
-    },
-    "Checkers LiquorShop": {
-        "brand": "Checkers",
-        "brand_wikidata": "Q5089126",
-        "category": Categories.SHOP_ALCOHOL,
-    },
-    "MediRite": {
-        "brand": "MediRite",
-        "brand_wikidata": "Q115696233",
-        "located_in": "Checkers",
-        "located_in_wikidata": "Q5089126",
-        "category": Categories.PHARMACY,
-    },
-    "MediRite Plus": {"brand": "MediRite Plus", "brand_wikidata": "Q115696233", "category": Categories.PHARMACY},
-    "Shoprite": {"brand": "Shoprite", "brand_wikidata": "Q1857639", "category": Categories.SHOP_SUPERMARKET},
-    "Shoprite Hyper": {
-        "brand": "Shoprite Hyper",
-        "brand_wikidata": "Q1857639",
-        "category": Categories.SHOP_SUPERMARKET,
-    },
-    "Shoprite LiquorShop": {
-        "brand": "LiquorShop Shoprite",
-        "brand_wikidata": "Q1857639",
-        "category": Categories.SHOP_ALCOHOL,
-    },
-    "Shoprite Mini": {
-        "brand": "Shoprite Mini",
-        "brand_wikidata": "Q1857639",
-        "category": Categories.SHOP_CONVENIENCE,
-    },
-    "Super Usave": {
-        "brand": "Super Usave",
-        "brand_wikidata": "Q115696368",
-        "category": Categories.SHOP_SUPERMARKET,
-    },
-    "Usave": {"brand": "Usave", "brand_wikidata": "Q115696368", "category": Categories.SHOP_SUPERMARKET},
+    "Checkers": ({"brand": "Checkers", "brand_wikidata": "Q5089126"}, Categories.SHOP_SUPERMARKET),
+    "Checkers Hyper": ({"brand": "Checkers Hyper", "brand_wikidata": "Q116518886"}, Categories.SHOP_SUPERMARKET),
+    "Checkers LiquorShop": ({"brand": "Checkers", "brand_wikidata": "Q5089126"}, Categories.SHOP_ALCOHOL),
+    "MediRite": (
+        {
+            "brand": "MediRite",
+            "brand_wikidata": "Q115696233",
+            "located_in": "Checkers",
+            "located_in_wikidata": "Q5089126",
+        },
+        Categories.PHARMACY,
+    ),
+    "MediRite Plus": ({"brand": "MediRite Plus", "brand_wikidata": "Q115696233"}, Categories.PHARMACY),
+    "Shoprite": ({"brand": "Shoprite", "brand_wikidata": "Q1857639"}, Categories.SHOP_SUPERMARKET),
+    "Shoprite Hyper": ({"brand": "Shoprite Hyper", "brand_wikidata": "Q1857639"}, Categories.SHOP_SUPERMARKET),
+    "Shoprite LiquorShop": ({"brand": "LiquorShop Shoprite", "brand_wikidata": "Q1857639"}, Categories.SHOP_ALCOHOL),
+    "Shoprite Mini": ({"brand": "Shoprite Mini", "brand_wikidata": "Q1857639"}, Categories.SHOP_CONVENIENCE),
+    "Super Usave": ({"brand": "Super Usave", "brand_wikidata": "Q115696368"}, Categories.SHOP_SUPERMARKET),
+    "Usave": ({"brand": "Usave", "brand_wikidata": "Q115696368"}, Categories.SHOP_SUPERMARKET),
 }
 
 COUNTRY_IDS = {
@@ -117,9 +95,9 @@ class ShopriteHoldingsSpider(Spider):
             item = DictParser.parse(location)
 
             item["branch"] = location["branch"]
-            attributes = dict(SHOPRITE_BRANDS[location["brand"]])
-            apply_category(attributes.pop("category"), item)
-            item.update(attributes)
+            brand, cat = SHOPRITE_BRANDS[location["brand"]]
+            apply_category(cat, item)
+            item.update(brand)
             item["website"] = self.get_website(item)
 
             yield JsonRequest(
@@ -147,7 +125,7 @@ class ShopriteHoldingsSpider(Spider):
             else:
                 item["opening_hours"].add_range(day_hours["TradingDay"], day_hours["StartTime"], day_hours["EndTime"])
 
-        item["extras"]["@source_uri"] = f"{STORES_API}?uid={item['ref']}"
+        # item["extras"]["@source_uri"] = f"{STORES_API}?uid={item['ref']}"
         yield item
 
     def get_website(self, item: Feature) -> str | None:
