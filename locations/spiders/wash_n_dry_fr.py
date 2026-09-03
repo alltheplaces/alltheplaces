@@ -33,7 +33,7 @@ class WashNDryFRSpider(JSONBlobSpider):
             .replace("7j/7", "Lu-Di")
             .replace("7/7", "Lu-Di")
             .replace("h00", ":00")
-            .replace("h30", ":00")
+            .replace("h30", ":30")
             .replace("h45", ":45")
         )
 
