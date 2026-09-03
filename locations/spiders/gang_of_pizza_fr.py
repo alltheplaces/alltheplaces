@@ -13,6 +13,8 @@ class GangOfPizzaFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"facebook", "image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["branch"] = (item.pop("name", "") or "").removeprefix("Gang Of Pizza ")
+        item["branch"] = (
+            (item.pop("name", "") or "").removeprefix("Gang Of Pizza").removeprefix("Gang of Pizza").strip()
+        )
         apply_category(Categories.VENDING_MACHINE, item)
         yield item
