@@ -1,15 +1,16 @@
 from typing import AsyncIterator, Iterable
 
+import scrapy
 from scrapy import Request
 from scrapy.http import TextResponse
-from scrapy_camoufox.page import PageMethod
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 # Fetched from within the locator page so that the request carries the
 # browser's own origin, cookies and headers.
@@ -27,30 +28,25 @@ LOCATIONS_FETCH_JS = """async () => {
 }"""
 
 
-class PostbankBGSpider(JSONBlobSpider, CamoufoxSpider):
+class PostbankBGSpider(JSONBlobSpider, PlaywrightSpider):
     name = "postbank_bg"
     item_attributes = {"brand": "Пощенска банка", "brand_wikidata": "Q7234083", "country": "BG"}
     allowed_domains = ["content.postbank.bg"]
     no_refs = True
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {
-        "CAMOUFOX_ABORT_REQUEST": lambda request: request.resource_type not in ["document", "fetch"]
-    }
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[Request]:
         # Akamai rejects a bare request to the API, so load the locator page in
         # the browser first and call the API from that page.
-        yield Request(
-            "https://content.postbank.bg/Contacts/Network",
-            meta={"camoufox_page_methods": [PageMethod("evaluate", LOCATIONS_FETCH_JS)]},
+        yield scrapy.FormRequest(
+            "https://content.postbank.bg/en/api/locations/locations",
+            formdata={"contextItemPath": "/sitecore/content/postbank/home"},
+            method="POST",
             callback=self.parse,
         )
 
     def extract_json(self, response: TextResponse) -> list[dict]:
-        return [
-            dict(branch, city=city["city"])
-            for city in response.meta["camoufox_page_methods"][0].result
-            for branch in city["branches"]
-        ]
+        return [dict(branch, city=city["city"]) for city in response.json() for branch in city["branches"]]
 
     def pre_process_data(self, feature: dict) -> None:
         feature["coords"] = feature.pop("branchCoords")
