@@ -38,7 +38,15 @@ class WashNDryFRSpider(JSONBlobSpider):
         )
 
         item["opening_hours"] = OpeningHours()
-        hours = location["openings"].lower().replace("7j/7","Lu-Di").replace("7/7","Lu-Di").replace("h00",":00").replace("h30",":00").replace("h45",":45")
+        hours = (
+            location["openings"]
+            .lower()
+            .replace("7j/7", "Lu-Di")
+            .replace("7/7", "Lu-Di")
+            .replace("h00", ":00")
+            .replace("h30", ":00")
+            .replace("h45", ":45")
+        )
         item["opening_hours"].add_ranges_from_string(hours, DAYS_FR, delimiters=DELIMITERS_FR)
-        
+
         yield item
