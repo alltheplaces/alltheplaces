@@ -11,6 +11,7 @@ class OmniHotelsSpider(SitemapSpider):
     item_attributes = {"brand": "Omni Hotels", "brand_wikidata": "Q7090329", "extras": Categories.HOTEL.value}
     sitemap_urls = ["https://www.omnihotels.com/sitemap.xml"]
     sitemap_rules = [(r"/property-details$", "parse")]
+    requires_proxy = True
 
     def parse(self, response):
         item = Feature()
