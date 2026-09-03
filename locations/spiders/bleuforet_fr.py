@@ -6,7 +6,7 @@ from scrapy.http import TextResponse
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 DAY_FR = {
@@ -61,9 +61,7 @@ class BleuforetFRSpider(Spider):
 
         item["phone"] = self.get_detail(response, "Téléphone")
 
-        email_encoded = response.xpath(
-            '//tr[normalize-space(td[1])="Email"]//@data-cfemail'
-        ).get()
+        email_encoded = response.xpath('//tr[normalize-space(td[1])="Email"]//@data-cfemail').get()
         if email_encoded:
             item["email"] = self.decode_cf_email(email_encoded)
 
@@ -82,14 +80,12 @@ class BleuforetFRSpider(Spider):
 
     @staticmethod
     def get_detail(response: TextResponse, label: str) -> str:
-        return response.xpath(
-            f'normalize-space(//table//tr[normalize-space(td[1])="{label}"]/td[2])'
-        ).get("")
+        return response.xpath(f'normalize-space(//table//tr[normalize-space(td[1])="{label}"]/td[2])').get("")
 
     @staticmethod
     def decode_cf_email(encoded: str) -> str:
         r = int(encoded[:2], 16)
-        return "".join(chr(int(encoded[i:i + 2], 16) ^ r) for i in range(2, len(encoded), 2))
+        return "".join(chr(int(encoded[i : i + 2], 16) ^ r) for i in range(2, len(encoded), 2))
 
     def parse_hours(self, response: TextResponse) -> OpeningHours:
         oh = OpeningHours()
