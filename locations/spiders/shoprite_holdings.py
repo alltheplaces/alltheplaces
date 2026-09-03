@@ -124,8 +124,6 @@ class ShopriteHoldingsSpider(Spider):
                 item["opening_hours"].set_closed(day_hours["TradingDay"])
             else:
                 item["opening_hours"].add_range(day_hours["TradingDay"], day_hours["StartTime"], day_hours["EndTime"])
-
-        # item["extras"]["@source_uri"] = f"{STORES_API}?uid={item['ref']}"
         yield item
 
     def get_website(self, item: Feature) -> str | None:
