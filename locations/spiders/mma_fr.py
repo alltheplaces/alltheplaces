@@ -14,17 +14,20 @@ class MmaFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = (item.pop("name", "") or "").removeprefix("AGENCE D'ASSURANCE MMA ")
-        item["opening_hours"] = self.parse_opening_hours(ld_data)
+        try:
+            item["opening_hours"] = self.parse_opening_hours(ld_data)
+        except Exception:
+            pass
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
 
     def parse_opening_hours(self, ld_data: dict) -> OpeningHours:
         oh = OpeningHours()
-        for l in ld_data["openingHours"]:
-            day, times = l.split(" ", 1)
+        for rule in ld_data["openingHours"]:
+            day, times = rule.split(" ", 1)
             if times == "Fermée":
                 oh.set_closed(day)
             else:
-                for t in times.strip().split(" "):
-                    oh.add_range(day, *t.split("-"))
+                for time in times.strip().split(" "):
+                    oh.add_range(day, *time.split("-"))
         return oh
