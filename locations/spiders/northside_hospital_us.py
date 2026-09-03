@@ -1,15 +1,18 @@
-from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class NorthsideHospitalUSSpider(Spider):
+class NorthsideHospitalUSSpider(PlaywrightSpider):
     name = "northside_hospital_us"
     item_attributes = {"brand": "Northside Hospital", "brand_wikidata": "Q7059745"}
     start_urls = ["https://locations-api-prod.northside.com/api/LocationsSearch?&Page=1&PageSize=10"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     _category_map = {
         "Cancer Services": (Categories.HOSPITAL, [HealthcareSpecialities.ONCOLOGY]),
