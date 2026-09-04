@@ -19,7 +19,6 @@ class GreeneKingPubsGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/pubs\/([-\w]+)\/([-\w]+)\/?$", "parse_sd")]
     custom_settings = {"REDIRECT_ENABLED": False, "USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_TIMEOUT": 60}
     wanted_types = ["BarOrPub"]
-    
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         apply_category(Categories.PUB, item)
