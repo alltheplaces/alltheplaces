@@ -113,7 +113,9 @@ class DocomoShopJPSpider(Spider):
         if len(hhmm) != 4 or not hhmm.isascii() or not hhmm.isdigit():
             return None
         hours, minutes = int(hhmm[:2]), int(hhmm[2:])
-        return f"{hours:02d}:{minutes:02d}" if hours <= 24 and minutes < 60 else None
+        if minutes > 59 or hours > 24 or (hours == 24 and minutes):
+            return None
+        return f"{hours:02d}:{minutes:02d}"
 
     @staticmethod
     def weekly_closures(holiday_code: Any) -> Iterable[str]:
