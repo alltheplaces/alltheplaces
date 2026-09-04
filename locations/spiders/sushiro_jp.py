@@ -8,6 +8,7 @@ from locations.categories import Categories, Extras, PaymentMethods, apply_categ
 from locations.hours import DAYS, DAYS_JP, OpeningHours, day_range
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.lang_utils import katakana_to_hiragana
 
 # Map of the site's "service" facility codes to OSM tags.
 SERVICE_TAGS = {
@@ -128,7 +129,7 @@ class SushiroJPSpider(JSONBlobSpider):
             item["extras"]["contact:fax"] = fax
 
         if kana := feature.get("kana"):
-            item["extras"]["name:ja-Hira"] = kana
+            item["extras"]["name:ja-Hira"] = katakana_to_hiragana(kana)
 
         if "クレジット" in (feature.get("memo") or ""):
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, True)
