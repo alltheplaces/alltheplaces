@@ -7,8 +7,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
-BLOCKED_PHONE = "800031500"
-
 
 class AkenaSpider(SitemapSpider, StructuredDataSpider):
     name = "akena"
@@ -19,12 +17,9 @@ class AkenaSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image", "facebook"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        phone = item.get("phone")
-        clean_phone = "".join(c for c in str(phone) if c.isdigit()) if phone else ""
-
-        if BLOCKED_PHONE in clean_phone:
-            self.logger.info(f"Dropping generic phone number for: {item.get('name')} - {response.url}")
+        if item.get("phone") == "0 800 031 500":
             item["phone"] = None
+        item["branch"] = item.pop("name").removeprefix("AKENA ")
 
         apply_category(Categories.CRAFT_CARPENTER, item)
         yield item
