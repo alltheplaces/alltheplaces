@@ -1,4 +1,5 @@
 from locations.categories import Categories, apply_category
+from locations.country_utils import get_locale
 from locations.storefinders.woosmap import WoosmapSpider
 
 
@@ -6,6 +7,32 @@ class AccorSpider(WoosmapSpider):
     name = "accor"
     key = "accor-prod-woos"
     origin = "https://accor.com"
+
+    # Languages that https://all.accor.com/ hotel pages are published in
+    # (i.e. valid "index.<lang>.shtml" suffixes). A country whose language
+    # is not in this set falls back to English.
+    SUPPORTED_WEBSITE_LANGUAGES = {
+        "ar",
+        "de",
+        "en",
+        "es",
+        "fr",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "nl",
+        "pl",
+        "pt",
+        "pt-br",
+        "ru",
+        "th",
+        "tr",
+        "zh",
+    }
+    # Countries where the language code returned by country_utils.get_locale()
+    # does not match the locale code used by all.accor.com.
+    WEBSITE_LANGUAGE_OVERRIDES = {"BR": "pt-br"}
 
     brand_mapping = {
         "SUI": {"brand": "Novotel", "brand_wikidata": "Q420545"},
@@ -78,6 +105,15 @@ class AccorSpider(WoosmapSpider):
         else:
             self.crawler.stats.inc_value(f"atp/accor/unknown_brand/{brand_id}")
         item["addr_full"] = item.pop("street_address")
-        item["website"] = f"https://all.accor.com/hotel/{item['ref']}/index.en.shtml"
+        item["website"] = (
+            f"https://all.accor.com/hotel/{item['ref']}/index.{self.website_language(item['country'])}.shtml"
+        )
         apply_category(Categories.HOTEL, item)
         yield item
+
+    def website_language(self, country: str | None) -> str:
+        language = self.WEBSITE_LANGUAGE_OVERRIDES.get(country)
+        if not language and country:
+            locale = get_locale(country)
+            language = locale.split("-")[0] if locale else None
+        return language if language in self.SUPPORTED_WEBSITE_LANGUAGES else "en"
