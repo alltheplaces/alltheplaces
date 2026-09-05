@@ -39,6 +39,8 @@ class AritziaSpider(JSONBlobSpider, CamoufoxSpider):
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         blob = response.xpath('//script[@id="mobify-data"]/text()').get()
+        if not blob:
+            return []
         return json.loads(blob)["__PRELOADED_STATE__"]["pageProps"]["results"]
 
     def pre_process_data(self, feature: dict) -> None:
