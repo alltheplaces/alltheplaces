@@ -1,9 +1,31 @@
-from locations.spiders.ok_furniture import OkFurnitureSpider
+from typing import Iterable
+
+from scrapy import Request, Selector
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.pipelines.address_clean_up import clean_address
+from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
-class Studio88Spider(OkFurnitureSpider):
+class Studio88Spider(AmastyStoreLocatorSpider):
     name = "studio_88"
     item_attributes = {"brand": "Studio 88", "brand_wikidata": "Q116498145"}
-    allowed_domains = ["studio-88.co.za"]
-    start_urls = ["https://www.studio-88.co.za/store-locator/"]
+    allowed_domains = ["www.studio-88.co.za"]
+    pagination_mode = True
     requires_proxy = "ZA"
+    skip_auto_cc_domain = True
+
+    def post_process_item(
+        self, item: Feature, feature: dict, popup_html: Selector | None = None
+    ) -> Iterable[Feature | Request]:
+        item["branch"] = item.pop("name").removeprefix("Studio 88 ")
+        if popup_html is not None:
+            item["addr_full"] = clean_address(
+                popup_html.xpath(
+                    '//div[contains(@class, "s2")]//div[contains(@class, "amlocator-today")]/text()'
+                ).getall()
+            )
+            item["phone"] = popup_html.xpath('//a[@class="phones"]/@href').get()
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item
