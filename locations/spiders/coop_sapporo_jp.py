@@ -21,6 +21,9 @@ class CoopSapporoJPSpider(CanlySpider):
         item["extras"]["branch:ja-Hira"] = feature.get("nameKana")
         item["website"] = f"https://map.sapporo.coop/store/detail/{feature.get('storeCode')}/"
 
+        if start_date := feature.get("establishmentDate"):
+            item["extras"]["start_date"] = start_date
+
         if feature.get("openStatus") != "IS_ALREADY_OPEN":
             # Temporarily closed locations (for example, closed for renovation)
             item["extras"]["disused:shop"] = "supermarket"
