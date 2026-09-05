@@ -29,9 +29,11 @@ class YaokoJPSpider(Spider):
     start_urls = ["https://yaoko-job.net/jobfind-pc/area/All"]
     store_list_url = "https://www.yaoko-net.com/store/"
 
-    branch_to_coords_map: dict[str, tuple[float, float]] = {}
-    seen_job_stores: set[str] = set()
-    phase2_started = False
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.branch_to_coords_map: dict[str, tuple[float, float]] = {}
+        self.seen_job_stores: set[str] = set()
+        self.phase2_started = False
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
