@@ -1,4 +1,5 @@
 from typing import Iterable
+
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
@@ -17,6 +18,6 @@ class CabinetBedinFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Cabinet Bedin Immobilier ")
-    
+
         apply_category(Categories.OFFICE_ESTATE_AGENT, item)
         yield item
