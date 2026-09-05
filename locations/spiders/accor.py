@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from locations.categories import Categories, apply_category
 from locations.country_utils import get_locale
 from locations.storefinders.woosmap import WoosmapSpider
@@ -11,7 +13,7 @@ class AccorSpider(WoosmapSpider):
     # Languages that https://all.accor.com/ hotel pages are published in
     # (i.e. valid "index.<lang>.shtml" suffixes). A country whose language
     # is not in this set falls back to English.
-    SUPPORTED_WEBSITE_LANGUAGES = {
+    SUPPORTED_WEBSITE_LANGUAGES: ClassVar[set[str]] = {
         "ar",
         "de",
         "en",
@@ -32,9 +34,9 @@ class AccorSpider(WoosmapSpider):
     }
     # Countries where the language code returned by country_utils.get_locale()
     # does not match the locale code used by all.accor.com.
-    WEBSITE_LANGUAGE_OVERRIDES = {"BR": "pt-br"}
+    WEBSITE_LANGUAGE_OVERRIDES: ClassVar[dict[str, str]] = {"BR": "pt-br"}
 
-    brand_mapping = {
+    brand_mapping: ClassVar[dict[str, dict[str, str] | None]] = {
         "SUI": {"brand": "Novotel", "brand_wikidata": "Q420545"},
         "NOV": {"brand": "Novotel", "brand_wikidata": "Q420545"},
         "NOL": {"brand": "Novotel", "brand_wikidata": "Q420545"},
