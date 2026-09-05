@@ -36,7 +36,12 @@ class BoulangerFRSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
         # No JSON-LD; this Yext Pages template embeds the full location profile here instead.
         raw = response.css("#js-map-config-dir-map::text").get()
-        entities = json.loads(raw).get("entities") if raw else None
+        try:
+            entities = json.loads(raw).get("entities") if raw else None
+        except json.JSONDecodeError:
+            # A truncated render can leave `raw` non-empty but syntactically invalid JSON;
+            # treat it the same as a missing blob so it hits the retry path below.
+            entities = None
         if not entities:
             # Zyte occasionally hands back a genuine 200 with a truncated render; retry rather
             # than silently losing the store.
