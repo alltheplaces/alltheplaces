@@ -126,7 +126,7 @@ class SushiroJPSpider(JSONBlobSpider):
             item["extras"]["contact:fax"] = fax
 
         if kana := feature.get("kana"):
-            item["extras"]["name:ja-Hira"] = katakana_to_hiragana(kana)
+            item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(kana)
 
         if "クレジット" in (feature.get("memo") or ""):
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, True)
