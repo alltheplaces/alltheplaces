@@ -118,7 +118,7 @@ class SushiroJPSpider(JSONBlobSpider):
         # Recorded as tags (see each line for the source field):
         item["ref"] = feature["id"]
         item["branch"] = item.pop("name").splitlines()[0].strip()
-        item["addr_full"] = feature["address"]
+        item["addr_full"] = f"{feature['pref_name']}{feature['city_name']}{feature['address']}"
         item["postcode"] = f"{feature['zip1']}{feature['zip2']}"
         item["city"] = feature["city_name"]
         item["extras"]["addr:province"] = feature["pref_name"]
