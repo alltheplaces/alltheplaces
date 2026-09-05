@@ -6,7 +6,7 @@ Often, a storefinder is a plugin or common software component. To encourage code
 
 Over and above the [core scrapy spider API](https://docs.scrapy.org/en/latest/topics/spiders.html), typically these store finders follow a pattern of:
 
-- Specifying an API key or `start_url`
+- Specifying an API key or `start_urls`
 - `pre_process_data` - a method for cleaning or transforming a structure from the API (dict, xpath/dom node) prior to processing.
 - `parse_item` or `post_process_item` (StructuredDataSpiders) - a method for further decorating an item after the primary processing is done. IE, removing invalid names or phone numbers.
 
