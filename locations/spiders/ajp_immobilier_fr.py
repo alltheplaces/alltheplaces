@@ -1,4 +1,5 @@
 from typing import Iterable
+
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
@@ -19,6 +20,6 @@ class AjpImmobilierFRSpider(SitemapSpider, StructuredDataSpider):
         if item.get("facebook") == "https://www.facebook.com/ajpimmobilierfrance":
             item["facebook"] = None
         item["branch"] = item.pop("name").removeprefix("AJP Immobilier ")
-    
+
         apply_category(Categories.OFFICE_ESTATE_AGENT, item)
         yield item
