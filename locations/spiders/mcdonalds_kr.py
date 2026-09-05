@@ -46,8 +46,8 @@ class McdonaldsKRSpider(Spider):
                     item["phone"] = tel
 
             try:
-                lat = float(store["lat"])
-                lon = float(store["lng"])
+                lat = float(store.get("lat"))
+                lon = float(store.get("lng"))
                 # Fix verified data entry error where leading '1' was omitted (e.g. 26.698... -> 126.698...)
                 if 20.0 < lon < 30.0:
                     lon += 100.0
