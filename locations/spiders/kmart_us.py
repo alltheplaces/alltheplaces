@@ -19,19 +19,19 @@ class KmartUSSpider(JSONBlobSpider):
     item_attributes = KMART_SHARED_ATTRIBUTES
     allowed_domains = ["www.kmart.com"]
 
+    # Kmart has shrunk to a tiny handful of stores remaining in US
+    # territories with no stores left in the continental US. There is no
+    # sitemap or bulk store list, so a postcode radius search (max radius
+    # 300 miles) is used, as suggested in
+    # https://github.com/alltheplaces/alltheplaces/issues/764. Requests are
+    # limited to territory postcodes (rather than all ~33k US postcodes) so
+    # the spider completes in a reasonable time.
+    TERRITORY_STATES = {"GU", "PR", "VI", "MP", "AS"}
+
     async def start(self) -> AsyncIterator[JsonRequest]:
-        # Kmart has shrunk to a tiny handful of stores remaining in US
-        # territories (Guam, US Virgin Islands) with no stores left in
-        # the continental US. There is no sitemap or bulk store list, so
-        # a postcode radius search (max radius 300 miles) is used, as
-        # suggested in https://github.com/alltheplaces/alltheplaces/issues/764.
-        # A min_population filter of 50000 keeps the request count down
-        # for the continental US (where no stores remain in any case)
-        # while still covering all postcodes in Guam/Puerto Rico/US
-        # Virgin Islands/Northern Mariana Islands/American Samoa, since
-        # those postcodes have no population figure in the source data
-        # and therefore always pass the filter.
-        for postal_region in postal_regions("US", min_population=50000, consolidate_cities=True):
+        for postal_region in postal_regions("US", consolidate_cities=True):
+            if postal_region.get("state") not in self.TERRITORY_STATES:
+                continue
             yield JsonRequest(
                 url="https://www.kmart.com/api/sal/v1/store/stores?store=Kmart&mileRadius=300&caller=storeLocator"
                 "&includeFilterStrTypes=002_A%7C002_B%7C001_O%7C001_A%7C001_B%7C001_C%7C001_D"
