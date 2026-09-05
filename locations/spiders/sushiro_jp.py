@@ -103,16 +103,8 @@ class SushiroJPSpider(JSONBlobSpider):
     def extract_json(self, response: Response) -> list[dict]:
         data_raw = response.xpath("//script[contains(text(), 'items = [')]/text()").get()
         start = data_raw.rindex("items = [") + len("items = [")
-        depth = 1
-        i = start
-        while depth > 0:
-            char = data_raw[i]
-            if char == "[":
-                depth += 1
-            elif char == "]":
-                depth -= 1
-            i += 1
-        return json.loads(data_raw[start - 1 : i])
+        items, _ = json.JSONDecoder().raw_decode(data_raw[start - 1 :])
+        return items
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         # Recorded as tags (see each line for the source field):
@@ -124,9 +116,9 @@ class SushiroJPSpider(JSONBlobSpider):
         item["extras"]["addr:province"] = feature["pref_name"]
         item["country"] = "JP"
         item["website"] = f"https://www.akindo-sushiro.co.jp/shop/detail.php?id={feature['id']}"
-        item["extras"][
-            "website:menu"
-        ] = f"https://www.akindo-sushiro.co.jp/menu/menu_detail/?s_id={feature['sushipass_id']}"
+        item["extras"]["website:menu"] = (
+            f"https://www.akindo-sushiro.co.jp/menu/menu_detail/?s_id={feature['sushipass_id']}"
+        )
         item["extras"]["website:allergens"] = "https://www.akindo-sushiro.co.jp/menu/allergy.html"
         item["opening_hours"] = self._parse_hours(feature["hours"])
 
