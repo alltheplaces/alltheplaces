@@ -95,6 +95,7 @@ class YaokoJPSpider(Spider):
         }
 
         item = Feature()
+        item["name"] = "ヤオコー"
         item["ref"] = response.url.rstrip("/").split("/")[-1].replace(".html", "")
         item["branch"] = re.sub(r"（.*?）$", "", response.xpath("//h1/text()").get("")).strip()
         item["website"] = response.url
