@@ -21,7 +21,10 @@ DETAIL_URL = "https://www.coop.ch/de/unternehmen/standorte-und-oeffnungszeiten/d
 class CoopCHSpider(StructuredDataSpider, CamoufoxSpider):
     name = "coop_ch"
     item_attributes = {"brand": "Coop", "brand_wikidata": "Q432564", "name": "Coop"}
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
+    # DataDome intermittently blocks even a real Camoufox browser request with
+    # a 403 (observed on the very first request of a crawl). A retry with a
+    # fresh page/context usually succeeds, so treat 403 as retryable here.
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"RETRY_HTTP_CODES": [403], "RETRY_TIMES": 5}
     # Every detail page carries the same corporate "Share on Twitter/Facebook"
     # links in its page chrome, not a branch-specific social profile; the
     # Twitter one isn't even a handle, just the "intent/tweet" share URL path.
