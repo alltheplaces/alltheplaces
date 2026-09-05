@@ -123,6 +123,11 @@ class SushiroJPSpider(JSONBlobSpider):
         item["city"] = feature["city_name"]
         item["extras"]["addr:province"] = feature["pref_name"]
         item["country"] = "JP"
+        item["website"] = f"https://www.akindo-sushiro.co.jp/shop/detail.php?id={feature['id']}"
+        item["extras"]["website:menu"] = (
+            f"https://www.akindo-sushiro.co.jp/menu/menu_detail/?s_id={feature['sushipass_id']}"
+        )
+        item["extras"]["website:allergens"] = "https://www.akindo-sushiro.co.jp/menu/allergy.html"
         item["opening_hours"] = self._parse_hours(feature["hours"])
 
         if fax := feature.get("fax"):
@@ -155,18 +160,16 @@ class SushiroJPSpider(JSONBlobSpider):
                 elif tag == "changing_table":
                     apply_yes_no(Extras.BABY_CHANGING_TABLE, item, True)
 
-        # Other skipped fields
+        # Unmapped fields
         #   pref_id       JIS prefecture code
         #   city_id       internal
         #   base_post_id  internal (parent-store link)
-        #   sushipass_id  internal membership-store id
         #   language      constant "0"
         #   category      constant "13"
         #   price_range   cost tier 1-7; no standard OSM tag
         #   access        transport directions; no standard OSM key
         #   result_name   duplicate of name plus a price note
-        #   togo_menu_url / demaecan_url / uber_eats_url
-        #                 takeout/delivery links, empty for most stores
+        #   togo_menu_url / demaecan_url / uber_eats_url   empty for all stores as of 2026-09-05
         #   recruit_url   job/hiring page, not POI data
         #   status        constant "0" (open)
         #   output_flag   constant "1" (shown on site)
