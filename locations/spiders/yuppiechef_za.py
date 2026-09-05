@@ -2,20 +2,21 @@ from typing import AsyncIterator
 
 from scrapy.http import Request
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 
-class YuppiechefZASpider(PlaywrightSpider):
+class YuppiechefZASpider(CamoufoxSpider):
     name = "yuppiechef_za"
     item_attributes = {"brand": "Yuppiechef", "brand_wikidata": "Q24234053"}
     start_urls = ["https://www.yuppiechef.com/store-directory.htm"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
     no_refs = True
-    requires_proxy = "ZA"
+    captcha_selector_indicating_success = '//article[contains(@class, "store-loc-card")]'
+    handle_httpstatus_list = [403]
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
