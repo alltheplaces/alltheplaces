@@ -124,9 +124,9 @@ class SushiroJPSpider(JSONBlobSpider):
         item["extras"]["addr:province"] = feature["pref_name"]
         item["country"] = "JP"
         item["website"] = f"https://www.akindo-sushiro.co.jp/shop/detail.php?id={feature['id']}"
-        item["extras"]["website:menu"] = (
-            f"https://www.akindo-sushiro.co.jp/menu/menu_detail/?s_id={feature['sushipass_id']}"
-        )
+        item["extras"][
+            "website:menu"
+        ] = f"https://www.akindo-sushiro.co.jp/menu/menu_detail/?s_id={feature['sushipass_id']}"
         item["extras"]["website:allergens"] = "https://www.akindo-sushiro.co.jp/menu/allergy.html"
         item["opening_hours"] = self._parse_hours(feature["hours"])
 
