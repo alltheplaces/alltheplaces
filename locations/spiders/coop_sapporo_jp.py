@@ -24,10 +24,11 @@ class CoopSapporoJPSpider(CanlySpider):
         if start_date := feature.get("establishmentDate"):
             item["extras"]["start_date"] = start_date
 
+        apply_category(Categories.SHOP_SUPERMARKET, item)
+
         if feature.get("openStatus") != "IS_ALREADY_OPEN":
-            # Temporarily closed locations (for example, closed for renovation)
-            item["extras"]["disused:shop"] = "supermarket"
-        else:
-            apply_category(Categories.SHOP_SUPERMARKET, item)
+            # API reports these as permanently closed, but they can be closed for
+            # renovation and later reopen in the same place (e.g. 砂川 -> すながわ)
+            item["extras"]["opening_hours"] = "closed"
 
         yield item
