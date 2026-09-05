@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.storefinders.canly import CanlySpider
 
@@ -29,6 +30,9 @@ class CoopSapporoJPSpider(CanlySpider):
         if feature.get("openStatus") != "IS_ALREADY_OPEN":
             # API reports these as permanently closed, but they can be closed for
             # renovation and later reopen in the same place (e.g. 砂川 -> すながわ)
-            item["extras"]["opening_hours"] = "closed"
+            closed_hours = OpeningHours()
+            for day in DAYS_FULL:
+                closed_hours.set_closed(day)
+            item["opening_hours"] = closed_hours
 
         yield item
