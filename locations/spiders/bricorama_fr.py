@@ -18,6 +18,8 @@ class BricoramaFRSpider(CrawlSpider, StructuredDataSpider):
     start_urls = ["https://www.bricorama.fr/magasins?device=mobile"]
     rules = [Rule(LinkExtractor(r"/magasin/[^/]+/(\d+)$"), "parse")]
     wanted_types = ["HomeAndConstructionBusiness"]
+    # Site now blocks plain requests with a Cloudflare 403 on every page, including robots.txt.
+    requires_proxy = "FR"
 
     def pre_process_data(self, ld_data: dict, **kwargs) -> None:
         ld_data["openingHoursSpecification"] = None  # Malformed and out of sync with HTML
