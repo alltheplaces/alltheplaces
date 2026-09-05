@@ -16,15 +16,15 @@ class CoopSapporoJPSpider(CanlySpider):
     api_endpoint = "https://api.site.can-ly.com/v2/directories/91/shops/search"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        # Skip any non-open locations
-        if feature.get("openStatus") != "IS_ALREADY_OPEN":
-            return
-
         item["name"] = feature.get("brand").get("name")
         item["branch"] = feature.get("nameKanji")
         item["extras"]["branch:ja-Hira"] = feature.get("nameKana")
         item["website"] = f"https://map.sapporo.coop/store/detail/{feature.get('storeCode')}/"
 
-        apply_category(Categories.SHOP_SUPERMARKET, item)
+        if feature.get("openStatus") != "IS_ALREADY_OPEN":
+            # Temporarily closed locations (for example, closed for renovation)
+            item["extras"]["disused:shop"] = "supermarket"
+        else:
+            apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
