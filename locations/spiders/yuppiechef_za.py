@@ -21,7 +21,7 @@ class YuppiechefZASpider(CamoufoxSpider):
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
             url=self.start_urls[0],
-            meta={"playwright": True, "playwright_include_page": True},
+            meta={"camoufox": True, "camoufox_include_page": True},
         )
 
     async def parse(self, response):
@@ -34,7 +34,7 @@ class YuppiechefZASpider(CamoufoxSpider):
             item["phone"] = location.xpath('.//a[contains(@href, "tel:")]/@href').get()
             items[name] = item
 
-        page = response.meta["playwright_page"]
+        page = response.meta["camoufox_page"]
 
         buttons = await page.locator('span:text("Store times and info")').all()
         for button in buttons:
