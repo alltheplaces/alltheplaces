@@ -1,26 +1,35 @@
-from json import loads
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
 from scrapy import Selector
-from scrapy.http import Request, Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
-from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class LibroATSpider(AmastyStoreLocatorSpider):
+class LibroATSpider(CrawlSpider, StructuredDataSpider):
     name = "libro_at"
     item_attributes = {"brand": "Libro", "brand_wikidata": "Q1823138"}
-
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(url="https://www.libro.at/rest/V1/mthecom/storelocator/locations")
-
-    def parse(self, response: Response) -> Iterable[Feature]:
-        yield from self.parse_features(loads(response.xpath("/response/text()").get())["items"])
+    requires_proxy = True
+    brands = {
+        "libro": {"brand": "Libro", "brand_wikidata": "Q1823138"},
+        "pagro": {"brand": "Pagro", "brand_wikidata": "Q57550022"},
+    }
+    start_urls = ["https://www.pagro.at/filialfinder"]
+    rules = [
+        Rule(
+            LinkExtractor(
+                allow="/filialfinder/",
+            ),
+            callback="parse_sd",
+        ),
+    ]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    time_format = "%H:%M:%S"
 
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
-        item["ref"], item["street_address"] = item.pop("name").split(": ", 1)
-        item["addr_full"] = clean_address(popup_html.xpath("//span/text()").getall()).removesuffix(", Filiale wählen")
-        item["website"] = f'https://www.libro.at/filialfinder/{item["ref"]}/'
+        item["name"], item["addr_full"] = item.pop("name").split(" Filiale ", 1)
+        item.update(self.brands[item["name"].lower()])
         yield item
