@@ -3,6 +3,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -20,5 +21,6 @@ class PaversGBSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         item["branch"] = response.xpath("//title/text()").get().removeprefix("Pavers Shoes")
         item["addr_full"] = merge_address_lines(response.xpath("//address/div/text()").getall())
+        apply_category(Categories.SHOP_SHOES, item)
 
         yield item
