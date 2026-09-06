@@ -16,7 +16,7 @@ class TgjonesGBSpider(SitemapSpider):
     name = "tgjones_gb"
     item_attributes = {"brand": "TGJones", "brand_wikidata": "Q133575797"}
     allowed_domains = ["tgjonesonline.co.uk"]
-    sitemap_urls = ["https://www.tgjonesonline.co.uk/SiteMap/sitemap-pages.xml"]
+    sitemap_urls = ["https://www.tgjonesonline.co.uk/sitemap/sitemap-pages.xml"]
     sitemap_rules = [(r"/stores/[-\w]+", "parse")]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
@@ -25,7 +25,7 @@ class TgjonesGBSpider(SitemapSpider):
     }
     coordinates_pattern = re.compile(r"google\.maps\.LatLng\(\s*([-\d.]+)[,\s]+([-\d.]+)\s*\)")
     skip_auto_cc_domain = True
-    requires_proxy = True
+    #requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
