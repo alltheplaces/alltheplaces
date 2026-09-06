@@ -211,6 +211,22 @@ def test_till_midnight_formatted_in_other_unusual_formats():
     assert o.as_opening_hours() == "Mo 11:00-24:00"
 
 
+def test_invalid_hour_24_close_time_is_ignored_not_raised():
+    # "24:00" is a valid way of expressing midnight (handled above), but
+    # anything else with hour 24 (e.g. "24:30") isn't a real time and
+    # previously raised out of time.strptime() instead of being treated as
+    # invalid source data.
+    o = OpeningHours()
+    o.add_range("Mo", "10:00", "24:30")
+
+    assert o.as_opening_hours() == ""
+
+    o = OpeningHours()
+    o.add_range("Tu", "10:00:00", "24:30:00", time_format="%H:%M:%S")
+
+    assert o.as_opening_hours() == ""
+
+
 def test_sanitise_days():
     assert sanitise_day("Mo") == "Mo"
     assert sanitise_day("Mon") == "Mo"

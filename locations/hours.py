@@ -1152,6 +1152,14 @@ class OpeningHours:
                 close_time = "23:59"
             if close_time in ("24:00:00", "00:00:00"):
                 close_time = "23:59:00"
+            if re.match(r"^24:(?!00(:00)?$)\d{2}(:\d{2})?$", close_time):
+                # Hour 24 is only a valid representation of midnight at
+                # exactly "24:00" (rewritten above to "23:59"). Anything
+                # else with hour 24 (e.g. "24:30") isn't a real time and
+                # isn't representable as a same-day close time - treat it
+                # as invalid source data rather than crashing in
+                # time.strptime() below.
+                return
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
