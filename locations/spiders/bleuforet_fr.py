@@ -28,6 +28,7 @@ class BleuforetFRSpider(Spider):
     item_attributes = {"brand": "Bleuforêt", "brand_wikidata": "Q2906440"}
     allowed_domains = ["bleuforet.fr"]
     start_urls = ["https://www.bleuforet.fr/fr/magasins"]
+    requires_proxy = "FR"
 
     def parse(self, response: TextResponse) -> Iterable[Request]:
         for href in response.css('a[href*="/fr/magasins/"]::attr(href)').getall():
