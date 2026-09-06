@@ -13,6 +13,10 @@ class MomstouchKRSpider(Spider):
     name = "momstouch_kr"
     item_attributes = {"brand": "맘스터치", "brand_wikidata": "Q23044856"}
     start_urls = ["https://www.momstouch.co.kr/store/inner_shop_list.php?type=area"]
+    requires_proxy = "KR"
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+    }
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for store in response.xpath("//ul/li[dl]"):
@@ -34,8 +38,9 @@ class MomstouchKRSpider(Spider):
             if raw_hours := store.xpath(".//div[dt[contains(text(), '운영시간')]]/dd/text()").get():
                 if match := re.search(r"(\d{1,2}:\d{2})~(\d{1,2}:\d{2})", raw_hours.replace(" ", "")):
                     open_time, close_time = match.groups()
+                    close_time = "23:59" if close_time == "24:00" else close_time.replace("24:", "00:")
                     oh = OpeningHours()
-                    oh.add_days_range(DAYS, open_time, close_time.replace("24:", "00:"), "%H:%M")
+                    oh.add_days_range(DAYS, open_time, close_time, "%H:%M")
                     item["opening_hours"] = oh
 
             apply_category(Categories.FAST_FOOD, item)
