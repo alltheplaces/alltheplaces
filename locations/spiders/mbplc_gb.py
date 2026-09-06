@@ -38,7 +38,7 @@ class MbplcGBSpider(WoosmapSpider):
             "extras": Categories.PUB.value,
         },
         "Castle": {
-            "brand": "Castle", 
+            "brand": "Castle",
             "brand_wikidata": "Q133280052",
             "extras": Categories.PUB.value,
         },
