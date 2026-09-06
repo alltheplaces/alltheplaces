@@ -15,7 +15,7 @@ class FlamingGrillGBSpider(SitemapSpider, StructuredDataSpider):
         "brand": "Flaming Grill",
         "brand_wikidata": "",
     }
-    allowed_domains = ["flamingrillpubs.co.uk"]
+    allowed_domains = ["flaminggrillpubs.co.uk"]
     sitemap_urls = ["https://www.flaminggrillpubs.co.uk/sitemap.xml"]
     sitemap_rules = [(r"\/pubs\/([-\w]+)\/([-\w]+)\/?$", "parse_sd")]
     custom_settings = {"REDIRECT_ENABLED": False, "USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_TIMEOUT": 60}
