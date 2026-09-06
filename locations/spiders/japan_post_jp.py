@@ -4,6 +4,7 @@ from io import StringIO
 from urllib.parse import urlencode
 
 from chompjs import parse_js_object
+from pyproj import Transformer
 from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
@@ -12,6 +13,9 @@ from locations.items import Feature
 
 # determined experimentally. per-type cap (TEMPO/POST). a type reaching this is truncated
 MAX_ITEMS = 1640
+
+# Tokyo (EPSG:4301) -> WGS 84 (EPSG:4326) via EPSG:15484 (Tokyo to WGS 84 (108)).
+TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
 RADIUS_KM = 24
 MIN_RADIUS_M = 1000
 MAP_ID = "search"
@@ -142,6 +146,8 @@ class JapanPostJPSpider(Spider):
             ref = row[1]
             lat = row[2]
             lon = row[3]
+            # raw lat/lon are Tokyo datum (EPSG:4301). convert to WGS 84 (EPSG:4326)
+            wgs84_lat, wgs84_lon = TOKYO_TO_WGS84.transform(float(lat), float(lon))
 
             if row_type == "POST":
                 postcode = row[21]
@@ -150,8 +156,8 @@ class JapanPostJPSpider(Spider):
                 item["ref"] = ref
                 # post detail page is not accessible without `?post=1`
                 item["website"] = f"https://map.japanpost.jp/p/{MAP_ID}/dtl/{ref}/?post=1"
-                item["lat"] = lat
-                item["lon"] = lon
+                item["lat"] = wgs84_lat
+                item["lon"] = wgs84_lon
                 item["postcode"] = postcode
                 item["addr_full"] = addr_full
                 apply_category(Categories.POST_BOX, item)
@@ -174,8 +180,8 @@ class JapanPostJPSpider(Spider):
             item = Feature()
             item["ref"] = ref
             item["website"] = f"https://map.japanpost.jp/p/{MAP_ID}/dtl/{ref}/"
-            item["lat"] = lat
-            item["lon"] = lon
+            item["lat"] = wgs84_lat
+            item["lon"] = wgs84_lon
             item["postcode"] = postcode
             item["addr_full"] = addr_full
             if icon in ("01", "02"):
