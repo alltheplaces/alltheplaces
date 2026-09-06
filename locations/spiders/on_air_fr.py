@@ -1,13 +1,12 @@
 import re
 from typing import Any
-from urllib.parse import parse_qs, urlparse
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
-from locations.items import Feature, set_lat_lon
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 
@@ -42,7 +41,6 @@ class OnAirFRSpider(SitemapSpider):
 
         map_link = response.css(".single_span_icn.map a")
         self.parse_address(item, map_link.css("::text").getall())
-        self.parse_coordinates(item, map_link.attrib.get("href", ""))
 
         if hours_text := " ".join(response.css(".single_span_icn.horaires::text").getall()):
             item["opening_hours"] = self.parse_opening_hours(hours_text)
@@ -69,15 +67,6 @@ class OnAirFRSpider(SitemapSpider):
             item["city"] = postcode_city.group("city")
         else:
             item["addr_full"] = clean_address(lines)
-
-    @staticmethod
-    def parse_coordinates(item: Feature, maps_url: str) -> None:
-        destination = parse_qs(urlparse(maps_url).query).get("destination", [""])[0]
-        try:
-            lat, lon = (float(value) for value in destination.split(","))
-        except ValueError:
-            return
-        set_lat_lon(item, lat, lon)
 
     @classmethod
     def parse_opening_hours(cls, hours_text: str) -> OpeningHours | str:
