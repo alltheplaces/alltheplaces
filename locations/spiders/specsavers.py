@@ -169,4 +169,6 @@ fragment sectionalNotification on StoreSectionalNotification {
                 elif store_type == "audiology":
                     apply_category(Categories.SHOP_HEARING_AIDS, item)
                     item["extras"]["healthcare"] = "audiologist"
+                if not item["name"]:
+                    item["name"] = "Specsavers"
                 yield item
