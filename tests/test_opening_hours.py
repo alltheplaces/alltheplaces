@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from locations.hours import (
     CLOSED_IT,
     DAYS,
@@ -18,6 +20,7 @@ from locations.hours import (
     NAMED_TIMES_IT,
     NAMED_TIMES_RU,
     OpeningHours,
+    _normalise_hour_over_24,
     day_range,
     sanitise_day,
 )
@@ -165,6 +168,48 @@ def test_over_midnight():
     assert (
         o.as_opening_hours() == "Mo 00:00-03:00,07:00-24:00; Tu-Sa 00:00-02:00,07:00-24:00; Su 00:00-02:00,05:00-24:00"
     )
+
+
+def test_over_24_close_hour():
+    o = OpeningHours()
+    o.add_range("Mo", "09:00", "25:00")
+    assert o.as_opening_hours() == "Mo 09:00-24:00; Tu 00:00-01:00"
+
+
+def test_over_24_open_next_day():
+    o = OpeningHours()
+    o.add_range("Mo", "25:00", "27:00")
+    assert o.as_opening_hours() == "Tu 01:00-03:00"
+
+
+def test_over_24_open_close_under_24():
+    o = OpeningHours()
+    o.add_range("Mo", "25:00", "6:00")
+    assert o.as_opening_hours() == "Tu 01:00-06:00"
+
+
+def test_normalise_hour_over_24_under_24():
+    assert _normalise_hour_over_24("09:00") == ("09:00", False)
+
+
+def test_normalise_hour_over_24_exact_24():
+    assert _normalise_hour_over_24("24:00") == ("00:00", True)
+
+
+def test_normalise_hour_over_24_over_24():
+    assert _normalise_hour_over_24("26:30") == ("02:30", True)
+
+
+def test_add_range_time_without_separator_raises():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "25", "26")
+
+
+def test_add_range_time_with_non_numeric_hour_raises():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "ab:00", "10:00")
 
 
 def test_till_midnight():
