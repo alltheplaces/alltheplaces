@@ -1,11 +1,11 @@
 from typing import Any
-from scrapy.spiders import SitemapSpider
 
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import merge_address_lines
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
+
 
 class PaversGBSpider(SitemapSpider):
     name = "pavers_gb"
