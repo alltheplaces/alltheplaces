@@ -155,7 +155,6 @@ class JapanPostJPSpider(Spider):
                 item["postcode"] = postcode
                 item["addr_full"] = addr_full
                 apply_category(Categories.POST_BOX, item)
-                item["name"] = "ポスト"
                 yield item
                 continue
 
