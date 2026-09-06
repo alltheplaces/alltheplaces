@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from locations.hours import (
     CLOSED_IT,
     DAYS,
@@ -186,12 +188,28 @@ def test_over_24_open_close_under_24():
     assert o.as_opening_hours() == "Tu 01:00-06:00"
 
 
-def test_normalise_hour_over_24_without_separator():
-    assert _normalise_hour_over_24("25") == ("25", False)
+def test_normalise_hour_over_24_under_24():
+    assert _normalise_hour_over_24("09:00") == ("09:00", False)
 
 
-def test_normalise_hour_over_24_non_numeric_hour():
-    assert _normalise_hour_over_24("ab:00") == ("ab:00", False)
+def test_normalise_hour_over_24_exact_24():
+    assert _normalise_hour_over_24("24:00") == ("00:00", True)
+
+
+def test_normalise_hour_over_24_over_24():
+    assert _normalise_hour_over_24("26:30") == ("02:30", True)
+
+
+def test_add_range_time_without_separator_raises():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "25", "26")
+
+
+def test_add_range_time_with_non_numeric_hour_raises():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "ab:00", "10:00")
 
 
 def test_till_midnight():
