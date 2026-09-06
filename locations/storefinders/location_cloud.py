@@ -38,7 +38,7 @@ class LocationCloudSpider(Spider):
             item["addr_full"] = location.get("address_name")
             item["postcode"] = location.get("postal_code")
 
-            if type(self).parse_detail_page is not LocationCloudSpider.parse_detail_page:
+            if self._has_parse_detail_page_override():
                 yield Request(
                     item["website"],
                     callback=self._parse_detail_page,
@@ -50,12 +50,17 @@ class LocationCloudSpider(Spider):
         if data["count"]["offset"] + data["count"]["limit"] < data["count"]["total"]:
             yield self._get_page(data["count"]["limit"] + response.meta["offset"])
 
+    def _has_parse_detail_page_override(self) -> bool:
+        return type(self).parse_detail_page is not LocationCloudSpider.parse_detail_page
+
     def _parse_detail_page(self, response: Response, item: Feature, source_feature: dict) -> Iterable[Feature]:
         for parsed in self.parse_detail_page(response, item, source_feature):
             yield from self.post_process_feature(parsed, source_feature)
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
+        """Override with any pre-processing on the item."""
         yield item
 
-    def parse_detail_page(self, response: Response, item: Feature, source_feature: dict):
-        pass
+    def parse_detail_page(self, response: Response, item: Feature, source_feature: dict) -> Iterable[Feature]:
+        """Override with any pre-processing on the item."""
+        yield item

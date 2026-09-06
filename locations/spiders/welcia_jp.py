@@ -531,7 +531,7 @@ class WelciaJPSpider(LocationCloudSpider):
             item["phone"] = f"+81 {phone}"
 
         if postal_code := source_feature.get("postal_code"):
-            self._apply_postal_address(item, postal_code)
+            self.apply_postal_address(item, postal_code)
 
         brand = BRANDS.get(source_feature["categories"][0]["code"])
         if brand is None:
@@ -550,14 +550,15 @@ class WelciaJPSpider(LocationCloudSpider):
         else:
             apply_category(Categories.SHOP_CHEMIST, item)
 
-        self._apply_branch_and_ruby(item, source_feature, brand)
+        self.apply_branch_and_ruby(item, source_feature, brand)
 
         if branch := item.get("branch"):
             item["branch"] = branch.removesuffix(" (調剤薬局)").removesuffix("(調剤薬局)").strip()
 
         yield item
 
-    def _apply_postal_address(self, item: Feature, postal_code: str) -> None:
+    @staticmethod
+    def apply_postal_address(item: Feature, postal_code: str) -> None:
         if region := POSTAL_LOOKUP.get(postal_code):
             item["extras"]["addr:province"] = region["province:ja"]
             item["city"] = region["city:ja"]
@@ -566,7 +567,8 @@ class WelciaJPSpider(LocationCloudSpider):
             elif neighbourhood := region.get("neighbourhood:ja"):
                 item["extras"]["addr:neighbourhood"] = neighbourhood
 
-    def _apply_branch_and_ruby(self, item: Feature, source_feature: dict, brand: dict) -> None:
+    @staticmethod
+    def apply_branch_and_ruby(item: Feature, source_feature: dict, brand: dict) -> None:
         if name := source_feature.get("name"):
             item["branch"] = name
             for prefix in brand.get("branch_prefixes", []):
