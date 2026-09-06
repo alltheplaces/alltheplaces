@@ -37,7 +37,11 @@ class MbplcGBSpider(WoosmapSpider):
             "brand_wikidata": "",
             "extras": Categories.PUB.value,
         },
-        "Castle": {"brand": "Castle", "brand_wikidata": "Q133280052"},
+        "Castle": {
+            "brand": "Castle", 
+            "brand_wikidata": "Q133280052",
+            "extras": Categories.PUB.value,
+        },
         "EGO Mediterranean": {"brand": "Ego", "brand_wikidata": "Q133279746"},
         "Orleans Smokehouse": {
             "brand": "Orleans Smokehouse",
