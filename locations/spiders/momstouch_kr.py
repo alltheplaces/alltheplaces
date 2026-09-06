@@ -7,15 +7,17 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class MomstouchKRSpider(Spider):
     name = "momstouch_kr"
     item_attributes = {"brand": "맘스터치", "brand_wikidata": "Q23044856"}
     start_urls = ["https://www.momstouch.co.kr/store/inner_shop_list.php?type=area"]
-    requires_proxy = "KR"
     custom_settings = {
+        "DOWNLOAD_TIMEOUT": 60,
         "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
