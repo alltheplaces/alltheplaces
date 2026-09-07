@@ -11,10 +11,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class FlamingGrillGBSpider(SitemapSpider, StructuredDataSpider):
     name = "flaming_grill_gb"
-    item_attributes = {
-        "brand": "Flaming Grill",
-        "brand_wikidata": "",
-    }
+    item_attributes = {"brand": "Flaming Grill"}
     allowed_domains = ["flaminggrillpubs.co.uk"]
     sitemap_urls = ["https://www.flaminggrillpubs.co.uk/sitemap.xml"]
     sitemap_rules = [(r"\/pubs\/([-\w]+)\/([-\w]+)\/?$", "parse_sd")]
