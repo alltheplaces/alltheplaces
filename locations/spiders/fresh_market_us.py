@@ -17,6 +17,8 @@ class FreshMarketUSSpider(JSONBlobSpider):
         feature.update(feature.pop("attributes", {}))
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if feature["store_status_name"] == "Inactive":
+            return
         item["street_address"] = item.pop("addr_full", None)
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
