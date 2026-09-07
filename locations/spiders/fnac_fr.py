@@ -65,12 +65,16 @@ class FnacFRSpider(scrapy.Spider):
             oh = OpeningHours()
             for day in store.get("Timetables") or []:
                 day_code = DAYS_FR.get(day["DayOfWeek"].capitalize())
+                if not day_code:
+                    continue
                 # Some stores close for lunch, giving two ranges in one string with no
                 # separator, e.g. "09:30 - 12:30 14:00 - 19:00".
                 times = re.findall(r"\d{1,2}:\d{2}", day.get("OpeningPeriods") or "")
-                if day_code:
-                    for open_time, close_time in zip(times[0::2], times[1::2]):
-                        oh.add_range(day_code, open_time, close_time)
+                if len(times) % 2:
+                    self.logger.warning("Skipping malformed opening periods for %s", store["EAGId"])
+                    continue
+                for open_time, close_time in zip(times[0::2], times[1::2], strict=True):
+                    oh.add_range(day_code, open_time, close_time)
             item["opening_hours"] = oh
 
             if url:
