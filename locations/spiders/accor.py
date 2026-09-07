@@ -1,7 +1,12 @@
 from typing import ClassVar
 
-from locations.categories import Categories, apply_category
+from scrapy import Request
+from scrapy.http import Response
+
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.country_utils import get_locale
+from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 from locations.storefinders.woosmap import WoosmapSpider
 
 
@@ -98,6 +103,25 @@ class AccorSpider(WoosmapSpider):
         # "TST": 6,
     }
 
+    # Woosmap "tags" that map cleanly onto an OSM extras tag. Absence of a
+    # tag is not treated as a "no" since Woosmap's tagging is not known to
+    # be exhaustive (apply_yes_no's default apply_positive_only=True skips
+    # the negative case for us).
+    TAG_EXTRAS: ClassVar[dict[str, Extras]] = {
+        "wifi": Extras.WIFI,
+        "air_conditioning": Extras.AIR_CONDITIONING,
+        "parking": Extras.PARKING,
+        "wheelchair_access": Extras.WHEELCHAIR,
+        "pool": Extras.SWIMMING_POOL,
+        "pet": Extras.PETS_ALLOWED,
+    }
+    # Named entries in a hotel page's schema.org amenityFeature list that map
+    # onto an OSM extras tag.
+    AMENITY_EXTRAS: ClassVar[dict[str, Extras]] = {
+        "Bar": Extras.BAR,
+        "Breakfast": Extras.BREAKFAST,
+    }
+
     def parse_item(self, item, feature, **kwargs):
         if "COMING SOON" in item["name"].upper():
             return
@@ -110,8 +134,30 @@ class AccorSpider(WoosmapSpider):
         item["website"] = (
             f"https://all.accor.com/hotel/{item['ref']}/index.{self.website_language(item['country'])}.shtml"
         )
+
+        if stars := feature["properties"]["user_properties"].get("localRating"):
+            item["extras"]["stars"] = str(stars).removesuffix(".0")
+
+        tags = feature["properties"].get("tags", [])
+        for tag, extra in self.TAG_EXTRAS.items():
+            apply_yes_no(extra, item, tag in tags)
+        if "non_smoking" in tags:
+            # Explicitly asserted by the source, unlike the tags above whose
+            # absence doesn't tell us anything either way.
+            apply_yes_no(Extras.SMOKING, item, False, apply_positive_only=False)
+
         apply_category(Categories.HOTEL, item)
-        yield item
+
+        # Phone, email and a couple of amenities are only available on the
+        # hotel's own page, not in the Woosmap feed, so fetch it too. Always
+        # use the English page for this regardless of item["website"]'s
+        # language: phone/email don't vary by language, but the amenity
+        # names we match on (self.AMENITY_EXTRAS) are translated on other
+        # locales, e.g. "Breakfast" becomes "Petit-déjeuner" on the French
+        # page. Fall back to yielding what we already have if the request
+        # fails.
+        detail_url = f"https://all.accor.com/hotel/{item['ref']}/index.en.shtml"
+        yield Request(detail_url, callback=self.parse_hotel_page, cb_kwargs={"item": item}, errback=self.failed)
 
     def website_language(self, country: str | None) -> str:
         language = self.WEBSITE_LANGUAGE_OVERRIDES.get(country)
@@ -119,3 +165,17 @@ class AccorSpider(WoosmapSpider):
             locale = get_locale(country)
             language = locale.split("-")[0] if locale else None
         return language if language in self.SUPPORTED_WEBSITE_LANGUAGES else "en"
+
+    def parse_hotel_page(self, response: Response, item: Feature):
+        if ld := LinkedDataParser.find_linked_data(response, "Hotel"):
+            if phone := LinkedDataParser.get_case_insensitive(ld, "telephone"):
+                item["phone"] = phone
+            if email := LinkedDataParser.get_case_insensitive(ld, "email"):
+                item["email"] = email
+            amenities = {a.get("name") for a in ld.get("amenityFeature") or [] if str(a.get("value")).lower() == "true"}
+            for name, extra in self.AMENITY_EXTRAS.items():
+                apply_yes_no(extra, item, name in amenities)
+        yield item
+
+    def failed(self, failure):
+        yield failure.request.cb_kwargs["item"]
