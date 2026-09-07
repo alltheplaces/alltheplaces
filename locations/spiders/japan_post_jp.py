@@ -108,8 +108,8 @@ class JapanPostJPSpider(Spider):
 
     async def start(self):
         radius_m = RADIUS_KM * 1000
-        for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
-            yield self.make_request(lat, lon, radius_m, source="grid")
+        for i, (lat, lon) in enumerate(country_iseadgg_centroids("JP", RADIUS_KM)):
+            yield self.make_request(lat, lon, radius_m, source=f"grid-{i}")
 
     def parse(
         self,
