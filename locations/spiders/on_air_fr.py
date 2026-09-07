@@ -5,6 +5,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.hours import DAYS, DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -45,6 +46,7 @@ class OnAirFRSpider(SitemapSpider):
         if hours_text := " ".join(response.css(".single_span_icn.horaires::text").getall()):
             item["opening_hours"] = self.parse_opening_hours(hours_text)
 
+        extract_google_position(item, response)
         apply_category(Categories.GYM, item)
 
         yield item
