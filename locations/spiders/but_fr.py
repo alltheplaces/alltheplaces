@@ -33,7 +33,7 @@ REGION_INDEX_PAGES = [
 
 class ButFRSpider(CrawlSpider, StructuredDataSpider):
     name = "but_fr"
-    item_attributes = {"brand": "But", "brand_wikidata": "Q2877537"}
+    item_attributes = {"brand": "But", "brand_wikidata": "Q2877537", "name": "But"}
     start_urls = [f"https://www.but.fr/magasins/{page}.html" for page in REGION_INDEX_PAGES]
     rules = [Rule(LinkExtractor(allow=r"/magasins/\d+/"), callback="parse_item", process_request="use_zyte_browser")]
     # Source gives hours as "10h00"/"09h30", not "10:00"/"09:30".
@@ -72,12 +72,9 @@ class ButFRSpider(CrawlSpider, StructuredDataSpider):
                 yield retry
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs):
-        # Both the JSON-LD address and "name" are generated from a URL-safe slug, not the real
-        # text: spaces become hyphens and accents/apostrophes are dropped (e.g. "l'Auge" ->
-        # "l-Auge", "Créteil" -> "Creteil", "Mantes-la-jolie - Buchelay" -> the misleading
-        # triple-hyphen "Mantes-la-jolie---Buchelay"). Visible page text is unaffected, so
-        # street/city/branch are all read from there instead; postcode/country are fine as
-        # parsed from the JSON-LD.
+        # JSON-LD address/name are generated from a URL slug, not the real text (spaces become
+        # hyphens, accents/apostrophes drop) - street/city/branch are read from visible text
+        # instead; postcode/country are fine as parsed from the JSON-LD.
         lines = response.css("div.shop-address div.address p::text").getall()
         if len(lines) == 2:
             item["street_address"] = lines[0].strip()
