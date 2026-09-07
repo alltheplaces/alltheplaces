@@ -25,7 +25,7 @@ class BriocheDoreeFRSpider(JSONBlobSpider):
         item["opening_hours"] = OpeningHours()
         for day in location.get("opening_hours", []):
             n_day = day.get("day")
-            if n_day is not None and n_day>0 and n_day < 8:
+            if n_day is not None and n_day > 0 and n_day < 8:
                 day_of_week = DAYS[day.get("day") - 1]
                 if day["is_closed"]:
                     item["opening_hours"].set_closed(day_of_week)
