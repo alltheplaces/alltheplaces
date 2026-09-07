@@ -6,7 +6,7 @@ from locations.hours import OpeningHours, DAYS
 
 
 
-class BriocheDoreeFrSpider(JSONBlobSpider):
+class BriocheDoreeFRSpider(JSONBlobSpider):
     name = "brioche_doree_fr"
     item_attributes = {
         "brand": "Brioche Dorée",
@@ -17,8 +17,7 @@ class BriocheDoreeFrSpider(JSONBlobSpider):
     locations_key = "stores"
 
     def post_process_item(self, item, response, location):
-        # apply_category(Categories.SHOP_XYZ, item)
-        print(location)
+        apply_category(Categories.SHOP_BAKERY, item)
         item["branch"] = item.pop("name", "")
 
         match = re.search(r"\b\d{4,5}\b", location.get("address"))
