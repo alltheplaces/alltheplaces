@@ -182,6 +182,7 @@ class JapanPostJPSpider(Spider):
                 item["addr_full"] = addr_full
 
                 apply_category(Categories.POST_BOX, item)
+                item["operator_wikidata"] = "Q11509260"
                 yield item
                 continue
 
