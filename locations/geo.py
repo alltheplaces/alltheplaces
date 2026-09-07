@@ -15,6 +15,8 @@ from locations.searchable_points import get_searchable_points_path, open_searcha
 EARTH_RADIUS = 6378.1
 # Kilometers per mile
 MILES_TO_KILOMETERS = 1.60934
+# Kilometers per degree of latitude, derived from the Earth's radius
+KILOMETERS_PER_DEGREE_LATITUDE = EARTH_RADIUS * math.pi / 180
 
 
 def vincenty_distance(lat: float, lon: float, distance_km: float, bearing_deg: float) -> tuple[float, float]:

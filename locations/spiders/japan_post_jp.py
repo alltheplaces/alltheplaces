@@ -6,9 +6,10 @@ from urllib.parse import urlencode
 from chompjs import parse_js_object
 from pyproj import Transformer
 from scrapy import Request, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.geo import city_locations, country_iseadgg_centroids
+from locations.geo import KILOMETERS_PER_DEGREE_LATITUDE, city_locations, country_iseadgg_centroids
 from locations.items import Feature
 
 # determined experimentally. per-type cap (TEMPO/POST). a type reaching this is truncated
@@ -24,7 +25,17 @@ MAP_ID = "search"
 class JapanPostJPSpider(Spider):
     name = "japan_post_jp"
 
-    def make_request(self, lat, lon, radius, offset=1, count=900, tempo_count=0, post_count=0, source=""):
+    def make_request(
+        self,
+        lat: float,
+        lon: float,
+        radius: float,
+        offset: int = 1,
+        count: int = 900,
+        tempo_count: int = 0,
+        post_count: int = 0,
+        source: str = "",
+    ):
         params = {
             "cid": MAP_ID,
             "postcid": "searchPO",
@@ -64,41 +75,39 @@ class JapanPostJPSpider(Spider):
             },
         )
 
-    def _subdivide(self, lat, lon, radius, source):
-        # Replace a truncated circle (center lat/lon, radius m) with 4 smaller
-        # circles whose union covers the original. Only used for the city-5.5 pass
-        # and only ONE level: children keep source "city-5.5-sub-<quadrant>", which
-        # never matches the "city-5.5" trigger, so they are not subdivided again.
-        #
-        # source is always hyphen-delimited, e.g. grid-24, city-5.5, city-5.5-sub-NW,
-        # so it splits cleanly for later analysis.
-        #
-        # Covering math: the parent disk (radius R) sits inside its bounding square
-        # of side 2R. Put one child at each quadrant centre, i.e. offset by R/2 in
-        # latitude and R/2 in longitude. The farthest corner of a quadrant from its
-        # centre is the half-diagonal sqrt((R/2)^2+(R/2)^2) = R*sqrt(2)/2, so a child
-        # of that radius covers its whole quadrant exactly. The 4 quadrants tile the
-        # bounding square, therefore union(4 children) = bounding square, which fully
-        # contains the parent circle. No point is missed.
-        #
-        # metre offsets -> degrees: 1 deg latitude ~ 111320 m, and a degree of
-        # longitude shrinks by cos(lat), so the R/2 offset in each axis is:
-        #   dlat = (R/2) / 111320              (degrees of latitude)
-        #   dlon = (R/2) / (111320 * cos(lat)) (degrees of longitude)
-        # sub_radius = R*sqrt(2)/2             (child radius, still in metres)
-        if radius <= MIN_RADIUS_M:
-            self.logger.warning(f"cannot subdivide below {MIN_RADIUS_M}m at {lat},{lon}")
+    def _child_circles(
+        self, lat_parent: float, lon_parent: float, radius_parent: float
+    ) -> list[tuple[float, float, float, str]]:
+        """
+        Return the 4 child circles to fully cover a parent circle of the given radius.
+
+        Each child is offset from the parent center by half the parent radius in latitude and in
+        longitude, and its radius is the distance to the half-diagonal. The four quadrants tile the
+        square around the parent circle, so the children cover it completely.
+        """
+        lat_child = (radius_parent / 2 / 1000) / KILOMETERS_PER_DEGREE_LATITUDE
+        lon_child = (radius_parent / 2 / 1000) / (KILOMETERS_PER_DEGREE_LATITUDE * math.cos(math.radians(lat_parent)))
+        radius_child = radius_parent * math.sqrt(2) / 2
+        return [
+            (lat_parent + lat_child, lon_parent + lon_child, radius_child, "NW"),
+            (lat_parent + lat_child, lon_parent - lon_child, radius_child, "NE"),
+            (lat_parent - lat_child, lon_parent + lon_child, radius_child, "SW"),
+            (lat_parent - lat_child, lon_parent - lon_child, radius_child, "SE"),
+        ]
+
+    def _subdivide(self, lat_parent: float, lon_parent: float, radius_parent: float, source: str):
+        # Request layer: split a truncated circle into 4 children and issue their
+        # queries. Only used for the city-5.5 pass and only ONE level: children keep
+        # source "city-5.5-sub-<quadrant>", which never matches the "city-5.5" trigger,
+        # so they are not subdivided again. source is always hyphen-delimited, so it
+        # splits cleanly for later analysis.
+        if radius_parent <= MIN_RADIUS_M:
+            self.logger.warning(f"cannot subdivide below {MIN_RADIUS_M}m at {lat_parent},{lon_parent}")
             return
-        dlat = (radius / 2) / 111320.0
-        dlon = (radius / 2) / (111320.0 * math.cos(math.radians(lat)))
-        sub_radius = radius * math.sqrt(2) / 2
-        for quadrant, d1, d2 in (
-            ("NW", dlat, dlon),
-            ("NE", dlat, -dlon),
-            ("SW", -dlat, dlon),
-            ("SE", -dlat, -dlon),
+        for center_child_lat, center_child_lon, radius_child, quadrant in self._child_circles(
+            lat_parent, lon_parent, radius_parent
         ):
-            yield self.make_request(lat + d1, lon + d2, sub_radius, source=f"{source}-sub-{quadrant}")
+            yield self.make_request(center_child_lat, center_child_lon, radius_child, source=f"{source}-sub-{quadrant}")
 
     async def start(self):
         radius_m = RADIUS_KM * 1000
@@ -107,7 +116,18 @@ class JapanPostJPSpider(Spider):
         for city in city_locations("JP", 200000):
             yield self.make_request(city["latitude"], city["longitude"], 5500, source="city-5.5")
 
-    def parse(self, response, lat, lon, radius, offset, count=900, tempo_count=0, post_count=0, source=""):
+    def parse(
+        self,
+        response: Response,
+        lat: float,
+        lon: float,
+        radius: float,
+        offset: int,
+        count=900,
+        tempo_count=0,
+        post_count=0,
+        source="",
+    ):
         # response is an EUC-encoded JS file that looks like
         #   ZdcEmapHttpResult[1] = '...';
         # where the string body is a TSV
@@ -144,10 +164,10 @@ class JapanPostJPSpider(Spider):
         for row in rows:
             row_type = row[0]
             ref = row[1]
-            lat = row[2]
-            lon = row[3]
+            lat = float(row[2])
+            lon = float(row[3])
             # raw lat/lon are Tokyo datum (EPSG:4301). convert to WGS 84 (EPSG:4326)
-            wgs84_lat, wgs84_lon = TOKYO_TO_WGS84.transform(float(lat), float(lon))
+            wgs84_lat, wgs84_lon = TOKYO_TO_WGS84.transform(lat, lon)
 
             if row_type == "POST":
                 postcode = row[21]
@@ -160,6 +180,7 @@ class JapanPostJPSpider(Spider):
                 item["lon"] = wgs84_lon
                 item["postcode"] = postcode
                 item["addr_full"] = addr_full
+
                 apply_category(Categories.POST_BOX, item)
                 yield item
                 continue
