@@ -1,21 +1,22 @@
 import re
+from typing import Iterable
+
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class BriocheDoreeFRSpider(JSONBlobSpider):
     name = "brioche_doree_fr"
-    item_attributes = {
-        "brand": "Brioche Dorée",
-        "brand_wikidata": "Q2925606",
-    }
+    item_attributes = {"brand": "Brioche Dorée", "brand_wikidata": "Q2925606"}
     start_urls = ["https://www.briochedoree.fr/api/stores"]
 
     locations_key = "stores"
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         apply_category(Categories.SHOP_BAKERY, item)
         item["branch"] = item.pop("name", "")
 
