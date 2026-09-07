@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class BanquePalatineFRSpider(CrawlSpider, StructuredDataSpider):
     name = "banque_palatine_fr"
     item_attributes = {
-        "brand": "Q2883429",
+        "brand": "Banque Palatine",
         "brand_wikidata": "Q2883429",
     }
     allowed_domains = ["agences.palatine.fr"]
