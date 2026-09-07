@@ -24,13 +24,17 @@ class BriocheDoreeFRSpider(JSONBlobSpider):
         item["postcode"] = match.group().zfill(5) if match else None
 
         item["opening_hours"] = OpeningHours()
-        for day in location.get("opening_hours"):
-            day_of_week = DAYS[day.get("day") - 1]
-            if day["is_closed"]:
-                item["opening_hours"].set_closed(day_of_week)
-            elif day.get("open") == day.get("close"):
-                item["opening_hours"].add_range(day_of_week, day.get("open"), "24:00")
-            else:
-                item["opening_hours"].add_range(day_of_week, day.get("open"), day.get("close"))
+        for day in location.get("opening_hours", []):
+            n_day = day.get("day")
+            if n_day is not None and n_day>0 and n_day < 8:
+                day_of_week = DAYS[day.get("day") - 1]
+                if day["is_closed"]:
+                    item["opening_hours"].set_closed(day_of_week)
+                else:
+                    if day.get("open") is not None and day.get("close") is not None:
+                        if day.get("open") == day.get("close"):
+                            item["opening_hours"].add_range(day_of_week, day.get("open"), "24:00")
+                        else:
+                            item["opening_hours"].add_range(day_of_week, day.get("open"), day.get("close"))
 
         yield item
