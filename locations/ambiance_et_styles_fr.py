@@ -1,4 +1,5 @@
 from typing import Iterable
+
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
@@ -19,6 +20,6 @@ class AmbianceEtStylesFRSpider(SitemapSpider, StructuredDataSpider):
         if item.get("facebook") == "https://www.facebook.com/ambianceetstyles":
             item["facebook"] = None
         item["branch"] = item.pop("name").removeprefix("Ambiance & Styles ")
-        
+
         apply_category(Categories.SHOP_INTERIOR_DECORATION, item)
         yield item
