@@ -1,7 +1,6 @@
 import re
 
 from locations.categories import Categories, apply_category
-
 from locations.hours import DAYS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -20,7 +19,7 @@ class BriocheDoreeFRSpider(JSONBlobSpider):
         apply_category(Categories.SHOP_BAKERY, item)
         item["branch"] = item.pop("name", "")
 
-        match = re.search(r"\b\d{4,5}$", location.get("address",""))
+        match = re.search(r"\b\d{4,5}$", location.get("address", ""))
         item["postcode"] = match.group().zfill(5) if match else None
 
         item["opening_hours"] = OpeningHours()
