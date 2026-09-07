@@ -34,6 +34,7 @@ REGION_INDEX_PAGES = [
 class ButFRSpider(CrawlSpider, StructuredDataSpider):
     name = "but_fr"
     item_attributes = {"brand": "But", "brand_wikidata": "Q2877537", "name": "But"}
+    allowed_domains = ["but.fr"]
     start_urls = [f"https://www.but.fr/magasins/{page}.html" for page in REGION_INDEX_PAGES]
     rules = [Rule(LinkExtractor(allow=r"/magasins/\d+/"), callback="parse_item", process_request="use_zyte_browser")]
     # Source gives hours as "10h00"/"09h30", not "10:00"/"09:30".
