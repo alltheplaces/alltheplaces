@@ -172,7 +172,12 @@ class AccorSpider(WoosmapSpider):
                 item["phone"] = phone
             if email := LinkedDataParser.get_case_insensitive(ld, "email"):
                 item["email"] = email
-            amenities = {a.get("name") for a in ld.get("amenityFeature") or [] if str(a.get("value")).lower() == "true"}
+            amenity_features = ld.get("amenityFeature") or []
+            if isinstance(amenity_features, dict):
+                # schema.org allows a single-valued multi-value property to
+                # be serialised as a lone object instead of a one-item list.
+                amenity_features = [amenity_features]
+            amenities = {a.get("name") for a in amenity_features if str(a.get("value")).lower() == "true"}
             for name, extra in self.AMENITY_EXTRAS.items():
                 apply_yes_no(extra, item, name in amenities)
         yield item
