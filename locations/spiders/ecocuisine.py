@@ -44,9 +44,7 @@ class AmbianceEtStylesFRSpider(SitemapSpider, StructuredDataSpider):
     def parse_hours(self, response: TextResponse) -> OpeningHours:
         oh = OpeningHours()
 
-        rows = response.xpath(
-            '//*[contains(text(),"Horaires d\'ouverture")]/following-sibling::ul[1]/li'
-        )
+        rows = response.xpath('//*[contains(text(),"Horaires d\'ouverture")]/following-sibling::ul[1]/li')
 
         for row in rows:
             text = " ".join(row.xpath(".//text()").getall())
