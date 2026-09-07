@@ -1,8 +1,8 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class BanquePalatineFRSpider(CrawlSpider, StructuredDataSpider):
@@ -23,12 +23,11 @@ class BanquePalatineFRSpider(CrawlSpider, StructuredDataSpider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
     drop_attributes = ["image"]
 
-
     def post_process_item(self, item, response, ld_data):
         apply_category(Categories.BANK, item)
-        if item.get("email","") == "contact@palatine.fr":
+        if item.get("email", "") == "contact@palatine.fr":
             item.pop("email")
 
         item["branch"] = item.pop("name", "")
-        
+
         yield item
