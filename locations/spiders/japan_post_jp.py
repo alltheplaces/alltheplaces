@@ -9,7 +9,7 @@ from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.geo import KILOMETERS_PER_DEGREE_LATITUDE, city_locations, country_iseadgg_centroids
+from locations.geo import KILOMETERS_PER_DEGREE_LATITUDE, country_iseadgg_centroids
 from locations.items import Feature
 
 # determined experimentally. per-type cap (TEMPO/POST). a type reaching this is truncated
@@ -96,25 +96,20 @@ class JapanPostJPSpider(Spider):
         ]
 
     def _subdivide(self, lat_parent: float, lon_parent: float, radius_parent: float, source: str):
-        # Request layer: split a truncated circle into 4 children and issue their
-        # queries. Only used for the city-5.5 pass and only ONE level: children keep
-        # source "city-5.5-sub-<quadrant>", which never matches the "city-5.5" trigger,
-        # so they are not subdivided again. source is always hyphen-delimited, so it
-        # splits cleanly for later analysis.
+        # Split a truncated circle into 4 children and issue their queries.
+        # Children keep source "<parent>-<quadrant>" and are recursively subdivided until no child is truncated.
         if radius_parent <= MIN_RADIUS_M:
             self.logger.warning(f"cannot subdivide below {MIN_RADIUS_M}m at {lat_parent},{lon_parent}")
             return
         for center_child_lat, center_child_lon, radius_child, quadrant in self._child_circles(
             lat_parent, lon_parent, radius_parent
         ):
-            yield self.make_request(center_child_lat, center_child_lon, radius_child, source=f"{source}-sub-{quadrant}")
+            yield self.make_request(center_child_lat, center_child_lon, radius_child, source=f"{source}-{quadrant}")
 
     async def start(self):
         radius_m = RADIUS_KM * 1000
         for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
-            yield self.make_request(lat, lon, radius_m, source="grid-24")
-        for city in city_locations("JP", 200000):
-            yield self.make_request(city["latitude"], city["longitude"], 5500, source="city-5.5")
+            yield self.make_request(lat, lon, radius_m, source="grid")
 
     def parse(
         self,
@@ -149,11 +144,10 @@ class JapanPostJPSpider(Spider):
             f"Query (source={source}, lat={lat}, lon={lon}, radius={radius}, page={page}, offset={offset}, rec={rec_count}, hit={hit_count}, tempo={tempo_total}, post={post_total})"
         )
         if tempo_total >= MAX_ITEMS or post_total >= MAX_ITEMS:
-            self.logger.warning(
-                f"Maximum number of items returned in one query, consider lowering the radius  (source={source})"
+            self.logger.info(
+                f"Maximum number of items {MAX_ITEMS} returned in one query, subdividing into small circles (source={source})"
             )
-            if source == "city-5.5":
-                yield from self._subdivide(lat, lon, radius, source)
+            yield from self._subdivide(lat, lon, radius, source)
             return
 
         if offset + rec_count < hit_count:
