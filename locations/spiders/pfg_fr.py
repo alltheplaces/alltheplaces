@@ -35,6 +35,7 @@ class PfgFRSpider(SitemapSpider, StructuredDataSpider):
 
         # address.addressLocality/addressRegion are lowercase, unaccented slugs; the breadcrumb has clean names.
         item.pop("state", None)
+        item.pop("city", None)
         if breadcrumbs := LinkedDataParser.find_linked_data(response, "BreadcrumbList"):
             for crumb in breadcrumbs.get("itemListElement", []):
                 if crumb.get("position") == 3:
