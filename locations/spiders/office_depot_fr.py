@@ -1,8 +1,8 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class OfficeDepotFRSpider(CrawlSpider, StructuredDataSpider):
