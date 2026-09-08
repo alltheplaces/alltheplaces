@@ -38,7 +38,7 @@ class BuffaloGrillFRSpider(SitemapSpider, StructuredDataSpider):
         item["branch"] = item.pop("name")
         item["opening_hours"] = self.parse_opening_hours(response)
         item["website"] = response.url
-        item["extras"]["@source_uri"] = response.url
+        item["ref"] = response.xpath("//@data-restaurant").get()
 
         apply_category(Categories.RESTAURANT, item)
         yield item
