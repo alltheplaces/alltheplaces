@@ -1,7 +1,11 @@
+from typing import Iterable
+
 import chompjs
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -11,20 +15,17 @@ class QuickFRSpider(JSONBlobSpider):
     allowed_domains = ["www.quick.fr"]
     start_urls = ["https://www.quick.fr/restaurants"]
 
-    def extract_json(self, response):
-        data = chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]//text()').get())["props"][
+    def extract_json(self, response: TextResponse) -> dict | list[dict]:
+        for d in chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]//text()').get())["props"][
             "pageProps"
-        ]["dehydratedState"]["queries"]
-
-        for d in data:
+        ]["dehydratedState"]["queries"]:
             if "restaurants" in d["queryKey"]:
                 return d["state"]["data"]
 
     def pre_process_data(self, feature: dict):
         feature.update(feature["attributes"])
 
-    def post_process_item(self, item, response, location):
-        item["country"] = "FR"
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", "")
         item["website"] = "https://www.quick.fr/restaurants/" + location["slug"]
 
