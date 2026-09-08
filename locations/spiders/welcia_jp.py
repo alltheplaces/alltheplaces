@@ -304,7 +304,7 @@ from collections.abc import Iterable
 
 from chompjs import parse_js_object
 
-from locations.categories import Categories, Drink, Extras, PaymentMethods, apply_category, apply_yes_no
+from locations.categories import Categories, Drink, Extras, PaymentMethods, Sells, apply_category, apply_yes_no
 from locations.geo import postal_regions
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
@@ -619,7 +619,8 @@ class WelciaJPSpider(LocationCloudSpider):
         detail_json = parse_js_object(blob.split("var spotDetailBean = ", 1)[1])
         detail_fields = self.detail_fields(detail_json)
 
-        if flag := detail_json["flags"].get(FLAG_CLOSED):
+        flags = detail_json["flags"]
+        if flag := flags.get(FLAG_CLOSED):
             if flag.get("value") == "true":
                 return
 
@@ -629,23 +630,23 @@ class WelciaJPSpider(LocationCloudSpider):
             if value := fax.get("value"):
                 item["extras"]["fax"] = f"+81 {value}"
 
-        if flag := detail_json["flags"].get(FLAG_ATM_AEON) or detail_json["flags"].get(FLAG_ATM_OTHERS):
+        if flag := flags.get(FLAG_ATM_AEON) or flags.get(FLAG_ATM_OTHERS):
             apply_yes_no(Extras.ATM, item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get(FLAG_COFFEE):
+        if flag := flags.get(FLAG_COFFEE):
             apply_yes_no(Drink.COFFEE, item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get(FLAG_TOILETS_OSTOMY):
-            apply_yes_no("toilets:ostomy", item, flag.get("value") == "true", apply_positive_only=False)
+        if flag := flags.get(FLAG_TOILETS_OSTOMY):
+            apply_yes_no(Extras.TOILETS_OSTOMY, item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get(FLAG_ALCOHOL):
-            apply_yes_no("sells:alcohol", item, flag.get("value") == "true", apply_positive_only=False)
+        if flag := flags.get(FLAG_ALCOHOL):
+            apply_yes_no(Sells.ALCOHOL, item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get(FLAG_DUTY_FREE):
-            apply_yes_no("duty_free", item, flag.get("value") == "true", apply_positive_only=False)
+        if flag := flags.get(FLAG_DUTY_FREE):
+            apply_yes_no(Extras.DUTY_FREE, item, flag.get("value") == "true", apply_positive_only=False)
 
-        if flag := detail_json["flags"].get(FLAG_PARKING):
-            apply_yes_no("parking", item, flag.get("value") == "true", apply_positive_only=False)
+        if flag := flags.get(FLAG_PARKING):
+            apply_yes_no(Extras.PARKING, item, flag.get("value") == "true", apply_positive_only=False)
 
         self._apply_dispensing(item, detail_json, detail_fields)
         self._apply_other_services(item, detail_json)
@@ -672,7 +673,7 @@ class WelciaJPSpider(LocationCloudSpider):
     def _apply_other_services(self, item: Feature, detail_json: dict) -> None:
         if flag := detail_json["flags"].get(FLAG_UBER_EATS):
             if flag.get("value") == "true":
-                item["extras"]["delivery"] = "yes"
+                apply_yes_no(Extras.DELIVERY, item, True)
                 item["extras"]["delivery:partner"] = "Uber Eats"
                 item["extras"]["delivery:partner:wikidata"] = "Q21462723"
 
@@ -715,7 +716,8 @@ class WelciaJPSpider(LocationCloudSpider):
         for day, ranges in day_hours.items():
             if day == "holiday":
                 continue
-            self._add_day_hours(oh, sanitise_day(day), ranges)
+            if sanitized_day := sanitise_day(day):
+                self._add_day_hours(oh, sanitized_day, ranges)
 
         result = oh.as_opening_hours()
 
@@ -725,7 +727,7 @@ class WelciaJPSpider(LocationCloudSpider):
         return result or None
 
     @staticmethod
-    def _add_day_hours(oh: OpeningHours, day_code: str | None, ranges) -> None:
+    def _add_day_hours(oh: OpeningHours, day_code: str, ranges) -> None:
         if ranges == "allday":
             oh.add_range(day_code, "00:00", "24:00")
         elif ranges == "closed":
