@@ -19,13 +19,9 @@ class BuffaloGrillFRSpider(SitemapSpider, StructuredDataSpider):
     wanted_types: ClassVar[list[str]] = ["Restaurant"]
 
     def parse(self, response: TextResponse, **kwargs):
-        if not (restaurant_id := response.css(".restaurant_full::attr(data-restaurant)").get()):
-            yield from self.parse_sd(response)
-            return
-
         yield FormRequest(
             "https://www.buffalo-grill.fr/ajax/restaurant/schedules",
-            formdata={"restaurantId": restaurant_id, "type": "schedules_full"},
+            formdata={"restaurantId": response.xpath("//@data-restaurant").get(), "type": "schedules_full"},
             callback=self.parse_schedules,
             errback=self.parse_schedules_error,
             cb_kwargs={"location_response": response},
