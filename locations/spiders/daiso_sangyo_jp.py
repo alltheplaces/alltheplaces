@@ -3,7 +3,7 @@ from typing import AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -30,6 +30,25 @@ class DaisoSangyoJPSpider(Spider):
         "threeppy": "THREEPPY ",
         "sp": "Standard Products ",
         "coucou": "CouCou ",
+    }
+
+    # Maps each service listed on the shop detail page
+    # to the OSM tag.
+    # "eクーポン" (e-coupon) has no OSM tag and is intentionally left unmapped.
+    SERVICE_TAGS = {
+        "各種クレジットカード": PaymentMethods.CREDIT_CARDS,
+        "イオンクレジット": PaymentMethods.CREDIT_CARDS,
+        "各種電子マネー": PaymentMethods.ICSF,
+        "PayPay": PaymentMethods.PAYPAY,
+        "auPay": PaymentMethods.AU_PAY,
+        "メルペイ": PaymentMethods.MERPAY,
+        "楽天ペイ": PaymentMethods.RAKUTEN_PAY,
+        "アリペイ": PaymentMethods.ALIPAY,
+        "WeChatペイ": PaymentMethods.WECHAT,
+        "d払い": PaymentMethods.D_BARAI,
+        "WAON": PaymentMethods.WAON,
+        "5円コピー": Extras.COPYING,
+        "写真プリント": Extras.PHOTO_PRINTING,
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -63,9 +82,21 @@ class DaisoSangyoJPSpider(Spider):
 
         item["opening_hours"] = self.parse_hours(shop["hours"])
 
+        self.apply_service_tags(item, response)
+
         apply_category(Categories.SHOP_VARIETY_STORE, item)
 
         yield item
+
+    @classmethod
+    def apply_service_tags(cls, item: Feature, response: Response) -> None:
+        for li in response.xpath('//div[contains(@class,"shopSingle-service")]//ul/li'):
+            text = "".join(li.xpath(".//text()").getall()).strip()
+            if not text:
+                continue
+            for part in text.split("、"):
+                if tag := cls.SERVICE_TAGS.get(part):
+                    apply_yes_no(tag, item, True)
 
     @staticmethod
     def parse_hours(value: str) -> OpeningHours:
