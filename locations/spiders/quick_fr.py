@@ -31,8 +31,7 @@ class QuickFRSpider(JSONBlobSpider):
 
         item["opening_hours"] = OpeningHours()
         for d in DAYS_FULL:
-            hours = item.get("dining" + d, None)
-            if hours is not None:
+            if hours := location.get("dining{}".format(d)):
                 item["opening_hours"].add_ranges_from_string(d + " " + hours)
 
         apply_category(Categories.FAST_FOOD, item)
