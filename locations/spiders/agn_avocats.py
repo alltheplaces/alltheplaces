@@ -29,7 +29,7 @@ DAY_LINE_RE = re.compile(
 )
 
 
-class AGNAvocatsSpider(SitemapSpider, StructuredDataSpider):
+class AgnAvocatsSpider(SitemapSpider, StructuredDataSpider):
     name = "agn_avocats"
     item_attributes = {"brand": "AGN Avocats", "brand_wikidata": "Q141355112"}
     sitemap_urls = ["https://www.agn-avocats.fr/page-sitemap.xml"]
