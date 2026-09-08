@@ -42,6 +42,8 @@ class AgnAvocatsSpider(SitemapSpider, StructuredDataSpider):
             item["phone"] = None
         if m := re.search(r"\[{\"lat\":(-?\d+\.\d+),\"lng\":(-?\d+\.\d+),\"popuptext\"", response.text):
             item["lat"], item["lon"] = m.groups()
+        item["branch"] = item.pop("name")
+        item["website"] = response.url
 
         item["opening_hours"] = self.parse_hours(response)
 
