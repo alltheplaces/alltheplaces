@@ -35,11 +35,6 @@ class BuffaloGrillFRSpider(SitemapSpider, StructuredDataSpider):
         yield from self.parse_sd(failure.request.cb_kwargs["location_response"])
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        if item["country"] == "FRA":
-            item["country"] = "FR"
-        elif item["country"] != "FR":
-            return
-
         item["branch"] = item.pop("name")
         item["opening_hours"] = self.parse_opening_hours(response)
         item["website"] = response.url
