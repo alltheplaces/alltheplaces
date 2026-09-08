@@ -40,6 +40,8 @@ class AgnAvocatsSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if item.get("phone") == "09 72 34 24 72":
             item["phone"] = None
+        if m := re.search(r"\[{\"lat\":(-?\d+\.\d+),\"lng\":(-?\d+\.\d+),\"popuptext\"", response.text):
+            item["lat"], item["lon"] = m.groups()
 
         item["opening_hours"] = self.parse_hours(response)
 
