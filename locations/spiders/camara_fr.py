@@ -5,7 +5,7 @@ from locations.hours import CLOSED_FR, DAYS_FR, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class CamaraFrSpider(JSONBlobSpider):
+class CamaraFRSpider(JSONBlobSpider):
     name = "camara_fr"
     item_attributes = {
         "brand": "Camara",
