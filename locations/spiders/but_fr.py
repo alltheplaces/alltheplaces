@@ -11,32 +11,22 @@ from locations.structured_data_spider import StructuredDataSpider
 # Site is behind DataDome; every request needs a real browser render to get past it.
 ZYTE_BROWSER_HTML = {"browserHtml": True, "geolocation": "FR", "javascript": True}
 
-# No dedicated store sitemap. The store finder's landing page links these 13 region index
-# pages, and each one lists every store in that region directly - no department-level page
-# needed in between.
-REGION_INDEX_PAGES = [
-    "Ile-de-France/index-r11",
-    "Centre-Val-de-Loire/index-r24",
-    "Bourgogne-Franche-Comte/index-r27",
-    "Normandie/index-r28",
-    "Hauts-de-France/index-r32",
-    "Grand-Est/index-r44",
-    "Pays-de-la-Loire/index-r52",
-    "Bretagne/index-r53",
-    "Nouvelle-Aquitaine/index-r75",
-    "Occitanie/index-r76",
-    "Auvergne-Rhone-Alpes/index-r84",
-    "Provence-Alpes-Cote-d-Azur/index-r93",
-    "Corse/index-r94",
-]
-
 
 class ButFRSpider(CrawlSpider, StructuredDataSpider):
     name = "but_fr"
     item_attributes = {"brand": "But", "brand_wikidata": "Q2877537", "name": "But"}
     allowed_domains = ["but.fr"]
-    start_urls = [f"https://www.but.fr/magasins/{page}.html" for page in REGION_INDEX_PAGES]
-    rules = [Rule(LinkExtractor(allow=r"/magasins/\d+/"), callback="parse_item", process_request="use_zyte_browser")]
+    # No dedicated store sitemap. The store finder's landing page links 13 region index pages
+    # (also cross-linked from every region page itself, so a single start URL is enough), and
+    # each region page lists every store in that region directly - no department-level page
+    # needed in between.
+    start_urls = ["https://www.but.fr/magasins/recherche-magasins"]
+    rules = [
+        # Region pages: no callback, so CrawlSpider follows them (default follow=True) without
+        # yielding items - just to discover the other regions and their store links below.
+        Rule(LinkExtractor(allow=r"/magasins/[^/]+/index-r\d+\.html"), process_request="use_zyte_browser"),
+        Rule(LinkExtractor(allow=r"/magasins/\d+/"), callback="parse_item", process_request="use_zyte_browser"),
+    ]
     # Source gives hours as "10h00"/"09h30", not "10:00"/"09:30".
     time_format = "%Hh%M"
     custom_settings = {
