@@ -1,5 +1,5 @@
 import re
-from typing import ClassVar, Iterable
+from typing import Iterable
 
 from scrapy import FormRequest
 from scrapy.http import TextResponse
@@ -13,10 +13,10 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class BuffaloGrillFRSpider(SitemapSpider, StructuredDataSpider):
     name = "buffalo_grill_fr"
-    item_attributes: ClassVar[dict[str, str]] = {"brand": "Buffalo Grill", "brand_wikidata": "Q944655"}
-    sitemap_urls: ClassVar[list[str]] = ["https://www.buffalo-grill.fr/sitemap.xml"]
-    sitemap_rules: ClassVar[list[tuple[str, str]]] = [(r"/nos-restaurants/([^/]+)/?$", "parse")]
-    wanted_types: ClassVar[list[str]] = ["Restaurant"]
+    item_attributes = {"brand": "Buffalo Grill", "brand_wikidata": "Q944655"}
+    sitemap_urls = ["https://www.buffalo-grill.fr/sitemap.xml"]
+    sitemap_rules = [(r"/nos-restaurants/([^/]+)/?$", "parse")]
+    wanted_types = ["Restaurant"]
 
     def parse(self, response: TextResponse, **kwargs):
         yield FormRequest(
