@@ -8,8 +8,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 BRANDS = {
-    "ACF": ("Abercrombie & Fitch", "Q319344"),
-    "KID": ("Abercrombie Kids", "Q429856"),
+    "ACF": {"brand": "Abercrombie & Fitch", "brand_wikidata": "Q319344"},
+    "KID": {"brand": "Abercrombie Kids", "brand_wikidata": "Q429856"},
 }
 
 
@@ -38,7 +38,7 @@ class AbercrombieAndFitchSpider(JSONBlobSpider):
         # Inventory-only records expose no displayable attributes, brand included.
         if not (brand := BRANDS.get(attributes.get("Brand"))):
             return
-        item["brand"], item["brand_wikidata"] = brand
+        item.update(brand)
         item["branch"] = item.pop("name")
 
         if hours := attributes.get("hours-Week1"):
