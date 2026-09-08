@@ -33,7 +33,7 @@ class AgnAvocatsSpider(SitemapSpider, StructuredDataSpider):
     name = "agn_avocats"
     item_attributes = {"brand": "AGN Avocats", "brand_wikidata": "Q141355112"}
     sitemap_urls = ["https://www.agn-avocats.fr/page-sitemap.xml"]
-    sitemap_rules = [(r"^https://www\.agn-avocats\.fr/[^/]+/?$", "parse_sd")]
+    sitemap_rules = [(r"^https://www\.agn-avocats\.fr/(?:agn-)?avocats-([^/]+)/$", "parse_sd")]
     wanted_types = ["LegalService"]
     drop_attributes = {"image", "twitter", "facebook"}
 
