@@ -5,14 +5,14 @@ from locations.items import Feature
 from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class TommyHilfigerFRSpider(YextAnswersSpider):
-    name = "tommy_hilfiger_fr"
+class TommyHilfigerITSpider(YextAnswersSpider):
+    name = "tommy_hilfiger_it"
     item_attributes = {"brand": "Tommy Hilfiger", "brand_wikidata": "Q634881"}
     api_key = "e922a5467c105dbc672e892b1c6a6564"
-    experience_key = "tommy-hilfiger-locator-fr"
-    feature_type = "fr-locations"
+    experience_key = "tommy-hilfiger-locator-it"
+    feature_type = "italy-locations"
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
-        item["website"] = "https://fr.tommy.com/store/" + location["slug"].removeprefix("en/")
+        item["website"] = "https://it.tommy.com/store/" + location["slug"].removeprefix("en/")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
