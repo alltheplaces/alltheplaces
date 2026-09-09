@@ -40,4 +40,10 @@ class AutodistributionFRSpider(SitemapSpider):
             data["schedule"].replace("et", " ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR
         )
 
+        item["lat"] = item.pop("lat","").replace(",",".")
+        lon = item.pop("lon","").replace(",",".")
+        if lon.startswith("."):
+            lon = "0" + lon
+        item["lon"] = lon
+
         yield item
