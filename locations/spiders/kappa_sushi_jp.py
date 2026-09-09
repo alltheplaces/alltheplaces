@@ -106,5 +106,5 @@ class KappaSushiJPSpider(JSONBlobSpider):
 
     @staticmethod
     def _day_token(token: str) -> str:
-        # 月曜 -> 月 ; 月曜日 -> 月 ; 月 -> 月
-        return token.rstrip("曜日")
+        # 月曜 -> 月 ; 月曜日 -> 月 ; 月 -> 月 ; 日曜日 -> 日
+        return token.removesuffix("曜日").removesuffix("曜")
