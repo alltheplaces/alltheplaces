@@ -17,6 +17,7 @@ class GsfCarPartsGBSpider(SitemapSpider, StructuredDataSpider):
     sitemap_follow = ["branch-sitemap"]
     sitemap_rules = [(r"/branches/([-\w]+)$", "parse")]
     wanted_types = ["Organization"]
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("GSF Car Parts - ")
@@ -25,7 +26,9 @@ class GsfCarPartsGBSpider(SitemapSpider, StructuredDataSpider):
 
         item["opening_hours"] = self.parse_opening_hours(response)
 
-        if m := re.search(r"\\\"center\\\":\{\\\"lat\\\":(-?\d+\.\d+),\\\"lng\\\":(-?\d+\.\d+)}", response.text):
+        if m := re.search(
+            r"\\\"latitude\\\":\\\"(-?\d+\.\d+)\\\",\\\"longitude\\\":\\\"(-?\d+\.\d+)\\\",", response.text
+        ):
             item["lat"], item["lon"] = m.groups()
 
         apply_category(Categories.SHOP_CAR_PARTS, item)

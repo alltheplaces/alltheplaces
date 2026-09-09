@@ -4,6 +4,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
@@ -20,7 +21,7 @@ class FujiserviceJPSpider(Spider):
 
             item = DictParser.parse(store)
             item["ref"] = re.search(r"^\S-\d{4}", str(store["title"])).group()
-            item["extras"]["amenity"] = "luggage_locker"
+            apply_category(Categories.LUGGAGE_LOCKER, item)
             item["operator"] = "フジサービス"
             item["extras"]["operator:en"] = "Fuji Service"
             item["image"] = store["pic"]
