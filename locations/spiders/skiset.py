@@ -15,11 +15,9 @@ class SkisetSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.skiset.com/sitemap.xml"]
     sitemap_rules = [(r"https://www\.skiset\.com/.*/magasins/.*", "parse_sd")]
     wanted_types = ["LocalBusiness"]
-    drop_attributes = {"image"}
+    drop_attributes = {"image", "facebook"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        if item.get("facebook") == "https://www.facebook.com/skiset.france/":
-            item["facebook"] = None
         item["branch"] = item.pop("name").removeprefix("Skiset ")
 
         if (idx := response.text.find("window.appConfig=")) != -1:
