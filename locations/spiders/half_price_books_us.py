@@ -13,6 +13,7 @@ class HalfPriceBooksUSSpider(JSONBlobSpider):
     name = "half_price_books_us"
     item_attributes = {"brand": "Half Price Books", "brand_wikidata": "Q5641744"}
     locations_key = "stores"
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
