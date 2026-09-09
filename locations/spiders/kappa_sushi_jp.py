@@ -19,18 +19,14 @@ class KappaSushiJPSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["code"]
-        item["branch"] = feature["name"].split("※")[0].strip()
-        item["name"] = None
-        item["phone"] = feature["tel"]
+        item["branch"] = item.pop("name", "").split("※")[0].strip()
+        item["street_address"] = item.pop("addr_full", "")
+
         if feature["code"] == "0552":
             # DB has a bad lat/lon (lat == lon). Correct only this coords in map_url
             # since the map's lat/lon is slightly different from the DB lat/lon
             item["lat"], item["lon"] = url_to_coords(feature["map_url"])
-        item["state"] = None
-        item["extras"]["addr:province"] = feature["prefecture"]
-        item["city"] = feature["city"]
-        item["addr_full"] = f"{feature['prefecture']}{feature['city']}{feature['address']}"
-        item["country"] = "JP"
+
         if kana := feature.get("name_kana"):
             item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(kana)
         if seats := feature.get("seats"):
@@ -38,7 +34,6 @@ class KappaSushiJPSpider(JSONBlobSpider):
         item["opening_hours"] = self._parse_hours(feature["open_time"])
 
         apply_category(Categories.FAST_FOOD, item)
-        item["extras"]["cuisine"] = "sushi"
 
         yield item
 
