@@ -26,15 +26,15 @@ class AutodistributionFRSpider(SitemapSpider):
         if key not in payload:
             return
         data = payload[key]["body"]
-        
+
         item = DictParser.parse(data)
         apply_category(Categories.SHOP_CAR_REPAIR, item)
         item["country"] = "FR"
 
         item["branch"] = item.pop("name", "").removeprefix("autodistribution ")
 
-        item["street_address"] = item.pop("addr_full","")
-        item["email"] = data.pop("mail","")
+        item["street_address"] = item.pop("addr_full", "")
+        item["email"] = data.pop("mail", "")
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(
             data["schedule"].replace("et", " ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR
