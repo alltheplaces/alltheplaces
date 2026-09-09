@@ -1,8 +1,11 @@
 import re
+from typing import Iterable
 
 import chompjs
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -47,18 +50,18 @@ class AmorinoSpider(JSONBlobSpider):
     def pre_process_data(self, feature: dict) -> None:
         feature["id"] = feature.pop("place_id", "")
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         apply_category(Categories.ICE_CREAM, item)
 
         item["branch"] = item.pop("name")
-        item["addr_full"] = location.pop("adress")
+        item["addr_full"] = feature.pop("adress")
 
-        slug = location.get("slug")
+        slug = feature.get("slug")
         if slug:
             item["website"] = "https://www.amorino.com/stores/" + slug
 
         if item.get("phone") is None:
-            google_phone = location.get("google_phone")
+            google_phone = feature.get("google_phone")
             if isinstance(google_phone, str) and google_phone:
                 item["phone"] = google_phone.removeprefix("'")
 
