@@ -4,7 +4,6 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class OldChicagoUSSpider(SitemapSpider):
@@ -16,8 +15,14 @@ class OldChicagoUSSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["branch"] = response.xpath("//h2/text()").get()
-        item["street_address"] = response.xpath('//*[@class="location-address"]//a/text()').get()
-        item["addr_full"] = merge_address_lines(response.xpath('//*[@class="location-address"]/a//text()').getall())
+        addr_lines = response.xpath('//*[@class="location-address"]/a//text()').getall()
+        item["street_address"] = addr_lines[0].strip() if addr_lines else None
+        if len(addr_lines) > 1:
+            city, _, rest = addr_lines[1].strip().partition(",")
+            state, _, postcode = rest.strip().partition(",")
+            item["city"] = city.strip()
+            item["state"] = state.strip()
+            item["postcode"] = postcode.strip()
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
         item["ref"] = item["website"] = response.url
         yield item

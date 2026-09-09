@@ -25,9 +25,8 @@ class MitsubishiPRSpider(scrapy.Spider):
             item = DictParser.parse(address_data)
             item["ref"] = key["id"]
             item["postcode"] = address_data["postalArea"]
-            item["addr_full"] = merge_address_lines(
-                [address_data["addressLine1"], address_data["addressLine2"], address_data["addressLine3"]]
-            )
+            item["city"] = address_data["addressLine3"]
+            item["addr_full"] = merge_address_lines([address_data["addressLine2"]])
             item["phone"] = raw_data[1][f'${key["id"]}.phone']["phoneNumber"]
             item["branch"] = raw_data[1][key["id"]]["name"]
             apply_category(Categories.SHOP_CAR, item)

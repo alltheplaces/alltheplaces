@@ -1,30 +1,26 @@
 from typing import Iterable
 
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
 
-class ShopMetroPHSpider(AgileStoreLocatorSpider):
+class ShopMetroPHSpider(Spider):
     name = "shop_metro_ph"
-    allowed_domains = [
-        "shopmetro.ph",
-    ]
+    item_attributes = {"brand_wikidata": "Q23808789"}
+    start_urls = ["https://shopmetro.ph/documentation/mrc-member-guide/"]
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        description = feature.get("description", "")
-        if "Super Metro" in item["name"]:
-            item["brand"] = "Super Metro"
-            item["brand_wikidata"] = "Q23808789"
+    def parse(self, response: Response) -> Iterable[Feature]:
+        for row in response.css("table.store-tbl tbody tr"):
+            name = row.css("td.td-name::text").get("").strip()
+            if name.startswith("Super Metro "):
+                brand = "Super Metro"
+                branch = name.removeprefix("Super Metro ")
+            else:
+                brand = "Metro Supermarket"
+                branch = name.removeprefix("Metro ")
+            item = Feature(ref=name, brand=brand, branch=branch, addr_full=row.css("td.td-addr::text").get("").strip())
             apply_category(Categories.SHOP_SUPERMARKET, item)
-        elif "Department Store" in description:
-            item["brand"] = "Metro Department Store"
-            item["brand_wikidata"] = "Q23808789"
-            apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
-        elif "Supermarket" in description:
-            item["brand"] = "Metro Supermarket"
-            item["brand_wikidata"] = "Q23808789"
-            apply_category(Categories.SHOP_SUPERMARKET, item)
-        yield item
+            yield item
