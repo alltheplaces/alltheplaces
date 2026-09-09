@@ -58,7 +58,9 @@ class AmorinoSpider(JSONBlobSpider):
             item["website"] = "https://www.amorino.com/stores/" + slug
 
         if item.get("phone") is None:
-            item["phone"] = location.get("google_phone").removeprefix("'")
+            google_phone = location.get("google_phone")
+            if isinstance(google_phone, str) and google_phone:
+                item["phone"] = google_phone.removeprefix("'")
 
         if (item.get("country") or "") in ["FR", "France", "France "]:
             match = re.search(r"\b\d{5}\b", item.get("addr_full"))
