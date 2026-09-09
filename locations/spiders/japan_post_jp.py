@@ -1,6 +1,7 @@
 import csv
 import math
 from io import StringIO
+from typing import List
 from urllib.parse import urlencode
 
 from chompjs import parse_js_object
@@ -174,6 +175,8 @@ class JapanPostJPSpider(Spider):
                 item["lon"] = wgs84_lon
                 item["postcode"] = postcode
                 item["addr_full"] = addr_full
+                if collection_times := self.get_collection_times(row):
+                    item["extras"]["collection_times"] = collection_times
                 item["extras"]["post_box:design"] = f"郵便差出箱{row[14]}"
 
                 apply_category(Categories.POST_BOX, item)
@@ -215,3 +218,18 @@ class JapanPostJPSpider(Spider):
                 item["branch"] = name.removesuffix("出張所")
 
             yield item
+
+    def get_collection_times(self, row: List[str]) -> str:
+        # POST rows have collection times in three fixed 20-slot groups:
+        #   cols 42-61 weekday (平日), 62-81 Saturday (土曜), 82-101 Sunday/holiday (日曜・休日)
+        groups = {
+            "Mo-Fr": row[42:62],
+            "Sa": row[62:82],
+            "Su": row[82:102],
+        }
+        parts = []
+        for day, times in groups.items():
+            times = [t for t in times if t]
+            if times:
+                parts.append(f"{day} {','.join(times)}")
+        return "; ".join(parts)
