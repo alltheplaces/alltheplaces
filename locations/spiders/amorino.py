@@ -11,10 +11,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class AmorinoSpider(JSONBlobSpider):
     name = "amorino"
-    item_attributes = {
-        "brand": "Amorino",
-        "brand_wikidata": "Q2843884",
-    }
+    item_attributes = {"brand": "Amorino", "brand_wikidata": "Q2843884"}
     start_urls = ["https://www.amorino.com/storelocator"]
 
     def extract_json(self, response):
