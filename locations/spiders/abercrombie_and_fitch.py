@@ -1,70 +1,54 @@
-from typing import Any
+from typing import Iterable
 
-import scrapy
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
+from locations.json_blob_spider import JSONBlobSpider
+
+BRANDS = {
+    "ACF": {"brand": "Abercrombie & Fitch", "brand_wikidata": "Q319344"},
+    "KID": {"brand": "Abercrombie Kids", "brand_wikidata": "Q429856"},
+}
 
 
-class AbercrombieAndFitchSpider(scrapy.Spider):
+class AbercrombieAndFitchSpider(JSONBlobSpider):
     name = "abercrombie_and_fitch"
-    item_attributes = {"brand": "Abercrombie & Fitch", "brand_wikidata": "Q319344"}
     allowed_domains = ["abercrombie.com"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    start_urls = ["https://www.abercrombie.com/api/ecomm/a-us/storelocator/search?country="]
+    locations_key = "physicalStores"
+    # robots.txt disallows /api/*, which is the only path serving store data.
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     requires_proxy = True
 
-    start_urls = [
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=AE",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=BE",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=CA",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=CN",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=DE",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=ES",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=FR",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=GB",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=HK",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=IT",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=JP",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=KW",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=MX",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=QA",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=SA",
-        "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=US",
-    ]
-    # Old regions:
-    # "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=EU",
-    # "https://www.abercrombie.com/api/ecomm/a-wd/storelocator/search?country=AM",
+    def pre_process_data(self, location: dict) -> None:
+        location["street_address"] = location.pop("addressLine")[0]
+        if (state := location.pop("stateOrProvinceName")) != location["country"]:
+            location["state"] = state
+        if location.get("postalCode") == "-":
+            location.pop("postalCode")
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = response.json()
-
-        if data["physicalStores"] is None:
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        attributes = {
+            attribute["name"]: attribute["value"]
+            for attribute in location["physicalStoreAttribute"]
+            if attribute["Displayable"]
+        }
+        # Inventory-only records expose no displayable attributes, brand included.
+        if not (brand := BRANDS.get(attributes.get("Brand"))):
             return
+        item.update(brand)
+        item["branch"] = item.pop("name")
 
-        for row in data["physicalStores"]:
-            properties = {
-                "ref": row["storeNumber"],
-                "name": row["name"],
-                "country": row["country"],
-                "state": row["stateOrProvinceName"],
-                "city": row["city"],
-                "lat": row["latitude"],
-                "lon": row["longitude"],
-                "phone": row["telephone"],
-                "street_address": row["addressLine"][0],
-            }
-            # Hong Kong seems to list postcodes with just - in them
-            if row["postalCode"] and row["postalCode"] != "-":
-                properties["postcode"] = row["postalCode"]
+        if hours := attributes.get("hours-Week1"):
+            item["opening_hours"] = OpeningHours()
+            for day, times in zip(DAYS_FROM_SUNDAY, hours.split(",")):
+                open_time, _, close_time = times.partition("|")
+                if open_time == close_time:
+                    item["opening_hours"].set_closed(day)
+                else:
+                    item["opening_hours"].add_range(day, open_time, close_time)
 
-            for brand in row["physicalStoreAttribute"]:
-                if brand["name"] == "Brand":
-                    if brand["value"] == "ACF":
-                        properties["brand"] = "Abercrombie & Fitch"
-                        properties["brand_wikidata"] = "Q319344"
-                    elif brand["value"] == "KID":
-                        properties["brand"] = "Abercrombie Kids"
-                        properties["brand_wikidata"] = "Q429856"
-
-            yield Feature(**properties)
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item
