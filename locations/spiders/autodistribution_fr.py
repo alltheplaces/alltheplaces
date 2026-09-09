@@ -1,11 +1,9 @@
-from scrapy.spiders import SitemapSpider
 import chompjs
+from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
-from locations.items import Feature
-from locations.hours import OpeningHours, DAYS_FR, DELIMITERS_FR, CLOSED_FR
 from locations.dict_parser import DictParser
+from locations.hours import CLOSED_FR, DAYS_FR, DELIMITERS_FR, OpeningHours
 
 
 class AutodistributionFRSpider(SitemapSpider):
@@ -32,12 +30,14 @@ class AutodistributionFRSpider(SitemapSpider):
         item = DictParser.parse(data)
         apply_category(Categories.SHOP_CAR_REPAIR, item)
         item["country"] = "FR"
-        
+
         item["branch"] = item.pop("name", "").removeprefix("autodistribution ")
 
         item["street_address"] = item.pop("addr_full","")
         item["email"] = data.pop("mail","")
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(data["schedule"].replace("et"," ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR)
-    
+        item["opening_hours"].add_ranges_from_string(
+            data["schedule"].replace("et", " ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR
+        )
+
         yield item
