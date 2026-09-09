@@ -153,11 +153,18 @@ class DictParser:
         "store-state",
         "store-province",
         "storeProvince",
-        "prefecture",
-        # JP
-        "都道府県",  # "prefecture"
         # IT
         "regione",  # "region"
+    ]
+
+    # For addresses in Japan, "addr:province" is used for the prefecture and "state" is unused
+    # ref.
+    # - Key:addr:province - OpenStreetMap Wiki - https://wiki.openstreetmap.org/wiki/Key:addr:province
+    # - Japan tagging - OpenStreetMap Wiki - https://wiki.openstreetmap.org/wiki/Japan_tagging#Places
+    region_keys_jp = [
+        # JP
+        "prefecture",
+        "都道府県",  # "prefecture"
     ]
 
     country_keys = [
@@ -386,6 +393,7 @@ class DictParser:
         item["street_address"] = DictParser.get_first_key(address, DictParser.street_address_keys)
         item["city"] = DictParser.get_first_key(address, DictParser.city_keys)
         item["state"] = DictParser.get_first_key(address, DictParser.region_keys)
+        item["extras"]["addr:province"] = DictParser.get_first_key(address, DictParser.region_keys_jp)
         item["postcode"] = DictParser.get_first_key(address, DictParser.postcode_keys)
 
         country = DictParser.get_first_key(address, DictParser.country_keys)
