@@ -18,18 +18,12 @@ class LibroATSpider(CrawlSpider, StructuredDataSpider):
         "pagro": {"brand": "Pagro", "brand_wikidata": "Q57550022"},
     }
     start_urls = ["https://www.pagro.at/filialfinder"]
-    rules = [
-        Rule(
-            LinkExtractor(
-                allow="/filialfinder/",
-            ),
-            callback="parse_sd",
-        ),
-    ]
+    rules = [Rule(LinkExtractor(allow="/filialfinder/"), callback="parse_sd")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    wanted_types = ["Store"]
     time_format = "%H:%M:%S"
 
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
-        item["name"], item["addr_full"] = item.pop("name").split(" Filiale ", 1)
-        item.update(self.brands[item["name"].lower()])
+        brand, item["addr_full"] = item.pop("name").split(" Filiale ", 1)
+        item.update(self.brands[brand.lower()])
         yield item
