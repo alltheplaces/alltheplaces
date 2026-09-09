@@ -174,6 +174,7 @@ class JapanPostJPSpider(Spider):
                 item["lon"] = wgs84_lon
                 item["postcode"] = postcode
                 item["addr_full"] = addr_full
+                item["extras"]["post_box:design"] = f"郵便差出箱{row[14]}"
 
                 apply_category(Categories.POST_BOX, item)
                 item["operator_wikidata"] = "Q11509260"
