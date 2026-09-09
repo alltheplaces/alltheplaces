@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from locations.hours import (
     CLOSED_IT,
     DAYS,
@@ -9,6 +11,7 @@ from locations.hours import (
     DAYS_IT,
     DAYS_PL,
     DAYS_RU,
+    DAYS_UA,
     DELIMITERS_ES,
     DELIMITERS_IT,
     DELIMITERS_RU,
@@ -17,6 +20,7 @@ from locations.hours import (
     NAMED_TIMES_IT,
     NAMED_TIMES_RU,
     OpeningHours,
+    _normalise_hour_over_24,
     day_range,
     sanitise_day,
 )
@@ -166,6 +170,48 @@ def test_over_midnight():
     )
 
 
+def test_over_24_close_hour():
+    o = OpeningHours()
+    o.add_range("Mo", "09:00", "25:00")
+    assert o.as_opening_hours() == "Mo 09:00-24:00; Tu 00:00-01:00"
+
+
+def test_over_24_open_next_day():
+    o = OpeningHours()
+    o.add_range("Mo", "25:00", "27:00")
+    assert o.as_opening_hours() == "Tu 01:00-03:00"
+
+
+def test_over_24_open_close_under_24():
+    o = OpeningHours()
+    o.add_range("Mo", "25:00", "6:00")
+    assert o.as_opening_hours() == "Tu 01:00-06:00"
+
+
+def test_normalise_hour_over_24_under_24():
+    assert _normalise_hour_over_24("09:00") == ("09:00", False)
+
+
+def test_normalise_hour_over_24_exact_24():
+    assert _normalise_hour_over_24("24:00") == ("00:00", True)
+
+
+def test_normalise_hour_over_24_over_24():
+    assert _normalise_hour_over_24("26:30") == ("02:30", True)
+
+
+def test_add_range_time_without_separator_raises():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "25", "26")
+
+
+def test_add_range_time_with_non_numeric_hour_raises():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "ab:00", "10:00")
+
+
 def test_till_midnight():
     o = OpeningHours()
     o.add_range("Mo", "11:00", "23:00")
@@ -225,6 +271,9 @@ def test_sanitise_days():
     assert sanitise_day("Съб. ", DAYS_DE) is None
     assert sanitise_day("Mo", DAYS_DE) == "Mo"
     assert sanitise_day("Do", DAYS_DE) == "Th"
+    assert sanitise_day("пн", DAYS_UA) == "Mo"
+    assert sanitise_day("Нд.", DAYS_UA) == "Su"
+    assert sanitise_day("середа", DAYS_UA) == "We"
 
 
 def test_opening_hours_closed():

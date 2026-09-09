@@ -6,7 +6,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_SR, OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class BipaHRSpider(Spider):
@@ -21,7 +20,8 @@ class BipaHRSpider(Spider):
             item["lat"] = store.xpath("@data-lat").get()
             item["lon"] = store.xpath("@data-lng").get()
             item["street_address"] = store.xpath("./article/address/text()[1]").get()
-            item["addr_full"] = merge_address_lines(store.xpath("./article/address/text()").getall())
+            if postcode_city := store.xpath("./article/address/text()[2]").get():
+                item["postcode"], _, item["city"] = postcode_city.strip().partition(" ")
             item["ref"] = store.xpath("./article/@class").get().split(" ", 1)[0]
 
             oh = OpeningHours()
