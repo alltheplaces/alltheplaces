@@ -1,20 +1,21 @@
 import re
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.spiders.mango import PlaywrightSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SephoraCHSpider(Spider):
+class SephoraCHSpider(PlaywrightSpider):
     name = "sephora_ch"
     item_attributes = {"brand": "Sephora", "brand_wikidata": "Q2408041"}
     start_urls = ["https://www.sephora.ch/storefinder/"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath('//div[contains(@class, "storefinder-ch")]//div[contains(@class, "richtext")]'):
@@ -28,7 +29,6 @@ class SephoraCHSpider(Spider):
             item = Feature()
             item["ref"] = re.sub(r"-+", "-", re.sub(r"[^a-z0-9]", "-", name.lower())).strip("-")
             item["branch"] = name.removeprefix("CORNER ").removeprefix("STORE ").title()
-            item["country"] = "CH"
 
             self._parse_details(item, paragraphs)
             apply_category(Categories.SHOP_COSMETICS, item)

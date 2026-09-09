@@ -6,7 +6,6 @@ from scrapy.http import Response
 
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.calvin_klein import CalvinKleinSpider
 
 
@@ -22,7 +21,6 @@ class CalvinKleinAUSpider(Spider):
             item["lat"] = location["l"]
             item["lon"] = location["g"]
             item["branch"] = location["n"].split(" | ", 1)[1].removeprefix("Calvin Klein ")
-            item["addr_full"] = merge_address_lines(location.get("a"))
             item["street_address"] = location["a"][0]
             item["city"] = location["a"][1]
             item["state"] = location["a"][2]
