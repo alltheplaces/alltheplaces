@@ -16,14 +16,18 @@ class AutodistributionFRSpider(SitemapSpider):
     }
     sitemap_urls = ["https://www.autodistribution.fr/sitemap.xml"]
     sitemap_rules = [(r"autodistribution.fr/magasins-pieces-auto/[^/]+", "process_item")]
-    wanted_types = ["AutomotiveBusiness"]
 
     def process_item(self, response):
 
         script = response.xpath('//script[contains(text(), "schedule")]/text()').get()
-        slug = response.request.url.split("/")[-1]
-        data = chompjs.parse_js_object(script.replace("&q;","\""))["G.json.https://backend.production.gcp.autodistribution.fr/api/shop/"+slug+"?"]["body"]
-
+        if not script:
+            return
+        slug = response.url.rstrip("/").split("/")[-1].split("?")[0]
+        payload = chompjs.parse_js_object(script.replace("&q;", '"'))
+        key = f"G.json.https://backend.production.gcp.autodistribution.fr/api/shop/{slug}?"
+        if key not in payload:
+            return
+        data = payload[key]["body"]
         
         item = DictParser.parse(data)
         apply_category(Categories.SHOP_CAR_REPAIR, item)
@@ -32,8 +36,7 @@ class AutodistributionFRSpider(SitemapSpider):
         item["branch"] = item.pop("name", "").removeprefix("autodistribution ")
 
         item["street_address"] = item.pop("addr_full","")
-        item["email"] = data["mail"]
-
+        item["email"] = data.pop("mail","")
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(data["schedule"].replace("et"," ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR)
     
