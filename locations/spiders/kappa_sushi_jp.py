@@ -2,6 +2,7 @@ import re
 from typing import Iterable
 
 from locations.categories import Categories, apply_category
+from locations.google_url import url_to_coords
 from locations.hours import DAYS, DAYS_JP, OpeningHours, day_range
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -19,8 +20,13 @@ class KappaSushiJPSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["code"]
         item["branch"] = feature["name"].split("※")[0].strip()
+        item["name"] = None
         item["phone"] = feature["tel"]
-        item.pop("state", None)
+        if feature["code"] == "0552":
+            # DB has a bad lat/lon (lat == lon). Correct only this coords in map_url
+            # since the map's lat/lon is slightly different from the DB lat/lon
+            item["lat"], item["lon"] = url_to_coords(feature["map_url"])
+        item["state"] = None
         item["extras"]["addr:province"] = feature["prefecture"]
         item["city"] = feature["city"]
         item["addr_full"] = f"{feature['prefecture']}{feature['city']}{feature['address']}"
