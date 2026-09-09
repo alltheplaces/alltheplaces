@@ -47,26 +47,21 @@ class AmorinoSpider(JSONBlobSpider):
 
         return replace_values(data)
 
-    def pre_process_data(self, feature: dict) -> None:
-        feature["id"] = feature.pop("place_id", "")
-
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        apply_category(Categories.ICE_CREAM, item)
-
         item["branch"] = item.pop("name")
-        item["addr_full"] = feature.pop("adress")
+        item["addr_full"] = feature.get("adress")
+        item["extras"]["ref:google:place_id"] = feature.get("place_id")
 
-        slug = feature.get("slug")
-        if slug:
-            item["website"] = "https://www.amorino.com/stores/" + slug
+        if slug := feature.get("slug"):
+            item["website"] = "https://www.amorino.com/stores/{}".format(slug)
 
-        if item.get("phone") is None:
-            google_phone = feature.get("google_phone")
-            if isinstance(google_phone, str) and google_phone:
+        if not item.get("phone"):
+            if google_phone := feature.get("google_phone"):
                 item["phone"] = google_phone.removeprefix("'")
 
         if (item.get("country") or "") in ["FR", "France", "France "]:
             match = re.search(r"\b\d{5}\b", item.get("addr_full"))
             item["postcode"] = match.group() if match else None
 
+        apply_category(Categories.ICE_CREAM, item)
         yield item
