@@ -1,46 +1,26 @@
-from typing import Any, AsyncIterator
+from typing import Any
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class PaversGBSpider(Spider):
+class PaversGBSpider(SitemapSpider):
     name = "pavers_gb"
     item_attributes = {"brand_wikidata": "Q7155843"}
     allowed_domains = ["pavers.co.uk"]
 
-    def make_request(self, page: int) -> JsonRequest:
-        return JsonRequest(
-            url="https://www.pavers.co.uk/api/storeLocation/search?query&page={}".format(page), meta={"page": page}
-        )
-
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield self.make_request(1)
+    sitemap_urls = ["https://www.pavers.co.uk/sitemap.xml"]
+    sitemap_rules = [(r"^https:\/\/www\.pavers\.co\.uk\/store\/[\w\-]+", "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["result"]["response"]["results"]:
-            item = DictParser.parse(location["data"])
-            if isinstance(item["website"], dict):
-                item["website"] = None
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["branch"] = response.xpath("//title/text()").get().removeprefix("Pavers Shoes")
+        item["addr_full"] = merge_address_lines(response.xpath("//address/div/text()").getall())
+        apply_category(Categories.SHOP_SHOES, item)
 
-            item["street_address"] = merge_address_lines(
-                [location["data"]["address"]["line1"], location["data"]["address"].get("line2")]
-            )
-
-            hours = OpeningHours()
-            for day, intervals in location["data"]["hours"].items():
-                if not isinstance(intervals, dict):
-                    continue
-                if intervals.get("isClosed") is True:
-                    hours.set_closed(day)
-                    continue
-                for interval in intervals["openIntervals"]:
-                    hours.add_range(day, interval["start"], interval["end"])
-            item["opening_hours"] = hours
-            yield item
-        if len(response.json()["result"]["response"]["results"]) == 20:
-            yield self.make_request(response.meta["page"] + 1)
+        yield item
