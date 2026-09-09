@@ -58,7 +58,7 @@ class BricodepotFRSpider(SitemapSpider, CamoufoxSpider):
                 state = self.resolve_nuxt(1, json.loads(nuxt_data))
                 retailer_key = next(k for k in state["data"] if k.startswith("getSingleRetailer"))
                 store = state["data"][retailer_key]["items"][0]
-            except (json.JSONDecodeError, KeyError, StopIteration, IndexError):
+            except (json.JSONDecodeError, KeyError, StopIteration, IndexError, TypeError):
                 store = None
 
         if not store:
