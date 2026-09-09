@@ -1,4 +1,3 @@
-import re
 from typing import Iterable
 
 import chompjs
@@ -55,10 +54,6 @@ class AmorinoSpider(JSONBlobSpider):
         if not item.get("phone"):
             if google_phone := feature.get("google_phone"):
                 item["phone"] = google_phone.removeprefix("'")
-
-        if (item.get("country") or "") in ["FR", "France", "France "]:
-            match = re.search(r"\b\d{5}\b", item.get("addr_full"))
-            item["postcode"] = match.group() if match else None
 
         apply_category(Categories.ICE_CREAM, item)
         yield item
