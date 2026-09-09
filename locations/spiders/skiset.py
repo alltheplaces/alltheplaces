@@ -1,5 +1,6 @@
 import json
 from typing import Iterable
+
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
@@ -20,7 +21,7 @@ class SkisetSpider(SitemapSpider, StructuredDataSpider):
         if item.get("facebook") == "https://www.facebook.com/skiset.france/":
             item["facebook"] = None
         item["branch"] = item.pop("name").removeprefix("Skiset ")
-        
+
         if (idx := response.text.find("window.appConfig=")) != -1:
             start = idx + len("window.appConfig=")
             try:
@@ -31,6 +32,6 @@ class SkisetSpider(SitemapSpider, StructuredDataSpider):
                     item["lon"] = geo["lng"]
             except (json.JSONDecodeError, AttributeError):
                 pass
-        
+
         apply_category(Categories.SHOP_SPORTS, item)
         yield item
