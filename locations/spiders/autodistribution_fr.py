@@ -37,8 +37,4 @@ class AutodistributionFRSpider(SitemapSpider):
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(data["schedule"].replace("et"," ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR)
     
-        print(data["schedule"])
-        print(item["opening_hours"].as_opening_hours())
-        print()
-
         yield item
