@@ -133,7 +133,7 @@ class JapanPostJPSpider(Spider):
         js_ls = f"[{js_str}]"
         (tsv_str,) = parse_js_object(js_ls)
         reader = csv.reader(StringIO(tsv_str), delimiter="\t")
-        ret_code, rec_count, hit_count = map(int, next(reader))
+        _, rec_count, hit_count = map(int, next(reader))
         assert rec_count <= hit_count, (rec_count, hit_count)
         rows = list(reader)
         tempo_total = tempo_count + sum(1 for r in rows if r[0] == "TEMPO")
