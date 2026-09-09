@@ -1,11 +1,11 @@
-import random
-import time
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Iterable
 
-from chompjs import parse_js_object
-from scrapy import Spider
-from scrapy.http import FormRequest, Response
+from parsel import Selector
+from scrapy import Request, Spider
+from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -16,48 +16,47 @@ class SideStepSpider(Spider):
     item_attributes = {"brand": "Side Step", "brand_wikidata": "Q116894527"}
     requires_proxy = "ZA"
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        form_key = self.get_form_key()
-        req_time = str(int(time.time() * 1000))
-        yield FormRequest(
-            f"https://www.side-step.co.za/store_locator/location/updatemainpage?_={req_time}",
-            formdata={"form_key": form_key},
-            headers={"x-requested-with": "XMLHttpRequest"},
-            callback=self.parse_stores,
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request("https://www.side-step.co.za/amlocator/index/ajax/?p=1", callback=self.parse)
+
+    def parse(self, response: Response, first_ref: int | None = None, **kwargs: Any) -> Iterable[Request]:
+        locations = response.json()["items"]
+        # Requesting a page past the last one silently serves the first page again.
+        if locations[0]["id"] == first_ref:
+            return
+
+        for location in locations:
+            item = Feature()
+            item["ref"] = location["id"]
+            item["lat"] = location["lat"]
+            item["lon"] = location["lng"]
+            item["branch"] = location["name"].removeprefix("Side Step ")
+            store_url = Selector(text=location["popup_html"]).xpath("//a[@class='amlocator-link']/@href").get()
+            yield response.follow(store_url, callback=self.parse_store, cb_kwargs={"item": item})
+
+        page = int(response.url.rsplit("=", 1)[1])
+        yield Request(
+            f"https://www.side-step.co.za/amlocator/index/ajax/?p={page + 1}",
+            callback=self.parse,
+            cb_kwargs={"first_ref": first_ref or locations[0]["id"]},
         )
 
-    def get_form_key(self):
-        # Not 100% sure if this is necessary, but replicates what the page does
-        allowedCharacters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        formKey = ""
-        for i in range(16):
-            formKey += allowedCharacters[int(random.random() * 16)]
-        return formKey
+    def parse_store(self, response: Response, item: Feature) -> Iterable[Feature]:
+        item["website"] = response.url
+        item["addr_full"] = clean_address(
+            response.xpath('//span[@class="amlocator-text -bold"]/../span').xpath("normalize-space(.)").getall()
+        )
+        item["phone"] = response.xpath(
+            '//div[contains(@class, "amlocator-column")]//a[starts-with(@href, "tel:")]/@href'
+        ).get()
 
-    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
-        store_positions = {}
-        markers = response.xpath('.//script[contains(text(), "var locationsDefault = [];")]/text()').get()
-        for line in markers.split("\n"):
-            if "locations['" in line:
-                id = parse_js_object(line.split("=")[0])[0]
-                coords = parse_js_object(line.split("=")[1])
-                store_positions[id] = coords
-
-        for location in response.xpath('.//li[contains(@class, "location-info")]'):
-            item = Feature()
-            item["ref"] = (
-                location.xpath('.//div[contains(@x-ref, "mw-location_details_")]/@x-ref')
-                .get()
-                .replace("mw-location_details_", "")
+        item["opening_hours"] = OpeningHours()
+        for row in response.xpath('//div[@class="amlocator-week"]//div[contains(@class, "amlocator-row")]'):
+            day = row.xpath('normalize-space(.//span[contains(@class, "-day")])').get()
+            open_time, _, close_time = (
+                row.xpath('normalize-space(.//span[contains(@class, "-time")])').get().partition(" - ")
             )
-            item["lat"] = store_positions[item["ref"]]["lat"]
-            item["lon"] = store_positions[item["ref"]]["lng"]
-            branch_raw = location.xpath('.//address/span[@class="font-bold"]/text()').get()
-            item["branch"] = branch_raw.strip()
-            addr_all = location.xpath(".//address/span//text()").getall()
-            addr_all.remove(branch_raw)
-            addr_all = [i.replace("\\n", ",") for i in addr_all]
-            item["addr_full"] = clean_address(addr_all)
-            yield item
-            # Could now hit https://www.side-step.co.za/store_locator/location/locationdetail?_={new_req_time}&id={item['ref']}&current_page=cms_page_view
-            # but only extra info appears to be a phone number
+            item["opening_hours"].add_range(day, open_time, close_time)
+
+        apply_category(Categories.SHOP_SHOES, item)
+        yield item

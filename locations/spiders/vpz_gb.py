@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -15,5 +16,10 @@ class VpzGBSpider(UberallSpider):
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         item["image"] = None
         item["ref"] = location.get("id")
+        item["website"] = "https://www.vpz.co.uk/stores/l/{0}/{1}/{2}".format(
+            re.sub("[-., '/]+", "-", location.get("city").lower()),
+            re.sub("[-., '/]+", "-", location.get("streetAndNumber").lower()),
+            location.get("id"),
+        )
         apply_category(Categories.SHOP_E_CIGARETTE, item)
         yield item

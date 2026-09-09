@@ -17,6 +17,7 @@ class AdriaticFurnitureAUSpider(CrawlSpider):
     item_attributes = {"brand": "Adriatic Furniture", "brand_wikidata": "Q117856796"}
     allowed_domains = ["www.adriatic.com.au"]
     start_urls = ["https://www.adriatic.com.au/pages/store-locator"]
+    requires_proxy = "AU"
 
     rules = [Rule(LinkExtractor(allow=r"/pages/[a-z0-9\-]+$"), follow=False, callback="parse_store")]
 

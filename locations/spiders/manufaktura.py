@@ -29,7 +29,8 @@ class ManufakturaSpider(CrawlSpider):
         item["street_address"] = address_lines[0].strip(",")  # strip trailing comma
         item["postcode"] = re.match(r"\d{3}\s?\d{2}", address_lines[1].strip())[0]
         item["city"] = address_lines[1].strip().removeprefix(item["postcode"]).strip()
-        item["image"] = response.xpath("//*[@class='seller-gallery-item']/img/@src").get()
+        if image := response.xpath("//*[@class='seller-gallery-item']/img/@src").get():
+            item["image"] = response.urljoin(image)
         extract_phone(item, response)
         extract_mapy_cz_position(item, response)
         apply_category(Categories.SHOP_COSMETICS, item)

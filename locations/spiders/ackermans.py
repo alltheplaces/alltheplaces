@@ -16,6 +16,7 @@ class AckermansSpider(scrapy.Spider):
         "brand_wikidata": "Q4674255",
     }
     start_urls = ["https://www.ackermans.co.za/pages/store-directory"]
+    requires_proxy = "ZA"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         authorization_token = re.search(r"Authorization\s*:\s*\"([A-Za-z0-9\s]+)\"", response.text).group(1)

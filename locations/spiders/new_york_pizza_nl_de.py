@@ -4,8 +4,9 @@ from typing import AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import FormRequest, Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_DE, DAYS_EN, OpeningHours
+from locations.hours import DAYS_EN, OpeningHours
 
 
 class NewYorkPizzaNLDESpider(Spider):
@@ -23,7 +24,7 @@ class NewYorkPizzaNLDESpider(Spider):
     def parse_auth_token(self, response: Response, top_level_domain: str = None) -> Iterable[FormRequest]:
         auth_token = response.xpath('//input[@id="completeAntiForgeryToken"]/@value').get()
         yield FormRequest(
-            url=f"https://www.newyorkpizza.{top_level_domain}/General/GetFilteredStores/",
+            url=f"https://www.newyorkpizza.{top_level_domain}/General/GetFilteredStores",
             formdata={"includeSliceStores": "false", "storeIds": ""},
             headers={"RequestVerificationToken": auth_token},
             callback=self.parse,
@@ -42,16 +43,21 @@ class NewYorkPizzaNLDESpider(Spider):
             item["postcode"], item["city"] = store["address_line_2"].split(maxsplit=1)
             item["country"] = top_level_domain.upper()
             item["website"] = response.urljoin(store["details_url"])
-            item["opening_hours"] = self.convert_opening_hours(store, top_level_domain)
+            try:
+                item["opening_hours"] = self.convert_opening_hours(store)
+            except Exception:
+                pass
+
+            apply_category(Categories.FAST_FOOD, item)
+
             yield item
 
     @staticmethod
-    def convert_opening_hours(store, language) -> OpeningHours:
-        days_to_en = DAYS_DE if language == "de" else DAYS_EN
+    def convert_opening_hours(store) -> OpeningHours:
         re_interval = re.compile(r"(\d\d:\d\d) - (\d\d:\d\d)")
         hours = OpeningHours()
         for entry in store["opening_hours"]:
-            for weekday in OpeningHours.days_in_day_range(entry["key"].split("-"), days_to_en):
+            for weekday in OpeningHours.days_in_day_range(entry["key"].split("-"), DAYS_EN):
                 for open_time, close_time in re_interval.findall(entry["value"]):
                     hours.add_range(weekday, open_time, close_time)
         return hours

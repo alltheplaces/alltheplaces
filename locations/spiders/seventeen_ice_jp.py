@@ -66,6 +66,7 @@ class SeventeenIceJPSpider(Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "COOKIES_ENABLED": True,
+        "CONCURRENT_REQUESTS": 1,
     }
 
     async def start(self) -> AsyncIterator[Request]:

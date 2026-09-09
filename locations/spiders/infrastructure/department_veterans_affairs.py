@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -15,7 +15,12 @@ class DepartmentVeteransAffairsSpider(Spider):
     item_attributes = {"operator": "Veterans Health Administration", "operator_wikidata": "Q6580225"}
     allowed_domains = ["api.va.gov"]
 
+    # The facilities API requires a CSRF token, obtained from any other vets-api response header.
     async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest("https://api.va.gov/v0/maintenance_windows", callback=self.parse_token)
+
+    def parse_token(self, response: Response, **kwargs: Any) -> Any:
+        self.csrf_token = response.headers.get("X-Csrf-Token").decode()
         data = {
             "page": 1,
             "per_page": 1000,
@@ -28,10 +33,11 @@ class DepartmentVeteransAffairsSpider(Spider):
         yield JsonRequest(
             "https://api.va.gov/facilities_api/v2/va",
             data=data,
+            headers={"X-CSRF-Token": self.csrf_token},
             callback=self.parse_info,
         )
 
-    def parse_info(self, response):
+    def parse_info(self, response: Response, **kwargs: Any) -> Any:
         resp_json = response.json()
 
         data = resp_json["data"]
@@ -72,7 +78,9 @@ class DepartmentVeteransAffairsSpider(Spider):
             yield item
 
         if next_url := resp_json["links"]["next"]:
-            yield JsonRequest(next_url, callback=self.parse_info, method="POST")
+            yield JsonRequest(
+                next_url, headers={"X-CSRF-Token": self.csrf_token}, callback=self.parse_info, method="POST"
+            )
 
     def parse_address(self, item: Feature, place_info: dict):
         addr = place_info["address"]

@@ -1,4 +1,3 @@
-import json
 from typing import Any, AsyncIterator
 
 from scrapy import FormRequest
@@ -10,6 +9,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TatraBankaSKSpider(PlaywrightSpider):
@@ -37,10 +37,7 @@ class TatraBankaSKSpider(PlaywrightSpider):
                 "branchesWithCashRegister": "false",
             },
             headers={
-                "User-Agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-                ),
+                "User-Agent": BROWSER_DEFAULT,
                 "Referer": "https://www.tatrabanka.sk/sk/o-banke/pobocky-bankomaty/",
                 "Accept-Language": "sk-SK",
                 "X-Requested-With": "XMLHttpRequest",
@@ -49,7 +46,7 @@ class TatraBankaSKSpider(PlaywrightSpider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre//text()").get()).get("places", []):
+        for location in response.json().get("places", []):
             if not location.get("active", True) or location.get("temporarilyClosed"):
                 continue
 
@@ -84,9 +81,9 @@ class TatraBankaSKSpider(PlaywrightSpider):
         item["lon"] = location.get("positionE")
         item["city"] = location.get("city", {}).get("name")
         item.pop("website", None)
-
-        if branch := item.pop("name", None):
-            item["branch"] = branch
+        item.pop("name", None)
+        item["phone"] = None
+        item["email"] = None
 
         return item
 

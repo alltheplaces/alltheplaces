@@ -6,14 +6,16 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class BricomarchePLSpider(JSONBlobSpider):
+class BricomarchePLSpider(JSONBlobSpider, PlaywrightSpider):
     name = "bricomarche_pl"
     item_attributes = {"brand": "Bricomarché", "brand_wikidata": "Q2925147"}
     start_urls = ["https://www.bricomarche.pl/api/v1/pos/pos/poses.json"]
     locations_key = "results"
-    requires_proxy = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Bricomarché ")

@@ -17,23 +17,31 @@ class IciciBankINSpider(Spider):
     start_urls = ["https://maps.icicibank.com/content/icicibank/in/en.microsite.json"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
+    @staticmethod
+    def parse_time_range(hours: str) -> tuple[str, str] | None:
+        if m := re.search(r"(\d+:\d+(?:AM|PM))-(\d+:\d+(?:AM|PM))", hours.replace(".", ":").replace(" ", "")):
+            return m.group(1), m.group(2)
+        return None
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for branch in json.loads(response.text)["branch"]:
             item = DictParser.parse(branch)
-            item["street_address"] = item.pop("addr_full")
-            item["branch"] = branch["branchName"]
+            item["street_address"] = item.pop("addr_full", None)
+            item.pop("phone", None)
+            item["branch"] = branch.get("branchName")
             item["name"] = None
-            item["ref"] = branch["ifsc"]
-            item["postcode"] = branch["pincode"]
-            item["website"] = f'https://www.icicibank.com{branch["knowMoreUrl"]}'
+            item["ref"] = branch.get("ifsc")
+            item["postcode"] = branch.get("pincode")
+            if url := branch.get("knowMoreUrl"):
+                item["website"] = f"https://www.icicibank.com{url}"
             try:
-                if hours := branch.get("mondayToSaturdayBranchWorking", ""):
-                    if m := re.search(
-                        r"(\d+:\d+(?:AM|PM))-(\d+:\d+(?:AM|PM))",
-                        hours.replace(".", ":").replace(" ", ""),
-                    ):
-                        item["opening_hours"] = OpeningHours()
-                        item["opening_hours"].add_days_range(DAYS[0:6], m.group(1), m.group(2), "%I:%M%p")
+                oh = OpeningHours()
+                if weekday := self.parse_time_range(branch.get("mondayToFridayWorkingHrs") or ""):
+                    oh.add_days_range(DAYS[0:5], *weekday, "%I:%M%p")
+                if saturday := self.parse_time_range(branch.get("saturdayWorkingHrs") or ""):
+                    oh.add_range("Sa", *saturday, "%I:%M%p")
+                if oh.day_hours:
+                    item["opening_hours"] = oh
             except Exception as e:
                 self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
                 self.logger.warning(f"Failed to parse hours for {item['ref']}, {e}")
@@ -44,14 +52,18 @@ class IciciBankINSpider(Spider):
 
         for atm in json.loads(response.text)["atm"]:
             item = DictParser.parse(atm)
-            item["street_address"] = item.pop("addr_full")
-            item["branch"] = item.pop("name").replace("ICICI Bank ATM in ", "").strip()
-            item["ref"] = atm["siteId"]
-            item["postcode"] = atm["pinCode"]
-            item["website"] = f'https://www.icicibank.com{atm["knowMoreUrl"]}'.replace("/en/", "/")
+            item["street_address"] = item.pop("addr_full", None)
+            if name := item.pop("name", None):
+                item["branch"] = name.replace("ICICI Bank ATM in ", "").strip()
+            item["ref"] = atm.get("siteId")
+            item["postcode"] = atm.get("pinCode")
+            if url := atm.get("knowMoreUrl"):
+                item["website"] = f"https://www.icicibank.com{url}".replace("/en/", "/")
+            if atm.get("atm") == "24X7":
+                item["opening_hours"] = "24/7"
 
             apply_category(Categories.ATM, item)
-            if "N/A" in item.get("lat"):
+            if item.get("lat") and "N/A" in item["lat"]:
                 item["lat"] = None
                 item["lon"] = None
             yield item

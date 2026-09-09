@@ -2,7 +2,7 @@ import json
 from typing import Any
 
 import scrapy
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
@@ -21,14 +21,10 @@ class AmeripriseUSSpider(Spider):
 
     def parse_city(self, response: Response, state: str) -> Any:
         for city in response.xpath('//*[@class="public-sitemap-list"]//a/text()').getall():
-            payload = {"searchTerm": f"{city}, {state}", "numberOfRowsToReturn": "250", "searchType": "city, state"}
-            yield scrapy.FormRequest(
+            payload = {"searchTerm": f"{city}, {state}", "numberOfRowsToReturn": "50", "searchType": "city, state"}
+            yield JsonRequest(
                 url="https://www.ameripriseadvisors.com/api/locatorsearch/search/",
-                formdata={"criteria": json.dumps(payload)},
-                headers={
-                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                    "Accept": "application/json",
-                },
+                data={"criteria": json.dumps(payload)},
                 callback=self.parse_details,
             )
 

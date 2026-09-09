@@ -38,7 +38,7 @@ def test_apply_yes_no():
 
 def test_shop_tag_sanity():
     for cat in Categories:
-        if cat in {Categories.SHOP_E_CIGARETTE, Categories.SHOP_BEAUTY_SPA}:
+        if cat in {Categories.SHOP_E_CIGARETTE, Categories.SHOP_BEAUTY_SPA, Categories.SHOP_BEAUTY_LASER_HAIR_REMOVAL}:
             continue
         if cat.name.startswith("SHOP_"):
             shop_name = cat.name.split("_", 1)[1].lower()

@@ -22,8 +22,8 @@ class TyrepowerAUSpider(Spider):
         for location in response.json()["all_stores"]:
             item = DictParser.parse(location)
             item["street_address"] = clean_address([location["address1"], location["address2"]])
-            if location.get("websiteUrl"):
-                item["website"] = location["websiteUrl"]
+            if website := location.get("websiteUrl"):
+                item["website"] = website if website.startswith("http") else f"https://{website}"
             elif location.get("url"):
                 item["website"] = "https://www.tyrepower.com.au/" + location["url"]
             yield item

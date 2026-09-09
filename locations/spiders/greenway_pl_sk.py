@@ -13,7 +13,15 @@ class GreenwayPLSKSpider(Spider):
     item_attributes = {"brand": "GreenWay", "brand_wikidata": "Q116450281"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for lat, lon in country_iseadgg_centroids(["PL", "SK"], 48):
+        # The API ignores spanLat/spanLng and instead always returns the
+        # (up to 500) locations nearest to the requested point, regardless
+        # of how tight or wide a span is requested. With only ~1,200
+        # stations across PL+SK, a fine-grained search grid causes almost
+        # total overlap between requests (~97% duplicate drop rate at
+        # radius=48). A much coarser grid still finds every station, since
+        # each request's nearest-500 cutoff comfortably covers a wide area
+        # of this sparse network.
+        for lat, lon in country_iseadgg_centroids(["PL", "SK"], 315):
             yield JsonRequest(
                 url=f"https://api.greenwaypolska.pl/api/location/map?max_power[from]=1&connector_type[ccs_plug]=1&connector_type[chademo_plug]=1&connector_type[type2_plug]=1&connector_type[type2_socket]=1&latitude={lat}&longitude={lon}&spanLat=1&spanLng=1",
             )

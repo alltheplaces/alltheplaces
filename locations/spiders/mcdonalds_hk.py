@@ -1,27 +1,47 @@
-from typing import Any, AsyncIterator
+from typing import Any, Iterable
 
+from chompjs import chompjs
 from scrapy import Spider
-from scrapy.http import FormRequest, Response
+from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.react_server_components import parse_rsc
 from locations.spiders.mcdonalds import McdonaldsSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
 class McdonaldsHKSpider(Spider):
     name = "mcdonalds_hk"
     item_attributes = McdonaldsSpider.item_attributes
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_TIMEOUT": 180}
+    allowed_domains = ["www.mcdonalds.com.hk"]
+    start_urls = ["https://www.mcdonalds.com.hk/en/find-a-restaurant/"]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        yield FormRequest(
-            url="https://www.mcdonalds.com.hk/wp-admin/admin-ajax.php?action=get_restaurants", formdata={"type": "init"}
-        )
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        objs = [
+            chompjs.parse_js_object(s)
+            for s in response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        ]
+        data = dict(parse_rsc("".join([s for n, s in objs]).encode()))
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for index, store in enumerate(response.json()["restaurants"]):
+        for store in DictParser.get_nested_key(data, "restaurants"):
             item = DictParser.parse(store)
-            item["branch"] = store["title"]
-            item["name"] = self.item_attributes["brand"]
-            item["ref"] = index
+            # DictParser maps the feed's region onto state
+            item.pop("state", None)
+            item["ref"] = store["rid"]
+            item["branch"] = item.pop("name")
+            item["website"] = "https://www.mcdonalds.com.hk/en/find-a-restaurant/{}/".format(store["storeNo"])
+
+            item["opening_hours"] = OpeningHours()
+            for schedule in store["openingHours"]:
+                for rule in schedule["hours"]:
+                    if rule["start"] == "00:00" and rule["end"] == "00:00":
+                        # The website renders this range as "Open 24 Hours", not as a closed day.
+                        item["opening_hours"].add_range(rule["day"], "00:00", "24:00")
+                    elif "$undefined" not in (rule["start"], rule["end"]):
+                        item["opening_hours"].add_range(rule["day"], rule["start"], rule["end"])
+
+            apply_category(Categories.FAST_FOOD, item)
+
             yield item

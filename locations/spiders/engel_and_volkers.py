@@ -1,84 +1,33 @@
-import re
-from typing import AsyncIterator
+import json
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class EngelAndVolkersSpider(Spider):
+class EngelAndVolkersSpider(SitemapSpider, StructuredDataSpider):
     name = "engel_and_volkers"
     item_attributes = {"brand": "Engel & Völkers", "brand_wikidata": "Q1341765"}
-    allowed_domains = ["engelvoelkers.com"]
-    search_url_template = "https://shop-finder-backend.engelvoelkers.com/shop-finder/search?page=1&limit=10000&lat=0&lng=0&boundingBox=0,0,0,0&businessUnit=BOTH&city=&location=&country={country_code}&newSearchLogic=true"
-    country_codes = [
-        "AD",
-        "AE",
-        "AT",
-        "BE",
-        "BS",
-        "CA",
-        "CH",
-        "CL",
-        "CO",
-        "CR",
-        "CZ",
-        "DE",
-        "DK",
-        "ES",
-        "FR",
-        "GR",
-        "HR",
-        "HU",
-        "IE",
-        "IT",
-        "KY",
-        "LI",
-        "LU",
-        "MX",
-        "NL",
-        "PT",
-        "TC",
-        "US",
-        "ZA",
-    ]
+    sitemap_urls = ["https://www.engelvoelkers.com/sitemap_shop_profile.xml"]
+    sitemap_rules = [(r"/en/shops/[^/]+$", "parse_sd")]
+    wanted_types = ["RealEstateAgent"]
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for country_code in self.country_codes:
-            yield JsonRequest(url=self.search_url_template.format(country_code=country_code))
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        next_data = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+        if not next_data:
+            return
+        shop = json.loads(next_data).get("props", {}).get("pageProps", {}).get("shopData") or {}
+        if shop.get("shopStatus") and shop["shopStatus"] != "OPENED":
+            return
 
-    def parse(self, response):
-        for location in response.json()["shops"]:
-            if location["status"] != "OPENED":
-                continue
-            item = DictParser.parse(location)
-            item["lat"] = location["address"]["location"].get("lat")
-            item["lon"] = location["address"]["location"].get("lng")
-            item["street_address"] = item.pop("street", None)
-            item["city"] = location["address"].get("city")
-            item["country"] = location["address"].get("countryCode")
-            item["postcode"] = location["address"].get("postalCode")
-            item["phone"] = location["contactInfo"].get("phone")
-            item["website"] = location["contactInfo"].get("website")
-            if item["website"]:
-                item["website"] = re.sub(r"^engelvoelkers\.com\/", "https://engelvoelkers.com/", item["website"])
-                item["website"] = re.sub(
-                    r"^www\.engelvoelkers\.com\/", "https://www.engelvoelkers.com/", item["website"]
-                )
-                item["website"] = re.sub(
-                    r"^([\w\-]+)\.evrealestate\.com", r"https://\1.evrealestate.com", item["website"]
-                )
-            if location.get("googlePlaceDetails") and location["googlePlaceDetails"].get("openingHours"):
-                item["opening_hours"] = OpeningHours()
-                for day_hours in location["googlePlaceDetails"]["openingHours"]["periods"]:
-                    if not day_hours.get("open") or not day_hours.get("close"):
-                        continue
-                    item["opening_hours"].add_range(
-                        DAYS[day_hours["open"]["day"] - 1],
-                        day_hours["open"]["time"],
-                        day_hours["close"]["time"],
-                        "%H%M",
-                    )
-            yield item
+        if geo := shop.get("geoLocation"):
+            item["lat"] = geo.get("lat")
+            item["lon"] = geo.get("lng")
+
+        item["ref"] = shop.get("masterDataShopId") or item.get("ref")
+        item["website"] = response.url
+
+        apply_category(Categories.OFFICE_ESTATE_AGENT, item)
+
+        yield item

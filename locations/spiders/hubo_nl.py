@@ -4,7 +4,7 @@ from typing import Iterable
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -12,9 +12,8 @@ from locations.items import Feature
 
 class HuboNLSpider(Spider):
     name = "hubo_nl"
-    item_attributes = {"brand": "Hubo", "brand_wikidata": "Q5473953", "extras": Categories.SHOP_DOITYOURSELF.value}
+    item_attributes = {"brand": "Hubo", "brand_wikidata": "Q5473953"}
     start_urls = ["https://www.hubo.nl/winkels"]
-    requires_proxy = True
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for script in response.xpath("//script/text()").getall():
@@ -33,5 +32,6 @@ class HuboNLSpider(Spider):
                             oh.add_range(day, rule[f"from{i}"], rule[f"to{i}"])
                 item["opening_hours"] = oh
 
+                apply_category(Categories.SHOP_DOITYOURSELF, item)
                 yield item
             return

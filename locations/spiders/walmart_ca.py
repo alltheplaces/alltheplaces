@@ -10,7 +10,7 @@ from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import CHROME_LATEST
 
 
 class WalmartCASpider(Spider):
@@ -18,13 +18,13 @@ class WalmartCASpider(Spider):
     allowed_domains = ["www.walmart.ca"]
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}
     custom_settings = {
-        "USER_AGENT": BROWSER_DEFAULT,
+        "USER_AGENT": CHROME_LATEST,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
     }
     base_url = "https://www.walmart.ca/orchestra/graphql/storeFinderNearbyNodesQuery"
-    hash = "d3236419dacf3a02137445459aeaeda81fd40630ddd2d3f218cf43f60e1ad16a"
+    hash = "23594c3a307d6359f419a4247d6212be409ec7b74fb8963f5402147bed22e7fb"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         # Tried raw GraphQL query, but it's blocked, hash appears to be stable and required for successful requests.
@@ -49,13 +49,17 @@ class WalmartCASpider(Spider):
             yield JsonRequest(
                 url=f"{self.base_url}/{self.hash}?{urlencode({'variables': dumps(variables)})}",
                 headers={
+                    "accept-language": "en-CA",
+                    "referer": "https://www.walmart.ca/en",
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-origin",
                     "x-apollo-operation-name": "storeFinderNearbyNodesQuery",
                     "x-o-bu": "WALMART-CA",
-                    "x-o-segment": "oaoh",
                     "x-o-gql-query": "query storeFinderNearbyNodesQuery",
                     "x-o-mart": "B2C",
+                    "x-o-segment": "oaoh",
                 },
-                cookies={"walmart.nearestLatLng": f'{city["latitude"]},{city["longitude"]}'},
             )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

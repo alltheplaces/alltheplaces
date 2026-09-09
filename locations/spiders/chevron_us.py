@@ -60,7 +60,7 @@ def slugify(s):
 class ChevronUSSpider(JSONBlobSpider):
     name = "chevron_us"
     start_urls = [
-        "https://apis.chevron.com/api/StationFinder/alongtheway?clientid=A67B7471&geoLoc=((90%2C-180)%2C(-90%2C-180))&oLat=1&oLng=1"
+        "https://apis.chevron.com/api/StationFinder/nearby?clientid=A67B7471&geoLoc=((90%2C-180)%2C(-90%2C-180))&oLat=1&oLng=1"
     ]
     locations_key = "stations"
 

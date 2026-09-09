@@ -12,6 +12,7 @@ class DixyRUSpider(scrapy.Spider):
     item_attributes = {"brand": "Дикси", "brand_wikidata": "Q4161561"}
     start_urls = ["https://dixy.ru/ajax/stores-json.php"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = "RU"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():

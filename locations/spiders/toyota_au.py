@@ -36,7 +36,8 @@ class ToyotaAUSpider(JSONBlobSpider, PlaywrightSpider):
         item["lon"] = feature["refX"]
         item["state"] = feature["state"]
         item["street_address"] = item.pop("addr_full", None)
-        item["website"] = feature["webSite"]
+        if website := feature.get("webSite"):
+            item["website"] = website if website.startswith("http") else f"https://{website}"
 
         if feature.get("sales"):
             sales = item.deepcopy()

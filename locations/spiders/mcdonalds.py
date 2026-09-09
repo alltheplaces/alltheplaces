@@ -1,4 +1,3 @@
-import json
 from typing import AsyncIterator, Iterable
 
 from scrapy.http import Request, Response
@@ -76,7 +75,7 @@ class McdonaldsSpider(PlaywrightSpider):
     def parse_major_api(self, response: Response, country: str, locale: str) -> Iterable[Feature]:
         if len(response.body) == 0:
             return
-        stores = json.loads(response.xpath("//pre/text()").get())["features"]
+        stores = response.json()["features"]
         for store in stores:
             properties = store["properties"]
             store_identifier = properties["identifierValue"]

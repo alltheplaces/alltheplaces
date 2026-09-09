@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
@@ -7,6 +8,7 @@ from scrapy.http import Request, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.items import Feature
 
 
 class SuzukiDESpider(Spider):
@@ -31,5 +33,20 @@ class SuzukiDESpider(Spider):
             store["location"]["website"] = store["dealer"].get("homepage")
             store["location"]["province"] = store["dealer"].get("province")
             item = DictParser.parse(store["location"])
-            apply_category(Categories.SHOP_CAR, item)
-            yield item
+            if store["dealer"].get("dealertype") == "V":  # sales & services both
+                yield self.build_sales_item(item)
+                yield self.build_service_item(item)
+            elif store["dealer"].get("dealertype") == "S":  # services
+                yield self.build_service_item(item)
+
+    def build_sales_item(self, item: Feature) -> Feature:
+        sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-SALES"
+        apply_category(Categories.SHOP_CAR, sales_item)
+        return sales_item
+
+    def build_service_item(self, item: Feature) -> Feature:
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-SERVICE"
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item

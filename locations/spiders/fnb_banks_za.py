@@ -12,6 +12,7 @@ from locations.items import Feature
 class FnbBanksZASpider(Spider):
     name = "fnb_banks_za"
     item_attributes = {"brand": "FNB", "brand_wikidata": "Q3072956"}
+    requires_proxy = "ZA"  # Radware Bot Manager (validate.perfdrive.com) blocks direct requests
 
     async def start(self) -> AsyncIterator[Request]:
         # Search claims to accept search by province, in practice this returns barely any results

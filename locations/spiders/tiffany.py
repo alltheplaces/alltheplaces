@@ -1,59 +1,27 @@
-import urllib
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
-
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
-from locations.user_agents import FIREFOX_LATEST
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.yext_answers import YextAnswersSpider
 
 
-class TiffanySpider(Spider):
+class TiffanySpider(YextAnswersSpider):
     name = "tiffany"
     item_attributes = {"brand": "Tiffany & Company", "brand_wikidata": "Q1066858"}
-    allowed_domains = ["www.tiffany.com"]
-    start_urls = ["https://www.tiffany.com/content/tiffany-n-co/_jcr_content/servlets/storeslist.1.json"]
-    custom_settings = {"USER_AGENT": FIREFOX_LATEST}  # ATP and older user agents are blocked.
-    requires_proxy = True  # Data centre netblocks appear to be blocked.
+    api_key = "7a20022b59c1f54cf9bfa431c1edee2e"
+    experience_key = "international-locator-search"
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
+        if location.get("closed") or location.get("comingSoon"):
+            return
 
-    def parse(self, response):
-        for location in response.json()["resultDto"]:
-            item = DictParser.parse(location["store"])
-            if "TEMPORARILY CLOSED" in item["name"].upper():
-                continue
-            item["lat"] = location["store"]["geoCodeLattitude"]
-            item["lon"] = location["store"]["geoCodeLongitude"]
-            item["street_address"] = clean_address(
-                [
-                    location["store"].get("address1"),
-                    location["store"].get("address2"),
-                    location["store"].get("address3"),
-                ]
-            )
-            item["phone"] = location["store"]["phone"].split("/", 1)[0].strip()
-            item["website"] = (
-                "https://www.tiffany.com/jewelry-stores/" + location["storeSeoAttributes"][0]["canonicalUrlkeyword"]
-            )
-            if location["store"]["storePhoto"] != "/shared/images/stores/store_location.jpg":
-                item["image"] = urllib.parse.quote(
-                    "https://www.tiffany.com" + location["store"]["storePhoto"], safe=":/?=&"
-                )
-            opening_soon = False
-            for store_hours in location["storeHours"]:
-                if store_hours.get("storeHourTypeId", 0) == 1:
-                    if "OPENING SOON" in store_hours["storeHours"].upper():
-                        opening_soon = True
-                        break
-                    item["opening_hours"] = OpeningHours()
-                    item["opening_hours"].add_ranges_from_string(
-                        store_hours["storeHours"].replace("<br>", "").replace(".", "")
-                    )
-            if opening_soon:
-                continue
-            yield item
+        item["email"] = None
+        item["branch"] = location["address"].get("extraDescription")
+        if website := item.get("website"):
+            item["website"] = website.split("?", 1)[0]
+        if photos := location.get("photoGallery"):
+            item["image"] = photos[0]["image"]["url"]
+
+        is_cafe = "Blue Box Cafe" in item.pop("name")
+        apply_category(Categories.CAFE if is_cafe else Categories.SHOP_JEWELRY, item)
+        yield item
