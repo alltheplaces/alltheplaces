@@ -10,6 +10,7 @@ from locations.storefinders.mapion import MapionSpider
 ISUZU_SHARED_ATTRIBUTES = {"brand": "Isuzu", "brand_wikidata": "Q29803"}
 TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
 
+
 class IsuzuJPSpider(MapionSpider):
     name = "isuzu_jp"
     item_attributes = ISUZU_SHARED_ATTRIBUTES
