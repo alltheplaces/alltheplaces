@@ -21,7 +21,7 @@ class SamsicEmploiFRSpider(CrawlSpider, StructuredDataSpider):
             '//script[@type="application/ld+json" and contains(text(), "EmploymentAgency")]/text()'
         ).get()
         if raw:
-            yield json.loads(raw)["@graph"][0]["itemListElement"][0]
+            yield from json.loads(raw)["@graph"][0]["itemListElement"]
 
     def post_process_item(self, item, response, ld_data):
         apply_category(Categories.OFFICE_EMPLOYMENT_AGENCY, item)
