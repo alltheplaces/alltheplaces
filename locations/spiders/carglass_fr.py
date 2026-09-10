@@ -4,7 +4,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
 
 
-class CarglassFrSpider(SitemapSpider, StructuredDataSpider):
+class CarglassFRSpider(SitemapSpider, StructuredDataSpider):
     name = "carglass_fr"
     item_attributes = {
         "brand": "Carglass",
