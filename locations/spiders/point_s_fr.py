@@ -1,9 +1,10 @@
-from scrapy.http import FormRequest
 import json
 
+from scrapy.http import FormRequest
+
 from locations.categories import Categories, apply_category
+from locations.hours import CLOSED_FR, DAYS_FR, DELIMITERS_FR, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.hours import DAYS_FR, DELIMITERS_FR, CLOSED_FR, OpeningHours
 
 
 class PointSFRSpider(JSONBlobSpider):
@@ -12,7 +13,7 @@ class PointSFRSpider(JSONBlobSpider):
         "brand": "Point S",
         "brand_wikidata": "Q3393358",
     }
-    locations_key = ["data","centers"]
+    locations_key = ["data", "centers"]
 
     async def start(self):
         yield FormRequest(
@@ -38,9 +39,11 @@ class PointSFRSpider(JSONBlobSpider):
                 for i in data:
                     day = data[i]
                     item["opening_hours"].add_ranges_from_string(
-                        day["day"] + " " + 
-                        day["label"].replace("h",":").replace("et de",""), 
-                        DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR)
+                        day["day"] + " " + day["label"].replace("h", ":").replace("et de", ""),
+                        DAYS_FR,
+                        delimiters=DELIMITERS_FR,
+                        closed=CLOSED_FR,
+                    )
             except json.JSONDecodeError:
                 pass
 
