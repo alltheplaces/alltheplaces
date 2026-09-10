@@ -19,6 +19,10 @@ class CarglassFRSpider(SitemapSpider, StructuredDataSpider):
         if item.get("street_address") and item["street_address"].lower() == "norauto":
             return
 
+        item["branch"] = (
+            (item.pop("name") or "")
+            .removeprefix("Carglass® ")
+            .removesuffix(" Réparation et remplacement de pare-brise")
+        )
         apply_category(Categories.SHOP_CAR_REPAIR, item)
-        item["branch"] = (item.pop("name", "") or "").removeprefix("Carglass® ")
         yield item
