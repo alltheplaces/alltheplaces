@@ -225,7 +225,7 @@ class JapanPostJPSpider(Spider):
         groups = {
             "Mo-Fr": row[42:62],
             "Sa": row[62:82],
-            "Su": row[82:102],
+            "Su,PH": row[82:102],
         }
         parts = []
         for day, times in groups.items():
