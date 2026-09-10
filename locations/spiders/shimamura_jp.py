@@ -76,7 +76,7 @@ class ShimamuraJPSpider(scrapy.Spider):
             if len(parts) == 2:
                 pref, rest = parts
                 poi["addr_full"] = pref + rest
-                poi["extras"]["addr:province"] = pref
+                poi["state"] = pref
             else:
                 poi["addr_full"] = addr
             if phone := item.css(".result-item_tel a::text").get():
