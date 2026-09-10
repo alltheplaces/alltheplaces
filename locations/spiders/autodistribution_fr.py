@@ -31,7 +31,7 @@ class AutodistributionFRSpider(SitemapSpider):
         apply_category(Categories.SHOP_CAR_REPAIR, item)
         item["country"] = "FR"
 
-        item["branch"] = item.pop("name", "").removeprefix("autodistribution ")
+        item["branch"] = (item.pop("name", "") or "").removeprefix("autodistribution ")
 
         item["street_address"] = item.pop("addr_full", "")
         item["email"] = data.pop("mail", "")
