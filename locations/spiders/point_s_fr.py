@@ -20,24 +20,26 @@ class PointSFRSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        apply_category(Categories.SHOP_CAR_REPAIR, item)
-        item["country"] = "FR"
         item["branch"] = item.pop("name", "")
 
-        schedule = feature.pop("schedules")
-        if schedule:
+        if schedules := feature.get("schedules"):
             try:
-                item["opening_hours"] = OpeningHours()
-                data = json.loads(schedule)
-                for i in data:
-                    day = data[i]
-                    item["opening_hours"].add_ranges_from_string(
-                        day["day"] + " " + day["label"].replace("h", ":").replace("et de", ""),
-                        DAYS_FR,
-                        delimiters=DELIMITERS_FR,
-                        closed=CLOSED_FR,
-                    )
-            except json.JSONDecodeError:
+                item["opening_hours"] = self.parse_opening_hours(schedules)
+            except Exception:
                 pass
 
+        apply_category(Categories.SHOP_CAR_REPAIR, item)
         yield item
+
+    def parse_opening_hours(self, schedules) -> OpeningHours:
+        oh = OpeningHours()
+
+        data = json.loads(schedules)
+        for day in data.values():
+            oh.add_ranges_from_string(
+                day["day"] + " " + day["label"].replace("h", ":").replace("et de", ""),
+                DAYS_FR,
+                delimiters=DELIMITERS_FR,
+                closed=CLOSED_FR,
+            )
+        return oh
