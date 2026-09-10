@@ -37,7 +37,8 @@ class AutodistributionFRSpider(SitemapSpider):
         item["branch"] = (item.pop("name", "") or "").removeprefix("autodistribution ")
 
         if item.get("street_address") is None:
-            item["street_address"] = item.pop("addr_full")
+            if addr_full := item.pop("addr_full", None):
+                item["street_address"] = addr_full
 
         if item.get("email") is None:
             item["email"] = data.pop("mail", "")
