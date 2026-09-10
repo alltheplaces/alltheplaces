@@ -1,6 +1,8 @@
 import chompjs
 from scrapy.spiders import SitemapSpider
 
+from urllib.parse import urlsplit
+
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import CLOSED_FR, DAYS_FR, DELIMITERS_FR, OpeningHours
@@ -20,7 +22,8 @@ class AutodistributionFRSpider(SitemapSpider):
         script = response.xpath('//script[contains(text(), "schedule")]/text()').get()
         if not script:
             return
-        slug = response.url.rstrip("/").split("/")[-1].split("?")[0]
+        slug = urlsplit(response.url).path.rstrip("/").rsplit("/", 1)[-1]
+
         payload = chompjs.parse_js_object(script.replace("&q;", '"'))
         key = f"G.json.https://backend.production.gcp.autodistribution.fr/api/shop/{slug}?"
         if key not in payload:
@@ -33,17 +36,24 @@ class AutodistributionFRSpider(SitemapSpider):
 
         item["branch"] = (item.pop("name", "") or "").removeprefix("autodistribution ")
 
-        item["street_address"] = item.pop("addr_full", "")
-        item["email"] = data.pop("mail", "")
+        if item.get("street_address") is None:
+            item["street_address"] = item.pop("addr_full")
+
+        if item.get("email") is None:
+            item["email"] = data.pop("mail", "")
+
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(
             data["schedule"].replace("et", " ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR
         )
 
-        item["lat"] = item.pop("lat", "").replace(",", ".")
-        lon = item.pop("lon", "").replace(",", ".")
-        if lon.startswith("."):
-            lon = "0" + lon
-        item["lon"] = lon
+        if item.get("lat") is not None:
+            item["lat"] = item.pop("lat", "").replace(",", ".")
+
+        if item.get("lon") is not None:
+            lon = item.pop("lon", "").replace(",", ".")
+            if lon.startswith("."):
+                lon = "0" + lon
+            item["lon"] = lon
 
         yield item
