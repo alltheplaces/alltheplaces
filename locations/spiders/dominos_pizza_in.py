@@ -1,33 +1,27 @@
-import re
+import json
+from typing import Iterator
 
-from scrapy import Request
+import scrapy
 from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.spiders import Spider
 
+from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class DominosPizzaINSpider(SitemapSpider, StructuredDataSpider):
+class DominosPizzaINSpider(Spider):
     name = "dominos_pizza_in"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}
-    sitemap_urls = ["https://www.dominos.co.in/store-locations/sitemap_store.xml"]
+    start_urls = ["https://www.dominos.co.in/store-location"]
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("Dominos Pizza ")
-        item["addr_full"] = item.pop("street_address")
-        if not clean_address(item["addr_full"]):
-            yield Request(
-                url=response.url.replace("store-locations", "store-location"),
-                callback=self.parse_location,
-                cb_kwargs=dict(item=item),
-            )
-        else:
-            yield item
+    def parse(self, response: Response) -> Iterator[Feature]:
+        for city in json.loads(response.xpath("//brand-city-list//@data-results").get()):
+            yield scrapy.Request(url=f"https://www.dominos.co.in/store-location/{city}", callback=self.parse_city)
 
-    def parse_location(self, response: Response, item: Feature):
-        address = response.xpath('//*[contains(@class, "store-page-address")]/text()').get("")
-        item["addr_full"] = re.sub(r"(.+?\d{5,}).*", r"\1", address)  # Remove phone to clean address
-        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get()
-        yield item
+    def parse_city(self, response: Response) -> Iterator[Feature]:
+        for stores_data in json.loads(response.xpath("//brand-store-list//@data-results").get()):
+            for store in stores_data.get("storeStationDetails"):
+                item = DictParser.parse(store.get("store"))
+                item["branch"] = item.pop("name")
+                item["website"] = response.url
+                yield item
