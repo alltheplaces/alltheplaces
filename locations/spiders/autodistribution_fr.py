@@ -1,7 +1,7 @@
+from urllib.parse import urlsplit
+
 import chompjs
 from scrapy.spiders import SitemapSpider
-
-from urllib.parse import urlsplit
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
