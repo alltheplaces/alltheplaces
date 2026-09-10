@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import AsyncIterator, Iterator
+from zoneinfo import ZoneInfo
 
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -49,11 +50,11 @@ FIELDS = {
     "pet_recycle": "col_55",  # PET bottle recycling machine
 }
 
-# The active-store + opening-date conditions is from the map page's own query.
-# opening_date (col_2) uses the YYYYMMDDHH form, so it returns stores opened up to now
+# The active-store + opening-date conditions are copied from the map page's own query.
+# opening_date (col_2) uses the YYYYMMDDHH format (UTC+9), so it returns stores opened up to now.
 SEARCH_CONDITIONS = [
     {"field": "col_10", "value": "1", "comparison_operator": "="},
-    {"field": "col_2", "value": datetime.now().strftime("%Y%m%d%H"), "comparison_operator": "<="},
+    {"field": "col_2", "value": datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d%H"), "comparison_operator": "<="},
     {
         "conditions": [
             {"field": "col_2", "value": "1", "comparison_operator": "prefix"},
