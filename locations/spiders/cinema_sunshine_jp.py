@@ -31,7 +31,7 @@ def parse_nuxt_jsonp(text: str) -> dict:
     params = PARAMS_RE.search(text).group(1).split(",")
     values = chompjs.parse_js_object(f"[{VALUES_RE.search(text).group(1)}]")
     data_object = chompjs.parse_js_object(OBJECT_RE.search(text).group(1))
-    args = dict(zip(params, values))
+    args = dict(zip(params, values, strict=True))
     payload = _populate_placeholders(data_object, args)
     return payload
 
