@@ -36,9 +36,6 @@ class MarksAndSpencerSpider(CrawlSpider):
             item["operator_wikidata"] = "Q6917970"
             item["name"] = "M&S Simply Food"
             apply_category(Categories.SHOP_CONVENIENCE, item)
-        elif "-simply-food-" in response.url:
-            item["name"] = "M&S Simply Food"
-            apply_category(Categories.SHOP_CONVENIENCE, item)
         else:
             item["name"] = "Marks & Spencer"
             apply_category(Categories.GENERIC_SHOP, item)
