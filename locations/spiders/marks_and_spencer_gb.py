@@ -9,8 +9,8 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 
 
-class MarksAndSpencerSpider(CrawlSpider):
-    name = "marks_and_spencer"
+class MarksAndSpencerGBSpider(CrawlSpider):
+    name = "marks_and_spencer_gb"
     item_attributes = {"brand": "Marks & Spencer", "brand_wikidata": "Q714491"}
     start_urls = ["https://www.marksandspencer.com/store-listing"]
     rules = [Rule(LinkExtractor(allow=r"/stores/[^/]+$"), callback="parse")]
