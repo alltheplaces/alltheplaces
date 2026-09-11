@@ -18,7 +18,6 @@ class ExtendedStayAmericaSpider(Spider):
     }
     start_urls = ["https://www.extendedstayamerica.com/hotels"]
     custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_data = json.loads(re.search(r"hotelsData\s*=\s*(\[.*\]);", response.text).group(1))
