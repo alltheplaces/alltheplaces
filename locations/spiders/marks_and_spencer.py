@@ -18,6 +18,7 @@ class MarksAndSpencerSpider(CrawlSpider):
             json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get()), "store"
         )
         item = DictParser.parse(json_data)
+        item["housenumber"] = item.pop("street_address")
         item["street"] = json_data.get("address").get("addressLine2")
         if "-bp-" in response.url:
             item["located_in"] = "BP"
