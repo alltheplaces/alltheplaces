@@ -1,5 +1,7 @@
 import json
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -13,7 +15,7 @@ class MarksAndSpencerSpider(CrawlSpider):
     start_urls = ["https://www.marksandspencer.com/store-listing"]
     rules = [Rule(LinkExtractor(allow=r"/stores/[^/]+$"), callback="parse")]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         json_data = DictParser.get_nested_key(
             json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get()), "store"
         )
