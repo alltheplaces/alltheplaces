@@ -20,6 +20,7 @@ class MarksAndSpencerSpider(CrawlSpider):
             json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get()), "store"
         )
         item = DictParser.parse(json_data)
+        item["branch"] = item.pop("name")
         item["housenumber"] = item.pop("street_address")
         item["street"] = json_data.get("address").get("addressLine2")
         item["website"] = response.url
@@ -34,15 +35,22 @@ class MarksAndSpencerSpider(CrawlSpider):
             item["operator_wikidata"] = "Q6917970"
             item["name"] = "M&S Simply Food"
             apply_category(Categories.SHOP_CONVENIENCE, item)
-        elif "-simply-food-" in response.url:
+        elif "-welcome-break-" in response.url:
+            item["name"] = "M&S Simply Food"
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        elif "-simply-food-" in response.url or "-simply-foods-" in response.url:
             item["name"] = "M&S Simply Food"
             apply_category(Categories.SHOP_CONVENIENCE, item)
         elif "-foodhall-" in response.url:
             item["name"] = "M&S Foodhall"
             apply_category(Categories.SHOP_SUPERMARKET, item)
         else:
-            item["name"] = "Marks & Spencer"
-            apply_category(Categories.GENERIC_SHOP, item)
+            if "OUTLET" in item["branch"]:
+                item["name"] = "M&S Outlet"
+                apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+            else:
+                item["name"] = "Marks & Spencer"
+                apply_category(Categories.GENERIC_SHOP, item)
 
         facilities = [f["name"] for f in json_data["facilities"]]
         apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "Baby changing facilities" in facilities)
