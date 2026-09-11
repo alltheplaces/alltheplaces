@@ -23,9 +23,15 @@ class MarksAndSpencerSpider(CrawlSpider):
         item["housenumber"] = item.pop("street_address")
         item["street"] = json_data.get("address").get("addressLine2")
         item["website"] = response.url
+
         if "-bp-" in response.url:
             item["located_in"] = "BP"
             item["located_in_wikidata"] = "Q152057"
+            item["name"] = "M&S Simply Food"
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        elif "-moto-simply-food-" in response.url:
+            item["operator"] = "Moto"
+            item["operator_wikidata"] = "Q6917970"
             item["name"] = "M&S Simply Food"
             apply_category(Categories.SHOP_CONVENIENCE, item)
         elif "-simply-food-" in response.url:
@@ -34,11 +40,6 @@ class MarksAndSpencerSpider(CrawlSpider):
         elif "-foodhall-" in response.url:
             item["name"] = "M&S Foodhall"
             apply_category(Categories.SHOP_SUPERMARKET, item)
-        elif "-moto-simply-food-" in response.url:
-            item["operator"] = "Moto"
-            item["operator_wikidata"] = "Q6917970"
-            item["name"] = "M&S Simply Food"
-            apply_category(Categories.SHOP_CONVENIENCE, item)
         else:
             item["name"] = "Marks & Spencer"
             apply_category(Categories.GENERIC_SHOP, item)
