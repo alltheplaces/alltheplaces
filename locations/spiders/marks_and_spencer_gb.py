@@ -21,8 +21,7 @@ class MarksAndSpencerGBSpider(CrawlSpider):
         )
         item = DictParser.parse(json_data)
         item["branch"] = item.pop("name")
-        item["housenumber"] = item.pop("street_address")
-        item["street"] = json_data.get("address").get("addressLine2")
+        item["street_address"] = json_data.get("address").get("addressLine2")
         item["website"] = response.url
 
         if "-bp-" in response.url:
