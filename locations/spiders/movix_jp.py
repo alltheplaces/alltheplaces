@@ -11,7 +11,7 @@ THEATER_LIST_URL = "https://www.smt-cinema.com/assets/module/page_theater_list_p
 
 class MovixJPSpider(Spider):
     name = "movix_jp"
-    item_attributes = {"brand_wikidata": "Q11532184"}
+    item_attributes = {"brand": "MOVIX", "brand_wikidata": "Q11532184"}
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(url=THEATER_LIST_URL, callback=self.parse_theater_list)
