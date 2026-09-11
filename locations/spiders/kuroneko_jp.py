@@ -61,7 +61,7 @@ class KuronekoJPSpider(Spider):
         if rec_count >= hit_count:
             yield self.make_request(lat, lon, offset + rec_count)
         for row in reader:
-            if row[3] in ("001", "002"):  # skip FamilyMart, 7-11
+            if row[3] in ("001", "002", "101", "171", "418", "436"):  # skip convenience stores
                 continue
             item = Feature()
             item["ref"] = row[0]
