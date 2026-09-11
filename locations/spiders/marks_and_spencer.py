@@ -5,7 +5,7 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
 
@@ -41,5 +41,16 @@ class MarksAndSpencerSpider(CrawlSpider):
         else:
             item["name"] = "Marks & Spencer"
             apply_category(Categories.GENERIC_SHOP, item)
+
+        facilities = [f["name"] for f in json_data["facilities"]]
+        apply_yes_no(Extras.BABY_CHANGING_TABLE, item, "Baby changing facilities" in facilities)
+        apply_yes_no(Extras.PARKING, item, "Car parking" in facilities)
+        apply_yes_no(Extras.TOILETS, item, "Toilets" in facilities)
+
+        services = [f["name"] for f in json_data["services"]]
+        apply_yes_no(Extras.ATM, item, "Cash machine" in services)
+        apply_yes_no(Extras.WIFI, item, "Free Wi-Fi" in services)
+
+        # departments = [f["name"] for f in json_data["departments"]]
 
         yield item
