@@ -22,6 +22,7 @@ class MarksAndSpencerSpider(CrawlSpider):
         item = DictParser.parse(json_data)
         item["housenumber"] = item.pop("street_address")
         item["street"] = json_data.get("address").get("addressLine2")
+        item["website"] = response.url
         if "-bp-" in response.url:
             item["located_in"] = "BP"
             item["located_in_wikidata"] = "Q152057"
