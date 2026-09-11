@@ -10,7 +10,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class RapidPareBriseFRSpider(SitemapSpider, StructuredDataSpider):
     name = "rapid_pare_brise_fr"
-    item_attributes = {"brand": "Rapid Pare-Brise", "brand_wikidata": "Q112064766"}
+    item_attributes = {"brand": "Rapid Pare Brise", "brand_wikidata": "Q112064766"}
     sitemap_urls = ["https://www.rapidparebrise.fr/sitemap.xml"]
     sitemap_rules = [(r"^https://www\.rapidparebrise\.fr/.*-\d+$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
