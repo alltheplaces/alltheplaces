@@ -1,116 +1,45 @@
 import json
 
-import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.spiders.central_england_cooperative import set_operator
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
-class MarksAndSpencerSpider(scrapy.Spider):
+class MarksAndSpencerSpider(CrawlSpider):
     name = "marks_and_spencer"
     item_attributes = {"brand": "Marks & Spencer", "brand_wikidata": "Q714491"}
-    start_urls = (
-        "https://www.marksandspencer.com/webapp/wcs/stores/servlet/MSResStoreFinderConfigCmd?storeId=10151&langId=-24",
-    )
+    start_urls = ["https://www.marksandspencer.com/store-listing"]
+    rules = [Rule(LinkExtractor(allow=r"/stores/[^/]+$"), callback="parse")]
 
     def parse(self, response):
-        config = json.loads(response.text.replace("STORE_FINDER_CONFIG=", ""))
-        stores_api_url = f"{config['storeFinderAPIBaseURL']}?apikey={config['apiConsumerKey']}"
-        yield response.follow(stores_api_url, self.parse_stores)
+        json_data = DictParser.get_nested_key(
+            json.loads(response.xpath('//*[@id="__NEXT_DATA__"]/text()').get()), "store"
+        )
+        item = DictParser.parse(json_data)
+        item["street"] = json_data.get("address").get("addressLine2")
+        if "-bp-" in response.url:
+            item["located_in"] = "BP"
+            item["located_in_wikidata"] = "Q152057"
+            item["name"] = "M&S Simply Food"
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        elif "-simply-food-" in response.url:
+            item["name"] = "M&S Simply Food"
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        elif "-foodhall-" in response.url:
+            item["name"] = "M&S Foodhall"
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif "-moto-simply-food-" in response.url:
+            item["operator"] = "Moto"
+            item["operator_wikidata"] = "Q6917970"
+            item["name"] = "M&S Simply Food"
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        elif "-simply-food-" in response.url:
+            item["name"] = "M&S Simply Food"
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+        else:
+            item["name"] = "Marks & Spencer"
+            apply_category(Categories.GENERIC_SHOP, item)
 
-    def parse_stores(self, response):
-        stores = response.json()
-        for store in stores["results"]:
-            if store.get("locationTypeName") in [None, "Applegreen", "Event"]:
-                continue
-
-            properties = {
-                "ref": store["id"],
-                "street_address": store["address"]["addressLine2"],
-                "city": store["address"]["city"],
-                "country": store["address"]["country"],
-                "postcode": store["address"]["postalCode"],
-                "lat": store["coordinates"]["latitude"],
-                "lon": store["coordinates"]["longitude"],
-                "phone": store.get("phone", ""),
-                "opening_hours": self.get_opening_hours(store),
-                "website": "https://www.marksandspencer.com/stores/"
-                + store["name"].lower().replace(" ", "-")
-                + "-"
-                + str(store["id"]),
-                "extras": {},
-            }
-
-            if store["address"]["country"] != "United Kingdom":
-                properties["website"] = None
-
-            if store["storeType"] == "mands":
-                set_operator(self.item_attributes, properties)
-
-            name = store["name"].lower()
-            if store["locationTypeName"] == "BP Store":
-                properties["located_in"] = "BP"
-                properties["located_in_wikidata"] = "Q152057"
-                properties["name"] = "M&S Simply Food"  # Or M&S Food
-                apply_category(Categories.SHOP_CONVENIENCE, properties)  # Or SHOP_SUPERMARKET
-            elif store["locationTypeName"] == "MOTO (Simply Food)":
-                properties["operator"] = "Moto"
-                properties["operator_wikidata"] = "Q6917970"
-                properties["name"] = "M&S Simply Food"
-                apply_category(Categories.SHOP_CONVENIENCE, properties)
-            elif store["locationTypeName"] in ["SSP Air (Simply)", "SSP Rail (Simply)", "SSP Hospitals"]:
-                properties["operator"] = "SSP"
-                properties["operator_wikidata"] = "Q7447660"
-                properties["name"] = "M&S Simply Food"
-                apply_category(Categories.SHOP_CONVENIENCE, properties)
-            elif store["locationTypeName"] == "HM Stanley":
-                properties["name"] = "M&S Food"
-                apply_category(Categories.SHOP_CONVENIENCE, properties)
-            elif store["locationTypeName"] == "Frn Prtn Simply Food":
-                properties["name"] = "M&S Simply Food"
-                apply_category(Categories.SHOP_CONVENIENCE, properties)
-            elif store["locationTypeName"] == "Outlet Store":
-                properties["name"] = "M&S Outlet"
-                apply_category(Categories.SHOP_DEPARTMENT_STORE, properties)
-            elif store["locationTypeName"] in ["Full Line", "Ireland - Full Line"]:
-                properties["name"] = "Marks & Spencer"
-                apply_category(Categories.SHOP_DEPARTMENT_STORE, properties)
-            elif store["locationTypeName"] == "Compass UK":
-                properties["operator"] = "Compass Group"
-                properties["operator_wikidata"] = "Q1074937"
-                properties["name"] = "M&S Food"
-                apply_category(Categories.SHOP_CONVENIENCE, properties)
-            elif store["locationTypeName"] == "LondonRetailPartner":
-                properties["name"] = "M&S Simply Food"
-                apply_category(Categories.SHOP_CONVENIENCE, properties)
-            else:
-                if name.endswith("foodhall") or name.endswith(" fh"):
-                    properties["name"] = "M&S Foodhall"
-                    apply_category(Categories.SHOP_SUPERMARKET, properties)
-                elif name.endswith("simply food") or name.endswith(" sf"):
-                    properties["name"] = "M&S Simply Food"
-                    apply_category(Categories.SHOP_CONVENIENCE, properties)
-                else:
-                    properties["name"] = "Marks & Spencer"
-                    apply_category(Categories.GENERIC_SHOP, properties)
-
-            services = [s["id"] for s in store["services"]]
-            apply_yes_no(Extras.ATM, properties, "SVC_CASHMC" in services)
-            apply_yes_no(Extras.WIFI, properties, "SVC_WIFI" in services)
-
-            yield Feature(**properties)
-
-    def get_opening_hours(self, store):
-        o = OpeningHours()
-        for day in store["coreOpeningHours"]:
-            if day["open"] == "00:00" and day["close"] == "00:00":
-                o.set_closed(day["day"])
-                continue
-            o.add_range(
-                day["day"][:2],
-                day["open"].replace("24:00", "00:00"),
-                day["close"].replace("24:00", "23:59"),
-            )
-        return o
+        yield item
