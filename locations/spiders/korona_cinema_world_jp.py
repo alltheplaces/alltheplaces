@@ -115,14 +115,14 @@ class KoronaCinemaWorldJPSpider(JSONBlobSpider):
         apply_category(Categories.CINEMA, item)
         yield item
 
-    DAYS_BY_LABEL = {
-        "平日": DAYS[:5],
-        "土曜日": ["Sa"],
-        "日・祝日": ["Su"],
-        "月曜日～木曜日": DAYS[:4],
-        "金曜日": ["Fr"],
-        "金曜日・祝前日": ["Fr"],
-        "金曜日～日曜日・祝日": DAYS[4:],
+    DAY_RULES = {
+        "平日": {"days": DAYS[:5]},
+        "土曜日": {"days": ["Sa"]},
+        "日・祝日": {"days": ["Su"], "holiday": "PH"},
+        "月曜日～木曜日": {"days": DAYS[:4]},
+        "金曜日": {"days": ["Fr"]},
+        "金曜日・祝前日": {"days": ["Fr"], "holiday": "PH -1 day"},
+        "金曜日～日曜日・祝日": {"days": DAYS[4:], "holiday": "PH"},
     }
 
     def apply_opening_hours(self, item: Feature, rows: list) -> None:
@@ -132,11 +132,15 @@ class KoronaCinemaWorldJPSpider(JSONBlobSpider):
             if not (match := TIME_RE.search(row["opening_hours"])):
                 continue
             label = row["opening_hours"][: match.start()].strip()
+            rule = self.DAY_RULES.get(label)
+            if not rule:
+                self.logger.warning(f"Unhandled opening hours label for {item.get('ref')}: {label!r}")
+                continue
             open_time = f"{int(match.group(1)):02d}:{match.group(2)}"
             close_time = f"{int(match.group(3)):02d}:{match.group(4)}"
-            oh.add_days_range(self.DAYS_BY_LABEL[label], open_time, close_time)
-            if label == "金曜日・祝前日":
-                holiday_clauses.append(f"PH -1 day {open_time}-{close_time}")
+            oh.add_days_range(rule["days"], open_time, close_time)
+            if prefix := rule.get("holiday"):
+                holiday_clauses.append(f"{prefix} {open_time}-{close_time}")
         if hours := oh.as_opening_hours():
             if holiday_clauses:
                 hours += "; " + "; ".join(holiday_clauses)
