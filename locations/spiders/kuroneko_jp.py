@@ -3,6 +3,7 @@ import re
 from io import StringIO
 
 from chompjs import parse_js_object
+from pyproj import Transformer
 from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
@@ -19,6 +20,7 @@ BRANDS = {
     "YTC": ("ヤマト運輸", "Q6584353"),
 }
 MAX_ITEMS = 1640  # determined experimentally
+TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
 RADIUS_KM = 24
 MAP_ID = "yamato01"  # for storefinder
 
@@ -59,13 +61,16 @@ class KuronekoJPSpider(Spider):
         if rec_count >= hit_count:
             yield self.make_request(lat, lon, offset + rec_count)
         for row in reader:
-            if row[3] == "001":  # skip FamilyMart
+            if row[3] in ("001", "002", "101", "171", "418", "436"):  # skip convenience stores
                 continue
             item = Feature()
             item["ref"] = row[0]
             item["website"] = f"https://www.e-map.ne.jp/p/{MAP_ID}/dtl/{row[0]}/"
-            item["lat"] = row[1]
-            item["lon"] = row[2]
+            lat = float(row[1])
+            lon = float(row[2])
+            wgs84_lat, wgs84_lon = TOKYO_TO_WGS84.transform(lat, lon)
+            item["lat"] = wgs84_lat
+            item["lon"] = wgs84_lon
             if row[3] == "YTC":
                 apply_category(Categories.POST_OFFICE, item)
                 item["branch"] = row[6]
