@@ -14,7 +14,7 @@ class TroisBrasseursFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://restaurants.3brasseurs.com/sitemap_pois.xml"]
     sitemap_rules = [(r"https://restaurants.3brasseurs.com/fr/france-FR/.*", "parse_sd")]
     wanted_types = ["Restaurant"]
-    drop_attributes = {"image"}
+    drop_attributes = {"image", "twitter"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if item.get("facebook") == "https://www.facebook.com/3brasseurs/":
