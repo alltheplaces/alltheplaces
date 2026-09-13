@@ -1,0 +1,26 @@
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
+
+
+class NocibeFRSpider(SitemapSpider, StructuredDataSpider):
+    name = "nocibe_fr"
+    item_attributes = {
+        "brand": "Nocibé",
+        "brand_wikidata": "Q3342592",
+    }
+    sitemap_urls = ["https://www.nocibe.fr/api/v2/fr_FR_ncb/sitemap/storesitemap0.xml"]
+    sitemap_rules = [(r"/\d+$", "parse_sd")]
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0"
+    }  # BROWSER_DEFAULT does not work
+    wanted_types = ["LocalBusiness"]
+    drop_attributes = ["facebook", "image"]
+    requires_proxy = "FR"
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["branch"] = item.pop("name", "")
+        item["street_address"] = (item.get("street_address") or "").removesuffix(" undefined")
+        apply_category(Categories.SHOP_PERFUMERY, item)
+        yield item
