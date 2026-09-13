@@ -2,7 +2,6 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import FIREFOX_LATEST
 
 
 class NocibeFRSpider(SitemapSpider, StructuredDataSpider):
@@ -13,7 +12,9 @@ class NocibeFRSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://www.nocibe.fr/api/v2/fr_FR_ncb/sitemap/storesitemap0.xml"]
     sitemap_rules = [(r"/\d+$", "parse_sd")]
-    custom_settings = {"USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0"}  # BROWSER_DEFAULT does not work
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0"
+    }  # BROWSER_DEFAULT does not work
     wanted_types = ["LocalBusiness"]
     drop_attributes = ["facebook", "image"]
     requires_proxy = "FR"
