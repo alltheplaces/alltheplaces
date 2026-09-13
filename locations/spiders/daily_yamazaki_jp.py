@@ -45,9 +45,12 @@ OPENING_HOURS_RE = re.compile(r"^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$")
 class DailyYamazakiJPSpider(AreamarkerSpider):
     name = "daily_yamazaki_jp"
     item_attributes = {
-        "brand": "デイリーヤマザキ",
+        "brand": "Daily YAMAZAKI",
         "brand_wikidata": "Q5209392",
-        "extras": {"brand:en": "Daily YAMAZAKI"},
+        "extras": {
+            "brand:en": "Daily YAMAZAKI",
+            "brand:ja": "デイリーヤマザキ",
+        },
     }
 
     api_url = "https://ss-api.areamarker.com/v1/search-by-condition"
