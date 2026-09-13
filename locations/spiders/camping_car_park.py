@@ -1,9 +1,9 @@
-from scrapy.spiders import SitemapSpider
-from locations.items import Feature
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-from locations.categories import Categories, apply_category, Extras, apply_yes_no
 
 
 class CampingCarParkSpider(SitemapSpider, StructuredDataSpider):
@@ -18,10 +18,9 @@ class CampingCarParkSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = ["image"]
     search_for_amenity_features = True
 
-
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.CARAVAN_SITE, item)
-        
+
         slug = item.get("website").split("/motor-home/")[1]
         lang = "en_GB/motor-home/"
         match item.get("country").lower():
@@ -42,7 +41,9 @@ class CampingCarParkSpider(SitemapSpider, StructuredDataSpider):
         for feature in ld_item.get("amenityFeature") or []:
             match feature.get("name") or "":
                 case "Drainage":
-                    apply_yes_no(Extras.SANITARY_DUMP_STATION, item, feature.get("value")) #should be "customers" instead of "yes" ?
+                    apply_yes_no(
+                        Extras.SANITARY_DUMP_STATION, item, feature.get("value")
+                    )  # should be "customers" instead of "yes" ?
                 case "Water":
                     apply_yes_no(Extras.DRINKING_WATER, item, feature.get("value"))
                 case "Wifi":
@@ -52,4 +53,4 @@ class CampingCarParkSpider(SitemapSpider, StructuredDataSpider):
                 case "Launderette":
                     apply_yes_no(Extras.LAUNDRY, item, feature.get("value"))
                 # case _:
-                    # ignore Security and Selective sorting features 
+                # ignore Security and Selective sorting features
