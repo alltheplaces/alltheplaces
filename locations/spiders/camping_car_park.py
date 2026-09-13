@@ -1,7 +1,7 @@
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Vending, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -51,6 +51,6 @@ class CampingCarParkSpider(SitemapSpider, StructuredDataSpider):
                 case "Electricity":
                     apply_yes_no(Extras.POWER_SUPPLY, item, feature.get("value"))
                 case "Launderette":
-                    apply_yes_no(Extras.LAUNDRY, item, feature.get("value"))
+                    apply_yes_no(Vending.LAUNDRY, item, feature.get("value"))
                 # case _:
                 # ignore Security and Selective sorting features
