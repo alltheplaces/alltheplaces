@@ -16,6 +16,7 @@ class NocibeFRSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"USER_AGENT": FIREFOX_LATEST}  # BROWSER_DEFAULT does not work
     wanted_types = ["LocalBusiness"]
     drop_attributes = ["facebook", "image"]
+    requires_proxy = "FR"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name", "")
