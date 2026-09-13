@@ -701,6 +701,7 @@ class Extras(Enum):
     INDOOR_SEATING = "indoor_seating"
     KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
+    LAUNDRY = "laundry"
     LIVE_MUSIC = "live_music"
     LUNCH = "lunch"
     MALE = "male"

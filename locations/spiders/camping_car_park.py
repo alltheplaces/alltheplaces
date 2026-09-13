@@ -22,7 +22,7 @@ class CampingCarParkSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.CARAVAN_SITE, item)
 
         slug = item.get("website").split("/motor-home/")[1]
-        lang = "en_GB/motor-home/"
+        lang = "en_GB/motor-home"
         match item.get("country").lower():
             case "spain":
                 lang = "es_ES/estancia-autocaravanas"
@@ -51,6 +51,6 @@ class CampingCarParkSpider(SitemapSpider, StructuredDataSpider):
                 case "Electricity":
                     apply_yes_no(Extras.POWER_SUPPLY, item, feature.get("value"))
                 case "Launderette":
-                    apply_yes_no(Vending.LAUNDRY, item, feature.get("value"))
+                    apply_yes_no(Extras.LAUNDRY, item, feature.get("value"))
                 # case _:
                 # ignore Security and Selective sorting features
