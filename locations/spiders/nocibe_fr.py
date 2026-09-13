@@ -19,6 +19,6 @@ class NocibeFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name", "")
-        item["street_address"] = (item.get("street_address") or "").removesuffix(' undefined')
+        item["street_address"] = (item.get("street_address") or "").removesuffix(" undefined")
         apply_category(Categories.SHOP_PERFUMERY, item)
         yield item
