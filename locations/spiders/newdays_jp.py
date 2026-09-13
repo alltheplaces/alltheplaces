@@ -6,16 +6,6 @@ from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 from locations.storefinders.location_cloud import LocationCloudSpider
 
-# Store-name brand tokens, longest first so "NewDays KIOSK" wins over "NewDays".
-BRAND_PREFIXES = (
-    "NewDays ",
-    "NewDaysミニ ",
-    "NewDaysミニ",
-    "NewDays KIOSK ",
-    "KIOSK ",
-    "NewDays＋HANAGATAYA ",
-)
-
 
 class NewdaysJPSpider(LocationCloudSpider):
     name = "newdays_jp"
@@ -143,7 +133,15 @@ class NewdaysJPSpider(LocationCloudSpider):
 
 
 def _strip_brand(name: str) -> str:
-    for prefix in BRAND_PREFIXES:
+    brand_prefixes = (
+        "NewDays KIOSK ",
+        "NewDays ",
+        "NewDaysミニ ",
+        "NewDaysミニ",
+        "KIOSK ",
+        "NewDays＋HANAGATAYA ",
+    )
+    for prefix in brand_prefixes:
         if name.startswith(prefix):
             return name[len(prefix) :]
     return name
