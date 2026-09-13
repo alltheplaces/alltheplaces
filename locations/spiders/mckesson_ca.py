@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, DAYS_FR, OpeningHours
 
@@ -32,6 +33,8 @@ class MckessonCASpider(Spider):
 
     def parse(self, response):
         for location in response.json()["pharmacies"]:
+            if location["banner"] not in self.brands:
+                continue
             item = DictParser.parse(location)
             item.update(self.brands[location["banner"]])
             if location["banner"] in ["G", "I", "R"]:
@@ -50,4 +53,5 @@ class MckessonCASpider(Spider):
                     item["opening_hours"].add_range(
                         DAYS_FR[day_hours["day"]], day_hours["startTime"], day_hours["endTime"], "%H:%M:%S"
                     )
+            apply_category(Categories.PHARMACY, item)
             yield item

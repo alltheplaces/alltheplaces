@@ -55,11 +55,12 @@ class CaffeNeroSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for day_name, day_hours in location["properties"]["hoursRegular"].items():
-                if day_hours["open"] == "closed" or day_hours["close"] == "closed":
-                    item["opening_hours"].set_closed(day_name)
                 if day_name == "holiday":
                     continue
-                item["opening_hours"].add_range(day_name, day_hours["open"], day_hours["close"])
+                if day_hours["open"] == "closed" or day_hours["close"] == "closed":
+                    item["opening_hours"].set_closed(day_name)
+                else:
+                    item["opening_hours"].add_range(day_name, day_hours["open"][:5], day_hours["close"][:5])
 
             apply_yes_no(Extras.TAKEAWAY, item, location["properties"]["status"]["takeaway"], False)
             apply_yes_no(Extras.DELIVERY, item, location["properties"]["status"]["delivery"], False)

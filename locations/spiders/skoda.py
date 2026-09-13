@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.spiders.volkswagen import VolkswagenSpider
 
 
@@ -74,8 +75,8 @@ class SkodaSpider(Spider):
                 url="https://www.skoda-auto.de/apps/retailers/api/{}/{}/DealersV2/GetDealers".format(
                     country_id, country[0]
                 ),
-                meta={"country_code": country[1]},
-                callback=self.parse_skoda_api,
+                meta={"country": country, "country_id": country_id},
+                callback=self.request_details,
             )
 
         for country in self.available_countries_porsche_api:
@@ -85,34 +86,93 @@ class SkodaSpider(Spider):
                 meta={"brand": self.item_attributes, "country": country, "crawler": self.crawler},
             )
 
-    def parse_skoda_api(self, response: Response, **kwargs: Any) -> Any:
+    def request_details(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json():
-            store.update(store.pop("address", {}))
-            item = DictParser.parse(store)
-            item["street_address"] = item.pop("street")
-            item["ref"] = store["globalId"]
-            item["country"] = response.meta["country_code"]
-            # Some coordinates in TR have lat and lon switched and are usually bad.
-            # Locations in ME have country property equal to RS
-            if result := reverse_geocoder.get((item["lat"], item["lon"]), mode=1, verbose=False):
-                if item["country"] != result["cc"] and item["country"] == "TR":
-                    item["lon"] = None
-                    item["lat"] = None
-                elif item["country"] != result["cc"] and item["country"] == "RS":
-                    item["country"] = result["cc"]
-            facilities = [
-                facility.get("code", "").lower()
-                for department in ["sales", "services"]
-                for facility in store.get(department, [])
-            ]
-            if "sales" in facilities or "usedcarsales" in facilities:
-                shop_item = deepcopy(item)
-                shop_item["ref"] = f"{item['ref']}-SHOP"
-                apply_category(Categories.SHOP_CAR, shop_item)
-                apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, shop_item, "usedcarsales" in facilities)
-                yield shop_item
-            if "service" in facilities:
-                service_item = deepcopy(item)
-                service_item["ref"] = f"{item['ref']}-SERVICE"
-                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-                yield service_item
+            yield JsonRequest(
+                url="https://www.skoda-auto.de/apps/retailers/api/{}/{}/DealersV2/GetDealerDetail?id={}".format(
+                    response.meta["country_id"], response.meta["country"][0], store["globalId"]
+                ),
+                meta={"country_code": response.meta["country"][1]},
+                callback=self.parse_skoda_api,
+            )
+
+    def parse_skoda_api(self, response: Response, **kwargs: Any) -> Any:
+        store = response.json()
+        store.update(store.pop("address", {}))
+        item = DictParser.parse(store)
+        item["street_address"] = item.pop("street")
+        item["ref"] = store["globalId"]
+        item["website"] = (store.get("contact") or {}).get("webUrl")
+        item["country"] = response.meta["country_code"]
+
+        # Some coordinates in TR have lat and lon switched and are usually bad.
+        # Locations in ME have country property equal to RS
+        if result := reverse_geocoder.get((item["lat"], item["lon"]), mode=1, verbose=False):
+            if item["country"] != result["cc"] and item["country"] == "TR":
+                item["lon"] = None
+                item["lat"] = None
+            elif item["country"] != result["cc"] and item["country"] == "RS":
+                item["country"] = result["cc"]
+
+        facilities = [
+            facility.get("code", "").lower()
+            for department in ["sales", "services"]
+            for facility in store.get(department, [])
+        ]
+
+        shop_facility = next((f for f in ["sales", "usedcarsales"] if f in facilities), None)
+        service_facility = next((f for f in ["service"] if f in facilities), None)
+
+        if shop_facility:
+            shop_item = deepcopy(item)
+            shop_item["ref"] = f"{item['ref']}-SHOP"
+            department = self.extract_department(store, "sale", shop_facility)
+            contact = department.get("contact") or {}
+            opening_hours = department.get("openingHours") or []
+            shop_item["phone"] = contact.get("telephone")
+            shop_item["email"] = contact.get("email")
+            try:
+                shop_item["opening_hours"] = self.parse_hours(opening_hours)
+            except Exception as e:
+                self.logger.warning("Error parsing hours for {}: {}".format(shop_item["ref"], e))
+            apply_category(Categories.SHOP_CAR, shop_item)
+            apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, shop_item, "usedcarsales" in facilities)
+            yield shop_item
+
+        if service_facility:
+            service_item = deepcopy(item)
+            service_item["ref"] = f"{item['ref']}-SERVICE"
+            department = self.extract_department(store, "service", service_facility)
+            contact = department.get("contact") or {}
+            opening_hours = department.get("openingHours") or []
+            service_item["phone"] = contact.get("telephone")
+            service_item["email"] = contact.get("email")
+            try:
+                service_item["opening_hours"] = self.parse_hours(opening_hours)
+            except Exception as e:
+                self.logger.warning("Error parsing hours for {}: {}".format(service_item["ref"], e))
+            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+            yield service_item
+
+    def extract_department(self, store: dict, department: str, facility: str) -> dict | None:
+        service = store.get(department) or {}
+        departments = service.get("items") or []
+        return next(
+            (d for d in departments if (d.get("code") or "").lower() == facility),
+            None,
+        )
+
+    def parse_hours(self, hours: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for entry in hours:
+            day = entry["weekDay"]
+            hour_type = entry["openingHourType"]
+            if hour_type == "closed":
+                oh.set_closed(day)
+            elif hour_type in ("oneTimeInterval", "twoTimeIntervals"):
+                intervals = ("1",) if hour_type == "oneTimeInterval" else ("1", "2")
+                for i in intervals:
+                    open_time = entry[f"interval{i}From"]
+                    close_time = entry[f"interval{i}To"]
+                    oh.add_range(day, open_time, close_time, "%H:%M:%S")
+        return oh

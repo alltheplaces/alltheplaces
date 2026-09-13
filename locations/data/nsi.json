@@ -950,7 +950,8 @@
 							"pl",
 							"pt",
 							"rs",
-							"ua"
+							"ua",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -1324,7 +1325,8 @@
 					"id": "bi1-df7908",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -2418,7 +2420,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -3016,7 +3019,8 @@
 							"de",
 							"es",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -6046,7 +6050,8 @@
 					"id": "netto-df7908",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -8536,7 +8541,8 @@
 					"id": "stationu-df7908",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -8705,7 +8711,8 @@
 					"id": "systemeu-df7908",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -9248,7 +9255,8 @@
 					"id": "totalcontact-df7908",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -18087,7 +18095,8 @@
 					"id": "banquepalatine-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -18121,7 +18130,8 @@
 					"id": "banquepopulairegrandouest-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -18526,7 +18536,8 @@
 					"id": "bcp-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -20468,7 +20479,8 @@
 					"id": "ccf-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -20764,7 +20776,8 @@
 					"id": "cic-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -21706,7 +21719,8 @@
 					"id": "creditcooperatif-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -21776,7 +21790,8 @@
 					"id": "creditmutueldebretagne-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -31222,7 +31237,8 @@
 					"id": "sg-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -31286,7 +31302,8 @@
 					"id": "societemarseillaisedecredit-2f8fb0",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -45905,7 +45922,8 @@
 					"id": "banquepalatine-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -45935,7 +45953,8 @@
 					"id": "banquepopulairegrandouest-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -46311,7 +46330,8 @@
 					"id": "bcp-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -48126,7 +48146,8 @@
 					"id": "ccf-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -48400,7 +48421,8 @@
 					"id": "cic-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -49288,7 +49310,8 @@
 					"id": "creditcooperatif-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -49352,7 +49375,8 @@
 					"id": "creditmutueldebretagne-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -58078,7 +58102,8 @@
 					"id": "sg-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -58139,7 +58164,8 @@
 					"id": "societemarseillaisedecredit-b30a91",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -70167,7 +70193,8 @@
 					"id": "cvelo-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -71296,7 +71323,8 @@
 					"id": "idecycle-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -71683,7 +71711,8 @@
 					"id": "levelo-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -71700,7 +71729,8 @@
 					"id": "levelopartbm-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -71734,7 +71764,8 @@
 					"id": "libelo-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -72002,7 +72033,8 @@
 					"id": "metrovelo-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -72483,7 +72515,8 @@
 					"id": "optymo-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -73376,7 +73409,8 @@
 					"id": "smtc-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -73470,7 +73504,8 @@
 					"id": "star-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -74000,7 +74035,8 @@
 					"id": "vlille-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -74089,7 +74125,8 @@
 					"id": "vcub-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -74169,7 +74206,8 @@
 					"id": "velektro-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -74248,7 +74286,8 @@
 					"id": "velibleu-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -74461,7 +74500,8 @@
 					"id": "velolib-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -74769,7 +74809,8 @@
 					"id": "yelo-d06f5d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -75588,7 +75629,8 @@
 							"re",
 							"sz",
 							"za",
-							"zm"
+							"zm",
+							"fr"
 						]
 					},
 					"tags": {
@@ -77042,7 +77084,8 @@
 					"id": "cafeducentre-1bfce4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -77119,7 +77162,8 @@
 							"be",
 							"fx",
 							"pt",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -79216,7 +79260,8 @@
 							"my",
 							"ph",
 							"sg",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -79482,7 +79527,8 @@
 							"si",
 							"sk",
 							"tr",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -80162,7 +80208,8 @@
 					"id": "momentea-1bfce4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -82453,7 +82500,8 @@
 						"include": [
 							"ae",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -87902,7 +87950,8 @@
 					"locationSet": {
 						"include": [
 							"ch",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -87923,7 +87972,8 @@
 							"de",
 							"es",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -89135,7 +89185,8 @@
 							"de",
 							"fx",
 							"it",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -91794,7 +91845,8 @@
 					"id": "cgrcinemas-24fd45",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -92174,7 +92226,8 @@
 					"id": "cineville-24fd45",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -92323,7 +92376,8 @@
 					"id": "hautetcourt-24fd45",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -92518,7 +92572,8 @@
 					"id": "lesecransdeparis-24fd45",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -92549,7 +92604,8 @@
 					"id": "majestic-24fd45",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -93131,7 +93187,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -93150,7 +93207,8 @@
 					"id": "utopia-24fd45",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -94811,7 +94869,8 @@
 					"id": "pointvision-0fcd2d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -94974,7 +95033,8 @@
 					"id": "pointcode-50cd0e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -95711,7 +95771,8 @@
 					"id": "bagelcorner-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -95910,7 +95971,8 @@
 							"de",
 							"fx",
 							"it",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -96541,7 +96603,8 @@
 					"id": "brutbutcher-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -97145,7 +97208,8 @@
 					"id": "chamastacos-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -97297,7 +97361,8 @@
 					"id": "chezlancien-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -97440,7 +97505,8 @@
 					"id": "chickenspot-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -97798,7 +97864,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -97866,7 +97933,8 @@
 					"id": "coeurdeble-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -97887,7 +97955,8 @@
 					"id": "cojean-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -98023,7 +98092,8 @@
 					"id": "cotesushi-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -99758,7 +99828,8 @@
 						"include": [
 							"be",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -100058,7 +100129,8 @@
 					"id": "gladalle-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -101577,7 +101649,8 @@
 					"id": "joystacos-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -102272,7 +102345,8 @@
 					"id": "kroustysabaidi-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -102756,7 +102830,8 @@
 					"id": "lesburgersdepapa-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -103208,7 +103283,8 @@
 					"id": "masterpoulet-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -105245,7 +105321,8 @@
 							"fx",
 							"gb-lon.geojson",
 							"it",
-							"tn"
+							"tn",
+							"fr"
 						]
 					},
 					"tags": {
@@ -105535,7 +105612,8 @@
 					"id": "pizzapai-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -105838,7 +105916,8 @@
 							"it",
 							"pt",
 							"ro",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -108213,7 +108292,8 @@
 					"id": "tacosavenue-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -108247,7 +108327,8 @@
 					"id": "takosking-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -108321,7 +108402,8 @@
 						"include": [
 							"be",
 							"dz",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -109069,7 +109151,8 @@
 					"id": "tuttipizza-11ef38",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -109735,7 +109818,8 @@
 							"id",
 							"mx",
 							"sg",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -109864,7 +109948,8 @@
 							"pt",
 							"qa",
 							"sa",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -115950,7 +116035,8 @@
 							"pl",
 							"pt",
 							"rs",
-							"ua"
+							"ua",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -116325,7 +116411,8 @@
 					"id": "bi1-acec89",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -117425,7 +117512,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -118080,7 +118168,8 @@
 							"de",
 							"es",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -121125,7 +121214,8 @@
 					"id": "netto-acec89",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -123623,7 +123713,8 @@
 					"id": "stationu-acec89",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -123792,7 +123883,8 @@
 					"id": "systemeu-acec89",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -124357,7 +124449,8 @@
 					"id": "totalcontact-acec89",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -130097,7 +130190,8 @@
 					"id": "crechepeopleandbaby-9b7dc9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -130312,7 +130406,8 @@
 					"id": "lespetitschaperonsrouges-9b7dc9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -132938,7 +133033,8 @@
 					"id": "pickupstation-b94a6a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -135385,7 +135481,8 @@
 							"nl",
 							"pt",
 							"ro",
-							"tr"
+							"tr",
+							"fr"
 						]
 					},
 					"preserveTags": [
@@ -135478,7 +135575,8 @@
 					"id": "antonandwillem-f887ab",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -139212,7 +139310,8 @@
 					"id": "pharmacieduchateau-f887ab",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -145814,7 +145913,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -146206,7 +146306,8 @@
 					"id": "ninkasi-f6ed5c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -146935,7 +147036,8 @@
 					"id": "cabanealivres-c4d8c7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -148566,7 +148668,8 @@
 					"id": "basilicandco-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -149033,7 +149136,8 @@
 					"id": "bistroregent-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -150930,7 +151034,8 @@
 						"include": [
 							"fx",
 							"gb",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -151361,7 +151466,8 @@
 					"id": "flunch-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -152608,7 +152714,8 @@
 					"id": "indianacafe-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -152650,7 +152757,8 @@
 							"ph",
 							"sg",
 							"us",
-							"vn"
+							"vn",
+							"fr"
 						]
 					},
 					"tags": {
@@ -153140,7 +153248,8 @@
 							"sg",
 							"th",
 							"us",
-							"xk"
+							"xk",
+							"fr"
 						]
 					},
 					"tags": {
@@ -153156,7 +153265,8 @@
 					"id": "latelier-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -153260,7 +153370,8 @@
 					"id": "lapataterie-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -153512,7 +153623,8 @@
 					"id": "leondebruxelles-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -154319,7 +154431,8 @@
 					"id": "memphis-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -154366,7 +154479,8 @@
 					"id": "meuhrestaurant-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -155551,7 +155665,8 @@
 					"id": "pbpouletbraise-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -155873,7 +155988,8 @@
 					"id": "pizzacosy-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -155958,7 +156074,8 @@
 					"id": "pizzapai-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -156068,7 +156185,8 @@
 					"id": "poivrerouge-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -156411,7 +156529,8 @@
 					"id": "ristorantedelarte-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -157132,7 +157251,8 @@
 					"id": "signorizza-47e37e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -164204,7 +164324,8 @@
 					"id": "ehpadduch-f6f802",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -164288,7 +164409,8 @@
 					"id": "lespetitescantines-f6f802",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -165027,7 +165149,8 @@
 					"id": "chariots-81c0b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -165330,7 +165453,8 @@
 					"id": "norisko-4cf8cf",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -166804,7 +166928,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -169435,7 +169560,8 @@
 					"id": "shiva-0ba6c8",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -170036,7 +170162,8 @@
 					"id": "kpark-64a527",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -170051,7 +170178,8 @@
 					"id": "komilfo-64a527",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171212,7 +171340,8 @@
 					"id": "biogroup-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171325,7 +171454,8 @@
 					"id": "biorylis-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171374,7 +171504,8 @@
 					"id": "cedibiounilabs-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171564,7 +171695,8 @@
 					"id": "eurofinsbiolab-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171580,7 +171712,8 @@
 					"id": "eylauunilabs-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171672,7 +171805,8 @@
 					"id": "laboratoiredebiologiemedicale-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171701,7 +171835,8 @@
 					"id": "laborizonmaineanjou-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171717,7 +171852,8 @@
 					"id": "labouest-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171953,7 +172089,8 @@
 					"id": "unibio-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -171992,7 +172129,8 @@
 					"id": "unilabsbioct-d77f29",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -175685,7 +175823,8 @@
 					"id": "lappartfitness-2caaa4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -175818,7 +175957,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -175872,7 +176012,8 @@
 					"id": "neoness-2caaa4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -176668,7 +176809,8 @@
 					"id": "vitaliberte-2caaa4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -177829,7 +177971,8 @@
 							"kr",
 							"kw",
 							"mx",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -178569,7 +178712,8 @@
 							"de",
 							"fx",
 							"it",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -181226,7 +181370,8 @@
 					"id": "generaledesservices-16802d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -181305,7 +181450,8 @@
 					"id": "lacompagniedesdeboucheurs-16802d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -182251,7 +182397,8 @@
 					"id": "appelmedical-e5fc42",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -182301,7 +182448,8 @@
 					"id": "critinterim-e5fc42",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -182353,7 +182501,8 @@
 					"id": "interaction-e5fc42",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -182452,7 +182601,8 @@
 					"id": "morganservices-e5fc42",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -182594,7 +182744,8 @@
 					"id": "supplay-e5fc42",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -182609,7 +182760,8 @@
 					"id": "synergie-e5fc42",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -182656,7 +182808,8 @@
 					"id": "temporis-e5fc42",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -182855,7 +183008,8 @@
 					"id": "activexpertise-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -183100,7 +183254,8 @@
 					"id": "cabinetbedin-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -183171,7 +183326,8 @@
 					"id": "cimmimmobilier-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -183339,7 +183495,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"mq"
+							"mq",
+							"fr"
 						]
 					},
 					"tags": {
@@ -183522,7 +183679,8 @@
 					"id": "foncia-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -183689,7 +183847,8 @@
 					"id": "humanimmobilier-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -184064,7 +184223,8 @@
 					"id": "nestenn-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -184079,7 +184239,8 @@
 					"id": "nexity-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -184375,7 +184536,8 @@
 					"id": "squarehabitat-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -184405,7 +184567,8 @@
 					"id": "stephaneplazaimmobilier-b7bc37",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -185272,7 +185435,8 @@
 					"id": "cafpi-1791d3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -185386,7 +185550,8 @@
 					"id": "meilleurtaux-1791d3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -185468,7 +185633,8 @@
 					"id": "vousfinancer-1791d3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -185498,7 +185664,8 @@
 					"id": "ymanci-1791d3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"note": "Three branches: Assurances, Cr\u00e9dit immobilier and Regroupement de cr\u00e9dits",
@@ -186193,7 +186360,8 @@
 					"id": "franceservices-9f865c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -186947,7 +187115,8 @@
 					"id": "abeilleassurances-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -186962,7 +187131,8 @@
 					"id": "aesiomutuelle-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -187436,7 +187606,8 @@
 					"id": "assu2000-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -188660,7 +188831,8 @@
 					"id": "harmoniemutuelle-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -189169,7 +189341,8 @@
 					"id": "macif-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -189215,7 +189388,8 @@
 					"id": "matmut-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -189309,7 +189483,8 @@
 					"id": "mma-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -189355,7 +189530,8 @@
 					"id": "mutuelledepoitiersassurances-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -189630,7 +189806,8 @@
 					"id": "prevoirassurances-8c2e7e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -191594,7 +191771,8 @@
 					"id": "randstaddigital-ae4dd7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -192235,7 +192413,8 @@
 					"id": "lesdemenageursbretons-05c8b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -192509,7 +192688,8 @@
 					"id": "particommunistefrancais-ed1753",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193556,7 +193736,8 @@
 					"id": "cfdt-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193572,7 +193753,8 @@
 					"id": "cfecgc-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193588,7 +193770,8 @@
 					"id": "cftc-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193604,7 +193787,8 @@
 					"id": "cgt-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193652,7 +193836,8 @@
 					"id": "fo-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193668,7 +193853,8 @@
 					"id": "fse-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193781,7 +193967,8 @@
 					"id": "sesl-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193797,7 +193984,8 @@
 					"id": "solidaires-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193813,7 +194001,8 @@
 					"id": "ue-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -193829,7 +194018,8 @@
 					"id": "unef-98227a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -194603,7 +194793,8 @@
 					"id": "lacervoiserie-f2c698",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -195316,7 +195507,8 @@
 					"id": "vandb-f2c698",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -196604,7 +196796,8 @@
 					"id": "aubert-e62f20",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -196845,7 +197038,8 @@
 					"id": "natalys-e62f20",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -197566,7 +197760,8 @@
 					"id": "aupaindemongrandpere-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -197581,7 +197776,8 @@
 					"id": "augustin-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -198121,7 +198317,8 @@
 					"id": "boulangeriefeuillette-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -198153,7 +198350,8 @@
 					"id": "boulangerielouise-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -198359,7 +198557,8 @@
 					"id": "campaillette-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -198789,7 +198988,8 @@
 					"id": "festivaldespains-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -199478,7 +199678,8 @@
 					"id": "latelierpapilles-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -199496,7 +199697,8 @@
 					"id": "lamiecaline-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -199511,7 +199713,8 @@
 					"id": "lapanetiere-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -199526,7 +199729,8 @@
 					"id": "latalemelerie-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -199628,7 +199832,8 @@
 					"id": "lepetrinribeirou-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -199661,7 +199866,8 @@
 					"id": "lesfournilsdefrance-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -199772,7 +199978,8 @@
 					"id": "maisonbecam-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -199787,7 +199994,8 @@
 					"id": "maisonplanchot-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -199850,7 +200058,8 @@
 					"id": "marieblachere-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -199869,7 +200078,8 @@
 					"id": "mariette-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -200759,7 +200969,8 @@
 					"id": "sophielebreuilly-09ad2c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -202685,7 +202896,8 @@
 					"id": "carlance-b52040",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -202701,7 +202913,8 @@
 					"id": "citronvert-b52040",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -202751,7 +202964,8 @@
 					"id": "depiltech-b52040",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -202825,7 +203039,8 @@
 							"fx",
 							"gf",
 							"gp",
-							"re"
+							"re",
+							"fr"
 						]
 					},
 					"tags": {
@@ -203198,7 +203413,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -203921,7 +204137,8 @@
 					"id": "franceliterie-1bbb34",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -203967,7 +204184,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -203982,7 +204200,8 @@
 					"id": "leroidumatelas-1bbb34",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -205015,7 +205234,8 @@
 					"id": "alltricks-64ac44",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -205117,7 +205337,8 @@
 					"id": "bouticycle-64ac44",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -205132,7 +205353,8 @@
 					"id": "culturevelo-64ac44",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -205147,7 +205369,8 @@
 					"id": "cyclable-64ac44",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -205330,7 +205553,8 @@
 					"id": "materielvelocom-64ac44",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -205348,7 +205572,8 @@
 					"id": "mondovelo-64ac44",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -206657,7 +206882,8 @@
 							"fx",
 							"gb-eng",
 							"it",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -207246,7 +207472,8 @@
 					"id": "laprocure-9d3dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -207386,7 +207613,8 @@
 					"id": "maxilivres-9d3dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -209264,7 +209492,8 @@
 					"id": "leseleveursdelacharentonne-bd963c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -210888,7 +211117,8 @@
 					"id": "distinxion-9ceb2b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -210967,7 +211197,8 @@
 					"id": "ewigo-9ceb2b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -211495,7 +211726,8 @@
 					"id": "ligierstore-9ceb2b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -213930,7 +214162,8 @@
 					"id": "123parebrise-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -214124,7 +214357,8 @@
 					"id": "autoprimo-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -214155,7 +214389,8 @@
 					"id": "avatacar-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -214190,7 +214425,8 @@
 							"na",
 							"no",
 							"sk",
-							"za"
+							"za",
+							"fr"
 						]
 					},
 					"tags": {
@@ -214440,7 +214676,8 @@
 					"id": "delko-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -214543,7 +214780,8 @@
 							"fi",
 							"fx",
 							"nl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -214656,7 +214894,8 @@
 					"id": "franceparebrise-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -215446,7 +215685,8 @@
 					"id": "precisium-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -215565,7 +215805,8 @@
 					"id": "roady-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -215855,7 +216096,8 @@
 					"id": "topgarage-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -216629,7 +216871,8 @@
 					"id": "distinxion-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -216660,7 +216903,8 @@
 					"id": "ewigo-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -217177,7 +217421,8 @@
 					"id": "ligierstore-46d04a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -218961,7 +219206,8 @@
 					"id": "emmaus-0d4d3e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -220359,7 +220605,8 @@
 							"no",
 							"pt",
 							"se",
-							"sk"
+							"sk",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -221556,7 +221803,8 @@
 					"id": "deneuville-b0e734",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -221571,7 +221819,8 @@
 					"id": "dufouxchocolats-b0e734",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -221729,7 +221978,8 @@
 						"include": [
 							"de",
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -221811,7 +222061,8 @@
 					"id": "voisin-b0e734",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222066,7 +222317,8 @@
 							"qa",
 							"sa",
 							"sg",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222271,7 +222523,8 @@
 							"ne",
 							"sg",
 							"tw",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222286,7 +222539,8 @@
 					"id": "aigle-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222410,7 +222664,8 @@
 							"ie",
 							"kr",
 							"mx",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222692,7 +222947,8 @@
 					"locationSet": {
 						"include": [
 							"ch",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222708,7 +222964,8 @@
 					"id": "antonelle-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222831,7 +223088,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222862,7 +223120,8 @@
 					"id": "armorlux-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -222877,7 +223136,8 @@
 					"id": "arthur-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -223472,7 +223732,8 @@
 					"id": "bizzbee-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -223800,7 +224061,8 @@
 					"id": "bonnegueule-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -223816,7 +224078,8 @@
 					"id": "bonobo-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -224014,7 +224277,8 @@
 					"id": "breal-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -224046,7 +224310,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -224286,7 +224551,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -224386,7 +224652,8 @@
 							"fx",
 							"lu",
 							"nl",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -224660,7 +224927,8 @@
 						"include": [
 							"ch",
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -224987,7 +225255,8 @@
 					"id": "chevignon-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225065,7 +225334,8 @@
 					"id": "christinelaure-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225160,7 +225430,8 @@
 						"include": [
 							"ad",
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225404,7 +225675,8 @@
 					"id": "comptoirdescotonniers-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225754,7 +226026,8 @@
 					"id": "cyrillus-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225799,7 +226072,8 @@
 						"include": [
 							"be",
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225821,7 +226095,8 @@
 							"me",
 							"mk",
 							"mt",
-							"rs"
+							"rs",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225853,7 +226128,8 @@
 					"id": "darjeeling-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225909,7 +226185,8 @@
 							"ch",
 							"fx",
 							"gb",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225929,7 +226206,8 @@
 							"fx",
 							"pl",
 							"pt",
-							"ro"
+							"ro",
+							"fr"
 						]
 					},
 					"tags": {
@@ -225993,7 +226271,8 @@
 					"id": "despetitshauts-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -226059,7 +226338,8 @@
 						"include": [
 							"be",
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -226121,7 +226401,8 @@
 					"id": "dim-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -226184,7 +226465,8 @@
 					"id": "districenter-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -226643,7 +226925,8 @@
 					"id": "edenpark-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -226679,7 +226962,8 @@
 							"gb-lon.geojson",
 							"it",
 							"jp",
-							"my"
+							"my",
+							"fr"
 						]
 					},
 					"tags": {
@@ -226722,7 +227006,8 @@
 							"fx",
 							"kw",
 							"mx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -226857,7 +227142,8 @@
 							"be",
 							"de",
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -226959,7 +227245,8 @@
 							"fx",
 							"gb",
 							"kr",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -227233,7 +227520,8 @@
 					"id": "faguo-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -227363,7 +227651,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -227395,7 +227684,8 @@
 						"include": [
 							"be",
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -227919,7 +228209,8 @@
 					"id": "georgesrech-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -228143,7 +228434,8 @@
 					"id": "graindemalice-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -228474,7 +228766,8 @@
 						"include": [
 							"fx",
 							"hu",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -228903,7 +229196,8 @@
 							"es",
 							"fx",
 							"lu",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -229092,7 +229386,8 @@
 					"id": "izac-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -229739,7 +230034,8 @@
 					"id": "kway-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -229888,7 +230184,8 @@
 					"id": "karlmarcjohn-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -230176,7 +230473,8 @@
 						"include": [
 							"be",
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -230228,7 +230526,8 @@
 							"be",
 							"es",
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -230244,7 +230543,8 @@
 					"id": "lafeemaraboutee-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -230487,7 +230787,8 @@
 							"ch",
 							"de",
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -230509,7 +230810,8 @@
 							"es",
 							"fx",
 							"lu",
-							"mg"
+							"mg",
+							"fr"
 						]
 					},
 					"tags": {
@@ -231202,7 +231504,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -231555,7 +231858,8 @@
 						"include": [
 							"ca",
 							"fx",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -231610,7 +231914,8 @@
 							"ch",
 							"ee",
 							"es",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -231746,7 +232051,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -231866,7 +232172,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -231909,7 +232216,8 @@
 					"id": "miseaugreen-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -232370,7 +232678,8 @@
 							"de",
 							"fx",
 							"lu",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -232424,7 +232733,8 @@
 							"de",
 							"es",
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -232521,7 +232831,8 @@
 							"fx",
 							"gb",
 							"ie",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -232536,7 +232847,8 @@
 					"id": "newman-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -233011,7 +233323,8 @@
 					"locationSet": {
 						"include": [
 							"ch",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -233075,7 +233388,8 @@
 					"id": "olympia-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -233181,7 +233495,8 @@
 					"id": "orcanta-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -233364,7 +233679,8 @@
 						"include": [
 							"be",
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -233430,7 +233746,8 @@
 							"de",
 							"fx",
 							"lu",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -233462,7 +233779,8 @@
 							"kr",
 							"pe",
 							"tw",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -233895,7 +234213,8 @@
 					"id": "phildar-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -234936,7 +235255,8 @@
 							"fx",
 							"gb",
 							"nz",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -235080,7 +235400,8 @@
 					"id": "saintjames-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -235132,7 +235453,8 @@
 							"de",
 							"es",
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -235201,7 +235523,8 @@
 					"id": "sandro-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -235348,7 +235671,8 @@
 							"it",
 							"lu",
 							"nl",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -235467,7 +235791,8 @@
 							"es",
 							"fx",
 							"gb",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -235602,7 +235927,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -235702,7 +236028,8 @@
 					"id": "smuggler-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -235737,7 +236064,8 @@
 						"include": [
 							"be",
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -236221,7 +236549,8 @@
 					"id": "sugar-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -236399,7 +236728,8 @@
 							"ro",
 							"rs",
 							"si",
-							"sk"
+							"sk",
+							"fr"
 						]
 					},
 					"tags": {
@@ -236719,7 +237049,8 @@
 						"include": [
 							"de",
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -237007,7 +237338,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -237378,7 +237710,8 @@
 							"ch",
 							"de",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -237394,7 +237727,8 @@
 					"id": "unjourailleurs-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -237847,7 +238181,8 @@
 					"id": "vicomtea-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -238457,7 +238792,8 @@
 							"fx",
 							"gb",
 							"it",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -238694,7 +239030,8 @@
 					"id": "z-90f7b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -238712,7 +239049,8 @@
 							"de",
 							"fx",
 							"gb",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -238799,7 +239137,8 @@
 							"fx",
 							"lu",
 							"nl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -240160,7 +240499,8 @@
 					"id": "ldlc-87ca9a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -242150,7 +242490,8 @@
 							"pl",
 							"pt",
 							"rs",
-							"ua"
+							"ua",
+							"fr"
 						]
 					},
 					"tags": {
@@ -242473,7 +242814,8 @@
 					"id": "biocoop-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -242506,7 +242848,8 @@
 					"id": "bonapp-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -242819,7 +243162,8 @@
 					"id": "carrefourmontagne-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -242853,7 +243197,8 @@
 					"id": "casino-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -243236,7 +243581,8 @@
 					"id": "coccimarket-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -243254,7 +243600,8 @@
 					"id": "coccimarketcity-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -243660,7 +244007,8 @@
 					"id": "daybyday-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -244065,7 +244413,8 @@
 							"de",
 							"es",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -244095,7 +244444,8 @@
 					"id": "episervice-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -245229,7 +245579,8 @@
 					"id": "intermarchecontact-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -245248,7 +245599,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -245802,7 +246154,8 @@
 					"id": "lemarchedacote-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -246618,7 +246971,8 @@
 							"it",
 							"me",
 							"nl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -246841,7 +247195,8 @@
 					"id": "monop-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -246962,7 +247317,8 @@
 						"include": [
 							"fx",
 							"pt",
-							"ro"
+							"ro",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -247218,7 +247574,8 @@
 					"id": "nousantigaspi-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -247567,7 +247924,8 @@
 					"id": "paniersympa-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -249997,7 +250355,8 @@
 							"de",
 							"fx",
 							"gb",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -250118,7 +250477,8 @@
 					"id": "viveco-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -250132,7 +250492,8 @@
 					"id": "votremarche-f6dc0a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -254225,7 +254586,8 @@
 					"id": "copytop-dbbed6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -254522,7 +254884,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -254845,7 +255208,8 @@
 					"id": "gouiranbeaute-bb76b2",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -255507,7 +255871,8 @@
 					"id": "sagacosmetics-bb76b2",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -257081,7 +257446,8 @@
 					"id": "comtessedubarry-ab8cdd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -259907,7 +260273,8 @@
 					"id": "bricocash-f33b88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -260020,7 +260387,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -260037,7 +260405,8 @@
 						"include": [
 							"fx",
 							"pl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -260052,7 +260421,8 @@
 					"id": "bricopro-f33b88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -260229,7 +260599,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -260244,7 +260615,8 @@
 					"id": "cedeo-f33b88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -260259,7 +260631,8 @@
 					"id": "chaussonmateriaux-f33b88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -260433,7 +260806,8 @@
 					"id": "fransbonhomme-f33b88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -260516,7 +260890,8 @@
 							"es",
 							"fx",
 							"lu",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -260890,7 +261265,8 @@
 					"id": "laplateformedubatiment-f33b88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -261212,7 +261588,8 @@
 					"id": "pointp-f33b88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -261410,7 +261787,8 @@
 					"id": "samse-f33b88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -261427,7 +261805,8 @@
 						"include": [
 							"de",
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -261577,7 +261956,8 @@
 							"be",
 							"fx",
 							"gb",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -262594,7 +262974,8 @@
 					"id": "kunzpressing-3d5050",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -262891,7 +263272,8 @@
 					"id": "cigusto-469b75",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -263291,7 +263673,8 @@
 					"id": "cged-f76a8e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -263401,7 +263784,8 @@
 							"fx",
 							"hu",
 							"it",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -263449,7 +263833,8 @@
 						"include": [
 							"fx",
 							"mc",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -263804,7 +264189,8 @@
 					"id": "boulanger-5cf230",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -264161,7 +264547,8 @@
 						"include": [
 							"be",
 							"es",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -264932,7 +265319,8 @@
 					"id": "mda-5cf230",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -265355,7 +265743,8 @@
 					"id": "proandcie-5cf230",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -267221,7 +267610,8 @@
 					"id": "mondialtissus-382b94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -268361,7 +268751,8 @@
 					"id": "ecomiam-e0768d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -268676,7 +269067,8 @@
 					"id": "pfg-d4c5bf",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -268692,7 +269084,8 @@
 					"id": "roblot-d4c5bf",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -269403,7 +269796,8 @@
 							"tn",
 							"tw",
 							"us",
-							"vn"
+							"vn",
+							"fr"
 						]
 					},
 					"tags": {
@@ -270761,7 +271155,8 @@
 					"id": "mobilierdefrance-419760",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -270821,7 +271216,8 @@
 					"id": "monsieurmeuble-419760",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -272521,7 +272917,8 @@
 					"id": "botanic-afed88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -272537,7 +272934,8 @@
 					"id": "cotenature-afed88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -272685,7 +273083,8 @@
 					"id": "magasinvert-afed88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -272812,7 +273211,8 @@
 					"id": "truffaut-afed88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -272842,7 +273242,8 @@
 					"id": "villaverde-afed88",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -274000,7 +274401,8 @@
 					"id": "orencash-357486",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -274076,7 +274478,8 @@
 					"id": "mafermeenville-6e345d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -274091,7 +274494,8 @@
 					"id": "mangeonsfrais-6e345d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -274694,7 +275098,8 @@
 					"id": "fabiosalsa-426627",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -274793,7 +275198,8 @@
 					"id": "fredericmoreno-426627",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -275626,7 +276032,8 @@
 					"id": "tchip-426627",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -276133,7 +276540,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -276417,7 +276825,8 @@
 					"id": "foussier-78a046",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -277319,7 +277728,8 @@
 					"id": "audilab-400e82",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -277334,7 +277744,8 @@
 					"id": "auditionconseil-400e82",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -277349,7 +277760,8 @@
 					"id": "auditionsante-400e82",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -277387,7 +277799,8 @@
 					"id": "benoitaudition-400e82",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -277468,7 +277881,8 @@
 					"id": "entendre-400e82",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -277618,7 +278032,8 @@
 					"id": "idealaudition-400e82",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -277744,7 +278159,8 @@
 					"id": "sonanceaudition-400e82",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"preserveTags": [
@@ -278175,7 +278591,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -278190,7 +278607,8 @@
 					"id": "linvosges-e1f628",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -278310,7 +278728,8 @@
 							"es",
 							"fx",
 							"gb",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -278444,7 +278863,8 @@
 					"id": "alicedelice-791615",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -278679,7 +279099,8 @@
 					"id": "dubruitdanslacuisine-791615",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -278815,7 +279236,8 @@
 					"id": "guydegrenne-791615",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -279489,7 +279911,8 @@
 							"fx",
 							"gb-lon.geojson",
 							"jp",
-							"kr"
+							"kr",
+							"fr"
 						]
 					},
 					"tags": {
@@ -279989,7 +280412,8 @@
 							"fx",
 							"it",
 							"lu",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -280159,7 +280583,8 @@
 						"include": [
 							"es",
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -280378,7 +280803,8 @@
 							"be",
 							"fx",
 							"lu",
-							"tn"
+							"tn",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -280669,7 +281095,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -280958,7 +281385,8 @@
 					"id": "cleor-381def",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -281632,7 +282060,8 @@
 					"id": "louispion-381def",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -281722,7 +282151,8 @@
 					"id": "manegeabijoux-381def",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -281737,7 +282167,8 @@
 					"id": "marcorian-381def",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -281752,7 +282183,8 @@
 					"id": "maty-381def",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -281768,7 +282200,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -282260,7 +282693,8 @@
 							"fx",
 							"it",
 							"nl",
-							"se"
+							"se",
+							"fr"
 						]
 					},
 					"tags": {
@@ -282357,7 +282791,8 @@
 							"es",
 							"fx",
 							"gb",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -283999,7 +284434,8 @@
 					"id": "socooc-789e69",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -284063,7 +284499,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -284200,7 +284637,8 @@
 						"include": [
 							"cv",
 							"es",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -284228,7 +284666,8 @@
 					"id": "pressing-31ef1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -288345,7 +288784,8 @@
 							"jp",
 							"kr",
 							"th",
-							"tw"
+							"tw",
+							"fr"
 						]
 					},
 					"tags": {
@@ -290477,7 +290917,8 @@
 					"id": "magpresse-8612f7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -291293,7 +291734,8 @@
 					"id": "acuitis-0a39a3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -291676,7 +292118,8 @@
 					"id": "ecoutervoir-0a39a3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -291954,7 +292397,8 @@
 						"include": [
 							"be",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -292018,7 +292462,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -292177,7 +292622,8 @@
 					"id": "lissac-0a39a3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -292285,7 +292731,8 @@
 							"es",
 							"fx",
 							"gb",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -293044,7 +293491,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -293939,7 +294387,8 @@
 							"be",
 							"fx",
 							"lu",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -293984,7 +294433,8 @@
 					"id": "auvieuxcampeur-6bb650",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -294178,7 +294628,8 @@
 					"id": "ekosport-6bb650",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -294193,7 +294644,8 @@
 					"id": "espacemontagne-6bb650",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -294337,7 +294789,8 @@
 							"it",
 							"nl",
 							"pl",
-							"ua"
+							"ua",
+							"fr"
 						]
 					},
 					"tags": {
@@ -294656,7 +295109,8 @@
 						"include": [
 							"fx",
 							"gb",
-							"ie"
+							"ie",
+							"fr"
 						]
 					},
 					"tags": {
@@ -295347,7 +295801,8 @@
 							"de",
 							"fx",
 							"gb-eng",
-							"gb-sct"
+							"gb-sct",
+							"fr"
 						]
 					},
 					"tags": {
@@ -296011,7 +296466,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -296027,7 +296483,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -296110,7 +296567,8 @@
 					"id": "misscookiescoffee-8e6242",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -297817,7 +298275,8 @@
 					"id": "uneheurepoursoi-856056",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -297918,7 +298377,8 @@
 					"id": "animalis-aea085",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -298332,7 +298792,8 @@
 					"id": "medoretcompagnie-aea085",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -300342,7 +300803,8 @@
 					"id": "easycash-839553",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -300891,7 +301353,8 @@
 					"id": "bessonchaussures-e6cf1b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -300953,7 +301416,8 @@
 					"id": "bocage-e6cf1b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -301109,7 +301573,8 @@
 					"id": "chaussexpo-e6cf1b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -301260,7 +301725,8 @@
 							"lu",
 							"ma",
 							"pt",
-							"qa"
+							"qa",
+							"fr"
 						]
 					},
 					"tags": {
@@ -301650,7 +302116,8 @@
 					"id": "freelance-e6cf1b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -301877,7 +302344,8 @@
 					"id": "jbmartin-e6cf1b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -302289,7 +302757,8 @@
 					"id": "manfield-e6cf1b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -302516,7 +302985,8 @@
 					"id": "minelli-e6cf1b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -302736,7 +303206,8 @@
 					"id": "pataugas-e6cf1b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -307823,7 +308294,8 @@
 					"id": "unepieceenplus-1d8b68",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -308248,7 +308720,8 @@
 							"lu",
 							"nl",
 							"pl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -308860,7 +309333,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -310089,7 +310563,8 @@
 					"id": "coccinelleexpress-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -310104,7 +310579,8 @@
 					"id": "coccinellesupermarche-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -310678,7 +311154,8 @@
 					"id": "cotenature-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -312291,7 +312768,8 @@
 					"id": "fresh-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -312464,7 +312942,8 @@
 					"id": "g20-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -312703,7 +313182,8 @@
 					"id": "grandfrais-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -313262,7 +313742,8 @@
 					"id": "hypercacher-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -313537,7 +314018,8 @@
 					"id": "intermarchedrive-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -313553,7 +314035,8 @@
 					"id": "intermarchehyper-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -313571,7 +314054,8 @@
 							"be",
 							"fx",
 							"pl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -315923,7 +316407,8 @@
 						"include": [
 							"ch",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -318075,7 +318560,8 @@
 					"id": "satoriz-94a8a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -319048,7 +319534,8 @@
 							"es",
 							"fx",
 							"ma",
-							"ro"
+							"ro",
+							"fr"
 						]
 					},
 					"tags": {
@@ -328644,7 +329131,8 @@
 					"id": "boutiquegrandeslignes-b7c783",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -328700,7 +329188,8 @@
 					"id": "guichettransilien-b7c783",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -329315,7 +329804,8 @@
 					"id": "lacivette-a60798",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -330450,7 +330940,8 @@
 							"de",
 							"fx",
 							"gb",
-							"ie"
+							"ie",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -333588,7 +334079,8 @@
 					"id": "fram-94396d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -333881,7 +334373,8 @@
 					"id": "promovacances-94396d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -336868,7 +337361,8 @@
 					"id": "maxibazar-efe747",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -336966,7 +337460,8 @@
 					"id": "noz-efe747",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -337276,7 +337771,8 @@
 					"id": "stokomani-efe747",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -338464,7 +338960,8 @@
 					],
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"note": "Micromania also has small sub-brands",
@@ -338702,7 +339199,8 @@
 					"id": "montresandco-db30b7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchTags": [
@@ -339842,7 +340340,8 @@
 					"id": "monsieurstore-f9190c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -340503,7 +341002,8 @@
 					"id": "thepeople-f13219",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -340768,7 +341268,8 @@
 					"id": "akena-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -341142,7 +341643,8 @@
 					"id": "balladins-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -341358,7 +341860,8 @@
 					"id": "brithotel-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -341396,7 +341899,8 @@
 							"it",
 							"jp",
 							"ru",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -341496,7 +342000,8 @@
 							"gb-eng",
 							"hr",
 							"is",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -342313,7 +342818,8 @@
 					"id": "fasthotel-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -342995,7 +343501,8 @@
 					"id": "hotelf1-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -343662,7 +344169,8 @@
 							"my",
 							"ph",
 							"sg",
-							"th"
+							"th",
+							"fr"
 						]
 					},
 					"tags": {
@@ -343731,7 +344239,8 @@
 							"pt",
 							"rs",
 							"sg",
-							"us-ca.geojson"
+							"us-ca.geojson",
+							"fr"
 						]
 					},
 					"tags": {
@@ -345381,7 +345890,8 @@
 							"fx",
 							"gb-eng",
 							"gb-sct",
-							"ie"
+							"ie",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -345654,7 +346164,8 @@
 							"mx",
 							"pt",
 							"tw",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -345764,7 +346275,8 @@
 					"id": "theoriginalsaccess-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -345779,7 +346291,8 @@
 					"id": "theoriginalsboutique-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -345794,7 +346307,8 @@
 					"id": "theoriginalscity-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -345809,7 +346323,8 @@
 					"id": "theoriginalscollection-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -345824,7 +346339,8 @@
 					"id": "theoriginalsrelais-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -345839,7 +346355,8 @@
 					"id": "theoriginalsresidence-89858b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -346337,7 +346854,8 @@
 							"pa",
 							"sa",
 							"th",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -346483,7 +347001,8 @@
 							"us-dc.geojson",
 							"us-fl.geojson",
 							"us-ma.geojson",
-							"us-ny.geojson"
+							"us-ny.geojson",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356771,7 +357290,8 @@
 					"id": "3daffichage-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356785,7 +357305,8 @@
 					"id": "abriservices-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356798,7 +357319,8 @@
 					"id": "actioncomm-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356838,7 +357360,8 @@
 					"id": "afcm-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356852,7 +357375,8 @@
 					"id": "affi-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356865,7 +357389,8 @@
 					"id": "affichageperedes-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356878,7 +357403,8 @@
 					"id": "afficion-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356892,7 +357418,8 @@
 					"id": "affiouest-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356906,7 +357433,8 @@
 					"id": "affirama-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356920,7 +357448,8 @@
 					"id": "affisud-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -356947,7 +357476,8 @@
 					"id": "agsd-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357008,7 +357538,8 @@
 					"id": "avenir-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357094,7 +357625,8 @@
 					"id": "blancom-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357108,7 +357640,8 @@
 					"id": "bretagneaffichage-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357135,7 +357668,8 @@
 					"id": "cadresblancs-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357149,7 +357683,8 @@
 					"id": "canalpub-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357176,7 +357711,8 @@
 					"id": "charvetdigitalmedia-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357204,7 +357740,8 @@
 					"id": "cityzmedia-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357252,7 +357789,8 @@
 					"id": "clindoeil-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357265,7 +357803,8 @@
 					"id": "clodejac-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357279,7 +357818,8 @@
 					"id": "cocktailvision-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357293,7 +357833,8 @@
 					"id": "comevents-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357307,7 +357848,8 @@
 					"id": "compy-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357335,7 +357877,8 @@
 					"id": "crip-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357361,7 +357904,8 @@
 					"id": "dauphin-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357374,7 +357918,8 @@
 					"id": "dececco-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357388,7 +357933,8 @@
 					"id": "devisu-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357402,7 +357948,8 @@
 					"id": "ducurtilpublicite-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357416,7 +357963,8 @@
 					"id": "espaceurbain-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357447,7 +357995,8 @@
 					"id": "exterieurs-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357461,7 +358010,8 @@
 					"id": "exterionmedia-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -357478,7 +358028,8 @@
 					"id": "fg-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357491,7 +358042,8 @@
 					"id": "fiacchetti-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357519,7 +358071,8 @@
 					"id": "fuertesaffichage-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357533,7 +358086,8 @@
 					"id": "futuris-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357547,7 +358101,8 @@
 					"id": "giraudy-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -357564,7 +358119,8 @@
 					"id": "girodmedias-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357614,7 +358170,8 @@
 					"id": "horizon-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357688,7 +358245,8 @@
 					"id": "impact-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357732,7 +358290,8 @@
 					"id": "laregierep-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357777,7 +358336,8 @@
 					"id": "leaderpublicite-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357818,7 +358378,8 @@
 					"id": "maci-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357865,7 +358426,8 @@
 					"id": "medialine-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -357995,7 +358557,8 @@
 					"id": "oxialive-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358022,7 +358585,8 @@
 					"id": "panorama-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358035,7 +358599,8 @@
 					"id": "pap-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358066,7 +358631,8 @@
 					"id": "pisoni-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358132,7 +358698,8 @@
 					"id": "promovil-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358160,7 +358727,8 @@
 					"id": "puboceane-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358174,7 +358742,8 @@
 					"id": "publiaquitaine-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358188,7 +358757,8 @@
 					"id": "publiespace-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358202,7 +358772,8 @@
 					"id": "publipub-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358216,7 +358787,8 @@
 					"id": "publicitedeselle-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358229,7 +358801,8 @@
 					"id": "publimat-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358243,7 +358816,8 @@
 					"id": "publimat3-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358257,7 +358831,8 @@
 					"id": "red-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358270,7 +358845,8 @@
 					"id": "redaffi33-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358283,7 +358859,8 @@
 					"id": "ribeiropublicite-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358296,7 +358873,8 @@
 					"id": "roudaut-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358309,7 +358887,8 @@
 					"id": "sapex-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358322,7 +358901,8 @@
 					"id": "scandere-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358353,7 +358933,8 @@
 					"id": "signalregie-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358367,7 +358948,8 @@
 					"id": "signali-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358394,7 +358976,8 @@
 					"id": "space-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358439,7 +359022,8 @@
 					"id": "triaire-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358466,7 +359050,8 @@
 					"id": "vediaud-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358480,7 +359065,8 @@
 					"id": "viarama-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358494,7 +359080,8 @@
 					"id": "villeandmedias-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358522,7 +359109,8 @@
 					"id": "visiocomoutdoor-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -358539,7 +359127,8 @@
 					"id": "vision-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358552,7 +359141,8 @@
 					"id": "visuest-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -358584,7 +359174,8 @@
 					"id": "wancom-28ca1f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359103,7 +359694,8 @@
 					"id": "3daffichage-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359117,7 +359709,8 @@
 					"id": "abriservices-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359130,7 +359723,8 @@
 					"id": "affiouest-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359158,7 +359752,8 @@
 					"id": "attria-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359203,7 +359798,8 @@
 					"id": "cadresblancs-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359217,7 +359813,8 @@
 					"id": "cityzmedia-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359265,7 +359862,8 @@
 					"id": "ellipse-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359297,7 +359895,8 @@
 					"id": "exterionmedia-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -359314,7 +359913,8 @@
 					"id": "girodmedias-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359347,7 +359947,8 @@
 					"id": "hpublicite-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359361,7 +359962,8 @@
 					"id": "horizon-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359389,7 +359991,8 @@
 					"id": "imediacenter-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359402,7 +360005,8 @@
 					"id": "insert-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359457,7 +360061,8 @@
 					"id": "mediagares-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359470,7 +360075,8 @@
 					"id": "medialine-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359484,7 +360090,8 @@
 					"id": "mediarail-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359497,7 +360104,8 @@
 					"id": "mediatransports-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359526,7 +360134,8 @@
 					"id": "mupi-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359539,7 +360148,8 @@
 					"id": "najamedia-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359567,7 +360177,8 @@
 					"id": "phenix-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359581,7 +360192,8 @@
 					"id": "pisoni-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359594,7 +360206,8 @@
 					"id": "promovil-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359608,7 +360221,8 @@
 					"id": "publiessor-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359622,7 +360236,8 @@
 					"id": "publid-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359635,7 +360250,8 @@
 					"id": "publimat-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359663,7 +360279,8 @@
 					"id": "red-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359676,7 +360293,8 @@
 					"id": "regionsudpaca-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359706,7 +360324,8 @@
 					"id": "spaceo-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359766,7 +360385,8 @@
 					"id": "triaire-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359794,7 +360414,8 @@
 					"id": "vediaud-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -359811,7 +360432,8 @@
 					"id": "vyp-b12dbd",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359884,7 +360506,8 @@
 					"id": "cityzmedia-6362e2",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359972,7 +360595,8 @@
 					"id": "mediagares-6362e2",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -359985,7 +360609,8 @@
 					"id": "mediatransports-6362e2",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360041,7 +360666,8 @@
 					"id": "oxialive-6362e2",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360054,7 +360680,8 @@
 					"id": "phenix-6362e2",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360068,7 +360695,8 @@
 					"id": "publin-6362e2",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360454,7 +361082,8 @@
 					"id": "alpesautopartage-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360586,7 +361215,8 @@
 					"id": "bollore-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360681,7 +361311,8 @@
 					"id": "citedia-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360695,7 +361326,8 @@
 					"id": "citelib-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360709,7 +361341,8 @@
 					"id": "citiz-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -360727,7 +361360,8 @@
 					"id": "citizalpesloire-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360755,7 +361389,8 @@
 					"id": "citizgrandest-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360769,7 +361404,8 @@
 					"id": "citiznantes-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -360830,7 +361466,8 @@
 					"locationSet": {
 						"include": [
 							"ca",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -361142,7 +361779,8 @@
 					"id": "lilas-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -361172,7 +361810,8 @@
 					"id": "marguerite-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -361200,7 +361839,8 @@
 					"id": "mobilib-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -361248,7 +361888,8 @@
 					"id": "modulauto-672a50",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -361418,7 +362059,8 @@
 							"dk",
 							"fx",
 							"it",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -361656,7 +362298,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -362055,7 +362698,8 @@
 						"include": [
 							"de",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -362093,7 +362737,8 @@
 							"lu",
 							"nl",
 							"pl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -362217,7 +362862,8 @@
 					"id": "alize-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -362849,7 +363495,8 @@
 					"id": "bouygues1ouest-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -362862,7 +363509,8 @@
 					"id": "bouyguesenergiesandservices-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -362985,7 +363633,8 @@
 					"id": "bump-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -363321,7 +363970,8 @@
 					"id": "clem-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -363536,7 +364186,8 @@
 							"gb",
 							"hu",
 							"ie",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -363567,7 +364218,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -363613,7 +364265,8 @@
 						"include": [
 							"de",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -363733,7 +364386,8 @@
 					"id": "driveco-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -363888,7 +364542,8 @@
 					"id": "etotem-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -363974,7 +364629,8 @@
 					"id": "easycharge-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -364030,7 +364686,8 @@
 					"id": "eborn-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -364228,7 +364885,8 @@
 					"id": "effia-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -364284,7 +364942,8 @@
 					"id": "electric55charging-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -365214,7 +365873,8 @@
 						"include": [
 							"be",
 							"es",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -366514,7 +367174,8 @@
 					"id": "iecharge-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -366724,7 +367385,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -366779,7 +367441,8 @@
 					"id": "izivia-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -367100,7 +367763,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -367167,7 +367831,8 @@
 					"id": "lidlfrance-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -367652,7 +368317,8 @@
 					"id": "modulo-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -367713,7 +368379,8 @@
 					"id": "morbihanenergies-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -368248,7 +368915,8 @@
 					"id": "ouestcharge-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -368276,7 +368944,8 @@
 					"id": "parissaclayinnovationplayground-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -368413,7 +369082,8 @@
 							"de",
 							"es",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -368457,7 +369127,8 @@
 					"id": "plusdebornes-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -368511,7 +369182,8 @@
 					"id": "powerdotfrance-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -368688,7 +369360,8 @@
 					"id": "r3-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -368825,7 +369498,8 @@
 					"id": "reveo-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369107,7 +369781,8 @@
 					"id": "sde04-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369120,7 +369795,8 @@
 					"id": "sde07-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369133,7 +369809,8 @@
 					"id": "sde35-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369160,7 +369837,8 @@
 					"id": "sded-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369173,7 +369851,8 @@
 					"id": "sdei36-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369186,7 +369865,8 @@
 					"id": "sdem50-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369199,7 +369879,8 @@
 					"id": "sdev-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369212,7 +369893,8 @@
 					"id": "sdey-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369225,7 +369907,8 @@
 					"id": "sedi-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369304,7 +369987,8 @@
 					"id": "sey78-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369317,7 +370001,8 @@
 					"id": "seymaborne-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369330,7 +370015,8 @@
 					"id": "sgamobility-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369374,7 +370060,8 @@
 					"id": "sieeen-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369428,7 +370115,8 @@
 					"id": "sieml-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369442,7 +370130,8 @@
 					"id": "sigeif-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369456,7 +370145,8 @@
 					"id": "siplec-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369516,7 +370206,8 @@
 					"id": "sodetrel-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -369627,7 +370318,8 @@
 					"id": "spbr1-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369653,7 +370345,8 @@
 					"id": "spie-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -369666,7 +370359,8 @@
 					"id": "spiecitynetworks-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -371065,7 +371759,8 @@
 					"id": "stationse-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -371251,7 +371946,8 @@
 					"id": "syme05-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -371421,7 +372117,8 @@
 					"id": "teslafrancesarl-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -371478,7 +372175,8 @@
 					"id": "totalmarketingfrance-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -371492,7 +372190,8 @@
 					"id": "totalenergiesmarketingfrance-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -371925,7 +372624,8 @@
 					"id": "waat-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -372237,7 +372937,8 @@
 					"id": "zeborne-170e94",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -372679,7 +373380,8 @@
 					"id": "babilou-2fc6fb",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -373190,7 +373892,8 @@
 					"id": "associationecho-c80b69",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -373291,7 +373994,8 @@
 							"dk",
 							"fx",
 							"no",
-							"se"
+							"se",
+							"fr"
 						]
 					},
 					"tags": {
@@ -376920,7 +377624,8 @@
 					"id": "ecoledeladeuxiemechance-dac3bc",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -377017,7 +377722,8 @@
 					"id": "ministeredelenseignementsuperieuretdelarecherche-dac3bc",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -377458,7 +378164,8 @@
 					"id": "associationdesmaisonsdequartierdereims-602375",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -380975,7 +381682,8 @@
 					"id": "eaudeparis-02ca9b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -381801,7 +382509,8 @@
 					"id": "sncfgaresandconnexions-02ca9b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -382146,7 +382855,8 @@
 					"id": "veoliaeau-02ca9b",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -389334,7 +390044,8 @@
 					"id": "assistancepubliquehopitauxdeparis-73646a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -389661,7 +390372,8 @@
 							"dk",
 							"fx",
 							"no",
-							"se"
+							"se",
+							"fr"
 						]
 					},
 					"tags": {
@@ -390133,7 +390845,8 @@
 					"id": "elsan-73646a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -392480,7 +393193,8 @@
 					"id": "ramsaysante-73646a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -393614,7 +394328,8 @@
 					"id": "associationdesmaisonsdequartierdereims-94d05d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -393821,7 +394536,8 @@
 					"id": "ccportededromardeche-94d05d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -395032,7 +395748,8 @@
 					"id": "lamaisonbleue-94d05d",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -397761,7 +398478,8 @@
 					"id": "cceg-03d22a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -399660,7 +400378,8 @@
 					"id": "reseaudesbibliothequesdesevremoine-03d22a",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -401441,7 +402160,8 @@
 					"id": "effia-dee437",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -402466,7 +403186,8 @@
 					"id": "yespark-dee437",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -414618,7 +415339,8 @@
 					"id": "directiondeladministrationpenitentiaire-3e48e3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -417240,7 +417962,8 @@
 							"be",
 							"de",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -417312,7 +418035,8 @@
 					"id": "citeo-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -417880,7 +418604,8 @@
 					"id": "compostri-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -418004,7 +418729,8 @@
 					"id": "coved-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -418491,7 +419217,8 @@
 					"id": "ecosystem-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -418509,7 +419236,8 @@
 					"id": "ecotextile-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -418611,7 +419339,8 @@
 					"id": "emmaus-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -422815,7 +423544,8 @@
 					"id": "lerelais-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -422845,7 +423575,8 @@
 					"id": "lerelaisatlantique-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -424251,7 +424982,8 @@
 					"id": "refashion-59e4c1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -425264,7 +425996,8 @@
 							"de",
 							"es",
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -425657,7 +426390,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -494692,7 +495426,8 @@
 					"id": "abrapa-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -494706,7 +495441,8 @@
 					"id": "adapei-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -494721,7 +495457,8 @@
 					"id": "admr-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -494736,7 +495473,8 @@
 					"id": "adoma-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -494766,7 +495504,8 @@
 					"id": "aeim-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -494925,7 +495664,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -494954,7 +495694,8 @@
 					"id": "arpavie-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -495277,7 +496018,8 @@
 					"id": "ccas-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -495306,7 +496048,8 @@
 					"id": "cg91-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -495335,7 +496078,8 @@
 					"id": "coallia-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -495409,7 +496153,8 @@
 					"id": "crousdeparis-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -495583,7 +496328,8 @@
 					"id": "domitys-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -495600,7 +496346,8 @@
 						"include": [
 							"es",
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -495630,7 +496377,8 @@
 					"id": "edenis-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -495810,7 +496558,8 @@
 					"id": "fondationleopoldbellan-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -496361,7 +497110,8 @@
 							"es",
 							"fx",
 							"it",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -496451,7 +497201,8 @@
 					"id": "lesrestosducoeur-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -496761,7 +497512,8 @@
 					"id": "orpea-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -496965,7 +497717,8 @@
 					"id": "sanitas-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -497023,7 +497776,8 @@
 					"id": "secourscatholique-704240",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -498981,7 +499735,8 @@
 					"id": "ratp-0bced1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -499057,7 +499812,8 @@
 					"id": "sncf-0bced1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -499083,7 +499839,8 @@
 					"id": "sncfterbretagne-0bced1",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -499416,7 +500173,8 @@
 					"id": "associationdelaccueilataize-73fc0c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -499629,7 +500387,8 @@
 					"id": "campingmunicipallepontdeletang-73fc0c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -501069,7 +501828,8 @@
 					"id": "sncfgaresandconnexions-73fc0c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -502807,7 +503567,8 @@
 					"id": "aliae-187795",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -513087,7 +513848,8 @@
 					"id": "societenationaledesauvetageenmer-adf184",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -513190,7 +513952,8 @@
 					"id": "aprr-6aca25",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -513568,7 +514331,8 @@
 					"id": "dir-6aca25",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -514103,7 +514867,8 @@
 					"id": "sanef-6aca25",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -514205,7 +514970,8 @@
 					"id": "sncf-6aca25",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -514223,7 +514989,8 @@
 					"id": "sncfreseau-6aca25",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -515941,7 +516708,8 @@
 					"locationSet": {
 						"include": [
 							"ch",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -515956,7 +516724,8 @@
 					"id": "societenationaledesauvetageenmer-04cc00",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -531633,7 +532402,8 @@
 						"include": [
 							"de",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -531673,7 +532443,8 @@
 							"lu",
 							"nl",
 							"pl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -531803,7 +532574,8 @@
 					"id": "alize-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -532477,7 +533249,8 @@
 					"id": "bouygues1ouest-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -532491,7 +533264,8 @@
 					"id": "bouyguesenergiesandservices-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -532622,7 +533396,8 @@
 					"id": "bump-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -532979,7 +533754,8 @@
 					"id": "clem-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -533208,7 +533984,8 @@
 							"gb",
 							"hu",
 							"ie",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -533241,7 +534018,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -533290,7 +534068,8 @@
 						"include": [
 							"de",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -533418,7 +534197,8 @@
 					"id": "driveco-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -533584,7 +534364,8 @@
 					"id": "etotem-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -533676,7 +534457,8 @@
 					"id": "easycharge-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -533736,7 +534518,8 @@
 					"id": "eborn-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -533947,7 +534730,8 @@
 					"id": "effia-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -534007,7 +534791,8 @@
 					"id": "electric55charging-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -535001,7 +535786,8 @@
 						"include": [
 							"be",
 							"es",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -536391,7 +537177,8 @@
 					"id": "iecharge-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -536612,7 +537399,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -536671,7 +537459,8 @@
 					"id": "izivia-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -537014,7 +537803,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"tags": {
@@ -537085,7 +537875,8 @@
 					"id": "lidlfrance-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -537604,7 +538395,8 @@
 					"id": "modulo-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -537669,7 +538461,8 @@
 					"id": "morbihanenergies-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -538242,7 +539035,8 @@
 					"id": "ouestcharge-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -538272,7 +539066,8 @@
 					"id": "parissaclayinnovationplayground-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -538418,7 +539213,8 @@
 							"de",
 							"es",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -538465,7 +539261,8 @@
 					"id": "plusdebornes-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -538523,7 +539320,8 @@
 					"id": "powerdotfrance-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -538712,7 +539510,8 @@
 					"id": "r3-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -538858,7 +539657,8 @@
 					"id": "reveo-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539160,7 +539960,8 @@
 					"id": "sde04-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539174,7 +539975,8 @@
 					"id": "sde07-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539188,7 +539990,8 @@
 					"id": "sde35-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539217,7 +540020,8 @@
 					"id": "sded-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539231,7 +540035,8 @@
 					"id": "sdei36-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539245,7 +540050,8 @@
 					"id": "sdem50-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539259,7 +540065,8 @@
 					"id": "sdev-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539273,7 +540080,8 @@
 					"id": "sdey-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539287,7 +540095,8 @@
 					"id": "sedi-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539372,7 +540181,8 @@
 					"id": "sey78-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539386,7 +540196,8 @@
 					"id": "seymaborne-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539400,7 +540211,8 @@
 					"id": "sgamobility-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539447,7 +540259,8 @@
 					"id": "sieeen-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539505,7 +540318,8 @@
 					"id": "sieml-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539520,7 +540334,8 @@
 					"id": "sigeif-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539535,7 +540350,8 @@
 					"id": "siplec-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539599,7 +540415,8 @@
 					"id": "sodetrel-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -539718,7 +540535,8 @@
 					"id": "spbr1-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539746,7 +540564,8 @@
 					"id": "spie-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -539760,7 +540579,8 @@
 					"id": "spiecitynetworks-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -541254,7 +542074,8 @@
 					"id": "stationse-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -541453,7 +542274,8 @@
 					"id": "syme05-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -541634,7 +542456,8 @@
 					"id": "teslafrancesarl-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -541695,7 +542518,8 @@
 					"id": "totalmarketingfrance-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -541710,7 +542534,8 @@
 					"id": "totalenergiesmarketingfrance-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -542174,7 +542999,8 @@
 					"id": "waat-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -542506,7 +543332,8 @@
 					"id": "zeborne-fa309c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -543095,7 +543922,8 @@
 					"id": "anfr-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -543155,7 +543983,8 @@
 					"id": "atcfrance-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -543374,7 +544203,8 @@
 						"include": [
 							"fx",
 							"gb",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -543817,7 +544647,8 @@
 					"id": "freemobile-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -543872,7 +544703,8 @@
 					"id": "ifwfree-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -543991,7 +544823,8 @@
 					"id": "itastim-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -544282,7 +545115,8 @@
 					"id": "neufcegetel-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -544736,7 +545570,8 @@
 					"id": "rte-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -544875,7 +545710,8 @@
 					"id": "sncf-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -544889,7 +545725,8 @@
 					"id": "sncfreseau-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -545221,7 +546058,8 @@
 					"id": "towercast-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -545639,7 +546477,8 @@
 					"id": "voiesnavigablesdefrance-0ddfe9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -546235,7 +547074,8 @@
 					"id": "brgm-94cf3c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -546710,7 +547550,8 @@
 						"include": [
 							"de",
 							"fx",
-							"lu"
+							"lu",
+							"fr"
 						]
 					},
 					"tags": {
@@ -546753,7 +547594,8 @@
 					"locationSet": {
 						"include": [
 							"de",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -546886,7 +547728,8 @@
 					"id": "federationfrancaisedevollibre-94cf3c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -548569,7 +549412,8 @@
 					"id": "vigicrues-94cf3c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -549286,7 +550130,8 @@
 					"id": "ascendperformancematerialsfrance-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -550807,7 +551652,8 @@
 					"id": "cnr-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -552567,7 +553413,8 @@
 					"id": "engiesolutions-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -553737,7 +554584,8 @@
 					"id": "gazreseaudistributionfrance-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -554527,7 +555375,8 @@
 					"id": "hydrocop-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -556291,7 +557140,8 @@
 					"id": "natran-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -558619,7 +559469,8 @@
 					"id": "sfdm-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -558718,7 +559569,8 @@
 					"id": "shem-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -558873,7 +559725,8 @@
 					"locationSet": {
 						"include": [
 							"de",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -560315,7 +561168,8 @@
 					"locationSet": {
 						"include": [
 							"de",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -560485,7 +561339,8 @@
 					"id": "trapil-02b185",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -564194,7 +565049,8 @@
 					"id": "altitude-ed5e6e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -564403,7 +565259,8 @@
 					"id": "axione-ed5e6e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -564940,7 +565797,8 @@
 					"id": "covage-ed5e6e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -565401,7 +566259,8 @@
 					"id": "electricitedefrance-ed5e6e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -566260,7 +567119,8 @@
 					"id": "gazreseaudistributionfrance-ed5e6e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -567924,7 +568784,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -568005,7 +568866,8 @@
 					"id": "reseda-ed5e6e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -568349,7 +569211,8 @@
 					"id": "srd-ed5e6e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -570434,7 +571297,8 @@
 					"id": "xpfibre-ed5e6e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -570900,7 +571764,8 @@
 						"include": [
 							"de",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -571033,7 +571898,8 @@
 							"lu",
 							"nl",
 							"pl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -571222,7 +572088,8 @@
 					"id": "aprr-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -572181,7 +573048,8 @@
 						"include": [
 							"fx",
 							"pl",
-							"ru"
+							"ru",
+							"fr"
 						]
 					},
 					"tags": {
@@ -572195,7 +573063,8 @@
 					"id": "ccf-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -572459,7 +573328,8 @@
 					"id": "cic-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -572865,7 +573735,8 @@
 					"id": "cnfpt-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -573375,7 +574246,8 @@
 					"id": "creditdunord-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -573967,7 +574839,8 @@
 					"id": "effia-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -574418,7 +575291,8 @@
 					"id": "franprix-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -574825,7 +575699,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"ie"
+							"ie",
+							"fr"
 						]
 					},
 					"tags": {
@@ -575103,7 +575978,8 @@
 					"id": "infocirculationfr-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -579557,7 +580433,8 @@
 					"id": "ratp-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -579981,7 +580858,8 @@
 					"id": "sanef-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -580303,7 +581181,8 @@
 					"id": "sncf-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -580978,7 +581857,8 @@
 					"id": "sureteferroviairesncf-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -582801,7 +583681,8 @@
 					"id": "vinci-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -582885,7 +583766,8 @@
 					"id": "voiesnavigablesdefrance-3bfa97",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -583102,7 +583984,8 @@
 						"include": [
 							"fx",
 							"jp",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -584622,7 +585505,8 @@
 					"id": "rte-99a9a3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -584865,7 +585749,8 @@
 					"id": "anfr-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -584929,7 +585814,8 @@
 					"id": "atcfrance-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -585163,7 +586049,8 @@
 						"include": [
 							"fx",
 							"gb",
-							"pl"
+							"pl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -585635,7 +586522,8 @@
 					"id": "freemobile-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -585694,7 +586582,8 @@
 					"id": "ifwfree-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -585821,7 +586710,8 @@
 					"id": "itastim-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -586130,7 +587020,8 @@
 					"id": "neufcegetel-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -586614,7 +587505,8 @@
 					"id": "rte-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -586763,7 +587655,8 @@
 					"id": "sncf-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -586778,7 +587671,8 @@
 					"id": "sncfreseau-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -587132,7 +588026,8 @@
 					"id": "towercast-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -587577,7 +588472,8 @@
 					"id": "voiesnavigablesdefrance-0bb1c4",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -588823,7 +589719,8 @@
 					"id": "saur-ea08bf",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -588982,7 +589879,8 @@
 					"id": "suezeaufrance-ea08bf",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -589055,7 +589953,8 @@
 					"id": "veolia-ea08bf",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -591448,7 +592347,8 @@
 						"include": [
 							"de",
 							"fx",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -591466,7 +592366,8 @@
 							"es",
 							"fx",
 							"nl",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -591561,7 +592462,8 @@
 					"id": "electricitedefrance-871306",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -596774,7 +597676,8 @@
 					"id": "ascendperformancematerialsfrance-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -598395,7 +599298,8 @@
 					"id": "cnr-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -600270,7 +601174,8 @@
 					"id": "engiesolutions-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -601517,7 +602422,8 @@
 					"id": "gazreseaudistributionfrance-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -602360,7 +603266,8 @@
 					"id": "hydrocop-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -604239,7 +605146,8 @@
 					"id": "natran-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -606721,7 +607629,8 @@
 					"id": "sfdm-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -606826,7 +607735,8 @@
 					"id": "shem-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -606991,7 +607901,8 @@
 					"locationSet": {
 						"include": [
 							"de",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -608527,7 +609438,8 @@
 					"locationSet": {
 						"include": [
 							"de",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -608708,7 +609620,8 @@
 					"id": "trapil-4a5c8f",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -611838,7 +612751,8 @@
 					"id": "sncfreseau-604b3c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -612436,7 +613350,8 @@
 					"id": "3denergies-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -612685,7 +613600,8 @@
 					"id": "ailesmarinessas-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -612769,7 +613685,8 @@
 							"lu",
 							"nl",
 							"pl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -612959,7 +613876,8 @@
 					"id": "allianz-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -614386,7 +615304,8 @@
 					"id": "cepeduboisdelaserre-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -614607,7 +615526,8 @@
 					"id": "cnr-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -615829,7 +616749,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -615941,7 +616862,8 @@
 					"locationSet": {
 						"include": [
 							"be",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -616310,7 +617232,8 @@
 					"id": "energieavesnes-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -616386,7 +617309,8 @@
 						"include": [
 							"de",
 							"fi",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -616403,7 +617327,8 @@
 					"id": "energreenproduction-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -616460,7 +617385,8 @@
 							"de",
 							"fx",
 							"pl",
-							"za"
+							"za",
+							"fr"
 						]
 					},
 					"tags": {
@@ -616548,7 +617474,8 @@
 					"id": "engiegreen-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -616739,7 +617666,8 @@
 					"id": "eoleres-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -616752,7 +617680,8 @@
 					"id": "eolfi-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -616899,7 +617828,8 @@
 					"id": "eolienmaritimefrance-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -617584,7 +618514,8 @@
 					"id": "forsaenergy-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -618353,7 +619284,8 @@
 					"id": "greensolver-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -618705,7 +619637,8 @@
 					"id": "hydrocop-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -619096,7 +620029,8 @@
 					"id": "initiativesetenergieslocales-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -619113,7 +620047,8 @@
 							"cl",
 							"fx",
 							"is",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -619181,7 +620116,8 @@
 					"id": "intervent-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -621723,7 +622659,8 @@
 					"id": "photosol-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -621937,7 +622874,8 @@
 					"id": "psapeugeot-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -622115,7 +623053,8 @@
 					"id": "regiedelectricitedelavendee-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -622171,7 +623110,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -622809,7 +623749,8 @@
 					"id": "sergies-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -622822,7 +623763,8 @@
 					"id": "sergiesseml-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -622848,7 +623790,8 @@
 					"id": "shem-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -622876,7 +623819,8 @@
 					"id": "siel-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -623175,7 +624119,8 @@
 					"id": "sncfreseau-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -623283,7 +624228,8 @@
 					"id": "sorea-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -623648,7 +624594,8 @@
 					"locationSet": {
 						"include": [
 							"de",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -624689,7 +625636,8 @@
 					"id": "valeco-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -625044,7 +625992,8 @@
 					"id": "versoenergy-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -625198,7 +626147,8 @@
 					"id": "volkswindfrance-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -625253,7 +626203,8 @@
 					"id": "vsbenergiesnouvelles-33d749",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -629636,7 +630587,8 @@
 					"id": "cnr-e3be4c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -632099,7 +633051,8 @@
 							"de",
 							"fx",
 							"pl",
-							"za"
+							"za",
+							"fr"
 						]
 					},
 					"tags": {
@@ -637211,7 +638164,8 @@
 					"id": "reseda-e3be4c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -637407,7 +638361,8 @@
 					"id": "rte-e3be4c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -637913,7 +638868,8 @@
 					"id": "sncf-e3be4c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -637927,7 +638883,8 @@
 					"id": "sncfreseau-e3be4c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -638218,7 +639175,8 @@
 					"id": "srd-e3be4c",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -643601,7 +644559,8 @@
 					"id": "cnr-718125",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -646226,7 +647185,8 @@
 							"de",
 							"fx",
 							"pl",
-							"za"
+							"za",
+							"fr"
 						]
 					},
 					"tags": {
@@ -651669,7 +652629,8 @@
 					"id": "reseda-718125",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -651878,7 +652839,8 @@
 					"id": "rte-718125",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -652417,7 +653379,8 @@
 					"id": "sncf-718125",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -652432,7 +653395,8 @@
 					"id": "sncfreseau-718125",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -652742,7 +653706,8 @@
 					"id": "srd-718125",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -656668,7 +657633,8 @@
 					"id": "cnr-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -657501,7 +658467,8 @@
 					"id": "energreenproduction-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -657545,7 +658512,8 @@
 							"de",
 							"fx",
 							"pl",
-							"za"
+							"za",
+							"fr"
 						]
 					},
 					"tags": {
@@ -657577,7 +658545,8 @@
 					"id": "engiegreen-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -657659,7 +658628,8 @@
 					"id": "eoleres-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -658490,7 +659460,8 @@
 					"id": "initiativesetenergieslocales-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -658507,7 +659478,8 @@
 							"cl",
 							"fx",
 							"is",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -659520,7 +660492,8 @@
 					"id": "photosol-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -659758,7 +660731,8 @@
 					"locationSet": {
 						"include": [
 							"fx",
-							"gb"
+							"gb",
+							"fr"
 						]
 					},
 					"tags": {
@@ -660029,7 +661003,8 @@
 					"id": "shem-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -660170,7 +661145,8 @@
 					"id": "solairedirect-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -660202,7 +661178,8 @@
 						"include": [
 							"es",
 							"fx",
-							"pr"
+							"pr",
+							"fr"
 						]
 					},
 					"tags": {
@@ -660557,7 +661534,8 @@
 						"include": [
 							"fx",
 							"nl",
-							"pt"
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -660777,7 +661755,8 @@
 					"id": "valeco-a6c8fe",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -664491,7 +665470,8 @@
 					"id": "cnr-1716c3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -667116,7 +668096,8 @@
 							"de",
 							"fx",
 							"pl",
-							"za"
+							"za",
+							"fr"
 						]
 					},
 					"tags": {
@@ -672559,7 +673540,8 @@
 					"id": "reseda-1716c3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -672768,7 +673750,8 @@
 					"id": "rte-1716c3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -673307,7 +674290,8 @@
 					"id": "sncf-1716c3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -673322,7 +674306,8 @@
 					"id": "sncfreseau-1716c3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -673632,7 +674617,8 @@
 					"id": "srd-1716c3",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -678592,7 +679578,8 @@
 					"id": "cesml-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -682527,7 +683514,8 @@
 					"id": "erdf-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -683448,7 +684436,8 @@
 					"id": "gedia-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -683461,7 +684450,8 @@
 					"id": "geg-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -683757,7 +684747,8 @@
 					"id": "greenalp-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -685409,7 +686400,8 @@
 					"id": "lisea-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -688348,7 +689340,8 @@
 					"id": "ratp-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -688547,7 +689540,8 @@
 					"id": "reseda-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -688576,7 +689570,8 @@
 					"id": "rethones-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -688742,7 +689737,8 @@
 					"id": "rte-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -689128,7 +690124,8 @@
 					"id": "semitag-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -689197,7 +690194,8 @@
 					"id": "sicaedelasommeetducambraisis-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -689287,7 +690285,8 @@
 					"id": "sncf-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -689301,7 +690300,8 @@
 					"id": "sncfreseau-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -689375,7 +690375,8 @@
 					"id": "sorea-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -689601,7 +690602,8 @@
 					"id": "srd-90b6b6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -698921,7 +699923,8 @@
 					"id": "cnr-06d365",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -701546,7 +702549,8 @@
 							"de",
 							"fx",
 							"pl",
-							"za"
+							"za",
+							"fr"
 						]
 					},
 					"tags": {
@@ -706989,7 +707993,8 @@
 					"id": "reseda-06d365",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -707198,7 +708203,8 @@
 					"id": "rte-06d365",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -707737,7 +708743,8 @@
 					"id": "sncf-06d365",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -707752,7 +708759,8 @@
 					"id": "sncfreseau-06d365",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -708062,7 +709070,8 @@
 					"id": "srd-06d365",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -713138,7 +714147,8 @@
 					"id": "cesml-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -717328,7 +718338,8 @@
 					"id": "erdf-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -718308,7 +719319,8 @@
 					"id": "gedia-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -718322,7 +719334,8 @@
 					"id": "geg-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -718638,7 +719651,8 @@
 					"id": "greenalp-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -720400,7 +721414,8 @@
 					"id": "lisea-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -723530,7 +724545,8 @@
 					"id": "ratp-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -723743,7 +724759,8 @@
 					"id": "reseda-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -723774,7 +724791,8 @@
 					"id": "rethones-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -723951,7 +724969,8 @@
 					"id": "rte-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -724361,7 +725380,8 @@
 					"id": "semitag-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -724435,7 +725455,8 @@
 					"id": "sicaedelasommeetducambraisis-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -724531,7 +725552,8 @@
 					"id": "sncf-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -724546,7 +725568,8 @@
 					"id": "sncfreseau-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -724625,7 +725648,8 @@
 					"id": "sorea-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -724865,7 +725889,8 @@
 					"id": "srd-bc2a36",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -733211,7 +734236,8 @@
 					"id": "reseda-0421f7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -733225,7 +734251,8 @@
 					"id": "rte-0421f7",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -734621,7 +735648,8 @@
 					"id": "sncfreseau-ced9a9",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736459,7 +737487,8 @@
 					"id": "altitude-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736513,7 +737542,8 @@
 					"id": "axione-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736572,7 +737602,8 @@
 					"id": "bfcfibre-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736671,7 +737702,8 @@
 					"id": "covage-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736827,7 +737859,8 @@
 					"id": "heraultthd-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736868,7 +737901,8 @@
 					"id": "iserefibre-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736895,7 +737929,8 @@
 					"id": "loiretfibre-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736908,7 +737943,8 @@
 					"id": "losangefibre-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736923,7 +737959,8 @@
 						"include": [
 							"ch",
 							"es",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -736981,7 +738018,8 @@
 					"id": "nathd-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -737165,7 +738203,8 @@
 					"id": "sipartech-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -737314,7 +738353,8 @@
 					"id": "thd64-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -737358,7 +738398,8 @@
 					"id": "valdeloirefibre-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -737401,7 +738442,8 @@
 					"id": "xpfibre-92129e",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -737417,7 +738459,8 @@
 							"fx",
 							"gb",
 							"ie",
-							"us"
+							"us",
+							"fr"
 						]
 					},
 					"tags": {
@@ -741828,7 +742871,8 @@
 							"nl",
 							"pt",
 							"si",
-							"sk"
+							"sk",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -747234,7 +748278,8 @@
 					"id": "fileo-db7894",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -747502,7 +748547,8 @@
 					"id": "forbus-db7894",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -751351,7 +752397,8 @@
 					"id": "lefil-db7894",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -759163,7 +760210,8 @@
 							"pl",
 							"si",
 							"sk",
-							"ua"
+							"ua",
+							"fr"
 						]
 					},
 					"tags": {
@@ -763647,7 +764695,8 @@
 							"ch",
 							"de",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -764518,7 +765567,8 @@
 					"id": "ter-db7894",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -781373,7 +782423,8 @@
 							"de",
 							"fx",
 							"it",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -781395,7 +782446,8 @@
 							"be",
 							"fx",
 							"gb",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -781957,7 +783009,8 @@
 					"locationSet": {
 						"include": [
 							"es-gi.geojson",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -784491,7 +785544,8 @@
 							"it",
 							"lu",
 							"mc",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -784510,7 +785564,8 @@
 					"id": "tgvinoui-3ecaf6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -784610,7 +785665,8 @@
 					"id": "transilien-3ecaf6",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -791237,7 +792293,8 @@
 							"nl",
 							"pt",
 							"si",
-							"sk"
+							"sk",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -796318,7 +797375,8 @@
 					"id": "fileo-add5eb",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -796569,7 +797627,8 @@
 					"id": "forbus-add5eb",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -800172,7 +801231,8 @@
 					"id": "lefil-add5eb",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -807525,7 +808585,8 @@
 							"pl",
 							"si",
 							"sk",
-							"ua"
+							"ua",
+							"fr"
 						]
 					},
 					"tags": {
@@ -811725,7 +812786,8 @@
 							"ch",
 							"de",
 							"fx",
-							"it"
+							"it",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -812544,7 +813606,8 @@
 					"id": "ter-add5eb",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -828597,7 +829660,8 @@
 							"de",
 							"fx",
 							"it",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -828616,7 +829680,8 @@
 							"be",
 							"fx",
 							"gb",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -829088,7 +830153,8 @@
 					"locationSet": {
 						"include": [
 							"es-gi.geojson",
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {
@@ -831238,7 +832304,8 @@
 							"it",
 							"lu",
 							"mc",
-							"nl"
+							"nl",
+							"fr"
 						]
 					},
 					"tags": {
@@ -831254,7 +832321,8 @@
 					"id": "tgvinoui-46b9eb",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"matchNames": [
@@ -831342,7 +832410,8 @@
 					"id": "transilien-46b9eb",
 					"locationSet": {
 						"include": [
-							"fx"
+							"fx",
+							"fr"
 						]
 					},
 					"tags": {

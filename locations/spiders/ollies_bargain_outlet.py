@@ -1,68 +1,35 @@
-from typing import AsyncIterator
+import json
+from typing import Any
 
 from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.linked_data_parser import LinkedDataParser
 
 
 class OlliesBargainOutletSpider(Spider):
     name = "ollies_bargain_outlet"
-    allowed_domains = ["ollies.us"]
+    allowed_domains = ["wswrapper.bullseyelocations.com", "ws.bullseyelocations.com"]
     item_attributes = {"brand": "Ollie's Bargain Outlet", "brand_wikidata": "Q7088304"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     requires_proxy = "US"
+    start_urls = [
+        "https://wswrapper.bullseyelocations.com/InterfaceConfiguration/GetInterfaceConfiguration?interfaceName=ollies-bargain-outlet-near-me&languageCode=en&version="
+    ]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        formdata = {
-            "Page": "0",
-            "PageSize": "1",
-            "StartIndex": "0",
-            "EndIndex": "5",
-            "Longitude": "-74.006065",
-            "Latitude": "40.712792",
-            "City": "",
-            "State": "",
-            "F": "GetNearestLocations",
-            "RangeInMiles": "5000",
-        }
-        url = "https://www.ollies.us/admin/locations/ajax.aspx"
-        headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        yield JsonRequest(
+            url="https://ws.bullseyelocations.com/RestSearch.svc/GetLocationList?countryIds=1&action=json&ClientId=8902&ApiKey={}".format(
+                response.json()["apiKey"]
+            ),
+            callback=self.parse_location,
+        )
 
-        yield FormRequest(url=url, method="POST", headers=headers, formdata=formdata, callback=self.get_all_locations)
-
-    def get_all_locations(self, response):
-        number_locations = response.json().get("LocationsCount")
-        formdata = {
-            "Page": "0",
-            "PageSize": str(number_locations),
-            "StartIndex": "0",
-            "EndIndex": "5",
-            "Longitude": "-74.006065",
-            "Latitude": "40.712792",
-            "City": "",
-            "State": "",
-            "F": "GetNearestLocations",
-            "RangeInMiles": "5000",
-        }
-        url = "https://www.ollies.us/admin/locations/ajax.aspx"
-        headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
-
-        yield FormRequest(url=url, method="POST", headers=headers, formdata=formdata, callback=self.parse)
-
-    def parse(self, response):
-        for data in response.json().get("Locations"):
-            item = DictParser.parse(data)
-            item["ref"] = data.get("StoreCode")
-            item["country"] = "US"
-            item["website"] = f'https://www.{self.allowed_domains[0]}{data.get("CustomUrl")}'
-            item["ref"] = data.get("StoreCode")
-
-            open_hours = data.get("OpenHours").split("<br />")
-            if "COMING SOON" not in open_hours[0].upper():
-                open_hour_filtered = [row.replace(":", "") for row in open_hours if "-" in row]
-                item["opening_hours"] = LinkedDataParser.parse_opening_hours(
-                    {"openingHours": open_hour_filtered}, "%I%p"
-                )
-                yield item
+    def parse_location(self, response: Response):
+        for location in json.loads(response.json())["locations"]:
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
+            item["state"] = location["StateAbbr"]
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
+            yield item

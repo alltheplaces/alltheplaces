@@ -58,7 +58,7 @@ class DeutschePostDESpider(Spider):
         for location in response.json()["pfLocations"]:
             location["location"] = location["geoPosition"]
             item = DictParser.parse(location)
-            item["ref"] = location["primaryKeyDeliverySystem"]
+            item["ref"] = location["primaryKeyPF"]
             item["name"] = location["locationName"]
             item["state"] = location["district"]
             item["opening_hours"] = self.parse_hours(location["pfTimeinfos"])

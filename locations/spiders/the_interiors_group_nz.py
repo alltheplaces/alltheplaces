@@ -1,31 +1,46 @@
-from locations.categories import Categories
-from locations.hours import OpeningHours
-from locations.storefinders.stockist import StockistSpider
+from typing import Any, Iterable
 
-CARPET_COURT = {"brand": "Carpet Court", "brand_wikidata": "Q137908618", "extras": Categories.SHOP_CARPET.value}
-CURTAIN_STUDIO = {"brand": "Curtain Studio", "brand_wikidata": "Q137908226", "extras": Categories.SHOP_CURTAIN.value}
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
+
+BRANDS = {
+    "carpetcourt.nz": {
+        "brand": "Carpet Court",
+        "brand_wikidata": "Q137908618",
+        "category": Categories.SHOP_CARPET,
+        "prefix": "Carpet Court",
+    },
+    "curtainstudio.co.nz": {
+        "brand": "Curtain Studio",
+        "brand_wikidata": "Q137908226",
+        "category": Categories.SHOP_CURTAIN,
+        "prefix": "Curtain Studio",
+    },
+}
 
 
-class TheInteriorsGroupNZSpider(StockistSpider):
+class TheInteriorsGroupNZSpider(SitemapSpider, StructuredDataSpider):
     name = "the_interiors_group_nz"
-    key = "map_93wgrpn3"
+    allowed_domains = ["carpetcourt.nz", "curtainstudio.co.nz"]
+    sitemap_urls = [
+        "https://carpetcourt.nz/sitemap_stores.xml",
+        "https://curtainstudio.co.nz/sitemap_stores.xml",
+    ]
+    sitemap_rules = [(r"/our-locations/[^/]+$", "parse_sd")]
+    wanted_types = ["HomeGoodsStore"]
+    search_for_facebook = False
 
-    def parse_item(self, item, location):
-        match location["filters"][0]["name"]:
-            case "Carpet Court":
-                item.update(CARPET_COURT)
-                item["branch"] = item.pop("name").removeprefix("Carpet Court ")
-                item["website"] = f"https://carpetcourt.nz{location['custom_fields'][1]['value']}"
-            case "Curtain Studio":
-                item.update(CURTAIN_STUDIO)
-                item["branch"] = item.pop("name").removeprefix("Curtain Studio ")
-                item["website"] = f"https://curtainstudio.co.nz{location['custom_fields'][1]['value']}"
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        brand = next(v for k, v in BRANDS.items() if k in response.url)
 
-        item["opening_hours"] = OpeningHours()
-        oh_string = location["custom_fields"][0]["value"].replace("\n ", "\n")
+        item["brand"] = brand["brand"]
+        item["brand_wikidata"] = brand["brand_wikidata"]
+        apply_category(brand["category"], item)
 
-        for lines in oh_string.split("\n"):
-            if lines.split(":")[0] in ["Mon-Fri", "Sat", "Sun"]:
-                item["opening_hours"].add_ranges_from_string(oh_string)
+        item["branch"] = item.pop("name").removeprefix(brand["prefix"]).strip(" -")
 
         yield item

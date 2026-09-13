@@ -1,9 +1,8 @@
-import json
 from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.playwright_spider import PlaywrightSpider
@@ -22,10 +21,11 @@ class BurgerKingRUSpider(PlaywrightSpider):
         yield JsonRequest(url=self.api_url, cookies={"spid": "", "spsc": ""})
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre/text()").get())["response"]:
+        for location in response.json()["response"]:
             item = DictParser.parse(location)
             item["street_address"] = item.pop("name", None)
             item["city"] = location["city"]["city_name"]
+            item["phone"] = None  # A single national number, varying only by extension
             try:
                 item["opening_hours"] = self.parse_opening_hours(location.get("timetable", []))
             except Exception as e:
@@ -33,6 +33,8 @@ class BurgerKingRUSpider(PlaywrightSpider):
 
             if location.get("features"):
                 apply_yes_no(Extras.DRIVE_THROUGH, item, location["features"].get("king_drive") is True, False)
+
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:

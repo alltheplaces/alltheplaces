@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -31,5 +32,5 @@ class JptcaSpider(SitemapSpider):
             if item["ref"] in img.group(1):
                 item["image"] = "https://jptca.org" + img.group(1)
 
-        item["extras"]["tourism"] = "artwork"
+        apply_category(Categories.TOURISM_ARTWORK, item)
         yield item

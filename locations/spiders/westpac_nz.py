@@ -3,18 +3,19 @@ from typing import Any
 
 from scrapy.http import Response
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class WestpacNZSpider(CamoufoxSpider):
+class WestpacNZSpider(PlaywrightSpider):
     name = "westpac_nz"
     item_attributes = {"brand": "Westpac", "brand_wikidata": "Q2031726"}
     start_urls = ["https://www.westpac.co.nz/contact-us/branch-finder/"]
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(response.xpath('//div[@class="js-branch-finder-map container"]/@data-props').get())[

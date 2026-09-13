@@ -1,3 +1,5 @@
+from scrapy.http import Response
+
 from locations.spiders.williams_sonoma_us import WilliamsSonomaUSSpider
 
 
@@ -7,3 +9,6 @@ class WilliamsSonomaCASpider(WilliamsSonomaUSSpider):
     start_urls = [
         "https://www.williams-sonoma.ca/search/stores.json?brands=WS,PB&lat=40.71304703&lng=-74.00723267&radius=100000&includeOutlets=false",
     ]
+
+    def extract_json(self, response: Response) -> dict | list[dict]:
+        return response.json().get("storeListResponse").get("stores")

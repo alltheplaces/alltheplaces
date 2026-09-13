@@ -53,9 +53,8 @@ class StockInStoreSpider(Spider):
         }
         yield FormRequest(
             url="https://stockinstore.net/stores/getAllStores",
-            method="POST",
             headers={"Origin": self.api_origin},
-            formdata=data,  # ty: ignore[invalid-argument-type]
+            formdata=data,
         )
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:

@@ -5,7 +5,6 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CostaCoffeeCZSpider(scrapy.Spider):
@@ -24,7 +23,6 @@ class CostaCoffeeCZSpider(scrapy.Spider):
             item["street_address"] = shop.xpath(".//*[@class='address px-6']//text()").get()
             item["postcode"] = shop.xpath(".//*[@class='address px-6']//span[2]/text()").get()
             item["city"] = shop.xpath(".//*[@class='address px-6']//span[3]/text()").get()
-            item["addr_full"] = merge_address_lines(shop.xpath(".//*[@class='address px-6']//text()").getall())
 
             apply_category(Categories.COFFEE_SHOP, item)
 

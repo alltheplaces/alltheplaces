@@ -9,6 +9,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class WholeFoodsSpider(SitemapSpider):
@@ -17,6 +18,7 @@ class WholeFoodsSpider(SitemapSpider):
     allowed_domains = ["wholefoodsmarket.com"]
     sitemap_urls = ["https://www.wholefoodsmarket.com/robots.txt"]
     sitemap_rules = [(r"/stores/([^/]+)$", "parse")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         script = response.xpath('//script[contains(@data-a-state, "detail-page-state")]/text()').get()

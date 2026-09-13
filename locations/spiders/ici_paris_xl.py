@@ -1,4 +1,3 @@
-import json
 from typing import AsyncIterator, Iterable
 from urllib.parse import urljoin
 
@@ -26,14 +25,16 @@ class IciParisXlSpider(JSONBlobSpider, PlaywrightSpider):
             )
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
-        json_data = json.loads(response.xpath("//pre//text()").get())["stores"]
+        json_data = response.json()["stores"]
         return json_data
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("address"))
+        feature.pop("region", None)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item.pop("name")
+        item["phone"] = None
         item["branch"] = feature.get("displayName")
         item["street_address"] = merge_address_lines([feature.get("line1"), feature.get("line2")])
         item["addr_full"] = feature.get("formattedAddress")

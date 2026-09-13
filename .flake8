@@ -5,5 +5,6 @@
     select = B,C,E,F,W,T4,B9,T20,N801,N802,N803,N806,N816
     per-file-ignores =
         ci/restore_history.py: T20
+        ci/update_user_agents.py: T20
         locations/commands/*: T20
         locations/__init__.py: T201
