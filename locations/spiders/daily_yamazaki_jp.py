@@ -81,7 +81,7 @@ class DailyYamazakiJPSpider(AreamarkerSpider):
 
         if store["hours"] == "00:00-23:59":
             item["opening_hours"] = "24/7"
-        elif m := OPENING_HOURS_RE.match(store["hours"]):
+        elif store["hours"] and (m := OPENING_HOURS_RE.match(store["hours"])):
             oh = OpeningHours()
             oh.add_days_range(DAYS, m.group(1), m.group(2))
             item["opening_hours"] = oh
