@@ -20,7 +20,7 @@ class AdFRSpider(SitemapSpider, StructuredDataSpider):
         item["branch"] = branch
 
         # Source tags New Caledonia stores as "FR"; its own ISO 3166-1 code is "NC".
-        if item.get("postcode", "").startswith("988"):
+        if postcode and postcode.startswith("988"):
             item["country"] = "NC"
 
         apply_category(Categories.SHOP_CAR_REPAIR, item)
