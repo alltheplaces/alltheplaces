@@ -1,4 +1,5 @@
 from typing import Iterable
+
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
@@ -17,9 +18,9 @@ class AbeilleAssurancesFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if item.get("facebook") == "https://www.facebook.com/AbeilleAssurances":
-        	item["facebook"] = None
-        
+            item["facebook"] = None
+
         item["branch"] = item.pop("name").removeprefix("Agence Abeille Assurances ")
-        
+
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
