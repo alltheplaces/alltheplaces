@@ -6,7 +6,7 @@ from pyproj import Transformer
 from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
-from locations.geo import city_locations, country_iseadgg_centroids
+from locations.geo import country_iseadgg_centroids
 from locations.items import Feature
 
 MAX_ITEMS = 1640  # determined experimentally
