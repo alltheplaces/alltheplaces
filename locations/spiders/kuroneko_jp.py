@@ -29,10 +29,6 @@ class KuronekoJPSpider(Spider):
         radius_m = RADIUS_KM * 1000
         for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
             yield self.make_request(lat, lon, radius_m)
-        for city in city_locations("JP", 50000):
-            yield self.make_request(city["latitude"], city["longitude"], 5500)
-        for city in city_locations("JP"):
-            yield self.make_request(city["latitude"], city["longitude"], 10000)
 
     def parse(self, response, lat, lon, offset):
         # response is an EUC-encoded JS file that looks like
