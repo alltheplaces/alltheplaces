@@ -1,20 +1,15 @@
 from datetime import datetime
-from typing import AsyncIterator, Iterator
+from typing import Iterable
 from zoneinfo import ZoneInfo
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, Drink, Extras, Sells, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.storefinders.areamarker import AreamarkerSpider
 
 CORP = "711map"
 API_URL = "https://seven-eleven-ss-api.areamarker.com/v1/search-by-condition"
-API_HEADERS = {
-    "X-Amss-Shopsite-Corp-ID": CORP,
-    "Origin": "https://seven-eleven.areamarker.com",
-    "Referer": "https://seven-eleven.areamarker.com/711map/",
-}
 
 # descriptive label -> API column name. meanings from the map page's
 # https://seven-eleven.areamarker.com/711map/data/serviceCol.json and sample data.
@@ -63,77 +58,57 @@ SEARCH_CONDITIONS = [
     },
 ]
 
-# A nationwide query pages through all ~21K stores. Keep the page small enough
-# that a single response stays under the API's ~6MB size cap.
-PAGE_SIZE = 1000
 
-
-class SevenElevenJPSpider(Spider):
+class SevenElevenJPSpider(AreamarkerSpider):
     name = "seven_eleven_jp"
     item_attributes = {
         "brand": "7-ELEVEN",
         "brand_wikidata": "Q259340",
     }
 
-    def make_request(self, search_after=None) -> JsonRequest:
-        body = {
-            "search_conditions": SEARCH_CONDITIONS,
-            "fields": list(FIELDS.values()),
-            "paging_mode": "search_after",
-            "sort": "+pre_code,+city_code,+kyo_id",
-            "corp_id": CORP,
-            "size": PAGE_SIZE,
-        }
-        if search_after:
-            body["search_after"] = search_after
-        return JsonRequest(API_URL, data=body, headers=API_HEADERS)
+    api_url = API_URL
+    corp_id = CORP
+    referer = "https://seven-eleven.areamarker.com/711map/"
+    fields = list(FIELDS.values())
+    search_conditions = SEARCH_CONDITIONS
+    # A nationwide query pages through all ~21K stores. Keep the page small enough
+    # that a single response stays under the API's ~6MB size cap.
+    page_size = 1000
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield self.make_request()
+    def post_process_item(self, record: dict, response: TextResponse) -> Iterable[Feature]:
+        store = {label: record["fields"][column] for label, column in FIELDS.items()}
 
-    def parse(self, response) -> Iterator[Feature | JsonRequest]:
-        data = response.json()
-        hits = data["result"]["hits"]
-        for hit in hits.get("hit", []):
-            store = {label: hit["fields"][column] for label, column in FIELDS.items()}
+        item = Feature()
+        item["ref"] = store["ref"]
+        item["lat"] = store["lat"]
+        item["lon"] = store["lon"]
+        item["branch"] = store["branch"]
+        item["name"] = None
+        item["phone"] = store["phone"]
+        item["website"] = f"https://seven-eleven.areamarker.com/711map/info/{store['ref']}"
+        item["addr_full"] = store["addr"]
+        item["postcode"] = store["postcode"]
 
-            item = Feature()
-            item["ref"] = store["ref"]
-            item["lat"] = store["lat"]
-            item["lon"] = store["lon"]
-            item["branch"] = store["branch"]
-            item["name"] = None
-            item["phone"] = store["phone"]
-            item["website"] = f"https://seven-eleven.areamarker.com/711map/info/{store['ref']}"
-            item["addr_full"] = store["addr"]
-            item["postcode"] = store["postcode"]
+        apply_category(Categories.SHOP_CONVENIENCE, item)
 
-            apply_category(Categories.SHOP_CONVENIENCE, item)
+        apply_yes_no(Extras.ATM, item, store["atm"] == "1")
+        apply_yes_no(Sells.TOBACCO, item, store["tobacco"] == "1")
+        apply_yes_no(Sells.ALCOHOL, item, store["alcohol"] == "1")
+        apply_yes_no(Extras.COPYING, item, store["copier"] == "1")
+        apply_yes_no(Extras.DELIVERY, item, store["seven_now_delivery"] == "1")
+        apply_yes_no(Extras.DUTY_FREE, item, store["tax_free"] == "1")
+        apply_yes_no(Extras.SELF_CHECKOUT, item, store["self_checkout"] == "1")
+        apply_yes_no(Drink.COFFEE, item, store["seven_cafe"] == "1")
+        if store["pet_recycle"] == "1":
+            item["extras"]["recycling:pet_drink_bottles"] = "yes"
 
-            apply_yes_no(Extras.ATM, item, store["atm"] == "1")
-            apply_yes_no(Sells.TOBACCO, item, store["tobacco"] == "1")
-            apply_yes_no(Sells.ALCOHOL, item, store["alcohol"] == "1")
-            apply_yes_no(Extras.COPYING, item, store["copier"] == "1")
-            apply_yes_no(Extras.DELIVERY, item, store["seven_now_delivery"] == "1")
-            apply_yes_no(Extras.DUTY_FREE, item, store["tax_free"] == "1")
-            apply_yes_no(Extras.SELF_CHECKOUT, item, store["self_checkout"] == "1")
-            apply_yes_no(Drink.COFFEE, item, store["seven_cafe"] == "1")
-            if store["pet_recycle"] == "1":
-                item["extras"]["recycling:pet_drink_bottles"] = "yes"
+        # Skipped service flags (no established OSM tag):
+        #   store["fried_food"] 揚げ物惣菜 (fried foods)
+        #   store["seven_cafe_smoothie"] セブンカフェスムージー (Seven Cafe smoothie)
+        #   store["seven_meal"] セブンミール (Seven Meal)
+        #   store["medicine"] 薬 (medicine)
+        #   store["store_hold"] 店舗留置サービス (store hold service)
+        #   store["seven_delivery"] セブンあんしんお届け便 (mobile sales for remote areas)
+        #   store["battery_rental"] モバイルバッテリーサービス (mobile battery rental)
 
-            # Skipped service flags (no established OSM tag):
-            #   store["fried_food"] 揚げ物惣菜 (fried foods)
-            #   store["seven_cafe_smoothie"] セブンカフェスムージー (Seven Cafe smoothie)
-            #   store["seven_meal"] セブンミール (Seven Meal)
-            #   store["medicine"] 薬 (medicine)
-            #   store["store_hold"] 店舗留置サービス (store hold service)
-            #   store["seven_delivery"] セブンあんしんお届け便 (mobile sales for remote areas)
-            #   store["battery_rental"] モバイルバッテリーサービス (mobile battery rental)
-
-            yield item
-
-        # `search_after` cursor pagination requires following the cursor returned
-        # by the previous page, so the next request is issued from here.
-        search_after = hits.get("search_after")
-        if search_after:
-            yield self.make_request(search_after)
+        yield item
