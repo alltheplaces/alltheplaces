@@ -1,5 +1,4 @@
 import csv
-import re
 from io import StringIO
 
 from chompjs import parse_js_object
@@ -48,7 +47,9 @@ class KuronekoJPSpider(Spider):
         if rec_count >= hit_count:
             yield self.make_request(lat, lon, offset + rec_count)
         for row in reader:
-            if any(i in row[6] for i in ["ツルハ", "福太郎", "イレブン", "ウォンツ", "B＆D", "Ｂ＆Ｄ"]):  # skip Tsuruha Drug locations
+            if any(
+                i in row[6] for i in ["ツルハ", "福太郎", "イレブン", "ウォンツ", "B＆D", "Ｂ＆Ｄ"]
+            ):  # skip Tsuruha Drug locations
                 continue
             item = Feature()
             item["ref"] = row[0]
