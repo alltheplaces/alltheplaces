@@ -22,14 +22,13 @@ class JoueclubSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.joueclub.fr/robots.txt"]
     sitemap_follow = ["Store"]
     wanted_types = ["ToyStore"]
-    # This site has no anti-bot measures (verified: identical response bytes to
-    # a plain browser request), so skip Zyte even when ZYTE_API_KEY is set.
-    custom_settings = {
-        "DOWNLOAD_HANDLERS": {
-            "http": "scrapy.core.downloader.handlers.http11.HTTP11DownloadHandler",
-            "https": "scrapy.core.downloader.handlers.http11.HTTP11DownloadHandler",
-        }
-    }
+    # Not needed for anti-bot reasons (direct requests get identical bytes to a
+    # plain browser) — but AWS CodeBuild's CI network gets a consistent 502 on
+    # this site's robots.txt (reproduced 3/3, direct AND with ZYTE_API_KEY set
+    # but unrouted — see PR discussion), while genuine Zyte routing succeeds
+    # every time. requires_proxy forces real Zyte routing instead of the
+    # ZyteApiByCountryMiddleware default (skip Zyte unless this is set).
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if item["country"] not in ALLOWED_COUNTRIES:
