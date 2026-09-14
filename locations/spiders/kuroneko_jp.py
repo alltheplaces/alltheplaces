@@ -10,7 +10,6 @@ from locations.geo import country_iseadgg_centroids
 from locations.items import Feature
 
 MAX_ITEMS = 1640  # determined experimentally
-TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
 RADIUS_KM = 24
 MAP_ID = "yamato01"  # for storefinder
 
@@ -25,6 +24,7 @@ class KuronekoJPSpider(Spider):
         )
 
     async def start(self):
+        self.transformer = Transformer.from_pipeline("EPSG:15484")
         radius_m = RADIUS_KM * 1000
         for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
             yield self.make_request(lat, lon, radius_m)
@@ -56,9 +56,7 @@ class KuronekoJPSpider(Spider):
             item["website"] = f"https://www.e-map.ne.jp/p/{MAP_ID}/dtl/{row[0]}/"
             lat = float(row[1])
             lon = float(row[2])
-            wgs84_lat, wgs84_lon = TOKYO_TO_WGS84.transform(lat, lon)
-            item["lat"] = wgs84_lat
-            item["lon"] = wgs84_lon
+            item["lat"], item["lon"] = self.transformer.transform(lat, lon)
             if row[3] == "YTC":
                 apply_category(Categories.POST_OFFICE, item)
                 item["branch"] = row[6]
