@@ -27,6 +27,12 @@ class JoueclubSpider(SitemapSpider, StructuredDataSpider):
         if item["country"] not in ALLOWED_COUNTRIES:
             return
 
+        # Monaco's JSON-LD reports addressCountry "FR" even though it isn't part
+        # of France; its postcode (980xx) is a more reliable marker than the
+        # locality name to exclude it.
+        if (item.get("postcode") or "").startswith("980"):
+            return
+
         # NSI doesn't resolve locationSet for French overseas departments, so set
         # this explicitly rather than relying on it (single unambiguous NSI
         # entry for this brand, so no risk of miscategorising).
@@ -55,7 +61,9 @@ class JoueclubSpider(SitemapSpider, StructuredDataSpider):
             for day in sorted(store["hours"]["openingHours"], key=lambda d: d["viewPos"]):
                 weekday = DAYS_FULL[day["viewPos"]]
                 am_begin, am_end, pm_begin, pm_end = day["amBegin"], day["amEnd"], day["pmBegin"], day["pmEnd"]
-                if am_begin and pm_end and not am_end and not pm_begin:
+                if not any((am_begin, am_end, pm_begin, pm_end)):
+                    item["opening_hours"].set_closed(weekday)
+                elif am_begin and pm_end and not am_end and not pm_begin:
                     # Open continuously through midday, e.g. Saturdays at some stores.
                     item["opening_hours"].add_range(weekday, am_begin, pm_end)
                 else:
