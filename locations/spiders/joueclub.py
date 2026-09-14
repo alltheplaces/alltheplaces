@@ -31,7 +31,9 @@ class JoueclubSpider(SitemapSpider, StructuredDataSpider):
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        if item["country"] not in ALLOWED_COUNTRIES:
+        # .get(), not [], and a name check: LinkedDataParser only sets "country"
+        # for recognised addressCountry shapes, and "name" can be None.
+        if item.get("country") not in ALLOWED_COUNTRIES or not item.get("name"):
             return
 
         # Monaco's JSON-LD reports addressCountry "FR" even though it isn't part
