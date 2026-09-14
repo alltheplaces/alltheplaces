@@ -12,7 +12,7 @@ from locations.json_blob_spider import JSONBlobSpider
 class AudiSpider(JSONBlobSpider):
     name = "audi"
     item_attributes = {"brand": "Audi", "brand_wikidata": "Q23317"}
-    graphql_url = "https://dev-dealer-graphql.apps.emea.vwapps.io/"
+    graphql_url = "https://graphql.pss.audi.com/"
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"clientid": "d7sfqwrxzu"}, "ROBOTSTXT_OBEY": False}
     locations_key = ["data", "dealersByMarket", "dealers"]
 

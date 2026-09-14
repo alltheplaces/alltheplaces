@@ -15,7 +15,7 @@ class LineDelimitedGeoJsonExporter(JsonLinesItemExporter):
             self.dataset_attributes = get_dataset_attributes(item["extras"].get("@spider"))
         super().export_item(item)
 
-    def _get_serialized_fields(self, item, default_value=None, include_empty=None):
+    def get_serialized_fields(self, item, default_value=None, include_empty=None):
         feature = []
         feature.append(("type", "Feature"))
         feature.append(("id", compute_hash(item)))

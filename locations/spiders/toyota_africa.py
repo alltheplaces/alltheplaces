@@ -151,12 +151,20 @@ class ToyotaAfricaSpider(CrawlSpider):
         for category in categories:
             if category in self.CATEGORY_SALES_KEYS:
                 apply_category(Categories.SHOP_CAR, item)
-                apply_yes_no(Extras.CAR_REPAIR, item, any(extra in self.CATEGORY_SERVICE_KEYS for extra in categories))
-                apply_yes_no(Extras.CAR_PARTS, item, any(extra in self.CATEGORY_PARTS_KEYS for extra in categories))
+                apply_yes_no(
+                    Extras.VEHICLE_CAR_REPAIR_SERVICES,
+                    item,
+                    any(extra in self.CATEGORY_SERVICE_KEYS for extra in categories),
+                )
+                apply_yes_no(
+                    Extras.VEHICLE_CAR_PARTS_SALES, item, any(extra in self.CATEGORY_PARTS_KEYS for extra in categories)
+                )
                 break
             elif category in self.CATEGORY_SERVICE_KEYS:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
-                apply_yes_no(Extras.CAR_PARTS, item, any(extra in self.CATEGORY_PARTS_KEYS for extra in categories))
+                apply_yes_no(
+                    Extras.VEHICLE_CAR_PARTS_SALES, item, any(extra in self.CATEGORY_PARTS_KEYS for extra in categories)
+                )
                 break
             elif category in self.CATEGORY_PARTS_KEYS:
                 apply_category(Categories.SHOP_CAR_PARTS, item)

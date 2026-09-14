@@ -13,6 +13,8 @@ class WellGBSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["website"] = response.url
         item["image"] = item["email"] = None
+        item["twitter"] = None
+        item["branch"] = item.pop("name").replace("Well Pharmacy", "").strip()
 
         if postcode := item.get("postcode"):
             if " " not in postcode:

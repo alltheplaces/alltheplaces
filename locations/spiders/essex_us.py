@@ -1,4 +1,3 @@
-import json
 from typing import Iterable
 
 from scrapy.http import TextResponse
@@ -21,7 +20,7 @@ class EssexUSSpider(JSONBlobSpider, PlaywrightSpider):
     requires_proxy = True
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
-        return json.loads(response.xpath("//pre/text()").get())["communities"]
+        return response.json()["communities"]
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["image"] = feature["imagelist"].split("|")[0]

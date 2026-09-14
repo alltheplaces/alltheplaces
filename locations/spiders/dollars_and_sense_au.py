@@ -1,4 +1,3 @@
-import re
 from typing import Iterable
 
 from scrapy import Spider
@@ -15,23 +14,10 @@ class DollarsAndSenseAUSpider(Spider):
     start_urls = ["https://www.dollarsense.au/pages/store-locations"]
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        # Coordinates are not made available. Embedded Google Maps iframes use
-        # a general search/query term similar to searching Google Maps for a
-        # feature such as "Dollars and Sense BranchName".
-        for store in response.xpath('//div[@class="ecom-sections"]/section[position() > 1]'):
-            location_details = (
-                re.sub(r"\s*:\s*", ": ", " ".join(store.xpath(".//text()").getall())).strip().removesuffix("Phone")
-            )
-            location_parts = re.split(r"(?:Located in:|Address:|Phone:)", location_details)
-            properties = {
-                "ref": location_parts[0].removeprefix("Dollars and Sense ").strip(),
-                "branch": location_parts[0].removeprefix("Dollars and Sense ").strip(),
-            }
-            if "Located in:" in location_details:
-                properties["addr_full"] = location_parts[2]
-            else:
-                properties["addr_full"] = location_parts[1]
-            if "Phone:" in location_details:
-                properties["phone"] = location_parts[-1]
-            apply_category(Categories.SHOP_VARIETY_STORE, properties)
-            yield Feature(**properties)
+        for store in response.xpath('//*[@class="ds-location-card__meta"]'):
+            item = Feature()
+            item["branch"] = item["ref"] = store.xpath("./p/text()").get()
+            item["addr_full"] = store.xpath("./p[2]/text()").get()
+            item["phone"] = store.xpath("./p[3]/text()").get()
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
+            yield item

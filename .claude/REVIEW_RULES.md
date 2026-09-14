@@ -59,6 +59,24 @@
 - Always include `Closes #N` when the PR resolves an existing issue or deletion PR
 - Include a brief summary of the CI output (count, warnings, any issues noted)
 
+## Code Verbosity (comments, tests)
+This is about the code itself, not the PR description (see "PR Descriptions" above, which
+should stay detailed) — the spider source should be lean.
+- **Flag excessive code comments.** LLM-assisted spiders in particular tend to over-comment —
+  a comment restating what the next line obviously does (e.g. `# extract the store name` above
+  `name = response.css(...)`) adds noise, not clarity. One line max per comment, and only where
+  the *why* isn't obvious from the code (a workaround, a non-obvious API quirk, a subtle
+  ordering requirement). Don't block a merge over this alone, but call it out as review feedback
+  so the author can trim it, either before merge or as a quick follow-up.
+- **Don't add a test file per spider.** This repo's convention is not to write an individual
+  test file for each spider — the shared test suite (`test_item_attributes`, structural checks,
+  etc.) already covers spiders generically. A per-spider test file is unnecessary and should be
+  flagged for removal.
+- Confirmed 2026-08-07 re: #17626 (`maaf_fr` spider) — Cj-Malone called the PR "excessively
+  verbose"; iandees's own follow-up feedback was "Claude added too many comments and we don't
+  need tests for every spider." The contributor opened a fast-follow PR (#17694) to trim
+  comments to one line each and delete the per-spider test file.
+
 ## Spider Fix PRs
 - Verify CI checks pass (pytest + pre-commit; AWS CodeBuild run is informational)
 - Check the diff size and scope - prefer small, focused changes
@@ -125,7 +143,7 @@
 - **Wikidata QID validation** — do not trust a `brand_wikidata` value just because it is syntactically valid (`Q` + digits). LLMs frequently hallucinate QIDs that exist but refer to a completely unrelated entity (e.g. a village in Nigeria assigned to a laundromat brand). Always verify the QID label matches the brand name by checking `https://www.wikidata.org/wiki/Q<id>` or searching NSI. If no real QID can be found, omit `brand_wikidata` rather than guessing.
 - **Missing wikidata on large brands** — if a new spider produces a large number of locations (>100) but has no `brand_wikidata`, flag it. A brand with hundreds of locations almost certainly has a Wikidata entry. Search NSI (`grep -i "<brand>" locations/data/nsi.json`) and Wikidata before merging. If genuinely not in Wikidata, a comment explaining the search was done is acceptable.
 - Check location count looks reasonable
-- **Category must use `apply_category`** — never set `item["extras"]["amenity"]` (or any other tag) directly. Always use `apply_category(Categories.X, item)` from `locations.categories`. If the right `Categories` enum value doesn't exist yet, add it to `categories.py` in the same PR.
+- **Category must use `apply_category`** — never set `item["extras"]["amenity"]` (or any other top level tag) directly. Always use `apply_category(Categories.X, item)` from `locations.categories`. If the right `Categories` enum value doesn't exist yet, add it to `categories.py` in the same PR.
 - **`add_list` for multi-value extras tags** — `apply_category` no longer accumulates values;
   calling it twice for the same key overwrites the first. For tags that genuinely need
   semicolon-separated values (e.g. `cuisine`), use `add_list(key, value, item)` from

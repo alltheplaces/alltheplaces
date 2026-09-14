@@ -4,11 +4,11 @@ import io
 import re
 import zipfile
 from collections import namedtuple
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 from urllib.parse import urlencode
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
 from locations.items import Feature
 from locations.user_agents import BOT_USER_AGENT_SCRAPY
@@ -48,7 +48,7 @@ class OpentransportdataSwissSpider(Spider):
             callback=self.handle_wikidata_operators,
         )
 
-    def handle_wikidata_operators(self, response):
+    def handle_wikidata_operators(self, response: Response) -> Iterable[Request]:
         self.operators = {}
         for row in csv.DictReader(io.StringIO(response.text), delimiter=","):
             if m := re.search(r"(Q\d+)", row["item"]):
@@ -56,12 +56,12 @@ class OpentransportdataSwissSpider(Spider):
         url = "https://data.opentransportdata.swiss/de/dataset/bfr-rollstuhl"
         yield Request(url, callback=self.handle_wheelchair_overview)
 
-    def handle_wheelchair_overview(self, response):
+    def handle_wheelchair_overview(self, response: Response) -> Iterable[Request]:
         # The download URL changes daily with every database dump.
         link = next(href for href in response.xpath("//a/@href").getall() if href.endswith("bfr_haltestellendaten.csv"))
         yield Request(link, callback=self.handle_wheelchair_data)
 
-    def handle_wheelchair_data(self, response):
+    def handle_wheelchair_data(self, response: Response) -> Iterable[Request]:
         # The data feed supplies seperate properties for railbound
         # and non-railbound wheelchair accessibility; in remote areas,
         # there are stations whose railway platforms are fully accessible
@@ -101,10 +101,10 @@ class OpentransportdataSwissSpider(Spider):
                 (start_date, end_date, railbound_value, nonrailbound_value)
             )
         # Next, fetch data file for wheelchair-accessible toilets.
-        url = self.dataset_pattern % "prm-toilet-actual-date"
+        url = self.dataset_pattern % "toilet-v2"
         yield Request(url, callback=self.handle_wheelchair_toilets)
 
-    def handle_wheelchair_toilets(self, response):
+    def handle_wheelchair_toilets(self, response: Response) -> Iterable[Request]:
         self.toilets_wheelchair = {}  # "ch:1:sloid:2213" -> "yes"
         for row in self.read_csv("actual-date-toilet", response):
             status = row["status"]
@@ -120,10 +120,10 @@ class OpentransportdataSwissSpider(Spider):
             f"found {len(self.toilets_wheelchair)} " + "transit stations with wheelchair toilet attributes"
         )
         # Next, fetch data file for "service points" (stations/stop areas).
-        url = self.dataset_pattern % "service-points-actual-date"
+        url = self.dataset_pattern % "service-point-v2"
         yield Request(url, callback=self.handle_service_points)
 
-    def handle_service_points(self, response):
+    def handle_service_points(self, response: Response) -> Iterable[Feature | Request]:
         self.stations = {}
         # "swiss-only" is an misnomer; the actual data goes far beyond.
         for row in self.read_csv("actual-date-swiss-service-point", response):
@@ -179,10 +179,10 @@ class OpentransportdataSwissSpider(Spider):
             )
 
         # Next, fetch data for "traffic points" (platforms).
-        url = self.dataset_pattern % "traffic-points-actual-date"
+        url = self.dataset_pattern % "traffic-point-v2"
         yield Request(url, callback=self.handle_traffic_points)
 
-    def handle_traffic_points(self, response):
+    def handle_traffic_points(self, response: Response) -> Iterable[Feature]:
         for row in self.read_csv("actual-date-world-traffic-point", response):
             # This table does not seem to have a status column,
             # so we do not check for status="VALIDATED" here.
@@ -230,21 +230,21 @@ class OpentransportdataSwissSpider(Spider):
             )
 
     @staticmethod
-    def parse_date(d):
+    def parse_date(d: str | None) -> datetime.date | None:
         if d and not d.startswith("9999"):
             return datetime.datetime.strptime(d, "%d.%m.%Y").date()
         else:
             return None
 
     @staticmethod
-    def parse_lat_lon_ele(row):
+    def parse_lat_lon_ele(row: dict) -> tuple[float, float, float]:
         lat = round(float(row["wgs84North"] or "0.0"), 7)
         lon = round(float(row["wgs84East"] or "0.0"), 7)
         ele = float(row["height"] or "0.0")
         return lat, lon, ele
 
     @staticmethod
-    def parse_uic_ref(row):
+    def parse_uic_ref(row: dict) -> str | None:
         num = row["number"]
         if len(num) == 7 and num.startswith(row["uicCountryCode"]):
             return num
@@ -252,7 +252,7 @@ class OpentransportdataSwissSpider(Spider):
             return None
 
     @staticmethod
-    def means_tags(means, platform):
+    def means_tags(means: tuple[str, ...], platform: bool) -> dict[str, str]:
         if not means:
             return {}
 
@@ -309,7 +309,7 @@ class OpentransportdataSwissSpider(Spider):
 
         return {k: v for k, v in tags.items() if v}
 
-    def wheelchair_tags(self, sloid, means):
+    def wheelchair_tags(self, sloid: str, means: tuple[str, ...]) -> tuple[str | None, str | None]:
         """Computes the wheelchair and wheelchair:conditional tags
         for a transit station given its SLOID identifier and the available
         means of transport."""
@@ -350,14 +350,14 @@ class OpentransportdataSwissSpider(Spider):
         return default_value, " ; ".join(cond_values)
 
     @staticmethod
-    def format_date(d):
+    def format_date(d: datetime.date) -> str:
         # Python strftime() is localizing its months, whereas dates in
         # OpenStreetMap conditional expressions have month names in English.
         # Therefore, we do our own date formatting.
         months = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
         return "%04d %s %02d" % (d.year, months[d.month - 1], d.day)
 
-    def read_csv(self, dataset, response):
+    def read_csv(self, dataset: str, response: Response) -> Iterable[dict]:
         content_type = response.headers.get("Content-Type").decode("utf-8")
         if content_type.startswith("text/csv"):
             content = response.text.removeprefix("\ufeff")

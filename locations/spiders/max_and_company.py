@@ -1,6 +1,7 @@
 import html
-import json
+import re
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 from locations.playwright_spider import PlaywrightSpider
@@ -18,9 +19,11 @@ class MaxAndCompanySpider(PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response, **kwargs):
-        for location in json.loads(response.xpath("//pre//text()").get())["features"]:
+        for location in response.json()["features"]:
             item = DictParser.parse(location["properties"])
-            item["name"] = html.unescape(location["properties"]["displayName"])
+            item.pop("name", None)
+            branch = html.unescape(location["properties"]["displayName"])
+            item["branch"] = re.sub(r"^max\s*&\s*co\.?\s*", "", branch, flags=re.IGNORECASE) or None
             item["addr_full"] = location["properties"]["formattedAddress"]
             item["state"] = location["properties"]["prov"]
 
@@ -31,6 +34,7 @@ class MaxAndCompanySpider(PlaywrightSpider):
                         start_time, end_time = time.split(" - ")
                         if end_time == "24.00":
                             end_time = "23.59"
-                        item["opening_hours"].add_range(day, start_time, end_time, time_format="%H.%M %p")
+                        item["opening_hours"].add_range(day, start_time, end_time, time_format="%I.%M %p")
 
+            apply_category(Categories.SHOP_CLOTHES, item)
             yield item

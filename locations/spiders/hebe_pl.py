@@ -1,13 +1,14 @@
-import scrapy
-
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class HebePLSpider(scrapy.Spider):
+class HebePLSpider(PlaywrightSpider):
     name = "hebe_pl"
     item_attributes = {"brand": "Hebe", "brand_wikidata": "Q110952328"}
     start_urls = ["https://www.hebe.pl/sklepy"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response, **kwargs):
         for shop in response.xpath("//*[@data-lat]"):

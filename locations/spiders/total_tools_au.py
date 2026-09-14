@@ -1,4 +1,3 @@
-import json
 from typing import Any, Iterable
 
 import scrapy
@@ -20,7 +19,7 @@ class TotalToolsAUSpider(PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in json.loads(response.xpath("//pre/text()").get())["storesjson"]:
+        for store in response.json()["storesjson"]:
             item = DictParser.parse(store)
             item["branch"] = item.pop("name").removeprefix("Total Tools ")
             item["ref"] = store["storelocator_id"]

@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class SamsClubMXSpider(Spider):
@@ -18,7 +19,7 @@ class SamsClubMXSpider(Spider):
                 method="POST",
                 headers={
                     "content-type": "application/json",
-                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+                    "user-agent": BROWSER_DEFAULT,
                     "x-apollo-operation-name": "nearByNodes",
                     "x-o-bu": "SAMS-MX",
                     "x-o-gql-query": "query nearByNodes",

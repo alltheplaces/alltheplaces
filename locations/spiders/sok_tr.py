@@ -6,7 +6,7 @@ from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import clean_address, merge_address_lines
+from locations.pipelines.address_clean_up import clean_address
 
 PROVINCES_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/sehirler"
 DISTRICTS_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/ilceler?city={province}"
@@ -49,8 +49,7 @@ class SokTRSpider(Spider):
             item["city"] = response.meta["district"]
             item["country"] = "TR"
             item["phone"] = store.get("phone")
-            item["street_address"] = clean_address(store["address"])
-            item["addr_full"] = merge_address_lines([item["street_address"], item["city"], item["state"]])
+            item["street_address"] = clean_address(item.pop("addr_full", store["address"]))
             apply_category(Categories.SHOP_SUPERMARKET, item)
 
             yield item

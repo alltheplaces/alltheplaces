@@ -84,7 +84,7 @@ class PorscheHoldingSpider(JSONBlobSpider):
         services = feature.get("contracts", {})
         if services.get("sales"):
             apply_category(Categories.SHOP_CAR, item)
-            apply_yes_no(Extras.CAR_REPAIR, item, services.get("service"))
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, item, services.get("service"))
         elif services.get("service"):
             apply_category(Categories.SHOP_CAR_REPAIR, item)
 

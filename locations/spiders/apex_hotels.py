@@ -15,6 +15,8 @@ class ApexHotelsSpider(SitemapSpider):
         item = LinkedDataParser.parse(response, "Hotel")
         if item:
             item["ref"] = response.url.split("/")[5]
+            if item.get("image"):
+                item["image"] = response.urljoin(item["image"])
 
             apply_category(Categories.HOTEL, item)
 

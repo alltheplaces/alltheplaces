@@ -132,6 +132,7 @@ Proxy costs money. Before adding `requires_proxy`:
 | Sitemap URL format changed | Update `sitemap_rules` regex | #16043 Five Guys CN |
 | Embedded JSON escaping changed | Custom unescape function (don't use `unicode-escape` — mojibakes UTF-8) | #16050 Commerzbank DE |
 | Marqii migration | Copy `dog_haus_us` RSC flight-chunk pattern | #16049 Bubbakoos Burritos US |
+| `start_urls` hardcoded a Next.js `/_next/data/<build-id>/...` path that no longer resolves after a site redeploy (build IDs rotate on every deploy) | Use the human-facing page URL and parse the `__NEXT_DATA__` `<script>` tag with `chompjs` instead of the build-ID data URL | pattern flagged by davidhicks, PR #17946 dreams_donuts |
 | SFCC/Demandware migration | SitemapSpider on `/sitemap_index.xml` + StructuredDataSpider + Camoufox | #16051 Aesop |
 | Brand still exists, new CloudFront/proxy-only | SitemapSpider + `requires_proxy = True` | #16045 Euromaster NL |
 

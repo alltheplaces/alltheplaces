@@ -1,28 +1,38 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import re
+from typing import Iterable
 
-from locations.categories import Categories, apply_category
+from scrapy.http import TextResponse
+
+from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
+from locations.hours import DAYS, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.subway import SubwaySpider
 
 
-class SubwayTWSpider(CrawlSpider):
+class SubwayTWSpider(JSONBlobSpider):
     name = "subway_tw"
     item_attributes = SubwaySpider.item_attributes
-    start_urls = ["https://subway.com.tw/GoWeb2/include/index.php?Page=2"]
-    rules = [
-        Rule(LinkExtractor(allow=r"pageNum"), callback="parse", follow=True),
-    ]
+    start_urls = ["https://www.subway.com.tw/stores-data.json"]
 
-    def parse(self, response, **kwargs):
-        for store in response.xpath("//*[contains(@class, 'store-table')]/tbody/tr"):
-            item = Feature()
-            item["name"] = store.xpath('./*[@data-title="門市名稱"]/text()').get("").strip()
-            item["addr_full"] = store.xpath('./*[@data-title="門市地址"]/a/text()').get().replace("\n", "")
-            item["phone"] = store.xpath('.//a[contains(@href, "tel")]/@href').get()
-            item["ref"] = store.xpath('./*[@data-title="NO"]/text()').get().strip()
-            item["website"] = response.url
-            apply_category(Categories.FAST_FOOD, item)
-            item["extras"]["cuisine"] = "sandwich"
-            item["extras"]["takeaway"] = "yes"
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["ref"] = feature["storeNum"]
+        item["opening_hours"] = self.parse_hours(feature["hours"])
+        apply_category(Categories.FAST_FOOD, item)
+        apply_yes_no(PaymentMethods.LINE_PAY, item, "LinePay" in feature["payment"], False)
+        item["extras"]["cuisine"] = "sandwich"
+        item["extras"]["takeaway"] = "yes"
+        yield item
+
+    @staticmethod
+    def parse_hours(hours: str) -> OpeningHours:
+        opening_hours = OpeningHours()
+        if all_week := re.match(r"\s*(\d{1,2}:\d{2})\s*[-~]\s*(\d{1,2}:\d{2})", hours):
+            # A leading range with no day prefix covers the whole week, one store then adds weekend hours
+            opening_hours.add_days_range(DAYS, all_week.group(1), all_week.group(2))
+            hours = hours[all_week.end() :]
+        opening_hours.add_ranges_from_string(hours, delimiters=["-", "~"], closed=["未營業"])
+        if days_off := re.search(r"((?:[A-Z]{3}[,\s]+)*[A-Z]{3}) day off", hours):
+            opening_hours.set_closed([sanitise_day(day) for day in re.findall(r"[A-Z]{3}", days_off.group(1))])
+        return opening_hours

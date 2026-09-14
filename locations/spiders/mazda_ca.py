@@ -1,42 +1,41 @@
 import re
 from copy import deepcopy
-from typing import Any, AsyncIterator
+from typing import Any
 
-import scrapy
-from scrapy.http import JsonRequest
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
 from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class MazdaCASpider(scrapy.Spider):
+class MazdaCASpider(Spider):
     name = "mazda_ca"
     item_attributes = MAZDA_SHARED_ATTRIBUTES
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    start_urls = [
+        "https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=5000&minlng=-125&maxlng=180&minlat=-90&maxlat=90"
+    ]
 
-    async def start(self) -> AsyncIterator[Any]:
-        for city in city_locations("CA", 0):
-            yield JsonRequest(
-                url=f'https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=1000&keyword={city["name"]}'
-            )
-
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for dealer in response.json()["data"]:
             item = DictParser.parse(dealer)
             item["ref"] = dealer["dealer_code"]
             item["street_address"] = merge_address_lines([dealer["address_line_1"], dealer["address_line_2"]])
-            item["email"] = dealer["oca_email"]
+            item["email"] = dealer["oca_email"].removesuffix("ï¿½").removesuffix("�")
             item["state"] = dealer["province"]["province_code"]
-
+            if item.get("website"):
+                item["website"] = "https://" + item["website"] if "https://" not in item["website"] else item["website"]
             if dealer.get("hours").get("sales"):
                 shop = deepcopy(item)
                 self.parse_hours(shop, dealer["hours"]["sales"])
                 apply_category(Categories.SHOP_CAR, shop)
                 if dealer["hours"]["service"]:
-                    apply_yes_no(Extras.CAR_REPAIR, shop, True)
+                    apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, shop, True)
                 yield shop
 
             if dealer.get("hours").get("service"):

@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 import scrapy
@@ -23,7 +22,7 @@ class WoolworthsAUSpider(scrapy.Spider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre/text()").get())["Stores"]:
+        for location in response.json()["Stores"]:
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["street_address"] = merge_address_lines([location["AddressLine1"], location["AddressLine2"]])

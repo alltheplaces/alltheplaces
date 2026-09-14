@@ -1,12 +1,22 @@
+from typing import Any
+
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.spiders.paul_fr import PAUL_SHARED_ATTRIBUTES
-from locations.storefinders.yext_search import YextSearchSpider
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class PaulZASpider(YextSearchSpider):
+class PaulZASpider(SitemapSpider, StructuredDataSpider):
     name = "paul_za"
     item_attributes = PAUL_SHARED_ATTRIBUTES
-    host = "https://location.paulsa.co.za"
+    sitemap_urls = ["https://locations.paulsa.co.za/sitemap.xml"]
+    sitemap_rules = [(r"/restaurants-[^/]+$", "parse_sd")]
 
-    def parse_item(self, location, item):
-        item["website"] = location["profile"]["c_pagesURL"]
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
+        item["branch"] = (item.pop("name") or "").removeprefix("PAUL").strip()
+        item.pop("image", None)
+        apply_category(Categories.SHOP_BAKERY, item)
         yield item

@@ -61,7 +61,7 @@ class NissanEUSpider(Spider):
             if "car" in services:
                 apply_category(Categories.SHOP_CAR, item)
                 if "configure" in services:
-                    apply_yes_no(Extras.CAR_REPAIR, item, True)
+                    apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, item, True)
             elif "configure" in services:
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             else:

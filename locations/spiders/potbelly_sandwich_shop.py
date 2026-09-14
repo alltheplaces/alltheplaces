@@ -1,27 +1,30 @@
 import re
 
 import scrapy
-from scrapy.spiders import Spider
+from scrapy.spiders import SitemapSpider
+from scrapy.spiders.sitemap import iterloc
+from scrapy.utils.sitemap import Sitemap
 
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class PotbellySandwichShopSpider(Spider):
+class PotbellySandwichShopSpider(SitemapSpider):
     name = "potbelly_sandwich_shop"
     item_attributes = {"brand": "Potbelly", "brand_wikidata": "Q7234777"}
     allowed_domains = ["www.potbelly.com", "api.prod.potbelly.com"]
-    start_urls = [
+    sitemap_urls = [
         "https://www.potbelly.com/sitemap_locations.xml",
     ]
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        for url in response.xpath("//loc/text()").extract():
+    def _parse_sitemap(self, response):
+        # Location pages are never fetched: the API can be queried directly using a
+        # slug parsed out of each sitemap URL, so bypass the default per-URL requests.
+        for url in iterloc(Sitemap(self._get_sitemap_body(response))):
             if m := re.search("/locations/[^/]+/([^/]+)", url):
                 slug = m[1]
-                url = f"https://api.prod.potbelly.com/v1/restaurants/byslug/{slug}?includeHours=true"
-                yield scrapy.Request(url, callback=self.parse_store)
+                api_url = f"https://api.prod.potbelly.com/v1/restaurants/byslug/{slug}?includeHours=true"
+                yield scrapy.Request(api_url, callback=self.parse_store)
 
     def parse_store(self, response):
         store = response.json()

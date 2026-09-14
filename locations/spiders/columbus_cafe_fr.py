@@ -11,7 +11,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class ColumbusCafeFRSpider(JSONBlobSpider):
     name = "columbus_cafe_fr"
-    item_attributes = {"brand": "Columbus Café & Co", "brand_wikidata": "Q2984582"}
+    item_attributes = {"brand": "Columbus Café", "brand_wikidata": "Q2984582"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = ["https://www.columbuscafe.com/wp/wp-admin/admin-ajax.php?action=storelocator"]
 
@@ -19,7 +19,7 @@ class ColumbusCafeFRSpider(JSONBlobSpider):
         feature.update(feature.pop("content"))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        if not feature.get("address") in ["false", False]:
+        if feature.get("address") not in ["false", False, None]:
             item["name"] = None
             item["ref"] = feature.get("ID")
             address = clean_address(feature.get("address")).split("Tél :")

@@ -2,6 +2,7 @@ import pycountry
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -46,7 +47,7 @@ class StasherSpider(Spider):
                     oh.add_range(day=day, open_time=rule["open"], close_time=rule["close"], time_format="%H:%M:%S")
             item["opening_hours"] = oh
 
-            item["extras"]["amenity"] = "left_luggage"
+            apply_category(Categories.LEFT_LUGGAGE, item)
             yield item
 
         page = data.get("page", 1)

@@ -1,23 +1,14 @@
 import csv
-import re
 from io import StringIO
 
 from chompjs import parse_js_object
+from pyproj import Transformer
 from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
-from locations.geo import city_locations, country_iseadgg_centroids
+from locations.geo import country_iseadgg_centroids
 from locations.items import Feature
 
-BRANDS = {
-    "001": ("ファミリーマート", "Q11247682"),
-    "002": ("セブン-イレブン", "Q259340"),
-    "101": ("ポプラ", "Q7229380"),
-    "171": ("ポプラ", "Q7229380"),
-    "418": ("NewDays", "Q11234763"),
-    "436": ("デイリーヤマザキ", "Q5209392"),
-    "YTC": ("ヤマト運輸", "Q6584353"),
-}
 MAX_ITEMS = 1640  # determined experimentally
 RADIUS_KM = 24
 MAP_ID = "yamato01"  # for storefinder
@@ -28,18 +19,15 @@ class KuronekoJPSpider(Spider):
 
     def make_request(self, lat, lon, distance, offset=1, count=900):
         return Request(
-            f"https://www.e-map.ne.jp/p/{MAP_ID}/zdcemaphttp.cgi?target=http%3A%2F%2F127.0.0.1%2Fcgi%2Fnkyoten.cgi%3F%26cid%3D{MAP_ID}%26pos%3D{offset}%26lat%3D{lat}%26lon%3D{lon}%26knsu%3D{MAX_ITEMS}%26cnt%3D{count}%26hour%3D1%26rad%3D{distance}&zdccnt=1",
+            f"https://www.e-map.ne.jp/p/{MAP_ID}/zdcemaphttp.cgi?target=http%3A%2F%2F127.0.0.1%2Fcgi%2Fnkyoten.cgi%3F%26cid%3D{MAP_ID}%26pos%3D{offset}%26lat%3D{lat}%26lon%3D{lon}%26knsu%3D{MAX_ITEMS}%26cnt%3D{count}%26hour%3D1%26rad%3D{distance}%26jkn%3D(COL_01%3A1%20OR%20COL_01%3A2%20AND%20((COL_39!%3A002%20AND%20COL_39!%3A001%20AND%20COL_39!%3A003%20AND%20COL_39!%3A418%20AND%20COL_39!%3A436%20AND%20COL_39!%3A101%20AND%20COL_39!%3A171%20AND%20COL_39!%3A207%20AND%20COL_39!%3AZ98%20AND%20COL_39!%3AZ99%20AND%20COL_39!%3A563)%20OR%20(COL_39%20IS%20NULL)))%20AND%20(((COL_01%3A1%20AND%20(COL_10%3AA%20OR%20COL_10%3AB))%20OR%20COL_01%3A2)%20AND%20((COL_39!%3AZ96%20AND%20COL_39!%3AZ97%20AND%20COL_39!%3A003%20AND%20COL_39!%3A207%20AND%20COL_39!%3AZ98%20AND%20COL_39!%3AZ99)%20OR%20COL_39%3A%40%40NULL%40%40))&zdccnt=1",
             cb_kwargs={"lat": lat, "lon": lon, "offset": offset},
         )
 
     async def start(self):
+        self.transformer = Transformer.from_pipeline("EPSG:15484")
         radius_m = RADIUS_KM * 1000
         for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
             yield self.make_request(lat, lon, radius_m)
-        for city in city_locations("JP", 50000):
-            yield self.make_request(city["latitude"], city["longitude"], 5500)
-        for city in city_locations("JP"):
-            yield self.make_request(city["latitude"], city["longitude"], 10000)
 
     def parse(self, response, lat, lon, offset):
         # response is an EUC-encoded JS file that looks like
@@ -59,34 +47,26 @@ class KuronekoJPSpider(Spider):
         if rec_count >= hit_count:
             yield self.make_request(lat, lon, offset + rec_count)
         for row in reader:
-            if row[3] == "001":  # skip FamilyMart
+            if any(
+                i in row[6] for i in ["ツルハ", "福太郎", "イレブン", "ウォンツ", "B＆D", "Ｂ＆Ｄ"]
+            ):  # skip Tsuruha Drug locations
                 continue
             item = Feature()
             item["ref"] = row[0]
             item["website"] = f"https://www.e-map.ne.jp/p/{MAP_ID}/dtl/{row[0]}/"
-            item["lat"] = row[1]
-            item["lon"] = row[2]
+            lat = float(row[1])
+            lon = float(row[2])
+            item["lat"], item["lon"] = self.transformer.transform(lat, lon)
             if row[3] == "YTC":
                 apply_category(Categories.POST_OFFICE, item)
                 item["branch"] = row[6]
-                item["name"] = "ヤマト運輸"
-            elif row[3] == "563":
-                apply_category(Categories.PARCEL_LOCKER, item)
-                item["name"] = row[6].replace("宅配便ロッカー", "").replace("宅配便ロッカー　", "")
+                item["name"] = item["brand"] = "ヤマト運輸"
+                item["brand_wikidata"] = "Q6584353"
             else:
-                if row[3] != "SHP":
-                    try:
-                        item["branch"] = re.search(r"(?:　+)\S+$", str(row[6])).group().replace("　", "")
-                        item["name"] = None
-                    except:
-                        item["branch"] = row[6]
-                else:
-                    item["name"] = row[6]
+                item["name"] = row[6]
                 apply_category(Categories.GENERIC_POI, item)
                 item.set_tag("post_office", "post_partner")
-                item["extras"]["post_office:service_provider"] = "ヤマト運輸"
-
-            item["brand"], item["brand_wikidata"] = BRANDS.get(row[3], (None, None))
+                item.set_tag("post_office:service_provider", "ヤマト運輸")
 
             item["addr_full"] = row[7]
             item["phone"] = row[16]

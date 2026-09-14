@@ -1,4 +1,3 @@
-import json
 from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
@@ -32,7 +31,7 @@ class SuperdrugSpider(PlaywrightSpider):
         yield self.make_request(0)
 
     def parse_api(self, response: Response, **kwargs: Any) -> Any:
-        results = json.loads(response.xpath("//pre/text()").get())
+        results = response.json()
         for location in results["stores"]:
             if location["address"]["country"]["isocode"] == "AZ":
                 location["address"]["country"]["isocode"] = None  # Null island
