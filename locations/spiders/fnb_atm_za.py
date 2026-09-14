@@ -15,7 +15,6 @@ from locations.spiders.shell import ShellSpider
 from locations.spiders.shoprite_holdings import SHOPRITE_BRANDS
 from locations.spiders.spar_bw_mz_na_sz_za import BRANDS as SPAR_BRANDS
 from locations.spiders.total_energies import TotalEnergiesSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 ZA_PROVINCES = [
     "Eastern Cape",
@@ -33,12 +32,7 @@ ZA_PROVINCES = [
 class FnbAtmZASpider(Spider):
     name = "fnb_atm_za"
     item_attributes = {"brand": "FNB", "brand_wikidata": "Q3072956"}
-    custom_settings = {
-        "USER_AGENT": BROWSER_DEFAULT,
-        "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 5,
-        "ROBOTSTXT_OBEY": False,
-    }
+    requires_proxy = "ZA"  # Radware Bot Manager (validate.perfdrive.com) blocks direct requests, see fnb_banks_za
 
     LOCATED_IN_MAPPINGS = [
         (["CALTEX"], CaltexSpider.item_attributes),

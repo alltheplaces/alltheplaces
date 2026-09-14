@@ -1065,6 +1065,28 @@ def sanitise_day(day: str, days: dict[str, str] = DAYS_EN) -> str | None:
     return days.get(day)
 
 
+def _normalise_hour_over_24(value: str) -> tuple[str, bool]:
+    """
+    Reduce the hour of a time string by 24 when it is 24 or later.
+
+    A value like 24:00, 25:00 or 26:30 denotes a time after midnight on the
+    following day and is reduced to 00:00, 01:00 or 02:30.
+
+    :param value: time string in a ``%H``-based format.
+    :returns: the normalised time string and whether the hour was 24 or later.
+    """
+    hour, sep, rest = value.partition(":")
+    if not sep:
+        return value, False
+    try:
+        hour_int = int(hour)
+    except ValueError:
+        return value, False
+    if hour_int < 24:
+        return value, False
+    return f"{hour_int - 24:02d}{sep}{rest}", True
+
+
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
@@ -1148,10 +1170,24 @@ class OpeningHours:
                 # Invalid range supplied. Probably the source data uses this
                 # notation for closed days.
                 return
+
+        # A time of 24:00 or later denotes a time after midnight. A close of
+        # exactly 24:00 means "until midnight" and becomes 23:59. Any other
+        # time of 24:00 or later (e.g. an open of 24:00, or 25:00/26:30) is
+        # reduced by 24 hours so it fits %H. An opening time past 24:00 places
+        # the whole range on the following day.
+        open_after_midnight = False
+        if isinstance(open_time, str):
+            open_time, open_after_midnight = _normalise_hour_over_24(open_time)
+        if isinstance(close_time, str):
             if close_time in ("24:00", "00:00", "0:00"):
                 close_time = "23:59"
-            if close_time in ("24:00:00", "00:00:00"):
+            elif close_time in ("24:00:00", "00:00:00"):
                 close_time = "23:59:00"
+            else:
+                close_time, _ = _normalise_hour_over_24(close_time)
+        if open_after_midnight:
+            day = DAYS[(DAYS.index(day) + 1) % len(DAYS)]
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):

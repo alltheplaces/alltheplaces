@@ -273,6 +273,7 @@ class Categories(Enum):
     OFFICE_HEALTHCARE = {"office": "healthcare"}
     OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
+    OFFICE_LAWYER = {"office": "lawyer"}
     OFFICE_MORTGAGE = {"office": "mortgage"}
     OFFICE_SUPERVISED_INJECTION_SITE = {"office": "supervised_injection_site"}
     OFFICE_TUTORING = {"office": "tutoring"}

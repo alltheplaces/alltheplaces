@@ -1,27 +1,35 @@
-import json
+import re
+from typing import Any, Iterable
 
-from scrapy import Spider
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_FULL, OpeningHours
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider, extract_facebook, extract_instagram
 
 
-class HandelsIceCreamUSSpider(Spider):
+class HandelsIceCreamUSSpider(SitemapSpider, StructuredDataSpider):
     name = "handels_ice_cream_us"
     item_attributes = {"brand": "Handel's Homemade Ice Cream", "brand_wikidata": "Q16983222"}
-    start_urls = ["https://handelsicecream.com/"]
+    sitemap_urls = ["https://handelsicecream.com/sitemap.xml"]
+    sitemap_rules = [(r"/store/([^/]+)/$", "parse_sd")]
+    wanted_types = ["FoodEstablishment"]
+    search_for_facebook = False
 
-    def parse(self, response):
-        js = response.xpath("//script[contains(text(), 'var branches =')]/text()").get()
-        for location in json.loads(js[js.find("=") + 1 : js.rfind(";")]).values():
-            item = DictParser.parse(location)
-            item["addr_full"] = location["address"].replace("<br>", ", ")
-            item["branch"] = item.pop("name")
-            item["website"] = location["link"]
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        if "coming soon" in response.xpath('//h6[@class="store-open"]/text()').get("").lower():
+            return
 
-            oh = OpeningHours()
-            for day in DAYS_FULL:
-                oh.add_ranges_from_string(f"{day} {location[day.lower()]}")
-            item["opening_hours"] = oh
+        item["lat"] = ld_data.get("latitude")
+        item["lon"] = ld_data.get("longitude")
+        item["branch"] = re.sub(r"^Handel[’']?s\s+Homemade\s+Ice\s+Cream\s+", "", item.pop("name"))
 
-            yield item
+        # Brand-wide social accounts also appear in the page footer
+        if address_block := response.xpath('//div[contains(@class, "address")]'):
+            extract_facebook(item, address_block)
+            extract_instagram(item, address_block)
+
+        apply_category(Categories.ICE_CREAM, item)
+
+        yield item

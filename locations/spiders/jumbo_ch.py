@@ -5,12 +5,13 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class JumboCHSpider(SitemapSpider, StructuredDataSpider):
+class JumboCHSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "jumbo_ch"
     item_attributes = {
         "brand": "Jumbo",
@@ -22,7 +23,6 @@ class JumboCHSpider(SitemapSpider, StructuredDataSpider):
     sitemap_follow = ["/sitemap/STORE-de-"]
     sitemap_rules = [(r"_POS$", "parse_sd")]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
-    is_playwright_spider = True
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
