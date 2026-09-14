@@ -13,6 +13,7 @@ class AugustusGelateryAUSpider(WPStoreLocatorSpider):
     item_attributes = {"brand": "Augustus Gelatery", "brand_wikidata": "Q141237454"}
     allowed_domains = ["augustusgelatery.com.au"]
     days = DAYS_EN
+    drop_attributes = {"email"}
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
