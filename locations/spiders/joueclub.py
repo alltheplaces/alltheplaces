@@ -22,6 +22,14 @@ class JoueclubSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.joueclub.fr/robots.txt"]
     sitemap_follow = ["Store"]
     wanted_types = ["ToyStore"]
+    # This site has no anti-bot measures (verified: identical response bytes to
+    # a plain browser request), so skip Zyte even when ZYTE_API_KEY is set.
+    custom_settings = {
+        "DOWNLOAD_HANDLERS": {
+            "http": "scrapy.core.downloader.handlers.http11.HTTP11DownloadHandler",
+            "https": "scrapy.core.downloader.handlers.http11.HTTP11DownloadHandler",
+        }
+    }
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if item["country"] not in ALLOWED_COUNTRIES:
