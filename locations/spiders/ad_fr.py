@@ -17,9 +17,22 @@ class AdFRSpider(SitemapSpider, StructuredDataSpider):
         postcode = item.get("postcode")
         if postcode and (idx := branch.rfind(" - ")) != -1 and postcode in branch[idx:]:
             branch = branch[:idx]
-        item["branch"] = branch
 
-        # Source tags New Caledonia stores as "FR"; its own ISO 3166-1 code is "NC".
+        if branch.startswith("AD CARROSSERIE & GARAGE AD EXPERT "):
+            item["branch"] = branch.removeprefix("AD CARROSSERIE & GARAGE AD EXPERT ")
+            item["name"] = "AD Carrosserie & Garage AD Expert"
+        elif branch.startswith("CARROSSERIE AD "):
+            item["branch"] = branch.removeprefix("CARROSSERIE AD ")
+            item["name"] = "AD Carrosserie"
+        elif branch.startswith("GARAGE AD EXPERT "):
+            item["branch"] = branch.removeprefix("GARAGE AD EXPERT ")
+            item["name"] = "Garage AD Expert"
+        elif branch.startswith("GARAGE AD "):
+            item["branch"] = branch.removeprefix("GARAGE AD ")
+            item["name"] = "Garage AD"
+        else:
+            item["name"] = branch
+
         if postcode and postcode.startswith("988"):
             item["country"] = "NC"
 
