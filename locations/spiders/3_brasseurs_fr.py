@@ -8,7 +8,7 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class TroisBrasseursFRSpider(SitemapSpider, StructuredDataSpider):
+class ThreeBrasseursFRSpider(SitemapSpider, StructuredDataSpider):
     name = "3_brasseurs_fr"
     item_attributes = {"brand": "3 Brasseurs", "brand_wikidata": "Q3230326"}
     sitemap_urls = ["https://restaurants.3brasseurs.com/sitemap_pois.xml"]
