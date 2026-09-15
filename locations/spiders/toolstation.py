@@ -1,84 +1,61 @@
-import json
 import re
+from typing import Any, AsyncIterator
 
-import chompjs
-import scrapy
+from scrapy.http import JsonRequest, Response
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.hours import CLOSED_NL, DAYS_NL, DELIMITERS_EN, OpeningHours
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class ToolstationSpider(scrapy.spiders.SitemapSpider):
+class ToolstationSpider(SitemapSpider, StructuredDataSpider):
     name = "toolstation"
     item_attributes = {"brand": "Toolstation", "brand_wikidata": "Q7824103"}
-    sitemap_urls = [
-        "https://www.toolstation.com/sitemap/branches.xml",
-        "https://www.toolstation.fr/sitemap/branches.xml",
-        "https://www.toolstation.nl/sitemap/branches.xml",
+    sitemap_urls = ["https://www.toolstation.com/sitemap/branches.xml"]
+    wanted_types = ["HardwareStore"]
+    search_for_twitter = False
+    search_for_facebook = False
+    branch_api_urls = [
+        "https://www.toolstation.be/api/branches",
+        "https://www.toolstation.nl/api/branches",
     ]
-    gm_pattern = re.compile(r"var store = (.*?)\n", re.MULTILINE | re.DOTALL)
-    params_pattern = re.compile(r"function\(([_$\w,\s]+)\)")
-    values_pattern = re.compile(r"}\((.+)\)\);")
-    stores_pattern = re.compile(r"data:(\[.+\]),fe")
 
-    def parse(self, response):
-        if js := response.xpath('//script[contains(., "var store")]/text()').get():
-            store = json.loads(re.search(self.gm_pattern, js).group(1))[0]
-            item = DictParser.parse(store)
-            item["website"] = response.url
-            item["addr_full"] = store["address_text"].split("<br /><br />")[0]
-            if item.get("name"):
-                item["branch"] = item.pop("name")
-            yield item
-        elif js := response.xpath('//script[contains(text(), "__NUXT__")]/text()').get():
-            # stores is actually a JS function, so we have to parse the parameters and values
-            if "function" in js:
-                params = re.search(self.params_pattern, js).group(1).split(",")
-                values = chompjs.parse_js_object("[" + re.search(self.values_pattern, js).group(1) + "]")
-                args = {}
-                for i in range(0, len(params)):
-                    args[params[i]] = values[i]
+    async def start(self) -> AsyncIterator[Any]:
+        for url in self.branch_api_urls:
+            yield JsonRequest(url=url, callback=self.parse_branch_api)
+        async for request in super().start():
+            yield request
 
-                store = chompjs.parse_js_object(re.search(self.stores_pattern, js).group(1))[0]["branch"]
-                self.populate(store, args)
-            else:
-                return
-            if store["status"] != 1:
-                return
+    def parse_branch_api(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.json()["data"]:
+            item = DictParser.parse(location)
+            item["ref"] = location["site_id"]
+            item["branch"] = item.pop("name", None)
+            item["website"] = response.urljoin("/branches/{}".format(location["slug"]))
 
-            item = DictParser.parse(store)
-            item["website"] = response.url
-            item["addr_full"] = store["address_text"]
-
+            address, *hours = re.split(r"<br\s*/?>", location["address_text"])
+            item["addr_full"] = address
+            hours = " ".join(hours)
             item["opening_hours"] = OpeningHours()
-            for rule in store["opening_hours"]:
-                days, times = rule.split(": ", 1)
-                if "-" in days:
-                    start_day, end_day = days.split("-")
-                else:
-                    start_day = end_day = days
-                start_day = sanitise_day(start_day)
-                end_day = sanitise_day(end_day)
-                if start_day and end_day:
-                    start_time, end_time = times.strip().split("-")
-                    item["opening_hours"].add_days_range(
-                        day_range(start_day, end_day), start_time, end_time, time_format="%H%M"
-                    )
-                if item.get("name"):
-                    item["branch"] = item.pop("name")
+            item["opening_hours"].add_ranges_from_string(
+                hours, days=DAYS_NL, closed=CLOSED_NL, delimiters=DELIMITERS_EN + ["t/m"]
+            )
+            if "zon- en feestdagen gesloten" in hours:
+                item["opening_hours"].set_closed("Su")
+
+            apply_category(Categories.SHOP_DOITYOURSELF, item)
             yield item
 
-    @staticmethod
-    def populate(data: dict, args: dict):
-        for key, value in data.items():
-            if isinstance(value, str):
-                if value in args:
-                    data[key] = args[value]
-            elif isinstance(value, list):
-                for i, x in enumerate(value):
-                    if isinstance(x, dict):
-                        ToolstationSpider.populate(x, args)
-                    elif x in args:
-                        value[i] = args[x]
-            elif isinstance(value, dict):
-                ToolstationSpider.populate(value, args)
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
+        if name := item.pop("name", None):
+            item["branch"] = name.removeprefix("Toolstation ")
+        if street_address := item.get("street_address"):
+            item["street_address"] = re.sub(r"^Toolstation\b[^,]*,?", "", street_address).strip(", ") or None
+        item["ref"] = item["website"].rsplit("/", 1)[-1]
+        item["phone"] = None
+
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
+        yield item
