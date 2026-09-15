@@ -1925,12 +1925,14 @@ wheels = [
 
 [[package]]
 name = "scrapy"
-version = "2.18.0"
+version = "2.19.0"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
+    { name = "aiohttp" },
     { name = "backports-zstd" },
     { name = "brotli", marker = "implementation_name != 'pypy'" },
     { name = "brotlicffi", marker = "implementation_name == 'pypy'" },
+    { name = "charset-normalizer" },
     { name = "cryptography" },
     { name = "cssselect" },
     { name = "defusedxml" },
@@ -1939,6 +1941,7 @@ dependencies = [
     { name = "lxml" },
     { name = "packaging" },
     { name = "parsel" },
+    { name = "platformdirs" },
     { name = "protego" },
     { name = "pydispatcher", marker = "platform_python_implementation == 'CPython'" },
     { name = "pyopenssl" },
@@ -1950,9 +1953,9 @@ dependencies = [
     { name = "w3lib" },
     { name = "zope-interface" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4a/ab/4c0ece9b5fed5dd2fe5f88e4eca662d1f2292a95293e074da56dd31922be/scrapy-2.18.0.tar.gz", hash = "sha256:2445f8b5bf87ba105d239cb230878646e29dbc6a6cae10037ba0550d8fe7fc73", size = 1407695, upload-time = "2026-08-20T15:15:39.382Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7a/bd/5a65f4d9319bf1533472a446915b941f393f6d2d547bf88cec23207beddf/scrapy-2.19.0.tar.gz", hash = "sha256:34130726582b64c91531162ab277c4053e558876d49ba219cb43679e71d80a87", size = 1457780, upload-time = "2026-09-10T11:14:20.383Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/c0/1c8b2b4cba1f07038c3494de4f88e00dae69a41f1852cc0282731346b671/scrapy-2.18.0-py3-none-any.whl", hash = "sha256:7cd2eaa6fb013247ca259fd4cad75208a2b37cd65fbdd3a6c3fbc75cdf61f3d9", size = 365413, upload-time = "2026-08-20T15:15:37.522Z" },
+    { url = "https://files.pythonhosted.org/packages/35/64/8507dcab59f2d4920152020dc348879fd8eed1dd17f152cf65d9fddd3ff2/scrapy-2.19.0-py3-none-any.whl", hash = "sha256:44c1ad4b008f1976e946c75b2adce0e448cbfe470c584b1b59469abf270e8013", size = 379771, upload-time = "2026-09-10T11:14:18.468Z" },
 ]
 
 [[package]]
