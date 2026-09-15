@@ -21,14 +21,15 @@ class SigRoofingGBSpider(AmastyStoreLocatorSpider):
         self, item: Feature, feature: dict, popup_html: Selector | None = None
     ) -> Iterable[Feature | Request]:
         item["branch"] = item.pop("name").removeprefix("SIG Roofing ").strip()
-        item["street_address"] = (
-            popup_html.xpath('//text()[contains(., "Address:")]').get("").replace("Address:", "").strip()
-        )
-        item["postcode"] = (
-            popup_html.xpath('//text()[contains(., "Postcode:")]').get("").replace("Postcode:", "").strip()
-        )
-        item["phone"] = popup_html.xpath('//a[starts-with(@href, "tel:")]/@href').get()
-        item["email"] = popup_html.xpath('//a[starts-with(@href, "mailto:")]/@href').get()
+        if popup_html is not None:
+            item["street_address"] = (
+                popup_html.xpath('//text()[contains(., "Address:")]').get("").replace("Address:", "").strip()
+            )
+            item["postcode"] = (
+                popup_html.xpath('//text()[contains(., "Postcode:")]').get("").replace("Postcode:", "").strip()
+            )
+            item["phone"] = popup_html.xpath('//a[starts-with(@href, "tel:")]/@href').get()
+            item["email"] = popup_html.xpath('//a[starts-with(@href, "mailto:")]/@href').get()
         apply_category(Categories.SHOP_TRADE, item)
         yield Request(
             url=f"https://www.sigroofing.co.uk/amlocator/location/schedule/location_id/{feature['id']}/",
