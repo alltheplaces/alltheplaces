@@ -15,7 +15,7 @@ class LakelandGBSpider(StockistSpider):
         custom_fields = {field["name"]: field["value"] for field in location["custom_fields"]}
         if store_code := custom_fields.pop("Store code", None):
             item["ref"] = store_code
-        if (name := item.pop("name")).startswith("Lakeland "):
+        if (name := item.pop("name") or "").startswith("Lakeland "):
             item["branch"] = name.removeprefix("Lakeland ")
         item["image"] = location["image_url"]
         item["opening_hours"] = OpeningHours()
