@@ -19,10 +19,11 @@ class BeaconLightingAUSpider(SitemapSpider, StructuredDataSpider):
     def pre_process_data(self, ld_data: dict, **kwargs: Any) -> None:
         # Some stores are published with a closing time earlier than the
         # opening time, which would otherwise be read as an overnight range.
+        rules = ld_data.get("openingHoursSpecification") or []
+        if isinstance(rules, dict):
+            rules = [rules]
         ld_data["openingHoursSpecification"] = [
-            rule
-            for rule in ld_data.get("openingHoursSpecification", [])
-            if rule.get("closes", "") > rule.get("opens", "")
+            rule for rule in rules if isinstance(rule, dict) and rule.get("closes", "") > rule.get("opens", "")
         ]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
