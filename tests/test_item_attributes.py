@@ -42,9 +42,11 @@ def test_item_attributes_brand_strings_match_nsi():
     Some edge/complex cases might occur that are not possible to solve right away.
     If you face such a case, please add the spider to the ignored_spiders list.
     """
+    # In extreme cases, we can disable the test for some spiders.
+    # This should rarely be used, instead try to be in sync with the NSI release, otherwise we'll conflict with
+    # OSM and iD.
     ignored_spiders = [
         "sparkasse_de",  # Overcomplicated in NSI
-        "columbus_cafe_fr",  # Brand dropped "& Co" but NSI hasn't caught up yet
     ]
 
     fails = []
