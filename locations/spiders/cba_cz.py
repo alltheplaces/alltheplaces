@@ -1,6 +1,7 @@
 import re
 
-from scrapy.spiders import SitemapSpider
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
@@ -8,12 +9,11 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class CbaCZSpider(SitemapSpider):
+class CbaCZSpider(CrawlSpider):
     name = "cba_cz"
     item_attributes = {"brand": "CBA", "brand_wikidata": "Q779845"}
-    sitemap_urls = ["https://www.cba.cz/wp-sitemap.xml"]
-    sitemap_follow = ["posts-page"]
-    sitemap_rules = [(r"/prodejny-cba/.+", "parse")]
+    start_urls = ["https://cba.cz/prodejny-cba/"]
+    rules = [Rule(LinkExtractor(allow=r"https://cba.cz/prodejny-cba/[^/]+/$"), callback="parse")]
     no_refs = True
 
     def parse(self, response, **kwargs):
