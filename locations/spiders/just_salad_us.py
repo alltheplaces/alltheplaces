@@ -39,12 +39,15 @@ class JustSaladUSSpider(Spider):
 
             item["opening_hours"] = OpeningHours()
             for period in location.get("opening_hours", {}).get("periods", []):
-                item["opening_hours"].add_range(
-                    DAYS[period["open"]["day"]],
-                    period["open"]["time"],
-                    period["close"]["time"],
-                    time_format="%H%M",
-                )
+                if period["open"]["time"] == period["close"]["time"] == "0000":
+                    item["opening_hours"].set_closed(DAYS[period["open"]["day"]])
+                else:
+                    item["opening_hours"].add_range(
+                        DAYS[period["open"]["day"]],
+                        period["open"]["time"],
+                        period["close"]["time"],
+                        time_format="%H%M",
+                    )
 
             amenities = location.get("amenities") or {}
             if amenities.get("drive_thru"):
