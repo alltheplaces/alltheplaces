@@ -40,11 +40,12 @@ class StLouisBarAndGrillCASpider(JSONBlobSpider):
                 item["opening_hours"].set_closed(day_name)
             elif day["is_24_hours"]:
                 item["opening_hours"].add_range(day_name, "00:00", "24:00")
-            for interval in day["intervals"]:
-                close_time = interval["close_time"]
-                if interval["close_day_offset"] and close_time == "00:00":
-                    close_time = "24:00"
-                item["opening_hours"].add_range(day_name, interval["open_time"], close_time)
+            else:
+                for interval in day["intervals"] or []:
+                    close_time = interval["close_time"]
+                    if interval["close_day_offset"] and close_time == "00:00":
+                        close_time = "24:00"
+                    item["opening_hours"].add_range(day_name, interval["open_time"], close_time)
 
         apply_category(Categories.RESTAURANT, item)
         yield item
