@@ -1,4 +1,3 @@
-import calendar
 import re
 import unicodedata
 from collections.abc import AsyncIterator, Iterable
