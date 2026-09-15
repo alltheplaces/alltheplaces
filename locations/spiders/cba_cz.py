@@ -15,6 +15,7 @@ class CbaCZSpider(CrawlSpider):
     start_urls = ["https://cba.cz/prodejny-cba/"]
     rules = [Rule(LinkExtractor(allow=r"https://cba.cz/prodejny-cba/[^/]+/$"), callback="parse")]
     no_refs = True
+    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for shop in response.xpath('//*[contains(text(),"Název")]/ancestor::div[@class="row_fix_width"]'):
