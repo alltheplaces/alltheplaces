@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class StLouisBarAndGrillCASpider(JSONBlobSpider):
@@ -19,21 +20,32 @@ class StLouisBarAndGrillCASpider(JSONBlobSpider):
         return data["props"]["pageProps"]["locations"]
 
     def pre_process_data(self, location: dict) -> None:
-        location["ref"] = location.pop("storeCode")
-        location["postcode"] = location.pop("postalCode", None)
-        location["street_address"] = ", ".join(location.get("addressLines") or [])
-        location["phone"] = (location.get("phoneNumbers") or [None])[0]
+        location["ref"] = location.pop("store_code")
+        location["street_address"] = merge_address_lines(
+            [location.pop(f"address_line_{line}", None) for line in range(1, 5)]
+        )
+        location["phone"] = location.pop("formatted_phone", None)
 
     def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs: Any) -> Iterable[Feature]:
-        item.pop("website", None)
         item.pop("name", None)
+        item["website"] = location["canonical_url"]
+
+        if open_date := location.get("open_date"):
+            item["extras"]["start_date"] = open_date[:10]
 
         item["opening_hours"] = OpeningHours()
-        for day, hours in zip(DAYS, location.get("businessHours") or []):
-            if not hours or None in hours:
-                continue
-            open_time, close_time = hours
-            item["opening_hours"].add_range(day, open_time, "24:00" if close_time == "00:00" else close_time)
+        for day in location.get("hours") or []:
+            day_name = DAYS[day["day_of_week"] - 1]
+            if day["is_closed"]:
+                item["opening_hours"].set_closed(day_name)
+            elif day["is_24_hours"]:
+                item["opening_hours"].add_range(day_name, "00:00", "24:00")
+            else:
+                for interval in day["intervals"] or []:
+                    close_time = interval["close_time"]
+                    if interval["close_day_offset"] and close_time == "00:00":
+                        close_time = "24:00"
+                    item["opening_hours"].add_range(day_name, interval["open_time"], close_time)
 
         apply_category(Categories.RESTAURANT, item)
         yield item
