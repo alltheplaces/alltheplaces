@@ -16,44 +16,32 @@ class RapidCoutureFRSpider(scrapy.Spider):
     item_attributes = {"brand": "Rapid' Couture", "brand_wikidata": "Q120664654", "country": "FR"}
     start_urls = ["https://www.rapid-couture.com/les-ateliers/"]
 
-    def parse(self, response: Response, **kwargs: Any):
-        # Location list is embedded as JavaScript array `var ateliers = [...]` in the page
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         m = re.search(r"var ateliers\s*=\s*(\[.*?\]);", response.text, re.DOTALL)
         if not m:
             self.logger.error("Could not find 'var ateliers' data on %s", response.url)
             return
 
-        ateliers = json.loads(m.group(1))
-        for atelier in ateliers:
-            # Skip if no coordinates
-            lat = atelier.get("latitude")
-            lon = atelier.get("longitute")  # typo in source
-            if not lat or not lon:
-                continue
-
+        for location in json.loads(m.group(1)):
             item = Feature()
-            item["ref"] = str(atelier.get("id"))
-            # Location names are "Rapid couture – CITY" variants; put the city part in branch
-            raw_name = html.unescape(atelier.get("nom", ""))
+            item["ref"] = str(location.get("id"))
             item["branch"] = re.sub(
-                r"^Rapid[\s'\u2019]couture\s*[\u2013-]\s*", "", raw_name, flags=re.IGNORECASE
+                r"^Rapid[\s'’]*couture[\s,]*(?:[–—-]+\s*)?",
+                "",
+                html.unescape(location.get("nom", "")),
+                flags=re.IGNORECASE,
             ).strip()
-            if not item["branch"]:
-                item["branch"] = raw_name
-            item["street_address"] = atelier.get("add1", "").strip()
-            # add2 is generally empty but append if present
-            add2 = atelier.get("add2", "").strip()
-            if add2:
+            item["street_address"] = location.get("add1", "").strip()
+            if add2 := location.get("add2", "").strip():
                 item["street_address"] = f"{item['street_address']}, {add2}"
-            item["postcode"] = atelier.get("code", "").strip()
-            item["city"] = atelier.get("ville", "").strip()
-            item["lat"] = float(lat)
-            item["lon"] = float(lon)
-            item["website"] = atelier.get("link", "")
+            item["postcode"] = location.get("code", "").strip()
+            item["city"] = location.get("ville", "").strip()
+            item["lat"] = location.get("latitude", "").strip(" ,")
+            item["lon"] = location.get("longitute", "").strip(" ,")
+            item["website"] = location.get("link", "")
 
             apply_category(Categories.SHOP_TAILOR, item)
 
-            # Fetch the individual atelier page for phone and opening hours
             if item["website"]:
                 yield scrapy.Request(
                     url=item["website"],
@@ -63,8 +51,7 @@ class RapidCoutureFRSpider(scrapy.Spider):
             else:
                 yield item
 
-    def parse_atelier(self, response: Response, item: Feature, **kwargs: Any):
-        # Extract phone number
+    def parse_atelier(self, response: Response, item: Feature, **kwargs: Any) -> Any:
         phone_span = response.xpath('//span[contains(@class,"tel_fra")]/following-sibling::text()').get("")
         if not phone_span:
             phone_text = response.xpath('//p[span[contains(@class,"tel_fra")]]/text()').get("")
@@ -75,7 +62,6 @@ class RapidCoutureFRSpider(scrapy.Spider):
             if re.search(r"\d{2}", phone):
                 item["phone"] = phone
 
-        # Extract opening hours from the <div class="horaires"> section
         hours_div = response.xpath('//div[contains(@class,"horaires")]')
         if hours_div:
             oh = self.parse_hours(hours_div.xpath("string()").get(""))
@@ -84,15 +70,13 @@ class RapidCoutureFRSpider(scrapy.Spider):
 
         yield item
 
-    def parse_hours(self, text: str) -> str | None:
+    def parse_hours(self, text: str) -> OpeningHours | None:
         oh = OpeningHours()
         found = False
         for line in text.splitlines():
             line = line.strip()
             if not line or ":" not in line:
                 continue
-            # Format: "Lundi : 09h30-13h00 & 14h00-18h00" or "Lundi : Fermé"
-            # (some entries omit the space before the colon: "Lundi: ...")
             parts = re.split(r"\s*:\s*", line, 1)
             if len(parts) != 2:
                 continue
@@ -105,7 +89,6 @@ class RapidCoutureFRSpider(scrapy.Spider):
                 oh.set_closed(day)
                 found = True
                 continue
-            # Can have multiple ranges separated by & or " & "
             for time_range in re.split(r"\s*&\s*", times_str):
                 time_range = time_range.strip()
                 m = re.match(r"(\d{1,2})h(\d{2})-(\d{1,2})h(\d{2})", time_range)
