@@ -17,13 +17,12 @@ CATEGORY_TAGS = {
     "Maisons SPA": {"office": "association"},
 }
 
-BRAND_PREFIX = re.compile(
-    r"^la\s+(société protectrice des animaux\s*(\(la\s*spa\)|\(spa\))?|spa)\s*[-–]\s*",
+# Strips the brand from a location's raw name, leading ("La SPA - Refuge de Rennes") or
+# mid-name ("Dispensaire SPA de Paris"), leaving just the branch descriptor.
+BRAND_RE = re.compile(
+    r"^la\s+(société protectrice des animaux\s*(\(la\s*spa\)|\(spa\))?|spa)\s*[-–]\s*|\bspa\b\s*",
     re.IGNORECASE,
 )
-# "Dispensaire SPA de Paris", "Maison SPA de Bordeaux": the brand also turns up mid-name,
-# not just as the leading prefix caught above.
-BRAND_WORD = re.compile(r"\bspa\b\s*", re.IGNORECASE)
 
 
 class SpaFRSpider(Spider):
@@ -58,7 +57,7 @@ class SpaFRSpider(Spider):
         # The detail endpoint occasionally has a blank name for a valid record; the list
         # endpoint always has one.
         raw_name = item.pop("name", None) or fallback.get("name") or ""
-        item["branch"] = BRAND_WORD.sub("", BRAND_PREFIX.sub("", raw_name)).strip()
+        item["branch"] = BRAND_RE.sub("", raw_name).strip()
         item["website"] = response.urljoin(location["url"])
         apply_category(category, item)
         if (has_pmr := location.get("hasAccessPmr")) is not None:
@@ -85,7 +84,7 @@ class SpaFRSpider(Spider):
         item = DictParser.parse(location)
         item["ref"] = location["ID"]
         item["street_address"] = (item.pop("addr_full", None) or "").replace("<br>", ", ")
-        item["branch"] = BRAND_WORD.sub("", BRAND_PREFIX.sub("", item.pop("name", None) or "")).strip()
+        item["branch"] = BRAND_RE.sub("", item.pop("name", None) or "").strip()
         item["website"] = f"https://www.la-spa.fr{location['url']}"
         apply_category(category, item)
         yield item
