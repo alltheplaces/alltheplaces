@@ -21,8 +21,7 @@ class ToolstationBENLSpider(Spider):
             item["branch"] = item.pop("name", None)
             item["website"] = response.urljoin("/branches/{}".format(location["slug"]))
 
-            address, *hours = re.split(r"<br\s*/?>", location["address_text"])
-            item["addr_full"] = address
+            item["addr_full"], *hours = re.split(r"<br\s*/?>", location["address_text"])
             hours = " ".join(hours)
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(
