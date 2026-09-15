@@ -1,9 +1,9 @@
 from typing import Any, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
@@ -50,10 +50,8 @@ class JustSaladUSSpider(Spider):
                     )
 
             amenities = location.get("amenities") or {}
-            if amenities.get("drive_thru"):
-                item["extras"]["drive_through"] = "yes"
-            if amenities.get("outdoor_seat"):
-                item["extras"]["outdoor_seating"] = "yes"
+            apply_yes_no(Extras.DRIVE_THROUGH, item, amenities.get("drive_thru") is True)
+            apply_yes_no(Extras.OUTDOOR_SEATING, item, amenities.get("outdoor_seat") is True)
 
             apply_category(Categories.FAST_FOOD, item)
             item["extras"]["cuisine"] = "salad"
