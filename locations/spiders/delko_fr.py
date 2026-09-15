@@ -18,11 +18,11 @@ class DelkoFRSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").removeprefix("DELKO ")
+        item["branch"] = item.pop("name", "").removeprefix("DELKO ")
 
-        item["lat"] = ld_data["latitude"]
-        item["lon"] = ld_data["longitude"]
-        item["extras"]["start_date"] = ld_data["foundingDate"]
+        item["lat"] = ld_data.get("latitude")
+        item["lon"] = ld_data.get("longitude")
+        item["extras"]["start_date"] = ld_data.get("foundingDate")
 
         apply_category(Categories.SHOP_CAR_REPAIR, item)
 
