@@ -26,7 +26,12 @@ class CarolinaAleHouseUSSpider(Spider):
     start_urls = ["https://www.carolinaalehouse.com/locations"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        for key, location in self.parse_apollo_state(response).items():
+        state = self.parse_apollo_state(response)
+        if not state:
+            self.logger.error("No Popmenu state on the locations page")
+            return
+
+        for key, location in state.items():
             if not key.startswith("RestaurantLocation:"):
                 continue
             if not location.get("isLocationEnabled") or location.get("isLocationClosed"):
@@ -56,7 +61,10 @@ class CarolinaAleHouseUSSpider(Spider):
     @staticmethod
     def parse_apollo_state(response: Response) -> dict:
         """Extracts the JSON object assigned to window.POPMENU_APOLLO_STATE."""
-        start = re.search(r"window\.POPMENU_APOLLO_STATE\s*=\s*", response.text).end()
+        if not (marker := re.search(r"window\.POPMENU_APOLLO_STATE\s*=\s*", response.text)):
+            return {}
+
+        start = marker.end()
         depth = 0
         for offset, character in enumerate(response.text[start:]):
             if character == "{":
