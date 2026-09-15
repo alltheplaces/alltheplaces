@@ -7,6 +7,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.settings import BROWSER_DEFAULT
 from locations.structured_data_spider import StructuredDataSpider
 
 # Published in place of a branch-specific contact on many store pages.
@@ -18,6 +19,7 @@ class JollyesGBSpider(SitemapSpider, StructuredDataSpider):
     name = "jollyes_gb"
     item_attributes = {"brand": "Jollyes", "brand_wikidata": "Q45844955"}
     sitemap_urls = ["https://backend.jollyes.co.uk/media/sitemap_store.xml"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     sitemap_rules = [(r"/store/", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
