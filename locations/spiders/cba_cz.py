@@ -1,5 +1,7 @@
 import re
+from typing import Any
 
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -17,13 +19,13 @@ class CbaCZSpider(CrawlSpider):
     no_refs = True
     requires_proxy = True
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for shop in response.xpath('//*[contains(text(),"Název")]/ancestor::div[@class="row_fix_width"]'):
             item = Feature()
             if name := re.search(r"Název:\s*(?:<br>)?(.+?)<br>", shop.get()):
                 item["branch"] = name.group(1).replace("\xa0", "")
             item["addr_full"] = merge_address_lines(shop.xpath("./div[3]//p/text()").getall())
-            if map_url := shop.xpath('//iframe[contains(@src, "maps")]/@src').get():
+            if map_url := shop.xpath('.//iframe[contains(@src, "maps")]/@src').get():
                 item["lat"], item["lon"] = url_to_coords(map_url)
             item["website"] = response.url
             apply_category(Categories.SHOP_SUPERMARKET, item)
