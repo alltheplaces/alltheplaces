@@ -17,8 +17,7 @@ BRAND_FACEBOOK_PATH = "jollyesuk"
 class JollyesGBSpider(SitemapSpider, StructuredDataSpider):
     name = "jollyes_gb"
     item_attributes = {"brand": "Jollyes", "brand_wikidata": "Q45844955"}
-    sitemap_urls = ["https://www.jollyes.co.uk/sitemap.xml"]
-    sitemap_follow = [r"sitemap_store"]
+    sitemap_urls = ["https://backend.jollyes.co.uk/media/sitemap_store.xml"]
     sitemap_rules = [(r"/store/", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
