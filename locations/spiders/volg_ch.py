@@ -17,7 +17,7 @@ class VolgCHSpider(Spider):
     item_attributes = {"brand": "Volg", "brand_wikidata": "Q2530746"}
     allowed_domains = ["www.volg.ch"]
     start_urls = [
-        "https://www.volg.ch/standorte-oeffnungszeiten/?tx_kochvolgstores_storelist[action]=search&tx_kochvolgstores_storelist[controller]=Stores"
+        "https://www.volg.ch/standorte-oeffnungszeiten/?tx_kochvolgstores_storelist%5Baction%5D=search&tx_kochvolgstores_storelist%5Bcontroller%5D=Stores"
     ]
 
     async def start(self) -> AsyncIterator[FormRequest]:
