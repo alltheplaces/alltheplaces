@@ -15,12 +15,9 @@ class RowlandsPharmacyGBSpider(JSONBlobSpider):
     start_urls = ["https://shop-services.rowlandspharmacy.co.uk/pharmacy-tools/api/locations"]
     locations_key = "locations"
 
-    def pre_process_data(self, feature: dict) -> None:
-        address = feature["address"]
-        address["street_address"] = merge_address_lines([address.pop("addressLine1"), address.pop("addressLine2")])
-
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["email"] = None
+        item["street_address"] = merge_address_lines([item["street_address"], feature["address"]["addressLine2"]])
+
         item["opening_hours"] = OpeningHours()
         for day, intervals in feature["openIntervals"].items():
             if not intervals["openIntervals"]:
