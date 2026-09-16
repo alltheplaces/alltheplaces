@@ -31,7 +31,7 @@ class GlobusDESpider(JSONBlobSpider):
         }
         del feature["region"]
         for de, en in rename.items():
-            feature[en] = feature.pop(de)
+            feature[en] = feature.pop(de, None)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         categories = {
@@ -41,8 +41,20 @@ class GlobusDESpider(JSONBlobSpider):
             "SBW": Categories.SHOP_SUPERMARKET,
             "TS": Categories.FUEL_STATION,
             "WS": Categories.CAR_WASH,
+            "FMZ": None,
+            "RS": None,
         }
-        apply_category(categories[feature["betriebsstaette"]], item)
-        item["extras"]["contact:maps"] = feature["googleUrl"]
-        item["branch"] = item.pop("name")
+        if cat := categories.get(feature["betriebsstaette"]):
+            apply_category(cat, item)
+
+        item["extras"]["contact:maps"] = feature.get("googleUrl")
+        item["branch"] = (
+            (item.pop("name") or "")
+            .removeprefix("GLOBUS ")
+            .removeprefix("Fachmarktzentrum ")
+            .removeprefix("Getränkecenter ")
+            .removeprefix("Restaurant ")
+            .removeprefix("Tankstelle ")
+            .removeprefix("Waschstraße ")
+        )
         yield item
