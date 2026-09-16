@@ -9,6 +9,7 @@ from locations.items import Feature
 
 TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
 
+
 class KireiJPSpider(Spider):
     name = "kirei_jp"
 
