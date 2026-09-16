@@ -48,9 +48,7 @@ class TjxSpider(Spider):
 
     def parse(self, response):
 
-        stores_text = response.xpath(
-            '//*[contains(text(),"Latitude")]//text()'
-        ).get()
+        stores_text = response.xpath('//*[contains(text(),"Latitude")]//text()').get()
         if not stores_text:
             return
 
@@ -58,8 +56,7 @@ class TjxSpider(Spider):
             r'"Stores"\s*:\s*(\[[\s\S]*?\])\s*,\s*"Status"',
             stores_text,
         ):
-            response.xpath('//*[contains(text(),"Latitude")]//text()').get(),
-        ):
+
             stores_data = json.loads(match.group(1))
 
             for location in stores_data:
