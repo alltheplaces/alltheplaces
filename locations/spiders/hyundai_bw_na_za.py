@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from typing import Iterable
 
 from scrapy.http import Response
@@ -34,21 +35,21 @@ class HyundaiBWNAZASpider(JSONBlobSpider):
         parts = feature.get("commercial_parts")
 
         if feature.get("sales") or feature.get("commercial_sales"):
-            shop = item.deepcopy()
+            shop = deepcopy(item)
             apply_category(Categories.SHOP_CAR, shop)
             apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, shop, service)
             apply_yes_no(Extras.VEHICLE_CAR_PARTS_SALES, shop, parts)
             yield shop
 
         if service:
-            service_item = item.deepcopy()
+            service_item = deepcopy(item)
             service_item["ref"] = f"{item['ref']}_service"
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
             apply_yes_no(Extras.VEHICLE_CAR_PARTS_SALES, service_item, parts)
             yield service_item
 
         if parts:
-            parts_item = item.deepcopy()
+            parts_item = deepcopy(item)
             parts_item["ref"] = f"{item['ref']}_parts"
             apply_category(Categories.SHOP_CAR_PARTS, parts_item)
             yield parts_item
