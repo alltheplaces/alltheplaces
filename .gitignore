@@ -111,3 +111,6 @@ ENV/
 commands.txt
 http_cache.sqlite
 http_cache/
+
+# Claude Code agent worktree scratch space
+.claude/worktrees/
