@@ -33,7 +33,9 @@ class GroupeBertrandSpider(SitemapSpider):
         item = DictParser.parse(store)
         item["website"] = response.url
         # supportEmail is a shared hotline, not per-location; only publicEmail (when set) is used.
-        item["email"] = store.get("contact", {}).get("publicEmail") or None
+        # contact is sometimes an empty list instead of a dict (e.g. Hippopotamus Villepinte).
+        contact = store.get("contact")
+        item["email"] = (contact.get("publicEmail") or None) if isinstance(contact, dict) else None
         item["opening_hours"] = self.parse_hours(store.get("openings", {}))
 
         if store.get("status") != "open":
