@@ -46,12 +46,18 @@ class CanlySpider(Spider):
                 for post_processed in self.post_process_item(item, response, feature) or []:
                     if website := post_processed.get("website"):
                         yield Request(
-                            url=website, callback=self.parse_detail, meta={"item": post_processed, "feature": feature}
+                            url=website,
+                            callback=self.parse_detail,
+                            errback=self.parse_detail_error,
+                            meta={"item": post_processed, "feature": feature},
                         )
                     else:
                         yield post_processed
             else:
                 yield from self.post_process_item(item, response, feature) or []
+
+    def parse_detail_error(self, failure) -> Iterable[Feature]:
+        yield failure.request.meta["item"]
 
     def _fetches_detail_pages(self) -> bool:
         # Override `post_process_detail` in a subclass to opt in to fetching each
