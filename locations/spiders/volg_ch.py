@@ -19,6 +19,7 @@ class VolgCHSpider(Spider):
     start_urls = [
         "https://www.volg.ch/standorte-oeffnungszeiten/?tx_kochvolgstores_storelist%5Baction%5D=search&tx_kochvolgstores_storelist%5Bcontroller%5D=Stores"
     ]
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[FormRequest]:
         for lat, lon in country_iseadgg_centroids(["CH", "LI"], 24):
