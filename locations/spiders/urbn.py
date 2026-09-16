@@ -3,6 +3,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import set_closed
@@ -97,4 +98,5 @@ class UrbnSpider(Spider):
                     hours_string + " " + DAYS[int(day_number) - 1] + ": " + day_hours["open"] + "-" + day_hours["close"]
                 )
             item["opening_hours"].add_ranges_from_string(hours_string)
+            apply_category(Categories.SHOP_CLOTHES, item)
             yield item
