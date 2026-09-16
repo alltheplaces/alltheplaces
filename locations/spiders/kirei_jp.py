@@ -7,8 +7,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
-
 
 class KireiJPSpider(Spider):
     name = "kirei_jp"
@@ -19,12 +17,13 @@ class KireiJPSpider(Spider):
     item_attributes = {"brand_wikidata": "Q11196102", "brand": "Ki-Re-i"}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        transformer = Transformer.from_pipeline("EPSG:15484")
         for store in response.json()["list"]:
 
             item = Feature()
 
             item["branch"] = store.get("place")
-            item["lat"], item["lon"] = TOKYO_TO_WGS84.transform(store.get("lat"), store.get("lon"))
+            item["lat"], item["lon"] = transformer.transform(store.get("lat"), store.get("lon"))
             item["addr_full"] = store.get("add")
             item["website"] = f"https://www.dnpphoto.jp/CGI/search/detail.cgi?seq={store.get('seq')}"
             item["ref"] = store.get("seq")
