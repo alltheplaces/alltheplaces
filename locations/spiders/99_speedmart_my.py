@@ -3,8 +3,8 @@ import re
 from typing import Any, AsyncIterator
 from urllib.parse import unquote
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Selector, Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
@@ -42,37 +42,46 @@ class NinetynineSpeedmartMYSpider(Spider):
     item_attributes = {"brand": "99 Speedmart", "brand_wikidata": "Q62075061", "name": "99 Speedmart"}
     allowed_domains = ["99speedmart.com.my"]
 
-    def make_request(self, page: int) -> Request:
-        return Request(
-            f"https://99speedmart.com.my/store-locations/?e-page-a09cddc={page}",
+    def make_request(self, page: int) -> FormRequest:
+        # The store-locations page's own "Load More" button re-requests this
+        # Jet Smart Filters AJAX endpoint (the same one the "wp-json/wp/v2/stores"
+        # API is fronted by, but this one includes the address/maps fields the
+        # bare REST API leaves empty for ~80% of records) and appends the
+        # returned HTML fragment to the grid already on the page.
+        # "defaults[paged]" is what actually selects the page of results;
+        # "props[page]" (as sent by the browser) is only an echo of the
+        # client's last-known state and is otherwise ignored server-side.
+        return FormRequest(
+            "https://99speedmart.com.my/wp-admin/admin-ajax.php",
+            formdata={
+                "action": "jet_smart_filters",
+                "provider": "epro-loop-builder/storelocation",
+                "query[__s_query|search]": "",
+                "defaults[has_custom_pagination]": "true",
+                "defaults[post_status]": "publish",
+                "defaults[post_type]": "stores",
+                "defaults[orderby]": "post_date",
+                "defaults[order]": "desc",
+                "defaults[paged]": str(page),
+                "settings[widget_id]": "a09cddc",
+                "settings[filtered_post_id]": "3404",
+            },
             meta={"page": page},
         )
 
-    async def start(self) -> AsyncIterator[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        # The site's own "wp-json/wp/v2/stores" REST API looks like a clean
-        # data source, but its "acf" field (address/maps) is empty for ~80%
-        # of records even though the same records render with full address
-        # and map data on this listing page. So the store-locations listing
-        # itself (paginated via ?e-page-a09cddc=N) is scraped instead, since
-        # it is the only place this data is reliably complete.
-        seen_refs = response.meta.get("seen_refs", set())
+        data = response.json()
 
-        for store in response.css("div.e-loop-item"):
+        for store in Selector(text=data["content"]).css("div.e-loop-item"):
             title = html.unescape(" ".join(store.css("p.elementor-heading-title::text").getall())).strip()
             if not title or "–" not in title:
                 continue
 
             ref, _, branch = title.partition("–")
             ref = ref.strip()
-            if ref in seen_refs:
-                # The same store can appear twice on a page (once in a
-                # "recently opened" carousel, once in the main grid), and a
-                # handful of stores have an accidental duplicate post with an
-                # identical address published under the same store number.
-                continue
 
             addr_full = " ".join(
                 store.css("div.elementor-widget-text-editor div.elementor-widget-container::text").getall()
@@ -81,17 +90,12 @@ class NinetynineSpeedmartMYSpider(Spider):
                 # A store with no listed address has no location information
                 # to publish at all.
                 continue
-            seen_refs.add(ref)
 
             yield self.parse_store(store, ref, branch, addr_full)
 
-        if response.css("div.e-load-more-anchor"):
-            max_page = int(response.css("div.e-load-more-anchor::attr(data-max-page)").get())
-            page = response.meta["page"]
-            if page < max_page:
-                next_request = self.make_request(page + 1)
-                next_request.meta["seen_refs"] = seen_refs
-                yield next_request
+        page = response.meta["page"]
+        if page < data["pagination"]["max_num_pages"]:
+            yield self.make_request(page + 1)
 
     def parse_store(self, store, ref: str, branch: str, addr_full: str) -> Feature:
         # Strip a leading internal state-abbreviation tag, e.g. "(JH) ", that
