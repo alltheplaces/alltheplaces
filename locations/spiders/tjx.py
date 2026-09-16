@@ -15,6 +15,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class TjxSpider(Spider):
     name = "tjx"
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
     chains = {
         # USA chains
         "08": ({"brand": "TJ Maxx", "brand_wikidata": "Q10860683"}, ["US"]),
