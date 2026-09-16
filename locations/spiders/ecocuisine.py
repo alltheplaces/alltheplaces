@@ -12,7 +12,7 @@ from locations.structured_data_spider import StructuredDataSpider
 TIME_RANGE_RE = re.compile(r"(\d{1,2}[:h]\d{2})\s*-\s*(\d{1,2}[:h]\d{2})")
 
 
-class AmbianceEtStylesFRSpider(SitemapSpider, StructuredDataSpider):
+class EcocuisineSpider(SitemapSpider, StructuredDataSpider):
     name = "ecocuisine"
     item_attributes = {"brand": "Ecocuisine", "brand_wikidata": "Q141349333"}
     sitemap_urls = ["https://www.ecocuisine.fr/sitemap.xml"]
