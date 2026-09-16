@@ -7,22 +7,21 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
-# Source JSON-LD hardcodes addressCountry to "FR" for these French overseas department/
-# collectivity stores, but each has its own ISO country distinct from mainland France.
-COUNTRY_OVERRIDES = {
-    "https://www.centrakor.com/magasin-centrakor/ctkstemari/centrakor-sainte-marie-97438.html#store": "RE",
-    "https://www.centrakor.com/magasin-centrakor/ctkpierrsa/centrakor---zoe-confetti-st-pierre-97410.html#store": "RE",
-    "https://www.centrakor.com/magasin-centrakor/ctkleport/centrakor-le-port-97420.html#store": "RE",
-    "https://www.centrakor.com/magasin-centrakor/ctkmoudong/centrakor-moudong-97122.html#store": "GP",
-    "https://www.centrakor.com/magasin-centrakor/ctklesabym/centrakor-les-abymes-97139.html#store": "GP",
-    "https://www.centrakor.com/magasin-centrakor/ctkbaillif/centrakor-baillif-97100.html#store": "GP",
-    "https://www.centrakor.com/magasin-centrakor/ctkcarribe/the-caribbean'touch-saint-martin-97150.html#store": "MF",
-    "https://www.centrakor.com/magasin-centrakor/ctklerober/centrakor-le-robert-97231.html#store": "MQ",
-    "https://www.centrakor.com/magasin-centrakor/ctklemarin/centrakor-le-marin-97290.html#store": "MQ",
-    "https://www.centrakor.com/magasin-centrakor/ctklelamen/centrakor-le-lamentin-97232.html#store": "MQ",
-    "https://www.centrakor.com/magasin-centrakor/ctkducos/centrakor-ducos-97224.html#store": "MQ",
-    "https://www.centrakor.com/magasin-centrakor/ctkcayenne/centrakor-cayenne-97300.html#store": "GF",
-    "https://www.centrakor.com/magasin-centrakor/ctkdumbea/centrakor-dumbea-98835.html#store": "NC",
+# Source JSON-LD hardcodes addressCountry to "FR" for French overseas department/collectivity
+# stores too, but each has its own ISO country distinct from mainland France, identifiable from
+# the postcode. "971"/"972" cover both a department and a smaller collectivity that split off it
+# in 2007 but kept the same postcode prefix, so those two need an exact-postcode check first.
+FR_OVERSEAS_POSTCODE_EXCEPTIONS = {"97150": "MF", "97133": "BL"}  # Saint-Martin, Saint-Barthélemy
+FR_OVERSEAS_POSTCODE_PREFIXES = {
+    "971": "GP",  # Guadeloupe
+    "972": "MQ",  # Martinique
+    "973": "GF",  # Guyane
+    "974": "RE",  # Réunion
+    "975": "PM",  # Saint-Pierre-et-Miquelon
+    "976": "YT",  # Mayotte
+    "986": "WF",  # Wallis-et-Futuna
+    "987": "PF",  # Polynésie française
+    "988": "NC",  # Nouvelle-Calédonie
 }
 
 
@@ -41,8 +40,10 @@ class CentrakorSpider(SitemapSpider, StructuredDataSpider):
                 break
         item["branch"] = branch
 
-        if country := COUNTRY_OVERRIDES.get(item["ref"]):
-            item["country"] = country
+        if item.get("country") == "FR" and (postcode := item.get("postcode")):
+            country = FR_OVERSEAS_POSTCODE_EXCEPTIONS.get(postcode) or FR_OVERSEAS_POSTCODE_PREFIXES.get(postcode[:3])
+            if country:
+                item["country"] = country
 
         if item.get("email") in ("adv.site@centrakor.com", "support.achat@cid-sa.com"):
             # Corporate/regional-office addresses shared across many stores, not location-specific
