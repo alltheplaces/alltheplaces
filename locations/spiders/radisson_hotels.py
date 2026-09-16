@@ -1,15 +1,14 @@
 from typing import Any, AsyncIterator
 
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class RadissonHotelsSpider(PlaywrightSpider):
+class RadissonHotelsSpider(Spider):
     name = "radisson_hotels"
     allowed_domains = ["www.radissonhotels.com"]
     brand_mapping = {
@@ -26,11 +25,11 @@ class RadissonHotelsSpider(PlaywrightSpider):
         "ri": ["Radisson Individuals", None],
         "pis": ["Park Inn & Suites by Radisson", None],
     }
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+    custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
-        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 300 * 1000,
     }
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(

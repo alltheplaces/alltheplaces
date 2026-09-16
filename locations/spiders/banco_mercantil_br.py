@@ -1,46 +1,45 @@
-from typing import Any, AsyncIterator
+from typing import Any, Iterable
 
-from scrapy.http import JsonRequest, Response
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.geo import city_locations
+from locations.hours import DAYS_PT, OpeningHours, sanitise_day
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import FIREFOX_LATEST
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class BancoMercantilBRSpider(PlaywrightSpider):
+class BancoMercantilBRSpider(SitemapSpider, StructuredDataSpider):
     name = "banco_mercantil_br"
     item_attributes = {"brand": "Banco Mercantil do Brasil", "brand_wikidata": "Q9645252"}
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": FIREFOX_LATEST, "ROBOTSTXT_OBEY": False}
+    sitemap_urls = ["https://encontre.bancomercantil.com.br/sitemap.xml"]
+    sitemap_rules = [(r"/banco-mercantil(?:-\d+)?$", "parse_sd")]
+    search_for_facebook = False
 
-    async def start(self) -> AsyncIterator[Any]:
-        for city in city_locations("BR", 15000):
-            yield JsonRequest(
-                url="https://bancomercantil.com.br/_layouts/15/MB.SHP.Internet.Portal.WebParts/ajax.aspx/getAgencias",
-                data={
-                    "lat": city["latitude"],
-                    "lng": city["longitude"],
-                    "raio": "50",
-                    "domain": "https://bancomercantil.com.br",
-                },
-                callback=self.parse,
-                method="POST",
-                headers={
-                    "Origin": "https://bancomercantil.com.br",
-                },
-            )
+    def post_process_item(
+        self, item: Feature, response: TextResponse, ld_data: dict, **kwargs: Any
+    ) -> Iterable[Feature]:
+        item["ref"] = response.xpath("//@data-trackingclient-store_id").get()
+        item["branch"] = item.pop("name").removeprefix("Banco Mercantil - ")
+        item["phone"] = None
+        item["opening_hours"] = self.parse_hours(response)
+        if review_link := response.xpath('//a[contains(@href, "placeid=")]/@href').get():
+            item["extras"]["ref:google:place_id"] = review_link.split("placeid=")[1].split("&")[0]
+        apply_category(Categories.BANK, item)
+        yield item
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        locations = response.json().get("d", {}).get("agencias") or []
-        for location in locations:
-            item = Feature()
-            item["branch"] = location["nomeAgencia"]
-            item["ref"] = location["numeroAgencia"]
-            item["addr_full"] = location["endereco"]
-            item["phone"] = location["telefone"]
-            item["lat"] = location["lat"]
-            item["lon"] = location["lng"]
-            apply_category(Categories.BANK, item)
-            yield item
+    @staticmethod
+    def parse_hours(response: TextResponse) -> OpeningHours:
+        oh = OpeningHours()
+        for row in response.xpath('//dl[@class="b-week"]/dt'):
+            day = sanitise_day(row.xpath("normalize-space(text())").get().split("-")[0], DAYS_PT)
+            if not day:
+                continue
+            for time_range in row.xpath("following-sibling::dd[1]/span/text()").getall():
+                time_range = time_range.strip()
+                if time_range == "Fechado":
+                    oh.set_closed(day)
+                else:
+                    open_time, _, close_time = time_range.partition("-")
+                    oh.add_range(day, open_time, close_time)
+        return oh

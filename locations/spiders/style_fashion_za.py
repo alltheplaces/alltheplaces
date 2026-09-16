@@ -1,9 +1,12 @@
+import re
 from json import loads
-from typing import AsyncIterator
+from typing import Any
+from urllib.parse import urljoin
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -18,45 +21,41 @@ COUNTRY_CODES = {
 class StyleFashionZASpider(Spider):
     name = "style_fashion_za"
     item_attributes = {"brand": "Style", "brand_wikidata": "Q130350929"}
-    # Store finder is "Store Locator by Secomapp" (https://doc.storelocator.secomapp.com/)
-    start_urls = ["https://stylefashion.co.za/cdn/shop/t/4/assets/sca.storelocatordata.json"]
+    start_urls = ["https://stylefashion.co.za/pages/store-locator"]
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        asset_url = response.urljoin(
+            response.xpath('(//@href | //@src)[contains(., "/cdn/shop/t/") and contains(., "/assets/")]').get()
+        )
+        yield JsonRequest(url=urljoin(asset_url, "sca.storelocatordata.json"), callback=self.parse_locations)
 
-    def parse(self, response, **kwargs):
+    def parse_locations(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
 
-            item["branch"] = item.pop("name", None)
+            item["country"] = COUNTRY_CODES.get(location.get("country"), "ZA")
 
-            # address is a shop unit reference; address2 is the shopping centre name.
-            # Neither is a street address on its own, so combine them.
-            address = location.get("address", "")
-            address2 = location.get("address2", "")
-            if address and address2:
-                item["street_address"] = f"{address}, {address2}"
-            elif address or address2:
-                item["street_address"] = address or address2
+            item["branch"] = re.sub(r"^(?:BW|NA|SW)\s+|\s*\([A-Z]\d+\)$", "", item.pop("name", "")).strip() or None
+
+            address_parts = [
+                re.sub(r"^Style\b\s*", "", part or "").strip()
+                for part in (location.get("address"), location.get("address2"))
+            ]
+            item["street_address"] = ", ".join(part for part in address_parts if part)
             item.pop("addr_full", None)
 
-            # Map full country name to ISO 3166-1 alpha-2 code.
-            country_name = location.get("country", "")
-            item["country"] = COUNTRY_CODES.get(country_name, "ZA")
-
-            # Drop all-zero placeholder postcodes.
-            postcode = item.get("postcode", "")
-            if postcode and not postcode.replace("0", "").strip():
-                item.pop("postcode", None)
+            if (postcode := item.get("postcode")) and not postcode.strip("0"):
+                item.pop("postcode")
 
             if location.get("operating_hours"):
                 item["opening_hours"] = OpeningHours()
-                hours_json = loads(location["operating_hours"])
-                for day_hours in hours_json.values():
-                    if day_hours.get("status") != "1":
-                        continue
-                    for slot in day_hours.get("slot", []):
-                        item["opening_hours"].add_range(day_hours["name"], slot["from"], slot["to"])
+                for day_hours in loads(location["operating_hours"]).values():
+                    if day_hours["status"] == "1":
+                        for slot in day_hours["slot"]:
+                            item["opening_hours"].add_range(day_hours["name"], slot["from"], slot["to"])
+                    else:
+                        item["opening_hours"].set_closed(day_hours["name"])
+
+            apply_category(Categories.SHOP_CLOTHES, item)
 
             yield item

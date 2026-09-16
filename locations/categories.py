@@ -273,6 +273,7 @@ class Categories(Enum):
     OFFICE_HEALTHCARE = {"office": "healthcare"}
     OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
+    OFFICE_LAWYER = {"office": "lawyer"}
     OFFICE_MORTGAGE = {"office": "mortgage"}
     OFFICE_SUPERVISED_INJECTION_SITE = {"office": "supervised_injection_site"}
     OFFICE_TUTORING = {"office": "tutoring"}
@@ -701,6 +702,7 @@ class Extras(Enum):
     INDOOR_SEATING = "indoor_seating"
     KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
+    LAUNDRY = "laundry"
     LIVE_MUSIC = "live_music"
     LUNCH = "lunch"
     MALE = "male"
@@ -716,9 +718,11 @@ class Extras(Enum):
     PETS_ALLOWED = "pets_allowed"
     PHOTO_PRINTING = "service:photo_printing"
     PICNIC_TABLES = "picnic_table"
+    POWER_SUPPLY = "power_supply"
     PRINTING = "service:print"
     RESERVATION = "reservation"
     RESERVATION_REQUIRED = "reservation=required"
+    SANITARY_DUMP_STATION = "sanitary_dump_station"
     SCANING = "service:scan"
     SELF_CHECKOUT = "self_checkout"
     SHOWERS = "shower"
