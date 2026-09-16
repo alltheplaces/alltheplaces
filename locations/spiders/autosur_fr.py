@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class AutosurFrSpider(SitemapSpider, StructuredDataSpider):
@@ -19,7 +19,7 @@ class AutosurFrSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.VEHICLE_INSPECTION, item)
         item["branch"] = item.pop("name", "").removeprefix("AUTOSUR ")
 
-        for i in ["facebook","twitter","image"]:
-            item.pop(i,"")
+        for i in ["facebook", "twitter", "image"]:
+            item.pop(i, "")
 
         yield item
