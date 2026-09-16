@@ -20,6 +20,7 @@ class RowlandsPharmacyGBSpider(JSONBlobSpider):
         address["street_address"] = merge_address_lines([address.pop("addressLine1"), address.pop("addressLine2")])
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["email"] = None
         item["opening_hours"] = OpeningHours()
         for day, intervals in feature["openIntervals"].items():
             if not intervals["openIntervals"]:
