@@ -44,49 +44,29 @@ def label_type(text: str) -> str | None:
 
 class LibCalSpider(Spider):
     """
-    LibCal is a calendar/room booking/hours platform by Springshare, used
-    mostly by academic libraries and by some public library systems. The
-    public hours widget API lists the locations of a LibCal tenant with their
-    hours for the next few weeks:
-    https://<tenant>.libcal.com/api_hours_grid.php?iid=<iid>&format=json&weeks=<n>
+    LibCal is Springshare's calendar, room booking and hours platform for
+    libraries. Its public hours API lists a tenant's locations with hours
+    for the coming weeks.
+    https://springshare.com/libcal/
 
-    To use this store finder, specify `libcal_host` (e.g. "ocpl.libcal.com",
-    some tenants use a custom domain) and `libcal_iid`, the numeric
-    institution ID, which is found in the page source of
-    https://<tenant>.libcal.com/hours (e.g. `iid: 6287`).
+    To use, specify:
+      - `libcal_host`: e.g. "ocpl.libcal.com"
+      - `libcal_iid`: the institution ID, found in the page source of
+        https://<libcal_host>/hours (e.g. `iid: 6287`)
+      - `country`: optional, for finding phone numbers in free text if the
+        spider name has no country suffix
 
-    LibCal is primarily a source of opening hours and contact details, not of
-    location details. Data quality varies a lot by tenant:
-    - `lat`/`long` are usually empty.
-    - Addresses are almost never structured. The free HTML `desc` and
-      `contact` fields sometimes contain one, which is left to subclasses.
-    - `url` is usually the branch's web page, but for consortia it can be the
-      member library's own website.
-    - `contact` is free HTML. Phone, fax and SMS numbers are found in the
-      text with `phonenumbers` (set `country` if the spider name has no
-      country suffix), else taken from tel: links or `data-tel` attributes.
-      Email is taken from mailto: links, else from the text.
-    Most tenants therefore need the branch web page for the address and
-    coordinates. To fetch it, have `parse_item` yield a request for
-    `item["website"]` that carries the item in `cb_kwargs` instead of
-    yielding the item, e.g.
-    `yield Request(item["website"], self.parse_branch_page, cb_kwargs={"item": item})`.
+    LibCal rarely has addresses or coordinates, so these usually need to be
+    taken from the branch web page: have `parse_item` yield a request for
+    `item["website"]` carrying the item in `cb_kwargs`.
 
-    Only locations with category "library" are returned. Locations with
-    category "department" (always with a `parent_lid`) are units inside a
-    library, such as a makerspace, help desk, archive or study room, and are
-    skipped.
+    Only "library" locations are returned; "department" locations inside a
+    library are skipped. The location name is stored as `branch`, and
+    subclasses should set `name`. Override `parse_item(item, location)` to
+    modify or skip locations (e.g. bookmobiles, offices, virtual services).
 
-    The location name (e.g. "Brea") is stored as `branch` and `name` is left
-    unset, as the bare branch name is not the name of the library. Subclasses
-    should set `name` in `parse_item` following the library system's naming
-    convention.
-
-    Override `parse_item(item, location)` to modify or skip (by not yielding)
-    individual locations, or to fetch more detail as above; `location` is the
-    raw location dictionary from the API. Locations that typically need to be
-    skipped per tenant are bookmobiles, administration/HQ buildings, virtual
-    or online services, and non-library partners.
+    A location closed every day gets "Mo-Su closed", the ATP convention for a
+    temporary closure; mark permanently closed locations with `set_closed`.
     """
 
     dataset_attributes: dict = {"source": "api", "api": "libcal.com"}
@@ -246,8 +226,13 @@ class LibCalSpider(Spider):
             top = counter.most_common(2)
             if top and (len(top) == 1 or top[0][1] > top[1][1]):
                 schedule[day] = top[0][0]
+        if len(schedule) == 7 and all(value == ("closed",) for value in schedule.values()):
+            # Closed every day, e.g. for renovation. ATP expresses such a
+            # temporary closure as "Mo-Su closed".
+            return "Mo-Su closed"
         if not any(value[0] != "closed" for value in schedule.values()):
-            # Only closed days are known, e.g. weekdays are "By appointment".
+            # No open day is known, e.g. only some days are closed and the
+            # rest are "By appointment" or not set.
             return None
         if len(schedule) == 7 and all(value == ("24hours",) for value in schedule.values()):
             return "24/7"

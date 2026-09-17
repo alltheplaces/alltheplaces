@@ -9,6 +9,11 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.libcal import PHONE_OR_REGEX, LibCalSpider
 
+CLOSED_FOR_RENOVATION = {
+    "Garden Grove Main": "https://libraries.oc.gov/GGM-updates",
+    "La Habra": "https://libraries.oc.gov/LH-updates",
+}
+
 
 class OcPublicLibrariesUSSpider(LibCalSpider):
     name = "oc_public_libraries_us"
@@ -21,12 +26,17 @@ class OcPublicLibrariesUSSpider(LibCalSpider):
         if item["branch"] == "Administrative Headquarters":
             # Administration building, not a library branch.
             return
-        if item["branch"] in ("La Habra", "Garden Grove Main"):
-            # Closed for renovation since May 2025 (~24 months, per
-            # libraries.oc.gov/LH-updates and /GGM-updates); branch pages are
-            # unpublished so no location is available.
-            return
         item["name"] = "{} Library".format(item["branch"])
+        if update_page := CLOSED_FOR_RENOVATION.get(item["branch"]):
+            # Closed for renovation since May 2025 (~24 months, per the update
+            # page). Their branch pages are unpublished, so no address or
+            # location is available. The LibCal email addresses are outdated
+            # (see below) and the branch page can't supply current ones.
+            item["website"] = update_page
+            item["opening_hours"] = "Mo-Su closed"
+            item["email"] = None
+            yield item
+            return
         # LibCal has no coordinates and rarely an address, so they are taken
         # from the branch page on the library website.
         yield Request(
