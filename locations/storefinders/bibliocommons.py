@@ -57,7 +57,7 @@ class BiblioCommonsSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
-    def parse(self, response: TextResponse, page: int = 1, **kwargs: Any) -> Iterable[Feature | Request]:
+    def parse(self, response: TextResponse, page: int, **kwargs: Any) -> Iterable[Feature | Request]:
         data = response.json()
         # A page with no results has no "entities" key.
         entities = data.get("entities", {})
