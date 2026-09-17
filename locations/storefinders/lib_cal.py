@@ -1,4 +1,5 @@
 import re
+import time
 from collections import Counter
 from functools import cached_property
 from typing import Any, AsyncIterator, Iterable
@@ -174,7 +175,12 @@ class LibCalSpider(Spider):
             value.strip().lower().replace(" ", "").replace(".", ""), NAMED_TIMES, time_24h=False
         ).lower()
         value = re.sub(r"^(\d{1,2})([ap]m)$", r"\1:00\2", value)
-        return value if re.fullmatch(r"\d{1,2}:\d{2}[ap]m", value) else None
+        try:
+            # Rejects times which look plausible but are not, e.g. "13:00pm".
+            time.strptime(value, "%I:%M%p")
+        except ValueError:
+            return None
+        return value
 
     @classmethod
     def parse_day(cls, times: dict) -> tuple | None:
