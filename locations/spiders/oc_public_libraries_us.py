@@ -2,13 +2,14 @@ import json
 from typing import Any, Iterable
 from urllib.parse import unquote
 
-from scrapy.http import Request, Response
+from scrapy.http import Request, Response, TextResponse
 from twisted.python.failure import Failure
 
 from locations.categories import Extras, apply_yes_no
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.storefinders.libcal import PHONE_OR_REGEX, LibCalSpider
+from locations.storefinders.lib_cal import PHONE_OR_REGEX, LibCalSpider
 
 CLOSED_FOR_RENOVATION = {
     "Garden Grove Main": "https://libraries.oc.gov/GGM-updates",
@@ -23,12 +24,16 @@ class OcPublicLibrariesUSSpider(LibCalSpider):
     libcal_iid = 6287
     country = "US"
 
-    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature | Request]:
-        if item["branch"] == "Administrative Headquarters":
+    def post_process_item(
+        self, item: Feature, response: TextResponse, location: dict, **kwargs
+    ) -> Iterable[Feature | Request]:
+        branch = item.pop("name")
+        if branch == "Administrative Headquarters":
             # Administration building, not a library branch.
             return
-        item["name"] = "{} Library".format(item["branch"])
-        if not item["opening_hours"] and (update_page := CLOSED_FOR_RENOVATION.get(item["branch"])):
+        item["branch"] = branch
+        item["name"] = "{} Library".format(branch)
+        if not item["opening_hours"] and (update_page := CLOSED_FOR_RENOVATION.get(branch)):
             # Closed for renovation since May 2025 (~24 months, per the update
             # page). Their branch pages are unpublished, so no address or
             # location is available. The LibCal email addresses are outdated
@@ -36,7 +41,8 @@ class OcPublicLibrariesUSSpider(LibCalSpider):
             # LibCal publishes hours for them again, they take the normal path
             # below and their location and contact details return.
             item["website"] = update_page
-            item["opening_hours"] = "Mo-Su closed"
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].set_closed(DAYS_FULL)
             item["email"] = None
             yield item
             return

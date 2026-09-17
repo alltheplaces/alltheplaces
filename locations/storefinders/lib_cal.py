@@ -57,16 +57,18 @@ class LibCalSpider(Spider):
         spider name has no country suffix
 
     LibCal rarely has addresses or coordinates, so these usually need to be
-    taken from the branch web page: have `parse_item` yield a request for
-    `item["website"]` carrying the item in `cb_kwargs`.
+    taken from the branch web page: have `post_process_item` yield a request
+    for `item["website"]` carrying the item in `cb_kwargs`.
 
     Only "library" locations are returned; "department" locations inside a
-    library are skipped. The location name is stored as `branch`, and
-    subclasses should set `name`. Override `parse_item(item, location)` to
-    modify or skip locations (e.g. bookmobiles, offices, virtual services).
+    library are skipped. `name` is the bare location name (e.g. "Brea"), so
+    subclasses should compose the library's real name from it. Override
+    `post_process_item(item, response, location)` to modify or skip locations
+    (e.g. bookmobiles, offices, virtual services).
 
     A location closed every day gets "Mo-Su closed", the ATP convention for a
-    temporary closure; mark permanently closed locations with `set_closed`.
+    temporary closure; mark permanently closed locations with
+    `set_closed(item)`.
     """
 
     dataset_attributes: dict = {"source": "api", "api": "libcal.com"}
@@ -93,13 +95,14 @@ class LibCalSpider(Spider):
         for location in response.json()["locations"]:
             if location.get("category") != "library" or location.get("parent_lid"):
                 continue
+            self.pre_process_data(location)
             item = self.parse_location(location)
-            yield from self.parse_item(item, location) or []
+            yield from self.post_process_item(item, response, location) or []
 
     def parse_location(self, location: dict) -> Feature:
         item = Feature()
         item["ref"] = location["lid"]
-        item["branch"] = (location.get("name") or "").strip() or None
+        item["name"] = (location.get("name") or "").strip() or None
         item["website"] = (location.get("url") or "").strip() or None
         if location.get("lat") and location.get("long"):
             item["lat"] = location["lat"]
@@ -228,9 +231,11 @@ class LibCalSpider(Spider):
             if top and (len(top) == 1 or top[0][1] > top[1][1]):
                 schedule[day] = top[0][0]
         if len(schedule) == 7 and all(value == ("closed",) for value in schedule.values()):
-            # Closed every day, e.g. for renovation. ATP expresses such a
-            # temporary closure as "Mo-Su closed".
-            return "Mo-Su closed"
+            # Closed every day, e.g. for renovation, which ATP expresses as
+            # "Mo-Su closed".
+            oh = OpeningHours()
+            oh.set_closed(DAYS_FULL)
+            return oh
         if not any(value[0] != "closed" for value in schedule.values()):
             # No open day is known, e.g. only some days are closed and the
             # rest are "By appointment" or not set.
@@ -249,5 +254,11 @@ class LibCalSpider(Spider):
                     oh.add_range(day, open_time, close_time, time_format="%I:%M%p")
         return oh
 
-    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature | Request]:
+    def pre_process_data(self, location: dict, **kwargs) -> None:
+        """Override with any pre-processing on the item."""
+
+    def post_process_item(
+        self, item: Feature, response: TextResponse, location: dict, **kwargs
+    ) -> Iterable[Feature | Request]:
+        """Override with any post-processing on the item."""
         yield item
