@@ -6,14 +6,9 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class SpeedyFRMASpider(SitemapSpider, StructuredDataSpider):
     name = "speedy_fr_ma"
-    item_attributes = {
-        "brand": "Speedy",
-        "brand_wikidata": "Q3492969",
-    }
-    sitemap_urls = ["https://centres-auto.speedy.fr/sitemap/18/sitemap-standard-0.xml"]
-    sitemap_rules = [
-        (r"\d+/\d+$", "parse"),
-    ]
+    item_attributes = {"brand": "Speedy", "brand_wikidata": "Q3492969"}
+    sitemap_urls = ["https://centres-auto.speedy.fr/robots.txt"]
+    sitemap_rules = [(r"\d+/\d+$", "parse")]
     custom_settings = {"DOWNLOAD_DELAY": 4}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
