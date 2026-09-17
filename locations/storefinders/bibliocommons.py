@@ -19,41 +19,25 @@ CLOSED_NOTE_REGEX = re.compile(r"\bclosed?\b|\bclosure\b", re.IGNORECASE)
 
 class BiblioCommonsSpider(Spider):
     """
-    BiblioCommons is a catalogue/discovery platform used by many public
-    library systems (mostly in the US and Canada). Branch locations are
-    available from the BiblioCommons gateway API:
-    https://gateway.bibliocommons.com/v2/libraries/<library_id>/locations
+    BiblioCommons is a library catalogue and website platform used by many
+    public library systems, mostly in the US and Canada. Its gateway API
+    lists a library system's locations.
+    https://www.bibliocommons.com/
 
-    To use this store finder, specify the `library_id` attribute of this
-    class. This is the subdomain of the library's BiblioCommons catalogue,
-    e.g. "kcls" for https://kcls.bibliocommons.com/.
+    To use, specify:
+      - `library_id`: the catalogue subdomain, e.g. "kcls" for
+        https://kcls.bibliocommons.com/
 
-    Locations are categorised as libraries, except those with "Locker(s)"
-    in their name, which are self-service holds pickup lockers and are
-    categorised as parcel lockers with `name` set to the API name. A
-    location open 00:00-23:45 (or until midnight) every day gets opening
-    hours of "24/7".
+    The location name is stored as `branch`, and subclasses should set
+    `name`. Locations named "Locker(s)" are categorised as parcel lockers
+    and keep the API name. Override `parse_item(item, location)` to modify
+    or skip locations (e.g. bookmobiles, offices, departments inside a
+    branch), or to yield a request for the branch web page carrying the item
+    in `cb_kwargs`.
 
-    For libraries, the API's location name (e.g. "Enumclaw") is stored as
-    `branch` and `name` is left unset, as the bare branch name is not the
-    name of the library. Subclasses should set `name` in `parse_item` (e.g.
-    "Enumclaw Library") following the library system's naming convention.
-
-    Override `parse_item(item, location)` to modify, categorise differently
-    or skip (by not yielding) individual locations; `location` is the raw
-    location dictionary from the API. Locations that typically need to be
-    skipped per library system are bookmobiles, administration/HQ/
-    operations buildings, virtual branches, departments inside a branch
-    (makerspace, cafe, genealogy room, drive-thru) and non-library partners.
-    Keep branches that are temporarily closed (e.g. for renovation), with
-    any closure notice cleaned out of `branch`/`name`. A location without
-    hours whose name or hours note says it is closed gets opening hours of
-    "Mo-Su closed", the ATP convention for temporary closures; a permanently
-    closed location should instead be marked with `set_closed(item)`.
-
-    To fetch more detail from the branch web page, `parse_item` can yield a
-    request to a callback of your own that carries the item, e.g.
-    `yield Request(item["website"], self.parse_branch_page, cb_kwargs={"item": item})`.
+    A location without hours whose name or hours note says it is closed gets
+    "Mo-Su closed", the ATP convention for a temporary closure; mark
+    permanently closed locations with `set_closed`.
     """
 
     dataset_attributes: dict = {"source": "api", "api": "bibliocommons.com"}
