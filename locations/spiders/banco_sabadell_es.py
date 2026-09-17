@@ -7,11 +7,13 @@ from scrapy.http import Request
 from locations.categories import Categories, apply_category
 from locations.geo import point_locations
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class BancoSabadellESSpider(Spider):
     name = "banco_sabadell_es"
     item_attributes = {"brand": "Banco Sabadell", "brand_wikidata": "Q762330"}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[Request]:
         for lat, lon in point_locations("eu_centroids_120km_radius_country.csv", "ES"):
