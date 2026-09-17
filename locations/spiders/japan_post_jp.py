@@ -121,71 +121,71 @@ class JapanPostJPSpider(EMapSpider):
                 lat, lon, radius, offset + rec_count, tempo_count=tempo_total, post_count=post_total, source=source
             )
 
-        yield from self.parse_rows(rows)
-
-    def parse_rows(self, rows):
         for row in rows:
-            row_type = row[0]
-            ref = row[1]
-            lat = float(row[2])
-            lon = float(row[3])
-            # raw lat/lon are Tokyo datum (EPSG:4301). convert to WGS 84 (EPSG:4326)
-            wgs84_lat, wgs84_lon = TOKYO_TO_WGS84.transform(lat, lon)
+            yield from self.parse_row(row)
 
-            if row_type == "POST":
-                postcode = row[21]
-                addr_full = row[7]
-                item = Feature()
-                item["ref"] = row[11]
-                # post detail page is not accessible without `?post=1`
-                item["website"] = f"https://map.japanpost.jp/p/{self.map_id}/dtl/{ref}/?post=1"
-                item["lat"] = wgs84_lat
-                item["lon"] = wgs84_lon
-                item["postcode"] = postcode
-                item["addr_full"] = addr_full
-                if collection_times := self.get_collection_times(row):
-                    item["extras"]["collection_times"] = collection_times
-                item["extras"]["post_box:design"] = f"差出箱{row[14]}"
+    def parse_row(self, row):
+        row_type = row[0]
+        ref = row[1]
+        lat = float(row[2])
+        lon = float(row[3])
+        # raw lat/lon are Tokyo datum (EPSG:4301). convert to WGS 84 (EPSG:4326)
+        wgs84_lat, wgs84_lon = TOKYO_TO_WGS84.transform(lat, lon)
 
-                apply_category(Categories.POST_BOX, item)
-                item["operator_wikidata"] = "Q11509260"
-                yield item
-                continue
-
-            # col [icon] is an icon_id (marker image) that selects the category:
-            #   01, 02          = post office
-            #   03,04,06,07,08  = ATM
-            #   05              = Japan Post kanpo Insurance
-            #   99              = search-center pin, not a real location
-            icon = row[4]
-            if icon == "99":
-                continue
-
-            name = row[7]
-            postcode = row[13]
-            addr_full = row[14]
-
+        if row_type == "POST":
+            postcode = row[21]
+            addr_full = row[7]
             item = Feature()
-            item["ref"] = ref
-            item["website"] = f"https://map.japanpost.jp/p/{self.map_id}/dtl/{ref}/"
+            item["ref"] = row[11]
+            # post detail page is not accessible without `?post=1`
+            item["website"] = f"https://map.japanpost.jp/p/{self.map_id}/dtl/{ref}/?post=1"
             item["lat"] = wgs84_lat
             item["lon"] = wgs84_lon
             item["postcode"] = postcode
             item["addr_full"] = addr_full
-            if icon in ("01", "02"):
-                apply_category(Categories.POST_OFFICE, item)
-                item.update({"brand": "日本郵便", "brand_wikidata": "Q11509260"})
-                item["name"] = name
-            elif icon == "05":
-                apply_category(Categories.OFFICE_INSURANCE, item)
-                item.update({"brand": "かんぽ生命保険", "brand_wikidata": "Q6157781"})
-                item["name"] = name
-            else:
-                apply_category(Categories.ATM, item)
-                item.update({"brand": "ゆうちょ銀行", "brand_wikidata": "Q907103"})
-                item["branch"] = name.removesuffix("出張所")
+            if collection_times := self.get_collection_times(row):
+                item["extras"]["collection_times"] = collection_times
+            item["extras"]["post_box:design"] = f"差出箱{row[14]}"
 
+            apply_category(Categories.POST_BOX, item)
+            item["operator_wikidata"] = "Q11509260"
             yield item
+            return
+
+        # col [icon] is an icon_id (marker image) that selects the category:
+        #   01, 02          = post office
+        #   03,04,06,07,08  = ATM
+        #   05              = Japan Post kanpo Insurance
+        #   99              = search-center pin, not a real location
+        icon = row[4]
+        if icon == "99":
+            return
+
+        name = row[7]
+        postcode = row[13]
+        addr_full = row[14]
+
+        item = Feature()
+        item["ref"] = ref
+        item["website"] = f"https://map.japanpost.jp/p/{self.map_id}/dtl/{ref}/"
+        item["lat"] = wgs84_lat
+        item["lon"] = wgs84_lon
+        item["postcode"] = postcode
+        item["addr_full"] = addr_full
+        if icon in ("01", "02"):
+            apply_category(Categories.POST_OFFICE, item)
+            item.update({"brand": "日本郵便", "brand_wikidata": "Q11509260"})
+            item["name"] = name
+        elif icon == "05":
+            apply_category(Categories.OFFICE_INSURANCE, item)
+            item.update({"brand": "かんぽ生命保険", "brand_wikidata": "Q6157781"})
+            item["name"] = name
+        else:
+            apply_category(Categories.ATM, item)
+            item.update({"brand": "ゆうちょ銀行", "brand_wikidata": "Q907103"})
+            item["branch"] = name.removesuffix("出張所")
+
+        yield item
 
     def get_collection_times(self, row: List[str]) -> str:
         # POST rows have collection times in three fixed 20-slot groups:

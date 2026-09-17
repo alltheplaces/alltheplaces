@@ -1,7 +1,7 @@
 import csv
 from _csv import Reader
 from io import StringIO
-from typing import AsyncIterator, Iterable
+from typing import AsyncIterator
 from urllib.parse import urlencode
 
 from chompjs import parse_js_object
@@ -66,16 +66,17 @@ class EMapSpider(Spider):
             yield self.make_request(lat, lon, radius_m)
 
     def parse(self, response: Response, lat: float, lon: float, radius: float, offset: int, count: int = 900, **kwargs):
-        """Decode the response, paginate past if any truncation, and pass each row to `parse_rows`."""
+        """Decode the response, paginate past any overflow, and hand each row to `parse_row`."""
         reader, rec_count, hit_count = self.get_reader(response)
         if hit_count >= self.max_items:
             self.logger.warning("Maximum number of items returned in one query, consider lowering the radius")
         if rec_count >= hit_count:
             yield self.make_request(lat, lon, radius, offset + rec_count)
-        yield from self.parse_rows(reader)
+        for row in reader:
+            yield from self.parse_row(row)
 
-    def parse_rows(self, rows: Iterable[list[str]]):
-        """Yield a Feature for each row; implemented by subclasses."""
+    def parse_row(self, row: list[str]):
+        """Yield a Feature for the given row; implemented by subclasses."""
         raise NotImplementedError
 
     def get_reader(self, response: Response) -> tuple[Reader, int, int]:

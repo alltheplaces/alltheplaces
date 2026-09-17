@@ -12,16 +12,15 @@ class LawsonBankJPSpider(EMapSpider):
         "brand_wikidata": "Q11350963",
     }
 
-    def parse_rows(self, rows):
-        for row in rows:
-            item = Feature()
-            item["ref"] = row[0]
-            item["website"] = f"https://map.lawsonbank.jp/p/{self.map_id}/dtl/{row[0]}/"
-            item["lat"] = row[1]
-            item["lon"] = row[2]
-            item["branch"] = row[7].removeprefix("ローソン銀行ＡＴＭ　").removesuffix("共同出張所")
-            item["addr_full"] = row[8]
+    def parse_row(self, row):
+        item = Feature()
+        item["ref"] = row[0]
+        item["website"] = f"https://map.lawsonbank.jp/p/{self.map_id}/dtl/{row[0]}/"
+        item["lat"] = row[1]
+        item["lon"] = row[2]
+        item["branch"] = row[7].removeprefix("ローソン銀行ＡＴＭ　").removesuffix("共同出張所")
+        item["addr_full"] = row[8]
 
-            apply_category(Categories.ATM, item)
+        apply_category(Categories.ATM, item)
 
-            yield item
+        yield item
