@@ -64,9 +64,7 @@ class BakersfieldUSSpider(Spider):
 
         for line in location.xpath('.//ul[@class="list-unstyled"]/li/text()').getall():
             line = line.replace("\u2013", "-").replace("\u2014", "-").strip()
-            if not (
-                times := re.search(r"(\d{1,2}(?::\d{2})?\s*[AP]M)\s*-\s*(\d{1,2}(?::\d{2})?\s*[AP]M)", line, re.I)
-            ):
+            if not (times := re.search(r"(\d{1,2}(?::\d{2})?\s*[AP]M)\s*-\s*(\d{1,2}(?::\d{2})?\s*[AP]M)", line, re.I)):
                 continue
 
             day_names = []
