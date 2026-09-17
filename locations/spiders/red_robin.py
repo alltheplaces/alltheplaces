@@ -13,6 +13,6 @@ class RedRobinSpider(NomNomSpider):
     def post_process_item(self, item, response, feature):
         if re.search(r"\b(Lab|Demo)\b", feature["name"]):
             return  # NomNom test tenants ("Lab 4", "... Demo Vendor") with 555 phone numbers
-        item["branch"] = feature["name"].removeprefix("Red Robin").strip()
+        item["branch"] = feature["name"].removeprefix("Red Robin").strip(" -")
         item["website"] = f"https://www.redrobin.com/location/{feature['slug']}"
         yield item
