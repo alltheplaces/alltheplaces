@@ -20,6 +20,7 @@ class YazigiBRSpider(StructuredDataSpider):
             yield Request(url, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item.pop("image", None)
         item["branch"] = item.pop("name").removeprefix("YÁZIGI ").title()
         apply_category(Categories.LANGUAGE_SCHOOL, item)
         yield item
