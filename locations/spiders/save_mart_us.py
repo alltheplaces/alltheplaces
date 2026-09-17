@@ -1,94 +1,51 @@
-from urllib.parse import quote
+from typing import Any
 
-from scrapy.http import JsonRequest
+import chompjs
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.categories import PaymentMethods, apply_yes_no
-from locations.hours import DAYS_3_LETTERS_FROM_SUNDAY, OpeningHours
-from locations.json_blob_spider import JSONBlobSpider
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 BRANDS = {
-    "a3b11717-f4ca-4196-b670-e5142c205dee": {"brand": "Lucky", "brand_wikidata": "Q6698032"},
-    "b0fbc8a0-c305-4adc-97c0-80d7548ea2f9": {"brand": "Save Mart", "brand_wikidata": "Q7428009"},
-    "ed5181c4-4323-4bac-9e4a-e5ca92c3de68": {"brand": "FoodMaxx", "brand_wikidata": "Q61894844"},
-}
-
-WEBSITES = {
-    "a3b11717-f4ca-4196-b670-e5142c205dee": "luckysupermarkets.com",
-    "b0fbc8a0-c305-4adc-97c0-80d7548ea2f9": "savemart.com",
-    "ed5181c4-4323-4bac-9e4a-e5ca92c3de68": "foodmaxx.com",
+    "foodmaxx.com": {"brand": "FoodMaxx", "brand_wikidata": "Q61894844"},
+    "luckysupermarkets.com": {"brand": "Lucky", "brand_wikidata": "Q6698032"},
+    "savemart.com": {"brand": "Save Mart", "brand_wikidata": "Q7428009"},
 }
 
 
-class SaveMartUSSpider(JSONBlobSpider):
+class SaveMartUSSpider(SitemapSpider):
     name = "save_mart_us"
-    locations_key = ["data", "stores", "all"]
+    sitemap_urls = [
+        "https://foodmaxx.com/sitemap.xml",
+        "https://luckysupermarkets.com/sitemap.xml",
+        "https://savemart.com/sitemap.xml",
+    ]
+    sitemap_rules = [(r"/stores/\d+$", "parse")]
 
-    async def start(self):
-        for brand in ["fm", "lu", "sm"]:
-            yield JsonRequest(
-                f"https://{brand}.swiftlyapi.net/graphql",
-                data={"query": """
-                        {
-                            stores {
-                                all {
-                                    address1
-                                    chainId
-                                    city
-                                    country
-                                    latitude
-                                    longitude
-                                    number
-                                    payments
-                                    postalCode
-                                    primaryDetails {
-                                        hours {
-                                            day
-                                            hours {
-                                                close
-                                                open
-                                            }
-                                        }
-                                        name
-                                        contactNumbers {
-                                            imageId
-                                            value
-                                        }
-                                    }
-                                    state
-                                    storeId
-                                }
-                            }
-                        }
-                    """},
-            )
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        location = chompjs.parse_js_object(
+            response.xpath('//*[contains(text(),"window.__remixContext")]/text()').get()
+        )["state"]["loaderData"]["routes/stores.$storeId._index"]["storeDetailsV2"]
+        location.update(location.pop("location"))
+        item = DictParser.parse(location)
+        item.update(BRANDS[response.url.split("/")[2]])
+        item["branch"] = item.pop("name")
+        item["website"] = response.url
+        item["phone"] = location["phoneNumbers"][0]["value"]
 
-    def post_process_item(self, item, response, location):
-        item.update(BRANDS[location["chainId"]])
+        item["opening_hours"] = self.parse_opening_hours(location["hours"]["weekly"])
 
-        item["ref"] = location["number"]
-        item["branch"] = location["primaryDetails"]["name"]
-        item["website"] = (
-            f"https://{WEBSITES[location['chainId']]}/stores/{location['storeId']}/{quote(location['primaryDetails']['name'])}/{location['number']}/{quote(location['city'])}"
-        )
-
-        apply_yes_no(PaymentMethods.CASH, item, "CASH" in location["payments"])
-        apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "CREDIT" in location["payments"])
-
-        oh = OpeningHours()
-        for day in location["primaryDetails"]["hours"]:
-            for hours in day["hours"]:
-                oh.add_range(
-                    DAYS_3_LETTERS_FROM_SUNDAY[day["day"]], hours["open"], hours["close"], time_format="%H:%M:%S"
-                )
-        item["opening_hours"] = oh
-
-        for contact_number in location["primaryDetails"]["contactNumbers"]:
-            if contact_number["imageId"] == "main_phone_icon":
-                item["phone"] = contact_number["value"]
-            elif contact_number["imageId"] == "fax_phone_icon":
-                item["extras"]["fax"] = contact_number["value"]
-
-        # The data seems to be consistently offset, at least compared to OSM
-        item["lon"] += 0.002
+        apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            if rule["daily"]["type"] == "OPEN_24_HOURS":
+                oh.add_range(rule["day"], "00:00", "24:00")
+            else:
+                oh.add_range(rule["day"], rule["daily"]["open"]["open"], rule["daily"]["open"]["close"], "%H:%M:%S")
+        return oh
