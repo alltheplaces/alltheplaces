@@ -33,9 +33,10 @@ class IonnaUSSpider(scrapy.Spider):
     start_urls = ["https://www.ionna.com/rechargeries/find-a-rechargery/"]
 
     def parse(self, response):
-        locations = extract_text_between(response.text, "var locations = ", "for(var key in locations) {")
-        # There is a trailing semicolon at the end of the string, so we need to remove it.
-        locations = locations.rstrip(";")
+        locations = extract_text_between(response.text, "window.allLocations = ", "};")
+        # extract_text_between() stops right before the closing "};" of the object literal, so
+        # add the closing brace back to make it valid JSON again.
+        locations = locations + "}"
 
         json_data = json.loads(locations)
 
