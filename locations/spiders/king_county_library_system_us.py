@@ -1,5 +1,7 @@
 from typing import Iterable
 
+from scrapy.http import TextResponse
+
 from locations.items import Feature
 from locations.storefinders.bibliocommons import BiblioCommonsSpider
 
@@ -9,7 +11,7 @@ class KingCountyLibrarySystemUSSpider(BiblioCommonsSpider):
     item_attributes = {"operator": "King County Library System", "operator_wikidata": "Q6411390"}
     library_id = "kcls"
 
-    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict, **kwargs) -> Iterable[Feature]:
         if branch := item.get("branch"):  # Lockers have a name instead.
             if branch.startswith("Administrative Office"):
                 # Administration building, not a library branch.

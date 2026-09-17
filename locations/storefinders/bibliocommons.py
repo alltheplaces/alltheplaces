@@ -68,8 +68,9 @@ class BiblioCommonsSpider(Spider):
                 # Hidden locations are not shown in the library's public
                 # location list.
                 continue
+            self.pre_process_data(location)
             item = self.parse_location(location, entities)
-            yield from self.parse_item(item, location) or []
+            yield from self.post_process_item(item, response, location) or []
 
         if page == 1:
             for next_page in range(2, data["locations"]["pagination"]["pages"] + 1):
@@ -161,5 +162,9 @@ class BiblioCommonsSpider(Spider):
         oh.set_closed([day for day in DAYS_FULL if day not in listed_days])
         return oh
 
-    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature | Request]:
+    def pre_process_data(self, location: dict, **kwargs) -> None:
+        """Override with any pre-processing on the item."""
+
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict, **kwargs) -> Iterable[Feature]:
+        """Override with any post-processing on the item."""
         yield item
