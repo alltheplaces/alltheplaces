@@ -168,7 +168,7 @@ class JapanPostJPSpider(Spider):
                 postcode = row[21]
                 addr_full = row[7]
                 item = Feature()
-                item["ref"] = ref
+                item["ref"] = row[11]
                 # post detail page is not accessible without `?post=1`
                 item["website"] = f"https://map.japanpost.jp/p/{MAP_ID}/dtl/{ref}/?post=1"
                 item["lat"] = wgs84_lat
@@ -177,7 +177,7 @@ class JapanPostJPSpider(Spider):
                 item["addr_full"] = addr_full
                 if collection_times := self.get_collection_times(row):
                     item["extras"]["collection_times"] = collection_times
-                item["extras"]["post_box:design"] = f"郵便差出箱{row[14]}"
+                item["extras"]["post_box:design"] = f"差出箱{row[14]}"
 
                 apply_category(Categories.POST_BOX, item)
                 item["operator_wikidata"] = "Q11509260"
