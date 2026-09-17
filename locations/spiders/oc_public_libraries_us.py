@@ -5,6 +5,7 @@ from urllib.parse import unquote
 from scrapy.http import Request, Response
 from twisted.python.failure import Failure
 
+from locations.categories import Extras, apply_yes_no
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.libcal import PHONE_OR_REGEX, LibCalSpider
@@ -67,6 +68,11 @@ class OcPublicLibrariesUSSpider(LibCalSpider):
             if number
         ]:
             item["phone"] = "; ".join(phones)
+
+        # e.g. <li>Wi-Fi: The library offers free public Wi-Fi.</li> in the
+        # list of amenities
+        if response.xpath('//*[contains(@class, "field-wysiwyg")]//li[re:test(string(.), "\\bwi-?fi\\b", "i")]'):
+            apply_yes_no(Extras.WIFI, item, True)
 
         address = response.xpath('//p[@class="address"]')
         item["street_address"] = merge_address_lines(
