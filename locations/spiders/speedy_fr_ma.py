@@ -17,13 +17,16 @@ class SpeedyFRMASpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"DOWNLOAD_DELAY": 4}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        if(item.get("lat") is not None):
-            if "+212" in (item.get("phone") or "") or (item.get("city") or "") in ["El Jadida", "Mohammedia"]:
-                item["country"] = "MA"
+        if item.get("lat") is None:
+            return
 
-            apply_category(Categories.SHOP_CAR_REPAIR, item)
-            item["branch"] = item.pop("name", "").removeprefix("Centre Auto SPEEDY ")
-            for i in ["facebook","image","twitter"]:
-                item.pop(i,"")
-            
-            yield item
+        #overwrite country as the information structured data wrongly indicates country "FR" for locations situated in Morocco.
+        if "+212" in (item.get("phone") or "") or (item.get("city") or "") in ["El Jadida", "Mohammedia"]:
+            item["country"] = "MA"
+
+        apply_category(Categories.SHOP_CAR_REPAIR, item)
+        item["branch"] = item.pop("name", "").removeprefix("Centre Auto SPEEDY ")
+        for i in ["facebook","image","twitter"]:
+            item.pop(i,"")
+        
+        yield item
