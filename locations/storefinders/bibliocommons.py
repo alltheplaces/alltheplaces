@@ -14,6 +14,10 @@ LOCKER_NAME_REGEX = re.compile(r"\blockers?\b", re.IGNORECASE)
 # matched by keyword.
 WIFI_LABEL_REGEX = re.compile(r"\bwi-?fi\b|\bwireless internet\b", re.IGNORECASE)
 ALL_DAY_CLOSE_TIMES = {"T23:45", "T23:59", "T24:00", "T00:00"}
+UNIT_REGEX = re.compile(
+    r"(.+?)[\s,]+((?:suites?|ste\.|ste|unit|room|bldg|building|no\.)(?=[\s.#\d])[\s.]*.+|#\s*\S+)", re.IGNORECASE
+)
+REDIRECTED_PHONE_REGEX = re.compile(r"answered at|please call", re.IGNORECASE)
 CLOSED_NOTE_REGEX = re.compile(r"\bclosed?\b|\bclosure\b", re.IGNORECASE)
 
 
@@ -75,6 +79,11 @@ class BiblioCommonsSpider(Spider):
         item = DictParser.parse(location)
         item["branch"] = item.pop("name")
         item["housenumber"] = (location.get("address") or {}).get("number")
+        if street := item.get("street"):
+            # e.g. "NE 8th Street, Suite K-11", "N. Oracle Rd., #199"
+            if m := UNIT_REGEX.fullmatch(street):
+                item["street"], item["unit"] = m.group(1), m.group(2)
+            item["street"] = item["street"].strip(" ,")
         if centre_point := (location.get("mapLocation") or {}).get("centrePoint"):
             item["lat"] = centre_point.get("lat")
             item["lon"] = centre_point.get("lng")
@@ -86,6 +95,10 @@ class BiblioCommonsSpider(Spider):
             if contact.get("contactType") == "phone":
                 number = contact.get("globalValue") or contact.get("value")
                 label = (contact.get("label") or "").lower()
+                if REDIRECTED_PHONE_REGEX.search(label):
+                    # e.g. "Calls answered at Burien Library during Burien
+                    # open hours": another location's number.
+                    continue
                 if "fax" in label:
                     item["extras"].setdefault(Extras.FAX.value, number)
                 elif re.search(r"\b(?:text|sms)\b", label):
