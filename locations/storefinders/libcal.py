@@ -14,14 +14,14 @@ from locations.hours import DAYS_FULL, NAMED_TIMES_EN, OpeningHours
 from locations.items import Feature
 
 EMAIL_REGEX = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+LABELS = r"fax|phone|telephone|tel|text|sms|call"
+# Reduce a combined label (e.g. "Tel/Fax:", "Call or text:") to its first
+# word, so that the number following it is classified as a phone number
+# rather than by the last of the labels.
+COMBINED_LABEL_REGEX = re.compile(rf"(?i)\b({LABELS})(?:\s*(?:[/&]|\bor\b)\s*(?:{LABELS})\b)+")
 # Split a line of text before each label, so that each number can be
-# classified by the label before it. Combined labels such as "Tel/Fax:" or
-# "Phone or text:" are not split, so they are classified by their first word.
-# "or" only joins labels directly after a label, as in "(415) 258-4656 or
-# Text: (415) 855-1597" it separates two numbers.
-LABEL_SPLIT_REGEX = re.compile(
-    r"(?i)(?<![/&])(?<![/&]\s)(?<!phone\sor\s)(?<!\btel\sor\s)(?=\b(?:fax|phone|telephone|tel|text|sms)\b)"
-)
+# classified by the label before it.
+LABEL_SPLIT_REGEX = re.compile(rf"(?i)(?=\b(?:{LABELS})\b)")
 FAX_LABEL_REGEX = re.compile(r"\bfax\b", re.IGNORECASE)
 SMS_LABEL_REGEX = re.compile(r"\b(?:text|sms)\b", re.IGNORECASE)
 # Several numbers in one tel: link, e.g. "(714)526-7728or(562)694-0078".
@@ -37,7 +37,7 @@ def label_type(text: str) -> str | None:
         return "fax"
     if SMS_LABEL_REGEX.match(text):
         return "sms"
-    if re.match(r"(?i)(?:phone|telephone|tel)\b", text):
+    if re.match(r"(?i)(?:phone|telephone|tel|call)\b", text):
         return "phone"
     return None
 
@@ -127,6 +127,7 @@ class LibCalSpider(Spider):
         # "215-751-8762 Fax", "704-216-3827 (Fax)").
         text = Selector(text=BLOCK_TAG_REGEX.sub("\n", contact)).xpath("string(.)").get() or ""
         for line in text.replace("\xa0", " ").splitlines():
+            line = COMBINED_LABEL_REGEX.sub(r"\1", line)
             segments = [(label_type(segment), segment) for segment in LABEL_SPLIT_REGEX.split(line)]
             for i, (kind, segment) in enumerate(segments):
                 matches = [m.raw_string for m in phonenumbers.PhoneNumberMatcher(segment, region)]

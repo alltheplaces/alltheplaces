@@ -28,11 +28,13 @@ class OcPublicLibrariesUSSpider(LibCalSpider):
             # Administration building, not a library branch.
             return
         item["name"] = "{} Library".format(item["branch"])
-        if update_page := CLOSED_FOR_RENOVATION.get(item["branch"]):
+        if not item["opening_hours"] and (update_page := CLOSED_FOR_RENOVATION.get(item["branch"])):
             # Closed for renovation since May 2025 (~24 months, per the update
             # page). Their branch pages are unpublished, so no address or
             # location is available. The LibCal email addresses are outdated
-            # (see below) and the branch page can't supply current ones.
+            # (see below) and the branch page can't supply current ones. Once
+            # LibCal publishes hours for them again, they take the normal path
+            # below and their location and contact details return.
             item["website"] = update_page
             item["opening_hours"] = "Mo-Su closed"
             item["email"] = None
