@@ -136,17 +136,18 @@ class BiblioCommonsSpider(Spider):
         )
 
     @staticmethod
-    def parse_opening_hours(location: dict) -> OpeningHours | str | None:
+    def parse_opening_hours(location: dict) -> OpeningHours | None:
         hours = location.get("hours") or []
+        oh = OpeningHours()
         if not hours:
             # A location without hours that says it is closed (e.g. "Closed
             # for renovation." in "hoursNote", or "Arvada Library (Closed
             # for Redesign)") is temporarily closed, which ATP expresses as
             # "Mo-Su closed". Other locations without hours are unknown.
             if CLOSED_NOTE_REGEX.search("{} {}".format(location.get("name") or "", location.get("hoursNote") or "")):
-                return "Mo-Su closed"
+                oh.set_closed(DAYS_FULL)
+                return oh
             return None
-        oh = OpeningHours()
         for rule in hours:
             if not rule.get("timeRef") or not rule.get("openTime") or not rule.get("closeTime"):
                 continue
