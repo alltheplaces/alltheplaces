@@ -4,12 +4,11 @@ from typing import Any, AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import JsonRequest, Request, TextResponse
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
-LOCKER_NAME_REGEX = re.compile(r"\blockers?\b", re.IGNORECASE)
 # Facility type labels are free text set by each library system, so they are
 # matched by keyword.
 WIFI_LABEL_REGEX = re.compile(r"\bwi-?fi\b|\bwireless internet\b", re.IGNORECASE)
@@ -78,7 +77,6 @@ class BiblioCommonsSpider(Spider):
 
     def parse_location(self, location: dict, entities: dict) -> Feature:
         item = DictParser.parse(location)
-        item["branch"] = item.pop("name")
         item["housenumber"] = (location.get("address") or {}).get("number")
         if street := item.get("street"):
             # e.g. "NE 8th Street, Suite K-11", "N. Oracle Rd., #199"
@@ -120,11 +118,6 @@ class BiblioCommonsSpider(Spider):
         else:
             item["opening_hours"] = self.parse_opening_hours(location)
 
-        if LOCKER_NAME_REGEX.search(item["branch"]):
-            item["name"] = item.pop("branch")
-            apply_category(Categories.PARCEL_LOCKER, item)
-        else:
-            apply_category(Categories.LIBRARY, item)
         return item
 
     @staticmethod
