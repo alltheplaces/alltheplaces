@@ -1,5 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
+from scrapy import Request
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -20,6 +21,15 @@ class FeuVertFRSpider(SitemapSpider, StructuredDataSpider):
     # reverse geocoder decide per store instead of assuming every item is "FR".
     skip_auto_cc_spider_name = True
     skip_auto_cc_domain = True
+    # robots.txt disallows nothing we need here, and skipping it avoids an extra unproxied
+    # fetch of the CI runner's IP against this site.
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+
+    async def start(self) -> AsyncIterator[Request]:
+        # Fetch the sitemap itself via Zyte too: a plain unproxied fetch of it has been
+        # observed taking far longer from CI's network than from a dev sandbox.
+        for url in self.sitemap_urls:
+            yield Request(url, self._parse_sitemap, meta={"zyte_api": {"httpResponseBody": True, "geolocation": "FR"}})
 
     def _parse_sitemap(self, response):
         # Store pages need browserHtml: Zyte returns an empty httpResponseHeaders list for
