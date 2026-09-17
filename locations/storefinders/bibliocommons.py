@@ -2,7 +2,7 @@ import re
 from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, TextResponse
+from scrapy.http import JsonRequest, Request, TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -14,6 +14,7 @@ LOCKER_NAME_REGEX = re.compile(r"\blockers?\b", re.IGNORECASE)
 # matched by keyword.
 WIFI_LABEL_REGEX = re.compile(r"\bwi-?fi\b|\bwireless internet\b", re.IGNORECASE)
 ALL_DAY_CLOSE_TIMES = {"T23:45", "T23:59", "T24:00", "T00:00"}
+CLOSED_NOTE_REGEX = re.compile(r"\bclosed?\b|\bclosure\b", re.IGNORECASE)
 
 
 class BiblioCommonsSpider(Spider):
@@ -44,6 +45,15 @@ class BiblioCommonsSpider(Spider):
     skipped per library system are bookmobiles, administration/HQ/
     operations buildings, virtual branches, departments inside a branch
     (makerspace, cafe, genealogy room, drive-thru) and non-library partners.
+    Keep branches that are temporarily closed (e.g. for renovation), with
+    any closure notice cleaned out of `branch`/`name`. A location without
+    hours whose name or hours note says it is closed gets opening hours of
+    "Mo-Su closed", the ATP convention for temporary closures; a permanently
+    closed location should instead be marked with `set_closed(item)`.
+
+    To fetch more detail from the branch web page, `parse_item` can yield a
+    request to a callback of your own that carries the item, e.g.
+    `yield Request(item["website"], self.parse_branch_page, cb_kwargs={"item": item})`.
     """
 
     dataset_attributes: dict = {"source": "api", "api": "bibliocommons.com"}
@@ -59,7 +69,7 @@ class BiblioCommonsSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(1)
 
-    def parse(self, response: TextResponse, page: int = 1, **kwargs: Any) -> Iterable[Feature | JsonRequest]:
+    def parse(self, response: TextResponse, page: int = 1, **kwargs: Any) -> Iterable[Feature | Request]:
         data = response.json()
         # A page with no results has no "entities" key.
         entities = data.get("entities", {})
@@ -91,8 +101,11 @@ class BiblioCommonsSpider(Spider):
         for contact in location.get("branchContacts") or []:
             if contact.get("contactType") == "phone":
                 number = contact.get("globalValue") or contact.get("value")
-                if "fax" in (contact.get("label") or "").lower():
+                label = (contact.get("label") or "").lower()
+                if "fax" in label:
                     item["extras"].setdefault(Extras.FAX.value, number)
+                elif re.search(r"\b(?:text|sms)\b", label):
+                    item["extras"].setdefault("contact:sms", number)
                 elif not item.get("phone"):
                     item["phone"] = number
             elif contact.get("contactType") == "email" and not item.get("email"):
@@ -126,11 +139,15 @@ class BiblioCommonsSpider(Spider):
         )
 
     @staticmethod
-    def parse_opening_hours(location: dict) -> OpeningHours | None:
+    def parse_opening_hours(location: dict) -> OpeningHours | str | None:
         hours = location.get("hours") or []
         if not hours:
-            # Typically a location that is temporarily closed, with details
-            # only in the free text "hoursNote".
+            # A location without hours that says it is closed (e.g. "Closed
+            # for renovation." in "hoursNote", or "Arvada Library (Closed
+            # for Redesign)") is temporarily closed, which ATP expresses as
+            # "Mo-Su closed". Other locations without hours are unknown.
+            if CLOSED_NOTE_REGEX.search("{} {}".format(location.get("name") or "", location.get("hoursNote") or "")):
+                return "Mo-Su closed"
             return None
         oh = OpeningHours()
         for rule in hours:
@@ -146,5 +163,5 @@ class BiblioCommonsSpider(Spider):
         oh.set_closed([day for day in DAYS_FULL if day not in listed_days])
         return oh
 
-    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature | Request]:
         yield item
