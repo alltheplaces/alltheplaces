@@ -28,7 +28,7 @@ MIN_SPAN_DEGREES = 0.001
 
 class NaviparkJPSpider(Spider):
     name = "navipark_jp"
-    item_attributes = {"brand": "ナビパーク", "brand_wikidata": "Q116975255"}
+    item_attributes = {"brand": "Navi Park", "brand_wikidata": "Q116975255"}
     allowed_domains = ["www.navipark1.com"]
 
     async def start(self) -> AsyncIterator[Request]:
