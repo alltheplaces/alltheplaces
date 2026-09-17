@@ -9,14 +9,12 @@ class AttUSSpider(Where2GetItSpider):
     item_attributes = {"brand": "AT&T", "brand_wikidata": "Q298594"}
     api_brand_name = "attstore"
     api_key = "A62B99DD-E92C-4936-B286-553804D8013F"
+    # Authorised retailers share this locator. Filter them out server side, as asking
+    # for every location returns over 2 GB and times out.
+    api_filter = {"company_owned_stores": {"eq": "1"}}
     api_filter_admin_level = 2
-    custom_settings = {
-        "DOWNLOAD_WARNSIZE": 268435456,  # 256 MiB needed as results are >225 MiB
-    }
 
     def parse_item(self, item, location):
-        if not location.get("company_owned_stores"):
-            return
         item["ref"] = location["clientkey"]
         item["name"] = re.sub(r" - \d+$", "", item["name"])
         item["lat"] = location["latitude"]
