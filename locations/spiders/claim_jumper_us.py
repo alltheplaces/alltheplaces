@@ -10,7 +10,7 @@ class ClaimJumperUSSpider(Spider):
     name = "claim_jumper_us"
     item_attributes = {"brand": "Claim Jumper", "brand_wikidata": "Q5125081", "country": "US"}
     allowed_domains = ["www.claimjumper.com"]
-    start_urls = ["https://www.claimjumper.com/locations"]
+    start_urls = ["https://www.claimjumper.com/store-locator/"]
     requires_proxy = True
 
     def parse(self, response):
