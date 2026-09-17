@@ -5,7 +5,7 @@ from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.storefinders.bibliocommons import BiblioCommonsSpider
+from locations.storefinders.biblio_commons import BiblioCommonsSpider
 
 LOCKER_NAME_REGEX = re.compile(r"\blockers?\b", re.IGNORECASE)
 
