@@ -75,9 +75,7 @@ class CodysOriginalRoadhouseUSSpider(Spider):
 
         for line in lines:
             line = line.replace("\u2013", "-").replace("\u2014", "-")
-            if not (
-                times := re.search(r"(\d{1,2}(?::\d{2})?\s*[ap]m)\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]m)", line, re.I)
-            ):
+            if not (times := re.search(r"(\d{1,2}(?::\d{2})?\s*[ap]m)\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]m)", line, re.I)):
                 continue
 
             day_names = []
