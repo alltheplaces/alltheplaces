@@ -61,7 +61,7 @@ class NaviparkJPSpider(Spider):
             and (north_lat - south_lat) > MIN_SPAN_DEGREES
             and (east_lon - west_lon) > MIN_SPAN_DEGREES
         ):
-            for sub_bbox in bbox_split(bbox, lat_parts=2, lon_parts=2):
+            for sub_bbox in bbox_split(bbox, lat_parts=2, lon_parts=2, precision=4):
                 yield self.make_request(sub_bbox)
             return
 
