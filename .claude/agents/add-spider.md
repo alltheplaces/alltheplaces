@@ -77,6 +77,16 @@ If the label/description doesn't clearly match the exact brand you're scraping �
 
 **Spider/class naming must match actual country coverage, not the obvious guess.** A French/UK/US brand can have locations in overseas territories or neighboring micro-states (Monaco, French Guiana, etc.) with different ISO 3166-1 codes than the primary market. If a spider genuinely returns single-country data, a `_fr`/`_us`-style suffix is correct; if it spans multiple countries, the name/class must reflect all of them (e.g. `mma_fr` → `mma_fr_mc` / `MmaFRMCSpider`) and `post_process_item` should set `item["country"]` explicitly per record when derivable from the source — never hardcode a single-country guess, and leave `country` unset if it can't be derived (letting ATP's reverse-geocoding fallback handle it) (davidhicks, PR #18376, #17950, #18378).
 
+### 3c. Weigh chain size before committing to write the spider
+
+Small chains cost the same to maintain as large ones — the same exposure to site redesigns, schema changes, bot-protection changes, and eventual dead-spider triage — for a much smaller payoff in map coverage. Once your research gives you an actual location count (from the sitemap, the API's full result set, or an enumerated store list — not just a guess from the sample page), weigh it before writing any spider code:
+
+- **Fewer than ~10 locations total**: default to declining. Don't write the spider. Report back (and comment on the issue if one exists) that the chain is very small and recommend against adding it, unless there's a concrete reason it's still worth the upkeep (e.g. a globally notable brand currently represented by only a few flagship locations, an explicit ask from a maintainer to add it anyway, or it's one country's slice of a brand that's much larger globally and other spiders already cover the rest).
+- **~10–20 locations**: borderline. Only build it if the data source is genuinely low-maintenance (clean sitemap + structured data, no bespoke pagination/bot-protection/proxy work) — if it would take real engineering effort to scrape, the upkeep math gets worse, not better, so decline instead. If you do build it, say the count out loud in your report so a human reviewer can veto it before merge; a filed issue existing is not itself a justification for the maintenance cost.
+- **20+ locations**: normal case — proceed as usual, no special flagging needed for size.
+
+This is a judgment call, not a hard gate — always state the count and your reasoning in the final report either way, so the person approving the PR can override your call.
+
 ### 4. Write the spider
 
 Match the simplest pattern that fits the data shape — see the framework cheat sheet in `dead-spider-triage.md` (`JSONBlobSpider`, `SitemapSpider + StructuredDataSpider`, Marqii RSC flight-chunk, Camoufox+Turnstile, etc.). Use `apply_category(Categories.X, item)` — never set `extras["shop"]`/`extras["amenity"]` directly, **and never set `item_attributes["extras"] = Categories.X.value` at the class level either** — this is a less obvious variant of the same mistake (it ends up functionally equivalent since `ApplySpiderLevelAttributesPipeline` merges it into `item["extras"]` anyway, so it won't fail CI, but it's shipped twice already this session and gets caught in review every time). Call `apply_category()` inside `parse`/`post_process_item` like every other spider does. If the right category doesn't exist yet in `locations/categories.py`, add it — but see the parallel-dispatch gotcha below.
@@ -180,7 +190,7 @@ Two in-flight architecture proposals from davidhicks, noted here so you don't se
 
 At the end of a run, report:
 - Issue # and brand name
-- Decision: built + PR opened / researched only, no clean data source
+- Decision: built + PR opened / researched only, no clean data source / researched only, chain too small to justify the upkeep (state the count)
 - What you found: data source shape, item count verified locally, any data-quality issues you fixed (and how)
 - PR URL, or the research summary if no PR
 - Anything a reviewer should double-check (proxy assumptions untested locally, category additions that might collide with a parallel PR, coordinate coverage gaps, etc.)
