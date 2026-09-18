@@ -1,13 +1,14 @@
 import re
 from copy import deepcopy
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.mazda_jp import MAZDA_SHARED_ATTRIBUTES
 from locations.user_agents import BROWSER_DEFAULT
@@ -17,11 +18,17 @@ class MazdaCASpider(Spider):
     name = "mazda_ca"
     item_attributes = MAZDA_SHARED_ATTRIBUTES
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
-    start_urls = [
-        "https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&limit=5000&minlng=-125&maxlng=180&minlat=-90&maxlat=90"
-    ]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def make_request(self, offset: int, limit: int = 150) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://n8xgyscaa3.execute-api.ca-central-1.amazonaws.com/prod/api/Dealers?lang_code=en&offset={offset}&limit={limit}&keyword=mazda",
+            cb_kwargs=dict(offset=offset, limit=limit),
+        )
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_request(0)
+
+    def parse(self, response: Response, offset: int, limit: int) -> Any:
         for dealer in response.json()["data"]:
             item = DictParser.parse(dealer)
             item["ref"] = dealer["dealer_code"]
@@ -52,12 +59,16 @@ class MazdaCASpider(Spider):
                 apply_category(Categories.SHOP_CAR_PARTS, parts)
                 yield parts
 
-    def parse_hours(self, item, opening_hours):
+        if len(response.json()["data"]) == limit:
+            yield self.make_request(offset + limit)
+
+    def parse_hours(self, item: Feature, opening_hours: list[dict]) -> None:
         oh = OpeningHours()
         for rule in opening_hours:
-            if rule["open"] == 0:  # closed
-                continue
             if day := sanitise_day(rule.get("day")):
+                if rule["open"] == 0:  # closed
+                    oh.set_closed(day)
+                    continue
                 open_time, close_time = [
                     re.sub(r"(\d+)(\d\d)", r"\1:\2", str(t)) for t in [rule["open"], rule["closed"]]
                 ]

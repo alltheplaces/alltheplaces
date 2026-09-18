@@ -6,6 +6,7 @@ from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature, set_closed
@@ -61,12 +62,23 @@ class BoulangerFRSpider(SitemapSpider):
         item["website"] = response.url  # profile's own websiteUrl can point at a stale domain
         item.pop("phone")  # same national hotline (09 69 32 32 23) on every store, not per-branch
         item["state"] = None  # a French département name, not a real addr:state value
-        item["branch"] = " ".join(item.pop("name", "").removeprefix("Boulanger").strip(" -").split())
+        if item["name"].startswith("Connexion Partenaire Boulanger "):
+            item["branch"] = item.pop("name").removeprefix("Connexion Partenaire Boulanger ")
+            item["name"] = "Connexion Partenaire Boulanger"
+        else:
+            item["branch"] = " ".join(item.pop("name", "").removeprefix("Boulanger").strip(" -").split())
 
         address = profile.get("address") or {}
         item["street_address"] = merge_address_lines([address.get("line1"), address.get("line2"), address.get("line3")])
 
         item["opening_hours"] = self.parse_hours(profile.get("hours", {}).get("normalHours", []))
+
+        apply_yes_no(PaymentMethods.GOOGLE_PAY, item, "Google Pay" in profile["paymentOptions"])
+        apply_yes_no(PaymentMethods.CASH, item, "Cash" in profile["paymentOptions"])
+        apply_yes_no(PaymentMethods.MASTER_CARD, item, "MasterCard" in profile["paymentOptions"])
+        apply_yes_no(PaymentMethods.VISA, item, "Visa" in profile["paymentOptions"])
+
+        apply_category(Categories.SHOP_ELECTRONICS, item)
 
         if profile.get("closed") is True:
             set_closed(item)
