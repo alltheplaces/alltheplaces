@@ -25,5 +25,7 @@ class TchipFRSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if (item["lat"], item["lon"]) == self.BAD_COORDINATES:
             item["lat"] = item["lon"] = None
+        if (item.get("name") or "").startswith("Tchip Coiffure "):
+            item["branch"] = item.pop("name").removeprefix("Tchip Coiffure ")
         apply_category(Categories.SHOP_HAIRDRESSER, item)
         yield item
