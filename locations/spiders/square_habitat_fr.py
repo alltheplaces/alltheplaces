@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class SquareHabitatFrSpider(SitemapSpider, StructuredDataSpider):
+class SquareHabitatFRSpider(SitemapSpider, StructuredDataSpider):
     name = "square_habitat_fr"
     item_attributes = {
         "brand": "Square Habitat",
