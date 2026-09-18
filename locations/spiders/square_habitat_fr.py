@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class SquareHabitatFrSpider(SitemapSpider, StructuredDataSpider):
@@ -15,7 +15,7 @@ class SquareHabitatFrSpider(SitemapSpider, StructuredDataSpider):
         (r"/agence/[^/]+", "parse"),
     ]
     wanted_types = ["RealEstateAgent"]
-    time_format="%H:%M:%S"
+    time_format = "%H:%M:%S"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.OFFICE_ESTATE_AGENT, item)
