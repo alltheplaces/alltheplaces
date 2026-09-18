@@ -21,4 +21,8 @@ class SquareHabitatFRSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.OFFICE_ESTATE_AGENT, item)
         item["branch"] = item.pop("name", "").removesuffix(" Square Habitat")
 
+        # Swap lat/lon coordinates to GeoJSON format [lon, lat]
+        if item.get("lat") is not None and item.get("lon") is not None:
+            item["lat"], item["lon"] = item["lon"], item["lat"]
+
         yield item
