@@ -143,6 +143,18 @@ should stay detailed) — the spider source should be lean.
 - **Wikidata QID validation** — do not trust a `brand_wikidata` value just because it is syntactically valid (`Q` + digits). LLMs frequently hallucinate QIDs that exist but refer to a completely unrelated entity (e.g. a village in Nigeria assigned to a laundromat brand). Always verify the QID label matches the brand name by checking `https://www.wikidata.org/wiki/Q<id>` or searching NSI. If no real QID can be found, omit `brand_wikidata` rather than guessing.
 - **Missing wikidata on large brands** — if a new spider produces a large number of locations (>100) but has no `brand_wikidata`, flag it. A brand with hundreds of locations almost certainly has a Wikidata entry. Search NSI (`grep -i "<brand>" locations/data/nsi.json`) and Wikidata before merging. If genuinely not in Wikidata, a comment explaining the search was done is acceptable.
 - Check location count looks reasonable
+- **Be reluctant to approve spiders for very small chains.** A spider costs roughly the same to
+  maintain (site redesigns, schema drift, eventual dead-spider triage) whether it covers 5
+  locations or 5,000, so a tiny chain is a poor trade of ongoing upkeep for map coverage.
+  - **Fewer than ~10 locations**: default to not merging. Comment asking for justification
+    (e.g. a globally notable brand currently down to a handful of flagship locations) rather
+    than merging on request alone — "someone filed an issue for it" is not itself justification.
+  - **~10-20 locations**: borderline. Lean toward merging only if the spider is low-maintenance
+    (clean sitemap/structured-data source, no bespoke pagination/bot-protection/proxy work) —
+    a fragile scrape for a small chain is the worst combination of upkeep cost and coverage value.
+  - **20+ locations**: no special scrutiny needed for size alone.
+  - This is a judgment call, not an automatic rejection — note the count and reasoning either
+    way in the review.
 - **Category must use `apply_category`** — never set `item["extras"]["amenity"]` (or any other top level tag) directly. Always use `apply_category(Categories.X, item)` from `locations.categories`. If the right `Categories` enum value doesn't exist yet, add it to `categories.py` in the same PR.
 - **`add_list` for multi-value extras tags** — `apply_category` no longer accumulates values;
   calling it twice for the same key overwrites the first. For tags that genuinely need
