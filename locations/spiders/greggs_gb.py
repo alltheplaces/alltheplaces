@@ -27,6 +27,9 @@ class GreggsGBSpider(Spider):
             if store["shopName"].startswith("Outlet: "):
                 item["name"] = "Greggs Outlet"
                 item["branch"] = store["shopName"].removeprefix("Outlet: ")
+            elif store["shopName"].endswith(" Bitesize"):
+                item["name"] = "Bitesize Greggs"
+                item["branch"] = store["shopName"].removesuffix(" Bitesize")
             else:
                 item["name"] = "Greggs"
                 item["branch"] = store["shopName"]
