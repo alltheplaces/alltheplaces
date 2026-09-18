@@ -254,6 +254,7 @@ class Categories(Enum):
     SHOP_VIDEO = {"shop": "video"}
     SHOP_VIDEO_GAMES = {"shop": "video_games"}
     SHOP_WATCHES = {"shop": "watches"}
+    SHOP_WATER = {"shop": "water"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
     SHOP_WINE = {"shop": "wine"}
