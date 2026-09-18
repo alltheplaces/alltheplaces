@@ -6,7 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -28,7 +28,7 @@ class RolldAUSpider(Spider):
             for rule in location["openingHours"].splitlines():
                 day, _, times = rule.partition(": ")
                 if times == "CLOSED":
-                    item["opening_hours"].set_closed(DAYS_EN[day])
+                    item["opening_hours"].set_closed(day)
                 elif match := re.match(r"(\d{1,2}:\d{2})(?::\d{2})?-(\d{1,2}:\d{2})", times):
                     item["opening_hours"].add_range(day, *match.groups())
 
