@@ -62,9 +62,7 @@ class HawaiianBrosUSSpider(Spider):
     @staticmethod
     def parse_amenities(item: Feature, location: Selector) -> None:
         for option in location.xpath('.//div[contains(@class, "map-list_store-option")]'):
-            title = (
-                option.xpath('.//div[contains(@class, "map-list_store-option-title")]/text()').get() or ""
-            ).strip()
+            title = (option.xpath('.//div[contains(@class, "map-list_store-option-title")]/text()').get() or "").strip()
             # Webflow hides the answer that does not apply.
             answer = option.xpath(
                 './/div[contains(@class, "map-list_store-option-data")]'
