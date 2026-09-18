@@ -34,7 +34,6 @@ class QTeamBESpider(JSONBlobSpider):
         for url in self.start_urls:
             yield JsonRequest(
                 url=url,
-                method="POST",
                 data={"PageSize": 1000},
                 headers={"Referer": LOCATOR_NL},
             )
@@ -55,7 +54,7 @@ class QTeamBESpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("QTeam").strip(" -")
         item["operator"] = feature["OfficialName"]
-        item["website"] = response.urljoin(feature["Url"])
+        item["website"] = item["extras"]["website:nl"] = response.urljoin(feature["Url"])
         # Each centre has a page in both languages, reachable by swapping the
         # localised path. One of the 104 uses a slightly different slug in French
         # and answers with a redirect to it rather than directly.
