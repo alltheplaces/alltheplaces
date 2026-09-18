@@ -1,5 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
+from scrapy import Request
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -22,6 +23,12 @@ class FeuVertFRSpider(SitemapSpider, StructuredDataSpider):
     skip_auto_cc_domain = True
     # robots.txt disallows nothing we need here, and skipping it avoids an extra request.
     custom_settings = {"ROBOTSTXT_OBEY": False}
+
+    async def start(self) -> AsyncIterator[Request]:
+        # Every request goes through Zyte manually (rather than requires_proxy + automap)
+        # so the whole spider follows one consistent routing rule, store pages included.
+        for url in self.sitemap_urls:
+            yield Request(url, self._parse_sitemap, meta={"zyte_api": {"httpResponseBody": True, "geolocation": "FR"}})
 
     def _parse_sitemap(self, response):
         # Store pages need browserHtml: Zyte returns an empty httpResponseHeaders list for
