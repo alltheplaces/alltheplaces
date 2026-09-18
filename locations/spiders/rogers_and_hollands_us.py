@@ -76,9 +76,7 @@ class RogersAndHollandsUSSpider(Spider):
     def parse_hours(self, response: Response, item: Feature) -> Iterable[Feature]:
         oh = OpeningHours()
 
-        for line in response.xpath(
-            '//h5[contains(text(), "Store Hours")]/following-sibling::ul[1]/li/text()'
-        ).getall():
+        for line in response.xpath('//h5[contains(text(), "Store Hours")]/following-sibling::ul[1]/li/text()').getall():
             if not (
                 rule := re.fullmatch(
                     r"\s*(\w+):\s*(\d{1,2}:\d{2}\s*[AP]M)\s*-\s*(\d{1,2}:\d{2}\s*[AP]M)\s*", line, re.I
