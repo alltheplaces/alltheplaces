@@ -50,7 +50,7 @@ class NafNafGrillUSSpider(Spider):
                 if not day or not hours:
                     continue
                 if hours.lower() == "closed":
-                    oh.add_range(day, "closed", "closed")
+                    oh.set_closed(day)
                 else:
                     open_time, close_time = re.split(r"\s*-\s*", hours, maxsplit=1)
                     oh.add_range(day, _parse_12h_time(open_time), _parse_12h_time(close_time))
