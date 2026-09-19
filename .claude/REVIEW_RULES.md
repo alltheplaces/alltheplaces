@@ -138,11 +138,54 @@ should stay detailed) — the spider source should be lean.
   - Pagination: does it still work correctly after the change?
   - Does any new import or helper exist and work as expected?
 
+## Multi-Brand Spiders (one company, several brands via a lookup dict)
+- Pattern seen in e.g. `amf_bowling.py` (AMF/Bowlero/Bowlmor), `bsro.py` (Firestone/Tires
+  Plus/Hibdon Tires Plus/Wheel Works), `sunglass_hut.py` (Sunglass Hut/LensCrafters/Pearle
+  Vision/Target Optical/etc. via one shared Yext account) - a single spider covers several
+  distinct customer-facing brands under one corporate parent's backend.
+- **A passing overall item count does not mean every brand is correct.** Confirmed this
+  session: `bsro.py` was shipping items for three of its four brands with no category tag
+  at all (only one brand's branch called `apply_category()`), and separately had one brand's
+  `start_urls` pointing at an entirely wrong, unrelated company's domain (an identically-named
+  bicycle shop) - so that brand was never crawled at all, while the spider's total item count
+  and CI status looked completely normal throughout. When reviewing a change to one of these
+  spiders (or evaluating whether a "new" brand request is already covered by one), check the
+  actual output filtered down to the specific brand in question - category, brand/brand:wikidata,
+  and a nonzero item count for that brand alone - not just that the spider runs and produces
+  output overall.
+- Verify each brand's Wikidata QID and NSI brand string independently; don't assume one brand's
+  correct QID/brand string generalizes to a sibling brand in the same dict.
+
 ## New Spiders
 - Verify brand/wikidata attributes are correct
 - **Wikidata QID validation** — do not trust a `brand_wikidata` value just because it is syntactically valid (`Q` + digits). LLMs frequently hallucinate QIDs that exist but refer to a completely unrelated entity (e.g. a village in Nigeria assigned to a laundromat brand). Always verify the QID label matches the brand name by checking `https://www.wikidata.org/wiki/Q<id>` or searching NSI. If no real QID can be found, omit `brand_wikidata` rather than guessing.
 - **Missing wikidata on large brands** — if a new spider produces a large number of locations (>100) but has no `brand_wikidata`, flag it. A brand with hundreds of locations almost certainly has a Wikidata entry. Search NSI (`grep -i "<brand>" locations/data/nsi.json`) and Wikidata before merging. If genuinely not in Wikidata, a comment explaining the search was done is acceptable.
 - Check location count looks reasonable
+- **Verify the store-finder domain actually belongs to the requested company**, not just a
+  same-named one. Confirmed this session: the obvious `wheelworks.com` is an unrelated
+  Massachusetts bicycle shop (the real "Wheel Works" tire chain is at `wheelworks.net`); a
+  generic-sounding brand ("First National Bank", "Great Southern Bank") can collide with an
+  unrelated same-named business in another country/region. Spot-check that the site's own
+  About/Contact content names the right HQ/parent/founding details for the brand in the
+  request before approving.
+- **A live-looking store locator does not prove the business is still operating.** A chain can
+  be bankrupt, mass-closed, or rebranded while its site keeps serving stale data for months.
+  For a smaller or long-established regional chain, a quick news search for recent
+  bankruptcy/closure/rebrand is worth doing if the PR's location count looks low relative to
+  the brand's historical size, or if a contributor flags this in the PR body - don't take the
+  scraped count at face value as "the current size of the business."
+- **Be reluctant to approve spiders for very small chains.** A spider costs roughly the same to
+  maintain (site redesigns, schema drift, eventual dead-spider triage) whether it covers 5
+  locations or 5,000, so a tiny chain is a poor trade of ongoing upkeep for map coverage.
+  - **Fewer than ~10 locations**: default to not merging. Comment asking for justification
+    (e.g. a globally notable brand currently down to a handful of flagship locations) rather
+    than merging on request alone — "someone filed an issue for it" is not itself justification.
+  - **~10-20 locations**: borderline. Lean toward merging only if the spider is low-maintenance
+    (clean sitemap/structured-data source, no bespoke pagination/bot-protection/proxy work) —
+    a fragile scrape for a small chain is the worst combination of upkeep cost and coverage value.
+  - **20+ locations**: no special scrutiny needed for size alone.
+  - This is a judgment call, not an automatic rejection — note the count and reasoning either
+    way in the review.
 - **Category must use `apply_category`** — never set `item["extras"]["amenity"]` (or any other top level tag) directly. Always use `apply_category(Categories.X, item)` from `locations.categories`. If the right `Categories` enum value doesn't exist yet, add it to `categories.py` in the same PR.
 - **`add_list` for multi-value extras tags** — `apply_category` no longer accumulates values;
   calling it twice for the same key overwrites the first. For tags that genuinely need
@@ -322,6 +365,20 @@ These apply to both new spiders and fixes. Sample the CI output GeoJSON before a
 - **Before closing an issue as "already fixed"**, confirm the fix actually produced data by
   checking the scraper-bot CI comment on the fixing PR for item counts. A merged PR is not
   sufficient evidence — the spider may still produce 0 items.
+- **A closed "already fixed" issue can be closed against the wrong company.** Two same-named
+  but unrelated businesses is a real, recurring trap — confirmed this session, a "Price Chopper"
+  feature request (the Kansas City, MO grocery chain at `mypricechopper.com`) had been closed
+  years earlier as fixed by a PR that actually added a spider for an entirely different,
+  unrelated "Price Chopper" grocery chain in New England (`pricechopper.com`, Golub
+  Corporation). Don't just check that a closing PR exists and mentions the same brand name —
+  open the PR/spider and confirm it points at the same company (same domain/HQ/parent as the
+  original request), especially for a generic-sounding brand name. If it doesn't, reopen the
+  issue with an explanation rather than leaving it wrongly closed.
+- **A closed-with-no-linked-PR issue may simply be stale/incorrect, not resolved.** An issue
+  closed years ago with a one-line comment and no `Closes #N`/linked PR, where no spider for
+  that brand currently exists in `locations/spiders/`, was probably closed in error or the
+  spider was later removed without the removal being tied back to the issue. Reopen and
+  re-investigate from scratch rather than treating the closed state as settled.
 
 ## Existing Spider Fixes — Specific Patterns
 - **Generic email**: if the source API returns the same email for every location, pop it.
