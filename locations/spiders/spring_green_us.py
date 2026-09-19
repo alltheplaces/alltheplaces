@@ -20,7 +20,7 @@ class SpringGreenUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"^https://www\.spring-green\.com/lawn-care-locations/[a-z0-9-]+$", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        if not item.get("street_address"):
+        if not item.get("street_address") or not item.get("postcode"):
             return
 
         item["ref"] = re.sub(r"[^a-z0-9]", "", (item["street_address"] + item["postcode"]).lower())
