@@ -1,3 +1,4 @@
+import copy
 from typing import Any, AsyncGenerator, Iterable, Iterator
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
@@ -416,6 +417,17 @@ class GbfsSpider(CSVFeedSpider):
             vehicle_types_categories[vehicle_type["vehicle_type_id"]] = cat
         return vehicle_types_categories
 
+    def get_system_fallback_category(self, vehicle_types_categories: dict[Any, dict[str, str]]) -> dict[str, str]:
+        """Determine the category to fall back on for stations whose own feed
+        data doesn't resolve to one. If every vehicle type declared by the
+        system shares a single amenity (e.g. a car sharing system only offers
+        cars), that amenity applies to the whole system. Otherwise assume a
+        bicycle rental, which is by far the most common kind of GBFS system."""
+        amenities = {cat["amenity"] for cat in vehicle_types_categories.values() if cat.get("amenity")}
+        if len(amenities) == 1:
+            return {"amenity": amenities.pop()}
+        return Categories.BICYCLE_RENTAL.value
+
     def get_station_status_categories(
         self, station_status: Any, vehicle_types_categories: dict[Any, dict[str, str]]
     ) -> dict[Any, list[dict[str, str]]]:
@@ -483,10 +495,17 @@ class GbfsSpider(CSVFeedSpider):
             else self.get_station_status_categories(station_status, vehicle_types_categories)
         )
 
+        fallback_category = self.get_system_fallback_category(vehicle_types_categories)
+
         # Now scrape the stations.
         for station in DictParser.get_nested_key(station_information, "stations") or []:
             yield self.parse_station(
-                station, shared_attributes, vehicle_types_categories, station_status_categories, **kwargs
+                station,
+                shared_attributes,
+                vehicle_types_categories,
+                station_status_categories,
+                fallback_category,
+                **kwargs,
             )
 
     def parse_station(
@@ -495,10 +514,11 @@ class GbfsSpider(CSVFeedSpider):
         shared_attributes: dict[str, Any],
         vehicle_types_categories: dict[Any, dict[str, str]],
         station_status_categories: dict[Any, list[dict[str, str]]],
+        fallback_category: dict[str, str],
         **kwargs,
     ) -> Feature:
         """Process an individual GBFS station."""
-        item = Feature(**shared_attributes)
+        item = Feature(**copy.deepcopy(shared_attributes))
         item["ref"] = item["extras"]["ref:gbfs"] = f"{kwargs['System ID']}:{station['station_id']}"
         item["extras"][f"ref:gbfs:{kwargs['System ID']}"] = str(station["station_id"])
         item["lat"] = station["lat"]
@@ -557,6 +577,6 @@ class GbfsSpider(CSVFeedSpider):
 
         # If neither the vehicle type nor a brand preset were available, set a fallback category.
         if "amenity" not in item["extras"] and not item.get("brand_wikidata"):
-            apply_category(Categories.BICYCLE_RENTAL, item)
+            apply_category(fallback_category, item)
 
         return item
