@@ -20,6 +20,9 @@ class JoltUSSpider(JSONBlobSpider):
 
     def extract_json(self, response):
         script = response.xpath("//script[contains(., 'var jolt = ')]/text()").get()
+        if not script:
+            self.logger.error("Could not find 'var jolt' script in page source")
+            return []
         start = script.index("var jolt = ") + len("var jolt = ")
         data, _ = json.JSONDecoder().raw_decode(script[start:])
         return list(data["charging_points"].values())
@@ -31,7 +34,8 @@ class JoltUSSpider(JSONBlobSpider):
         if match := ADDRESS_RE.match(feature["address"]):
             item["street_address"] = match.group("street")
             item["city"] = match.group("city")
-            item["postcode"] = match.group("postcode").zfill(5)
+            postcode, separator, suffix = match.group("postcode").partition("-")
+            item["postcode"] = postcode.zfill(5) + (separator + suffix if separator else "")
             item["country"] = "US"
         else:
             item["addr_full"] = feature["address"]
