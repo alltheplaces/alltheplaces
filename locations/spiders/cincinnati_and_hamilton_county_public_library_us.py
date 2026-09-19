@@ -10,7 +10,7 @@ from locations.storefinders.biblio_commons import BiblioCommonsSpider
 class CincinnatiAndHamiltonCountyPublicLibraryUSSpider(BiblioCommonsSpider):
     name = "cincinnati_and_hamilton_county_public_library_us"
     item_attributes = {
-        "operator": "Cincinnati & Hamilton County Public Library",
+        "operator": "Cincinnati and Hamilton County Public Library",
         "operator_wikidata": "Q5492644",
     }
     library_id = "cincinnatilibrary"
