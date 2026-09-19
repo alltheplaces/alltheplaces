@@ -65,6 +65,7 @@ class FarewayUSSpider(Spider):
             # with an occasional extra note about a separate carry-out window that
             # is not the store's own opening hours, so anything after it is dropped.
             hours_text = re.split(r"carry out", hours_text, flags=re.I)[0]
+            closed_day_match = re.search(r"closed\s+([a-z]+)", hours_text, re.I)
             hours_text = re.sub(r"\([^)]*\)", "", hours_text)
             day_match = re.search(r"([a-z]+)\s*-\s*([a-z]+)", hours_text, re.I)
             time_match = re.search(
@@ -75,6 +76,8 @@ class FarewayUSSpider(Spider):
                     days = DAYS[DAYS.index(start_day) : DAYS.index(end_day) + 1]
                     oh = OpeningHours()
                     oh.add_days_range(days, normalise_time(time_match.group(1)), normalise_time(time_match.group(2)))
+                    if closed_day_match and (closed_day := DAYS_EN.get(closed_day_match.group(1).title())):
+                        oh.set_closed(closed_day)
                     item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_SUPERMARKET, item)
