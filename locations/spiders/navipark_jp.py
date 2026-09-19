@@ -28,7 +28,6 @@ MIN_SPAN_DEGREES = 0.001
 
 class NaviparkJPSpider(Spider):
     name = "navipark_jp"
-    item_attributes = {"brand": "Navi Park", "brand_wikidata": "Q116975255"}
     allowed_domains = ["www.navipark1.com"]
 
     async def start(self) -> AsyncIterator[Request]:
@@ -72,9 +71,15 @@ class NaviparkJPSpider(Spider):
         # The lot's unique code, present under two keys: propertyCD and KHNVCD.
         lot_code = lot.get("propertyCD") or lot.get("KHNVCD")
 
+        # ナビサイクル (Navi Cycle) is the operator's bicycle-parking brand
+        # (時間貸し駐輪場), distinct from ナビパーク car parking. No API flag
+        # distinguishes them, so the name prefix is only reliable marker.
+        is_bicycle = (lot.get("propertyName") or lot.get("KHNVNM") or "").startswith("ナビサイクル")
+
         item = Feature()
         item["ref"] = lot_code
-        item["branch"] = unicodedata.normalize("NFKC", lot.get("propertyName") or lot.get("KHNVNM"))
+        raw_name = unicodedata.normalize("NFKC", lot.get("propertyName") or lot.get("KHNVNM"))
+        item["branch"] = raw_name.removeprefix("ナビサイクル") if is_bicycle else raw_name
         item["addr_full"] = unicodedata.normalize("NFKC", lot.get("propertyAddress"))
         item["operator"] = "スターツアメニティー"
         item["operator_wikidata"] = "Q116975260"
@@ -109,7 +114,14 @@ class NaviparkJPSpider(Spider):
         apply_yes_no(PaymentMethods.CREDIT_CARDS, item, lot.get("feature6") == "1")
         apply_yes_no(PaymentMethods.APP, item, lot.get("feature15") == "1")
 
-        apply_category(Categories.PARKING, item)
+        if is_bicycle:
+            item["brand"] = "ナビサイクル"
+            item["name"] = "ナビサイクル"
+            apply_category(Categories.BICYCLE_PARKING, item)
+        else:
+            item["brand"] = "Navi Park"
+            item["brand_wikidata"] = "Q116975255"
+            apply_category(Categories.PARKING, item)
 
         return item
 
