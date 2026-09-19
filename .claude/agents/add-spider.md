@@ -158,6 +158,10 @@ Before considering the spider done, check the output for these specific mistakes
 
 **Two more opening-hours edge cases to watch for**: (a) some venues list only an open time with an undefined/variable "LATE" close, or split lunch/dinner sessions with a closure gap in between — don't assume a single continuous range fits every source; (b) for non-English sources using locale-specific hour separators (e.g. French `9h30` / `09 h 00 - 12 h 30`), `re.sub` the separator (` h `/`h`) to `:` before feeding the string into `OpeningHours.add_ranges_from_string(...)` with the appropriate localized day table (e.g. `DAYS_FR`), rather than hand-writing per-spider regex extraction (davidhicks, PR #18384, #18374, #18378).
 
+**When you hand-write an hours parser instead of using `add_ranges_from_string`/`add_range` on already-structured data, two mistakes recur often enough to check for explicitly every time (confirmed twice each across a single 2026-09-19 batch of PRs — this is not a one-off):**
+- **Always add a branch for explicit closures.** If the source can say a day is closed (a `"Day closed"` token in free text, a per-day status field, an empty/null time pair meant to signal "no hours today"), call `hours.set_closed(day)` for it. A regex that only matches the open-range shape (`"Day HH:MM - HH:MM"`) will just skip a `"Day closed"` line with no error — `opening_hours` comes out quietly incomplete instead of obviously wrong, and CI still reports `success`. (PR #18845, #18857.)
+- **Never build a range by pairing whichever start/end values are non-null across separate sessions (e.g. AM/PM).** Only pair a start and end that belong to the *same* session; if one half of a session is missing, drop that session rather than substituting the other session's boundary. A `starts = [x for x in (am_begin, pm_begin) if x]; ends = [...]; add_range(starts[0], ends[-1])`-style fallback will fabricate a false all-day range whenever one session is partially missing. (PR #18855.)
+
 ### 5. Verify locally
 
 ```bash
