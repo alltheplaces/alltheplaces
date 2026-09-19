@@ -253,6 +253,26 @@ These apply to both new spiders and fixes. Sample the CI output GeoJSON before a
   are ignored by `StructuredDataSpider`'s default parser - handle them manually.
 - Normalise non-standard time formats (e.g. `"8.00"` -> `"08:00"`, `"800"` -> `"08:00"`) before
   passing to `add_range`.
+- **Record explicit closures with `set_closed(day)` — don't just skip the day.** When source
+  data explicitly marks a day as closed (e.g. a schema.org string containing `"Su closed"`, or a
+  per-day field whose value/status says "closed"), call `hours.set_closed(day)` for it. A
+  hand-rolled regex/parser that only matches the open-range pattern will silently drop these
+  days instead of recording them as closed, leaving `opening_hours` incomplete rather than wrong
+  in an obviously-visible way — easy to miss in review since CI still reports `success`.
+  Confirmed twice in the same add-spider batch (2026-09-19): PR #18845 (figaros_pizza_us) and
+  PR #18857 (dunn_brothers_coffee_us) both had this exact bug — a regex over open-hours text
+  matched only `"Day HH:MM - HH:MM"` and had no branch at all for a `"Day closed"` token in the
+  same source string.
+- **When combining separate AM/PM (or multi-session) fields into a range, never fall back to
+  pairing whichever start/end values happen to be non-null.** A parser that does
+  `starts = [t for t in (am_begin, pm_begin) if t]; ends = [t for t in (am_end, pm_end) if t];
+  add_range(starts[0], ends[-1])` will fabricate a false continuous period when one session is
+  partially missing (e.g. `pm_begin` absent but `pm_end` present) by pairing the AM start with
+  the PM end. Only call `add_range` when both ends of the *same* session are present — add each
+  session's range independently and skip it entirely if incomplete, rather than merging across
+  sessions. Confirmed 2026-09-19, PR #18855 (emmaus_fr): CodeRabbit caught a case where a midday
+  closure combined with a missing `pm_begin` produced a spurious `09:00-18:00` all-day range
+  instead of the correct `09:00-12:00`.
 
 ### Coordinates
 - Items without coordinates are acceptable **only when the data is otherwise valuable** — rich address, phone, email, hours data for a brand with no other source. Use judgment: 137 international language schools with full address/contact data is worth having; a handful of locations with address-only is not.
