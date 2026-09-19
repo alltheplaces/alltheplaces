@@ -47,6 +47,7 @@ class RogersAndHollandsUSSpider(Spider):
             item["website"] = details.xpath('//a[contains(@class, "store-link")]/@href').get()
 
             if brand := location.get("name"):
+                item["name"] = brand
                 item["brand"] = brand
                 item["brand_wikidata"] = BRANDS.get(brand)
 
