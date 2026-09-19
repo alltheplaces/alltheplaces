@@ -66,6 +66,7 @@ class Categories(Enum):
     CRAFT_CAR_PAINTER = {"craft": "car_painter"}
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CATERER = {"craft": "caterer"}
+    CRAFT_CLEANING = {"craft": "cleaning"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
