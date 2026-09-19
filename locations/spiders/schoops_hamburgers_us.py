@@ -37,6 +37,9 @@ class SchoopsHamburgersUSSpider(scrapy.Spider):
         # is no separate API endpoint or sitemap that is reliably kept up to date (the
         # site's sitemap still contains menu pages for several since-closed locations).
         blob = response.xpath('//div[@data-element-type="dm_geo_location"]/@data-editor').get()
+        if not blob:
+            self.logger.error("Could not find geo_location widget")
+            return
         for location in json.loads(base64.b64decode(blob))["locations"]:
             street, city, state_zip, _country = [p.strip() for p in location["formattedAddress"].split(",")]
             state, postcode = state_zip.split(" ")
