@@ -15,7 +15,7 @@ class MutualOfOmahaUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/district-offices/[^/]+/[^/]+/[^/]+$", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").removesuffix(" Mutual of Omaha Advisors")
+        item["branch"] = (item.pop("name") or "").removesuffix(" Mutual of Omaha Advisors")
         item["image"] = None
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
