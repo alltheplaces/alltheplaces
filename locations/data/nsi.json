@@ -1,9 +1,9 @@
 {
 	"_meta": {
-		"generated": "2026-09-14T14:28:10.811Z",
-		"hash": "faa6d70b6ba39d75a787a35b12bd7cf0",
-		"url": "https://cdn.jsdelivr.net/npm/name-suggestion-index@8.0.20260914/dist/json/nsi.json",
-		"version": "8.0.20260914"
+		"generated": "2026-09-18T19:50:18.997Z",
+		"hash": "3d3f4ba18fae91f329a6faaf73702e96",
+		"url": "https://cdn.jsdelivr.net/npm/name-suggestion-index@8.0.20260918/dist/json/nsi.json",
+		"version": "8.0.20260918"
 	},
 	"nsi": {
 		"brands/advertising/totem": {
@@ -9953,6 +9953,21 @@
 					}
 				},
 				{
+					"displayName": "WICO",
+					"fromTemplate": true,
+					"id": "wico-2d76fb",
+					"locationSet": {
+						"include": [
+							"ar"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "WICO",
+						"brand:wikidata": "Q141235933"
+					}
+				},
+				{
 					"displayName": "Winxo",
 					"fromTemplate": true,
 					"id": "winxo-3f0b55",
@@ -12813,6 +12828,29 @@
 						"brand:wikidata": "Q6741957",
 						"operator": "MEPS",
 						"operator:wikidata": "Q6741957"
+					}
+				},
+				{
+					"displayName": "Moneta Bank",
+					"id": "monetabank-767782",
+					"issues": [
+						12705
+					],
+					"locationSet": {
+						"include": [
+							"cz"
+						]
+					},
+					"matchNames": [
+						"moneta"
+					],
+					"tags": {
+						"amenity": "atm",
+						"brand": "Moneta Bank",
+						"brand:wikidata": "Q24282966",
+						"operator": "Moneta Money Bank",
+						"operator:type": "private",
+						"operator:wikidata": "Q24282966"
 					}
 				},
 				{
@@ -27251,27 +27289,6 @@
 					}
 				},
 				{
-					"displayName": "Moneta Bank",
-					"fromTemplate": true,
-					"id": "monetabank-767782",
-					"locationSet": {
-						"include": [
-							"cz"
-						]
-					},
-					"matchNames": [
-						"moneta",
-						"moneta money bank"
-					],
-					"tags": {
-						"amenity": "atm",
-						"brand": "Moneta Bank",
-						"brand:wikidata": "Q24282966",
-						"operator": "Moneta Bank",
-						"operator:wikidata": "Q24282966"
-					}
-				},
-				{
 					"displayName": "Monte dei Paschi di Siena",
 					"fromTemplate": true,
 					"id": "montedeipaschidisiena-64483a",
@@ -41375,6 +41392,7 @@
 					"templateExclude": [
 						"abnamro",
 						"bankinghub",
+						"monetabank",
 						"monobank",
 						"postfinance"
 					],
@@ -54407,20 +54425,25 @@
 				{
 					"displayName": "Moneta Bank",
 					"id": "monetabank-7d13c0",
+					"issues": [
+						12705
+					],
 					"locationSet": {
 						"include": [
 							"cz"
 						]
 					},
 					"matchNames": [
-						"moneta",
-						"moneta money bank"
+						"moneta"
 					],
 					"tags": {
 						"amenity": "bank",
 						"brand": "Moneta Bank",
 						"brand:wikidata": "Q24282966",
-						"name": "Moneta Bank"
+						"name": "Moneta Bank",
+						"operator": "Moneta Money Bank",
+						"operator:type": "private",
+						"operator:wikidata": "Q24282966"
 					}
 				},
 				{
@@ -71398,9 +71421,9 @@
 						"brand:wikidata": "Q3146580",
 						"network": "IDEcycle",
 						"network:wikidata": "Q3146580",
-						"operator": "Cykleo",
+						"operator": "Fifteen",
 						"operator:type": "private",
-						"operator:wikidata": "Q109250587"
+						"operator:wikidata": "Q3487061"
 					}
 				},
 				{
@@ -89780,7 +89803,7 @@
 				},
 				{
 					"displayName": "eMotion",
-					"id": "emotion-d44228",
+					"id": "emotion-abc49e",
 					"locationSet": {
 						"include": [
 							"at",
@@ -89788,7 +89811,25 @@
 							"cz",
 							"hu",
 							"ro",
-							"rs",
+							"rs"
+						]
+					},
+					"matchNames": [
+						"omv emotion"
+					],
+					"tags": {
+						"amenity": "charging_station",
+						"brand": "eMotion",
+						"brand:wikidata": "Q139071415",
+						"operator": "OMV",
+						"operator:wikidata": "Q168238"
+					}
+				},
+				{
+					"displayName": "eMotion (Slovensko)",
+					"id": "emotion-8610f2",
+					"locationSet": {
+						"include": [
 							"sk"
 						]
 					},
@@ -89798,7 +89839,9 @@
 					"tags": {
 						"amenity": "charging_station",
 						"brand": "eMotion",
-						"brand:wikidata": "Q139071415"
+						"brand:wikidata": "Q139071415",
+						"operator": "OMV Slovensko",
+						"operator:wikidata": "Q168238"
 					}
 				},
 				{
@@ -90048,6 +90091,20 @@
 						"amenity": "charging_station",
 						"brand": "evmapa",
 						"brand:wikidata": "Q136929506"
+					}
+				},
+				{
+					"displayName": "EVPoint",
+					"id": "evpoint-59a92d",
+					"locationSet": {
+						"include": [
+							"bg"
+						]
+					},
+					"tags": {
+						"amenity": "charging_station",
+						"brand": "EVPoint",
+						"brand:wikidata": "Q130044600"
 					}
 				},
 				{
@@ -90308,7 +90365,23 @@
 					}
 				},
 				{
-					"displayName": "Innogy",
+					"displayName": "Innogy (\u010cesko)",
+					"id": "innogy-52c83f",
+					"locationSet": {
+						"include": [
+							"cz"
+						]
+					},
+					"tags": {
+						"amenity": "charging_station",
+						"brand": "Innogy",
+						"brand:wikidata": "Q28920338",
+						"operator": "Innogy Energo",
+						"operator:wikidata": "Q54968106"
+					}
+				},
+				{
+					"displayName": "Innogy (Deutschland)",
 					"id": "innogy-190c99",
 					"locationSet": {
 						"include": [
@@ -91078,44 +91151,29 @@
 					}
 				},
 				{
-					"displayName": "Tesla Destination Charger",
-					"id": "tesladestinationcharger-4bd82e",
+					"displayName": "Tesla",
+					"id": "tesla-4bd82e",
 					"locationSet": {
 						"include": [
 							"001"
 						]
 					},
 					"matchNames": [
-						"tesla wall connector"
-					],
-					"tags": {
-						"amenity": "charging_station",
-						"brand": "Tesla",
-						"brand:wikidata": "Q478214",
-						"name": "Tesla Destination Charger"
-					}
-				},
-				{
-					"displayName": "Tesla Supercharger",
-					"id": "teslasupercharger-4bd82e",
-					"locationSet": {
-						"include": [
-							"001"
-						]
-					},
-					"matchNames": [
+						"tesla destination charger",
+						"tesla france sarl",
+						"tesla germany gmbh",
+						"tesla inc",
 						"tesla motors",
 						"tesla motors inc",
+						"tesla supercharger",
+						"tesla wall connector",
 						"\u7279\u65af\u62c9\u8d85\u7ea7\u5145\u7535\u6869",
 						"\u7279\u65af\u62c9\u8d85\u7ea7\u5145\u7535\u7ad9"
 					],
 					"tags": {
 						"amenity": "charging_station",
-						"brand": "Tesla Supercharger",
-						"brand:wikidata": "Q17089620",
-						"name": "Tesla Supercharger",
-						"operator": "Tesla",
-						"operator:wikidata": "Q478214"
+						"brand": "Tesla",
+						"brand:wikidata": "Q478214"
 					}
 				},
 				{
@@ -91679,9 +91737,6 @@
 				"exclude": {
 					"generic": [
 						"^charging station$"
-					],
-					"named": [
-						"^tesla, inc.$"
 					]
 				},
 				"path": "brands/amenity/charging_station",
@@ -96470,6 +96525,23 @@
 					}
 				},
 				{
+					"displayName": "Bitesize Greggs",
+					"id": "bitesizegreggs-45095e",
+					"locationSet": {
+						"include": [
+							"gb"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Greggs",
+						"brand:wikidata": "Q3403981",
+						"cuisine": "sandwich;bakery",
+						"name": "Bitesize Greggs",
+						"takeaway": "only"
+					}
+				},
+				{
 					"displayName": "Blackjack Pizza",
 					"id": "blackjackpizza-4d2ff4",
 					"locationSet": {
@@ -98051,7 +98123,7 @@
 						"amenity": "fast_food",
 						"brand": "Chowking",
 						"brand:wikidata": "Q1076816",
-						"cuisine": "asian",
+						"cuisine": "chinese;filipino",
 						"name": "Chowking",
 						"takeaway": "yes"
 					}
@@ -100951,6 +101023,23 @@
 					}
 				},
 				{
+					"displayName": "Greggs Outlet",
+					"id": "greggsoutlet-45095e",
+					"locationSet": {
+						"include": [
+							"gb"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Greggs",
+						"brand:wikidata": "Q3403981",
+						"cuisine": "sandwich;bakery",
+						"name": "Greggs Outlet",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Grill'd",
 					"id": "grilld-d43c69",
 					"locationSet": {
@@ -102050,7 +102139,7 @@
 						"amenity": "fast_food",
 						"brand": "Jollibee",
 						"brand:wikidata": "Q37614",
-						"cuisine": "burger",
+						"cuisine": "burger;chicken",
 						"name": "Jollibee",
 						"takeaway": "yes"
 					}
@@ -103730,7 +103819,7 @@
 				},
 				{
 					"displayName": "McDonald's",
-					"id": "mcdonalds-c9aa1b",
+					"id": "mcdonalds-d35a75",
 					"locationSet": {
 						"exclude": [
 							"ae",
@@ -103751,6 +103840,7 @@
 							"ma",
 							"no",
 							"om",
+							"ph",
 							"qa",
 							"ru",
 							"sa",
@@ -103809,6 +103899,24 @@
 						"brand:wikidata": "Q38076",
 						"cuisine": "burger",
 						"name": "McDonald's",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "McDonald's (Philippines)",
+					"id": "mcdonalds-33d36e",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "McDonald's",
+						"brand:wikidata": "Q38076",
+						"cuisine": "burger;chicken",
+						"name": "McDonald's",
+						"short_name": "McDo",
 						"takeaway": "yes"
 					}
 				},
@@ -109333,6 +109441,25 @@
 						"brand:wikidata": "Q116737896",
 						"cuisine": "milkshake",
 						"name": "The Yard Milkshake Bar",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "tinyfish",
+					"id": "tinyfish-2fcd78",
+					"locationSet": {
+						"include": [
+							"ch"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "tinyfish",
+						"brand:wikidata": "Q141190900",
+						"cuisine": "sushi",
+						"name": "tinyfish",
+						"operator": "Tiny Fish AG",
+						"payment:cards": "only",
 						"takeaway": "yes"
 					}
 				},
@@ -125648,6 +125775,21 @@
 						"brand": "Westfalen",
 						"brand:wikidata": "Q1411209",
 						"name": "Westfalen"
+					}
+				},
+				{
+					"displayName": "WICO",
+					"id": "wico-dca697",
+					"locationSet": {
+						"include": [
+							"ar"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "WICO",
+						"brand:wikidata": "Q141235933",
+						"name": "WICO"
 					}
 				},
 				{
@@ -151616,6 +151758,22 @@
 						"brand:wikidata": "Q19880747",
 						"cuisine": "barbecue",
 						"name": "Dickey's Barbecue Pit"
+					}
+				},
+				{
+					"displayName": "DIGG Pizza",
+					"id": "diggpizza-0a0782",
+					"locationSet": {
+						"include": [
+							"no"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "DIGG Pizza",
+						"brand:wikidata": "Q141447618",
+						"cuisine": "pizza",
+						"takeaway": "yes"
 					}
 				},
 				{
@@ -180176,7 +180334,7 @@
 				{
 					"displayName": "eMotion",
 					"fromTemplate": true,
-					"id": "emotion-4afda5",
+					"id": "emotion-c03e0c",
 					"locationSet": {
 						"include": [
 							"at",
@@ -180184,7 +180342,26 @@
 							"cz",
 							"hu",
 							"ro",
-							"rs",
+							"rs"
+						]
+					},
+					"matchNames": [
+						"omv emotion"
+					],
+					"tags": {
+						"brand": "eMotion",
+						"brand:wikidata": "Q139071415",
+						"man_made": "charge_point",
+						"operator": "OMV",
+						"operator:wikidata": "Q168238"
+					}
+				},
+				{
+					"displayName": "eMotion (Slovensko)",
+					"fromTemplate": true,
+					"id": "emotion-fed676",
+					"locationSet": {
+						"include": [
 							"sk"
 						]
 					},
@@ -180194,7 +180371,9 @@
 					"tags": {
 						"brand": "eMotion",
 						"brand:wikidata": "Q139071415",
-						"man_made": "charge_point"
+						"man_made": "charge_point",
+						"operator": "OMV Slovensko",
+						"operator:wikidata": "Q168238"
 					}
 				},
 				{
@@ -180448,6 +180627,21 @@
 					"tags": {
 						"brand": "evmapa",
 						"brand:wikidata": "Q136929506",
+						"man_made": "charge_point"
+					}
+				},
+				{
+					"displayName": "EVPoint",
+					"fromTemplate": true,
+					"id": "evpoint-d790f7",
+					"locationSet": {
+						"include": [
+							"bg"
+						]
+					},
+					"tags": {
+						"brand": "EVPoint",
+						"brand:wikidata": "Q130044600",
 						"man_made": "charge_point"
 					}
 				},
@@ -180718,7 +180912,24 @@
 					}
 				},
 				{
-					"displayName": "Innogy",
+					"displayName": "Innogy (\u010cesko)",
+					"fromTemplate": true,
+					"id": "innogy-9fccfa",
+					"locationSet": {
+						"include": [
+							"cz"
+						]
+					},
+					"tags": {
+						"brand": "Innogy",
+						"brand:wikidata": "Q28920338",
+						"man_made": "charge_point",
+						"operator": "Innogy Energo",
+						"operator:wikidata": "Q54968106"
+					}
+				},
+				{
+					"displayName": "Innogy (Deutschland)",
 					"fromTemplate": true,
 					"id": "innogy-edd896",
 					"locationSet": {
@@ -181465,7 +181676,7 @@
 					}
 				},
 				{
-					"displayName": "Tesla Destination Charger",
+					"displayName": "Tesla",
 					"fromTemplate": true,
 					"id": "tesla-6f8a39",
 					"locationSet": {
@@ -181474,35 +181685,21 @@
 						]
 					},
 					"matchNames": [
-						"tesla wall connector"
+						"tesla destination charger",
+						"tesla france sarl",
+						"tesla germany gmbh",
+						"tesla inc",
+						"tesla motors",
+						"tesla motors inc",
+						"tesla supercharger",
+						"tesla wall connector",
+						"\u7279\u65af\u62c9\u8d85\u7ea7\u5145\u7535\u6869",
+						"\u7279\u65af\u62c9\u8d85\u7ea7\u5145\u7535\u7ad9"
 					],
 					"tags": {
 						"brand": "Tesla",
 						"brand:wikidata": "Q478214",
 						"man_made": "charge_point"
-					}
-				},
-				{
-					"displayName": "Tesla Supercharger",
-					"fromTemplate": true,
-					"id": "teslasupercharger-6f8a39",
-					"locationSet": {
-						"include": [
-							"001"
-						]
-					},
-					"matchNames": [
-						"tesla motors",
-						"tesla motors inc",
-						"\u7279\u65af\u62c9\u8d85\u7ea7\u5145\u7535\u6869",
-						"\u7279\u65af\u62c9\u8d85\u7ea7\u5145\u7535\u7ad9"
-					],
-					"tags": {
-						"brand": "Tesla Supercharger",
-						"brand:wikidata": "Q17089620",
-						"man_made": "charge_point",
-						"operator": "Tesla",
-						"operator:wikidata": "Q478214"
 					}
 				},
 				{
@@ -195331,6 +195528,21 @@
 						"brand": "Agrimark",
 						"brand:wikidata": "Q141238019",
 						"name": "Agrimark",
+						"shop": "agrarian"
+					}
+				},
+				{
+					"displayName": "Agroland",
+					"id": "agroland-bf6506",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Agroland",
+						"brand:wikidata": "Q141462072",
+						"name": "Agroland",
 						"shop": "agrarian"
 					}
 				},
@@ -212631,7 +212843,8 @@
 						]
 					},
 					"tags": {
-						"brand": "Q141159741",
+						"brand": "Ewigo",
+						"brand:wikidata": "Q141159741",
 						"name": "Ewigo",
 						"service:vehicle:used_car_sales": "only",
 						"shop": "car"
@@ -213834,6 +214047,7 @@
 						]
 					},
 					"matchNames": [
+						"tesla inc",
 						"tesla motors"
 					],
 					"tags": {
@@ -217397,10 +217611,11 @@
 				},
 				{
 					"displayName": "Speedy",
-					"id": "speedy-98e3a2",
+					"id": "speedy-cd3b68",
 					"locationSet": {
 						"include": [
-							"fr"
+							"fr",
+							"ma"
 						]
 					},
 					"tags": {
@@ -218401,7 +218616,8 @@
 						]
 					},
 					"tags": {
-						"brand": "Q141159741",
+						"brand": "Ewigo",
+						"brand:wikidata": "Q141159741",
 						"name": "Ewigo",
 						"service:vehicle:used_car_sales": "only",
 						"shop": "car_repair"
@@ -219593,6 +219809,7 @@
 						]
 					},
 					"matchNames": [
+						"tesla inc",
 						"tesla motors"
 					],
 					"tags": {
@@ -220714,10 +220931,9 @@
 				},
 				{
 					"displayName": "Emma\u00fcs",
-					"id": "emmaus-0d4d3e",
+					"id": "emmaus-0ba1a2",
 					"locationSet": {
 						"include": [
-							"fx",
 							"fr"
 						]
 					},
@@ -220725,8 +220941,8 @@
 						"brand": "Mouvement Emma\u00fcs",
 						"brand:wikidata": "Q989437",
 						"name": "Emma\u00fcs",
-						"operator": "Mouvement Emma\u00fcs",
-						"operator:wikidata": "Q989437",
+						"operator": "Emma\u00fcs France",
+						"operator:wikidata": "Q3053001",
 						"shop": "charity"
 					}
 				},
@@ -225193,6 +225409,22 @@
 					}
 				},
 				{
+					"displayName": "Bigotti",
+					"id": "bigotti-4b1198",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Bigotti",
+						"brand:wikidata": "Q4907014",
+						"clothes": "men",
+						"name": "Bigotti",
+						"shop": "clothes"
+					}
+				},
+				{
 					"displayName": "Bik Bok",
 					"id": "bikbok-0779c3",
 					"locationSet": {
@@ -229451,10 +229683,13 @@
 				},
 				{
 					"displayName": "Free People",
-					"id": "freepeople-0615dc",
+					"id": "freepeople-281261",
 					"locationSet": {
 						"include": [
 							"ca",
+							"dk",
+							"fr",
+							"gb",
 							"us"
 						]
 					},
@@ -261317,6 +261552,20 @@
 					}
 				},
 				{
+					"displayName": "ShockPrice",
+					"id": "shockprice-44c79d",
+					"locationSet": {
+						"include": [
+							"pl"
+						]
+					},
+					"tags": {
+						"brand": "ShockPrice",
+						"name": "ShockPrice",
+						"shop": "department_store"
+					}
+				},
+				{
 					"displayName": "Shopko",
 					"id": "shopko-592fe0",
 					"locationSet": {
@@ -261959,6 +262208,24 @@
 					}
 				},
 				{
+					"displayName": "Brico (Romania)",
+					"id": "brico-8112dc",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"matchNames": [
+						"brico d\u00e9p\u00f4t"
+					],
+					"tags": {
+						"brand": "Brico",
+						"brand:wikidata": "Q141459039",
+						"name": "Brico",
+						"shop": "doityourself"
+					}
+				},
+				{
 					"displayName": "Brico Cash",
 					"id": "bricocash-f33b88",
 					"locationSet": {
@@ -261976,13 +262243,12 @@
 				},
 				{
 					"displayName": "Brico D\u00e9p\u00f4t",
-					"id": "bricodepot-46eef0",
+					"id": "bricodepot-3638e6",
 					"locationSet": {
 						"include": [
 							"es",
 							"fr",
-							"pt",
-							"ro"
+							"pt"
 						]
 					},
 					"tags": {
@@ -273780,6 +274046,21 @@
 					}
 				},
 				{
+					"displayName": "Staer",
+					"id": "staer-e892fd",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Staer",
+						"brand:wikidata": "Q18548069",
+						"name": "Staer",
+						"shop": "furniture"
+					}
+				},
+				{
 					"displayName": "Structube",
 					"id": "structube-a33c55",
 					"locationSet": {
@@ -278112,7 +278393,6 @@
 						"^(the )?barber(ia|shop|\\sshop)?$",
 						"^(\u043f\u0430\u0440\u0438\u043a\u043c\u0430\u0445\u0435\u0440(\u0441\u043a\u0430\u044f)?|\u043f\u0435\u0440\u0441\u043e\u043d\u0430|\u043f\u0435\u0440\u0443\u043a\u0430\u0440\u043d\u044f)$",
 						"^coiff(eur|ure)\\s?(homme|dame)?$",
-						"^haar(genau|monie|scharf)$",
 						"^hair\\s?(design|dresser|lounge|salon|studio|style)$",
 						"^kade\u0159nictv\u00ed$",
 						"^kirpykla$",
@@ -278124,7 +278404,7 @@
 					"named": [
 						"^(a cut above|art of hair|biguine|cutting edge|espace coiffure|figaro|glamour|golden scissors|haarwerk|hair & beauty|hairport)$",
 						"^(anna|natalie)$",
-						"^(ihr friseur|new look|schnittpunkt|style|the cutting room|the hair lounge)$",
+						"^(ihr friseur|new look|schnittpunkt|haar(genau|monie|scharf)|style|the cutting room|the hair lounge)$",
 						"^(\u043a\u0430\u043f\u0440\u0438\u0437|\u0444\u0435\u044f|\u0441\u0442\u0438\u043b\u044c|\u043b\u043e\u043a\u043e\u043d|\u0448\u0430\u0440\u043c|\u043d\u0430\u0442\u0430\u043b\u0438)$",
 						"^fodr\u00e1szat$"
 					]
@@ -280439,6 +280719,21 @@
 						"brand": "Volpes",
 						"brand:wikidata": "Q116431266",
 						"name": "Volpes",
+						"shop": "household_linen"
+					}
+				},
+				{
+					"displayName": "Whitehouse & Continental Linen",
+					"id": "whitehouseandcontinentallinen-f55b77",
+					"locationSet": {
+						"include": [
+							"za"
+						]
+					},
+					"tags": {
+						"brand": "Whitehouse & Continental Linen",
+						"brand:wikidata": "Q141238478",
+						"name": "Whitehouse & Continental Linen",
 						"shop": "household_linen"
 					}
 				},
@@ -284373,6 +284668,22 @@
 						"brand:wikidata": "Q13117711",
 						"name": "Tanishq",
 						"name:en": "Tanishq",
+						"shop": "jewelry"
+					}
+				},
+				{
+					"displayName": "Teilor",
+					"id": "teilor-845201",
+					"locationSet": {
+						"include": [
+							"bg",
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Teilor",
+						"brand:wikidata": "Q115773344",
+						"name": "Teilor",
 						"shop": "jewelry"
 					}
 				},
@@ -289867,6 +290178,27 @@
 						"brand": "Walmart",
 						"brand:wikidata": "Q483551",
 						"name": "Walmart Wireless",
+						"shop": "mobile_phone"
+					}
+				},
+				{
+					"displayName": "WeFix",
+					"id": "wefix-3888e5",
+					"locationSet": {
+						"include": [
+							"be",
+							"fr"
+						]
+					},
+					"matchTags": [
+						"craft/electronics_repair"
+					],
+					"tags": {
+						"brand": "WeFix",
+						"brand:wikidata": "Q121543865",
+						"mobile_phone:repair": "yes",
+						"name": "WeFix",
+						"second_hand": "yes",
 						"shop": "mobile_phone"
 					}
 				},
@@ -303371,6 +303703,21 @@
 					}
 				},
 				{
+					"displayName": "Benvenuti",
+					"id": "benvenuti-fca3af",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Benvenuti",
+						"brand:wikidata": "Q12721652",
+						"name": "Benvenuti",
+						"shop": "shoes"
+					}
+				},
+				{
 					"displayName": "Besson Chaussures",
 					"id": "bessonchaussures-e6cf1b",
 					"locationSet": {
@@ -304856,6 +305203,21 @@
 					"tags": {
 						"brand": "Mani",
 						"brand:wikidata": "Q127922507",
+						"shop": "shoes"
+					}
+				},
+				{
+					"displayName": "Marelbo",
+					"id": "marelbo-fca3af",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Marelbo",
+						"brand:wikidata": "Q141462391",
+						"name": "Marelbo",
 						"shop": "shoes"
 					}
 				},
@@ -307533,6 +307895,24 @@
 						"brand": "Finish Line",
 						"brand:wikidata": "Q5450341",
 						"name": "Finish Line",
+						"shop": "sports"
+					}
+				},
+				{
+					"displayName": "FitnessBoutique",
+					"id": "fitnessboutique-ab34c1",
+					"locationSet": {
+						"include": [
+							"be",
+							"fr",
+							"ma"
+						]
+					},
+					"tags": {
+						"alt_name": "Fitness Boutique",
+						"brand": "FitnessBoutique",
+						"brand:wikidata": "Q65151892",
+						"name": "FitnessBoutique",
 						"shop": "sports"
 					}
 				},
@@ -311685,6 +312065,8 @@
 						"brand": "Billa",
 						"brand:wikidata": "Q42969493",
 						"name": "Billa",
+						"operator": "Billa",
+						"operator:wikidata": "Q42969493",
 						"shop": "supermarket"
 					}
 				},
@@ -320986,11 +321368,15 @@
 							"sg"
 						]
 					},
+					"matchNames": [
+						"\u6607\u677e\u8d85\u5e02"
+					],
 					"tags": {
 						"brand": "Sheng Siong",
 						"brand:wikidata": "Q3481878",
 						"name": "Sheng Siong",
-						"name:zh": "\u6607\u677e\u8d85\u5e02",
+						"name:en": "Sheng Siong",
+						"name:zh": "\u6607\u83d8\u8d85\u5e02",
 						"shop": "supermarket"
 					}
 				},
@@ -338237,6 +338623,21 @@
 					}
 				},
 				{
+					"displayName": "QTeam",
+					"id": "qteam-dea2ad",
+					"locationSet": {
+						"include": [
+							"be"
+						]
+					},
+					"tags": {
+						"brand": "QTeam",
+						"brand:wikidata": "Q127691554",
+						"name": "QTeam",
+						"shop": "tyres"
+					}
+				},
+				{
 					"displayName": "Quick Reifendiscount",
 					"id": "quickreifendiscount-24681a",
 					"locationSet": {
@@ -342836,6 +343237,26 @@
 					}
 				},
 				{
+					"displayName": "Camping-Car Park",
+					"id": "campingcarpark-650d8f",
+					"locationSet": {
+						"include": [
+							"be",
+							"de",
+							"es",
+							"fr",
+							"nl",
+							"pt"
+						]
+					},
+					"tags": {
+						"brand": "Camping-Car Park",
+						"brand:wikidata": "Q127751797",
+						"name": "Camping-Car Park",
+						"tourism": "caravan_site"
+					}
+				},
+				{
 					"displayName": "KOA Holiday",
 					"id": "koaholiday-c4d1c5",
 					"locationSet": {
@@ -347082,7 +347503,6 @@
 						]
 					},
 					"matchNames": [
-						"paradores de turismo de tspa\u00f1a",
 						"paradores nacionales"
 					],
 					"note": "No name for Paradores's brand as each hotel is named differently.",
@@ -363000,6 +363420,55 @@
 			},
 			"templates": []
 		},
+		"operators/amenity/bbq": {
+			"items": [
+				{
+					"displayName": "City of Gold Coast",
+					"id": "cityofgoldcoast-980a63",
+					"locationSet": {
+						"include": [
+							"au-qld.geojson"
+						]
+					},
+					"matchNames": [
+						"gccc",
+						"gold coast city council"
+					],
+					"tags": {
+						"amenity": "bbq",
+						"operator": "City of Gold Coast",
+						"operator:wikidata": "Q30267253"
+					}
+				},
+				{
+					"displayName": "United States Forest Service",
+					"id": "unitedstatesforestservice-cb4e7e",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "bbq",
+						"operator": "United States Forest Service",
+						"operator:short": "USFS",
+						"operator:wikidata": "Q1891156"
+					}
+				}
+			],
+			"properties": {
+				"exclude": {
+					"generic": [
+						"^(bbq|barbe[cq]ue)$"
+					],
+					"named": [
+						"^schweizer familie$"
+					]
+				},
+				"path": "operators/amenity/bbq"
+			},
+			"templates": []
+		},
 		"operators/amenity/bicycle_parking": {
 			"items": [
 				{
@@ -366152,15 +366621,16 @@
 				},
 				{
 					"displayName": "City of Gold Coast",
-					"id": "cityofgoldcoast-bd4e91",
+					"id": "cityofgoldcoast-830192",
 					"locationSet": {
 						"include": [
-							[
-								153.4,
-								-28
-							]
+							"au-qld.geojson"
 						]
 					},
+					"matchNames": [
+						"gccc",
+						"gold coast city council"
+					],
 					"tags": {
 						"amenity": "charging_station",
 						"operator": "City of Gold Coast",
@@ -368372,6 +368842,20 @@
 						"amenity": "charging_station",
 						"operator": "EVN",
 						"operator:wikidata": "Q872140"
+					}
+				},
+				{
+					"displayName": "EVN (\u0411\u044a\u043b\u0433\u0430\u0440\u0438\u044f)",
+					"id": "evn-befeeb",
+					"locationSet": {
+						"include": [
+							"bg"
+						]
+					},
+					"tags": {
+						"amenity": "charging_station",
+						"operator": "EVN",
+						"operator:wikidata": "Q20498243"
 					}
 				},
 				{
@@ -370977,20 +371461,6 @@
 						"amenity": "charging_station",
 						"operator": "OK",
 						"operator:wikidata": "Q12329785"
-					}
-				},
-				{
-					"displayName": "OMV eMotion",
-					"id": "omv-c22d3a",
-					"locationSet": {
-						"include": [
-							"001"
-						]
-					},
-					"tags": {
-						"amenity": "charging_station",
-						"operator": "OMV",
-						"operator:wikidata": "Q168238"
 					}
 				},
 				{
@@ -374330,33 +374800,6 @@
 						"amenity": "charging_station",
 						"operator": "Tepl\u00e1rny Brno",
 						"operator:wikidata": "Q54980987"
-					}
-				},
-				{
-					"displayName": "TESLA France SARL",
-					"id": "teslafrancesarl-170e94",
-					"locationSet": {
-						"include": [
-							"fx",
-							"fr"
-						]
-					},
-					"tags": {
-						"amenity": "charging_station",
-						"operator": "TESLA France SARL"
-					}
-				},
-				{
-					"displayName": "Tesla Germany GmbH",
-					"id": "teslagermanygmbh-1299a8",
-					"locationSet": {
-						"include": [
-							"de"
-						]
-					},
-					"tags": {
-						"amenity": "charging_station",
-						"operator": "Tesla Germany GmbH"
 					}
 				},
 				{
@@ -383527,6 +383970,24 @@
 						"operator": "City of Denton",
 						"operator:type": "government",
 						"operator:wikidata": "Q128306"
+					}
+				},
+				{
+					"displayName": "City of Gold Coast",
+					"id": "cityofgoldcoast-966b8b",
+					"locationSet": {
+						"include": [
+							"au-qld.geojson"
+						]
+					},
+					"matchNames": [
+						"gccc",
+						"gold coast city council"
+					],
+					"tags": {
+						"amenity": "drinking_water",
+						"operator": "City of Gold Coast",
+						"operator:wikidata": "Q30267253"
 					}
 				},
 				{
@@ -400830,6 +401291,25 @@
 					}
 				},
 				{
+					"displayName": "City of Gold Coast",
+					"id": "cityofgoldcoast-8e5058",
+					"locationSet": {
+						"include": [
+							"au-qld.geojson"
+						]
+					},
+					"matchNames": [
+						"gccc",
+						"gold coast city council"
+					],
+					"tags": {
+						"amenity": "library",
+						"operator": "City of Gold Coast",
+						"operator:type": "government",
+						"operator:wikidata": "Q30267253"
+					}
+				},
+				{
 					"displayName": "City of Moreton Bay",
 					"id": "cityofmoretonbay-8e5058",
 					"locationSet": {
@@ -404905,6 +405385,25 @@
 						"operator": "City Center Parking",
 						"operator:type": "private",
 						"operator:wikidata": "Q108276976"
+					}
+				},
+				{
+					"displayName": "City of Gold Coast",
+					"id": "cityofgoldcoast-d2c33d",
+					"locationSet": {
+						"include": [
+							"au-qld.geojson"
+						]
+					},
+					"matchNames": [
+						"gccc",
+						"gold coast city council"
+					],
+					"tags": {
+						"amenity": "parking",
+						"operator": "City of Gold Coast",
+						"operator:type": "government",
+						"operator:wikidata": "Q30267253"
 					}
 				},
 				{
@@ -498567,6 +499066,238 @@
 			},
 			"templates": []
 		},
+		"operators/amenity/shower": {
+			"items": [
+				{
+					"displayName": "Action contre la Faim",
+					"id": "actioncontrelafaim-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Action contre la Faim",
+						"operator:en": "Action Against Hunger",
+						"operator:fr": "Action contre la Faim",
+						"operator:short": "ACF",
+						"operator:wikidata": "Q343624"
+					}
+				},
+				{
+					"displayName": "Ajuntament El Prat del Llobregat",
+					"id": "ajuntamentelpratdelllobregat-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Ajuntament El Prat del Llobregat"
+					}
+				},
+				{
+					"displayName": "BC Parks",
+					"id": "bcparks-170851",
+					"locationSet": {
+						"include": [
+							"ca-bc.geojson"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "BC Parks",
+						"operator:wikidata": "Q2876928"
+					}
+				},
+				{
+					"displayName": "Catholic Relief Services",
+					"id": "catholicreliefservices-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Catholic Relief Services",
+						"operator:short": "CRS",
+						"operator:wikidata": "Q2942152"
+					}
+				},
+				{
+					"displayName": "City of Gold Coast",
+					"id": "cityofgoldcoast-e3716a",
+					"locationSet": {
+						"include": [
+							"au-qld.geojson"
+						]
+					},
+					"matchNames": [
+						"gccc",
+						"gold coast city council"
+					],
+					"tags": {
+						"amenity": "shower",
+						"operator": "City of Gold Coast",
+						"operator:wikidata": "Q30267253"
+					}
+				},
+				{
+					"displayName": "Comune di Arenzano",
+					"id": "comunediarenzano-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Comune di Arenzano"
+					}
+				},
+				{
+					"displayName": "Croix-Rouge fran\u00e7aise",
+					"id": "croixrougefrancaise-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Croix-Rouge fran\u00e7aise",
+						"operator:short": "CRF",
+						"operator:wikidata": "Q3003244"
+					}
+				},
+				{
+					"displayName": "Croix-Rouge ha\u00eftienne",
+					"id": "croixrougehaitienne-d01db8",
+					"locationSet": {
+						"include": [
+							"ht"
+						]
+					},
+					"matchNames": [
+						"rouge haitienne",
+						"xrouge haitienne"
+					],
+					"tags": {
+						"amenity": "shower",
+						"operator": "Croix-Rouge ha\u00eftienne",
+						"operator:wikidata": "Q104779243"
+					}
+				},
+				{
+					"displayName": "Grado Impianti Turistici",
+					"id": "gradoimpiantituristici-332d68",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Grado Impianti Turistici",
+						"operator:short": "GIT"
+					}
+				},
+				{
+					"displayName": "Lignano Sabbiadoro Gestioni",
+					"id": "lignanosabbiadorogestioni-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Lignano Sabbiadoro Gestioni"
+					}
+				},
+				{
+					"displayName": "Oxfam",
+					"id": "oxfam-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Oxfam",
+						"operator:wikidata": "Q267941"
+					}
+				},
+				{
+					"displayName": "Playa Montroig Campresort",
+					"id": "playamontroigcampresort-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Playa Montroig Campresort"
+					}
+				},
+				{
+					"displayName": "PuntAla Camp & Resort",
+					"id": "puntalacampandresort-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "PuntAla Camp & Resort"
+					}
+				},
+				{
+					"displayName": "Save the Children",
+					"id": "savethechildren-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "Save the Children",
+						"operator:wikidata": "Q215934"
+					}
+				},
+				{
+					"displayName": "UNICEF",
+					"id": "unicef-a31d47",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"amenity": "shower",
+						"operator": "UNICEF",
+						"operator:wikidata": "Q740308"
+					}
+				}
+			],
+			"properties": {
+				"exclude": {
+					"generic": [
+						"^p[u\u00fa]blic(o)?$",
+						"^shower$"
+					]
+				},
+				"path": "operators/amenity/shower"
+			},
+			"templates": []
+		},
 		"operators/amenity/social_facility": {
 			"items": [
 				{
@@ -503589,10 +504320,10 @@
 				},
 				{
 					"displayName": "Catholic Relief Services",
-					"id": "catholicreliefservices-481bb7",
+					"id": "catholicreliefservices-48c608",
 					"locationSet": {
 						"include": [
-							"ht"
+							"001"
 						]
 					},
 					"tags": {
@@ -503678,6 +504409,24 @@
 						"operator:type": "government",
 						"operator:wikidata": "Q1185115",
 						"operator:xh": "IsiXeko saseKapa"
+					}
+				},
+				{
+					"displayName": "City of Gold Coast",
+					"id": "cityofgoldcoast-1f33cd",
+					"locationSet": {
+						"include": [
+							"au-qld.geojson"
+						]
+					},
+					"matchNames": [
+						"gccc",
+						"gold coast city council"
+					],
+					"tags": {
+						"amenity": "toilets",
+						"operator": "City of Gold Coast",
+						"operator:wikidata": "Q30267253"
 					}
 				},
 				{
@@ -537073,15 +537822,16 @@
 				{
 					"displayName": "City of Gold Coast",
 					"fromTemplate": true,
-					"id": "cityofgoldcoast-cf5c60",
+					"id": "cityofgoldcoast-7879ae",
 					"locationSet": {
 						"include": [
-							[
-								153.4,
-								-28
-							]
+							"au-qld.geojson"
 						]
 					},
+					"matchNames": [
+						"gccc",
+						"gold coast city council"
+					],
 					"tags": {
 						"man_made": "charge_point",
 						"operator": "City of Gold Coast",
@@ -539442,6 +540192,21 @@
 						"man_made": "charge_point",
 						"operator": "EVN",
 						"operator:wikidata": "Q872140"
+					}
+				},
+				{
+					"displayName": "EVN (\u0411\u044a\u043b\u0433\u0430\u0440\u0438\u044f)",
+					"fromTemplate": true,
+					"id": "evn-f58e30",
+					"locationSet": {
+						"include": [
+							"bg"
+						]
+					},
+					"tags": {
+						"man_made": "charge_point",
+						"operator": "EVN",
+						"operator:wikidata": "Q20498243"
 					}
 				},
 				{
@@ -542224,21 +542989,6 @@
 						"man_made": "charge_point",
 						"operator": "OK",
 						"operator:wikidata": "Q12329785"
-					}
-				},
-				{
-					"displayName": "OMV eMotion",
-					"fromTemplate": true,
-					"id": "omv-7872f6",
-					"locationSet": {
-						"include": [
-							"001"
-						]
-					},
-					"tags": {
-						"man_made": "charge_point",
-						"operator": "OMV",
-						"operator:wikidata": "Q168238"
 					}
 				},
 				{
@@ -545807,35 +546557,6 @@
 						"man_made": "charge_point",
 						"operator": "Tepl\u00e1rny Brno",
 						"operator:wikidata": "Q54980987"
-					}
-				},
-				{
-					"displayName": "TESLA France SARL",
-					"fromTemplate": true,
-					"id": "teslafrancesarl-fa309c",
-					"locationSet": {
-						"include": [
-							"fx",
-							"fr"
-						]
-					},
-					"tags": {
-						"man_made": "charge_point",
-						"operator": "TESLA France SARL"
-					}
-				},
-				{
-					"displayName": "Tesla Germany GmbH",
-					"fromTemplate": true,
-					"id": "teslagermanygmbh-9a316b",
-					"locationSet": {
-						"include": [
-							"de"
-						]
-					},
-					"tags": {
-						"man_made": "charge_point",
-						"operator": "Tesla Germany GmbH"
 					}
 				},
 				{
@@ -567176,6 +567897,22 @@
 					}
 				},
 				{
+					"displayName": "Veolia Eau",
+					"fromTemplate": true,
+					"id": "veoliaeau-be8c84",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"man_made": "pumping_station",
+						"operator": "Veolia Eau",
+						"operator:wikidata": "Q682599"
+					}
+				},
+				{
 					"displayName": "Watercare",
 					"fromTemplate": true,
 					"id": "watercare-876848",
@@ -567813,6 +568550,22 @@
 						"operator:short": "SPU",
 						"operator:type": "public",
 						"operator:wikidata": "Q7442159"
+					}
+				},
+				{
+					"displayName": "Veolia Eau",
+					"fromTemplate": true,
+					"id": "veoliaeau-a8f89d",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"man_made": "reservoir_covered",
+						"operator": "Veolia Eau",
+						"operator:wikidata": "Q682599"
 					}
 				},
 				{
@@ -573793,13 +574546,16 @@
 				},
 				{
 					"displayName": "Tesla",
-					"id": "tesla-36c4af",
+					"id": "tesla-f91ac8",
 					"locationSet": {
 						"include": [
-							"dk",
-							"pt"
+							"001"
 						]
 					},
+					"matchNames": [
+						"tesla inc",
+						"tesla motors"
+					],
 					"tags": {
 						"man_made": "street_cabinet",
 						"operator": "Tesla",
@@ -594143,6 +594899,22 @@
 					}
 				},
 				{
+					"displayName": "Veolia Eau",
+					"fromTemplate": true,
+					"id": "veoliaeau-c9a05e",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"man_made": "water_tower",
+						"operator": "Veolia Eau",
+						"operator:wikidata": "Q682599"
+					}
+				},
+				{
 					"displayName": "Watercare",
 					"fromTemplate": true,
 					"id": "watercare-988247",
@@ -595204,6 +595976,22 @@
 						"operator:short": "SPU",
 						"operator:type": "public",
 						"operator:wikidata": "Q7442159"
+					}
+				},
+				{
+					"displayName": "Veolia Eau",
+					"fromTemplate": true,
+					"id": "veoliaeau-5a447d",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"man_made": "water_works",
+						"operator": "Veolia Eau",
+						"operator:wikidata": "Q682599"
 					}
 				},
 				{
@@ -600102,6 +600890,21 @@
 						"operator:short": "SPU",
 						"operator:type": "public",
 						"operator:wikidata": "Q7442159"
+					}
+				},
+				{
+					"displayName": "Veolia Eau",
+					"id": "veoliaeau-2a0c26",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"office": "water_utility",
+						"operator": "Veolia Eau",
+						"operator:wikidata": "Q682599"
 					}
 				},
 				{
@@ -628552,12 +629355,16 @@
 				},
 				{
 					"displayName": "Tesla",
-					"id": "tesla-7b0614",
+					"id": "tesla-74685d",
 					"locationSet": {
 						"include": [
-							"nz"
+							"001"
 						]
 					},
+					"matchNames": [
+						"tesla inc",
+						"tesla motors"
+					],
 					"tags": {
 						"operator": "Tesla",
 						"operator:wikidata": "Q478214",
@@ -664966,7 +665773,8 @@
 						]
 					},
 					"matchNames": [
-						"tesla inc"
+						"tesla inc",
+						"tesla motors"
 					],
 					"tags": {
 						"operator": "Tesla",
@@ -760622,6 +761430,26 @@
 					}
 				},
 				{
+					"displayName": "Naolib",
+					"fromTemplate": true,
+					"id": "naolib-8c601f",
+					"locationSet": {
+						"include": [
+							"fr-pdl.geojson"
+						]
+					},
+					"matchNames": [
+						"tan"
+					],
+					"tags": {
+						"highway": "bus_stop",
+						"network": "Naolib",
+						"network:wikidata": "Q17519150",
+						"operator": "Semitan",
+						"operator:wikidata": "Q3487840"
+					}
+				},
+				{
 					"displayName": "Narva",
 					"fromTemplate": true,
 					"id": "narva-322271",
@@ -768577,23 +769405,6 @@
 						"highway": "bus_stop",
 						"network": "TAMSE",
 						"network:wikidata": "Q6151720"
-					}
-				},
-				{
-					"displayName": "TAN",
-					"fromTemplate": true,
-					"id": "tan-8c601f",
-					"locationSet": {
-						"include": [
-							"fr-pdl.geojson"
-						]
-					},
-					"tags": {
-						"highway": "bus_stop",
-						"network": "TAN",
-						"network:wikidata": "Q17519150",
-						"operator": "SEMITAN",
-						"operator:wikidata": "Q3487840"
 					}
 				},
 				{
@@ -781000,6 +781811,42 @@
 						"network:wikidata": "Q2778618",
 						"operator": "Sound Transit",
 						"operator:wikidata": "Q3965367",
+						"public_transport": "station",
+						"railway": "station",
+						"station": "light_rail"
+					}
+				},
+				{
+					"displayName": "LRT Jabodebek",
+					"fromTemplate": true,
+					"id": "lrtjabodebek-a500ae",
+					"locationSet": {
+						"include": [
+							"id"
+						]
+					},
+					"tags": {
+						"light_rail": "yes",
+						"network": "LRT Jabodebek",
+						"network:wikidata": "Q20427104",
+						"public_transport": "station",
+						"railway": "station",
+						"station": "light_rail"
+					}
+				},
+				{
+					"displayName": "LRT Jakarta",
+					"fromTemplate": true,
+					"id": "lrtjakarta-a500ae",
+					"locationSet": {
+						"include": [
+							"id"
+						]
+					},
+					"tags": {
+						"light_rail": "yes",
+						"network": "LRT Jakarta",
+						"network:wikidata": "Q56810702",
 						"public_transport": "station",
 						"railway": "station",
 						"station": "light_rail"
@@ -809264,6 +810111,25 @@
 					}
 				},
 				{
+					"displayName": "Naolib",
+					"id": "naolib-00e183",
+					"locationSet": {
+						"include": [
+							"fr-pdl.geojson"
+						]
+					},
+					"matchNames": [
+						"tan"
+					],
+					"tags": {
+						"network": "Naolib",
+						"network:wikidata": "Q17519150",
+						"operator": "Semitan",
+						"operator:wikidata": "Q3487840",
+						"route": "bus"
+					}
+				},
+				{
 					"displayName": "Narva",
 					"id": "narva-fca621",
 					"locationSet": {
@@ -816732,22 +817598,6 @@
 					"tags": {
 						"network": "TAMSE",
 						"network:wikidata": "Q6151720",
-						"route": "bus"
-					}
-				},
-				{
-					"displayName": "TAN",
-					"id": "tan-00e183",
-					"locationSet": {
-						"include": [
-							"fr-pdl.geojson"
-						]
-					},
-					"tags": {
-						"network": "TAN",
-						"network:wikidata": "Q17519150",
-						"operator": "SEMITAN",
-						"operator:wikidata": "Q3487840",
 						"route": "bus"
 					}
 				},
@@ -829433,6 +830283,34 @@
 						"network:wikidata": "Q2778618",
 						"operator": "Sound Transit",
 						"operator:wikidata": "Q3965367",
+						"route": "light_rail"
+					}
+				},
+				{
+					"displayName": "LRT Jabodebek",
+					"id": "lrtjabodebek-44909f",
+					"locationSet": {
+						"include": [
+							"id"
+						]
+					},
+					"tags": {
+						"network": "LRT Jabodebek",
+						"network:wikidata": "Q20427104",
+						"route": "light_rail"
+					}
+				},
+				{
+					"displayName": "LRT Jakarta",
+					"id": "lrtjakarta-44909f",
+					"locationSet": {
+						"include": [
+							"id"
+						]
+					},
+					"tags": {
+						"network": "LRT Jakarta",
+						"network:wikidata": "Q56810702",
 						"route": "light_rail"
 					}
 				},
