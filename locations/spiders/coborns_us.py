@@ -75,6 +75,7 @@ class CobornsUSSpider(scrapy.Spider):
         item = response.meta["item"]
         data = response.json().get("item")
         if not data:
+            yield item
             return
 
         item["street_address"] = data.get("fullAddressLine") or " ".join(data.get("addressLines") or [])
