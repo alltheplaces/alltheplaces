@@ -9,6 +9,8 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
+MAP_URL = "https://siroco.lerelais.org/index.php?do=pointsdecollecte/maplci&action=getDing"
+
 
 class DingFringFRSpider(Spider):
     name = "ding_fring_fr"
@@ -68,6 +70,8 @@ class DingFringFRSpider(Spider):
 
             apply_category(Categories.SHOP_CLOTHES, item)
             item["extras"]["second_hand"] = "only"
+            # The request is a form POST, so point at the map page that displays these shops instead.
+            item["extras"]["@source_uri"] = MAP_URL
 
             yield item
 
