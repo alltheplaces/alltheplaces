@@ -28,6 +28,8 @@ class GiordanosUSSpider(scrapy.Spider):
         item["branch"] = response.css("h1::text").get("").strip()
 
         addr_lines = response.css(".address a::text").getall()
+        if len(addr_lines) < 2:
+            return
         item["street_address"] = addr_lines[0].strip()
         city_state_zip = re.sub(r"\s+", " ", addr_lines[1]).strip()
         city, _, rest = city_state_zip.partition(",")
