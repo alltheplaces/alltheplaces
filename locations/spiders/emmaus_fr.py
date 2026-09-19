@@ -92,14 +92,13 @@ class EmmausFRSpider(Spider):
             am_end = self.parse_time(store.get(f"h_{day_index}_am_end"))
             pm_begin = self.parse_time(store.get(f"h_{day_index}_pm_begin"))
             pm_end = self.parse_time(store.get(f"h_{day_index}_pm_end"))
-            if am_begin and am_end and pm_begin and pm_end:
+            if am_begin and am_end:
                 oh.add_range(day, am_begin, am_end)
+            if pm_begin and pm_end:
                 oh.add_range(day, pm_begin, pm_end)
-                continue
-            starts = [t for t in (am_begin, pm_begin) if t]
-            ends = [t for t in (am_end, pm_end) if t]
-            if starts and ends:
-                oh.add_range(day, starts[0], ends[-1])
+            # One continuous span is given as am_begin + pm_end with both middle fields empty.
+            if am_begin and pm_end and not am_end and not pm_begin:
+                oh.add_range(day, am_begin, pm_end)
         return oh
 
     @staticmethod
