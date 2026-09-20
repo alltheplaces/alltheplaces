@@ -1,9 +1,9 @@
 {
 	"_meta": {
-		"generated": "2026-09-14T14:28:10.696Z",
-		"hash": "efe3b7b63def3d39ca871c325181eaa7",
-		"url": "https://cdn.jsdelivr.net/npm/name-suggestion-index@8.0.20260914/dist/wikidata/wikidata.json",
-		"version": "8.0.20260914"
+		"generated": "2026-09-18T19:50:18.841Z",
+		"hash": "a182f75fea2f6765fa820125c99b1b55",
+		"url": "https://cdn.jsdelivr.net/npm/name-suggestion-index@8.0.20260918/dist/wikidata/wikidata.json",
+		"version": "8.0.20260918"
 	},
 	"wikidata": {
 		"Q1000": {
@@ -5691,7 +5691,7 @@
 		"Q10394039": {
 			"description": "Portuguese electronics store chain",
 			"identities": {
-				"facebook": "wortenpt",
+				"facebook": "100064975890370",
 				"instagram": "wortenpt",
 				"linkedin": "worten",
 				"pinterest": "wortenportugal",
@@ -25461,7 +25461,7 @@
 			"label": "Municipal Transport Company of Madrid",
 			"logos": {
 				"facebook": "https://graph.facebook.com/emtmadrid/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/EMTlogo.svg"
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/S\u00edmbolo de EMT Madrid.svg"
 			},
 			"officialWebsites": [
 				"http://www.emtmadrid.es/",
@@ -26795,6 +26795,9 @@
 				"youtubeHandle": "landoflincolngoodwill689"
 			},
 			"label": "Land of Lincoln Goodwill Industries",
+			"logos": {
+				"facebook": "https://graph.facebook.com/llgoodwill/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.llgi.org/"
 			]
@@ -40719,7 +40722,7 @@
 				"website": "https://qsrsystem.com/",
 				"youtube": "UCvRH4-D8PEk2zdyprlWKs-g"
 			},
-			"label": "Vkusno i tochka",
+			"label": "Vkusno i Tochka",
 			"logos": {
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Vkusno I Tochka symbol.svg"
 			},
@@ -50442,7 +50445,7 @@
 			]
 		},
 		"Q1136203": {
-			"description": "mobile phone operator in Greece",
+			"description": "mobile phone operator in Greece, formerly known as Cosmote",
 			"identities": {
 				"facebook": "cosmote",
 				"instagram": "cosmote_greece",
@@ -50451,7 +50454,7 @@
 				"website": "https://www.cosmoteinsurance.gr",
 				"youtube": "UCUcddUlRWVl5aP32m6gTTgA"
 			},
-			"label": "Cosmote",
+			"label": "Telekom Greece",
 			"logos": {
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Logo Cosmote old.svg"
 			},
@@ -59636,6 +59639,24 @@
 			},
 			"officialWebsites": [
 				"https://gigatron.rs/"
+			]
+		},
+		"Q115773344": {
+			"description": "Romanian jewelry company",
+			"identities": {
+				"facebook": "TeilorRomania",
+				"instagram": "teilor_finejewellery",
+				"linkedin": "teilor",
+				"pinterest": "teilor_finejewellery",
+				"website": "https://www.teilor.ro/",
+				"youtubeHandle": "BijuteriaTeilorFineJewellery"
+			},
+			"label": "Teilor",
+			"logos": {
+				"facebook": "https://graph.facebook.com/TeilorRomania/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://www.teilor.ro/"
 			]
 		},
 		"Q115774046": {
@@ -73727,18 +73748,26 @@
 		},
 		"Q118719984": {
 			"identities": {
+				"facebook": "cajaruralleonourensevalladolidzamora",
 				"website": "https://www.cajaruraldigital.com/"
 			},
 			"label": "Caja Rural de Zamora",
+			"logos": {
+				"facebook": "https://graph.facebook.com/cajaruralleonourensevalladolidzamora/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.cajaruraldigital.com/"
 			]
 		},
 		"Q118719995": {
 			"identities": {
+				"facebook": "crsur.oficial",
 				"website": "https://www.cajaruraldelsur.es/"
 			},
 			"label": "Caja Rural del Sur",
+			"logos": {
+				"facebook": "https://graph.facebook.com/crsur.oficial/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.cajaruraldelsur.es/"
 			]
@@ -73755,6 +73784,7 @@
 		"Q118720015": {
 			"description": "Credit union",
 			"identities": {
+				"facebook": "758367570867590",
 				"website": "https://www.crextremadura.com/"
 			},
 			"label": "Caja Rural de Extremadura",
@@ -77258,6 +77288,8 @@
 			"description": "Chicken fast food franchise",
 			"identities": {
 				"facebook": "FavoriteChicken",
+				"instagram": "favoritechickenofficial",
+				"tiktok": "favoritechickenofficial",
 				"twitter": "FavoriteChicken",
 				"website": "https://favorite.co.uk/"
 			},
@@ -83241,6 +83273,25 @@
 			"officialWebsites": [
 				"https://www.zasilkovna.cz/zbox",
 				"https://www.packeta.sk/zbox"
+			]
+		},
+		"Q121543865": {
+			"description": "Repair workshop for smartphones and tablets",
+			"identities": {
+				"facebook": "wefix.net",
+				"instagram": "wefix_fr",
+				"linkedin": "wefix",
+				"website": "https://boutique.wefix.net/"
+			},
+			"label": "WeFix",
+			"locationInfoWebsites": [
+				"https://boutique.wefix.net/"
+			],
+			"logos": {
+				"facebook": "https://graph.facebook.com/wefix.net/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://boutique.wefix.net/"
 			]
 		},
 		"Q1215658": {
@@ -91995,12 +92046,16 @@
 		"Q123271999": {
 			"description": "chain of pharmacies in Europe",
 			"identities": {
+				"facebook": "alphegafarmaciaes",
 				"website": "https://www.alphega-pharmacy.co.uk"
 			},
 			"label": "Alphega Pharmacy",
 			"locationInfoWebsites": [
 				"https://app.alphega-pharmacy.co.uk/pharmacy"
 			],
+			"logos": {
+				"facebook": "https://graph.facebook.com/alphegafarmaciaes/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.alphega-pharmacy.co.uk"
 			]
@@ -101624,16 +101679,17 @@
 			]
 		},
 		"Q126075497": {
-			"description": "global chain of hotels and restaurants",
+			"description": "International hospitality cooperation of approximately 200 independently owned hotels and restaurants across 11 countries, headquartered in Frankfurt am Main, Germany.",
 			"identities": {
 				"facebook": "RomantikHotels",
 				"instagram": "romantikhotels",
+				"linkedin": "https://de.linkedin.com/company/romantikhotels&restaurantsag",
+				"pinterest": "https://de.pinterest.com/romantikhotelsr/",
 				"website": "https://www.romantikhotels.com/"
 			},
-			"label": "Romantik Hotels & Restaurants",
+			"label": "Romantik\u00ae Hotels & Restaurants",
 			"logos": {
-				"facebook": "https://graph.facebook.com/RomantikHotels/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FRomantik%20Hotel%20Logo.jpg&width=150"
+				"facebook": "https://graph.facebook.com/RomantikHotels/picture?type=large"
 			},
 			"officialWebsites": [
 				"https://www.romantikhotels.com/"
@@ -102815,7 +102871,9 @@
 		"Q126366376": {
 			"description": "Spanish courier service providing shipment solutions for B2C and B2B",
 			"identities": {
-				"website": "https://www.nacex.es"
+				"linkedin": "nacex",
+				"website": "https://www.nacex.es",
+				"youtube": "UCkObpiowENbXVhxOoixWrVg"
 			},
 			"label": "NACEX",
 			"officialWebsites": [
@@ -106468,6 +106526,23 @@
 				"https://www.bsbfashion.com/"
 			]
 		},
+		"Q12721652": {
+			"description": "Romanian shoe retail chain",
+			"identities": {
+				"facebook": "Benvenuti.Com.Official",
+				"instagram": "benvenuti.com.official",
+				"website": "https://www.benvenuti.com/",
+				"youtube": "UC4IuIHwk8EGp7eu-sR6-vOw",
+				"youtubeHandle": "benvenutiromania"
+			},
+			"label": "Benvenuti",
+			"logos": {
+				"facebook": "https://graph.facebook.com/Benvenuti.Com.Official/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://www.benvenuti.com/"
+			]
+		},
 		"Q127221886": {
 			"description": "Ukrainian shoe retailer",
 			"identities": {
@@ -108612,6 +108687,17 @@
 				"https://www.mojelekarna.cz/"
 			]
 		},
+		"Q127691554": {
+			"description": "Tyre dealer and fitting",
+			"identities": {
+				"website": "https://www.qteam.be"
+			},
+			"label": "QTeam",
+			"officialWebsites": [
+				"https://www.qteam.be",
+				"https://www.qteam.be/nl/onze-service-centers/"
+			]
+		},
 		"Q127691615": {
 			"description": "liquor store chain based in Texas",
 			"identities": {
@@ -108964,6 +109050,23 @@
 			},
 			"officialWebsites": [
 				"https://www.pentabank.sk/"
+			]
+		},
+		"Q127751797": {
+			"description": "motorhome and camper-van site rental company",
+			"identities": {
+				"facebook": "campingcarpark.aires",
+				"instagram": "camping_car_park",
+				"linkedin": "camping-car-park",
+				"website": "https://www.campingcarpark.com/",
+				"youtube": "UCQ-Ij3HZMmmQstgnEupd_MQ"
+			},
+			"label": "Camping-Car Park",
+			"logos": {
+				"facebook": "https://graph.facebook.com/campingcarpark.aires/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://www.campingcarpark.com/"
 			]
 		},
 		"Q127753246": {
@@ -112995,6 +113098,20 @@
 				"https://www.sw-trl.de/"
 			]
 		},
+		"Q130044600": {
+			"description": "electric vehicle charging station manufacturer and network in Bulgaria",
+			"identities": {
+				"facebook": "EVPoint.bg",
+				"website": "https://evpoint.bg/"
+			},
+			"label": "EVPoint",
+			"logos": {
+				"facebook": "https://graph.facebook.com/EVPoint.bg/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://evpoint.bg/"
+			]
+		},
 		"Q130044603": {
 			"description": "EV charging network",
 			"identities": {
@@ -113330,16 +113447,16 @@
 			]
 		},
 		"Q130145579": {
-			"description": "social and cultural services provider in Berlin, Germany",
+			"description": "social institution based in Germany",
 			"identities": {
 				"instagram": "pfefferwerk_stadtkultur",
-				"website": "https://www.pfefferwerk.de",
+				"website": "https://www.pfefferwerk.de/",
 				"youtube": "UCg4jSKlAi4GnWtAs3x3F22A",
 				"youtubeHandle": "pfefferwerk_stadtkultur"
 			},
 			"label": "Pfefferwerk Stadtkultur",
 			"officialWebsites": [
-				"https://www.pfefferwerk.de"
+				"https://www.pfefferwerk.de/"
 			]
 		},
 		"Q130146073": {
@@ -118011,14 +118128,15 @@
 		"Q130418463": {
 			"description": "branding used by the interurban bus network of the Government of Aragon in Spain",
 			"identities": {
-				"website": "https://www.aragon.es/-/nuevo-mapa-concesional"
+				"website": "https://www.aragon.es/transportes/infraestructuras-y-concesiones/mapa-de-las-concesiones"
 			},
 			"label": "Transporte P\u00fablico de Arag\u00f3n",
 			"logos": {
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Logo Transporte P\u00fablico de Arag\u00f3n peque\u00f1o.svg"
 			},
 			"officialWebsites": [
-				"https://www.aragon.es/-/nuevo-mapa-concesional"
+				"https://www.aragon.es/-/nuevo-mapa-concesional",
+				"https://www.aragon.es/transportes/infraestructuras-y-concesiones/mapa-de-las-concesiones"
 			]
 		},
 		"Q130426825": {
@@ -130225,7 +130343,7 @@
 			"label": "Pit-Stop",
 			"logos": {
 				"facebook": "https://graph.facebook.com/pitstop.de/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Pit-Stop.svg"
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Pitstop Logo 5.2020.svg"
 			},
 			"officialWebsites": [
 				"https://www.pitstop.de/"
@@ -132731,7 +132849,7 @@
 			},
 			"label": "Red E",
 			"locationInfoWebsites": [
-				"https://www.redecharge.com/find-a-charger"
+				"https://www.redecharge.com/ev-charging-stations"
 			],
 			"logos": {
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Red E Icon.svg"
@@ -136421,7 +136539,8 @@
 			"description": "Operator of electric truck charging stations in Europe",
 			"identities": {
 				"linkedin": "milence1",
-				"website": "https://www.milence.com"
+				"website": "https://www.milence.com",
+				"youtube": "UCBtgHOBnckKxEREAEbhFEgA"
 			},
 			"label": "Milence",
 			"locationInfoWebsites": [
@@ -136904,9 +137023,13 @@
 		"Q1320887": {
 			"description": "statutory corporation responsible for driver licensing and vehicle registration in Victoria, Australia",
 			"identities": {
+				"facebook": "Vicroads",
 				"website": "https://www.vicroads.vic.gov.au"
 			},
 			"label": "VicRoads",
+			"logos": {
+				"facebook": "https://graph.facebook.com/Vicroads/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.vicroads.vic.gov.au"
 			]
@@ -139374,9 +139497,6 @@
 			"locationInfoWebsites": [
 				"https://www.fashion-luna.com/SRB_rs/lokali-po-gradovima"
 			],
-			"logos": {
-				"facebook": "https://graph.facebook.com/byLUNAfashion/picture?type=large"
-			},
 			"officialWebsites": [
 				"https://www.fashion-luna.com/"
 			]
@@ -146075,13 +146195,13 @@
 			]
 		},
 		"Q135270188": {
-			"description": "jewelry store chain in the United States",
+			"description": "Jewelry store chain in the United States",
 			"identities": {
-				"facebook": "HannoushJewelry",
-				"instagram": "hannoushjewelers",
+				"facebook": "hannoushma",
+				"instagram": "hannoushjewelerschicopee",
 				"linkedin": "hannoush-jewelers-inc",
 				"twitter": "HannoushJewelry",
-				"website": "https://www.hannoush.com/",
+				"website": "https://www.hannoushma.com",
 				"youtubeHandle": "HannoushJewelers"
 			},
 			"label": "Hannoush Jewelers",
@@ -146089,10 +146209,11 @@
 				"https://www.hannoush.com/pages/store-locator"
 			],
 			"logos": {
-				"facebook": "https://graph.facebook.com/HannoushJewelry/picture?type=large"
+				"facebook": "https://graph.facebook.com/hannoushma/picture?type=large"
 			},
 			"officialWebsites": [
-				"https://www.hannoush.com/"
+				"https://www.hannoush.com/",
+				"https://www.hannoushma.com"
 			],
 			"urlMatchPatterns": [
 				"^https:\\/\\/www\\.hannoush\\.com\\/pages\\/([-\\w]+)$"
@@ -146744,8 +146865,13 @@
 			"officialWebsites": []
 		},
 		"Q135686550": {
-			"label": "Mr. Wild Man",
-			"officialWebsites": []
+			"identities": {
+				"website": "https://www.yeahgelato.cn/"
+			},
+			"label": "Gelato",
+			"officialWebsites": [
+				"https://www.yeahgelato.cn/"
+			]
 		},
 		"Q135725721": {
 			"identities": {
@@ -150271,9 +150397,6 @@
 				"website": "https://www.qooqybakery.ge"
 			},
 			"label": "QooQy",
-			"logos": {
-				"facebook": "https://graph.facebook.com/QooQyBakery/picture?type=large"
-			},
 			"officialWebsites": [
 				"https://www.qooqybakery.ge"
 			]
@@ -153597,8 +153720,21 @@
 		},
 		"Q139071415": {
 			"description": "electric car charging brand, operated by OMV",
+			"identities": {
+				"facebook": "OMV",
+				"website": "https://www.omv.com/en/expertise/fuels/electric-mobility"
+			},
 			"label": "eMotion",
-			"officialWebsites": []
+			"locationInfoWebsites": [
+				"https://www.omv.at/de/mobilitaet/e-mobilitaet"
+			],
+			"logos": {
+				"facebook": "https://graph.facebook.com/OMV/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://www.omv.bg/bg/mobilnost-i-zarezhdane/elektricheski-zariadni-stantcii",
+				"https://www.omv.com/en/expertise/fuels/electric-mobility"
+			]
 		},
 		"Q139098562": {
 			"description": "shoe retail chain",
@@ -154006,6 +154142,7 @@
 			]
 		},
 		"Q139373328": {
+			"description": "electric vehicle charging network in Bulgaria",
 			"identities": {
 				"facebook": "electripbulgaria",
 				"website": "https://electrip.net/bg"
@@ -156963,7 +157100,7 @@
 			"identities": {
 				"facebook": "ComboioFertagus",
 				"instagram": "fertagus",
-				"website": "https://www.fertagus.pt"
+				"website": "https://www.fertagus.pt/"
 			},
 			"label": "Fertagus",
 			"logos": {
@@ -156971,7 +157108,7 @@
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Fertagus logo.svg"
 			},
 			"officialWebsites": [
-				"https://www.fertagus.pt"
+				"https://www.fertagus.pt/"
 			]
 		},
 		"Q1408870": {
@@ -157429,6 +157566,25 @@
 				"https://www.dekra-norisko.fr/"
 			]
 		},
+		"Q141159741": {
+			"identities": {
+				"facebook": "AgenceAutomobile",
+				"instagram": "ewigofrance",
+				"tiktok": "ewigo_france",
+				"website": "https://www.ewigo.com/",
+				"youtube": "UCfQScblYW971yS5qK_OE0CA"
+			},
+			"label": "Ewigo",
+			"locationInfoWebsites": [
+				"https://www.ewigo.com/points-de-vente/"
+			],
+			"logos": {
+				"facebook": "https://graph.facebook.com/AgenceAutomobile/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://www.ewigo.com/"
+			]
+		},
 		"Q141160707": {
 			"identities": {
 				"facebook": "distinxion.autos.fr",
@@ -157575,6 +157731,20 @@
 			},
 			"officialWebsites": [
 				"https://www.cestdeuxeuros.com/"
+			]
+		},
+		"Q141190900": {
+			"description": "Swiss sushi fast-food chain",
+			"identities": {
+				"facebook": "108365890981122",
+				"website": "https://www.tinyfish.ch/"
+			},
+			"label": "tinyfish",
+			"logos": {
+				"facebook": "https://graph.facebook.com/108365890981122/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://www.tinyfish.ch/"
 			]
 		},
 		"Q141191958": {
@@ -157761,6 +157931,16 @@
 				"https://vog.fr/"
 			]
 		},
+		"Q141235933": {
+			"description": "Argentine fuel refining and retailing company",
+			"identities": {
+				"website": "https://www.wico.com.ar/"
+			},
+			"label": "WICO",
+			"officialWebsites": [
+				"https://www.wico.com.ar/"
+			]
+		},
 		"Q141238019": {
 			"description": "South African agricultural supply retail chain",
 			"identities": {
@@ -157774,6 +157954,16 @@
 			},
 			"officialWebsites": [
 				"https://www.agrimark.co.za/"
+			]
+		},
+		"Q141238478": {
+			"description": "South African household linen and soft furnishings retail chain",
+			"identities": {
+				"website": "https://bedbathhome.co.za"
+			},
+			"label": "Whitehouse & Continental Linen",
+			"officialWebsites": [
+				"https://bedbathhome.co.za"
 			]
 		},
 		"Q141242163": {
@@ -158162,6 +158352,71 @@
 			"officialWebsites": [
 				"https://jacklecoq.com",
 				"https://jacklecoq.com/en/"
+			]
+		},
+		"Q141447618": {
+			"description": "Norwegian fastfood pizza chain",
+			"identities": {
+				"facebook": "diggpizza",
+				"website": "https://digg.no"
+			},
+			"label": "DIGG Pizza",
+			"logos": {
+				"facebook": "https://graph.facebook.com/diggpizza/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://digg.no"
+			]
+		},
+		"Q141459039": {
+			"description": "Romanian hardware store chain",
+			"identities": {
+				"facebook": "BricoRomania",
+				"instagram": "bricoromania",
+				"linkedin": "brico-romania",
+				"tiktok": "bricoromania",
+				"website": "https://bricostore.ro/",
+				"youtubeHandle": "BricoRomania"
+			},
+			"label": "Brico",
+			"logos": {
+				"facebook": "https://graph.facebook.com/BricoRomania/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://bricostore.ro/"
+			]
+		},
+		"Q141462072": {
+			"description": "Romanian retail chain for garden, pet and farm products",
+			"identities": {
+				"facebook": "Agroland1Romania",
+				"instagram": "agroland.romania",
+				"linkedin": "agroland",
+				"pinterest": "AgrolandRomania",
+				"website": "https://agroland.ro/",
+				"youtube": "UCuD__Q850XYyEzHzbA9bERQ"
+			},
+			"label": "Agroland",
+			"logos": {
+				"facebook": "https://graph.facebook.com/Agroland1Romania/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://agroland.ro/"
+			]
+		},
+		"Q141462391": {
+			"description": "Romanian footwear manufacturer and retailer",
+			"identities": {
+				"facebook": "marelbo.official",
+				"instagram": "marelbo.official",
+				"website": "https://marelbo.com/"
+			},
+			"label": "Marelbo",
+			"logos": {
+				"facebook": "https://graph.facebook.com/marelbo.official/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://marelbo.com/"
 			]
 		},
 		"Q1414813": {
@@ -158998,7 +159253,7 @@
 			"label": "Vivo",
 			"logos": {
 				"facebook": "https://graph.facebook.com/vivo/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Logo Vivo Purpura Positivo.svg"
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Vivo (Brazil) logo.svg"
 			},
 			"officialWebsites": [
 				"https://www.vivo.com.br"
@@ -160247,16 +160502,21 @@
 			"description": "government agency",
 			"identities": {
 				"facebook": "WIDNR",
+				"instagram": "wi_dnr",
 				"pinterest": "wdnr",
+				"threads": "wi_dnr",
 				"twitter": "WDNR",
-				"website": "http://dnr.wi.gov"
+				"website": "https://dnr.wisconsin.gov/",
+				"youtube": "UCXxmfKh4WwJuw0eCEC6LQ9w",
+				"youtubeHandle": "WIDNRTV"
 			},
 			"label": "Wisconsin Department of Natural Resources",
 			"logos": {
 				"facebook": "https://graph.facebook.com/WIDNR/picture?type=large"
 			},
 			"officialWebsites": [
-				"http://dnr.wi.gov"
+				"http://dnr.wi.gov",
+				"https://dnr.wisconsin.gov/"
 			]
 		},
 		"Q14680260": {
@@ -160825,7 +161085,7 @@
 			"description": "Spanish hotel chain",
 			"identities": {
 				"facebook": "paradores",
-				"website": "http://www.parador.es"
+				"website": "https://www.paradores.es"
 			},
 			"label": "Paradores de Turismo",
 			"logos": {
@@ -160833,7 +161093,7 @@
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/LogotipoParadores.svg"
 			},
 			"officialWebsites": [
-				"http://www.parador.es"
+				"https://www.paradores.es"
 			]
 		},
 		"Q1476881": {
@@ -164122,7 +164382,7 @@
 			"label": "VTB Bank",
 			"logos": {
 				"facebook": "https://graph.facebook.com/vtbrussia/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FVTB%20Logo%202018%20Latin%20Alphabet%20version.png&width=150"
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/VTB Logo 2018.svg"
 			},
 			"officialWebsites": [
 				"https://vtb.com",
@@ -168316,7 +168576,7 @@
 			]
 		},
 		"Q160120": {
-			"description": "Chinese multinational technology company",
+			"description": "Chinese multinational technology enterprise",
 			"identities": {
 				"facebook": "huaweimobile",
 				"instagram": "huawei",
@@ -174666,7 +174926,7 @@
 				"twitter": "USFCHEFSTORE",
 				"website": "https://www.chefstore.com/"
 			},
-			"label": "CHEF'STORE",
+			"label": "Chef'Store",
 			"logos": {
 				"facebook": "https://graph.facebook.com/USFChefStore/picture?type=large",
 				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FUSFoods%20CHEFSTORE%20Logo.png&width=150"
@@ -177885,7 +178145,7 @@
 			]
 		},
 		"Q16998281": {
-			"description": "Fuel station brand in the UK",
+			"description": "fuel station brand in the UK and formerly in Sweden",
 			"identities": {
 				"website": "https://murco.co.uk/"
 			},
@@ -180690,23 +180950,6 @@
 			"label": "Tallgrass Energy Partners",
 			"officialWebsites": [
 				"https://tallgrass.com/"
-			]
-		},
-		"Q17089620": {
-			"description": "global network of electric vehicle fast-charging stations operated by Tesla, Inc.",
-			"identities": {
-				"twitter": "Tesla",
-				"website": "https://www.tesla.com/supercharger"
-			},
-			"label": "Tesla Supercharger network",
-			"locationInfoWebsites": [
-				"https://www.tesla.com/findus"
-			],
-			"logos": {
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Tesla T symbol.svg"
-			},
-			"officialWebsites": [
-				"https://www.tesla.com/supercharger"
 			]
 		},
 		"Q17089825": {
@@ -183997,7 +184240,7 @@
 				"facebook": "PetromRo",
 				"instagram": "omvpetrom",
 				"linkedin": "petrom",
-				"website": "https://www.omv.ro",
+				"website": "https://www.omvpetrom.com",
 				"youtube": "UCG8W2kdFZ7aCbSxp21RV6lg"
 			},
 			"label": "OMV Petrom",
@@ -184006,10 +184249,9 @@
 				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FOMV%20Petrom.jpg&width=150"
 			},
 			"officialWebsites": [
-				"https://www.omv.ro",
 				"https://www.omvpetrom.com",
 				"https://www.petrom.ro/",
-				"https://www.omv.si"
+				"https://www.omv.ro"
 			]
 		},
 		"Q1755705": {
@@ -187683,9 +187925,13 @@
 		},
 		"Q18223400": {
 			"identities": {
+				"facebook": "SomosGlobalcaja",
 				"website": "http://www.globalcaja.es/"
 			},
 			"label": "Globalcaja",
+			"logos": {
+				"facebook": "https://graph.facebook.com/SomosGlobalcaja/picture?type=large"
+			},
 			"officialWebsites": [
 				"http://www.globalcaja.es/"
 			]
@@ -188034,7 +188280,7 @@
 			"label": "vivo",
 			"logos": {
 				"facebook": "https://graph.facebook.com/vivomobileit/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Vivo logo 2019.svg"
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Vivo (China) logo.svg"
 			},
 			"officialWebsites": [
 				"https://www.vivo.com/",
@@ -189448,6 +189694,20 @@
 				"https://www.tfgm.com/public-transport/tram"
 			]
 		},
+		"Q18548069": {
+			"description": "Romanian furniture retail chain",
+			"identities": {
+				"facebook": "staer.ro",
+				"website": "https://staer.ro/"
+			},
+			"label": "Staer",
+			"logos": {
+				"facebook": "https://graph.facebook.com/staer.ro/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://staer.ro/"
+			]
+		},
 		"Q185564": {
 			"description": "company",
 			"identities": {
@@ -190758,7 +191018,7 @@
 			]
 		},
 		"Q188514": {
-			"description": "Indian multinational automotive manufacturing company",
+			"description": "Indian multinational automotive manufacturer",
 			"identities": {
 				"facebook": "TataMotorsGroup",
 				"instagram": "tatamotorsgroup",
@@ -190766,7 +191026,7 @@
 				"twitter": "TataMotors",
 				"website": "https://www.tatamotors.com/"
 			},
-			"label": "Tata Motors Ltd",
+			"label": "Tata Motors Limited",
 			"locationInfoWebsites": [
 				"https://dealer-locator.cars.tatamotors.com/",
 				"https://www.tata.co.za/dealer-locator"
@@ -190778,7 +191038,6 @@
 			"officialWebsites": [
 				"https://www.tatamotors.com/",
 				"https://www.commercial-vehicles.buytrucknbus.tatamotors.com",
-				"https://www.nexonev.tatamotors.com",
 				"https://www.tata.co.za/"
 			]
 		},
@@ -191755,7 +192014,7 @@
 			]
 		},
 		"Q191731": {
-			"description": "flag of the state of Palastine",
+			"description": "flag of the state of Palestine",
 			"label": "Flag of Palestine",
 			"logos": {
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Flag of Palestine.svg"
@@ -197660,6 +197919,22 @@
 				"https://www.city.toyama.toyama.jp/vietnamese/VietNam.html"
 			]
 		},
+		"Q20427104": {
+			"description": "Light rapid transit in Greater Jakarta",
+			"identities": {
+				"facebook": "lrtjabodebek",
+				"instagram": "lrt_jabodebek",
+				"website": "https://lrtjabodebek.kai.id/"
+			},
+			"label": "Jabodebek LRT",
+			"logos": {
+				"facebook": "https://graph.facebook.com/lrtjabodebek/picture?type=large",
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Jabodebek LRT.svg"
+			},
+			"officialWebsites": [
+				"https://lrtjabodebek.kai.id/"
+			]
+		},
 		"Q20429441": {
 			"description": "bank in Moldova",
 			"identities": {
@@ -199946,10 +200221,14 @@
 		"Q20908850": {
 			"description": "Spanish bank",
 			"identities": {
+				"facebook": "unicajabanco",
 				"twitter": "UnicajaBanco",
 				"website": "https://www.unicajabanco.es"
 			},
 			"label": "Unicaja Banco",
+			"logos": {
+				"facebook": "https://graph.facebook.com/unicajabanco/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.unicajabanco.es"
 			]
@@ -202837,7 +203116,7 @@
 			]
 		},
 		"Q215293": {
-			"description": "automotive brand manufacturing subsidiary of Geely",
+			"description": "Swedish automobile manufacturer",
 			"identities": {
 				"facebook": "volvocarde",
 				"instagram": "volvocarde",
@@ -203832,7 +204111,7 @@
 			]
 		},
 		"Q219060": {
-			"description": "A political entity that enjoys incomplete recognition as a state, located in West Asia",
+			"description": "political entity that enjoys incomplete recognition as a state, located in West Asia",
 			"identities": {
 				"website": "https://president.ps/"
 			},
@@ -210236,7 +210515,7 @@
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Coop Logo.svg"
 			},
 			"officialWebsites": [
-				"https://coop.nl/",
+				"https://www.lekkermakkelijk.nl/coop",
 				"https://www.coop.cz",
 				"https://www.coop.se/"
 			]
@@ -210317,6 +210596,7 @@
 		"Q2393003": {
 			"description": "transport company in France",
 			"identities": {
+				"linkedin": "aprr",
 				"website": "http://www.aprr.com"
 			},
 			"label": "Autoroutes Paris-Rhin-Rh\u00f4ne",
@@ -213893,12 +214173,12 @@
 				"instagram": "delko_france",
 				"linkedin": "delko",
 				"tiktok": "delko_france",
-				"website": "https://delko.fr/",
+				"website": "https://www.delko.com/",
 				"youtube": "UCUOCxC3F9Xk_eXNoHuaTC_A"
 			},
 			"label": "Delko",
 			"locationInfoWebsites": [
-				"https://delko.fr/garage/",
+				"https://www.delko.com/garages/",
 				"https://franchise.delko.fr/"
 			],
 			"logos": {
@@ -213906,7 +214186,7 @@
 				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FLogo-delko-2025.png&width=150"
 			},
 			"officialWebsites": [
-				"https://delko.fr/"
+				"https://www.delko.com/"
 			]
 		},
 		"Q24935610": {
@@ -219200,6 +219480,9 @@
 				"website": "https://cimvdl.pt/"
 			},
 			"label": "Viseu D\u00e3o Laf\u00f5es (intermunicipal community)",
+			"logos": {
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Logo of Viseu D\u00e3o Laf\u00f5es Intermunicipal Community.svg"
+			},
 			"officialWebsites": [
 				"https://cimvdl.pt/"
 			]
@@ -219464,7 +219747,7 @@
 				"youtube": "UCYwrS5QvBY_JbSdbINLey6Q",
 				"youtubeHandle": "BMWGroupView"
 			},
-			"label": "BMW Group",
+			"label": "BMW",
 			"logos": {
 				"facebook": "https://graph.facebook.com/BMW/picture?type=large",
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/BMW logo (gray).svg"
@@ -230941,9 +231224,13 @@
 		"Q295611": {
 			"description": "Italian road construction company",
 			"identities": {
+				"facebook": "StradeAnas",
 				"website": "https://www.stradeanas.it"
 			},
 			"label": "ANAS",
+			"logos": {
+				"facebook": "https://graph.facebook.com/StradeAnas/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.stradeanas.it",
 				"http://www.stradeanas.it"
@@ -233060,7 +233347,7 @@
 			"label": "AWG Mode",
 			"logos": {
 				"facebook": "https://graph.facebook.com/AWG.Mode/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/AWG-Modecenter.svg"
+				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FLogo%20AWG%20Mode%20Alle%20Werden%20Gl%C3%BCcklich%2009.2026.webp&width=150"
 			},
 			"officialWebsites": [
 				"https://www.awg-mode.de"
@@ -234782,7 +235069,7 @@
 			]
 		},
 		"Q3036373": {
-			"description": "master franchise of the Burger King brand in Australia",
+			"description": "master frenchise of the Burger King brand in Australia",
 			"identities": {
 				"facebook": "HungryJacks",
 				"instagram": "hungryjacksau",
@@ -234791,7 +235078,7 @@
 				"website": "https://www.hungryjacks.com.au",
 				"youtube": "UC8RggNMOd77S38sGIx5592A"
 			},
-			"label": "Hungry Jack's",
+			"label": "Hungry Jake's",
 			"locationInfoWebsites": [
 				"https://www.hungryjacks.com.au/find-us"
 			],
@@ -235346,6 +235633,17 @@
 			},
 			"officialWebsites": [
 				"http://www.westlandinfra.nl/"
+			]
+		},
+		"Q3053001": {
+			"description": "organization",
+			"identities": {
+				"twitter": "emmaus_france",
+				"website": "http://www.emmaus-france.org/"
+			},
+			"label": "Emmaus france",
+			"officialWebsites": [
+				"http://www.emmaus-france.org/"
 			]
 		},
 		"Q3053375": {
@@ -241341,7 +241639,7 @@
 				"instagram": "knigovorot",
 				"tiktok": "knigovorot",
 				"twitter": "bookcrossing_su",
-				"vk": "knigovorot",
+				"vk": "bookcrossing",
 				"website": "https://www.bookcrossing.com/",
 				"youtube": "UCfn6_m-_4Xvv2rbgFpurvdw",
 				"youtubeHandle": "knigovorot"
@@ -242695,11 +242993,18 @@
 		},
 		"Q3297794": {
 			"description": "community of municipalities in Pamplona, Spain",
+			"identities": {
+				"facebook": "mancomunidadcomarcapamplona",
+				"website": "https://www.mcp.es/"
+			},
 			"label": "Pamplona metropolitan area",
 			"logos": {
+				"facebook": "https://graph.facebook.com/mancomunidadcomarcapamplona/picture?type=large",
 				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FLogo%20MCP.jpg&width=150"
 			},
-			"officialWebsites": []
+			"officialWebsites": [
+				"https://www.mcp.es/"
+			]
 		},
 		"Q3297972": {
 			"description": "government agency",
@@ -243034,7 +243339,7 @@
 			]
 		},
 		"Q3307451": {
-			"description": "Crown agency",
+			"description": "Ontario Crown agency",
 			"identities": {
 				"instagram": "metrolinx",
 				"tiktok": "metrolinx",
@@ -247097,12 +247402,18 @@
 			]
 		},
 		"Q3456841": {
-			"description": "interurban transport network of Gironde, France",
+			"description": "former interurban transport network of Gironde, France",
+			"dissolutions": [
+				{
+					"date": "2021-01-01T00:00:00.000Z",
+					"upgrade": "Q139418123"
+				}
+			],
 			"identities": {
 				"twitter": "Transgironde",
 				"website": "https://www.transgironde.fr/"
 			},
-			"label": "R\u00e9seau interurbain de Gironde",
+			"label": "TransGironde",
 			"officialWebsites": [
 				"http://transgironde.gironde.fr",
 				"https://www.transgironde.fr/"
@@ -247927,6 +248238,18 @@
 			},
 			"officialWebsites": [
 				"https://www.okc.gov/"
+			]
+		},
+		"Q3487061": {
+			"description": "French company that designs, manufactures and markets products related to bike sharing",
+			"identities": {
+				"linkedin": "fifteeneu",
+				"twitter": "fifteeneu",
+				"website": "https://fifteen.eu/fr/"
+			},
+			"label": "Fifteen",
+			"officialWebsites": [
+				"https://fifteen.eu/fr/"
 			]
 		},
 		"Q3487620": {
@@ -249987,11 +250310,12 @@
 		"Q3540213": {
 			"description": "municipal sector of Marseille, France",
 			"identities": {
-				"website": "https://www.marseille4-5.com/"
+				"website": "https://www.marseille4-5.fr/"
 			},
 			"label": "third sector of Marseille",
 			"officialWebsites": [
-				"https://www.marseille4-5.com/"
+				"https://www.marseille4-5.com/",
+				"https://www.marseille4-5.fr/"
 			]
 		},
 		"Q3540261": {
@@ -250510,6 +250834,9 @@
 				"website": "https://www.infotbm.com/fr/le-velo"
 			},
 			"label": "LE V\u00c9LO",
+			"locationInfoWebsites": [
+				"https://www.infotbm.com/fr/le-velo/trouver-ma-station"
+			],
 			"officialWebsites": [
 				"https://www.infotbm.com/fr/le-velo",
 				"http://www.VCub.fr"
@@ -270611,12 +270938,12 @@
 			]
 		},
 		"Q482539": {
-			"description": "Italian sportswear brand owned by South-Korean company Misto Holdings.",
+			"description": "South-Korean sportswear brand owned",
 			"identities": {
 				"facebook": "filausa",
 				"instagram": "filausa",
 				"twitter": "filausa",
-				"website": "https://www.fila.com/regionselector",
+				"website": "https://www.fila.com/",
 				"youtube": "UCeVfEdKeGrv0bRqN0qI6FFA",
 				"youtubeHandle": "filaeurope"
 			},
@@ -270626,7 +270953,7 @@
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Fila logo.svg"
 			},
 			"officialWebsites": [
-				"https://www.fila.com/regionselector"
+				"https://www.fila.com/"
 			]
 		},
 		"Q4826087": {
@@ -275904,6 +276231,20 @@
 				"https://www.biggby.com/"
 			]
 		},
+		"Q4907014": {
+			"description": "Romanian men's clothing retailer",
+			"identities": {
+				"facebook": "bigotti.romania",
+				"website": "https://www.bigotti.eu/"
+			},
+			"label": "Bigotti",
+			"logos": {
+				"facebook": "https://graph.facebook.com/bigotti.romania/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://www.bigotti.eu/"
+			]
+		},
 		"Q490737": {
 			"description": "city in Hennepin County, Minnesota, United States",
 			"identities": {
@@ -276537,12 +276878,10 @@
 		"Q49218": {
 			"description": "county seat of Monroe County, New York, United States",
 			"identities": {
-				"facebook": "CityofRochesterNY",
 				"website": "https://www.cityofrochester.gov/"
 			},
 			"label": "Rochester",
 			"logos": {
-				"facebook": "https://graph.facebook.com/CityofRochesterNY/picture?type=large",
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Seal of Rochester, New York.svg"
 			},
 			"officialWebsites": [
@@ -294574,7 +294913,8 @@
 				"https://euronet.pl/",
 				"https://geldautomat.de/",
 				"https://www.euronetatms.com/",
-				"https://www.euronetatms.es/"
+				"https://www.euronetatms.es/",
+				"https://www.euronetatms.lt/"
 			]
 		},
 		"Q5412861": {
@@ -294790,6 +295130,12 @@
 		},
 		"Q54173": {
 			"description": "American multinational conglomerate (1892\u20132024)",
+			"dissolutions": [
+				{
+					"date": "2024-01-01T00:00:00.000Z",
+					"upgrade": "Q118957699"
+				}
+			],
 			"identities": {
 				"instagram": "generalelectric",
 				"linkedin": "ge",
@@ -295887,9 +296233,13 @@
 		"Q5440417": {
 			"description": "road safety corps",
 			"identities": {
+				"facebook": "FRSCNigeria",
 				"website": "http://frsc.gov.ng"
 			},
 			"label": "Federal Road Safety Corps",
+			"logos": {
+				"facebook": "https://graph.facebook.com/FRSCNigeria/picture?type=large"
+			},
 			"officialWebsites": [
 				"http://frsc.gov.ng"
 			]
@@ -296521,12 +296871,15 @@
 		"Q5453803": {
 			"description": "British bus operator",
 			"identities": {
-				"facebook": "FirstWestofEngland",
+				"facebook": "FirstBusUK",
 				"instagram": "firstwestofengland",
 				"twitter": "FirstBSA",
 				"website": "https://www.firstbus.co.uk/bristol-bath-and-west"
 			},
 			"label": "First West of England",
+			"logos": {
+				"facebook": "https://graph.facebook.com/FirstBusUK/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.firstbus.co.uk/bristol-bath-and-west"
 			]
@@ -298810,6 +299163,17 @@
 			},
 			"officialWebsites": [
 				"https://www.scanquilt.cz/"
+			]
+		},
+		"Q54968106": {
+			"description": "energy company in the Czech Republic",
+			"identities": {
+				"website": "https://energo.innogy.cz/"
+			},
+			"label": "innogy Energo",
+			"officialWebsites": [
+				"https://energo.innogy.cz/",
+				"https://www.innogy.cz/energo/index/"
 			]
 		},
 		"Q5496837": {
@@ -301212,7 +301576,6 @@
 				"https://www.giraffe.net/find-a-giraffe"
 			],
 			"logos": {
-				"facebook": "https://graph.facebook.com/girafferestaurants/picture?type=large",
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Giraffe-logo.svg"
 			},
 			"officialWebsites": [
@@ -306339,6 +306702,22 @@
 				"http://www.hpedsb.on.ca/"
 			]
 		},
+		"Q56810702": {
+			"description": "light rapid transit in Jakarta",
+			"identities": {
+				"facebook": "lrtjkt",
+				"instagram": "lrtjkt",
+				"website": "http://www.lrtjakarta.co.id/"
+			},
+			"label": "Jakarta LRT",
+			"logos": {
+				"facebook": "https://graph.facebook.com/lrtjkt/picture?type=large",
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Jakarta LRT logo.svg"
+			},
+			"officialWebsites": [
+				"http://www.lrtjakarta.co.id/"
+			]
+		},
 		"Q56811344": {
 			"description": "Chinese coffee shop company",
 			"identities": {
@@ -307694,9 +308073,13 @@
 		},
 		"Q5739403": {
 			"identities": {
+				"facebook": "cajaruralteruel",
 				"website": "https://www.ruralteruel.com/es"
 			},
 			"label": "Caja Rural de Teruel",
+			"logos": {
+				"facebook": "https://graph.facebook.com/cajaruralteruel/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.ruralteruel.com/es"
 			]
@@ -307887,7 +308270,7 @@
 			"identities": {
 				"website": "http://www.castillalamancha.es/"
 			},
-			"label": "Castile\u2013La Mancha",
+			"label": "Castilla\u2013La Mancha",
 			"logos": {
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Escudo de Castilla-La Mancha.svg"
 			},
@@ -318204,7 +318587,7 @@
 			"identities": {
 				"website": "http://www.sitp.gov.co/"
 			},
-			"label": "Integrated Public Transport System",
+			"label": "TransMiZonal",
 			"logos": {
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Sitp Bogot\u00e1 logo.svg"
 			},
@@ -319011,6 +319394,7 @@
 			"description": "bus company",
 			"identities": {
 				"instagram": "avanzaenzaragoza",
+				"tiktok": "avanzaenzaragoza",
 				"website": "http://zaragoza.avanzagrupo.com",
 				"youtube": "UC90UujKcPblc_T4cnIrSu2w"
 			},
@@ -319842,7 +320226,7 @@
 			},
 			"label": "Stendalbus",
 			"logos": {
-				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FStendalBus%20TD%20Logo%20CMYK.jpg&width=150"
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Stendalbus Logo 2020.svg"
 			},
 			"officialWebsites": [
 				"http://www.stendalbus.de/"
@@ -325047,11 +325431,13 @@
 		"Q63247817": {
 			"description": "integrated mobility services system of Viseu, Portugal",
 			"identities": {
+				"facebook": "muviseu",
 				"website": "http://www.muv.pt/"
 			},
 			"label": "Mobilidade Urbana de Viseu",
 			"logos": {
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Logo MUV.svg"
+				"facebook": "https://graph.facebook.com/muviseu/picture?type=large",
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/V MUV.svg"
 			},
 			"officialWebsites": [
 				"http://www.muv.pt/"
@@ -328790,7 +329176,7 @@
 			"label": "Swisscom",
 			"logos": {
 				"facebook": "https://graph.facebook.com/Swisscom/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Swisscom Logo.svg"
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Swisscom Logo 2025.svg"
 			},
 			"officialWebsites": [
 				"https://www.swisscom.ch/"
@@ -332140,6 +332526,25 @@
 				"https://www.muchoburritous.com/"
 			]
 		},
+		"Q65151892": {
+			"identities": {
+				"facebook": "fitnessboutiquefrance",
+				"instagram": "fitnessboutiquefrance",
+				"tiktok": "fitnessboutique",
+				"website": "https://www.fitnessboutique.fr/",
+				"youtube": "UC08Zz9uXNBPglN3UUSsmyIg"
+			},
+			"label": "FitnessBoutique",
+			"locationInfoWebsites": [
+				"https://www.fitnessboutique.fr/pages/trouver-magasin"
+			],
+			"logos": {
+				"facebook": "https://graph.facebook.com/fitnessboutiquefrance/picture?type=large"
+			},
+			"officialWebsites": [
+				"https://www.fitnessboutique.fr/"
+			]
+		},
 		"Q6515314": {
 			"description": "Norwegian agency for maritime administation",
 			"identities": {
@@ -333683,6 +334088,9 @@
 		"Q65681329": {
 			"description": "private foreign language education institution in Taiwan",
 			"label": "Global Village Organization",
+			"logos": {
+				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2F%E5%9C%B0%E7%90%83%E6%9D%91%E7%BE%8E%E6%97%A5%E9%9F%93%E8%AA%9E%E5%95%86%E6%A8%99.gif&width=150"
+			},
 			"officialWebsites": []
 		},
 		"Q65684234": {
@@ -349077,7 +349485,8 @@
 			},
 			"label": "PGE Energetyka Kolejowa",
 			"logos": {
-				"facebook": "https://graph.facebook.com/gkpge/picture?type=large"
+				"facebook": "https://graph.facebook.com/gkpge/picture?type=large",
+				"wikidata": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FLogo%20PGE%20Energetyka%20Kolejowa.png&width=150"
 			},
 			"officialWebsites": [
 				"https://pgeenergetykakolejowa.pl/"
@@ -354176,14 +354585,17 @@
 			]
 		},
 		"Q72981668": {
-			"description": "American women's clothing store chain",
+			"description": "American women's fashion retailer",
 			"identities": {
 				"facebook": "Windsorstore",
 				"instagram": "windsorstore",
 				"pinterest": "windsorstore",
 				"threads": "windsorstore",
+				"tiktok": "windsorstore",
 				"twitter": "Windsorstore",
-				"website": "https://www.windsorstore.com/"
+				"website": "https://www.windsorstore.com/",
+				"youtube": "UC82OGMVgw_RE6qMfnj6b_8g",
+				"youtubeHandle": "Windsorstore"
 			},
 			"label": "Windsor",
 			"logos": {
@@ -355896,9 +356308,13 @@
 		},
 		"Q73399877": {
 			"identities": {
+				"facebook": "cajaruraldenavarra",
 				"website": "https://www.cajaruraldenavarra.com"
 			},
 			"label": "Caja Rural de Navarra",
+			"logos": {
+				"facebook": "https://graph.facebook.com/cajaruraldenavarra/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.cajaruraldenavarra.com"
 			]
@@ -359002,6 +359418,9 @@
 				"website": "https://www.scope.org.uk/"
 			},
 			"label": "Scope",
+			"logos": {
+				"facebook": "https://graph.facebook.com/Scope/picture?type=large"
+			},
 			"officialWebsites": [
 				"https://www.scope.org.uk/"
 			]
@@ -363667,10 +364086,11 @@
 		"Q7596840": {
 			"description": "Bus operator in North West England",
 			"identities": {
-				"website": "http://www.stagecoachbus.com/region_4.html"
+				"website": "https://www.stagecoachbus.com/about/cumbria-and-north-lancashire"
 			},
 			"label": "Stagecoach Cumbria and Lancashire",
 			"officialWebsites": [
+				"https://www.stagecoachbus.com/about/cumbria-and-north-lancashire",
 				"http://www.stagecoachbus.com/region_4.html"
 			]
 		},
@@ -363679,7 +364099,7 @@
 			"dissolutions": [
 				{
 					"date": "2025-12-01T00:00:00.000Z",
-					"upgrade": "Q138865951"
+					"upgrade": "Q7596840"
 				}
 			],
 			"identities": {
@@ -375137,7 +375557,7 @@
 			],
 			"logos": {
 				"facebook": "https://graph.facebook.com/frdmmobile/picture?type=large",
-				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Freedom Mobile 2024 Logo.svg"
+				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Freedom Mobile 2025 logo.svg"
 			},
 			"officialWebsites": [
 				"http://www.windmobile.ca/",
@@ -382601,7 +383021,6 @@
 				"facebook": "https://graph.facebook.com/Bezeq/picture?type=large"
 			},
 			"officialWebsites": [
-				"http://www.bezeq.co.il",
 				"https://www.bezeq.co.il"
 			]
 		},
@@ -383442,7 +383861,7 @@
 			]
 		},
 		"Q858": {
-			"description": "Country in West Asia",
+			"description": "country in West Asia",
 			"label": "Syria",
 			"logos": {
 				"wikidata": "https://commons.wikimedia.org/wiki/Special:FilePath/Emblem of Syria (2025\u2013present).svg"
@@ -389805,6 +390224,9 @@
 		},
 		"Q9068439": {
 			"description": "Spanish bus network",
+			"identities": {
+				"facebook": "reustransport"
+			},
 			"label": "Reus Transport",
 			"officialWebsites": []
 		},
@@ -396016,7 +396438,7 @@
 			"identities": {
 				"facebook": "FeltrinelliLibrerie",
 				"instagram": "lafeltrinelli",
-				"twitter": "Feltrinelli_",
+				"twitter": "LaFeltrinelli",
 				"website": "https://laFeltrinelli.it",
 				"youtube": "UC8by66NojhMg2XKOlxOkpSg",
 				"youtubeHandle": "feltrinelli_librerie"
