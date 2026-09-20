@@ -13,6 +13,8 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 API_URL = "https://api.communico.co/v1/{}"
 IMAGE_URL = "https://static.libnet.info/images/locations/{}/{}"
+# A location the library has no coordinates for is published at 0, 0.
+NULL_COORDINATES = {"0", "0.0", "0.000000", ""}
 
 
 class CommunicoSpider(Spider):
@@ -81,6 +83,9 @@ class CommunicoSpider(Spider):
             # Multi-Service Center" followed by "2020 Jackson Avenue".
             item["located_in"] = address_lines.pop(0).strip()
         item["street_address"] = merge_address_lines(address_lines)
+
+        if location.get("lat") in NULL_COORDINATES and location.get("lon") in NULL_COORDINATES:
+            item["lat"] = item["lon"] = None
 
         item["phone"] = location.get("tel")
         if fax := location.get("fax"):
