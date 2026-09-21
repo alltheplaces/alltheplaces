@@ -39,7 +39,8 @@ class MapionSpider(Spider):
     def parse_detail(self, response: Response) -> Iterable[Feature]:
         if not (m := re.search(r"window\.infoJSON\s*=\s*(\{.*?\});", response.text)):
             return
-        data = json.loads(m.group(1))
+        raw = re.sub(r'(?<!\\)((?:\\\\)*)\\(?!["\\/bfnrtu])', r"\1", m.group(1))  # some store pages have invalid JSON
+        data = json.loads(raw)
         self.pre_process_data(data)
 
         item = DictParser.parse(data)
