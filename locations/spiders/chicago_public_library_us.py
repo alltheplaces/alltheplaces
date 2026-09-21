@@ -23,14 +23,11 @@ class ChicagoPublicLibraryUSSpider(BiblioCommonsSpider):
     def post_process_item(self, item: Feature, response: TextResponse, location: dict, **kwargs) -> Iterable[Feature]:
         branch = item.pop("name")
         if branch == "Harold Washington Library Center":
-            item["branch"] = "Harold Washington"
             item["name"] = branch
         elif branch.endswith(" Regional"):
-            item["branch"] = branch.removesuffix(" Regional")
             item["name"] = "{} Library".format(branch)
         else:
-            item["branch"] = INVERTED_BRANCH_NAMES.get(branch, branch)
-            item["name"] = "{} Branch Library".format(item["branch"])
+            item["name"] = "{} Branch Library".format(INVERTED_BRANCH_NAMES.get(branch, branch))
 
         apply_category(Categories.LIBRARY, item)
 
