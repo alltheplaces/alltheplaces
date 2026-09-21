@@ -128,11 +128,10 @@ class TohoCinemasJPSpider(scrapy.Spider):
             apply_yes_no("cinema:IMAX", item, True)
         if about.xpath('.//a[contains(@href, "/service/mx4d/")]'):
             apply_yes_no("cinema:MX4D", item, True)
-        if about.xpath('.//a[contains(normalize-space(.), "DOLBY ATMOS")]'):
-            apply_yes_no("cinema:dolby_atmos", item, True)
 
-        # ScreenX and Dolby Cinema appear as screen names in the table
         table_text = re.sub(r"\s+", " ", about.xpath("string(.)").get() or "")
+        if re.search(r"DOLBY\s*ATMOS|ドルビーアトモス", table_text):
+            apply_yes_no("cinema:dolby_atmos", item, True)
         if "ScreenX" in table_text:
             apply_yes_no("cinema:screenx", item, True)
         if "ドルビーシネマ" in table_text:
