@@ -74,9 +74,7 @@ class SweetParisUSSpider(Spider):
                 if rule := re.fullmatch(
                     r"(\d{1,2}(?::\d{2})?\s*[ap]m)\s*[\u2013-]\s*(\d{1,2}(?::\d{2})?\s*[ap]m)", time, re.I
                 ):
-                    oh.add_range(
-                        day, self.normalise_time(rule.group(1)), self.normalise_time(rule.group(2)), "%I:%M%p"
-                    )
+                    oh.add_range(day, self.normalise_time(rule.group(1)), self.normalise_time(rule.group(2)), "%I:%M%p")
             item["opening_hours"] = oh if oh else None
 
         yield item
