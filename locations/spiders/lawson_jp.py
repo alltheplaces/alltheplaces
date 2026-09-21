@@ -2,12 +2,11 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, Extras, Fuel, PaymentMethods, Sells, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.categories import Categories, Extras, Sells, Fuel, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.storefinders.areamarker import AreamarkerSpider
-
 
 FIELDS = {
     "ref": "kyo_id",  # store id
@@ -17,40 +16,40 @@ FIELDS = {
     "pre_code": "pre_code",  # prefecture (JIS) code
     "city_code": "city_code",  # municipality (JIS) code
     "addr": "addr_1",  # full street address
-    "city": "col_3", # municipality
-    "street_address": "col_4", # address (from neighborhood)
-    "phone_col": "col_5", # phone (duplicate of tel_1)
-    "brand": "col_6", # brand, defined in BRANDS
-    "24h": "col_7", # open 24/7
-    "open_time": "col_8", # opening time
-    "close_time": "col_9", # closing time
+    "city": "col_3",  # municipality
+    "street_address": "col_4",  # address (from neighborhood)
+    "phone_col": "col_5",  # phone (duplicate of tel_1)
+    "brand": "col_6",  # brand, defined in BRANDS
+    "24h": "col_7",  # open 24/7
+    "open_time": "col_8",  # opening time
+    "close_time": "col_9",  # closing time
     "atm": "col_10",  # ATM
     "phone": "tel_1",  # phone number
     "alcohol": "col_11",  # alcohol
     "tobacco": "col_12",  # tobacco
-    "fax_flag": "col_13", # has fax
+    "fax_flag": "col_13",  # has fax
     "medicine": "col_15",  # medicine
-    "suica": "col_16", # Suica payment
-    "kitaca": "col_17", # Kitaca payment
-    "icoca": "col_18", # icoca payment
-    "branch_hira": "col_29", # branch name (hiragana)
-    "car_charging": "col_33", # electric car charger
-    "photo_print": "col_36", # digital photo printing
-    "dry_cleaning": "col_48", # dry cleaning pickup
-    "wifi": "col_49", # has wifi
-    "fruit_veg": "col_51", # fruits and vegetables
-    "copier": "col_52", # has printer
-    "parking": "col_53", # has parking
-    "manaca": "col_54", # manaca payment
-    "books": "col_56", # sells books
-    "self_service": "col_61", # smartphone checkout
-    "indoor_seating": "col_57", # eating space
-    "wheelchair_toilet": "col_58", # accessible toilet
-    "halal": "col_75", # halal food
-    "tax_free": "col_76", # duty free
-    "soft_serve": "col_77", # soft-serve ice cream
-    "parcel_from": "col_78", # send parcels with Smari
-    "uber_eats": "col_79", # Uber Eats delivery
+    "suica": "col_16",  # Suica payment
+    "kitaca": "col_17",  # Kitaca payment
+    "icoca": "col_18",  # icoca payment
+    "branch_hira": "col_29",  # branch name (hiragana)
+    "car_charging": "col_33",  # electric car charger
+    "photo_print": "col_36",  # digital photo printing
+    "dry_cleaning": "col_48",  # dry cleaning pickup
+    "wifi": "col_49",  # has wifi
+    "fruit_veg": "col_51",  # fruits and vegetables
+    "copier": "col_52",  # has printer
+    "parking": "col_53",  # has parking
+    "manaca": "col_54",  # manaca payment
+    "books": "col_56",  # sells books
+    "self_service": "col_61",  # smartphone checkout
+    "indoor_seating": "col_57",  # eating space
+    "wheelchair_toilet": "col_58",  # accessible toilet
+    "halal": "col_75",  # halal food
+    "tax_free": "col_76",  # duty free
+    "soft_serve": "col_77",  # soft-serve ice cream
+    "parcel_from": "col_78",  # send parcels with Smari
+    "uber_eats": "col_79",  # Uber Eats delivery
 }
 
 BRANDS = {
@@ -58,6 +57,7 @@ BRANDS = {
     "2": ("NATURAL LAWSON", "Q11323850"),
     "4": ("LAWSON STORE 100", "Q11350960"),
 }
+
 
 class LawsonJPSpider(AreamarkerSpider):
     name = "lawson_jp"
@@ -72,7 +72,7 @@ class LawsonJPSpider(AreamarkerSpider):
         store = {label: record["fields"].get(column) for label, column in FIELDS.items()}
 
         item = DictParser.parse(store)
-        
+
         item["brand"], item["brand_wikidata"] = BRANDS.get(store["brand"], (None, None))
         item["branch"] = store["branch"]
         item.set_tag("branch:ja-Hira", store["branch_hira"])
