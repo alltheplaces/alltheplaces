@@ -23,10 +23,10 @@ class LiquorCityZASpider(Spider):
             item = DictParser.parse(location)
             if name := item.pop("name", None):
                 item["branch"] = name.removeprefix("Liquor City ")
-            item["ref"] = location["branch_number"]
+            item["ref"] = location.get("branch_number")
 
             oh = OpeningHours()
-            for day_time in location["working_hours"]:
+            for day_time in location.get("working_hours") or []:
                 if "Public Holiday" in day_time["day"]:
                     continue
                 if day_time.get("closed"):
