@@ -5,7 +5,7 @@ from scrapy.http import TextResponse
 from locations.categories import Categories, Extras, Fuel, PaymentMethods, Sells, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.storefinders.areamarker import AreamarkerSpider
+from locations.storefinders.area_marker import AreaMarkerSpider
 
 BRANDS = {
     "1": ("LAWSON", "Q1557223"),
@@ -14,7 +14,7 @@ BRANDS = {
 }
 
 
-class LawsonJPSpider(AreamarkerSpider):
+class LawsonJPSpider(AreaMarkerSpider):
     name = "lawson_jp"
     item_attributes = {"brand": "LAWSON", "brand_wikidata": "Q1557223"}
     corp_id = "lawson"

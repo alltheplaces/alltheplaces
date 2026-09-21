@@ -7,7 +7,7 @@ from scrapy.http import TextResponse
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.storefinders.areamarker import AreamarkerSpider
+from locations.storefinders.area_marker import AreaMarkerSpider
 
 # The fascia is spelled with either the plain セリア (Seria) or the
 # 生活良品 (Seikatsu Ryohin) sub-brand. Strip either prefix to leave the
@@ -18,7 +18,7 @@ OPENING_HOURS_RE = re.compile(r"^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$")
 HOUR_DAY_FIELDS = ["b_mon", "b_tue", "b_wed", "b_thu", "b_fri", "b_sat", "b_sun"]
 
 
-class SeriaJPSpider(AreamarkerSpider):
+class SeriaJPSpider(AreaMarkerSpider):
     name = "seria_jp"
     item_attributes = {"brand": "セリア", "brand_wikidata": "Q11314509"}
 

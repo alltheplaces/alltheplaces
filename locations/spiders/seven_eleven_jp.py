@@ -6,10 +6,10 @@ from scrapy.http import TextResponse
 
 from locations.categories import Categories, Drink, Extras, Sells, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.storefinders.areamarker import AreamarkerSpider
+from locations.storefinders.area_marker import AreaMarkerSpider
 
 
-class SevenElevenJPSpider(AreamarkerSpider):
+class SevenElevenJPSpider(AreaMarkerSpider):
     name = "seven_eleven_jp"
     item_attributes = {"brand": "7-ELEVEN", "brand_wikidata": "Q259340"}
 

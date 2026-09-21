@@ -7,7 +7,7 @@ from scrapy.http import TextResponse
 from locations.categories import Categories, Extras, Sells, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.storefinders.areamarker import AreamarkerSpider
+from locations.storefinders.area_marker import AreaMarkerSpider
 
 # The brand-family name is spelled with either ー (U+30FC) or － (U+FF0D) and
 # historically as デイリーヤマザキ / ニューヤマザキデイリーストア /
@@ -19,7 +19,7 @@ BRAND_PREFIX_RE = re.compile(
 OPENING_HOURS_RE = re.compile(r"^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$")
 
 
-class DailyYamazakiJPSpider(AreamarkerSpider):
+class DailyYamazakiJPSpider(AreaMarkerSpider):
     name = "daily_yamazaki_jp"
     item_attributes = {"brand": "Daily YAMAZAKI", "brand_wikidata": "Q5209392"}
 

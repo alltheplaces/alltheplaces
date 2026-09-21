@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class AreamarkerSpider(Spider):
+class AreaMarkerSpider(Spider):
     """
     Store locator platform by AreaMarker (areamarker.com). POIs are served by
     an OpenSearch-backed JSON API (ss-api.areamarker.com or a brand subdomain)
@@ -19,8 +19,8 @@ class AreamarkerSpider(Spider):
     per-brand `X-Amss-Shopsite-Corp-ID` header, so those must be supplied.
     `Origin` is derived from `referer` (its scheme + netloc).
 
-    To use, set `api_url`, `corp_id`, `referer`, and `fields` (the list of API
-    columns to request). `search_conditions` and `page_size` may be overridden
+    To use, set `api_url`, `corp_id`, `referer`, and `fields` (the map of API
+    columns to field names to request). `search_conditions` and `page_size` may be overridden
     per brand. Then implement `post_process_item` to build a Feature from each
     raw API record.
     """
