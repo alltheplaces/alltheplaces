@@ -48,8 +48,7 @@ class WillysMexicanaGrillUSSpider(SitemapSpider):
         )
 
         offered = {
-            option.strip()
-            for option in response.xpath('//ul[@class="list-box"]/li[@class="check"]/text()').getall()
+            option.strip() for option in response.xpath('//ul[@class="list-box"]/li[@class="check"]/text()').getall()
         }
         apply_yes_no(Extras.DELIVERY, item, "Delivery" in offered, False)
         apply_yes_no(Extras.OUTDOOR_SEATING, item, "Patio" in offered, False)
