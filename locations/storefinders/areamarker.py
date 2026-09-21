@@ -26,9 +26,9 @@ class AreamarkerSpider(Spider):
 
     dataset_attributes = {"source": "api", "api": "areamarker.com"}
 
-    api_url: str
+    api_url: str = "https://ss-api.areamarker.com/v1/search-by-condition"
     corp_id: str
-    referer: str
+    referer: str = "https://www.areamarker.com/"
     fields: list[str]
     search_conditions: list[dict] = []
     page_size: int = 500
