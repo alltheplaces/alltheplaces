@@ -4,7 +4,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours, DAYS_WEEKDAY
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 from locations.storefinders.mapion import MapionSpider
 
@@ -16,7 +16,7 @@ class BankOfYokohamaJPSpider(MapionSpider):
     feature_url_template = "https://sasp.mapion.co.jp/b/boy/attr/?t=attr_con&start={}"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
-        
+
         item["name"] = "横浜銀行"
         item["branch"] = data.get("name")
 
