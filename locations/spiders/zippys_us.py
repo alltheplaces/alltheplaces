@@ -76,6 +76,6 @@ class ZippysUSSpider(Spider):
 
     @staticmethod
     def normalise_time(value: str) -> str:
-        """"6 AM" -> "6:00AM"."""
+        """ "6 AM" -> "6:00AM"."""
         value = value.replace(" ", "").upper()
         return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)
