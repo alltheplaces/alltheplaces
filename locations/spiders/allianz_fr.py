@@ -58,13 +58,13 @@ class AllianzFRSpider(SitemapSpider):
             schedule = poi["schedules"]["Defaultweekschedule"]
             # IsOpen is false on every day when the agency has no hours entered, which is not "closed".
             if any(day["values"]["IsOpen"] for day in schedule):
-                item["opening_hours"] = oh = OpeningHours()
+                item["opening_hours"] = OpeningHours()
                 for day in schedule:
                     if not day["values"]["IsOpen"]:
-                        oh.set_closed(day["name"])
+                        item["opening_hours"].set_closed(day["name"])
                     for rng in day["values"]["OpeningRanges"]:
                         begin, end = rng["BeginTime"], rng["EndTime"]
-                        oh.add_range(
+                        item["opening_hours"].add_range(
                             day["name"],
                             f'{begin["Hour"]:02d}:{begin["Minute"]:02d}',
                             f'{end["Hour"]:02d}:{end["Minute"]:02d}',
