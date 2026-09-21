@@ -16,21 +16,15 @@ class CentralArkansasLibrarySystemUSSpider(BiblioCommonsSpider):
     library_id = "cals"
 
     def post_process_item(self, item: Feature, response: TextResponse, location: dict, **kwargs) -> Iterable[Feature]:
-        branch = item.pop("name", None) or ""
-
-        if branch in ("Arkansas Museum of Fine Arts", "UAMS Hold Pickup Location"):
+        if item.get("name") in ("Arkansas Museum of Fine Arts", "UAMS Hold Pickup Location"):
             # Partner venues listed in the catalogue for holds pickup: an
             # independent museum and the university's own medical library.
             # Neither is run by CALS and the API gives no coordinates for them.
             return
 
-        if BOOK_LOCKER_NAME_REGEX.search(branch):
-            item["name"] = branch
+        if BOOK_LOCKER_NAME_REGEX.search(item.get("name")):
             apply_category(Categories.PARCEL_LOCKER, item)
         else:
-            # Every branch is named "<Branch> Library" already.
-            item["branch"] = branch.removesuffix(" Library")
-            item["name"] = branch
             apply_category(Categories.LIBRARY, item)
 
         yield item
