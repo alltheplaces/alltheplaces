@@ -4,6 +4,7 @@ from urllib.parse import urlsplit
 from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
+from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
@@ -29,14 +30,14 @@ class AreamarkerSpider(Spider):
     api_url: str = "https://ss-api.areamarker.com/v1/search-by-condition"
     corp_id: str
     referer: str = "https://www.areamarker.com/"
-    fields: list[str]
+    fields: dict[str, str]
     search_conditions: list[dict] = []
     page_size: int = 500
 
     def make_request(self, search_after: list | None = None) -> JsonRequest:
         body = {
             "search_conditions": self.search_conditions,
-            "fields": self.fields,
+            "fields": list(self.fields.values()),
             "paging_mode": "search_after",
             "sort": "+pre_code,+city_code,+kyo_id",
             "corp_id": self.corp_id,
@@ -58,7 +59,10 @@ class AreamarkerSpider(Spider):
     def parse(self, response: TextResponse) -> Iterator[Feature | JsonRequest]:
         hits = response.json()["result"]["hits"]
         for record in hits.get("hit", []):
-            yield from self.post_process_item(record, response) or []
+            self.pre_process_data(record)
+            store = {label: record["fields"].get(column) for label, column in self.fields.items()}
+            item = DictParser.parse(store)
+            yield from self.post_process_item(item, response, store, record) or []
 
         # `search_after` cursor pagination requires following the cursor
         # returned by the previous page, so the next request is issued from here.
@@ -66,6 +70,11 @@ class AreamarkerSpider(Spider):
         if search_after:
             yield self.make_request(search_after)
 
-    def post_process_item(self, record: dict, response: TextResponse) -> Iterable[Feature]:
-        """Override to build one or more Features from a raw API record."""
-        return []
+    def pre_process_data(self, raw_record: dict, **kwargs) -> None:
+        """Override with any pre-processing on the item."""
+
+    def post_process_item(
+        self, item: Feature, response: TextResponse, store: dict, raw_record: dict, **kwargs
+    ) -> Iterable[Feature]:
+        """Override with any post-processing on the item."""
+        yield item
