@@ -5,7 +5,7 @@ from pyproj import Transformer
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_WEEKDAY, DAYS_JP, OpeningHours
+from locations.hours import DAYS_JP, DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 from locations.storefinders.mapion import MapionSpider
 
@@ -48,7 +48,7 @@ class HokkokuBankJPSpider(MapionSpider):
         # neither counter nor ATM hours, since they're not a distinct location.
         if not data.get("handle_time_st1") and not data.get("atm_time_st1"):
             return
-        if "イーネット" in data.get("name"): # skip E-net ATMs, they are covered by own spider
+        if "イーネット" in data.get("name"):  # skip E-net ATMs, they are covered by own spider
             return
 
         item["name"] = self.item_attributes["brand"]
