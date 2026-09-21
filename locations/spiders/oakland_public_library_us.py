@@ -27,10 +27,8 @@ class OaklandPublicLibraryUSSpider(BiblioCommonsSpider):
             return
 
         if branch == "Main Library":
-            item["branch"] = branch
             item["name"] = "Oakland Public Library"
         elif branch.endswith(" Branch"):
-            item["branch"] = branch.removesuffix(" Branch")
             item["name"] = "{} Oakland Public Library".format(branch)
         else:
             item["name"] = branch
