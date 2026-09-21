@@ -42,7 +42,7 @@ class AllianzFRSpider(SitemapSpider):
             contacts = poi["metadata"]["contacts"]
             item = Feature()
             item["ref"] = poi["code"]
-            item["branch"] = poi["metadata"]["details"]["Name"].title()
+            item["branch"] = poi["metadata"]["details"]["Name"].title().removeprefix("Allianz ")
             item["lat"] = poi["position"]["Latitude"]
             item["lon"] = poi["position"]["Longitude"]
             item["street_address"] = poi["address"]["AddressLine1"].title()
