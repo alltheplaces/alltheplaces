@@ -27,7 +27,8 @@ class MitsubishiVNSpider(JSONBlobSpider):
 
     def pre_process_data(self, feature):
         feature.update(feature.pop("acf"))
-        feature.update(feature.pop("dealer_location"))
+        if feature.get("dealer_location"):
+            feature.update(feature.pop("dealer_location", ""))
 
     def parse_hours(self, working_items):
         oh = OpeningHours()
