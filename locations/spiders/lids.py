@@ -39,18 +39,28 @@ class LidsSpider(Spider):
         if not (match := TIME_PATTERN.match(value)):
             return None
         hour, minute, meridiem = int(match.group(1)), match.group(2), (match.group(3) or "").upper()
+        if hour > 23 or int(minute) > 59:
+            return None
         if meridiem and hour <= 12:
             hour = hour % 12 + (12 if meridiem == "PM" else 0)
         return f"{hour:02d}:{minute}"
 
     @staticmethod
     def parse_coordinates(coordinate: dict) -> tuple[float | None, float | None]:
-        lat, lon = coordinate.get("latitude"), coordinate.get("longitude")
-        if lat is None or lon is None:
+        try:
+            lat, lon = float(coordinate.get("latitude")), float(coordinate.get("longitude"))
+        except (TypeError, ValueError):
+            return None, None
+        if (
+            str(coordinate["latitude"]).strip() in MISSING_VALUES
+            or str(coordinate["longitude"]).strip() in MISSING_VALUES
+        ):
             return None, None
         # The API currently reports latitude and longitude the wrong way round for all but a handful of stores.
-        if not 0 < float(lat) < 90:
+        if not 0 < lat < 90:
             lat, lon = lon, lat
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            return None, None
         return lat, lon
 
     def parse_hours(self, location: dict) -> OpeningHours:
