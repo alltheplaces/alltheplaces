@@ -7,18 +7,26 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class CampBowWowSpider(JSONBlobSpider):
     name = "camp_bow_wow"
     item_attributes = {"brand": "Camp Bow Wow", "brand_wikidata": "Q121322343"}
     allowed_domains = ["www.campbowwow.com"]
-    start_urls = ["https://www.campbowwow.com/locations/Systems-Advanced-Map.svc?action=GetMapData"]
     locations_key = "Localities"
+    custom_settings = {
+        "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_DELAY": 3,
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+    }
 
     async def start(self) -> AsyncIterator[Request]:
-        for url in self.start_urls:
-            yield Request(url=url, headers={"x-request-from": "https://www.campbowwow.com/locations/"})
+        yield Request(
+            url="https://www.campbowwow.com/Systems-Advanced-Map.svc?action=GetMapData",
+            headers={"x-request-from": "https://www.campbowwow.com/locations/"},
+        )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Request]:
         item["ref"] = str(feature["ID"])
