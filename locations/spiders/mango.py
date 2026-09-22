@@ -1,9 +1,8 @@
 from typing import Any, Iterable
 
 import chompjs
-from scrapy import Request
+from scrapy import Request, Spider
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -36,17 +35,15 @@ from locations.hours import (
     sanitise_day,
 )
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
 from locations.react_server_components import parse_rsc
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MangoSpider(PlaywrightSpider):
+class MangoSpider(Spider):
     name = "mango"
     item_attributes = {"brand": "Mango", "brand_wikidata": "Q136503"}
     start_urls = ["https://api.shop.mango.com/cs/online-configuration/v1/country?channelId=shop"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}  # | DEFAULT_PLAYWRIGHT_SETTINGS
 
     LANGUAGE_DAYS_MAP = {
         "AR": DAYS_AR,
@@ -87,36 +84,34 @@ class MangoSpider(PlaywrightSpider):
             if default_language:
                 yield Request(
                     url=f"https://shop.mango.com/{country_code}/{default_language}/stores".lower(),
-                    callback=self.parse_store_urls,
+                    callback=self.parse_store_details,
                     cb_kwargs={"country": country_code, "language": default_language.upper()},
                 )
 
-    def parse_store_urls(self, response: Response, country: str, language: str) -> Any:
-        for link in LinkExtractor(allow=r"/[a-z]{2}/[a-z]{2}/stores/[^/]+/[^/]+/\d+$").extract_links(response):
-            yield response.follow(
-                url=link.url, callback=self.parse_store_details, cb_kwargs={"country": country, "language": language}
-            )
+    # def parse_store_urls(self, response: Response, country: str, language: str) -> Any:
+    #     for link in LinkExtractor(allow=r"/[a-z]{2}/[a-z]{2}/stores/[^/]+/[^/]+/\d+$").extract_links(response):
+    #         print(link,"tttttttttttttttttttttttttttt")
+    #         yield response.follow(
+    #             url=link.url, callback=self.parse_store_details, cb_kwargs={"country": country, "language": language}
+    #         )
 
     def parse_store_details(self, response: Response, country: str, language: str) -> Iterable[Feature]:
-        scripts = response.xpath('//script[contains(text(), "timeSchedule")]/text()').getall()
+        scripts = response.xpath('//script[contains(text(), "addresses")]/text()').getall()
         objs = [chompjs.parse_js_object(s) for s in scripts]
         rsc = "".join([s for n, s in objs]).encode()
-        if store_data := DictParser.get_nested_key(dict(parse_rsc(rsc)), "stores"):
-            store = store_data[0]
-            store.update(store.pop("details", {}))
-            store.update(store.pop("addresses", {}))
-            item = DictParser.parse(store)
-            item["street_address"] = item.pop("addr_full", None)
-            item["branch"] = store.get("shoppingCenter")
-            item["website"] = response.url
-            item["country"] = country
-            try:
-                item["opening_hours"] = self.parse_opening_hours(store.get("timeSchedule", []), language)
-            except Exception as e:
-                self.logger.error(f'Failed to parse opening hours:{store.get("timeSchedule")} {e}')
+        if stores_list := DictParser.get_nested_key(dict(parse_rsc(rsc)), "storesFromLite"):
+            for store in stores_list:
+                # store = store_data[0]
+                # store.update(store.pop("details", {}))
+                store.update(store.pop("addresses", {}))
+                item = DictParser.parse(store)
+                item["street_address"] = item.pop("addr_full", None)
+                item["branch"] = store.get("shoppingCenter")
+                item["website"] = "/".join([response.url, store.get("url")])
+                item["country"] = country
 
-            apply_category(Categories.SHOP_CLOTHES, item)
-            yield item
+                apply_category(Categories.SHOP_CLOTHES, item)
+                yield item
 
     def parse_opening_hours(self, rules: list[dict], language: str) -> OpeningHours:
         opening_hours = OpeningHours()
