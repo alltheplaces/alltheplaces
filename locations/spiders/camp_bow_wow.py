@@ -7,6 +7,7 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class CampBowWowSpider(JSONBlobSpider):
@@ -14,7 +15,12 @@ class CampBowWowSpider(JSONBlobSpider):
     item_attributes = {"brand": "Camp Bow Wow", "brand_wikidata": "Q121322343"}
     allowed_domains = ["www.campbowwow.com"]
     locations_key = "Localities"
-    custom_settings = {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 3}
+    custom_settings = {
+        "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_DELAY": 3,
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+    }
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
