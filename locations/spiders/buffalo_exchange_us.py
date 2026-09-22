@@ -1,33 +1,30 @@
 from typing import Iterable
-from urllib.parse import urljoin
-
-from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN
-from locations.items import Feature
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.hours import OpeningHours
+from locations.items import Feature, set_closed
+from locations.storefinders.stockist import StockistSpider
 
 
-class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
+class BuffaloExchangeUSSpider(StockistSpider):
     name = "buffalo_exchange_us"
     item_attributes = {
         "brand_wikidata": "Q4985721",
         "brand": "Buffalo Exchange",
     }
-    allowed_domains = [
-        "buffaloexchange.com",
-    ]
-    days = DAYS_EN
-    iseadgg_countries_list = ["US"]
-    search_radius = 1000
-    max_results = 100
+    key = "map_v3jk2neq"
 
-    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        if "PERMANENTLY CLOSED" in item["name"]:
-            return
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        location_description = location.get("description") or ""
+        if "Permanently Closed" in location_description.title():
+            set_closed(item)
         if branch_name := item.pop("name", None):
-            item["branch"] = branch_name.removeprefix("Buffalo Outlet – ").removeprefix("Buffalo Trading Post – ")
-        item["website"] = urljoin("https://buffaloexchange.com", item["website"])
+            item["branch"] = branch_name.removeprefix("Buffalo Outlet ")
+        item["opening_hours"] = self.parse_opening_hours(location_description)
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
+
+    def parse_opening_hours(self, location_hours: str) -> OpeningHours:
+        opening_hours = OpeningHours()
+        opening_hours.add_ranges_from_string(location_hours)
+        return opening_hours
