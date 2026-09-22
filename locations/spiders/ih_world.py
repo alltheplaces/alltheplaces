@@ -70,7 +70,7 @@ class IhWorldSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         item = Feature()
         item["ref"] = response.xpath("//body/@class").re_first(r"postid-(\d+)")
-        item["name"] = response.xpath("//h1/text()").get()
+        item["branch"] = response.xpath("//h1/text()").get().removeprefix("IH ")
         item["country"] = COUNTRY_MAP.get(
             response.xpath(
                 '//nav[contains(@class, "rank-math-breadcrumb")]//a[contains(@href, "/schools/countries/")]/text()'
