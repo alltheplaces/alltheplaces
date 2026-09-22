@@ -1,5 +1,11 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class FastsignsSpider(JSONBlobSpider):
@@ -7,13 +13,14 @@ class FastsignsSpider(JSONBlobSpider):
     item_attributes = {"brand": "Fastsigns", "brand_wikidata": "Q5437127"}
     # Not covered: Dominican Republic, Grand Cayman, Malta
     start_urls = [
-        "https://www.fastsigns.com/locations/?CallAjax=AllLocations",  # covers CA, PR, US
         "https://www.fastsigns.co.uk/locations/?CallAjax=AllLocations",
         "https://www.fastsigns.cl/locales/?CallAjax=AllLocations",
         "https://www.signwave.com.au/locations/?CallAjax=AllLocations",
     ]
+    requires_proxy = True
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         item.pop("name")
         item["street_address"] = merge_address_lines([location["Address1"], location["Address2"]])
         item["unit"] = location["Address2"]
