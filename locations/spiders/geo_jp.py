@@ -45,8 +45,7 @@ class GeoJPSpider(scrapy.Spider):
                 )
 
     def parse_store(self, response):
-        table = response.xpath('//table[contains(@class, "store_detail_basic")]')
-        if not table:
+        if not (table := response.xpath('//table[contains(@class, "store_detail_basic")]')):
             return
 
         fields = {}
