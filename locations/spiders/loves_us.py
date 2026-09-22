@@ -1,19 +1,19 @@
 from typing import AsyncIterator, Iterable
 
+from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
 
 
-class LovesUSSpider(JSONBlobSpider):
+class LovesUSSpider(Spider):
     name = "loves_us"
     SPEEDCO = {"brand": "Speedco", "brand_wikidata": "Q112455073"}
     item_attributes = {"brand": "Love's", "brand_wikidata": "Q1872496"}
     allowed_domains = ["www.loves.com"]
-    locations_key = "stores"
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     PAGE_SIZE = 100
     AMENITIES = {
@@ -47,53 +47,53 @@ class LovesUSSpider(JSONBlobSpider):
         )
 
     def parse(self, response: TextResponse, page_number: int = 0) -> Iterable[Feature | JsonRequest]:
-        locations = self.extract_json(response)
-        yield from self.parse_feature_array(response, locations)
-        if len(locations) == self.PAGE_SIZE:
+        for store in response.json()["stores"]:
+            item = DictParser.parse(store)
+            item["ref"] = store.get("number")
+            item["street_address"] = item.pop("addr_full", None)
+            item["email"] = store["mainEmail"]
+            item["website"] = "https://www.loves.com/locations/{}".format(store["number"])
+
+            if store["storeSearchData"]["name"] == "Speedco":
+                item.update(self.SPEEDCO)
+                apply_category(Categories.SHOP_TRUCK_REPAIR, item)
+            elif store["storeSearchData"]["name"] == "Country Store":
+                apply_category(Categories.FUEL_STATION, item)
+            else:
+                apply_category(Categories.HIGHWAY_SERVICES, item)
+
+            custom_fields = store["mappedCustomFields"]
+            item["opening_hours"] = OpeningHours()
+            if store_hours := next(
+                (
+                    field["fieldValue"]
+                    for field in custom_fields["facilityHoursOfOperation"]
+                    if field["fieldName"] == "Store"
+                ),
+                None,
+            ):
+                for day in DAYS:
+                    self.add_hours(item["opening_hours"], day, store_hours)
+            for field in custom_fields["businessHours"]:
+                self.add_hours(item["opening_hours"], field["fieldName"], field["fieldValue"])
+
+            amenities = {field["smaFieldName"] for field in custom_fields["amenities"] if field["fieldValue"] == "true"}
+            for amenity, tag in self.AMENITIES.items():
+                apply_yes_no(tag, item, amenity in amenities)
+
+            fuel_types = {fuel["fuelType"] for fuel in store["fuelPrices"]}
+            for fuel_type, tag in self.FUEL_TYPES.items():
+                apply_yes_no(tag, item, fuel_type in fuel_types)
+            apply_yes_no(Fuel.DIESEL, item, any("Diesel" in fuel_type for fuel_type in fuel_types))
+            apply_yes_no(
+                Fuel.HGV_DIESEL, item, any(fuel_type.startswith(("Bio-Diesel", "Diesel")) for fuel_type in fuel_types)
+            )
+            apply_yes_no(Fuel.BIODIESEL, item, any(fuel_type.startswith("Bio-Diesel") for fuel_type in fuel_types))
+
+            yield item
+
+        if len(response.json()["stores"]) == self.PAGE_SIZE:
             yield self.page_request(page_number + 1)
-
-    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
-        item["ref"] = location["number"]
-        item["street_address"] = item.pop("addr_full", None)
-        item["email"] = location["mainEmail"]
-        item["website"] = "https://www.loves.com/locations/{}".format(location["number"])
-
-        custom_fields = location["mappedCustomFields"]
-        item["opening_hours"] = OpeningHours()
-        if store_hours := next(
-            (
-                field["fieldValue"]
-                for field in custom_fields["facilityHoursOfOperation"]
-                if field["fieldName"] == "Store"
-            ),
-            None,
-        ):
-            for day in DAYS:
-                self.add_hours(item["opening_hours"], day, store_hours)
-        for field in custom_fields["businessHours"]:
-            self.add_hours(item["opening_hours"], field["fieldName"], field["fieldValue"])
-
-        amenities = {field["smaFieldName"] for field in custom_fields["amenities"] if field["fieldValue"] == "true"}
-        for amenity, tag in self.AMENITIES.items():
-            apply_yes_no(tag, item, amenity in amenities)
-
-        fuel_types = {fuel["fuelType"] for fuel in location["fuelPrices"]}
-        for fuel_type, tag in self.FUEL_TYPES.items():
-            apply_yes_no(tag, item, fuel_type in fuel_types)
-        apply_yes_no(Fuel.DIESEL, item, any("Diesel" in fuel_type for fuel_type in fuel_types))
-        apply_yes_no(
-            Fuel.HGV_DIESEL, item, any(fuel_type.startswith(("Bio-Diesel", "Diesel")) for fuel_type in fuel_types)
-        )
-        apply_yes_no(Fuel.BIODIESEL, item, any(fuel_type.startswith("Bio-Diesel") for fuel_type in fuel_types))
-
-        if location["storeSearchData"]["name"] == "Speedco":
-            item.update(self.SPEEDCO)
-            apply_category(Categories.SHOP_TRUCK_REPAIR, item)
-        elif location["storeSearchData"]["name"] == "Country Store":
-            apply_category(Categories.FUEL_STATION, item)
-        else:
-            apply_category(Categories.HIGHWAY_SERVICES, item)
-        yield item
 
     @staticmethod
     def add_hours(opening_hours: OpeningHours, day: str, hours: str) -> None:
