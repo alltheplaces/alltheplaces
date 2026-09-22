@@ -23,8 +23,7 @@ class HennepinCountyLibraryUSSpider(BiblioCommonsSpider):
         # Southdale is listed as "Southdale/Yorktown (Hold Pickup only)" while closed for renovation.
         if location.get("id") == "SD":
             item["name"] = "Southdale"
-        item["branch"] = item.pop("name")
-        item["name"] = "{} Library".format(item["branch"])
+        item["name"] = "{} Library".format(item["name"])
 
         apply_category(Categories.LIBRARY, item)
 
