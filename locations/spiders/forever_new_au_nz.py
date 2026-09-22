@@ -34,11 +34,11 @@ class ForeverNewAUNZSpider(StockInStoreSpider):
         elif "David Jones" in name:
             item["located_in"] = DavidJonesAUNZSpider.item_attributes["brand"]
             item["located_in_wikidata"] = DavidJonesAUNZSpider.item_attributes["brand_wikidata"]
-        if page_url := location.get("store_locator_page_url"):
+        if location.get("country_code") == "AU" and (page_url := location.get("store_locator_page_url")):
             item["website"] = urljoin(self.api_origin, page_url)
         else:
             item["website"] = None
-        if item.get("email") == "customers@forevernew.com.au":
+        if (item.get("email") or "").lower() == "customers@forevernew.com.au":
             item["email"] = None
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
