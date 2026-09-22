@@ -34,8 +34,7 @@ class ZiebartUSSpider(SitemapSpider):
         # the visitor last used, so the store's own map and code are taken from
         # the location map block and the URL rather than the first match.
         address = unquote(
-            response.xpath('//div[contains(@class, "location-google-map")]//iframe/@src').re_first(r"[?&]q=(.+)$")
-            or ""
+            response.xpath('//div[contains(@class, "location-google-map")]//iframe/@src').re_first(r"[?&]q=(.+)$") or ""
         ).replace("+", " ")
         if not (parts := re.fullmatch(r"(.+),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})", address.strip())):
             return
