@@ -18,5 +18,6 @@ class BrowArt23USSpider(AgileStoreLocatorSpider):
         # Every store has placeholder "0" hours for all days, not real closures
         item.pop("opening_hours")
         item.pop("website")
+        item.pop("email")
         apply_category(Categories.SHOP_BEAUTY, item)
         yield item
