@@ -30,7 +30,6 @@ class SanAntonioPublicLibraryUSSpider(BiblioCommonsSpider):
             if not item.get("opening_hours"):
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].set_closed(DAYS_FULL)
-        item["branch"] = name.removesuffix(" Library Portal").removesuffix(" Library")
         item["name"] = "San Antonio Central Library" if name == "Central Library" else name
         if name.endswith(" Library Portal"):
             # A small library space inside the Briscoe Western Art Museum.
