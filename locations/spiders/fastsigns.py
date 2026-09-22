@@ -17,7 +17,6 @@ class FastsignsSpider(JSONBlobSpider):
         "https://www.fastsigns.cl/locales/?CallAjax=AllLocations",
         "https://www.signwave.com.au/locations/?CallAjax=AllLocations",
     ]
-    requires_proxy = True
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
