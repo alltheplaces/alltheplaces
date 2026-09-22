@@ -1,11 +1,11 @@
 import re
 from typing import Any, AsyncIterator, Iterable
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Request, TextResponse
 
-from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
+from locations.hours import DAYS, DAYS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -53,16 +53,18 @@ def parse_office_hours(slots: list | None) -> OpeningHours | None:
     """
     Parse a field of the Drupal Office Hours module: a list of slots with
     "day" counted from 0 for Sunday, and times as integers such as 930 for
-    09:30.
+    09:30. Only open days have slots, so any other day is closed.
     https://www.drupal.org/project/office_hours
     """
     if not slots:
         return None
     oh = OpeningHours()
+    open_days = set()
     for slot in slots:
         if slot.get("day") is None:
             continue
         day = DAYS_FROM_SUNDAY[int(slot["day"])]
+        open_days.add(day)
         if slot.get("all_day"):
             oh.add_range(day, "00:00", "24:00")
         elif slot.get("starthours") is not None and slot.get("endhours") is not None:
@@ -71,7 +73,10 @@ def parse_office_hours(slots: list | None) -> OpeningHours | None:
                 "{:02}:{:02}".format(*divmod(int(slot["starthours"]), 100)),
                 "{:02}:{:02}".format(*divmod(int(slot["endhours"]), 100)),
             )
-    return oh or None
+    if not oh:
+        return None
+    oh.set_closed([day for day in DAYS if day not in open_days])
+    return oh
 
 
 class DrupalJsonApiSpider(Spider):
@@ -96,6 +101,11 @@ class DrupalJsonApiSpider(Spider):
     are set here and everything else is read from `entry["attributes"]` in
     `post_process_item`. `parse_address_field`, `parse_geofield` and
     `parse_office_hours` also help with these modules' fields elsewhere.
+
+    Where locations need data from another resource, such as opening hours
+    kept as separate content that refers back to each location, override
+    `start()` to request it with `make_request()`, follow `next_page()` to
+    collect every page, and then yield from `super().start()`.
     """
 
     dataset_attributes: dict = {"source": "api", "api": "drupal-jsonapi"}
@@ -110,9 +120,13 @@ class DrupalJsonApiSpider(Spider):
             url="{}/jsonapi/{}?page%5Blimit%5D={}".format(self.drupal_host, resource, self.page_size), **kwargs
         )
 
-    @staticmethod
-    def next_page(response: TextResponse) -> str | None:
-        return ((response.json().get("links") or {}).get("next") or {}).get("href")
+    def next_page(self, response: TextResponse) -> str | None:
+        if not (href := ((response.json().get("links") or {}).get("next") or {}).get("href")):
+            return None
+        # A site behind a proxy can build its links on the internal scheme or
+        # host, e.g. "http://" for an "https://" site, costing a redirect.
+        host = urlparse(self.drupal_host)
+        return urlparse(href)._replace(scheme=host.scheme, netloc=host.netloc).geturl()
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield self.make_request(self.jsonapi_resource)
