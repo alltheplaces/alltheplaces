@@ -6,8 +6,8 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.spiders.mango import PlaywrightSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
