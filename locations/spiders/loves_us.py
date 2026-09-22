@@ -1,7 +1,9 @@
-from typing import AsyncIterator, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, TextResponse
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response, TextResponse
+from scrapy.spiders.sitemap import iterloc
+from scrapy.utils.sitemap import Sitemap
 
 from locations.categories import Access, Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -36,7 +38,16 @@ class LovesUSSpider(Spider):
         "Unleaded": Fuel.OCTANE_87,
     }
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
+    canonical_urls = {}
+
+    async def start(self) -> AsyncIterator[Any]:
+        yield Request("https://www.loves.com/sitemap-locations.xml", callback=self.parse_sitemap)
+
+    def parse_sitemap(self, response: Response, **kwargs: Any) -> Any:
+        for url in iterloc(Sitemap(response.body)):
+            if url.startswith("https://www.loves.com/locations/"):
+                self.canonical_urls[url.rsplit("-", 1)[1]] = url
+
         yield self.page_request(0)
 
     def page_request(self, page_number: int) -> JsonRequest:
@@ -50,9 +61,12 @@ class LovesUSSpider(Spider):
         for store in response.json()["stores"]:
             item = DictParser.parse(store)
             item["ref"] = store.get("number")
+            item["branch"] = store["preferredName"]
             item["street_address"] = item.pop("addr_full", None)
             item["email"] = store["mainEmail"]
             item["website"] = "https://www.loves.com/locations/{}".format(store["number"])
+            if store.get("number") and str(store["number"]) in self.canonical_urls:
+                item["website"] = self.canonical_urls[str(store["number"])]
 
             if store["storeSearchData"]["name"] == "Speedco":
                 item.update(self.SPEEDCO)
