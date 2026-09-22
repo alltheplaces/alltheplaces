@@ -7,6 +7,8 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -20,7 +22,7 @@ from locations.user_agents import BROWSER_DEFAULT
 # dataset_name = "WEP2_Retail_PROD/RetailGasStations"
 
 
-class ExxonMobilSpider(CrawlSpider, StructuredDataSpider):
+class ExxonMobilSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
     name = "exxon_mobil"
     start_urls = ["https://www.exxonmobilfuels.com/en/find-gas-station/united-states"]
     rules = [
@@ -30,7 +32,7 @@ class ExxonMobilSpider(CrawlSpider, StructuredDataSpider):
             callback="parse",
         ),
     ]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
     wanted_types = ["LocalBusiness"]
     brands = {
         "Exxon": {"brand": "Exxon", "brand_wikidata": "Q109675651"},
@@ -44,7 +46,7 @@ class ExxonMobilSpider(CrawlSpider, StructuredDataSpider):
                 text.replace('"True?  string.Join(",", Model.PhoneNumber)" : string.Empty', '""').replace(
                     '"False?  string.Join(",", Model.PhoneNumber)" : string.Empty', '""'
                 )
-            )  # print(json_data)
+            )
             item = DictParser.parse(json_data)
             item.pop("name", None)
             item["ref"] = item["website"] = response.url
