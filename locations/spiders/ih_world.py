@@ -2,8 +2,8 @@ import re
 from typing import Any, Iterable
 from urllib.parse import unquote
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -57,51 +57,27 @@ COUNTRY_MAP = {
 }
 
 
-class IhWorldSpider(Spider):
+class IhWorldSpider(SitemapSpider):
     name = "ih_world"
     item_attributes = {
         "brand": "International House",
         "brand_wikidata": "Q6050993",
     }
-    start_urls = [
-        "https://ihworld.com/wp-json/wp/v2/schools?per_page=100&page=1&_embed",
-        "https://ihworld.com/wp-json/wp/v2/schools?per_page=100&page=2&_embed",
-    ]
+    sitemap_urls = ["https://ihworld.com/sitemap_index.xml"]
+    sitemap_follow = ["/schools-sitemap"]
+    sitemap_rules = [(r"/schools/countries/[^/%]+/[^/]+/$", "parse")]
 
-    def parse(self, response: Response, **kwargs: Any) -> Iterable:
-        for school in response.json():
-            country_name = ""
-            for termlist in school.get("_embedded", {}).get("wp:term", []):
-                for term in termlist:
-                    if term.get("taxonomy") == "countries":
-                        country_name = term.get("name", "")
-                        break
-
-            yield response.follow(
-                school["link"],
-                callback=self.parse_school,
-                cb_kwargs={
-                    "ref": str(school["id"]),
-                    "name": school["title"]["rendered"],
-                    "country": COUNTRY_MAP.get(country_name, ""),
-                    "website_url": school["link"],
-                },
-            )
-
-    def parse_school(
-        self,
-        response: Response,
-        ref: str,
-        name: str,
-        country: str,
-        website_url: str,
-        **kwargs: Any,
-    ) -> Iterable:
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         item = Feature()
-        item["ref"] = ref
-        item["name"] = name
-        item["country"] = country
-        item["website"] = website_url
+        item["ref"] = response.xpath("//body/@class").re_first(r"postid-(\d+)")
+        item["name"] = response.xpath("//h1/text()").get()
+        item["country"] = COUNTRY_MAP.get(
+            response.xpath(
+                '//nav[contains(@class, "rank-math-breadcrumb")]//a[contains(@href, "/schools/countries/")]/text()'
+            ).get(""),
+            "",
+        )
+        item["website"] = response.url
 
         # Extract address from Google Maps embed query parameter
         maps_q = response.xpath(
