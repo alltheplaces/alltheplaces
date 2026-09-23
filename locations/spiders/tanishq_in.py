@@ -27,7 +27,11 @@ class TanishqINSpider(scrapy.Spider):
         self.seen_cities = set()
 
     def parse(self, response: Response) -> Iterable[scrapy.Request]:
-        for store in response.json().get("result") or []:
+        payload = response.json()
+        if not isinstance(payload.get("result"), list):
+            self.logger.warning("No results for %s: %s", response.url, payload.get("message"))
+            return
+        for store in payload["result"]:
             city = (store.get("city") or "").strip()
             if not city or city.casefold() in self.seen_cities:
                 continue
@@ -35,7 +39,11 @@ class TanishqINSpider(scrapy.Spider):
             yield JsonRequest(url=DETAILS_URL.format(quote(city)), callback=self.parse_city)
 
     def parse_city(self, response: Response) -> Iterable[Feature]:
-        for location in response.json().get("result") or []:
+        payload = response.json()
+        if not isinstance(payload.get("result"), list):
+            self.logger.warning("No results for %s: %s", response.url, payload.get("message"))
+            return
+        for location in payload["result"]:
             item = Feature()
             item["ref"] = location["storeCode"]
             item["branch"] = self.branch_name(location)
