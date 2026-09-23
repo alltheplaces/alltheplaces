@@ -16,8 +16,7 @@ class SugiPharmacyJPSpider(Spider):
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
-            url=("https://bff.sugi-net.jp/stores/by-area?page={}".format(page)
-            ),
+            url=("https://bff.sugi-net.jp/stores/by-area?page={}".format(page)),
             meta={"page": page},
         )
 
@@ -26,7 +25,7 @@ class SugiPharmacyJPSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for loc in response.json()["stores"]:
-            if "オープン予定" in loc.get("name"): # skip future openings
+            if "オープン予定" in loc.get("name"):  # skip future openings
                 continue
             loc.update(loc.pop("position"))
             item = DictParser.parse(loc)
@@ -37,7 +36,7 @@ class SugiPharmacyJPSpider(Spider):
                 item.update({"brand": "ジャパン", "brand_wikidata": "Q11309938"})
             else:
                 item.update({"brand": "スギ薬局", "brand_wikidata": "Q11311460"})
-            
+
             item["name"] = item["brand"]
 
             item["branch"] = loc.get("name").removeprefix("阪神調剤薬局").removeprefix("ジャパン")
