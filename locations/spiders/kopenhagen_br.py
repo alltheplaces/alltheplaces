@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 BRAZIL_STATES = {
     "Acre": "AC",
@@ -53,7 +54,7 @@ class KopenhagenBRSpider(PlaywrightSpider):
     name = "kopenhagen_br"
     item_attributes = {"brand": "Kopenhagen", "brand_wikidata": "Q10314624", "name": "Kopenhagen"}
     allowed_domains = ["www.kopenhagen.com.br"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
 
     # The store finder widget is a private VTEX IO app
