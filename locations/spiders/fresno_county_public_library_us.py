@@ -38,9 +38,6 @@ class FresnoCountyPublicLibraryUSSpider(Spider):
         item["ref"] = response.url.rsplit("/", 1)[-1].removesuffix(".html")
         item["website"] = response.url
         item["name"] = (response.css("h2.title::text").get() or "").strip()
-        branch = re.sub(r"\s*(?:Branch|Regional)?\s*Library$", "", item["name"])
-        if branch and branch != item["name"]:
-            item["branch"] = branch
 
         # The address block ends at the "map" link. Anything after it is a
         # mailing address, and anything before it may be a closure notice or a
