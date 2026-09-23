@@ -10,8 +10,6 @@ from locations.google_url import extract_google_position
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
-PREF_CODES = range(1, 48)
-
 
 class GeoJPSpider(scrapy.Spider):
     name = "geo_jp"
@@ -19,7 +17,7 @@ class GeoJPSpider(scrapy.Spider):
     allowed_domains = ["geo-online.co.jp"]
 
     async def start(self) -> AsyncIterator[Request]:
-        for pref in PREF_CODES:
+        for pref in range(1, 48):
             yield Request(
                 f"https://geo-online.co.jp/store/search?type=pref&pref={pref:02d}",
                 callback=self.parse_list,
