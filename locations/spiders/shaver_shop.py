@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, TextResponse
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ShaverShopSpider(JSONBlobSpider):
@@ -24,6 +25,8 @@ class ShaverShopSpider(JSONBlobSpider):
             yield JsonRequest(url=url)
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", None)
+        item["street_address"] = merge_address_lines([feature.get("address1"), feature.get("address2")])
         if "shavershop.co.nz" in response.url:
             item["website"] = (
                 "https://www.shavershop.co.nz/stores/"
