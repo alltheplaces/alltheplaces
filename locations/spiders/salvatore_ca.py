@@ -14,7 +14,6 @@ class SalvatoreCASpider(CrawlSpider, StructuredDataSpider):
     name = "salvatore_ca"
     item_attributes = {"brand_wikidata": "Q121738133"}
     rules = [Rule(LinkExtractor("/en/restaurant/"), "parse_sd")]
-    wanted_types = ["FastFoodRestaurant"]
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request("https://salvatore.com/en/restaurant", callback=self.parse_page)
