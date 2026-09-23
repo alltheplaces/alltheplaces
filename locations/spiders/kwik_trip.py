@@ -1,7 +1,6 @@
-from typing import Any, AsyncIterator
+from typing import Any
 
-import scrapy
-from scrapy import Request
+from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
@@ -19,23 +18,17 @@ BRANDS = {
 }
 
 
-class KwikTripSpider(scrapy.Spider):
+class KwikTripSpider(Spider):
     name = "kwik_trip"
     item_attributes = {"brand": "Kwik Trip", "brand_wikidata": "Q6450420"}
     allowed_domains = ["www.kwiktrip.com"]
-    requires_proxy = "US"
-
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(
-            url="https://www.kwiktrip.com/Maps-Downloads/Store-List",
-            meta={"zyte_api_automap": {"browserHtml": True}},
-        )
+    start_urls = ["https://www.kwiktrip.com/Maps-Downloads/Store-List"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath("(//tr)[position()>1]"):
+        for location in response.xpath('//table[contains(@class, "kwiktrip-table")]/tbody/tr'):
             yield JsonRequest(
                 url="https://www.kwiktrip.com/locproxy.php?location={}".format(
-                    location.xpath('.//td[@class="column-1"]/text()').get()
+                    location.xpath("normalize-space(./td[1])").get()
                 ),
                 callback=self.parse_location,
             )

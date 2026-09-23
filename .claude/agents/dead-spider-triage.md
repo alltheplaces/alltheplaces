@@ -135,6 +135,9 @@ Proxy costs money. Before adding `requires_proxy`:
 | `start_urls` hardcoded a Next.js `/_next/data/<build-id>/...` path that no longer resolves after a site redeploy (build IDs rotate on every deploy) | Use the human-facing page URL and parse the `__NEXT_DATA__` `<script>` tag with `chompjs` instead of the build-ID data URL | pattern flagged by davidhicks, PR #17946 dreams_donuts |
 | SFCC/Demandware migration | SitemapSpider on `/sitemap_index.xml` + StructuredDataSpider + Camoufox | #16051 Aesop |
 | Brand still exists, new CloudFront/proxy-only | SitemapSpider + `requires_proxy = True` | #16045 Euromaster NL |
+| Spider scrapes N full HTML page loads for a paginated listing | Check what the page's own "Load More"/pagination control requests (often `wp-admin/admin-ajax.php` on WordPress, or a dedicated XHR/GraphQL call) — it's usually a lighter request per page and can expose real pagination metadata a scraped page's DOM markers don't | #18358 99 Speedmart MY |
+
+**Verify a suspected pagination parameter before committing to it**: an AJAX/XHR endpoint can return `HTTP 200` with valid-looking content for every page number sent while silently ignoring the parameter and always returning page 1 (confirmed on #18358 — a plausible `props[page]` field from a naive request example was inert; the real driver was an undocumented `defaults[paged]` field). Request two different page numbers and diff the actual results before trusting a pagination scheme, not just checking for a 200 status.
 
 ## Ambiguous cases — defer to user
 

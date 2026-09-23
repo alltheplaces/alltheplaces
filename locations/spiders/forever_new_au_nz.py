@@ -1,33 +1,44 @@
-import json
+import re
+from typing import Iterable
+from urllib.parse import urljoin
 
-from scrapy.http import TextResponse
-
-from locations.hours import OpeningHours
-from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.spiders.david_jones_au_nz import DavidJonesAUNZSpider
+from locations.spiders.myer_au import MyerAUSpider
+from locations.storefinders.stockinstore import StockInStoreSpider
 
 FOREVER_NEW_SHARED_ATTRIBUTES = {"brand": "Forever New", "brand_wikidata": "Q119221929"}
 
 
-class ForeverNewAUNZSpider(JSONBlobSpider):
+class ForeverNewAUNZSpider(StockInStoreSpider):
     name = "forever_new_au_nz"
     item_attributes = FOREVER_NEW_SHARED_ATTRIBUTES
-    start_urls = [
-        "https://www.forevernew.com.au/locator/index/search/?address=sydney&components[country]=AU&radius=1000000000&type=all",
-        "https://www.forevernew.co.nz/locator/index/search/?address=wellington&components[country]=NZ&radius=1000000000&type=all",
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    api_site_id = "10400"
+    api_widget_id = "404"
+    api_widget_type = "storelocator"
+    api_origin = "https://www.forevernew.com.au"
 
-    def extract_json(self, response: TextResponse):
-        data = response.json()["results"]["results"]
-        return data
-
-    def post_process_item(self, item, response, location):
-        # Ignore locations which are embedded within a Myer department store.
-        if location.get("name") is not None and " MYER " in location["name"].upper():
-            return
-        hours = json.loads(location["trading_hours"])
-        item["branch"] = item.pop("name").replace("Forever New - ", "")
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(str(hours))
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        name = item.pop("name")
+        item["branch"] = re.sub(
+            r"^Forever New(?: and Forever New Curve| Curve)?(?: at)?\s*[-–]?\s*(?:Myer|David Jones)?\s*[-–]?\s*",
+            "",
+            name,
+        )
+        if name.startswith("Forever New Curve"):
+            item["branch"] += " (Curve)"
+        if "Myer" in name:
+            item["located_in"] = MyerAUSpider.item_attributes["brand"]
+            item["located_in_wikidata"] = MyerAUSpider.item_attributes["brand_wikidata"]
+        elif "David Jones" in name:
+            item["located_in"] = DavidJonesAUNZSpider.item_attributes["brand"]
+            item["located_in_wikidata"] = DavidJonesAUNZSpider.item_attributes["brand_wikidata"]
+        if location.get("country_code") == "AU" and (page_url := location.get("store_locator_page_url")):
+            item["website"] = urljoin(self.api_origin, page_url)
+        else:
+            item["website"] = None
+        if (item.get("email") or "").lower() == "customers@forevernew.com.au":
+            item["email"] = None
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item

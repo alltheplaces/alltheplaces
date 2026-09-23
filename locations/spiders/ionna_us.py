@@ -33,11 +33,19 @@ class IonnaUSSpider(scrapy.Spider):
     start_urls = ["https://www.ionna.com/rechargeries/find-a-rechargery/"]
 
     def parse(self, response):
-        locations = extract_text_between(response.text, "var locations = ", "for(var key in locations) {")
-        # There is a trailing semicolon at the end of the string, so we need to remove it.
-        locations = locations.rstrip(";")
+        # The page used to assign the location dict straight to "var locations", but it's now
+        # assigned to "window.allLocations" first and "var locations" just references that. Find
+        # the start of the JSON object and let the JSON decoder work out where it ends, since
+        # there's no longer a following "for(var key in locations) {" to use as an end marker
+        # (and using a fixed end string is fragile if the object contains that substring).
+        marker = "window.allLocations = "
+        start_index = response.text.find(marker)
+        if start_index == -1:
+            self.logger.error("Could not find location data in page")
+            return
+        start_index += len(marker)
 
-        json_data = json.loads(locations)
+        json_data, _ = json.JSONDecoder().raw_decode(response.text, start_index)
 
         for location_id, location in json_data.items():
             # Skip locations that are not yet open. They indicate this with "Coming Soon" or

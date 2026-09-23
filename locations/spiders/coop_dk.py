@@ -22,7 +22,7 @@ class CoopDKSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[FormRequest]:
-        url = "https://info.coop.dk/umbraco/api/Chains/GetAllStores"
+        url = "https://coop.dk/umbraco/api/Chains/GetAllStores"
         headers = {"Accept": "application/json", "Origin": "https://info.coop.dk"}
         form = {
             "pageId": "19807",

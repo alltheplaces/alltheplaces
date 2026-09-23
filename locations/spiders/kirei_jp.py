@@ -1,5 +1,6 @@
 from typing import Any
 
+from pyproj import Transformer
 from scrapy import Spider
 from scrapy.http import Response
 
@@ -16,13 +17,13 @@ class KireiJPSpider(Spider):
     item_attributes = {"brand_wikidata": "Q11196102", "brand": "Ki-Re-i"}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        transformer = Transformer.from_pipeline("EPSG:15484")
         for store in response.json()["list"]:
 
             item = Feature()
 
             item["branch"] = store.get("place")
-            item["lat"] = store.get("lat")
-            item["lon"] = store.get("lon")
+            item["lat"], item["lon"] = transformer.transform(store.get("lat"), store.get("lon"))
             item["addr_full"] = store.get("add")
             item["website"] = f"https://www.dnpphoto.jp/CGI/search/detail.cgi?seq={store.get('seq')}"
             item["ref"] = store.get("seq")

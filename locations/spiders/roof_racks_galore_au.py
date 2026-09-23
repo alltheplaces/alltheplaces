@@ -4,7 +4,7 @@ from typing import Iterable
 from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -14,7 +14,6 @@ class RoofRacksGaloreAUSpider(Spider):
     item_attributes = {
         "brand": "Roof Racks Galore",
         "brand_wikidata": "Q126179662",
-        "extras": Categories.SHOP_CAR_PARTS.value,
     }
     allowed_domains = ["www.roofracksgalore.com.au"]
     start_urls = ["https://www.roofracksgalore.com.au/locations"]
@@ -28,26 +27,30 @@ class RoofRacksGaloreAUSpider(Spider):
                 store_name = feature[0]
                 lat = feature[1]
                 lon = feature[2]
-                url = f"https://www.roofracksgalore.com.au/marcwatts/magento/magento2/storelocater/action/get/collection/database/store/list/magento2-storelocater-get-collection-database-store-list.php?store_name={store_name}&is_postcode_use=1&postcode=&current_long={lon}&current_lat={lat}"
-                yield JsonRequest(url=url, callback=self.parse_store)
+                url = f"https://www.roofracksgalore.com.au/infinite/location/get/map/default?store_name={store_name}&is_postcode_use=1&postcode=&current_long={lon}&current_lat={lat}"
+                yield JsonRequest(url=url, callback=self.parse_store, meta={"lat": lat, "lon": lon})
 
     def parse_store(self, response: Response) -> Iterable[Feature]:
-        feature = Selector(text=response.json()["stores"]).xpath("(//li)[1]")
+        feature = Selector(text=response.json()["stores"].split("<li>")[1])
 
         properties = {
-            "ref": feature.xpath("//@data-store-id").get(),
-            "branch": feature.xpath('//label[contains(@class, "store-item-lable")]/text()').get().strip(),
-            "addr_full": feature.xpath('//span[contains(@class, "address-location")]/text()').get().strip(),
-            "phone": feature.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", ""),
-            "email": feature.xpath('//a[contains(@href, "mailto:")]/@href').get("").replace("mailto:", ""),
+            "ref": feature.xpath(".//@data-store-id").get(),
+            "lat": response.meta["lat"],
+            "lon": response.meta["lon"],
+            "branch": feature.xpath('.//label[contains(@class, "store-item-lable")]/text()').get().strip(),
+            "addr_full": feature.xpath('.//span[contains(@class, "address-location")]/text()').get().strip(),
+            "phone": feature.xpath('.//a[contains(@href, "tel:")]/@href').get("").replace("tel:", ""),
+            "email": feature.xpath('.//a[contains(@href, "mailto:")]/@href').get("").replace("mailto:", ""),
             "opening_hours": OpeningHours(),
         }
 
         hours_string = " ".join(
             filter(
-                None, map(str.strip, feature.xpath('//div[contains(@class, "store-opening-hours")]//text()').getall())
+                None, map(str.strip, feature.xpath('.//div[contains(@class, "store-opening-hours")]//text()').getall())
             )
         )
         properties["opening_hours"].add_ranges_from_string(hours_string)
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.SHOP_CAR_PARTS, item)
+        yield item

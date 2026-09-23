@@ -1,10 +1,11 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy.http import Request
+from scrapy.http import Request, TextResponse
 
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.astron_energy_za import AstronEnergyZASpider
 from locations.spiders.bp import BpSpider
@@ -31,8 +32,8 @@ from locations.spiders.woolworths_za import WoolworthsZASpider
 LOCATED_IN_MAPPINGS = [
     (["7-11", "7/11", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
     (["FRESHSTOP", "FRESH STOP"], FreshstopZASpider.item_attributes),
-    (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"]),
-    (["CHECKERS"], SHOPRITE_BRANDS["Checkers"]),
+    (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"][0]),
+    (["CHECKERS"], SHOPRITE_BRANDS["Checkers"][0]),
     (["SUPERSPAR"], SPAR_BRANDS["SUPERSPAR"][1]),
     (["KWIKSPAR", "KWIK SPAR"], SPAR_BRANDS["KWIKSPAR"][1]),
     (["SPAR"], SPAR_BRANDS["SPAR"][1]),
@@ -42,22 +43,22 @@ LOCATED_IN_MAPPINGS = [
     (["WOOLWORTHS"], WoolworthsZASpider.item_attributes),
     (["GAME"], GameZASpider.item_attributes),
     (["BUILDERS"], BuildersSpider.item_attributes),
-    (["U-SAVE", "USAVE", "U SAVE"], SHOPRITE_BRANDS["Usave"]),
+    (["U-SAVE", "USAVE", "U SAVE"], SHOPRITE_BRANDS["Usave"][0]),
     (["OK GROCER"], OK_FOODS_BRANDS["OK GROCER"]),
     (["OK FOODS"], OK_FOODS_BRANDS["OK FOODS"]),
     (["OK MINIMARK", "OK MINI"], OK_FOODS_BRANDS["OK MINIMARK"]),
     (["OK VALUE"], OK_FOODS_BRANDS["OK VALUE"]),
-    (["OK "], OK_FOODS_BRANDS["OK FOODS"]),
+    (["OK"], OK_FOODS_BRANDS["OK FOODS"]),
     (["CAMBRIDGE"], {"brand": "Cambridge Food", "brand_wikidata": "Q129263104"}),
     (["FOOD LOVER"], FOOD_LOVERS_STORE_TYPES["Store"]),
-    (["PEP "], {"brand": PepSpider.brands["PEP"][0], "brand_wikidata": PepSpider.brands["PEP"][1]}),
+    (["PEP"], {"brand": PepSpider.brands["PEP"][0], "brand_wikidata": PepSpider.brands["PEP"][1]}),
     (["EDGARS"], EdgarsSpider.item_attributes),
     (["CHICKEN LICKEN"], ChickenLickenSpider.item_attributes),
     (["KFC"], KFC_SHARED_ATTRIBUTES),
     (["ENGEN"], EngenSpider.item_attributes),
     (["SHELL"], ShellSpider.item_attributes),
     (["CALTEX"], CaltexSpider.item_attributes),
-    (["BP "], BpSpider.brands["bp"]),
+    (["BP"], BpSpider.brands["bp"]),
     (["TOTAL"], TotalEnergiesSpider.BRANDS["tot"]),
     (["SASOL"], SasolZASpider.item_attributes),
     (["ASTRON"], AstronEnergyZASpider.item_attributes),
@@ -86,7 +87,7 @@ class NedbankZASpider(JSONBlobSpider):
         for url in self.start_urls:
             yield Request(url=url, callback=self.fetch_json)
 
-    def fetch_json(self, response):
+    def fetch_json(self, response: TextResponse, **kwargs: Any) -> Any:
         auth_token = response.xpath('.//input[@id="authorizationtoken"]/@value').get()
         yield Request(
             url="https://api.nedsecure.co.za/nedbank/channeldistribution/v2/branches?resultsize=1000&latitude=-26&longitude=28",
@@ -100,13 +101,13 @@ class NedbankZASpider(JSONBlobSpider):
             callback=self.parse,
         )
 
-    def pre_process_data(self, location):
+    def pre_process_data(self, location: dict) -> None:
         if "geoLocation" in location:
             location.update(location.pop("geoLocation"))
         if "address" in location:
             location.update(location.pop("address"))
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         if location["type"] in ["ATM", "ID"]:  # ID = Intelligent Depositor (deposit-capable ATM)
             apply_category(Categories.ATM, item)
             apply_yes_no(Extras.CASH_IN, item, location.get("depositIndicator") == "YES")
@@ -136,7 +137,7 @@ class NedbankZASpider(JSONBlobSpider):
         else:
             self.crawler.stats.inc_value(f"atp/{self.name}/unhandled_type/{location['type']}")
 
-    def parse_store(self, response):
+    def parse_store(self, response: TextResponse, **kwargs: Any) -> Any:
         item = response.meta["item"]
         location = response.json()["data"]
         item["opening_hours"] = OpeningHours()

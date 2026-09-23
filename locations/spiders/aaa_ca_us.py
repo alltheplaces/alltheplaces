@@ -1,59 +1,81 @@
-from typing import AsyncIterator
-from urllib.parse import urlencode
+import math
+from typing import AsyncIterator, Iterable
 
-from scrapy import Request, Spider
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.geo import country_iseadgg_centroids
+from locations.geo import city_locations, country_iseadgg_centroids
+from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class AaaCAUSSpider(Spider):
+class AaaCAUSSpider(JSONBlobSpider):
     name = "aaa_ca_us"
     item_attributes = {"brand": "American Automobile Association", "brand_wikidata": "Q463436"}
-    allowed_domains = ["tdr.aaa.com"]
+    allowed_domains = ["www.aaa.com"]
 
-    async def start(self) -> AsyncIterator[Request]:
-        for lat, lon in country_iseadgg_centroids(["CA", "US"], 79):
-            params = {
-                "searchtype": "O",
-                "radius": "100",
-                "format": "json",
-                "ident": "AAACOM",
-                "destination": f"{lat},{lon}",
-            }
-            yield Request("https://tdr.aaa.com/tdrl/search.jsp?" + urlencode(params))
+    # GeoNames admin1 codes, which the API's geocoder does not understand.
+    CA_PROVINCES = {
+        "01": "AB",
+        "02": "BC",
+        "03": "MB",
+        "04": "NB",
+        "05": "NL",
+        "07": "NS",
+        "08": "ON",
+        "09": "PE",
+        "10": "QC",
+        "11": "SK",
+        "12": "YT",
+        "13": "NT",
+    }
 
-    def parse(self, response):
-        locations = response.json()["aaa"]["services"].get("travelItems")
-        if not locations:
-            return
-        locations = locations.get("travelItem", [])
-        # If result is a singleton POI then it is not supplied as a list! Make consistent.
-        if not isinstance(locations, list):
-            locations = [locations]
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        # The API only geocodes place names, so snap each grid cell to its nearest city and widen the radius to match.
+        cities = [*city_locations("US"), *city_locations("CA")]
+        cell_radius_miles = 196
+        for lat, lon in country_iseadgg_centroids(["CA", "US"], 315):
+            cos_lat = math.cos(math.radians(lat))
+            city = min(cities, key=lambda c: (c["latitude"] - lat) ** 2 + ((c["longitude"] - lon) * cos_lat) ** 2)
+            offset_miles = 69 * math.hypot(city["latitude"] - lat, (city["longitude"] - lon) * cos_lat)
+            if offset_miles > cell_radius_miles:
+                # No city in this cell (Arctic or open ocean), and very large radii make the API return HTTP 500.
+                continue
+            yield JsonRequest(
+                url="https://www.aaa.com/sharedservices/officedata.jsp?type=addresssearch",
+                data={
+                    "meta": {"appid": "BOL", "club": "999"},
+                    "types": {"office": {"clustered": False, "limit": 1000, "sort": [["distance", "asc"]]}},
+                    "withinAddress": {
+                        "city": city["name"],
+                        "state": self.CA_PROVINCES.get(city["admin1code"], city["admin1code"]),
+                        "radius": cell_radius_miles + offset_miles,
+                    },
+                },
+            )
 
-        if len(locations) > 0:
-            self.crawler.stats.inc_value("atp/geo_search/hits")
-        else:
-            self.crawler.stats.inc_value("atp/geo_search/misses")
-        self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+    def extract_json(self, response: TextResponse) -> list[dict]:
+        return [
+            office | office["addresses"][0]
+            for category in response.json()["categories"]
+            for office in category["items"]
+        ]
 
-        for location in locations:
-            properties = {
-                "ref": location["id"],
-                "name": location["itemName"],
-                "street_address": location["addresses"]["address"]["addressLine"],
-                "city": location["addresses"]["address"]["cityName"],
-                "state": location["addresses"]["address"]["stateProv"]["code"],
-                "postcode": location["addresses"]["address"]["postalCode"],
-                "country": location["addresses"]["address"]["countryName"]["code"],
-                "lat": location["position"]["latitude"],
-                "lon": location["position"]["longitude"],
-                "phone": location["phones"].get("phone", {}).get("content"),
-            }
-            item = Feature(**properties)
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = merge_address_lines([item["street_address"], feature["addressLine2"]])
+        item["city"] = feature["city"]["text"]
+        item["state"] = feature["stateProv"]["text"]
+        item["phone"] = feature["phones"][0]["text"] if feature["phones"] else None
 
-            apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
+        item["opening_hours"] = OpeningHours()
+        for day in feature["hours"][0]["days"]:
+            if day.get("closed"):
+                item["opening_hours"].set_closed(day["day"])
+            for shift in day.get("shifts", []):
+                item["opening_hours"].add_range(day["day"], shift["open"], shift["close"])
 
-            yield item
+        apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
+
+        yield item

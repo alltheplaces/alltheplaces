@@ -1,19 +1,20 @@
-from typing import Any
+from typing import Any, Iterable
 
+from scrapy import Spider
 from scrapy.http import Response
-from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class JigsawGBSpider(Spider):
     name = "jigsaw_gb"
     item_attributes = {"brand": "Jigsaw", "brand_wikidata": "Q6192383"}
-    start_urls = ["https://www.jigsaw-online.com/cdn/shop/t/619/assets/jigsaw-stores.json"]
+    start_urls = ["https://cdn.shopify.com/s/files/1/0561/7297/0150/files/jigsaw-stores.json"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for location in response.json()["features"]:
             newlocation = {key.replace("branch_", ""): value for key, value in location["properties"].items()}
             item = DictParser.parse(newlocation)
