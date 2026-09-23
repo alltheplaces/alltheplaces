@@ -54,6 +54,7 @@ class KopenhagenBRSpider(PlaywrightSpider):
     item_attributes = {"brand": "Kopenhagen", "brand_wikidata": "Q10314624", "name": "Kopenhagen"}
     allowed_domains = ["www.kopenhagen.com.br"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     # The store finder widget is a private VTEX IO app
     # ("kopenhagen21.ourstores") that exposes a public GraphQL endpoint.
