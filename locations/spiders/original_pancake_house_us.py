@@ -30,9 +30,7 @@ class OriginalPancakeHouseUSSpider(SitemapSpider):
 
         for location in response.xpath('//div[@class="location"]'):
             lines = [
-                re.sub(r"\s+", " ", line).strip()
-                for line in location.xpath("./p[1]//text()").getall()
-                if line.strip()
+                re.sub(r"\s+", " ", line).strip() for line in location.xpath("./p[1]//text()").getall() if line.strip()
             ]
             # "Arlington Heights, Illinois 60004", or with the state abbreviated.
             if not lines or not (locality := re.fullmatch(r"(.+?),\s*([A-Za-z .]+?)\s+(\d{5})", lines[-1])):
