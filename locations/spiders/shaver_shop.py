@@ -32,7 +32,7 @@ class ShaverShopSpider(JSONBlobSpider):
                 + feature["city"]
                 + "/"
                 + feature["id"]
-            )
+            ).replace(" ", "%20")
             item.pop("state")
         else:
             item["website"] = "https://www.shavershop.com.au/stores/" + feature["stateCode"] + "/" + feature["id"]
