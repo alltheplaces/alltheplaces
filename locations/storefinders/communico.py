@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time
 from typing import Any, AsyncIterator, Iterable
 from urllib.parse import quote
 
@@ -7,7 +7,7 @@ from scrapy.http import JsonRequest, Request, TextResponse
 
 from locations.categories import Extras
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -90,7 +90,7 @@ class CommunicoSpider(Spider):
         item["phone"] = location.get("tel")
         if fax := location.get("fax"):
             item["extras"][Extras.FAX.value] = fax
-        item["website"] = location.get("about_url")
+        item["website"] = location.get("about_url") or None
         if image := location.get("image"):
             item["image"] = IMAGE_URL.format(self.communico_client, quote(image))
         item["opening_hours"] = opening_hours.get(location["id"])
@@ -100,15 +100,33 @@ class CommunicoSpider(Spider):
     @staticmethod
     def parse_opening_hours(dates: dict) -> OpeningHours | None:
         oh = OpeningHours()
+        weekdays = set()
+        closures = False
         for times in dates.values():
             if not (day := times.get("day")):
                 # An exception to the weekly schedule, which carries the
                 # date it applies to instead of a day of the week.
+                closures = closures or times.get("open") == times.get("close")
                 continue
+            weekdays.add(day)
             if times["open"] == times["close"]:
                 oh.set_closed(day)
-            else:
-                oh.add_range(day, times["open"], times["close"], time_format="%I:%M%p")
+                continue
+            open_time = datetime.strptime(times["open"], "%I:%M%p").time()
+            close_time = datetime.strptime(times["close"], "%I:%M%p").time()
+            if close_time != time(0) and close_time < open_time:
+                # A typo rather than overnight opening, e.g. "10:00PM" to
+                # "8:00PM" for 10:00AM, which would otherwise run into the
+                # next day.
+                continue
+            oh.add_range(day, times["open"], times["close"], time_format="%I:%M%p")
+        if closures and len(weekdays) < 7:
+            # Every weekday otherwise appears in half a year of dates, closed
+            # days included, so a weekday missing entirely means closure
+            # exceptions have replaced the schedule: a location closed for
+            # renovation, which ATP records as closed every day.
+            oh = OpeningHours()
+            oh.set_closed(DAYS_FULL)
         return oh or None
 
     def pre_process_data(self, location: dict, **kwargs) -> None:
