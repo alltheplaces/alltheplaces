@@ -17,7 +17,6 @@ class RibolaHRSpider(JSONBlobSpider):
     start_urls = [
         "https://ribola.hr/wp-admin/admin-ajax.php?action=asl_load_stores&nonce=50703d0778&load_all=1&layout=1"
     ]
-    requires_proxy = "HR"
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["opening_hours"] = OpeningHours()
