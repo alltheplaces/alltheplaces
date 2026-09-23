@@ -39,9 +39,7 @@ class BestFriendsPetCareUSSpider(WPStoreLocatorSpider):
         item["website"] = location.get("permalink")
 
         # One record carries "Denver" as its state and "CO" as its city.
-        if not re.fullmatch(r"[A-Z]{2}", item.get("state") or "") and re.fullmatch(
-            r"[A-Z]{2}", item.get("city") or ""
-        ):
+        if not re.fullmatch(r"[A-Z]{2}", item.get("state") or "") and re.fullmatch(r"[A-Z]{2}", item.get("city") or ""):
             item["city"], item["state"] = item["state"], item["city"]
 
         apply_category(Categories.ANIMAL_BOARDING, item)
