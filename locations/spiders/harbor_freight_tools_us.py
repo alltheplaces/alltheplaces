@@ -14,11 +14,9 @@ class HarborFreightToolsUSSpider(JSONBlobSpider):
     name = "harbor_freight_tools_us"
     item_attributes = {"brand": "Harbor Freight Tools", "brand_wikidata": "Q5654601"}
     allowed_domains = ["api.harborfreight.com"]
-    requires_proxy = True
     locations_key = ["data", "findStoresNearCoordinates", "stores"]
     custom_settings = {
         "DOWNLOAD_DELAY": 10,  # Aggressive HTTP 403 rate limiting is used, robots.txt wants a delay of 10s
-        "ZYTE_API_AUTOMAP_PARAMS": {"customHttpRequestHeaders": []},
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
