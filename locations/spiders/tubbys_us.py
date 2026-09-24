@@ -52,7 +52,7 @@ class TubbysUSSpider(scrapy.Spider):
         for day, hours_text in zip(DAYS, hours_texts):
             hours_text = hours_text.strip()
             if hours_text.upper() == "CLOSED":
-                oh.add_range(day, "closed", "closed")
+                oh.set_closed(day)
                 continue
             if m := re.match(r"(\d{1,2}(?::\d{2})?)\s*(AM|PM)\s*-\s*(\d{1,2}(?::\d{2})?)\s*(AM|PM)", hours_text, re.I):
                 open_time, close_time = m.group(1, 3)
