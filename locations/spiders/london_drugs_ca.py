@@ -6,11 +6,10 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class LondonDrugsCASpider(
-    SitemapSpider,
-):
+class LondonDrugsCASpider(SitemapSpider):
     name = "london_drugs_ca"
     item_attributes = {"brand": "London Drugs", "brand_wikidata": "Q3258955"}
     allowed_domains = ["www.londondrugs.com"]
@@ -19,7 +18,6 @@ class LondonDrugsCASpider(
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response):
-        print(response.xpath('//*[contains(text(),"latitude")]/text()').get())
         json_data = json.loads(
             re.search(
                 r"({.+})[0-9a-z]+:\[", response.xpath('//*[contains(text(),"latitude")]/text()').get().replace("\\", "")
