@@ -7,6 +7,7 @@ from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 STORES_QUERY = """
 query {
@@ -47,6 +48,7 @@ class CulturaFRSpider(JSONBlobSpider):
     item_attributes = {"brand": "Cultura", "brand_wikidata": "Q3007154"}
     allowed_domains = ["www.cultura.com"]
     locations_key = ["data", "stores", "items"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
