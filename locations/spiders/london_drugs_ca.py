@@ -18,6 +18,7 @@ class LondonDrugsCASpider(SitemapSpider, PlaywrightSpider):
     sitemap_urls = ["https://www.londondrugs.com/stores/sitemap.xml"]
     sitemap_rules = [("https://www.londondrugs.com/stores/[^/]+/[^/]+/[^/]+$", "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     def parse(self, response: Response):
         json_data = json.loads(
