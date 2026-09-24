@@ -6,10 +6,12 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
+MARCUS_CINEMA = {"brand": "Marcus Cinema", "brand_wikidata": "Q64083352"}
+MOVIE_TAVERN = {"brand": "Movie Tavern", "brand_wikidata": "Q64083534"}
+
 
 class MarcusTheatresSpider(JSONBlobSpider):
     name = "marcus_theatres"
-    item_attributes = {"brand": "Marcus Cinema", "brand_wikidata": "Q64083352"}
     api_url = "https://api-injin.marcustheatres.com"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -28,7 +30,16 @@ class MarcusTheatresSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["cinemaid"]
-        item["branch"] = item.pop("name")
+        name = item.pop("name")
+        if name.startswith("Movie Tavern "):
+            item.update(MOVIE_TAVERN)
+            item["branch"] = name.removeprefix("Movie Tavern ")
+        elif name.startswith("BistroPlex "):
+            item["brand"] = item["name"] = "BistroPlex"
+            item["branch"] = name.removeprefix("BistroPlex ")
+        else:
+            item.update(MARCUS_CINEMA)
+            item["branch"] = name
         item["street_address"] = feature["address1"]
         item["city"] = feature["city"][0]
         item["state"] = feature["states"][0]
