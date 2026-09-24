@@ -6,16 +6,18 @@ from scrapy.spiders import SitemapSpider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class LondonDrugsCASpider(SitemapSpider):
+class LondonDrugsCASpider(SitemapSpider, PlaywrightSpider):
     name = "london_drugs_ca"
     item_attributes = {"brand": "London Drugs", "brand_wikidata": "Q3258955"}
     allowed_domains = ["www.londondrugs.com"]
     sitemap_urls = ["https://www.londondrugs.com/stores/sitemap.xml"]
     sitemap_rules = [("https://www.londondrugs.com/stores/[^/]+/[^/]+/[^/]+$", "parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response):
         json_data = json.loads(
