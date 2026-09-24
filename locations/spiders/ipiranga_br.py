@@ -2,12 +2,9 @@ from typing import Any, AsyncIterator
 
 import scrapy
 from scrapy import Spider
-from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.geo import country_iseadgg_centroids
-from locations.items import Feature
 
 
 class IpirangaBRSpider(Spider):
