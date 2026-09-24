@@ -14,7 +14,7 @@ class LondonDrugsCASpider(SitemapSpider):
     item_attributes = {"brand": "London Drugs", "brand_wikidata": "Q3258955"}
     allowed_domains = ["www.londondrugs.com"]
     sitemap_urls = ["https://www.londondrugs.com/stores/sitemap.xml"]
-    sitemap_rules = [("https://www.londondrugs.com/stores/[^/]+/[^/]+/\d+$", "parse")]
+    sitemap_rules = [("https://www.londondrugs.com/stores/[^/]+/[^/]+/[^/]+$", "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response):
