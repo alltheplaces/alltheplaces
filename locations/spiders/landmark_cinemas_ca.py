@@ -29,6 +29,7 @@ class LandmarkCinemasCASpider(PlaywrightSpider):
     def parse_location(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         location = json.loads(response.json())
         item = DictParser.parse(location)
+        item["email"] = None
         item["branch"] = location["CinemaName"]
         item["website"] = item["ref"] = f'https://www.landmarkcinemas.com{location["CinemaInfoUrl"]}'
         item["image"] = f'https://www.landmarkcinemas.com{location["Image"]}'
