@@ -27,7 +27,8 @@ class RedRoosterAUSpider(Spider):
             if attributes["storeName"].rstrip().lower().endswith(("- closed", "- inactive")):
                 # Closed stores are renamed "... - Closed" but usually stay isEnabledForTrading.
                 continue
-            if not location["relationships"].get("storeAddress"):
+            store_address = location["relationships"].get("storeAddress")
+            if not store_address or not store_address.get("data"):
                 continue
 
             # Note: unit, floor and streetNumber fields are present but never
