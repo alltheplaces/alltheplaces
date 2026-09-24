@@ -1,34 +1,29 @@
-import json
-import re
+from typing import Any, Iterable
 
-from scrapy import Spider
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class CineworldGBJESpider(Spider):
+class CineworldGBJESpider(SitemapSpider, StructuredDataSpider):
     name = "cineworld_gb_je"
     item_attributes = {"brand": "Cineworld", "brand_wikidata": "Q5120901"}
-    start_urls = ["https://www.cineworld.co.uk/"]
+    sitemap_urls = ["https://www.cineworld.co.uk/sitemap-0.xml"]
+    sitemap_rules = [(r"^https://www\.cineworld\.co\.uk/cinemas/([a-z0-9]+)-.+/$", "parse_sd")]
+    wanted_types = ["MovieTheater"]
+    search_for_amenity_features = False
+    drop_attributes = {"twitter"}
     requires_proxy = "GB"
 
-    def parse(self, response, **kwargs):
-        for location in json.loads(re.search(r"apiSitesList = (\[.+\]),", response.text).group(1)):
-            item = DictParser.parse(location)
-            item["street_address"] = merge_address_lines(
-                [
-                    location["address"]["address1"],
-                    location["address"]["address2"],
-                    location["address"]["address3"],
-                    location["address"]["address4"],
-                ]
-            )
-            if item.get("postcode") and len(item["postcode"]) >= 2 and item["postcode"][:2] == "JE":
-                item["country"] = "JE"
-            else:
-                item["country"] = "GB"
-            item["ref"] = location["externalCode"]
-            item["website"] = response.urljoin("{}/{}".format(location["uri"], location["externalCode"]))
-
-            yield item
+    def post_process_item(
+        self, item: Feature, response: TextResponse, ld_data: dict, **kwargs: Any
+    ) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", None)
+        item["website"] = response.url
+        if (item.get("postcode") or "").startswith("JE"):
+            item["country"] = "JE"
+        apply_category(Categories.CINEMA, item)
+        yield item
