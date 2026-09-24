@@ -1,40 +1,37 @@
-import scrapy
+from typing import AsyncIterator, Iterable
 
+from scrapy.http import JsonRequest, Response
+
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class MarcusTheatresSpider(scrapy.Spider):
+class MarcusTheatresSpider(JSONBlobSpider):
     name = "marcus_theatres"
-    item_attributes = {"brand_wikidata": "Q64083352"}
-    allowed_domains = ["marcustheatres.com"]
-    start_urls = ("http://www.marcustheatres.com/theatre-locations/",)
-    requires_proxy = True  # Imperva
+    item_attributes = {"brand": "Marcus Cinema", "brand_wikidata": "Q64083352"}
+    api_url = "https://api-injin.marcustheatres.com"
 
-    def parse(self, response):
-        response.selector.remove_namespaces()
-        city_urls = response.xpath('//h3[@class="theatre-name"]/a/@href').extract()
-        for path in city_urls:
-            yield scrapy.Request(
-                "http://www.marcustheatres.com" + path.strip(),
-                callback=self.parse_store,
-            )
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            url=f"{self.api_url}/user/v2/token",
+            method="POST",
+            headers={"Authorization": "Basic d2Vic2l0ZUBpbmppbi5jb206MEhDcntmIXtzXjA4bkpXLjdyIzBxa2p3"},
+            callback=self.parse_access_token,
+        )
 
-    def parse_store(self, response):
-        properties = {
-            "name": response.xpath('//h1[@class="ph__title text-cursive mb0"]/text()').extract_first(),
-            "ref": response.url,
-            "addr_full": response.xpath('//div[@class="theatre-map__street-address"]/text()').extract_first(),
-            "city": response.xpath('//div[@class="theatre-map__locality"]/text()').extract_first(),
-            "state": response.xpath('//div[@class="theatre-map__region"]/text()').extract_first(),
-            "postcode": response.xpath('//div[@class="theatre-map__postal-code"]/text()').extract_first(),
-            "phone": response.xpath('//div[@class="theatre-map__theatre-phone"]/text()').extract_first(),
-            "website": response.url,
-            "lat": float(
-                response.xpath('//div[@class="map-link"]/a/@href').extract_first().split("loc:")[1].split("+")[0]
-            ),
-            "lon": float(
-                response.xpath('//div[@class="map-link"]/a/@href').extract_first().split("loc:")[1].split("+")[1]
-            ),
-        }
+    def parse_access_token(self, response: Response) -> Iterable[JsonRequest]:
+        yield JsonRequest(
+            url=f"{self.api_url}/cms/v2/cinemas",
+            headers={"Authorization": f"Bearer {response.json()['accessToken']}"},
+        )
 
-        yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["cinemaid"]
+        item["branch"] = item.pop("name")
+        item["street_address"] = feature["address1"]
+        item["city"] = feature["city"][0]
+        item["state"] = feature["states"][0]
+        item["website"] = f"https://www.marcustheatres.com/theatre-locations/{feature['urlSafeName']}"
+        apply_category(Categories.CINEMA, item)
+        yield item
