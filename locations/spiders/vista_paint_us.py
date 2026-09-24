@@ -30,8 +30,7 @@ class VistaPaintUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Any]:
         for row in response.xpath("//table//tr"):
             cells = [
-                re.sub(r"\s+", " ", " ".join(cell.xpath(".//text()").getall())).strip()
-                for cell in row.xpath("./td")
+                re.sub(r"\s+", " ", " ".join(cell.xpath(".//text()").getall())).strip() for cell in row.xpath("./td")
             ]
             if len(cells) < 6:
                 continue
