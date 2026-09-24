@@ -46,7 +46,6 @@ class AngusAndCooteAUSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs: Any) -> Iterable[Feature]:
         item["branch"] = item.pop("name", None)
-        item["state"] = location.get("regioncode")
         item["addr_full"] = re.sub(r"\s+", " ", item.get("addr_full", ""))
         item["website"] = "https://www.anguscoote.com.au/stores/" + location.get("url")
         if location.get("openhours"):
