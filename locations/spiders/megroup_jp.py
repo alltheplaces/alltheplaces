@@ -29,7 +29,6 @@ class MegroupJPSpider(Spider):
         for loc in response.json():
             item = DictParser.parse(loc)
             item["ref"] = loc["LocNmKanji"]
-            item["street_address"] = loc["Address"]
             if loc["MachineType"] == "S":
                 item["name"] = item["brand"] = "Photo-Me"
                 item["branch"] = loc["LocNmKanji"]
