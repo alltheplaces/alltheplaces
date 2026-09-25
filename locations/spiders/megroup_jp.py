@@ -15,7 +15,9 @@ class MegroupJPSpider(Spider):
     item_attributes = {"operator": "ME Group Japan", "operator_wikidata": "Q124004072"}
 
     def make_request(self, lat, lon):
-        return JsonRequest(f"https://locator.me-group.jp/api/Machines/GetNearbyMachines?lat={lat}&lon={lon}&optAll=1&optMyNo=1&optCloudSave=1&optCloudSaveRepr=1&optBihada=1&optOrange=1&optApple=1&optNames=1")
+        return JsonRequest(
+            f"https://locator.me-group.jp/api/Machines/GetNearbyMachines?lat={lat}&lon={lon}&optAll=1&optMyNo=1&optCloudSave=1&optCloudSaveRepr=1&optBihada=1&optOrange=1&optApple=1&optNames=1"
+        )
 
     async def start(self):
         for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
