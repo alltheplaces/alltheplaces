@@ -8,6 +8,8 @@ class BingLeeAUSpider(SitemapSpider, StructuredDataSpider):
     name = "bing_lee_au"
     item_attributes = {"brand": "Bing Lee", "brand_wikidata": "Q4914136"}
     sitemap_urls = ["https://www.binglee.com.au/public/sitemap-locations.xml"]
-    sitemap_rules = [(r"\/stores\/", "parse_sd")]
+    sitemap_rules = [("/stores/", "parse_sd")]
     wanted_types = ["ElectronicsStore"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    drop_attributes = {"facebook"}
+    requires_proxy = True
