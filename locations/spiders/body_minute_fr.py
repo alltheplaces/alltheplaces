@@ -12,7 +12,7 @@ class BodyMinuteFRSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://bodyminute.com/robots.txt"]
     sitemap_rules = [
-        (r"/instituts/[^/]+/", "parse"),
+        (r"/instituts/[^/]+/$", "parse"),
     ]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
