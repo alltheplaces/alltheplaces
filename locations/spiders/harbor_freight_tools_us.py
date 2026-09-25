@@ -14,25 +14,63 @@ class HarborFreightToolsUSSpider(JSONBlobSpider):
     name = "harbor_freight_tools_us"
     item_attributes = {"brand": "Harbor Freight Tools", "brand_wikidata": "Q5654601"}
     allowed_domains = ["api.harborfreight.com"]
-    requires_proxy = True
-    start_urls = [
-        'https://api.harborfreight.com/graphql?operationName=FindStoresNearCoordinates&variables={"filter":{"status":"OPEN"},"latitude":0,"longitude":0,"withDistance":true}&extensions={"persistedQuery":{"version":1,"sha256Hash":"3af6e542b419920c44979e2521ef6b73cd998b9089694f1c12f8f3c29edb7eb1"}}'
-    ]
     locations_key = ["data", "findStoresNearCoordinates", "stores"]
     custom_settings = {
         "DOWNLOAD_DELAY": 10,  # Aggressive HTTP 403 rate limiting is used, robots.txt wants a delay of 10s
-        "ZYTE_API_AUTOMAP_PARAMS": {"customHttpRequestHeaders": []},
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        # GraphQL query returns results in a 60mi radius.
-        for coordinates in country_iseadgg_centroids(["US"], 94):
-            graphql_url = (
-                self.start_urls[0]
-                .replace('"latitude":0,', f'"latitude":{coordinates[0]},')
-                .replace('"longitude":0,', f'"longitude":{coordinates[1]},')
+        for coordinates in country_iseadgg_centroids(["US"], 315):
+            yield JsonRequest(
+                url="https://api.harborfreight.com/graphql",
+                data={
+                    "query": """
+                                query FindStoresNearCoordinates(
+                                  $filter: StoresFilterInput,
+                                  $latitude: Float,
+                                  $longitude: Float,
+                                  $limit: Int,
+                                  $radius: Int,
+                                  $withDistance: Boolean!
+                                ) {
+                                  findStoresNearCoordinates(
+                                    filter: $filter,
+                                    latitude: $latitude,
+                                    longitude: $longitude,
+                                    limit: $limit,
+                                    radius: $radius
+                                  ) {
+                                    stores {
+                                      title
+                                      address
+                                      address_description
+                                      city
+                                      latitude
+                                      longitude
+                                      postcode
+                                      store_number
+                                      store_type
+                                      telephone
+                                      image
+                                      store_hours_mf
+                                      store_hours_sat
+                                      store_hours_sun
+                                      status
+                                      distance @include(if: $withDistance)
+                                    }
+                                  }
+                                }
+                                """,
+                    "variables": {
+                        "filter": {"status": "OPEN"},
+                        "latitude": coordinates[0],
+                        "longitude": coordinates[1],
+                        "limit": 150,
+                        "radius": 250,
+                        "withDistance": True,
+                    },
+                },
             )
-            yield JsonRequest(url=graphql_url)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = feature["title"]
