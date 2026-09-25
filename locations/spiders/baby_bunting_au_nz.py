@@ -14,7 +14,6 @@ class BabyBuntingAUNZSpider(JSONBlobSpider):
         "brand": "Baby Bunting",
         "brand_wikidata": "Q109626935",
     }
-    requires_proxy = True
     allowed_domains = ["www.babybunting.com.au"]
     start_urls = ["https://www.babybunting.com.au/api/cnts/getAllFromType"]
 
