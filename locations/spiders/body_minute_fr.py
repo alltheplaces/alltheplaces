@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class BodyMinuteFRSpider(SitemapSpider, StructuredDataSpider):
@@ -21,5 +21,5 @@ class BodyMinuteFRSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["name"].startswith("Institut beauté et épilation sans RDV à"):
             apply_category(Categories.SHOP_BEAUTY, item)
-            item["branch"] = (item.pop("name","") or "").removeprefix("Institut beauté et épilation sans RDV à ")
+            item["branch"] = (item.pop("name", "") or "").removeprefix("Institut beauté et épilation sans RDV à ")
             yield item
