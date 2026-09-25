@@ -15,7 +15,7 @@ class HottoMottoJPSpider(MapionSpider):
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["name"] = None
-        item["branch"] = data.get("name").removeprefix("ほっともっと ").removeprefix("ほっともっと")
+        item["branch"] = data.get("name").removeprefix("ほっともっと").lstrip()
         apply_category(Categories.FAST_FOOD, item)
 
         yield item
