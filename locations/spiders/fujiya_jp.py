@@ -24,9 +24,13 @@ class FujiyaJPSpider(MapionSpider):
             .lstrip()
         )
         item["phone"] = f"+81 {data.get('tel1')}-{data.get('tel2')}-{data.get('tel3')}"
-        if (open_time := f"{data.get('openhour1')}:{data.get('openmin1')}") and (
-            close_time := f"{data.get('closehour1')}:{data.get('closemin1')}"
-        ):
+        time_values = tuple(
+            data.get(key)
+            for key in ("openhour1", "openmin1", "closehour1", "closemin1")
+        )
+        if all(value not in (None, "") for value in time_values):
+            open_time = f"{time_values[0]}:{time_values[1]}"
+            close_time = f"{time_values[2]}:{time_values[3]}"
             oh = OpeningHours()
             oh.add_days_range(DAYS, open_time, close_time)
             item["opening_hours"] = oh
