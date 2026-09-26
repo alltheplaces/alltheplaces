@@ -11,6 +11,8 @@ class TrailsRegionalLibraryUSSpider(TheEventsCalendarSpider):
     name = "trails_regional_library_us"
     item_attributes = {"operator": "Trails Regional Library", "operator_wikidata": "Q69481162"}
     events_calendar_host = "www.trailslibrary.org"
+    # The site times out for requests from ATP's CI, on AWS.
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, venue: dict, **kwargs) -> Iterable[Feature]:
         # e.g. "Odessa Branch"; other venues host events, such as the
