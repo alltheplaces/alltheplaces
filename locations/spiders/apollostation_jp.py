@@ -16,7 +16,9 @@ class ApollostationJPSpider(MapionSpider):
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["name"] = None
         item["branch"] = data.get("name")
-        apply_yes_no(Fuel.ELECTRIC, item, (data.get("has_ev_charger_fast") == "1") or (data.get("has_ev_charger_normal") == "1"))
+        apply_yes_no(
+            Fuel.ELECTRIC, item, (data.get("has_ev_charger_fast") == "1") or (data.get("has_ev_charger_normal") == "1")
+        )
         apply_category(Categories.FUEL_STATION, item)
 
         yield item
