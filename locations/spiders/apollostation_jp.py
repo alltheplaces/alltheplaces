@@ -11,7 +11,7 @@ class ApollostationJPSpider(MapionSpider):
     name = "apollostation_jp"
     item_attributes = {"brand": "apollostation", "brand_wikidata": "Q114731101"}
     allowed_domains = ["map.idemitsu.com"]
-    feature_url_template = "https://map.idemitsu.com/b/a/attr/?t=attr_con&start={}"
+    feature_url_template = "https://map.idemitsu.com/b/a/attr/?t=attr_con&kind=0&start={}"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["name"] = None
