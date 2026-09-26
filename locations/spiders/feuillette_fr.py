@@ -46,15 +46,15 @@ class FeuilletteFRSpider(Spider):
             item["website"] = f"https://etablissements.groupe-feuillette.fr/etablissement/{location['slug']}"
 
             if schedules := location.get("decodedSchedules"):
-                # Google Places style periods, sometimes dated (next 7 days): keep one range per weekday.
-                ranges = {
-                    period["open"]["day"]: (period["open"]["time"], period["close"]["time"])
-                    for period in schedules.get("periods", [])
-                    if "close" in period
-                }
                 item["opening_hours"] = OpeningHours()
-                for day, (open_time, close_time) in ranges.items():
-                    item["opening_hours"].add_range(DAYS_FROM_SUNDAY[day], open_time, close_time, "%H%M")
+                for period in schedules.get("periods", []):
+                    if "close" in period:
+                        item["opening_hours"].add_range(
+                            DAYS_FROM_SUNDAY[period["open"]["day"]],
+                            period["open"]["time"],
+                            period["close"]["time"],
+                            "%H%M",
+                        )
 
             apply_category(Categories.SHOP_BAKERY, item)
             yield item
