@@ -22,11 +22,12 @@ class TheEventsCalendarSpider(Spider):
     A site uses the plugin if https://<host>/wp-json/tribe/events/v1/venues
     returns a list of venues.
 
-    Venues without a street address, such as online or "to be decided"
-    venues, are skipped. Most sites also list venues which are not the
-    operator's own locations, such as a park or restaurant hosting one event,
-    or a room inside a location; skip these in `post_process_item`. The API
-    has no opening hours.
+    Venues without a name or a street address, such as online or "to be
+    decided" venues, are skipped, so `post_process_item` always gets an item
+    with a name. Most sites also list venues which are not the operator's own
+    locations, such as a park or restaurant hosting one event, or a room
+    inside a location; skip these in `post_process_item`. The API has no
+    opening hours.
     """
 
     dataset_attributes: dict = {"source": "api", "api": "theeventscalendar.com"}
@@ -42,7 +43,7 @@ class TheEventsCalendarSpider(Spider):
         data = response.json()
         for venue in data["venues"]:
             self.pre_process_data(venue)
-            if not self.clean(venue.get("address")):
+            if not self.clean(venue.get("venue")) or not self.clean(venue.get("address")):
                 continue
             item = self.parse_venue(venue)
             yield from self.post_process_item(item, response, venue) or []
