@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -20,7 +20,7 @@ class FonciaFRSpider(Spider):
     start_urls = ["https://fr.foncia.com/agence-immobiliere/toutes-les-agences-par-departement"]
     api_url = "https://fnc-api.prod.fonciatech.net/agences/agences/"
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
         for slug in response.xpath("//a/@href").re(r"/agence-immobiliere/agences-immobilieres/([^/?#]+)$"):
             yield JsonRequest(
                 url=self.api_url + "search",
@@ -28,11 +28,11 @@ class FonciaFRSpider(Spider):
                 callback=self.parse_agencies,
             )
 
-    def parse_agencies(self, response: Response, **kwargs: Any) -> Any:
+    def parse_agencies(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
         for agency in response.json()["agences"]:
             yield JsonRequest(url=self.api_url + agency["numeroAgence"], callback=self.parse_agency)
 
-    def parse_agency(self, response: Response, **kwargs: Any) -> Any:
+    def parse_agency(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         agency = response.json()
         if agency.get("agenceVirtuelle"):
             return
