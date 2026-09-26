@@ -16,13 +16,21 @@ class FujiyaJPSpider(MapionSpider):
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["name"] = None
-        item["branch"] = data.get("name").removeprefix("ペコちゃんmilkyドーナツ").removeprefix("milky70 since1951").removeprefix("ペコちゃんmilkyタイム").lstrip()
+        item["branch"] = (
+            data.get("name")
+            .removeprefix("ペコちゃんmilkyドーナツ")
+            .removeprefix("milky70 since1951")
+            .removeprefix("ペコちゃんmilkyタイム")
+            .lstrip()
+        )
         item["phone"] = f"+81 {data.get('tel1')}-{data.get('tel2')}-{data.get('tel3')}"
-        if (open_time := f"{data.get('openhour1')}:{data.get('openmin1')}") and (close_time := f"{data.get('closehour1')}:{data.get('closemin1')}"):
+        if (open_time := f"{data.get('openhour1')}:{data.get('openmin1')}") and (
+            close_time := f"{data.get('closehour1')}:{data.get('closemin1')}"
+        ):
             oh = OpeningHours()
             oh.add_days_range(DAYS, open_time, close_time)
             item["opening_hours"] = oh
-        if data.get("flag4"): # flag4 is for sit-down restaurants. they sell confectionery as well
+        if data.get("flag4"):  # flag4 is for sit-down restaurants. they sell confectionery as well
             apply_category(Categories.RESTAURANT, item)
         apply_category(Categories.SHOP_CONFECTIONERY, item)
 
