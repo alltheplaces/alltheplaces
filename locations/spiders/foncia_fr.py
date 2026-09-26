@@ -57,8 +57,12 @@ class FonciaFRSpider(Spider):
 
         item["opening_hours"] = OpeningHours()
         for rule in agency.get("horaires") or []:
-            times = [rule[key] for key in ("startAM", "endAM", "startPM", "endPM") if rule.get(key)]
-            ranges = " ".join(f"{start}-{end}" for start, end in zip(times[::2], times[1::2])).replace("h", ":")
+            start_am, end_am, start_pm, end_pm = (rule.get(key) for key in ("startAM", "endAM", "startPM", "endPM"))
+            if start_am and end_pm and not end_am and not start_pm:
+                periods = [(start_am, end_pm)]  # Open without a lunch break
+            else:
+                periods = [(start_am, end_am), (start_pm, end_pm)]
+            ranges = " ".join(f"{start}-{end}" for start, end in periods if start and end).replace("h", ":")
             item["opening_hours"].add_ranges_from_string(
                 f"{rule['days']} {ranges}", days=DAYS_FR, delimiters=DELIMITERS_FR
             )
