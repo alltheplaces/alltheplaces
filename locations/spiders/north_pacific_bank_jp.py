@@ -39,7 +39,7 @@ class NorthPacificBankJPSpider(MapionSpider):
                 item.set_tag("opening_hours:atm", oh_atm.as_opening_hours())
             item.set_tag("branch:en", data.get("poi_name_en").removesuffix(" BRANCH").capitalize())
             if wheel := data.get("service_flg6"):
-                 apply_yes_no(Extras.WHEELCHAIR, item, wheel == "1")
+                apply_yes_no(Extras.WHEELCHAIR, item, wheel == "1")
             apply_category(Categories.BANK, item)
         if oh:
             item["opening_hours"] = oh
