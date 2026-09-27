@@ -20,9 +20,7 @@ class NipponRentacarJPSpider(MapionSpider):
             item.set_tag("branch:ja-Hira", yomi.split("[")[0])
         if eng_name := data.get("ww_name_yomi"):
             item.set_tag("branch:en", eng_name)
-        item["addr_full"] = "".join(
-            part for part in (data.get("address1"), data.get("address2")) if part
-        )
+        item["addr_full"] = "".join(part for part in (data.get("address1"), data.get("address2")) if part)
         apply_category(Categories.CAR_RENTAL, item)
 
         yield item
