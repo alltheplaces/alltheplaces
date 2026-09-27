@@ -29,7 +29,10 @@ class NorthPacificBankJPSpider(MapionSpider):
                 self.add_hours(oh, DAYS_WEEKEND, holi)
             apply_category(Categories.ATM, item)
         else:
-            self.add_hours(oh, DAYS_WEEKDAY, data.get("handle_time"))
+            handle_time = data.get("handle_time")
+            self.add_hours(oh, DAYS_WEEKDAY, handle_time)
+            if handle_time and "土日祝日も同じ時間" in handle_time:
+                self.add_hours(oh, DAYS_WEEKEND, handle_time)
             oh_atm = OpeningHours()
             self.add_hours(oh_atm, DAYS_WEEKDAY, data.get("atm_time"))
             if holi := data.get("atm_holi"):
