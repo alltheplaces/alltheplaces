@@ -53,6 +53,11 @@ class ChibaBankJPSpider(MapionSpider):
     def add_hours(oh: OpeningHours, days: list[str], time_range: str | None):
         if not time_range:
             return
+        monday_time_range = None
+        if "Mo" in days and (match := re.search(r"※月曜日は(.+)", time_range)):
+            monday_time_range = match.group(1)
+            time_range = time_range[: match.start()]
+            days = [day for day in days if day != "Mo"]
         for segment in re.split(r"<br\s*/?>", time_range):
             if hours := re.match(r"(\d{1,2}):(\d{2})[~〜～](\d{1,2}):(\d{2})", segment.strip()):
                 # Some ATMs use "25:00" style times to mean 01:00 the next
@@ -65,3 +70,5 @@ class ChibaBankJPSpider(MapionSpider):
                 else:
                     close_time = f"{close_hour % 24:02d}:{hours.group(4)}"
                 oh.add_days_range(days, open_time, close_time)
+        if monday_time_range:
+            ChibaBankJPSpider.add_hours(oh, ["Mo"], monday_time_range)
