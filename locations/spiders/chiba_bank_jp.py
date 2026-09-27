@@ -59,5 +59,9 @@ class ChibaBankJPSpider(MapionSpider):
                 # day; normalise so OpeningHours' own overnight handling
                 # (triggered when close < open) picks it up.
                 open_time = f"{int(hours.group(1)) % 24:02d}:{hours.group(2)}"
-                close_time = f"{int(hours.group(3)) % 24:02d}:{hours.group(4)}"
+                close_hour = int(hours.group(3))
+                if close_hour == 24 and hours.group(4) == "00":
+                    close_time = "24:00"
+                else:
+                    close_time = f"{close_hour % 24:02d}:{hours.group(4)}"
                 oh.add_days_range(days, open_time, close_time)
