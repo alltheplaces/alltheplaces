@@ -22,20 +22,20 @@ class ChibaBankJPSpider(MapionSpider):
 
         oh = OpeningHours()
         if data.get("store_kind") == "2":
-            self.add_hours(oh, DAYS_WEEKDAY, data.get("week_atm").replace("：", ":"))
-            self.add_hours(oh, ["Sa"], data.get("sat_atm").replace("：", ":"))
-            self.add_hours(oh, ["Su"], data.get("sun_atm").replace("：", ":"))
+            self.add_hours(oh, DAYS_WEEKDAY, data.get("week_atm"))
+            self.add_hours(oh, ["Sa"], data.get("sat_atm"))
+            self.add_hours(oh, ["Su"], data.get("sun_atm"))
             apply_category(Categories.ATM, item)
         elif data.get("store_kind") == "0":  # foreign exchange counter, no opening hours in data.
             item.set_tag("branch:ja-Hira", data.get("poi_name_yomi").removeprefix("（").removesuffix("）"))
             apply_category(Categories.BUREAU_DE_CHANGE, item)
         else:
-            self.add_hours(oh, DAYS_WEEKDAY, data.get("week_time").replace("：", ":"))
-            self.add_hours(oh, DAYS_WEEKEND, data.get("holi_time").replace("：", ":"))
+            self.add_hours(oh, DAYS_WEEKDAY, data.get("week_time"))
+            self.add_hours(oh, DAYS_WEEKEND, data.get("holi_time"))
             oh_atm = OpeningHours()
-            self.add_hours(oh_atm, DAYS_WEEKDAY, data.get("week_atm").replace("：", ":"))
-            self.add_hours(oh_atm, ["Sa"], data.get("sat_atm").replace("：", ":"))
-            self.add_hours(oh_atm, ["Su"], data.get("sun_atm").replace("：", ":"))
+            self.add_hours(oh_atm, DAYS_WEEKDAY, data.get("week_atm"))
+            self.add_hours(oh_atm, ["Sa"], data.get("sat_atm"))
+            self.add_hours(oh_atm, ["Su"], data.get("sun_atm"))
             if oh_atm:
                 apply_yes_no(Extras.ATM, item, oh_atm)
                 item.set_tag("opening_hours:atm", oh_atm.as_opening_hours())
@@ -58,17 +58,10 @@ class ChibaBankJPSpider(MapionSpider):
             monday_time_range = match.group(1)
             time_range = time_range[: match.start()]
             days = [day for day in days if day != "Mo"]
-        for segment in re.split(r"<br\s*/?>", time_range):
-            if hours := re.match(r"(\d{1,2}):(\d{2})[~〜～](\d{1,2}):(\d{2})", segment.strip()):
-                # Some ATMs use "25:00" style times to mean 01:00 the next
-                # day; normalise so OpeningHours' own overnight handling
-                # (triggered when close < open) picks it up.
-                open_time = f"{int(hours.group(1)) % 24:02d}:{hours.group(2)}"
-                close_hour = int(hours.group(3))
-                if close_hour == 24 and hours.group(4) == "00":
-                    close_time = "24:00"
-                else:
-                    close_time = f"{close_hour % 24:02d}:{hours.group(4)}"
+        for segment in re.split(r"<br\s*/?>", time_range.replace("：", ":")):
+            if hours := re.match(r"(\d{1,2}:\d{2})[~〜～](\d{1,2}:\d{2})", segment.strip()):
+                open_time = f"{hours.group(1)}"
+                close_time = f"{hours.group(2)}"
                 oh.add_days_range(days, open_time, close_time)
         if monday_time_range:
             ChibaBankJPSpider.add_hours(oh, ["Mo"], monday_time_range)
