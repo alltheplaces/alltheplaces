@@ -38,7 +38,6 @@ class CoopFoodGBSpider(CamoufoxSpider):
         yield JsonRequest(
             url=self.start_urls[0],
             meta={"camoufox_page_methods": [WAIT_FOR_IMPERVA_CHALLENGE]},
-            headers={"content-type": "application/json"},
         )
 
     def parse_hours(self, hours: list[dict]) -> OpeningHours | None:
