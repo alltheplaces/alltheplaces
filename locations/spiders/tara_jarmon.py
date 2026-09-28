@@ -60,5 +60,4 @@ class TaraJarmonSpider(XMLFeedSpider):
         item["opening_hours"].add_ranges_from_string(hours)
 
         apply_category(Categories.SHOP_CLOTHES, item)
-        apply_category({"clothes": "women"}, item)
         yield item
