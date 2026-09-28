@@ -46,7 +46,8 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
 
     def pre_process_data(self, ld_data, **kwargs):
         html_decode_dict(ld_data)
-        ld_data["openingHours"] = ld_data["openingHours"][0].replace("\r\n", "").split(",")
+        if ld_data.get("openingHours"):
+            ld_data["openingHours"] = ld_data["openingHours"][0].replace("\r\n", "").split(",")
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(self.STONEGATE, item)
