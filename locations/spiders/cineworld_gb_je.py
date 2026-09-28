@@ -11,7 +11,7 @@ from locations.structured_data_spider import StructuredDataSpider
 class CineworldGBJESpider(SitemapSpider, StructuredDataSpider):
     name = "cineworld_gb_je"
     item_attributes = {"brand": "Cineworld", "brand_wikidata": "Q5120901"}
-    sitemap_urls = ["https://www.cineworld.co.uk/sitemap-0.xml"]
+    sitemap_urls = ["https://www.cineworld.co.uk/robots.txt"]
     sitemap_rules = [(r"^https://www\.cineworld\.co\.uk/cinemas/([a-z0-9]+)-.+/$", "parse_sd")]
     wanted_types = ["MovieTheater"]
     search_for_amenity_features = False
