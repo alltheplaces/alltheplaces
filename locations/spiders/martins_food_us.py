@@ -18,9 +18,7 @@ class MartinsFoodUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["GroceryStore"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["ref"] = response.xpath(
-            '//div[@class="StoreDetails-storeNum"]/text()'
-        ).get()
+        item["ref"] = response.xpath('//div[@class="StoreDetails-storeNum"]/text()').get()
         item["branch"] = item.pop("name").removeprefix("MARTIN'S ")
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
