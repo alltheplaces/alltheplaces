@@ -7,17 +7,14 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class ScotrailGBSpider(SitemapSpider, PlaywrightSpider):
+class ScotrailGBSpider(SitemapSpider):
     name = "scotrail_gb"
     item_attributes = {"operator": "ScotRail", "operator_wikidata": "Q18356161"}
     sitemap_urls = ["https://www.scotrail.co.uk/default/sub/sitemaps/content--station/sitemap.xml"]
     sitemap_rules = [(r"/plan-your-journey", "parse")]
     requires_proxy = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
