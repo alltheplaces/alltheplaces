@@ -1,7 +1,7 @@
 from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest, Response, JsonResponse
 
 from locations.categories import PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
@@ -18,7 +18,7 @@ class PinMeToSpider(Spider):
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest("https://public.pinmeto.com/api/v1/{}/{}/locations".format(self.id, self.key))
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: JsonResponse, **kwargs: Any) -> Any:
         for location in response.json()["locations"]:
             self.pre_process_data(location)
 
@@ -52,6 +52,6 @@ class PinMeToSpider(Spider):
     def pre_process_data(self, location: dict, **kwargs) -> None:
         """Override with any pre-processing on the item."""
 
-    def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: JsonResponse, location: dict, **kwargs) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item
