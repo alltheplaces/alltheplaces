@@ -1,43 +1,45 @@
 import re
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
-from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class ShaverShopSpider(Spider):
+class ShaverShopSpider(JSONBlobSpider):
     name = "shaver_shop"
     item_attributes = {"brand": "Shaver Shop", "brand_wikidata": "Q119443589"}
-    allowed_domains = ["www.shavershop.com.au", "www.shavershop.net.nz"]
     start_urls = [
         "https://www.shavershop.com.au/on/demandware.store/Sites-Shaver_Shop_au-Site/en_AU/Stores-GetAllStores?countryCode=AU",
-        "https://www.shavershop.net.nz/on/demandware.store/Sites-Shaver_Shop_nz-Site/en_NZ/Stores-GetAllStores?countryCode=NZ",
+        "https://www.shavershop.co.nz/on/demandware.store/Sites-Shaver_Shop_nz-Site/en_NZ/Stores-GetAllStores?countryCode=NZ",
     ]
+    locations_key = "stores"
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
-    def parse(self, response):
-        for location in response.json()["stores"]:
-            item = DictParser.parse(location)
-            if "shavershop.net.nz" in response.url:
-                item["website"] = (
-                    "https://www.shavershop.net.nz/stores/"
-                    + location["stateCode"]
-                    + "/"
-                    + location["city"]
-                    + "/"
-                    + location["id"]
-                )
-                item.pop("state")
-            else:
-                item["website"] = "https://www.shavershop.com.au/stores/" + location["stateCode"] + "/" + location["id"]
-            hours_string = re.sub(r"\s+", " ", location["storeHours"].replace("<br />", "").replace("<p>", "")).strip()
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", None)
+        item["street_address"] = merge_address_lines([feature.get("address1"), feature.get("address2")])
+        if "shavershop.co.nz" in response.url:
+            item["website"] = (
+                "https://www.shavershop.co.nz/stores/"
+                + feature["stateCode"]
+                + "/"
+                + feature["city"]
+                + "/"
+                + feature["id"]
+            ).replace(" ", "%20")
+            item.pop("state")
+        else:
+            item["website"] = "https://www.shavershop.com.au/stores/" + feature["stateCode"] + "/" + feature["id"]
+        hours_string = re.sub(r"\s+", " ", feature["storeHours"].replace("<br />", "").replace("<p>", "")).strip()
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours_string)
+        yield item
