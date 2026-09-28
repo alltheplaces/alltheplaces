@@ -1,15 +1,14 @@
 import json
 from typing import Any, AsyncIterator
 
-import scrapy
 from scrapy import Selector
 from scrapy.http import JsonRequest, Response
 from scrapy_camoufox.page import PageMethod
 
 from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
@@ -30,8 +29,7 @@ class CoopFoodGBSpider(CamoufoxSpider):
         "https://www.coop.co.uk/store-finder/api/locations/food?location=54.9966124%2C-7.308574799999974&distance=30000000000&always_one=true&format=json"
     ]
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {
-        # Default blocks everything but the document, which also blocks Imperva's
-        # challenge script. Block only heavy static assets instead.
+        # Default blocks everything but the document, which also blocks Imperva's challenge script. Block only heavy static assets instead.
         "CAMOUFOX_ABORT_REQUEST": lambda request: request.resource_type
         in ["image", "media", "font", "stylesheet"],
     }
@@ -66,30 +64,21 @@ class CoopFoodGBSpider(CamoufoxSpider):
         for store in data["results"]:
             if not store["public"]:
                 continue
-            open_hours = self.parse_hours(store["opening_hours"])
-
-            properties = {
-                "ref": store["url"],
-                "opening_hours": open_hours,
-                "website": "https://www.coop.co.uk" + store["url"],
-                "street_address": merge_address_lines(
-                    [store["street_address"], store["street_address2"], store["street_address3"]]
-                ),
-                "city": store["town"],
-                "postcode": store["postcode"],
-                "lon": float(store["position"]["x"]),
-                "lat": float(store["position"]["y"]),
-                "phone": store["phone"],
-                "operator": store["society"],
-                "extras": {
-                    "location_type": store["location_type"],
-                },
-            }
-
-            apply_category(Categories.SHOP_CONVENIENCE, properties)
-
-            yield Feature(**properties)
+            item = DictParser.parse(store)
+            item["ref"] = store["hubnumber"]
+            item["branch"] = item.pop("name")
+            item["street_address"] = merge_address_lines(
+                [store["street_address"], store["street_address2"], store["street_address3"]]
+            )
+            item["lon"] = float(store["position"]["x"])
+            item["lat"] = float(store["position"]["y"])
+            item["opening_hours"] = self.parse_hours(store["opening_hours"])
+            item["website"] = response.urljoin(store["url"])
+            item["operator"] = store["society"]
+            item["extras"]["location_type"] = store["location_type"]
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+            yield item
 
         if data["next"] is not None:
-            self.page_number = self.page_number + 1
-            yield scrapy.Request(self.start_urls[0] + "&page=" + str(self.page_number))
+            self.page_number += 1
+            yield JsonRequest(self.start_urls[0] + "&page=" + str(self.page_number))
