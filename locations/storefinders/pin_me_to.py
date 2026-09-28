@@ -1,7 +1,7 @@
 from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response, JsonResponse
+from scrapy.http import JsonRequest, JsonResponse
 
 from locations.categories import PaymentMethods, apply_yes_no
 from locations.dict_parser import DictParser
