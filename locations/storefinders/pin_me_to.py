@@ -27,6 +27,11 @@ class PinMeToSpider(Spider):
             item["branch"] = location.get("locationDescriptor")
             item["extras"]["start_date"] = location.get("openingDate")
 
+            try:
+                item["opening_hours"] = self.parse_opening_hours(location)
+            except Exception:
+                pass
+
             if payment_methods := location.get("paymentMethods"):
                 apply_yes_no(PaymentMethods.CREDIT_CARDS, item, "creditCard" in payment_methods)
                 apply_yes_no(PaymentMethods.DEBIT_CARDS, item, "debitCard" in payment_methods)
@@ -37,10 +42,11 @@ class PinMeToSpider(Spider):
     def parse_opening_hours(self, location: dict) -> OpeningHours:
         oh = OpeningHours()
         for day, rule in ((location.get("hours") or {}).get("openHours") or {}).items():
-            if rule["state"] != "Open":
-                raise Exception(rule)
-            for time in rule["span"]:
-                oh.add_range(day, time["open"], time["close"])
+            if rule["state"] == "Closed":
+                oh.set_closed(day)
+            elif rule["state"] == "Open":
+                for time in rule["span"]:
+                    oh.add_range(day, time["open"], time["close"], time_format="%H%M")
         return oh
 
     def pre_process_data(self, location: dict, **kwargs) -> None:
