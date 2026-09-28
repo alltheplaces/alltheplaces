@@ -16,16 +16,10 @@ class YanceyRentsUSSpider(WPStoreLocatorSpider):
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        # The store locator covers every Yancey Bros Co division (equipment
-        # sales, hydraulics, power systems, bus sales, etc.), and a "rents"
-        # category is also applied to some non-Yancey Rents branches that
-        # merely also offer rental services, so filter on the branded name.
-        if not item["name"].startswith("Yancey Rents"):
+        if not item["name"].startswith("Yancey CAT Rentals"):
             return
         item["branch"] = item["name"].rsplit("–", 1)[-1].strip()
         item["name"] = None
-        # The "url" field is usually a Google review short link rather than
-        # the branch's own page, so use the permalink for the website field.
         item["website"] = feature.get("permalink") or item["website"]
         apply_category(Categories.SHOP_PLANT_HIRE, item)
         yield item
