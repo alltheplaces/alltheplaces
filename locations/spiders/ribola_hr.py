@@ -1,27 +1,25 @@
-import re
 from typing import Iterable
 
+from scrapy.http import TextResponse
+
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_HR, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.storefinders.wp_go_maps import WpGoMapsSpider
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class RibolaHRSpider(WpGoMapsSpider):
+class RibolaHRSpider(JSONBlobSpider):
     name = "ribola_hr"
     item_attributes = {
         "brand": "Ribola",
         "brand_wikidata": "Q65124070",
     }
-    allowed_domains = ["ribola.hr"]
-    map_id = 4
+    start_urls = ["https://ribola.hr/wp-admin/admin-ajax.php?action=asl_load_stores"]
     requires_proxy = "HR"
 
-    def post_process_item(self, item: Feature, location: dict) -> Iterable[Feature]:
-        if name := item.pop("name"):
-            if m := re.match(r"Ribola (\d+) ", name):
-                item["ref"] = m.group(1)
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Ribola ")
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(location["description"], days=DAYS_HR)
+        item["opening_hours"].add_ranges_from_string(feature["open_hours"])
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
