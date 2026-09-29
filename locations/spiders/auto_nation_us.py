@@ -29,8 +29,10 @@ class AutoNationUSSpider(JSONBlobSpider, PlaywrightSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature.get("hyperionId")
 
-        website = (item.get("website") or "").replace("null", "")
-        if not website.startswith("https://www.autonation.com") and "autonation.com" in website:
+        website = item.get("website") or ""
+        if website == "null":
+            item["website"] = None
+        elif not website.startswith("https://www.autonation.com") and "autonation.com" in website:
             item["website"] = urljoin("https://www.autonation.com", website.split("autonation.com")[1])
         else:
             item["website"] = website
