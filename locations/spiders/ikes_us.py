@@ -4,7 +4,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request, Response
 
-from locations.categories import Drink, Extras, PaymentMethods, apply_yes_no
+from locations.categories import Categories, Drink, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import SocialMedia, set_social_media
@@ -70,12 +70,13 @@ class IkesUSSpider(Spider):
             callback=self.parse,
         )
 
-    def parse(self, response: Response) -> Any:
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json().get("response", {}).get("collection", [])
         for location in data:
             item = DictParser.parse(location)
             item["ref"] = location.get("uid")
             item["branch"] = item.pop("name", "")
+            item.pop("email", None)
 
             if openDate := location.get("openDate"):
                 item["extras"]["start_date"] = openDate
@@ -92,7 +93,8 @@ class IkesUSSpider(Spider):
                 elif "no" in values:
                     apply_yes_no(extra, item, False, apply_positive_only=False)
 
-            item["extras"]["website:menu"] = attributes.get("url_menu")
+            if menu_url := attributes.get("url_menu"):
+                item["extras"]["website:menu"] = menu_url
 
             payment_forms = location.get("location", {}).get("payment_forms", [])
             apply_yes_no(PaymentMethods.AMERICAN_EXPRESS, item, "American Express" in payment_forms)
@@ -110,8 +112,9 @@ class IkesUSSpider(Spider):
                         item["opening_hours"].add_range(day=day[:2], open_time=open_time, close_time=close_time)
 
             self.post_cleaning(item)
+            apply_category(Categories.FAST_FOOD, item)
             yield item
 
     def post_cleaning(self, item: dict) -> None:
-        if "website" in item and not item["website"].startswith("http"):
+        if item.get("website") and not item["website"].startswith("http"):
             item["website"] = "https://" + item["website"]
