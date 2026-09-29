@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
@@ -60,12 +60,11 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
 
         if location.get("status") == "closed" or location.get("closeDate"):
             set_closed(item, self.parse_date(location.get("closeDate")))
-        elif location.get("status") == "inactive" and not (start_date and start_date > datetime.now()):
+        elif location.get("status") == "inactive" and not (start_date and start_date > datetime.now(UTC)):
             set_closed(item)  # Inactive centres with a future openDate are upcoming openings, left open
 
         apply_category(Categories.SHOP_CAR_REPAIR, item)
-        if services != {"fleetCare"}:  # Fleet care alone does not say whether body repair is offered
-            apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, item, "collision" in services, False)
+        apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, item, bool(services & {"collision", "fleetCare"}), False)
         apply_yes_no(Extras.VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES, item, bool(services & {"glass", "mobileGlass"}))
         apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, item, "autoCare" in services)
 
@@ -80,8 +79,8 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
         if not date_str:
             return None
         if match := millisecond_date.match(date_str):
-            return datetime.fromtimestamp(int(match.group(1)) / 1000)
+            return datetime.fromtimestamp(int(match.group(1)) / 1000, UTC)
         if (match := mdy_date.match(date_str)) or (match := iso_date.match(date_str)):
-            return datetime(**{k: int(v) for k, v in match.groupdict().items()})
+            return datetime(**{k: int(v) for k, v in match.groupdict().items()}, tzinfo=UTC)
         self.logger.info(f"Unknown date format {date_str!r}")
         return None
