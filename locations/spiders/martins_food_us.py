@@ -9,8 +9,6 @@ class MartinsFoodUSSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {
         "brand": "Martin's",
         "brand_wikidata": "Q123028492",
-        "operator": "Giant Food Stores",
-        "operator_wikidata": "Q5558332",
     }
     allowed_domains = ["martinsfoods.com"]
     sitemap_urls = ["https://stores.martinsfoods.com/robots.txt"]
