@@ -28,7 +28,6 @@ class AutoNationUSSpider(JSONBlobSpider, PlaywrightSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature.get("hyperionId")
-        item["opening_hours"] = self.parse_opening_hours(feature.get("detailedHours") or [])
 
         website = (item.get("website") or "").replace("null", "")
         if not website.startswith("https://www.autonation.com") and "autonation.com" in website:
@@ -36,22 +35,34 @@ class AutoNationUSSpider(JSONBlobSpider, PlaywrightSpider):
         else:
             item["website"] = website
 
-        departments = [department.get("name") for department in feature.get("departments", [])]
+        hours = feature.get("detailedHours") or []
 
-        if "Sales" in departments:
-            sales_item = item.deepcopy()
-            sales_item["ref"] = "{}-sales".format(sales_item["ref"])
-            apply_category(Categories.SHOP_CAR, sales_item)
-            yield sales_item
+        departments = feature.get("departments") or []
+        department_types = [department.get("name") for department in departments]
+        for department in departments:
+            if department.get("name") == "Sales":
+                sales_item = item.deepcopy()
+                sales_item["ref"] = "{}-sales".format(sales_item["ref"])
+                sales_item["opening_hours"] = self.parse_opening_hours(department.get("detailedHours") or hours)
+                apply_category(Categories.SHOP_CAR, sales_item)
+                yield sales_item
 
-        if "Service" in departments or "Collision" in departments:
-            service_item = item.deepcopy()
-            service_item["ref"] = "{}-service".format(service_item["ref"])
-            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-            yield service_item
+            elif department.get("name") == "Service":
+                service_item = item.deepcopy()
+                service_item["ref"] = "{}-service".format(service_item["ref"])
+                service_item["opening_hours"] = self.parse_opening_hours(department.get("detailedHours") or hours)
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                yield service_item
 
-        if "Sales" not in departments and "Service" not in departments and "Collision" not in departments:
-            self.logger.warning("Unknown feature type from provided departments: {}".format(";".join(departments)))
+            elif department.get("name") == "Collision" and "Service" not in department_types:
+                service_item = item.deepcopy()
+                service_item["ref"] = "{}-service".format(service_item["ref"])
+                service_item["opening_hours"] = self.parse_opening_hours(department.get("detailedHours") or hours)
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                yield service_item
+
+        if not any(department_type in department_types for department_type in ["Sales", "Service", "Collision"]):
+            self.logger.warning("Unknown feature type from provided departments: {}".format(";".join(department_types)))
 
     def parse_opening_hours(self, rules: list) -> OpeningHours:
         oh = OpeningHours()
