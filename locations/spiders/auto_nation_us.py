@@ -1,5 +1,6 @@
 import re
 from typing import Iterable
+from urllib.parse import urljoin
 
 from chompjs import chompjs
 from scrapy.http import TextResponse
@@ -28,6 +29,12 @@ class AutoNationUSSpider(JSONBlobSpider, PlaywrightSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature.get("hyperionId")
         item["opening_hours"] = self.parse_opening_hours(feature.get("detailedHours") or [])
+
+        website = (item.get("website") or "").replace("null", "")
+        if not website.startswith("https://www.autonation.com") and "autonation.com" in website:
+            item["website"] = urljoin("https://www.autonation.com", website.split("autonation.com")[1])
+        else:
+            item["website"] = website
 
         departments = [department.get("name") for department in feature.get("departments", [])]
 
