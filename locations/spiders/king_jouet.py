@@ -53,7 +53,10 @@ class KingJouetSpider(JSONBlobSpider):
         yield from super().parse(response)
 
     def extract_json(self, response: TextResponse) -> list[dict]:
-        payload = json.loads(response.xpath('//script[@id="__NUXT_DATA__"]/text()').get("[]"))
+        if not (nuxt_data := response.xpath('//script[@id="__NUXT_DATA__"]/text()').get()):
+            self.logger.warning(f"No __NUXT_DATA__ payload on {response.url}")
+            return []
+        payload = json.loads(nuxt_data)
         store_keys = {"guid", "code", "label", "latitude", "longitude", "openingHours", "slug"}
         return [
             self.resolve(payload, index)
