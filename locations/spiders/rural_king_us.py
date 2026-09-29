@@ -1,8 +1,9 @@
 from json import loads
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
+from twisted.python.failure import Failure
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.hours import OpeningHours
@@ -22,6 +23,7 @@ class RuralKingUSSpider(Spider):
     name = "rural_king_us"
     item_attributes = {"brand": "Rural King", "brand_wikidata": "Q7380525"}
     allowed_domains = ["ruralking.com"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Request]:
         # Check if a specific URL was passed for testing
@@ -34,7 +36,7 @@ class RuralKingUSSpider(Spider):
             all_stores_url = "https://www.ruralking.com/wcs/resources/store/10151/storelocator/latitude/0/longitude/0?maxItems=1000&radius=2500&siteLevelStoreSearch=false"
             yield Request(all_stores_url, callback=self.parse_api)
 
-    def parse_api(self, response):
+    def parse_api(self, response: Response) -> Iterable[Request]:
         data = loads(response.text)
         stores = data.get("PhysicalStore", [])
 
@@ -57,7 +59,7 @@ class RuralKingUSSpider(Spider):
                 errback=self.errback_store_page,
             )
 
-    def errback_store_page(self, failure):
+    def errback_store_page(self, failure: Failure) -> Feature | None:
         """Handle errors when fetching store pages"""
         store = failure.request.meta.get("store_data")
         if store:
@@ -67,7 +69,7 @@ class RuralKingUSSpider(Spider):
             )
             return self.create_store_item(store, services=[])
 
-    def parse_store_page(self, response):
+    def parse_store_page(self, response: Response) -> Feature:
         """Parse individual store page to extract services"""
         store = response.meta.get("store_data")
 
@@ -84,7 +86,7 @@ class RuralKingUSSpider(Spider):
         # Create and return the store item with services - pass the actual page URL
         return self.create_store_item(store, services, response.url)
 
-    def create_store_item(self, store, services, website_url=None):
+    def create_store_item(self, store: dict, services: list[str], website_url: str | None = None) -> Feature:
         """Create a Feature item for a store with the specified services and website URL"""
         # If we have the actual store page URL, use it; otherwise fall back to constructed URL
         website = (
@@ -151,7 +153,7 @@ class RuralKingUSSpider(Spider):
 
         return item
 
-    def parse_hours(self, store):
+    def parse_hours(self, store: dict) -> OpeningHours:
         oh = OpeningHours()
 
         days = {"Mon": "Mo", "Tue": "Tu", "Wed": "We", "Thu": "Th", "Fri": "Fr", "Sat": "Sa", "Sun": "Su"}
