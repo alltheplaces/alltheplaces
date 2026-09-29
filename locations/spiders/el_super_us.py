@@ -1,6 +1,8 @@
+import json
 import re
-from typing import Iterator
+from typing import Any
 
+from scrapy import Selector
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
@@ -19,7 +21,7 @@ class ElSuperUSSpider(SitemapSpider):
     sitemap_urls = ["https://elsupermarkets.com/wp-sitemap-posts-store-1.xml"]
     sitemap_rules = [(r"/store/[^/]+/$", "parse_store")]
 
-    def parse_store(self, response: Response) -> Iterator[Feature]:
+    def parse_store(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
 
         # Extract basic store info
@@ -57,20 +59,11 @@ class ElSuperUSSpider(SitemapSpider):
         # Extract reference from URL
         ref = response.url.split("/")[-2]
 
-        item["name"] = store_name
+        item["branch"] = store_name
         item["ref"] = ref
 
     def _extract_address(self, response: Response, item: Feature) -> None:
-        address_text = response.xpath('//div[contains(@class, "single-store-info")]//p/text()').get()
-        if not address_text:
-            # Try to get address from JavaScript data
-            js_data = response.xpath('//script[contains(text(), "var storeData")]/text()').get()
-            if js_data:
-                address_match = re.search(r'"address":"([^"]+)"', js_data)
-                if address_match:
-                    address_text = address_match.group(1)
-
-        if address_text:
+        if address_text := response.xpath('//div[contains(@class, "single-store-info")]//p/text()').get():
             item["addr_full"] = address_text
             self._parse_address_components(address_text, item)
 
@@ -117,109 +110,8 @@ class ElSuperUSSpider(SitemapSpider):
                 item["lat"] = coords_match.group(1)
                 item["lon"] = coords_match.group(2)
 
-        # If not found in directions link, try JavaScript data
-        if not item.get("lat") or not item.get("lon"):
-            self._extract_coordinates_from_js(response, item)
-
-    def _extract_coordinates_from_js(self, response: Response, item: Feature) -> None:
-        js_data = response.xpath('//script[contains(text(), "var storeData")]/text()').get()
-        if js_data:
-            lat_match = re.search(r'"lat":"?([0-9.-]+)"?', js_data)
-            lon_match = re.search(r'"lng":"?([0-9.-]+)"?', js_data)
-            if lat_match and lon_match:
-                lat = lat_match.group(1)
-                lon = lon_match.group(1)
-                item["lat"] = lat
-                item["lon"] = lon
-
     def _extract_opening_hours(self, response: Response, item: Feature) -> None:
-        oh = OpeningHours()
-
-        # Try different methods to extract hours
-        if not self._extract_hours_from_list(response, oh):
-            if not self._extract_hours_from_open_at(response, oh):
-                self._extract_hours_from_js(response, oh)
-
-        # Add opening hours to item if we found any
-        item["opening_hours"] = oh
-
-    def _extract_hours_from_list(self, response: Response, oh: OpeningHours) -> bool:
-        hours_elements = response.xpath(
-            '//div[contains(@class, "single-store-info")]//ul/li[string-length(text()) > 0]'
-        )
-
-        if not hours_elements:
-            return False
-
-        day_mapping = {"Mon": "Mo", "Tue": "Tu", "Wed": "We", "Thu": "Th", "Fri": "Fr", "Sat": "Sa", "Sun": "Su"}
-
-        # Pattern to match day and hours like "Tue Feb 25: 7:00 AM - 10:00 PM"
-        pattern = r"([A-Za-z]{3})[^:]*:\s*(\d+:\d+\s*[AP]M)\s*-\s*(\d+:\d+\s*[AP]M)"
-
-        found_hours = False
-        for hour_elem in hours_elements:
-            day_time = hour_elem.xpath("./text()").get()
-            if day_time:
-                match = re.search(pattern, day_time)
-                if match:
-                    day_abbr = match.group(1)
-                    if day_abbr in day_mapping:
-                        day_code = day_mapping[day_abbr]
-                        open_time = match.group(2)
-                        close_time = match.group(3)
-                        oh.add_range(day_code, open_time, close_time, time_format="%I:%M %p")
-                        found_hours = True
-
-        return found_hours
-
-    def _extract_hours_from_open_at(self, response: Response, oh: OpeningHours) -> bool:
-        open_hours = response.xpath('//div[contains(@class, "open-at")]/h3/text()').get()
-        if not open_hours:
-            return False
-
-        hours_match = re.search(r"(\d+:\d+\s*[AP]M)\s*-\s*(\d+:\d+\s*[AP]M)", open_hours)
-        if not hours_match:
-            return False
-
-        open_time = hours_match.group(1)
-        close_time = hours_match.group(2)
-        # If we only have general hours, apply to all days
-        for day in ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]:
-            oh.add_range(day, open_time, close_time, time_format="%I:%M %p")
-
-        return True
-
-    def _extract_hours_from_js(self, response: Response, oh: OpeningHours) -> bool:
-        js_data = response.xpath('//script[contains(text(), "var storeData")]/text()').get()
-        if not js_data:
-            return False
-
-        hours_match = re.search(r'"hours":\s*(\{[^}]+\})', js_data)
-        if not hours_match:
-            return False
-
-        hours_json = hours_match.group(1)
-        day_matches = re.findall(r'"([^"]+)":\s*"([^"]+)"', hours_json)
-
-        day_mapping = {
-            "monday": "Mo",
-            "tuesday": "Tu",
-            "wednesday": "We",
-            "thursday": "Th",
-            "friday": "Fr",
-            "saturday": "Sa",
-            "sunday": "Su",
-        }
-
-        found_hours = False
-        for day, hours in day_matches:
-            if day.lower() in day_mapping:
-                day_code = day_mapping[day.lower()]
-                hours_match = re.search(r"(\d+:\d+\s*[AP]M)\s*-\s*(\d+:\d+\s*[AP]M)", hours)
-                if hours_match:
-                    open_time = hours_match.group(1)
-                    close_time = hours_match.group(2)
-                    oh.add_range(day_code, open_time, close_time, time_format="%I:%M %p")
-                    found_hours = True
-
-        return found_hours
+        if match := re.search(r"singleStore\s*=\s*(\{.*?\});", response.text):
+            hours_html = json.loads(match.group(1)).get("hours") or ""
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(" ".join(Selector(text=hours_html).xpath("//text()").getall()))
