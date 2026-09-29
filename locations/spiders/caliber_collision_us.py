@@ -78,9 +78,12 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
     def parse_date(self, date_str: str | None) -> datetime | None:
         if not date_str:
             return None
-        if match := millisecond_date.match(date_str):
-            return datetime.fromtimestamp(int(match.group(1)) / 1000, UTC)
-        if (match := mdy_date.match(date_str)) or (match := iso_date.match(date_str)):
-            return datetime(**{k: int(v) for k, v in match.groupdict().items()}, tzinfo=UTC)
+        try:
+            if match := millisecond_date.match(date_str):
+                return datetime.fromtimestamp(int(match.group(1)) / 1000, UTC)
+            if (match := mdy_date.match(date_str)) or (match := iso_date.match(date_str)):
+                return datetime(**{k: int(v) for k, v in match.groupdict().items()}, tzinfo=UTC)
+        except (ValueError, OverflowError, OSError):
+            pass  # Shaped like a date but not a real one (e.g. month 13, or a timestamp out of range)
         self.logger.info(f"Unknown date format {date_str!r}")
         return None
