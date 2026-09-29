@@ -1,51 +1,70 @@
-import json
+import re
+from typing import Iterable
+from urllib.parse import urljoin
 
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from chompjs import chompjs
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class AutoNationUSSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
+class AutoNationUSSpider(JSONBlobSpider, PlaywrightSpider):
     name = "auto_nation_us"
     allowed_domains = ["autonation.com"]
     item_attributes = {"brand": "AutoNation", "brand_wikidata": "Q784804"}
-    sitemap_urls = ["https://www.autonation.com/robots.txt"]
-    sitemap_rules = [(r"https://www.autonation.com/dealers/[^/]+$", "parse")]
+    # Any dealer page like https://www.autonation.com/dealers/land-rover-bethesda contains this "StoreDetailsPage/main-*.js" file, which holds the list of all dealers
+    start_urls = ["https://www.autonation.com/dealers/public/dist/StoreDetailsPage/main-2ZVLGVZJ.js"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000}
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        store_data = json.loads(response.xpath('//script[@id="store-detail-state"]/text()').get())
-        store_info = DictParser.get_nested_key(store_data, "storeInfo")
-        item["lat"] = store_info.get("latitude")
-        item["lon"] = store_info.get("longitude")
-        item["ref"] = store_info.get("hyperionId")
-        item.pop("image", None)  # Same brand logo on every location, not per-location
-        # ld_data has opening hours of sales and services all merged, difficult to differentiate.
-        item["opening_hours"] = self.parse_opening_hours(store_info.get("detailedHours") or [])
+    def extract_json(self, response: TextResponse) -> dict | list[dict]:
+        return chompjs.parse_js_object(
+            re.search(r"serviceStoresList:(\[.+])[,\s]+offers", response.text).group(1), unicode_escape=True
+        )
 
-        departments = [department.get("name") for department in store_info.get("departments", [])]
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature.get("hyperionId")
 
-        if "Sales" in departments:
-            sales_item = item.deepcopy()
-            sales_item["ref"] = "{}-sales".format(sales_item["ref"])
-            apply_category(Categories.SHOP_CAR, sales_item)
-            yield sales_item
+        website = item.get("website") or ""
+        if website == "null":
+            item["website"] = None
+        elif not website.startswith("https://www.autonation.com") and "autonation.com" in website:
+            item["website"] = urljoin("https://www.autonation.com", website.split("autonation.com")[1])
+        else:
+            item["website"] = website
 
-        if "Service" in departments or "Collision" in departments:
-            service_item = item.deepcopy()
-            service_item["ref"] = "{}-service".format(service_item["ref"])
-            apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-            yield service_item
+        hours = feature.get("detailedHours") or []
 
-        if "Sales" not in departments and "Service" not in departments and "Collision" not in departments:
-            self.logger.warning("Unknown feature type from provided departments: {}".format(departments.join(";")))
+        departments = feature.get("departments") or []
+        department_types = [department.get("name") for department in departments]
+        for department in departments:
+            if department.get("name") == "Sales":
+                sales_item = item.deepcopy()
+                sales_item["ref"] = "{}-sales".format(sales_item["ref"])
+                sales_item["opening_hours"] = self.parse_opening_hours(department.get("detailedHours") or hours)
+                apply_category(Categories.SHOP_CAR, sales_item)
+                yield sales_item
+
+            elif department.get("name") == "Service":
+                service_item = item.deepcopy()
+                service_item["ref"] = "{}-service".format(service_item["ref"])
+                service_item["opening_hours"] = self.parse_opening_hours(department.get("detailedHours") or hours)
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                yield service_item
+
+            elif department.get("name") == "Collision" and "Service" not in department_types:
+                service_item = item.deepcopy()
+                service_item["ref"] = "{}-service".format(service_item["ref"])
+                service_item["opening_hours"] = self.parse_opening_hours(department.get("detailedHours") or hours)
+                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+                yield service_item
+
+        if not any(department_type in department_types for department_type in ["Sales", "Service", "Collision"]):
+            self.logger.warning("Unknown feature type from provided departments: {}".format(";".join(department_types)))
 
     def parse_opening_hours(self, rules: list) -> OpeningHours:
         oh = OpeningHours()
