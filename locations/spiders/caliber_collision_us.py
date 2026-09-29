@@ -1,10 +1,10 @@
 import re
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import SocialMedia, set_closed, set_social_media
 from locations.json_blob_spider import JSONBlobSpider
@@ -25,10 +25,6 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
         yield JsonRequest("https://www.caliber.com/api/es/search", data=data)
 
     def post_process_item(self, item, response, location):
-        services = {key for service in location.get("serviceType") or [] for key in service}
-        if not services or services == {"mobileGlass"}:
-            return  # Glass market pages and mobile glass service areas, not premises
-
         item["branch"] = location["title"]
         item["extras"]["alt_ref"] = location.get("centerId")
         item["extras"]["fax"] = location.get("faxNumber")
@@ -60,13 +56,13 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
 
         if location.get("status") == "closed" or location.get("closeDate"):
             set_closed(item, self.parse_date(location.get("closeDate")))
-        elif location.get("status") == "inactive" and not (start_date and start_date > datetime.now(UTC)):
-            set_closed(item)  # Inactive centres with a future openDate are upcoming openings, left open
 
-        apply_category(Categories.SHOP_CAR_REPAIR, item)
-        apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, item, bool(services & {"collision", "fleetCare"}), False)
-        apply_yes_no(Extras.VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES, item, bool(services & {"glass", "mobileGlass"}))
-        apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, item, "autoCare" in services)
+        if services := {key for service in location.get("serviceType") or [] for key in service}:
+            body_repair = bool(services & {"collision", "fleetCare"})
+            glass = bool(services & {"glass", "mobileGlass"})
+            apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, item, body_repair, apply_positive_only=not glass)
+            apply_yes_no(Extras.VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES, item, glass)
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, item, "autoCare" in services)
 
         if path := location.get("urlMap"):
             item["website"] = response.urljoin(path)
@@ -80,9 +76,9 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
             return None
         try:
             if match := millisecond_date.match(date_str):
-                return datetime.fromtimestamp(int(match.group(1)) / 1000, UTC)
+                return datetime.fromtimestamp(int(match.group(1)) / 1000)
             if (match := mdy_date.match(date_str)) or (match := iso_date.match(date_str)):
-                return datetime(**{k: int(v) for k, v in match.groupdict().items()}, tzinfo=UTC)
+                return datetime(**{k: int(v) for k, v in match.groupdict().items()})
         except (ValueError, OverflowError, OSError):
             pass  # Shaped like a date but not a real one (e.g. month 13, or a timestamp out of range)
         self.logger.info(f"Unknown date format {date_str!r}")
