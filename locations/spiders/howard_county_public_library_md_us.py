@@ -2,25 +2,37 @@ import re
 from collections.abc import Iterable
 from typing import ClassVar, Final
 
+import requests
 from scrapy.http import Response
 from scrapy.spiders import CrawlSpider, SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
 from locations.hours import DELIMITERS_EN, OpeningHours
 from locations.items import Feature
 
-ADDR_RE: Final = re.compile(r"(?P<street_address>.*),\s+(?P<city>.*),\s+MD\s+(?P<postcode>\d{5})")
-BAD_COORDINATES: Final[bool] = (
-    True  # As of 29 Sep 2026, the Google Maps are not centered on the actual locations, making this information useless
-)
+# Pre-compile regexes:
+ADDR_RE: Final = re.compile(r"(?P<street_address>.*),\s+(?P<city>.*),\s+MD\s+(?P<postcode>\d{5})")  # Street Address
+
+# This block is for working with Google URLs:
+FLOAT_RE: Final = r"\d\.\d+"
+# All of Maryland fits in lat 3x lon -7x
+LAT_RE: Final = rf"(?P<lat>3{FLOAT_RE})"
+LON_RE: Final = rf"(?P<lon>-7{FLOAT_RE})"
+# Sometimes it is LAT then LON, sometimes reversed. Always seems to have prefix !Xd where X=1-5
+ALT_MAP_RE: Final = re.compile(rf".*?![1-5]d{LON_RE}.*![1-5]d{LAT_RE}!?")
+ALT_MAP_RE_REV: Final = re.compile(rf".*?![1-5]d{LAT_RE}.*![1-5]d{LON_RE}!?")
+
+# Regex for a number and then am/pm:
+TRAILING_TIME_RE: Final = re.compile(r"\s+\d+\s+([ap]m)", re.IGNORECASE)
+# Regex to pull location name (ref) out of URL:
+URL_REF_RE: Final = re.compile("locations/(.*?)/")
+
+
 BAD_BRANCHES: Final = {
     "admin",
     "popup",
     "steam",
 }  # Admin branch has no books and the popup/RV don't have fixed addresses
-TRAILING_TIME_RE: Final = re.compile(r"\s+\d+\s+([ap]m)", re.IGNORECASE)
-URL_REF_RE: Final = re.compile("locations/(.*?)/")
 
 
 class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
@@ -81,13 +93,18 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
                     for k, v in match.groupdict().items():
                         item[k] = v
 
-            # Extract lat/lon from Google Map link
-            if not BAD_COORDINATES and (
-                google_loc := response.xpath(
-                    "//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]"
-                )
-            ):
-                extract_google_position(item, google_loc)
+            # Extract lat/lon from Google Maps link
+            # NOTE: As of 29 Sep 2026, the Google Maps are not centered on the actual locations, so we cannot use locations.google_url.extract_google_position
+            if google_loc := response.xpath(
+                "normalize-space(//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]/a/@href)"
+            ).get():
+                # Note: Some (like miller location) use https://maps.app.goo.gl/ shortener
+                if google_loc.startswith("https://maps.app.goo.gl/"):  # noqa: SIM102
+                    if (redirected := requests.head(google_loc, allow_redirects=True)).ok:
+                        google_loc = redirected.url
+                if (match := ALT_MAP_RE.search(google_loc)) or (match := ALT_MAP_RE_REV.search(google_loc)):
+                    for k, v in match.groupdict().items():
+                        item[k] = float(v)
 
             # Unique Image
             if image := response.xpath("//div[contains(@class, 'text-image-carousel--slider')]/img/@src").getall():
