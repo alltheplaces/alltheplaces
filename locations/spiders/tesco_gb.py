@@ -84,7 +84,9 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
             elif store_details["storeformat"] == "Metro":
                 apply_category(Categories.SHOP_SUPERMARKET, item)
                 item.update(self.TESCO_METRO)
-            services = response.xpath('//li[@class="MainServices-listItem"]').xpath("normalize-space()").getall()
+            services = (
+                response.xpath('//li[contains(@class, "MainServices-listItem")]').xpath("normalize-space()").getall()
+            )
             apply_yes_no(Extras.ATM, item, "ATM" in services)
         else:
             # This is skipping ClothingStore (obvious) and LocalBusiness (Travel Money) types
