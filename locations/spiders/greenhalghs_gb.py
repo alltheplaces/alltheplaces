@@ -13,7 +13,6 @@ class GreenhalghsGBSpider(WPStoreLocatorSpider):
     item_attributes = {"brand": "Greenhalgh's", "brand_wikidata": "Q99939079"}
     allowed_domains = ["www.greenhalghs.com"]
     days = DAYS_EN
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item.pop("addr_full", None)
