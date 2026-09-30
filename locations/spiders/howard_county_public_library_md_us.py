@@ -85,57 +85,62 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
 
     def _parse_address(self: Self, response: Response, item: Feature) -> None:
         """Helper to find street address and, if possible, break it down"""
-        if addr_full := response.xpath(
-            "normalize-space(//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]/p)"
-        ).get():
-            item["addr_full"] = addr_full
-            item["state"] = "MD"
-            if match := ADDR_RE.match(addr_full):
-                for k, v in match.groupdict().items():
-                    item[k] = v
+        if not (
+            addr_full := response.xpath(
+                "normalize-space(//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]/p)"
+            ).get()
+        ):
+            return
+        item["addr_full"] = addr_full
+        item["state"] = "MD"
+        if match := ADDR_RE.match(addr_full):
+            for k, v in match.groupdict().items():
+                item[k] = v
 
     def _parse_google_maps(self: Self, response: Response, item: Feature, logger: logging.Logger) -> None:
         """Helper to extract lat/lon from Google Maps link"""
         # NOTE: As of 29 Sep 2026, the Google Maps are not centered on the actual locations, so we cannot use locations.google_url.extract_google_position
-        if google_loc := response.xpath(
-            "normalize-space(//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]/a/@href)"
-        ).get():
-            # Note: Some (like miller location) use https://maps.app.goo.gl/ shortener
-            if google_loc.startswith("https://maps.app.goo.gl/"):
-                try:
-                    if (redirected := requests.head(google_loc, allow_redirects=True, timeout=5)).ok:
-                        google_loc = redirected.url
-                except requests.RequestException:
-                    logger.exception("Trying to expand %s", google_loc)
-            if not google_loc.startswith("https://www.google.com/maps/"):
-                logger.error("Invalid redirect to %s", google_loc)
-                return
-            if (match := ALT_MAP_RE.search(google_loc)) or (match := ALT_MAP_RE_REV.search(google_loc)):
-                for k, v in match.groupdict().items():
-                    item[k] = float(v)
+        if not (
+            google_loc := response.xpath(
+                "normalize-space(//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]/a/@href)"
+            ).get()
+        ):
+            return
+        # Note: Some (like miller location) use https://maps.app.goo.gl/ shortener
+        if google_loc.startswith("https://maps.app.goo.gl/"):
+            try:
+                if (redirected := requests.head(google_loc, allow_redirects=True, timeout=5)).ok:
+                    google_loc = redirected.url
+            except requests.RequestException:
+                logger.exception("Trying to expand %s", google_loc)
+        if not google_loc.startswith("https://www.google.com/maps/"):
+            logger.error("Invalid redirect to %s", google_loc)
+            return
+        if (match := ALT_MAP_RE.search(google_loc)) or (match := ALT_MAP_RE_REV.search(google_loc)):
+            for k, v in match.groupdict().items():
+                item[k] = float(v)
 
     def _parse_hours(self: Self, response: Response, item: Feature) -> None:
         """Helper to try to find open hours"""
-        if hours := response.xpath("//li[contains(@class, 'row-address__hours')]//p//text()").getall():
-            open_hours: Final = OpeningHours()
-            # "Sun 1 – 5 pm" is being interpreted as 0100 - 1700
-            # Maybe this fix should be in OpeningHours.extract_hours_from_string?
-            hours_str = " ".join(
-                " ".join(hours).split()
-            )  # This rips out all the extra whitespace (lots of useless tabs)
-            for delim in DELIMITERS_EN:
-                loc = 2
-                while True:
-                    if (loc := hours_str.find(delim, loc)) == -1:  # No more found
-                        break
-                    # We have one, back up and check if no am/pm, if an am/pm follows, we duplicate
-                    if hours_str[loc - 2].isdigit() and (trailing := TRAILING_TIME_RE.search(hours_str[loc + 1 :])):
-                        hours_str = f"{hours_str[:loc]}{trailing[1]} {hours_str[loc:]}"
-                    loc += 1
+        if not (hours := response.xpath("//li[contains(@class, 'row-address__hours')]//p//text()").getall()):
+            return
+        open_hours: Final = OpeningHours()
+        # "Sun 1 – 5 pm" is being interpreted as 0100 - 1700
+        # Maybe this fix should be in OpeningHours.extract_hours_from_string?
+        hours_str = " ".join(" ".join(hours).split())  # This rips out all the extra whitespace (lots of useless tabs)
+        for delim in DELIMITERS_EN:
+            loc = 2
+            while True:
+                if (loc := hours_str.find(delim, loc)) == -1:  # No more found
+                    break
+                # We have one, back up and check if no am/pm, if an am/pm follows, we duplicate
+                if hours_str[loc - 2].isdigit() and (trailing := TRAILING_TIME_RE.search(hours_str[loc + 1 :])):
+                    hours_str = f"{hours_str[:loc]}{trailing[1]} {hours_str[loc:]}"
+                loc += 1
 
-            open_hours.add_ranges_from_string(hours_str)
-            if open_hours.as_opening_hours():
-                item["opening_hours"] = open_hours
+        open_hours.add_ranges_from_string(hours_str)
+        if open_hours.as_opening_hours():
+            item["opening_hours"] = open_hours
 
     def _parse_image(self: Self, response: Response, item: Feature) -> None:
         """Helper to try to find an aerial image of the branch"""
