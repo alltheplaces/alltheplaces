@@ -5,7 +5,6 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
@@ -14,6 +13,7 @@ API_URL = "https://www.spar.co.uk/umbraco/api/storelocationapi/stores"
 
 class SparGBSpider(scrapy.Spider):
     name = "spar_gb"
+    item_attributes = SPAR_SHARED_ATTRIBUTES
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     # The "Services" list in each store record only ever contains Petrol Station, Post Office and Car Wash.
@@ -64,20 +64,12 @@ class SparGBSpider(scrapy.Spider):
 
         for store in stores:
             item = DictParser.parse(store)
-            item.update(SPAR_SHARED_ATTRIBUTES)
             item["website"] = "https://www.spar.co.uk" + store["StoreUrl"].rstrip("/")
             item["street_address"] = clean_address(
                 [store.get("Address1"), store.get("Address2"), store.get("Address3")]
             )
 
             services = [s["Name"] for s in store["Services"]]
-
-            # Fuel stations and car washes are usually operated under a fuel brand (Esso, BP, Shell, ...)
-            # which the API does not provide, so they are yielded as separate unbranded features.
-            if "Petrol Station" in services:
-                yield self.make_forecourt_feature(item, "fuel", Categories.FUEL_STATION)
-            if "Car Wash" in services:
-                yield self.make_forecourt_feature(item, "carwash", Categories.CAR_WASH)
 
             for service, tag in self.SERVICE_FILTERS.items():
                 apply_yes_no(tag, item, store["Id"] in self.stores_by_service[service])
@@ -87,16 +79,3 @@ class SparGBSpider(scrapy.Spider):
             apply_category(Categories.SHOP_CONVENIENCE, item)
 
             yield item
-
-    @staticmethod
-    def make_forecourt_feature(item: Feature, suffix: str, category: dict) -> Feature:
-        feature = Feature(
-            ref=f"{item['ref']}-{suffix}",
-            lat=item.get("lat"),
-            lon=item.get("lon"),
-            street_address=item.get("street_address"),
-            city=item.get("city"),
-            postcode=item.get("postcode"),
-        )
-        apply_category(category, feature)
-        return feature
