@@ -13,7 +13,6 @@ class HslGBSpider(Spider):
         for location in response.xpath(
             '//div[@class="card-item card-showroom border-0 bg-lightgrey text-base overflow-hidden h-full"]'
         ):
-            print(location)
             item = Feature()
             item["branch"] = location.xpath('.//h4[@class="mb-0"]/text()').get()
             item["addr_full"] = location.xpath('.//p[@class="mb-3"]/text()').get()
