@@ -47,6 +47,7 @@ class CentralEnglandCooperativeSpider(SitemapSpider, StructuredDataSpider):
         else:
             if "PETROL" in name.upper():
                 fuel_item = deepcopy(item)
+                fuel_item["ref"] = "{}-fuel".format(item["ref"])
                 apply_category(Categories.FUEL_STATION, fuel_item)
                 yield fuel_item
             apply_category(Categories.SHOP_CONVENIENCE, item)
