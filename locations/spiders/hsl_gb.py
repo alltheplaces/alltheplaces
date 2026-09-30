@@ -16,7 +16,7 @@ class HslGBSpider(Spider):
             item = Feature()
             item["branch"] = location.xpath('.//h4[@class="mb-0"]/text()').get().removeprefix("HSL ")
             item["addr_full"] = location.xpath('.//p[@class="mb-3"]/text()').get()
-            #Not sure about this next bit - can anyone rewrite 
+            # Not sure about this next bit - can anyone rewrite
             item["phone"] = location.xpath('.//p[contains(text(), "0")]/text()').get()
             item["ref"] = item["website"] = location.xpath(
                 './/a[contains(@href,"https://www.hslchairs.com/find-a-showroom/")]/@href'
