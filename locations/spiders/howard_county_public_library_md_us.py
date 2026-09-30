@@ -43,7 +43,8 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
         "brand": "Howard County Public Library",
         "brand_wikidata": "Q18152010",
     }
-    sitemap_urls: ClassVar[list[str]] = ["https://www.hclibrary.org/branch-sitemap.xml"]
+    sitemap_urls: ClassVar[list[str]] = ["https://www.hclibrary.org/robots.txt"]
+    sitemap_follow: ClassVar[list[str]] = [r".*branch.*"]
     sitemap_rules: ClassVar[list[tuple[str, str]]] = [
         (r"/locations/", "parse_branch"),
     ]
