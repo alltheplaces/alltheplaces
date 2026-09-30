@@ -28,26 +28,17 @@ class TargetUSSpider(SitemapSpider):
                 yield entry
 
     def extract_store(self, html: str) -> dict[str, Any] | None:
-        target_marker = r"\"store\":{\"store\":{"
-        if (idx := html.find(target_marker)) == -1:
+        if not (match := re.search(r'\\"store\\":\{\\"store\\":\{', html)):
             return None
 
-        script_start = html.rfind("<script", 0, idx)
-        if script_start == -1:
-            return None
-        args_start = html.find("(", script_start, idx) + 1
-        args_end = html.find(")</script>", idx)
-        if args_start <= 0 or args_end == -1:
-            return None
+        # Slice to the end of the script tag and unescape quotes/slashes
+        payload = html[match.end() - 1 : html.find("</script>", match.end())]
+        unescaped = payload.replace('\\"', '"').replace("\\\\", "\\")
 
         try:
-            payload = json.loads(html[args_start:args_end])
-            decoded = payload[1]
-            if not (match := re.search(r'"store":\{"store":\{', decoded)):
-                return None
-            store_obj, _ = json.JSONDecoder().raw_decode(decoded, match.end() - 1)
+            store_obj, _ = json.JSONDecoder().raw_decode(unescaped)
             return store_obj
-        except (json.JSONDecodeError, IndexError, TypeError):
+        except json.JSONDecodeError:
             return None
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
