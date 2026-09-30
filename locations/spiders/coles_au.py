@@ -47,17 +47,15 @@ class ColesAUSpider(Spider):
         if len(stores) < self.MAX_STORES:
             return
         covered_km = max(store["distance"] for store in stores)
-        # The centre child would repeat this same search, so shrink the cell
-        # until this search covers its centre child, then search the 6 others.
-        while covered_km < radius_km / 2 and radius_km > self.MIN_RADIUS_KM:
-            radius_km /= 2
-        if covered_km >= radius_km or radius_km <= self.MIN_RADIUS_KM:
-            return
-
+        # This search already stands in for the centre child, so only the 6
+        # outer children are searched at each level. Descend through the
+        # centre until this search covers it.
         lat, lon = response.meta["lat"], response.meta["lon"]
-        for bearing in range(0, 360, 60):
-            child_lat, child_lon = vincenty_distance(lat, lon, radius_km * math.sqrt(3) / 2, bearing)
-            yield self.make_request(child_lat, child_lon, radius_km / 2)
+        while covered_km < radius_km and radius_km > self.MIN_RADIUS_KM:
+            for bearing in range(0, 360, 60):
+                child_lat, child_lon = vincenty_distance(lat, lon, radius_km * math.sqrt(3) / 2, bearing)
+                yield self.make_request(child_lat, child_lon, radius_km / 2)
+            radius_km /= 2
 
     def parse_stores(self, stores: list[dict]) -> Any:
         for location in stores:
