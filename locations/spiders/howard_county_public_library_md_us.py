@@ -107,6 +107,9 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
                         google_loc = redirected.url
                 except requests.RequestException:
                     logger.exception("Trying to expand %s", google_loc)
+            if not google_loc.startswith("https://www.google.com/maps/"):
+                logger.error("Invalid redirect to %s", google_loc)
+                return
             if (match := ALT_MAP_RE.search(google_loc)) or (match := ALT_MAP_RE_REV.search(google_loc)):
                 for k, v in match.groupdict().items():
                     item[k] = float(v)
