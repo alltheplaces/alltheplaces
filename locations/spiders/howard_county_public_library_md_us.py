@@ -1,3 +1,4 @@
+import logging
 import re
 from collections.abc import Iterable
 from typing import ClassVar, Final
@@ -49,9 +50,11 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
 
     def parse_branch(self, response: Response) -> Iterable[Feature | None]:
         if not (match := URL_REF_RE.search(response.url)) or match[1] in BAD_BRANCHES:
+            logging.getLogger("HowardCountyPublicLibraryMDUSSpider").debug("Skipping %s", response.url)
             yield None
         else:
             item = Feature()
+            logger = logging.getLogger(f"HowardCountyPublicLibraryMDUSSpider[{match[1]}]")
 
             item["ref"] = match[1]
             item["name"] = (response.css("h1::text").get() or "").strip()
@@ -100,8 +103,11 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
             ).get():
                 # Note: Some (like miller location) use https://maps.app.goo.gl/ shortener
                 if google_loc.startswith("https://maps.app.goo.gl/"):  # noqa: SIM102
-                    if (redirected := requests.head(google_loc, allow_redirects=True)).ok:
-                        google_loc = redirected.url
+                    try:
+                        if (redirected := requests.head(google_loc, allow_redirects=True, timeout=5)).ok:
+                            google_loc = redirected.url
+                    except requests.RequestException:
+                        logger.exception("Trying to expand %s", google_loc)
                 if (match := ALT_MAP_RE.search(google_loc)) or (match := ALT_MAP_RE_REV.search(google_loc)):
                     for k, v in match.groupdict().items():
                         item[k] = float(v)
@@ -110,6 +116,17 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
             if image := response.xpath("//div[contains(@class, 'text-image-carousel--slider')]/img/@src").getall():
                 # Take the first image that has the word "aerial" in it; if none do, then just use the first
                 item["image"] = next((img for img in image if "aerial" in img.lower()), image[0])
+
+            # Final sanity check
+            for field in (
+                "addr_full",
+                "lat",
+                "opening_hours",
+                "phone",
+                "street_address",
+            ):
+                if field not in item:
+                    logger.error("Did not parse/set field '%s'", field)
 
             apply_category(Categories.LIBRARY, item)
             yield item
