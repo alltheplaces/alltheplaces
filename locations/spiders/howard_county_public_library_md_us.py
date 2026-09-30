@@ -10,6 +10,10 @@ from locations.google_url import extract_google_position
 from locations.hours import DELIMITERS_EN, OpeningHours
 from locations.items import Feature
 
+ADDR_RE: Final = re.compile(r"(?P<street_address>.*),\s+(?P<city>.*),\s+MD\s+(?P<postcode>\d{5})")
+BAD_COORDINATES: Final[bool] = (
+    True  # As of 29 Sep 2026, the Google Maps are not centered on the actual locations, making this information useless
+)
 BAD_BRANCHES: Final = {
     "admin",
     "popup",
@@ -41,6 +45,10 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
             item["name"] = (response.css("h1::text").get() or "").strip()
             item["website"] = response.url
 
+            # Telephone
+            if telephone := response.xpath('//a[starts-with(@href, "tel:")]/@href').get():
+                item["phone"] = telephone.split(":")[1]
+
             # Hours
             if hours := response.xpath("//li[contains(@class, 'row-address__hours')]//p//text()").getall():
                 open_hours: Final = OpeningHours()
@@ -68,12 +76,23 @@ class HowardCountyPublicLibraryMDUSSpider(SitemapSpider, CrawlSpider):
                 "normalize-space(//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]/p)"
             ).get():
                 item["addr_full"] = addr_full
+                item["state"] = "MD"
+                if match := ADDR_RE.match(addr_full):
+                    for k, v in match.groupdict().items():
+                        item[k] = v
 
             # Extract lat/lon from Google Map link
-            if google_loc := response.xpath(
-                "//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]"
+            if not BAD_COORDINATES and (
+                google_loc := response.xpath(
+                    "//li[contains(@class, 'row-address__address')]/div[contains(@class, 'row-address__content')]"
+                )
             ):
                 extract_google_position(item, google_loc)
+
+            # Unique Image
+            if image := response.xpath("//div[contains(@class, 'text-image-carousel--slider')]/img/@src").getall():
+                # Take the first image that has the word "aerial" in it; if none do, then just use the first
+                item["image"] = next((img for img in image if "aerial" in img.lower()), image[0])
 
             apply_category(Categories.LIBRARY, item)
             yield item
