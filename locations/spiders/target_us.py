@@ -9,20 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
-
-def extract_balanced_json(text: str, start_idx: int) -> str | None:
-    """Extract a substring enclosed by balanced curly braces starting at start_idx."""
-    depth = 0
-    for i in range(start_idx, len(text)):
-        if text[i] == "{":
-            depth += 1
-        elif text[i] == "}":
-            depth -= 1
-            if depth == 0:
-                return text[start_idx : i + 1]
-    return None
-
-
 STORE_URL = "https://www.target.com/sl/store/{}"
 
 
@@ -42,15 +28,26 @@ class TargetUSSpider(SitemapSpider):
                 yield entry
 
     def extract_store(self, html: str) -> dict[str, Any] | None:
-        # Store metadata is extracted from Next.js RSC hydration payloads.
-        if not (match := re.search(r'\\"store\\":\{\\"store\\":\{', html)):
+        target_marker = r"\"store\":{\"store\":{"
+        if (idx := html.find(target_marker)) == -1:
             return None
-        if not (raw_json := extract_balanced_json(html, match.end() - 1)):
+
+        script_start = html.rfind("<script", 0, idx)
+        if script_start == -1:
+            return None
+        args_start = html.find("(", script_start, idx) + 1
+        args_end = html.find(")</script>", idx)
+        if args_start <= 0 or args_end == -1:
             return None
 
         try:
-            return json.loads(raw_json.replace('\\"', '"').replace("\\\\", "\\"))
-        except json.JSONDecodeError:
+            payload = json.loads(html[args_start:args_end])
+            decoded = payload[1]
+            if not (match := re.search(r'"store":\{"store":\{', decoded)):
+                return None
+            store_obj, _ = json.JSONDecoder().raw_decode(decoded, match.end() - 1)
+            return store_obj
+        except (json.JSONDecodeError, IndexError, TypeError):
             return None
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
