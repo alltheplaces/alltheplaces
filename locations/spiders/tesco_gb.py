@@ -4,7 +4,7 @@ from typing import Iterable
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -84,6 +84,8 @@ class TescoGBSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
             elif store_details["storeformat"] == "Metro":
                 apply_category(Categories.SHOP_SUPERMARKET, item)
                 item.update(self.TESCO_METRO)
+            services = response.xpath('//li[@class="MainServices-listItem"]').xpath("normalize-space()").getall()
+            apply_yes_no(Extras.ATM, item, "ATM" in services)
         else:
             # This is skipping ClothingStore (obvious) and LocalBusiness (Travel Money) types
             self.crawler.stats.inc_value(f'atp/ld_type/{ld_data["@type"]}/ignore')
