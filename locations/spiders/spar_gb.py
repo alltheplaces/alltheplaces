@@ -73,6 +73,7 @@ class SparGBSpider(scrapy.Spider):
 
             for service, tag in self.SERVICE_FILTERS.items():
                 apply_yes_no(tag, item, store["Id"] in self.stores_by_service[service])
+            apply_yes_no(Extras.CAR_WASH, item, "Car Wash" in services)
             if "Post Office" in services:
                 item["extras"]["post_office"] = "post_partner"
 
