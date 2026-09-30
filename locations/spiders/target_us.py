@@ -42,7 +42,6 @@ class TargetUSSpider(SitemapSpider):
                 yield entry
 
     def extract_store(self, html: str) -> dict[str, Any] | None:
-        # Redsky API blocks after ~500 requests with PerimeterX HTTP 435.
         # Store metadata is extracted from Next.js RSC hydration payloads.
         if not (match := re.search(r'\\"store\\":\{\\"store\\":\{', html)):
             return None
