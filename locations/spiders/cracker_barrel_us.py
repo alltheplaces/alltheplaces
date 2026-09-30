@@ -9,14 +9,17 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class CrackerBarrelUSSpider(SitemapSpider, JSONBlobSpider):
+class CrackerBarrelUSSpider(SitemapSpider, JSONBlobSpider, PlaywrightSpider):
     name = "cracker_barrel_us"
     item_attributes = {"brand": "Cracker Barrel", "brand_wikidata": "Q4492609"}
     allowed_domains = ["crackerbarrel.com"]
     sitemap_urls = ["https://www.crackerbarrel.com/sitemap-locations.xml"]
     sitemap_rules = [(r"/locations/states/\w{2}/[-\w]+/\d+$", "parse")]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"CONCURRENT_REQUESTS": 1}
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         return [
