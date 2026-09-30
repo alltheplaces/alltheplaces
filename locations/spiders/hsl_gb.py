@@ -16,11 +16,11 @@ class HslGBSpider(Spider):
         ):
             print(location)
             item = Feature()
-            item["branch"] = location.xpath('//h4[@class="mb-0"]/text()').get()
-            item["addr_full"] = location.xpath('//p[@class="mb-3"]/text()').get()
-            item["phone"] = location.xpath('//p[contains(text(), "0")]/text()').get()
+            item["branch"] = location.xpath('.//h4[@class="mb-0"]/text()').get()
+            item["addr_full"] = location.xpath('.//p[@class="mb-3"]/text()').get()
+            item["phone"] = location.xpath('.//p[contains(text(), "0")]/text()').get()
             item["ref"] = item["website"] = location.xpath(
-                '//a[contains(@href,"https://www.hslchairs.com/find-a-showroom/")]/@href'
+                './/a[contains(@href,"https://www.hslchairs.com/find-a-showroom/")]/@href'
             ).get()
             item["lat"], item["lon"] = (
                 location.xpath('.//a[contains(@href, "https://www.google.com/maps/dir/?api=1&destination=")]/@href')
