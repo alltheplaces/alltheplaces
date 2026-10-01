@@ -1,44 +1,61 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
-from scrapy import Request, Spider
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class DrMartensSpider(Spider):
     name = "dr_martens"
     item_attributes = {"brand": "Dr. Martens", "brand_wikidata": "Q1126126"}
-    start_urls = ["https://www.drmartens.com/uk/en_gb/store-finder?q=&page=0&latitude=0&longitude=0"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    no_refs = True
+    attempt_after_empty_response = 0
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        per_page = 10
-        pages = -(-response.json()["total"] // per_page)
-        for i in range(0, pages):
-            yield Request(
-                url=f"https://www.drmartens.com/uk/en_gb/store-finder?q=&page={i}&latitude=0&longitude=0",
-                callback=self.parse_stores,
-            )
+    def make_request(self, page: int) -> JsonRequest:
+        return JsonRequest(
+            url="https://www.drmartens.com/api/stores/search",
+            data={"market": "en_GB", "latitude": 55.860149, "longitude": -4.254456, "page": page},
+            cb_kwargs=dict(page=page),
+        )
 
-    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json()["data"]:
-            location["street_address"] = ", ".join(filter(None, [location["line1"], location["line2"]]))
-            location["phone"] = location["phone1"]
-            location["id"] = location.pop("url").split("?")[0]  # drop the empty lat/long query
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_request(0)
+
+    def parse(self, response: Response, page: int) -> Any:
+        results = response.json()
+        for location in results.get("stores", []):
+            if location.get("ownStore") is False:  # Skip retail stores or stockists
+                continue
+            location.update(location.pop("address", {}))
             item = DictParser.parse(location)
-            item["branch"] = location["displayName"].replace("Dr. Martens ", "")
-            apply_category(Categories.SHOP_SHOES, item)
+            location["street_address"] = merge_address_lines([location.get("line1"), location.get("line2")])
+            #  location["displayName"] is inconsistent to clean and set as branch
             item.pop("name")
-            try:
-                oh = OpeningHours()
-                for day, times in location.get("openings", {}).items():
-                    if times in ["Closed", " - "]:
-                        continue
-                    start_time, end_time = times.split(" - ")
-                    oh.add_range(day, start_time, end_time)
-                item["opening_hours"] = oh
-            except Exception:
-                pass
+            apply_category(Categories.SHOP_SHOES, item)
+            if opening_hours := location.get("openingHours"):
+                try:
+                    oh = OpeningHours()
+                    for day, times in opening_hours.items():
+                        start_time, end_time = times.split("-")
+                        oh.add_range(day, start_time.strip(), end_time.strip())
+                    item["opening_hours"] = oh
+                except Exception as e:
+                    self.logger.error(f"Failed to parse opening hours: {opening_hours}, {e}")
             yield item
+
+        next_page = results.get("cursor")
+        # The API sometimes returns an empty stores list for a page (e.g. page 10) and
+        # then resumes with data on a later page (e.g. page 11). To be safe, don't
+        # stop at the first empty page: keep trying page + 1 and give up only after
+        # three consecutive empty responses.
+        if next_page is not None:
+            self.attempt_after_empty_response = 0  # reset: only consecutive failures count
+            yield self.make_request(int(next_page))
+        elif self.attempt_after_empty_response < 3:
+            self.attempt_after_empty_response += 1
+            yield self.make_request(page + 1)
