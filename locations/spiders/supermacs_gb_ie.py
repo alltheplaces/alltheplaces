@@ -1,9 +1,10 @@
 from typing import Any, AsyncIterator
 
-from scrapy import Spider
+from scrapy import Selector, Spider
 from scrapy.http import FormRequest, Response
 
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class SupermacsGBIESpider(Spider):
@@ -33,81 +34,16 @@ class SupermacsGBIESpider(Spider):
             item["phone"] = location["store_telephone"]
             item["addr_full"] = item["addr_full"].replace("<br />", "")
             item["ref"] = item["website"]
-
-            # TODO: Parse the HTML table of hours
-            # item["opening_hours"] = OpeningHours()
-            # item["opening_hours"].add_ranges_from_string(location["store_opening_hours"])
-            # print(location["store_opening_hours"].replace(' style="text-align: center;"', "").replace('<td class="center">&#8211;</td>', ''))
-            # <table id="store-schedule">
-            # <tbody>
-            # <tr>
-            # <th>Monday</th>
-            # <th>Tuesday</th>
-            # <th>Wednesday</th>
-            # <th>Thursday</th>
-            # <th>Friday</th>
-            # <th>Saturday</th>
-            # <th>Sunday</th>
-            # </tr>
-            # <tr>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # </tr>
-            # <tr>
-            # </tr>
-            # <tr>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # </tr>
-            # </tbody>
-            # </table>
-            # <p>&nbsp;</p>
-            # <p><b>Christmas and New Years 2023</b></p>
-            # <table style="width: 100%;">
-            # <tbody>
-            # <tr>
-            # <th>24th Dec</th>
-            # <th>25th Dec</th>
-            # <th>26th Dec</th>
-            # <th>27th Dec</th>
-            # <th>28th Dec</th>
-            # <th>29th Dec</th>
-            # <th>30th Dec</th>
-            # <th>31st Dec/1st Jan</th>
-            # </tr>
-            # <tr>
-            # <td>9:00</td>
-            # <td>Closed</td>
-            # <td>12:00</td>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # <td>9:00</td>
-            # <td>9:00 / 22:00</td>
-            # </tr>
-            # <tr></tr>
-            # <tr>
-            # <td>20:00</td>
-            # <td>Closed</td>
-            # <td>22:00</td>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # <td>23:00</td>
-            # <td>12:00 / 23:00</td>
-            # </tr>
-            # </tbody>
-            # </table>
-            # <p>&nbsp;</p>
+            item["opening_hours"] = self.parse_hours(location["store_opening_hours"])
 
             yield item
+
+    @staticmethod
+    def parse_hours(hours_html: str) -> OpeningHours:
+        oh = OpeningHours()
+        # Further tables with the same id belong to co-located brands or delivery hours
+        rows = Selector(text=hours_html).xpath('(//table[@id="store-schedule"])[1]/tbody/tr')
+        days = rows[0].xpath("./th/text()").getall()
+        for day, opens, closes in zip(days, rows[1].xpath("./td"), rows[-1].xpath("./td")):
+            oh.add_ranges_from_string(f'{day} {opens.xpath("string()").get()} - {closes.xpath("string()").get()}')
+        return oh
