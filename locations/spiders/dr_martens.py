@@ -48,14 +48,13 @@ class DrMartensSpider(Spider):
                     self.logger.error(f"Failed to parse opening hours: {opening_hours}, {e}")
             yield item
 
-        next_page = results.get("cursor")
         # The API sometimes returns an empty stores list for a page (e.g. page 10) and
         # then resumes with data on a later page (e.g. page 11). To be safe, don't
         # stop at the first empty page: keep trying page + 1 and give up only after
         # three consecutive empty responses.
-        if next_page is not None:
+        if results.get("stores"):
             self.attempt_after_empty_response = 0  # reset: only consecutive failures count
-            yield self.make_request(int(next_page))
-        elif self.attempt_after_empty_response < 3:
+            yield self.make_request(page + 1)
+        elif self.attempt_after_empty_response < 3:  # Attempt next request after empty response
             self.attempt_after_empty_response += 1
             yield self.make_request(page + 1)
