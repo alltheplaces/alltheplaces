@@ -17,7 +17,6 @@ class WalmartUSSpider(Spider):
     name = "walmart_us"
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}
     allowed_domains = ["www.walmart.com"]
-    requires_proxy = "US"
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 2,
@@ -52,7 +51,7 @@ class WalmartUSSpider(Spider):
             "input": {
                 "postalCode": "",
                 "accessTypes": ["PICKUP_INSTORE", "PICKUP_CURBSIDE"],
-                "nodeTypes": ["STORE", "PICKUP_SPOKE", "PICKUP_POPUP"],
+                "nodeTypes": ["STORE"],
                 "latitude": 0.0,
                 "longitude": 0.0,
                 "radius": 100,
@@ -65,7 +64,6 @@ class WalmartUSSpider(Spider):
             "enableStoreBrandFormat": False,
             "disableNodeAddressPostalCode": False,
         }
-        zyte_api = {"httpResponseBody": True, "geolocation": "US"}
 
         for lat, lon in country_iseadgg_centroids("US", 94):
             variables["input"]["latitude"] = lat
@@ -74,7 +72,6 @@ class WalmartUSSpider(Spider):
                 url=f"{self.base_url}/{self.hash}?{urlencode({'variables': json.dumps(variables)})}",
                 headers=headers,
                 cookies={"walmart.nearestLatLng": f"{lat},{lon}"},
-                meta={"zyte_api": zyte_api},
             )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
