@@ -30,7 +30,7 @@ class AureconGroupSpider(scrapy.Spider):
                 "addr_full": addr,
                 "phone": location.xpath('.//following-sibling::div//span[@itemprop="telephone"]/text()').get().strip(),
             }
-            if coordinates is not None:
+            if coordinates:
                 coordinates = (str(coordinates).split("=")[1]).split(",")
                 properties["lat"] = float(coordinates[0])
                 properties["lon"] = float(coordinates[1])

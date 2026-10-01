@@ -30,16 +30,30 @@ class StoragePugSpider(Spider):
     dataset_attributes: dict = {"source": "api", "api": "storagepug.com"}
 
     def parse(self, response: TextResponse) -> Iterable[Request]:
-        state_path = re.search(r"/_nuxt/static/[^\"']+/state\.js", response.text).group(0)
-        yield Request(response.urljoin(state_path), callback=self.parse_state)
+        state_path = re.search(r"/_nuxt/static/[^\"']+/state\.js", response.text)
+        if state_path is not None:
+            yield Request(response.urljoin(state_path.group(0)), callback=self.parse_state)
+        else:
+            yield None
 
     def parse_state(self, response: TextResponse) -> Iterable[Feature]:
         nuxt_data = response.text
-        parameter_names = re.search(r"function\(([\w$,]+)\)", nuxt_data).group(1).split(",")
+        parameter_names_res = re.search(r"function\(([\w$,]+)\)", nuxt_data)
+        if parameter_names_res is None:
+            raise ValueError
+
+        parameter_names = parameter_names_res.group(1).split(",")
         arguments_start = nuxt_data.rfind("}}}}(") + 5
         parameter_values = chompjs.parse_js_object("[" + nuxt_data[arguments_start : nuxt_data.rfind("))")] + "]")
         parameters = dict(zip(parameter_names, parameter_values))
-        literals = {"!0": True, "!1": False, "void 0": None, "null": None, "true": True, "false": False}
+        literals = {
+            "!0": True,
+            "!1": False,
+            "void 0": None,
+            "null": None,
+            "true": True,
+            "false": False,
+        }
 
         def resolve(value: Any) -> Any:
             if isinstance(value, dict):
