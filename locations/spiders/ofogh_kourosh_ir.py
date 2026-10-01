@@ -7,7 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
-class OfoghKouroshIRSpider(Spider):
+class OfoghKouroshIrSpider(Spider):
     """Ofogh Kourosh, Iran's largest supermarket chain (okcs.com).
 
     All branches are server-rendered on a single /stores page as <li>
