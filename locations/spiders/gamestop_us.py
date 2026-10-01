@@ -30,9 +30,7 @@ class GamestopUSSpider(Spider):
     name = "gamestop_us"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
     allowed_domains = ["www.gamestop.com"]
-    _base_url = (
-        "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores"
-    )
+    _base_url = "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores"
     _query_params = {
         "hasCondition": "false",
         "hasVariantsAvailableForLookup": "false",
@@ -130,7 +128,9 @@ class GamestopUSSpider(Spider):
                     else:
                         item["opening_hours"] = OpeningHours()
                         for day_hours in hours_data:
-                            item["opening_hours"].add_range(day_hours["day"], day_hours["open"], day_hours["close"], "%H%M")
+                            item["opening_hours"].add_range(
+                                day_hours["day"], day_hours["open"], day_hours["close"], "%H%M"
+                            )
                 except Exception:
                     pass
 
