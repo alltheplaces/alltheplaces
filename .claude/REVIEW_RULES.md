@@ -159,7 +159,7 @@ should stay detailed) — the spider source should be lean.
 ## New Spiders
 - Verify brand/wikidata attributes are correct
 - **Wikidata QID validation** — do not trust a `brand_wikidata` value just because it is syntactically valid (`Q` + digits). LLMs frequently hallucinate QIDs that exist but refer to a completely unrelated entity (e.g. a village in Nigeria assigned to a laundromat brand). Always verify the QID label matches the brand name by checking `https://www.wikidata.org/wiki/Q<id>` or searching NSI. If no real QID can be found, omit `brand_wikidata` rather than guessing.
-- **Missing wikidata on large brands** — if a new spider produces a large number of locations (>100) but has no `brand_wikidata`, flag it. A brand with hundreds of locations almost certainly has a Wikidata entry. Search NSI (`grep -i "<brand>" locations/data/nsi.json`) and Wikidata before merging. If genuinely not in Wikidata, a comment explaining the search was done is acceptable.
+- **Missing wikidata on large brands** — if a new spider produces a large number of locations (>100) but has no `brand_wikidata`, flag it. A brand with hundreds of locations almost certainly has a Wikidata entry. Search NSI (`grep -i "<brand>" locations/data/nsi.json`) and Wikidata before merging. If genuinely not in Wikidata, suggest creating the item rather than omitting `brand:wikidata` — Cj-Malone's reply to "the brand has no Wikidata item" was "Have you considered making one?" (PR #19063). The maintainers also look up and supply QIDs themselves (#19056, #19280), and expect the spider's `brand` string to match the NSI entry's name (e.g. "Hotshots Sports Bar and Grill").
 - Check location count looks reasonable
 - **Verify the store-finder domain actually belongs to the requested company**, not just a
   same-named one. Confirmed this session: the obvious `wheelworks.com` is an unrelated
@@ -428,6 +428,20 @@ These apply to both new spiders and fixes. Sample the CI output GeoJSON before a
   response has `Content-Type: application/json` before calling `response.json()`, and log an
   error if it returns HTML (a 302/redirect signals that the buildId rotated on a site redeploy).
   Affected sites include anything using `/_next/data/<buildId>/...` URL patterns.
+
+- **Hardcoded `nonce`/token query params** — a WordPress `admin-ajax.php` URL (or similar) with a
+  hardcoded `nonce` in `start_urls` may expire or rotate. Check it is stable, or fetch it from the
+  page first (Cj-Malone, PR #19069: "I wonder if nonce is stable").
+
+- **Missing page payload: warn, don't error.** CI runs with `CLOSESPIDER_ERRORCOUNT=1`, so a
+  `logger.error` (or raise) on one bad/missing payload (e.g. absent `__NUXT_DATA__`) stops the
+  whole run. Log a `logger.warning` instead of silently treating it as zero stores (14im and
+  CodeRabbit agreed on this, PR #19263).
+
+- **After a mechanical rename or auto-fix** (e.g. `start_url` → `start_urls`), grep for stale
+  references to the old name in custom `start_requests`/pagination code (PR #19374). Also don't
+  wrap `.get()` in `str()` before a None guard (`str(None)` is the truthy `"None"`), and mutate the
+  source dict *before* `DictParser.parse`, or set the field on the item afterwards (PR #19357).
 
 - **Sites requiring a session cookie from the homepage**: some Laravel/PHP sites (e.g. `seventeenice-map.glico.com`) redirect all requests to an SSO login page unless a session cookie is established first by visiting the homepage. The fix is to start the spider by requesting the homepage, then follow up with the real data requests. Scrapy carries cookies across requests in the same session automatically. Test with `curl -sc /tmp/cookies.txt <homepage> -L -o /dev/null && curl -sb /tmp/cookies.txt <data-url>` to confirm the pattern before building the spider.
 

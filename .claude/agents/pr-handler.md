@@ -65,7 +65,9 @@ Read `.claude/REVIEW_RULES.md` then check:
 - `requires_proxy` added unnecessarily — adds Zyte cost. Only justified when proxy measurably increases location count.
 
 **Data quality checks:**
-- Wikidata QID: verify label matches brand at `https://www.wikidata.org/wiki/Q<id>`. Do not trust QIDs without checking.
+- Wikidata QID: verify label matches brand at `https://www.wikidata.org/wiki/Q<id>`. Do not trust QIDs without checking. If the brand has no item, suggest creating one rather than accepting a bare omission; `brand` should match the NSI name.
+- Hardcoded `nonce`/token params in URLs (e.g. WordPress admin-ajax) — check they are stable.
+- New "missing payload" guards should `logger.warning`, not `logger.error`/raise (CI uses `CLOSESPIDER_ERRORCOUNT=1`).
 - `addr:state` set to a country code (e.g. `"FR"`, `"DE"`) — must be a state/province code
 - `addr:street` containing a house number — should be `addr:street_address`
 - Generic phone/email/website stamped on every location (check CodeBuild warnings)
