@@ -23,7 +23,7 @@ class PatriziaPepeSpider(JSONBlobSpider):
 
     async def start(self) -> AsyncIterator[Request | JsonRequest]:
         yield Request(
-            self.start_url,
+            self.start_urls[0],
             callback=self.parse_stores_page,
         )
 

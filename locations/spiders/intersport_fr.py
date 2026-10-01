@@ -22,7 +22,7 @@ class IntersportFRSpider(Spider):
             "Accept-Language": "en-US,en;q=0.8,fr-FR;q=0.5,fr;q=0.3",
             "User-Agent": BROWSER_DEFAULT,
         }
-        yield Request(url=self.start_url, headers=headers, callback=self.parse)
+        yield Request(url=self.start_urls[0], headers=headers, callback=self.parse)
 
     def parse(self, response, **kwargs):
         store_data = response.xpath('//div[@id="map_canvas"]/@data-stores').get()

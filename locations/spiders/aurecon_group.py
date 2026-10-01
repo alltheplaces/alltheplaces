@@ -22,7 +22,7 @@ class AureconGroupSpider(scrapy.Spider):
                     for i in range(2)
                 ]
             )
-            coordinates = str(location.xpath('.//following-sibling::div//a[@target="_blank"]/@href').get())
+            coordinates = location.xpath('.//following-sibling::div//a[@target="_blank"]/@href').get()
             properties = {
                 "ref": location.xpath('.//following-sibling::div//span[@itemprop="telephone"]/text()').get().strip(),
                 "brand": "Aurecon Group",
@@ -30,8 +30,8 @@ class AureconGroupSpider(scrapy.Spider):
                 "addr_full": addr,
                 "phone": location.xpath('.//following-sibling::div//span[@itemprop="telephone"]/text()').get().strip(),
             }
-            if coordinates:
-                coordinates = (coordinates.split("=")[1]).split(",")
+            if coordinates is not None:
+                coordinates = (str(coordinates).split("=")[1]).split(",")
                 properties["lat"] = float(coordinates[0])
                 properties["lon"] = float(coordinates[1])
             apply_category({"office": "construction_company"}, properties)

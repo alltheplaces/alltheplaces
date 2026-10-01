@@ -24,7 +24,12 @@ class EquinoxSpider(Spider):
     }
 
     async def start(self) -> AsyncIterator[Request]:
-        yield Request(self.start_url, callback=self.parse, headers=self.headers, meta={"skip": 0})
+        yield Request(
+            self.start_urls[0],
+            callback=self.parse,
+            headers=self.headers,
+            meta={"skip": 0},
+        )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
@@ -44,7 +49,7 @@ class EquinoxSpider(Spider):
         records_read = data["skip"] + data["limit"]
         if records_read < data["total"]:
             yield Request(
-                f"{self.start_url}&skip={records_read}",
+                f"{self.start_urls[0]}&skip={records_read}",
                 callback=self.parse,
                 headers=self.headers,
             )
