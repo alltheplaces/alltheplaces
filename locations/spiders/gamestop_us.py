@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 from urllib.parse import urlencode
 
 from scrapy import Spider
@@ -90,7 +90,7 @@ class GamestopUSSpider(Spider):
                 seen.add(code)
                 yield code
 
-    def start_requests(self) -> Iterable[FormRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
