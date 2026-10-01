@@ -13,10 +13,9 @@ from locations.spiders.maverik import MaverikSpider
 from locations.spiders.meijer_us import MeijerUSSpider
 from locations.spiders.pilot_flying_j import FLYING_J, PILOT
 from locations.spiders.schlotzskys import SchlotzskysSpider
+from locations.spiders.travelcenters_of_america_us import TA
 from locations.spiders.walmart_us import WalmartUSSpider
 from locations.structured_data_spider import StructuredDataSpider
-
-TA_EXPRESS = {"brand": "TA Express", "brand_wikidata": "Q7835892"}
 
 
 class CinnabonUSSpider(SitemapSpider, StructuredDataSpider):
@@ -32,7 +31,7 @@ class CinnabonUSSpider(SitemapSpider, StructuredDataSpider):
         (["FLYING J"], FLYING_J),
         (["SCHLOTZSKY'S"], SchlotzskysSpider.item_attributes),
         (["WALMART", "WAL-MART", "WAL MART"], WalmartUSSpider.item_attributes),
-        (["TA EXPRESS"], TA_EXPRESS),
+        (["TA EXPRESS"], TA),
         (["BURGER KING"], BURGER_KING_SHARED_ATTRIBUTES),
     ]
 
