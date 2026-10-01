@@ -40,7 +40,6 @@ class GamestopUSSpider(Spider):
         "products": "undefined:1",
     }
     start_urls = [f"{_base_url}?{urlencode(_query_params, safe=':')}"]
-    requires_proxy = "US"
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
