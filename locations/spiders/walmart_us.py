@@ -81,6 +81,9 @@ class WalmartUSSpider(Spider):
             self.seen_refs.add(ref)
 
             item = DictParser.parse(location)
+            if geo_point := location.get("geoPoint"):
+                item["lat"] = geo_point.get("latitude")
+                item["lon"] = geo_point.get("longitude")
             item["branch"] = location.get("displayName", "").split(",")[0].strip()
             item["street_address"] = merge_address_lines(
                 [location["address"].get("addressLineOne"), location["address"].get("addressLineTwo")]
