@@ -42,3 +42,8 @@ repos:
       - id: autoflake
         language_version: python3.11
         args: [--remove-all-unused-imports, --in-place]
+  - repo: https://github.com/scrapy/scrapy-lint
+    rev: v0.1.1
+    hooks:
+    - id: scrapy-lint
+      files: locations/

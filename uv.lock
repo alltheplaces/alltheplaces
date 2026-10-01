@@ -136,6 +136,7 @@ dev = [
     { name = "pre-commit" },
     { name = "pylint" },
     { name = "pytest" },
+    { name = "scrapy-lint" },
     { name = "ty" },
 ]
 
@@ -189,6 +190,7 @@ dev = [
     { name = "pre-commit" },
     { name = "pylint" },
     { name = "pytest" },
+    { name = "scrapy-lint", specifier = ">=0.1.1" },
     { name = "ty" },
 ]
 
@@ -1885,6 +1887,15 @@ wheels = [
 ]
 
 [[package]]
+name = "ruamel-yaml"
+version = "0.19.1"
+source = { registry = "https://pypi.python.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/3b/ebda527b56beb90cb7652cb1c7e4f91f48649fbcd8d2eb2fb6e77cd3329b/ruamel_yaml-0.19.1.tar.gz", hash = "sha256:53eb66cd27849eff968ebf8f0bf61f46cdac2da1d1f3576dd4ccee9b25c31993", size = 142709, upload-time = "2026-01-02T16:50:31.84Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b8/0c/51f6841f1d84f404f92463fc2b1ba0da357ca1e3db6b7fbda26956c3b82a/ruamel_yaml-0.19.1-py3-none-any.whl", hash = "sha256:27592957fedf6e0b62f281e96effd28043345e0e66001f97683aa9a40c667c93", size = 118102, upload-time = "2026-01-02T16:50:29.201Z" },
+]
+
+[[package]]
 name = "runstats"
 version = "2.0.0"
 source = { registry = "https://pypi.python.org/simple" }
@@ -1966,6 +1977,20 @@ dependencies = [
     { name = "camoufox", extra = ["geoip"] },
     { name = "playwright" },
     { name = "scrapy" },
+]
+
+[[package]]
+name = "scrapy-lint"
+version = "0.1.1"
+source = { registry = "https://pypi.python.org/simple" }
+dependencies = [
+    { name = "packaging" },
+    { name = "pathspec" },
+    { name = "ruamel-yaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0f/09/8a2297986f89b34f04a950f140dd16c43ef9280289043e23fcd0a7e03fb5/scrapy_lint-0.1.1.tar.gz", hash = "sha256:32c220e28157623332686e7c1e18f748109e8ee332f525c4d2d7bada95b6cc25", size = 77591, upload-time = "2026-01-27T13:49:49.617Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4d/8b/6cdcd8c533220cf4c4127b2e47fe1bb1f98bdb263a262563e30469946cbb/scrapy_lint-0.1.1-py3-none-any.whl", hash = "sha256:310dfd5e147e453d76d8e73ebce18d89ef837b0bf0976c73b320f0918b2f4eca", size = 45899, upload-time = "2026-01-27T13:49:47.639Z" },
 ]
 
 [[package]]
