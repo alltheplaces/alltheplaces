@@ -29,12 +29,11 @@ class StoragePugSpider(Spider):
 
     dataset_attributes: dict = {"source": "api", "api": "storagepug.com"}
 
-    def parse(self, response: TextResponse) -> Iterable[Request]:
-        state_path = re.search(r"/_nuxt/static/[^\"']+/state\.js", response.text)
-        if state_path is not None:
+    def parse(self, response: TextResponse) -> Iterable[Request] | None:
+        if (state_path := re.search(r"/_nuxt/static/[^\"']+/state\.js", response.text)) is not None:
             yield Request(response.urljoin(state_path.group(0)), callback=self.parse_state)
         else:
-            yield None
+            return None
 
     def parse_state(self, response: TextResponse) -> Iterable[Feature]:
         nuxt_data = response.text
