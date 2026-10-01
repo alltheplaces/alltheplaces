@@ -16,9 +16,9 @@ class QuestDiagnosticsSpider(SitemapSpider):
             "ref": response.url,
             "lat": response.xpath('//div[@class="latitude"]/text()').get(),
             "lon": response.xpath('//div[@class="longitude"]/text()').get(),
-            "name": response.xpath('//div[@class="location-detail-title"]/text()').extract_first().strip(),
+            "name": response.xpath('//div[@class="location-detail-title"]/text()').get().strip(),
             "website": response.url,
-            "phone": response.xpath('//a[@id="phone"]/text()').extract_first(),
+            "phone": response.xpath('//a[@id="phone"]/text()').get(),
             "addr_full": clean_address(response.xpath('//div[@class="address"]/text()').getall()),
         }
 
@@ -26,7 +26,7 @@ class QuestDiagnosticsSpider(SitemapSpider):
             # Invalid location
             return
 
-        fax = response.xpath('//a[@id="fax"]/text()').extract_first()
+        fax = response.xpath('//a[@id="fax"]/text()').get()
         if fax:
             properties["extras"] = {"fax": fax}
 

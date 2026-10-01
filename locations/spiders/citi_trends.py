@@ -13,32 +13,30 @@ class CitiTrendsSpider(scrapy.Spider):
 
     def parse_stores(self, response):
         properties = {
-            "street_address": response.xpath(
-                'normalize-space(//span[@class="c-address-street-1"]/text())'
-            ).extract_first(),
-            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').extract_first(),
-            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').extract_first(),
-            "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').extract_first(),
-            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').extract_first(),
+            "street_address": response.xpath('normalize-space(//span[@class="c-address-street-1"]/text())').get(),
+            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]/text())').get(),
+            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]/text())').get(),
+            "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]/text())').get(),
+            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]/text())').get(),
             "ref": re.findall(r"[a-z]{2}\/[^()]+\/[^.]+", response.url)[0].replace("/", "_"),
             "website": response.url,
-            "lat": float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
-            "lon": float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
+            "lat": float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').get()),
+            "lon": float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').get()),
         }
 
-        hours = response.xpath('//div[@itemprop="openingHours"]/@content').extract()
+        hours = response.xpath('//div[@itemprop="openingHours"]/@content').getall()
         hours = "; ".join(hours)
         if hours:
             properties["opening_hours"] = hours
         yield Feature(**properties)
 
     def parse_city_stores(self, response):
-        stores = response.xpath('//h2[@class="c-location-grid-item-title"]/a/@href').extract()
+        stores = response.xpath('//h2[@class="c-location-grid-item-title"]/a/@href').getall()
         for store in stores:
             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
 
     def parse_state(self, response):
-        city_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
+        city_urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').getall()
         for path in city_urls:
             pattern1 = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+.html$")
             if pattern1.match(path.strip()):
@@ -47,7 +45,7 @@ class CitiTrendsSpider(scrapy.Spider):
                 yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').extract()
+        urls = response.xpath('//div[@class="c-directory-list-content-wrapper"]/ul/li/a/@href').getall()
         for path in urls:
             pattern = re.compile("^[a-z]{2}.html$")
             pattern1 = re.compile(r"^[a-z]{2}\/[^()]+\/[^()]+.html$")

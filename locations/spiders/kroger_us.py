@@ -1,11 +1,12 @@
 import re
 from copy import deepcopy
 from typing import Iterable
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 from scrapy import Request
 from scrapy.spiders import SitemapSpider
 from scrapy.spiders.sitemap import iterloc
+from scrapy.utils.httpobj import urlparse_cached
 from scrapy.utils.sitemap import Sitemap
 
 from locations.categories import Categories, apply_category
@@ -50,7 +51,7 @@ class KrogerUSSpider(SitemapSpider):
     }
 
     def _parse_sitemap(self, response):
-        brand_domain = urlparse(response.url).hostname
+        brand_domain = urlparse_cached(response).hostname
 
         location_ids = []
         for url in iterloc(Sitemap(self._get_sitemap_body(response))):

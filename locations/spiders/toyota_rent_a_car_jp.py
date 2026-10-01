@@ -2,10 +2,11 @@ import json
 import re
 from datetime import date
 from typing import Any, Iterable
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
@@ -72,7 +73,7 @@ class ToyotaRentACarJPSpider(SitemapSpider):
     sitemap_urls = ["https://rent.toyota.co.jp/sitemap_shop_detail.xml"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        qs = parse_qs(urlparse(response.url).query)
+        qs = parse_qs(urlparse_cached(response).query)
         rcode = qs.get("rCode", [None])[0]
         ecode = qs.get("eCode", [None])[0]
         if not rcode or not ecode:

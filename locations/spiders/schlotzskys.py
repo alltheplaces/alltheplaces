@@ -26,8 +26,8 @@ class SchlotzskysSpider(scrapy.Spider):
     def parse(self, response):
         links = response.xpath('//a[@class="Directory-listLink"]')
         for link in links:
-            count = link.xpath("./@data-count").extract_first()
-            url = response.urljoin(link.xpath("./@href").extract_first().strip())
+            count = link.xpath("./@data-count").get()
+            url = response.urljoin(link.xpath("./@href").get().strip())
 
             if count == "(1)":
                 yield scrapy.Request(url, callback=self.parse_store)
@@ -36,16 +36,16 @@ class SchlotzskysSpider(scrapy.Spider):
 
     def parse_store(self, response):
         properties = {
-            "ref": response.xpath('//main[@id="main"]/@itemid').extract_first(),
-            "lat": response.xpath('//meta[@itemprop="latitude"]/@content').extract_first(),
-            "lon": response.xpath('//meta[@itemprop="longitude"]/@content').extract_first(),
-            "phone": response.xpath('//div[@itemprop="telephone"]/text()').extract_first(),
-            "website": response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/text()').extract_first(),
-            "city": response.xpath('//meta[@itemprop="addressLocality"]/text()').extract_first(),
-            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-            "opening_hours": self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').extract()),
+            "ref": response.xpath('//main[@id="main"]/@itemid').get(),
+            "lat": response.xpath('//meta[@itemprop="latitude"]/@content').get(),
+            "lon": response.xpath('//meta[@itemprop="longitude"]/@content').get(),
+            "phone": response.xpath('//div[@itemprop="telephone"]/text()').get(),
+            "website": response.xpath('//link[@rel="canonical"]/@href').get(),
+            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/text()').get(),
+            "city": response.xpath('//meta[@itemprop="addressLocality"]/text()').get(),
+            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').get(),
+            "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').get(),
+            "opening_hours": self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').getall()),
         }
 
         yield Feature(**properties)

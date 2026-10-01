@@ -21,9 +21,7 @@ class RoadRangerUSSpider(scrapy.Spider):
             if m := re.search(r"Coordinates:\s+(-?\d+\.\d+), (-?\d+\.\d+)", location.get()):
                 item["lat"], item["lon"] = m.groups()
 
-            item["addr_full"] = item["ref"] = (
-                location.css(".store-location-teaser__address::text").extract_first().strip()
-            )
+            item["addr_full"] = item["ref"] = location.css(".store-location-teaser__address::text").get().strip()
 
             amenities = location.css(".store-location-teaser__amenities").get()
 

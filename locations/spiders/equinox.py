@@ -12,7 +12,9 @@ class EquinoxSpider(Spider):
     name = "equinox"
     item_attributes = {"brand": "Equinox", "brand_wikidata": "Q5384535"}
     allowed_domains = ["cdn.contentful.com"]
-    start_url = "https://cdn.contentful.com/spaces/drib7o8rcbyf/environments/master/entries?content_type=club&include=3"
+    start_urls = [
+        "https://cdn.contentful.com/spaces/drib7o8rcbyf/environments/master/entries?content_type=club&include=3"
+    ]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     headers = {

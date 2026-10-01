@@ -12,7 +12,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class IntersportFRSpider(Spider):
     name = "intersport_fr"
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
-    start_url = "https://www.intersport.fr/store-finder/"
+    start_urls = ["https://www.intersport.fr/store-finder/"]
     requires_proxy = "FR"
 
     async def start(self) -> AsyncIterator[Request]:

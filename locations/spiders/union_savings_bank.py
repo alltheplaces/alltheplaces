@@ -19,7 +19,7 @@ class UnionSavingsBankSpider(SitemapSpider):
 
         oh = OpeningHours()
         for hours in response.css(".hours"):
-            day, interval = hours.xpath(".//div/text()").extract()
+            day, interval = hours.xpath(".//div/text()").getall()
             if interval == "Closed":
                 continue
             open_time, close_time = interval.split("-")

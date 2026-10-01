@@ -19,7 +19,7 @@ class GeicoSpider(scrapy.Spider):
     def parse(self, response):
         response.selector.remove_namespaces()
 
-        urls = response.xpath('//loc[contains(text(), "insurance-agents")]/text()').extract()
+        urls = response.xpath('//loc[contains(text(), "insurance-agents")]/text()').getall()
 
         for url in urls:
             if len(url.split("/")) > 7:  # location page
@@ -28,7 +28,7 @@ class GeicoSpider(scrapy.Spider):
     def parse_location(self, response):
         script_data = response.xpath(
             '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-        ).extract_first()
+        ).get()
         if script_data:
             data = json.loads(script_data)
             ref = "_".join(re.search(r".+/(.+?)/(.+?)/?(?:\.html|$)", response.url).groups())

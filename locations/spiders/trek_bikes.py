@@ -26,7 +26,7 @@ class TrekBikesSpider(scrapy.Spider):
         opening_hours = OpeningHours()
         hours_table = response.xpath('//table[@qaid="store-hours"]')
         for row in hours_table.xpath(".//tr"):
-            s = row.xpath(".//text()").extract()
+            s = row.xpath(".//text()").getall()
             day, *intervals = (x.strip() for x in s if x.strip())
             for interval in intervals:
                 if interval == "Closed":

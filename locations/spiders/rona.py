@@ -18,7 +18,7 @@ class RonaSpider(SitemapSpider):
 
     def parse_hours(self, hours):
         opening_hours = OpeningHours()
-        day_hours = hours.xpath('.//li/time[@itemprop="openingHours"]/@datetime').extract()
+        day_hours = hours.xpath('.//li/time[@itemprop="openingHours"]/@datetime').getall()
 
         for open_hours in day_hours:
             day, open_close = open_hours.split(" ")
@@ -28,7 +28,7 @@ class RonaSpider(SitemapSpider):
         return opening_hours
 
     def parse_store(self, response):
-        phone_text = response.xpath('normalize-space(//div[@itemprop="telephone"]//text())').extract_first()
+        phone_text = response.xpath('normalize-space(//div[@itemprop="telephone"]//text())').get()
         if phone_text:
             phone = "".join(re.findall(r"([0-9]+)", phone_text))
         else:
@@ -36,18 +36,16 @@ class RonaSpider(SitemapSpider):
 
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": response.xpath('normalize-space(//*[@itemprop="name"]//text())').extract_first(),
-            "street_address": response.xpath(
-                'normalize-space(//span[@itemprop="streetAddress"]//text())'
-            ).extract_first(),
-            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())').extract_first(),
-            "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]//text())').extract_first(),
-            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').extract_first(),
+            "name": response.xpath('normalize-space(//*[@itemprop="name"]//text())').get(),
+            "street_address": response.xpath('normalize-space(//span[@itemprop="streetAddress"]//text())').get(),
+            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())').get(),
+            "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]//text())').get(),
+            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').get(),
             "country": "CA",
             "phone": phone,
             "website": response.url,
-            "lat": float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').extract_first()),
-            "lon": float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').extract_first()),
+            "lat": float(response.xpath('normalize-space(//meta[@itemprop="latitude"]/@content)').get()),
+            "lon": float(response.xpath('normalize-space(//meta[@itemprop="longitude"]/@content)').get()),
         }
 
         hours = response.xpath('(//ul[@class="storedetails__list storedetails__list-hours"])[1]')

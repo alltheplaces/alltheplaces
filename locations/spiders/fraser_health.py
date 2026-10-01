@@ -15,25 +15,25 @@ class FraserHealthSpider(scrapy.Spider):
     ]
 
     def parse_place(self, response):
-        coords = response.xpath('//*[@class="component map-static-content o-grid__col"]/div/a/@href').extract_first()
+        coords = response.xpath('//*[@class="component map-static-content o-grid__col"]/div/a/@href').get()
         lat = re.search(r"q=(.*?),", coords).groups()[0]
         lng = re.search(r",(.*)$", coords).groups()[0]
-        state = response.xpath('//*[@class="location-province field-province"]/text()').extract_first()
+        state = response.xpath('//*[@class="location-province field-province"]/text()').get()
         if state is not None:
             state = state.replace(".", "")
             state = state.strip()
 
         properties = {
             "ref": response.meta["ref"],
-            "name": response.xpath('//*[@class="title field-title field-title"]/a/@title').extract_first(),
-            "street_address": response.xpath('//*[@class="field-address"]/text()').extract_first(),
-            "city": response.xpath('//*[@class="field-title"]/a/@title').extract_first(),
+            "name": response.xpath('//*[@class="title field-title field-title"]/a/@title').get(),
+            "street_address": response.xpath('//*[@class="field-address"]/text()').get(),
+            "city": response.xpath('//*[@class="field-title"]/a/@title').get(),
             "state": state,
-            "postcode": response.xpath('//*[@class="postal-code field-postalcode"]/text()').extract_first(),
+            "postcode": response.xpath('//*[@class="postal-code field-postalcode"]/text()').get(),
             "country": "CA",
             "lat": lat,
             "lon": lng,
-            "phone": response.xpath('//*[@class="phone field-phone"]/text()').extract_first(),
+            "phone": response.xpath('//*[@class="phone field-phone"]/text()').get(),
             "website": response.url,
         }
 
