@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class UStorItUSSpider(SitemapSpider, StructuredDataSpider):
+class UStorITUSSpider(SitemapSpider, StructuredDataSpider):
     name = "u_stor_it_us"
     item_attributes = {"brand": "U-Stor-It", "brand_wikidata": "Q116225856", "name": "U-Stor-It"}
     sitemap_urls = ["https://www.ustorit.com/sitemap.xml"]
