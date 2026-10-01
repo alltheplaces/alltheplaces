@@ -33,7 +33,7 @@ class DrMartensSpider(Spider):
                 continue
             location.update(location.pop("address", {}))
             item = DictParser.parse(location)
-            location["street_address"] = merge_address_lines([location.get("line1"), location.get("line2")])
+            item["street_address"] = merge_address_lines([location.get("line1"), location.get("line2")])
             #  location["displayName"] is inconsistent to clean and set as branch
             item.pop("name")
             apply_category(Categories.SHOP_SHOES, item)
