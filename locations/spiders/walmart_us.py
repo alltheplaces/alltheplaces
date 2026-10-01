@@ -1,16 +1,16 @@
 import json
-from typing import Any, AsyncIterator, Iterable
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Request, Response
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.user_agents import BROWSER_DEFAULT
+from locations.user_agents import CHROME_LATEST
 
 
 class WalmartUSSpider(Spider):
@@ -18,7 +18,7 @@ class WalmartUSSpider(Spider):
     item_attributes = {"brand": "Walmart", "brand_wikidata": "Q483551"}
     allowed_domains = ["www.walmart.com"]
     custom_settings = {
-        "USER_AGENT": BROWSER_DEFAULT,
+        "USER_AGENT": CHROME_LATEST,
         "CONCURRENT_REQUESTS": 2,
         "DOWNLOAD_DELAY": 1,
         "ROBOTSTXT_OBEY": False,
@@ -26,23 +26,18 @@ class WalmartUSSpider(Spider):
     base_url = "https://www.walmart.com/orchestra/home/graphql/nearByNodes"
     hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(
-            url="https://www.walmart.com/store-finder",
-            callback=self.start_centroids,
-            headers={
-                "User-Agent": BROWSER_DEFAULT,
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.9",
-            },
-            dont_filter=True,
-        )
-
-    def start_centroids(self, response: Response) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         headers = {
+            "accept": "application/json",
+            "accept-language": "en-US,en;q=0.9",
+            "referer": "https://www.walmart.com/store-finder",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
             "x-apollo-operation-name": "nearByNodes",
             "x-o-bu": "WALMART-US",
             "x-o-gql-query": "query nearByNodes",
+            "x-o-mart": "B2C",
             "x-o-platform": "rweb",
             "x-o-platform-version": "usweb-1.220.0-ada3f07b1e1f576f89fca794606c73b0cd2ce649-8211424r",
             "x-o-segment": "oaoh",
@@ -71,7 +66,6 @@ class WalmartUSSpider(Spider):
             yield JsonRequest(
                 url=f"{self.base_url}/{self.hash}?{urlencode({'variables': json.dumps(variables)})}",
                 headers=headers,
-                cookies={"walmart.nearestLatLng": f"{lat},{lon}"},
             )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
