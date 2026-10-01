@@ -16,6 +16,7 @@ class HeartOfEnglandCooperativeGBSpider(SitemapSpider):
     name = "heart_of_england_cooperative_gb"
     sitemap_urls = ["https://heartofengland.coop/store-sitemap.xml"]
     sitemap_rules = [(r"/store/[-\w]+/$", "parse_store")]
+    requires_proxy = "GB"  # Cloudflare blocks non-GB requests
 
     def parse_store(self, response: Response, **kwargs: Any) -> Any:
         # The "image" and "addressLocality" values contain unescaped HTML, which breaks the JSON
