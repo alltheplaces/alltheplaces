@@ -19,7 +19,6 @@ class TgjonesGBSpider(SitemapSpider):
     sitemap_urls = ["https://www.tgjonesonline.co.uk/SiteMap/sitemap-pages.xml"]
     sitemap_rules = [(r"/stores/[-\w]+", "parse")]
     custom_settings = {
-        "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {"Host": "www.tgjonesonline.co.uk", "Alt-Used": "www.tgjonesonline.co.uk"},
         "USER_AGENT": BROWSER_DEFAULT,
     }
@@ -34,6 +33,9 @@ class TgjonesGBSpider(SitemapSpider):
         if not item["name"]:
             return
         item["addr_full"] = clean_address(response.xpath('//*[@class="shop-styling__address"]/p/text()').getall())
+        if not item["addr_full"]:
+            return
+        item["phone"] = response.xpath('//*[@class="shop-styling__number"]/p/text()').get()
         if coordinates := re.search(self.coordinates_pattern, response.text):
             item["lat"], item["lon"] = coordinates.groups()
         # Some stores have wildly incorrect coordinates for
@@ -41,18 +43,19 @@ class TgjonesGBSpider(SitemapSpider):
         # these incorrect coordinates.
         # Some stores are located in countries other than GB. Make
         # the required change to the item's country.
-        if result := reverse_geocoder.get((float(item["lat"]), float(item["lon"])), mode=1, verbose=False):
-            match result["cc"]:
-                case "GB" | "IE" | "JE" | "IM" | "GG":
-                    item["country"] = result["cc"]
-                case _:
-                    item.pop("lat")
-                    item.pop("lon")
+        if item.get("lat") and item.get("lon"):
+            if result := reverse_geocoder.get((float(item["lat"]), float(item["lon"])), mode=1, verbose=False):
+                match result["cc"]:
+                    case "GB" | "IE" | "JE" | "IM" | "GG":
+                        item["country"] = result["cc"]
+                    case _:
+                        item.pop("lat")
+                        item.pop("lon")
 
         apply_category(Categories.SHOP_NEWSAGENT, item)
 
         item["opening_hours"] = OpeningHours()
-        for rule in response.xpath('//li[@class="whs-hours-item"]'):
+        for rule in response.xpath('//li[@class="tgj-hours-item"]'):
             day = rule.xpath('.//*[contains(@class, "day")]/text()').get("")
             hours = rule.xpath('.//*[contains(@class, "time")]/text()').get("").replace("24hr-24hr", "00:00-23:59")
             item["opening_hours"].add_ranges_from_string(f"{day} {hours}")
