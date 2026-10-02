@@ -16,7 +16,7 @@ class BudgensGBSpider(SitemapSpider, OpenGraphSpider):
     sitemap_rules = [("/our-stores/", "parse")]
 
     def post_process_item(self, item: Feature, response: Response, **kwargs: Any) -> Any:
-        item["branch"] = (item.pop("name", None) or "").removeprefix("Budgens ").removeprefix("BUDGENS ").strip(" –-")
+        item["branch"] = (item.pop("name", None) or "").removeprefix("Budgens ").removeprefix("Budgens ").removeprefix("BUDGENS ").strip(" –-")
         item["street_address"] = item["street_address"].strip(",")
 
         item["opening_hours"] = OpeningHours()
