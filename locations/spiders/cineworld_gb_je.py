@@ -16,7 +16,6 @@ class CineworldGBJESpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["MovieTheater"]
     search_for_amenity_features = False
     drop_attributes = {"twitter"}
-    requires_proxy = "GB"
 
     def post_process_item(
         self, item: Feature, response: TextResponse, ld_data: dict, **kwargs: Any
