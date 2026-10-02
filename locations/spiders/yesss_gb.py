@@ -20,9 +20,11 @@ class YesssGBSpider(Spider):
             item["lon"] = location["longitude"]
             item["email"] = location["email"]
             item["branch"] = item.pop("name")
+
             apply_category(Categories.SHOP_ELECTRICAL, item)
 
             # The feed's hours are a 00:00-00:00 placeholder; the real hours are on each store page
+            item["opening_hours"] = None
             yield Request(location["url"], callback=self.parse_store, cb_kwargs={"item": item})
 
     def parse_store(self, response: Response, item: Feature, **kwargs: Any) -> Any:
