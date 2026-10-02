@@ -19,8 +19,7 @@ class YesssGBSpider(Spider):
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             item["email"] = location["email"]
-            item["branch"] = location["name"]
-            item["name"] = None
+            item["branch"] = item.pop("name")
             apply_category(Categories.SHOP_ELECTRICAL, item)
 
             # The feed's hours are a 00:00-00:00 placeholder; the real hours are on each store page
