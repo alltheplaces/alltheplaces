@@ -1,9 +1,8 @@
 import json
 from typing import Any, AsyncIterator, Iterable
-from urllib.parse import quote
 
-from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy import FormRequest, Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
@@ -15,45 +14,46 @@ class BurgerKingJPSpider(Spider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     page_size = 100
 
-    def make_request(self, page: int) -> Request:
-        message = {
-            "header": {
-                "result": True,
-                "error_code": "",
-                "error_text": "",
-                "info_text": "",
-                "message_version": "",
-                "login_session_id": "",
-                "trcode": "BKJ0302",
-                "cdCallChnn": "02",
-            },
-            "body": {
-                "tpSearchStore": "03",
-                "searchKeyword": "",
-                "storeServiceCode": [""],
-                "sort": "02",
-                "xCoordinates": "",
-                "yCoordinates": "",
-                "page": page,
-                "dataCount": self.page_size,
-            },
-        }
-        return Request(
+    def make_request(self, page: int) -> FormRequest:
+        return FormRequest(
             url="https://www.burgerking.co.jp/burgerking/BKJ0302.json",
             headers={
                 "Accept": "application/json, text/plain, */*",
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            method="POST",
-            body="message=" + quote(json.dumps(message, separators=(",", ":"))),
+            formdata={
+                "message": json.dumps(
+                    {
+                        "header": {
+                            "result": True,
+                            "error_code": "",
+                            "error_text": "",
+                            "info_text": "",
+                            "message_version": "",
+                            "login_session_id": "",
+                            "trcode": "BKJ0302",
+                            "cdCallChnn": "02",
+                        },
+                        "body": {
+                            "tpSearchStore": "03",
+                            "searchKeyword": "",
+                            "storeServiceCode": [""],
+                            "sort": "02",
+                            "xCoordinates": "",
+                            "yCoordinates": "",
+                            "page": page,
+                            "dataCount": self.page_size,
+                        },
+                    }
+                )
+            },
             cb_kwargs={"page": page},
-            callback=self.parse,
         )
 
-    async def start(self) -> AsyncIterator[Request]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         yield self.make_request(1)
 
-    def parse(self, response: Response, page: int, **kwargs: Any) -> Iterable[Feature | Request]:
+    def parse(self, response: Response, page: int, **kwargs: Any) -> Iterable[Feature | FormRequest]:
         body = response.json()["body"]
         for location in body["data"]:
             item = Feature()
@@ -64,10 +64,9 @@ class BurgerKingJPSpider(Spider):
             item["addr_full"] = location["storAddr"]
             item["website"] = "https://www.burgerking.co.jp/"
             services = {service["storeServiceCode"] for service in location.get("storeServiceCodeList") or []}
-            apply_yes_no(Extras.DRIVE_THROUGH, item, "02" in services, False)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "02" in services)
             apply_category(Categories.FAST_FOOD, item)
             yield item
 
-        # The endpoint caps results per page; follow pages until the reported total is reached.
         if page * self.page_size < int(body["dataCount"]):
             yield self.make_request(page + 1)
