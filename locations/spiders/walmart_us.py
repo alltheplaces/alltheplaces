@@ -1,9 +1,8 @@
 import json
 from typing import Any, AsyncIterator
-from urllib.parse import urlencode
 
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -20,13 +19,12 @@ class WalmartUSSpider(Spider):
     custom_settings = {
         "USER_AGENT": CHROME_LATEST,
         "CONCURRENT_REQUESTS": 2,
-        "DOWNLOAD_DELAY": 1,
         "ROBOTSTXT_OBEY": False,
     }
     base_url = "https://www.walmart.com/orchestra/home/graphql/nearByNodes"
     hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
+    async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
             "accept": "application/json",
             "accept-language": "en-US,en;q=0.9",
@@ -63,8 +61,10 @@ class WalmartUSSpider(Spider):
         for lat, lon in country_iseadgg_centroids("US", 94):
             variables["input"]["latitude"] = lat
             variables["input"]["longitude"] = lon
-            yield JsonRequest(
-                url=f"{self.base_url}/{self.hash}?{urlencode({'variables': json.dumps(variables)})}",
+            yield FormRequest(
+                url=f"{self.base_url}/{self.hash}",
+                method="GET",
+                formdata={"variables": json.dumps(variables)},
                 headers=headers,
             )
 
