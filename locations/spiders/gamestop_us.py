@@ -1,7 +1,6 @@
 import json
 import re
 from typing import Any, AsyncIterator, Iterable
-from urllib.parse import urlencode
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
@@ -30,16 +29,7 @@ class GamestopUSSpider(Spider):
     name = "gamestop_us"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
     allowed_domains = ["www.gamestop.com"]
-    _base_url = "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores"
-    _query_params = {
-        "hasCondition": "false",
-        "hasVariantsAvailableForLookup": "false",
-        "hasVariantsAvailableForPickup": "false",
-        "source": "plp",
-        "showMap": "false",
-        "products": "undefined:1",
-    }
-    start_urls = [f"{_base_url}?{urlencode(_query_params, safe=':')}"]
+    start_urls = ["https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores"]
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
@@ -97,13 +87,23 @@ class GamestopUSSpider(Spider):
             "Referer": "https://www.gamestop.com/stores/",
             "X-Requested-With": "XMLHttpRequest",
         }
+        base_params = {
+            "radius": "200",
+            "hasCondition": "false",
+            "hasVariantsAvailableForLookup": "false",
+            "hasVariantsAvailableForPickup": "false",
+            "source": "plp",
+            "showMap": "false",
+            "products": "undefined:1",
+            "csrf_token": "0",
+        }
         for url in self.start_urls:
             for postcode in self.get_postal_regions():
                 yield FormRequest(
                     url=url,
                     method="POST",
                     headers=headers,
-                    formdata={"postalCode": postcode, "radius": "200", "csrf_token": "0"},
+                    formdata=base_params | {"postalCode": postcode},
                 )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -122,9 +122,11 @@ class GamestopUSSpider(Spider):
             if hours_raw := location.get("storeOperationHours"):
                 try:
                     hours_data = json.loads(hours_raw)
-                    if all(day.get("open") == "CLOSED" and day.get("close") == "CLOSED" for day in hours_data):
+                    if hours_data and all(
+                        day.get("open") == "CLOSED" and day.get("close") == "CLOSED" for day in hours_data
+                    ):
                         set_closed(item)
-                    else:
+                    elif hours_data:
                         item["opening_hours"] = OpeningHours()
                         for day_hours in hours_data:
                             item["opening_hours"].add_range(
