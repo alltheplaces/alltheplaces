@@ -1,3 +1,4 @@
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.storefinders.storepoint import StorepointSpider
 
@@ -7,7 +8,7 @@ class TouchstoneMedicalImagingUSSpider(StorepointSpider):
     item_attributes = {
         "brand": "Touchstone Medical Imaging",
         "brand_wikidata": "Q123370518",
-        "extras": {"amenity": "clinic", "healthcare": "clinic", "healthcare:speciality": "diagnostic_radiology"},
+        "extras": {"healthcare:speciality": "diagnostic_radiology"},
     }
     key = "1632ba0abb55f7"
 
@@ -18,4 +19,5 @@ class TouchstoneMedicalImagingUSSpider(StorepointSpider):
             hours_range = location.get(day_name.lower(), "")
             hours_string = f"{hours_string} {day_name}: {hours_range}"
         item["opening_hours"].add_ranges_from_string(hours_string)
+        apply_category(Categories.CLINIC, item)
         yield item

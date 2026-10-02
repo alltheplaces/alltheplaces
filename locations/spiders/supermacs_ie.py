@@ -9,13 +9,8 @@ from locations.hours import OpeningHours
 
 class SupermacsIESpider(Spider):
     name = "supermacs_ie"
-    item_attributes = {
-        "brand_wikidata": "Q7643750",
-        "brand": "Supermac's",
-    }
-    allowed_domains = [
-        "supermacs.ie",
-    ]
+    item_attributes = {"brand": "Supermac's", "brand_wikidata": "Q7643750"}
+    allowed_domains = ["supermacs.ie"]
 
     async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
