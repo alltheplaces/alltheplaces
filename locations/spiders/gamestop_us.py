@@ -38,15 +38,12 @@ class GamestopUSSpider(Spider):
         "AUTOTHROTTLE_ENABLED": True,
         "AUTOTHROTTLE_START_DELAY": 1.0,
         "AUTOTHROTTLE_MAX_DELAY": 5.0,
-        "AUTOTHROTTLE_TARGET_CONCURRENCY": 1.0,
         "RETRY_TIMES": 5,
-        "RETRY_HTTP_CODES": [429, 500, 502, 503, 504, 522, 524, 408],
     }
-    seen_refs: set[str] = set()
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.seen_refs = set()
+        self.seen_refs: set[str] = set()
 
     # Supplemental postal codes for isolated areas >200 miles from any 50k+ city
     # (Alaska, rural Northern Plains, and Upper Michigan) to achieve 100% US coverage
@@ -107,11 +104,11 @@ class GamestopUSSpider(Spider):
                 )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json().get("stores", []):
-            ref = str(location.get("ID", ""))
-            if not ref or ref in self.seen_refs:
+        for location in response.json()["stores"]:
+            # Search radii overlap heavily, so skip stores already emitted.
+            ref = location["ID"]
+            if ref in self.seen_refs:
                 continue
-            self.seen_refs.add(ref)
 
             item = DictParser.parse(location)
             item["name"] = re.sub(r"(?i)\s*-\s*gamestop\b", "", item["name"]).strip()
@@ -119,20 +116,14 @@ class GamestopUSSpider(Spider):
                 suite = location.get("address2").upper().replace("STE", "Suite")
                 item["street_address"] = clean_address([location.get("address1"), suite])
             item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
-            if hours_raw := location.get("storeOperationHours"):
-                try:
-                    hours_data = json.loads(hours_raw)
-                    if hours_data and all(
-                        day.get("open") == "CLOSED" and day.get("close") == "CLOSED" for day in hours_data
-                    ):
-                        set_closed(item)
-                    elif hours_data:
-                        item["opening_hours"] = OpeningHours()
-                        for day_hours in hours_data:
-                            item["opening_hours"].add_range(
-                                day_hours["day"], day_hours["open"], day_hours["close"], "%H%M"
-                            )
-                except Exception:
-                    pass
+            if hours := json.loads(location.get("storeOperationHours") or "[]"):
+                if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours):
+                    # Stores pending closure report every day as CLOSED.
+                    set_closed(item)
+                else:
+                    item["opening_hours"] = OpeningHours()
+                    for day in hours:
+                        item["opening_hours"].add_range(day["day"], day["open"], day["close"], "%H%M")
 
+            self.seen_refs.add(ref)
             yield item
