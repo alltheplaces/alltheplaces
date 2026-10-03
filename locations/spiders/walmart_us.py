@@ -87,10 +87,10 @@ class WalmartUSSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = location.get("displayName", "").split(",")[0].strip()
             address = location.get("address") or {}
-            item["street_address"] = merge_address_lines(
-                [address.get("addressLineOne"), address.get("addressLineTwo")]
+            item["street_address"] = merge_address_lines([address.get("addressLineOne"), address.get("addressLineTwo")])
+            item["website"] = (
+                f"https://www.walmart.com/store/{item['ref']}-{item['city'].replace(' ', '-')}-{item['state']}"
             )
-            item["website"] = f"https://www.walmart.com/store/{item['ref']}-{item['city'].replace(' ', '-')}-{item['state']}"
             item["opening_hours"] = self._parse_hours(location.get("operationalHours", []))
 
             self._apply_store_type(item, location.get("name", ""))
