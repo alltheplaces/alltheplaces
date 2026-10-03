@@ -18,6 +18,7 @@ class LoungesGBSpider(SitemapSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
         item["branch"] = response.xpath("//h1/span/text()").get()
+        item["name"] = item["branch"] + " Lounge"
         item["addr_full"] = (
             response.xpath('//*[contains(@class ,"title-section__address-section")]').xpath("normalize-space()").get()
         )
