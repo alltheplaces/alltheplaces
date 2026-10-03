@@ -38,5 +38,5 @@ class LoungesGBSpider(SitemapSpider):
                 -2:
             ]:
                 item["opening_hours"].add_ranges_from_string(day_time)
-            if not item.get("geometry"):
+            if item.get("lat"):
                 yield item
