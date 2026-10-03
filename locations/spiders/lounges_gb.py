@@ -19,7 +19,9 @@ class LoungesGBSpider(SitemapSpider):
         item = Feature()
         item["branch"] = response.xpath("//h1/span/text()").get()
         if item.get("branch"):
-            if not "Lounge" in item["branch"]:
+            if "Lounge" in item["branch"]:
+                item["name"] = item["branch"]
+            else:
                 item["name"] = item["branch"] + " Lounge"
             item["addr_full"] = (
                 response.xpath('//*[contains(@class ,"title-section__address-section")]')
@@ -36,4 +38,5 @@ class LoungesGBSpider(SitemapSpider):
                 -2:
             ]:
                 item["opening_hours"].add_ranges_from_string(day_time)
-            yield item
+            if not item.get("lat"):
+                yield item
