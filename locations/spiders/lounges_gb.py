@@ -22,7 +22,9 @@ class LoungesGBSpider(SitemapSpider):
             if not "Lounge" in item["branch"]:
                 item["name"] = item["branch"] + " Lounge"
             item["addr_full"] = (
-                response.xpath('//*[contains(@class ,"title-section__address-section")]').xpath("normalize-space()").get()
+                response.xpath('//*[contains(@class ,"title-section__address-section")]')
+                .xpath("normalize-space()")
+                .get()
             )
             item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
             item["email"] = response.xpath('//*[contains(@href,"mailto:")]/text()').get()
