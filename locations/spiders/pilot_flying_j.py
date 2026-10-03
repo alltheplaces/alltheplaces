@@ -20,7 +20,7 @@ class PilotFlyingJSpider(scrapy.Spider):
     start_urls = ["https://locations.pilotflyingj.com/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for href in response.xpath('//a[@data-ya-track="todirectory" or @data-ya-track="visitpage"]/@href').extract():
+        for href in response.xpath('//a[@data-ya-track="todirectory" or @data-ya-track="visitpage"]/@href').getall():
             yield scrapy.Request(response.urljoin(href))
 
         for item in response.xpath('//*[@itemtype="http://schema.org/LocalBusiness"]'):

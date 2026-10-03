@@ -16,9 +16,9 @@ class DicksSportingGoodsSpider(SitemapSpider):
     requires_proxy = True
 
     def parse_hours(self, response):
-        days = response.xpath('//meta[@property="business:hours:day"]/@content').extract()
-        start_times = response.xpath('//meta[@property="business:hours:start"]/@content').extract()
-        end_times = response.xpath('//meta[@property="business:hours:end"]/@content').extract()
+        days = response.xpath('//meta[@property="business:hours:day"]/@content').getall()
+        start_times = response.xpath('//meta[@property="business:hours:start"]/@content').getall()
+        end_times = response.xpath('//meta[@property="business:hours:end"]/@content').getall()
         opening_hours = OpeningHours()
         for day, open_time, close_time in zip(days, start_times, end_times):
             opening_hours.add_range(day, self.fix_hours(open_time), self.fix_hours(close_time))
@@ -45,21 +45,17 @@ class DicksSportingGoodsSpider(SitemapSpider):
                 branch = response.xpath('//div[@class="addressBlock"]//h1/text()').get()
 
             yield Feature(
-                lat=float(response.xpath('//meta[@property="place:location:latitude"]/@content').extract_first()),
-                lon=float(response.xpath('//meta[@property="place:location:longitude"]/@content').extract_first()),
+                lat=float(response.xpath('//meta[@property="place:location:latitude"]/@content').get()),
+                lon=float(response.xpath('//meta[@property="place:location:longitude"]/@content').get()),
                 street_address=response.xpath(
                     '//meta[@property="business:contact_data:street_address"]/@content'
-                ).extract_first(),
-                city=response.xpath('//meta[@property="business:contact_data:locality"]/@content').extract_first(),
-                state=response.xpath('//meta[@property="business:contact_data:region"]/@content').extract_first(),
-                postcode=response.xpath(
-                    '//meta[@property="business:contact_data:postal_code"]/@content'
-                ).extract_first(),
-                country=response.xpath(
-                    '//meta[@property="business:contact_data:country_name"]/@content'
-                ).extract_first(),
-                phone=response.xpath('//meta[@property="business:contact_data:phone_number"]/@content').extract_first(),
-                website=response.xpath('//meta[@property="business:contact_data:website"]/@content').extract_first(),
+                ).get(),
+                city=response.xpath('//meta[@property="business:contact_data:locality"]/@content').get(),
+                state=response.xpath('//meta[@property="business:contact_data:region"]/@content').get(),
+                postcode=response.xpath('//meta[@property="business:contact_data:postal_code"]/@content').get(),
+                country=response.xpath('//meta[@property="business:contact_data:country_name"]/@content').get(),
+                phone=response.xpath('//meta[@property="business:contact_data:phone_number"]/@content').get(),
+                website=response.xpath('//meta[@property="business:contact_data:website"]/@content').get(),
                 ref=ref,
                 name=name,
                 branch=branch,

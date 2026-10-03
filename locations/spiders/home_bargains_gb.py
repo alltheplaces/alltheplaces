@@ -17,12 +17,12 @@ class HomeBargainsGBSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.split("/store/", 1)[1].split("/", 1)[0]
-        full_address_parts = response.xpath('//*[@itemprop="address"]/text()').extract()[:-1]
+        full_address_parts = response.xpath('//*[@itemprop="address"]/text()').getall()[:-1]
         item["addr_full"] = clean_address(full_address_parts)
         item["postcode"] = full_address_parts[-1].strip()
-        item["opening_hours"] = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@datetime').extract())
-        item["lat"] = response.xpath('//*[@itemprop="latitude"]/text()').extract_first()
-        item["lon"] = response.xpath('//*[@itemprop="longitude"]/text()').extract_first()
+        item["opening_hours"] = self.parse_hours(response.xpath('//*[@itemprop="openingHours"]/@datetime').getall())
+        item["lat"] = response.xpath('//*[@itemprop="latitude"]/text()').get()
+        item["lon"] = response.xpath('//*[@itemprop="longitude"]/text()').get()
         item["country"] = "GB"
         yield item
 

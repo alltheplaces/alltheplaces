@@ -16,17 +16,17 @@ class KampsDESpider(SitemapSpider):
 
     def parse(self, response):
         properties = {
-            "ref": response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            "phone": response.xpath('//a[contains(@href, "tel:")]/text()').extract_first(),
-            "website": response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            "street_address": response.xpath('//div[@class="card-block"]/p/text()').extract()[0].strip(),
-            "city": response.xpath('//div[@class="card-block"]/p/text()').extract()[1].strip().split(" ", 1)[1],
-            "postcode": response.xpath('//div[@class="card-block"]/p/text()').extract()[1].strip().split(" ", 1)[0],
+            "ref": response.xpath('//link[@rel="canonical"]/@href').get(),
+            "phone": response.xpath('//a[contains(@href, "tel:")]/text()').get(),
+            "website": response.xpath('//link[@rel="canonical"]/@href').get(),
+            "street_address": response.xpath('//div[@class="card-block"]/p/text()').get().strip(),
+            "city": response.xpath('//div[@class="card-block"]/p/text()').getall()[1].strip().split(" ", 1)[1],
+            "postcode": response.xpath('//div[@class="card-block"]/p/text()').getall()[1].strip().split(" ", 1)[0],
         }
 
         oh = OpeningHours()
         for row in response.xpath('//div[@class="card-block"]/table/tr'):
-            day_de = row.xpath("./td/text()")[0].extract()
+            day_de = row.xpath("./td/text()").get()
             range_str = row.xpath("./td/text()")[-1].extract()
             if "geschlossen" in range_str:
                 oh.set_closed(DAYS_DE[day_de])

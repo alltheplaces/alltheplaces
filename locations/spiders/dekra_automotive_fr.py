@@ -1,6 +1,5 @@
-from urllib.parse import urlparse
-
 from scrapy.spiders import SitemapSpider
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
@@ -18,7 +17,7 @@ class DekraAutomotiveFRSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["AutoRepair"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["ref"] = urlparse(response.url).query
+        item["ref"] = urlparse_cached(response).query
         # "Centre contrôle technique NORISKO Arleux 59151" -> Norisko, branch "Arleux"
         enseigne, _, branch = item.pop("name").removeprefix("Centre contrôle technique ").partition(" ")
         item.update(self.BRANDS[enseigne])

@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 
 from scrapy import Spider
 from scrapy.http import Request, TextResponse
+from scrapy.utils.httpobj import urlparse_cached
 from w3lib.html import remove_tags
 
 from locations.categories import Categories, Extras, apply_category
@@ -28,7 +29,7 @@ class PioneerlandLibrarySystemUSSpider(Spider):
 
     def parse_library(self, response: TextResponse) -> Iterable[Feature]:
         item = Feature()
-        item["ref"] = urlparse(response.url).hostname
+        item["ref"] = urlparse_cached(response).hostname
         item["website"] = response.url
 
         for widget in response.css("div.rightwidget"):

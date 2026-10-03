@@ -53,13 +53,13 @@ class WaterstonesSpider(CrawlSpider):
         yield Feature(**properties)
 
     def get_meta_property(self, response, property):
-        return response.xpath(f'//meta[@property="{property}"]/@content').extract_first()
+        return response.xpath(f'//meta[@property="{property}"]/@content').get()
 
     def get_opening_hours(self, response):
         try:
-            days = response.xpath('//meta[@property="business:hours:day"]/@content').extract()
-            starts = response.xpath('//meta[@property="business:hours:start"]/@content').extract()
-            ends = response.xpath('//meta[@property="business:hours:end"]/@content').extract()
+            days = response.xpath('//meta[@property="business:hours:day"]/@content').getall()
+            starts = response.xpath('//meta[@property="business:hours:start"]/@content').getall()
+            ends = response.xpath('//meta[@property="business:hours:end"]/@content').getall()
             o = OpeningHours()
             for i in range(len(days)):
                 day = days[i][0].upper() + days[i][1]

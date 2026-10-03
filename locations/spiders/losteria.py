@@ -1,8 +1,8 @@
 import json
-from urllib.parse import urlparse
 
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -22,7 +22,7 @@ class LosteriaSpider(CrawlSpider, StructuredDataSpider):
     country_url_map = {"gb": "en", "cz": "en"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        url = urlparse(response.url)
+        url = urlparse_cached(response)
         path_components = url.path.split("/")
         item["ref"] = path_components[-2]
         coordinates_json = response.xpath("//div/@data-center").get()

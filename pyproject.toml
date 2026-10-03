@@ -46,8 +46,6 @@ dependencies = [
 name = "pypi"
 url = "https://pypi.python.org/simple"
 
-[tool.uv.sources]
-
 [tool.black]
 line-length = 120
 target-version = ['py311']
@@ -63,6 +61,7 @@ dev = [
     "pre-commit",
     "pylint",
     "pytest",
+    "scrapy-lint>=0.1.1",
     "ty",
 ]
 

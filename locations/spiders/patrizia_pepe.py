@@ -18,12 +18,12 @@ class PatriziaPepeSpider(JSONBlobSpider):
     locations_key = "stores"
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    start_url = "https://www.patriziapepe.com/it/en/stores"
+    start_urls = ["https://www.patriziapepe.com/it/en/stores"]
     json_url = "https://www.patriziapepe.com/on/demandware.store/Sites-patriziapepe_EU-Site/en_IT/Stores-All"
 
     async def start(self) -> AsyncIterator[Request | JsonRequest]:
         yield Request(
-            self.start_url,
+            self.start_urls[0],
             callback=self.parse_stores_page,
         )
 
