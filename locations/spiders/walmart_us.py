@@ -22,7 +22,11 @@ class WalmartUSSpider(Spider):
         "ROBOTSTXT_OBEY": False,
     }
     base_url = "https://www.walmart.com/orchestra/home/graphql/nearByNodes"
-    hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
+    query_hash = "383d44ac5962240870e513c4f53bb3d05a143fd7b19acb32e8a83e39f1ed266c"
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.seen_refs: set[str] = set()
 
     async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
@@ -45,8 +49,6 @@ class WalmartUSSpider(Spider):
                 "postalCode": "",
                 "accessTypes": ["PICKUP_INSTORE", "PICKUP_CURBSIDE"],
                 "nodeTypes": ["STORE"],
-                "latitude": 0.0,
-                "longitude": 0.0,
                 "radius": 100,
             },
             "checkItemAvailability": False,
@@ -59,21 +61,23 @@ class WalmartUSSpider(Spider):
         }
 
         for lat, lon in country_iseadgg_centroids("US", 94):
-            variables["input"]["latitude"] = lat
-            variables["input"]["longitude"] = lon
             yield FormRequest(
-                url=f"{self.base_url}/{self.hash}",
+                url=f"{self.base_url}/{self.query_hash}",
                 method="GET",
-                formdata={"variables": json.dumps(variables)},
+                formdata={
+                    "variables": json.dumps(
+                        variables | {"input": variables["input"] | {"latitude": lat, "longitude": lon}}
+                    )
+                },
                 headers=headers,
             )
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.seen_refs: set[str] = set()
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        location_nodes = response.json().get("data", {}).get("nearByNodes") or {}
+        data = response.json()
+        if errors := data.get("errors"):
+            self.logger.warning("GraphQL errors in response for %s: %s", response.url, errors)
+            return
+        location_nodes = data.get("data", {}).get("nearByNodes") or {}
         for location in location_nodes.get("nodes", []):
             ref = str(location.get("id"))
             if ref in self.seen_refs:
@@ -81,37 +85,35 @@ class WalmartUSSpider(Spider):
             self.seen_refs.add(ref)
 
             item = DictParser.parse(location)
-            if geo_point := location.get("geoPoint"):
-                item["lat"] = geo_point.get("latitude")
-                item["lon"] = geo_point.get("longitude")
             item["branch"] = location.get("displayName", "").split(",")[0].strip()
+            address = location.get("address") or {}
             item["street_address"] = merge_address_lines(
-                [location["address"].get("addressLineOne"), location["address"].get("addressLineTwo")]
+                [address.get("addressLineOne"), address.get("addressLineTwo")]
             )
-            item["website"] = f'https://www.walmart.com/store/{item["ref"]}-{item["city"]}-{item["state"]}'.replace(
-                " ", "-"
-            )
-            item["opening_hours"] = self.parse_hours(location.get("operationalHours", []))
+            item["website"] = f"https://www.walmart.com/store/{item['ref']}-{item['city'].replace(' ', '-')}-{item['state']}"
+            item["opening_hours"] = self._parse_hours(location.get("operationalHours", []))
 
-            store_type = location.get("name", "")
-            if store_type == "Walmart Supercenter":
-                item["name"] = "Walmart Supercenter"
-                apply_category(Categories.SHOP_SUPERMARKET, item)
-            elif "Neighborhood Market" in store_type:
-                item["name"] = "Walmart Neighborhood Market"
-                item["brand"] = "Walmart Neighborhood Market"
-                item["brand_wikidata"] = "Q7963529"
-                apply_category(Categories.SHOP_SUPERMARKET, item)
-            elif "Pharmacy" in store_type:
-                item["name"] = "Walmart Pharmacy"
-                apply_category(Categories.PHARMACY, item)
-            else:
-                item["name"] = "Walmart"
-                apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+            self._apply_store_type(item, location.get("name", ""))
 
             yield item
 
-    def parse_hours(self, hours: list) -> OpeningHours | None:
+    def _apply_store_type(self, item: dict, store_type: str) -> None:
+        if store_type == "Walmart Supercenter":
+            item["name"] = "Walmart Supercenter"
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif "Neighborhood Market" in store_type:
+            item["name"] = "Walmart Neighborhood Market"
+            item["brand"] = "Walmart Neighborhood Market"
+            item["brand_wikidata"] = "Q7963529"
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+        elif "Pharmacy" in store_type:
+            item["name"] = "Walmart Pharmacy"
+            apply_category(Categories.PHARMACY, item)
+        else:
+            item["name"] = "Walmart"
+            apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
+
+    def _parse_hours(self, hours: list) -> OpeningHours | None:
         if not hours:
             return None
 
@@ -125,5 +127,5 @@ class WalmartUSSpider(Spider):
                     oh.add_range(day, rule.get("start"), rule.get("end"))
             return oh
         except Exception as e:
-            self.logger.error(f"Failed to parse hours: {hours}, {e}")
+            self.logger.error("Failed to parse hours: %s, %s", hours, e)
             return None
