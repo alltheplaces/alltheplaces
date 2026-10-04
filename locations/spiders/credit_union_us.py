@@ -4,14 +4,13 @@ from geonamescache import GeonamesCache
 from scrapy.http import Request, Response
 from scrapy.spiders import CSVFeedSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 
 
 class CreditUnionUSSpider(CSVFeedSpider):
     name = "credit_union_us"
-    item_attributes = {"extras": Categories.BANK.value}
     allowed_domains = ["co-opcreditunions.org"]
     no_refs = True
 
@@ -37,5 +36,7 @@ class CreditUnionUSSpider(CSVFeedSpider):
             close_time = row.get("Hours{}Close".format(day))
             if open_time and open_time != "Closed":
                 item["opening_hours"].add_range(day, open_time, close_time)
+
+        apply_category(Categories.BANK, item)
 
         yield item

@@ -3,7 +3,7 @@ from typing import Any, Iterable
 
 import chompjs
 from scrapy import Request, Spider
-from scrapy.http import TextResponse
+from scrapy.http import Response, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -30,12 +30,15 @@ class StoragePugSpider(Spider):
     dataset_attributes: dict = {"source": "api", "api": "storagepug.com"}
 
     def parse(self, response: TextResponse) -> Iterable[Request]:
-        state_path = re.search(r"/_nuxt/static/[^\"']+/state\.js", response.text).group(0)
-        yield Request(response.urljoin(state_path), callback=self.parse_state)
+        if not (m := re.search(r"/_nuxt/static/[^\"']+/state\.js", response.text)):
+            return
+        yield Request(response.urljoin(m.group(0)), callback=self.parse_state)
 
-    def parse_state(self, response: TextResponse) -> Iterable[Feature]:
+    def parse_state(self, response: Response) -> Iterable[Feature]:
         nuxt_data = response.text
-        parameter_names = re.search(r"function\(([\w$,]+)\)", nuxt_data).group(1).split(",")
+        if not (m := re.search(r"function\(([\w$,]+)\)", nuxt_data)):
+            return
+        parameter_names = m.group(1).split(",")
         arguments_start = nuxt_data.rfind("}}}}(") + 5
         parameter_values = chompjs.parse_js_object("[" + nuxt_data[arguments_start : nuxt_data.rfind("))")] + "]")
         parameters = dict(zip(parameter_names, parameter_values))
