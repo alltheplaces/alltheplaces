@@ -53,7 +53,7 @@ class BulgarianPostsBGSpider(Spider):
                 if location[f"working_hours_{day_name.lower()}"]:
                     try:
                         day_hours = location[f"working_hours_{day_name.lower()}"].split("-", 1)
-                        if has_break:
+                        if has_break and day_hours[0] < break_start < break_end < day_hours[1]:
                             oh.add_range(day_name, day_hours[0], break_start)
                             oh.add_range(day_name, break_end, day_hours[1])
                         else:
