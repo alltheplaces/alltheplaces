@@ -1,9 +1,10 @@
 import csv
 import gzip
 import json
-import math
 import re
 from typing import Any, AsyncIterator
+
+from pyproj import Geod
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
@@ -16,6 +17,8 @@ from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import get_searchable_points_path
 from locations.user_agents import BROWSER_DEFAULT
+
+WGS84 = Geod(ellps="WGS84")
 
 GAMESTOP_SHARED_ATTRIBUTES = {
     "brand": "GameStop",
@@ -70,11 +73,7 @@ class GamestopUSSpider(Spider):
 
         mapped = []
         for lat, lon in country_iseadgg_centroids("US", radius_km):
-            cos_lat = math.cos(math.radians(lat))
-            nearest = min(
-                zips,
-                key=lambda z: (z[1] - lat) ** 2 + (((z[2] - lon + 180) % 360 - 180) * cos_lat) ** 2,
-            )
+            nearest = min(zips, key=lambda z: abs(WGS84.inv(lon, lat, z[2], z[1])[2]))
             mapped.append(nearest[0])
 
         return list(dict.fromkeys(mapped))
