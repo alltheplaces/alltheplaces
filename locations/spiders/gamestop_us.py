@@ -67,22 +67,6 @@ class GamestopUSSpider(Spider):
         return list(dict.fromkeys(mapped))
 
     async def start(self) -> AsyncIterator[FormRequest]:
-        headers = {
-            # "Accept": "application/json",
-            # "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Referer": "https://www.gamestop.com/stores/",
-            # "X-Requested-With": "XMLHttpRequest",
-        }
-        base_params = {
-            "radius": "200",
-            # "hasCondition": "false",
-            # "hasVariantsAvailableForLookup": "false",
-            # "hasVariantsAvailableForPickup": "false",
-            # "source": "plp",
-            # "showMap": "false",
-            # "products": "undefined:1",
-            # "csrf_token": "0",
-        }
         postal_codes = self.get_centroid_postal_regions(self.radius_km)
         self.logger.info(
             "Starting crawl with %d centroid-derived postal codes (grid radius: %d km)",
@@ -94,17 +78,20 @@ class GamestopUSSpider(Spider):
                 yield FormRequest(
                     url=url,
                     method="POST",
-                    headers=headers,
-                    formdata=base_params | {"postalCode": postcode},
+                    headers={"Referer": "https://www.gamestop.com/stores/"},
+                    formdata={"radius": "200", "postalCode": postcode},
                 )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["name"] = re.sub(r"(?i)\s*-\s*gamestop\b", "", item["name"]).strip()
-            if location.get("address2"):
-                suite = location.get("address2").upper().replace("STE", "Suite")
-                item["street_address"] = clean_address([location.get("address1"), suite])
+            if addr2 := location.get("address2"):
+                unit = re.sub(r"(?i)\bSTE\.?\b", "Suite", addr2)
+                unit = re.sub(r"(?i)\bSPC[E]?\.?\b", "Space", unit)
+                unit = re.sub(r"(?i)\bBLD[G]?\.?\b", "Building", unit)
+                unit = re.sub(r"(?i)\bRM\.?\b", "Room", unit)
+                item["street_address"] = clean_address([location.get("address1"), unit])
             item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
             if hours := json.loads(location.get("storeOperationHours") or "[]"):
                 if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours):
