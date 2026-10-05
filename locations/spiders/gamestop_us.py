@@ -24,7 +24,7 @@ GAMESTOP_SHARED_ATTRIBUTES = {
 
 NAME_CLEANUP_RE = re.compile(r"(?i)\s*-\s*gamestop\b")
 
-UNIT_REPLACEMENTS = (
+UNIT_CLEANUP_RULES = (
     (re.compile(r"(?i)\b(?:STE\.?|SUITE)(?=\s|$)"), "Suite"),
     (re.compile(r"(?i)\b(?:SPC[E]?\.?|SPACE)(?=\s|$)"), "Space"),
     (re.compile(r"(?i)\b(?:BLD[G]?\.?|BUILDING)(?=\s|$)"), "Building"),
@@ -108,7 +108,7 @@ class GamestopUSSpider(Spider):
             item["name"] = NAME_CLEANUP_RE.sub("", item["name"]).strip()
             item["website"] = f"https://www.gamestop.com/search/?store={item['ref']}"
             if addr2 := location.get("address2"):
-                for pattern, repl in UNIT_REPLACEMENTS:
+                for pattern, repl in UNIT_CLEANUP_RULES:
                     addr2 = pattern.sub(repl, addr2)
                 item["street_address"] = clean_address([location.get("address1"), addr2])
             self.parse_hours(item, location.get("storeOperationHours"))
