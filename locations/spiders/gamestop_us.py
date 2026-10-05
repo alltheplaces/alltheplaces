@@ -86,13 +86,14 @@ class GamestopUSSpider(Spider):
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
             item["name"] = re.sub(r"(?i)\s*-\s*gamestop\b", "", item["name"]).strip()
-            if addr2 := location.get("address2"):
-                unit = re.sub(r"(?i)\bSTE\.?\b", "Suite", addr2)
-                unit = re.sub(r"(?i)\bSPC[E]?\.?\b", "Space", unit)
-                unit = re.sub(r"(?i)\bBLD[G]?\.?\b", "Building", unit)
-                unit = re.sub(r"(?i)\bRM\.?\b", "Room", unit)
-                item["street_address"] = clean_address([location.get("address1"), unit])
             item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
+            if addr2 := location.get("address2"):
+                unit = re.sub(r"(?i)\b(?:STE\.?|SUITE)(?=\s|$)", "Suite", addr2)
+                unit = re.sub(r"(?i)\b(?:SPC[E]?\.?|SPACE)(?=\s|$)", "Space", unit)
+                unit = re.sub(r"(?i)\b(?:BLD[G]?\.?|BUILDING)(?=\s|$)", "Building", unit)
+                unit = re.sub(r"(?i)\b(?:RM\.?|ROOM)(?=\s|$)", "Room", unit)
+                unit = re.sub(r"(?i)\bUNIT(?=\s|$)", "Unit", unit)
+                item["street_address"] = clean_address([location.get("address1"), unit])
             if hours := json.loads(location.get("storeOperationHours") or "[]"):
                 if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours):
                     # Stores pending closure report every day as CLOSED.
