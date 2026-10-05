@@ -75,13 +75,13 @@ class GamestopUSSpider(Spider):
         }
         base_params = {
             "radius": "200",
-            "hasCondition": "false",
-            "hasVariantsAvailableForLookup": "false",
-            "hasVariantsAvailableForPickup": "false",
-            "source": "plp",
-            "showMap": "false",
-            "products": "undefined:1",
-            "csrf_token": "0",
+            # "hasCondition": "false",
+            # "hasVariantsAvailableForLookup": "false",
+            # "hasVariantsAvailableForPickup": "false",
+            # "source": "plp",
+            # "showMap": "false",
+            # "products": "undefined:1",
+            # "csrf_token": "0",
         }
         postal_codes = self.get_centroid_postal_regions(self.radius_km)
         self.logger.info(
