@@ -1,6 +1,7 @@
 import csv
 import gzip
 import json
+import math
 import re
 from typing import Any, AsyncIterator
 
@@ -10,7 +11,7 @@ from scrapy.http import FormRequest, Response
 from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours, sanitise_day
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import get_searchable_points_path
@@ -69,7 +70,11 @@ class GamestopUSSpider(Spider):
 
         mapped = []
         for lat, lon in country_iseadgg_centroids("US", radius_km):
-            nearest = min(zips, key=lambda z: (z[1] - lat) ** 2 + (z[2] - lon) ** 2)
+            cos_lat = math.cos(math.radians(lat))
+            nearest = min(
+                zips,
+                key=lambda z: (z[1] - lat) ** 2 + (((z[2] - lon + 180) % 360 - 180) * cos_lat) ** 2,
+            )
             mapped.append(nearest[0])
 
         return list(dict.fromkeys(mapped))
@@ -94,7 +99,10 @@ class GamestopUSSpider(Spider):
     def parse_hours(item: Feature, raw_hours: str | None) -> None:
         if not raw_hours or not (hours := json.loads(raw_hours)):
             return
-        if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours):
+        if (
+            all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours)
+            and {sanitise_day(day["day"]) for day in hours} == set(DAYS)
+        ):
             # Stores pending closure report every day as CLOSED.
             set_closed(item)
             return
