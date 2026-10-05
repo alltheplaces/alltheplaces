@@ -24,7 +24,7 @@ class LidsSpider(Spider):
 
     async def start(self) -> AsyncIterator[Request]:
         url = "https://www.lids.com/api/data/v2/stores/514599?lat=30.2729209&long=-97.74438630000002&num=12000&shipToStore=false"
-        headers = {"Connection": "keep-alive", "Host": "www.lids.com"}
+        headers = {"Connection": "keep-alive", "Host": "www.lids.com", "Alt-Used": "www.lids.com"}
         yield Request(url, method="GET", headers=headers)
 
     @staticmethod
