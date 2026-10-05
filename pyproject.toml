@@ -73,9 +73,22 @@ dev = [
     "ty",
 ]
 
-[tool.scrapy-lint]
 # Project-level files define custom settings and use them outside of Scrapy components.
-per-file-ignores = {"locations/settings.py" = ["SCP10", "SCP17", "SCP27", "SCP34", "SCP37"], "locations/__init__.py" = ["SCP27"], "locations/commands/genspider.py" = ["SCP40"], "locations/extensions/filter_stats.py" = ["SCP27"], "locations/extensions/log_stats.py" = ["SCP27", "SCP40"], "locations/exporters/geojson.py" = ["SCP32"], "locations/spiders/naptan_gb.py" = ["SCP27"], "locations/spiders/cashzone_gb.py" = ["SCP04"], "locations/spiders/infrastructure/fdsn_seismic_stations.py" = ["SCP04"], "locations/spiders/feu_vert_fr.py" = ["SCP46"], "locations/spiders/feuillette_fr.py" = ["SCP46"], "locations/spiders/hyatt.py" = ["SCP46"], "locations/spiders/intermarche.py" = ["SCP46"], "locations/spiders/walmart_us.py" = ["SCP46"]}
+[tool.scrapy-lint.per-file-ignores]
+"locations/settings.py" = ["SCP10", "SCP17", "SCP27", "SCP34", "SCP37"]
+"locations/__init__.py" = ["SCP27"]
+"locations/commands/genspider.py" = ["SCP40"]
+"locations/extensions/filter_stats.py" = ["SCP27"]
+"locations/extensions/log_stats.py" = ["SCP27", "SCP40"]
+"locations/exporters/geojson.py" = ["SCP32"]
+"locations/spiders/naptan_gb.py" = ["SCP27"]
+"locations/spiders/cashzone_gb.py" = ["SCP04"]
+"locations/spiders/infrastructure/fdsn_seismic_stations.py" = ["SCP04"]
+"locations/spiders/feu_vert_fr.py" = ["SCP46"]
+"locations/spiders/feuillette_fr.py" = ["SCP46"]
+"locations/spiders/hyatt.py" = ["SCP46"]
+"locations/spiders/intermarche.py" = ["SCP46"]
+"locations/spiders/walmart_us.py" = ["SCP46"]
 
 [tool.ty.rules]
 invalid-method-override = "ignore"
