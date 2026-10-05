@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any
 
 from scrapy.http import Response
@@ -14,6 +15,7 @@ class RomanOriginalsGBSpider(Spider):
     name = "roman_originals_gb"
     item_attributes = {"brand": "Roman Originals", "brand_wikidata": "Q94579553"}
     start_urls = ["https://www.roman.co.uk/store-locator"]
+    requires_proxy = "GB"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         graph = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').get())["@graph"]
@@ -34,6 +36,7 @@ class RomanOriginalsGBSpider(Spider):
         hours = " ".join(response.xpath('//h2[text()="Opening times"]/following-sibling::text()').getall())
         if "Closed Until Further Notice" in hours:
             return
+        hours = re.sub(r"(\d+):(\d\d) PM", lambda m: f"{int(m.group(1)) % 12 + 12}:{m.group(2)}", hours)
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours.replace(" AM", "").replace(" PM", ""))
+        item["opening_hours"].add_ranges_from_string(hours.replace(" AM", ""))
         yield item
