@@ -47,14 +47,13 @@ class LeonGBSpider(Spider):
         item["addr_full"] = store["address"].get("fullAddress")
         item["phone"] = (store.get("contactDetails") or {}).get("phoneNumber")
 
-        oh = OpeningHours()
-        for rule in (store.get("restaurantOpeningTimes") or {}).get("openingTimes") or []:
-            try:
-                oh.add_range(rule["day"], rule["opensAt"], rule["closesAt"])
-            except:
-                pass
-        item["opening_hours"] = oh
-
+        try:
+            oh = OpeningHours()
+            for rule in (store.get("restaurantOpeningTimes") or {}).get("openingTimes") or []:
+                oh.add_range(rule["day"], rule["opensAt"][:5], rule["closesAt"])
+            item["opening_hours"] = oh
+        except Exception:
+            pass
         item["website"] = f'https://leon.co/restaurants/{store["slug"]}/'
 
         apply_category(Categories.FAST_FOOD, item)
