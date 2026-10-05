@@ -41,10 +41,6 @@ class GamestopUSSpider(Spider):
         "RETRY_TIMES": 5,
     }
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.seen_refs: set[str] = set()
-
     # Supplemental postal codes for isolated areas >200 miles from any 50k+ city
     # (Alaska, rural Northern Plains, and Upper Michigan) to achieve 100% US coverage
     # without inflating the nationwide population threshold.
@@ -105,11 +101,6 @@ class GamestopUSSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
-            # Search radii overlap heavily, so skip stores already emitted.
-            ref = location["ID"]
-            if ref in self.seen_refs:
-                continue
-
             item = DictParser.parse(location)
             item["name"] = re.sub(r"(?i)\s*-\s*gamestop\b", "", item["name"]).strip()
             if location.get("address2"):
@@ -125,5 +116,4 @@ class GamestopUSSpider(Spider):
                     for day in hours:
                         item["opening_hours"].add_range(day["day"], day["open"], day["close"], "%H%M")
 
-            self.seen_refs.add(ref)
             yield item
