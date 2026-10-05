@@ -11,7 +11,7 @@ from locations.categories import Categories
 from locations.dict_parser import DictParser
 from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
-from locations.items import set_closed
+from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import clean_address
 from locations.searchable_points import get_searchable_points_path
 from locations.user_agents import BROWSER_DEFAULT
@@ -21,6 +21,8 @@ GAMESTOP_SHARED_ATTRIBUTES = {
     "brand_wikidata": "Q202210",
     "extras": Categories.SHOP_VIDEO_GAMES.value,
 }
+
+NAME_CLEANUP_RE = re.compile(r"(?i)\s*-\s*gamestop\b")
 
 UNIT_REPLACEMENTS = (
     (re.compile(r"(?i)\b(?:STE\.?|SUITE)(?=\s|$)"), "Suite"),
@@ -48,7 +50,7 @@ class GamestopUSSpider(Spider):
     # Centroid search grid radius in kilometers.
     # Default is 158 km (~98 miles), which maps to 214 search postal codes.
     # When combined with GameStop's 200-mile query radius, this provides 100% US coverage
-    # with a ~100-mile overlap safety margin (cutting requests from 638 to 214).
+    # with a ~100-mile overlap safety margin.
     radius_km: int = 158
 
     def __init__(self, *args: Any, radius_km: int | str = 158, **kwargs: Any) -> None:
@@ -88,22 +90,27 @@ class GamestopUSSpider(Spider):
                     formdata={"radius": self.api_search_radius_miles, "postalCode": postcode},
                 )
 
+    @staticmethod
+    def parse_hours(item: Feature, raw_hours: str | None) -> None:
+        if not raw_hours or not (hours := json.loads(raw_hours)):
+            return
+        if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours):
+            # Stores pending closure report every day as CLOSED.
+            set_closed(item)
+            return
+        item["opening_hours"] = OpeningHours()
+        for day in hours:
+            item["opening_hours"].add_range(day["day"], day["open"], day["close"], "%H%M")
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
-            item["name"] = re.sub(r"(?i)\s*-\s*gamestop\b", "", item["name"]).strip()
-            item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
+            item["name"] = NAME_CLEANUP_RE.sub("", item["name"]).strip()
+            item["website"] = f"https://www.gamestop.com/search/?store={item['ref']}"
             if addr2 := location.get("address2"):
                 for pattern, repl in UNIT_REPLACEMENTS:
                     addr2 = pattern.sub(repl, addr2)
                 item["street_address"] = clean_address([location.get("address1"), addr2])
-            if hours := json.loads(location.get("storeOperationHours") or "[]"):
-                if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours):
-                    # Stores pending closure report every day as CLOSED.
-                    set_closed(item)
-                else:
-                    item["opening_hours"] = OpeningHours()
-                    for day in hours:
-                        item["opening_hours"].add_range(day["day"], day["open"], day["close"], "%H%M")
+            self.parse_hours(item, location.get("storeOperationHours"))
 
             yield item
