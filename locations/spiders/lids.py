@@ -24,7 +24,7 @@ class LidsSpider(Spider):
 
     async def start(self) -> AsyncIterator[Request]:
         url = "https://www.lids.com/api/data/v2/stores/514599?lat=30.2729209&long=-97.74438630000002&num=12000&shipToStore=false"
-        headers = {"Accept": "application/json", "Host": "www.lids.com"}
+        headers = {"Connection": "keep-alive", "Host": "www.lids.com"}
         yield Request(url, method="GET", headers=headers)
 
     @staticmethod
@@ -74,7 +74,10 @@ class LidsSpider(Spider):
             open_time = self.parse_time(open_value)
             close_time = self.parse_time(close_value)
             if open_time and close_time:
-                opening_hours.add_range(DAYS_EN[day], open_time, close_time)
+                try:
+                    opening_hours.add_range(DAYS_EN[day], open_time, close_time)
+                except:
+                    pass
         return opening_hours
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
