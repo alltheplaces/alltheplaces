@@ -1,14 +1,20 @@
+import csv
+import gzip
 import json
+import re
+from io import TextIOWrapper
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.geo import postal_regions
+from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
+from locations.items import set_closed
 from locations.pipelines.address_clean_up import clean_address
+from locations.searchable_points import get_searchable_points_path
 from locations.user_agents import BROWSER_DEFAULT
 
 GAMESTOP_SHARED_ATTRIBUTES = {
@@ -22,10 +28,48 @@ class GamestopUSSpider(Spider):
     name = "gamestop_us"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
     allowed_domains = ["www.gamestop.com"]
-    start_urls = [
-        "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?hasCondition=false&hasVariantsAvailableForLookup=false&hasVariantsAvailableForPickup=false&source=plp&showMap=false&products=undefined:1"
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    start_urls = ["https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+        "DOWNLOAD_DELAY": 1.0,
+        "AUTOTHROTTLE_ENABLED": True,
+        "AUTOTHROTTLE_START_DELAY": 1.0,
+        "AUTOTHROTTLE_MAX_DELAY": 5.0,
+        "RETRY_TIMES": 5,
+    }
+
+    # Centroid search grid radius in kilometers.
+    # Default is 158 km (~98 miles), which maps to 214 search postal codes.
+    # When combined with GameStop's 200-mile query radius, this provides 100% US coverage
+    # with a ~100-mile overlap safety margin (cutting requests from 638 to 214).
+    # Can also be set to 315 km (~195 miles) for a faster 73-point sweep:
+    #   scrapy crawl gamestop_us -a radius_km=315
+    radius_km: int = 158
+
+    def __init__(self, *args: Any, radius_km: int | str = 158, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.radius_km = int(radius_km)
+
+    @classmethod
+    def get_centroid_postal_regions(cls, radius_km: int = 158) -> list[str]:
+        """
+        Derive the minimal set of search postal codes required for 100% US coverage.
+        Because GameStop requires searching by postal code rather than raw coordinates,
+        this maps WGS84 ISEADGG geodesic centroids to their nearest US zip code.
+        """
+        zips = []
+        with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rb") as points:
+            for row in csv.DictReader(TextIOWrapper(points)):
+                zips.append((row["zip"], float(row["lat"]), float(row["lng"])))
+
+        mapped = []
+        for lat, lon in country_iseadgg_centroids("US", radius_km):
+            nearest = min(zips, key=lambda z: (z[1] - lat) ** 2 + (z[2] - lon) ** 2)
+            mapped.append(nearest[0])
+
+        return list(dict.fromkeys(mapped))
 
     async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
@@ -34,70 +78,46 @@ class GamestopUSSpider(Spider):
             "Referer": "https://www.gamestop.com/stores/",
             "X-Requested-With": "XMLHttpRequest",
         }
+        base_params = {
+            "radius": "200",
+            "hasCondition": "false",
+            "hasVariantsAvailableForLookup": "false",
+            "hasVariantsAvailableForPickup": "false",
+            "source": "plp",
+            "showMap": "false",
+            "products": "undefined:1",
+            "csrf_token": "0",
+        }
+        postal_codes = self.get_centroid_postal_regions(self.radius_km)
+        self.logger.info(
+            "Starting crawl with %d centroid-derived postal codes (grid radius: %d km)",
+            len(postal_codes),
+            self.radius_km,
+        )
         for url in self.start_urls:
-            # There appears to be no way via the website or API to
-            # list all stores or perform a coordinate/radius or
-            # bounding box search. A postcode search appears to be
-            # the only option and there are almost 38000 postcodes
-            # in the US (38000 API requests to Gamestop). It is
-            # possible to reduce the list of postcodes to search
-            # by ignoring postcodes with low populations. There are
-            # fancier and more accurate ways to reduce the list of
-            # postcodes to those which are useful, but this is not
-            # yet implemented in ATP and is a complex problem
-            # requiring significant experimentation and
-            # documentation to explain the methodology which others
-            # can reproduce.
-            #
-            # The 2022 Annual Report (https://news.gamestop.com/static-files/fe325562-c087-4fad-809c-efd183364196)
-            # states that there were 2949 open stores at 28 Jan 2023
-            # operating in the US.
-            #
-            # One year later, the following search results were
-            # observed for different population filter values:
-            # 1. Population > 30000: 2843 locations returned
-            #    from 2013 requests to the API.
-            # 2. Population > 50000: 2824 locations returned
-            #    from 629 requests to the API.
-            #
-            # This spider picks option (2) as a balance between
-            # minimising API requests and obtaining as many
-            # locations as possible.
-            #
-            # A website tracking Gamestop store closures indicates
-            # that 55 stores were known to have closed in 2023 and
-            # to the end of January 2024. Reference:
-            # https://gsclosing.blogspot.com/
-            #
-            # The error margin therefore appears to be ~70 stores
-            # (<2.5%) which this spider may miss due to reduction
-            # in postcodes which are searched for stores.
-            #
-            # Note the search radius can be increased above 200
-            # however this will result in API failures because
-            # there is a limit of a 3MB response and 1 million
-            # characters returned.
-            for postal_region in postal_regions("US", min_population=50000, consolidate_cities=True):
-                postcode = postal_region["postal_region"]
+            for postcode in postal_codes:
                 yield FormRequest(
                     url=url,
                     method="POST",
                     headers=headers,
-                    formdata={"postalCode": str(postcode), "radius": "200", "csrf_token": "0"},
+                    formdata=base_params | {"postalCode": postcode},
                 )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
-            item["name"] = item["name"].replace(" - GameStop", "")
+            item["name"] = re.sub(r"(?i)\s*-\s*gamestop\b", "", item["name"]).strip()
             if location.get("address2"):
                 suite = location.get("address2").upper().replace("STE", "Suite")
-                item["street_address"] = clean_address([suite, location.get("address1")])
+                item["street_address"] = clean_address([location.get("address1"), suite])
             item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
-            item["opening_hours"] = OpeningHours()
-            for day_hours in json.loads(location.get("storeOperationHours")):
-                item["opening_hours"].add_range(day_hours["day"], day_hours["open"], day_hours["close"], "%H%M")
-
-            apply_category(Categories.SHOP_VIDEO_GAMES, item)
+            if hours := json.loads(location.get("storeOperationHours") or "[]"):
+                if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours):
+                    # Stores pending closure report every day as CLOSED.
+                    set_closed(item)
+                else:
+                    item["opening_hours"] = OpeningHours()
+                    for day in hours:
+                        item["opening_hours"].add_range(day["day"], day["open"], day["close"], "%H%M")
 
             yield item
