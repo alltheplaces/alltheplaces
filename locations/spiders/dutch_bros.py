@@ -19,7 +19,7 @@ class DutchBrosSpider(scrapy.Spider):
     name = "dutch_bros"
     item_attributes = {"brand": "Dutch Bros. Coffee", "brand_wikidata": "Q5317253"}
 
-    allowed_domains = ["www.dutchbros.com"]
+    allowed_domains = ["files.dutchbros.com", "www.dutchbros.com"]
     start_urls = ("https://files.dutchbros.com/api-cache/stands.json",)
 
     def parse(self, response):

@@ -7,7 +7,7 @@ from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_T
 
 class WildberriesSpider(scrapy.Spider):
     name = "wildberries"
-    allowed_domains = ["www.wildberries.ru"]
+    allowed_domains = ["static-basket-01.wbbasket.ru", "www.wildberries.ru"]
     start_urls = ["https://static-basket-01.wbbasket.ru/vol0/data/all-poo-fr-v10.json"]
     item_attributes = {"brand": "Wildberries", "brand_wikidata": "Q24933714"}
 

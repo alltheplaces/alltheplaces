@@ -21,10 +21,10 @@ class BarburritoCASpider(WPStoreLocatorSpider):
         yield Request(url="https://www.barburrito.ca/locations/", callback=self.parse_ajax_url)
 
     def parse_ajax_url(self, response: Response, **kwargs: Any) -> Any:
-        settings = json.loads(
+        wpsl_settings = json.loads(
             response.xpath('//script[contains(., "wpslSettings")]/text()').re_first(r"wpslSettings\s*=\s*(\{.+\});")
         )
-        yield JsonRequest(url="{}&action=store_search&autoload=1".format(settings["ajaxurl"]), callback=self.parse)
+        yield JsonRequest(url="{}&action=store_search&autoload=1".format(wpsl_settings["ajaxurl"]), callback=self.parse)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature.get("status") != "open":

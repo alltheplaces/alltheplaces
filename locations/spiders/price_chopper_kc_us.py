@@ -1,5 +1,4 @@
 from typing import Any
-from urllib.parse import urljoin
 
 from scrapy import Request, Spider
 from scrapy.http import Response
@@ -27,7 +26,7 @@ class PriceChopperKcUSSpider(Spider):
                 continue
             store["street_address"] = store.pop("Address1")
             item = DictParser.parse(store)
-            item["website"] = urljoin(response.url, store["StoreDetailsPageUrl"])
+            item["website"] = response.urljoin(store["StoreDetailsPageUrl"])
             yield Request(url=item["website"], callback=self.parse_store, cb_kwargs={"item": item})
 
     def parse_store(self, response: Response, item: dict) -> Any:

@@ -21,8 +21,8 @@ class GulfGBSpider(scrapy.Spider):
         if not match:
             return
 
-        settings = chompjs.parse_js_object(match.group(1))
-        pins = settings.get("pins", {}).get("pins", [])
+        page_settings = chompjs.parse_js_object(match.group(1))
+        pins = page_settings.get("pins", {}).get("pins", [])
 
         for location in pins:
             item = Feature()

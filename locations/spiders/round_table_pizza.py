@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class RoundTablePizzaSpider(scrapy.Spider):
     name = "round_table_pizza"
-    allowed_domains = ["www.roundtablepizza.com"]
+    allowed_domains = ["ordering.roundtablepizza.com", "www.roundtablepizza.com"]
     item_attributes = {"brand": "Round Table Pizza", "brand_wikidata": "Q7371139"}
     start_urls = ("https://ordering.roundtablepizza.com/site/rtp/locations",)
 

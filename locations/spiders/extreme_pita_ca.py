@@ -1,6 +1,5 @@
 import re
 from typing import Any
-from urllib.parse import urljoin
 
 from scrapy import Spider
 from scrapy.http import Response
@@ -41,4 +40,4 @@ class ExtremePitaCASpider(Spider):
             yield item
 
         for next_page in response.xpath('//a[contains(@href, "/locations/page/")]/@href').getall():
-            yield response.follow(urljoin(response.url, next_page), callback=self.parse)
+            yield response.follow(response.urljoin(next_page), callback=self.parse)

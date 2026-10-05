@@ -14,8 +14,10 @@ class VodacomCDSpider(Spider):
     start_urls = ["https://www.vodacom.cd/fr/particulier/assisstance/nos-vodashops/find-vodashops"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
-        settings = json.loads(response.xpath('//script[@data-drupal-selector="drupal-settings-json"]/text()').get())
-        for marker in settings["leaflet"]["leaflet-map-view-vodashops-page-shop-listing"]["features"]:
+        page_settings = json.loads(
+            response.xpath('//script[@data-drupal-selector="drupal-settings-json"]/text()').get()
+        )
+        for marker in page_settings["leaflet"]["leaflet-map-view-vodashops-page-shop-listing"]["features"]:
             if "lat" not in marker:
                 continue
             yield Request(

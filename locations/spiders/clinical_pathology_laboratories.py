@@ -9,7 +9,7 @@ class ClinicalPathologyLaboratoriesSpider(scrapy.Spider):
         "brand": "Clinical Pathology Laboratories",
         "brand_wikidata": "Q91911320",
     }
-    allowed_domains = ["cpllabs.com"]
+    allowed_domains = ["cpllabs.com", "www.zeemaps.com"]
     start_urls = [
         "https://www.zeemaps.com/emarkers?g=3025292&k=REGULAR&e=true&_dc=0.9710587730049409",
     ]

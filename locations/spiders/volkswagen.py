@@ -135,7 +135,7 @@ class VolkswagenSpider(JSONBlobSpider):
         # some countries work only with "en" language (ID for example)
         if response.status == 500 and lang != "en":
             updated_url = re.sub(r"(%22language%22:%22)[^%]+(%22)", r"\1en\2", response.url)
-            yield JsonRequest(url=updated_url, callback=self.check_status, meta=response.meta)
+            yield JsonRequest(url=updated_url, callback=self.check_status, meta=response.meta.copy())
         elif response.status == 500:
             # porsche API is used for some countries
             content_mapping = {"onehub_pkw": "V", "onehub_nfz": "L"}

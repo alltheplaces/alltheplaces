@@ -10,7 +10,7 @@ class UnitedSurgicalPartnersInternationalSpider(scrapy.Spider):
         "brand": "United Surgical Partners International",
         "brand_wikidata": "Q7893575",
     }
-    allowed_domains = ["uspi.com"]
+    allowed_domains = ["uspi.com", "webwidgets.q4api.com"]
     start_urls = [
         "https://webwidgets.q4api.com/v1/fusion?sql=SELECT%20*%20FROM%201MgAq-T0B9gtHKnM0RbfBi8xeJRwmCQftIEvcNdY0Olw&key=AIzaSyBjtj8mMa96IpYNmDjwH-EbmMT3RpeU6ao",
     ]

@@ -11,7 +11,7 @@ class RemaxITSpider(scrapy.Spider):
         "brand": "RE/MAX",
         "brand_wikidata": "Q965845",
     }
-    allowed_domains = ["remax.com"]
+    allowed_domains = ["cms.remax.it", "remax.com"]
     start_urls = ["https://cms.remax.it/api/v1/agencies?collection=false&commercial=false&page=1&per_page=1000"]
 
     def parse(self, response):

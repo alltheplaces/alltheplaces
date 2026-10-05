@@ -16,7 +16,7 @@ class LunchGardenBESpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         yield JsonRequest(
-            url=urljoin(response.url, response.xpath('//*[@type="application/json"]/@data-src').get()),
+            url=response.urljoin(response.xpath('//*[@type="application/json"]/@data-src').get()),
             callback=self.parse_location,
         )
 

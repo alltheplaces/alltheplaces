@@ -37,9 +37,12 @@ class KookaiFRSpider(JSONBlobSpider):
             "https://kookai.fr/apps/store-locator/stores/info?shop=kookai-amh.myshopify.com&data=detailed&store_id="
             + str(location["store_id"]),
             callback=self.parse_store_detail,
-            errback=lambda self, response: (yield response.meta["item"]),
+            errback=self.parse_store_detail_error,
             meta={"item": item},
         )
+
+    def parse_store_detail_error(self, failure):
+        yield failure.request.meta["item"]
 
     def parse_store_detail(self, response):
         item = response.meta["item"]

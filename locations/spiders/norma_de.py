@@ -25,7 +25,7 @@ class NormaDESpider(Spider):
             weekday = store.xpath(
                 './/div[@class="col-xs-12 col-sm-6 col-md-3 col-lg-3"]'
                 '//table[@class="shopHours"]//tbody//tr//td/text()'
-            )[0].get()
+            ).get()
             if weekday:
                 from_tm, to_tm = weekday.replace(" ", "").split("-")
                 for day in ["Mo", "Tu", "We", "Th", "Fr"]:

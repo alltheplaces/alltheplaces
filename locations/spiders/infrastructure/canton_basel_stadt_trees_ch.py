@@ -10,7 +10,7 @@ from locations.licenses import Licenses
 
 class CantonBaselStadtTreesCHSpider(Spider):
     name = "canton_basel_stadt_trees_ch"
-    allowed_domains = ["www.ogd.stadt-zuerich.ch"]
+    allowed_domains = ["data.bs.ch"]
     dataset_attributes = Licenses.CCBY4.value | {
         "attribution:name": "Canton of Basel-Stadt",
         "attribution:website": "https://data.bs.ch/",

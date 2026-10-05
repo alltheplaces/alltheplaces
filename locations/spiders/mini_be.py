@@ -13,7 +13,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class MiniBESpider(scrapy.Spider):
     name = "mini_be"
     item_attributes = {"brand": "Mini", "brand_wikidata": "Q116232"}
-    allowed_domains = ["mini.be"]
+    allowed_domains = ["c2b-services.bmw.com", "mini.be"]
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     start_urls = [
         "https://c2b-services.bmw.com/c2b-localsearch/services/api/v4/clients/BMWSTAGE2_DLO/-/pois?category=MI&maxResults=2000&showAll=true&country=BE"

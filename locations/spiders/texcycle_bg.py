@@ -10,7 +10,7 @@ from locations.items import Feature
 class TexcycleBGSpider(Spider):
     name = "texcycle_bg"
     item_attributes = {"operator": "TexCycle", "operator_wikidata": "Q85614408"}
-    allowed_domains = ["www.texcycle.bg"]
+    allowed_domains = ["texcycle.bg", "www.texcycle.bg"]
     start_urls = ["https://texcycle.bg/bin-locations-list/"]
     no_refs = True
 

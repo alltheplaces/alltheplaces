@@ -7,7 +7,7 @@ from locations.pipelines.address_clean_up import clean_address
 class AlamoSpider(scrapy.Spider):
     name = "alamo"
     item_attributes = {"brand": "Alamo", "brand_wikidata": "Q1429287"}
-    allowed_domains = ["alamo.com"]
+    allowed_domains = ["alamo.com", "prd.location.enterprise.com"]
     start_urls = ["https://prd.location.enterprise.com/enterprise-sls/search/location/alamo/web/all?dto=true"]
 
     def parse(self, response):
