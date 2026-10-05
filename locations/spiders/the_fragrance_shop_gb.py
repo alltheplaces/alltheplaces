@@ -1,22 +1,12 @@
-import re
 from typing import Any
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
-
-DAYS_MAPPING = {
-    1: "Mo",
-    2: "Tu",
-    3: "We",
-    4: "Th",
-    5: "Fr",
-    6: "Sa",
-    7: "Su",
-}
 
 
 class TheFragranceShopGBSpider(Spider):
@@ -30,24 +20,18 @@ class TheFragranceShopGBSpider(Spider):
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
             item["street_address"] = merge_address_lines([location["address1"], location["address2"]])
-
-            self.parse_hours(item, location)
+            item["opening_hours"] = self.parse_hours(location.get("openingHours", ""))
+            apply_category(Categories.SHOP_PERFUMERY, item)
             yield item
 
-    def parse_hours(self, item, location):
-        if "openingHours" in location:
-            times = location.get("openingHours")
-            oh = OpeningHours()
-            hours = re.split(r",\s*", times)
-            if hours[-1] == "":
-                hours.pop()
-            i = 1
-            for times in hours:
-                # Days off
-                if times == "CLOSED":
-                    continue
-                day = DAYS_MAPPING.get(i)
-                open, close = times.split("-")
-                oh.add_range(day, open, close)
-                i = i + 1
-            item["opening_hours"] = oh
+    def parse_hours(self, times: str) -> OpeningHours:
+        # Seven comma-separated ranges, Monday first; a few stores prefix each range with its day name
+        oh = OpeningHours()
+        for day, part in zip(DAYS, (p.strip() for p in times.split(",") if p.strip())):
+            if part.upper() == "CLOSED":
+                oh.set_closed(day)
+            elif sanitise_day(part.split()[0]):
+                oh.add_ranges_from_string(part)
+            else:
+                oh.add_ranges_from_string(f"{day} {part}")
+        return oh

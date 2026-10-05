@@ -12,7 +12,7 @@ from locations.spiders.central_england_cooperative import set_operator
 
 class MorrisonsGBSpider(Spider):
     name = "morrisons_gb"
-    allowed_domains = ["api.morrisons.com", "my.morrisons.com"]
+    allowed_domains = ["api.morrisons.com", "www.morrisons.com"]
     start_urls = ["https://api.morrisons.com/location/v2/stores?apikey=kxBdM2chFwZjNvG2PwnSn3sj6C53dLEY&limit=20000"]
 
     MCCOLLS = {"brand": "McColl's", "brand_wikidata": "Q16997477"}
@@ -45,7 +45,7 @@ class MorrisonsGBSpider(Spider):
             item["street_address"] = clean_address(
                 [location["address"].get("addressLine1"), location["address"].get("addressLine2")]
             )
-            item["website"] = "https://my.morrisons.com/storefinder/{}/{}".format(
+            item["website"] = "https://www.morrisons.com/storefinder/{}/{}/".format(
                 item["ref"], self.create_slug(location["storeName"])
             )
 
@@ -89,7 +89,7 @@ class MorrisonsGBSpider(Spider):
             item["branch"] = item.pop("name", None)
 
             # Fetch store page-data.json for additional services
-            page_data_url = "https://my.morrisons.com/storefinder/page-data/{}/{}/page-data.json".format(
+            page_data_url = "https://www.morrisons.com/storefinder/page-data/{}/{}/page-data.json".format(
                 item["ref"], self.create_slug(location["storeName"])
             )
             yield Request(

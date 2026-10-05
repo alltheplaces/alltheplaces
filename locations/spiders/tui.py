@@ -5,14 +5,14 @@ from scrapy import Spider
 from scrapy.http import Response
 from unidecode import unidecode
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, DAYS_PL, OpeningHours
 
 
 class TuiSpider(Spider):
     name = "tui"
-    item_attributes = {"brand": "TUI", "brand_wikidata": "Q573103", "extras": Categories.SHOP_TRAVEL_AGENCY.value}
+    item_attributes = {"brand": "TUI", "brand_wikidata": "Q573103"}
     start_urls = ["https://www.tui.pl/api/services/tui-cms/api/offices/offices?market=pl&locale=pl"]
     countries = {
         "Česká republika": "CZ",
@@ -57,5 +57,6 @@ class TuiSpider(Spider):
             hours_string = office["program"].strip().replace("<br>", " ")
             item["opening_hours"] = OpeningHours()
             item["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_PL)
+        apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
 
         yield item
