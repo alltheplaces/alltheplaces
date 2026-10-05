@@ -1,8 +1,9 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
@@ -17,22 +18,23 @@ class AnglingDirectGBSpider(Spider):
         for url in self.start_urls:
             yield JsonRequest(url=url, method="POST", headers={"X-Requested-With": "XMLHttpRequest"})
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             if location["coming_soon"] != "0":
                 continue
             if location["store_status"] is not None:
-                return
+                continue
             item = DictParser.parse(location)
             item["ref"] = location["location_id"]
-            item["website"] = "https://www.anglingdirect.co.uk/storelocator/" + item["name"].replace(
-                "Angling Direct ", ""
-            ).lower().replace(" ", "-")
+            item["branch"] = item.pop("name").removeprefix("Angling Direct ")
+            item["website"] = "https://www.anglingdirect.co.uk/storelocator/" + item["branch"].lower().replace(" ", "-")
             item["opening_hours"] = OpeningHours()
             for day_name, day_hours in location["opening_hours"].items():
                 if "CLOSED" in day_hours.upper():
-                    continue
-                item["opening_hours"].add_range(
-                    day_name.title(), day_hours.split(" - ", 1)[0], day_hours.split(" - ", 1)[1]
-                )
+                    item["opening_hours"].set_closed(day_name.title())
+                else:
+                    item["opening_hours"].add_range(
+                        day_name.title(), day_hours.split(" - ", 1)[0], day_hours.split(" - ", 1)[1]
+                    )
+            apply_category(Categories.SHOP_FISHING, item)
             yield item
