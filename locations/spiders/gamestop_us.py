@@ -101,7 +101,6 @@ class GamestopUSSpider(Spider):
         if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours) and {
             sanitise_day(day["day"]) for day in hours
         } == set(DAYS):
-            # Stores pending closure report every day as CLOSED.
             set_closed(item)
             return
         item["opening_hours"] = OpeningHours()
