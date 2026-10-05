@@ -33,11 +33,6 @@ class GamestopUSSpider(Spider):
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
-        "DOWNLOAD_DELAY": 1.0,
-        "AUTOTHROTTLE_ENABLED": True,
-        "AUTOTHROTTLE_START_DELAY": 1.0,
-        "AUTOTHROTTLE_MAX_DELAY": 5.0,
-        "RETRY_TIMES": 5,
     }
 
     # Centroid search grid radius in kilometers.
