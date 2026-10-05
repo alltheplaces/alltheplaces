@@ -46,6 +46,14 @@ dependencies = [
 name = "pypi"
 url = "https://pypi.python.org/simple"
 
+[tool.uv]
+# scrapy-camoufox pins camoufox<0.5.0, but camoufox 0.4.x installs whatever
+# browser build is newest and breaks on v156.0.1-beta.33+ (#19411). From 0.5.x,
+# `camoufox fetch` installs the browser build paired with the library version.
+override-dependencies = ["camoufox[geoip]>=0.5.7"]
+
+[tool.uv.sources]
+
 [tool.black]
 line-length = 120
 target-version = ['py311']
