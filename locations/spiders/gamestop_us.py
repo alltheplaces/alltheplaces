@@ -5,7 +5,6 @@ import re
 from typing import Any, AsyncIterator
 
 from pyproj import Geod
-
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
