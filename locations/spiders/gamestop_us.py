@@ -68,10 +68,10 @@ class GamestopUSSpider(Spider):
 
     async def start(self) -> AsyncIterator[FormRequest]:
         headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            # "Accept": "application/json",
+            # "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Referer": "https://www.gamestop.com/stores/",
-            "X-Requested-With": "XMLHttpRequest",
+            # "X-Requested-With": "XMLHttpRequest",
         }
         base_params = {
             "radius": "200",
