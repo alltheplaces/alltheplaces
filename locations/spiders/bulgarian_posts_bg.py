@@ -15,6 +15,11 @@ class BulgarianPostsBGSpider(Spider):
     allowed_domains = ["bgpost.bg"]
     start_urls = ["https://bgpost.bg/api/offices?search_by_city_name_or_address="]
 
+    @staticmethod
+    def minutes(time: str) -> int:
+        hours, minutes = time.strip().split(":")
+        return int(hours) * 60 + int(minutes)
+
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url)
@@ -52,8 +57,8 @@ class BulgarianPostsBGSpider(Spider):
             for day_name in DAYS_FULL:
                 if location[f"working_hours_{day_name.lower()}"]:
                     try:
-                        day_hours = location[f"working_hours_{day_name.lower()}"].split("-", 1)
-                        if has_break and day_hours[0] < break_start < break_end < day_hours[1]:
+                        day_hours = [h.strip() for h in location[f"working_hours_{day_name.lower()}"].split("-", 1)]
+                        if has_break and self.minutes(day_hours[0]) < self.minutes(break_start) < self.minutes(break_end) < self.minutes(day_hours[1]):
                             oh.add_range(day_name, day_hours[0], break_start)
                             oh.add_range(day_name, break_end, day_hours[1])
                         else:
