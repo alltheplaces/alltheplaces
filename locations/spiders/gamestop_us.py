@@ -97,10 +97,9 @@ class GamestopUSSpider(Spider):
     def parse_hours(item: Feature, raw_hours: str | None) -> None:
         if not raw_hours or not (hours := json.loads(raw_hours)):
             return
-        if (
-            all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours)
-            and {sanitise_day(day["day"]) for day in hours} == set(DAYS)
-        ):
+        if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours) and {
+            sanitise_day(day["day"]) for day in hours
+        } == set(DAYS):
             set_closed(item)
             return
         item["opening_hours"] = OpeningHours()
