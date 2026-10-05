@@ -2,7 +2,6 @@ import csv
 import gzip
 import json
 import re
-from io import TextIOWrapper
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
@@ -23,6 +22,14 @@ GAMESTOP_SHARED_ATTRIBUTES = {
     "extras": Categories.SHOP_VIDEO_GAMES.value,
 }
 
+UNIT_REPLACEMENTS = (
+    (re.compile(r"(?i)\b(?:STE\.?|SUITE)(?=\s|$)"), "Suite"),
+    (re.compile(r"(?i)\b(?:SPC[E]?\.?|SPACE)(?=\s|$)"), "Space"),
+    (re.compile(r"(?i)\b(?:BLD[G]?\.?|BUILDING)(?=\s|$)"), "Building"),
+    (re.compile(r"(?i)\b(?:RM\.?|ROOM)(?=\s|$)"), "Room"),
+    (re.compile(r"(?i)\bUNIT(?=\s|$)"), "Unit"),
+)
+
 
 class GamestopUSSpider(Spider):
     name = "gamestop_us"
@@ -35,29 +42,28 @@ class GamestopUSSpider(Spider):
         "CONCURRENT_REQUESTS": 1,
     }
 
+    # Demandware API maximum query radius (in miles)
+    api_search_radius_miles: str = "200"
+
     # Centroid search grid radius in kilometers.
     # Default is 158 km (~98 miles), which maps to 214 search postal codes.
     # When combined with GameStop's 200-mile query radius, this provides 100% US coverage
     # with a ~100-mile overlap safety margin (cutting requests from 638 to 214).
-    # Can also be set to 315 km (~195 miles) for a faster 73-point sweep:
-    #   scrapy crawl gamestop_us -a radius_km=315
     radius_km: int = 158
 
     def __init__(self, *args: Any, radius_km: int | str = 158, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.radius_km = int(radius_km)
 
-    @classmethod
-    def get_centroid_postal_regions(cls, radius_km: int = 158) -> list[str]:
+    @staticmethod
+    def get_centroid_postal_regions(radius_km: int = 158) -> list[str]:
         """
         Derive the minimal set of search postal codes required for 100% US coverage.
         Because GameStop requires searching by postal code rather than raw coordinates,
         this maps WGS84 ISEADGG geodesic centroids to their nearest US zip code.
         """
-        zips = []
-        with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rb") as points:
-            for row in csv.DictReader(TextIOWrapper(points)):
-                zips.append((row["zip"], float(row["lat"]), float(row["lng"])))
+        with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rt", encoding="utf-8") as f:
+            zips = [(row["zip"], float(row["lat"]), float(row["lng"])) for row in csv.DictReader(f)]
 
         mapped = []
         for lat, lon in country_iseadgg_centroids("US", radius_km):
@@ -79,7 +85,7 @@ class GamestopUSSpider(Spider):
                     url=url,
                     method="POST",
                     headers={"Referer": "https://www.gamestop.com/stores/"},
-                    formdata={"radius": "200", "postalCode": postcode},
+                    formdata={"radius": self.api_search_radius_miles, "postalCode": postcode},
                 )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -88,12 +94,9 @@ class GamestopUSSpider(Spider):
             item["name"] = re.sub(r"(?i)\s*-\s*gamestop\b", "", item["name"]).strip()
             item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
             if addr2 := location.get("address2"):
-                unit = re.sub(r"(?i)\b(?:STE\.?|SUITE)(?=\s|$)", "Suite", addr2)
-                unit = re.sub(r"(?i)\b(?:SPC[E]?\.?|SPACE)(?=\s|$)", "Space", unit)
-                unit = re.sub(r"(?i)\b(?:BLD[G]?\.?|BUILDING)(?=\s|$)", "Building", unit)
-                unit = re.sub(r"(?i)\b(?:RM\.?|ROOM)(?=\s|$)", "Room", unit)
-                unit = re.sub(r"(?i)\bUNIT(?=\s|$)", "Unit", unit)
-                item["street_address"] = clean_address([location.get("address1"), unit])
+                for pattern, repl in UNIT_REPLACEMENTS:
+                    addr2 = pattern.sub(repl, addr2)
+                item["street_address"] = clean_address([location.get("address1"), addr2])
             if hours := json.loads(location.get("storeOperationHours") or "[]"):
                 if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours):
                     # Stores pending closure report every day as CLOSED.
