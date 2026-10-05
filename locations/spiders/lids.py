@@ -1,17 +1,13 @@
-import re
-from typing import Any, AsyncIterator
+from typing import AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.http import Request
 
-from locations.categories import Categories, apply_category
-from locations.hours import CLOSED_EN, DAYS_EN, DAYS_FULL, OpeningHours
+from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.user_agents import BROWSER_DEFAULT
 
-TIME_PATTERN = re.compile(r"^(\d{1,2}):(\d{2})\s*(AM|PM)?$", re.IGNORECASE)
-MISSING_VALUES = ["", "-999"]
-
+TIME_FORMAT = "%I:%M %p"
 
 class LidsSpider(Spider):
     name = "lids"
@@ -27,74 +23,54 @@ class LidsSpider(Spider):
         headers = {"Connection": "keep-alive", "Host": "www.lids.com", "Alt-Used": "www.lids.com"}
         yield Request(url, method="GET", headers=headers)
 
-    @staticmethod
-    def clean_value(value: Any) -> str | None:
-        if not isinstance(value, str) or value.strip() in MISSING_VALUES:
-            return None
-        return value.strip()
-
-    @staticmethod
-    def parse_time(value: str) -> str | None:
-        # Times are a mix of 12h and 24h clock readings, both carrying a meridiem, e.g. "9:00 PM" and "21:00 PM".
-        if not (match := TIME_PATTERN.match(value)):
-            return None
-        hour, minute, meridiem = int(match.group(1)), match.group(2), (match.group(3) or "").upper()
-        if hour > 23 or int(minute) > 59:
-            return None
-        if meridiem and hour <= 12:
-            hour = hour % 12 + (12 if meridiem == "PM" else 0)
-        return f"{hour:02d}:{minute}"
-
-    @staticmethod
-    def parse_coordinates(coordinate: dict) -> tuple[float | None, float | None]:
-        try:
-            lat, lon = float(coordinate.get("latitude")), float(coordinate.get("longitude"))
-        except (TypeError, ValueError):
-            return None, None
-        if (
-            str(coordinate["latitude"]).strip() in MISSING_VALUES
-            or str(coordinate["longitude"]).strip() in MISSING_VALUES
-        ):
-            return None, None
-        # The API currently reports latitude and longitude the wrong way round for all but a handful of stores.
-        if not 0 < lat < 90:
-            lat, lon = lon, lat
-        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
-            return None, None
-        return lat, lon
-
-    def parse_hours(self, location: dict) -> OpeningHours:
+    def parse_hours(self, hours):
         opening_hours = OpeningHours()
         for day in DAYS_FULL:
-            open_value = self.clean_value(location.get(day.lower() + "Open")) or ""
-            close_value = self.clean_value(location.get(day.lower() + "Close")) or ""
-            if open_value.lower() in CLOSED_EN and close_value.lower() in CLOSED_EN:
-                opening_hours.set_closed(DAYS_EN[day])
-                continue
-            open_time = self.parse_time(open_value)
-            close_time = self.parse_time(close_value)
-            if open_time and close_time:
-                try:
-                    opening_hours.add_range(DAYS_EN[day], open_time, close_time)
-                except:
-                    pass
-        return opening_hours
+            open_time = hours[day.lower() + "Open"]
+            close_time = hours[day.lower() + "Close"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
-            item = Feature()
-            item["ref"] = location["storeId"]
-            item["branch"] = self.clean_value(location["location"].get("name"))
-            item["street_address"] = self.clean_value(location["address"].get("addressLine1"))
-            item["city"] = self.clean_value(location["address"].get("city"))
-            item["postcode"] = self.clean_value(location["address"].get("zip"))
-            item["state"] = self.clean_value(location["address"].get("state"))
-            item["country"] = self.clean_value(location["address"].get("country"))
-            item["phone"] = self.clean_value(location.get("phone"))
-            item["website"] = self.clean_value(location.get("url"))
-            item["lat"], item["lon"] = self.parse_coordinates(location["location"].get("coordinate") or {})
-            item["opening_hours"] = self.parse_hours(location)
+            if close_time == "" or open_time == "":
+                return
 
-            apply_category(Categories.SHOP_CLOTHES, item)
+            try:
+                opening_hours.add_range(
+                    day=DAYS_EN[day],
+                    open_time=open_time,
+                    close_time=close_time,
+                    time_format=TIME_FORMAT,
+                )
+            except:
+                pass
+        return opening_hours.as_opening_hours()
 
-            yield item
+    def parse(self, response):
+        ldata = response.json()
+
+        for row in ldata:
+            properties = {
+                "ref": row["storeId"],
+                "name": row["name"],
+                "street_address": row["address"]["addressLine1"],
+                "city": row["address"]["city"],
+                "postcode": row["address"]["zip"],
+                "state": row["address"]["state"],
+                "country": row["address"]["country"],
+                "website": "https://www.lids.com" + row["taggedUrl"],
+            }
+            try:
+                properties["phone"] = row["phone"]
+            except KeyError:
+                pass
+
+            try:
+                properties["lat"] = row["location"]["coordinate"]["latitude"]
+                properties["lon"] = row["location"]["coordinate"]["longitude"]
+            except KeyError:
+                pass
+
+            hours = self.parse_hours(row)
+
+            if hours:
+                properties["opening_hours"] = hours
+
+            yield Feature(**properties)
