@@ -1,11 +1,13 @@
 import json
 from typing import Any
-from urllib.parse import urljoin
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 class RomanOriginalsGBSpider(Spider):
@@ -13,22 +15,25 @@ class RomanOriginalsGBSpider(Spider):
     item_attributes = {"brand": "Roman Originals", "brand_wikidata": "Q94579553"}
     start_urls = ["https://www.roman.co.uk/store-locator"]
 
-    def find_between(self, text, first, last):
-        start = text.index(first) + len(first)
-        end = text.index(last, start)
-        return text[start:end]
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = self.find_between(response.text, '"@graph":', "}</script>")
-        json_data = json.loads(data)
-        for stores in json_data:
+        graph = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').get())["@graph"]
+        for stores in graph:
             if stores["@type"] == "Store":
                 for store in stores["department"]:
+                    store.update(store.pop("location")["geo"])
                     item = DictParser.parse(store)
+                    item.pop("name")
                     item["ref"] = store["areaServed"][0]["name"][0]
                     item["branch"] = item["ref"]
-                    item["website"] = urljoin("https://www.roman.co.uk", store["url"])
-                    item["lat"] = store["location"]["geo"]["latitude"]
-                    item["lon"] = store["location"]["geo"]["longitude"]
+                    item["website"] = response.urljoin(store["url"])
+                    apply_category(Categories.SHOP_CLOTHES, item)
+                    yield response.follow(store["url"], self.parse_store, cb_kwargs={"item": item})
 
-                    yield item
+    def parse_store(self, response: Response, item: Feature) -> Any:
+        # The locator's ld+json hours are the same placeholder for every store; the store page has the real ones
+        hours = " ".join(response.xpath('//h2[text()="Opening times"]/following-sibling::text()').getall())
+        if "Closed Until Further Notice" in hours:
+            return
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(hours.replace(" AM", "").replace(" PM", ""))
+        yield item
