@@ -11,41 +11,25 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class BoulangerFRSpider(SitemapSpider):
+class BoulangerFRSpider(SitemapSpider, PlaywrightSpider):
     name = "boulanger_fr"
     item_attributes = {"brand": "Boulanger", "brand_wikidata": "Q2921695"}
     sitemap_urls = ["https://www.boulanger.com/sitemap_magasins.xml"]
-    # Sitemap also lists brand shop-in-shops ("espaces") and news posts ("actualites");
-    # only the 4-segment region/department/city/address paths are actual store pages.
     sitemap_rules = [(r"/magasins/(?!espaces/|actualites/)[^/]+/[^/]+/[^/]+/[^/]+$", "parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
-
-    async def start(self):
-        # Akamai-protected, so even the initial sitemap fetch needs Zyte. httpResponseHeaders is
-        # required alongside httpResponseBody, or scrapy-zyte-api returns an unparseable binary Response.
-        async for request in super().start():
-            request.meta["zyte_api"] = {"httpResponseBody": True, "httpResponseHeaders": True}
-            yield request
-
-    def _parse_sitemap(self, response):
-        for request in super()._parse_sitemap(response):
-            request.meta["zyte_api"] = {"httpResponseBody": True, "httpResponseHeaders": True}
-            yield request
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
-        # No JSON-LD; this Yext Pages template embeds the full location profile here instead.
         raw = response.css("#js-map-config-dir-map::text").get()
         try:
             entities = json.loads(raw).get("entities") if raw else None
         except json.JSONDecodeError:
-            # A truncated render can leave `raw` non-empty but syntactically invalid JSON;
-            # treat it the same as a missing blob so it hits the retry path below.
             entities = None
         if not entities:
-            # Zyte occasionally hands back a genuine 200 with a truncated render; retry rather
-            # than silently losing the store.
             if response.request is not None:
                 if retry := get_retry_request(
                     response.request,
