@@ -20,7 +20,7 @@ class SubwaySouthAmericaSpider(CrawlSpider, StructuredDataSpider):
     rules = [
         Rule(LinkExtractor(allow=r"https://restaurantes.subway.com/[a-z-]+"), callback="parse"),
     ]
-    wanted_types = ["LocalBusiness"]
+    wanted_types = ["Place"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for url in re.findall(
