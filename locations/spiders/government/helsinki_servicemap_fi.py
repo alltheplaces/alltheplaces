@@ -1770,7 +1770,9 @@ class HelsinkiServicemapFiSpider(Spider):
             return
 
     def _normalize_website(self, www):
-        # Feed omits the scheme.
+        # Feed omits the scheme. Known-bad feed hostnames pass through and
+        # the pipeline drops just the website field (website/invalid):
+        # comma typo unit 66055 plus punycode units 68883/64153/47295.
         if isinstance(www, str) and www.strip():
             www = {"fi": www.strip()}
         if not isinstance(www, dict):
@@ -1798,6 +1800,8 @@ class HelsinkiServicemapFiSpider(Spider):
         return None
 
     def _apply_contact(self, item, unit):
+        # Municipal contacts repeat across units (one phone/email serves
+        # many schools/clinics): low uniqueness is the dataset, not dupes.
         if website := self._normalize_website(unit.get("www")):
             item["website"] = website
         phone = unit.get("phone")
@@ -1812,7 +1816,8 @@ class HelsinkiServicemapFiSpider(Spider):
             item["email"] = email
 
     def _apply_media(self, item, unit):
-        # Picture endpoint, when the feed sets one.
+        # Picture endpoint, when the feed sets one. Placeholders repeat
+        # across units, so low image uniqueness is expected.
         picture = unit.get("picture_url")
         if isinstance(picture, str) and picture.strip():
             item["image"] = picture.strip()
@@ -2759,6 +2764,9 @@ class HelsinkiServicemapFiSpider(Spider):
             self._apply_name_rescue(item, unit)
             if not self._has_category(item):
                 # Per docs/CATEGORIES.md: amenity=yes beats a tagless Feature.
+                # Unrescuable leftovers (novel nodes like kiintorastit) keep
+                # the generic tag, so the pipeline "category not set" residual
+                # is expected, not a filing bug.
                 apply_category(Categories.GENERIC_POI, item)
                 self._stat("category/generic")
             return
