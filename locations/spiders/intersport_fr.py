@@ -12,7 +12,6 @@ from locations.user_agents import BROWSER_DEFAULT
 class IntersportFRSpider(Spider):
     name = "intersport_fr"
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
-    start_urls = ["https://www.intersport.fr/store-finder/"]
     requires_proxy = "FR"
 
     async def start(self) -> AsyncIterator[Request]:
@@ -22,7 +21,7 @@ class IntersportFRSpider(Spider):
             "Accept-Language": "en-US,en;q=0.8,fr-FR;q=0.5,fr;q=0.3",
             "User-Agent": BROWSER_DEFAULT,
         }
-        yield Request(url=self.start_urls[0], headers=headers, callback=self.parse)
+        yield Request(url="https://www.intersport.fr/store-finder/", headers=headers)
 
     def parse(self, response, **kwargs):
         store_data = response.xpath('//div[@id="map_canvas"]/@data-stores').get()

@@ -7,10 +7,7 @@ from locations.dict_parser import DictParser
 
 class RemaxITSpider(scrapy.Spider):
     name = "remax_it"
-    item_attributes = {
-        "brand": "RE/MAX",
-        "brand_wikidata": "Q965845",
-    }
+    item_attributes = {"brand": "RE/MAX", "brand_wikidata": "Q965845"}
     allowed_domains = ["cms.remax.it", "remax.com"]
     start_urls = ["https://cms.remax.it/api/v1/agencies?collection=false&commercial=false&page=1&per_page=1000"]
 

@@ -12,9 +12,7 @@ class EquinoxSpider(Spider):
     name = "equinox"
     item_attributes = {"brand": "Equinox", "brand_wikidata": "Q5384535"}
     allowed_domains = ["cdn.contentful.com"]
-    start_urls = [
-        "https://cdn.contentful.com/spaces/drib7o8rcbyf/environments/master/entries?content_type=club&include=3"
-    ]
+    api_url = "https://cdn.contentful.com/spaces/drib7o8rcbyf/environments/master/entries?content_type=club&include=3"
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     headers = {
@@ -25,8 +23,7 @@ class EquinoxSpider(Spider):
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
-            self.start_urls[0],
-            callback=self.parse,
+            self.api_url,
             headers=self.headers,
             meta={"skip": 0},
         )
@@ -49,7 +46,6 @@ class EquinoxSpider(Spider):
         records_read = data["skip"] + data["limit"]
         if records_read < data["total"]:
             yield Request(
-                f"{self.start_urls[0]}&skip={records_read}",
-                callback=self.parse,
+                f"{self.api_url}&skip={records_read}",
                 headers=self.headers,
             )

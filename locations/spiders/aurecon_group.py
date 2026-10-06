@@ -6,12 +6,9 @@ from locations.items import Feature
 
 class AureconGroupSpider(scrapy.Spider):
     name = "aurecon_group"
-    item_attributes = {
-        "brand": "Aurecon",
-        "brand_wikidata": "Q2871849",
-    }
+    item_attributes = {"brand": "Aurecon", "brand_wikidata": "Q2871849"}
     allowed_domains = ["www.aurecon.com", "www.aurecongroup.com"]
-    start_urls = ("https://www.aurecongroup.com/locations",)
+    start_urls = ["https://www.aurecongroup.com/locations"]
 
     def parse(self, response):
         for location in response.xpath(".//h4"):
@@ -25,7 +22,6 @@ class AureconGroupSpider(scrapy.Spider):
             coordinates = location.xpath('.//following-sibling::div//a[@target="_blank"]/@href').get()
             properties = {
                 "ref": location.xpath('.//following-sibling::div//span[@itemprop="telephone"]/text()').get().strip(),
-                "brand": "Aurecon Group",
                 "city": location.xpath(".//strong/text()").get().replace("\t", "").replace("\n", "").replace("\r", ""),
                 "addr_full": addr,
                 "phone": location.xpath('.//following-sibling::div//span[@itemprop="telephone"]/text()').get().strip(),
