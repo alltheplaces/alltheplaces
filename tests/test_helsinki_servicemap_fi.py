@@ -1332,6 +1332,20 @@ def test_aimo_park_brand():
     assert item["brand_wikidata"] == "Q126728228"
 
 
+def test_aimo_park_branch_split():
+    # Chain name plus branch site split OSM-style (unit 67707 shape).
+    spider = make_spider()
+    item = Feature()
+    item["name"] = "Aimo Park, Vallila"
+    spider._apply_brand(
+        item,
+        {"organizer_name": "Aimo Park Finland Oy / Q-park", "name": {"fi": "Aimo Park, Vallila"}},
+    )
+    assert item["name"] == "Aimo Park"
+    assert item["branch"] == "Vallila"
+    assert item["extras"]["official_name"] == "Aimo Park, Vallila"
+
+
 def test_website_scheme_added():
     # SYNTHETIC (feed has no schemeless www left).
     item = contacted({"www": {"fi": "www.hel.fi/palvelukartta"}})

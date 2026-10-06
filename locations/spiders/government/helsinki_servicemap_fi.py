@@ -55,7 +55,10 @@ class HelsinkiServicemapFiSpider(Spider):
     custom_settings = {
         "DOWNLOAD_TIMEOUT": 60,
         "RETRY_TIMES": 5,
-        "DOWNLOAD_DELAY": 1,
+        # No delay: a full crawl is ~25 requests and CI kills spiders
+        # past 120s. No robots fetch either; the API terms document use.
+        "DOWNLOAD_DELAY": 0,
+        "ROBOTSTXT_OBEY": False,
     }
 
     # A unit can match several nodes; the earliest row wins. Real facilities
@@ -627,10 +630,32 @@ class HelsinkiServicemapFiSpider(Spider):
         self.seen_places = set()
         self.expected_units = None
         self.seen_units = 0
+        # Departments and the node tree are independent: fetch both at once
+        # (one round trip saved matters under CI's 120s kill) and start the
+        # units only after both paginations finish.
+        self.bootstrap_pending = {"departments", "service_nodes"}
         yield JsonRequest(
             url=f"{self.api_base_url}/department/?page_size={self.page_size}&format=json",
             callback=self.parse_departments,
             errback=self.parse_bootstrap_error,
+        )
+        yield JsonRequest(
+            url=f"{self.api_base_url}/service_node/?page_size={self.page_size}&format=json",
+            callback=self.parse_service_nodes,
+            errback=self.parse_bootstrap_error,
+        )
+
+    def _bootstrap_done(self, key):
+        # One bootstrap leg finished paging; returns the first units request
+        # once both legs are done, else None.
+        self.bootstrap_pending.discard(key)
+        if self.bootstrap_pending:
+            return None
+        self._build_service_graph()
+        return JsonRequest(
+            url=f"{self.api_base_url}/unit/?page_size={self.page_size}&format=json",
+            callback=self.parse_units,
+            errback=self.parse_unit_page_error,
         )
 
     def _stat(self, suffix, n=1):
@@ -701,11 +726,8 @@ class HelsinkiServicemapFiSpider(Spider):
         if request := self._follow(payload, self.parse_departments, self.parse_bootstrap_error):
             yield request
             return
-        yield JsonRequest(
-            url=f"{self.api_base_url}/service_node/?page_size={self.page_size}&format=json",
-            callback=self.parse_service_nodes,
-            errback=self.parse_bootstrap_error,
-        )
+        if request := self._bootstrap_done("departments"):
+            yield request
 
     def parse_service_nodes(self, response):
         payload = self._payload(response)
@@ -720,12 +742,8 @@ class HelsinkiServicemapFiSpider(Spider):
         if request := self._follow(payload, self.parse_service_nodes, self.parse_bootstrap_error):
             yield request
             return
-        self._build_service_graph()
-        yield JsonRequest(
-            url=f"{self.api_base_url}/unit/?page_size={self.page_size}&format=json",
-            callback=self.parse_units,
-            errback=self.parse_unit_page_error,
-        )
+        if request := self._bootstrap_done("service_nodes"):
+            yield request
 
     def _build_service_graph(self):
         self.rule_by_service_node = {}
@@ -743,7 +761,8 @@ class HelsinkiServicemapFiSpider(Spider):
                 self._stat(f"{label}/missing", len(ids))
 
     # Dedupe keys: name, coords, every category tag, located_in. The offline
-    # harness reuses this tuple; _has_category reads it too.
+    # harness reuses this tuple; _has_category reads it too. historic rides
+    # along for memorials (no mappable top-level tag otherwise).
     DEDUPE_TAGS = (
         "shop",
         "amenity",
@@ -785,13 +804,15 @@ class HelsinkiServicemapFiSpider(Spider):
                 continue
             if item is not None:
                 # Pipeline dedupes on ref only; collapse same name/coords/category
-                # here (categories live in extras, hence get_tag).
+                # here (categories live in extras, hence get_tag). Branch rides
+                # along since chain sites share names (cf. Aimo Park halls).
                 key = (
                     item.get("name"),
                     round(float(item.get("lon")), 7),
                     round(float(item.get("lat")), 7),
                     *(item.get_tag(tag) for tag in self.DEDUPE_TAGS),
                     item.get("located_in"),
+                    item.get("branch"),
                 )
                 if key in self.seen_places:
                     self._stat("dropped/duplicate")
@@ -1659,6 +1680,16 @@ class HelsinkiServicemapFiSpider(Spider):
                     continue
                 item["brand"] = brand
                 item["brand_wikidata"] = qid
+                if brand == "Aimo Park" and "," in (item.get("name") or ""):
+                    # "Aimo Park, Arabia 135": chain name plus branch site.
+                    # OSM names the branch separately (branch=*), so split
+                    # on the first comma (unit 67707 shape).
+                    head, _, branch = item["name"].partition(",")
+                    if head.strip() and branch.strip():
+                        if "official_name" not in item["extras"]:
+                            item["extras"]["official_name"] = item["name"]
+                        item["name"] = head.strip()
+                        item["branch"] = branch.strip()
                 return
 
     def _normalize_website(self, www):
