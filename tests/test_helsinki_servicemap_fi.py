@@ -1325,6 +1325,13 @@ def test_spr_kontti_brand():
     assert item["brand_wikidata"] == "Q409603"
 
 
+def test_aimo_park_brand():
+    # Unit 67707: organizer "Aimo Park Finland Oy / Q-park".
+    item = branded({"organizer_name": "Aimo Park Finland Oy / Q-park", "name": {"fi": "Aimo Park, Vallila"}})
+    assert item["brand"] == "Aimo Park"
+    assert item["brand_wikidata"] == "Q126728228"
+
+
 def test_website_scheme_added():
     # SYNTHETIC (feed has no schemeless www left).
     item = contacted({"www": {"fi": "www.hel.fi/palvelukartta"}})
@@ -2255,6 +2262,19 @@ def test_eskola_slash_never_inverts():
     item = named(make_spider(), "Palvelu / Eskola")
     assert item["name"] == "Eskola"
     assert item["located_in"] == "Palvelu"
+
+
+def test_comma_school_health_splits_service_first():
+    # Unit 5664: school prefix comes out, service stays the name.
+    item = full(make_spider(), "Kruununhaan yläasteen koulu, kouluterveydenhuolto", [2164, 2165])
+    assert item["name"] == "kouluterveydenhuolto"
+    assert item["located_in"] == "Kruununhaan yläasteen koulu"
+    assert item.get_tag("healthcare") == "nurse"
+    # Unit 80388: student-welfare variant at a vocational college.
+    item = full(make_spider(), "Helsingin Pelastuskoulu, opiskeluterveydenhuolto", [2166, 2167])
+    assert item["name"] == "opiskeluterveydenhuolto"
+    assert item["located_in"] == "Helsingin Pelastuskoulu"
+    assert item["extras"]["healthcare:speciality"] == "community"
 
 
 def test_swedish_only_name_refines():

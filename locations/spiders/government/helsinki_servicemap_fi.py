@@ -1001,6 +1001,13 @@ class HelsinkiServicemapFiSpider(Spider):
         r"(\w*(päiväkoti|lukio|opisto|koulu)\b|\b(skola|skolan|daghem\w*|förskol\w*|gymnasi\w*|omnia|preschool|playschool|nursery|montessori|kindergarten|school)\b)"
     )
 
+    # School words anywhere in a comma head ("Kallion ala-aste");
+    # VENUE_WORDS_RE misses ala-aste/yläaste/peruskoulu forms. Only used
+    # with service tails, so the broad match cannot misfire elsewhere.
+    SCHOOL_HEAD_RE = re.compile(
+        r"(ala-aste|yläaste|yläkoulu|peruskoulu|yhtenäiskoulu|lyseo|lukio|koulu|opisto|päiväkoti|skola|skolan|gymnasi\w*|daghem\w*)"
+    )
+
     # Institution tails are venues ("Malmin sairaala"); end-anchored so
     # lookalikes like "auditorio" never match. Compounds match too
     # ("perhekeskus" via keskus). Built from the tuple above.
@@ -1122,6 +1129,19 @@ class HelsinkiServicemapFiSpider(Spider):
             return head.strip(), None
         if head.strip() and re.search(self.VENUE_WORDS_RE, tail.strip().lower()):
             return head.strip(), tail.strip()
+        if (
+            head.strip()
+            and re.search(self.SCHOOL_HEAD_RE, head.strip().lower())
+            and re.search(
+                r"(kouluterveydenhuolto|opiskeluterveydenhuolto|opiskeluhuolto)$",
+                tail.strip().lower(),
+            )
+        ):
+            # Service at a school ("Kruununhaan yläasteen koulu,
+            # kouluterveydenhuolto", unit 5664; "Kallion ala-aste,
+            # kouluterveydenhuolto"): the service comes first, the school
+            # is the venue. Mirrors the slash-pair rule above.
+            return tail.strip(), head.strip()
         if head.strip() and re.search(r"\besiopetus$", tail.strip().lower()):
             if re.search(self.VENUE_WORDS_RE, head.strip().lower()):
                 # "Tuohimäen päiväkoti, esiopetus": head is the venue.
@@ -2104,6 +2124,7 @@ class HelsinkiServicemapFiSpider(Spider):
         ("uff", "UFF", "Q11899315", "word"),
         ("kierrätyskeskus", "Pääkaupunkiseudun Kierrätyskeskus", "Q20920687", "prefix"),
         ("spr kontti", "SPR Kontti", "Q409603", "phrase"),
+        ("aimo park", "Aimo Park", "Q126728228", "phrase"),
         ("punaisen ristin kontti", "SPR Kontti", "Q409603", "phrase"),
     )
 
