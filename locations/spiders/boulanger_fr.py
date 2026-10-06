@@ -11,6 +11,7 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class BoulangerFRSpider(SitemapSpider):
@@ -20,7 +21,7 @@ class BoulangerFRSpider(SitemapSpider):
     # Sitemap also lists brand shop-in-shops ("espaces") and news posts ("actualites");
     # only the 4-segment region/department/city/address paths are actual store pages.
     sitemap_rules = [(r"/magasins/(?!espaces/|actualites/)[^/]+/[^/]+/[^/]+/[^/]+$", "parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self):
         # Akamai-protected, so even the initial sitemap fetch needs Zyte. httpResponseHeaders is
