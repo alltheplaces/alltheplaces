@@ -1,49 +1,24 @@
-from typing import AsyncIterator, Iterable
+from typing import Any
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class AlnaturaDESpider(Spider):
+class AlnaturaDESpider(SitemapSpider, StructuredDataSpider):
     name = "alnatura_de"
     item_attributes = {"brand": "Alnatura", "brand_wikidata": "Q876811"}
     allowed_domains = ["www.alnatura.de"]
-    start_urls = [
-        "https://www.alnatura.de/api/sitecore/stores/FindStoresforMap?ElementsPerPage=10000&lat=49.878708&lng=8.646927&radius=10000&Tradepartner=1"
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    sitemap_urls = ["https://www.alnatura.de/sitemap/markets-de-de.xml"]
+    sitemap_rules = [(r"/marktfinder/.+-(\d+)$", "parse")]
+    wanted_types = ["LocalBusiness"]
+    time_format = "%H:%M:%S"
+    drop_attributes = {"facebook"}
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
-    def parse(self, response: Response) -> Iterable[JsonRequest]:
-        for feature in response.json()["Payload"]:
-            feature_id = feature["Id"]
-            yield JsonRequest(
-                url=f"https://www.alnatura.de/api/sitecore/stores/StoreDetails?storeid={feature_id}",
-                meta={"lat": feature.get("Lat").replace(",", "."), "lon": feature.get("Lng").replace(",", ".")},
-                callback=self.parse_feature,
-            )
-
-    def parse_feature(self, response: Response) -> Iterable[Feature]:
-        feature = response.json()["Payload"]
-        item = DictParser.parse(feature)
-        item["lat"] = response.meta["lat"]
-        item["lon"] = response.meta["lon"]
-        item["street_address"] = clean_address([feature.get("Street"), feature.get("AddressExtension")])
-        item.pop("street", None)
-        if feature.get("StoreDetailPage"):
-            item["website"] = "https://www.alnatura.de" + feature["StoreDetailPage"]
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(feature.get("OpeningTime", ""))
-
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
+        item["branch"] = item.pop("name").removeprefix("Alnatura Super Natur Markt ").strip()
         apply_category(Categories.SHOP_SUPERMARKET, item)
-
         yield item
