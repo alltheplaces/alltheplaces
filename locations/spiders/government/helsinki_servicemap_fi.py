@@ -1681,17 +1681,90 @@ class HelsinkiServicemapFiSpider(Spider):
                     continue
                 item["brand"] = brand
                 item["brand_wikidata"] = qid
-                if brand == "Aimo Park" and "," in (item.get("name") or ""):
-                    # "Aimo Park, Arabia 135": chain name plus branch site.
-                    # OSM names the branch separately (branch=*), so split
-                    # on the first comma (unit 67707 shape).
-                    head, _, branch = item["name"].partition(",")
-                    if head.strip() and branch.strip():
-                        if "official_name" not in item["extras"]:
-                            item["extras"]["official_name"] = item["name"]
-                        item["name"] = head.strip()
-                        item["branch"] = branch.strip()
+                break
+        self._apply_chain_branch(item, unit)
+
+    # Chains whose every feed unit is shaped "Brand separator Branch"
+    # (verified uniform per chain, one row each): split the branch off
+    # into branch=*. Store-type branches never split ("Partioaitta
+    # Outlet" keeps its full name). Non-uniform chains (Pilke, Norlandia,
+    # Dylan, Factory) and generic words shared by independent shops
+    # (Antikvariaatti, Lankakauppa) are deliberately absent.
+    CHAIN_SPLITS = (
+        "Jungle Juice Bar",
+        "Kanniston Leipomo",
+        "Hanko Aasia",
+        "Paperikauppa Putinki",
+        "Pizzeria Via Tribunali",
+        "Levain",
+        "Fazer Café",
+        "UFF",
+        "Fida secondhand",
+        "Metrosuutarit",
+        "Fonum",
+        "SPR Kontti",
+        "Picnic",
+        "Musti ja Mirri",
+        "Robert's Coffee",
+        "24 Pesula",
+        "Eat Poke",
+        "Kultajousi",
+        "Laatukoru",
+        "Arnolds",
+        "Partioaitta",
+        "Kidia",
+        "William K.",
+        "Omena-hotelli",
+        "Tortilla House",
+        "Deliberi",
+        "Ruohonjuuri",
+        "Sizzle Station",
+        "Finnfoto Galleria",
+        "Bär Bar",
+        "Mashiro",
+        "Uuno",
+        "VillageWorks",
+        "Meeting Park",
+        "Innovation Home",
+        "Putte's Bar & Pizza",
+        "Boneless",
+        "Friends & Brgrs",
+        "Gateau",
+        "Makaronitehdas",
+        "Suomalainen Kirjakauppa",
+        "Classic Pizza Restaurant",
+        "Noodle Story",
+        "Hemingway's",
+        "Delhi Rasoi",
+        "Burger Company",
+        "Brewster Bar",
+        "Oishi18",
+        "Ristorante Limone",
+        "Bambu Sushi",
+        "The Pantry",
+        "The Body Shop",
+        "Marimekko",
+        "Tortilla Corner",
+        "Joe & the Juice",
+        "Aimo Park",
+    )
+
+    def _apply_chain_branch(self, item, unit):
+        # OSM names the branch separately (branch=*): "Aimo Park, Vallila"
+        # becomes name plus branch (unit 67707 shape). Runs on the applied
+        # name, so comma-venue and translation splits happen first.
+        name = item.get("name") or ""
+        for prefix in self.CHAIN_SPLITS:
+            if not re.match(re.escape(prefix) + r"(?![A-Za-zÅÄÖåäö])", name, re.IGNORECASE):
+                continue
+            branch = name[len(prefix) :].strip(" ,-/–")
+            if not branch or branch.casefold() == "outlet":
                 return
+            if "official_name" not in item["extras"]:
+                item["extras"]["official_name"] = item["name"]
+            item["name"] = prefix
+            item["branch"] = branch
+            return
 
     def _normalize_website(self, www):
         # Feed omits the scheme.

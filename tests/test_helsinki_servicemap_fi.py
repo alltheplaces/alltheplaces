@@ -1338,6 +1338,85 @@ def test_aimo_park_brand():
     assert item["brand_wikidata"] == "Q126728228"
 
 
+def test_chain_branch_splits():
+    # Verified uniform "Brand separator Branch" chains: name splits, branch
+    # carries the site (ref = sample unit). Guards (no branch, Outlet,
+    # non-chain lookalikes) keep the full name.
+    cases = (
+        ("Aimo Park", "Aimo Park, Vallila", "Vallila", 67707),
+        ("Jungle Juice Bar", "Jungle Juice Bar - Hertsi", "Hertsi", 72903),
+        ("Kanniston Leipomo", "Kanniston Leipomo Sello", "Sello", 76929),
+        ("Hanko Aasia", "Hanko Aasia Tripla", "Tripla", 61847),
+        ("Paperikauppa Putinki", "Paperikauppa Putinki Hakaniemi", "Hakaniemi", 58491),
+        ("Pizzeria Via Tribunali", "Pizzeria Via Tribunali Punavuori", "Punavuori", 72754),
+        ("Levain", "Levain Ullanlinna", "Ullanlinna", 73512),
+        ("Fazer Café", "Fazer Café Bulevardi", "Bulevardi", 69045),
+        ("UFF", "UFF Annankatu", "Annankatu", 80644),
+        ("Fida secondhand", "Fida secondhand Tammisto", "Tammisto", 80278),
+        ("Metrosuutarit", "Metrosuutarit Tapiola", "Tapiola", 64199),
+        ("Fonum", "Fonum Kamppi", "Kamppi", 64221),
+        ("SPR Kontti", "SPR Kontti Espoo Galleria", "Espoo Galleria", 76073),
+        ("Picnic", "Picnic Columbus", "Columbus", 79353),
+        ("Musti ja Mirri", "Musti ja Mirri Stockmann", "Stockmann", 79233),
+        ("Robert's Coffee", "Robert's Coffee Arabia", "Arabia", 78779),
+        ("24 Pesula", "24 Pesula Easton", "Easton", 79348),
+        ("Eat Poke", "Eat Poke Kaari", "Kaari", 79305),
+        ("Kultajousi", "Kultajousi Forum", "Forum", 79434),
+        ("Laatukoru", "Laatukoru Itis", "Itis", 79453),
+        ("Arnolds", "Arnolds REDI", "REDI", 78636),
+        ("Partioaitta", "Partioaitta Tripla", "Tripla", 80642),
+        ("Kidia", "Kidia Ainoa Espoo", "Ainoa Espoo", 71983),
+        ("William K.", "William K. Mannerheimintie", "Mannerheimintie", 70609),
+        ("Omena-hotelli", "Omena-hotelli Lönnrotinkatu", "Lönnrotinkatu", 24572),
+        ("Tortilla House", "Tortilla House Kamppi", "Kamppi", 73478),
+        ("Deliberi", "Deliberi Tapiola", "Tapiola", 72775),
+        ("Ruohonjuuri", "Ruohonjuuri Itis", "Itis", 79862),
+        ("Sizzle Station", "Sizzle Station Sello", "Sello", 72422),
+        ("Finnfoto Galleria", "Finnfoto Galleria Kaari", "Kaari", 73149),
+        ("Bär Bar", "Bär Bar Kasarmikatu", "Kasarmikatu", 78938),
+        ("Mashiro", "Mashiro Viikki", "Viikki", 78986),
+        ("Uuno", "Uuno Herttoniemi", "Herttoniemi", 78783),
+        ("VillageWorks", "VillageWorks Ruoholahti", "Ruoholahti", 79262),
+        ("Meeting Park", "Meeting Park Kamppi", "Kamppi", 72468),
+        ("Innovation Home", "Innovation Home Arabia", "Arabia", 74152),
+        ("Putte's Bar & Pizza", "Putte's Bar & Pizza Tikkurila", "Tikkurila", 71746),
+        ("Boneless", "Boneless Vuosaari", "Vuosaari", 75177),
+        ("Friends & Brgrs", "Friends & Brgrs Kulttuurikasarmi", "Kulttuurikasarmi", 77604),
+        ("Gateau", "Gateau Rautatieasema", "Rautatieasema", 79024),
+        ("Makaronitehdas", "Makaronitehdas Ainoa", "Ainoa", 72808),
+        ("Suomalainen Kirjakauppa", "Suomalainen Kirjakauppa Kamppi", "Kamppi", 72803),
+        ("Classic Pizza Restaurant", "Classic Pizza Restaurant Iso Omena", "Iso Omena", 72819),
+        ("Noodle Story", "Noodle Story Freda", "Freda", 73669),
+        ("Hemingway's", "Hemingway's Tennispalatsi", "Tennispalatsi", 73568),
+        ("Delhi Rasoi", "Delhi Rasoi Tripla", "Tripla", 73567),
+        ("Burger Company", "Burger Company Postitalo", "Postitalo", 80619),
+        ("Brewster Bar", "Brewster Bar Roba", "Roba", 71724),
+        ("Oishi18", "Oishi18 Töölö", "Töölö", 79504),
+        ("Ristorante Limone", "Ristorante Limone Tripla", "Tripla", 73365),
+        ("Bambu Sushi", "Bambu Sushi Konepaja", "Konepaja", 73481),
+        ("The Pantry", "The Pantry Vallila", "Vallila", 79900),
+        ("The Body Shop", "The Body Shop Kamppi", "Kamppi", 80691),
+        ("Marimekko", "Marimekko Itäkeskus", "Itäkeskus", 80307),
+        ("Tortilla Corner", "Tortilla Corner Mannerheimintie", "Mannerheimintie", 79015),
+        ("Joe & the Juice", "Joe & the Juice Forum", "Forum", 78985),
+    )
+    spider = make_spider()
+    for brand, fi, branch, ref in cases:
+        item = Feature()
+        item["name"] = fi
+        spider._apply_chain_branch(item, {"name": {"fi": fi}})
+        assert item["name"] == brand, (ref, fi)
+        assert item["branch"] == branch, (ref, fi)
+        assert item["extras"]["official_name"] == fi, (ref, fi)
+    # Guards: store-type branch, missing branch, non-chain lookalikes stay whole.
+    for fi in ("Partioaitta Outlet", "Fazer 8th Floor", "Musti ja Murri Munkkivuori", "Minibuffet"):
+        item = Feature()
+        item["name"] = fi
+        spider._apply_chain_branch(item, {"name": {"fi": fi}})
+        assert item["name"] == fi, fi
+        assert "branch" not in item, fi
+
+
 def test_aimo_park_branch_split():
     # Chain name plus branch site split OSM-style (unit 67707 shape).
     spider = make_spider()
