@@ -19,7 +19,6 @@ class ExtendedStayAmericaSpider(PlaywrightSpider):
     }
     start_urls = ["https://www.extendedstayamerica.com/hotels"]
     custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_data = json.loads(re.search(r"hotelsData\s*=\s*(\[.*\]);", response.text).group(1))
