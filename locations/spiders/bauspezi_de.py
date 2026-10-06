@@ -28,5 +28,6 @@ class BauspeziDESpider(WpGoMapsSpider):
         custom_fields = {field["name"]: field["value"] for field in location.get("custom_field_data", [])}
         item["email"] = custom_fields.get("E-Mail-Adresse")
         item["phone"] = custom_fields.get("Telefon")
-        item["website"] = location.get("link")
+        if location.get("link", "").startswith("http"):
+            item["website"] = location["link"]
         yield item
