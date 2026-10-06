@@ -11,15 +11,17 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class BoulangerFRSpider(SitemapSpider):
+class BoulangerFRSpider(SitemapSpider, PlaywrightSpider):
     name = "boulanger_fr"
     item_attributes = {"brand": "Boulanger", "brand_wikidata": "Q2921695"}
     sitemap_urls = ["https://www.boulanger.com/sitemap_magasins.xml"]
     sitemap_rules = [(r"/magasins/(?!espaces/|actualites/)[^/]+/[^/]+/[^/]+/[^/]+$", "parse")]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
         raw = response.css("#js-map-config-dir-map::text").get()
