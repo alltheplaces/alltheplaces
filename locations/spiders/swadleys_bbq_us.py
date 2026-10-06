@@ -54,9 +54,7 @@ class SwadleysBbqUSSpider(Spider):
             item["street_address"], item["city"], item["state"], item["postcode"] = addresses[0].groups()
             item["ref"] = re.sub(r"[^a-z0-9]+", "-", f"{item['branch']} {item['postcode']}".lower()).strip("-")
 
-            lines = [
-                re.sub(r"\s+", " ", line).strip() for line in section.xpath(".//text()").getall() if line.strip()
-            ]
+            lines = [re.sub(r"\s+", " ", line).strip() for line in section.xpath(".//text()").getall() if line.strip()]
             if phone := next((PHONE.fullmatch(line) for line in lines if PHONE.fullmatch(line)), None):
                 item["phone"] = phone.group(0)
 
