@@ -519,7 +519,7 @@ def test_numberless_place_pair():
 
 def test_dash_sentinels_yield_no_address():
     # Unit 80738 shape ("-") and its en-dash twin: sentinels, not streets.
-    for raw in ("-", "–"):
+    for raw in ("-", "\u2013"):
         item = addressed(make_spider(), raw)
         assert "street" not in item, raw
         assert "housenumber" not in item, raw
@@ -1409,7 +1409,13 @@ def test_chain_branch_splits():
         assert item["branch"] == branch, (ref, fi)
         assert item["extras"]["official_name"] == fi, (ref, fi)
     # Guards: store-type branch, missing branch, non-chain lookalikes stay whole.
-    for fi in ("Partioaitta Outlet", "Fazer 8th Floor", "Musti ja Murri Munkkivuori", "Minibuffet"):
+    for fi in (
+        "Partioaitta Outlet",
+        "Partioaitta Outlet Helsinki",
+        "Fazer 8th Floor",
+        "Musti ja Murri Munkkivuori",
+        "Minibuffet",
+    ):
         item = Feature()
         item["name"] = fi
         spider._apply_chain_branch(item, {"name": {"fi": fi}})
@@ -2143,7 +2149,7 @@ def test_mobile_hospital_unit_keeps_hospital():
 
 def test_endash_housenumber_range():
     # Unit 64736: Valimotie 17–19 (U+2013).
-    item = addressed(make_spider(), "Valimotie 17–19")
+    item = addressed(make_spider(), "Valimotie 17\u201319")
     assert item["street"] == "Valimotie"
     assert item["housenumber"] == "17-19"
 
@@ -2151,7 +2157,7 @@ def test_endash_housenumber_range():
 def test_soft_hyphen_stripped():
     # Unit 39964 address shape.
     # Merikatu 8 + U+00AD line-break artifact.
-    item = addressed(make_spider(), "Merikatu 8­")
+    item = addressed(make_spider(), "Merikatu 8\u00ad")
     assert item["housenumber"] == "8"
     assert item["street"] == "Merikatu"
 
@@ -2224,7 +2230,7 @@ def test_spaced_rappu_tail_is_unit():
     assert item["unit"] == "A-rappu"
 
 
-def test_station_address_takes_addr_place():
+def test_station_address_stays_freeform():
     # SYNTHETIC: stations are not postal addr:place; freeform keeps them findable.
     item = addressed(make_spider(), "Kivistön asema")
     assert item["street_address"] == "Kivistön asema"
@@ -2238,7 +2244,7 @@ def test_trailing_number_reads_as_apartment():
     assert item["unit"] == "8"
 
 
-def test_venue_named_addresses_route_to_located_in():
+def test_venue_named_addresses_stay_freeform():
     # Harbours, manors, hides, cemeteries and outdoor areas name venues.
     # Units Hietaniemen hautausmaa (54635) and Luukin ulkoilualue (50889);
     # Kotilahden satama is Unit 79743's address; rest venue-word shapes.
@@ -2265,7 +2271,7 @@ def test_venue_named_addresses_route_to_located_in():
         assert "located_in" not in item, raw
 
 
-def test_open_water_takes_addr_place():
+def test_open_water_address_stays_freeform():
     # Seurasaaren selkä is unit 64836's address: open water is not postal
     # addr:place; freeform keeps it findable.
     item = addressed(make_spider(), "Seurasaaren selkä")
@@ -2273,7 +2279,7 @@ def test_open_water_takes_addr_place():
     assert "addr:place" not in item["extras"]
 
 
-def test_venue_headed_address_routes_to_located_in():
+def test_venue_headed_address_stays_freeform():
     # Units 63023/63017: Leikkipaikka Savela (venue name first).
     item = addressed(make_spider(), "Leikkipaikka Savela")
     assert item["street_address"] == "Leikkipaikka Savela"
@@ -2292,17 +2298,18 @@ def test_table_order_frozen():
     # kindergarten filing. Reordering SERVICE_NODES must break this loudly.
     # Pairwise assertions (not a full snapshot): each pins a decided
     # multi-filing outcome below. SYNTHETIC combo names force the filings.
-    order = list(make_spider().SERVICE_NODES)
-    assert order.index(1097) < order.index(532) if 532 in order else True
+    spider = make_spider()
+    order = list(spider.SERVICE_NODES)
+    assert order.index(1097) < order.index(532)
     assert order.index(1097) < order.index(868)
     assert order.index(614) < order.index(662)
     assert order.index(324) < order.index(749)
-    assert order.index(1004) < order.index(2189) if 2189 in order else True
+    assert order.index(1004) < order.index(2189)
     assert order.index(2173) < order.index(350)
     assert order.index(155) < order.index(2173)
     assert order.index(2249) < order.index(2298)
     assert order.index(2249) < order.index(2297)
-    item = full(make_spider(), "Koulu ja pysäköinti", [1097, 532] if 532 in make_spider().SERVICE_NODES else [1097])
+    item = full(spider, "Koulu ja pysäköinti", [1097, 532])
     assert item.get_tag("amenity") == "school"
 
 

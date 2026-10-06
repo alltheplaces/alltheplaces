@@ -1758,7 +1758,10 @@ class HelsinkiServicemapFiSpider(Spider):
             if not re.match(re.escape(prefix) + r"(?![A-Za-zÅÄÖåäö])", name, re.IGNORECASE):
                 continue
             branch = name[len(prefix) :].strip(" ,-/–")
-            if not branch or branch.casefold() == "outlet":
+            outlet = branch.casefold()
+            if not branch or outlet == "outlet" or outlet.startswith("outlet ") or outlet.startswith("outlet-"):
+                # "Partioaitta Outlet" (or "Outlet Helsinki") is a store
+                # type, not a branch site: keep the full name.
                 return
             if "official_name" not in item["extras"]:
                 item["extras"]["official_name"] = item["name"]
