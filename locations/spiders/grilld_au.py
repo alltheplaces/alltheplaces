@@ -8,7 +8,7 @@ from locations.hours import OpeningHours
 class GrilldAUSpider(Spider):
     name = "grilld_au"
     item_attributes = {"brand": "Grill'd", "brand_wikidata": "Q18165852", "extras": Categories.FAST_FOOD.value}
-    allowed_domains = ["www.grilld.com.au"]
+    allowed_domains = ["api.digital.grilld.com.au", "www.grilld.com.au"]
     start_urls = ["https://api.digital.grilld.com.au/v1/Restaurants/nearby?lat=-23.12&lng=132.13&limit=10000"]
 
     def parse(self, response):

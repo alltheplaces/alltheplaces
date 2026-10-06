@@ -11,21 +11,12 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class PatriziaPepeSpider(JSONBlobSpider):
     name = "patrizia_pepe"
-    item_attributes = {
-        "brand": "Patrizia Pepe",
-        "brand_wikidata": "Q3897831",
-    }
+    item_attributes = {"brand": "Patrizia Pepe", "brand_wikidata": "Q3897831"}
     locations_key = "stores"
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    start_url = "https://www.patriziapepe.com/it/en/stores"
-    json_url = "https://www.patriziapepe.com/on/demandware.store/Sites-patriziapepe_EU-Site/en_IT/Stores-All"
-
     async def start(self) -> AsyncIterator[Request | JsonRequest]:
-        yield Request(
-            self.start_url,
-            callback=self.parse_stores_page,
-        )
+        yield Request("https://www.patriziapepe.com/it/en/stores", callback=self.parse_stores_page)
 
     def parse_stores_page(self, response: TextResponse):
         csrf_token = response.css(
@@ -36,8 +27,8 @@ class PatriziaPepeSpider(JSONBlobSpider):
             raise ValueError("Could not extract Patrizia Pepe CSRF token")
 
         yield JsonRequest(
-            self.json_url + "?csrf_token=" + csrf_token,
-            callback=self.parse,
+            "https://www.patriziapepe.com/on/demandware.store/Sites-patriziapepe_EU-Site/en_IT/Stores-All?csrf_token="
+            + csrf_token
         )
 
     @staticmethod

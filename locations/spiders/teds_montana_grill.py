@@ -13,15 +13,15 @@ class TedsMontanaGrillSpider(scrapy.Spider):
     def parse(self, response):
         location_selectors = response.xpath('.//div[@class="location-list-item"]')
         for location_selector in location_selectors[:]:
-            if location_selector.xpath(".//h3/text()").extract_first():
-                state = location_selector.xpath(".//h3/text()").extract_first()
+            if location_selector.xpath(".//h3/text()").get():
+                state = location_selector.xpath(".//h3/text()").get()
             yield from self.parse_location(location_selector, state)
 
     def parse_location(self, location, state):
-        ref = location.xpath(".//a/@href").extract_first()
-        city = location.xpath(".//h5/text()").extract_first()
-        phone = location.xpath(".//p")[-1].xpath(".//span/a/@href").extract_first().replace("tel:", "")
-        address = location.xpath(".//p")[-1].xpath("text()").extract()
+        ref = location.xpath(".//a/@href").get()
+        city = location.xpath(".//h5/text()").get()
+        phone = location.xpath(".//p")[-1].xpath(".//span/a/@href").get().replace("tel:", "")
+        address = location.xpath(".//p")[-1].xpath("text()").getall()
         street_address = clean_address([line.strip() for line in address[:-1]])
         postcode = address[-1].strip()
         addr_full = f"{street_address}, {postcode}"

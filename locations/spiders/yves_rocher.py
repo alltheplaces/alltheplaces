@@ -1,6 +1,5 @@
 import json
 import re
-from urllib.parse import urljoin
 
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -39,7 +38,7 @@ class YvesRocherSpider(CrawlSpider):
                     for start_time, end_time in re.findall(r"(\d\d:\d\d)\s*-\s*(\d\d:\d\d)", rule):
                         item["opening_hours"].add_range(day, start_time, end_time)
 
-            item["website"] = urljoin(response.url, location["uri"])
+            item["website"] = response.urljoin(location["uri"])
 
             apply_category(Categories.SHOP_COSMETICS, item)
 

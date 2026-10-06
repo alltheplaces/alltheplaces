@@ -76,7 +76,7 @@ class RotpunktApothekenCHSpider(CrawlSpider):
         hours_list = response.css(".location-info__opening-hours-list")
         oh = OpeningHours()
         day = None
-        for t in hours_list.xpath("*/text()").extract():
+        for t in hours_list.xpath("*/text()").getall():
             day = DAYS_DE.get(t.strip(), day)
             for open_h, close_h in re.findall(r"(\d\d:\d\d) – (\d\d:\d\d)", t):
                 oh.add_range(day, open_h, close_h)

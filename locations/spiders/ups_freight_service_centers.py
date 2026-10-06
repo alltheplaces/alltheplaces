@@ -15,27 +15,27 @@ class UpsFreightServiceCentersSpider(scrapy.Spider):
         ref = re.search(r".+/(.+)", response.url).group(1)
 
         properties = {
-            "addr_full": response.xpath('//span[contains(@id, "Address")]/text()').extract()[0],
-            "city": response.xpath('//span[contains(@id, "Zip")]/text()').extract()[0].split(",")[0],
-            "state": response.xpath('//span[contains(@id, "Zip")]/text()').extract()[0].split(", ")[1].split(" ")[0],
-            "postcode": response.xpath('//span[contains(@id, "Zip")]/text()').extract()[0].split(", ")[1].split(" ")[1],
+            "addr_full": response.xpath('//span[contains(@id, "Address")]/text()').get(),
+            "city": response.xpath('//span[contains(@id, "Zip")]/text()').get().split(",")[0],
+            "state": response.xpath('//span[contains(@id, "Zip")]/text()').get().split(", ")[1].split(" ")[0],
+            "postcode": response.xpath('//span[contains(@id, "Zip")]/text()').get().split(", ")[1].split(" ")[1],
             "ref": ref,
             "website": response.url,
-            "phone": response.xpath('//span[contains(@id, "Telephone")]/text()').extract()[0],
-            "name": response.xpath('//span[contains(@id, "lName")]/text()').extract()[0],
+            "phone": response.xpath('//span[contains(@id, "Telephone")]/text()').get(),
+            "name": response.xpath('//span[contains(@id, "lName")]/text()').get(),
             "country": ref.split("qcountry=")[1].split("&svc")[0],
         }
 
         yield Feature(**properties)
 
     def parse_state(self, response):
-        location_urls = response.xpath('//*[@id="app_ctl00_scTable_hlDetail"]/@href').extract()
+        location_urls = response.xpath('//*[@id="app_ctl00_scTable_hlDetail"]/@href').getall()
 
         for url in location_urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse(self, response):
-        urls = response.xpath("//table//table//table//table//table//a/@href").extract()
+        urls = response.xpath("//table//table//table//table//table//a/@href").getall()
 
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_state)

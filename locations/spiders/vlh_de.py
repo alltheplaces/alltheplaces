@@ -8,7 +8,10 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class VlhDESpider(SitemapSpider, StructuredDataSpider):
     name = "vlh_de"
-    item_attributes = {"brand": "Vereinigte Lohnsteuerhilfe", "brand_wikidata": "Q15852617"}
+    item_attributes = {
+        "brand": "Vereinigte Lohnsteuerhilfe",
+        "brand_wikidata": "Q15852617",
+    }
     sitemap_urls = [
         "https://www.vlh.de/sitemap.bst.xml",
     ]
@@ -33,8 +36,8 @@ class VlhDESpider(SitemapSpider, StructuredDataSpider):
             oh = OpeningHours()
 
             for row in table.xpath("./tr"):
-                day = row.xpath("./td/text()").extract()[0]
-                times = row.xpath("./td/text()").extract()[1:]
+                day = row.xpath("./td/text()").get()
+                times = row.xpath("./td/text()").getall()[1:]
 
                 for time in times:
                     time.strip()
@@ -49,5 +52,5 @@ class VlhDESpider(SitemapSpider, StructuredDataSpider):
             item["opening_hours"] = oh
 
         except Exception as e:
-            self.logger.warning(f'Failed to parse opening hours for {item["ref"]}, {e}')
+            self.logger.warning(f"Failed to parse opening hours for {item['ref']}, {e}")
             self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")

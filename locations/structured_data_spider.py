@@ -1,6 +1,6 @@
 import re
 from typing import Iterable
-from urllib.parse import parse_qs, urlencode, urljoin, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from scrapy import Selector, Spider
 from scrapy.http import Response, TextResponse
@@ -273,7 +273,7 @@ class StructuredDataSpider(Spider):
             elif item["website"].startswith("www"):
                 item["website"] = "https://" + item["website"]
             elif item["website"].startswith("/"):
-                item["website"] = urljoin(response.url, item["website"])
+                item["website"] = response.urljoin(item["website"])
 
             if self.search_for_email and item["email"] is None:
                 extract_email(item, selector)
@@ -300,7 +300,7 @@ class StructuredDataSpider(Spider):
                 extract_instagram(item, selector)
 
             if item.get("image") and item["image"].startswith("/"):
-                item["image"] = urljoin(response.url, item["image"])
+                item["image"] = response.urljoin(item["image"])
 
             yield from self.post_process_item(item, response, ld_item) or []
 

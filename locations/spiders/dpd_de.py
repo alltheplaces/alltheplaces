@@ -58,25 +58,25 @@ class DpdDESpider(scrapy.Spider):
             item = Feature()
             name = shop.css(
                 "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopName_" + str(nr) + "::text"
-            ).extract()[0]
+            ).get()
             street_element = shop.css(
                 "span#ContentPlaceHolder1_modShopFinder_repShopList_labShopStreet_" + str(nr) + "::text"
-            ).extract()[0]
+            ).get()
             streets = street_element.split("\xa0")
             street = streets[0]
             housenumber = streets[1]
 
             postal_and_city = (
                 shop.css("span#ContentPlaceHolder1_modShopFinder_repShopList_labShopCity_" + str(nr) + "::text")
-                .extract()[0]
+                .get()
                 .split()
             )
             lat = shop.css(
                 "input#ContentPlaceHolder1_modShopFinder_repShopList_latitude_" + str(nr) + "::attr(value)"
-            ).extract()[0]
+            ).get()
             lng = shop.css(
                 "input#ContentPlaceHolder1_modShopFinder_repShopList_longitude_" + str(nr) + "::attr(value)"
-            ).extract()[0]
+            ).get()
             plz = postal_and_city[0]
             city = postal_and_city[1]
             item["lat"] = lat
@@ -145,12 +145,12 @@ class DpdDESpider(scrapy.Spider):
             for nr in range(7):
                 day = shops.css(
                     "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessDay_" + str(nr) + "::text"
-                ).extract()[0]
+                ).get()
                 opening_hours = (
                     shops.css(
                         "span#ContentPlaceHolder1_modShopFinder_repBusinessHours_labBusinessHour_" + str(nr) + "::text"
                     )
-                    .extract()[0]
+                    .get()
                     .split(" ")
                 )
                 if "Geschlossen" in opening_hours:

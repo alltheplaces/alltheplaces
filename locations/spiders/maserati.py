@@ -11,11 +11,8 @@ from locations.items import Feature
 
 class MaseratiSpider(scrapy.Spider):
     name = "maserati"
-    item_attributes = {
-        "brand": "Maserati",
-        "brand_wikidata": "Q35962",
-    }
-    allowed_domains = ["maserati.com"]
+    item_attributes = {"brand": "Maserati", "brand_wikidata": "Q35962"}
+    allowed_domains = ["api.onthemap.io", "maserati.com"]
     start_urls = [
         "https://api.onthemap.io/server/v1/api/location?language=en&sort=dealername&key=6e0b94fb-7f95-11ec-9c36-eb25f50f4870&channel=www.maserati.com",
     ]

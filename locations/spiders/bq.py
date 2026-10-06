@@ -8,7 +8,7 @@ from locations.pipelines.address_clean_up import clean_address
 class BqSpider(scrapy.Spider):
     name = "bq"
     item_attributes = {"brand": "B&Q", "brand_wikidata": "Q707602"}
-    allowed_domains = ["www.diy.com"]
+    allowed_domains = ["api.kingfisher.com", "www.diy.com"]
     # To get a new atmosphere_app_id key, check Network calls within https://www.diy.com/find-a-store/ (call to api.kingfisher.com)
     custom_settings = {
         "DEFAULT_REQUEST_HEADERS": {"Authorization": "Atmosphere atmosphere_app_id=kingfisher-7c4QgmLEROp4PUh0oUebbI94"}

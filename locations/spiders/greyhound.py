@@ -1,6 +1,5 @@
 import json
 import re
-from urllib.parse import urljoin
 
 from scrapy.spiders import SitemapSpider
 
@@ -51,7 +50,7 @@ class GreyhoundSpider(SitemapSpider):
             item["postcode"] = station["Zip"]
             # Phone number is brand-wide
             # item["phone"] = station["Phone"]
-            item["website"] = urljoin(response.url, station["PagePath"])
+            item["website"] = response.urljoin(station["PagePath"])
 
             apply_category(Categories.BUS_STATION, item)
             yield item

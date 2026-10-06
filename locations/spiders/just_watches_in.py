@@ -1,5 +1,4 @@
 from typing import Iterable
-from urllib.parse import urljoin
 
 import scrapy
 from scrapy import Spider
@@ -28,4 +27,4 @@ class JustWatchesINSpider(Spider):
             item["ref"] = item["website"] = location.xpath(".//h2//@href").get()
             yield item
         if page_url := response.xpath('//*[@class="next"]'):
-            yield scrapy.Request(url=urljoin(response.url, page_url.xpath(".//@href").get()), callback=self.parse)
+            yield scrapy.Request(url=response.urljoin(page_url.xpath(".//@href").get()), callback=self.parse)

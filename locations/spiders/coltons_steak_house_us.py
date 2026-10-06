@@ -1,9 +1,10 @@
 import re
 from typing import Any, Iterable
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs
 
 from scrapy import Spider
 from scrapy.http import Response
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
@@ -31,7 +32,7 @@ class ColtonsSteakHouseUSSpider(Spider):
             return
 
         item = Feature(
-            ref=parse_qs(urlparse(response.url).query)["id"][0],
+            ref=parse_qs(urlparse_cached(response).query)["id"][0],
             branch=(response.xpath("normalize-space(//h1)").get() or "")
             .replace("\N{NO-BREAK SPACE}", " ")
             .lstrip(": "),

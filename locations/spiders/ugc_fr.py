@@ -1,6 +1,5 @@
 import re
 from typing import Any
-from urllib.parse import urljoin
 
 from scrapy import Spider
 from scrapy.http import Response
@@ -23,7 +22,7 @@ class UgcFRSpider(Spider):
             item = Feature()
             item["ref"] = block.css("a.add-to-fav::attr(data-fav-cinema-id)").get()
             item["name"] = name
-            item["website"] = urljoin(response.url, block.css(".block--title a::attr(href)").get())
+            item["website"] = response.urljoin(block.css(".block--title a::attr(href)").get())
 
             address_lines = [line.strip() for line in block.css("p.address::text").getall() if line.strip()]
             if address_lines:

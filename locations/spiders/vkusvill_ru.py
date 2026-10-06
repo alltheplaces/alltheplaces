@@ -1,5 +1,3 @@
-from urllib.parse import urljoin
-
 from chompjs import chompjs
 from scrapy.http import Request
 from scrapy.spiders import Spider
@@ -57,7 +55,7 @@ class VkusvillRUSpider(Spider):
                 # Remove darkstore word from address
                 item["street_address"] = item.pop("addr_full", "").replace("Даркстор", "").strip()
                 item["phone"] = poi.get("PHONE", [None])[0]
-                item["website"] = urljoin(response.url, f"?shop_id={item['ref']}")
+                item["website"] = response.urljoin(f"?shop_id={item['ref']}")
                 icon = shop_point.get("options", {}).get("iconImageHref", "")
                 if "vkusomat.svg" in icon:
                     apply_category(Categories.VENDING_MACHINE, item)

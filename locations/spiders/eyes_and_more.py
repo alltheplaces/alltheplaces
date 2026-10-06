@@ -1,7 +1,6 @@
 import json
 import re
 from typing import Any
-from urllib.parse import urljoin
 
 from scrapy import Request, Selector, Spider
 from scrapy.http import Response
@@ -35,9 +34,7 @@ class EyesAndMoreSpider(Spider):
 
                 selector = Selector(text=location["mapMarkerInfoWindowHTML"])
                 item["addr_full"] = selector.xpath('//div[@class="address"]/text()').get()
-                item["website"] = urljoin(
-                    response.url, selector.xpath('//a[@class="address-buttons__link"]/@href').get()
-                )
+                item["website"] = response.urljoin(selector.xpath('//a[@class="address-buttons__link"]/@href').get())
                 extract_phone(item, selector)
                 apply_category(Categories.SHOP_OPTICIAN, item)
                 yield Request(url=item["website"], callback=self.parse_store, cb_kwargs={"item": item})

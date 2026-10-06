@@ -15,16 +15,16 @@ class AlliedUniversalSpider(scrapy.Spider):
             yield from self.parse_location(location_selector)
 
     def parse_location(self, location):
-        ref = location.xpath('.//div[@class="Address-1"]/text()').extract_first().strip()
+        ref = location.xpath('.//div[@class="Address-1"]/text()').get().strip()
         street_address = (
-            location.xpath('.//div[@class="Address-1"]/text()').extract_first().strip()
+            location.xpath('.//div[@class="Address-1"]/text()').get().strip()
             + ", "
-            + location.xpath('.//div[@class="Address-2"]/text()').extract_first().strip()
+            + location.xpath('.//div[@class="Address-2"]/text()').get().strip()
         )
-        postcode = location.xpath('.//span[@class="Zip"]/text()').extract_first().strip()
-        city = location.xpath('.//span[@class="City"]/text()').extract_first().strip()
-        state = location.xpath('.//span[@class="State"]/text()').extract_first().strip()
-        country = location.xpath('.//div[@class="Country"]/text()').extract_first().strip()
+        postcode = location.xpath('.//span[@class="Zip"]/text()').get().strip()
+        city = location.xpath('.//span[@class="City"]/text()').get().strip()
+        state = location.xpath('.//span[@class="State"]/text()').get().strip()
+        country = location.xpath('.//div[@class="Country"]/text()').get().strip()
         if not country and state != "PR":
             country = "US"
         elif not country and state == "PR":
@@ -38,8 +38,8 @@ class AlliedUniversalSpider(scrapy.Spider):
         elif country == "Australia" and state == "New Zealand":
             country = "NZ"
             state = None
-        phone = location.xpath('.//div[@class="PhoneNum"]/text()').extract_first().replace(".", "-").strip()
-        website = location.xpath(".//a/@href").extract_first()
+        phone = location.xpath('.//div[@class="PhoneNum"]/text()').get().replace(".", "-").strip()
+        website = location.xpath(".//a/@href").get()
         if website:
             if website[0] == "/":
                 website = "https://www.aus.com" + website

@@ -11,10 +11,10 @@ class SbarroSpider(StructuredDataSpider):
     wanted_types = ["Restaurant"]
 
     def parse(self, response):
-        store_urls = response.xpath('//*[@class="location-name "]/a/@href').extract()
-        ids = response.xpath('//*[@class="locations-result"]/@id').extract()
-        lats = response.xpath('//*[@class="locations-result"]/@data-latitude').extract()
-        longs = response.xpath('//*[@class="locations-result"]/@data-longitude').extract()
+        store_urls = response.xpath('//*[@class="location-name "]/a/@href').getall()
+        ids = response.xpath('//*[@class="locations-result"]/@id').getall()
+        lats = response.xpath('//*[@class="locations-result"]/@data-latitude').getall()
+        longs = response.xpath('//*[@class="locations-result"]/@data-longitude').getall()
 
         for store_url, id, lat, long in zip(store_urls, ids, lats, longs):
             store_url = "https://sbarro.com" + store_url + "/"

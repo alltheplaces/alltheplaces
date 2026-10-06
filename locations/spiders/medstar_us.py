@@ -22,22 +22,22 @@ class MedstarUSSpider(scrapy.Spider):
 
     def parse_loc(self, response):
         try:
-            phone = response.xpath('//div[@class="field-phone-number"]/a/@href').extract()[0].replace("tel:", "")
+            phone = response.xpath('//div[@class="field-phone-number"]/a/@href').get().replace("tel:", "")
         except:
             phone = ""
         item = Feature()
 
         item["ref"] = item["website"] = response.url
 
-        item["name"] = response.xpath('//h1[@class="field-title"]/text()').extract()[0]
+        item["name"] = response.xpath('//h1[@class="field-title"]/text()').get()
         item["addr_full"] = (
-            response.xpath('//div[@class="field-address"][1]/text()').extract()[0]
+            response.xpath('//div[@class="field-address"][1]/text()').get()
             + ", "
-            + response.xpath('//div[@class="field-city"]/text()').extract()[0]
+            + response.xpath('//div[@class="field-city"]/text()').get()
         )
         item["phone"] = phone
-        item["lat"] = float(response.xpath('//div[@class="field-distance fieldlocation "]/span/@data-lat').extract()[0])
-        item["lon"] = float(response.xpath('//div[@class="field-distance fieldlocation "]/span/@data-lon').extract()[0])
+        item["lat"] = float(response.xpath('//div[@class="field-distance fieldlocation "]/span/@data-lat').get())
+        item["lon"] = float(response.xpath('//div[@class="field-distance fieldlocation "]/span/@data-lon').get())
         name = item["name"].lower()
         if ("hospital" in name or "medical center" in name) and " at " not in name:
             apply_category(Categories.HOSPITAL, item)

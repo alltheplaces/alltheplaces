@@ -21,7 +21,7 @@ class KutchenhausGBSpider(SitemapSpider):
         item["lat"] = response.xpath('//div[@id="storeDetailsMap"]/@data-store-geopoint-latitude').get()
         item["lon"] = response.xpath('//div[@id="storeDetailsMap"]/@data-store-geopoint-longitude').get()
         item["name"] = response.xpath('//div[@class="store-details--caption"]/h1/text()').get()
-        item["addr_full"] = response.xpath('//div[@class="store-details--info-item col-10"]/text()').getall()[0].strip()
+        item["addr_full"] = response.xpath('//div[@class="store-details--info-item col-10"]/text()').get().strip()
         item["phone"] = response.xpath('//div[@class="store-details--info-item col-10"]/a/text()').get()
         item["ref"] = item["website"] = response.url
 

@@ -16,7 +16,7 @@ class GiantFoodStoresSpider(SitemapSpider):
         main = response.xpath("//main")
 
         hours = OpeningHours()
-        for row in main.xpath('.//*[@itemprop="openingHours"]/@content').extract():
+        for row in main.xpath('.//*[@itemprop="openingHours"]/@content').getall():
             day, interval = row.split(" ")
             if interval == "Closed":
                 continue

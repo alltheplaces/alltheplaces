@@ -56,8 +56,8 @@ class LuminorLTSpider(Spider):
         if data_start == -1:
             return None
 
-        settings, _ = json.JSONDecoder().raw_decode(response.text[data_start:])
-        return settings.get("dnb_contacts")
+        page_settings, _ = json.JSONDecoder().raw_decode(response.text[data_start:])
+        return page_settings.get("dnb_contacts")
 
     def clean_branch(self, branch: str | None) -> str | None:
         if not branch:

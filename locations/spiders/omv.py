@@ -132,7 +132,7 @@ class OmvSpider(Spider):
                 url=self.details_url,
                 formdata={"ID": poi["sid"]},
                 callback=self.parse_poi,
-                meta=response.meta,
+                meta=response.meta.copy(),
             )
 
     def parse_poi(self, response: Response) -> Iterable[Feature]:

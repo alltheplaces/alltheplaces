@@ -24,7 +24,7 @@ class ThalesFRSpider(scrapy.Spider):
     def parse_location(self, ref, placemark):
         addr = re.search(
             "Address: (.*?)<br>",
-            placemark.xpath(".//description/text()").extract_first(),
+            placemark.xpath(".//description/text()").get(),
         )[1]
         if "France" not in addr:
             street = locality = postal = ""
@@ -39,11 +39,11 @@ class ThalesFRSpider(scrapy.Spider):
                 postal = re.search(r"\d{5}", addr_split[1]).group(0)
                 locality = addr_split[1].replace(postal, "").strip()
 
-        x, y, z = placemark.xpath(".//coordinates/text()").extract_first().strip().split(",")
+        x, y, z = placemark.xpath(".//coordinates/text()").get().strip().split(",")
 
         properties = {
             "ref": ref,
-            "name": placemark.xpath(".//name/text()").extract_first(),
+            "name": placemark.xpath(".//name/text()").get(),
             "street_address": street,
             "city": locality,
             "postcode": postal,

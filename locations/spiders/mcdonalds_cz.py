@@ -9,7 +9,7 @@ from locations.spiders.mcdonalds import McdonaldsSpider
 class McdonaldsCZSpider(scrapy.Spider):
     name = "mcdonalds_cz"
     item_attributes = McdonaldsSpider.item_attributes
-    allowed_domains = ["www.mcdonalds.cz"]
+    allowed_domains = ["restaurace.mcdonalds.cz", "www.mcdonalds.cz"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
     start_urls = (
         "https://restaurace.mcdonalds.cz/api?token=7983978c4175e5a88b9a58e5b5c6d105217fbc625b6c20e9a8eef3b8acc6204f",

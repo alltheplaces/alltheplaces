@@ -141,7 +141,7 @@ class SherwinWilliamsSpider(Spider):
                 )
 
     def parse(self, response):
-        json_data = response.xpath('//script[@id="storeResultsJSON"]/text()').extract_first()
+        json_data = response.xpath('//script[@id="storeResultsJSON"]/text()').get()
         if json_data:
             data = json.loads(json_data)
             store_type = response.meta["store_type"]
