@@ -2555,6 +2555,26 @@ def test_translated_address_tails_stripped_like_fi():
     assert item["extras"]["name:en"] == "Unrestrained car park Patotien päiväkoti"
 
 
+def test_unit_page_fan_out_math():
+    # CI kill is 120s: 22 sequential pages must fan out, not next-chain.
+    from types import SimpleNamespace
+
+    spider = make_spider()
+    request = SimpleNamespace(meta={})
+    requests = spider._fan_unit_pages(request, {"count": 21531})
+    assert len(requests) == 21
+    assert spider.units_pages_pending == 22
+    assert all(r.meta.get("paged") for r in requests)
+    assert requests[0].url.endswith("unit/?page=2&page_size=1000&format=json")
+    # Paged responses never re-fan; completion counting is once-per-page.
+    assert spider._fan_unit_pages(SimpleNamespace(meta={"paged": True}), {"count": 21531}) is None
+    assert spider._fan_unit_pages(SimpleNamespace(meta={}), {}) is None
+    spider._count_page_done(request)
+    assert spider.units_pages_pending == 21
+    spider._count_page_done(request)
+    assert spider.units_pages_pending == 21
+
+
 def test_skating_field_is_ice_rink():
     # Unit 39819: luistelukenttä rinks are ice rinks, not pitches.
     item = full(make_spider(), "Mäkkylän luistelukenttä", [642])

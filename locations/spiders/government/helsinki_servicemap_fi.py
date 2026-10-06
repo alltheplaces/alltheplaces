@@ -630,6 +630,7 @@ class HelsinkiServicemapFiSpider(Spider):
         self.seen_places = set()
         self.expected_units = None
         self.seen_units = 0
+        self.units_pages_pending = 0
         # Departments and the node tree are independent: fetch both at once
         # (one round trip saved matters under CI's 120s kill) and start the
         # units only after both paginations finish.
@@ -680,6 +681,7 @@ class HelsinkiServicemapFiSpider(Spider):
         self.logger.error("unit page failed: %s", failure.request.url)
         if failure.request.meta.get("retried"):
             self._stat("page/skipped")
+            self._count_page_done(failure.request)
             return None
         yield self._retry_units(failure.request)
 
@@ -822,30 +824,70 @@ class HelsinkiServicemapFiSpider(Spider):
                 self.seen_units += 1
                 self._stat("item/yielded")
                 yield item
-        if request := self._follow(payload, self.parse_units, self.parse_unit_page_error):
+        if response.request.meta.get("paged"):
+            pass  # Fanned page: results already scheduled, no chaining.
+        elif request := self._fan_unit_pages(response.request, payload):
+            yield from request
+        elif request := self._follow(payload, self.parse_units, self.parse_unit_page_error):
             yield request
             return
-        if self.expected_units is not None:
-            dropped = sum(
-                self.crawler.stats.get_value(f"atp/{self.name}/dropped/{reason}", 0)
-                for reason in (
-                    "not_displayed",
-                    "non_place",
-                    "no_coords",
-                    "invalid",
-                    "no_name",
-                    "test_data",
-                    "duplicate",
+        self._count_page_done(response.request)
+        if self.units_pages_pending <= 0:
+            self._check_unit_drift()
+
+    def _count_page_done(self, request):
+        if self.units_pages_pending > 0 and not request.meta.get("counted"):
+            request.meta["counted"] = True
+            self.units_pages_pending -= 1
+
+    def _fan_unit_pages(self, request, payload):
+        # First unit page carries the row count: fetch the rest up front
+        # instead of next-chaining 22 pages (~90s) into CI's 120s kill.
+        # Falls back to sequential when the count is missing.
+        if request.meta.get("paged"):
+            return None
+        count = payload.get("count")
+        if not isinstance(count, int) or count <= 0:
+            return None
+        total = max(1, -(-count // self.page_size))
+        self.units_pages_pending = total
+        requests = []
+        for page in range(1, total + 1):
+            if page == 1:
+                continue
+            requests.append(
+                JsonRequest(
+                    url=f"{self.api_base_url}/unit/?page={page}&page_size={self.page_size}&format=json",
+                    callback=self.parse_units,
+                    errback=self.parse_unit_page_error,
+                    meta={"paged": True},
                 )
-            ) + self.crawler.stats.get_value(f"atp/{self.name}/item/failed", 0)
-            +self.crawler.stats.get_value(f"atp/{self.name}/page/skipped", 0)
-            if self.seen_units + dropped != self.expected_units:
-                self.logger.warning(
-                    "unit count drift: api=%s seen=%s dropped=%s",
-                    self.expected_units,
-                    self.seen_units,
-                    dropped,
-                )
+            )
+        return requests
+
+    def _check_unit_drift(self):
+        if self.expected_units is None:
+            return
+        dropped = sum(
+            self.crawler.stats.get_value(f"atp/{self.name}/dropped/{reason}", 0)
+            for reason in (
+                "not_displayed",
+                "non_place",
+                "no_coords",
+                "invalid",
+                "no_name",
+                "test_data",
+                "duplicate",
+            )
+        ) + self.crawler.stats.get_value(f"atp/{self.name}/item/failed", 0)
+        +self.crawler.stats.get_value(f"atp/{self.name}/page/skipped", 0)
+        if self.seen_units + dropped != self.expected_units:
+            self.logger.warning(
+                "unit count drift: api=%s seen=%s dropped=%s",
+                self.expected_units,
+                self.seen_units,
+                dropped,
+            )
 
     def _service_ids(self, unit):
         def _one(value):
