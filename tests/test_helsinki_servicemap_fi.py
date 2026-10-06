@@ -1399,6 +1399,8 @@ def test_chain_branch_splits():
         ("Marimekko", "Marimekko Itäkeskus", "Itäkeskus", 80307),
         ("Tortilla Corner", "Tortilla Corner Mannerheimintie", "Mannerheimintie", 79015),
         ("Joe & the Juice", "Joe & the Juice Forum", "Forum", 78985),
+        ("EuroPark", "EuroPark, P-WTC", "P-WTC", 67636),
+        ("EuroPark", "EuroPark, P-Porttikeskus P8", "P-Porttikeskus P8", 67630),
     )
     spider = make_spider()
     for brand, fi, branch, ref in cases:
@@ -2558,6 +2560,110 @@ def test_skating_field_is_ice_rink():
     item = full(make_spider(), "Mäkkylän luistelukenttä", [642])
     assert item.get_tag("leisure") == "ice_rink"
     assert item.get_tag("sport") == "ice_skating"
+
+
+def test_hospital_departments_demoted():
+    # Units filed under hospital nodes but naming wards and receptions.
+    item = full(make_spider(), "Sisätautien osastot 4 ja 6, Haartmanin sairaala", [1009])
+    assert item.get_tag("amenity") == "clinic"
+    assert item.get_tag("healthcare") is None
+    item = full(make_spider(), "Geropsykiatrian vastaanotto, Pasila", [1009])
+    assert item.get_tag("amenity") == "clinic"
+    # Mobile units keep the hospital; bare institution names too.
+    item = full(make_spider(), "Lastenpsykiatrian liikkuva intensiivihoito, Töölö", [1009])
+    assert item.get_tag("amenity") == "hospital"
+    item = full(make_spider(), "Tammisairaala", [1009])
+    assert item.get_tag("amenity") == "hospital"
+    # Emergency departments read as urgent care (unit 70479).
+    item = full(make_spider(), "Naistentautien ja synnytysten päivystys, Hyvinkään sairaala", [1009])
+    assert item.get_tag("amenity") == "clinic"
+    assert item.get_tag("healthcare:speciality") == "urgent"
+    # Co-filed clinical rows win over the hospital row (unit 68400).
+    item = full(make_spider(), "Kliininen neurofysiologia, Raaseporin sairaala", [1018, 1010])
+    assert item.get_tag("healthcare") == "medical_imaging"
+
+
+def test_wellness_centre_health_stations_are_clinics():
+    # Units 61667/54491: genuine health centres, not eco-stores.
+    item = full(make_spider(), "Myllypuron terveys- ja hyvinvointikeskus", [2190])
+    assert item.get_tag("amenity") == "clinic"
+    item = full(make_spider(), "Kalasataman terveys- ja hyvinvointikeskus", [2190])
+    assert item.get_tag("amenity") == "clinic"
+    # Ruohonjuuri stores keep the shop.
+    item = full(make_spider(), "Ruohonjuuri Itis", [739, 750, 2190])
+    assert item.get_tag("shop") == "health_food"
+
+
+def test_swimming_pier_is_pier():
+    # Unit 79589: piers filed as beaches.
+    item = full(make_spider(), "Gälisnäsin uimalaituri", [688])
+    assert item.get_tag("man_made") == "pier"
+    item = full(make_spider(), "Vilniemen uimaranta", [688])
+    assert item.get_tag("natural") == "beach"
+
+
+def test_football_stadium_has_soccer():
+    # Unit 20999 shape: stadiums are never sportless.
+    item = full(make_spider(), "Bolt Arena", [656])
+    assert item.get_tag("leisure") == "pitch"
+    assert item.get_tag("sport") == "soccer"
+
+
+def test_staff_canteen_is_canteen():
+    # Unit 77540: co-filed under generic restaurants, still a staff canteen.
+    item = full(make_spider(), "Henkilöstöravintola, ravintola Merta", [183, 751])
+    assert item.get_tag("amenity") == "canteen"
+
+
+def test_valaistu_tail_sets_lit():
+    # Unit 68639: lit trails carry the attribute, not the name.
+    item = named(make_spider(), "Keimolan hiihtoharjoittelualue, valaistu", [595])
+    assert item["name"] == "Keimolan hiihtoharjoittelualue"
+    assert item["extras"]["lit"] == "yes"
+
+
+def test_hosted_site_splits_to_venue():
+    # Units 68526/78533: institution heads with hosted site tails.
+    item = full(make_spider(), "Vantaan musiikkiopisto, Aurinkokiven koulun opetuspiste", [1370])
+    assert item["name"] == "Vantaan musiikkiopisto"
+    assert item["located_in"] == "Aurinkokiven koulun opetuspiste"
+    item = full(make_spider(), "Stadin ammattiopisto, Nilsiänkadun toimipaikka", [2180])
+    assert item["name"] == "Stadin ammattiopisto"
+    assert item["located_in"] == "Nilsiänkadun toimipaikka"
+    # Unit 69937: same systematic class (street-named site).
+    item = full(make_spider(), "Työtehoseura, Sarkatien toimipiste", [2167, 2166])
+    assert item["name"] == "Työtehoseura"
+    assert item["located_in"] == "Sarkatien toimipiste"
+
+
+def test_bureau_tail_stripped():
+    # Unit 79871: department bureaucracy is metadata, kept in official_name.
+    fi = "Iltapäivätoiminta / Pasilan peruskoulu / Vaativan tuen erityisopetus, Kasvatuksen ja koulutuksen toimiala (vaativan tuen erityisopetus)"
+    item = named(make_spider(), fi, [1181])
+    assert item["name"] == "Iltapäivätoiminta / Pasilan peruskoulu / Vaativan tuen erityisopetus"
+    assert item["extras"]["official_name"] == fi
+
+
+def test_ry_provider_tail_promotes_club():
+    # Unit 76868: association tails strip like Oy ones and promote.
+    fi = "Iltapäivätoiminta / Laajasalon peruskoulu, Helsingin Nuorten Miesten Kristillinen Yhdistys r.y."
+    item = named(make_spider(), fi, [1181])
+    assert item["name"] == "Iltapäivätoiminta / Laajasalon peruskoulu"
+    _, item = operated(Categories.SCHOOL, {"name": {"fi": fi}, "organizer_name": None})
+    assert item["operator"] == "Helsingin Nuorten Miesten Kristillinen Yhdistys r.y."
+    assert item["extras"]["operator:type"] == "private"
+
+
+def test_service_headed_translation_venue_skipped():
+    # Unit 76771: en venue slot holds the service (feed typo included).
+    item = named(
+        make_spider(),
+        "Iltapäivätoiminta / Tahvonlahden ala-aste, Sportti Iltapäiväkerhot Oy",
+        [1181],
+        en="fter-school activities / Tahvonlahti Comprehensive school/ Sportti Iltapäiväkerhot Oy",
+    )
+    assert "located_in" not in item
+    assert item["extras"]["name:en"] == "Tahvonlahti Comprehensive school"
 
 
 def test_swedish_only_name_refines():

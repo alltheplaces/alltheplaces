@@ -289,7 +289,7 @@ class HelsinkiServicemapFiSpider(Spider):
         655: (Categories.LEISURE_PITCH, {"sport": Sport.BEACH_VOLLEYBALL}),  # Beachvolleykenttä (beach volleyball)
         2355: (Categories.LEISURE_PITCH, {"sport": Sport.PADEL}),  # Padelkenttäalue (padel court areas)
         661: (Categories.LEISURE_PITCH, {}),  # Rullakiekkokenttä (roller-hockey rinks)
-        656: (Categories.LEISURE_PITCH, {}),  # Jalkapallostadionit (football stadiums)
+        656: (Categories.LEISURE_PITCH, {"sport": Sport.SOCCER}),  # Jalkapallostadionit (football stadiums)
         660: (Categories.LEISURE_PITCH, {"sport": Sport.BASEBALL}),  # Pesäpallostadion (pesäpallo stadiums)
         627: (Categories.LEISURE_PITCH, {"sport": Sport.TABLE_TENNIS}),  # Pöytätennistila (table-tennis rooms)
         613: (Categories.LEISURE_FITNESS_STATION, {}),  # Voimailusali (weight-training rooms)
@@ -1099,14 +1099,21 @@ class HelsinkiServicemapFiSpider(Spider):
         # Register flags, never name parts ("Daghemmet Fyndet Kanel,
         # yksityinen", unit 64929, in all three languages).
         primary = re.sub(r",\s*(yksityinen|yksityiset|privat|private)\.?$", "", primary, flags=re.IGNORECASE).strip()
-        org_stripped = re.sub(r",\s*[^,]*\b(ry|oy|ab)\.?$", "", primary, flags=re.IGNORECASE).strip()
+        # Bureau tails are record metadata ("Iltapäivätoiminta / ... /
+        # Vaativan tuen erityisopetus, Kasvatuksen ja koulutuksen toimiala
+        # (...)", unit 79871).
+        primary = re.sub(r",\s*Kasvatuksen ja koulutuksen toimiala.*$", "", primary).strip()
+        primary = re.sub(r",\s*Sektorn för fostran och utbildning.*$", "", primary).strip()
+        primary = re.sub(r",\s*Education Division$", "", primary).strip()
+        primary = re.sub(r",\s*valaistu\s*$", "", primary, flags=re.IGNORECASE).strip()
+        org_stripped = re.sub(r"[,/]\s*[^,/]*\b(r\.y\.|ry|oy|ab)\.?$", "", primary, flags=re.IGNORECASE).strip()
         if (
             org_stripped
             and org_stripped != primary
             and (
                 " / " in org_stripped
                 or re.search(
-                    r"(päiväkoti|lukio|opisto|koulu|kirjasto|museo|kirkko|teatteri|uimahalli|satama|skola|iltapäivätoiminta|asukastila)\b",
+                    r"(päiväkoti|lukio|opisto|koulu|kirjasto|museo|kirkko|teatteri|uimahalli|satama|skola|iltapäivätoiminta|eftermiddagsverksamhet|after-school activit|fter-school activit|asukastila)\b",
                     org_stripped.lower(),
                 )
             )
@@ -1183,6 +1190,12 @@ class HelsinkiServicemapFiSpider(Spider):
             # Linnaistenmetsä, lentopallokenttä", unit 57400, cf. the
             # slash twins that already split): the court is the name.
             return tail.strip(), head.strip()
+        if head.strip() and re.search(r"(toimipaikka|opetuspiste|toimipiste)$", tail.strip().lower()):
+            # Hosted sites ("Vantaan musiikkiopisto, Aurinkokiven koulun
+            # opetuspiste", unit 68526; "Työtehoseura, Sarkatien
+            # toimipiste", unit 69937): the institution is the name, the
+            # site the venue.
+            return head.strip(), tail.strip()
         if head.strip() and re.search(self.VENUE_WORDS_RE, tail.strip().lower()):
             return head.strip(), tail.strip()
         if (
@@ -1261,7 +1274,27 @@ class HelsinkiServicemapFiSpider(Spider):
                 text = self._clean_name(text)
                 facility, venue = self._split_facility(text)
                 if venue and "located_in" not in item:
-                    item["located_in"] = venue
+                    if any(
+                        word in venue.lower()
+                        for word in (
+                            "iltapäivätoiminta",
+                            "eftermiddagsverksamhet",
+                            "after-school activit",
+                            "fter-school activit",
+                            "opiskeluhuolto",
+                            "opiskeluterveydenhuolto",
+                            "elevhälsa",
+                            "skolhälsovård",
+                            "student welfare",
+                            "school health",
+                        )
+                    ):
+                        # Service-headed translation ("fter-school activities /
+                        # Tahvonlahti ...", unit 76771, feed typo included):
+                        # the venue slot holds the service, not a venue.
+                        venue = None
+                    else:
+                        item["located_in"] = venue
                 if facility and facility != item.get("name"):
                     item["extras"][f"name:{key}"] = facility
                     if raw != facility:
@@ -1316,6 +1349,10 @@ class HelsinkiServicemapFiSpider(Spider):
                 # The feed's official designation, kept verbatim for
                 # searchability; name holds the OSM-friendly short form.
                 item["extras"]["official_name"] = raw_primary
+            if re.search(r",\s*valaistu\s*$", raw_primary, re.IGNORECASE):
+                # Lit trails ("Keimolan hiihtoharjoittelualue, valaistu",
+                # unit 68639); the tail strips in _clean_name.
+                item["extras"]["lit"] = "yes"
             item["name"] = primary
         self._apply_translations(item, name)
 
@@ -1704,7 +1741,12 @@ class HelsinkiServicemapFiSpider(Spider):
 
     # Provider tails that name the legal operator (feed spells short).
     # Unknown tails (Beanet Oy, caterers) never promote: only mapped ones.
-    PROVIDER_OPERATORS = {"puuhala oy": "Puuhala iltapäiväkerhot Oy"}
+    # Keys are folded without dots/spaces ("r.y." vs "ry" spellings).
+    PROVIDER_OPERATORS = {
+        "puuhalaoy": "Puuhala iltapäiväkerhot Oy",
+        "helsinginnuortenmiestenkristillinenyhdistysry": "Helsingin Nuorten Miesten Kristillinen Yhdistys r.y.",
+        "sporttiiltapäiväkerhotoy": "Sportti Iltapäiväkerhot Oy",
+    }
 
     OWNERSHIP_TAIL_RE = re.compile(r",\s*(yksityinen|yksityiset|privat|private)\.?$", re.IGNORECASE)
 
@@ -1716,10 +1758,10 @@ class HelsinkiServicemapFiSpider(Spider):
     def _provider_tail_operator(self, unit):
         name = unit.get("name") or {}
         fi = str(name.get("fi") or "") if isinstance(name, dict) else ""
-        match = re.search(r",\s*([^,]*\b(ry|oy|ab)\.?)$", fi, flags=re.IGNORECASE)
+        match = re.search(r",\s*([^,]*\b(r\.y\.|ry|oy|ab)\.?)$", fi, flags=re.IGNORECASE)
         if not match:
             return None
-        return self.PROVIDER_OPERATORS.get(match.group(1).strip().casefold())
+        return self.PROVIDER_OPERATORS.get(re.sub(r"[\s.]+", "", match.group(1)).lower())
 
     def _apply_operator(self, item, unit):
         # Tenants (shops, eateries, hotels, cinemas, canteens): the department
@@ -1856,6 +1898,7 @@ class HelsinkiServicemapFiSpider(Spider):
         "Tortilla Corner",
         "Joe & the Juice",
         "Aimo Park",
+        "EuroPark",
     )
 
     def _apply_chain_branch(self, item, unit):
@@ -2397,6 +2440,30 @@ class HelsinkiServicemapFiSpider(Spider):
     RENTAL_SAUNA_NODES = frozenset({155, 264, 511})
     ADULT_GUIDANCE_NODES = frozenset({2187, 2188})
 
+    # Hospital wards and receptions are departments, not hospitals
+    # ("Geropsykiatrian vastaanotto, Pasila", unit 76614). Mobile units
+    # keep the hospital (standing decision); bare institution names keep it
+    # too ("Naistenklinikka" is a hospital building, "Tammisairaala" 77573).
+    HOSPITAL_NODES = frozenset({1009, 1010, 1012})
+    HOSPITAL_DEPT_RE = re.compile(
+        r"(osasto|vastaanot|poliklinik|klinik|yksikk|röntgen|rontgen|laboratorio|leikkaus|terapi|terapeut|neuvon|diabetes|synnyt|seulon|fysioterapi|fysiologia|puheterapi|kuntoutus|päivyst)"
+    )
+    HOSPITAL_MOBILE_RE = re.compile(r"(liikkuva|etsivä|kiertävä)")
+    CLINICAL_CATEGORIES = frozenset(
+        {
+            Categories.CLINIC,
+            Categories.CLINIC_URGENT,
+            Categories.DOCTOR_GP,
+            Categories.DENTIST,
+            Categories.NURSE_CLINIC,
+            Categories.MEDICAL_LABORATORY,
+            Categories.MEDICAL_IMAGING,
+            Categories.SPEECH_THERAPIST,
+            Categories.PHYSIOTHERAPIST,
+            Categories.PODIATRIST,
+        }
+    )
+
     def _refine_special_category(self, category, text, unit, winner):
         # One-off filing corrections; None falls through to the noun tables.
         if winner in self.BILLING_NODES and self._is_water_post(unit):
@@ -2412,7 +2479,17 @@ class HelsinkiServicemapFiSpider(Spider):
             # kansallinen muistomerkki, unit 55958).
             return Categories.HISTORIC_MEMORIAL
         if "henkilöstöravintola" in text:
-            return category
+            # Staff canteens are canteens even when co-filed as restaurants
+            # (unit 77540 under generic Ravintolat).
+            return Categories.CANTEEN
+        if winner == 2190 and re.search(r"(hyvinvointikeskus|terveyskeskus|perhekeskus)", text):
+            # Genuine health centres filed under the wellness-centre service
+            # node (Myllypuro 61667, Kalasatama 54491); eco-stores like
+            # Ruohonjuuri keep the shop.
+            return Categories.CLINIC
+        if winner == 688 and "laituri" in text:
+            # Swimming piers filed as beaches (Gälisnäsin uimalaituri 79589).
+            return Categories.MAN_MADE_PIER
         if re.search(r"\w+museo$", text) and category in (
             Categories.RESTAURANT,
             Categories.CAFE,
@@ -2435,12 +2512,38 @@ class HelsinkiServicemapFiSpider(Spider):
             return Categories.LEISURE_GOLF_COURSE
         return None
 
+    def _hospital_department_category(self, category, matched, unit, text):
+        if self.HOSPITAL_MOBILE_RE.search(text):
+            return category
+        if "päivyst" in text:
+            # Emergency departments read as urgent care (unit 70479).
+            return Categories.CLINIC_URGENT
+        if not self.HOSPITAL_DEPT_RE.search(text):
+            return category
+        name = unit.get("name") or {}
+        fi = str(name.get("fi") or "") if isinstance(name, dict) else ""
+        # A trailing hospital head does not count as department evidence on
+        # its own ("Naistenklinikka" is the hospital itself); anything
+        # before it does ("Kliininen neurofysiologia, Raaseporin sairaala").
+        if not self.HOSPITAL_DEPT_RE.search(re.sub(r"(sairaala|klinikka)\s*$", "", fi, flags=re.IGNORECASE)):
+            # Bare institution names are the hospital itself.
+            return category
+        for rule in sorted(matched, key=lambda r: self.rule_precedence[r]):
+            cofiled, _ = self.SERVICE_NODES[rule]
+            if cofiled in self.CLINICAL_CATEGORIES:
+                # Imaging/lab co-filing beats the hospital row
+                # ("Kliininen neurofysiologia, Raaseporin sairaala", 68400).
+                return cofiled
+        return Categories.CLINIC
+
     def _refine_category(self, category, matched, unit):
         # Facility nouns in names beat feed filing, in every language.
         text = self._refine_text(unit)
         winner = self._earliest(matched)
         if special := self._refine_special_category(category, text, unit, winner):
             return special
+        if category == Categories.HOSPITAL and winner in self.HOSPITAL_NODES:
+            return self._hospital_department_category(category, matched, unit, text)
         for substring, refined in self.NAME_CATEGORIES:
             if substring in text:
                 if substring in ("kirjasto", "bibliotek", "library") and category != Categories.TOURISM_ATTRACTION:
