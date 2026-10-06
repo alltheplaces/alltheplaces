@@ -15,6 +15,7 @@ class KfcATSpider(SitemapSpider, StructuredDataSpider):
     search_for_image = False
 
     def post_process_item(self, item: Feature, response, ld_data, **kwargs):
+        item["email"] = None
         item["branch"] = item.pop("name").removeprefix("KFC ")
         apply_category(Categories.FAST_FOOD, item)
         yield item
