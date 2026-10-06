@@ -44,6 +44,7 @@ class Categories(Enum):
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
     TRAIN_STATION = {"railway": "station"}
+    RAILWAY_SUBWAY_ENTRANCE = {"railway": "subway_entrance"}
 
     AMUSEMENT_ARCADE = {"leisure": "amusement_arcade"}
     BOWLING = {"leisure": "bowling_alley"}
@@ -76,31 +77,47 @@ class Categories(Enum):
     CRAFT_PLUMBER = {"craft": "plumber"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
     CRAFT_TAILOR = {"craft": "tailor"}
+    CRAFT_UPHOLSTERER = {"craft": "upholsterer"}
     CRAFT_WATCHMAKER = {"craft": "watchmaker"}
     CRAFT_WINERY = {"craft": "winery"}
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
+    ALLOTMENTS = {"landuse": "allotments"}
 
     INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
     RESIDENTIAL_APARTMENTS = {"landuse": "residential", "residential": "apartments"}
 
     LEISURE_GARDEN = {"leisure": "garden"}
+    LEISURE_DANCE = {"leisure": "dance"}
     LEISURE_DOG_PARK = {"leisure": "dog_park"}
+    LEISURE_DISC_GOLF_COURSE = {"leisure": "disc_golf_course"}
     LEISURE_FITNESS_STATION = {"leisure": "fitness_station"}
+    LEISURE_FISHING = {"leisure": "fishing"}
     LEISURE_GAZEBO = {"amenity": "shelter", "shelter_type": "gazebo"}
+    LEISURE_ICE_RINK = {"leisure": "ice_rink"}
     LEISURE_INDOOR_PLAY = {"leisure": "indoor_play"}
     LEISURE_NATURE_RESERVE = {"leisure": "nature_reserve"}
     LEISURE_PARK = {"leisure": "park"}
+    LEISURE_PADDLING_POOL = {"leisure": "paddling_pool"}
+    LEISURE_PARKOUR = {"leisure": "parkour_park"}
     LEISURE_PICNIC_SHELTER = {"amenity": "shelter", "shelter_type": "picnic_shelter"}
     LEISURE_PICNIC_TABLE = {"leisure": "picnic_table"}
+    TOURISM_PICNIC_SITE = {"tourism": "picnic_site"}
     LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
     LEISURE_SLIPWAY = {"leisure": "slipway"}
+    LEISURE_BOWLING_ALLEY = {"leisure": "bowling_alley"}
     LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
+    LEISURE_SPORTS_HALL = {"leisure": "sports_hall"}
     LEISURE_SWIMMING_POOL = {"leisure": "swimming_pool"}
+    LEISURE_SWIMMING_AREA = {"leisure": "swimming_area"}
+    LEISURE_TRACK = {"leisure": "track"}
     LEISURE_TRAMPOLINE_PARK = {"leisure": "trampoline_park"}
     LEISURE_WATER_PARK = {"leisure": "water_park"}
+    LEISURE_MINIATURE_GOLF = {"leisure": "miniature_golf"}
+    LEISURE_GOLF_COURSE = {"leisure": "golf_course"}
+    LEISURE_ESCAPE_GAME = {"leisure": "escape_game"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -218,6 +235,7 @@ class Categories(Enum):
     SHOP_PERFUMERY = {"shop": "perfumery"}
     SHOP_PEST_CONTROL = {"shop": "pest_control"}
     SHOP_PET = {"shop": "pet"}
+    SHOP_PET_GROOMING = {"shop": "pet_grooming"}
     SHOP_PHOTO = {"shop": "photo"}
     SHOP_PLANT_HIRE = {"shop": "plant_hire"}
     SHOP_POTTERY = {"shop": "pottery"}
@@ -279,6 +297,9 @@ class Categories(Enum):
     OFFICE_IT = {"office": "it"}
     OFFICE_LAWYER = {"office": "lawyer"}
     OFFICE_MORTGAGE = {"office": "mortgage"}
+    OFFICE_RESEARCH = {"office": "research"}
+    OFFICE_ADMINISTRATIVE = {"office": "administrative"}
+    OFFICE_SECURITY = {"office": "security"}
     OFFICE_SUPERVISED_INJECTION_SITE = {"office": "supervised_injection_site"}
     OFFICE_TUTORING = {"office": "tutoring"}
 
@@ -288,6 +309,7 @@ class Categories(Enum):
     TOURISM_ATTRACTION_SQUARE = {"tourism": "attraction", "place": "square"}
     TOURISM_ATTRACTION_STREET = {"tourism": "attraction", "highway": "street"}
     TOURISM_BED_AND_BREAKFAST = {"tourism": "guest_house", "guest_house": "bed_and_breakfast"}
+    TOURISM_GUEST_HOUSE = {"tourism": "guest_house"}
     TOURISM_BOAT_TOURS = {"tourism": "tours", "tours": "boat"}
     TOURISM_CAMP_SITE = {"tourism": "camp_site"}
     TOURISM_CHALET = {"tourism": "chalet"}
@@ -323,6 +345,7 @@ class Categories(Enum):
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
     CANTEEN = {"amenity": "canteen"}
+    CARPET_WASHING = {"amenity": "carpet_washing"}
     CARAVAN_SITE = {"tourism": "caravan_site"}
     CASINO = {"amenity": "casino"}
     CHARGE_POINT = {"man_made": "charge_point"}
@@ -341,10 +364,12 @@ class Categories(Enum):
     DIALYSIS = {"healthcare": "dialysis"}
     DISASTER_HELP_POINT = {"emergency": "disaster_help_point"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare:speciality": "community"}
+    DRINKING_WATER = {"amenity": "drinking_water"}
     DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     EVENTS_VENUE = {"amenity": "events_venue"}
     FAST_FOOD = {"amenity": "fast_food"}
+    FERRY_TERMINAL = {"amenity": "ferry_terminal"}
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
     GRAVE = {"cemetery": "grave"}
@@ -360,6 +385,7 @@ class Categories(Enum):
     LIBRARY = {"amenity": "library"}
     MAILROOM = {"amenity": "mailroom"}
     MANHOLE = {"man_made": "manhole"}
+    MARINA = {"leisure": "marina"}
     MARKETPLACE = {"amenity": "marketplace"}
     MEDICAL_IMAGING = {
         "healthcare": "medical_imaging"
@@ -370,6 +396,7 @@ class Categories(Enum):
     MORTUARY = {"amenity": "mortuary"}
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
+    MUSIC_SCHOOL = {"amenity": "music_school"}
     MUSIC_VENUE = {"amenity": "music_venue"}
     NIGHTCLUB = {"amenity": "nightclub"}
     NURSE_CLINIC = {"healthcare": "nurse"}
@@ -382,8 +409,11 @@ class Categories(Enum):
     PHARMACY = {"amenity": "pharmacy"}
     PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
+    PLACE_ISLAND = {"place": "island"}
+    PLACE_NEIGHBOURHOOD = {"place": "neighbourhood"}
     PLACE_OF_WORSHIP = {"amenity": "place_of_worship"}
     PODIATRIST = {"healthcare": "podiatrist"}
+    POLICE = {"amenity": "police"}
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
@@ -398,6 +428,7 @@ class Categories(Enum):
     RESTAURANT = {"amenity": "restaurant"}
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SHARPS_WASTE_BASKET = {"amenity": "waste_basket", "waste": "sharps"}
+    SHELTER = {"amenity": "shelter"}
     SOCIAL_CENTRE = {"amenity": "social_centre"}
     SOCIAL_FACILITY = {"amenity": "social_facility"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
@@ -405,6 +436,8 @@ class Categories(Enum):
     TELEPHONE = {"amenity": "telephone"}
     TOILETS = {"amenity": "toilets"}
     THEATRE = {"amenity": "theatre"}
+    AMENITY_BOAT_RENTAL = {"amenity": "boat_rental"}
+    TOOL_LIBRARY = {"amenity": "tool_library"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VENDING_MACHINE = {"amenity": "vending_machine"}
     VETERINARY = {"amenity": "veterinary"}
@@ -427,6 +460,7 @@ class Categories(Enum):
 
     ANTENNA = {"man_made": "antenna"}
     BOREHOLE = {"man_made": "borehole"}
+    MILITARY_BUNKER = {"military": "bunker"}
     CULVERT = {"tunnel": "culvert"}
     FIRE_HYDRANT = {"emergency": "fire_hydrant"}
     KERB_GRATE = {
@@ -443,6 +477,7 @@ class Categories(Enum):
         "substance": "rainwater",
     }
     PETROLEUM_WELL = {"man_made": "petroleum_well"}
+    MAN_MADE_PIER = {"man_made": "pier"}
     POWER_POLE = {"power": "pole"}
     POWER_TOWER = {"power": "tower"}
     PUMPING_STATION_SEWAGE = {
@@ -484,9 +519,11 @@ class Categories(Enum):
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
     TRANSFORMER = {"power": "transformer"}
     WASTEWATER_PLANT = {"man_made": "wastewater_plant", "utility": "sewerage", "substance": "sewage;wastewater"}
+    WATER_WORKS = {"man_made": "water_works"}
     WATER_WELL = {"man_made": "water_well"}
 
     NATURAL_BASIN = {"natural": "water", "water": "basin"}
+    NATURAL_BEACH = {"natural": "beach"}
     NATURAL_LANDFORM = {"natural": "landform"}
     NATURAL_TREE = {"natural": "tree"}
 
@@ -1083,6 +1120,23 @@ class Sport(Enum):
     EQUESTRIAN = "equestrian"
     AMERICAN_FOOTBALL = "american_football"
     CRICKET = "cricket"
+    MARTIAL_ARTS = "martial_arts"
+    ATHLETICS = "athletics"
+    BADMINTON = "badminton"
+    FLOORBALL = "floorball"
+    HANDBALL = "handball"
+    RUGBY = "rugby"
+    ICE_HOCKEY = "ice_hockey"
+    CYCLING = "cycling"
+    PARKOUR = "parkour"
+    TABLE_TENNIS = "table_tennis"
+    PADEL = "padel"
+    ICE_SKATING = "ice_skating"
+    SKATEBOARD = "skateboard"
+    VOLLEYBALL = "volleyball"
+    BEACH_VOLLEYBALL = "beachvolleyball"
+    CLIMBING = "climbing"
+    KARTING = "karting"
 
 
 def add_sport(sport: Sport | Iterable[Sport], item: Feature | dict) -> None:
