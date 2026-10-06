@@ -112,7 +112,10 @@ EMPTYING_TIME = re.compile(r"\b([a-zäö]{2})(?:\s*-\s*([a-zäö]{2}))?\s+(\d{1,
 
 class PostiFISpider(Spider):
     name = "posti_fi"
-    custom_settings = {"CONCURRENT_REQUESTS": 4, "DOWNLOAD_DELAY": 0.25}
+    # graphql.posti.fi sits behind a CloudFront firewall that started returning 403
+    # for every request after a crawl at about 3 requests a second; the whole
+    # country is about 400 requests, so go slowly.
+    custom_settings = {"CONCURRENT_REQUESTS": 1, "DOWNLOAD_DELAY": 1}
 
     # Both queries error above 50 results and have no pagination; results are the
     # 50 nearest the centre of the rectangle, so saturated rectangles are split.
