@@ -781,6 +781,7 @@ class HelsinkiServicemapFiSpider(Spider):
         "railway",
         "sport",
         "landuse",
+        "historic",
     )
 
     def parse_units(self, response):
@@ -2214,6 +2215,12 @@ class HelsinkiServicemapFiSpider(Spider):
         if category == Categories.RECYCLING and "hallinto" in text:
             # Company HQ filed as a recycling centre (cf. Kierrätyskeskus Oy).
             return Categories.OFFICE_COMPANY
+        if category == Categories.TOURISM_ARTWORK and (
+            "muistomerkki" in text or "memorial" in text or "minnesmärke" in text
+        ):
+            # Named memorials filed as public art (cf. Talvisodan
+            # kansallinen muistomerkki, unit 55958).
+            return Categories.HISTORIC_MEMORIAL
         if "henkilöstöravintola" in text:
             return category
         if re.search(r"\w+museo$", text) and category in (

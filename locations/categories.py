@@ -393,6 +393,7 @@ class Categories(Enum):
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MONUMENT = {"historic": "monument"}
+    HISTORIC_MEMORIAL = {"historic": "memorial"}
     MORTUARY = {"amenity": "mortuary"}
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}

@@ -787,8 +787,14 @@ def test_laavu_is_shelter():
     assert item.get_tag("amenity") == "shelter"
 
 
-def test_talkoolaituri_is_tool_library():
-    # Unit 79897: Clean-up station, not a pier.
+def test_memorial_named_artwork_is_memorial():
+    # Unit 55958: national Winter War memorial filed as public art.
+    item = full(make_spider(), "Talvisodan kansallinen muistomerkki", [2006])
+    assert item.get_tag("historic") == "memorial"
+    assert item.get_tag("tourism") is None
+
+
+def test_talkoolaituri_is_tool_library():  # Unit 79897: Clean-up station, not a pier.
     item = full(make_spider(), "Kaupunginpuutarhan talkoolaituri", [2235, 72])
     assert item.get_tag("amenity") == "tool_library"
 
