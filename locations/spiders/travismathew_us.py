@@ -2,14 +2,14 @@ from urllib.parse import parse_qs, urlparse
 
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
 class TravismathewUSSpider(SitemapSpider):
     name = "travismathew_us"
-    item_attributes = {"brand": "TravisMathew", "name": "TravisMathew", "extras": Categories.SHOP_CLOTHES.value}
+    item_attributes = {"brand": "TravisMathew", "name": "TravisMathew"}
     sitemap_urls = ["https://travismathew.com/sitemap.xml"]
     sitemap_rules = [(r"/pages/store/[\w-]+$", "parse_item")]
 
@@ -33,5 +33,7 @@ class TravismathewUSSpider(SitemapSpider):
             hours = "".join(line.xpath("text()").getall())
             oh.add_ranges_from_string(f"{day} {hours}")
         item["opening_hours"] = oh
+
+        apply_category(Categories.SHOP_CLOTHES, item)
 
         yield item
