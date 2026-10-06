@@ -23,7 +23,6 @@ class MountainAmericaCreditUnionUSSpider(JSONBlobSpider):
 
         del item["name"]
         item["ref"] = location["branch_id"]
-        print(location.get("name"),"ooooooooooooooooooooooooooooooooooooooooooooo")
         if name := location.get("name"):
             item["state"], _ = name.replace("AZ: Queen Creek Combs","AZ - Queen Creek Combs").split(" - ")
         item["branch"] = location["headline"]
