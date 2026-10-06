@@ -265,7 +265,7 @@ class HelsinkiServicemapFiSpider(Spider):
         662: (Categories.LEISURE_PITCH, {}),  # Tenniskenttäalue (tennis court areas)
         554: (Categories.LEISURE_PITCH, {"sport": Sport.EQUESTRIAN}),  # Esteratsastuskenttä (show-jumping grounds)
         555: (Categories.LEISURE_PITCH, {"sport": Sport.EQUESTRIAN}),  # Ratsastuskenttä (riding fields)
-        642: (Categories.LEISURE_PITCH, {"sport": Sport.ICE_SKATING}),  # Luistelukenttä (skating rinks)
+        642: (Categories.LEISURE_ICE_RINK, {"sport": Sport.ICE_SKATING}),  # Luistelukenttä (skating rinks)
         641: (Categories.LEISURE_PITCH, {"sport": Sport.ICE_HOCKEY}),  # Kaukalo (hockey rinks)
         644: (Categories.LEISURE_PITCH, {"sport": Sport.ICE_SKATING}),  # Pikaluistelurata (speed-skating tracks)
         645: (Categories.LEISURE_PITCH, {"sport": Sport.ICE_SKATING}),  # Tekojääkenttä (artificial ice fields)
@@ -1061,6 +1061,10 @@ class HelsinkiServicemapFiSpider(Spider):
         else:
             return text, None
         ven, fac = venue.strip(), facility.strip()
+        if len(ven) <= 1 or len(fac) <= 1:
+            # Ship prefixes ("M/S Carmel Terrace", unit 77887): single
+            # letters are never a venue or a facility.
+            return text, None
         ven_l, fac_l = ven.lower(), fac.lower()
         head0 = venue.split("/")[0].strip().casefold()
         if head0 in self.NO_SPLIT_VENUES:
@@ -1092,6 +1096,9 @@ class HelsinkiServicemapFiSpider(Spider):
         # Bare organisation names ("Allergia-, Iho- ja Astmaliitto ry") stay whole.
         primary = re.sub(r",\s*toiminta päättyy.*$", "", raw).strip()
         primary = re.sub(r",\s*SULJETTU TOISTAISEKSI\s*$", "", primary, flags=re.IGNORECASE).strip()
+        # Register flags, never name parts ("Daghemmet Fyndet Kanel,
+        # yksityinen", unit 64929, in all three languages).
+        primary = re.sub(r",\s*(yksityinen|yksityiset|privat|private)\.?$", "", primary, flags=re.IGNORECASE).strip()
         org_stripped = re.sub(r",\s*[^,]*\b(ry|oy|ab)\.?$", "", primary, flags=re.IGNORECASE).strip()
         if (
             org_stripped
@@ -1141,6 +1148,19 @@ class HelsinkiServicemapFiSpider(Spider):
         r"(tie|katu|kuja|polku|väylä|raitti|ranta|kaari|esplanadi|bulevardi|vägen|väg|gatan|gata|gränden|gränd|stigen|stig)\s+\d"
     )
 
+    # Court/field/hall tails that name the facility, not the venue
+    # (lentopallokenttä, liikuntasali); per-language like the other
+    # end-anchored rules. Bare kenttä/sali excluded: "Mäntymäen kenttä"
+    # names the field itself.
+    FACILITY_TAIL_RE = re.compile(
+        r"(\w*(pallo|koris|tennis|sulkapallo|salibandy|hiekka|nurmi|tekonurmi)kenttä"
+        r"|\w*(liikunta|urheilu|palloilu)sali"
+        r"|\w*(bollplan|basketplan|fotbollsplan|tennisplan|friidrottsplan)"
+        r"|\w*(idrottshall|sporthall)"
+        r"|(football|volleyball|basketball|tennis|ball|playground)\s+(field|court)"
+        r"|sports?\s+hall)$"
+    )
+
     def _split_comma_venue(self, primary):
         # Service at a preschool group; bare "X esiopetus" too, unless the
         # head names the venue ("Tuohimäen päiväkoti, esiopetus" stays whole).
@@ -1149,6 +1169,20 @@ class HelsinkiServicemapFiSpider(Spider):
             # Address tail ("Koskelan ala-asteen koulu, Mäkelänkatu 84",
             # "Alueellinen keräyspiste, Malmgatan 20-21").
             return head.strip(), None
+        if head.strip() and re.search(
+            r"(kouluterveydenhuolto|opiskeluterveydenhuolto|opiskeluhuolto|elevhälsa|skolhälsovård|student welfare|school health care)$",
+            head.strip().lower(),
+        ):
+            # Service-first health names ("Esiopetuksen opiskeluhuolto,
+            # Touhula Fallåker", unit 78143; "Opiskeluhuolto, Karhusuon
+            # koulu", unit 69678): the service is the name whatever the
+            # tail, the tail is the venue.
+            return head.strip(), tail.strip()
+        if head.strip() and re.search(self.FACILITY_TAIL_RE, tail.strip().lower()):
+            # Facility tails read like the slash form ("Puistokenttä
+            # Linnaistenmetsä, lentopallokenttä", unit 57400, cf. the
+            # slash twins that already split): the court is the name.
+            return tail.strip(), head.strip()
         if head.strip() and re.search(self.VENUE_WORDS_RE, tail.strip().lower()):
             return head.strip(), tail.strip()
         if (
@@ -1186,12 +1220,42 @@ class HelsinkiServicemapFiSpider(Spider):
             return primary.strip()
         return None
 
+    # Translated service designations appended to the venue (unit 70202:
+    # en "Hämeenkylä School, school health care", sv "Hämeenkylä skola
+    # skolhälsovård"). Stripped only with a remainder: bare "Elevhälsa"
+    # stays a name.
+    SERVICE_TAIL_RE = re.compile(
+        r"(school health care|student health care|student welfare|pupil welfare"
+        r"|skolhälsovård|studenthälsovård|elevhälsa|hälsovård för studerande)$",
+        re.IGNORECASE,
+    )
+
     def _apply_translations(self, item, name):
         official = item["extras"].get("official_name", "")
+        fi_venue = item.get("located_in") or ""
         for key in ("sv", "en"):
-            text = re.sub(self.ZW_CHARS, "", str(name.get(key) or "")).strip()
+            raw = re.sub(self.ZW_CHARS, "", str(name.get(key) or "")).strip()
+            text = raw
+            if fi_venue and text.lower().endswith((", " + fi_venue).lower()):
+                # Same venue tail the fi split moved to located_in
+                # ("Elevhälsa, Karhusuon koulu", unit 69678): strip it for parity.
+                text = text[: len(text) - len(fi_venue)].rstrip(" ,-/–").strip()
+            if fi_venue:
+                # Comma-less facility tails ("Park fältet Trädan Basketplan",
+                # unit 42382): the trailing court/field/hall word is the name.
+                match = self.FACILITY_TAIL_RE.search(text.lower())
+                if match and match.start() > 0:
+                    text = text[match.start() :].strip()
+            service = self.SERVICE_TAIL_RE.search(text)
+            if service and text[: service.start()].rstrip(" ,-/–").strip():
+                text = text[: service.start()].rstrip(" ,-/–").strip()
+            head, _, tail = text.rpartition(",")
+            if head.strip() and self.COMMA_STREET_RE.search(tail.strip().lower()):
+                # Same address tails fi drops ("Patotie 8", unit 74944):
+                # structured street/housenumber carry them.
+                text = head.strip()
             if text and text != item.get("name") and text != official:
-                if re.match(r"^(vesiposti|vattenpost)\b", text.lower()):
+                if re.match(r"^(vesiposti|vattenpost|water post)\b", text.lower()):
                     # Water posts: tails repeat the parsed street address.
                     text = re.split(r"[,/]", text, maxsplit=1)[0].strip()
                 text = self._clean_name(text)
@@ -1200,6 +1264,10 @@ class HelsinkiServicemapFiSpider(Spider):
                     item["located_in"] = venue
                 if facility and facility != item.get("name"):
                     item["extras"][f"name:{key}"] = facility
+                    if raw != facility:
+                        # Transformed translation: keep the feed's full form
+                        # alongside official_name like the fi raw.
+                        item["extras"][f"official_name:{key}"] = raw
                 # Same name after cleaning, but keep the venue set above.
 
     def _apply_name(self, item, unit):
@@ -1634,6 +1702,25 @@ class HelsinkiServicemapFiSpider(Spider):
         if qid is not None:
             item["operator_wikidata"] = qid
 
+    # Provider tails that name the legal operator (feed spells short).
+    # Unknown tails (Beanet Oy, caterers) never promote: only mapped ones.
+    PROVIDER_OPERATORS = {"puuhala oy": "Puuhala iltapäiväkerhot Oy"}
+
+    OWNERSHIP_TAIL_RE = re.compile(r",\s*(yksityinen|yksityiset|privat|private)\.?$", re.IGNORECASE)
+
+    def _has_ownership_tail(self, unit):
+        name = unit.get("name") or {}
+        fi = str(name.get("fi") or "") if isinstance(name, dict) else ""
+        return bool(self.OWNERSHIP_TAIL_RE.search(fi))
+
+    def _provider_tail_operator(self, unit):
+        name = unit.get("name") or {}
+        fi = str(name.get("fi") or "") if isinstance(name, dict) else ""
+        match = re.search(r",\s*([^,]*\b(ry|oy|ab)\.?)$", fi, flags=re.IGNORECASE)
+        if not match:
+            return None
+        return self.PROVIDER_OPERATORS.get(match.group(1).strip().casefold())
+
     def _apply_operator(self, item, unit):
         # Tenants (shops, eateries, hotels, cinemas, canteens): the department
         # only maintains the record (Kino Tapiola is not run by the city).
@@ -1644,6 +1731,15 @@ class HelsinkiServicemapFiSpider(Spider):
             or item.get_tag("amenity") in ("restaurant", "cafe", "bar", "fast_food", "cinema", "canteen")
             or item.get_tag("tourism") == "hotel"
         )
+        if not self._clean_organizer_name(unit.get("organizer_name")) and (
+            provider := self._provider_tail_operator(unit)
+        ):
+            # Known provider runs the unit (Puuhala afternoon clubs, unit
+            # 74329); the department only keeps the record.
+            self._finish_operator(item, unit, provider)
+            item["extras"]["operator:type"] = "private"
+            self._stat("operator/private")
+            return
         # The feed flags private services itself; a city is never their operator.
         if unit.get("displayed_service_owner_type") in ("PRIVATE_SERVICE", "VOUCHER_SERVICE"):
             if not is_tenant:
@@ -1655,6 +1751,19 @@ class HelsinkiServicemapFiSpider(Spider):
             # Tenants are private operators by definition; brand carries
             # the name, operator:type the privateness.
             item["extras"]["operator:type"] = "private"
+            return
+        if self._has_ownership_tail(unit):
+            # Register flag, not a name ("Daghemmet Fyndet Kanel,
+            # yksityinen", unit 64929): private whatever the feed flag says.
+            item["extras"]["operator:type"] = "private"
+            if self._clean_organizer_name(unit.get("organizer_name")) and (
+                operator := self._resolve_operator_name(unit)
+            ):
+                self._finish_operator(item, unit, operator)
+            else:
+                # No organizer: a city department never operates a private
+                # unit (cf. Steiner school 75921, filed under the city).
+                self._stat("operator/private")
             return
         if operator := self._resolve_operator_name(unit):
             self._finish_operator(item, unit, operator)

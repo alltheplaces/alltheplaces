@@ -2383,6 +2383,183 @@ def test_comma_school_health_splits_service_first():
     assert item["extras"]["healthcare:speciality"] == "community"
 
 
+def test_comma_service_health_splits_whatever_tail():
+    # Units 78143/78164: service-first health names split even when the tail
+    # names no school (private daycare chains), so the service is the name.
+    item = full(make_spider(), "Esiopetuksen opiskeluhuolto, Touhula Fallåker", [2164, 2165])
+    assert item["name"] == "Esiopetuksen opiskeluhuolto"
+    assert item["located_in"] == "Touhula Fallåker"
+    item = full(make_spider(), "Esiopetuksen opiskeluhuolto, Pikku Akatemia", [2164, 2165])
+    assert item["name"] == "Esiopetuksen opiskeluhuolto"
+    assert item["located_in"] == "Pikku Akatemia"
+
+
+def test_translations_drop_fi_split_venue_tail():
+    # Unit 69678: sv/en carry the same venue tail the fi split moved to
+    # located_in; parity strips it there too.
+    item = named(
+        make_spider(),
+        "Opiskeluhuolto, Karhusuon koulu",
+        [2164, 2165],
+        sv="Elevhälsa, Karhusuon koulu",
+        en="Student welfare, Karhusuon koulu",
+    )
+    assert item["name"] == "Opiskeluhuolto"
+    assert item["located_in"] == "Karhusuon koulu"
+    assert item["extras"]["name:sv"] == "Elevhälsa"
+    assert item["extras"]["name:en"] == "Student welfare"
+    # Unit 64829: en water-post tail repeats the street address like fi/sv.
+    item = named(
+        make_spider(),
+        "Vesiposti, Nupurintie 12",
+        [301, 93],
+        sv="Vattenpost, Nupurintie 12",
+        en="Water post, Nupurintie 12",
+    )
+    assert item["name"] == "Vesiposti"
+    assert item["extras"]["name:en"] == "Water post"
+
+
+def test_ship_prefix_slash_never_splits():
+    # Unit 77887: en "M/S Carmel Terrace" is a ship name, not facility/venue.
+    item = named(make_spider(), "Meriterassi Carmel", [2174], en="M/S Carmel Terrace")
+    assert item["name"] == "Meriterassi Carmel"
+    assert "located_in" not in item
+    assert item["extras"]["name:en"] == "M/S Carmel Terrace"
+
+
+def test_comma_facility_tail_splits_like_slash():
+    # Unit 57400: comma facility tails split like their slash twins (64933).
+    item = named(
+        make_spider(),
+        "Puistokenttä Linnaistenmetsä, lentopallokenttä",
+        [658],
+        sv="Park fältet Linnaisskogen, volleybollplan",
+    )
+    assert item["name"] == "lentopallokenttä"
+    assert item["located_in"] == "Puistokenttä Linnaistenmetsä"
+    assert item["extras"]["name:sv"] == "volleybollplan"
+    # Unit 42382: comma-less sv tails split on the trailing court word.
+    item = named(
+        make_spider(),
+        "Puistokenttä Kesanto, koripallokenttä",
+        [657],
+        sv="Park fältet Trädan Basketplan",
+    )
+    assert item["name"] == "koripallokenttä"
+    assert item["located_in"] == "Puistokenttä Kesanto"
+    assert item["extras"]["name:sv"] == "Basketplan"
+    assert item["extras"]["official_name:sv"] == "Park fältet Trädan Basketplan"
+
+
+def test_provider_tail_promotes_known_operator():  # Unit 74329: Puuhala runs the afternoon club; the city only files it.
+    _, item = operated(
+        Categories.SCHOOL,
+        {"name": {"fi": "Iltapäivätoiminta / Konalan ala-asteen koulu, Puuhala Oy"}, "organizer_name": None},
+    )
+    assert item["operator"] == "Puuhala iltapäiväkerhot Oy"
+    assert item["extras"]["operator:type"] == "private"
+    # Unknown providers never promote (Beanet Oy shape): department stands.
+    _, item = operated(
+        Categories.SCHOOL,
+        {
+            "name": {"fi": "Iltapäivätoiminta / Pihlajamäen ala-aste, Beanet Oy"},
+            "organizer_name": None,
+            "root_department": "X",
+            "municipality": "helsinki",
+        },
+        departments={"X": "Helsingin kaupunki"},
+    )
+    assert item["operator"] == "Helsingin kaupunki"
+    assert "operator:type" not in item["extras"]
+
+
+def test_ownership_tail_stripped_and_private():
+    # Unit 64929: register flag in all three languages, never a name part.
+    item = named(
+        make_spider(),
+        "Daghemmet Fyndet Kanel, yksityinen",
+        [868],
+        sv="Daghemmet Fyndet Kanel, privat",
+        en="Daghemmet Fyndet Kanel, private",
+    )
+    assert item["name"] == "Daghemmet Fyndet Kanel"
+    assert "name:sv" not in item["extras"]
+    assert "name:en" not in item["extras"]
+    # Organizer kept as operator, privateness flagged.
+    _, item = operated(
+        Categories.KINDERGARTEN,
+        {"name": {"fi": "Daghemmet Fyndet Kanel, yksityinen"}, "organizer_name": "Daghemmet Kanel"},
+    )
+    assert item["operator"] == "Daghemmet Kanel"
+    assert item["extras"]["operator:type"] == "private"
+    # Unit 75921 shape: no organizer, so no city operator either.
+    _, item = operated(
+        Categories.SCHOOL,
+        {
+            "name": {"fi": "Vantaan seudun steinerkoulu, yksityinen"},
+            "organizer_name": None,
+            "root_department": "X",
+            "municipality": "vantaa",
+        },
+        departments={"X": "Vantaan kaupunki"},
+    )
+    assert "operator" not in item
+    assert item["extras"]["operator:type"] == "private"
+
+
+def test_swedish_name_in_fi_field_stays_whole():
+    # Unit 15413: the fi field holds a Swedish name; its nodes are untabled
+    # but descend from basic education (1187 → 1097), so it files as a
+    # school without splitting the Swedish name.
+    parents = {1246: 1187, 1249: 1187, 1250: 1249, 1189: 1188, 1188: 1187, 1191: 1190, 1190: 1187, 1187: 1097}
+    item = full(make_spider(parents), "Finno skola", [1246, 1249, 1250, 1189, 1191])
+    assert item["name"] == "Finno skola"
+    assert item.get_tag("amenity") == "school"
+
+
+def test_translated_service_tails_stripped():  # Unit 70202: the service designation lives only in sv/en; strip it to
+    # the translated venue.
+    item = named(
+        make_spider(),
+        "Hämeenkylän koulu",
+        [1374, 2350, 1375, 2164, 2165],
+        sv="Hämeenkylä skola skolhälsovård",
+        en="Hämeenkylä School, school health care",
+    )
+    assert item["name"] == "Opiskeluhuolto"
+    assert item["located_in"] == "Hämeenkylän koulu"
+    assert item["extras"]["name:sv"] == "Hämeenkylä skola"
+    assert item["extras"]["name:en"] == "Hämeenkylä School"
+    assert item["extras"]["official_name:sv"] == "Hämeenkylä skola skolhälsovård"
+    assert item["extras"]["official_name:en"] == "Hämeenkylä School, school health care"
+    # Bare service words stay names, never strip to nothing.
+    item = named(make_spider(), "Opiskeluhuolto", [2164, 2165], en="Student welfare")
+    assert item["extras"]["name:en"] == "Student welfare"
+
+
+def test_translated_address_tails_stripped_like_fi():
+    # Unit 74944: address tails strip from sv/en exactly like fi; the
+    # structured street/housenumber (not asserted here) carries them.
+    item = named(
+        make_spider(),
+        "Esteetön pysäköintialue Patotien päiväkoti, Patotie 8",
+        [532],
+        sv="Obehindrad parkeringsplats Patotien päiväkoti, Patotie 8",
+        en="Unrestrained car park Patotien päiväkoti, Patotie 8",
+    )
+    assert item["name"] == "Esteetön pysäköintialue Patotien päiväkoti"
+    assert item["extras"]["name:sv"] == "Obehindrad parkeringsplats Patotien päiväkoti"
+    assert item["extras"]["name:en"] == "Unrestrained car park Patotien päiväkoti"
+
+
+def test_skating_field_is_ice_rink():
+    # Unit 39819: luistelukenttä rinks are ice rinks, not pitches.
+    item = full(make_spider(), "Mäkkylän luistelukenttä", [642])
+    assert item.get_tag("leisure") == "ice_rink"
+    assert item.get_tag("sport") == "ice_skating"
+
+
 def test_swedish_only_name_refines():
     # SYNTHETIC Swedish-only youth-room name.
     # Swedish-only youth-room name still refines through the noun tables.
