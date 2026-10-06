@@ -30,7 +30,7 @@ class ChedrauiMXSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for data in response.json()["data"]["documents"]:
             store = {field["key"]: field["value"] for field in data["fields"] if not field["value"] == "null"}
-            if "full_name" not in store:
+            if not isinstance(store.get("full_name"), str):
                 continue
             store["latitude"], store["longitude"] = [
                 coord.replace(",", ".", 1).replace(",", "")
