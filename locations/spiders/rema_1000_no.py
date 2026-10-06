@@ -16,7 +16,7 @@ class Rema1000NOSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.rema.no/sitemap.xml"]
     sitemap_rules = [(r"/butikker/[^/]+/[^/]+/(?:rema-1000|innom)-[^/]+/$", "parse_sd")]
     wanted_types = ["GroceryStore"]
-    drop_attributes = {"facebook"}
+    drop_attributes = {"facebook", "image"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
         if item["name"].startswith("REMA 1000 "):
