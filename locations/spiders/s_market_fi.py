@@ -40,10 +40,11 @@ class SMarketFISpider(Spider):
     name = "s_market_fi"
     custom_settings = {
         # Brand queries paginate as independent cursor chains. Measured
-        # 2026-10-07: 376 requests in 118s at delay 0.25 on this single host
+        # 2026-10-07: 376 requests in ~75s at delay 0.15 on this single host
         # (chains share one delay slot, so brand parallelism does not divide
-        # wall time). 0.15 keeps ~75s, inside the CI time budget with margin;
-        # the host showed zero 429s across hundreds of requests.
+        # wall time). The host showed zero 429s across hundreds of requests.
+        # Sub-default delay is intentional: see ALLOWED_LOW_DOWNLOAD_DELAY in
+        # tests/test_download_delay.py.
         "DOWNLOAD_DELAY": 0.15,
     }
 
@@ -220,7 +221,13 @@ class SMarketFISpider(Spider):
         name = str(result.get("name") or "")
         street = re.sub(r"\s+", " ", str(result.get("street") or "")).strip().lower()
         postcode = str(result.get("postalCode") or "").strip()
-        key = (street, postcode)
+        if street or postcode:
+            key = (street, postcode)
+        else:
+            # Address-less records must never share one key: all of them
+            # would collapse to ("", ""). Fall back to the record's own
+            # identity (URL before source id), so each survives on its own.
+            key = ("", str(result.get("url") or result.get("id") or "").strip().lower())
         preference = (
             host == self.BRANDS[brand]["host"],
             name.lower().startswith(brand.lower() + " "),
