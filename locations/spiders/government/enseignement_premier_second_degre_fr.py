@@ -18,10 +18,10 @@ NATURE_UAI_CATEGORY_MAP = {
     103: ("kindergarten", "0", Categories.KINDERGARTEN),  # ECOLE MATERNELLE D APPLICATION
     151: ("primary", "1", Categories.SCHOOL),  # ECOLE DE NIVEAU ELEMENTAIRE
     153: ("primary", "1", Categories.SCHOOL),  # ECOLE ELEMENTAIRE D APPLICATION
-    160: ("primary", "1", Categories.SCHOOL),  # ECOLE DE PLEIN AIR
+    160: ("primary", None, Categories.SCHOOL),  # ECOLE DE PLEIN AIR
     162: ("primary;special_education_needs", "1", Categories.SCHOOL),  # ECOLE DE NIVEAU ELEMENTAIRE SPECIALISEE
-    169: ("primary", "1", Categories.SCHOOL),  # ECOLE REGIONALE DU PREMIER DEGRE
-    170: ("primary", "1", Categories.SCHOOL),  # ECOLE SANS EFFECTIFS PERMANENTS
+    169: ("primary", None, Categories.SCHOOL),  # ECOLE REGIONALE DU PREMIER DEGRE (maternelle or élémentaire)
+    170: ("primary", None, Categories.SCHOOL),  # ECOLE SANS EFFECTIFS PERMANENTS (maternelles and élémentaires)
     # Lower secondary: collèges (ISCED 2)
     340: ("secondary", "2", Categories.SCHOOL),  # COLLEGE
     346: ("secondary", "2", Categories.SCHOOL),  # COLLEGE EXPERIMENTAL
