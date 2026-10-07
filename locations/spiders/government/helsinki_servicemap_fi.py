@@ -1055,6 +1055,7 @@ class HelsinkiServicemapFiSpider(Spider):
         "talo",
         "keskus",
         "toimisto",
+        "laitos",
     )
 
     # Combined institutions ("Karkkilan yläaste/lukio", "A yläaste / lukio"),
@@ -1125,9 +1126,42 @@ class HelsinkiServicemapFiSpider(Spider):
             venue, facility = text[:idx], text[idx + 1 :]
             if " " not in venue.strip() and " " not in facility.strip():
                 return text, None
+            if re.fullmatch(r"[a-zåäö]+", facility.strip()) and not facility.strip().endswith(
+                (
+                    "kenttä",
+                    "sali",
+                    "rata",
+                    "maja",
+                    "kota",
+                    "katos",
+                    "allas",
+                    "talo",
+                    "keskus",
+                    "halli",
+                    "puisto",
+                    "paikka",
+                    "alue",
+                    "tori",
+                    "toimisto",
+                    "stadion",
+                    "areena",
+                )
+            ):
+                # Spaceless qualifier, not a facility ("Nuorten vastaanotto
+                # Kallio/vaativa", unit 68047): keep the whole name rather
+                # than naming the unit after debris.
+                return text, None
         else:
             return text, None
         ven, fac = venue.strip(), facility.strip()
+        if fac.lower() in ("nurmi", "hiekka", "tekonurmi", "sora", "asfaltti", "gräs", "grass") and (
+            " / " in ven or "/" in ven
+        ):
+            # Surface as last segment ("Myllypuron liikuntapuisto /
+            # Baseball-kenttä / nurmi", unit 60097): the middle names the
+            # facility, the first the venue.
+            ven, _, fac = ven.rpartition("/") if " / " not in ven else ven.rpartition(" / ")
+            ven, fac = ven.strip(), fac.strip()
         if len(ven) <= 1 or len(fac) <= 1:
             # Ship prefixes ("M/S Carmel Terrace", unit 77887): single
             # letters are never a venue or a facility.
@@ -1154,6 +1188,11 @@ class HelsinkiServicemapFiSpider(Spider):
             # UKK-monumentti", unit 23246, is the Lähde memorial to
             # president Kekkonen): the title side is the name, no venue.
             return ven, None
+        if fac_l == "sosiaalitoimisto":
+            # Service desks, not venues ("Karkkilan kaupungintalo/
+            # sosiaalitoimisto", unit 71716): the service is the name,
+            # the building the venue.
+            return fac, ven
         if fac_l not in self.NO_INVERT_FACILITIES and re.search(self.INSTITUTION_TAIL_RE, fac_l):
             # Tails that are institutions are venues ("Malmin sairaala",
             # "Vuosaaren perhekeskus", compounds included); end-anchored so
@@ -1166,6 +1205,15 @@ class HelsinkiServicemapFiSpider(Spider):
             # ("Esiopetuksen opiskeluhuolto / Playschool Espoonlahti"):
             # the service comes first, the school is the venue.
             return ven, fac
+        if "toimintaterapia" in ven_l and "terapia" not in fac_l:
+            # Therapy at a named site ("Lasten toimintaterapia/Länsi-Pasila",
+            # unit 69066): the service is the name. Sub-units naming their
+            # own therapy (unit 69061) keep the default split.
+            return ven, fac
+        if re.search(self.COMMA_STREET_RE, ven_l):
+            # Bare street addresses are parsed into street/housenumber, never
+            # located_in ("Kurkisuontie 2 / Hiekkakenttä", unit 45330).
+            return fac, None
         return fac, ven
 
     def _clean_name(self, raw):
@@ -1278,15 +1326,21 @@ class HelsinkiServicemapFiSpider(Spider):
             # Address tail ("Koskelan ala-asteen koulu, Mäkelänkatu 84",
             # "Alueellinen keräyspiste, Malmgatan 20-21").
             return head.strip(), None
-        if head.strip() and re.search(
+        svc, _, rest = primary.partition(",")
+        if svc.strip() and re.search(
             r"(kouluterveydenhuolto|opiskeluterveydenhuolto|opiskeluhuolto|elevhälsa|skolhälsovård|student welfare|school health care)$",
-            head.strip().lower(),
+            svc.strip().lower(),
         ):
             # Service-first health names ("Esiopetuksen opiskeluhuolto,
             # Touhula Fallåker", unit 78143; "Opiskeluhuolto, Karhusuon
-            # koulu", unit 69678): the service is the name whatever the
-            # tail, the tail is the venue.
-            return head.strip(), tail.strip()
+            # koulu", unit 69678): the service is the name, the rest the
+            # venue. First comma, so middle segments stay with the venue
+            # ("Opiskeluhuolto, Karjaan yhteiskoulu, lukio", unit 69833);
+            # lowercase tails are descriptions, not places ("...,
+            # keskitetty palvelu Espoo ja Kauniainen", unit 69236).
+            if rest.strip() and rest.strip()[0].isupper():
+                return svc.strip(), rest.strip()
+            return primary, None
         if head.strip() and "ankkalampi" in head.strip().lower():
             # Private-chain daycares name the site after the comma
             # ("Päiväkoti Ankkalampi, Punavuori", unit 29918; "Päiväkoti
@@ -1314,6 +1368,20 @@ class HelsinkiServicemapFiSpider(Spider):
             # toimipiste", unit 69937): the institution is the name, the
             # site the venue.
             return head.strip(), tail.strip()
+        if head.strip().lower() in ("shakkilauta", "shakkilaudat"):
+            # Street-furniture chessboards at named places ("Shakkilauta,
+            # Tilkantori", unit 63009; parks to squares, 25 units): the
+            # place is the venue.
+            if tail.strip() and not self.COMMA_STREET_RE.search(tail.strip().lower()):
+                return head.strip(), tail.strip()
+        if head.strip().lower() == "henkilöstöravintola":
+            # Staff canteens at host institutions ("Henkilöstöravintola,
+            # Terveyden ja hyvinvoinnin laitos (THL)", unit 8817): the site
+            # is the venue. Appositive proper names ("Henkilöstöravintola,
+            # ravintola Onnikka", unit 8796) and service descriptors stay whole.
+            tail_base = re.sub(r"\s*\([^()]*\)$", "", tail.strip())
+            if tail_base and re.search(self.INSTITUTION_TAIL_RE, tail_base.lower()):
+                return head.strip(), tail.strip()
         if head.strip() and re.search(self.VENUE_WORDS_RE, tail.strip().lower()):
             return head.strip(), tail.strip()
         if (
@@ -1422,8 +1490,12 @@ class HelsinkiServicemapFiSpider(Spider):
                     # Water posts: tails repeat the parsed street address.
                     text = re.split(r"[,/]", text, maxsplit=1)[0].strip()
                 text = self._clean_name(text)
+                # Feed glosses the venue type in en translations ("Juvanpuiston
+                # koulu (school) / Disc golf course (3)", unit 50343): drop it.
+                text = re.sub(r"\s*\(school\)", "", text)
                 facility, venue = self._split_facility(text)
-                if venue and "located_in" not in item and venue != item.get("name"):
+                venue_name = item.get("name") or ""
+                if venue and "located_in" not in item and venue != venue_name and venue_name not in venue:
                     # A venue identical to the name is the name itself, not
                     # a host (bilingual "Oodi 60 000 järvelle / The Ode ...",
                     # unit 23168, before the bilingual strip above).
@@ -2667,6 +2739,7 @@ class HelsinkiServicemapFiSpider(Spider):
         ("punaisen ristin kontti", "SPR Kontti", "Q409603", "phrase"),
         ("terveystalo", "Terveystalo", "Q11897034", "word"),
         ("finnkino", "Finnkino", "Q5450883", "prefix"),
+        ("scandic", "Scandic", "Q129391", "start"),
     )
 
     def _match_brand_keyword(self, keyword, match, text):
@@ -2675,6 +2748,12 @@ class HelsinkiServicemapFiSpider(Spider):
         if match == "phrase":
             # Multi-word names match as phrases (cf. SPR Kontti).
             return keyword in text
+        if match == "start":
+            # Chain-first names only ("Scandic Meilahti", unit 54709):
+            # "Marski by Scandic" (unit 20877) and parking at Scandic
+            # hotels (units 67632/67692) must not brand as Scandic.
+            # Leading whitespace is the empty organizer (cf. _apply_brand).
+            return re.match(r"\s*" + re.escape(keyword), text)
         # Bare substring matched Minibuffet-style lookalikes before.
         return re.search(r"\b" + re.escape(keyword) + r"\w*", text)
 

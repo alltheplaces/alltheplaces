@@ -1502,6 +1502,25 @@ def test_finnkino_chain_brand():
     assert item["brand_wikidata"] == "Q5450883"
 
 
+def test_scandic_chain_brand():
+    # Unit 54709: Scandic hotels carry the verified chain brand (Q129391,
+    # Swedish hotel chain). Start-anchored: "Marski by Scandic" (unit
+    # 20877) and parking at Scandic hotels (unit 67632) stay unbranded.
+    spider = make_spider()
+    item = Feature()
+    spider._apply_name(item, {"name": {"fi": "Scandic Meilahti"}, "service_nodes": []})
+    spider._apply_brand(item, {"name": {"fi": "Scandic Meilahti"}, "organizer_name": None})
+    assert item["name"] == "Scandic"
+    assert item["branch"] == "Meilahti"
+    assert item["extras"]["official_name"] == "Scandic Meilahti"
+    assert item["brand"] == "Scandic"
+    assert item["brand_wikidata"] == "Q129391"
+    item = branded({"name": {"fi": "Marski by Scandic"}, "organizer_name": None})
+    assert "brand" not in item
+    item = branded({"name": {"fi": "EuroPark, P-Scandic Grand Marina"}, "organizer_name": "AutoParkki Norden Oy"})
+    assert "brand" not in item
+
+
 def test_chain_branch_swedish_parity():
     # Unit 73568: fi splits to branch, sv strips the same tail instead of
     # keeping the full form; the full forms live in official_name:sv/en.
@@ -1619,6 +1638,118 @@ def test_paren_slash_splits_outside_parens():
     assert (
         item["extras"]["official_name"] == "Uimastadion kuntorata / Ulkokuntosali (Pohjoinen Stadiontie / Muistomerkki)"
     )
+
+
+def test_chessboard_comma_place_split():
+    # Units 63009/73192: street-furniture chessboards name their place
+    # after the comma. Reversed tails (unit 67825) stay whole.
+    item = named(make_spider(), "Shakkilauta, Tilkantori", [2236])
+    assert item["name"] == "Shakkilauta"
+    assert item["located_in"] == "Tilkantori"
+    assert item["extras"]["official_name"] == "Shakkilauta, Tilkantori"
+    item = named(make_spider(), "Shakkilauta, Hesperianpuisto", [2236])
+    assert item["name"] == "Shakkilauta"
+    assert item["located_in"] == "Hesperianpuisto"
+    item = named(make_spider(), "Puistokenttä Koiruohonpuisto, shakkilauta", [648])
+    assert item["name"] == "Puistokenttä Koiruohonpuisto, shakkilauta"
+    assert "located_in" not in item
+
+
+def test_staff_canteen_institution_split():
+    # Units 8817/8790/8845: staff canteens at host institutions name the
+    # site after the comma. Appositive proper names (unit 8796) and bare
+    # descriptors (units 8843/8797) stay whole.
+    item = named(make_spider(), "Henkilöstöravintola, Terveyden ja hyvinvoinnin laitos (THL)", [183])
+    assert item["name"] == "Henkilöstöravintola"
+    assert item["located_in"] == "Terveyden ja hyvinvoinnin laitos (THL)"
+    assert item["extras"]["official_name"] == "Henkilöstöravintola, Terveyden ja hyvinvoinnin laitos (THL)"
+    item = named(make_spider(), "Henkilöstöravintola, Sähkötalo", [183])
+    assert item["name"] == "Henkilöstöravintola"
+    assert item["located_in"] == "Sähkötalo"
+    item = named(make_spider(), "Henkilöstöravintola, ravintola Onnikka", [183])
+    assert item["name"] == "Henkilöstöravintola, ravintola Onnikka"
+    assert "located_in" not in item
+    item = named(make_spider(), "Henkilöstöravintola, Holkki", [183])
+    assert item["name"] == "Henkilöstöravintola, Holkki"
+    assert "located_in" not in item
+
+
+def test_health_service_first_comma():
+    # Units 69833/69681: multi-segment service heads split at the first
+    # comma. Description tails (unit 69236) stay whole.
+    item = named(make_spider(), "Opiskeluhuolto, Karjaan yhteiskoulu, lukio", [1374])
+    assert item["name"] == "Opiskeluhuolto"
+    assert item["located_in"] == "Karjaan yhteiskoulu, lukio"
+    item = named(make_spider(), "Opiskeluhuolto, Ammattiopisto Live, päärakennus", [1374])
+    assert item["name"] == "Opiskeluhuolto"
+    assert item["located_in"] == "Ammattiopisto Live, päärakennus"
+    item = named(make_spider(), "Opiskeluterveydenhuolto, keskitetty palvelu Espoo ja Kauniainen", [1374])
+    assert item["name"] == "Opiskeluterveydenhuolto, keskitetty palvelu Espoo ja Kauniainen"
+    assert "located_in" not in item
+
+
+def test_translation_venue_holding_name_skipped():
+    # Unit 22996: the en field joins fi and en with a spaceless slash; the
+    # fi-holding "venue" is the name itself, not a host.
+    item = named(
+        make_spider(),
+        "Crescendo / Vuoden 1918 Kansalaissodan uhrien muistomerkki",
+        [2006],
+        en="Crescendo (Vuoden 1918 Kansalaissodan uhrien muistomerkki)/ A Memorial to those who fell in the 1918",
+    )
+    assert item["name"] == "Crescendo"
+    assert "located_in" not in item
+    assert item["extras"]["name:en"] == "A Memorial to those who fell in the 1918"
+
+
+def test_school_gloss_stripped_from_venue():
+    # Unit 50343: the en field glosses the venue type ("(school)").
+    item = named(
+        make_spider(),
+        "Juvanpuiston koulun frisbeegolfrata (3)",
+        [578],
+        en="Juvanpuiston koulu (school) / Disc golf course (3)",
+    )
+    assert item["located_in"] == "Juvanpuiston koulu"
+
+
+def test_street_address_venue_dropped():
+    # Unit 45330: bare addresses parse into street/housenumber, never venue.
+    item = named(make_spider(), "Kurkisuontie 2 / Hiekkakenttä")
+    assert item["name"] == "Hiekkakenttä"
+    assert "located_in" not in item
+
+
+def test_therapy_site_split():
+    # Unit 69066: therapy at a named site names the service. Sub-units
+    # naming their own therapy (unit 69061) keep the default split.
+    item = named(make_spider(), "Lasten toimintaterapia/Länsi-Pasila", [1038])
+    assert item["name"] == "Lasten toimintaterapia"
+    assert item["located_in"] == "Länsi-Pasila"
+    item = named(make_spider(), "Laakson toimintaterapia/Laakson neurologinen toimintaterapia", [1038])
+    assert item["name"] == "Laakson neurologinen toimintaterapia"
+    assert item["located_in"] == "Laakson toimintaterapia"
+
+
+def test_service_desk_names_service():
+    # Unit 71716: a service desk at a city hall names the service.
+    item = named(make_spider(), "Karkkilan kaupungintalo/ sosiaalitoimisto", [851])
+    assert item["name"] == "sosiaalitoimisto"
+    assert item["located_in"] == "Karkkilan kaupungintalo"
+
+
+def test_spaceless_debris_facility_stays_whole():
+    # Unit 68047: a spaceless lowercase qualifier is debris, not a facility.
+    item = named(make_spider(), "Nuorten vastaanotto Kallio/vaativa", [789])
+    assert item["name"] == "Nuorten vastaanotto Kallio/vaativa"
+    assert "located_in" not in item
+
+
+def test_surface_last_segment_names_middle():
+    # Unit 60097: a surface word as last segment names the middle facility.
+    item = named(make_spider(), "Myllypuron liikuntapuisto / Baseball-kenttä / nurmi", [659])
+    assert item["name"] == "Baseball-kenttä"
+    assert item["located_in"] == "Myllypuron liikuntapuisto"
 
 
 def test_website_scheme_added():
