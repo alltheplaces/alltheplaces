@@ -1218,6 +1218,24 @@ class HelsinkiServicemapFiSpider(Spider):
         r"|sports?\s+hall)$"
     )
 
+    # Provider chains embedded as infixes ("Aalto-yliopisto Terveystalo
+    # Otaniemi", unit 50608): host provider site. Word-mode only, like UFF.
+    PROVIDER_INFIX = {"terveystalo": ("Terveystalo", "Q11897034")}
+
+    def _split_provider_infix(self, text):
+        for keyword, (brand, _qid) in self.PROVIDER_INFIX.items():
+            match = re.search(r"\b" + re.escape(keyword) + r"\b", text, flags=re.IGNORECASE)
+            if match and text[: match.start()].strip() and text[match.end() :].strip():
+                head, tail = text[: match.start()].strip(), text[match.end() :].strip()
+                return f"{brand} {tail}", head
+        return None, None
+
+    def _provider_infix_identity(self, text):
+        for keyword, (brand, qid) in self.PROVIDER_INFIX.items():
+            if re.search(r"\b" + re.escape(keyword) + r"\b", text, flags=re.IGNORECASE):
+                return brand, qid
+        return None
+
     def _split_comma_venue(self, primary):
         # Service at a preschool group; bare "X esiopetus" too, unless the
         # head names the venue ("Tuohimäen päiväkoti, esiopetus" stays whole).
@@ -1323,7 +1341,12 @@ class HelsinkiServicemapFiSpider(Spider):
                 # Same address tails fi drops ("Patotie 8", unit 74944):
                 # structured street/housenumber carry them.
                 text = head.strip()
-            if text and text != item.get("name") and text != official:
+            provider_split, provider_venue = self._split_provider_infix(text)
+            if provider_venue:
+                text = provider_split
+                if "located_in" not in item:
+                    item["located_in"] = provider_venue
+            if text and (text != item.get("name") or raw != text) and text != official:
                 if re.match(r"^(vesiposti|vattenpost|water post)\b", text.lower()):
                     # Water posts: tails repeat the parsed street address.
                     text = re.split(r"[,/]", text, maxsplit=1)[0].strip()
@@ -1351,11 +1374,13 @@ class HelsinkiServicemapFiSpider(Spider):
                         venue = None
                     else:
                         item["located_in"] = venue
-                if facility and facility != item.get("name"):
-                    item["extras"][f"name:{key}"] = facility
+                if facility:
+                    if facility != item.get("name"):
+                        item["extras"][f"name:{key}"] = facility
                     if raw != facility:
                         # Transformed translation: keep the feed's full form
-                        # alongside official_name like the fi raw.
+                        # alongside official_name like the fi raw, even when
+                        # the useful part duplicates the name.
                         item["extras"][f"official_name:{key}"] = raw
                 # Same name after cleaning, but keep the venue set above.
 
@@ -1386,6 +1411,10 @@ class HelsinkiServicemapFiSpider(Spider):
                 primary, venue = self._split_facility(primary)
             if not venue and "," in primary:
                 primary, venue = self._split_comma_venue(primary)
+            if not venue:
+                provider_split, provider_venue = self._split_provider_infix(primary)
+                if provider_venue:
+                    primary, venue = provider_split, provider_venue
             if not venue and "," not in primary:
                 if welfare := self._welfare_venue(unit, primary):
                     venue = welfare
@@ -1838,8 +1867,24 @@ class HelsinkiServicemapFiSpider(Spider):
             item["extras"]["operator:type"] = "private"
             self._stat("operator/private")
             return
+        if not self._clean_organizer_name(unit.get("organizer_name")):
+            name = unit.get("name") or {}
+            fi = str(name.get("fi") or "") if isinstance(name, dict) else ""
+            if (identity := self._provider_infix_identity(fi)) and self._split_provider_infix(fi)[1]:
+                # Embedded provider runs the unit (Terveystalo Otaniemi on
+                # the Aalto campus, unit 50608).
+                brand, qid = identity
+                item["operator"] = brand
+                item["operator_wikidata"] = qid
+                item["extras"]["operator:type"] = "private"
+                self._stat("operator/private")
+                return
         # The feed flags private services itself; a city is never their operator.
-        if unit.get("displayed_service_owner_type") in ("PRIVATE_SERVICE", "VOUCHER_SERVICE"):
+        if unit.get("displayed_service_owner_type") in (
+            "PRIVATE_SERVICE",
+            "VOUCHER_SERVICE",
+            "PRIVATE_CONTRACT_SCHOOL",
+        ):
             if not is_tenant:
                 # Tenant-private records are private by type but not counted.
                 self._stat("operator/private")
@@ -2317,6 +2362,10 @@ class HelsinkiServicemapFiSpider(Spider):
         ("nollamök", None, Categories.TOURISM_CHALET),
         ("pumptrack", None, Categories.LEISURE_TRACK),
         ("bmx-rata", None, Categories.LEISURE_TRACK),
+        ("lastauslaituri", Categories.LOADING_DOCK, Categories.LOADING_DOCK),
+        ("lastausalue", Categories.LOADING_DOCK, Categories.LOADING_DOCK),
+        ("lastbrygga", Categories.LOADING_DOCK, Categories.LOADING_DOCK),
+        ("loading dock", Categories.LOADING_DOCK, Categories.LOADING_DOCK),
     )
     # Filtered views, order-preserving: rescue serves untabled units,
     # NAME_CATEGORIES refines tabled ones.
@@ -2471,6 +2520,7 @@ class HelsinkiServicemapFiSpider(Spider):
         ("spr kontti", "SPR Kontti", "Q409603", "phrase"),
         ("aimo park", "Aimo Park", "Q126728228", "phrase"),
         ("punaisen ristin kontti", "SPR Kontti", "Q409603", "phrase"),
+        ("terveystalo", "Terveystalo", "Q11897034", "word"),
     )
 
     def _match_brand_keyword(self, keyword, match, text):

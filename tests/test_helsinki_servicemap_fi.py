@@ -904,11 +904,11 @@ def test_school_nurse_speciality():
     assert item["extras"]["healthcare:speciality"] == "community"
 
 
-def test_loading_dock_filed_as_ticket_stays_generic():
+def test_loading_dock_filed_as_ticket_gets_dock_tag():
     # Unit 59265: A Bloc lastauslaituri is a service-yard dock, not ticket sales.
     item = full(make_spider(), "A Bloc lastauslaituri", [514])
     assert item.get_tag("shop") is None
-    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("amenity") == "loading_dock"
 
 
 def test_ticket_service_point_is_ticket_shop():
@@ -2711,8 +2711,7 @@ def test_ry_provider_tail_promotes_club():
     assert item["extras"]["operator:type"] == "private"
 
 
-def test_service_headed_translation_venue_skipped():
-    # Unit 76771: en venue slot holds the service (feed typo included).
+def test_service_headed_translation_venue_skipped():  # Unit 76771: en venue slot holds the service (feed typo included).
     item = named(
         make_spider(),
         "Iltapäivätoiminta / Tahvonlahden ala-aste, Sportti Iltapäiväkerhot Oy",
@@ -2721,6 +2720,56 @@ def test_service_headed_translation_venue_skipped():
     )
     assert "located_in" not in item
     assert item["extras"]["name:en"] == "Tahvonlahti Comprehensive school"
+
+
+def test_provider_infix_splits_host():
+    # Unit 50608: the signed name is Terveystalo Otaniemi (Q11897034,
+    # verified Finnish private healthcare company); Aalto hosts it.
+    item = named(
+        make_spider(),
+        "Aalto-yliopisto Terveystalo Otaniemi",
+        [994, 1359],
+        sv="Aalto-universitetet Terveystalo Otaniemi",
+        en="Aalto University Terveystalo Otaniemi",
+    )
+    assert item["name"] == "Terveystalo Otaniemi"
+    assert item["located_in"] == "Aalto-yliopisto"
+    assert "name:sv" not in item["extras"]
+    assert "name:en" not in item["extras"]
+    assert item["extras"]["official_name:sv"] == "Aalto-universitetet Terveystalo Otaniemi"
+    assert (
+        branded({"name": {"fi": "Aalto-yliopisto Terveystalo Otaniemi"}, "organizer_name": None})["brand"]
+        == "Terveystalo"
+    )
+    assert (
+        branded({"name": {"fi": "Aalto-yliopisto Terveystalo Otaniemi"}, "organizer_name": None})["brand_wikidata"]
+        == "Q11897034"
+    )
+    _, item = operated(
+        Categories.CLINIC,
+        {"name": {"fi": "Aalto-yliopisto Terveystalo Otaniemi"}, "organizer_name": None},
+    )
+    assert item["operator"] == "Terveystalo"
+    assert item["operator_wikidata"] == "Q11897034"
+    assert item["extras"]["operator:type"] == "private"
+
+
+def test_loading_dock_rescue():
+    # Units 59265/59266: back-of-house docks are still mappable POIs.
+    item = full(make_spider(), "A Bloc lastauslaituri", [514])
+    assert item.get_tag("amenity") == "loading_dock"
+    item = full(make_spider(), "Aalto ARTS Väre lastausalue", [1359])
+    assert item.get_tag("amenity") == "loading_dock"
+
+
+def test_private_contract_school_flag():
+    # Unit 34961 shape: the feed's own private vocabulary.
+    _, item = operated(
+        Categories.SCHOOL,
+        {"name": {"fi": "X"}, "organizer_name": None, "displayed_service_owner_type": "PRIVATE_CONTRACT_SCHOOL"},
+    )
+    assert item["extras"]["operator:type"] == "private"
+    assert "operator" not in item
 
 
 def test_swedish_only_name_refines():

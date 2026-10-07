@@ -383,6 +383,7 @@ class Categories(Enum):
     INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
     LIBRARY = {"amenity": "library"}
+    LOADING_DOCK = {"amenity": "loading_dock"}
     MAILROOM = {"amenity": "mailroom"}
     MANHOLE = {"man_made": "manhole"}
     MARINA = {"leisure": "marina"}
