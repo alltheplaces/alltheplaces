@@ -30,6 +30,5 @@ class EsbEnergyGBSpider(Spider):
                 continue
 
             item = DictParser.parse(location)
-            item["street_address"] = location["dn"]
             apply_category(Categories.CHARGING_STATION, item)
             yield item
