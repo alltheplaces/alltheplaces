@@ -38,9 +38,7 @@ class BarkingHoundVillageUSSpider(Spider):
             if not lines or "@barkinghoundvillage.com" not in " ".join(lines):
                 continue
 
-            branch = re.sub(
-                r"\s+", " ", entry.xpath("string(./preceding::*[self::h2 or self::h3][1])").get("")
-            ).strip()
+            branch = re.sub(r"\s+", " ", entry.xpath("string(./preceding::*[self::h2 or self::h3][1])").get("")).strip()
             if not branch:
                 continue
 
