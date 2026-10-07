@@ -1240,6 +1240,12 @@ class HelsinkiServicemapFiSpider(Spider):
             # Linnaistenmetsä, lentopallokenttä", unit 57400, cf. the
             # slash twins that already split): the court is the name.
             return tail.strip(), head.strip()
+        if head.strip() and (
+            match := re.match(r"(.+?)\s+-\s+(?:\w+\s+)*kielikylpy\w*$", tail.strip(), flags=re.IGNORECASE)
+        ):
+            # Branch descriptors, not venues ("Tapiola - ruotsin kielen
+            # kielikylpypäiväkoti", unit 20243): the district locates it.
+            return head.strip(), match.group(1).strip()
         if head.strip() and re.search(r"(toimipaikka|opetuspiste|toimipiste)$", tail.strip().lower()):
             # Hosted sites ("Vantaan musiikkiopisto, Aurinkokiven koulun
             # opetuspiste", unit 68526; "Työtehoseura, Sarkatien

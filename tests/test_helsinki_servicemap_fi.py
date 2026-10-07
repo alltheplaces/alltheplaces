@@ -2684,12 +2684,21 @@ def test_hosted_site_splits_to_venue():
     assert item["located_in"] == "Sarkatien toimipiste"
 
 
-def test_bureau_tail_stripped():
-    # Unit 79871: department bureaucracy is metadata, kept in official_name.
+def test_bureau_tail_stripped():  # Unit 79871: department bureaucracy is metadata, kept in official_name.
     fi = "Iltapäivätoiminta / Pasilan peruskoulu / Vaativan tuen erityisopetus, Kasvatuksen ja koulutuksen toimiala (vaativan tuen erityisopetus)"
     item = named(make_spider(), fi, [1181])
     assert item["name"] == "Iltapäivätoiminta / Pasilan peruskoulu / Vaativan tuen erityisopetus"
     assert item["extras"]["official_name"] == fi
+
+
+def test_kielikylpy_descriptor_district_locates():
+    # Units 20243/72753: the dash descriptor names no venue; the district does.
+    item = named(make_spider(), "Länsiväylän kielikylpy, Tapiola - ruotsin kielen kielikylpypäiväkoti", [2164])
+    assert item["name"] == "Länsiväylän kielikylpy"
+    assert item["located_in"] == "Tapiola"
+    item = named(make_spider(), "Länsiväylän kielikylpy, Olari 2 - ruotsinkielinen kielikylpypäiväkoti", [2164])
+    assert item["name"] == "Länsiväylän kielikylpy"
+    assert item["located_in"] == "Olari 2"
 
 
 def test_ry_provider_tail_promotes_club():
