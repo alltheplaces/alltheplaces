@@ -1451,6 +1451,20 @@ def test_website_bad_scheme_rejected():
     assert "website" not in item
 
 
+def test_website_invalid_hostnames_rejected():
+    # Units 66055 (comma typo) and 68883/64153/47295 (punycode): the
+    # pipeline fails the build on these, so the spider drops the field.
+    for raw in (
+        "http://www,kirkkonummi.fi",
+        "http://www.xn--tlnverhoomo-rfbab.fi/",
+        "http://xn--pivkotipolku-gcbc.fi/index.html",
+        "https://www.xn--polkupyrkirppis-7kb81a.fi/",
+    ):
+        assert "website" not in contacted({"www": {"fi": raw}}), raw
+    item = contacted({"www": {"fi": "https://www.hel.fi/palvelukartta"}})
+    assert item["website"] == "https://www.hel.fi/palvelukartta"
+
+
 def test_website_string_shape_accepted():
     # SYNTHETIC (feed www is always a dict).
     item = contacted({"www": "espoo.fi"})
@@ -2422,8 +2436,7 @@ def test_translations_drop_fi_split_venue_tail():
     assert item["extras"]["name:en"] == "Water post"
 
 
-def test_ship_prefix_slash_never_splits():
-    # Unit 77887: en "M/S Carmel Terrace" is a ship name, not facility/venue.
+def test_ship_prefix_slash_never_splits():  # Unit 77887: en "M/S Carmel Terrace" is a ship name, not facility/venue.
     item = named(make_spider(), "Meriterassi Carmel", [2174], en="M/S Carmel Terrace")
     assert item["name"] == "Meriterassi Carmel"
     assert "located_in" not in item

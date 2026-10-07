@@ -1,5 +1,7 @@
 import re
+import unicodedata
 from datetime import datetime
+from urllib.parse import urlparse
 
 from scrapy import Spider
 from scrapy.exceptions import CloseSpider
@@ -1978,8 +1980,32 @@ class HelsinkiServicemapFiSpider(Spider):
             website = "https://" + website.lstrip("/")
         scheme, _, host = website.partition("://")
         if scheme.lower() in ("http", "https") and "." in host:
-            return website
+            if self._valid_hostname(urlparse(website).hostname):
+                return website
+            # Known feed faults the pipeline fails the build on (comma-typo
+            # unit 66055, punycode units 68883/64153/47295): drop the field.
+            self._stat("website/invalid")
+            return None
         return None
+
+    @staticmethod
+    def _valid_hostname(hostname):
+        # Mirrors CheckItemPropertiesPipeline._is_valid_hostname, including
+        # its explicit Punycode rejection.
+        if not hostname or len(hostname) > 253:
+            return False
+        for part in hostname.split("."):
+            if not part or len(part) > 63:
+                return False
+            if part.startswith("-") or part.endswith("-"):
+                return False
+            if part.lower().startswith("xn--"):
+                return False
+            for ch in part:
+                cat = unicodedata.category(ch)
+                if not (cat.startswith("L") or cat == "Nd" or ch == "-"):
+                    return False
+        return True
 
     def _normalize_email(self, email):
         # De-obfuscate "a (at) b dot fi".
