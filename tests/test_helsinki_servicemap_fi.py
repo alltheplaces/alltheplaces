@@ -2655,6 +2655,21 @@ def test_valaistu_tail_sets_lit():
     assert item["extras"]["lit"] == "yes"
 
 
+def test_coordinate_tails_stripped_from_island_names():
+    # Units 57204/57612: raw coordinates are not name parts, in any language.
+    item = named(
+        make_spider(),
+        "Kuusiluoto, P 60° 12,239' ja I 24° 59,696'",
+        [548],
+        sv="Granholmen, N 60° 12,239' och E 24° 59,696'",
+    )
+    assert item["name"] == "Kuusiluoto"
+    assert item["extras"]["name:sv"] == "Granholmen"
+    assert item["extras"]["official_name"] == "Kuusiluoto, P 60° 12,239' ja I 24° 59,696'"
+    item = named(make_spider(), "Lähteelän ulkoilualue N 59° 58,8' E 24° 26,3'", [548])
+    assert item["name"] == "Lähteelän ulkoilualue"
+
+
 def test_hosted_site_splits_to_venue():
     # Units 68526/78533: institution heads with hosted site tails.
     item = full(make_spider(), "Vantaan musiikkiopisto, Aurinkokiven koulun opetuspiste", [1370])

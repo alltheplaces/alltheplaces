@@ -1150,6 +1150,12 @@ class HelsinkiServicemapFiSpider(Spider):
         primary = re.sub(r",\s*Sektorn för fostran och utbildning.*$", "", primary).strip()
         primary = re.sub(r",\s*Education Division$", "", primary).strip()
         primary = re.sub(r",\s*valaistu\s*$", "", primary, flags=re.IGNORECASE).strip()
+        # Raw coordinates leaked into island names ("Kuusiluoto, P 60°
+        # 12,239' ja I 24° 59,696'", unit 57204; "Lähteelän ulkoilualue N
+        # 59° 58,8' E 24° 26,3'", unit 57612): cut at the first degree mark.
+        primary = re.sub(r"\s*(?:[PN]\s*)?\d+\s*°.*$", "", primary).strip(" ,-/–").strip()
+        if not primary:
+            primary = raw.strip()
         org_stripped = re.sub(r"[,/]\s*[^,/]*\b(r\.y\.|ry|oy|ab)\.?$", "", primary, flags=re.IGNORECASE).strip()
         if (
             org_stripped
