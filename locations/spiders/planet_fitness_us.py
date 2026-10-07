@@ -13,7 +13,7 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class PlanetFitnessUSSpider(CrawlSpider, StructuredDataSpider,PlaywrightSpider):
+class PlanetFitnessUSSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
     name = "planet_fitness_us"
     item_attributes = {"brand": "Planet Fitness", "brand_wikidata": "Q7201095"}
     allowed_domains = ["www.planetfitness.com"]
