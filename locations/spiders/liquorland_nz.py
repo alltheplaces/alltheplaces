@@ -19,6 +19,7 @@ class LiquorlandNZSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["image"] = None
         item["addr_full"] = item.pop("street_address")
         item["branch"] = item.pop("name").replace("Liquorland ", "")
         item["website"] = response.url
