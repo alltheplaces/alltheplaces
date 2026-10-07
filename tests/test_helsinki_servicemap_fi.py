@@ -358,6 +358,22 @@ def test_double_staircase():
     assert item["unit"] == "B-C"
 
 
+def test_apartment_before_stair():
+    # Unit 70641: Pursimiehenkatu 8 52 A. The house is the first number.
+    item = addressed(make_spider(), "Pursimiehenkatu 8 52 A")
+    assert item["street"] == "Pursimiehenkatu"
+    assert item["housenumber"] == "8"
+    assert item["unit"] == "52 A"
+
+
+def test_bare_spaced_letter_folds():
+    # SYNTHETIC (no 3-token lowercase shape in feed): "Katu 5 a" is
+    # housenumber 5a, never staircase a.
+    item = addressed(make_spider(), "Katu 5 a")
+    assert item["housenumber"] == "5a"
+    assert "unit" not in item
+
+
 def test_fused_staircase_apartment():
     # Unit 40930: Arabianpolku 1A2.
     item = addressed(make_spider(), "Arabianpolku 1A2")
@@ -937,6 +953,22 @@ def test_lipas_extras_surface_lighting_toilets():
     assert item["extras"]["surface"] == "fine_gravel"
     assert item["extras"]["lit"] == "yes"
     assert item["extras"]["toilets"] == "yes"
+
+
+def test_lipas_correct_lighting_spelling_accepted():
+    # SYNTHETIC constructed unit id 999012 (feed spells it "ligthing"):
+    # a feed fix to the correct spelling must keep working.
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 999012,
+            "name": {"fi": "Kenttä"},
+            "service_nodes": [659],
+            "location": {"coordinates": [24.9, 60.1]},
+            "extra": {"lipas.lighting": "1"},
+        }
+    )
+    assert item["extras"]["lit"] == "yes"
 
 
 def test_picture_url_becomes_image():
@@ -1778,6 +1810,13 @@ def test_website_invalid_hostnames_rejected():
     assert item["website"] == "https://www.hel.fi/palvelukartta"
 
 
+def test_website_falls_back_to_sv():
+    # SYNTHETIC (no bad-fi plus good-sv shape in feed): a bad fi hostname
+    # must not block a good sv one.
+    item = contacted({"www": {"fi": "http://www.xn--tlnverhoomo-rfbab.fi/", "sv": "https://www.hel.fi/sv"}})
+    assert item["website"] == "https://www.hel.fi/sv"
+
+
 def test_website_string_shape_accepted():
     # SYNTHETIC (feed www is always a dict).
     item = contacted({"www": "espoo.fi"})
@@ -1806,6 +1845,20 @@ def test_parking_plain_capacity():
     # Unit 80707.
     item = parked("Pysäköintialue Soukankuja", "5 pysäköintipaikkaa")
     assert item["extras"]["capacity"] == "5"
+
+
+def test_parking_reversed_counts():
+    # Unit 67671: noun-first counts ("Pysäköintipaikkoja: 165") plus a
+    # zero disabled count (no wheelchair tag for zero).
+    item = parked("Ulkoalue", "Pysäköintipaikkoja: 165\nInva-paikat: 0")
+    assert item["extras"]["capacity"] == "165"
+    assert "capacity:disabled" not in item["extras"]
+    assert "wheelchair" not in item["extras"]
+    # SYNTHETIC nonzero disabled count.
+    item = parked("Ulkoalue", "Pysäköintipaikkoja: 10\nInva-paikat: 2")
+    assert item["extras"]["capacity"] == "10"
+    assert item["extras"]["capacity:disabled"] == "2"
+    assert item["extras"]["wheelchair"] == "designated"
 
 
 def test_parking_disabled_only_capacity():
@@ -2946,6 +2999,14 @@ def test_swimming_pier_is_pier():
     assert item.get_tag("man_made") == "pier"
     item = full(make_spider(), "Vilniemen uimaranta", [688])
     assert item.get_tag("natural") == "beach"
+
+
+def test_toollibrary_beats_pier_substring():
+    # SYNTHETIC (no talkoolaituri filed under 688): tool libraries keep
+    # their rescue category even though the noun contains "laituri".
+    item = full(make_spider(), "Rantatalkoolaituri", [688])
+    assert item.get_tag("amenity") == "tool_library"
+    assert item.get_tag("man_made") is None
 
 
 def test_football_stadium_has_soccer():

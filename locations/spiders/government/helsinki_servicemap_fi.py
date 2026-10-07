@@ -110,7 +110,7 @@ class HelsinkiServicemapFiSpider(Spider):
         1365: (Categories.COLLEGE, {}),  # Ruotsinkielinen työväenopisto (Swedish workers' institute)
         2212: (Categories.COLLEGE, {}),  # Kansalaisopisto (civic institute, adult education)
         1371: (Categories.COLLEGE, {}),  # Kansanopisto (folk high school)
-        1073: (Categories.COLLEGE, {}),  # Pelastuskoulu (rescue school)
+        1073: (Categories.SCHOOL, {}),  # Pelastuskoulu (rescue school)
         340: (Categories.COMMUNITY_CENTRE, {}),  # Kurssimuotoista tietokoneopetusta (computer courses)
         1363: (Categories.COLLEGE, {}),  # Opetuspaikat (teaching venues)
         1367: (Categories.COLLEGE, {}),  # Opetuspaikat (teaching venues)
@@ -1721,6 +1721,7 @@ class HelsinkiServicemapFiSpider(Spider):
     # Staircase/room/door tails after a housenumber, in priority order:
     # (min tokens, housenumber offset, middle, last, flags, join, note).
     STAIRCASE_RULES = (
+        (4, 3, r"\d+[A-Za-z]?", r"[A-Za-z]{1,2}", 0, "MID LAST", "apartment + stair (Pursimiehenkatu 8 52 A)"),
         (4, 3, r"[A-Za-z]", r"\d+(?:-\d+)?[A-Za-z]?", 0, "MID LAST", "letter stair + number"),
         (4, 3, r"[A-Za-z]", r"[A-Za-z]", 0, "MID-LAST", "two letter stairs (Lummetie 2 B C)"),
         (
@@ -1777,6 +1778,10 @@ class HelsinkiServicemapFiSpider(Spider):
             # belongs to the number (13a), the last token is the staircase.
             # Staircases are uppercase, so uppercase middles never fold.
             tokens = tokens[:-3] + [tokens[-3] + tokens[-2]] + tokens[-1:]
+        elif len(tokens) == 3 and re.fullmatch(r"\d+", tokens[-2]) and re.fullmatch(r"[a-zåäö]", tokens[-1]):
+            # Same without a staircase ("Katu 5 a" shape, SYNTHETIC): a bare
+            # trailing lowercase letter is the appendix, never a unit.
+            tokens = tokens[:-2] + [tokens[-2] + tokens[-1]]
         if len(tokens) >= 2 and (dotted := re.fullmatch(r"(\d+)\.([A-Za-z]\.\d+)", tokens[-1])):
             # Dotted apartment tails ("Valhallankatu 4.A.9").
             item["housenumber"] = dotted.group(1)
@@ -2247,19 +2252,26 @@ class HelsinkiServicemapFiSpider(Spider):
             www = {"fi": www.strip()}
         if not isinstance(www, dict):
             return None
-        raw = www.get("fi") or www.get("sv") or www.get("en")
-        if not (isinstance(raw, str) and (website := raw.strip())):
+        invalid = False
+        for key in ("fi", "sv", "en"):
+            # A bad fi website must not block a good sv/en one.
+            raw = www.get(key)
+            if not (isinstance(raw, str) and (website := raw.strip())):
+                continue
+            if "://" not in website:
+                website = "https://" + website.lstrip("/")
+            scheme, _, host = website.partition("://")
+            if scheme.lower() in ("http", "https") and "." in host:
+                if self._valid_hostname(urlparse(website).hostname):
+                    return website
+                # Known feed faults the pipeline fails the build on (comma-typo
+                # unit 66055, punycode units 68883/64153/47295): try the next
+                # language before dropping the field.
+                invalid = True
+                continue
             return None
-        if "://" not in website:
-            website = "https://" + website.lstrip("/")
-        scheme, _, host = website.partition("://")
-        if scheme.lower() in ("http", "https") and "." in host:
-            if self._valid_hostname(urlparse(website).hostname):
-                return website
-            # Known feed faults the pipeline fails the build on (comma-typo
-            # unit 66055, punycode units 68883/64153/47295): drop the field.
+        if invalid:
             self._stat("website/invalid")
-            return None
         return None
 
     @staticmethod
@@ -2338,7 +2350,9 @@ class HelsinkiServicemapFiSpider(Spider):
         surface = extra.get("lipas.surfaceMaterial")
         if isinstance(surface, str) and surface.strip().lower() in self.LIPAS_SURFACES:
             item["extras"]["surface"] = self.LIPAS_SURFACES[surface.strip().lower()]
-        if str(extra.get("lipas.ligthing") or "").strip() == "1":
+        if str(extra.get("lipas.ligthing") or extra.get("lipas.lighting") or "").strip() == "1":
+            # The feed spells the key "ligthing"; accept the correct
+            # spelling too so a feed fix cannot silently drop lit.
             item["extras"]["lit"] = "yes"
         if str(extra.get("lipas.toilet") or "").strip() == "1":
             item["extras"]["toilets"] = "yes"
@@ -2362,7 +2376,17 @@ class HelsinkiServicemapFiSpider(Spider):
             text,
         )
         if not match:
-            self._stat("parking/no_capacity")
+            # Reversed counts ("Pysäköintipaikkoja: 165", unit 67671).
+            match = re.search(r"(?:pysäköinti|auto|p-)?paikkoja?:\s*(\d+)", text)
+            if match:
+                item["extras"]["capacity"] = match.group(1)
+                self._stat("parking/capacity")
+            disabled = re.search(r"inva-paikat:\s*(\d+)", text)
+            if disabled and int(disabled.group(1)) > 0:
+                item["extras"]["capacity:disabled"] = disabled.group(1)
+                item["extras"]["wheelchair"] = "designated"
+            if not match and not disabled:
+                self._stat("parking/no_capacity")
             return
         if match.group(2):
             # Accessible-only count: no total capacity.
@@ -2842,8 +2866,10 @@ class HelsinkiServicemapFiSpider(Spider):
             # node (Myllypuro 61667, Kalasatama 54491); eco-stores like
             # Ruohonjuuri keep the shop.
             return Categories.CLINIC
-        if winner == 688 and "laituri" in text:
+        if winner == 688 and "laituri" in text and "talkoolaituri" not in text:
             # Swimming piers filed as beaches (Gälisnäsin uimalaituri 79589).
+            # Tool libraries borrow the same noun (talkoolaituri); they keep
+            # their rescue category.
             return Categories.MAN_MADE_PIER
         if re.search(r"\w+museo$", text) and category in (
             Categories.RESTAURANT,
