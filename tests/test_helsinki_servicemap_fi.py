@@ -1401,6 +1401,55 @@ def test_chain_branch_splits():
         ("Joe & the Juice", "Joe & the Juice Forum", "Forum", 78985),
         ("EuroPark", "EuroPark, P-WTC", "P-WTC", 67636),
         ("EuroPark", "EuroPark, P-Porttikeskus P8", "P-Porttikeskus P8", 67630),
+        ("Finnkino", "Finnkino Tennispalatsi", "Tennispalatsi", 56616),
+        ("Finnkino", "Finnkino Itis", "Itis", 66748),
+        ("Finnkino", "Finnkino Maxim", "Maxim", 30169),
+        ("Finnkino", "Finnkino Kinopalatsi", "Kinopalatsi", 24442),
+        ("Scandic", "Scandic Espoo", "Espoo", 20876),
+        ("Scandic", "Scandic Hakaniemi", "Hakaniemi", 24335),
+        ("Clarion Hotel", "Clarion Hotel Helsinki", "Helsinki", 50693),
+        ("Comfort Hotel", "Comfort Hotel Helsinki Airport", "Helsinki Airport", 75521),
+        ("Holiday Inn", "Holiday Inn Helsinki - Expo", "Helsinki - Expo", 20436),
+        ("Original Sokos Hotel", "Original Sokos Hotel Tripla", "Tripla", 61506),
+        ("Solo Sokos Hotel", "Solo Sokos Hotel Pier 4", "Pier 4", 75878),
+        ("Break Sokos Hotel", "Break Sokos Hotel Flamingo", "Flamingo", 25473),
+        ("GLO Hotel", "GLO Hotel Sello", "Sello", 25477),
+        ("Hiisi Hotel", "Hiisi Hotel Helsinki Jätkäsaari", "Helsinki Jätkäsaari", 75058),
+        ("Hiisi Homes & Hotel", "Hiisi Homes & Hotel Helsinki Haaga", "Helsinki Haaga", 57594),
+        ("Forenom Aparthotel Helsinki", "Forenom Aparthotel Helsinki Kamppi", "Kamppi", 43281),
+        (
+            "Forenom Serviced Apartments Helsinki",
+            "Forenom Serviced Apartments Helsinki Lauttasaari",
+            "Lauttasaari",
+            76673,
+        ),
+        ("Forenom Hostel Helsinki", "Forenom Hostel Helsinki Pitäjänmäki", "Pitäjänmäki", 51224),
+        ("Radisson Blu Hotel", "Radisson Blu Hotel, Espoo", "Espoo", 24250),
+        ("Radisson Blu Seaside Hotel", "Radisson Blu Seaside Hotel, Helsinki", "Helsinki", 21199),
+        ("Radisson RED", "Radisson RED Helsinki", "Helsinki", 73312),
+        ("Citybox Hotel", "Citybox Hotel Helsinki", "Helsinki", 73127),
+        ("Hotel Indigo", "Hotel Indigo Helsinki - Boulevard", "Helsinki - Boulevard", 44862),
+        ("The Folks Hotel", "The Folks Hotel Konepaja", "Konepaja", 63288),
+        ("Lapland Hotels", "Lapland Hotels Bulevardi", "Bulevardi", 55963),
+        ("Home Hotel", "Home Hotel Katajanokka", "Katajanokka", 21031),
+        ("Crowne Plaza", "Crowne Plaza Helsinki - Hesperia", "Helsinki - Hesperia", 20871),
+        ("Ravintola Loru", "Ravintola Loru Lauttasaari", "Lauttasaari", 79718),
+        ("Ravintola Konnichiwa", "Ravintola Konnichiwa Kamppi", "Kamppi", 79486),
+        ("Krung Thep Thai Bistro", "Krung Thep Thai Bistro Kalasatama", "Kalasatama", 79236),
+        ("Ravintola MoMo", "Ravintola MoMo Punavuori", "Punavuori", 70641),
+        ("Ravintola Rioni", "Ravintola Rioni Espoo", "Espoo", 76658),
+        ("Fat Lizard", "Fat Lizard Otaniemi", "Otaniemi", 63370),
+        ("Rosso Pizza", "Rosso Pizza, Tikkurila", "Tikkurila", 78902),
+        ("Amarillo", "Amarillo Tikkurila", "Tikkurila", 68787),
+        ("Ravintola Haiku", "Ravintola Haiku Kämp Galleria", "Kämp Galleria", 72905),
+        ("Stockmann", "Stockmann, Helsingin keskusta", "Helsingin keskusta", 20863),
+        ("Rusta", "Rusta Helsinki - Lanterna", "Helsinki - Lanterna", 53147),
+        ("Puuilo", "Puuilo Itäkeskus, Helsinki", "Itäkeskus, Helsinki", 68971),
+        ("Food Market Herkku", "Food Market Herkku, Helsinki keskusta", "Helsinki keskusta", 54692),
+        ("NP Housukauppa", "NP Housukauppa Tripla", "Tripla", 78955),
+        ("Moomin Shop", "Moomin Shop Esplanadi", "Esplanadi", 73463),
+        ("Heirol Shop", "Heirol Shop Helsinki", "Helsinki", 78954),
+        ("Sinelli-myymälä", "Sinelli-myymälä, Itis", "Itis", 78685),
     )
     spider = make_spider()
     for brand, fi, branch, ref in cases:
@@ -1417,6 +1466,10 @@ def test_chain_branch_splits():
         "Fazer 8th Floor",
         "Musti ja Murri Munkkivuori",
         "Minibuffet",
+        "Amarillo",
+        "Ravintola Rioni",
+        "Finnkino Tennispalatsi (Finnkino Yritysmyynti)",
+        "Comfort Hotel Sellon talkoolaituri",
     ):
         item = Feature()
         item["name"] = fi
@@ -1437,6 +1490,135 @@ def test_aimo_park_branch_split():
     assert item["name"] == "Aimo Park"
     assert item["branch"] == "Vallila"
     assert item["extras"]["official_name"] == "Aimo Park, Vallila"
+
+
+def test_finnkino_chain_brand():
+    # Units 56616/66748/30169/24442: Finnkino cinemas carry the verified
+    # chain brand (Q5450883, Finnish cinema chain); the corporate sales
+    # office 20989 keeps its paren qualifier whole (pinned in the chain
+    # table guards).
+    item = branded({"name": {"fi": "Finnkino Tennispalatsi"}, "organizer_name": None})
+    assert item["brand"] == "Finnkino"
+    assert item["brand_wikidata"] == "Q5450883"
+
+
+def test_chain_branch_swedish_parity():
+    # Unit 73568: fi splits to branch, sv strips the same tail instead of
+    # keeping the full form; the full forms live in official_name:sv/en.
+    spider = make_spider()
+    item = Feature()
+    spider._apply_name(
+        item,
+        {
+            "name": {
+                "fi": "Hemingway's Tennispalatsi",
+                "sv": "Hemingway's Tennispalatset",
+                "en": "Hemingway's Tennispalatsi",
+            },
+            "service_nodes": [],
+        },
+    )
+    spider._apply_brand(item, {"name": {"fi": "Hemingway's Tennispalatsi"}, "organizer_name": None})
+    assert item["name"] == "Hemingway's"
+    assert item["branch"] == "Tennispalatsi"
+    assert item["extras"]["official_name"] == "Hemingway's Tennispalatsi"
+    assert "name:sv" not in item["extras"]
+    assert "name:en" not in item["extras"]
+    assert item["extras"]["official_name:sv"] == "Hemingway's Tennispalatset"
+    assert item["extras"]["official_name:en"] == "Hemingway's Tennispalatsi"
+
+
+def test_ankkalampi_comma_site_split():
+    # Units 29918/33747: private-chain daycares name the site after the
+    # comma; the site is the venue. Self-referential tails (unit 46377)
+    # stay whole.
+    item = named(make_spider(), "Päiväkoti Ankkalampi, Punavuori", [879])
+    assert item["name"] == "Päiväkoti Ankkalampi"
+    assert item["located_in"] == "Punavuori"
+    assert item["extras"]["official_name"] == "Päiväkoti Ankkalampi, Punavuori"
+    item = named(
+        make_spider(),
+        "Päiväkoti Ankkalampi,Töölö - Duckies",
+        [879],
+        en="Daycare Ankkalampi,Töölö - Duckies",
+    )
+    assert item["name"] == "Päiväkoti Ankkalampi"
+    assert item["located_in"] == "Töölö - Duckies"
+    assert item["extras"]["name:en"] == "Daycare Ankkalampi"
+    assert item["extras"]["official_name:en"] == "Daycare Ankkalampi,Töölö - Duckies"
+    item = named(make_spider(), "Päiväkoti Ankkalampi,Mechelininkadun Ankkalampi-Ankdammen", [887])
+    assert item["name"] == "Päiväkoti Ankkalampi,Mechelininkadun Ankkalampi-Ankdammen"
+    assert "located_in" not in item
+
+
+def test_spaced_housenumber_letter_folds():
+    # Units 26123/68882/64842: the lowercase appendix is spaced off the
+    # number ("Mannerheimintie 13 a A"); it belongs to the housenumber
+    # (13a), the last token is the staircase. Uppercase middles
+    # ("Lummetie 2 B C", unit 68880) never fold.
+    item = addressed(make_spider(), "Mannerheimintie 13 a A")
+    assert item["street"] == "Mannerheimintie"
+    assert item["housenumber"] == "13a"
+    assert item["unit"] == "A"
+    item = addressed(make_spider(), "Lummetie 2 b C")
+    assert item["housenumber"] == "2b"
+    assert item["unit"] == "C"
+
+
+def test_memorial_slash_names_title():
+    # Unit 23246 is the Lähde memorial to president Kekkonen: the title
+    # side is the name, the dedication is not a venue. Memorial-first
+    # pairs (unit 23309) keep the existing facility-name split.
+    item = named(make_spider(), "Lähde / UKK-monumentti")
+    assert item["name"] == "Lähde"
+    assert "located_in" not in item
+    assert item["extras"]["official_name"] == "Lähde / UKK-monumentti"
+    item = named(make_spider(), "Itä ja Länsi / J. K. Paasikiven muistomerkki")
+    assert item["name"] == "Itä ja Länsi"
+    assert "located_in" not in item
+    item = named(make_spider(), "Juutalaispakolaisten muistomerkki / Apua anovat kädet")
+    assert item["name"] == "Apua anovat kädet"
+    assert item["located_in"] == "Juutalaispakolaisten muistomerkki"
+
+
+def test_tori_filed_as_marketplace_is_square():
+    # Units 34753/34752/34723: a tori is a square first, market function
+    # or not (cf. Kauppatori itself, tagged square via the sights node).
+    item = full(make_spider(), "Töölöntori", [84, 753])
+    assert item.get_tag("tourism") == "attraction"
+    assert item.get_tag("place") == "square"
+    assert item.get_tag("amenity") is None
+
+
+def test_bilingual_translation_slash_strips_fi():
+    # Units 23168/29944: the en field repeats fi before the translation
+    # ("Oodi 60 000 järvelle / The Ode ..."); the fi prefix is not a
+    # venue, and the venue must never equal the name.
+    item = named(
+        make_spider(),
+        "Oodi 60 000 järvelle",
+        [2006],
+        en="Oodi 60 000 järvelle / The Ode to the 60,000 Lakes",
+    )
+    assert item["name"] == "Oodi 60 000 järvelle"
+    assert "located_in" not in item
+    assert item["extras"]["name:en"] == "The Ode to the 60,000 Lakes"
+    assert item["extras"]["official_name:en"] == "Oodi 60 000 järvelle / The Ode to the 60,000 Lakes"
+    item = named(make_spider(), "Unelma", [2006], en="Unelma / Dream")
+    assert "located_in" not in item
+    assert item["extras"]["name:en"] == "Dream"
+
+
+def test_paren_slash_splits_outside_parens():
+    # Unit 42121: the parenthetical holds its own slash; the facility
+    # split ignores slashes inside parens instead of naming the unit
+    # "Muistomerkki)".
+    item = named(make_spider(), "Uimastadion kuntorata / Ulkokuntosali (Pohjoinen Stadiontie / Muistomerkki)")
+    assert item["name"] == "Ulkokuntosali (Pohjoinen Stadiontie / Muistomerkki)"
+    assert item["located_in"] == "Uimastadion kuntorata"
+    assert (
+        item["extras"]["official_name"] == "Uimastadion kuntorata / Ulkokuntosali (Pohjoinen Stadiontie / Muistomerkki)"
+    )
 
 
 def test_website_scheme_added():

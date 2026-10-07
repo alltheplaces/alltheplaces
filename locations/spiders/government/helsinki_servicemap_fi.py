@@ -1091,15 +1091,38 @@ class HelsinkiServicemapFiSpider(Spider):
     UFF_RE = re.compile(r"\buff\b")
     PAR3_RE = re.compile(r"\bpar[\s-]?3\b")
 
+    @staticmethod
+    def _mask_parens(text):
+        # Blank parenthetical spans (same length) so slash splitting
+        # ignores slashes inside them ("Uimastadion kuntorata /
+        # Ulkokuntosali (Pohjoinen Stadiontie / Muistomerkki)", unit
+        # 42121, splits at the facility slash, not the parenthetical).
+        chars = list(text)
+        depth = 0
+        for i, ch in enumerate(chars):
+            if ch == "(":
+                depth += 1
+                chars[i] = " "
+            elif ch == ")":
+                chars[i] = " "
+                if depth:
+                    depth -= 1
+            elif depth:
+                chars[i] = " "
+        return "".join(chars)
+
     def _split_facility(self, text):
         # "Vesalan liikuntapuisto / Pienpelikenttä 2" -> facility in venue.
         # Bare slashes too ("Puolarmaarin ulkoilukeskus/koripallokenttä"),
         # but compounds without spaces stay whole (koripallo/lentopallo).
         text = re.sub(self.ZW_CHARS, "", str(text)).strip()
-        if " / " in text:
-            venue, _, facility = text.rpartition(" / ")
-        elif "/" in text:
-            venue, _, facility = text.rpartition("/")
+        masked = self._mask_parens(text)
+        if " / " in masked:
+            idx = masked.rfind(" / ")
+            venue, facility = text[:idx], text[idx + 3 :]
+        elif "/" in masked:
+            idx = masked.rfind("/")
+            venue, facility = text[:idx], text[idx + 1 :]
             if " " not in venue.strip() and " " not in facility.strip():
                 return text, None
         else:
@@ -1120,6 +1143,17 @@ class HelsinkiServicemapFiSpider(Spider):
             # both sides name school levels. A service at a school
             # ("opiskeluhuolto / Malmin koulu") splits below instead.
             return text, None
+        memorial = ("muistomerk", "monument", "minnesmärk", "memorial")
+        if (
+            any(word in fac_l for word in memorial)
+            and not any(word in ven_l for word in memorial)
+            and "(" not in text
+            and ")" not in text
+        ):
+            # Memorial dedications name the artwork, not a venue ("Lähde /
+            # UKK-monumentti", unit 23246, is the Lähde memorial to
+            # president Kekkonen): the title side is the name, no venue.
+            return ven, None
         if fac_l not in self.NO_INVERT_FACILITIES and re.search(self.INSTITUTION_TAIL_RE, fac_l):
             # Tails that are institutions are venues ("Malmin sairaala",
             # "Vuosaaren perhekeskus", compounds included); end-anchored so
@@ -1253,6 +1287,16 @@ class HelsinkiServicemapFiSpider(Spider):
             # koulu", unit 69678): the service is the name whatever the
             # tail, the tail is the venue.
             return head.strip(), tail.strip()
+        if head.strip() and "ankkalampi" in head.strip().lower():
+            # Private-chain daycares name the site after the comma
+            # ("Päiväkoti Ankkalampi, Punavuori", unit 29918; "Päiväkoti
+            # Ankkalampi,Töölö - Duckies", unit 33747, missing space
+            # included): the site is the venue. Self-referential tails
+            # ("...Mechelininkadun Ankkalampi-Ankdammen", unit 46377)
+            # stay whole.
+            tail_clean = tail.strip()
+            if tail_clean and "ankkalampi" not in tail_clean.lower():
+                return head.strip(), tail_clean
         if head.strip() and re.search(self.FACILITY_TAIL_RE, tail.strip().lower()):
             # Facility tails read like the slash form ("Puistokenttä
             # Linnaistenmetsä, lentopallokenttä", unit 57400, cf. the
@@ -1317,15 +1361,40 @@ class HelsinkiServicemapFiSpider(Spider):
         re.IGNORECASE,
     )
 
+    def _chain_translation_text(self, text, fi_prefix):
+        # Fi splits (or will split) this chain branch off ("Hemingway's
+        # Tennispalatsi", unit 73568): strip the same tail from sv/en for
+        # parity; the full form lands in official_name:sv/en below.
+        if fi_prefix and re.match(re.escape(fi_prefix) + r"(?![A-Za-zÅÄÖåäö])", text, flags=re.IGNORECASE):
+            if text[len(fi_prefix) :].strip(" ,-/–"):
+                return fi_prefix
+        return text
+
+    def _bilingual_translation_text(self, text, fi_raw):
+        # Bilingual translation fields ("Oodi 60 000 järvelle / The Ode
+        # to the 60,000 Lakes", unit 23168): the fi prefix is not a venue;
+        # keep the translated part.
+        if fi_raw and text.lower().startswith((fi_raw + " / ").lower()):
+            if rest := text[len(fi_raw) + 3 :].strip():
+                return rest
+        return text
+
     def _apply_translations(self, item, name):
         official = item["extras"].get("official_name", "")
         fi_venue = item.get("located_in") or ""
+        # The fi chain split runs later in _apply_brand; resolve it here
+        # from the still-full fi name so sv/en strip the same tail.
+        fi_prefix, _fi_branch = self._chain_split(item.get("name") or "")
         for key in ("sv", "en"):
             raw = re.sub(self.ZW_CHARS, "", str(name.get(key) or "")).strip()
             text = raw
-            if fi_venue and text.lower().endswith((", " + fi_venue).lower()):
+            if fi_venue and (
+                text.lower().endswith((", " + fi_venue).lower()) or text.lower().endswith(("," + fi_venue).lower())
+            ):
                 # Same venue tail the fi split moved to located_in
-                # ("Elevhälsa, Karhusuon koulu", unit 69678): strip it for parity.
+                # ("Elevhälsa, Karhusuon koulu", unit 69678; missing-space
+                # "Daycare Ankkalampi,Töölö - Duckies", unit 33747): strip
+                # it for parity.
                 text = text[: len(text) - len(fi_venue)].rstrip(" ,-/–").strip()
             if fi_venue:
                 # Comma-less facility tails ("Park fältet Trädan Basketplan",
@@ -1346,13 +1415,18 @@ class HelsinkiServicemapFiSpider(Spider):
                 text = provider_split
                 if "located_in" not in item:
                     item["located_in"] = provider_venue
+            text = self._chain_translation_text(text, fi_prefix)
+            text = self._bilingual_translation_text(text, re.sub(self.ZW_CHARS, "", str(name.get("fi") or "")).strip())
             if text and (text != item.get("name") or raw != text) and text != official:
                 if re.match(r"^(vesiposti|vattenpost|water post)\b", text.lower()):
                     # Water posts: tails repeat the parsed street address.
                     text = re.split(r"[,/]", text, maxsplit=1)[0].strip()
                 text = self._clean_name(text)
                 facility, venue = self._split_facility(text)
-                if venue and "located_in" not in item:
+                if venue and "located_in" not in item and venue != item.get("name"):
+                    # A venue identical to the name is the name itself, not
+                    # a host (bilingual "Oodi 60 000 järvelle / The Ode ...",
+                    # unit 23168, before the bilingual strip above).
                     if any(
                         word in venue.lower()
                         for word in (
@@ -1375,7 +1449,10 @@ class HelsinkiServicemapFiSpider(Spider):
                     else:
                         item["located_in"] = venue
                 if facility:
-                    if facility != item.get("name"):
+                    if facility != item.get("name") and facility != fi_prefix:
+                        # Chain-stripped translations equal the post-brand
+                        # fi name, not the still-full applied name: suppress
+                        # them like identical translations.
                         item["extras"][f"name:{key}"] = facility
                     if raw != facility:
                         # Transformed translation: keep the feed's full form
@@ -1622,6 +1699,12 @@ class HelsinkiServicemapFiSpider(Spider):
     def _parse_address_tokens(self, item, tokens):
         number = self.HOUSENUMBER_RE
         tokens = [clean for t in tokens if (clean := t.strip().strip(",.;"))]
+        if len(tokens) >= 3 and re.fullmatch(r"\d+", tokens[-3]) and re.fullmatch(r"[a-zåäö]", tokens[-2]):
+            # Spaced housenumber letter ("Mannerheimintie 13 a A", unit
+            # 26123; "Paasikuja 3 b A", unit 68882): the lowercase appendix
+            # belongs to the number (13a), the last token is the staircase.
+            # Staircases are uppercase, so uppercase middles never fold.
+            tokens = tokens[:-3] + [tokens[-3] + tokens[-2]] + tokens[-1:]
         if len(tokens) >= 2 and (dotted := re.fullmatch(r"(\d+)\.([A-Za-z]\.\d+)", tokens[-1])):
             # Dotted apartment tails ("Valhallankatu 4.A.9").
             item["housenumber"] = dotted.group(1)
@@ -1941,7 +2024,10 @@ class HelsinkiServicemapFiSpider(Spider):
     # into branch=*. Store-type branches never split ("Partioaitta
     # Outlet" keeps its full name). Non-uniform chains (Pilke, Norlandia,
     # Dylan, Factory) and generic words shared by independent shops
-    # (Antikvariaatti, Lankakauppa) are deliberately absent.
+    # (Antikvariaatti, Lankakauppa) are deliberately absent, as are
+    # collision shapes: bare "Sokos" would catch the Sokos Hotel gym
+    # (unit 53941), and "Cafe Tarina" would catch the bakery unit 79479
+    # ("Leipomo & Myymälä" is a descriptor, not a site).
     CHAIN_SPLITS = (
         "Jungle Juice Bar",
         "Kanniston Leipomo",
@@ -2000,13 +2086,54 @@ class HelsinkiServicemapFiSpider(Spider):
         "Joe & the Juice",
         "Aimo Park",
         "EuroPark",
+        "Finnkino",
+        "Scandic",
+        "Clarion Hotel",
+        "Comfort Hotel",
+        "Holiday Inn",
+        "Original Sokos Hotel",
+        "Solo Sokos Hotel",
+        "Break Sokos Hotel",
+        "GLO Hotel",
+        "Hiisi Hotel",
+        "Hiisi Homes & Hotel",
+        "Forenom Aparthotel Helsinki",
+        "Forenom Serviced Apartments Helsinki",
+        "Forenom Hostel Helsinki",
+        "Radisson Blu Hotel",
+        "Radisson Blu Seaside Hotel",
+        "Radisson Blu Royal Hotel",
+        "Radisson Blu Plaza Hotel",
+        "Radisson Blu Aleksanteri Hotel",
+        "Radisson RED",
+        "Citybox Hotel",
+        "Hotel Indigo",
+        "The Folks Hotel",
+        "Lapland Hotels",
+        "Home Hotel",
+        "Crowne Plaza",
+        "Ravintola Loru",
+        "Ravintola Konnichiwa",
+        "Krung Thep Thai Bistro",
+        "Ravintola MoMo",
+        "Ravintola Rioni",
+        "Fat Lizard",
+        "Rosso Pizza",
+        "Amarillo",
+        "Ravintola Haiku",
+        "Stockmann",
+        "Rusta",
+        "Puuilo",
+        "Food Market Herkku",
+        "NP Housukauppa",
+        "Moomin Shop",
+        "Heirol Shop",
+        "Sinelli-myymälä",
     )
 
-    def _apply_chain_branch(self, item, unit):
-        # OSM names the branch separately (branch=*): "Aimo Park, Vallila"
-        # becomes name plus branch (unit 67707 shape). Runs on the applied
-        # name, so comma-venue and translation splits happen first.
-        name = item.get("name") or ""
+    def _chain_split(self, name):
+        # "Brand separator Branch" split shared by _apply_chain_branch and
+        # translation parity: (None, None) when the name stays whole.
         for prefix in self.CHAIN_SPLITS:
             if not re.match(re.escape(prefix) + r"(?![A-Za-zÅÄÖåäö])", name, re.IGNORECASE):
                 continue
@@ -2015,12 +2142,30 @@ class HelsinkiServicemapFiSpider(Spider):
             if not branch or outlet == "outlet" or outlet.startswith("outlet ") or outlet.startswith("outlet-"):
                 # "Partioaitta Outlet" (or "Outlet Helsinki") is a store
                 # type, not a branch site: keep the full name.
-                return
-            if "official_name" not in item["extras"]:
-                item["extras"]["official_name"] = item["name"]
-            item["name"] = prefix
-            item["branch"] = branch
+                return None, None
+            if "(" in branch or "talkoolaituri" in outlet:
+                # Paren qualifiers name a sub-unit, not a site ("Finnkino
+                # Tennispalatsi (Finnkino Yritysmyynti)", unit 20989); a
+                # talkoolaituri remainder is a tool-library record filed
+                # under a hotel name ("Comfort Hotel Sellon
+                # talkoolaituri", unit 79884). Keep the full name.
+                return None, None
+            return prefix, branch
+        return None, None
+
+    def _apply_chain_branch(self, item, unit):
+        # OSM names the branch separately (branch=*): "Aimo Park, Vallila"
+        # becomes name plus branch (unit 67707 shape). Runs on the applied
+        # name, so comma-venue and translation splits happen first.
+        name = item.get("name") or ""
+        prefix, branch = self._chain_split(name)
+        if not prefix:
             return
+        if "official_name" not in item["extras"]:
+            item["extras"]["official_name"] = item["name"]
+        item["name"] = prefix
+        item["branch"] = branch
+        return
 
     def _normalize_website(self, www):
         # Feed omits the scheme. Known-bad feed hostnames pass through and
@@ -2521,6 +2666,7 @@ class HelsinkiServicemapFiSpider(Spider):
         ("aimo park", "Aimo Park", "Q126728228", "phrase"),
         ("punaisen ristin kontti", "SPR Kontti", "Q409603", "phrase"),
         ("terveystalo", "Terveystalo", "Q11897034", "word"),
+        ("finnkino", "Finnkino", "Q5450883", "prefix"),
     )
 
     def _match_brand_keyword(self, keyword, match, text):
@@ -2719,11 +2865,12 @@ class HelsinkiServicemapFiSpider(Spider):
         if unit is not None:
             fi, sv, en = self._names_lower(unit)
             tails = [fi.rstrip(), sv.rstrip(), en.rstrip(), text.rstrip()]
-        if (
-            any(t.endswith("tori") and not t.endswith(("konttori", "toimisto", "varasto")) for t in tails)
-            and category == Categories.TOURISM_ATTRACTION
-        ):
-            # Market squares filed as sights (cf. Hakaniementori).
+        if any(
+            t.endswith("tori") and not t.endswith(("konttori", "toimisto", "varasto")) for t in tails
+        ) and category in (Categories.TOURISM_ATTRACTION, Categories.MARKETPLACE):
+            # Market squares filed as sights (cf. Hakaniementori); a tori
+            # is a square first, market function or not (cf. Töölöntori,
+            # unit 34753, filed straight as marketplace).
             return Categories.TOURISM_ATTRACTION_SQUARE
         if any(t.endswith(("puisto", "parken", "park")) or re.search(r"\bpark$", t) for t in tails) and category in (
             Categories.TOURISM_ATTRACTION,
