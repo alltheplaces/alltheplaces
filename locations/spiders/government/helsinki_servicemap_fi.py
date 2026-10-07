@@ -2323,7 +2323,11 @@ class HelsinkiServicemapFiSpider(Spider):
 
     def _apply_media(self, item, unit):
         # Picture endpoint, when the feed sets one. Placeholders repeat
-        # across units, so low image uniqueness is expected.
+        # across units, so low image uniqueness is expected. Dead picture
+        # URLs pass through (cf. unit 15358, 403 on both browser and API
+        # fetch while 4/4 sampled siblings return 200): no feed signal
+        # distinguishes them, and crawl-time probing would break the CI
+        # time budget.
         picture = unit.get("picture_url")
         if isinstance(picture, str) and picture.strip():
             item["image"] = picture.strip()
