@@ -4,6 +4,7 @@ from scrapy import Request
 from scrapy.http import Response, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS_EN
 from locations.items import Feature
 from locations.spiders.shell import ShellSpider
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
@@ -14,6 +15,10 @@ DUCK_THRU = {"brand": "Duck Thru", "brand_wikidata": "Q139631383"}
 class DuckThruUSSpider(WPStoreLocatorSpider):
     name = "duck_thru_us"
     allowed_domains = ["duckthru.com"]
+    iseadgg_countries_list = ["US"]
+    search_radius = 500
+    max_results = 55
+    days = DAYS_EN
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         yield Request(item["website"], callback=self.parse_page, cb_kwargs={"shop": item.deepcopy()})
