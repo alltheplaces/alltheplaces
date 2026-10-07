@@ -52,6 +52,8 @@ class WorldcatSpider(JSONBlobSpider):
             if address := re.search(r"[-\w.+]+@[-\w]+\.[-\w.]+", emails[0]):
                 item["email"] = address.group(0)
         if website := location.get("homePageUrl"):
-            item["website"] = re.sub(r"^(https?):/(?!/)", r"\1://", website)
+            website = re.sub(r"^(https?):/?(?!/)", r"\1://", website)
+            if re.fullmatch(r"https?://[\w-]+(\.[\w-]+)+(:\d+)?(/\S*)?", website):
+                item["website"] = website
 
         yield item
