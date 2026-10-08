@@ -7,32 +7,14 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_ES, OpeningHours
 from locations.items import Feature
 
 # Day words used in the free-text schedules ("L-V", "Lun-Mié", "Lunes a Viernes", "SAB", "S"...).
+# They are the DAYS_ES names, lower-cased and accent-stripped like the text, mapped to the day's index in DAYS.
 DAY_WORDS = {
-    "lunes": 0,
-    "lun": 0,
-    "l": 0,
-    "martes": 1,
-    "mar": 1,
-    "miercoles": 2,
-    "mie": 2,
-    "jueves": 3,
-    "jue": 3,
-    "viernes": 4,
-    "vie": 4,
-    "v": 4,
-    "sabado": 5,
-    "sabados": 5,
-    "sab": 5,
-    "sa": 5,
-    "s": 5,
-    "domingo": 6,
-    "domingos": 6,
-    "dom": 6,
-    "d": 6,
+    unicodedata.normalize("NFKD", word.lower()).encode("ascii", "ignore").decode(): DAYS.index(day)
+    for word, day in DAYS_ES.items()
 }
 DAY_RE = re.compile(r"\b(" + "|".join(sorted(DAY_WORDS, key=len, reverse=True)) + r")\b")
 TIME_RE = re.compile(r"(\d{1,2})(?:\s*[:.;]\s*(\d{2}))?\s*(am|pm|m\b)?")
