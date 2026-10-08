@@ -13,6 +13,7 @@ class WhittardGBSpider(Spider):
     name = "whittard_gb"
     item_attributes = {"brand": "Whittard of Chelsea", "brand_wikidata": "Q7996831"}
     start_urls = ["https://www.whittard.com/pages/stores"]
+    requires_proxy = "GB"
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath("//*[@data-store-finder-pin-data]"):
