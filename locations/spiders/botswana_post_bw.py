@@ -25,7 +25,6 @@ class BotswanaPostBWSpider(Spider):
             item["ref"] = link.attrib["href"].rstrip("/").rsplit("/", 1)[-1]
             item["branch"] = link.css("::text").get("").strip()
             item["phone"] = location.css(".views-field-field-telephone .field-content::text").get()
-            item["country"] = "BW"
             item["website"] = response.urljoin(link.attrib["href"])
             yield response.follow(link.attrib["href"], callback=self.parse_branch, cb_kwargs={"item": item})
 
