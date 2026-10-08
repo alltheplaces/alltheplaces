@@ -52,7 +52,6 @@ class CorreosDeCubaCuSpider(Spider):
             item["addr_full"] = clean(office["direccion"])
             item["postcode"] = clean(office["codigo_postal"])
             item["city"], item["state"] = municipalities.get(office["municipio_id"], (None, None))
-            item["country"] = "CU"
             try:
                 lat, lon = float(office["latitud"]), float(office["longitud"])
                 if 19.5 < lat < 23.5 and -85.2 < lon < -74:
