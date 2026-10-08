@@ -5,12 +5,12 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_RU, OpeningHours, day_range
 from locations.items import Feature
 
-DAYS_RU = {"пн": "Mo", "вт": "Tu", "ср": "We", "чт": "Th", "пт": "Fr", "сб": "Sa", "вс": "Su"}
-DAYS_RU_KEYS = list(DAYS_RU)
-DAY_RE = "|".join(DAYS_RU_KEYS)
+# Schedules use the two-letter abbreviations ("пн", "вт", ...), in lower case.
+DAY_ABBREVIATIONS = {day: name.lower() for name, day in DAYS_RU.items() if len(name) == 2}
+DAY_RE = "|".join(DAY_ABBREVIATIONS.values())
 TOKEN_RE = re.compile(
     rf"(?P<day>{DAY_RE})|(?P<time>\d{{1,2}}[:.]\d{{2}})\s*-\s*(?P<end>\d{{1,2}}[:.]\d{{2}})|(?P<lunch>обед|перерыв)"
     r"|(?P<closed>выходн|демалыс)"  # day off (Russian, Kazakh)
@@ -72,14 +72,16 @@ class KazpostKZSpider(Spider):
         text = re.sub(r"без\s+(обеда?|перерыва)", " ", schedule.lower().replace("c", "с"))  # Latin "c" typos
         text = re.sub(
             rf"({DAY_RE})\s*-\s*({DAY_RE})",
-            lambda m: " ".join(DAYS_RU_KEYS[DAYS_RU_KEYS.index(m[1]) : DAYS_RU_KEYS.index(m[2]) + 1]),
+            lambda m: " ".join(
+                DAY_ABBREVIATIONS[day] for day in day_range(DAYS_RU[m[1].title()], DAYS_RU[m[2].title()])
+            ),
             text,
         )
         oh = OpeningHours()
         pending_days, group, lunch = [], None, False
         for token in TOKEN_RE.finditer(text):
             if token["day"]:
-                pending_days.append(DAYS_RU[token["day"]])
+                pending_days.append(DAYS_RU[token["day"].title()])
             elif token["lunch"]:
                 lunch = True
             elif token["time"]:
