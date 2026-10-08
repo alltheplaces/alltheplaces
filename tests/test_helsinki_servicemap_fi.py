@@ -1154,6 +1154,11 @@ def test_wellness_studio_without_sauna_word_keeps_table():
     assert item.get_tag("amenity") == "yes"
     item = full(make_spider(), "Teurastamo", [155, 2173])
     assert item.get_tag("amenity") == "events_venue"
+    # A rental-sauna filing with an opaque name keeps its sauna: the node
+    # itself identifies the venue (SYNTHETIC — no single-filed rental unit
+    # lacks sauna terms).
+    item = full(make_spider(), "Sugoi", [155])
+    assert item.get_tag("leisure") == "sauna"
 
 
 def test_retail_shop_filed_as_repair_uses_name():
@@ -2198,11 +2203,14 @@ def test_wellness_branches():
         ("joogastudio a16", Categories.GYM),
     ]
     for text, expected in cases:
-        assert spider._wellness_category(Categories.SAUNA, text) == expected, text
+        assert spider._wellness_category(Categories.SAUNA, [2168], text) == expected, text
     # Keepers fall through to their owning rules (spa, trade) or the default.
-    assert spider._wellness_category(Categories.SAUNA, "kellumo") is None
-    assert spider._wellness_category(Categories.SAUNA, "hilla helsinki - day spa & shop") is None
-    assert spider._wellness_category(Categories.SAUNA, "pranama kallio") is Categories.GENERIC_POI
+    assert spider._wellness_category(Categories.SAUNA, [2168], "kellumo") is None
+    assert spider._wellness_category(Categories.SAUNA, [2168], "hilla helsinki - day spa & shop") is None
+    assert spider._wellness_category(Categories.SAUNA, [2168], "pranama kallio") is Categories.GENERIC_POI
+    # Rental-sauna nodes identify the venue themselves: opaque names keep
+    # their sauna (SYNTHETIC — no single-filed rental unit lacks sauna terms).
+    assert spider._wellness_category(Categories.SAUNA, [155], "pranama kallio") is None
 
 
 def test_activity_branches():
@@ -2379,7 +2387,7 @@ def test_activity_playground_with_gear():
 def test_wellness_barber():
     # SYNTHETIC barber filing name.
     spider = make_spider()
-    assert spider._wellness_category(Categories.SAUNA, "parturi next century") == Categories.SHOP_HAIRDRESSER
+    assert spider._wellness_category(Categories.SAUNA, [2168], "parturi next century") == Categories.SHOP_HAIRDRESSER
 
 
 def test_civic_resident_room_and_parish_house():

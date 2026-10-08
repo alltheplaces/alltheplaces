@@ -3372,7 +3372,7 @@ class HelsinkiServicemapFISpider(Spider):
             return Categories.LEISURE_FITNESS_STATION
         return None
 
-    def _wellness_category(self, category, text):
+    def _wellness_category(self, category, matched, text):
         if category != Categories.SAUNA:
             return None
         if re.search(r"(parturi|barber|kampaamo|\bhair\b)", text):
@@ -3394,7 +3394,11 @@ class HelsinkiServicemapFISpider(Spider):
         ):
             # 2168 filing with neither sauna evidence nor a trade word owned
             # by a later rule (cf. Pranama Kallio, Hyvinvointitila): a
-            # wellness filing without evidence is not a sauna.
+            # wellness filing without evidence is not a sauna. Rental-sauna
+            # nodes (155/264/511) identify the venue themselves, so only
+            # vague 2168 filings go generic.
+            if matched and self._earliest(matched) != 2168:
+                return None
             self._stat("category/wellness_generic")
             return Categories.GENERIC_POI
         return None
@@ -3622,7 +3626,7 @@ class HelsinkiServicemapFISpider(Spider):
             return sauna_trade
         if station := self._station_category(category, text):
             return station
-        if wellness := self._wellness_category(category, text):
+        if wellness := self._wellness_category(category, matched, text):
             return wellness
         if civic := self._civic_category(category, text):
             return civic
