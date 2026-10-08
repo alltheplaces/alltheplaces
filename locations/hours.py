@@ -363,25 +363,39 @@ DAYS_LT = {
 }
 
 DAYS_SE = {
+    "Måndagar": "Mo",
     "Måndag": "Mo",
+    "Månd": "Mo",
     "Mån": "Mo",
     "Må": "Mo",
+    "Tisdagar": "Tu",
     "Tisdag": "Tu",
+    "Tisd": "Tu",
     "Tis": "Tu",
     "Ti": "Tu",
+    "Onsdagar": "We",
     "Onsdag": "We",
+    "Onsd": "We",
     "Ons": "We",
     "On": "We",
+    "Torsdagar": "Th",
     "Torsdag": "Th",
+    "Torsd": "Th",
     "Tors": "Th",
     "To": "Th",
+    "Fredagar": "Fr",
     "Fredag": "Fr",
+    "Fred": "Fr",
     "Fre": "Fr",
     "Fr": "Fr",
+    "Lördagar": "Sa",
     "Lördag": "Sa",
+    "Lörd": "Sa",
     "Lör": "Sa",
     "Lö": "Sa",
+    "Söndagar": "Su",
     "Söndag": "Su",
+    "Sönd": "Su",
     "Sön": "Su",
     "Sö": "Su",
 }
@@ -880,6 +894,11 @@ DAYS_BY_FREQUENCY = [
 
 NAMED_DAY_RANGES_DK = {
     "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
+}
+
+NAMED_DAY_RANGES_SE = {
+    "Vardagar": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
+    "Vardag": ["Mo", "Tu", "We", "Th", "Fr"],
 }
 
 NAMED_DAY_RANGES_EN = {

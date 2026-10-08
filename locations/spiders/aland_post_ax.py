@@ -7,27 +7,16 @@ from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, DAYS_WEEKDAY, OpeningHours
+from locations.hours import DAYS, DAYS_SE, NAMED_DAY_RANGES_SE, OpeningHours
 from locations.items import Feature
 
 OPERATOR = {"operator": "Åland Post", "operator_wikidata": "Q1951188"}
 
-# Swedish day names as used in the letter box collection times ("tömning").
-DAYS_AX = {
-    "mån": "Mo",
-    "må": "Mo",
-    "tis": "Tu",
-    "ti": "Tu",
-    "ons": "We",
-    "on": "We",
-    "tor": "Th",
-    "to": "Th",
-    "fre": "Fr",
-    "fr": "Fr",
-    "lör": "Sa",
-    "sön": "Su",
-}
-DAY_TOKEN = r"(?:vardagar|mån\w*|må|tis\w*|ti|ons\w*|on|tor\w*|to|fre\w*|fr|lör\w*|sön\w*)"
+# Swedish day names and ranges ("Vardagar", "Månd.", "Tisd-Fred.") as matched by OpeningHours.
+DAYS_REGEX = OpeningHours.any_day_extraction_regex(
+    days=DAYS_SE, named_day_ranges=NAMED_DAY_RANGES_SE, delimiters=["-", "–"]
+)
+COLLECTION_TOKEN = re.compile(rf"(?P<days>{DAYS_REGEX})|(?P<time>\d{{1,2}}[:.]\d{{2}})|(?P<comma>,)", re.IGNORECASE)
 
 
 def next_flight_data(html: str) -> str:
@@ -43,38 +32,29 @@ def json_array(data: str, key: str) -> list:
     return json.JSONDecoder().raw_decode(data, start + len(key) + 3)[0]
 
 
-def to_day(token: str) -> str | None:
-    token = token.lower().rstrip(".")
-    for prefix, day in DAYS_AX.items():
-        if token.startswith(prefix):
-            return day
-    return None
-
-
 def parse_collection_times(text: str) -> str:
     # "Vardagar 14:00, Lördagar 11:00", "Vardagar Månd.12:30 Tisd-Fred. 15:00",
     # "Vardagar Må,On,Fr 10:00  Ti,To 9:00", "Vardagar 12:00 o 16:30 Måndagar också 07:30"
+    # Letter boxes have one collection time per day rather than an opening range, so OpeningHours
+    # can't hold them; it still finds the day names, and each time applies to the days before it.
     text = re.sub(r"(\d) (\d:\d\d)", r"\1\2", text)  # "Månd.1 3:00"
+    text = re.sub(r"(?<=[a-zåäö])\.", " ", text, flags=re.IGNORECASE)  # "Tisd.-Fred." -> "Tisd -Fred "
     times: dict[str, set[str]] = {}
     days: list[str] = []
-    pending: list[str] = []  # day names collected since the last time
-    in_range = False
-    for token in re.findall(rf"\d{{1,2}}[:.]\d{{2}}|(?<![a-zåäö]){DAY_TOKEN}(?![a-zåäö])|-", text, re.I):
-        if token == "-":
-            in_range = bool(pending)
-        elif re.match(r"\d", token):
-            if pending:
-                days, pending = pending, []
-            for day in days or DAYS_WEEKDAY:
-                times.setdefault(day, set()).add(token.replace(".", ":").zfill(5))
-        elif token.lower() == "vardagar":
-            pending = list(DAYS_WEEKDAY)
-        elif day := to_day(token):
-            if in_range and pending:
-                pending = pending + DAYS[DAYS.index(pending[-1]) + 1 : DAYS.index(day) + 1]
-            else:
-                pending = pending + [day] if pending and not days_complete(pending) else [day]
-            in_range = False
+    new_days = after_comma = False
+    for token in COLLECTION_TOKEN.finditer(text):
+        if token["days"]:
+            day_range = [d for d in re.fullmatch(DAYS_REGEX, token["days"], re.IGNORECASE).groups() if d]
+            matched = OpeningHours.days_in_day_range(day_range, DAYS_SE, NAMED_DAY_RANGES_SE)
+            # "Må,On,Fr" adds to the days; "Vardagar Månd." or a day after a time starts afresh.
+            days = days + matched if new_days and after_comma else matched
+            new_days, after_comma = True, False
+        elif token["comma"]:
+            after_comma = True
+        else:
+            for day in days:
+                times.setdefault(day, set()).add(token["time"].replace(".", ":").zfill(5))
+            new_days = after_comma = False
     by_day = {day: ",".join(sorted(t)) for day, t in times.items()}
     out = []
     for time, group in groupby(DAYS, key=by_day.get):
@@ -82,11 +62,6 @@ def parse_collection_times(text: str) -> str:
             group = list(group)
             out.append(f"{group[0]}-{group[-1]} {time}" if len(group) > 2 else f"{','.join(group)} {time}")
     return "; ".join(out)
-
-
-def days_complete(pending: list[str]) -> bool:
-    # "Vardagar" followed by an explicit day starts a new group rather than extending Mo-Fr.
-    return pending == DAYS_WEEKDAY
 
 
 class AlandPostAxSpider(Spider):
@@ -105,7 +80,6 @@ class AlandPostAxSpider(Spider):
             item["ref"] = str(box["id"])
             item["lat"], item["lon"] = box["latitude"], box["longitude"]
             item["postcode"] = str(box.get("postnr") or "")
-            item["country"] = "AX"
             if location := (box.get("placering") or "").strip():
                 item["extras"]["description"] = location
             if collection_times := parse_collection_times(box.get("tomning") or ""):
@@ -123,7 +97,6 @@ class AlandPostAxSpider(Spider):
                 item = Feature()
                 item["ref"] = place["_id"]
                 item["lat"], item["lon"] = place["location"]["lat"], place["location"]["lng"]
-                item["country"] = "AX"
                 postcode, _, city = (place.get("heading") or "").partition(" ")
                 item["postcode"], item["city"] = postcode, city
                 item["street_address"] = blocks.get("Visiting Address")
