@@ -2937,11 +2937,11 @@ class HelsinkiServicemapFiSpider(Spider):
         # which need service_ids and cannot live in NOUN_TABLE.
         if ("jooga" in text or "yoga" in text) and "festiva" not in text:
             # Yoga studios; festival names are events, not venues.
-            apply_category(Categories.LEISURE_FITNESS_STATION, item)
+            apply_category(Categories.GYM, item)
             add_sport(Sport.YOGA, item)
         elif "pilate" in text:
             # Stem covers pilates/pilatesta.
-            apply_category(Categories.LEISURE_FITNESS_STATION, item)
+            apply_category(Categories.GYM, item)
             add_sport(Sport.PILATES, item)
         elif "ampumahiihto" in text:
             apply_category(Categories.LEISURE_PITCH, item)
