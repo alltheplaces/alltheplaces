@@ -404,6 +404,9 @@ class SMarketFISpider(Spider):
             ranges = entry.get("ranges") or []
             if ranges:
                 for span in ranges:
+                    if not isinstance(span, dict):
+                        self.crawler.stats.inc_value("atp/s_market_fi/hours/bad_range")
+                        continue
                     open_time = self.clean_time(span.get("open"))
                     close_time = self.clean_time(span.get("close"))
                     if open_time is None or close_time is None:
