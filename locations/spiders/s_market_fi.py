@@ -171,7 +171,14 @@ class SMarketFISpider(Spider):
                 logger.warning("s_market_fi: hasMore without nextCursor for %s", brand)
             yield from self.flush(brand)
 
-    def errback(self, failure, brand: str | None = None) -> Iterable[Feature]:
+    def errback(self, failure) -> Iterable[Feature]:
+        # Scrapy calls errbacks as errback(failure): cb_kwargs are NOT passed
+        # as arguments, so a `brand` parameter here would always be None and
+        # the buffer below would never flush. Recover it from the failed
+        # request instead (explicit kwarg first, request URL as fallback).
+        request = getattr(failure, "request", None)
+        cb_kwargs = getattr(request, "cb_kwargs", None) or {}
+        brand = cb_kwargs.get("brand") or (self.brand_of(request) if request is not None else None)
         self.crawler.stats.inc_value(f"atp/s_market_fi/failed/{brand or 'unknown'}")
         logger.warning("s_market_fi: request failed for %s: %s", brand, failure.value)
         if brand in self.pending:
