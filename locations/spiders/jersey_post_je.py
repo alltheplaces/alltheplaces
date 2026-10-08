@@ -73,8 +73,11 @@ class JerseyPostJESpider(Spider):
     def parse_office_hours(self, counters: list[dict]) -> OpeningHours:
         oh = OpeningHours()
         for counter in counters[:1]:  # the post office counter itself
+            # A later rule replaces an earlier one for its days, e.g. "Monday - Friday" then "Tuesday".
+            day_times = {}
             for rule in counter.get("times") or []:
-                for start, end in re.findall(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", rule.get("times") or ""):
-                    for day in self.days_of(rule.get("day") or ""):
-                        oh.add_range(day, start, end)
+                for day in self.days_of(rule.get("day") or ""):
+                    day_times[day] = rule.get("times") or ""
+            for day, times in day_times.items():
+                oh.add_ranges_from_string(f"{day} {times}")
         return oh
