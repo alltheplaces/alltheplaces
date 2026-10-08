@@ -32,7 +32,9 @@ class EltaGRSpider(Spider):
             item = Feature()
             item["ref"] = branch["code"] or branch["id"]
             item["branch"] = name
-            item["lat"], item["lon"] = branch["cordinates_lat"], branch["cordinates_long"]
+            item["lat"], item["lon"] = self.parse_coordinate(branch["cordinates_lat"]), self.parse_coordinate(
+                branch["cordinates_long"]
+            )
             item["street"] = branch["street"]
             item["housenumber"] = branch["street_number"]
             item["postcode"] = branch["postcode"]
@@ -45,6 +47,14 @@ class EltaGRSpider(Spider):
             else:
                 apply_category(Categories.POST_OFFICE, item)
             yield item
+
+    @staticmethod
+    def parse_coordinate(value: str | None) -> str | None:
+        # A few branches use a decimal comma ("40,7599", "35,236678\t", "36,832,185").
+        value = (value or "").strip()
+        if "." not in value:
+            value = value.replace(",", ".", 1).replace(",", "")
+        return value or None
 
     @staticmethod
     def parse_hours(branch: dict) -> OpeningHours:
