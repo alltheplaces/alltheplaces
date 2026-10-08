@@ -6,26 +6,11 @@ from scrapy import Spider
 from scrapy.http import FormRequest, JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_PT, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 BASE_URL = "https://appserver2.ctt.pt/feapl_2/app/open/stationSearch/search.jspx"
 PAGE_SIZE = 5  # Fixed by the site; no page size parameter is honoured.
-
-DAY_NAMES = {
-    "2ª": DAYS[0],
-    "segunda-feira": DAYS[0],
-    "3ª": DAYS[1],
-    "terça-feira": DAYS[1],
-    "4ª": DAYS[2],
-    "quarta-feira": DAYS[2],
-    "5ª": DAYS[3],
-    "quinta-feira": DAYS[3],
-    "6ª": DAYS[4],
-    "sexta-feira": DAYS[4],
-    "sábado": DAYS[5],
-    "domingo": DAYS[6],
-}
 
 
 class CttPTSpider(Spider):
@@ -169,12 +154,12 @@ class CttPTSpider(Spider):
             elif part == "feriados":
                 continue
             elif " a " in part:
-                first, last = (DAY_NAMES.get(d.strip()) for d in part.split(" a ", 1))
+                first, last = (sanitise_day(d, DAYS_PT) for d in part.split(" a ", 1))
                 if not first or not last:
                     return None
-                days += DAYS[DAYS.index(first) : DAYS.index(last) + 1]
-            elif part in DAY_NAMES:
-                days.append(DAY_NAMES[part])
+                days += day_range(first, last)
+            elif day := sanitise_day(part, DAYS_PT):
+                days.append(day)
             else:
                 return None
         return days
