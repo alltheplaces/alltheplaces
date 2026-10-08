@@ -40,4 +40,6 @@ class McdonaldsMASpider(PlaywrightSpider):
             apply_yes_no(Extras.DELIVERY, item, "mcdelivery" in services)
             apply_yes_no(Extras.DRIVE_THROUGH, item, "mcdrive" in services)
 
+            apply_category(Categories.FAST_FOOD, item)
+
             yield item
