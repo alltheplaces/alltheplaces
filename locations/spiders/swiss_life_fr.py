@@ -1,7 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
-from locations.structured_data_spider import StructuredDataSpider
 from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
 
 
 class SwissLifeFRSpider(SitemapSpider, StructuredDataSpider):
@@ -13,5 +13,5 @@ class SwissLifeFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.OFFICE_INSURANCE, item)
-        item["branch"] = item.pop("name","")
+        item["branch"] = item.pop("name", "")
         yield item
