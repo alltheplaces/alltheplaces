@@ -6,11 +6,14 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
+from locations.geo import bbox_contains
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 API = "https://postbase-api.thailandpost.co.th/api/frontend/post_office/"
 PAGE_SIZE = 1000
+# lon_min, lat_min, lon_max, lat_max
+TH_BOUNDS = (97.0, 5.0, 106.0, 21.0)
 
 
 class ThailandPostTHSpider(Spider):
@@ -49,7 +52,18 @@ class ThailandPostTHSpider(Spider):
         item["ref"] = str(office["post_office_id"])
         # e.g. "ปณ.พระโขนง", "คปณ.พญาแล", "ปณร.พระโขนง 201 (อาคารมโนรม)": type abbreviation, then name
         item["branch"] = re.sub(r"^[\u0e00-\u0e7f]{1,4}\.\s*", "", office["title"].strip())
-        item["lat"], item["lon"] = detail.get("latitude"), detail.get("longitude")
+        try:
+            lat, lon = float(detail.get("latitude")), float(detail.get("longitude"))
+        except (TypeError, ValueError):
+            lat = lon = None
+        # A few offices have broken coordinates, e.g. Suan Taeng's longitude is 100678.0.
+        if lat is not None and bbox_contains(TH_BOUNDS, (lon, lat)):
+            item["lat"], item["lon"] = lat, lon
+        elif detail.get("latitude") or detail.get("longitude"):
+            self.logger.debug(
+                f"Bad coordinates for {office['slug']}: {detail.get('latitude')}, {detail.get('longitude')}"
+            )
+            self.crawler.stats.inc_value(f"atp/{self.name}/bad_coordinates")
         item["addr_full"] = detail.get("address")
         item["postcode"] = office["postcode"]
         item["state"] = office["province_en"]
