@@ -104,8 +104,10 @@ PARTNER_CODES = {
     "32",
     "33",
 }
-# Parcel lockers (90, 91) and Helposti drop-off points (35) are not requested.
-COUNTER_CODES = sorted(POSTI_OFFICE_CODES | POSTI_BUSINESS_CODES | PARTNER_CODES, key=int)
+# Posti parcel lockers ("Postin automaatti").
+PARCEL_LOCKER_CODES = {"90", "91"}
+# Helposti drop-off points (35) are not requested.
+SERVICE_POINT_CODES = sorted(POSTI_OFFICE_CODES | POSTI_BUSINESS_CODES | PARTNER_CODES | PARCEL_LOCKER_CODES, key=int)
 
 EMPTYING_TIME = re.compile(r"\b([a-zäö]{2})(?:\s*-\s*([a-zäö]{2}))?\s+(\d{1,2})[.:](\d{2})\b", re.IGNORECASE)
 
@@ -157,7 +159,7 @@ class PostiFISpider(Spider):
             query = LETTERBOX_QUERY
         else:
             query = SERVICE_POINT_QUERY
-            variables["sapProfileCodes"] = COUNTER_CODES
+            variables["sapProfileCodes"] = SERVICE_POINT_CODES
         return JsonRequest(
             "https://graphql.posti.fi/graphql",
             data={"query": query, "variables": variables},
@@ -218,7 +220,6 @@ class PostiFISpider(Spider):
         item["postcode"] = location.get("postcode")
         if city := location.get("postcodeName"):
             item["city"] = city.title()
-        item["country"] = "FI"
         apply_category(Categories.POST_BOX, item)
         item.update(POSTI)
         # The box's location as shown on the map, e.g. "KULOSAAREN METROASEMA".
@@ -258,7 +259,6 @@ class PostiFISpider(Spider):
         item["postcode"] = address.get("postcode")
         if city := address.get("city"):
             item["city"] = city.title() if city.isupper() else city
-        item["country"] = "FI"
         if address.get("specificLocation"):
             item["extras"]["description"] = address["specificLocation"]
         item["opening_hours"] = self.parse_opening_hours((location.get("availability") or {}).get("openingHours"))
@@ -292,6 +292,10 @@ class PostiFISpider(Spider):
             item["extras"]["post_office"] = "post_partner"
             item["extras"]["post_office:brand"] = POSTI_BRAND["brand"]
             item["extras"]["post_office:brand:wikidata"] = POSTI_BRAND["brand_wikidata"]
+        elif code in PARCEL_LOCKER_CODES:
+            apply_category(Categories.PARCEL_LOCKER, item)
+            item.update(POSTI | POSTI_BRAND)
+            item["branch"] = branch.removeprefix("Postin automaatti, ").strip()
         else:
             self.crawler.stats.inc_value(f"atp/posti_fi/unknown_profile/{code}")
             return
