@@ -45,7 +45,6 @@ class MongolPostMNSpider(Spider):
             phones = [p.strip() for p in (location.get("phone") or "").split(",")]
             item["phone"] = "; ".join(p for p in phones if p and p != "12345678")
             item["image"] = location.get("photo")
-            item["country"] = "MN"
             if location.get("code"):
                 item["extras"]["ref:mongol_post"] = location["code"]
             item["opening_hours"] = self.parse_hours(location.get("timeSheets") or [])
