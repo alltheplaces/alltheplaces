@@ -22,7 +22,6 @@ ADDRESSES_CSV = (
 JORDAN_BBOX = (34.8, 29.1, 39.4, 33.4)
 DMS_RE = re.compile(r"(\d+)\s*°\s*(\d+)\s*'\s*([\d.]+)\s*\"")
 DECIMAL_RE = re.compile(r"\d+\.\d+")
-HOURS_RE = re.compile(r"^\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}$")
 
 
 class JordanPostJOSpider(Spider):
@@ -51,12 +50,10 @@ class JordanPostJOSpider(Spider):
             item["extras"] = {"operator:en": "Jordan Post"}
             if address_row := addresses.get(serial):
                 # Columns: serial, directorate, office name, working hours, address ("city/district/street").
-                _, _, _, hours, address = (address_row + [""] * 5)[:5]
+                # The working hours are only a daily time window ("8:30-15:30") without the days, so they
+                # can't be an opening_hours schedule and are left out.
+                address = (address_row + [""] * 5)[4]
                 item["addr_full"] = address or None
-                # Only a daily time window is given ("8:30-15:30"); the working days are not stated,
-                # so it is not turned into an opening_hours schedule.
-                if HOURS_RE.match(hours):
-                    item["extras"]["working_hours"] = re.sub(r"\s+", "", hours)
             apply_category(Categories.POST_OFFICE, item)
             yield item
 
