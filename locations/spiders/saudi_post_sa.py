@@ -22,7 +22,8 @@ class SaudiPostSASpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for branch in response.json()["Result"]:
             if branch["IsParcelStation"]:
-                continue  # 24-hour self-service parcel lockers
+                yield self.parse_parcel_station(branch)
+                continue
             address = branch["Address"]
             item = Feature()
             item["ref"] = str(branch["BranchID"])
@@ -39,6 +40,23 @@ class SaudiPostSASpider(Spider):
             item["opening_hours"] = self.parse_hours(branch)
             apply_category(Categories.POST_OFFICE, item)
             yield item
+
+    def parse_parcel_station(self, branch: dict) -> Feature:
+        # 24-hour self-service parcel lockers, mostly hosted by shops and pharmacies:
+        # "Al Quds Parcel Station - Riyadh - Al Dawaa". Their RegionName holds the street address.
+        address = branch["Address"]
+        item = Feature()
+        item["ref"] = str(branch["BranchID"])
+        item["extras"]["description"] = re.sub(r"\s+", " ", branch["BranchName"]).strip()
+        if address["Latitude"] and address["Longitude"]:
+            item["lat"], item["lon"] = address["Latitude"], address["Longitude"]
+        if (address["RegionName"] or "").strip() not in ("", "Address Incomplete"):
+            item["addr_full"] = address["RegionName"].strip()
+        item["city"] = address["CityName"].title()
+        if branch["OfficeHours"] == "24 Hours":
+            item["opening_hours"] = "24/7"
+        apply_category(Categories.PARCEL_LOCKER, item)
+        return item
 
     def parse_hours(self, branch: dict) -> OpeningHours:
         oh = OpeningHours()
