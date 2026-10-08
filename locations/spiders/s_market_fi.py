@@ -38,15 +38,6 @@ logger = logging.getLogger(__name__)
 
 class SMarketFISpider(Spider):
     name = "s_market_fi"
-    custom_settings = {
-        # Brand queries paginate as independent cursor chains. Measured
-        # 2026-10-07: 376 requests in ~75s at delay 0.15 on this single host
-        # (chains share one delay slot, so brand parallelism does not divide
-        # wall time). The host showed zero 429s across hundreds of requests.
-        # Sub-default delay is intentional: see ALLOWED_LOW_DOWNLOAD_DELAY in
-        # tests/test_download_delay.py.
-        "DOWNLOAD_DELAY": 0.15,
-    }
 
     BRANDS = {
         # Key is the brand name, query string and branch-strip token.
