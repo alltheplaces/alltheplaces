@@ -43,6 +43,5 @@ class PostaUgandaUGSpider(Spider):
             if position not in placeholder and -1.5 < position[0] < 4.3 and 29.5 < position[1] < 35.1:
                 item["lat"], item["lon"] = position
             item["extras"]["post_office:type"] = station["stationType"]  # GPO, DPO (district) or SPO (sub)
-            item["country"] = "UG"
             apply_category(Categories.POST_OFFICE, item)
             yield item
