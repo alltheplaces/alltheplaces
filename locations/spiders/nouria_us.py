@@ -15,9 +15,12 @@ class NouriaUSSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
+            # Records without filters are EV chargers, offices and other non-store entries
+            if not location["filters"] or location["opening_status"] != "open" or location["title"].startswith("Test"):
+                continue
             location = location | location["address"]
             item = DictParser.parse(location)
-            item["ref"] = item.pop("name").rsplit(" - ", 1)[1]
+            item.pop("name")
             item["website"] = location["link"]
             item["street_address"] = merge_address_lines(
                 [location["address"]["address_line_1"], location["address"]["address_line_2"]]

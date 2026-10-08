@@ -15,6 +15,7 @@ class SofiaUrbanMobilityCenterBGSpider(JSONBlobSpider):
         "brand_wikidata": "Q7553668",
     }
     start_urls = ["https://webportal.sofiatraffic.bg/sales-points"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def pre_process_data(self, feature: dict) -> None:
         feature.update(feature.pop("location"))
