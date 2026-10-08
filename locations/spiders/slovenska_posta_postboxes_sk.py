@@ -8,10 +8,8 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS
+from locations.hours import DAYS, DAYS_SK, day_range
 from locations.items import Feature
-
-DAY_CODES = {"po": "Mo", "ut": "Tu", "st": "We", "št": "Th", "pi": "Fr", "so": "Sa", "ne": "Su"}
 
 
 class SlovenskaPostaPostboxesSKSpider(Spider):
@@ -50,10 +48,10 @@ class SlovenskaPostaPostboxesSKSpider(Spider):
         times = {}
         for days, time in re.findall(r"([a-zš]{2}(?:-[a-zš]{2})?):(\d{1,2}:\d{2})", text):
             first, _, last = days.partition("-")
-            if first not in DAY_CODES or (last and last not in DAY_CODES):
+            first, last = DAYS_SK.get(first.title()), DAYS_SK.get((last or first).title())
+            if not first or not last:
                 continue
-            start, end = DAYS.index(DAY_CODES[first]), DAYS.index(DAY_CODES[last or first])
-            for day in DAYS[start : end + 1]:
+            for day in day_range(first, last):
                 times[day] = time.zfill(5)
         collection_times = []
         for time, days in groupby(DAYS, key=times.get):
