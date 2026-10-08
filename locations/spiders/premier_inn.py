@@ -80,6 +80,8 @@ class PremierInnSpider(SitemapSpider, StructuredDataSpider):
             apply_category(restaurant[2], rest)
             yield rest
 
+        apply_category(Categories.HOTEL, item)
+
         yield item
 
     def post_process_item(self, item, response, ld_data, **kwargs):
