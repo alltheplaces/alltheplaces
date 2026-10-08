@@ -38,7 +38,6 @@ class IraqiPostIqSpider(Spider):
                 if match := OFFICE_CODE_RE.match(code):
                     item["postcode"] = match.group(1)
                 item["state"] = governorate or None
-                item["country"] = "IQ"
                 item["extras"] = {"operator:en": "Iraqi Post"}
                 apply_category(Categories.POST_OFFICE, item)
                 yield item
