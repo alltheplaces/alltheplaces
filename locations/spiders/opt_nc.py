@@ -6,18 +6,8 @@ from scrapy import Request, Selector, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_FR, DELIMITERS_FR, OpeningHours
 from locations.items import Feature
-
-DAYS_NC = {
-    "lundi": "Mo",
-    "mardi": "Tu",
-    "mercredi": "We",
-    "jeudi": "Th",
-    "vendredi": "Fr",
-    "samedi": "Sa",
-    "dimanche": "Su",
-}
 
 
 class OptNCSpider(Spider):
@@ -46,7 +36,6 @@ class OptNCSpider(Spider):
                 item["branch"] = name[len("Agence de ") :].strip()
                 item["lat"], item["lon"] = agency["position"]["lat"], agency["position"]["lon"]
                 item["city"] = district.title()
-                item["country"] = "NC"
                 yield Request(
                     f"https://office.opt.nc/fr/opt/maps/agency?id={agency['id']}",
                     callback=self.parse_agency,
@@ -77,14 +66,7 @@ class OptNCSpider(Spider):
     def parse_hours(lines: list[str]) -> OpeningHours:
         # "Du lundi au mercredi de 07:45 à 15:30", "Le jeudi de 07:45 à 11:30 et de 12:15 à 14:00"
         oh = OpeningHours()
-        for line in lines:
-            names = [DAYS_NC[d] for d in re.findall(r"\b(" + "|".join(DAYS_NC) + r")\b", line.lower())]
-            if not names:
-                continue
-            if len(names) == 2 and re.search(r"\bau\b", line):
-                days = DAYS[DAYS.index(names[0]) : DAYS.index(names[1]) + 1]
-            else:
-                days = names
-            for start, end in re.findall(r"(\d{1,2}[:h]\d{2})\s*à\s*(\d{1,2}[:h]\d{2})", line):
-                oh.add_days_range(days, start.replace("h", ":").zfill(5), end.replace("h", ":").zfill(5))
+        oh.add_ranges_from_string(
+            re.sub(r"\s+et\s+de\s+", ", ", " ".join(lines)), days=DAYS_FR, delimiters=DELIMITERS_FR
+        )
         return oh
