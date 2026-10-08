@@ -34,7 +34,6 @@ class NampostNASpider(Spider):
             item["street_address"] = (office.get("address") or "").strip(" .") or None
             item["postcode"] = office.get("post_code")
             item["city"] = (office.get("city") or {}).get("title")
-            item["country"] = "NA"
             item["phone"] = office.get("telephone") or office.get("cellphone")
             item["email"] = office.get("email")
             item["opening_hours"] = self.parse_hours(office.get("weekdays"), office.get("saturdays"))
