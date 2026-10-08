@@ -24,6 +24,9 @@ class HrvatskaPostaHRSpider(Spider):
         contents = {int(i): c for i, _, c in re.findall(r"content\[(\d+)\]\s*=\s*(['\"])(.*?)\2\s*;", html, re.DOTALL)}
         positions = re.search(r"var\s+neighborhoods\s*=\s*\[(.*?)\];", html, re.DOTALL).group(1)
         coords = re.findall(r"LatLng\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)", positions)
+        # Box codes ("<office postcode>-<box no>") repeat now and then: on the same street it is the same
+        # box listed twice, on another street it is a different box.
+        seen = {}
         for i, (lat, lon) in enumerate(coords):
             kind = kinds.get(i)
             if kind not in ("pu", "kov"):
@@ -36,7 +39,11 @@ class HrvatskaPostaHRSpider(Spider):
             item["lat"], item["lon"] = lat, lon
             # lines: [kind label, "<office postcode>[-<box no>] <PLACE>", "<street>", ...]
             code, _, place = lines[1].partition(" ")
-            item["ref"] = code
+            streets = seen.setdefault((kind, code), [])
+            if lines[2].casefold() in streets:
+                continue
+            streets.append(lines[2].casefold())
+            item["ref"] = code if len(streets) == 1 else f"{code}-{len(streets)}"
             item["city"] = place.title()
             item["street_address"] = lines[2]
             if kind == "kov":
