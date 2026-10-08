@@ -25,19 +25,15 @@ class CorreoParaguayoPYSpider(Spider):
 
     def parse_kml(self, response: Response) -> Any:
         response.selector.remove_namespaces()
-        seen = set()
         for placemark in response.xpath("//Placemark"):
             name = re.sub(r"\s+", " ", placemark.xpath("name/text()").get() or "").strip()
             lon, lat = placemark.xpath("Point/coordinates/text()").get().strip().split(",")[:2]
-            if (name, lat, lon) in seen:
-                continue  # "Sucursal Villa Hayes" is in the map twice
-            seen.add((name, lat, lon))
 
             item = Feature()
+            # "Sucursal Villa Hayes" is in the map twice; the duplicate ref is dropped by the pipeline.
             item["ref"] = re.sub(r"\W+", "-", name.lower()).strip("-")
             # The map was made from a spreadsheet that turned abbreviation dots into commas: "Juan E, Oleary".
             item["branch"] = re.sub(r"^Sucursal\s+", "", name.replace(", ", ". "))
             item["lat"], item["lon"] = lat, lon
-            item["country"] = "PY"
             apply_category(Categories.POST_OFFICE, item)
             yield item
