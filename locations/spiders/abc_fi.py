@@ -88,10 +88,13 @@ class ABCFISpider(SitemapSpider):
             # Bare brand names (no locality) emit without a branch.
             item["branch"] = branch
         address = (station.get("location") or {}).get("address") or {}
-        item["street_address"] = self._str((address.get("street") or {}).get("default"))
-        item["postcode"] = self._str(address.get("postcode"))
+        if (street := self._str((address.get("street") or {}).get("default"))) is not None:
+            item["street_address"] = street
+        if (postcode := self._str(address.get("postcode"))) is not None:
+            item["postcode"] = postcode
         municipality = (address.get("municipality") or {}).get("name") or {}
-        item["city"] = self._str(municipality.get("fi") or municipality.get("default"))
+        if (city := self._str(municipality.get("fi") or municipality.get("default"))) is not None:
+            item["city"] = city
         item["country"] = self._str((address.get("country") or {}).get("code")) or "FI"
         lat = lon = None
         try:
