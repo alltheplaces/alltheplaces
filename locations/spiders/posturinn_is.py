@@ -5,10 +5,8 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_IS, OpeningHours
 from locations.items import Feature
-
-DAYS_IS = {"mán": "Mo", "þri": "Tu", "mið": "We", "fim": "Th", "fös": "Fr", "lau": "Sa", "sun": "Su"}
 
 
 class PosturinnISSpider(Spider):
@@ -55,15 +53,7 @@ class PosturinnISSpider(Spider):
 
     @staticmethod
     def parse_hours(text: str) -> OpeningHours:
-        # "mán - fim:  9:30-17, fös  9:30-16."
+        # "mán - fim:  9:30-17, fös  9:30-16.", "Mán - fös:  9-12 og 13-17. Samstarfsaðili er Aldan verslun."
         oh = OpeningHours()
-        for part in re.split(r",|;|\.\s", text):
-            names = [DAYS_IS[d] for d in re.findall(r"(mán|þri|mið|fim|fös|lau|sun)", part.lower())]
-            if not names:
-                continue
-            days = DAYS[DAYS.index(names[0]) : DAYS.index(names[-1]) + 1] if "-" in part.split(":")[0] else names
-            for start, end in re.findall(r"(\d{1,2}(?::\d{2})?)\s*-\s*(\d{1,2}(?::\d{2})?)", part):
-                start, end = (t if ":" in t else f"{t}:00" for t in (start, end))
-                for day in days:
-                    oh.add_range(day, start.zfill(5), end.zfill(5))
+        oh.add_ranges_from_string(re.sub(r"\s+og\s+", ", ", text), days=DAYS_IS)
         return oh
