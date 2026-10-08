@@ -7,7 +7,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.geo import bbox_contains, make_subdivisions
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_FULL, OpeningHours
 from locations.items import Feature
 
 SWISS_POST = {"operator": "Die Post", "operator_wikidata": "Q614803"}
@@ -80,7 +80,6 @@ class SwissPostCHSpider(Spider):
         item["postcode"] = root.xpath("Address/Zip/text()").get()
         item["city"] = root.xpath("Address/City/text()").get()
         item["state"] = root.xpath("Address/KantonCode/text()").get()
-        item["country"] = root.xpath("Address/CountryCode/text()").get() or "CH"
         item["website"] = f"https://places.post.ch/de/{poi['id']}"
 
         if poi["type"] == LETTER_BOX:
@@ -140,9 +139,8 @@ class SwissPostCHSpider(Spider):
         period = (current or periods)[0]
         oh = OpeningHours()
         open_days = set()
-        day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         for rule in period.xpath("OpeningHours"):
-            days = [DAYS[i] for i, name in enumerate(day_names) if rule.xpath(f"{name}/text()").get() == "true"]
+            days = [DAYS[i] for i, name in enumerate(DAYS_FULL) if rule.xpath(f"{name}/text()").get() == "true"]
             for timeslice in rule.xpath("Timeslice"):
                 open_time = (timeslice.xpath("TimeFrom/text()").get() or "")[:5]
                 close_time = (timeslice.xpath("TimeUntil/text()").get() or "")[:5]
