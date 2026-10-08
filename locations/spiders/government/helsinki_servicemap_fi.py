@@ -281,7 +281,7 @@ class HelsinkiServicemapFiSpider(Spider):
             {"sport": Sport.ATHLETICS},
         ),  # Yleisurheilun harjoitusalue (athletics training areas)
         649: (Categories.LEISURE_PITCH, {"sport": Sport.PARKOUR}),  # Parkour- alue (parkour areas)
-        651: (Categories.LEISURE_PITCH, {"sport": Sport.CYCLING}),  # Pyöräilyrata (cycling tracks)
+        651: (Categories.LEISURE_TRACK, {"sport": Sport.CYCLING}),  # Pyöräilyrata (cycling tracks, cf. velodromes)
         574: (Categories.LEISURE_PITCH, {"sport": Sport.CLIMBING}),  # Ulkokiipeilypaikka (outdoor climbing venues)
         650: (Categories.LEISURE_TRACK, {"sport": Sport.CYCLING}),  # Pyöräilyalue (cycling areas, cf. BMX tracks)
         670: (Categories.LEISURE_TRACK, {"sport": Sport.KARTING}),  # Karting-rata (kart circuits)
@@ -308,9 +308,11 @@ class HelsinkiServicemapFiSpider(Spider):
         66: (Categories.LEISURE_DOG_PARK, {}),  # Koirauimarannat (dog beaches)
         94: (Categories.TOILETS, {}),  # Yleisövessat (public toilets)
         1083: (
-            Categories.MILITARY_BUNKER,
-            {"bunker_type": "bomb_shelter"},
-        ),  # Väestönsuojat (civil-defence shelters)
+            Categories.SHELTER,
+            {"shelter_type": "bomb_shelter"},
+        ),  # Väestönsuojat (civil-defence shelters; amenity=shelter per the
+        # shelter_type=bomb_shelter wiki — military=bunker is disputed for
+        # civilian use, so it stays out)
         497: (Categories.LEISURE_DOG_PARK, {}),  # Koirauimarannat (dog beaches)
         2008: (Categories.LEISURE_DOG_PARK, {}),  # Koiraurheilualue (dog sports areas)
         19: (Categories.LEISURE_DOG_PARK, {}),  # Koirametsät (dog forests)
@@ -508,6 +510,8 @@ class HelsinkiServicemapFiSpider(Spider):
         2297: (Categories.CRAFT_ELECTRONICS_REPAIR, {}),  # Tietokonehuolto (computer repair)
         73: (Categories.ALLOTMENTS, {}),  # Viljelyspalstat (allotments)
         503: (Categories.ALLOTMENTS, {}),  # Viljelyspalstat (allotments)
+        88: (Categories.SHOP_GARDEN_CENTRE, {}),  # Mullan myynti (bulk soil pickup retail)
+        296: (Categories.SHOP_GARDEN_CENTRE, {}),  # Mullan myynti (bulk soil pickup retail)
         2377: (Categories.ALLOTMENTS, {}),  # Yhteisöviljelypaikat (community cultivation)
         2378: (Categories.ALLOTMENTS, {}),  # Yhteisöviljelypaikat (community cultivation)
         741: (Categories.SHOP_KIOSK, {}),  # Kioskit (kiosks)
@@ -543,6 +547,68 @@ class HelsinkiServicemapFiSpider(Spider):
         295: (Categories.WASTEWATER_PLANT, {}),  # Jäteveden puhdistamo (wastewater plant)
         299: (Categories.WATER_WORKS, {}),  # Vedenpuhdistuslaitos (drinking-water plant)
         91: (Categories.WATER_WORKS, {}),  # Vedenpuhdistuslaitos (drinking-water plant)
+        # Generic-coverage rows (2026-10): placed before the fallback so
+        # they only win when no earlier tabled node matches. Each was
+        # verified against all filed units before adding; see
+        # tests/test_helsinki_servicemap_fi.py.
+        2412: (Categories.TRAINING, {}),  # Nuorisosirkus (youth circus)
+        2414: (Categories.TRAINING, {}),  # Perhesirkus (family circus)
+        2416: (Categories.TRAINING, {}),  # Sirkuskoulu (circus schools)
+        1369: (Categories.TRAINING, {}),  # Kuvataidekoulu (art schools)
+        2401: (Categories.TRAINING, {}),  # Käsityökoulu (craft schools)
+        2417: (Categories.MUSIC_SCHOOL, {}),  # Taidekoulu (art/music schools, cf. Sandels)
+        2236: (Categories.LEISURE_PITCH, {"sport": Sport.CHESS}),  # Puistoshakkilaudat (park chessboards)
+        2237: (Categories.LEISURE_PITCH, {"sport": Sport.CHESS}),  # Puistoshakkilaudat (park chessboards)
+        18: (Categories.DOG_TOILET, {}),  # Koirakäymälät (dog toilets)
+        64: (Categories.DOG_TOILET, {}),  # Koirakäymälät (dog toilets)
+        495: (Categories.DOG_TOILET, {}),  # Koirakäymälät (dog toilets)
+        600: (Categories.LEISURE_SPORTS_CENTRE, {"sport": Sport.ORIENTEERING}),  # Suunnistusalue (orienteering areas)
+        2424: (Categories.LEISURE_PLAYGROUND, {}),  # Pulkkamäki (sledding hills)
+        576: (Categories.LEISURE_SPORTS_CENTRE, {"sport": Sport.SKIING}),  # Laskettelun suorituspaikat (ski resorts)
+        595: (
+            Categories.LEISURE_SPORTS_CENTRE,
+            {"sport": Sport.CROSS_COUNTRY_SKIING},
+        ),  # Hiihtomaa (ski areas)
+        596: (
+            Categories.LEISURE_SPORTS_CENTRE,
+            {"sport": Sport.CROSS_COUNTRY_SKIING},
+        ),  # Kilpahiihtokeskus (cross-country ski centres)
+        560: (Categories.LEISURE_PITCH, {"sport": Sport.SHOOTING}),  # Ampumarata (shooting ranges)
+        628: (Categories.LEISURE_SPORTS_HALL, {"sport": Sport.SHOOTING}),  # Sisäampumarata (indoor ranges)
+        593: (Categories.LEISURE_PITCH, {"sport": Sport.BIATHLON}),  # Ampumahiihdon harjoittelualue (biathlon areas)
+        676: (Categories.AERODROME, {}),  # Urheiluilmailualue (sport airfields)
+        275: (Categories.POWER_PLANT, {}),  # Voimalaitokset (power plants)
+        27: (Categories.POWER_PLANT, {}),  # Voimalaitokset (power plants)
+        2318: (Categories.SOCIAL_FACILITY_OUTREACH, {}),  # Perheneuvonta (family counselling teams)
+        775: (Categories.OFFICE_GOVERNMENT, {}),  # Edunvalvonta (guardianship offices)
+        135: (Categories.OFFICE_GOVERNMENT, {}),  # Kaupungin tai kunnan vuokra-asunnot (municipal housing offices)
+        247: (Categories.OFFICE_GOVERNMENT, {}),  # Kaupungin tai kunnan vuokra-asunnot (municipal housing offices)
+        249: (Categories.OFFICE_GOVERNMENT, {}),  # Asuntotonttien vuokraus ja myynti (plot allocation offices)
+        137: (Categories.OFFICE_GOVERNMENT, {}),  # Asuntotonttien vuokraus ja myynti (plot allocation offices)
+        225: (Categories.OFFICE_GOVERNMENT, {}),  # Kaavat ja kaavoitus (planning offices)
+        227: (Categories.OFFICE_GOVERNMENT, {}),  # Liikennesuunnittelu (transport planning offices)
+        2159: (Categories.OFFICE_GOVERNMENT, {}),  # Teknisten ja ympäristöpalvelujen neuvonta (advisory offices)
+        104: (Categories.OFFICE_GOVERNMENT, {}),  # Asumisterveys (environmental health supervision)
+        114: (Categories.OFFICE_GOVERNMENT, {}),  # Uimavesien valvonta (bathing-water supervision)
+        998: (Categories.OFFICE_GOVERNMENT, {}),  # Tartuntaudit (disease surveillance back-offices)
+        185: (Categories.OFFICE_EMPLOYMENT_AGENCY, {}),  # Rekrytointi (recruitment services)
+        157: (Categories.OFFICE_PROPERTY_MANAGEMENT, {}),  # Liike- ja toimistotilojen vuokraus (commercial rentals)
+        2021: (Categories.OFFICE_PROPERTY_MANAGEMENT, {}),  # Liike- ja toimistotilojen vuokraus (commercial rentals)
+        274: (Categories.OFFICE_CONSULTING, {}),  # Energianeuvonta (energy advisory)
+        313: (Categories.ARCHIVE, {}),  # Katu-, puisto- ja rakennuspiirustusten arkisto (planning archive)
+        1039: (Categories.NUTRITIONIST, {}),  # Ravitsemusterapia (nutrition therapy)
+        1037: (Categories.REHABILITATION, {}),  # Rintamavetaraanien kuntoutus (veterans' rehab)
+        2386: (Categories.ASSISTED_LIVING, {}),  # Mielenterveyskuntoutujien perhehoito (family foster care)
+        2385: (Categories.ASSISTED_LIVING, {}),  # Mielenterveyskuntoutujien perhehoito (family foster care)
+        404: (Categories.COMMUNITY_CENTRE, {}),  # Kerhotoiminta (club rooms)
+        355: (Categories.COMMUNITY_CENTRE, {}),  # Kulttuurin monitoimitalot (multicultural houses)
+        548: (Categories.PLACE_ISLAND, {}),  # Ulkoilusaaret (excursion islands)
+        704: (Categories.SHELTER, {}),  # Ulkoilumaja / hiihtomaja (outdoor huts)
+        389: (Categories.COMMUNITY_CENTRE, {}),  # Fillari- ja moottoripaja (youth motor workshops)
+        438: (Categories.COMMUNITY_CENTRE, {}),  # Moottorihalli (youth motor halls)
+        440: (Categories.COMMUNITY_CENTRE, {}),  # Mopokerho (youth moped clubs)
+        2425: (Categories.LEISURE_SPORTS_HALL, {}),  # Sisäaktiviteettipuisto (indoor activity parks)
+        683: (Categories.LEISURE_SPORTS_CENTRE, {}),  # Vesihiihtoalue (water-ski areas)
         # Last on purpose: a generic fallback, so multi-node units keep
         # their real facility (cf. Tapanilan Urheilukeskus, Suomenlinnan
         # vierailijakeskus); single-node Gallträsk still resolves to park.
@@ -577,8 +643,8 @@ class HelsinkiServicemapFiSpider(Spider):
 
     # No visitable service (housing, meal services, org records), linear
     # features (routes), road furniture (stops, crosswalks, hotspots),
-    # back-office only (depots, planning). Kiintorastit (600) and snow
-    # dumps (78/538/75/535) stay uncategorised: no established OSM tag.
+    # back-office only (depots, planning). Snow dumps (78/538/75/535)
+    # stay uncategorised: no established OSM tag.
     excluded_subtrees = {
         5,  # Asumisoikeusasuminen (right-of-occupancy housing)
         9,  # Kaupungin tai kunnan vuokra-asunnot (municipal rentals)
@@ -713,9 +779,12 @@ class HelsinkiServicemapFiSpider(Spider):
         next_url = payload.get("next")
         if not next_url:
             return None
-        if next_url in self.seen_next:
+        # Keyed per pagination leg: identical next-URL shapes across the
+        # department/node/unit legs must never false-positive a loop.
+        key = (getattr(callback, "__name__", None), next_url)
+        if key in self.seen_next:
             raise CloseSpider(f"pagination loop at {next_url}")
-        self.seen_next.add(next_url)
+        self.seen_next.add(key)
         return JsonRequest(url=next_url, callback=callback, errback=errback)
 
     def parse_departments(self, response):
@@ -724,8 +793,10 @@ class HelsinkiServicemapFiSpider(Spider):
             if not isinstance(department, dict):
                 # One malformed row must not kill the whole page.
                 continue
-            name = (department.get("name") or {}).get("fi")
-            if department.get("id") is not None and name:
+            dept_name = department.get("name")
+            # Non-dict names must not kill the page (cf. str-valued name).
+            name = dept_name.get("fi") if isinstance(dept_name, dict) else None
+            if type(department.get("id")) is int and name:
                 self.departments[department["id"]] = name.strip()
         if request := self._follow(payload, self.parse_departments, self.parse_bootstrap_error):
             yield request
@@ -738,10 +809,12 @@ class HelsinkiServicemapFiSpider(Spider):
         for node in payload.get("results") or []:
             if not isinstance(node, dict):
                 continue
-            if node.get("id") is None:
+            # ids/parents must be real ints: unhashable or bool values would
+            # poison the service graph walk (cf. True == 1).
+            if type(node.get("id")) is not int:
                 continue
             self.all_service_nodes.add(node["id"])
-            if node.get("parent") is not None:
+            if type(node.get("parent")) is int:
                 self.parent_service_node[node["id"]] = node["parent"]
         if request := self._follow(payload, self.parse_service_nodes, self.parse_bootstrap_error):
             yield request
@@ -786,6 +859,8 @@ class HelsinkiServicemapFiSpider(Spider):
         "sport",
         "landuse",
         "historic",
+        "aeroway",
+        "power",
     )
 
     def parse_units(self, response):
@@ -799,7 +874,10 @@ class HelsinkiServicemapFiSpider(Spider):
             yield self._retry_units(response.request)
             return
         if self.expected_units is None:
-            self.expected_units = payload.get("count")
+            # Coerced once: a string count must not poison the int drift
+            # comparison below (int != str warns forever).
+            count = payload.get("count")
+            self.expected_units = count if type(count) is int else None
         for unit in payload.get("results") or []:
             try:
                 item = self._build_item(unit)
@@ -832,9 +910,13 @@ class HelsinkiServicemapFiSpider(Spider):
             yield from request
         elif request := self._follow(payload, self.parse_units, self.parse_unit_page_error):
             yield request
+            self._count_page_done(response.request)
             return
         self._count_page_done(response.request)
         if self.units_pages_pending <= 0:
+            # Chain end (sequential) or drained fan: the only point where
+            # seen-vs-expected is meaningful. Mid-chain pages always
+            # "drift", so checking there is pure log spam.
             self._check_unit_drift()
 
     def _count_page_done(self, request):
@@ -893,7 +975,9 @@ class HelsinkiServicemapFiSpider(Spider):
 
     def _service_ids(self, unit):
         def _one(value):
-            if isinstance(value, int):
+            # type() is int, not isinstance: bool is int and True == 1
+            # would file junk booleans under node 1.
+            if type(value) is int:
                 return value
             if isinstance(value, str) and value.isdigit():
                 return int(value)
@@ -920,7 +1004,10 @@ class HelsinkiServicemapFiSpider(Spider):
             # "attest"/"hottest" must not match, but "Esteettömyystestipiste" must.
             token == "test"
             or token.startswith(("testaa", "testaus"))
-            or (token.startswith("testi") and not token.startswith(("testimonial", "testimony", "testament")))
+            or (
+                token.startswith("testi")
+                and not token.startswith(("testimonial", "testimony", "testament", "testing", "tested"))
+            )
             or (
                 token.endswith(("testi", "testaus", "testipiste", "testauspiste"))
                 and not token.startswith(
@@ -937,6 +1024,10 @@ class HelsinkiServicemapFiSpider(Spider):
         except (IndexError, KeyError, TypeError, ValueError):
             return None
         if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):
+            return None
+        # Service-map data is Finnish: a swapped pair (lat 24.9, lon 60.1)
+        # passes the global range yet lands in Yemen. Åland (~19.5E) included.
+        if not (59.0 <= lat <= 71.0 and 19.0 <= lon <= 32.0):
             return None
         return lon, lat
 
@@ -1149,7 +1240,9 @@ class HelsinkiServicemapFiSpider(Spider):
             ):
                 # Spaceless qualifier, not a facility ("Nuorten vastaanotto
                 # Kallio/vaativa", unit 68047): keep the whole name rather
-                # than naming the unit after debris.
+                # than naming the unit after debris. Lowercase-only on
+                # purpose: capitalized single words (".../Aallotar") are
+                # real facility names and must still split.
                 return text, None
         else:
             return text, None
@@ -1220,7 +1313,7 @@ class HelsinkiServicemapFiSpider(Spider):
         # Closure notes are metadata (end_date carries them), as are
         # trailing provider names ("Myyrmäen asukastila, Sporttia kaikille ry").
         # Bare organisation names ("Allergia-, Iho- ja Astmaliitto ry") stay whole.
-        primary = re.sub(r",\s*toiminta päättyy.*$", "", raw).strip()
+        primary = re.sub(r",\s*toiminta päättyy.*$", "", raw, flags=re.IGNORECASE).strip()
         primary = re.sub(r",\s*SULJETTU TOISTAISEKSI\s*$", "", primary, flags=re.IGNORECASE).strip()
         # Register flags, never name parts ("Daghemmet Fyndet Kanel,
         # yksityinen", unit 64929, in all three languages).
@@ -1433,8 +1526,10 @@ class HelsinkiServicemapFiSpider(Spider):
         # Fi splits (or will split) this chain branch off ("Hemingway's
         # Tennispalatsi", unit 73568): strip the same tail from sv/en for
         # parity; the full form lands in official_name:sv/en below.
-        if fi_prefix and re.match(re.escape(fi_prefix) + r"(?![A-Za-zÅÄÖåäö])", text, flags=re.IGNORECASE):
-            if text[len(fi_prefix) :].strip(" ,-/–"):
+        if fi_prefix and (
+            chain_match := re.match(re.escape(fi_prefix) + r"(?![A-Za-zÅÄÖåäö])", text, flags=re.IGNORECASE)
+        ):
+            if text[chain_match.end() :].strip(" ,-/–"):
                 return fi_prefix
         return text
 
@@ -1492,7 +1587,7 @@ class HelsinkiServicemapFiSpider(Spider):
                 text = self._clean_name(text)
                 # Feed glosses the venue type in en translations ("Juvanpuiston
                 # koulu (school) / Disc golf course (3)", unit 50343): drop it.
-                text = re.sub(r"\s*\(school\)", "", text)
+                text = re.sub(r"\s*\(school\)", "", text, flags=re.IGNORECASE)
                 facility, venue = self._split_facility(text)
                 venue_name = item.get("name") or ""
                 if venue and "located_in" not in item and venue != venue_name and venue_name not in venue:
@@ -1508,6 +1603,8 @@ class HelsinkiServicemapFiSpider(Spider):
                             "fter-school activit",
                             "opiskeluhuolto",
                             "opiskeluterveydenhuolto",
+                            "kouluterveydenhuolto",
+                            "esiopetus",
                             "elevhälsa",
                             "skolhälsovård",
                             "student welfare",
@@ -1782,6 +1879,10 @@ class HelsinkiServicemapFiSpider(Spider):
             # Same without a staircase ("Katu 5 a" shape, SYNTHETIC): a bare
             # trailing lowercase letter is the appendix, never a unit.
             tokens = tokens[:-2] + [tokens[-2] + tokens[-1]]
+        if len(tokens) >= 2 and (paren := re.fullmatch(r"\(\s*([A-Za-z])\s*\)", tokens[-1])):
+            # Parenthesised staircase ("Katu 5 (A)"): the letter is the unit.
+            item["unit"] = paren.group(1)
+            tokens = tokens[:-1]
         if len(tokens) >= 2 and (dotted := re.fullmatch(r"(\d+)\.([A-Za-z]\.\d+)", tokens[-1])):
             # Dotted apartment tails ("Valhallankatu 4.A.9").
             item["housenumber"] = dotted.group(1)
@@ -1814,7 +1915,7 @@ class HelsinkiServicemapFiSpider(Spider):
     # the comma floor rule must precede the bare-word rule, or
     # "Mannerheimintie 5, 2. krs" degrades to "Mannerheimintie 5, 2.".
     STRIP_RULES = (
-        (r"\s*\([^)]*\)", 0, "parenthetical wings/floors"),
+        (r"\s*\((?![A-Za-z]\))[^)]*\)", 0, "parenthetical wings/floors (single-letter staircase spared)"),
         (r",\s*[\d\s&\.,-]*(krs|kerros|rak\.?|rakennus)\b.*$", 0, "comma floor/building tail"),
         (r"\s+\d+\.?\s*(krs|kerros)\b.*$", 0, "numbered floor tail"),
         (r"/\s*\d+\.?\s*(krs|kerros)\b.*$", 0, "slash floor tail"),
@@ -1852,7 +1953,7 @@ class HelsinkiServicemapFiSpider(Spider):
         if not segs:
             # Degenerate punctuation-only address: nothing to parse.
             return True
-        tail = re.sub(r"^(käyntiosoite|besöksadress):\s*", "", segs[-1], flags=re.IGNORECASE).strip()
+        tail = re.sub(r"^(käyntiosoite|besöksadress):?\s*", "", segs[-1], flags=re.IGNORECASE).strip()
         if re.search(r"\d", tail) and self._parse_address_tokens(item, tail.split()):
             return True
         if re.search(r"\d", segs[0]) and self._parse_address_tokens(item, segs[0].split()):
@@ -1860,10 +1961,14 @@ class HelsinkiServicemapFiSpider(Spider):
                 # Door/staircase tail alongside a numbered head
                 # ("Sairaalatie 8, A-ovi"); districts never match this shape.
                 item["unit"] = tail
+            elif "unit" not in item and (paren := re.fullmatch(r"\(\s*([A-Za-z])\s*\)", tail)):
+                # Parenthesised staircase tail ("Sairaalatie 8, (A)").
+                item["unit"] = paren.group(1)
             return True
-        for seg in reversed(segs[1:]):
-            # Middle segments, last first; the tail already failed above.
-            if seg != tail and re.search(r"\d", seg) and self._parse_address_tokens(item, seg.split()):
+        for seg in reversed(segs[1:-1]):
+            # Middle segments, last first; head and tail tried above, and
+            # value-comparison would skip distinct same-valued segments.
+            if re.search(r"\d", seg) and self._parse_address_tokens(item, seg.split()):
                 return True
         if not re.search(r"\d", address):
             # Place parts, no numbers ("Iso Mustasaari, Suomenlinna").
@@ -1877,6 +1982,15 @@ class HelsinkiServicemapFiSpider(Spider):
         # Finnish floor numbers don't convert to OSM level, so they are dropped.
         address = self._strip_address_base(address)
         if not address:
+            return
+        if re.search(r"\d\s+-\s+[A-Za-zåäöÅÄÖ]", address):
+            # Cross-street descriptions ("Katu 5 - Katu 6"): a number left
+            # of the dash with letters right names two streets, hence no
+            # single housenumber. Descriptor tails ("... Center -
+            # katutaso") have no number on the left and still parse below.
+            # Spaced number ranges ("Nummentie 12 - 14") and compact ones
+            # ("Valimotie 17-19") never match, so they parse too.
+            item["street_address"] = address
             return
         tokens = address.split()
         if "," in address:
@@ -1998,12 +2112,13 @@ class HelsinkiServicemapFiSpider(Spider):
     def _has_ownership_tail(self, unit):
         name = unit.get("name") or {}
         fi = str(name.get("fi") or "") if isinstance(name, dict) else ""
-        return bool(self.OWNERSHIP_TAIL_RE.search(fi))
+        return bool(self.OWNERSHIP_TAIL_RE.search(fi.strip()))
 
     def _provider_tail_operator(self, unit):
         name = unit.get("name") or {}
         fi = str(name.get("fi") or "") if isinstance(name, dict) else ""
-        match = re.search(r",\s*([^,]*\b(r\.y\.|ry|oy|ab)\.?)$", fi, flags=re.IGNORECASE)
+        # Stripped: a trailing space breaks the end anchor below.
+        match = re.search(r",\s*([^,]*\b(r\.y\.|ry|oy|ab)\.?)$", fi.strip(), flags=re.IGNORECASE)
         if not match:
             return None
         return self.PROVIDER_OPERATORS.get(re.sub(r"[\s.]+", "", match.group(1)).lower())
@@ -2120,6 +2235,7 @@ class HelsinkiServicemapFiSpider(Spider):
         "SPR Kontti",
         "Picnic",
         "Musti ja Mirri",
+        "Musti ja Murri",
         "Robert's Coffee",
         "24 Pesula",
         "Eat Poke",
@@ -2214,7 +2330,7 @@ class HelsinkiServicemapFiSpider(Spider):
         for prefix in self.CHAIN_SPLITS:
             if not re.match(re.escape(prefix) + r"(?![A-Za-zÅÄÖåäö])", name, re.IGNORECASE):
                 continue
-            branch = name[len(prefix) :].strip(" ,-/–")
+            branch = name[len(prefix) :].strip(" ,-/–:")
             outlet = branch.casefold()
             if not branch or outlet == "outlet" or outlet.startswith("outlet ") or outlet.startswith("outlet-"):
                 # "Partioaitta Outlet" (or "Outlet Helsinki") is a store
@@ -2269,7 +2385,9 @@ class HelsinkiServicemapFiSpider(Spider):
                 # language before dropping the field.
                 invalid = True
                 continue
-            return None
+            # Unusable scheme (cf. ftp://): counted, then the next language.
+            invalid = True
+            continue
         if invalid:
             self._stat("website/invalid")
         return None
@@ -2297,7 +2415,8 @@ class HelsinkiServicemapFiSpider(Spider):
         # De-obfuscate "a (at) b dot fi".
         if not isinstance(email, str):
             return None
-        value = email.strip().removeprefix("mailto:")
+        value = email.strip()
+        value = re.sub(r"^mailto:", "", value, flags=re.IGNORECASE)
         value = re.sub(r"\(at\)|\[at\]| at ", "@", value, flags=re.IGNORECASE)
         value = re.sub(r"\(dot\)|\[dot\]| dot ", ".", value, flags=re.IGNORECASE)
         value = value.replace(" ", "").replace(chr(0xFEFF), "")
@@ -2572,6 +2691,7 @@ class HelsinkiServicemapFiSpider(Spider):
         ("lelukauppa", Categories.SHOP_TOYS, None),
         ("pelago", Categories.SHOP_BICYCLE, None),
         ("seven art", Categories.SHOP_ART, None),
+        ("perheneuvola", Categories.SOCIAL_FACILITY_OUTREACH, Categories.SOCIAL_FACILITY_OUTREACH),
         ("neuvola", Categories.CLINIC, None),
         ("venevuokraus", Categories.AMENITY_BOAT_RENTAL, None),
         ("viljelypalsta", Categories.ALLOTMENTS, None),
@@ -2593,7 +2713,7 @@ class HelsinkiServicemapFiSpider(Spider):
         ("kahluuall", None, Categories.LEISURE_PADDLING_POOL),
         ("siirtolapuutarha", Categories.ALLOTMENTS, Categories.ALLOTMENTS),
         ("skeittihalli", None, Categories.LEISURE_SPORTS_CENTRE),
-        ("leikkimaa", None, Categories.LEISURE_PLAYGROUND),
+        ("leikkimaa", Categories.LEISURE_PLAYGROUND, Categories.LEISURE_PLAYGROUND),
         ("laboratorio", None, Categories.MEDICAL_LABORATORY),
         ("minigolf", None, Categories.LEISURE_MINIATURE_GOLF),
         ("hohtogolf", None, Categories.LEISURE_MINIATURE_GOLF),
@@ -2611,6 +2731,52 @@ class HelsinkiServicemapFiSpider(Spider):
         ("lastausalue", Categories.LOADING_DOCK, Categories.LOADING_DOCK),
         ("lastbrygga", Categories.LOADING_DOCK, Categories.LOADING_DOCK),
         ("loading dock", Categories.LOADING_DOCK, Categories.LOADING_DOCK),
+        # Generic-coverage nouns (2026-10): rescue-only, so tabled units keep
+        # their filing. Each verified against filed units before adding.
+        ("trampoliini", Categories.LEISURE_TRAMPOLINE_PARK, None),
+        ("seikkailupuisto", Categories.LEISURE_SPORTS_CENTRE, None),
+        ("pulkkamäki", Categories.LEISURE_PLAYGROUND, None),
+        ("ulkoilumaja", Categories.SHELTER, None),
+        ("hiihtomaja", Categories.SHELTER, None),
+        ("moottorihalli", Categories.COMMUNITY_CENTRE, None),
+        ("mopohalli", Categories.COMMUNITY_CENTRE, None),
+        ("eteläsatama", Categories.FERRY_TERMINAL, None),
+        ("valtuusto", Categories.OFFICE_GOVERNMENT, None),
+        ("kaupunginhallitus", Categories.OFFICE_GOVERNMENT, None),
+        ("kulttuuripaja", Categories.COMMUNITY_CENTRE, None),
+        ("kansalaistoiminta", Categories.COMMUNITY_CENTRE, None),
+        ("yleisökassa", Categories.PAYMENT_CENTRE, None),
+        ("matkatavarasäilytys", Categories.LUGGAGE_LOCKER, None),
+        ("venetaksi", Categories.TOURISM_BOAT_TOURS, None),
+        ("taxi boat", Categories.TOURISM_BOAT_TOURS, None),
+        ("monistamo", Categories.SHOP_COPYSHOP, None),
+        ("banditila", Categories.AMENITY_STUDIO, None),
+        ("musiikkistudio", Categories.AMENITY_STUDIO, None),
+        ("silmälasi", Categories.SHOP_OPTICIAN, None),
+        ("lasistudio", Categories.ARTS_CENTRE, None),
+        ("keramiikka", Categories.SHOP_POTTERY, None),
+        ("askartelupaja", Categories.ARTS_CENTRE, None),
+        ("pitopalvelu", Categories.CRAFT_CATERER, None),
+        ("catering", Categories.CRAFT_CATERER, None),
+        ("energianeuvonta", Categories.OFFICE_CONSULTING, None),
+        ("energiatori", Categories.OFFICE_CONSULTING, None),
+        ("puolustusvoimat", Categories.OFFICE_GOVERNMENT, None),
+        ("ympäristökeskus", Categories.OFFICE_GOVERNMENT, None),
+        ("ympäristöterveys", Categories.OFFICE_GOVERNMENT, None),
+        ("apuvälinemyymälä", Categories.SHOP_MEDICAL_SUPPLY, None),
+        ("sirkuskoulu", Categories.TRAINING, None),
+        ("musiikkiopisto", Categories.MUSIC_SCHOOL, None),
+        ("koirakäymälä", Categories.DOG_TOILET, None),
+        ("voimalaitos", Categories.POWER_PLANT, None),
+        ("kuntoutuskeskus", Categories.REHABILITATION, None),
+        ("ravitsemusterapia", Categories.NUTRITIONIST, None),
+        ("metsäkeskus", Categories.OFFICE_GOVERNMENT, None),
+        ("exit room", Categories.LEISURE_ESCAPE_GAME, None),
+        ("leo's", Categories.LEISURE_PLAYGROUND, None),
+        ("katsastus", Categories.VEHICLE_INSPECTION, None),
+        ("pakastus", Categories.SHOP_STORAGE_RENTAL, None),
+        ("tukisuhde", Categories.SOCIAL_FACILITY_OUTREACH, None),
+        ("tiny wonders", Categories.KINDERGARTEN, None),
     )
     # Filtered views, order-preserving: rescue serves untabled units,
     # NAME_CATEGORIES refines tabled ones.
@@ -2676,6 +2842,171 @@ class HelsinkiServicemapFiSpider(Spider):
         self._stat("category/rescued")
         return True
 
+    def _rescue_desc_venue(self, item, unit):
+        # Description evidence for activity venues filed under the catch-all
+        # 2246 node, whose names say nothing (cf. Sugoi, EXITE, Fööni).
+        # Gated on 2246: the same nouns elsewhere (cafés showing matches,
+        # hotels near golf courses) must not mistag. Tight compounds only.
+        if 2246 not in set(self._service_ids(unit)):
+            return False
+        description = unit.get("description") or {}
+        desc = str(description.get("fi") or "").strip().lower() if isinstance(description, dict) else ""
+        if not desc:
+            return False
+        sports = []
+        if (
+            "pelihalli" in desc
+            or "videopeli" in desc
+            or "arcade" in desc
+            or "vr-areena" in desc
+            or "vr areena" in desc
+            or "virtual reality" in desc
+        ):
+            # VR first: OLiO's escape rooms run inside the VR arena, so both
+            # arcade nouns and VR nouns precede the pakohuone branch below.
+            apply_category(Categories.AMUSEMENT_ARCADE, item)
+        elif "pakohuone" in desc or "escape room" in desc:
+            apply_category(Categories.LEISURE_ESCAPE_GAME, item)
+        elif "kirveenheitto" in desc or "axe throwing" in desc:
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            sports.append(Sport.AXE_THROWING)
+        elif "tuulitunneli" in desc or "vapaalentotunneli" in desc or "wind tunnel" in desc:
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+        elif "lentosimulaattori" in desc or "flight simulator" in desc:
+            apply_category(Categories.TOURISM_ATTRACTION, item)
+        elif "golfsimulaattori" in desc or "golf-simulaattori" in desc or "trackman" in desc:
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            sports.append(Sport.GOLF)
+        elif "padel" in desc:
+            apply_category(Categories.LEISURE_SPORTS_HALL, item)
+            sports.append(Sport.PADEL)
+        elif self._rescue_desc_leisure(item, desc, sports):
+            # Racket halls, studios, simulators, trampolines and rentals.
+            pass
+        else:
+            return False
+        if sports:
+            add_sport(sports, item)
+        return True
+
+    def _rescue_desc_leisure(self, item, desc, sports):
+        # Second half of the 2246 description evidence (split out for
+        # flake8 max-complexity); branch order with the head matters.
+        if "tenniskenttä" in desc or "sulkapallokenttä" in desc:
+            # Racket halls (cf. Outshine Center): tag each sport present.
+            apply_category(Categories.LEISURE_SPORTS_HALL, item)
+            if "tennis" in desc:
+                sports.append(Sport.TENNIS)
+            if "sulkapallo" in desc or "badminton" in desc:
+                sports.append(Sport.BADMINTON)
+        elif "photobooth" in desc:
+            # Photo-booth studios (cf. Muikku Photo).
+            apply_category(Categories.AMENITY_STUDIO, item)
+        elif "golfata" in desc and "simulaattori" in desc:
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            sports.append(Sport.GOLF)
+        elif "simulaattori" in desc:
+            # Simulator venues with no more specific mapping (cf. Takeoff
+            # flight simulators): attractions, not generic.
+            apply_category(Categories.TOURISM_ATTRACTION, item)
+        elif "trampoliin" in desc:
+            # Stem covers trampoliini/trampoliineilla/trampoliinipuisto.
+            apply_category(Categories.LEISURE_TRAMPOLINE_PARK, item)
+        elif "jalkapallo" in desc:
+            # Sports-entertainment concepts (cf. Reaktion Games); bars merely
+            # showing matches never file under 2246.
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            sports.append(Sport.SOCCER)
+        elif (
+            any(
+                word in desc
+                for word in ("sup-laudat", "sup laudat", "suppailu", "kajak", "kanootti", "polkuvene", "soutuvene")
+            )
+            and "vuokra" in desc
+        ):
+            # Rental rowboats, SUP boards and kayaks (cf. Laguuni).
+            apply_category(Categories.AMENITY_BOAT_RENTAL, item)
+        else:
+            return False
+        return True
+
+    def _rescue_sport_venue(self, item, unit, text):
+        # Sport-carrying name rescues for untabled units: the sport noun is
+        # certain, so both tags apply together (cf. the pumptrack block
+        # above). Also hosts the transport-node-gated ferry/airport rules,
+        # which need service_ids and cannot live in NOUN_TABLE.
+        if ("jooga" in text or "yoga" in text) and "festiva" not in text:
+            # Yoga studios; festival names are events, not venues.
+            apply_category(Categories.LEISURE_FITNESS_STATION, item)
+            add_sport(Sport.YOGA, item)
+        elif "pilate" in text:
+            # Stem covers pilates/pilatesta.
+            apply_category(Categories.LEISURE_FITNESS_STATION, item)
+            add_sport(Sport.PILATES, item)
+        elif "ampumahiihto" in text:
+            apply_category(Categories.LEISURE_PITCH, item)
+            add_sport(Sport.BIATHLON, item)
+        elif "ampumarata" in text:
+            if any(word in text for word in ("sisä", "sisa", "indoor")):
+                # Indoor ranges are halls per the node-628 table row.
+                apply_category(Categories.LEISURE_SPORTS_HALL, item)
+            else:
+                apply_category(Categories.LEISURE_PITCH, item)
+            add_sport(Sport.SHOOTING, item)
+        elif "hiihtokeskus" in text or "hiihtomaa" in text:
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            add_sport(Sport.CROSS_COUNTRY_SKIING, item)
+        elif "shakkilauta" in text or "shakkilaudat" in text:
+            apply_category(Categories.LEISURE_PITCH, item)
+            add_sport(Sport.CHESS, item)
+        elif "kiintorasti" in text:
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            add_sport(Sport.ORIENTEERING, item)
+        elif "kiipeilyhalli" in text or "kiipeilyareena" in text:
+            # Indoor walls only; outdoor crags (ulkokiipeilypaikka) stay out.
+            apply_category(Categories.LEISURE_SPORTS_HALL, item)
+            add_sport(Sport.CLIMBING, item)
+        elif "padel" in text:
+            apply_category(Categories.LEISURE_SPORTS_HALL, item)
+            add_sport(Sport.PADEL, item)
+        elif "parkour" in text:
+            # Indoor academies and halls (cf. Parkour Akatemia); outdoor
+            # spots stay with their filing.
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            add_sport(Sport.PARKOUR, item)
+        elif "arena center" in text:
+            # Floorball-hall chain (cf. Ruskeasuo/Hakaniemi descs, both
+            # salibandy-first); tabled halls keep their filing.
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            add_sport(Sport.FLOORBALL, item)
+        elif any(word in text for word in ("wake park", "wakeboard", "wakeskate")):
+            # Cable wake parks (cf. Ridenjoy Wake Park); bare "wake" also
+            # matches cafés and wake-up event names, so compounds only.
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            add_sport(Sport.WAKEBOARDING, item)
+        elif "laskettelurinne" in text or "laskettelukeskus" in text:
+            apply_category(Categories.LEISURE_SPORTS_CENTRE, item)
+            add_sport(Sport.SKIING, item)
+        elif (
+            512 in set(self._service_ids(unit))
+            and ("terminaali" in text or ("lentoasema" in text and "rautatieasema" not in text))
+            and "bussiterminaali" not in text
+            and "bussiasema" not in text
+        ):
+            # Passenger transport filed as generic traffic (cf.
+            # Länsiterminaali 2, Eteläsatama, Helsinki-Vantaan lentoasema).
+            # Bus terminals share the noun but are not ferry terminals.
+            # SIXT/Avis counters, the Vesibussi route, the airport railway
+            # station and Tulli customs points share node 512 but not the
+            # nouns, so they fall through untouched.
+            if "lentoasema" in text:
+                apply_category(Categories.AERODROME, item)
+            else:
+                apply_category(Categories.FERRY_TERMINAL, item)
+        else:
+            return False
+        return True
+
     def _apply_name_rescue(self, item, unit):
         # Fallback nouns for untabled units (talkoolaituri, unit 60892).
         name = unit.get("name") or {}
@@ -2719,6 +3050,11 @@ class HelsinkiServicemapFiSpider(Spider):
                 # (cf. Myyrmäen ulkokiipeilypaikka, unit 75230).
                 return
             apply_category(Categories.SHOP_OUTDOOR, item)
+        elif self._rescue_sport_venue(item, unit, text) or self._rescue_desc_venue(item, unit):
+            # Sport-carrying name rescues (yoga studios, shooting ranges),
+            # else description evidence for 2246-filed activity venues.
+            # Short-circuit: descs consulted only when names fail.
+            pass
         elif set(self._service_ids(unit)) <= {739, 750}:
             # Generic shops with no trade filing (cf. Soma Shop).
             apply_category(Categories.GENERIC_SHOP, item)
@@ -2856,19 +3192,28 @@ class HelsinkiServicemapFiSpider(Spider):
             # Company HQ filed as a recycling centre (cf. Kierrätyskeskus Oy).
             return Categories.OFFICE_COMPANY
         if category == Categories.TOURISM_ARTWORK and (
-            "muistomerkki" in text or "memorial" in text or "minnesmärke" in text
+            "muistomerkki" in text
+            or "muistolaatta" in text
+            or "patsas" in text
+            or "memorial" in text
+            or "minnesmärke" in text
+            or "plaque" in text
+            or "statue" in text
         ):
             # Named memorials filed as public art (cf. Talvisodan
-            # kansallinen muistomerkki, unit 55958).
+            # kansallinen muistomerkki, unit 55958; plaques like Tove
+            # Janssonin muistolaatta 23494 and statues like Mannerheimin
+            # ratsastajapatsas 23142 carry no muistomerkki stem).
             return Categories.HISTORIC_MEMORIAL
         if "henkilöstöravintola" in text:
             # Staff canteens are canteens even when co-filed as restaurants
             # (unit 77540 under generic Ravintolat).
             return Categories.CANTEEN
-        if winner == 2190 and re.search(r"(hyvinvointikeskus|terveyskeskus|perhekeskus)", text):
+        if winner == 2190 and "terveys" in text and re.search(r"(hyvinvointikeskus|terveyskeskus|perhekeskus)", text):
             # Genuine health centres filed under the wellness-centre service
-            # node (Myllypuro 61667, Kalasatama 54491); eco-stores like
-            # Ruohonjuuri keep the shop.
+            # node (Myllypuro 61667, Kalasatama 54491, both terveys- ja
+            # hyvinvointikeskus); pure wellness names without terveys and
+            # eco-stores like Ruohonjuuri keep their filing.
             return Categories.CLINIC
         if winner == 688 and "laituri" in text and "talkoolaituri" not in text:
             # Swimming piers filed as beaches (Gälisnäsin uimalaituri 79589).
@@ -3038,6 +3383,15 @@ class HelsinkiServicemapFiSpider(Spider):
             return Categories.PHYSIOTHERAPIST
         if any(word in text for word in ("jooga", "yoga")):
             return Categories.GYM
+        if not re.search(
+            r"(sauna|löyly|kylpy|uinti|kellumo|bastu|\bspa\b|\bshop\b|kauppa|myymälä|store)",
+            text,
+        ):
+            # 2168 filing with neither sauna evidence nor a trade word owned
+            # by a later rule (cf. Pranama Kallio, Hyvinvointitila): a
+            # wellness filing without evidence is not a sauna.
+            self._stat("category/wellness_generic")
+            return Categories.GENERIC_POI
         return None
 
     def _station_category(self, category, text):
@@ -3097,11 +3451,19 @@ class HelsinkiServicemapFiSpider(Spider):
             return Categories.CLINIC
         if re.search(self.UNIVERSITY_GUEST_RE, text):
             return Categories.TOURISM_GUEST_HOUSE
+        if "kandidaattikeskus" in text and ("arts" in text or "kauppakorkeakoulu" in text):
+            # School-specific service points inside the shared
+            # Kandidaattikeskus building (cf. ARTS unit 51092,
+            # kauppakorkeakoulu unit 50607); the bare record (unit 46043)
+            # is the building itself.
+            return Categories.OFFICE_ADMINISTRATIVE
         if has_dept:
             # Teaching and research units stay with the institution.
             return None
         if re.search(self.UNIVERSITY_BUILDING_RE, text):
-            return False
+            # Individual buildings map as nodes (building=* is valid on
+            # nodes); the institution tag stays off them.
+            return Categories.BUILDING_UNIVERSITY
         return None
 
     def _civic_category(self, category, text):
@@ -3125,9 +3487,6 @@ class HelsinkiServicemapFiSpider(Spider):
     def _facility_correction(self, category, matched, text):
         if category == Categories.SAUNA and re.search(r"\bspa\b", text):
             return Categories.SHOP_BEAUTY_SPA
-        if category == Categories.SHOP_TICKET and "lastauslaituri" in text:
-            # Loading docks filed as ticket sales (cf. A Bloc, unit 59265).
-            return None
         if category == Categories.SHOP_HEALTH_FOOD:
             if "hammas" in text:
                 return Categories.DENTIST
@@ -3159,12 +3518,16 @@ class HelsinkiServicemapFiSpider(Spider):
         return None
 
     def _church_category(self, category, matched, text):
-        # False drops towers/crypts to the generic fallback; None passes on.
+        # False drops crypts/fortresses to the generic fallback; None passes on.
         if category == Categories.TOURISM_ATTRACTION and any(
             self.SERVICE_NODES[r][0] == Categories.PLACE_OF_WORSHIP for r in matched
         ):
             if self._has_no_premises(Categories.PLACE_OF_WORSHIP, text):
-                # Towers/crypts are not visitable churches (cf. Kallion kirkon torni).
+                if "torni" in text:
+                    # Visitable towers are sights (cf. Kallion kirkon torni,
+                    # 273 steps, guided tower visits) even when church-filed.
+                    return Categories.TOURISM_ATTRACTION
+                # Crypts and fortresses stay generic.
                 return False
             # A church filed as a sight is still a church (cf. Espoon tuomiokirkko).
             return Categories.PLACE_OF_WORSHIP
@@ -3235,20 +3598,19 @@ class HelsinkiServicemapFiSpider(Spider):
 
     def _refine_place(self, category, matched, text, desc="", unit=None):
         # Helpers return a category, None to pass on, or False to force the
-        # generic fallback (only the university and church rules use False).
+        # generic fallback (only the church rule still uses False).
         # Final None means unmappable.
         if corrected := self._generic_venue_correction(category, matched, text):
             return corrected
         if category == Categories.UNIVERSITY:
-            uni = self._university_category(category, text)
-            if uni is False:
-                return None
-            if uni is not None:
+            if uni := self._university_category(category, text):
                 return uni
         if activity := self._activity_category(category, text, desc):
             return activity
         if clinic := self._clinic_category(category, text):
             return clinic
+        if sauna_trade := self._wellness_desc_category(category, matched, desc):
+            return sauna_trade
         if station := self._station_category(category, text):
             return station
         if wellness := self._wellness_category(category, text):
@@ -3266,7 +3628,45 @@ class HelsinkiServicemapFiSpider(Spider):
             return church
         if swim := self._swim_category(category, unit, text):
             return swim
+        if venue := self._refine_named_venue(category, matched, text, desc):
+            return venue
         return self._facility_correction(category, matched, text)
+
+    def _refine_named_venue(self, category, matched, text, desc):
+        # Venue-specific overrides for excursion islands whose POI is the
+        # venue, not the islet (cf. Suomenlinna fortress, Klippan restaurant
+        # island, Särkkä yacht harbour). Bare islets keep PLACE_ISLAND;
+        # overnight claims stay out (cf. day-trip-only Porsas), so no
+        # camp/picnic inference here.
+        if category == Categories.PLACE_ISLAND:
+            if "suomenlinna" in text:
+                return Categories.TOURISM_ATTRACTION
+            if "klippan" in text:
+                return Categories.RESTAURANT
+            if "särkkä" in text or "sarkka" in text:
+                return Categories.MARINA
+            if "viljelypalsta" in text:
+                # Allotment gardens on islands (cf. Tullisaari): scoped here
+                # so parking areas serving allotments keep their tags.
+                return Categories.ALLOTMENTS
+            if "taxi boat" in text or "venetaksi" in text:
+                return Categories.TOURISM_BOAT_TOURS
+            return None
+        return None
+
+    def _wellness_desc_category(self, category, matched, desc):
+        # Trade evidence lives in descriptions for name-opaque 2168 studios
+        # (cf. Söndag beauty salon, Saint Katariina hairdresser). Runs before
+        # the name-based wellness fallback, which would generic-ify them.
+        if category == Categories.SAUNA and matched and self._earliest(matched) == 2168:
+            if re.search(r"(kauneus|kosmet|beauty|\bspa\b)", desc):
+                return Categories.SHOP_BEAUTY
+            if re.search(r"(parturi|kampaamo|barber|hairdresser|frisör|frisor)", desc):
+                return Categories.SHOP_HAIRDRESSER
+            if re.search(r"(jooga|yoga|pilates)", desc):
+                # Yoga/pilates studios (cf. Pranama Kallio/Töölö).
+                return Categories.GYM
+        return None
 
     def _apply_info_artwork_track_subtags(self, item, category, fi_name, sv_name, en_name):
         if category == Categories.TOURISM_INFORMATION:
@@ -3313,6 +3713,13 @@ class HelsinkiServicemapFiSpider(Spider):
         if category == Categories.SOCIAL_FACILITY and re.search(r"(ryhmäkoti|perhekoti)", fi_name):
             # Named group homes (cf. Keravan perheryhmäkoti, unit 76608).
             item["extras"]["social_facility"] = "group_home"
+        if category == Categories.HISTORIC_MEMORIAL:
+            # memorial=* subtypes by noun (plaques and statues; generic
+            # muistomerkki carries no subtype).
+            if "muistolaatta" in fi_name or "plaque" in en_name:
+                item["extras"]["memorial"] = "plaque"
+            elif "patsas" in fi_name or "statue" in en_name:
+                item["extras"]["memorial"] = "statue"
         self._apply_info_artwork_track_subtags(item, category, fi_name, sv_name, en_name)
 
     def _fixup_pitch_sport(self, item, unit):
@@ -3362,9 +3769,9 @@ class HelsinkiServicemapFiSpider(Spider):
             self._apply_name_rescue(item, unit)
             if not self._has_category(item):
                 # Per docs/CATEGORIES.md: amenity=yes beats a tagless Feature.
-                # Unrescuable leftovers (novel nodes like kiintorastit) keep
-                # the generic tag, so the pipeline "category not set" residual
-                # is expected, not a filing bug.
+                # Unrescuable leftovers (service records without a visitable
+                # venue) keep the generic tag, so the pipeline "category not
+                # set" residual is expected, not a filing bug.
                 apply_category(Categories.GENERIC_POI, item)
                 self._stat("category/generic")
             return

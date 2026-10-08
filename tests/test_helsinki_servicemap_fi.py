@@ -618,6 +618,16 @@ def test_university_lab_beats_medical_lab():
     assert item.get_tag("office") == "research"
 
 
+def test_university_buildings_map_as_nodes():
+    # Units 76785 (Biokeskus 1), 75353 (Päärakennus): individual buildings
+    # map building=university on the node; the institution tag stays off.
+    item = full(make_spider(), "Biokeskus 1", [1359])
+    assert item.get_tag("building") == "university"
+    assert item.get_tag("amenity") is None
+    item = full(make_spider(), "Helsingin yliopiston päärakennus", [1359])
+    assert item.get_tag("building") == "university"
+
+
 def test_youth_guidance_is_office():
     # Unit 53329.
     item = full(make_spider(), "Nuorten urapalvelut", [2156, 490])
@@ -803,11 +813,26 @@ def test_laavu_is_shelter():
     assert item.get_tag("amenity") == "shelter"
 
 
+def test_civil_defence_shelter_is_bomb_shelter():
+    # Units 68539/68494 (nodes 1086/1084 inherit from 1083): civilian
+    # shelters tag amenity=shelter + shelter_type=bomb_shelter, never
+    # military=bunker.
+    item = categorised(make_spider({1086: 1083}), "Koivusaaren metroaseman yleinen väestönsuoja", [1086])
+    assert item.get_tag("amenity") == "shelter"
+    assert item["extras"]["shelter_type"] == "bomb_shelter"
+    assert item.get_tag("military") is None
+
+
 def test_memorial_named_artwork_is_memorial():
     # Unit 55958: national Winter War memorial filed as public art.
     item = full(make_spider(), "Talvisodan kansallinen muistomerkki", [2006])
     assert item.get_tag("historic") == "memorial"
     assert item.get_tag("tourism") is None
+    # memorial=* subtypes by noun (units 23494, 23142).
+    item = full(make_spider(), "Tove Janssonin muistolaatta", [2006])
+    assert item["extras"]["memorial"] == "plaque"
+    item = full(make_spider(), "Marsalkka Mannerheimin ratsastajapatsas", [2006])
+    assert item["extras"]["memorial"] == "statue"
 
 
 def test_talkoolaituri_is_tool_library():  # Unit 79897: Clean-up station, not a pier.
@@ -840,16 +865,11 @@ def test_church_filed_as_sight_stays_church():
 
 
 def test_church_tower_has_no_premises():
-    # Unit 77517 shape: Kallion kirkon torni. A tower is a building part
-    # with no independent premises, so no worship tag — but the named record
-    # is still yielded as amenity=yes per docs/CATEGORIES.md rather than
-    # dropped outright.
-    spider = make_spider()
-    item = Feature()
-    unit = {"name": {"fi": "Kallion kirkon torni"}, "service_nodes": [350, 749]}
-    spider._apply_name(item, unit)
-    spider._apply_category(item, unit)
-    assert item.get_tag("amenity") == "yes"
+    # Unit 77517 shape: Kallion kirkon torni. A tower is not a visitable
+    # church, so no worship tag — but the guided tower visits (273 steps,
+    # city views) make it a sight, not a generic record.
+    item = full(make_spider(), "Kallion kirkon torni", [350, 749])
+    assert item.get_tag("tourism") == "attraction"
     assert item["name"] == "Kallion kirkon torni"
 
 
@@ -1115,10 +1135,14 @@ def test_hired_venue_at_library_keeps_program():
 
 
 def test_wellness_studio_without_sauna_word_keeps_table():
-    # SYNTHETIC studio names: wellness filing stands, while rental-sauna
-    # rows (155/264/511) yield to a co-filed events venue.
+    # Pranama Kallio (unit 78519) is a yoga studio, not a sauna: a 2168
+    # filing without sauna evidence or an owned trade word is generic.
+    # Rental-sauna rows (155/264/511) still yield to a co-filed events venue.
     item = full(make_spider(), "Pranama Kallio", [2168, 2173])
-    assert item.get_tag("leisure") == "sauna"
+    assert item.get_tag("amenity") == "yes"
+    # Unit 78500 is literally named "Hyvinvointitila".
+    item = full(make_spider(), "Hyvinvointitila", [2168])
+    assert item.get_tag("amenity") == "yes"
     item = full(make_spider(), "Teurastamo", [155, 2173])
     assert item.get_tag("amenity") == "events_venue"
 
@@ -1390,6 +1414,7 @@ def test_chain_branch_splits():
         ("SPR Kontti", "SPR Kontti Espoo Galleria", "Espoo Galleria", 76073),
         ("Picnic", "Picnic Columbus", "Columbus", 79353),
         ("Musti ja Mirri", "Musti ja Mirri Stockmann", "Stockmann", 79233),
+        ("Musti ja Murri", "Musti ja Murri Munkkivuori", "Munkkivuori", 79231),
         ("Robert's Coffee", "Robert's Coffee Arabia", "Arabia", 78779),
         ("24 Pesula", "24 Pesula Easton", "Easton", 79348),
         ("Eat Poke", "Eat Poke Kaari", "Kaari", 79305),
@@ -1496,7 +1521,6 @@ def test_chain_branch_splits():
         "Partioaitta Outlet",
         "Partioaitta Outlet Helsinki",
         "Fazer 8th Floor",
-        "Musti ja Murri Munkkivuori",
         "Minibuffet",
         "Amarillo",
         "Ravintola Rioni",
@@ -2166,6 +2190,10 @@ def test_wellness_branches():
     ]
     for text, expected in cases:
         assert spider._wellness_category(Categories.SAUNA, text) == expected, text
+    # Keepers fall through to their owning rules (spa, trade) or the default.
+    assert spider._wellness_category(Categories.SAUNA, "kellumo") is None
+    assert spider._wellness_category(Categories.SAUNA, "hilla helsinki - day spa & shop") is None
+    assert spider._wellness_category(Categories.SAUNA, "pranama kallio") is Categories.GENERIC_POI
 
 
 def test_activity_branches():
@@ -2303,7 +2331,9 @@ def test_university_branches():
     assert spider._university_category(cat, "vahtimestarit") == Categories.OFFICE_ADMINISTRATIVE
     assert spider._university_category(cat, "terveystalo") == Categories.CLINIC
     assert spider._university_category(cat, "vierastalo") == Categories.TOURISM_GUEST_HOUSE
-    assert spider._university_category(cat, "dipoli") is False
+    assert spider._university_category(cat, "dipoli") == Categories.BUILDING_UNIVERSITY
+    assert spider._university_category(cat, "kandidaattikeskus") == Categories.BUILDING_UNIVERSITY
+    assert spider._university_category(cat, "aalto arts kandidaattikeskus") == Categories.OFFICE_ADMINISTRATIVE
     assert spider._university_category(cat, "fysiikan laitos") is None
 
 
@@ -3175,3 +3205,238 @@ def test_tenant_gets_private_type():
     )
     assert item is not None
     assert item["extras"].get("operator:type") == "private"
+
+
+def test_cross_street_kept_whole():
+    # SYNTHETIC: letter streets on both sides of the dash name no single
+    # street; numbered ranges still parse.
+    item = addressed(make_spider(), "Katu 5 - Katu 6")
+    assert item["street_address"] == "Katu 5 - Katu 6"
+    assert "housenumber" not in item
+
+
+def test_parenthesised_staircase_is_unit():
+    # SYNTHETIC: single-letter parens are staircases, not wings.
+    item = addressed(make_spider(), "Katu 5 (A)")
+    assert (item["street"], item["housenumber"], item["unit"]) == ("Katu", "5", "A")
+    item = addressed(make_spider(), "Sairaalatie 8, (A)")
+    assert (item["street"], item["housenumber"], item["unit"]) == ("Sairaalatie", "8", "A")
+
+
+def test_provider_tail_tolerates_trailing_space():
+    # SYNTHETIC: feed trailing space must not break the end anchor.
+    spider = make_spider()
+    assert (
+        spider._provider_tail_operator({"name": {"fi": "Iltap\u00e4kerho, Puuhala Oy "}})
+        == "Puuhala iltap\u00e4iv\u00e4kerhot Oy"
+    )
+
+
+def test_velodrome_is_track_and_spa_keeper():
+    # Node 651 Pyöräilyrata is a track like 670 Karting-rata, not a pitch.
+    # Unit 41334 is the Käpylä velodrome; Hilla Helsinki is unit 80697.
+    item = full(make_spider(), "Velodromi", [651])
+    assert item.get_tag("leisure") == "track"
+    assert item.get_tag("sport") == "cycling"
+    # Spa trade word falls through to its owning rule (unit: Hilla Helsinki).
+    item = full(make_spider(), "Hilla Helsinki - Day Spa & Shop", [2168])
+    assert item.get_tag("shop") == "beauty"
+
+
+def test_generic_coverage_table_rows():
+    # Node-anchored coverage for previously generic units (live unit ids).
+    cases = [
+        ("Shakkilauta, Hesperianpuisto", [2237, 2236], "leisure", "pitch", 73192),
+        ("Saukonpaadenpuiston koirakäymälä", [495, 18, 64], "amenity", "dog_toilet", 66782),
+        ("Keskuspuiston kiintorastit", [600], "leisure", "sports_centre", 64640),
+        ("Metsäpirtin multa, Viikin noutomyyntipiste", [88, 296], "shop", "garden_centre", 22722),
+        ("Leppävaaran pulkkamäki", [2424], "leisure", "playground", 79627),
+        ("Keimolan kilpahiihtokeskus", [596], "leisure", "sports_centre", 42552),
+        ("Laskettelurinne", [576], "leisure", "sports_centre", 45164),
+        ("Inkoon ampumarata", [560], "leisure", "pitch", 79567),
+        ("Inkoon ilma-aserata", [628], "leisure", "sports_hall", 79619),
+        ("Inkoon ampumahiihtoalue", [593], "leisure", "pitch", 79608),
+        ("Torbackan lentopaikka", [676], "aeroway", "aerodrome", 79561),
+        ("Vanhankaupungin vesivoimalaitos", [275, 27], "power", "plant", 7210),
+        ("Perheneuvola pohjoinen työryhmä", [2318], "amenity", "social_facility", 3132),
+        ("Helsingin edunvalvontatoimisto, Helsingin toimipaikka", [775], "office", "government", 28931),
+        ("Hekan asiakaspalvelupiste", [247, 135, 9], "office", "government", 10010),
+        ("Tonttiyksikkö", [249, 137, 536, 76], "office", "government", 21975),
+        ("Asemakaavoitus", [225, 331], "office", "government", 53388),
+        ("Kaupunkitekniikan keskus", [2159], "office", "government", 21971),
+        ("Terveydensuojelu", [104, 109, 119, 114], "office", "government", 8207),
+        ("Tartuntatautien ja infektioiden torjuntayksikkö", [998], "office", "government", 69965),
+        ("Rekrytointipalvelut", [124, 185], "office", "employment_agency", 64078),
+        ("Seure", [124, 185], "office", "employment_agency", 9292),
+        ("VillageWorks Ruoholahti", [157, 2021], "office", "property_management", 79262),
+        ("Energiatori", [274, 26], "office", "consulting", 7206),
+        ("Kaupunkiympäristön arkisto", [313, 331], "amenity", "archive", 57308),
+        ("Ravitsemusterapia, Tikkurilan terveysasema", [1039], "healthcare", "nutrition_counselling", 71847),
+        ("Oulunkylän kuntoutuskeskus sr", [1037], "healthcare", "rehabilitation", 10079),
+        ("Mielenterveystyön perhehoito", [2386, 2385], "amenity", "social_facility", 6030),
+        ("Malminiityn kerhotila", [404], "amenity", "community_centre", 43161),
+        ("EestiMaja Viro-keskus", [355], "amenity", "community_centre", 68933),
+        ("Paloheinän ulkoilumaja", [704], "amenity", "shelter", 41518),
+        ("Pitäjänmäen moottorihalli", [389], "amenity", "community_centre", 8076),
+        ("Nuorten liikennekoulutusalue Tattarisuo", [389, 440], "amenity", "community_centre", 8034),
+        ("Musik- och kulturskolan Sandels", [2417], "amenity", "music_school", 80919),
+        ("Pukinmäen sirkuskoulu", [2412, 2414, 2416, 2417], "amenity", "training", 77595),
+        ("Käsityökoulu", [2401], "amenity", "training", 76961),
+        ("Torra Lövö", [548], "place", "island", 22257),
+        ("Porsas", [548, 71, 502], "place", "island", 50872),
+    ]
+    spider = make_spider()
+    for fi, nodes, tag, value, ref in cases:
+        assert full(spider, fi, nodes).get_tag(tag) == value, (ref, fi)
+
+
+def test_generic_coverage_rescue_nouns():
+    # Bare nouns on fake node 99999 isolate the rescue layer. Rows with ref
+    # None are SYNTHETIC (Mallila names avoid testi*).
+    cases = [
+        ("Rush-trampoliinipuisto", "leisure", "trampoline_park", 53151),
+        ("Seikkailupuisto Korkee", "leisure", "sports_centre", 53144),
+        ("Paloheinän pulkkamäki", "leisure", "playground", 41884),
+        ("Paloheinän ulkoilumaja", "amenity", "shelter", 41518),
+        ("Hiihtomaja", "amenity", "shelter", 40125),
+        ("Pukinmäen mopohalli", "amenity", "community_centre", None),
+        ("Perheneuvola pohjoinen", "amenity", "social_facility", None),
+        ("Nuorisovaltuusto", "office", "government", 20042),
+        ("Helsingin kaupunginhallitus", "office", "government", 25726),
+        ("Kulttuuripaja Kitee", "amenity", "community_centre", None),
+        ("Kansalaistoimintakerros", "amenity", "community_centre", 45057),
+        ("Yleisökassa", "amenity", "payment_centre", 8260),
+        ("Helsinki Kamppi matkatavarasäilytys", "amenity", "luggage_locker", 75621),
+        ("Musiikkistudio Kobra", "amenity", "studio", 75040),
+        ("Lasistudio Hytti", "amenity", "arts_centre", 79711),
+        ("UDUMBARA keramiikka studio", "shop", "pottery", 57095),
+        ("Kontulan askartelupaja", "amenity", "arts_centre", 7992),
+        ("Base Catering", "craft", "caterer", 77038),
+        ("Energiatori", "office", "consulting", 7206),
+        ("Puolustusvoimat, Uudenmaan aluetoimisto", "office", "government", 60154),
+        ("Keski-Uudenmaan ympäristökeskus", "office", "government", 60142),
+        ("Apuvälinemyymälä Aviris", "shop", "medical_supply", 34705),
+        ("Sirkuskoulu Tapanila", "amenity", "training", None),
+        ("Musiikkiopisto Juvenalia", "amenity", "music_school", None),
+        ("Koirakäymälä Mallipuisto", "amenity", "dog_toilet", None),
+        ("Voimalaitos Mallilä", "power", "plant", None),
+        ("Kuntoutuskeskus Mallila", "healthcare", "rehabilitation", None),
+        ("Ravitsemusterapia Mallila", "healthcare", "nutrition_counselling", None),
+        ("Metsäkeskus Mallila", "office", "government", None),
+        ("Exit Room Helsinki", "leisure", "escape_game", 54733),
+        ("Leo's Leikkimaa Mallila", "leisure", "playground", None),
+        ("CityKatsastus Mallila", "amenity", "vehicle_inspection", 68147),
+        ("Pakastus Mallila", "shop", "storage_rental", None),
+        ("Tukisuhdetoiminta Mallila", "amenity", "social_facility", 79223),
+        ("Tiny Wonders", "amenity", "kindergarten", 78360),
+        ("Silmälasistudio", "shop", "optician", 68607),
+        ("Monistamo Mallila", "shop", "copyshop", None),
+    ]
+    spider = make_spider()
+    for fi, tag, value, ref in cases:
+        assert full(spider, fi, [99999]).get_tag(tag) == value, (ref, fi)
+
+
+def test_generic_coverage_sport_venues():
+    # Sport-carrying rescues (untabled names on fake node 99999; Mallila
+    # names are SYNTHETIC and avoid testi* so the test-data filter stays quiet).
+    cases = [
+        ("Joogastudio Mallila", ["yoga"], 78519),
+        ("Pilates Studio Mallila", ["pilates"], 79686),
+        ("Ampumarata Mallila", ["shooting"], 79567),
+        ("Ampumahiihto Mallila", ["biathlon"], 79608),
+        ("Hiihtokeskus Mallila", ["cross_country_skiing"], 42552),
+        ("Shakkilauta Mallipuisto", ["chess"], 73192),
+        ("Kiintorastit Mallila", ["orienteering"], 64640),
+        ("Kiipeilyhalli Mallila", ["climbing"], 78899),
+        ("Padelhalli Mallila", ["padel"], None),
+        ("Arena Center Mallila", ["floorball"], None),
+        ("Laskettelurinne Mallila", ["skiing"], 45164),
+    ]
+    spider = make_spider()
+    for fi, sports, ref in cases:
+        assert full(spider, fi, [99999]).get_tag("sport") == ";".join(sorted(sports)), (ref, fi)
+
+
+def test_island_venue_overrides():
+    # SYNTHETIC: names constructed; cf. live units Klippan 57111 and Särkkä
+    # 57113, whose descs confirm the restaurant villa and yacht club;
+    # Tullisaari passes via the node-503 table row rather than the island branch.
+    spider = make_spider()
+    assert full(spider, "Suomenlinna", [548]).get_tag("tourism") == "attraction"
+    assert full(spider, "Klippan", [548]).get_tag("amenity") == "restaurant"
+    assert full(spider, "Särkkä", [548]).get_tag("leisure") == "marina"
+    assert full(spider, "Tullisaari, viljelypalstat", [503, 73]).get_tag("landuse") == "allotments"
+    assert full(spider, "Helsinki Taxi Boat", [748, 548]).get_tag("tourism") == "tours"
+
+
+def test_wellness_desc_trades():
+    # SYNTHETIC: hand-written descs exercising the helper directly; the
+    # feed has no such description strings.
+    spider = make_spider()
+    assert (
+        spider._wellness_desc_category(
+            Categories.SAUNA, [2168], "kauneushoitola, laaja valikoima kauneushoitopalveluita"
+        )
+        is Categories.SHOP_BEAUTY
+    )
+    assert (
+        spider._wellness_desc_category(Categories.SAUNA, [2168], "parturi-kampaamo, meikkaus- ja stailauspalvelut")
+        is Categories.SHOP_HAIRDRESSER
+    )
+    assert (
+        spider._wellness_desc_category(Categories.SAUNA, [2168], "joogastudio, yinjoogaa ja pilatesta")
+        is Categories.GYM
+    )
+    assert spider._wellness_desc_category(Categories.SAUNA, [155], "kauneushoitola") is None
+
+
+def test_rescue_desc_venue():
+    # Description evidence for 2246-filed activity venues (descs verbatim
+    # from live units Sugoi 78852, EXITE 64714, OLiO VR 79328, HELAXE 68658,
+    # Fööni 57705, Takeoff 44848, Eagle Club 78988, Social Sports 78253,
+    # SuperPark 53150, Laguuni 77927; unit dicts hand-built).
+    spider = make_spider()
+
+    def rescued(fi, nodes, desc):
+        item = Feature()
+        unit = {"name": {"fi": fi}, "service_nodes": nodes, "description": {"fi": desc}}
+        assert spider._rescue_desc_venue(item, unit) is True, fi
+        return item
+
+    assert rescued("Sugoi", [2246], "pelihalli, noin 80 videopeliautomaattia").get_tag("leisure") == "amusement_arcade"
+    assert rescued("EXITE Live Games", [2246], "escape room-pelikeskus").get_tag("leisure") == "escape_game"
+    assert (
+        rescued("OLiO VR", [2246], "VR-areena, pakohuoneet virtuaaliareenalla").get_tag("leisure") == "amusement_arcade"
+    )
+    item = rescued("HELAXE", [2246], "urbaani kirveenheittorata")
+    assert (item.get_tag("leisure"), item.get_tag("sport")) == ("sports_centre", "axe_throwing")
+    assert rescued("Fööni", [2246], "vapaalentotunneli").get_tag("leisure") == "sports_centre"
+    assert (
+        rescued("Takeoff Simulations", [2246], "matkustajalentokonesimulaattorielämys").get_tag("tourism")
+        == "attraction"
+    )
+    item = rescued("Eagle Club", [2246], "TrackMan golf- ja ammuntasimulaattorit")
+    assert (item.get_tag("leisure"), item.get_tag("sport")) == ("sports_centre", "golf")
+    item = rescued("Social Sports Club", [2246], "pelata padelia, golfata simulaattorissa")
+    assert (item.get_tag("leisure"), item.get_tag("sport")) == ("sports_hall", "padel")
+    assert rescued("SuperPark Vantaa", [2246], "temppuile trampoliineilla").get_tag("leisure") == "trampoline_park"
+    assert rescued("Laguuni", [2246], "vuokrattavaksi polkuveneet, SUP-laudat").get_tag("amenity") == "boat_rental"
+    item = rescued(
+        "Outshine Center", [2246], "tennis- ja sulkapallohalli, kolme tenniskenttää ja neljä sulkapallokenttää"
+    )
+    assert (item.get_tag("leisure"), item.get_tag("sport")) == ("sports_hall", "badminton;tennis")
+    assert rescued("Muikku Photo", [2246], "vintage-henkinen photobooth ja luova studio").get_tag("amenity") == "studio"
+    # Gate: other nodes never fire, empty descs never fire (SYNTHETIC units).
+    item = Feature()
+    assert (
+        spider._rescue_desc_venue(
+            item, {"name": {"fi": "Sugoi"}, "service_nodes": [99999], "description": {"fi": "pelihalli"}}
+        )
+        is False
+    )
+    item = Feature()
+    assert (
+        spider._rescue_desc_venue(item, {"name": {"fi": "Sugoi"}, "service_nodes": [2246], "description": {"fi": ""}})
+        is False
+    )
