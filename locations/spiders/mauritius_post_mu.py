@@ -58,7 +58,6 @@ class MauritiusPostMUSpider(Spider):
             region = office["category"][0]["name"] if office["category"] else None
             if region in ("Rodgriues", "Agalega"):
                 item["state"] = "Rodrigues" if region == "Rodgriues" else region
-            item["country"] = "MU"
 
             if office["branch"].endswith(("Delivery", "Stores")):
                 apply_category(Categories.POST_DEPOT, item)  # delivery/stores units have no public counter
