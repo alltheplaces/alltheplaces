@@ -6,7 +6,7 @@ from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_BR, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 STATES = [
@@ -24,14 +24,6 @@ PARTNER_TYPES = {
     "PONTO DE COLETA": "Ponto de Coleta",  # parcel drop-off point in a third-party business
     "CEL": "CEL",  # small counters in remote towns and resorts, listed apart from the "AC" agencies
 }
-
-HOURS_DAYS = {
-    "SEGUNDA A SEXTA": ["Mo", "Tu", "We", "Th", "Fr"],
-    "SÁBADO": ["Sa"],
-    "SABADO": ["Sa"],
-    "DOMINGO": ["Su"],
-}
-DAY_WORDS = {"SEGUNDA": "Mo", "TERÇA": "Tu", "TERCA": "Tu", "QUARTA": "We", "QUINTA": "Th", "SEXTA": "Fr"}
 
 
 class CorreiosBRSpider(Spider):
@@ -76,7 +68,6 @@ class CorreiosBRSpider(Spider):
             )
             item["city"] = city
             item["state"] = state
-            item["country"] = "BR"
             # Units without a known location have latitude="0" longitude="0".
             if (lat := re.search(r'latitude="([-\d.]+)"\s+longitude="([-\d.]+)"', base)) and float(lat.group(1)):
                 item["lat"], item["lon"] = lat.group(1), lat.group(2)
@@ -119,18 +110,18 @@ class CorreiosBRSpider(Spider):
 
     @staticmethod
     def parse_hours(rows: list[tuple[str, str]]) -> OpeningHours:
-        # e.g. ("Segunda a sexta", "08:00 às 16:00"), ("Sábado", "09:00 às 13:00"); weekend duty ("Plantão")
-        # hours and the last posting time are skipped.
+        # e.g. ("Segunda a sexta", "08:00 às 12:00 e 13:00 às 17:00"), ("Segunda, terÇa, quinta", "08:00 às 12:00");
+        # weekend duty ("Plantão") hours and the last posting time ("Horário Limite de Postagem") are skipped.
         oh = OpeningHours()
         for label, value in rows:
-            label = re.sub(r"\s+", " ", label).strip().upper()
-            if label in HOURS_DAYS:
-                days = HOURS_DAYS[label]
-            elif all(word.strip() in DAY_WORDS for word in label.split(",")):
-                days = [DAY_WORDS[word.strip()] for word in label.split(",")]
+            label = " ".join(label.split())
+            if " a " in label:
+                first, last = (sanitise_day(day, DAYS_BR) for day in label.split(" a ", 1))
+                days = day_range(first, last) if first and last else []
             else:
+                days = [sanitise_day(day, DAYS_BR) for day in label.split(",")]
+            if not days or not all(days):
                 continue
             for start, end in re.findall(r"(\d{1,2}:\d{2})\s*às\s*(\d{1,2}:\d{2})", value):
-                for day in days:
-                    oh.add_range(day, start, end)
+                oh.add_days_range(days, start, end)
         return oh

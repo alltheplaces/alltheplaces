@@ -137,6 +137,7 @@ DAYS_BR = {
     "Sex": "Fr",
     "Sábado": "Sa",
     "Sáb": "Sa",
+    "Domingo": "Su",
     "Domingos": "Su",
     "Dom": "Su",
 }
