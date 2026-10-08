@@ -29,19 +29,14 @@ class JamaicaPostJMSpider(Spider):
             name = re.split(r"<", re.sub(r"^\s*<h4>", "", marker["content"]))[0].strip()
             offices.append((name, marker["coords"]["lat"], marker["coords"]["lng"]))
         # Some markers are copies of a neighbour's point (Negril and Grange Hill, 15 km apart, share one):
-        # such points are not trusted. A second "Santa Cruz" marker sits far from the town, so only the first
-        # marker of a name is kept.
+        # such points are not trusted. A second "Santa Cruz" marker sits far from the town; it has the same ref
+        # as the first, so the duplicates pipeline keeps only the first marker of a name.
         shared = Counter((lat, lon) for _, lat, lon in offices)
-        seen = set()
         for name, lat, lon in offices:
-            if name in seen:
-                continue
-            seen.add(name)
             item = Feature()
             item["ref"] = re.sub(r"\W+", "-", name.lower()).strip("-")
             item["branch"] = re.sub(r"\s+(Post\s+)?Office$", "", name)
             if shared[(lat, lon)] == 1:
                 item["lat"], item["lon"] = lat, lon
-            item["country"] = "JM"
             apply_category(Categories.POST_OFFICE, item)
             yield item
