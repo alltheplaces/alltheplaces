@@ -51,13 +51,13 @@ class UkrposhtaUASpider(Spider):
             )
 
     def parse_offices(self, response: Response, postcode: str) -> Any:
-        offices = {}
+        offices = []
         for office in self.entries(response):
             if office["LOCK_CODE"] != "0":
                 continue  # closed or temporarily not working (LOCK_UA explains why)
             if office["TYPE_ACRONYM"] == "ПВ":
                 continue  # mobile post offices (vans) have no fixed location
-            offices[office["ID"]] = office
+            offices.append(office)
         if offices:
             yield JsonRequest(
                 f"{self.API}get_postoffices_openhours_by_postindex&pc={postcode}",
@@ -67,11 +67,11 @@ class UkrposhtaUASpider(Spider):
                 priority=1,
             )
 
-    def parse_hours(self, response: Response, offices: dict) -> Any:
+    def parse_hours(self, response: Response, offices: list[dict]) -> Any:
         intervals = {}
         for interval in self.entries(response):
             intervals.setdefault(interval["id"], []).append(interval)
-        for office in offices.values():
+        for office in offices:
             item = Feature()
             item["ref"] = office["ID"]
             item["branch"] = office["PO_SHORT"]
