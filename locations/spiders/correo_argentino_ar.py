@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_ES, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 # Province codes used by the finder (the letter of each ISO 3166-2:AR code).
@@ -35,9 +35,6 @@ PROVINCES = {
     "Y": "Jujuy",
     "Z": "Santa Cruz",
 }
-
-DAYS_ES = {"LUN": "Mo", "MAR": "Tu", "MIE": "We", "JUE": "Th", "VIE": "Fr", "SAB": "Sa", "DOM": "Su"}
-WEEK = list(DAYS_ES.values())
 
 
 class CorreoArgentinoARSpider(Spider):
@@ -115,7 +112,6 @@ class CorreoArgentinoARSpider(Spider):
             item["city"] = lines[1] if len(lines) > 1 else locality["nombre"]
             item["postcode"] = locality.get("cp")
             item["state"] = PROVINCES[province]
-            item["country"] = "AR"
             if marker := re.search(r"L\.marker\(\[\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\]", chunk):
                 item["lat"], item["lon"] = marker.group(1), marker.group(2)
             if hours := re.search(r"HORARIOS:\s*</strong>(.*?)</p>", chunk, re.S):
@@ -139,20 +135,22 @@ class CorreoArgentinoARSpider(Spider):
 
     @staticmethod
     def parse_hours(text: str) -> OpeningHours:
-        # e.g. "LUN A VIE 08.00 A 13.00 LUN A VIE 16.00 A 20.00 SAB 09.00 A 12.00", "MIE Y JUE 09.00 A 13.00"
+        # e.g. "LUN A VIE 08.00 A 13.00 LUN A VIE 16.00 A 20.00 SAB 09.00 A 12.00", "MIE Y JUE 09.00 A 13.00",
+        # "LUN A JUEV 12.00 A 19.00". Days are read by their first three letters. Not add_ranges_from_string: it reads
+        # "MAR Y JUE" as Tuesday to Thursday.
         oh = OpeningHours()
         for first, sep, last, start, end in re.findall(
             r"([A-Z]{3})[A-Z]*(?:\s+(A|Y)\s+([A-Z]{3})[A-Z]*)?\s+(\d{1,2}[.:]\d{2})\s+A\s+(\d{1,2}[.:]\d{2})",
             text.upper(),
         ):
-            if first not in DAYS_ES or (last and last not in DAYS_ES):
+            first, last = sanitise_day(first, DAYS_ES), sanitise_day(last, DAYS_ES)
+            if not first or (sep and not last):
                 continue
             if sep == "A":
-                days = WEEK[WEEK.index(DAYS_ES[first]) : WEEK.index(DAYS_ES[last]) + 1]
+                days = day_range(first, last)
             elif sep == "Y":
-                days = [DAYS_ES[first], DAYS_ES[last]]
+                days = [first, last]
             else:
-                days = [DAYS_ES[first]]
-            for day in days:
-                oh.add_range(day, start.replace(".", ":"), end.replace(".", ":"))
+                days = [first]
+            oh.add_days_range(days, start.replace(".", ":"), end.replace(".", ":"))
         return oh
