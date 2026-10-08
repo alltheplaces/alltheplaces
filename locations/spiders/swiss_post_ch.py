@@ -80,6 +80,11 @@ class SwissPostCHSpider(Spider):
         item["postcode"] = root.xpath("Address/Zip/text()").get()
         item["city"] = root.xpath("Address/City/text()").get()
         item["state"] = root.xpath("Address/KantonCode/text()").get()
+        if item["state"] == "FL":
+            # Letter boxes in Liechtenstein are listed with canton "FL"; they belong to Liechtensteinische Post,
+            # which has its own spider (liechtensteinische_post_li).
+            self.crawler.stats.inc_value("atp/swiss_post_ch/skipped_liechtenstein")
+            return
         item["website"] = f"https://places.post.ch/de/{poi['id']}"
 
         if poi["type"] == LETTER_BOX:
