@@ -791,7 +791,9 @@ class HelsinkiServicemapFISpider(Spider):
             dept_name = department.get("name")
             # Non-dict names must not kill the page (cf. str-valued name).
             name = dept_name.get("fi") if isinstance(dept_name, dict) else None
-            if type(department.get("id")) is int and name:
+            if type(department.get("id")) is int and isinstance(name, str) and name.strip():
+                # Non-string fi values never reach strip: one malformed row
+                # must not kill department pagination.
                 self.departments[department["id"]] = name.strip()
         if request := self._follow(payload, self.parse_departments, self.parse_bootstrap_error):
             yield request

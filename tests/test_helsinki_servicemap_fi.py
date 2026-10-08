@@ -9,6 +9,9 @@ and the input exercises a helper branch directly.
 """
 
 from types import SimpleNamespace
+import json
+
+from scrapy.http import JsonResponse
 
 from locations.categories import Categories, apply_category, get_category_tags
 from locations.items import Feature
@@ -3455,3 +3458,28 @@ def test_rescue_desc_venue():
         spider._rescue_desc_venue(item, {"name": {"fi": "Sugoi"}, "service_nodes": [2246], "description": {"fi": ""}})
         is False
     )
+
+
+def test_malformed_department_rows_are_skipped():
+    # SYNTHETIC: the feed has no non-string fi values (all 689 department
+    # rows probed), but one malformed row must not kill pagination.
+    spider = make_spider()
+    spider.seen_next = set()
+    spider.bootstrap_pending = {"departments", "service_nodes"}
+    payload = {
+        "results": [
+            {"id": 1, "name": {"fi": 123}},
+            {"id": 2, "name": "not-a-dict"},
+            {"id": 3, "name": {"fi": "  "}},
+            {"id": 4, "name": {"fi": "Kasvatus"}},
+            "not-a-dict",
+        ],
+        "next": None,
+    }
+    response = JsonResponse(
+        url="https://www.hel.fi/palvelukarttaws/rest/v4/department/",
+        body=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    assert list(spider.parse_departments(response)) == []
+    assert spider.departments == {4: "Kasvatus"}
