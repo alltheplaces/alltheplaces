@@ -3,7 +3,7 @@ import re
 from typing import Iterable
 from urllib.parse import parse_qsl, urlencode, urlparse
 
-from scrapy import Request, Spider
+from scrapy import Request, Spider, signals
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -184,7 +184,15 @@ class SMarketFISpider(Spider):
         if brand in self.pending:
             yield from self.flush(brand)
 
-    def closed(self, reason: str) -> None:
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super().from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider) -> None:
+        # Plain `closed()` is not a Scrapy hook and would never run; the
+        # audit must hang off the spider_closed signal instead.
         leftover = {brand: len(items) for brand, items in self.pending.items() if items}
         if leftover:
             self.crawler.stats.inc_value("atp/s_market_fi/unflushed_on_close")
@@ -196,7 +204,15 @@ class SMarketFISpider(Spider):
         self.flushed.add(brand)
         best = {}
         for result in self.pending[brand]:
-            item = self.parse_store(result, brand)
+            try:
+                item = self.parse_store(result, brand)
+            except Exception:
+                # One malformed record (non-dict coordinates or hour spans,
+                # unparseable times) must not take down the brand's whole
+                # buffer; drop it loudly and keep the rest.
+                self.crawler.stats.inc_value(f"atp/s_market_fi/dropped/crashed/{brand}")
+                logger.warning("s_market_fi: dropping malformed record for %s", brand, exc_info=True)
+                continue
             if item is None:
                 continue
             key, preference = self.dedupe_key(result, brand)
