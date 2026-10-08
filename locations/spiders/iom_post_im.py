@@ -8,17 +8,15 @@ from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_3_LETTERS, DAYS_EN, OpeningHours, day_range
 from locations.items import Feature
-
-DAY_ABBR = {"mon": "Mo", "tue": "Tu", "wed": "We", "thu": "Th", "fri": "Fr", "sat": "Sa", "sun": "Su"}
 
 
 def days_of(text: str) -> list[str]:
     # "Mon - Fri", "Monday - Sunday", "Sat", "Sunday"
-    names = [DAY_ABBR[d[:3].lower()] for d in re.findall(r"\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*", text, re.I)]
+    names = [DAYS_EN[d.title()] for d in re.findall(rf"\b({'|'.join(DAYS_3_LETTERS)})[a-z]*", text, re.I)]
     if len(names) >= 2 and "-" in text:
-        return DAYS[DAYS.index(names[0]) : DAYS.index(names[1]) + 1]
+        return day_range(names[0], names[1])
     return names
 
 
@@ -56,12 +54,11 @@ class IomPostIMSpider(Spider):
             item["branch"] = re.sub(r"\s*Post Office$", "", name)
             text = re.sub(r"<br\s*/?>", "\n", unescape(office.get("collection") or ""))
             text = re.sub(r"<[^>]+>", "", text)
-            oh = OpeningHours()
-            for line in text.split("\n"):
-                for start, end in re.findall(r"(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})", line):
-                    for day in days_of(line):
-                        oh.add_range(day, start, end)
-            item["opening_hours"] = oh
+            # "09.00 - 12.30 & 13.30 - 17.30" -> "09:00 - 12:30, 13:30 - 17:30"
+            hours = re.sub(r"(\d)\.(\d{2})", r"\1:\2", text)
+            hours = re.sub(r"(\d)\s*&\s*(\d)", r"\1, \2", hours)
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours)
             if m := re.search(r"(IM\d{1,2}\s*\d[A-Z]{2})", text):
                 item["postcode"] = m.group(1)
             apply_category(Categories.POST_OFFICE, item)
