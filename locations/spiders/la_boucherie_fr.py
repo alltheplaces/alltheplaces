@@ -9,12 +9,9 @@ class LaBoucherieFRSpider(SitemapSpider, StructuredDataSpider):
     name = "la_boucherie_fr"
     item_attributes = {"brand": "La Boucherie", "brand_wikidata": "Q21427479"}
     sitemap_urls = ["https://www.la-boucherie.fr/nc_stores-sitemap.xml"]
-    sitemap_rules = [(r"", "parse_sd")]
-
     search_for_facebook = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category(Categories.RESTAURANT, item)
         item["branch"] = (
             item.pop("name", "")
             .removeprefix("La Boucherie, ")
@@ -24,7 +21,7 @@ class LaBoucherieFRSpider(SitemapSpider, StructuredDataSpider):
             .removeprefix("au ")
         )
 
-        print(item)
+        apply_category(Categories.RESTAURANT, item)
         yield item
 
     def iter_linked_data(self, response):
