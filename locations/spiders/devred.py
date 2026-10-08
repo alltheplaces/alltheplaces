@@ -13,6 +13,7 @@ class DevredSpider(Spider):
     name = "devred"
     item_attributes = {"brand": "Devred", "brand_wikidata": "Q3025542"}
     start_urls = ["https://devred.com/pages/nos-boutiques"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.css("div.store-locator__store"):
