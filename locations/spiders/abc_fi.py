@@ -50,10 +50,12 @@ class ABCFISpider(SitemapSpider):
         "98-e5": (Fuel.OCTANE_98, Fuel.E5),
         "smartdiesel": (Fuel.DIESEL,),
         "smartdiesel-vali": (Fuel.DIESEL,),
+        "diesel-vali": (Fuel.DIESEL,),
         # HVO renewable diesel: the wiki folds HVO100 into biodiesel.
         "nextdiesel-talvi": (Fuel.BIODIESEL,),
         "ekoflex-e85": (Fuel.E85,),
         "moottoripolttooljy-talvi": (Fuel.HEATING_OIL,),
+        "polttooljy-talvi": (Fuel.HEATING_OIL,),
         "polttooljy-mittarikentalta": (Fuel.HEATING_OIL,),
     }
     # In-station tenants share the station's brand but are not fuel POIs
@@ -174,7 +176,11 @@ class ABCFISpider(SitemapSpider):
         if today is None:
             today = datetime.date.today().isoformat()
         current = [e for e in entries if (e.get("start") or "") <= today]
-        entry = current[-1] if current else entries[0]
+        if not current:
+            # No schedule in force (e.g. pre-opening): emit no hours
+            # rather than a future timetable.
+            return None
+        entry = current[-1]
         oh = OpeningHours()
         days = entry.get("days") or []
         for day_entry in days:
@@ -217,7 +223,10 @@ class ABCFISpider(SitemapSpider):
         match = self.TIME_RE.match(value.strip())
         if not match:
             return None
-        return f"{int(match.group(1)):02d}:{match.group(2)}"
+        hours, minutes = int(match.group(1)), int(match.group(2))
+        if hours > 23 or minutes > 59:
+            return None
+        return f"{hours:02d}:{match.group(2)}"
 
     @staticmethod
     def _str(value) -> str | None:
