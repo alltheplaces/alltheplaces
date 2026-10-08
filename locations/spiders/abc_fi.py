@@ -7,7 +7,7 @@ from typing import Iterable
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 
@@ -38,6 +38,20 @@ class ABCFISpider(SitemapSpider):
     # Only the ABC fuel brands. Everything else under /asemat/ (lataus,
     # carwash, parking, non-ABC traffic stores) is out of scope.
     FUEL_BRANDS = ("abc-liikennemyymalat", "abc-automaattiasemat")
+    # Station service codes that name a sold fuel, as seen 2026-10-08.
+    # Unmapped on purpose: nestekaasut (ambiguous) and auton-tankkaus
+    # (generic refuelling marker, not a fuel type).
+    FUEL_MAP = {
+        "95-e10": (Fuel.OCTANE_95, Fuel.E10),
+        "98-e5": (Fuel.OCTANE_98, Fuel.E5),
+        "smartdiesel": (Fuel.DIESEL,),
+        "smartdiesel-vali": (Fuel.DIESEL,),
+        # HVO renewable diesel: the wiki folds HVO100 into biodiesel.
+        "nextdiesel-talvi": (Fuel.BIODIESEL,),
+        "ekoflex-e85": (Fuel.E85,),
+        "moottoripolttooljy-talvi": (Fuel.HEATING_OIL,),
+        "polttooljy-mittarikentalta": (Fuel.HEATING_OIL,),
+    }
     # In-station tenants share the station's brand but are not fuel POIs
     # (cf. ABC Hyvinkää ravintola, duplicating its station).
     TENANT_WORDS = ("hesburger", "ravintola", "carwash")
@@ -101,11 +115,21 @@ class ABCFISpider(SitemapSpider):
             item["phone"] = str(phone)
 
         apply_category(Categories.FUEL_STATION, item)
+        self.apply_fuels(item, station)
 
         if hours := self.parse_hours(station.get("openingTimes") or {}):
             item["opening_hours"] = hours
 
         yield item
+
+    def apply_fuels(self, item: Feature, station: dict) -> None:
+        # Tag sold fuels from the station's service codes. EV chargers stay
+        # untagged here: the dedicated abc-lataus spider covers them.
+        for service in station.get("services") or []:
+            service_type = service.get("serviceType") if isinstance(service, dict) else None
+            code = service_type.get("code") if isinstance(service_type, dict) else None
+            for fuel in self.FUEL_MAP.get(code, ()):
+                apply_yes_no(fuel, item, True)
 
     def extract_location(self, response: Response) -> dict | None:
         match = self.NEXT_DATA_RE.search(response.text)
