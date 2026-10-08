@@ -846,6 +846,7 @@ class HelsinkiServicemapFISpider(Spider):
         "craft",
         "man_made",
         "military",
+        "mooring",
         "place",
         "natural",
         "emergency",

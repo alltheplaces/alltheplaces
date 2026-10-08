@@ -596,6 +596,7 @@ top_level_tags = [
     "landuse",
     "leisure",
     "man_made",
+    "mooring",
     "natural",
     "office",
     "power",

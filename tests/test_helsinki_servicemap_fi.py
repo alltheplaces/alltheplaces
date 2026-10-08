@@ -10,7 +10,7 @@ and the input exercises a helper branch directly.
 
 from types import SimpleNamespace
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, apply_category, get_category_tags
 from locations.items import Feature
 from locations.spiders.government.helsinki_servicemap_fi import HelsinkiServicemapFISpider
 
@@ -879,6 +879,10 @@ def test_boat_berths_are_moorings_not_marinas():
     item = full(make_spider(), "Kauppatori, Vironallas", [2198, 2199])
     assert item.get_tag("mooring") == "yes"
     assert item.get_tag("leisure") is None
+    # mooring=yes is a recognised top-level category (clears the CI
+    # "category is not set" check) and trips the _has_category gate.
+    assert get_category_tags(item) == {"mooring": "yes"}
+    assert make_spider()._has_category(item)
 
 
 def test_company_hq_beats_recycling_filing():
