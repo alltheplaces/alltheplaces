@@ -3,7 +3,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.spiders.mcdonalds import McdonaldsSpider
@@ -56,4 +56,7 @@ class McdonaldsTRSpider(Spider):
                 item["opening_hours"].add_days_range(DAYS, open_time, close_time)
             apply_yes_no(Extras.DRIVE_THROUGH, item, location["MC_DRIVE"], False)
             apply_yes_no(Extras.DELIVERY, item, location["IS_DELIVERY_STORE"], False)
+
+            apply_category(Categories.FAST_FOOD, item)
+
             yield item

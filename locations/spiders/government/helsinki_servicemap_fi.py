@@ -39,7 +39,7 @@ from locations.licenses import Licenses
 #   category refinement (tabled units) and subtags
 
 
-class HelsinkiServicemapFiSpider(Spider):
+class HelsinkiServicemapFISpider(Spider):
     """Helsinki region Service Map (Palvelukartta) units."""
 
     name = "helsinki_servicemap_fi"
@@ -54,12 +54,7 @@ class HelsinkiServicemapFiSpider(Spider):
     api_base_url = "https://api.hel.fi/servicemap/v2"
     page_size = 1000
 
-    custom_settings = {
-        "DOWNLOAD_TIMEOUT": 60,
-        "RETRY_TIMES": 5,
-        # No robots fetch; the API terms document use.
-        "ROBOTSTXT_OBEY": False,
-    }
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60, "RETRY_TIMES": 5}
 
     # A unit can match several nodes; the earliest row wins. Real facilities
     # on top, parking at the bottom, or a playground with a car park tags
