@@ -344,15 +344,10 @@ class SMarketFISpider(Spider):
         return True
 
     def split_branch(self, name: str, brand: str) -> tuple[str | None, str | None]:
-        # Branch after the brand prefix (cf. k_market_fi), case-insensitive:
-        # the feed mixes "S-market" and "S-Market". Infix names strip through
-        # the brand token and keep the full signed form in official_name.
-        # Word-boundary matched, so "Prisma" inside "Prismakeskus" does not
-        # split. Returns (None, None) when the brand is absent: the record
-        # is not a store of this brand. A leading ABC survives on s-kaupat
-        # grocery names (cf. ABC Särkisalmi Sale) and is stripped from the
-        # venue part; abcasemat.fi station views are dropped by host below,
-        # not here, since split runs before the host check.
+        # Branch after the brand prefix (cf. k_market_fi), case-insensitive.
+        # Infix names keep the full signed form in official_name ("Prisma"
+        # inside "Prismakeskus" does not split). A leading ABC on grocery
+        # names (cf. ABC Särkisalmi Sale) is stripped from the venue part.
         match = self.branch_res[brand].search(name)
         if not match:
             return None, None
