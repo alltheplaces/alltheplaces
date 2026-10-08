@@ -327,7 +327,7 @@ class SMarketFISpider(Spider):
         "SUN": "Su",
     }
 
-    def parse_hours(self, weeks: list[dict]) -> OpeningHours | None:
+    def parse_hours(self, weeks: list[dict]) -> OpeningHours | str | None:
         # weeks[0] is the current week: holiday, renovation and pre-opening
         # deviations baked into it must not become the timetable (cf. Alepa
         # Helsinginkatu closed Mon-Wed of week 41 for refit). Per weekday, use
@@ -347,6 +347,7 @@ class SMarketFISpider(Spider):
                     continue
                 by_day.setdefault(day, []).append(entry)
         oh = OpeningHours()
+        full_days = set()
         for day in ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"):
             entries = by_day.get(day) or []
             clean = [e for e in entries if not e.get("message") and not e.get("exceptional")]
@@ -375,14 +376,18 @@ class SMarketFISpider(Spider):
                     # as ...-24:00 on the same day, which is the correct
                     # reading of "open until midnight".
                     oh.add_range(day, open_time, close_time, time_format="%H:%M")
-            elif mode == "ALL_DAY":
+            elif mode == "ALL_DAY" and not ranges:
                 # Full-week ALL_DAY with no ranges reads as 24h (cf. S-market
                 # Sokos Helsinki); the feed has no "hours unspecified" mode.
+                # Seven distinct such days collapse to 24/7 below.
                 oh.add_range(day, "00:00", "23:59", time_format="%H:%M")
+                full_days.add(day)
             else:
                 # BY_RESERVATION, unknown modes and RANGE-without-ranges:
                 # leave the day unknown rather than invent hours.
                 self.crawler.stats.inc_value(f"atp/s_market_fi/hours/unknown_mode/{mode or 'missing'}")
+        if len(full_days) == 7:
+            return "24/7"
         return oh if oh.day_hours else None
 
     def clean_time(self, value) -> str | None:
