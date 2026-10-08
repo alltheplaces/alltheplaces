@@ -166,7 +166,7 @@ class ABCFISpider(SitemapSpider):
         "SUN": "Su",
     }
 
-    def parse_hours(self, opening_times: dict, today: str | None = None) -> OpeningHours | None:
+    def parse_hours(self, opening_times: dict, today: str | None = None) -> OpeningHours | str | None:
         # defaults[] holds consecutive validity ranges: use the last entry
         # already in force. Date-set exceptions are single-day deviations
         # and are skipped. All-closed schedules emit no hours (cf. Keuruu).
@@ -183,14 +183,19 @@ class ABCFISpider(SitemapSpider):
         entry = current[-1]
         oh = OpeningHours()
         days = entry.get("days") or []
+        all_24h = len(days) == 7
         for day_entry in days:
             if not isinstance(day_entry, dict):
+                all_24h = False
                 continue
             day = self.DAY_MAP.get(str(day_entry.get("day") or "").upper())
             if not day:
+                all_24h = False
                 self.crawler.stats.inc_value("atp/abc_fi/hours/unknown_day")
                 continue
             mode = str(day_entry.get("mode") or "").upper()
+            if mode != "24H":
+                all_24h = False
             if mode == "CLOSED":
                 oh.set_closed(day)
                 continue
@@ -215,6 +220,8 @@ class ABCFISpider(SitemapSpider):
                 # Unknown modes and RANGE-without-ranges: leave the day
                 # unknown rather than invent hours.
                 self.crawler.stats.inc_value(f"atp/abc_fi/hours/unknown_mode/{mode or 'missing'}")
+        if all_24h:
+            return "24/7"
         return oh if oh.day_hours else None
 
     def clean_time(self, value) -> str | None:
