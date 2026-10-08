@@ -23,13 +23,11 @@ class PosteSrpskeBaSpider(Spider):
         # (Serbian labels) and one in Latin script (English labels), each with its own marker ids.
         # Only the Latin copy is used.
         decoder = json.JSONDecoder()
-        seen = set()
         for match in re.finditer(r'"markers":\[', response.text):
             markers, _ = decoder.raw_decode(response.text, match.end() - 1)
             for marker in markers:
-                if CYRILLIC_RE.search(marker["title"]) or marker["id"] in seen:
+                if CYRILLIC_RE.search(marker["title"]):
                     continue
-                seen.add(marker["id"])
                 if item := self.parse_marker(marker):
                     yield item
 
