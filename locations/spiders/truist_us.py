@@ -99,7 +99,7 @@ class TruistUSSpider(StructuredDataSpider):
         else:
             oh = OpeningHours()
             for line in ld_data["openingHours"].split(", "):
-                line = re.sub(r"(\d)\D+$", r"\1", line)
+                line = re.sub(r"(\d)[^\dAPM]+$", r"\1", line)
                 # Website implies PM of ending time, but OpeningHours assumes AM, so need to make explicit
                 if line[-1].isdigit():
                     line += "PM"
