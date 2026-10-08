@@ -6,10 +6,8 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_HR, OpeningHours
 from locations.items import Feature
-
-DAYS_HR = {"Pon": "Mo", "Uto": "Tu", "Sri": "We", "Čet": "Th", "Pet": "Fr", "Sub": "Sa", "Ned": "Su"}
 
 
 class HrvatskaPostaHRSpider(Spider):
@@ -55,10 +53,5 @@ class HrvatskaPostaHRSpider(Spider):
     def parse_hours(lines: list[str]) -> OpeningHours:
         # "... Pon:", "7:00-24:00", "Uto:", "7:00-24:00", ... (a missing range means closed)
         oh = OpeningHours()
-        for label, value in zip(lines, lines[1:]):
-            day = DAYS_HR.get(label.rstrip(":"))
-            if not day:
-                continue
-            for start, end in re.findall(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", value):
-                oh.add_range(day, start, end)
+        oh.add_ranges_from_string(" ".join(lines), days=DAYS_HR)
         return oh
