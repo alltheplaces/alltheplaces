@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import CLOSED_EN, OpeningHours
 from locations.items import Feature
 
 # Branch types (/api/branch-types, "short_form") that are post offices run by Pos Malaysia: general post offices,
@@ -16,12 +16,6 @@ POST_OFFICE_TYPES = {"GPO", "PO", "Kiosk", "PPL", "SC"}
 # agents (MyPospay ParcelHub, Collectco and other shops taking parcels and bill payments).
 PARTNER_TYPES = {"Mini", "Agent", None}
 # Not included: "EDT" (Pos Laju Ezidrive-Thru parcel drop-offs) and "ArRahnu" (Islamic pawnbroking counters).
-
-HOURS_RE = re.compile(
-    r"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*:\s*"
-    r"(?:(24 Hours)|(\d{1,2})(?:[.:](\d{2}))?\s*([ap]m)\s*[-–]\s*(\d{1,2})(?:[.:](\d{2}))?\s*([ap]m))",
-    re.IGNORECASE,
-)
 
 
 class PosMalaysiaMYSpider(Spider):
@@ -77,15 +71,6 @@ class PosMalaysiaMYSpider(Spider):
         if not text:
             return None
         oh = OpeningHours()
-        for day, all_day, h1, m1, ap1, h2, m2, ap2 in HOURS_RE.findall(text):
-            day = DAYS_EN[day.title()]
-            if all_day:
-                oh.add_range(day, "00:00", "24:00")
-                continue
-            oh.add_range(day, to_24h(h1, m1, ap1), to_24h(h2, m2, ap2))
+        # "24 Hours" is rewritten in 12-hour form, so that it parses alongside the am/pm times.
+        oh.add_ranges_from_string(text.replace("24 Hours", "12:00am - 11:59pm"), closed=CLOSED_EN + ["tiada"])
         return oh
-
-
-def to_24h(hour: str, minute: str, ampm: str) -> str:
-    h = int(hour) % 12 + (12 if ampm.lower() == "pm" else 0)
-    return f"{h:02d}:{int(minute or 0):02d}"
