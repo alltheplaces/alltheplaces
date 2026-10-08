@@ -6,7 +6,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, DAYS_EN, OpeningHours
+from locations.hours import DAYS, DAYS_EN, DAYS_FULL, OpeningHours, day_range
 from locations.items import Feature
 
 
@@ -25,12 +25,11 @@ def clock(text: str) -> str | None:
 
 def days_of(text: str) -> list[str]:
     # "Monday-Friday", "Monday to Friday", "Saturday"
-    names = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)", text)
+    names = re.findall("|".join(DAYS_FULL), text)
     if not names:
         return []
     if len(names) >= 2 and re.search(r"(-|to)", text):
-        start, end = DAYS.index(DAYS_EN[names[0]]), DAYS.index(DAYS_EN[names[1]])
-        return DAYS[start : end + 1]
+        return day_range(names[0], names[1])
     return [DAYS_EN[n] for n in names]
 
 
@@ -106,12 +105,11 @@ class GuernseyPostGGSpider(Spider):
         # BATIF currency collection with its own hours, which aren't the counter's.
         oh = OpeningHours()
         for line in re.split(r"[\n|]", text.split("BATIF")[0]):
-            days = days_of(line.split(":")[0])
-            for start, end in re.findall(
-                r"(\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|noon)?)\s*(?:to|-)\s*(\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|noon))",
-                line.lower(),
-            ):
-                if (s := clock(start)) and (e := clock(end)):
-                    for day in days:
-                        oh.add_range(day, s, e)
+            day_text, _, times = line.partition(":")
+            # "8.30am" -> "8:30am", "12 noon" -> "12:00pm"
+            times = re.sub(r"(\d)\.(\d{2})", r"\1:\2", times)
+            times = re.sub(r"12(?::00)?\s*noon", "12:00pm", times, flags=re.IGNORECASE)
+            # Days can be a list ("Monday, Tuesday, Thursday and Friday"), which the helper doesn't read.
+            for day in days_of(day_text):
+                oh.add_ranges_from_string(f"{day} {times}")
         return oh
