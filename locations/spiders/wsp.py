@@ -19,6 +19,7 @@ class WspSpider(Spider):
     item_attributes = {"brand": "WSP", "brand_wikidata": "Q1333162"}
     start_urls = ["https://www.wsp.com/en-gl/contact-us/offices"]
     custom_settings = {"USER_AGENT": BOT_USER_AGENT_SCRAPY}
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for office in response.css("div.offices-address"):
