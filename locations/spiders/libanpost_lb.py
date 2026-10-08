@@ -28,6 +28,5 @@ class LibanpostLBSpider(Spider):
             item["lat"], item["lon"] = option.attrib["data-lat"], option.attrib["data-long"]
             item["branch"] = name.removesuffix(" - Post Office").strip()
             item["addr_full"] = addresses.get(name)
-            item["country"] = "LB"
             apply_category(Categories.POST_OFFICE, item)
             yield item
