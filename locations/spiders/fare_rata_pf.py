@@ -35,7 +35,6 @@ class FareRataPfSpider(Spider):
         item["city"] = office.get("nom")
         item["state"] = office.get("archipel")
         item["extras"]["addr:island"] = office.get("ile")
-        item["country"] = "PF"
         item["phone"] = office.get("numeroTelephone")
         if office.get("code"):
             item["extras"]["ref:fare_rata"] = str(office["code"])
