@@ -1875,9 +1875,13 @@ class HelsinkiServicemapFISpider(Spider):
             # trailing lowercase letter is the appendix, never a unit.
             tokens = tokens[:-2] + [tokens[-2] + tokens[-1]]
         if len(tokens) >= 2 and (paren := re.fullmatch(r"\(\s*([A-Za-z])\s*\)", tokens[-1])):
-            # Parenthesised staircase ("Katu 5 (A)"): the letter is the unit.
-            item["unit"] = paren.group(1)
+            # Parenthesised staircase ("Katu 5 (A)"): held back until a
+            # housenumber confirms the address parses, so failures leave
+            # no stray unit behind.
+            paren_unit = paren.group(1)
             tokens = tokens[:-1]
+        else:
+            paren_unit = None
         if len(tokens) >= 2 and (dotted := re.fullmatch(r"(\d+)\.([A-Za-z]\.\d+)", tokens[-1])):
             # Dotted apartment tails ("Valhallankatu 4.A.9").
             item["housenumber"] = dotted.group(1)
@@ -1896,6 +1900,8 @@ class HelsinkiServicemapFISpider(Spider):
             return True
         if len(tokens) >= 2 and re.fullmatch(number, tokens[-1]):
             item["housenumber"] = tokens[-1]
+            if paren_unit is not None:
+                item["unit"] = paren_unit
             item["street"] = " ".join(tokens[:-1])
             return True
         if len(tokens) >= 2 and (match := re.fullmatch(r"(\d+[A-Za-z]+)(\d+[A-Za-z]*)", tokens[-1])):
@@ -2989,7 +2995,8 @@ class HelsinkiServicemapFISpider(Spider):
             and "bussiasema" not in text
         ):
             # Passenger transport filed as generic traffic (cf.
-            # Länsiterminaali 2, Eteläsatama, Helsinki-Vantaan lentoasema).
+            # Länsiterminaali 2, Helsinki-Vantaan lentoasema; Eteläsatama
+            # arrives via the NOUN_TABLE row instead).
             # Bus terminals share the noun but are not ferry terminals.
             # SIXT/Avis counters, the Vesibussi route, the airport railway
             # station and Tulli customs points share node 512 but not the

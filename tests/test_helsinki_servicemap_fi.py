@@ -3225,6 +3225,15 @@ def test_parenthesised_staircase_is_unit():
     assert (item["street"], item["housenumber"], item["unit"]) == ("Sairaalatie", "8", "A")
 
 
+def test_paren_without_number_leaves_no_stray_unit():
+    # SYNTHETIC: a parenthesised letter with no housenumber is not a unit;
+    # the address stays whole and no unit leaks onto the item.
+    item = addressed(make_spider(), "Katu (A)")
+    assert "unit" not in item
+    assert "housenumber" not in item
+    assert item["street_address"] == "Katu (A)"
+
+
 def test_provider_tail_tolerates_trailing_space():
     # SYNTHETIC: feed trailing space must not break the end anchor.
     spider = make_spider()
