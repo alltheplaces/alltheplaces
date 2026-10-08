@@ -27,7 +27,6 @@ class PakistanPostPKSpider(Spider):
     """
 
     name = "pakistan_post_pk"
-    item_attributes = PAKISTAN_POST
     allowed_domains = ["apply.dfpo.pk"]
     api_url = "https://apply.dfpo.pk/DAL/"
     api_auth = {"username": "dfpo.pk", "apikey": "87e8cb463421730ac871bc94cac3705f"}
@@ -70,7 +69,7 @@ class PakistanPostPKSpider(Spider):
                 continue
             seen.add(key)
 
-            item = Feature()
+            item = Feature(**PAKISTAN_POST)
             item["ref"] = "{}-{}".format(location["Type"], location["Key"])
             item["branch"] = branch
             item["postcode"] = postcode
@@ -92,8 +91,10 @@ class PakistanPostPKSpider(Spider):
             item["phone"] = location["ContactNumber"]
             self.set_location(item, location["DfpoLat"], location["DfpoLng"])
             apply_category(Categories.POST_OFFICE, item)
+            # Run by the franchisee, offering Pakistan Post services: no operator.
             item["extras"]["post_office"] = "post_partner"
             item["extras"]["post_office:brand"] = "Pakistan Post"
+            item["extras"]["post_office:brand:wikidata"] = "Q4046330"
             yield item
 
     def set_location(self, item: Feature, lat: Any, lon: Any) -> None:
