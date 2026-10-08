@@ -751,12 +751,23 @@ DAYS_ES = {
 
 DAYS_RO = {
     "Luni": "Mo",
+    "L": "Mo",
     "Marți": "Tu",
+    "Marti": "Tu",
+    "Ma": "Tu",
     "Miercuri": "We",
+    "Mi": "We",
     "Joi": "Th",
+    "J": "Th",
     "Vineri": "Fr",
+    "Vi": "Fr",
+    "V": "Fr",
     "Sâmbătă": "Sa",
+    "Sambata": "Sa",
+    "S": "Sa",
     "Duminică": "Su",
+    "Duminica": "Su",
+    "D": "Su",
 }
 
 DAYS_SR = {

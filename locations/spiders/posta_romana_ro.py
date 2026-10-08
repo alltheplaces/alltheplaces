@@ -8,7 +8,7 @@ from scrapy.http import FormRequest, Response
 from scrapy.signals import spider_idle
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_RO, OpeningHours, day_range
 from locations.items import Feature
 
 API = "https://www.posta-romana.ro/cnpr-app/modules/gaseste-oficiu-postal/ajax/"
@@ -26,25 +26,6 @@ INACTIVE = re.compile(
     r"|^\W*(?:localitatile .* deservite de|deserveste|activitate(?:a)? (?:este )?asigurata de"
     r"|actititate asigurata de|activitate de prezentare se realizeaza la)"
 )
-
-DAYS_RO = {
-    "l": "Mo",
-    "luni": "Mo",
-    "ma": "Tu",
-    "marti": "Tu",
-    "mi": "We",
-    "miercuri": "We",
-    "j": "Th",
-    "joi": "Th",
-    "v": "Fr",
-    "vi": "Fr",
-    "vineri": "Fr",
-    "s": "Sa",
-    "sambata": "Sa",
-    "d": "Su",
-    "duminica": "Su",
-}
-DAY_ORDER = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
 def normalise(text: str) -> str:
@@ -202,12 +183,12 @@ class PostaRomanaROSpider(Spider):
                 if token in ("si", "program", "orar"):
                     continue
                 if "-" in token:
-                    a, b = (DAYS_RO.get(t.strip()) for t in token.split("-", 1))
+                    a, b = (DAYS_RO.get(t.strip().title()) for t in token.split("-", 1))
                     if not a or not b:
                         return None
-                    days += DAY_ORDER[DAY_ORDER.index(a) : DAY_ORDER.index(b) + 1]
-                elif token in DAYS_RO:
-                    days.append(DAYS_RO[token])
+                    days += day_range(a, b)
+                elif token.title() in DAYS_RO:
+                    days.append(DAYS_RO[token.title()])
                 else:
                     return None
             for start, end in re.findall(r"(\d{1,2}[:.]\d{2})\s*-\s*(\d{1,2}[:.]\d{2})", times_text):
