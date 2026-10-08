@@ -57,9 +57,7 @@ class HelsinkiServicemapFiSpider(Spider):
     custom_settings = {
         "DOWNLOAD_TIMEOUT": 60,
         "RETRY_TIMES": 5,
-        # No delay: a full crawl is ~25 requests and CI kills spiders
-        # past 120s. No robots fetch either; the API terms document use.
-        "DOWNLOAD_DELAY": 0,
+        # No robots fetch; the API terms document use.
         "ROBOTSTXT_OBEY": False,
     }
 

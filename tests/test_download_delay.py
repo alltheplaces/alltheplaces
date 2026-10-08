@@ -29,7 +29,6 @@ def test_spiders_do_not_use_lower_download_delay_than_default():
     ALLOWED_LOW_DOWNLOAD_DELAY = set(
         [
             "usps_collection_boxes",  # Need to be faster to complete within time limits
-            "helsinki_servicemap_fi",  # ~25 API requests; delay 0 to finish inside CI time limit
         ]
     )
 
