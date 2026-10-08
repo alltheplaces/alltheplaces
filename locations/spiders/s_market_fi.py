@@ -29,11 +29,12 @@ logger = logging.getLogger(__name__)
 # instead: same S Group store master (names, addresses, coordinates, weekly
 # hours, per-store phone numbers), plain paginated JSON, no auth.
 # Verified 2026-10-07: q=<brand> is full-text, so results are filtered by
-# name and canonical host below. The same physical store is listed once per
-# S Group vertical (grocery master, ABC station view, in-store tenants);
-# same-address records collapse to the grocery master (cf. S-market Isojoki,
-# listed under both s-kaupat and abcasemat at Luukkaantie 1), so station
-# views, carwash/EV-charging points and tenant counters never duplicate it.
+# name and canonical host below. The same store can be listed under several
+# S Group verticals (grocery master, in-store tenants); same-address records
+# collapse to the grocery master, so tenant counters never duplicate it.
+# ABC station views (abcasemat.fi) are out of scope: they are fuel POIs for
+# the abc_fi spider (cf. ABC S-market Isojoki at Luukkaantie 1), so this
+# spider drops that host outright.
 
 
 class SMarketFISpider(Spider):
@@ -67,10 +68,7 @@ class SMarketFISpider(Spider):
     # tenant, not a store. Dropped hosts are counted per host so verification
     # surfaces any new legitimate storefront. Åland included via varuboden
     # (cf. S-market Åland Godby): Finnish stores, different coop domain.
-    STORE_HOSTS = ("www.s-kaupat.fi", "www.prisma.fi", "www.abcasemat.fi", "varuboden.ax")
-    # Carwash and EV-charging points are separate POIs for a future ABC
-    # spider, not grocery stores. Matched against lowercased path segments.
-    FACILITY_SEGMENTS = ("autopesu", "latausasema")
+    STORE_HOSTS = ("www.s-kaupat.fi", "www.prisma.fi", "varuboden.ax")
     # Staff-only, fulfillment-only and bank-counter records are not shops.
     # Lowercase; compared against the lowered name.
     EXCLUDE_WORDS = (
@@ -82,10 +80,6 @@ class SMarketFISpider(Spider):
         "asiakasomistaja",
         "s-pankki",
     )
-    # Last URL segments that carry no identity (facility views); fall back to
-    # the record id for those. Facility paths are dropped before ref
-    # derivation, so this is belt-and-suspenders.
-    GENERIC_SLUGS = ("latausasema-latauspisteet", "autopesu")
     TIME_RE = re.compile(r"^(\d{1,2}):(\d{2})(?::\d{2})?$")
 
     start_urls = [
@@ -226,8 +220,8 @@ class SMarketFISpider(Spider):
 
     def dedupe_key(self, result: dict, brand: str) -> tuple[tuple[str, str], tuple[bool, bool, int]]:
         # Same-address records from different verticals collapse to one item.
-        # Prefer the grocery master over the ABC station view, brand-prefixed
-        # names over leftovers, and shorter names over department suffixes.
+        # Prefer the canonical host over tenant pages, brand-prefixed names
+        # over leftovers, and shorter names over department suffixes.
         try:
             host = urlparse(str(result.get("url") or "")).hostname
         except ValueError:
@@ -305,17 +299,13 @@ class SMarketFISpider(Spider):
         if parts.hostname == "varuboden.ax" and not parts.path.startswith("/tjanster/"):
             self.crawler.stats.inc_value("atp/s_market_fi/dropped/host/varuboden.ax")
             return None
-        path = parts.path.lower()
-        if any(segment in path for segment in self.FACILITY_SEGMENTS):
-            self.crawler.stats.inc_value("atp/s_market_fi/dropped/facility")
-            return None
         return parts
 
     def _apply_identity(
         self, item: Feature, result: dict, brand: str, branch: str, official: str | None, parts
     ) -> bool:
         slug = parts.path.rstrip("/").rsplit("/", 1)[-1]
-        if not slug or slug in self.GENERIC_SLUGS:
+        if not slug:
             slug = result.get("id")
         if slug is None:
             self.crawler.stats.inc_value(f"atp/s_market_fi/dropped/no_ref/{brand}")
@@ -355,13 +345,14 @@ class SMarketFISpider(Spider):
 
     def split_branch(self, name: str, brand: str) -> tuple[str | None, str | None]:
         # Branch after the brand prefix (cf. k_market_fi), case-insensitive:
-        # the feed mixes "S-market" and "S-Market". Infix names (ABC Sale
-        # Kontiolahti) strip through the brand token and keep the full signed
-        # form in official_name; trailing-brand names (ABC Särkisalmi Sale)
-        # keep the venue part with a leading ABC stripped for parity with the
-        # infix shape. Word-boundary matched, so "Prisma" inside
-        # "Prismakeskus" does not split. Returns (None, None) when the brand
-        # is absent: the record is not a store of this brand.
+        # the feed mixes "S-market" and "S-Market". Infix names strip through
+        # the brand token and keep the full signed form in official_name.
+        # Word-boundary matched, so "Prisma" inside "Prismakeskus" does not
+        # split. Returns (None, None) when the brand is absent: the record
+        # is not a store of this brand. A leading ABC survives on s-kaupat
+        # grocery names (cf. ABC Särkisalmi Sale) and is stripped from the
+        # venue part; abcasemat.fi station views are dropped by host below,
+        # not here, since split runs before the host check.
         match = self.branch_res[brand].search(name)
         if not match:
             return None, None
