@@ -5,11 +5,8 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS
+from locations.hours import DAYS, DAYS_EE, sanitise_day
 from locations.items import Feature
-
-# Estonian day abbreviations used in the emptying times.
-DAYS_ET = {"E": "Mo", "T": "Tu", "K": "We", "N": "Th", "R": "Fr", "L": "Sa", "P": "Su"}
 
 
 class OmnivaLetterBoxesEESpider(Spider):
@@ -29,7 +26,6 @@ class OmnivaLetterBoxesEESpider(Spider):
             item["lat"], item["lon"] = box["lat"], box["lng"]
             # "ZIP" is a six-digit Omniva point code (Estonian postcodes have five digits), which the address repeats.
             item["addr_full"] = box["address_text"].removesuffix(box["ZIP"]).strip(" ,")
-            item["country"] = box["country_id"]
             item["extras"]["ref:omniva"] = box["id"]
             if collection_times := self.parse_collection_times(box["SERVICE_HOURS"]):
                 item["extras"]["collection_times"] = collection_times
@@ -41,7 +37,7 @@ class OmnivaLetterBoxesEESpider(Spider):
         # e.g. "Tühjendamine:;T,N,R 08:00" (emptying: Tuesday, Thursday, Friday at 08:00)
         rules = []
         for days, time in re.findall(r"([EKLNPRT](?:\s*,\s*[EKLNPRT])*)\s+(\d{1,2}:\d{2})", service_hours):
-            day_list = [DAYS_ET[d.strip()] for d in days.split(",")]
+            day_list = [sanitise_day(d, DAYS_EE) for d in days.split(",")]
             rules.append(f"{cls.join_days(day_list)} {time.zfill(5)}")
         return "; ".join(rules) or None
 
