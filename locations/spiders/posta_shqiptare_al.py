@@ -5,14 +5,9 @@ from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_AL, OpeningHours, day_range
 from locations.items import Feature
 
-DAY_LABELS = {
-    "e hënë - e premte": DAYS[:5],
-    "e shtunë": ["Sa"],
-    "e diel": ["Su"],
-}
 # Times are written loosely: "07.30:15.30", "08.00 : 16.30", "07. 20:20.00", "08:00-14:00", "08.00 : 1600".
 TIME_RE = re.compile(r"(\d{1,2})\s*[.:;]?\s*(\d{2})(?!\d)")
 
@@ -55,9 +50,10 @@ class PostaShqiptareALSpider(Spider):
         oh = OpeningHours()
         for line in lines:
             label, _, text = line.partition(":")
-            days = DAY_LABELS.get(re.sub(r"\s+", " ", label).strip().lower())
-            if days is None:
+            day_names = [DAYS_AL.get(" ".join(day.split()).title()) for day in label.split("-")]
+            if len(day_names) > 2 or not all(day_names):
                 continue
+            days = day_range(day_names[0], day_names[-1])
             if "pushim" in text.lower() and not TIME_RE.search(text):
                 oh.set_closed(days)
                 continue
