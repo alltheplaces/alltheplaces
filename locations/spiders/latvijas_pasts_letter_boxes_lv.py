@@ -5,10 +5,8 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import sanitise_day
 from locations.items import Feature
-
-# Keys seen in "pickUpTimes"; only "workdays" is used at the time of writing.
-PICKUP_DAYS = {"workdays": "Mo-Fr", "saturday": "Sa", "sunday": "Su"}
 
 
 class LatvijasPastsLetterBoxesLVSpider(Spider):
@@ -37,18 +35,20 @@ class LatvijasPastsLetterBoxesLVSpider(Spider):
             item["lat"], item["lon"] = box["latitude"], box["longitude"]
             item["addr_full"] = box["readableAddress"]
             item["postcode"] = box["postCode"]
-            item["country"] = box["countryCode"]
             # Where the box is, e.g. "Pie pasta nodaļas" (at the post office) or "Pakomāts" (at a parcel locker).
             if info := box.get("info"):
                 item["extras"]["description"] = info
-            times = [
-                f"{PICKUP_DAYS[day]} {time}"
-                for day, time in (box.get("pickUpTimes") or {}).items()
-                if day in PICKUP_DAYS and re.fullmatch(r"\d{2}:\d{2}", time or "")
-            ]
+            times = []
+            for key, time in (box.get("pickUpTimes") or {}).items():
+                if key == "@type":
+                    continue
+                # Only "workdays" is used at the time of writing; other keys are day names ("saturday").
+                days = "Mo-Fr" if key == "workdays" else sanitise_day(key)
+                if not days:
+                    self.logger.warning("Unknown pick-up day %s for box %s", key, box["id"])
+                elif re.fullmatch(r"\d{2}:\d{2}", time or ""):
+                    times.append(f"{days} {time}")
             if times:
                 item["extras"]["collection_times"] = "; ".join(times)
-            for day in (box.get("pickUpTimes") or {}).keys() - PICKUP_DAYS.keys() - {"@type"}:
-                self.logger.warning("Unknown pick-up day %s for box %s", day, box["id"])
             apply_category(Categories.POST_BOX, item)
             yield item
