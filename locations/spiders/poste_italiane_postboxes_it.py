@@ -5,10 +5,9 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS, DAYS_IT
 from locations.items import Feature
 
-DAYS_IT = {"LUN": "Mo", "MAR": "Tu", "MER": "We", "GIO": "Th", "VEN": "Fr", "SAB": "Sa", "DOM": "Su"}
-DAY_ORDER = list(DAYS_IT.values())
 # e.g. "LUN - VEN alle 12:00", "LUN, MER, VEN alle 10:00", "MAR, GIO alle 10:00"
 COLLECTION_TIME = re.compile(r"^(?P<days>[A-Z ,\-]+?)\s+alle\s+(?P<hour>\d{1,2})[:.](?P<minute>\d{2})$")
 
@@ -39,10 +38,7 @@ class PosteItalianePostboxesITSpider(Spider):
     # About 50m; a box this small still holding more than LIST_LIMIT locations is paged through instead.
     MIN_HALF_SPAN = 0.0005
 
-    seen: set[str]
-
     async def start(self) -> AsyncIterator[JsonRequest]:
-        self.seen = set()
         yield self.search_request(*self.ITALY)
 
     def make_body(self, lat: float, lon: float, half_lat: float, half_lon: float) -> dict:
@@ -133,10 +129,6 @@ class PosteItalianePostboxesITSpider(Spider):
         for point in points:
             if point.get("tipoPunto") != "CassettaPostale":
                 continue
-            ref = point["nomePunto"]
-            if ref in self.seen:
-                continue
-            self.seen.add(ref)
             yield self.parse_box(point)
 
     def parse_box(self, point: dict) -> Feature:
@@ -165,19 +157,19 @@ class PosteItalianePostboxesITSpider(Spider):
             return None
         days = set()
         for part in match.group("days").split(","):
-            ends = [end.strip() for end in part.split("-")]
-            if not all(end in DAYS_IT for end in ends) or len(ends) > 2:
+            ends = [DAYS_IT.get(end.strip().title()) for end in part.split("-")]
+            if not all(ends) or len(ends) > 2:
                 return None
-            start, end = DAY_ORDER.index(DAYS_IT[ends[0]]), DAY_ORDER.index(DAYS_IT[ends[-1]])
+            start, end = DAYS.index(ends[0]), DAYS.index(ends[-1])
             if end < start:
                 return None
-            days.update(DAY_ORDER[start : end + 1])
+            days.update(DAYS[start : end + 1])
         return f"{format_days(days)} {int(match.group('hour')):02d}:{match.group('minute')}"
 
 
 def format_days(days: set[str]) -> str:
     """Format a set of weekdays as OSM day ranges, e.g. {Mo, Tu, We, Fr} -> "Mo-We,Fr"."""
-    indexes = sorted(DAY_ORDER.index(day) for day in days)
+    indexes = sorted(DAYS.index(day) for day in days)
     runs = []
     for index in indexes:
         if runs and index == runs[-1][1] + 1:
@@ -187,7 +179,7 @@ def format_days(days: set[str]) -> str:
     parts = []
     for start, end in runs:
         if end - start >= 2:
-            parts.append(f"{DAY_ORDER[start]}-{DAY_ORDER[end]}")
+            parts.append(f"{DAYS[start]}-{DAYS[end]}")
         else:
-            parts.extend(DAY_ORDER[start : end + 1])
+            parts.extend(DAYS[start : end + 1])
     return ",".join(parts)
