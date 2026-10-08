@@ -20,6 +20,8 @@ RESTAURANTS = {
     "Thyme Bar & Grill": ("Thyme", "Q120645568", Categories.RESTAURANT),
     "Toby Carvery": ("Toby Carvery", "Q7811777", Categories.RESTAURANT),
     "Cookhouse and Pub": ("Cookhouse and Pub", "Q137927878", Categories.RESTAURANT),
+    "Premier Inn restaurant": ("Premier Inn", "Q2108626", Categories.RESTAURANT),
+    "The Social": ("The Social", None, Categories.RESTAURANT),
 }
 
 
@@ -48,6 +50,8 @@ class PremierInnSpider(SitemapSpider, StructuredDataSpider):
             return
 
         location = DictParser.get_nested_key(json.loads(blob), "hotelInformationBySlug")
+        if not location:
+            return
 
         item = DictParser.parse(location)
         item["branch"] = item.pop("name")
