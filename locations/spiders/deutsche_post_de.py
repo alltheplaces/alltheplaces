@@ -15,6 +15,7 @@ from locations.user_agents import BROWSER_DEFAULT
 WGS84 = Geod(ellps="WGS84")
 
 DEUTSCHE_POST = {"brand": "Deutsche Post", "brand_wikidata": "Q157645"}
+DHL_POSTSTATION = {"brand": "DHL Poststation", "brand_wikidata": "Q123120984"}
 
 
 class DeutschePostDESpider(Spider):
@@ -110,7 +111,7 @@ class DeutschePostDESpider(Spider):
         item["opening_hours"] = self.parse_hours(location["pfTimeinfos"])
 
         if cat := self.cats.get(location["locationType"]):
-            item.update(DEUTSCHE_POST)
+            item.update(DHL_POSTSTATION if location["locationType"] == "POSTSTATION" else DEUTSCHE_POST)
             apply_category(cat, item)
             if location["locationType"] in ("LETTER_BOX", "POSTSTATION"):
                 if collection_times := self.parse_collection_times(location["pfTimeinfos"]):
