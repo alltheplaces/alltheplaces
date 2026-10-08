@@ -6,10 +6,9 @@ from scrapy import Selector, Spider
 from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_SR, OpeningHours, day_range
 from locations.items import Feature
 
-DAY_TOKENS = {"pon": "Mo", "uto": "Tu", "sri": "We", "cet": "Th", "pet": "Fr", "sub": "Sa", "ned": "Su"}
 # "08:00h - 15:00h", "08h-16h", "07,00-14,00", "07.00-10.00"
 TIME_RANGE = r"(\d{1,2})(?:[.:,](\d{2}))?\s*h?\s*[-–]\s*(\d{1,2})(?:[.:,](\d{2}))?\s*h?"
 
@@ -104,10 +103,9 @@ class PostaCrneGoreMESpider(Spider):
         tokens = re.findall(r"\b(pon|uto|sri|[čc]et|pet|sub|ned)[a-zčćšž]*\b(\s*-\s*)?", day_text)
         days = []
         for i, (token, dash) in enumerate(tokens):
-            day = DAY_TOKENS[token.replace("č", "c")]
+            day = DAYS_SR[token.title()]
             if dash and i + 1 < len(tokens):
-                end = DAY_TOKENS[tokens[i + 1][0].replace("č", "c")]
-                days += DAYS[DAYS.index(day) : DAYS.index(end) + 1]
+                days += day_range(day, DAYS_SR[tokens[i + 1][0].title()])
             elif day not in days:
                 days.append(day)
         if not days:
