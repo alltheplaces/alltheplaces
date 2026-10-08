@@ -12,7 +12,7 @@ from types import SimpleNamespace
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.spiders.government.helsinki_servicemap_fi import HelsinkiServicemapFiSpider
+from locations.spiders.government.helsinki_servicemap_fi import HelsinkiServicemapFISpider
 
 
 class _Stats:
@@ -27,7 +27,7 @@ class _Stats:
 
 
 def make_spider(extra_parents=None):
-    spider = HelsinkiServicemapFiSpider()
+    spider = HelsinkiServicemapFISpider()
     spider.crawler = SimpleNamespace(stats=_Stats())
     spider.rule_precedence = {node_id: i for i, node_id in enumerate(spider.SERVICE_NODES)}
     spider.departments = {}
