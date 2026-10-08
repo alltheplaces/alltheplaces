@@ -184,8 +184,10 @@ class PostnordLetterBoxesSESpider(Spider):
 
     def parse_detail(self, response: Response, x: int, y: int) -> Iterable[Feature]:
         for extent, properties, points in self.read_tile(response):
-            if not points or properties["id"] in self.seen:
+            if not points:
                 continue
+            # Boxes in a tile's buffer are repeated by its neighbours; DuplicatesPipeline drops the repeats.
+            # self.seen is only for the missing-box stats in closed().
             self.seen.add(properties["id"])
             u, v = points[0]
             lat, lon = tile_to_lat_lon(self.DETAIL_ZOOM, x + u / extent, y + v / extent)
@@ -199,7 +201,6 @@ class PostnordLetterBoxesSESpider(Spider):
         item["street_address"] = ", ".join(filter(None, [box.get("address"), box.get("address2")]))
         item["postcode"] = box.get("postalcode")
         item["city"] = box.get("postalcity")
-        item["country"] = box.get("countrycode")
         apply_category(Categories.POST_BOX, item)
         if collection_times := self.parse_collection_times(box):
             item["extras"]["collection_times"] = collection_times
