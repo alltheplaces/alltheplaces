@@ -7,19 +7,8 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_CN, OpeningHours
 from locations.items import Feature
-
-# Mail-counter hours per day ("郵務" columns on weekdays; Saturday and Sunday have one column each).
-HOUR_COLUMNS = {
-    "Mo": "週一 郵務",
-    "Tu": "週二 郵務",
-    "We": "週三 郵務",
-    "Th": "週四 郵務",
-    "Fr": "週五 郵務",
-    "Sa": "週六",
-    "Su": "週日",
-}
 
 
 class ChunghwaPostTWSpider(Spider):
@@ -43,9 +32,13 @@ class ChunghwaPostTWSpider(Spider):
             item["street_address"] = row["地址"]
             item["phone"] = row["郵務電話"]
             oh = OpeningHours()
-            for day, column in HOUR_COLUMNS.items():
-                for start, end in re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", row.get(column) or ""):
-                    oh.add_range(day, start, end)
+            # Mail-counter hours are in the "週一 郵務" to "週五 郵務" columns on weekdays ("週一 儲匯" etc. are the
+            # savings counters) and in "週六" and "週日" at weekends.
+            for column, value in row.items():
+                day_name, _, counter = (column or "").partition(" ")
+                if (day := DAYS_CN.get(day_name)) and counter in ("郵務", ""):
+                    for start, end in re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", value or ""):
+                        oh.add_range(day, start, end)
             item["opening_hours"] = oh
             apply_category(Categories.POST_OFFICE, item)
             yield item
