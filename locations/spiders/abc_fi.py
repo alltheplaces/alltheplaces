@@ -32,6 +32,10 @@ logger = logging.getLogger(__name__)
 class ABCFISpider(SitemapSpider):
     name = "abc_fi"
 
+    # The stations sitemap is generated on request and can take over the
+    # 15s default to arrive; station pages themselves answer in ~0.2s.
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+
     sitemap_urls = ["https://www.abcasemat.fi/server-sitemaps/sitemap-stations.xml"]
     sitemap_rules = [(r"^https://www\.abcasemat\.fi/asemat/[^/]+$", "parse_station")]
 
