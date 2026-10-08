@@ -31,11 +31,13 @@ def extract_branch(name: str) -> str:
             return name[len(prefix) :].strip() or name.strip()
     # e.g. "Lahti ulkoautomaatti, S-market Ahtiala" keeps the venue after the comma
     if ", " in name:
-        return name.split(", ", 1)[1].strip() or name.strip()
-    return name.strip()
+        return SERVICE_RE.sub("", name.split(", ", 1)[1]).strip() or name.strip()
+    return SERVICE_RE.sub("", name).strip() or name.strip()
 
 
 def expand_days(token: str) -> list[str]:
+    if not isinstance(token, str):
+        return []
     parts = [p.strip() for p in token.replace("–", "-").replace("—", "-").split("-")]
     days = [DAYS_FI[p] for p in parts if p in DAYS_FI]
     if len(days) != len(parts):
@@ -60,6 +62,9 @@ def parse_hours(open_times: list[dict[str, Any]]) -> OpeningHours | str | None:
             seen.add(day)
             open_time, close_time = entry.get("openTime"), entry.get("closeTime")
             if not open_time or not close_time:
+                all_day = False
+                continue
+            if not isinstance(open_time, str) or not isinstance(close_time, str):
                 all_day = False
                 continue
             if not TIME_RE.match(open_time) or not TIME_RE.match(close_time):
