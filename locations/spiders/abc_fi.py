@@ -16,28 +16,17 @@ logger = logging.getLogger(__name__)
 # No open license is declared on S Group store data, so no
 # dataset_attributes license is declared here.
 
-# ABC is the S Group fuel-station chain (ABC-ketju, brand ABC / Q10397504,
-# NSI abc-1c8a41 covers Finland): service stations (abc-liikennemyymalat),
-# unmanned automaattiasema points and the marina fuel point, each with (or
-# attached to) an ABC, S-market, Sale, Prisma or Alepa shop. Unlike
-# s-kaupat.fi, which answers HTTP 429 to every client, abcasemat.fi serves
-# Scrapy normally, so this spider crawls the first-party stations sitemap
-# and reads the Next.js __NEXT_DATA__ payload on each station page: name,
-# address, coordinates, per-store phone and the station timetable in one
-# place, no auth. Verified 2026-10-08.
+# ABC is the S Group fuel-station chain (brand ABC / Q10397504, NSI
+# abc-1c8a41): service stations, unmanned automaattiasema points and the
+# marina fuel point. Crawls the first-party stations sitemap and reads the
+# Next.js __NEXT_DATA__ payload per page (abcasemat.fi serves Scrapy
+# normally, unlike s-kaupat.fi which 429s). Verified 2026-10-08.
 #
-# Companion to s_market_fi, which covers the four grocery chains from the
-# S-Etukortti search API and drops every abcasemat.fi record: the ABC
-# station views of grocery stores (cf. ABC S-market Isojoki at
-# Luukkaantie 1) are fuel POIs here, not grocery items there, so the two
-# spiders never emit the same function twice. ABC-lataus EV-charging pages
-# (brand abc-sahkoautolataus), carwash pages (abc-carwash), contract/staff
-# parking pages and the muut-liikennemyymalat non-ABC traffic stores all
-# live under /asemat/ too and are dropped by brand below with per-code
-# counters, so verification surfaces any new station brand. The seasonal
-# ABC Inkoo marina point currently signs itself "Suljettu ... | ABC Inkoo
-# Pienvenesatama" and is dropped by the name rule until its signed name
-# returns.
+# Companion to s_market_fi, which drops every abcasemat.fi record: ABC
+# station views of grocery stores (cf. ABC S-market Isojoki) are fuel POIs
+# here, not grocery items there. Lataus/carwash/parking/non-ABC pages drop
+# by brand below; ABC-lataus gets its own spider. Seasonally closed Inkoo
+# is dropped by the name rule until its signed name returns.
 
 
 class ABCFISpider(SitemapSpider):
@@ -50,8 +39,7 @@ class ABCFISpider(SitemapSpider):
     # carwash, parking, non-ABC traffic stores) is out of scope.
     FUEL_BRANDS = ("abc-liikennemyymalat", "abc-automaattiasemat")
     # In-station tenants share the station's brand but are not fuel POIs
-    # (cf. ABC Hyvinkää ravintola, a restaurant view duplicating the
-    # Hyvinkää station at the same address). Lowercase substrings.
+    # (cf. ABC Hyvinkää ravintola, duplicating its station).
     TENANT_WORDS = ("hesburger", "ravintola", "carwash")
     # The signed form is always "ABC <branch>".
     NAME_RE = re.compile(r"^abc\s+(.*)$", re.IGNORECASE)
@@ -70,9 +58,8 @@ class ABCFISpider(SitemapSpider):
             return
         match = self.NAME_RE.match(str((station.get("name") or {}).get("default") or ""))
         if not match:
-            # Only the signed "ABC <branch>" form is a station of this
-            # brand (cf. the seasonally closed Inkoo marina point, which
-            # currently prefixes its name with a closure notice).
+            # Only the signed "ABC <branch>" form is a station (seasonally
+            # closed Inkoo currently prefixes a closure notice).
             self.crawler.stats.inc_value("atp/abc_fi/dropped/name")
             return
         if any(word in match.group(0).lower() for word in self.TENANT_WORDS):
@@ -150,13 +137,9 @@ class ABCFISpider(SitemapSpider):
     }
 
     def parse_hours(self, opening_times: dict, today: str | None = None) -> OpeningHours | None:
-        # defaults[] holds consecutive validity ranges (seasonal schedules):
-        # use the last entry already in force, so a past renovation timetable
-        # or a future schedule change never becomes the timetable. Date-set
-        # exceptions are single-day deviations and are skipped, like
-        # messaged/exceptional entries in the S-Etukortti weeks. A schedule
-        # with every day closed or skipped emits no hours at all (cf. the
-        # temporarily closed Inkoo marina point).
+        # defaults[] holds consecutive validity ranges: use the last entry
+        # already in force. Date-set exceptions are single-day deviations
+        # and are skipped. All-closed schedules emit no hours (cf. Keuruu).
         entries = [e for e in opening_times.get("defaults") or [] if isinstance(e, dict)]
         if not entries:
             return None
@@ -187,12 +170,9 @@ class ABCFISpider(SitemapSpider):
                     if open_time is None or close_time is None:
                         self.crawler.stats.inc_value("atp/abc_fi/hours/bad_range")
                         continue
-                    # Overnight ranges (closeOnSameDay false with close past
-                    # midnight) pass through: OpeningHours splits them at
-                    # midnight when rendering. A close of exactly 00:00
-                    # becomes 23:59 inside add_range and renders as
-                    # ...-24:00 on the same day, which is the correct reading
-                    # of "open until midnight".
+                    # Overnight ranges pass through (OpeningHours splits at
+                    # midnight); a close of exactly 00:00 renders as
+                    # ...-24:00, i.e. "open until midnight".
                     oh.add_range(day, open_time, close_time, time_format="%H:%M")
             elif mode == "24H":
                 # Day-round opening with no ranges reads as 24h.
