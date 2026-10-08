@@ -5,12 +5,8 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_CN, DELIMITERS_EN, OpeningHours
 from locations.items import Feature
-
-# Chinese weekday names used in "openingHours", e.g. "星期一至五,09:00 至 18:00;星期六,09:00 至 13:00".
-DAYS_ZH = {"一": "Mo", "二": "Tu", "三": "We", "四": "Th", "五": "Fr", "六": "Sa", "日": "Su"}
-DAY_ORDER = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 
 class MacauPostMOSpider(Spider):
@@ -42,25 +38,11 @@ class MacauPostMOSpider(Spider):
 
     @staticmethod
     def parse_hours(text: str) -> OpeningHours | None:
+        # e.g. "星期一至五,09:00 至 18:00;星期六,09:00 至 13:00" or "星期一至日,24小時"
         if not text:
             return None
+        # "星期一至五" -> "星期一-星期五", so that both ends of the day range are full day names.
+        text = re.sub(r"至([一二三四五六日])", r"-星期\1", text).replace("24小時", "00:00-24:00")
         oh = OpeningHours()
-        for part in text.split(";"):
-            if "," not in part:
-                continue
-            days_text, times_text = part.split(",", 1)
-            if "24小時" in times_text:
-                times = [("00:00", "24:00")]
-            else:
-                times = re.findall(r"(\d{1,2}:\d{2})\s*至\s*(\d{1,2}:\d{2})", times_text)
-            if m := re.search(r"星期([一二三四五六日])至([一二三四五六日])", days_text):
-                start, end = DAY_ORDER.index(DAYS_ZH[m.group(1)]), DAY_ORDER.index(DAYS_ZH[m.group(2)])
-                days = DAY_ORDER[start : end + 1]
-            elif m := re.search(r"星期([一二三四五六日])", days_text):
-                days = [DAYS_ZH[m.group(1)]]
-            else:
-                continue
-            for day in days:
-                for open_time, close_time in times:
-                    oh.add_range(day, open_time, close_time)
+        oh.add_ranges_from_string(text, days=DAYS_CN, delimiters=DELIMITERS_EN + ["至"])
         return oh
