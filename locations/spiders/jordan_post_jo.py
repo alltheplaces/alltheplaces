@@ -48,7 +48,6 @@ class JordanPostJOSpider(Spider):
             item["lat"], item["lon"] = self.parse_coordinates(location)
             if re.fullmatch(r"\d{5}", postcode):
                 item["postcode"] = postcode
-            item["country"] = "JO"
             item["extras"] = {"operator:en": "Jordan Post"}
             if address_row := addresses.get(serial):
                 # Columns: serial, directorate, office name, working hours, address ("city/district/street").
