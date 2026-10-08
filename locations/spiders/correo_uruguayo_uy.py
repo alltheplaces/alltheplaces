@@ -1,14 +1,13 @@
 import csv
 import io
 import re
-import unicodedata
 from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_ES, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 DEPARTMENTS = {
@@ -32,10 +31,9 @@ DEPARTMENTS = {
     "TA": "Tacuarembó",
     "TT": "Treinta y Tres",
 }
-DAY_NAMES = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
-DAY = "|".join(DAY_NAMES)
-DAYS_RE = re.compile(rf"({DAY})(?:\s*(a|y)\s*({DAY}))?(.*?)(?=(?:{DAY})|$)")
-RANGE_RE = re.compile(r"(\d{1,2})(?:[.:](\d{2}))?\s*a\s*(\d{1,2})(?:[.:](\d{2}))?")
+DAY = "|".join(sorted(map(re.escape, DAYS_ES), key=len, reverse=True))
+DAYS_RE = re.compile(rf"\b({DAY})\b(?:\s*(a|y)\s*\b({DAY})\b)?(.*?)(?=\b(?:{DAY})\b|$)", re.IGNORECASE)
+RANGE_RE = re.compile(r"(\d{1,2})(?:[.:](\d{2}))?\s*a\s*(\d{1,2})(?:[.:](\d{2}))?", re.IGNORECASE)
 
 
 def clean(value: str | None) -> str | None:
@@ -78,7 +76,6 @@ class CorreoUruguayoUYSpider(Spider):
                 item["extras"]["addr:suburb"] = place  # a Montevideo neighbourhood ("Pocitos", "Cordon")
             else:
                 item["city"] = place
-            item["country"] = "UY"
             item["phone"] = office["Telefonos"]
             item["opening_hours"] = self.parse_hours(office["Horarios"] or "")
             apply_category(Categories.POST_OFFICE, item)
@@ -87,22 +84,22 @@ class CorreoUruguayoUYSpider(Spider):
     @staticmethod
     def parse_hours(text: str) -> OpeningHours | None:
         """Parse "Lunes a Viernes de 9 a 14 y de 14.45 a 17 hs - Sabado y Domingo de 10 a 22 hs"."""
-        text = unicodedata.normalize("NFKD", text.lower()).encode("ascii", "ignore").decode()
+        # Not add_ranges_from_string: it reads "Martes y Jueves 8 a 12 hs" as Tuesday to Thursday.
         oh = OpeningHours()
         found = False
         for first, joiner, last, rest in DAYS_RE.findall(text):
-            start = DAY_NAMES.index(first)
+            first = sanitise_day(first, DAYS_ES)
             if not last:
-                days = [start]
-            elif joiner == "a":
-                days = list(range(start, DAY_NAMES.index(last) + 1))
+                days = [first]
+            elif joiner.lower() == "a":
+                days = day_range(first, sanitise_day(last, DAYS_ES))
             else:
-                days = [start, DAY_NAMES.index(last)]  # "Martes y Jueves"
+                days = [first, sanitise_day(last, DAYS_ES)]  # "Martes y Jueves"
             ranges = RANGE_RE.findall(rest)
-            if not days or not ranges:
+            if not ranges:
                 return None
             for open_h, open_m, close_h, close_m in ranges:
                 for day in days:
-                    oh.add_range(DAYS[day], f"{open_h}:{open_m or '00'}", f"{close_h}:{close_m or '00'}", "%H:%M")
+                    oh.add_range(day, f"{open_h}:{open_m or '00'}", f"{close_h}:{close_m or '00'}", "%H:%M")
             found = True
         return oh if found else None
