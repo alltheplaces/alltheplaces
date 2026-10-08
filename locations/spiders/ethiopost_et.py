@@ -106,6 +106,5 @@ class EthiopostEtSpider(Spider):
                 lat = lon = None
             if lat is not None and 3.4 < lat < 14.9 and 32.9 < lon < 48.0:
                 item["lat"], item["lon"] = lat, lon
-        item["country"] = "ET"
         apply_category(Categories.POST_OFFICE, item)
         return item
