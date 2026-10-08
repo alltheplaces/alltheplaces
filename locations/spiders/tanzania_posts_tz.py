@@ -35,7 +35,6 @@ class TanzaniaPostsTZSpider(Spider):
             item["extras"]["addr:region:code"] = str(branch["region"])  # numeric id, no name lookup exposed
             if (c := coords[ref]) and stacked[c] == 1:
                 item["lat"], item["lon"] = c
-            item["country"] = "TZ"
             apply_category(Categories.POST_OFFICE, item)
             yield item
 
