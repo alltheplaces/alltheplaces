@@ -87,6 +87,5 @@ class LibyaPostLySpider(Spider):
                 item["extras"]["addr:city:en"] = city["name_en"]
             if region := city.get("region"):
                 item["state"] = region.get("name")
-        item["country"] = "LY"
         apply_category(Categories.POST_OFFICE, item)
         return item
