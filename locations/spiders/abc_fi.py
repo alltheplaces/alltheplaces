@@ -64,7 +64,7 @@ class ABCFISpider(SitemapSpider):
     # The signed form is always "ABC <branch>".
     NAME_RE = re.compile(r"^abc\s+(.*)$", re.IGNORECASE)
     NEXT_DATA_RE = re.compile(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', re.S)
-    TIME_RE = re.compile(r"^(\d{1,2}):(\d{2})(?::\d{2})?$")
+    TIME_RE = re.compile(r"^(\d{1,2}):(\d{2})(?::(\d{2}))?$")
 
     def parse_station(self, response: Response) -> Iterable[Feature]:
         location = self.extract_location(response)
@@ -224,7 +224,8 @@ class ABCFISpider(SitemapSpider):
         if not match:
             return None
         hours, minutes = int(match.group(1)), int(match.group(2))
-        if hours > 23 or minutes > 59:
+        seconds = int(match.group(3)) if match.group(3) is not None else 0
+        if hours > 23 or minutes > 59 or seconds > 59:
             return None
         return f"{hours:02d}:{match.group(2)}"
 
