@@ -618,14 +618,15 @@ def test_university_lab_beats_medical_lab():
     assert item.get_tag("office") == "research"
 
 
-def test_university_buildings_map_as_nodes():
+def test_university_buildings_stay_generic():
     # Units 76785 (Biokeskus 1), 75353 (Päärakennus): individual buildings
-    # map building=university on the node; the institution tag stays off.
+    # are not the institution, and with no building category available
+    # they stay generic rather than mistagging.
     item = full(make_spider(), "Biokeskus 1", [1359])
-    assert item.get_tag("building") == "university"
-    assert item.get_tag("amenity") is None
+    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("building") is None
     item = full(make_spider(), "Helsingin yliopiston päärakennus", [1359])
-    assert item.get_tag("building") == "university"
+    assert item.get_tag("amenity") == "yes"
 
 
 def test_youth_guidance_is_office():
@@ -2332,8 +2333,8 @@ def test_university_branches():
     assert spider._university_category(cat, "vahtimestarit") == Categories.OFFICE_ADMINISTRATIVE
     assert spider._university_category(cat, "terveystalo") == Categories.CLINIC
     assert spider._university_category(cat, "vierastalo") == Categories.TOURISM_GUEST_HOUSE
-    assert spider._university_category(cat, "dipoli") == Categories.BUILDING_UNIVERSITY
-    assert spider._university_category(cat, "kandidaattikeskus") == Categories.BUILDING_UNIVERSITY
+    assert spider._university_category(cat, "dipoli") is False
+    assert spider._university_category(cat, "kandidaattikeskus") is False
     assert spider._university_category(cat, "aalto arts kandidaattikeskus") == Categories.OFFICE_ADMINISTRATIVE
     assert spider._university_category(cat, "fysiikan laitos") is None
 

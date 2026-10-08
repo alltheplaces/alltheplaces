@@ -17,8 +17,6 @@ class Categories(Enum):
     GENERIC_POI = {"amenity": "yes"}
     GENERIC_SHOP = {"shop": "yes"}
 
-    BUILDING_UNIVERSITY = {"building": "university"}
-
     BICYCLE_PARKING = {"amenity": "bicycle_parking"}
     BICYCLE_RENTAL = {"amenity": "bicycle_rental"}
     BICYCLE_RENTAL_CARGO = {"amenity": "bicycle_rental", "rental": "cargo_bike"}

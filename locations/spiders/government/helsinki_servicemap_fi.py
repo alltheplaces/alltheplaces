@@ -3456,9 +3456,9 @@ class HelsinkiServicemapFISpider(Spider):
             # Teaching and research units stay with the institution.
             return None
         if re.search(self.UNIVERSITY_BUILDING_RE, text):
-            # Individual buildings map as nodes (building=* is valid on
-            # nodes); the institution tag stays off them.
-            return Categories.BUILDING_UNIVERSITY
+            # Individual buildings are not the institution; with no
+            # building category available they stay generic.
+            return False
         return None
 
     def _civic_category(self, category, text):
@@ -3593,12 +3593,16 @@ class HelsinkiServicemapFISpider(Spider):
 
     def _refine_place(self, category, matched, text, desc="", unit=None):
         # Helpers return a category, None to pass on, or False to force the
-        # generic fallback (only the church rule still uses False).
+        # generic fallback (only the university and church rules use False).
         # Final None means unmappable.
         if corrected := self._generic_venue_correction(category, matched, text):
             return corrected
         if category == Categories.UNIVERSITY:
-            if uni := self._university_category(category, text):
+            uni = self._university_category(category, text)
+            if uni is False:
+                # Named buildings: generic, never the institution.
+                return None
+            if uni is not None:
                 return uni
         if activity := self._activity_category(category, text, desc):
             return activity
