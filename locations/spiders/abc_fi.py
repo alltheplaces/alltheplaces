@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # is dropped by the name rule until its signed name returns.
 
 
-class ABCFISpider(SitemapSpider):
+class AbcFISpider(SitemapSpider):
     name = "abc_fi"
 
     # The stations sitemap is generated on request and can take over the
