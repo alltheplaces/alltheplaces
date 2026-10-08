@@ -334,6 +334,8 @@ class HelsinkiServicemapFiSpider(Spider):
         546: (Categories.MARINA, {}),  # Venesatamat (marinas)
         705: (Categories.MARINA, {}),  # Venesatama (marina)
         2142: (Categories.MARINA, {}),  # Venesatamat (marinas)
+        2198: (Categories.MOORING, {}),  # Veneiden lyhytaikainen kiinnittyminen (short-term moorings)
+        2199: (Categories.MOORING, {}),  # Veneiden lyhytaikainen kiinnittyminen (short-term moorings)
         825: (Categories.NURSING_HOME, {}),  # Iäkkäiden ympärivuorokautinen palveluasuminen (elderly care housing)
         826: (Categories.NURSING_HOME, {}),  # Iäkkäiden laitospalvelu (elderly institutional care)
         2446: (Categories.MORTUARY, {}),  # Vainajatilat (mortuaries)

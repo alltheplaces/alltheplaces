@@ -392,6 +392,7 @@ class Categories(Enum):
     MAILROOM = {"amenity": "mailroom"}
     MANHOLE = {"man_made": "manhole"}
     MARINA = {"leisure": "marina"}
+    MOORING = {"mooring": "yes"}
     MARKETPLACE = {"amenity": "marketplace"}
     MEDICAL_IMAGING = {
         "healthcare": "medical_imaging"

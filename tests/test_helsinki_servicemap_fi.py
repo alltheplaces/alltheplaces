@@ -873,10 +873,11 @@ def test_church_tower_has_no_premises():
     assert item["name"] == "Kallion kirkon torni"
 
 
-def test_boat_berths_stay_uncategorised():
-    # Unit 59456: no honest tag, so amenity=yes (generic), never tagless.
+def test_boat_berths_are_moorings_not_marinas():
+    # Unit 59456: short-term mooring basins tag mooring=yes, never marina.
     item = full(make_spider(), "Kauppatori, Vironallas", [2198, 2199])
-    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("mooring") == "yes"
+    assert item.get_tag("leisure") is None
 
 
 def test_company_hq_beats_recycling_filing():
