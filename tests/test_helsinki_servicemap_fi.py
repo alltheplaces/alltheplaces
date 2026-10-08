@@ -8,8 +8,8 @@ count) unless marked SYNTHETIC, in which case the feed has no occurrence
 and the input exercises a helper branch directly.
 """
 
-from types import SimpleNamespace
 import json
+from types import SimpleNamespace
 
 from scrapy.http import JsonResponse
 
