@@ -86,7 +86,7 @@ class DinosolESSpider(Spider):
                 response.xpath('//div[@class="page-corporate__tiendas"]/div[1]/div[1]/div[1]/h3/text()').get().strip()
             )
 
-        if properties["name"].upper().startswith("CENTRO DISTRIBUCIÓN ONLINE"):
+        if "ONLINE" in properties["name"].upper():
             return
 
         if properties["name"]:
