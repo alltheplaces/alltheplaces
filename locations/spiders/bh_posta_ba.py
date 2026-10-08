@@ -32,13 +32,13 @@ class BhPostaBaSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # The network map ("WP Google Map Gold" plugin) embeds every office as JSON: "places":[...].
         decoder = json.JSONDecoder()
-        seen = set()
         for match in re.finditer(r'"places":\[', response.text):
             places, _ = decoder.raw_decode(response.text, match.end() - 1)
+            if not isinstance(places, list):
+                continue
             for place in places:
-                if place["id"] in seen:
+                if not isinstance(place, dict) or place.get("id") is None or not place.get("title"):
                     continue
-                seen.add(place["id"])
                 if item := self.parse_place(place):
                     yield item
 
@@ -55,7 +55,8 @@ class BhPostaBaSpider(Spider):
         title = re.sub(r"\s+", " ", place["title"]).strip()  # "71101 Sarajevo", "71162 Sarajevo - Sud BiH"
         item = Feature()
         item["ref"] = place["id"]
-        item["lat"], item["lon"] = location.get("lat"), location.get("lng")
+        # Strip stray separators: one office has "lat": "44.884851,".
+        item["lat"], item["lon"] = (str(location.get(key) or "").strip(" ,") or None for key in ("lat", "lng"))
         if m := re.match(r"(\d{5})\s*(.*)", title):
             item["postcode"], item["branch"] = m.group(1), m.group(2)
         else:
@@ -85,7 +86,7 @@ class BhPostaBaSpider(Spider):
             # A label right after the range ("08:00-16:00 (pon.-pet.)", "08:00-13:00 sub.") wins; otherwise
             # the last label before it ("(pon.-pet.): 08:00-15:00", "subota: 08:00-13:00").
             if m := re.match(r"[\s,]*(?:\(([^()]*)\)?|(sub)(?:ota)?\b\.?(?!\s*:))", following, re.IGNORECASE):
-                days = self.label_days(m.group(1) or m.group(2))
+                days = self.label_days(m.group(1) or m.group(2) or "")
                 used_until = rng.end() + m.end()
             else:
                 labels = PAREN_RE.findall(preceding) + re.findall(r"\b(subota)\s*:", preceding, re.IGNORECASE)
