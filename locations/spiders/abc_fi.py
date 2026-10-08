@@ -183,23 +183,25 @@ class ABCFISpider(SitemapSpider):
         entry = current[-1]
         oh = OpeningHours()
         days = entry.get("days") or []
-        all_24h = len(days) == 7
+        full_days = set()
         for day_entry in days:
             if not isinstance(day_entry, dict):
-                all_24h = False
                 continue
             day = self.DAY_MAP.get(str(day_entry.get("day") or "").upper())
             if not day:
-                all_24h = False
                 self.crawler.stats.inc_value("atp/abc_fi/hours/unknown_day")
                 continue
             mode = str(day_entry.get("mode") or "").upper()
-            if mode != "24H":
-                all_24h = False
             if mode == "CLOSED":
                 oh.set_closed(day)
                 continue
             ranges = day_entry.get("ranges") or []
+            if mode == "24H" and not ranges:
+                # Day-round opening with no ranges reads as 24h; seven
+                # distinct such days collapse to 24/7 below.
+                oh.add_range(day, "00:00", "23:59", time_format="%H:%M")
+                full_days.add(day)
+                continue
             if ranges:
                 for span in ranges:
                     if not isinstance(span, dict):
@@ -220,7 +222,7 @@ class ABCFISpider(SitemapSpider):
                 # Unknown modes and RANGE-without-ranges: leave the day
                 # unknown rather than invent hours.
                 self.crawler.stats.inc_value(f"atp/abc_fi/hours/unknown_mode/{mode or 'missing'}")
-        if all_24h:
+        if len(full_days) == 7:
             return "24/7"
         return oh if oh.day_hours else None
 
