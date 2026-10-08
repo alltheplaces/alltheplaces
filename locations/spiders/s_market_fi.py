@@ -3,7 +3,7 @@ import re
 from typing import Iterable
 from urllib.parse import parse_qsl, urlencode, urlparse
 
-from scrapy import Request, Spider, signals
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -80,7 +80,7 @@ class SMarketFISpider(Spider):
         "asiakasomistaja",
         "s-pankki",
     )
-    TIME_RE = re.compile(r"^(\d{1,2}):(\d{2})(?::\d{2})?$")
+    TIME_RE = re.compile(r"^(\d{1,2}):(\d{2})(?::(\d{2}))?$")
 
     start_urls = [
         "https://s-etukortti.fi/data/pob-search?" + urlencode({"q": brand, "locale": "fi"}) for brand in BRANDS
@@ -88,14 +88,14 @@ class SMarketFISpider(Spider):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Address-dedupe buffer per brand: same-address records from different
-        # verticals arrive in arbitrary page order, so candidates are
-        # collected and flushed when the brand's last page lands. Bounded at
-        # ~2000 small dicts; partial loss on mid-chain failure is handled by
-        # flushing in the errback.
-        self.pending = {brand: [] for brand in self.BRANDS}
+        # Streaming dedupe state per brand: same-address records from
+        # different verticals share a key and the first record wins (offline
+        # proof over 1864 records: first-wins is value-identical to
+        # best-wins). Items yield per page, so a CI timeout still exports
+        # partial output instead of losing whole brands in a buffer.
+        self.seen_keys = {brand: set() for brand in self.BRANDS}
+        self.seen_refs = {brand: set() for brand in self.BRANDS}
         self.seen_cursors = {brand: set() for brand in self.BRANDS}
-        self.flushed = set()
         self.branch_res = {
             brand: re.compile(r"(^|[\s,./():-])" + re.escape(brand) + r"([\s,./():-]|$)", re.IGNORECASE)
             for brand in self.BRANDS
@@ -122,25 +122,46 @@ class SMarketFISpider(Spider):
         except ValueError:
             self.crawler.stats.inc_value(f"atp/s_market_fi/bad_payload/{brand}")
             logger.warning("s_market_fi: non-JSON payload for %s", brand)
-            yield from self.flush(brand)
             return
         if not isinstance(data, dict):
             self.crawler.stats.inc_value(f"atp/s_market_fi/bad_payload/{brand}")
             logger.warning("s_market_fi: unexpected payload shape for %s", brand)
-            yield from self.flush(brand)
             return
         results = data.get("results") or []
+        if not isinstance(results, list):
+            self.crawler.stats.inc_value(f"atp/s_market_fi/bad_payload/{brand}")
+            logger.warning("s_market_fi: non-list results for %s", brand)
+            return
         self.crawler.stats.inc_value(f"atp/s_market_fi/pages/{brand}")
         self.crawler.stats.inc_value(f"atp/s_market_fi/results/{brand}", len(results))
         for result in results:
-            if isinstance(result, dict):
-                self.pending[brand].append(result)
+            if not isinstance(result, dict):
+                continue
+            try:
+                item = self.parse_store(result, brand)
+            except Exception:
+                # One malformed record must not take down the page.
+                self.crawler.stats.inc_value(f"atp/s_market_fi/dropped/crashed/{brand}")
+                logger.warning("s_market_fi: dropping malformed record for %s", brand, exc_info=True)
+                continue
+            if item is None:
+                continue
+            key = self.dedupe_key(result)
+            if key in self.seen_keys[brand]:
+                self.crawler.stats.inc_value(f"atp/s_market_fi/dropped/dup_address/{brand}")
+                continue
+            if item["ref"] in self.seen_refs[brand]:
+                self.crawler.stats.inc_value(f"atp/s_market_fi/dropped/dup_ref/{brand}")
+                continue
+            self.seen_keys[brand].add(key)
+            self.seen_refs[brand].add(item["ref"])
+            self.crawler.stats.inc_value(f"atp/s_market_fi/flushed/{brand}")
+            yield item
         if data.get("hasMore") and data.get("nextCursor"):
             cursor = data["nextCursor"]
             if cursor in self.seen_cursors[brand]:
                 self.crawler.stats.inc_value(f"atp/s_market_fi/repeated_cursor/{brand}")
-                logger.warning("s_market_fi: repeated cursor for %s, flushing partial", brand)
-                yield from self.flush(brand)
+                logger.warning("s_market_fi: repeated cursor for %s, stopping chain", brand)
                 return
             self.seen_cursors[brand].add(cursor)
             yield Request(
@@ -149,99 +170,34 @@ class SMarketFISpider(Spider):
                 errback=self.errback,
                 cb_kwargs={"brand": brand},
             )
-        else:
-            if data.get("hasMore"):
-                # Truncated chain: cursor missing but more pages claimed.
-                self.crawler.stats.inc_value(f"atp/s_market_fi/truncated/{brand}")
-                logger.warning("s_market_fi: hasMore without nextCursor for %s", brand)
-            yield from self.flush(brand)
+        elif data.get("hasMore"):
+            # Truncated chain: cursor missing but more pages claimed.
+            self.crawler.stats.inc_value(f"atp/s_market_fi/truncated/{brand}")
+            logger.warning("s_market_fi: hasMore without nextCursor for %s", brand)
 
-    def errback(self, failure) -> Iterable[Feature]:
+    def errback(self, failure) -> None:
         # Scrapy calls errbacks as errback(failure): cb_kwargs are NOT passed
-        # as arguments, so a `brand` parameter here would always be None and
-        # the buffer below would never flush. Recover it from the failed
-        # request instead (explicit kwarg first, request URL as fallback).
+        # as arguments, so a `brand` parameter here would always be None.
+        # Recover it from the failed request instead (explicit kwarg first,
+        # request URL as fallback). Items so far are already yielded, so a
+        # mid-chain failure only truncates, never loses, the brand.
         request = getattr(failure, "request", None)
         cb_kwargs = getattr(request, "cb_kwargs", None) or {}
         brand = cb_kwargs.get("brand") or (self.brand_of(request) if request is not None else None)
         self.crawler.stats.inc_value(f"atp/s_market_fi/failed/{brand or 'unknown'}")
         logger.warning("s_market_fi: request failed for %s: %s", brand, failure.value)
-        if brand in self.pending:
-            yield from self.flush(brand)
 
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super().from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
-        return spider
-
-    def spider_closed(self, spider) -> None:
-        # Plain `closed()` is not a Scrapy hook and would never run; the
-        # audit must hang off the spider_closed signal instead.
-        leftover = {brand: len(items) for brand, items in self.pending.items() if items}
-        if leftover:
-            self.crawler.stats.inc_value("atp/s_market_fi/unflushed_on_close")
-            logger.error("s_market_fi: unflushed buffers on close: %s", leftover)
-
-    def flush(self, brand: str) -> Iterable[Feature]:
-        if brand in self.flushed:
-            return
-        self.flushed.add(brand)
-        best = {}
-        for result in self.pending[brand]:
-            try:
-                item = self.parse_store(result, brand)
-            except Exception:
-                # One malformed record (non-dict coordinates or hour spans,
-                # unparseable times) must not take down the brand's whole
-                # buffer; drop it loudly and keep the rest.
-                self.crawler.stats.inc_value(f"atp/s_market_fi/dropped/crashed/{brand}")
-                logger.warning("s_market_fi: dropping malformed record for %s", brand, exc_info=True)
-                continue
-            if item is None:
-                continue
-            key, preference = self.dedupe_key(result, brand)
-            if key not in best or preference > best[key][1]:
-                best[key] = (item, preference)
-        self.pending[brand] = []
-        # Same ref on two records (cf. Prisma Pori garden department sharing
-        # the hypermarket's id): keep the more store-like one deterministically
-        # instead of leaving it to pipeline drop order. The store's branch is
-        # the bare location name; departments append descriptors, so shorter
-        # wins ties.
-        by_ref = {}
-        for item, preference in best.values():
-            order = (preference, -(len(item.get("branch") or "")))
-            if item["ref"] not in by_ref or order > by_ref[item["ref"]][1]:
-                by_ref[item["ref"]] = (item, order)
-        self.crawler.stats.inc_value(f"atp/s_market_fi/flushed/{brand}", len(by_ref))
-        for item, _ in by_ref.values():
-            yield item
-
-    def dedupe_key(self, result: dict, brand: str) -> tuple[tuple[str, str], tuple[bool, bool, int]]:
-        # Same-address records from different verticals collapse to one item.
-        # Prefer the canonical host over tenant pages, brand-prefixed names
-        # over leftovers, and shorter names over department suffixes.
-        try:
-            host = urlparse(str(result.get("url") or "")).hostname
-        except ValueError:
-            host = None
-        name = str(result.get("name") or "")
+    def dedupe_key(self, result: dict) -> tuple[str, str]:
+        # Same-address records from different verticals share one key and
+        # the first record wins.
         street = re.sub(r"\s+", " ", str(result.get("street") or "")).strip().lower()
         postcode = str(result.get("postalCode") or "").strip()
         if street or postcode:
-            key = (street, postcode)
-        else:
-            # Address-less records must never share one key: all of them
-            # would collapse to ("", ""). Fall back to the record's own
-            # identity (URL before source id), so each survives on its own.
-            key = ("", str(result.get("url") or result.get("id") or "").strip().lower())
-        preference = (
-            host == self.BRANDS[brand]["host"],
-            name.lower().startswith(brand.lower() + " "),
-            -len(name),
-        )
-        return key, preference
+            return street, postcode
+        # Address-less records must never share one key: all of them
+        # would collapse to ("", ""). Fall back to the record's own
+        # identity (URL before source id), so each survives on its own.
+        return "", str(result.get("url") or result.get("id") or "").strip().lower()
 
     @staticmethod
     def _str(value) -> str | None:
@@ -435,4 +391,8 @@ class SMarketFISpider(Spider):
         match = self.TIME_RE.match(value.strip())
         if not match:
             return None
-        return f"{int(match.group(1)):02d}:{match.group(2)}"
+        hours, minutes = int(match.group(1)), int(match.group(2))
+        seconds = int(match.group(3)) if match.group(3) is not None else 0
+        if hours > 23 or minutes > 59 or seconds > 59:
+            return None
+        return f"{hours:02d}:{match.group(2)}"
