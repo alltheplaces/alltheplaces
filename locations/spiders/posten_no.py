@@ -1,3 +1,5 @@
+import re
+from itertools import groupby
 from typing import Any
 
 import pyproj
@@ -5,14 +7,17 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
 class PostenNOSpider(Spider):
     name = "posten_no"
     item_attributes = {"brand": "Posten", "brand_wikidata": "Q1815701"}
-    start_urls = ["https://www.posten.no/en/map/_/service/no.posten.map/enonicUnits?country=NO"]
+    # Red letter boxes are only included when asked for.
+    start_urls = [
+        "https://www.posten.no/en/map/_/service/no.posten.map/enonicUnits?country=NO&includeRedMailBoxes=true"
+    ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         transformer = pyproj.Transformer.from_crs(25833, 4326)
@@ -57,10 +62,31 @@ class PostenNOSpider(Spider):
                 apply_category(Categories.PARCEL_LOCKER, item)
             elif attributes["enhetstype"] == 10:
                 apply_category(Categories.POST_BOX, item)
+                if collection_times := self.parse_collection_times(attributes.get("deadlines") or []):
+                    item["extras"]["collection_times"] = collection_times
             else:
                 item["extras"]["enhetstype"] = str(attributes["enhetstype"])
                 self.logger.error("Unexpected type: {}".format(attributes["enhetstype"]))
             yield item
+
+    @staticmethod
+    def parse_collection_times(deadlines: list[dict]) -> str:
+        # Each deadline is a collection time ("1400") on a set of weekdays ("1,2,3,4,5", 1 = Monday).
+        times = {}
+        for deadline in deadlines:
+            time = deadline.get("dateTime") or ""
+            if not re.fullmatch(r"\d{4}", time):
+                continue
+            for day in str(deadline.get("periodDays") or "").split(","):
+                if day.strip().isdigit() and 1 <= int(day) <= 7:
+                    times.setdefault(DAYS[int(day) - 1], set()).add(f"{time[:2]}:{time[2:]}")
+        by_day = {day: ",".join(sorted(day_times)) for day, day_times in times.items()}
+        collection_times = []
+        for time, days in groupby(DAYS, key=by_day.get):
+            if time:
+                days = list(days)
+                collection_times.append(f"{days[0]}-{days[-1]} {time}" if len(days) > 1 else f"{days[0]} {time}")
+        return "; ".join(collection_times)
 
     def parse_opening_hours(self, rules: dict) -> OpeningHours:
         oh = OpeningHours()
