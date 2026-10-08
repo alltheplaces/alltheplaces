@@ -35,7 +35,9 @@ class DeutschePostDESpider(Spider):
         "BULK_ACCEPTANCE_OFFICE": None,
         "BUSINESS_MAIL_ACCEPTANCE_POINT": None,
         "POST_OFFICE_BOX": Categories.POST_BOX,
-        "POSTSTATION": None,
+        # A parcel locker with a letter slot and stamp sales; it is returned by the letter box and
+        # Packstation searches, and its letter slot has collection times.
+        "POSTSTATION": Categories.PARCEL_LOCKER,
     }
 
     # Each type is searched on its own: the API returns the nearest 250 locations, so a mixed search
@@ -110,7 +112,7 @@ class DeutschePostDESpider(Spider):
         if cat := self.cats.get(location["locationType"]):
             item.update(DEUTSCHE_POST)
             apply_category(cat, item)
-            if location["locationType"] == "LETTER_BOX":
+            if location["locationType"] in ("LETTER_BOX", "POSTSTATION"):
                 if collection_times := self.parse_collection_times(location["pfTimeinfos"]):
                     item["extras"]["collection_times"] = collection_times
         elif location["locationType"] == "PAKETSHOP":
