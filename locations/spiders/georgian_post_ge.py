@@ -6,18 +6,8 @@ from scrapy import FormRequest, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_GE, OpeningHours
 from locations.items import Feature
-
-DAYS_KA = {
-    "ორშაბათი": "Mo",
-    "სამშაბათი": "Tu",
-    "ოთხშაბათი": "We",
-    "ხუთშაბათი": "Th",
-    "პარასკევი": "Fr",
-    "შაბათი": "Sa",
-    "კვირა": "Su",
-}
 
 
 class GeorgianPostGESpider(Spider):
@@ -68,14 +58,5 @@ class GeorgianPostGESpider(Spider):
     def parse_hours(self, lines: list[str]) -> OpeningHours:
         # e.g. "ორშაბათი - პარასკევი : 09:00 - 19:00", "შაბათი : 10:00 - 16:00", "კვირა: დასვენების დღე" (day off)
         oh = OpeningHours()
-        for line in lines:
-            days_text, _, hours_text = line.partition(":")
-            day_names = [DAYS_KA.get(day.strip()) for day in days_text.split("-")]
-            if not all(day_names):
-                continue
-            days = DAYS[DAYS.index(day_names[0]) : DAYS.index(day_names[-1]) + 1]
-            if "დასვენების" in hours_text:
-                oh.set_closed(days)
-            elif match := re.search(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", hours_text):
-                oh.add_days_range(days, match[1], match[2])
+        oh.add_ranges_from_string("; ".join(lines), days=DAYS_GE, closed=["დასვენების"])
         return oh
