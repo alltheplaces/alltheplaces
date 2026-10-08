@@ -5,13 +5,11 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS_FR, DELIMITERS_FR, OpeningHours
 from locations.items import Feature
 
-# "08h00mn à 12h00 min", "15h 00mn a 16h 30 min", "14 h 30 à 17h30mn", "08h à 11h"
-TIME = r"(\d{1,2})\s*h\s*(\d{2})?\s*(?:mn|min(?:utes)?)?"
-RANGE_RE = re.compile(TIME + r"\s*(?:à|a|-)\s*" + TIME, re.IGNORECASE)
-DAYS_RE = re.compile(r"(lundi\s+au\s+vendredi|samedi)", re.IGNORECASE)
+# "08h00mn", "12h00 min", "15h 00mn", "14 h 30", "08h"
+TIME_RE = re.compile(r"(\d{1,2})\s*h(?:\s*(\d{2}))?(?:\s*(?:mn|min(?:utes)?)\b)?", re.IGNORECASE)
 PHONE_RE = re.compile(r"T[ée]l[ée]phone\s*:\s*([\d ]{9,})")
 
 
@@ -36,7 +34,6 @@ class PaositraMalagasyMgSpider(Spider):
                 if phone := PHONE_RE.search(description):
                     item["phone"] = phone.group(1).strip()
                 item["opening_hours"] = self.parse_hours(description)
-                item["country"] = "MG"
                 if item["branch"].lower().startswith("centre de tri"):
                     apply_category(Categories.POST_DEPOT, item)  # national sorting centre (CTPR), no counter
                 else:
@@ -44,22 +41,10 @@ class PaositraMalagasyMgSpider(Spider):
                 yield item
 
     @staticmethod
-    def parse_hours(description: str) -> OpeningHours | None:
-        # Day labels are followed by one or two time ranges, on the same line or the next ones.
+    def parse_hours(description: str) -> OpeningHours:
+        # "LUNDI au VENDREDI : 08h à 12h00 min / 14h a 17h min\nSamedi : 08h à 11h00 min"
+        text = TIME_RE.sub(lambda m: "{}:{}".format(m.group(1), m.group(2) or "00"), description)
+        text = re.sub(r"(?<=\d)\s+a\s+(?=\d)", " à ", text)
         oh = OpeningHours()
-        days = None
-        position = 0
-        for match in DAYS_RE.finditer(description):
-            if days is not None:
-                PaositraMalagasyMgSpider.add_ranges(oh, days, description[position : match.start()])
-            days = DAYS[:5] if match.group(1).lower().startswith("lundi") else ["Sa"]
-            position = match.end()
-        if days is None:
-            return None
-        PaositraMalagasyMgSpider.add_ranges(oh, days, description[position:])
+        oh.add_ranges_from_string(text, days=DAYS_FR, delimiters=DELIMITERS_FR)
         return oh
-
-    @staticmethod
-    def add_ranges(oh: OpeningHours, days: list[str], text: str) -> None:
-        for h1, m1, h2, m2 in RANGE_RE.findall(text):
-            oh.add_days_range(days, "{}:{}".format(h1, m1 or "00"), "{}:{}".format(h2, m2 or "00"))
