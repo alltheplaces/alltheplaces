@@ -104,52 +104,103 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
 
     def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
         for entry in entries:
-            # Sitemap templating bug emits "[object Promise]" as locale prefix
-            entry["loc"] = entry["loc"].replace("/[object Promise]", "")
-            if entry["loc"] == "https://asemat.neste.fi/":
+            loc = entry.get("loc") if isinstance(entry, dict) else None
+            if not isinstance(loc, str) or not loc:
                 continue
+            # Sitemap templating bug emits "[object Promise]" as locale prefix
+            loc = loc.replace("/[object Promise]", "")
+            if loc == "https://asemat.neste.fi/":
+                continue
+            entry["loc"] = loc
             yield entry
+
+    def _inc_stat(self, key: str) -> None:
+        stats = getattr(getattr(self, "crawler", None), "stats", None)
+        if stats is not None:
+            stats.inc_value(key)
+
+    @staticmethod
+    def _fuel_names(ld_data: dict) -> list[str]:
+        catalogs = ld_data.get("hasOfferCatalog")
+        if isinstance(catalogs, dict):
+            catalogs = [catalogs]
+        elif not isinstance(catalogs, list):
+            return []
+        names = []
+        for catalog in catalogs:
+            if not isinstance(catalog, dict):
+                continue
+            elements = catalog.get("itemListElement", []) or []
+            if isinstance(elements, dict):
+                elements = [elements]
+            for offer in elements:
+                if not isinstance(offer, dict):
+                    continue
+                offered = offer.get("itemOffered") or {}
+                if isinstance(offered, str):
+                    product = offered
+                elif isinstance(offered, dict):
+                    product = offered.get("name")
+                else:
+                    continue
+                if isinstance(product, str) and product:
+                    names.append(product)
+        return names
+
+    @staticmethod
+    def _clean_phone(value: Any) -> str | None:
+        if isinstance(value, str):
+            candidates = [value]
+        elif isinstance(value, list):
+            candidates = [p for p in value if isinstance(p, str)]
+        else:
+            return None
+        for candidate in candidates:
+            for part in (p.strip() for p in candidate.split(",")):
+                if part and re.sub(r"[\s\-]", "", part) not in HOTLINE_NUMBERS:
+                    return part
+        return None
 
     def post_process_item(
         self, item: Feature, response: TextResponse, ld_data: dict, **kwargs: Any
     ) -> Iterable[Feature]:
-        if ld_data.get("@type") != "GasStation":
-            self.crawler.stats.inc_value("atp/neste_fi/type/skip/{}".format(ld_data.get("@type")))
+        ld_types = ld_data.get("@type")
+        if isinstance(ld_types, str):
+            ld_types = [ld_types]
+        if not isinstance(ld_types, list) or "GasStation" not in ld_types:
+            self._inc_stat("atp/neste_fi/type/skip/{}".format(str(ld_data.get("@type")).replace("/", "-")))
             return
         if m := re.search(r"Asemanumero:\s*(\d+)", response.text):
             item["ref"] = m.group(1)
         else:
-            self.crawler.stats.inc_value("atp/neste_fi/ref/missing")
+            self._inc_stat("atp/neste_fi/ref/missing")
             return
         if name := item.pop("name", None):
             if branch := re.sub(r"\s+", " ", name.removeprefix("Neste ").strip()):
                 item["branch"] = branch
-        if phone := item.get("phone"):
-            phone = phone.split(",")[0].strip()
-            item["phone"] = None if phone in HOTLINE_NUMBERS else phone
+        if item.get("phone"):
+            item["phone"] = self._clean_phone(item.get("phone"))
         item.pop("image", None)
         item.pop("twitter", None)
         item.pop("facebook", None)
-        if "-veneasema-" in response.url:
+        url = (response.url or "").lower()
+        if "-veneasema-" in url:
             apply_category(Categories.BOAT_FUEL_STATION, item)
         else:
             apply_category(Categories.FUEL_STATION, item)
-        fuels = []
-        if isinstance(ld_data.get("hasOfferCatalog"), dict):
-            for offer in ld_data["hasOfferCatalog"].get("itemListElement", []) or []:
-                if product := (offer.get("itemOffered") or {}).get("name"):
-                    fuels.append(product)
-        for fuel in fuels:
+        for fuel in self._fuel_names(ld_data):
             if fuel not in FUEL_TYPES_MAPPING:
-                self.crawler.stats.inc_value("atp/neste_fi/fuel/unmapped/{}".format(fuel))
+                self._inc_stat("atp/neste_fi/fuel/unmapped/{}".format(fuel.replace("/", "-")))
             elif tag := FUEL_TYPES_MAPPING[fuel]:
                 apply_yes_no(tag, item, True)
         services = response.xpath('//*[contains(@class, "ServiceIcon_text")]/text()').getall()
+        if not services:
+            self._inc_stat("atp/neste_fi/service/empty")
         for service in [s.strip() for s in services if s.strip()]:
             if service not in SERVICES_MAPPING:
-                self.crawler.stats.inc_value("atp/neste_fi/service/unmapped/{}".format(service))
+                self._inc_stat("atp/neste_fi/service/unmapped/{}".format(service.replace("/", "-")))
             elif tag := SERVICES_MAPPING[service]:
                 apply_yes_no(tag, item, True)
-        if "-truck-" in response.url:
+        if "-truck-" in url:
             apply_yes_no(Access.HGV, item, True)
         yield item
