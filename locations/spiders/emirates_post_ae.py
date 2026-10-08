@@ -43,6 +43,5 @@ class EmiratesPostAESpider(Spider):
                 item["state"] = "Abu Dhabi"
             else:
                 item["state"] = row["Emirates"]
-            item["country"] = "AE"
             apply_category(Categories.POST_OFFICE, item)
             yield item
