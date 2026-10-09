@@ -14,11 +14,12 @@ class SwissLifeFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://agences.swisslife.fr/sitemap_pois.xml"]
     sitemap_rules = [(r"/(\d+)/[^/]+/details$", "parse_sd")]
     wanted_types = ["InsuranceAgency"]
-    drop_attributes = ["facebook", "image", "twitter"]
     search_for_facebook = False
     search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
         item["branch"] = item.pop("name", "").removeprefix("Swiss Life ")
+        item["image"] = None
+
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
