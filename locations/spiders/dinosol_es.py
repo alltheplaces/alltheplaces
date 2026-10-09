@@ -60,13 +60,9 @@ class DinosolESSpider(Spider):
         current_page_number = response.meta["page_number"]
         if current_page_number == 1:
             island_id = response.meta["island_id"]
-            total_pages = int(
-                response.xpath('//div[contains(@class, "table-container--pagination__numeration")]//span[2]/text()')
-                .get()
-                .strip()
-            )
-            for page_number in range(2, total_pages, 1):
-                yield from self.request_page(island_id, page_number)
+            if total_pages := response.xpath('//div[@id="am-page-count"]/text()').get():
+                for page_number in range(2, int(total_pages) + 1):
+                    yield from self.request_page(island_id, page_number)
 
     def parse_store(self, response: Response):
         properties = {
@@ -90,7 +86,7 @@ class DinosolESSpider(Spider):
                 response.xpath('//div[@class="page-corporate__tiendas"]/div[1]/div[1]/div[1]/h3/text()').get().strip()
             )
 
-        if properties["name"].upper().startswith("CENTRO DISTRIBUCIÓN ONLINE"):
+        if "ONLINE" in properties["name"].upper():
             return
 
         if properties["name"]:

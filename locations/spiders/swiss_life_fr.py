@@ -15,6 +15,8 @@ class SwissLifeFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/(\d+)/[^/]+/details$", "parse_sd")]
     wanted_types = ["InsuranceAgency"]
     drop_attributes = ["facebook", "image", "twitter"]
+    search_for_facebook = False
+    search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
         item["ref"] = response.url.split("/")[-3]
