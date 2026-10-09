@@ -2,14 +2,13 @@ import json
 import re
 from typing import AsyncIterator, Iterable
 
+from scrapy import Spider
 from scrapy.http import Request, Response
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.geo import bbox_split
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
 # Bounding box comfortably covering all of Japan, including Okinawa.
 JAPAN_BBOX = ((46.0, 122.0), (20.0, 150.0))
@@ -19,10 +18,10 @@ JAPAN_BBOX = ((46.0, 122.0), (20.0, 150.0))
 RESULT_CAP = 100
 
 
-class MujiJPSpider(CamoufoxSpider):
+class MujiJPSpider(Spider):
     name = "muji_jp"
     item_attributes = {"brand": "無印良品", "brand_wikidata": "Q708789"}
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
+    zyte_meta = {"zyte_api": {"httpResponseBody": True, "httpResponseHeaders": True, "geolocation": "JP"}}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,7 +37,7 @@ class MujiJPSpider(CamoufoxSpider):
             "https://www.muji.com/jp/ja/shop/api/searchBounds"
             f"?swLat={se_lat}&swLng={nw_lon}&neLat={nw_lat}&neLng={se_lon}&lang=ja"
         )
-        return Request(url, callback=self.parse, cb_kwargs={"bbox": bbox})
+        return Request(url, callback=self.parse, cb_kwargs={"bbox": bbox}, meta=self.zyte_meta)
 
     def parse(
         self, response: Response, bbox: tuple[tuple[float, float], tuple[float, float]]
@@ -61,6 +60,10 @@ class MujiJPSpider(CamoufoxSpider):
         shop_cd = store.get("shop_cd")
         if not shop_cd or shop_cd in self.crawled_shop_cds:
             return
+        shopname = store.get("shopname") or ""
+        # 【閉】 = closed; MUJI BASE = accommodation
+        if "【閉】" in shopname or "ＭＵＪＩ　ＢＡＳＥ" in shopname:
+            return
         self.crawled_shop_cds.add(shop_cd)
 
         item = Feature()
@@ -81,7 +84,12 @@ class MujiJPSpider(CamoufoxSpider):
         if hours := self.parse_hours(store.get("weekday_business_time")):
             item["opening_hours"] = hours
 
-        apply_category(Categories.SHOP_VARIETY_STORE, item)
+        if "Ｃａｆｅ" in shopname:
+            apply_category(Categories.CAFE, item)
+        elif "キャンプ場" in shopname:
+            apply_category(Categories.TOURISM_CAMP_SITE, item)
+        else:
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
 
         yield item
 

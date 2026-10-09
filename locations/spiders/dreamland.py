@@ -12,6 +12,7 @@ class DreamlandSpider(Spider):
     name = "dreamland"
     item_attributes = {"brand_wikidata": "Q13574205"}
     start_urls = ["https://www.dreamland.nl/vestigingen", "https://www.dreamland.be/nl/winkels"]
+    requires_proxy = True  # Cloudflare Managed Challenge site-wide (cf-mitigated: challenge)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//*[@class="overview-store"]'):

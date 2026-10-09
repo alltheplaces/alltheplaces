@@ -50,8 +50,8 @@ class FnbAtmZASpider(Spider):
         ),
         (["SPAR"], SPAR_BRANDS["SPAR"][1]),
         (["BOXER"], {"brand": "Boxer", "brand_wikidata": "Q116586275"}),
-        (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"]),
-        (["CHECKERS"], SHOPRITE_BRANDS["Checkers"]),
+        (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"][0]),
+        (["CHECKERS"], SHOPRITE_BRANDS["Checkers"][0]),
     ]
 
     async def start(self) -> AsyncIterator[Request]:

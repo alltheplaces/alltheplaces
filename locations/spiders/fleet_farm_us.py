@@ -4,14 +4,16 @@ from typing import Iterable
 from scrapy.http import Request, TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FleetFarmUSSpider(StructuredDataSpider):
+class FleetFarmUSSpider(StructuredDataSpider, PlaywrightSpider):
     name = "fleet_farm_us"
     item_attributes = {"brand": "Fleet Farm", "brand_wikidata": "Q6859973"}
     start_urls = ["https://www.fleetfarm.com/sitewide/storeLocator.jsp"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: TextResponse) -> Iterable[Request]:
         stores = json.loads(response.xpath('//input[@id="storeJsonObjectid"]/@value').get())
