@@ -107,6 +107,7 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
             oh = OpeningHours()
             for day in json.loads(raw_days):
                 if day.get("isClosed"):
+                    oh.set_closed(day["day"])
                     continue
                 for interval in day.get("intervals", []):
                     oh.add_range(
