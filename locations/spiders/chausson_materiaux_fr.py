@@ -11,8 +11,8 @@ class ChaussonMateriauxFRSpider(SitemapSpider, StructuredDataSpider):
     search_for_facebook = False
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        apply_category(Categories.SHOP_TRADE, item)
-        apply_category(Categories.TRADE_BUILDING_SUPPLIES, item)
         item["branch"] = item.pop("name", "")
+
+        apply_category(Categories.SHOP_TRADE, item)
 
         yield item
