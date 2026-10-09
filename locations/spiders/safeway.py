@@ -20,7 +20,9 @@ class SafewaySpider(SitemapSpider, StructuredDataSpider):
         "https://local.pharmacy.safeway.com/sitemap.xml",
         "https://local.fuel.safeway.com/sitemap.xml",
     ]
-    sitemap_rules = [(r"^https://local\.(?:fuel\.|pharmacy\.)?safeway\.com/safeway/\w\w/[-\w]+/[-\w]+\.html$", "parse_sd")]
+    sitemap_rules = [
+        (r"^https://local\.(?:fuel\.|pharmacy\.)?safeway\.com/safeway/\w\w/[-\w]+/[-\w]+\.html$", "parse_sd")
+    ]
     wanted_types = ["GroceryStore", "GasStation", "Pharmacy"]
     drop_attributes = {"image"}
     search_for_email = False
