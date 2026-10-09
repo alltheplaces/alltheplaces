@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.country_utils import CountryUtils
@@ -72,9 +72,9 @@ class CostaCoffeeSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
-            yield JsonRequest(url=f"{url}&limit={self.page_size}")
+            yield JsonRequest(url=f"{url}&limit={self.page_size}", cb_kwargs={"url": url})
 
-    def parse(self, response):
+    def parse(self, response: Response, url: str, **kwargs: Any) -> Any:
         entries = {}
         for entry in response.json()["includes"]["Entry"]:
             entries[entry["sys"]["id"]] = entry["fields"]["name"]
@@ -100,7 +100,7 @@ class CostaCoffeeSpider(Spider):
                 elif open_time and close_time:
                     item["opening_hours"].add_range(day_name, open_time, close_time)
 
-            store_type = entries[location["fields"]["storeType"]["sys"]["id"]]
+            store_type = entries.get(location["fields"]["storeType"]["sys"]["id"])
 
             if brand := self.store_types.get(store_type):
                 item.update(brand[0])
@@ -109,6 +109,6 @@ class CostaCoffeeSpider(Spider):
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/{store_type}/")
 
-        offset = response.json()["skip"]
-        if offset + response.json()["limit"] < response.json()["total"]:
-            yield JsonRequest(url=f"{response.request.url}&limit={self.page_size}&offset={offset}")
+        skip = response.json()["skip"] + response.json()["limit"]
+        if skip < response.json()["total"]:
+            yield JsonRequest(url=f"{url}&limit={self.page_size}&skip={skip}", cb_kwargs={"url": url})
