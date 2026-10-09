@@ -4,7 +4,7 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ChaussonMateriauxFrSpider(SitemapSpider, StructuredDataSpider):
+class ChaussonMateriauxFRSpider(SitemapSpider, StructuredDataSpider):
     name = "chausson_materiaux_fr"
     item_attributes = {"brand": "Chausson Matériaux", "brand_wikidata": "Q100701530"}
     sitemap_urls = ["https://www.chausson.fr/sitemap-agencies.xml"]
