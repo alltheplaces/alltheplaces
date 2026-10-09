@@ -279,6 +279,16 @@ DAYS_GR = {
     "Κυριακή": "Su",
 }
 
+DAYS_AL = {
+    "E Hënë": "Mo",
+    "E Martë": "Tu",
+    "E Mërkurë": "We",
+    "E Enjte": "Th",
+    "E Premte": "Fr",
+    "E Shtunë": "Sa",
+    "E Diel": "Su",
+}
+
 DAYS_HR = {
     "Ponedjeljak": "Mo",
     "Pon": "Mo",
