@@ -1,5 +1,5 @@
 from collections import Counter, defaultdict
-from datetime import date, timedelta
+from datetime import date
 from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Request, Spider
@@ -16,12 +16,10 @@ PAGE_SIZE = 10000
 
 # https://www.data.gouv.fr/datasets/67adf208fff16d427cc86a5e
 # One row per site and per day over the next three months, keyed on the same
-# identifier as the sites dataset.
+# identifier as the sites dataset. Unlike the sites dataset (Etalab 2.0), it is
+# published under the ODbL.
 CALENDAR_URL = "https://data.laposte.fr/data-fair/api/v1/datasets/tjwztt6h44ve52i7fln6rbxz/lines"
 CALENDAR_FIELDS = ["plage_horaire_1", "plage_horaire_2", "plage_horaire_3", "plage_horaire_4"]
-# Three weeks lets the most frequent slots of each weekday outvote a bank
-# holiday or a one-off closure.
-CALENDAR_WEEKS = 3
 
 LA_POSTE = {"operator": "La Poste", "operator_wikidata": "Q373724"}
 
@@ -61,15 +59,15 @@ class LaPosteFRSpider(Spider):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # ref -> weekday -> Counter of that day's slots across the window
+        # ref -> weekday -> Counter of that day's slots across the calendar
         self.slots = defaultdict(lambda: defaultdict(Counter))
 
     async def start(self) -> AsyncIterator[Request]:
-        monday = date.today() + timedelta(days=7 - date.today().weekday())
-        last_day = monday + timedelta(weeks=CALENDAR_WEEKS, days=-1)
+        # The whole three months are read so that each weekday's most frequent
+        # slots outvote bank holidays and school holiday closures, which shut
+        # many municipal agencies for weeks at a time.
         yield Request(
-            url=f"{CALENDAR_URL}?size={PAGE_SIZE}&qs=date_calendrier:[{monday} TO {last_day}]"
-            f"&select=identifiant,date_calendrier,{','.join(CALENDAR_FIELDS)}",
+            url=f"{CALENDAR_URL}?size={PAGE_SIZE}&select=identifiant,date_calendrier,{','.join(CALENDAR_FIELDS)}",
             callback=self.parse_calendar,
         )
 
@@ -88,15 +86,13 @@ class LaPosteFRSpider(Spider):
             yield Request(url=f"{DATASET_URL}?size={PAGE_SIZE}")
 
     def opening_hours(self, ref: str) -> OpeningHours | None:
-        # A site closed on every day of the window is shut for works or for
-        # good, which says nothing about its usual hours.
-        if not any(slots for day in self.slots.get(ref, {}).values() for slots in day):
+        week = {day: counter.most_common(1)[0][0] for day, counter in self.slots.get(ref, {}).items()}
+        # A site closed most of the calendar is shut for works or for good,
+        # which says nothing about its usual hours.
+        if not any(week.values()):
             return None
         oh = OpeningHours()
-        for day in DAYS:
-            if not self.slots[ref][day]:
-                continue
-            slots = self.slots[ref][day].most_common(1)[0][0]
+        for day, slots in week.items():
             if not slots:
                 oh.set_closed(day)
             for slot in slots:
