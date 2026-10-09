@@ -27,6 +27,7 @@ class GrazeCrazeUSSpider(Spider):
     item_attributes = {"brand": "Graze Craze"}
     allowed_domains = ["www.grazecraze.com", "graphql.gorilladash.com"]
     start_urls = ["https://www.grazecraze.com/locations"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
         if not (token := re.search(r'window\.graphqlToken\s*=\s*"([^"]+)"', response.text)):
