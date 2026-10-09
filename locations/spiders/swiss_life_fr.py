@@ -19,7 +19,6 @@ class SwissLifeFRSpider(SitemapSpider, StructuredDataSpider):
     search_for_twitter = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
-        item["ref"] = response.url.split("/")[-3]
         item["branch"] = item.pop("name", "").removeprefix("Swiss Life ")
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield item
