@@ -38,7 +38,6 @@ class RallyHouseUSSpider(CamoufoxSpider):
             item["city"] = properties["city"]
             item["state"] = properties["state"]
             item["postcode"] = properties["zip"].zfill(5)
-            item["country"] = "US"
             item["phone"] = properties.get("phone")
             item["website"] = "https://www.rallyhouse.com" + properties["url"]
             item["image"] = properties.get("photo")

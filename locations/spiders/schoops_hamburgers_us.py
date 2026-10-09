@@ -51,7 +51,6 @@ class SchoopsHamburgersUSSpider(scrapy.Spider):
             item["city"] = city
             item["state"] = state
             item["postcode"] = postcode
-            item["country"] = "US"
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             item["phone"] = location["phone"]

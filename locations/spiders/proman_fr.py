@@ -50,7 +50,6 @@ class PromanFRSpider(Spider):
             item["street_address"] = location["address"]
             item["city"] = location["city"]
             item["postcode"] = (location.get("zip") or "").strip()
-            item["country"] = "FR"
             item["phone"] = location.get("phone")
             item["email"] = email or None
             item["website"] = "https://www.proman-emploi.fr/" + location["url_path"]

@@ -1586,7 +1586,6 @@ class HelsinkiServicemapFISpider(Spider):
     # ---- Address handling: housenumber/unit token parsing, tail
     # ---- stripping, comma fallbacks, street/place/venue routing.
     def _apply_address(self, item, unit):
-        item["country"] = "FI"
         municipality = unit.get("municipality")
         if isinstance(municipality, str) and municipality.strip():
             # Source stores municipalities lowercase; capitalise for output.

@@ -21,7 +21,6 @@ class DruryHotelsUSSpider(SitemapSpider):
         item["state"] = response.css('span[itemprop="addressRegion"]::text').get()
         item["postcode"] = response.css('span[itemprop="postalCode"]::text').get()
         item["phone"] = response.css('span[itemprop="telephone"] a::text').get()
-        item["country"] = "US"
         item["image"] = response.css(".first ::attr(data-src)").get()
         extract_google_position(item, response)
 

@@ -72,7 +72,6 @@ class CacauShowBRSpider(Spider):
             item = DictParser.parse(store)
             item["ref"] = ref
             item["branch"] = item.pop("name", None)
-            item["country"] = "BR"
 
             address_parts = [p for p in (store.get("address1"), store.get("address2")) if p]
             item["street_address"] = ", ".join(address_parts) if address_parts else None

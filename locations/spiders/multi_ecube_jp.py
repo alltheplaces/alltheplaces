@@ -42,7 +42,6 @@ class MultiEcubeJPSpider(Spider):
         item["ref"] = str(location["id"])
         item["lat"] = location.get("latitude")
         item["lon"] = location.get("longitude")
-        item["country"] = "JP"
 
         attributes = location.get("attributes", {})
         item["branch"] = attributes.get("display_name")

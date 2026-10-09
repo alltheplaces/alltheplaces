@@ -50,7 +50,6 @@ class WoodcraftUSSpider(Spider):
         item["city"] = store.get("city")
         item["state"] = store.get("state")
         item["postcode"] = store.get("zip")
-        item["country"] = "US"
         item["phone"] = store.get("phone_number")
         item["email"] = store.get("email")
         item["website"] = "https://www.woodcraft.com/pages/store/{}".format(store.get("slug", ""))

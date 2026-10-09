@@ -68,7 +68,6 @@ class FargerikeNOSpider(Spider):
             item["city"] = store.get("postDistrict")
             item["lat"] = store.get("latitude")
             item["lon"] = store.get("longitude")
-            item["country"] = "NO"
             item["opening_hours"] = oh
             item["website"] = "https://www.fargerike.no" + store["externalUrl"] if store.get("externalUrl") else None
             apply_category(Categories.SHOP_PAINT, item)

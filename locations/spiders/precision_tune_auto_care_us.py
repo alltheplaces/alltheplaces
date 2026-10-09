@@ -22,7 +22,6 @@ class PrecisionTuneAutoCareUSSpider(StoreRocketSpider):
         # needed alongside them.
         item.pop("addr_full", None)
         # Two centres on military bases leave country blank.
-        item["country"] = "US"
 
         apply_category(Categories.SHOP_CAR_REPAIR, item)
 

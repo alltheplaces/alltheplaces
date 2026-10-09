@@ -81,7 +81,6 @@ class BricodepotFRSpider(SitemapSpider, CamoufoxSpider):
         item["street_address"] = merge_address_lines(store["address_data"]["street"])
         item["city"] = store["address_data"]["city"]
         item["postcode"] = store["address_data"]["postcode"]
-        item["country"] = "FR"
         item["phone"] = store.get("contact_phone") or None
         item["email"] = store.get("contact_mail") or None
 

@@ -72,7 +72,6 @@ class CinemaSunshineJPSpider(JSONBlobSpider):
         item["ref"] = feature["path"]
         item["branch"] = item.pop("name", "")
         item["name"] = "シネマサンシャイン"
-        item["country"] = "JP"
 
         if coords := self.extract_coords(feature.get("google_map_url") or ""):
             item["lat"], item["lon"] = coords

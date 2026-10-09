@@ -29,7 +29,6 @@ class PetesMarketUSSpider(SitemapSpider):
             item["street_address"] = address_lines[0]
             if m := re.match(r"^(.*),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$", address_lines[1]):
                 item["city"], item["state"], item["postcode"] = m.groups()
-        item["country"] = "US"
 
         if m := re.search(r"(\d{1,2}:\d{2} [AP]M) - (\d{1,2}:\d{2} [AP]M) DAILY", response.css(".store-hours").get("")):
             oh = OpeningHours()

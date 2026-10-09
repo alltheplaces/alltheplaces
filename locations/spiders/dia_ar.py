@@ -57,7 +57,6 @@ class DiaARSpider(Spider):
             store["location"] = store.get("address", {}).get("location", {})
             item = DictParser.parse(store)
             item["branch"] = item.pop("name")
-            item["country"] = "AR"
 
             try:
                 item["opening_hours"] = self.parse_opening_hours(store.get("businessHours", []))

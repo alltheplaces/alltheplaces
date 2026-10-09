@@ -32,7 +32,6 @@ class MazdaRUSpider(Spider):
             item["lon"] = address["longitude"]
             item["street_address"] = " ".join(filter(None, [address.get("street"), address.get("house")]))
             item["city"] = (address.get("city") or {}).get("name")
-            item["country"] = "RU"
             if url := location.get("url"):
                 item["website"] = url
 

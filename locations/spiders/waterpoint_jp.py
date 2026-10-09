@@ -43,7 +43,6 @@ class WaterpointJPSpider(Spider):
             item["lon"] = float(lng)
             item["name"] = name
             item["street_address"] = street_address
-            item["country"] = "JP"
 
             apply_category(Categories.VENDING_MACHINE, item)
             add_vending(Vending.WATER, item)

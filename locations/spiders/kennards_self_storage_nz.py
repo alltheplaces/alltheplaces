@@ -30,6 +30,5 @@ class KennardsSelfStorageNZSpider(SitemapSpider, StructuredDataSpider):
     ) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         # Every location incorrectly states an Australian addressCountry
-        item["country"] = "NZ"
         apply_category(Categories.SHOP_STORAGE_RENTAL, item)
         yield item

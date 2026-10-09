@@ -28,7 +28,6 @@ class ReznictviRabbitCZSpider(Spider):
     def parse_store(self, response: Response) -> Iterable[Feature]:
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["country"] = "CZ"
 
         item["branch"] = response.xpath('//li[@class="last"]/text()').get("").strip()
 

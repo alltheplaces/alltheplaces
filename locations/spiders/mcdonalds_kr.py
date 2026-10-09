@@ -38,7 +38,6 @@ class McdonaldsKRSpider(Spider):
             item["postcode"] = store.get("zipCode")
             item["city"] = store.get("gugunKor")
             item["state"] = store.get("sidoKor")
-            item["country"] = "KR"
             item["website"] = "https://www.mcdonalds.co.kr/kor/store/main"
 
             if tel := store.get("tel1"):

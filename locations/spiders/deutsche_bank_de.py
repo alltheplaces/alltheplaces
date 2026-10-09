@@ -41,8 +41,6 @@ class DeutscheBankDESpider(Spider):
                 f'https://www.deutsche-bank.de/cip/rest/api/url/filialfinder/Home/Details?id={location["ID"]}'
             )
 
-            item["country"] = "DE"
-
             item["extras"]["type"] = location_type = location["CurrentBranch"]["BranchType"]
 
             if location_type in ["PBCxFIN", "PBCxINV", "PBCxPRIBC", "PBCxSEL"]:

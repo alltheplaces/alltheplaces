@@ -67,7 +67,6 @@ class TokyoStarBankJPSpider(Spider):
         item["ref"] = ref
         item["branch"] = branch_name
         item["addr_full"] = addr_full
-        item["country"] = "JP"
         item["phone"] = phone
         item["website"] = response.url
 

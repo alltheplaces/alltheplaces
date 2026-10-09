@@ -33,7 +33,6 @@ class RoyalBankOfScotlandGBSpider(Spider):
                         item["street_address"] = address_lines[0]
                     item["city"] = postal_address.get("TownName")
                     item["postcode"] = postal_address.get("PostCode")
-                    item["country"] = "GB"
 
                     if geo_location := postal_address.get("GeoLocation", {}).get("GeographicCoordinates"):
                         if lat := geo_location.get("Latitude"):

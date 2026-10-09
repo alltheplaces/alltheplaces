@@ -32,7 +32,6 @@ class BenuCZSpider(SitemapSpider, StructuredDataSpider):
         if "vydejni-box" in response.url or "e-shop" in response.url:
             return
 
-        item["country"] = "CZ"
         if re.sub(r"\D", "", item.get("phone") or "").endswith(NATIONAL_HOTLINE_DIGITS):
             item["phone"] = None
         apply_category(Categories.PHARMACY, item)

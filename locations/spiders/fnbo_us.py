@@ -53,7 +53,6 @@ class FnboUSSpider(Spider):
             item = DictParser.parse(location)
             item.pop("street", None)
             item["street_address"] = location.get("Street")
-            item["country"] = "US"
             item["branch"] = location["InstitutionName"]
             item["phone"] = location.get("WorkPhone") or None
 

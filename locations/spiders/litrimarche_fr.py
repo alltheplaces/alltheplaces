@@ -38,7 +38,6 @@ class LitrimarcheFRSpider(scrapy.Spider):
             item["street_address"] = street_address.title() if street_address.isupper() else street_address
             item["postcode"] = postcode
             item["city"] = city.title()
-            item["country"] = "FR"
             item["phone"] = footer_text[0].strip() if len(footer_text) > 0 else None
             item["email"] = footer_text[1].strip() if len(footer_text) > 1 else None
             item["opening_hours"] = self.parse_hours(article)

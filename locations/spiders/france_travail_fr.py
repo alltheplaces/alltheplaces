@@ -59,7 +59,6 @@ class FranceTravailFRSpider(Spider):
             )
             item["postcode"] = address["code_postal"]
             item["city"] = address["nom_commune"]
-            item["country"] = "FR"
             item["lat"] = address["latitude"]
             item["lon"] = address["longitude"]
             # The only telephone and website given are the national hotline

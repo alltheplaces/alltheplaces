@@ -41,7 +41,6 @@ class LiviqueCHSpider(SitemapSpider, StructuredDataSpider):
                 "Could not parse brand from store title: {}. Perhaps this is a new brand?".format(item["name"])
             )
 
-        item["country"] = "CH"
         item["image"] = self.cleanup_image(item["image"])
         if phone := item.get("phone"):
             item["phone"] = self.cleanup_phone(phone)

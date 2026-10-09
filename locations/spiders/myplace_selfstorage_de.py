@@ -13,7 +13,6 @@ class MyplaceSelfstorageDESpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
-        item["country"] = "DE"
         if item.get("phone") and item["phone"].replace(" ", "").endswith("800591591010"):
             item["phone"] = None
         apply_category(Categories.SHOP_STORAGE_RENTAL, item)

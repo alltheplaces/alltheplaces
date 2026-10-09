@@ -33,7 +33,6 @@ class UlsterBankGBSpider(Spider):
                         item["street_address"] = address_lines[0] if len(address_lines) > 0 else None
                     item["city"] = postal_address.get("TownName")
                     item["postcode"] = postal_address.get("PostCode")
-                    item["country"] = "GB"
 
                     # Extract coordinates from nested GeoLocation structure
                     if geo_location := postal_address.get("GeoLocation", {}).get("GeographicCoordinates"):

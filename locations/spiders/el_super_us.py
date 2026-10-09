@@ -94,8 +94,6 @@ class ElSuperUSSpider(SitemapSpider):
             if postcode_match:
                 item["postcode"] = postcode_match.group(1)
 
-        item["country"] = "US"
-
     def _extract_phone(self, response: Response, item: Feature) -> None:
         phone = response.xpath('//a[contains(@class, "single-store-a") and contains(@href, "tel:")]/text()').get()
         if phone:

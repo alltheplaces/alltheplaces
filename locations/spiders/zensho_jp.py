@@ -236,7 +236,6 @@ class ZenshoJPSpider(scrapy.Spider):
             item["lon"] = store.get("lng")
             item["branch"] = store.get("name")
             item["website"] = f"https://maps.zensho.co.jp/jp/detail/{ref}.html"
-            item["country"] = "JP"
 
             item["brand"] = brand_info["brand"]
             item["name"] = brand_info["brand"]

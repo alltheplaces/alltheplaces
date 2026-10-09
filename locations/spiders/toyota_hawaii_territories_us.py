@@ -46,7 +46,6 @@ class ToyotaHawaiiTerritoriesUSSpider(Spider):
             item["city"] = address["cityName"]["value"]
             item["state"] = address["stateOrProvinceCountrySubDivisionID"]["value"]
             item["postcode"] = address["postcode"]["value"]
-            item["country"] = "US"
             departments = feature["dealerParty"]["specifiedOrganization"]["primaryContact"]
 
             for department in departments:
