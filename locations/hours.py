@@ -680,6 +680,7 @@ DAYS_ES = {
     "Lunes": "Mo",
     "Lun": "Mo",
     "Lu": "Mo",
+    "L": "Mo",
     "Martes": "Tu",
     "Mar": "Tu",
     "Ma": "Tu",
@@ -694,16 +695,20 @@ DAYS_ES = {
     "Viernes": "Fr",
     "Vie": "Fr",
     "Vi": "Fr",
+    "V": "Fr",
     "Sabado": "Sa",
     "Sábado": "Sa",
+    "Sabados": "Sa",
     "Sábados": "Sa",
     "Sab": "Sa",
     "Sáb": "Sa",
     "Sa": "Sa",
+    "S": "Sa",
     "Domingo": "Su",
     "Domingos": "Su",
     "Dom": "Su",
     "Do": "Su",
+    "D": "Su",
 }
 
 DAYS_RO = {
