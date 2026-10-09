@@ -62,7 +62,9 @@ class BaridAlMaghribMASpider(Spider):
                     points.append((lat, lon))
             lat += GRID_SPACING_KM * math.sqrt(3) / 2 / 110.57
             row += 1
-        return points
+        # North first: the dense north (Tangier, Rabat, Casablanca) before the Western Sahara desert, so a
+        # short run (the 2-minute CI test) already finds outlets. The full run covers the same points.
+        return points[::-1]
 
     @staticmethod
     def km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
