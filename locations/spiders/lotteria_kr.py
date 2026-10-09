@@ -8,13 +8,13 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-API_URL = "https://www.lotteeatz.com/api/v1/stores/search?brandList=10&brandCodeList=LOTTERIA&page={}&size=100"
-
 
 class LotteriaKRSpider(Spider):
     name = "lotteria_kr"
     item_attributes = {"brand": "롯데리아", "brand_wikidata": "Q249525"}
+    API_URL = "https://www.lotteeatz.com/api/v1/stores/search?brandList=10&brandCodeList=LOTTERIA&page={}&size=100"
     start_urls = [API_URL.format(1)]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         data = response.json()
@@ -53,4 +53,4 @@ class LotteriaKRSpider(Spider):
             yield item
 
         if not data["last"]:
-            yield Request(API_URL.format(data["pageNumber"] + 1))
+            yield Request(self.API_URL.format(data["pageNumber"] + 1))
