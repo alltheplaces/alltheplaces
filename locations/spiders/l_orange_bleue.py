@@ -12,7 +12,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class LOrangeBleueSpider(SitemapSpider, StructuredDataSpider):
     name = "l_orange_bleue"
-    item_attributes = {"brand": "L'Orange bleue", "brand_wikidata": "Q3204640"}
+    item_attributes = {"brand": "L'Orange Bleue", "brand_wikidata": "Q3204640"}
     sitemap_urls = [
         "https://www.lorangebleue.fr/clubs-list-sitemap1.xml",
         "https://www.lorangebleue.es/clubs-list-sitemap1.xml",
