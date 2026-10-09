@@ -51,7 +51,10 @@ class LaPosteFRSpider(Spider):
     # indexed. La Poste's terms of service list the API as a delivery channel
     # for the data, and data.gouv.fr publishes this URL as the dataset's file.
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    dataset_attributes = Licenses.ETALAB2.value | {
+    # opening_hours comes from the ODbL calendar, whose share-alike clause then
+    # covers the whole output. Etalab 2.0 lets the sites dataset be relicensed
+    # under it.
+    dataset_attributes = Licenses.ODBL.value | {
         "source": "api",
         "attribution:name": "La Poste",
         "attribution:website": "https://data.laposte.fr/datasets/laposte-poincont2",

@@ -76,6 +76,13 @@ class Licenses(Enum):
         "attribution": "required",
         "use:commercial": "permit",
     }
+    ODBL = {
+        "license": "Open Database License 1.0",
+        "license:website": "https://opendatacommons.org/licenses/odbl/1-0/",
+        "license:wikidata": "Q1224853",
+        "attribution": "required",
+        "use:commercial": "permit",
+    }
     UNLICENSE = {
         "license": "Unlicense",
         "license:website": "https://unlicense.org/",
