@@ -71,7 +71,8 @@ class LeonidasSpider(CamoufoxSpider):
                     website = website if website.startswith("http") else f"https://{website}"
                     for service in (SocialMedia.FACEBOOK, SocialMedia.INSTAGRAM):
                         if f"{service.value}.com" in website.lower():
-                            set_social_media(item, service, website)
+                            # A stray "&suffix" breaks the profile path
+                            set_social_media(item, service, website.split("&")[0])
                             break
                     else:
                         item["website"] = website
