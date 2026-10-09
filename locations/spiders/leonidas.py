@@ -11,6 +11,7 @@ from scrapy_camoufox.page import PageMethod
 from locations.camoufox_spider import CamoufoxSpider
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import SocialMedia, set_social_media
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 logger = logging.getLogger(__name__)
@@ -64,12 +65,16 @@ class LeonidasSpider(CamoufoxSpider):
             item["street_address"] = item.pop("street")
             if item.get("email"):
                 item["email"] = item["email"][0]
-            if website := item.get("website"):
-                # Mostly scheme-less; drop placeholders with no domain such as "www."
+            if website := item.pop("website", None):
+                # Mostly scheme-less; skip placeholders with no domain such as "www."
                 if "." in website.removeprefix("www."):
-                    item["website"] = website if website.startswith("http") else f"https://{website}"
-                else:
-                    item["website"] = None
+                    website = website if website.startswith("http") else f"https://{website}"
+                    for service in (SocialMedia.FACEBOOK, SocialMedia.INSTAGRAM):
+                        if f"{service.value}.com" in website.lower():
+                            set_social_media(item, service, website)
+                            break
+                    else:
+                        item["website"] = website
             try:
                 oh = OpeningHours()
                 for key, value in data.get("schedule").items():
