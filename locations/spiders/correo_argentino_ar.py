@@ -52,7 +52,8 @@ class CorreoArgentinoARSpider(Spider):
     async def start(self) -> AsyncIterator[FormRequest]:
         for province in PROVINCES:
             if province == "C":
-                # The finder hard-codes a single locality for the city of Buenos Aires.
+                # The finder hard-codes a single locality for the city of Buenos Aires. Searched at the highest
+                # priority so items appear straight away rather than after the locality lists.
                 yield self.search(province, {"id": "5001", "nombre": "Ciudad Autónoma de Buenos Aires", "cp": None})
                 continue
             yield FormRequest(
@@ -85,7 +86,7 @@ class CorreoArgentinoARSpider(Spider):
             headers=self.headers,
             callback=self.parse_units,
             cb_kwargs={"province": province, "locality": locality},
-            priority=3 if province == "C" else priority,
+            priority=11 if province == "C" else priority,
         )
 
     def parse_units(self, response: Response, province: str, locality: dict) -> Any:
