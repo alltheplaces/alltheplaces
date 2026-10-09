@@ -848,6 +848,7 @@ DAYS_IS = {
     "Fim": "Th",
     "Fimmtudagur": "Th",
     "Fös": "Fr",
+    "Föst": "Fr",
     "Föstudagur": "Fr",
     "Lau": "Sa",
     "Laugardagur": "Sa",
