@@ -64,6 +64,12 @@ class LeonidasSpider(CamoufoxSpider):
             item["street_address"] = item.pop("street")
             if item.get("email"):
                 item["email"] = item["email"][0]
+            if website := item.get("website"):
+                # Mostly scheme-less; drop placeholders with no domain such as "www."
+                if "." in website.removeprefix("www."):
+                    item["website"] = website if website.startswith("http") else f"https://{website}"
+                else:
+                    item["website"] = None
             try:
                 oh = OpeningHours()
                 for key, value in data.get("schedule").items():
