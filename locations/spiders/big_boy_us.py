@@ -1,30 +1,22 @@
+from typing import Iterable
+
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from locations.google_url import extract_google_position
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class BigBoyUSSpider(SitemapSpider):
+class BigBoyUSSpider(SitemapSpider, StructuredDataSpider):
     name = "big_boy_us"
     item_attributes = {"brand": "Big Boy", "brand_wikidata": "Q4386779"}
     allowed_domains = ["www.bigboy.com"]
-    sitemap_urls = ["https://www.bigboy.com/dynamic-location-sitemap.xml"]
-    sitemap_rules = [(r"/location/big-boy", "parse")]
+    sitemap_urls = ["https://www.bigboy.com/robots.txt"]
+    sitemap_rules = [(r"/locations/[-\w]+", "parse_sd")]
+    drop_attributes = {"facebook", "image", "twitter"}
 
-    def parse(self, response):
-        properties = {
-            "ref": response.url,
-            "name": response.xpath("//main/section/div[2]/div[3]/div[2]/h2/text()").get(default="").replace("®", ""),
-            "addr_full": response.xpath("//main/section/div[2]/div[2]/div[4]/div[3]/p/a/text()").get(),
-            "phone": response.xpath("//main/section/div[2]/div[2]/div[7]/div[3]/p/a/text()").get(),
-            "website": response.url,
-        }
-        extract_google_position(properties, response)
-        oh = OpeningHours()
-        hours_raw = " ".join(
-            (" ".join(response.xpath("//main/section/div[2]/div[2]/div[11]/div[3]/p/text()").getall())).split()
-        )
-        oh.add_ranges_from_string(hours_raw)
-        properties["opening_hours"] = oh
-        yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Big Boy ")
+        apply_category(Categories.RESTAURANT, item)
+        yield item
