@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, ClassVar
 
 import chompjs
 from scrapy import FormRequest, Request, Spider
@@ -15,6 +15,7 @@ class AcquaSaponeITSpider(Spider):
     start_urls = ["https://www.acquaesapone.it/puntivendita-filtri/"]
     security_key = ""
     requires_proxy = True
+    custom_settings: ClassVar[dict] = {"CONCURRENT_REQUESTS_PER_DOMAIN": 1, "DOWNLOAD_DELAY": 3}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         self.security_key = chompjs.parse_js_object(

@@ -15,7 +15,6 @@ class ArcelikGlobalTRSpider(PlaywrightSpider):
     name = "arcelik_global_tr"
     start_urls = ["https://www.arcelik.com.tr/arcelik-magazalari", "https://www.beko.com.tr/beko-magazalari"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
-    requires_proxy = True
 
     def parse(self, response, **kwargs):
         for location in response.xpath('//*[@class="srv-item "][@data-order]'):

@@ -10,6 +10,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.asda_gb import AsdaGBSpider
 from locations.spiders.bq import BqSpider
 from locations.spiders.homebase_gb_ie import HomebaseGBIESpider
+from locations.spiders.jewson_gb import JewsonGBSpider
 from locations.spiders.john_lewis_gb import JohnLewisGBSpider
 from locations.spiders.leyland_sdm_gb import LeylandSdmGBSpider
 from locations.spiders.morrisons_gb import MorrisonsGBSpider
@@ -42,7 +43,15 @@ class TimpsonGroupSpider(JSONBlobSpider):
             "brand": "Timpson",
             "brand_wikidata": "Q7807658",
             "category": Categories.SHOP_HAIRDRESSER,
-            "website_tempalte": None,
+            "website_template": None,
+        },
+        "chelsea_photos": {
+            # Note: concept store brand (one off) and therefore not likely to
+            # be present in Wikidata or NSI.
+            "brand": "Chelsea Photos",
+            "brand_wikidata": None,
+            "category": Categories.SHOP_PHOTO,
+            "website_template": None,
         },
         "columbine": {
             "brand": "Columbine",
@@ -122,6 +131,9 @@ class TimpsonGroupSpider(JSONBlobSpider):
             elif feature["loc_type"] == "8":
                 # "Barbershop" branded hairdresser.
                 apply_category(self.brands["barbershop"]["category"], item)
+            elif feature["loc_type"] == "9":
+                # Self-service launderette.
+                apply_category(Categories.SHOP_LAUNDRY, item)
             else:
                 # Includes loc_type of 3 which is a drop-off/pick-up point for
                 # dry cleaning.
@@ -142,12 +154,12 @@ class TimpsonGroupSpider(JSONBlobSpider):
                 # Store/feature is not open for business and should be ignored.
                 return
             item["opening_hours"] = OpeningHours()
-            for day_index, day_abbrev in enumerate(DAYS):
-                day_hours = feature["opening_{}".format(day_index + 1)].replace(" ", "").replace(".", ":")
-                if day_hours.upper() == "CLOSED":
-                    item["opening_hours"].set_closed(day_abbrev)
-                    continue
-                item["opening_hours"].add_range(day_abbrev, *day_hours.split("-", 1))
+            item["opening_hours"].add_ranges_from_string(
+                "; ".join(
+                    "{} {}".format(day_abbrev, feature.get("opening_{}".format(day_index + 1)) or "")
+                    for day_index, day_abbrev in enumerate(DAYS)
+                )
+            )
 
         yield item
 
@@ -168,6 +180,9 @@ class TimpsonGroupSpider(JSONBlobSpider):
             case "homebase":
                 item["located_in"] = HomebaseGBIESpider.item_attributes["brand"]
                 item["located_in_wikidata"] = HomebaseGBIESpider.item_attributes["brand_wikidata"]
+            case "jewson":
+                item["located_in"] = JewsonGBSpider.item_attributes["brand"]
+                item["located_in_wikidata"] = JewsonGBSpider.item_attributes["brand_wikidata"]
             case "john-lewis":
                 item["located_in"] = JohnLewisGBSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = JohnLewisGBSpider.item_attributes["brand_wikidata"]
@@ -187,7 +202,7 @@ class TimpsonGroupSpider(JSONBlobSpider):
             case "robert-dyas":
                 item["located_in"] = RobertDyasGBSpider.item_attributes["brand"]
                 item["located_in_wikidata"] = RobertDyasGBSpider.item_attributes["brand_wikidata"]
-            case "sainsburys":
+            case "sainsburys" | "Sainsburys":
                 item["located_in"] = SainsburysSpider.SAINSBURYS["brand"]
                 item["located_in_wikidata"] = SainsburysSpider.SAINSBURYS["brand_wikidata"]
             case "screwfix":

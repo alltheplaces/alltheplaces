@@ -36,7 +36,6 @@ class SummitCreditUnionUSSpider(CamoufoxSpider):
             item["city"] = location["address"]["city"]
             item["state"] = "WI"
             item["postcode"] = str(location["address"]["postalCode"])
-            item["country"] = "US"
 
             item["branch"] = location["branchName"]
             item["name"] = self.item_attributes["brand"]

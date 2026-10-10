@@ -22,6 +22,7 @@ class LindtSpider(JSONBlobSpider):
         "https://www.lindt.es/tiendas-lindt/",
         "https://www.lindt.hu/stores/",
         "https://www.lindt.com.nl/nl/stores/",
+        "https://www.lindt.co.uk/stores/",
         "https://www.lindt.no/no/stores/",
         "https://www.lindt.at/stores/",
         "https://www.lindt.pl/stores/",

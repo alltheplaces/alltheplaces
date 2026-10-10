@@ -47,7 +47,6 @@ class SokTRSpider(Spider):
             item["lon"] = self.parse_float(store["ltd"])
             item["state"] = response.meta["province"]
             item["city"] = response.meta["district"]
-            item["country"] = "TR"
             item["phone"] = store.get("phone")
             item["street_address"] = clean_address(item.pop("addr_full", store["address"]))
             apply_category(Categories.SHOP_SUPERMARKET, item)

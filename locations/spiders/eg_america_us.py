@@ -30,6 +30,7 @@ class EgAmericaUSSpider(Spider):
         18: {"brand": "Kwik Shop", "brand_wikidata": "Q6450417"},
         19: {"brand": "Loaf 'N Jug", "brand_wikidata": "Q6663398"},
         20: {"brand": "Sprint", "brand_wikidata": "Q123012447"},
+        23: {"brand": "Coen Markets Inc", "brand_wikidata": "Q122856721"},
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -38,7 +39,10 @@ class EgAmericaUSSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["value"]["mapResults"]:
             item = DictParser.parse(location)
-            item.update(self.brands[location["bannerId"]])
+            if brand := self.brands.get(location["bannerId"]):
+                item.update(brand)
+            else:
+                self.logger.warning("Unknown bannerId: {}".format(location["bannerId"]))
             item["street_address"] = item.pop("addr_full", None)
             item["website"] = location.get("pageUrl")
             apply_category(Categories.FUEL_STATION, item)

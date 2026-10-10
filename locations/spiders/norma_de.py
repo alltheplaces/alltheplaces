@@ -84,7 +84,9 @@ class NormaDESpider(Spider):
                 zip = match.group(1)
                 city = match.group(2)
 
-            position = store.xpath('.//div[@class="col-xs-12 col-sm-6 col-md-2 col-lg-2 actions"]' "//a/@href").get()
+            position = store.xpath(
+                './/div[@class="col-xs-12 col-sm-6 col-md-2 col-lg-2 actions"]//a[@class="btn btnRoute"]/@href'
+            ).get()
             if position:
                 match = re.search(r"@(-?\d+\.\d+),(-?\d+\.\d+)", position)
                 if match:
@@ -93,7 +95,7 @@ class NormaDESpider(Spider):
 
             properties = {
                 "ref": f"{lat}_{lon}",
-                "street": street,
+                "street_address": street,
                 "city": city,
                 "postcode": zip,
                 "country": "DE",

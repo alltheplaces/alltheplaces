@@ -15,7 +15,7 @@ class BankHapoalimILSpider(Spider):
     requires_proxy = True  # Incapsula blocks direct requests.
 
     async def start(self) -> AsyncIterator[Any]:
-        yield JsonRequest(url="https://www.bankhapoalim.co.il/he/api/branches/data")
+        yield JsonRequest(url="https://www.bankhapoalim.co.il/forms/he/api/branches/data")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():

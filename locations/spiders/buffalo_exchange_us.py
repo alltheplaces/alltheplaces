@@ -1,33 +1,31 @@
 from typing import Iterable
-from urllib.parse import urljoin
-
-from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from locations.storefinders.stockist import StockistSpider
 
 
-class BuffaloExchangeUSSpider(WPStoreLocatorSpider):
+class BuffaloExchangeUSSpider(StockistSpider):
     name = "buffalo_exchange_us"
     item_attributes = {
         "brand_wikidata": "Q4985721",
         "brand": "Buffalo Exchange",
     }
-    allowed_domains = [
-        "buffaloexchange.com",
-    ]
-    days = DAYS_EN
-    iseadgg_countries_list = ["US"]
-    search_radius = 1000
-    max_results = 100
+    key = "map_v3jk2neq"
 
-    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        if "PERMANENTLY CLOSED" in item["name"]:
+    def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        hours_raw = location.get("description")
+        if hours_raw and "permanently closed" in hours_raw.lower():
             return
-        if branch_name := item.pop("name", None):
-            item["branch"] = branch_name.removeprefix("Buffalo Outlet – ").removeprefix("Buffalo Trading Post – ")
-        item["website"] = urljoin("https://buffaloexchange.com", item["website"])
-        apply_category(Categories.SHOP_CLOTHES, item)
+        item["branch"] = item.pop("name").removeprefix("Buffalo Outlet ")
+        item.pop("street_address")
+        if hours_raw:
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(hours_raw, days=DAYS_EN)
+        if "Headquarters" in item["branch"]:
+            item["name"] = self.item_attributes["brand"]
+            apply_category(Categories.OFFICE_COMPANY, item)
+        else:
+            apply_category(Categories.SHOP_CLOTHES, item)
         yield item

@@ -46,7 +46,6 @@ class SmallcakesUSSpider(Spider):
             item["city"] = city
             item["state"] = state
             item["postcode"] = postcode
-            item["country"] = "US"
             item["phone"] = phone or None
             item["website"] = unescape(website) if website else None
             item["lat"] = match.group("lat")

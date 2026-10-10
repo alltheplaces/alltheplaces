@@ -81,6 +81,7 @@ Read `.claude/REVIEW_RULES.md` then check:
 - Brand + wikidata set and correct?
 - Category applied?
 - Location count looks plausible?
+- **Scraping full HTML page loads for a paginated listing when a lighter backend API exists**: check what request the page's own "Load More"/pagination control makes (often `wp-admin/admin-ajax.php` on WordPress, or a dedicated XHR/GraphQL call) — it's usually cheaper per page and can expose real pagination metadata (a `max_num_pages`-style field) that scraped-page DOM markers don't. This is worth flagging even when the spider already checked the site's public REST API and rejected it for being incomplete (missing address/geo fields) — the AJAX endpoint behind "Load More" is a separate option from the public REST API and can carry the missing fields. If you push this as a fixup yourself, verify any pagination parameter actually changes the response (request two different page values and diff the results) rather than trusting a plausible-looking field name — one can return `HTTP 200` with valid content while silently ignoring the parameter and always returning page 1 (confirmed on PR #18358, where `props[page]` looked right but was inert, and the real field was undocumented `defaults[paged]`).
 
 ## Step 3 — Decide
 

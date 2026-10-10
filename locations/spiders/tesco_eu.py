@@ -18,10 +18,7 @@ class TescoEUSpider(SitemapSpider, StructuredDataSpider):
         "https://www.tesco.hu/aruhazak/sitemap.xml",
         "https://www.tesco.sk/obchody/sitemap.xml",
     ]
-    sitemap_rules = [
-        (r"/(prodejny|aruhazak)/[^/]+/[^/]+/?$", "parse_sd"),
-        (r"/obchody/[^/]+/[^/]+/[^/]+/?$", "parse_sd"),
-    ]
+    sitemap_rules = [(r"/(prodejny|aruhazak|obchody)/[^/]+/[^/]+", "parse_sd")]
     requires_proxy = "CZ"
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:

@@ -1,4 +1,8 @@
+from typing import Any, Iterable
+
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 from locations.storefinders.where2getit import Where2GetItSpider
 
 
@@ -14,12 +18,11 @@ class FossilSpider(Where2GetItSpider):
         }
     }
 
-    def parse_item(self, item, location):
-        hours_string = ""
-        for day in DAYS_FULL:
-            open_time = location.get(day.lower() + "open")
-            close_time = location.get(day.lower() + "close")
-            hours_string = hours_string + f" {day}: {open_time} - {close_time}"
+    def parse_item(self, item: Feature, location: dict, **kwargs: Any) -> Iterable[Feature]:
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
+        for day in DAYS_FULL:
+            open_time = location.get(f"{day.lower()}_open")
+            close_time = location.get(f"{day.lower()}_close")
+            item["opening_hours"].add_range(day, open_time, close_time)
+        apply_category(Categories.SHOP_WATCHES, item)
         yield item

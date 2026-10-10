@@ -1,8 +1,10 @@
 import json
+from datetime import date
 
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -23,6 +25,9 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
             item["lat"] = coords["latitude"]
             item["lon"] = coords["longitude"]
 
+        if schedule := response.xpath("//script/text()").re_first(r"const horaires = (\[.*\]);"):
+            item["opening_hours"] = self.parse_opening_hours(json.loads(schedule))
+
         services = [s.lower() for s in response.xpath('//span[@class="npc-sl-strct-srv-card--text "]/text()').getall()]
         apply_yes_no(
             Extras.ATM,
@@ -34,3 +39,26 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
         apply_category(Categories.BANK, item)
 
         yield item
+
+    @staticmethod
+    def parse_opening_hours(schedule: list[dict]) -> OpeningHours:
+        # The schedule lists the coming weeks day by day; the first ordinary day
+        # of each weekday stands for it, a bank holiday does not.
+        oh = OpeningHours()
+        seen = set()
+        for day in schedule:
+            weekday = DAYS[date.fromisoformat(day["date"]).weekday()]
+            if weekday in seen or day["type"] not in ("OUVERT", "FERME"):
+                continue
+            seen.add(weekday)
+            for slot in (day.get("matin"), day.get("apresMidi")):
+                # A slot with a typeOuverture is not open to walk-in customers:
+                # by appointment only (OUV_RDV), remote advice only (CONSEIL_DIST)
+                # or temporarily closed (FERM_TEMPO).
+                if slot and not slot.get("typeOuverture"):
+                    oh.add_range(
+                        weekday,
+                        "{heures:02}:{minutes:02}".format(**slot["ouverture"]),
+                        "{heures:02}:{minutes:02}".format(**slot["fermeture"]),
+                    )
+        return oh

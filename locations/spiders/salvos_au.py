@@ -1,38 +1,68 @@
-import json
+from typing import AsyncIterator, Iterable
 
-from scrapy.spiders import SitemapSpider
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class SalvosAUSpider(SitemapSpider):
+class SalvosAUSpider(Spider):
     name = "salvos_au"
     item_attributes = {"brand": "Salvos", "brand_wikidata": "Q120646407"}
-    sitemap_urls = ["https://www.salvosstores.com.au/sitemap.xml"]
-    sitemap_rules = [("/stores/", "parse")]
 
-    def parse(self, response):
-        next_data = response.xpath('//*[@id="__NEXT_DATA__"]/text()').get() or ""
-        json_data = json.loads(next_data)
-        store_data = json_data.get("props", {}).get("pageProps", {}).get("store", {})
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.query_warehouses()
 
-        if not store_data.get("StoreID"):
-            return
+    def query_warehouses(self, after: str | None = None) -> JsonRequest:
+        return JsonRequest(
+            url="https://checkout.ssapi.link/graphql/",
+            data={
+                "query": """
+                    query getWarehouses($after: String) {
+                      warehouses(first: 100, after: $after) {
+                        pageInfo {
+                          hasNextPage
+                          endCursor
+                        }
+                        edges {
+                          node {
+                            id
+                            name
+                            address {
+                              streetAddress1
+                              streetAddress2
+                              city
+                              postalCode
+                              countryArea
+                              phone
+                            }
+                          }
+                        }
+                      }
+                    }
+                """,
+                "variables": {"after": after},
+            },
+        )
 
-        item = DictParser.parse(store_data)
-        item["website"] = response.url
-        item["branch"] = item.pop("name")
+    def parse(self, response: Response) -> Iterable[Feature | JsonRequest]:
+        warehouses = response.json()["data"]["warehouses"]
+        if warehouses["pageInfo"]["hasNextPage"]:
+            yield self.query_warehouses(warehouses["pageInfo"]["endCursor"])
 
-        oh = OpeningHours()
-        for day, time in store_data["OpeningHours"].items():
-            day = day
-            if time == "Close":
-                oh.set_closed(day)
-            else:
-                open_time = time["Opening"]
-                close_time = time["Closing"]
-                oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
-        item["opening_hours"] = oh
+        for edge in warehouses["edges"]:
+            store = edge["node"]
+            address = store.pop("address")
+            if store["name"].startswith("Test ") or address["streetAddress1"] == "ONLINE STORE ONLY":
+                continue
+            store.update(address)
 
-        yield item
+            item = DictParser.parse(store)
+            item["branch"] = item.pop("name").split(", ")[0].strip()
+            item["street_address"] = merge_address_lines([address["streetAddress1"], address["streetAddress2"]])
+            item["state"] = address["countryArea"]
+            apply_category(Categories.SHOP_CHARITY, item)
+            yield item

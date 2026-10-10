@@ -1,7 +1,6 @@
-from typing import AsyncIterator
+from urllib.parse import unquote
 
 from scrapy import Spider
-from scrapy.http import FormRequest
 
 from locations.items import Feature
 
@@ -15,38 +14,38 @@ class ReviveHerbalHealthZASpider(Spider):
     allowed_domains = [
         "reviveherbalhealth.co.za",
     ]
+    start_urls = ["https://reviveherbalhealth.co.za/store-locator/"]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        yield FormRequest(
-            url="https://reviveherbalhealth.co.za/shop/wp-admin/admin-ajax.php",
-            formdata={
-                "action": "get_all_stores",
-                "lat": "",
-                "lng": "",
-            },
-            callback=self.parse,
-        )
-
-    # See also HeronFoods, Mikucha
     def parse(self, response):
-        stores = response.json()
-        for i in range(0, len(stores)):
-            store = stores[str(i)]
+        phone_links = response.xpath('//a[starts-with(@href, "tel:")]')
 
-            properties = {
-                "lat": store["lat"],
-                "lon": store["lng"],
-                "branch": store["na"],
-                "street_address": store["st"].strip(" ,"),
-                "city": store["ct"].strip(),
-                "country": "ZA",
-                "website": store["gu"],
-                "ref": store["ID"],
-            }
+        for phone in phone_links:
+            store = phone.xpath('ancestor::*[.//h2[contains(@class, "elementor-heading-title")]][1]')
 
-            if "te" in store:
-                properties["phone"] = store["te"]
-            elif "mo" in store:
-                properties["phone"] = store["mo"]
+            if not store:
+                continue
 
-            yield Feature(**properties)
+            location = self.clean(store.xpath('.//h2[contains(@class, "elementor-heading-title")]/text()').get())
+
+            text_values = [
+                text
+                for text in map(
+                    self.clean,
+                    store.xpath('.//div[contains(@class, "elementor-widget-text-editor")]//p//text()').getall(),
+                )
+                if text
+            ]
+
+            if not text_values:
+                continue
+            item = Feature()
+            item["city"] = location
+            item["branch"] = text_values[0]
+            item["addr_full"] = item["ref"] = text_values[-1]
+            item["phone"] = unquote(phone.attrib.get("href", "").removeprefix("tel:")).strip()
+
+            yield item
+
+    @staticmethod
+    def clean(value):
+        return " ".join(value.split()) if value else ""

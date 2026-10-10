@@ -10,7 +10,7 @@ from locations.spiders.circle_k_dk import CircleKDKSpider
 
 class CircleKSESpider(CircleKDKSpider):
     name = "circle_k_se"
-    start_urls = ["https://www.circlek.se/stations"]
+    sitemap_urls = ["https://www.circlek.se/sitemaps/stations/sitemap.xml"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if item["name"].startswith("CIRCLE K TRUCK "):

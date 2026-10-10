@@ -54,7 +54,6 @@ class FelleskjopetNOSpider(Spider):
 
                 if not item["lat"] or not item["lon"]:
                     continue
-                item["country"] = "NO"
 
                 if hours_raw := unit.get("openingHours"):
                     oh = OpeningHours()

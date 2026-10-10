@@ -1,35 +1,36 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import re
+from typing import Iterable
 
-from locations.google_url import extract_google_position
+from scrapy import Spider
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class RolldAUSpider(CrawlSpider):
+class RolldAUSpider(Spider):
     name = "rolld_au"
     item_attributes = {"brand": "Roll'd", "brand_wikidata": "Q113114631"}
-    start_urls = ["https://rolld.com.au/location-sitemap/"]
-    rules = [Rule(LinkExtractor(allow="/location/"), callback="parse")]
+    start_urls = ["https://sl-front.proguscommerce.com/api/locations?shopId=10052"]
 
-    def parse(self, response, **kwargs):
-        item = Feature()
+    def parse(self, response: Response) -> Iterable[Feature]:
+        for location in response.json():
+            item = DictParser.parse(location)
+            if match := re.compile(r"Roll\S{1,3}d (?:Vietnamese )?(.+)").fullmatch(item.pop("name")):
+                item["branch"] = match.group(1)
+            item["street_address"] = item.pop("addr_full")
+            # The feed uses state codes everywhere except one store, which spells the state out.
+            item["state"] = {"Northern Territory": "NT"}.get(item["state"], item["state"])
 
-        item["ref"] = item["website"] = response.url.split("?")[0]
+            item["opening_hours"] = OpeningHours()
+            for rule in location["openingHours"].splitlines():
+                day, _, times = rule.partition(": ")
+                if times == "CLOSED":
+                    item["opening_hours"].set_closed(day)
+                elif match := re.match(r"(\d{1,2}:\d{2})(?::\d{2})?-(\d{1,2}:\d{2})", times):
+                    item["opening_hours"].add_range(day, *match.groups())
 
-        item["name"] = response.xpath('//h1[@class="entry-title"]/text()').get()
-        item["street_address"] = response.xpath('//div[@class="wpsl-location-address"]/span/text()').get()
-        item["postcode"] = response.xpath('normalize-space(//span[@class="zip-code"]/text())').get()
-        item["addr_full"] = merge_address_lines(
-            response.xpath('//div[@class="wpsl-location-address"]/span/text()').getall()
-        )
-        item["phone"] = response.xpath('//div[@class="phone-number"]/text()').get()
-
-        if "closed" in item["name"].lower():
-            return
-        try:
-            extract_google_position(item, response)
-        except:
-            pass
-
-        yield item
+            apply_category(Categories.FAST_FOOD, item)
+            yield item

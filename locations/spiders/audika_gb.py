@@ -16,7 +16,6 @@ class AudikaGBSpider(CrawlSpider, StructuredDataSpider):
     item_attributes = {"brand": "Audika", "brand_wikidata": "Q2870745"}
     start_urls = ["https://www.audika.co.uk/hearing-aids-centre/all-clinics"]
     rules = [Rule(LinkExtractor(allow=r"/hearing-aids-centre/[a-z-]+/audika-"), callback="parse")]
-    wanted_types = ["LocalBusiness"]
     search_for_facebook = False
     search_for_email = False
 
@@ -31,8 +30,8 @@ class AudikaGBSpider(CrawlSpider, StructuredDataSpider):
         if image := item.get("image"):
             if "retail/shared/images/clinic" in image:
                 item["image"] = None
-            else:
-                item["image"] = image.replace("https://www.audika.co.ukhttps://www.audika.co.ukhttps", "https")
+            elif "https://assets-we.rt.demant.com" in image:
+                item["image"] = "https://assets-we.rt.demant.com" + image.split("https://assets-we.rt.demant.com", 1)[1]
 
         if item.get("email") in ["info@audika.co.uk"]:
             del item["email"]

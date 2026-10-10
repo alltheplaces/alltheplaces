@@ -1,36 +1,26 @@
-from typing import AsyncIterator
+import re
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy import Request
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class YazigiBRSpider(Spider):
+class YazigiBRSpider(StructuredDataSpider):
     name = "yazigi_br"
     item_attributes = {"brand": "Yázigi", "brand_wikidata": "Q10394813"}
+    start_urls = ["https://escolas.yazigi.com.br/"]
+    wanted_types = ["LocalBusiness"]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        url = "https://www.yazigi.com.br/BuscaUnidadesMapa"
-        yield FormRequest(
-            url=url,
-            formdata={"isLead": "false", "isMapa": "true", "isTeste": "false"},
-        )
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
+        for url in re.findall(r'\\"siteUrl\\":\\"(https://escolas\.yazigi\.com\.br/[^\\"]+)\\"', response.text):
+            yield Request(url, callback=self.parse_sd)
 
-    def parse(self, response, **kwargs):
-        data = response.json()["Unidades"]
-        for poi in data:
-            poi["Unidade"].update(poi["Unidade"].pop("Coordenadas"))
-            item = DictParser.parse(poi["Unidade"])
-            item["ref"] = poi["Unidade"].get("CodigoEmitente")
-            item["branch"] = poi["Unidade"].get("NomeFantasia")
-            item["phone"] = poi["Unidade"].get("Telefone")
-            address = poi["Unidade"]["Endereco"]
-            item["street_address"] = address.get("Logradouro")
-            item["city"] = address.get("CidadeNome")
-            item["state"] = address.get("EstadoNome")
-            item["postcode"] = address.get("CEP")
-            apply_category(Categories.LANGUAGE_SCHOOL, item)
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item.pop("image", None)
+        item["branch"] = item.pop("name").removeprefix("YÁZIGI ").title()
+        apply_category(Categories.LANGUAGE_SCHOOL, item)
+        yield item

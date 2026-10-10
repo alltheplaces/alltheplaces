@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -12,7 +13,13 @@ class NespressoSpider(Spider):
     allowed_domains = ["nespresso.com"]
     item_attributes = {"brand": "Nespresso", "brand_wikidata": "Q301301"}
 
+    @staticmethod
+    def is_placeholder_phone(phone: str) -> bool:
+        # Nespresso's API returns the same placeholder for every French store
+        return len(re.sub(r"\D", "", phone).rstrip("0")) <= 3
+
     async def start(self) -> AsyncIterator[Request]:
+
         countries = [
             "AD",
             "AE",
@@ -98,7 +105,9 @@ class NespressoSpider(Spider):
                 "postcode": store["point_of_interest"]["address"]["postal_code"],
                 "lat": store["position"]["latitude"],
                 "lon": store["position"]["longitude"],
-                "phone": store["point_of_interest"]["phone"],
             }
+
+            if (phone := store["point_of_interest"].get("phone")) and not self.is_placeholder_phone(phone):
+                properties["phone"] = phone
 
             yield Feature(**properties)

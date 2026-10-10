@@ -1,14 +1,14 @@
 from chompjs import parse_js_object
 from scrapy import Request, Spider
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_PL, OpeningHours
 from locations.items import Feature
 
 
 class TopazPLSpider(Spider):
     name = "topaz_pl"
-    item_attributes = {"brand": "Topaz", "brand_wikidata": "Q11837058", "extras": Categories.SHOP_SUPERMARKET.value}
+    item_attributes = {"brand": "Topaz", "brand_wikidata": "Q11837058"}
     allowed_domains = ["topaz24.pl"]
     start_urls = ["https://topaz24.pl/sklepy-topaz"]
 
@@ -47,4 +47,5 @@ class TopazPLSpider(Spider):
         )
         properties["opening_hours"] = OpeningHours()
         properties["opening_hours"].add_ranges_from_string(hours_string, days=DAYS_PL)
+        apply_category(Categories.SHOP_SUPERMARKET, properties)
         yield Feature(**properties)
