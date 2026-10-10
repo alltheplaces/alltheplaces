@@ -1,4 +1,3 @@
-import json
 import re
 from typing import Iterable
 
@@ -21,7 +20,7 @@ class VersaceSpider(JSONBlobSpider, CamoufoxSpider):
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS
 
     def extract_json(self, response: TextResponse) -> list[dict]:
-        return json.loads(response.xpath("//pre/text()").get())["stores"]
+        return response.json()["stores"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = (

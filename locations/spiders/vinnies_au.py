@@ -19,18 +19,28 @@ class VinniesAUSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name")
+            item["branch"] = item.pop("name").removeprefix("Vinnies ")
             item["website"] = urljoin("https://www.vinnies.org.au", item["website"])
-            item["addr_full"] = location["fullAddress"]
+
+            # Non-public warehouses, listed alongside the shops.
+            if "Distribution Centre" in item["branch"] and "Shop" not in item["branch"]:
+                continue
 
             item["opening_hours"] = OpeningHours()
             for day in location["openingTimes"]:
-                if day["closed"] or not day["open"] or not day["close"]:
-                    continue
-                item["opening_hours"].add_range(
-                    day["weekday"], day["open"].split("T", 1)[1], day["close"].split("T", 1)[1], "%H:%M:%S"
-                )
+                # The "closed" flag is inverted: the website displays the supplied
+                # times when it is true, and "Closed" otherwise. A handful of shops
+                # have a close time before the open time (09:00-05:00), which would
+                # otherwise be read as an overnight range.
+                if day["closed"] and day["open"] and day["close"]:
+                    if day["open"] < day["close"]:
+                        item["opening_hours"].add_range(day["weekday"], day["open"], day["close"], "%H:%M:%S")
+                else:
+                    item["opening_hours"].set_closed(day["weekday"])
 
-            apply_category(Categories.SHOP_CHARITY, item)
+            if "Return and Earn" in item["branch"]:
+                apply_category(Categories.RECYCLING, item)
+            else:
+                apply_category(Categories.SHOP_CHARITY, item)
 
             yield item

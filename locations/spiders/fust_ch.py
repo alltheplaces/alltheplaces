@@ -16,6 +16,7 @@ class FustCHSpider(JSONBlobSpider):
         "brand_wikidata": "Q1227164",
         "country": "CH",
     }
+    requires_proxy = "CH"  # DataDome blocks the CI data-centre IP; retesting after prior 520s in #17970
     start_urls = ["https://www.fust.ch/store-finder"]
 
     def extract_json(self, response: Response) -> list[dict]:

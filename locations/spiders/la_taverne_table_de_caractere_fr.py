@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class LaTaverneTableDeCaractereFRSpider(Spider):
     name = "la_taverne_table_de_caractere_fr"
-    item_attributes = {"brand": "La Taverne - Table de Caractère", "brand_wikidata": "Q141215923"}
+    item_attributes = {"brand": "La Taverne - Table de caractère", "brand_wikidata": "Q141215923"}
     allowed_domains = ["lestavernes.com"]
     start_urls = ["https://www.lestavernes.com/nos-restaurants-la-taverne-table-de-caracteres/"]
 

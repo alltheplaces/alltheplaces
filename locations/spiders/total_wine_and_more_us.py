@@ -1,12 +1,11 @@
 from typing import Any, AsyncIterator, Iterable
 
-import pycountry
+from chompjs import parse_js_object
 from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.geo import city_locations
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -16,30 +15,28 @@ class TotalWineAndMoreUSSpider(Spider):
     name = "total_wine_and_more_us"
     item_attributes = {"brand": "Total Wine", "brand_wikidata": "Q7828084"}
     allowed_domains = ["www.totalwine.com"]
+    start_urls = ["https://www.totalwine.com/store-finder/browse"]
+    zyte_meta = {"zyte_api": {"httpResponseBody": True, "httpResponseHeaders": True}}
 
-    def make_request(self, query: str, state: str | None = None) -> JsonRequest:
-        return JsonRequest(
-            url="https://www.totalwine.com/registry/~actions/GET_STORES/location-slideout-component/",
-            data={"query": query},
-            meta={"query": query, "state": state},
-        )
+    async def start(self) -> AsyncIterator[Request]:
+        for url in self.start_urls:
+            yield Request(url, meta=self.zyte_meta)
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for subdivision in pycountry.subdivisions.get(country_code="US"):
-            yield self.make_request(subdivision.name, subdivision.code.removeprefix("US-"))
+    @staticmethod
+    def extract_search(response: Response) -> dict:
+        script = response.xpath('//script[contains(text(), "window.INITIAL_STATE")]/text()').get()
+        return parse_js_object(script.split("window.INITIAL_STATE = ", 1)[1])["search"]["stores"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature | JsonRequest]:
-        stores = DictParser.get_nested_key(response.json(), "stores") or []
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
+        for state in self.extract_search(response)["metadata"]["states"]:
+            yield Request(
+                f"https://www.totalwine.com/store-finder/browse/{state['stateIsoCode']}",
+                callback=self.parse_state,
+                meta=self.zyte_meta,
+            )
 
-        pagination = DictParser.get_nested_key(response.json(), "pagination") or {}
-        if state := response.meta["state"]:
-            if pagination.get("totalResults", 0) > len(stores):
-                # The API returns at most 40 stores per query, so refine by city.
-                for city in city_locations("US", 100000):
-                    if city["admin1code"] == state:
-                        yield self.make_request("{}, {}".format(city["name"], response.meta["query"]))
-
-        for location in stores:
+    def parse_state(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        for location in self.extract_search(response)["stores"]:
             item = DictParser.parse(location)
             item["ref"] = location["storeNumber"]
             item["branch"] = item.pop("name")

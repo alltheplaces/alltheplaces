@@ -43,9 +43,9 @@ def test_iter_nsi():
     # McDonald's has identities in a number of locationSet's (countries)
     matches = list(nsi.iter_nsi("Q38076"))
     assert len(matches) > 4
-    # Greggs is present only in the UK, only one match then
-    matches = list(nsi.iter_nsi("Q3403981"))
+    # Morley's is present only in the UK, only one match then
+    matches = list(nsi.iter_nsi("Q21008528"))
     assert len(matches) == 1
     i = matches[0]
-    assert i["displayName"] == "Greggs"
+    assert i["displayName"] == "Morley's"
     assert i["tags"]["amenity"] == "fast_food"

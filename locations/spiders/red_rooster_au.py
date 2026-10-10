@@ -11,8 +11,8 @@ from locations.items import Feature
 class RedRoosterAUSpider(Spider):
     name = "red_rooster_au"
     item_attributes = {"brand": "Red Rooster", "brand_wikidata": "Q376466"}
-    start_urls = ["https://content-acl.redrooster.com.au/all_stores.json"]
-    allowed_domains = ["content-acl.redrooster.com.au"]
+    start_urls = ["https://d3c377j0gjsips.cloudfront.net/rr_all_store_sync.json"]
+    allowed_domains = ["d3c377j0gjsips.cloudfront.net"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
@@ -20,8 +20,15 @@ class RedRoosterAUSpider(Spider):
 
     def parse(self, response):
         for location in response.json()["data"]:
-            if location["attributes"]["isEnabledForTrading"] is not True:
-                # Ignore closed locations.
+            attributes = location["attributes"]
+            if attributes.get("isEnabled") is False or attributes.get("isEnabledForTrading") is not True:
+                # Ignore disabled locations.
+                continue
+            if attributes["storeName"].rstrip().lower().endswith(("- closed", "- inactive")):
+                # Closed stores are renamed "... - Closed" but usually stay isEnabledForTrading.
+                continue
+            store_address = location["relationships"].get("storeAddress")
+            if not store_address or not store_address.get("data"):
                 continue
 
             # Note: unit, floor and streetNumber fields are present but never

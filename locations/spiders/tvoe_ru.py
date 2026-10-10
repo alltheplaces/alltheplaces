@@ -1,29 +1,26 @@
-import json
-from typing import Any
+from typing import Iterable
 
-from scrapy.http import Response
-from scrapy.spiders import Spider
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class TvoeRUSpider(Spider):
+class TvoeRUSpider(JSONBlobSpider):
     name = "tvoe_ru"
     item_attributes = {"brand": "ТВОЕ", "brand_wikidata": "Q110034939"}
-    start_urls = ["https://tvoe.ru/contacts/"]
+    start_urls = ["https://tvoe.ru/api/shops/"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for shop in json.loads(response.xpath('//component[@is="shops"]').attrib.get(":shops")):
-            item = DictParser.parse(shop)
-            item["branch"] = item.pop("name")
-            item["street_address"] = item.pop("addr_full")
-            oh = OpeningHours()
-            open_time, close_time = shop.get("workhours").replace(" ", "").split("-")
-            oh.add_days_range(DAYS, open_time, close_time)
-            item["opening_hours"] = oh
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item.pop("name", None)
+        item["street_address"] = item.pop("addr_full")
+        oh = OpeningHours()
+        open_time, close_time = feature["workhours"].replace(" ", "").split("-")
+        oh.add_days_range(DAYS, open_time, close_time)
+        item["opening_hours"] = oh
 
-            apply_category(Categories.SHOP_CLOTHES, item)
+        apply_category(Categories.SHOP_CLOTHES, item)
 
-            yield item
+        yield item

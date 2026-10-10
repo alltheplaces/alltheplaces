@@ -54,16 +54,6 @@ class CrewCarwashUSSpider(scrapy.Spider):
             lat = acf.get("latitude") or acf.get("lat") or acf.get("latitude")
             lon = acf.get("longitude") or acf.get("lng") or acf.get("longitude")
 
-            addr_parts = []
-            if acf.get("street_address"):
-                addr_parts.append(acf.get("street_address"))
-            if acf.get("city"):
-                addr_parts.append(acf.get("city"))
-            if acf.get("state"):
-                addr_parts.append(acf.get("state"))
-            if acf.get("zip_code"):
-                addr_parts.append(acf.get("zip_code"))
-
             opening_hours = self.parse_hours(acf.get("hours") or "")
 
             properties = {
@@ -72,7 +62,10 @@ class CrewCarwashUSSpider(scrapy.Spider):
                 "lon": lon,
                 "website": row.get("link") or acf.get("location_link"),
                 "name": row.get("title", {}).get("rendered"),
-                "addr_full": ", ".join(addr_parts) if addr_parts else None,
+                "street_address": acf.get("street_address"),
+                "city": acf.get("city"),
+                "state": acf.get("state"),
+                "postcode": acf.get("zip_code"),
                 "phone": acf.get("phone_number") or acf.get("phone"),
                 "opening_hours": opening_hours,
             }

@@ -1,3 +1,4 @@
+import copy
 from typing import Any, AsyncGenerator, Iterable, Iterator
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
@@ -22,27 +23,48 @@ from locations.items import Feature
 BRAND_MAPPING = {
     "aupa": {"brand": "Citiz", "brand_wikidata": "Q3080530"},
     "BA": {"brand": "Bay Wheels", "brand_wikidata": "Q16971391"},
+    "bcycle_aventura": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_bentonville": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_boulder": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_broward": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
     "bcycle_bublr": {"brand": "Bublr Bikes", "brand_wikidata": "Q108789295"},
+    "bcycle_cincyredbike": {"brand": "Red Bike", "brand_wikidata": "Q18393750"},
+    "bcycle_desmoines": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_elpaso": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_greenville": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_heartland": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
     "bcycle_indego": {"brand": "Indego", "brand_wikidata": "Q19876452"},
+    # bcycle_lametro (Metro Bike Share, Q60749521) is deliberately unmapped: NSI defines the brand
+    # with a circular locationSet, which ApplyNSICategoriesPipeline cannot match, leaving items
+    # without a category.
+    "bcycle_madison": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_mcallen": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
     "bcycle_memphis": {"brand": "Explore Bike Share", "brand_wikidata": "Q86706492"},
+    "bcycle_nashville": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_pacersbikeshare": {"brand": "Indiana Pacers Bikeshare", "brand_wikidata": "Q109557888"},
+    "bcycle_rtcbikeshare": {"brand": "RTC Bike Share", "brand_wikidata": "Q104727968"},
+    "bcycle_sanantonio": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_santabarbara": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_santacruz": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
+    "bcycle_truckee": {"brand": "BCycle", "brand_wikidata": "Q4833723"},
     "bergen-city-bike": {"brand": "Bergen Bysykkel", "brand_wikidata": "Q109288835"},
-    "beryl_bcp": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_brighton": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_cornwall": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_greater_manchester": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_hackney_cargo_bike": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_hereford": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_hertsmere": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_isle_of_wight": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_leeds": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_norwich": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_plymouth": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_portsmouth": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_southampton": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_watford": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_west_midlands": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_westminster_cargo_bike": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
-    "beryl_wool": {"brand": "Beryl Bike Share", "brand_wikidata": "Q106575365"},
+    "beryl_bcp": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_brighton": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_cornwall": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_greater_manchester": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_hackney_cargo_bike": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_hereford": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_hertsmere": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_isle_of_wight": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_leeds": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_norwich": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_plymouth": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_portsmouth": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_southampton": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_watford": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_west_midlands": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_westminster_cargo_bike": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
+    "beryl_wool": {"brand": "Beryl", "brand_wikidata": "Q106575365"},
     "bicimad_madrid": {"brand": "BiciMAD", "brand_wikidata": "Q17402113"},
     "bici_madrid": {"brand": "BiciMAD", "brand_wikidata": "Q17402113"},
     "bike_barcelona": {"brand": "Bicing", "brand_wikidata": "Q1833385"},
@@ -395,6 +417,17 @@ class GbfsSpider(CSVFeedSpider):
             vehicle_types_categories[vehicle_type["vehicle_type_id"]] = cat
         return vehicle_types_categories
 
+    def get_system_fallback_category(self, vehicle_types_categories: dict[Any, dict[str, str]]) -> dict[str, str]:
+        """Determine the category to fall back on for stations whose own feed
+        data doesn't resolve to one. If every vehicle type declared by the
+        system shares a single amenity (e.g. a car sharing system only offers
+        cars), that amenity applies to the whole system. Otherwise assume a
+        bicycle rental, which is by far the most common kind of GBFS system."""
+        amenities = {cat["amenity"] for cat in vehicle_types_categories.values() if cat.get("amenity")}
+        if len(amenities) == 1:
+            return {"amenity": amenities.pop()}
+        return Categories.BICYCLE_RENTAL.value
+
     def get_station_status_categories(
         self, station_status: Any, vehicle_types_categories: dict[Any, dict[str, str]]
     ) -> dict[Any, list[dict[str, str]]]:
@@ -462,10 +495,17 @@ class GbfsSpider(CSVFeedSpider):
             else self.get_station_status_categories(station_status, vehicle_types_categories)
         )
 
+        fallback_category = self.get_system_fallback_category(vehicle_types_categories)
+
         # Now scrape the stations.
         for station in DictParser.get_nested_key(station_information, "stations") or []:
             yield self.parse_station(
-                station, shared_attributes, vehicle_types_categories, station_status_categories, **kwargs
+                station,
+                shared_attributes,
+                vehicle_types_categories,
+                station_status_categories,
+                fallback_category,
+                **kwargs,
             )
 
     def parse_station(
@@ -474,10 +514,11 @@ class GbfsSpider(CSVFeedSpider):
         shared_attributes: dict[str, Any],
         vehicle_types_categories: dict[Any, dict[str, str]],
         station_status_categories: dict[Any, list[dict[str, str]]],
+        fallback_category: dict[str, str],
         **kwargs,
     ) -> Feature:
         """Process an individual GBFS station."""
-        item = Feature(**shared_attributes)
+        item = Feature(**copy.deepcopy(shared_attributes))
         item["ref"] = item["extras"]["ref:gbfs"] = f"{kwargs['System ID']}:{station['station_id']}"
         item["extras"][f"ref:gbfs:{kwargs['System ID']}"] = str(station["station_id"])
         item["lat"] = station["lat"]
@@ -486,7 +527,6 @@ class GbfsSpider(CSVFeedSpider):
         item["postcode"] = station.get("post_code")
         item["city"] = station.get("city")
         item["opening_hours"] = station.get("station_opening_hours")
-        item["geometry"] = station.get("station_area")
         item["extras"]["parking"] = PARKING_TYPE_MAP.get(station.get("parking_type"))
         item["phone"] = station.get("contact_phone")
         item["website"] = station.get("rental_uris", {}).get("web")
@@ -536,6 +576,6 @@ class GbfsSpider(CSVFeedSpider):
 
         # If neither the vehicle type nor a brand preset were available, set a fallback category.
         if "amenity" not in item["extras"] and not item.get("brand_wikidata"):
-            apply_category(Categories.BICYCLE_RENTAL, item)
+            apply_category(fallback_category, item)
 
         return item

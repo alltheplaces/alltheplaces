@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -22,8 +23,7 @@ class SpacerJPSpider(JSONBlobSpider):
             return
 
         item["branch"] = item.pop("name", None)
-        item["country"] = "JP"
-        item["extras"]["amenity"] = "left_luggage"
+        apply_category(Categories.LEFT_LUGGAGE, item)
 
         oh = OpeningHours()
         open_time = feature.get("open")

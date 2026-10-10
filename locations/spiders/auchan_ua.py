@@ -1,28 +1,55 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class AuchanUASpider(Spider):
+class AuchanUASpider(PlaywrightSpider):
     name = "auchan_ua"
     item_attributes = {"brand_wikidata": "Q4073419"}
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        url = "https://auchan.ua/graphql/?query=query%20getWarehouses%20%7B%0A%20getAuchanWarehouses%20%7B%0A%20warehouses%20%7B%0A%20code%0A%20city%0A%20city_ru%0A%20hours%0A%20address%0A%20title%0A%20position%20%7B%0A%20latitude%0A%20longitude%0A%20__typename%0A%20%7D%0A%20__typename%0A%20%7D%0A%20__typename%0A%20%7D%0A%7D%0A&operationName=getWarehouses"
-        yield JsonRequest(url=url, callback=self.parse)
+        yield JsonRequest(
+            url="https://auchan.ua/graphql",
+            data={
+                "query": """
+                    query getWarehouses {
+                        getAuchanWarehouses {
+                            warehouses {
+                                code
+                                city: city_ua
+                                city_ru
+                                hours
+                                address
+                                title
+                                position {
+                                    latitude
+                                    longitude
+                                }
+                            }
+                        }
+                    }
+                """,
+                "operationName": "getWarehouses",
+            },
+        )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["data"]["getAuchanWarehouses"]["warehouses"]:
             store.update(store.pop("position"))
             item = DictParser.parse(store)
+            item["branch"] = (
+                item.pop("name").removeprefix("Мой Auchan ").removeprefix("Auchan ").removeprefix("Pick Up Point ")
+            )
             item["street_address"] = item.pop("addr_full")
-            item["city"] = store["city_ru"]
+            item["extras"]["city:ru"] = store["city_ru"]
+            item["extras"]["city:uk"] = store["city"]
             item["ref"] = store["code"]
             item["opening_hours"] = OpeningHours()
             if store["hours"] not in ["Зачинено", "Зачинений"]:

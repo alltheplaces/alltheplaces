@@ -30,7 +30,7 @@ body:
     attributes:
       label: Countries?
       placeholder: AU,CA
-      description: Does this spider cover one or two specific countries? Or is it a worldwide brand?
+      description: Does this website cover one or two specific countries? Or is it a worldwide brand?
   - type: dropdown
     id: difficulty
     attributes:
@@ -40,18 +40,17 @@ body:
         - Easy - existing storefinders and no customisation
         - Medium - some customisation or data cleansing
         - Hard - Hard work spider / Bespoke HTML parsing
-        - Extreme - Obsfucated, brittle behaviour
+        - Extreme - Obfuscated, brittle behaviour
   - type: dropdown
     id: size
     attributes:
       label: Number of POI?
       description: Approximately how many points/locations/branches?
       options:
-        - 0-10
-        - 10-20
-        - 20-50
-        - 50-100
-        - 100+
+        - 0-20 (please only request notable small brands)
+        - 20-100
+        - 100-500
+        - 500+
   - type: checkboxes
     id: behaviour
     attributes:

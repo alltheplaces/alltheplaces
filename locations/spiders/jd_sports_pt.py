@@ -6,14 +6,17 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class JdSportsPTSpider(CrawlSpider, StructuredDataSpider):
+class JdSportsPTSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
     name = "jd_sports_pt"
     item_attributes = {"brand": "JD Sports", "brand_wikidata": "Q6108019"}
     start_urls = ["https://www.jdsports.pt/store-locator/all-stores/"]
     rules = [Rule(LinkExtractor(allow=r"store-locator/[^/]+/\d+/$"), callback="parse_sd")]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name")

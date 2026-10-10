@@ -2,27 +2,23 @@ import json
 import re
 from typing import Any, Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
 
-class SdiBrokerBGSpider(Spider):
+class SdiBrokerBGSpider(SitemapSpider):
     """Spider for SDI Broker (Bulgaria) insurance offices.
     Closes #5915
     """
 
     name = "sdi_broker_bg"
     item_attributes = {"brand": "SDI Broker", "brand_wikidata": "Q65224484"}
-    start_urls = ["https://www.sdi.bg/sitemap.xml"]
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for url in response.xpath("//url/loc/text() | //*[local-name()='loc']/text()").getall():
-            if re.match(r"https://www\.sdi\.bg/offices/[a-z].*\.html$", url):
-                yield response.follow(url, callback=self.parse_city)
+    sitemap_urls = ["https://www.sdi.bg/sitemap.xml"]
+    sitemap_rules = [(r"https://www\.sdi\.bg/offices/[a-z].*\.html$", "parse_city")]
 
     def parse_city(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         m = re.search(r"var offices\s*=\s*(\[[\s\S]*?\]);", response.text)

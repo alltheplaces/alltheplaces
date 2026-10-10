@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import datetime
 from typing import Any, AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
@@ -15,6 +16,44 @@ class AudiSpider(JSONBlobSpider):
     graphql_url = "https://graphql.pss.audi.com/"
     custom_settings = {"DEFAULT_REQUEST_HEADERS": {"clientid": "d7sfqwrxzu"}, "ROBOTSTXT_OBEY": False}
     locations_key = ["data", "dealersByMarket", "dealers"]
+
+    DEPARTMENT_KEYS = {
+        "DEFAULT": {
+            "SHOP": [
+                "sales",
+                "showroom",
+                "verkauf",
+                "salg",
+                "vehículos nuevos",
+                "ventas",
+                "myynti",
+                "sprzedaż",
+                "πωλήσεις",
+                "vendita",
+                "ショールーム",
+                "セールス",
+                "営業時間",
+                "pardavimų",
+                "tirdzniecība",
+            ],
+            "SERVICE": [
+                "service",
+                "aftersales",
+                "posventa",
+                "taller",
+                "huolto",
+                "serwis",
+                "サービス",
+                "営業時間",
+                "verksted",
+                "serviso",
+                "serviss",
+            ],
+        },
+        # French keeps its own entry: "Service commercial" is sales, and the merged SERVICE list's
+        # bare "service" would otherwise claim it.
+        "FRA": {"SHOP": ["ventes", "service commercial"], "SERVICE": ["après-vente", "atelier"]},
+    }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
@@ -33,7 +72,42 @@ class AudiSpider(JSONBlobSpider):
                 method="POST",
                 data={
                     "variables": {"market": market["market"]},
-                    "query": "query DealersByMarket($market: Market!) { dealersByMarket(market: $market) { dealers { country name region street houseNumber city dealerId brand services latitude longitude phone fax email url zipCode openingHours { openingHoursNote openingHoursFormatted departments { departmentName departmentOpeningHoursNote id openingHours { id open timeRanges { closeTime openTime } } } } } } }",
+                    "query": """
+                        query DealersByMarket($market: Market!) {
+                            dealersByMarket(market: $market) {
+                                dealers {
+                                    dealerId
+                                    name
+                                    latitude
+                                    longitude
+                                    houseNumber
+                                    street
+                                    city
+                                    region
+                                    zipCode
+                                    country
+                                    phone
+                                    url
+                                    email
+                                    fax
+                                    services
+                                    openingHours {
+                                        departments {
+                                            departmentName
+                                            openingHours {
+                                                id
+                                                open
+                                                timeRanges {
+                                                    closeTime
+                                                    openTime
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    """,
                 },
             )
 
@@ -43,42 +117,60 @@ class AudiSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["dealerId"]
+        item["extras"]["fax"] = feature["fax"]
+
         if item.get("website") and not item["website"].startswith("http"):
             item["website"] = "https://" + item["website"]
 
-        if "sales" in feature["services"] or "usedcars" in feature["services"]:
+        services = feature["services"]
+        has_sales = "sales" in services or "usedcars" in services
+        has_service = "service" in services
+        departments = self.DEPARTMENT_KEYS.get(feature["country"]) or self.DEPARTMENT_KEYS["DEFAULT"]
+
+        if has_sales:
             shop_item = deepcopy(item)
             shop_item["ref"] = f"{item['ref']}-SHOP"
             try:
-                shop_item["opening_hours"] = self.parse_hours(feature.get("openingHours"), ["sales", "0"])
+                shop_item["opening_hours"] = self.parse_hours(feature["openingHours"], departments["SHOP"])
             except Exception as e:
-                self.logger.warning("Error parsing {} {}".format(feature.get("openingHours"), e))
+                self.logger.warning("Error parsing hours for {}: {}".format(feature["dealerId"], e))
             apply_category(Categories.SHOP_CAR, shop_item)
             yield shop_item
 
-        if "service" in feature["services"]:
+        if has_service:
             service_item = deepcopy(item)
             service_item["ref"] = f"{item['ref']}-SERVICE"
             try:
-                service_item["opening_hours"] = self.parse_hours(feature.get("openingHours"), ["service", "1"])
+                service_item["opening_hours"] = self.parse_hours(feature["openingHours"], departments["SERVICE"])
             except Exception as e:
-                self.logger.warning("Error parsing {} {}".format(feature.get("openingHours"), e))
+                self.logger.warning("Error parsing hours for {}: {}".format(feature["dealerId"], e))
             apply_category(Categories.SHOP_CAR_REPAIR, service_item)
             yield service_item
 
-        if "test" in feature["services"]:
+        if "test" in services:
             self.logger.info("Test data {}".format(feature))
 
-    def parse_hours(self, hours: dict, department_ids: list[str]) -> OpeningHours:
+    def parse_hours(self, hours: dict, selected_departments: list[str]) -> OpeningHours:
         oh = OpeningHours()
-        departments = hours.get("departments", []) if hours else []
+        departments = hours["departments"] if hours else []
         for department in departments:
-            if department.get("id") in department_ids:
-                for day in department.get("openingHours", []):
+            department_name = (department["departmentName"] or "").lower()
+            if any(name in department_name for name in selected_departments):
+                for day in department["openingHours"]:
                     if day["open"]:
-                        open_time = day["timeRanges"][0]["openTime"]
-                        close_time = day["timeRanges"][0]["closeTime"]
-                        oh.add_range(day["id"], open_time, close_time, "%H:%M:%S")
+                        for time_range in day["timeRanges"]:
+                            open_time = self.clean_time(time_range["openTime"])
+                            close_time = self.clean_time(time_range["closeTime"])
+                            oh.add_range(day["id"], open_time, close_time, "%H:%M")
                     else:
                         oh.set_closed(day["id"])
+                break
         return oh
+
+    def clean_time(self, value: str) -> str:
+        for fmt in ("%H:%M:%S", "%H:%M", "%H%M"):
+            try:
+                return datetime.strptime(value.strip(), fmt).strftime("%H:%M")
+            except ValueError:
+                continue
+        return value

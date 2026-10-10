@@ -4,13 +4,14 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class PuuiloFISpider(Spider):
     name = "puuilo_fi"
     item_attributes = {"brand": "Puuilo", "brand_wikidata": "Q18689102"}
-    start_urls = ["https://www.puuilo.fi/tavaratalot"]
+    start_urls = ["https://www.puuilo.fi/myymalat"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(
@@ -19,7 +20,9 @@ class PuuiloFISpider(Spider):
             if location["enabled"] != "1":
                 continue
             item = DictParser.parse(location)
+            item["phone"] = None
             item["branch"] = item.pop("name")
             item["street_address"] = item.pop("street")
             item["country"] = location["country_id"]
+            apply_category(Categories.SHOP_DOITYOURSELF, item)
             yield item

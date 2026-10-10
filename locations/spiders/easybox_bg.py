@@ -16,7 +16,10 @@ class EasyboxBGSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         for location in response.json()["data"]:
             item = DictParser.parse(location)
-            item["ref"] = location["oohId"]
+            if location["country"] == "Bulgaria":
+                item["ref"] = location["name"].split(" ")[1]
+            else:
+                item["ref"] = location["oohId"]
             apply_category(Categories.PARCEL_LOCKER, item)
             if location["photo"]:
                 item["image"] = response.urljoin(location["photo"])

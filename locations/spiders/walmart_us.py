@@ -1,13 +1,15 @@
 import json
 from typing import Any
 
-from scrapy.http import Response
+from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
+
+SITEMAP_ZYTE_API_PARAMS = {"httpResponseBody": True, "geolocation": "US"}
+PAGE_ZYTE_API_PARAMS = {"httpResponseBody": True, "httpResponseHeaders": True, "geolocation": "US"}
 
 
 class WalmartUSSpider(SitemapSpider):
@@ -16,16 +18,26 @@ class WalmartUSSpider(SitemapSpider):
     allowed_domains = ["www.walmart.com"]
     sitemap_urls = ["https://www.walmart.com/sitemap_store_main.xml"]
     sitemap_rules = [(r"/store/\d+-", "parse")]
-    requires_proxy = True
     custom_settings = {
-        "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 5,
         "ROBOTSTXT_OBEY": False,
+        "DOWNLOAD_TIMEOUT": 210,
     }
 
+    async def start(self):
+        for url in self.sitemap_urls:
+            yield Request(url, self._parse_sitemap, meta={"zyte_api": dict(SITEMAP_ZYTE_API_PARAMS)})
+
+    def _parse_sitemap(self, response):
+        for request in super()._parse_sitemap(response):
+            if request.callback == self._parse_sitemap:
+                request.meta["zyte_api"] = dict(SITEMAP_ZYTE_API_PARAMS)
+            else:
+                request.meta["zyte_api"] = dict(PAGE_ZYTE_API_PARAMS)
+            yield request
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        # Extract data from __NEXT_DATA__ script tag
         script_data = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         if not script_data:
             self.logger.warning(f"Could not find __NEXT_DATA__ in {response.url}")
@@ -37,7 +49,6 @@ class WalmartUSSpider(SitemapSpider):
             self.logger.warning(f"Could not parse __NEXT_DATA__ JSON from {response.url}")
             return
 
-        # Navigate to node detail
         node = (
             next_data.get("props", {})
             .get("pageProps", {})
@@ -66,22 +77,21 @@ class WalmartUSSpider(SitemapSpider):
             website=response.url,
         )
 
-        # Set branch name (location-specific name like "Willmar Supercenter")
         item["branch"] = node.get("displayName", "").split(",")[0].strip()
 
-        # Parse store type and apply category
         store_type = node.get("name", "")
         if store_type == "Walmart Supercenter":
             item["name"] = "Walmart Supercenter"
             apply_category(Categories.SHOP_SUPERMARKET, item)
         elif "Neighborhood Market" in store_type:
             item["name"] = "Walmart Neighborhood Market"
+            item["brand"] = "Walmart Neighborhood Market"
+            item["brand_wikidata"] = "Q7963529"
             apply_category(Categories.SHOP_SUPERMARKET, item)
         else:
             item["name"] = "Walmart"
             apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
 
-        # Parse opening hours
         hours = node.get("operationalHours", [])
         if hours:
             item["opening_hours"] = self.parse_hours(hours)

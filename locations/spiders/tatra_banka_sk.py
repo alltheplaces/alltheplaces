@@ -9,6 +9,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TatraBankaSKSpider(PlaywrightSpider):
@@ -36,10 +37,7 @@ class TatraBankaSKSpider(PlaywrightSpider):
                 "branchesWithCashRegister": "false",
             },
             headers={
-                "User-Agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-                ),
+                "User-Agent": BROWSER_DEFAULT,
                 "Referer": "https://www.tatrabanka.sk/sk/o-banke/pobocky-bankomaty/",
                 "Accept-Language": "sk-SK",
                 "X-Requested-With": "XMLHttpRequest",

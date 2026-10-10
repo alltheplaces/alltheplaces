@@ -1,18 +1,14 @@
 from scrapy import Request
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_3_LETTERS, DAYS_WEEKDAY, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class VodacomMZSpider(JSONBlobSpider):
     name = "vodacom_mz"
-    item_attributes = item_attributes = {
-        "brand": "Vodacom Moçambique",
-        "brand_wikidata": "Q130477552",
-        "extras": Categories.SHOP_MOBILE_PHONE.value,
-    }
+    item_attributes = {"brand": "Vodacom Moçambique", "brand_wikidata": "Q130477552"}
     start_urls = ["https://www.vm.co.mz/lojas"]
     locations_key = "data"
 
@@ -52,4 +48,7 @@ class VodacomMZSpider(JSONBlobSpider):
                     item["opening_hours"].set_closed(weekday)
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/closed/failed")
+
+        apply_category(Categories.SHOP_MOBILE_PHONE, item)
+
         yield item

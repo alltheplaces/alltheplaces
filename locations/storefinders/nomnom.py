@@ -4,7 +4,7 @@ from typing import AsyncIterator, Iterable
 from urllib import parse as urlparse
 
 from scrapy import Spider
-from scrapy.http import JsonResponse, Request
+from scrapy.http import Request, TextResponse
 
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
@@ -76,11 +76,10 @@ class NomNomSpider(Spider):
         "dispatch": "opening_hours:delivery",
     }
 
-    def parse(self, response: JsonResponse) -> Iterable[Feature]:
-        if not isinstance(response, JsonResponse):
-            self.logger.error(
-                f"Unexpected response type {type(response)} (content-type {response.headers.get(b'Content-Type')})"
-            )
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
+        # Not isinstance(JsonResponse): Zyte API passes through Content-Encoding, so Scrapy picks TextResponse
+        if b"json" not in (response.headers.get(b"Content-Type") or b""):
+            self.logger.error(f"Unexpected content-type {response.headers.get(b'Content-Type')}")
             return
         for location in response.json()["restaurants"]:
             item = DictParser.parse(location)
@@ -107,6 +106,6 @@ class NomNomSpider(Spider):
 
             yield from self.post_process_item(item, response, location)
 
-    def post_process_item(self, item: Feature, response: JsonResponse, feature: dict) -> Iterable[Feature]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item

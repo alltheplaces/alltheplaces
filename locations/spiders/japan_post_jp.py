@@ -1,66 +1,203 @@
-import csv
-from io import StringIO
+import math
+from typing import List
 
-from chompjs import parse_js_object
-from scrapy import Request, Spider
+from pyproj import Transformer
 
 from locations.categories import Categories, apply_category
-from locations.geo import city_locations, country_iseadgg_centroids
+from locations.geo import KILOMETERS_PER_DEGREE_LATITUDE, country_iseadgg_centroids
 from locations.items import Feature
+from locations.storefinders.emap import EMapSpider
 
-MAX_ITEMS = 1640  # determined experimentally
-RADIUS_KM = 24
-MAP_ID = "search"
+# Tokyo (EPSG:4301) -> WGS 84 (EPSG:4326) via EPSG:15484 (Tokyo to WGS 84 (108)).
+TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
+MIN_RADIUS_M = 1000
 
 
-class JapanPostJPSpider(Spider):
+class JapanPostJPSpider(EMapSpider):
     name = "japan_post_jp"
+    map_id = "search"
+    host = "map.japanpost.jp"
 
-    def make_request(self, lat, lon, distance, offset=1, count=900):
-        return Request(
-            f"https://map.japanpost.jp/p/{MAP_ID}/zdcemaphttp.cgi?target=http%3A%2F%2F127.0.0.1%2Fcgi%2Fnkyoten.cgi%3F%26cid%3D{MAP_ID}%26pos%3D{offset}%26lat%3D{lat}%26lon%3D{lon}%26knsu%3D{MAX_ITEMS}%26cnt%3D{count}%26hour%3D1%26rad%3D{distance}&zdccnt=1",
-            cb_kwargs={"lat": lat, "lon": lon, "offset": offset},
+    def make_request(
+        self,
+        lat: float,
+        lon: float,
+        radius: float,
+        offset: int = 1,
+        count: int = 900,
+        tempo_count: int = 0,
+        post_count: int = 0,
+        source: str = "",
+    ):
+        # include TEMPO (post offices + ATMs + kanpo insurance) and POST (postboxes)
+        return super().make_request(
+            lat,
+            lon,
+            radius,
+            offset,
+            count,
+            extra_params={
+                "postcid": "searchPO",
+                "search_tempo": "1",
+                "search_post": "1",
+                "opt": "search",
+                # cap on POST rows for this whole query
+                "postknsu": self.max_items,
+            },
+            tempo_count=tempo_count,
+            post_count=post_count,
+            source=source,
         )
 
-    async def start(self):
-        radius_m = RADIUS_KM * 1000
-        for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
-            yield self.make_request(lat, lon, radius_m)
-        for city in city_locations("JP", 200000):
-            yield self.make_request(city["latitude"], city["longitude"], 5500)
+    def _child_circles(
+        self, lat_parent: float, lon_parent: float, radius_parent: float
+    ) -> list[tuple[float, float, float, str]]:
+        """
+        Return the 4 child circles to fully cover a parent circle of the given radius.
 
-    def parse(self, response, lat, lon, offset):
+        Each child is offset from the parent center by half the parent radius in latitude and in
+        longitude, and its radius is the distance to the half-diagonal. The four quadrants tile the
+        square around the parent circle, so the children cover it completely.
+        """
+        lat_child = (radius_parent / 2 / 1000) / KILOMETERS_PER_DEGREE_LATITUDE
+        lon_child = (radius_parent / 2 / 1000) / (KILOMETERS_PER_DEGREE_LATITUDE * math.cos(math.radians(lat_parent)))
+        radius_child = radius_parent * math.sqrt(2) / 2
+        return [
+            (lat_parent + lat_child, lon_parent + lon_child, radius_child, "NW"),
+            (lat_parent + lat_child, lon_parent - lon_child, radius_child, "NE"),
+            (lat_parent - lat_child, lon_parent + lon_child, radius_child, "SW"),
+            (lat_parent - lat_child, lon_parent - lon_child, radius_child, "SE"),
+        ]
+
+    def _subdivide(self, lat_parent: float, lon_parent: float, radius_parent: float, source: str):
+        # Split a truncated circle into 4 children and issue their queries.
+        # Children keep source "<parent>-<quadrant>" and are recursively subdivided until no child is truncated.
+        if radius_parent <= MIN_RADIUS_M:
+            self.logger.warning(f"cannot subdivide below {MIN_RADIUS_M}m at {lat_parent},{lon_parent}")
+            return
+        for center_child_lat, center_child_lon, radius_child, quadrant in self._child_circles(
+            lat_parent, lon_parent, radius_parent
+        ):
+            yield self.make_request(center_child_lat, center_child_lon, radius_child, source=f"{source}-{quadrant}")
+
+    async def start(self):
+        radius_m = self.radius_km * 1000
+        for i, (lat, lon) in enumerate(country_iseadgg_centroids("JP", self.radius_km)):
+            yield self.make_request(lat, lon, radius_m, source=f"grid-{i}")
+
+    def parse(
+        self,
+        response,
+        lat: float,
+        lon: float,
+        radius: float,
+        offset: int,
+        count=900,
+        tempo_count=0,
+        post_count=0,
+        source="",
+    ):
         # response is an EUC-encoded JS file that looks like
         #   ZdcEmapHttpResult[1] = '...';
         # where the string body is a TSV
-        js_body = response.body.decode("euc-jp")
-        # chompjs sees the array index as an array itself, so get just the string itself:
-        js_str = js_body[js_body.find("'") : js_body.rfind("'") + 1]
-        # For some reason, neither Python json nor chompjs like just the string on its own, so wrap it in an array
-        js_ls = f"[{js_str}]"
-        (tsv_str,) = parse_js_object(js_ls)
-        reader = csv.reader(StringIO(tsv_str), delimiter="\t")
-        ret_code, rec_count, hit_count = map(int, next(reader))
-        assert rec_count <= hit_count, (rec_count, hit_count)
-        if hit_count >= MAX_ITEMS:
-            self.logger.warning("Maximum number of items returned in one query, consider lowering the radius")
-        if rec_count >= hit_count:
-            yield self.make_request(lat, lon, offset + rec_count)
-        for row in reader:
-            item = Feature()
-            item["ref"] = row[0]
-            item["website"] = f"https://map.japanpost.jp/p/{MAP_ID}/dtl/{row[0]}/"
-            item["lat"] = row[1]
-            item["lon"] = row[2]
-            item["postcode"] = row[12]
-            item["addr_full"] = row[13]
-            if "郵便局" in row[6]:
-                apply_category(Categories.POST_OFFICE, item)
-                item.update({"brand": "日本郵便", "brand_wikidata": "Q11509260"})
-                item["name"] = row[6]
-            else:
-                apply_category(Categories.ATM, item)
-                item.update({"brand": "ゆうちょ銀行", "brand_wikidata": "Q907103"})
-                item["branch"] = row[6].removesuffix("出張所")
+        reader, rec_count, hit_count = self.get_reader(response)
+        rows = list(reader)
+        tempo_total = tempo_count + sum(1 for r in rows if r[0] == "TEMPO")
+        post_total = post_count + sum(1 for r in rows if r[0] == "POST")
 
+        page = (offset - 1) // count + 1
+        self.logger.info(
+            f"Query (source={source}, lat={lat}, lon={lon}, radius={radius}, page={page}, offset={offset}, rec={rec_count}, hit={hit_count}, tempo={tempo_total}, post={post_total})"
+        )
+        if tempo_total >= self.max_items or post_total >= self.max_items:
+            self.logger.info(
+                f"Maximum number of items {self.max_items} returned in one query, subdividing into small circles (source={source})"
+            )
+            yield from self._subdivide(lat, lon, radius, source)
+            return
+
+        if offset + rec_count < hit_count:
+            yield self.make_request(
+                lat, lon, radius, offset + rec_count, tempo_count=tempo_total, post_count=post_total, source=source
+            )
+
+        for row in rows:
+            yield from self.parse_row(row)
+
+    def parse_row(self, row):
+        row_type = row[0]
+        ref = row[1]
+        lat = float(row[2])
+        lon = float(row[3])
+        # raw lat/lon are Tokyo datum (EPSG:4301). convert to WGS 84 (EPSG:4326)
+        wgs84_lat, wgs84_lon = TOKYO_TO_WGS84.transform(lat, lon)
+
+        if row_type == "POST":
+            postcode = row[21]
+            addr_full = row[7]
+            item = Feature()
+            item["ref"] = row[11]
+            # post detail page is not accessible without `?post=1`
+            item["website"] = f"https://map.japanpost.jp/p/{self.map_id}/dtl/{ref}/?post=1"
+            item["lat"] = wgs84_lat
+            item["lon"] = wgs84_lon
+            item["postcode"] = postcode
+            item["addr_full"] = addr_full
+            if collection_times := self.get_collection_times(row):
+                item["extras"]["collection_times"] = collection_times
+            item["extras"]["post_box:design"] = f"差出箱{row[14]}"
+
+            apply_category(Categories.POST_BOX, item)
+            item["operator_wikidata"] = "Q11509260"
             yield item
+            return
+
+        # col [icon] is an icon_id (marker image) that selects the category:
+        #   01, 02          = post office
+        #   03,04,06,07,08  = ATM
+        #   05              = Japan Post kanpo Insurance
+        #   99              = search-center pin, not a real location
+        icon = row[4]
+        if icon == "99":
+            return
+
+        name = row[7]
+        postcode = row[13]
+        addr_full = row[14]
+
+        item = Feature()
+        item["ref"] = ref
+        item["website"] = f"https://map.japanpost.jp/p/{self.map_id}/dtl/{ref}/"
+        item["lat"] = wgs84_lat
+        item["lon"] = wgs84_lon
+        item["postcode"] = postcode
+        item["addr_full"] = addr_full
+        if icon in ("01", "02"):
+            apply_category(Categories.POST_OFFICE, item)
+            item.update({"brand": "日本郵便", "brand_wikidata": "Q11509260"})
+            item["name"] = name
+        elif icon == "05":
+            apply_category(Categories.OFFICE_INSURANCE, item)
+            item.update({"brand": "かんぽ生命保険", "brand_wikidata": "Q6157781"})
+            item["name"] = name
+        else:
+            apply_category(Categories.ATM, item)
+            item.update({"brand": "ゆうちょ銀行", "brand_wikidata": "Q907103"})
+            item["branch"] = name.removesuffix("出張所")
+
+        yield item
+
+    def get_collection_times(self, row: List[str]) -> str:
+        # POST rows have collection times in three fixed 20-slot groups:
+        #   cols 42-61 weekday (平日), 62-81 Saturday (土曜), 82-101 Sunday/holiday (日曜・休日)
+        groups = {
+            "Mo-Fr": row[42:62],
+            "Sa": row[62:82],
+            "Su,PH": row[82:102],
+        }
+        parts = []
+        for day, times in groups.items():
+            times = [t for t in times if t]
+            if times:
+                parts.append(f"{day} {','.join(times)}")
+        return "; ".join(parts)

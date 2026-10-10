@@ -15,14 +15,15 @@ from locations.hours import OpeningHours, sanitise_day
 class BsroSpider(CrawlSpider):
     name = "bsro"
     BRANDS = {
-        "FCAC": {"brand": "Firestone", "brand_wikidata": "Q420837"},
-        "TP": {"brand": "Tires Plus", "brand_wikidata": "Q64015091"},
-        "WW": {"brand": "Wheel Works", "brand_wikidata": "Q121088283"},
-        "HTP": {"brand": "Hibdon Tires Plus"},
+        "FCAC": {"brand": "Firestone", "brand_wikidata": "Q420837", "category": Categories.SHOP_CAR_REPAIR},
+        "TP": {"brand": "Tires Plus", "brand_wikidata": "Q64015091", "category": Categories.SHOP_TYRES},
+        "WW": {"brand": "Wheel Works", "brand_wikidata": "Q121088283", "category": Categories.SHOP_TYRES},
+        "HTP": {"brand": "Hibdon Tires Plus", "category": Categories.SHOP_TYRES},
     }
     start_urls = [
         "https://www.firestonecompleteautocare.com/local/",
         "https://www.tiresplus.com/local/",
+        "https://www.wheelworks.net/local/",
     ]
     rules = [
         Rule(
@@ -55,7 +56,9 @@ class BsroSpider(CrawlSpider):
                     item["opening_hours"].add_range(day, rule.get("openTime"), rule.get("closeTime"))
             if store_type := store.get("storeType"):
                 if brand_info := self.BRANDS.get(store_type.replace("TPL", "TP")):  # TPL: Tires Plus Licensee
+                    brand_info = dict(brand_info)
+                    apply_category(brand_info.pop("category"), item)
                     item.update(brand_info)
-                if store_type == "HTP":
-                    apply_category(Categories.SHOP_TYRES, item)
+                if store_type == "WW":
+                    item["extras"]["service:vehicle:car_repair"] = "yes"
             yield item
