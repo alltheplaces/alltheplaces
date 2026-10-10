@@ -19,13 +19,18 @@ class Studio88Spider(AmastyStoreLocatorSpider):
     def post_process_item(
         self, item: Feature, feature: dict, popup_html: Selector | None = None
     ) -> Iterable[Feature | Request]:
-        item["branch"] = item.pop("name").removeprefix("Studio 88 ")
+        name = item.pop("name", "")
+        if name:
+            item["branch"] = name.removeprefix("Studio 88 ")
         if popup_html is not None:
-            item["addr_full"] = clean_address(
+            address = clean_address(
                 popup_html.xpath(
                     '//div[contains(@class, "s2")]//div[contains(@class, "amlocator-today")]/text()'
                 ).getall()
             )
-            item["phone"] = popup_html.xpath('//a[@class="phones"]/@href').get()
+            if address:
+                item["addr_full"] = address
+            if phone := popup_html.xpath('//a[@class="phones"]/@href').get():
+                item["phone"] = phone
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
