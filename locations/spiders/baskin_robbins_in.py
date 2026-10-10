@@ -13,6 +13,7 @@ class BaskinRobbinsINSpider(StockistSpider):
         item["addr_full"] = item.pop("street_address", None)
 
         if item["country"] == "No":
+            item["country"] = "IN"
             item["postcode"] = item["state"]
             item["state"] = item["city"]
             item["city"] = location["address_line_2"]
