@@ -61,11 +61,15 @@ class LaGrandeRecreFRSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for rule in store["hours"]["openingHours"]:
                 day = DAYS[(rule["num"] - 1) % 7]
-                times = [rule[period] for period in ["amBegin", "amEnd", "pmBegin", "pmEnd"] if rule.get(period)]
-                if not times:
+                has_hours = False
+                if rule.get("amBegin") and rule.get("amEnd"):
+                    item["opening_hours"].add_range(day, rule["amBegin"], rule["amEnd"])
+                    has_hours = True
+                if rule.get("pmBegin") and rule.get("pmEnd"):
+                    item["opening_hours"].add_range(day, rule["pmBegin"], rule["pmEnd"])
+                    has_hours = True
+                if not has_hours:
                     item["opening_hours"].set_closed(day)
-                for open_time, close_time in zip(times[::2], times[1::2]):
-                    item["opening_hours"].add_range(day, open_time, close_time)
 
             apply_category(Categories.SHOP_TOYS, item)
             yield item
