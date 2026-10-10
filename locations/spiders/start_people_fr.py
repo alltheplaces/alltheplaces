@@ -71,7 +71,7 @@ class StartPeopleFRSpider(Spider):
                     )
                 if slot.get("comment"):
                     rule = '{} "{}"'.format(rule, slot["comment"].replace('"', "")).strip()
-                if rule:
+                if rule and slot.get("day") is not None:
                     days_by_rule[rule].append(DAYS_FROM_SUNDAY[int(slot["day"])])
             item["opening_hours"] = ", ".join(
                 "{} {}".format(",".join(days), rule) for rule, days in days_by_rule.items()
