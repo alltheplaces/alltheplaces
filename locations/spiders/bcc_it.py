@@ -1,7 +1,7 @@
 from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
-from w3lib.html import remove_tags
+from w3lib.html import replace_tags
 
 from locations.categories import Categories, apply_category
 from locations.geo import country_iseadgg_centroids
@@ -42,7 +42,7 @@ class BccITSpider(JSONBlobSpider):
             item["extras"]["wheelchair"] = "yes"
 
         if opening := location["ORARIO_APERTURA"]:
-            times = remove_tags(opening, token=" ")
+            times = replace_tags(opening, token=" ")
             item["opening_hours"] = oh = OpeningHours()
             oh.add_ranges_from_string(
                 times.replace(" e ", ", "),
