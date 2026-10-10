@@ -42,7 +42,7 @@ class BccITSpider(JSONBlobSpider):
             item["extras"]["wheelchair"] = "yes"
 
         if opening := location["ORARIO_APERTURA"]:
-            times = remove_tags(opening)
+            times = remove_tags(opening, token=" ")
             item["opening_hours"] = oh = OpeningHours()
             oh.add_ranges_from_string(
                 times.replace(" e ", ", "),
