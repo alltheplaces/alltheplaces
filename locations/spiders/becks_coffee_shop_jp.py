@@ -20,8 +20,9 @@ class BecksCoffeeShopJPSpider(LocationCloudSpider):
         if phone := source_feature.get("phone"):
             item["phone"] = f"+81 {phone}"
 
-        texts = {t["label"]: t["value"] for t in source_feature.get("details", [{}])[0].get("texts", [])}
-        flags = {f["label"]: f["value"] for f in source_feature.get("details", [{}])[0].get("flags", [])}
+        details = (source_feature.get("details") or [{}])[0]
+        texts = {t["label"]: t["value"] for t in details.get("texts", [])}
+        flags = {f["label"]: f["value"] for f in details.get("flags", [])}
 
         if flags.get("閉店"):
             return
