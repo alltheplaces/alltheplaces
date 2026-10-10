@@ -22,7 +22,6 @@ class CoopProntoCHSpider(SitemapSpider, StructuredDataSpider):
 
         item["branch"] = item.pop("name")
         item["ref"] = response.url.split("/")[-1]
-        item["country"] = "CH"
 
         apply_category(Categories.SHOP_CONVENIENCE, item)
 

@@ -52,7 +52,6 @@ class TheBigBiscuitUSSpider(Spider):
                     item["city"] = city_state[0].strip()
                     if len(city_state) > 1:
                         item["state"] = city_state[1].strip()
-                item["country"] = "US"
 
             item["ref"] = item.get("website") or item["branch"]
 

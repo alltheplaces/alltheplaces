@@ -54,7 +54,6 @@ class PrincipalityGBSpider(Spider):
         item["lat"] = branch["position"]["lat"]
         item["lon"] = branch["position"]["lng"]
         item["website"] = response.url
-        item["country"] = "GB"
 
         # Parse address: last comma-part is always the UK postcode,
         # second-to-last is typically the city/region.

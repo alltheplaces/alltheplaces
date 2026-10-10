@@ -64,7 +64,6 @@ class HobbycoAUSpider(Spider):
             item["branch"] = props.get("address")
             item["city"] = props.get("city")
             item["postcode"] = props.get("postalCode")
-            item["country"] = "AU"
             item["phone"] = props.get("phone") or None
             item["email"] = props.get("email") or None
             item["website"] = props.get("maps") or None

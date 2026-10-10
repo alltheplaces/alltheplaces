@@ -229,7 +229,6 @@ class PiattaformaUnicaNazionaleITSpider(scrapy.Spider):
             item["state"] = state.strip()
         if postcode := loc.get("postal_code"):
             item["postcode"] = str(postcode).strip()
-        item["country"] = "IT"
 
         if operator := first_evse.get("businessName"):
             item["operator"] = operator.strip()

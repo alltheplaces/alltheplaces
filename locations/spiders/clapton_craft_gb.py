@@ -42,7 +42,6 @@ class ClaptonCraftGBSpider(Spider):
             addr2 = loc.get("addressLine2", "").strip()
             if addr2 and addr2.lower() not in ("united kingdom", ""):
                 item["addr_full"] = ", ".join(filter(None, [loc.get("addressLine1"), addr2]))
-            item["country"] = "GB"
             item["lat"] = loc["markerLat"]
             item["lon"] = loc["markerLng"]
 

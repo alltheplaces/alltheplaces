@@ -39,7 +39,6 @@ class LegalSeaFoodsUSSpider(SitemapSpider):
         item["addr_full"] = address
         if match := re.search(r", ([^,]+), ([A-Z]{2}) (\d{5})$", address):
             item["city"], item["state"], item["postcode"] = match.groups()
-            item["country"] = "US"
 
         hours = OpeningHours()
         for line in response.xpath(

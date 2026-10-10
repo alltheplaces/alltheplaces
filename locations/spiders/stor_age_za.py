@@ -33,7 +33,6 @@ class StorAgeZASpider(SitemapSpider):
         item["email"] = store["storeEmail"]
         item["addr_full"] = address
         item["website"] = response.url
-        item["country"] = "ZA"
 
         item["opening_hours"] = oh = OpeningHours()
         for rule in store.get("officeHours") or []:

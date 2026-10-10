@@ -29,7 +29,6 @@ class BenesseBestudioJPSpider(Spider):
             item["phone"] = location.get("phone")
             item["addr_full"] = location.get("address_name")
             item["postcode"] = location.get("postal_code")
-            item["country"] = "JP"
             if coord := location.get("coord"):
                 item["lat"] = coord.get("lat")
                 item["lon"] = coord.get("lon")

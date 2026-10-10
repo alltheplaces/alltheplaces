@@ -34,7 +34,6 @@ class OnAirFRSpider(SitemapSpider):
         item = Feature(**self.item_attributes)
         item["ref"] = item["website"] = response.url
         item["branch"] = self.parse_branch(response)
-        item["country"] = "FR"
         item["phone"] = (
             re.sub(r"\s+", "", response.css(".single_span_icn.tel").xpath("normalize-space()").get("")) or None
         )

@@ -64,7 +64,6 @@ class FenebergDESpider(scrapy.Spider):
         item["city"] = kwargs["city"]
         item["phone"] = kwargs["phone"]
         item["website"] = response.url
-        item["country"] = "DE"
 
         item["opening_hours"] = self.parse_hours(response)
 

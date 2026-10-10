@@ -88,7 +88,6 @@ class ToyotaRentACarJPSpider(SitemapSpider):
         item = Feature()
         item["ref"] = f"{rcode}-{ecode}"
         item["website"] = response.url
-        item["country"] = "JP"
         item["phone"] = response.css("#lblTel::text").get("").strip() or None
         item["branch"] = shop_name
 

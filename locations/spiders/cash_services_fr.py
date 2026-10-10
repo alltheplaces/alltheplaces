@@ -67,7 +67,6 @@ class CashServicesFRSpider(CrawlSpider):
                     item["street_address"] = address_paragraphs[i - 1].strip()
                 break
 
-        item["country"] = "FR"
         item["website"] = response.url
 
         services = response.xpath('//@class[contains(., "ei_rogi_picto_")]').getall()

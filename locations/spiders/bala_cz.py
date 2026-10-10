@@ -49,7 +49,6 @@ class BalaCZSpider(Spider):
             item["street_address"] = contact.get("ulice")
             item["city"] = contact.get("mesto")
             item["postcode"] = contact.get("psc")
-            item["country"] = "CZ"
             item["lat"] = contact.get("gpsLat")
             item["lon"] = contact.get("gpsLng")
             item["phone"] = contact.get("telefon")

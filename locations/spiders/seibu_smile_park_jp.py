@@ -84,7 +84,6 @@ class SeibuSmileParkJPSpider(scrapy.Spider):
                 item["lat"] = lat
                 item["lon"] = lon
                 item["addr_full"] = address.strip() if address else None
-                item["country"] = "JP"
                 item["website"] = response.url
 
                 apply_category(category, item)

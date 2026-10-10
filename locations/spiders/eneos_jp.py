@@ -212,7 +212,6 @@ class EneosJPSpider(scrapy.Spider):
         item["name"] = "ENEOS"
         item["branch"] = name
         item["street_address"] = address.strip()
-        item["country"] = "JP"
         item["phone"] = tel.strip() or None
         item["website"] = response.url
 

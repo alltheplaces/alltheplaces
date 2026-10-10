@@ -146,7 +146,6 @@ class HopHeyUASpider(Spider):
             item["lat"] = marker.get("GPS_N")
             item["lon"] = marker.get("GPS_S")
             item["addr_full"] = marker.get("ADDRESS_CLEARED")
-            item["country"] = "UA"
 
             oh = OpeningHours()
             for schedule in marker.get("SCHEDULE_SPLITTED", []):

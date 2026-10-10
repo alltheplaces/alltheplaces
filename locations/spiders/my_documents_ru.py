@@ -28,6 +28,5 @@ class MyDocumentsRUSpider(scrapy.Spider):
             baloonContent = poi["properties"]["balloonContentBody"]
             address, phone = baloonContent.split("</br>")
             item["addr_full"] = address
-            item["country"] = "RU"
             item["phone"] = phone
             yield item
