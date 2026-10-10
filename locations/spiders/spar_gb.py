@@ -10,6 +10,7 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 API_URL = "https://www.spar.co.uk/umbraco/api/storelocationapi/stores"
+MAX_SERVICE_PAGES = 50  # Safety limit to prevent infinite pagination
 
 
 class SparGBSpider(scrapy.Spider):
@@ -58,7 +59,7 @@ class SparGBSpider(scrapy.Spider):
             yield from self.service_done()
             return
         self.stores_by_service[service].update(store["Id"] for store in stores)
-        if len(stores) == 10:
+        if len(stores) == 10 and page < MAX_SERVICE_PAGES:
             yield self.service_request(service, page + 1)
         else:
             yield from self.service_done()
@@ -81,9 +82,9 @@ class SparGBSpider(scrapy.Spider):
         except (KeyError, ValueError) as e:
             self.logger.error(f"Failed to parse main store list: {e!r}")
             return
-        if len(stores) == 10:
-            page_no = response.meta["page"] + 1
-            yield JsonRequest(url=f"{API_URL}?pageNumber={page_no}", meta={"page": page_no})
+        page_no = response.meta.get("page", 1)
+        if len(stores) == 10 and page_no < 500:
+            yield JsonRequest(url=f"{API_URL}?pageNumber={page_no + 1}", meta={"page": page_no + 1})
 
         for store in stores:
             item = DictParser.parse(store)
