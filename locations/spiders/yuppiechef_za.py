@@ -34,6 +34,10 @@ class YuppiechefZASpider(CamoufoxSpider):
             item["phone"] = location.xpath('.//a[contains(@href, "tel:")]/@href').get()
             items[name] = item
 
+        if response.status == 403 and not items:
+            self.logger.error(f"Got 403 response with no content from {response.url}")
+            return
+
         page = response.meta["camoufox_page"]
 
         buttons = await page.locator('span:text("Store times and info")').all()
