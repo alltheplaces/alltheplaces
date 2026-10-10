@@ -27,7 +27,6 @@ class GoldsmithsGBSpider(Spider):
             location["email"] = location["address"].get("email")
 
             item = DictParser.parse(location)
-            item["country"] = "GB"
             item["branch"] = item.pop("name")
             item["website"] = f'https://www.goldsmiths.co.uk/store/{item["ref"]}'
 

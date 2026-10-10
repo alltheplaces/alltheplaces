@@ -70,7 +70,6 @@ class CycaParkingJPSpider(SitemapSpider):
         item["street_address"] = "".join(
             filter(None, [area.get("prefecture"), area.get("city"), parking.get("address")])
         )
-        item["country"] = "JP"
         item["phone"] = phone
         item["website"] = response.url
         if oh:

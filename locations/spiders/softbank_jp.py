@@ -37,7 +37,6 @@ class SoftbankJPSpider(Spider):
         item["website"] = f"https://www.softbank.jp/shop/search/detail/{item['ref']}/"
         item["branch"] = (shop.get("shop_name") or {}).get("name")
 
-        item["country"] = "JP"
         item["addr_full"] = shop.get("address")
         item["phone"] = shop.get("tel")
 

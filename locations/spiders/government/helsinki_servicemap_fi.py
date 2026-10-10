@@ -39,7 +39,7 @@ from locations.licenses import Licenses
 #   category refinement (tabled units) and subtags
 
 
-class HelsinkiServicemapFiSpider(Spider):
+class HelsinkiServicemapFISpider(Spider):
     """Helsinki region Service Map (Palvelukartta) units."""
 
     name = "helsinki_servicemap_fi"

@@ -50,7 +50,6 @@ class SantanderESSpider(JSONBlobSpider):
         item["street_address"] = loc.get("address")
         item["postcode"] = loc.get("zipcode")
         item["city"] = loc.get("city")
-        item["country"] = "ES"
         item.pop("name", None)  # name is just the branch number, not useful
 
         if obj_type == "BRANCH":

@@ -27,7 +27,6 @@ class PizzaMyHeartUSSpider(StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Request]:
         item["ref"] = item["website"].rstrip("/").rsplit("/", 1)[-1]
         item["branch"] = item.pop("name")
-        item["country"] = "US"
         apply_category(Categories.RESTAURANT, item)
         item["extras"]["cuisine"] = "pizza"
         yield Request(item["website"], callback=self.parse_location, meta={"item": item})

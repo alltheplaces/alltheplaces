@@ -1,6 +1,6 @@
 import json
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_ES, OpeningHours, sanitise_day
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.mcdonalds import McdonaldsSpider
@@ -26,5 +26,7 @@ class McdonaldsGTSpider(JSONBlobSpider):
                 for rule in oh_rules["horarios"]:
                     if day := sanitise_day(rule["description"], DAYS_ES):
                         item["opening_hours"].add_range(day, rule["start_time"], rule["end_time"])
+
+        apply_category(Categories.FAST_FOOD, item)
 
         yield item

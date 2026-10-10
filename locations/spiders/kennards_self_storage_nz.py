@@ -6,6 +6,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class KennardsSelfStorageNZSpider(SitemapSpider, StructuredDataSpider):
@@ -16,6 +17,8 @@ class KennardsSelfStorageNZSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["SelfStorage"]
     search_for_twitter = False
     search_for_facebook = False
+    requires_proxy = True
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
     def pre_process_data(self, ld_data: dict, **kwargs: Any) -> None:
         # A described specification covers 24 hour customer access, not office hours
@@ -27,6 +30,5 @@ class KennardsSelfStorageNZSpider(SitemapSpider, StructuredDataSpider):
     ) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         # Every location incorrectly states an Australian addressCountry
-        item["country"] = "NZ"
         apply_category(Categories.SHOP_STORAGE_RENTAL, item)
         yield item

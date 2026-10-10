@@ -24,5 +24,4 @@ class GapTWSpider(Spider):
         for city in response.json()["data"][0]["cityList"]:
             for store in city["storeLocations"]:
                 item = DictParser.parse(store)
-                item["country"] = "TW"
                 yield item

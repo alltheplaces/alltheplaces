@@ -99,7 +99,6 @@ class YaokoJPSpider(Spider):
         item["ref"] = response.url.rstrip("/").split("/")[-1].replace(".html", "")
         item["branch"] = re.sub(r"（.*?）$", "", response.xpath("//h1/text()").get("")).strip()
         item["website"] = response.url
-        item["country"] = "JP"
 
         addr_lines = [line.strip() for line in info.get("住所", "").split("\n") if line.strip()]
         item["addr_full"] = re.sub(r"〒\s*[0-9\-]+\s*", "", "\n".join(addr_lines)).strip()

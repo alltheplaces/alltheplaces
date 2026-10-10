@@ -59,7 +59,6 @@ class GhandaAUSpider(Spider):
             item["postcode"] = data.get("postcode")
             if state := data.get("state"):
                 item["state"] = STATES.get(state.lower(), state)
-            item["country"] = "AU"
             item["phone"] = data.get("phone")
 
             if geo := data.get("geolocation"):
