@@ -5,7 +5,7 @@ from typing import Iterable
 from scrapy.http import Response, TextResponse
 
 from locations.camoufox_spider import CamoufoxSpider
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -56,7 +56,9 @@ class AritziaSpider(JSONBlobSpider, CamoufoxSpider):
         for feature in features:
             self.pre_process_data(feature)
 
-            store_id = feature.get("storeId") or ""
+            store_id = feature.get("storeId")
+            if not store_id:
+                continue
             if store_id.startswith(NON_ARITZIA_STORE_ID_PREFIXES):
                 continue
 
@@ -65,7 +67,7 @@ class AritziaSpider(JSONBlobSpider, CamoufoxSpider):
                 # Store has not opened yet ("coming soon").
                 continue
 
-            item = Feature()
+            item = Feature(**self.item_attributes)
             item["ref"] = store_id
             item["branch"] = feature.get("storeName", "").strip()
             item["street_address"] = merge_address_lines(
@@ -88,7 +90,7 @@ class AritziaSpider(JSONBlobSpider, CamoufoxSpider):
             item["opening_hours"] = self.parse_hours((feature.get("storeHours") or {}).get("en") or [])
 
             apply_category(Categories.SHOP_CLOTHES, item)
-            apply_category({"clothes": "women"}, item)
+            apply_clothes(Clothes.WOMEN, item)
 
             yield item
 
@@ -98,7 +100,9 @@ class AritziaSpider(JSONBlobSpider, CamoufoxSpider):
         for day_hour in day_hours:
             day = day_hour.get("key")
             value = (day_hour.get("value") or "").strip()
-            if not value or value.upper() == "CLOSED":
+            if not value:
+                continue
+            if value.upper() == "CLOSED":
                 oh.add_range(day, "closed", "closed")
                 continue
             if match := re.match(r"^(.+?)\s*-\s*(.+)$", value):
