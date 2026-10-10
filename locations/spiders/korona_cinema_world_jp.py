@@ -90,7 +90,6 @@ class KoronaCinemaWorldJPSpider(JSONBlobSpider):
         item["branch"] = item.pop("name", "")
         item["name"] = "コロナシネマワールド"
         item["website"] = f"https://cinema.korona.co.jp/theaters/{feature['path']}/"
-        item["country"] = "JP"
 
         if coords := url_to_coords(feature.get("google_map_url") or ""):
             item["lat"], item["lon"] = coords

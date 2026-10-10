@@ -44,7 +44,6 @@ class BleuforetFRSpider(Spider):
         item["ref"] = response.url.rstrip("/").rsplit("/", 1)[-1].split("-", 1)[0]
         item["name"] = name
         item["website"] = response.url
-        item["country"] = "FR"
 
         if "bleuforêt" not in name.lower() and "bleuforet" not in name.lower():
             item["brand"] = None

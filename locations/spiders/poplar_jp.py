@@ -75,7 +75,6 @@ class PoplarJPSpider(scrapy.Spider):
                 item["postcode"] = postcode
             if phone:
                 item["phone"] = f"+81 {phone}"
-            item["country"] = "JP"
             item["website"] = detail_url
 
             apply_category(Categories.SHOP_CONVENIENCE, item)

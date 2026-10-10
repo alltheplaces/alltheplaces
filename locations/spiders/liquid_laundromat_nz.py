@@ -47,7 +47,6 @@ class LiquidLaundromatNZSpider(Spider):
         if not parts:
             return
         item["street_address"] = parts[0]
-        item["country"] = "NZ"
         if len(parts) >= 2:
             last = parts[-1]
             pc_match = re.search(r"\b(\d{4})\b", last)

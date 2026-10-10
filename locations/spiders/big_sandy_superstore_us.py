@@ -74,7 +74,6 @@ class BigSandySuperstoreUSSpider(scrapy.Spider):
                 item["phone"] = m.group(1)
 
         item["website"] = response.url
-        item["country"] = "US"
 
         if store_ld and (oh := self.parse_opening_hours(store_ld)):
             item["opening_hours"] = oh

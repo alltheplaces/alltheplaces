@@ -25,7 +25,6 @@ class BricktownBreweryUSSpider(StoreRocketSpider):
         item.pop("addr_full", None)
         # The API leaves country blank on most records; every restaurant is in
         # the US.
-        item["country"] = "US"
 
         apply_category(Categories.RESTAURANT, item)
         item["extras"]["cuisine"] = "american"

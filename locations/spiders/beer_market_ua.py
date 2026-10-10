@@ -36,7 +36,6 @@ class BeerMarketUASpider(Spider):
             item["lat"] = placemark["LAT"]
             item["lon"] = placemark["LON"]
             item["addr_full"] = address
-            item["country"] = "UA"
             item["website"] = response.url
 
             if hours := fields.get("t"):
