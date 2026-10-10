@@ -49,7 +49,14 @@ class SparGBSpider(scrapy.Spider):
         )
 
     def parse_service(self, response: Response, service: str, page: int) -> Any:
-        stores = response.json()["storeList"]
+        try:
+            stores = response.json()["storeList"]
+        except (KeyError, ValueError) as e:
+            self.logger.error(f"Service lookup for {service} failed to parse response: {e!r}")
+            self.crawler.stats.inc_value("atp/spar_gb/failed_service")
+            self.failed_services.add(service)
+            yield from self.service_done()
+            return
         self.stores_by_service[service].update(store["Id"] for store in stores)
         if len(stores) == 10:
             yield self.service_request(service, page + 1)
@@ -69,7 +76,11 @@ class SparGBSpider(scrapy.Spider):
             yield JsonRequest(url=f"{API_URL}?pageNumber=1", meta={"page": 1})
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        stores = response.json()["storeList"]
+        try:
+            stores = response.json()["storeList"]
+        except (KeyError, ValueError) as e:
+            self.logger.error(f"Failed to parse main store list: {e!r}")
+            return
         if len(stores) == 10:
             page_no = response.meta["page"] + 1
             yield JsonRequest(url=f"{API_URL}?pageNumber={page_no}", meta={"page": page_no})
