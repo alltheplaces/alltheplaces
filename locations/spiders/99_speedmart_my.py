@@ -10,6 +10,44 @@ from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
 
+
+def dms_to_decimal(dms_str: str) -> float:
+    """Convert DMS (Degrees, Minutes, Seconds) to decimal degrees.
+
+    Handles formats like "3°16'51.1\"N" or "3°16'51.1\"S".
+    Returns the decimal degree value with sign applied for S/W directions.
+    """
+    # Extract direction (N, S, E, W)
+    direction_match = re.search(r"[NSEW]", dms_str)
+    if not direction_match:
+        raise ValueError(f"No direction found in DMS string: {dms_str}")
+
+    direction = direction_match.group(0)
+
+    # Remove direction and whitespace
+    dms_str = dms_str.replace(direction, "").strip()
+
+    # Extract degrees, minutes, seconds
+    # Pattern: degrees°minutes'seconds" or degrees°minutes' or degrees°
+    pattern = r"(\d+(?:\.\d+)?)[°º]\s*(\d+(?:\.\d+)?)?['′]?\s*(\d+(?:\.\d+)?)?[\"″]?"
+    match = re.search(pattern, dms_str)
+
+    if not match:
+        raise ValueError(f"Could not parse DMS format: {dms_str}")
+
+    degrees = float(match.group(1))
+    minutes = float(match.group(2)) if match.group(2) else 0
+    seconds = float(match.group(3)) if match.group(3) else 0
+
+    decimal_degrees = degrees + (minutes / 60) + (seconds / 3600)
+
+    # Apply direction
+    if direction in ("S", "W"):
+        decimal_degrees = -decimal_degrees
+
+    return decimal_degrees
+
+
 # A large number of older stores use a legacy "maps.google.com.my/maps?q=..."
 # link with a raw "N02.93163, E101.31520"-style decimal-degree pair (with an
 # inconsistent mix of separators/whitespace) that locations.google_url's
@@ -126,6 +164,26 @@ class NinetynineSpeedmartMYSpider(Spider):
 
             if item.get("lat") is None and (m := LEGACY_COORD_PATTERN.search(unquote(maps_url))):
                 item["lat"], item["lon"] = float(m.group(1)), float(m.group(2))
+
+            # Fallback for DMS format coordinates (e.g. "3°16'51.1\"N")
+            # that url_to_coords and LEGACY_COORD_PATTERN don't handle
+            if item.get("lat") is None:
+                # Extract potential DMS coordinates from the URL
+                # Google Maps uses the place name as the coordinate for "share this pin" links
+                dms_match = re.search(r"(\d{1,3}°\d{1,2}'[\d.]+\"[NSEW])\s*[\d.,]*°", unquote(maps_url))
+                if dms_match:
+                    try:
+                        lat_str = dms_match.group(1)
+                        # Try to find longitude following the latitude
+                        lon_match = re.search(
+                            r"" + re.escape(lat_str) + r"\s*(\d{1,3}°\d{1,2}'[\d.]+\"[NSEW])", unquote(maps_url)
+                        )
+                        if lon_match:
+                            lon_str = lon_match.group(1)
+                            item["lat"] = dms_to_decimal(lat_str)
+                            item["lon"] = dms_to_decimal(lon_str)
+                    except (ValueError, AttributeError):
+                        pass
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
