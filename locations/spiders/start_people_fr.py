@@ -63,13 +63,16 @@ class StartPeopleFRSpider(Spider):
             days_by_rule = defaultdict(list)
             for slot in slots:
                 rule = ""
-                if slot.get("starthours") is not None and slot.get("endhours") is not None:
+                if slot.get("all_day"):
+                    rule = "00:00-24:00"
+                elif slot.get("starthours") is not None and slot.get("endhours") is not None:
                     rule = "{:02}:{:02}-{:02}:{:02}".format(
                         *divmod(int(slot["starthours"]), 100), *divmod(int(slot["endhours"]), 100)
                     )
                 if slot.get("comment"):
                     rule = '{} "{}"'.format(rule, slot["comment"].replace('"', "")).strip()
-                days_by_rule[rule].append(DAYS_FROM_SUNDAY[int(slot["day"])])
+                if rule:
+                    days_by_rule[rule].append(DAYS_FROM_SUNDAY[int(slot["day"])])
             item["opening_hours"] = ", ".join(
                 "{} {}".format(",".join(days), rule) for rule, days in days_by_rule.items()
             )
