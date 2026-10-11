@@ -24,6 +24,6 @@ class ManpowerSpider(SitemapSpider, StructuredDataSpider):
     search_for_instagram = False
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").removeprefix("Manpower ")
+        item["branch"] = item.pop("name").removeprefix("Manpower ").removeprefix("UK ")
         apply_category(Categories.OFFICE_EMPLOYMENT_AGENCY, item)
         yield item
