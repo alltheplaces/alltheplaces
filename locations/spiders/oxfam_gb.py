@@ -30,7 +30,7 @@ class OxfamGBSpider(JSONBlobSpider):
     }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for city in city_locations("GB", 100000):
+        for city in city_locations("GB", 15000):
             yield JsonRequest(url=f'https://www.oxfam.org.uk/api/locations/?query={city["name"]}')
 
     def pre_process_data(self, feature: dict) -> None:
