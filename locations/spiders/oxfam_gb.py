@@ -34,10 +34,10 @@ class OxfamGBSpider(JSONBlobSpider):
             yield JsonRequest(url=f'https://www.oxfam.org.uk/api/locations/?query={city["name"]}')
 
     def pre_process_data(self, feature: dict) -> None:
-        if feature["shop"]:
+        if feature.get("shop"):
             for key, value in feature["shop"].items():
                 feature[key] = value
-        elif feature["donationpoint"]:
+        elif feature.get("donationpoint"):
             for key, value in feature["donationpoint"].items():
                 feature[key] = value
 
@@ -45,14 +45,14 @@ class OxfamGBSpider(JSONBlobSpider):
         item["street_address"] = merge_address_lines(
             [feature.get("address_line_1"), feature.get("address_line_2"), feature.get("address_line_3")]
         )
-        if feature["shop"]:
+        if feature.get("shop"):
             item["website"] = feature["detail_url"]
             apply_category(Categories.SHOP_CHARITY, item)
             for url, brand in self.brands.items():
                 if url in item["website"]:
                     item.update(brand)
                     break
-        elif feature["donationpoint"]:
+        elif feature.get("donationpoint"):
             if "Book Bank" in feature["name"]:
                 apply_category(Categories.RECYCLING, item)
                 apply_yes_no("recycling:books", item, True)
