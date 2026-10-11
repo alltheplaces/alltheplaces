@@ -37,6 +37,8 @@ class OxfamGBSpider(JSONBlobSpider):
         if feature.get("shop"):
             for key, value in feature["shop"].items():
                 feature[key] = value
+            if feature.get("phone_number"):
+                feature["phone_number"] = feature["phone_number"]["international"]
         elif feature.get("donationpoint"):
             for key, value in feature["donationpoint"].items():
                 feature[key] = value
