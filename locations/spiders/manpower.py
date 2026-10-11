@@ -24,7 +24,12 @@ class ManpowerSpider(SitemapSpider, StructuredDataSpider):
     search_for_twitter = False
 
     def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
+        entries = list(entries)
+        urls = [entry["loc"] for entry in entries]
         for entry in entries:
+            # Region and city pages are a prefix of another URL, branch pages never are.
+            if any(url.startswith(entry["loc"].rstrip("/") + "/") for url in urls):
+                continue
             # The Swiss sitemap omits the language prefix, without which its pages are 404.
             entry["loc"] = entry["loc"].replace("manpower.ch/", "manpower.ch/de/")
             yield entry
