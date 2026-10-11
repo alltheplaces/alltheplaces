@@ -19,11 +19,9 @@ class ManpowerSpider(SitemapSpider, StructuredDataSpider):
         "https://interim-branches.manpower.be/sitemap.xml",
         "https://standorte.manpower.ch/de/sitemap.xml",
     ]
-    sitemap_rules = [("", "parse_sd")]
     wanted_types = ["EmploymentAgency"]
     search_for_facebook = False
     search_for_twitter = False
-    search_for_instagram = False
 
     def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
         for entry in entries:
@@ -32,9 +30,11 @@ class ManpowerSpider(SitemapSpider, StructuredDataSpider):
             yield entry
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        name = item.pop("name", None) or ""
         # The locators also list other ManpowerGroup brands (AviationPower, Brook Street).
-        if "Manpower" not in item["name"]:
+        if "Manpower" not in name:
             return
-        item["branch"] = re.sub(r"\bManpower(?: UK| AG)?\b[ -]*", "", item.pop("name"), count=1) or None
+        # "Manpower UK Leeds" -> "Leeds", "Manpower AG - Bern" -> "Bern", "Cabinet Manpower Blois" -> "Cabinet Blois"
+        item["branch"] = re.sub(r"\bManpower(?: UK| AG)?\b[ -]*", "", name, count=1) or None
         apply_category(Categories.OFFICE_EMPLOYMENT_AGENCY, item)
         yield item
