@@ -70,8 +70,9 @@ class EMapSpider(Spider):
         reader, rec_count, hit_count = self.get_reader(response)
         if hit_count >= self.max_items:
             self.logger.warning("Maximum number of items returned in one query, consider lowering the radius")
-        if rec_count >= hit_count:
-            yield self.make_request(lat, lon, radius, offset + rec_count)
+        # rec_count is the number of rows in this page, which covers rows offset..offset+rec_count-1
+        if rec_count and offset + rec_count <= hit_count:
+            yield self.make_request(lat, lon, radius, offset + rec_count, count)
         for row in reader:
             yield from self.parse_row(row)
 
