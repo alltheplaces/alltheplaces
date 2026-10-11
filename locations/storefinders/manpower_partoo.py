@@ -35,5 +35,7 @@ class ManpowerPartooSpider(SitemapSpider, StructuredDataSpider):
             return
         # "Manpower UK Leeds" -> "Leeds", "Manpower AG - Bern" -> "Bern", "Cabinet Manpower Blois" -> "Cabinet Blois"
         item["branch"] = re.sub(r"\bManpower(?: UK| AG)?\b[ -]*", "", name, count=1) or None
+        # The "@id" ends in the locator's own store number; a branch listed under two URLs shares it.
+        item["ref"] = item["ref"].rsplit("#store-", 1)[-1]
         apply_category(Categories.OFFICE_EMPLOYMENT_AGENCY, item)
         yield item
