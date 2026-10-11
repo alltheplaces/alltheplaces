@@ -2,11 +2,12 @@ from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
-from locations.pipelines.address_clean_up import merge_address_lines
-from locations.geo import city_locations
 from locations.categories import Categories, apply_category, apply_yes_no
+from locations.geo import city_locations
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
+
 
 class OxfamGBSpider(JSONBlobSpider):
     name = "oxfam_gb"
@@ -28,12 +29,9 @@ class OxfamGBSpider(JSONBlobSpider):
         # oxfam-superstore- (1)
     }
 
-
     async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("GB", 15000):
-            yield JsonRequest(
-                url=f'https://www.oxfam.org.uk/api/locations/?query={city["name"]}'
-        )
+            yield JsonRequest(url=f'https://www.oxfam.org.uk/api/locations/?query={city["name"]}')
 
     def pre_process_data(self, feature: dict) -> None:
         if feature["shop"]:
@@ -43,9 +41,10 @@ class OxfamGBSpider(JSONBlobSpider):
             for key, value in feature["donationpoint"].items():
                 feature[key] = value
 
-
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["street_address"] = merge_address_lines([feature.get("address_line_1"), feature.get("address_line_2"),feature.get("address_line_3")])
+        item["street_address"] = merge_address_lines(
+            [feature.get("address_line_1"), feature.get("address_line_2"), feature.get("address_line_3")]
+        )
         if feature["shop"]:
             item["website"] = feature["detail_url"]
             apply_category(Categories.SHOP_CHARITY, item)
