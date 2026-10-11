@@ -1,21 +1,19 @@
-from typing import Iterable
+from typing import AsyncIterator, Iterable
 
-from scrapy.http import TextResponse
-from scrapy.spiders import SitemapSpider
+from scrapy.http import JsonRequest, Response
 
+from locations.pipelines.address_clean_up import merge_address_lines
+from locations.geo import city_locations
 from locations.categories import Categories, apply_category, apply_yes_no
-from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.structured_data_spider import extract_email, extract_phone
+from locations.json_blob_spider import JSONBlobSpider
 
-
-class OxfamGBSpider(SitemapSpider):
+class OxfamGBSpider(JSONBlobSpider):
     name = "oxfam_gb"
     item_attributes = {"brand": "Oxfam", "brand_wikidata": "Q267941"}
-    sitemap_urls = ["https://www.oxfam.org.uk/sitemap.xml"]
-    sitemap_rules = [("/shops/oxfam-", "parse_shop")]
+    locations_key = "results"
     brands = {
-        "oxfam-shop-": {"brand": "Oxfam", "brand_wikidata": "Q267941", "extras": Categories.SHOP_CHARITY.value},
+        "oxfam-shop-": {"brand": "Oxfam", "brand_wikidata": "Q267941"},
         "oxfam-bookshop-": {"brand": "Oxfam Bookshop", "brand_wikidata": "Q7115196"},
         "oxfam-books-music-": {"brand": "Oxfam Books & Music", "brand_wikidata": "Q117838013"},
         # oxfam-boutique- (4)
@@ -29,40 +27,38 @@ class OxfamGBSpider(SitemapSpider):
         # oxfam-original- (2)
         # oxfam-superstore- (1)
     }
-    recycle_types = {
-        "books": "recycling:books",
-        # "boutique": "",
-        # "bridal": "",
-        "clothing": "recycling:clothes",
-        "electricals": "recycling:electrical_appliances",
-        # "ephemera": "",
-        "furniture": "recycling:furniture",
-        # "homewares": "",
-        "music": "recycling:cds",
-    }
 
-    def parse_shop(self, response: TextResponse) -> Iterable[Feature]:
-        item = Feature()
-        item["website"] = item["ref"] = response.url
-        item["name"] = response.xpath('normalize-space(//h1[@class="t t--h1  t--h1-pushed"]/text())').get()
-        item["street_address"] = response.xpath('//*[@class="shop-address"]/li/text()').get()
-        item["city"] = response.xpath('//*[@class="shop-address"]/li[2]/text()').get()
-        item["postcode"] = response.xpath('//*[@class="shop-address"]/li[3]/text()').get()
 
-        extract_google_position(item, response.selector)
-        extract_email(item, response.selector)
-        extract_phone(item, response.selector)
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        for city in city_locations("GB", 15000):
+            yield JsonRequest(
+                url=f'https://www.oxfam.org.uk/api/locations/?query={city["name"]}'
+        )
 
-        for url, brand in self.brands.items():
-            if url in response.url:
-                item.update(brand)
-                break
-        else:
+    def pre_process_data(self, feature: dict) -> None:
+        if feature["shop"]:
+            for key, value in feature["shop"].items():
+                feature[key] = value
+        elif feature["donationpoint"]:
+            for key, value in feature["donationpoint"].items():
+                feature[key] = value
+
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = merge_address_lines([feature.get("address_line_1"), feature.get("address_line_2"),feature.get("address_line_3")])
+        if feature["shop"]:
+            item["website"] = feature["detail_url"]
             apply_category(Categories.SHOP_CHARITY, item)
-
-        for kind in response.xpath('//li[contains(@class, "shop-accepts__item")]/@class').getall():
-            kind = kind.replace("shop-accepts__item", "").replace("--", "").strip()
-            if tag := self.recycle_types.get(kind):
-                apply_yes_no(tag, item, True)
+            for url, brand in self.brands.items():
+                if url in item["website"]:
+                    item.update(brand)
+                    break
+        elif feature["donationpoint"]:
+            if "Book Bank" in feature["name"]:
+                apply_category(Categories.RECYCLING, item)
+                apply_yes_no("recycling:books", item, True)
+            elif "Clothing Bank" in feature["name"]:
+                apply_category(Categories.RECYCLING, item)
+                apply_yes_no("recycling:clothes", item, True)
 
         yield item
