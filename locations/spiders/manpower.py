@@ -33,7 +33,7 @@ class ManpowerSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         # The locators also list other ManpowerGroup brands (AviationPower, Brook Street).
-        if not item["name"].startswith("Manpower"):
+        if "Manpower" not in item["name"]:
             return
         item["branch"] = re.sub(r"^Manpower(?: UK| AG)?\b[ -]*", "", item.pop("name")) or None
         apply_category(Categories.OFFICE_EMPLOYMENT_AGENCY, item)
