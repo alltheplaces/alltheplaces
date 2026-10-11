@@ -24,6 +24,9 @@ class ManpowerSpider(SitemapSpider, StructuredDataSpider):
     search_for_instagram = False
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        # The locators also list other ManpowerGroup brands (AviationPower, Brook Street).
+        if not item["name"].startswith("Manpower"):
+            return
         item["branch"] = item.pop("name").removeprefix("Manpower ").removeprefix("UK ")
         apply_category(Categories.OFFICE_EMPLOYMENT_AGENCY, item)
         yield item
