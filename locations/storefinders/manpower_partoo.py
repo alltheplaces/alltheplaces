@@ -9,16 +9,13 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class ManpowerSpider(SitemapSpider, StructuredDataSpider):
-    name = "manpower"
+class ManpowerPartooSpider(SitemapSpider, StructuredDataSpider):
+    """
+    Manpower's branch locators in BE, CH, DE, ES, FR, GB and LU are separate sites built on the same Partoo store
+    locator. This class contains their common spider code.
+    """
+
     item_attributes = {"brand": "Manpower", "brand_wikidata": "Q1472539"}
-    sitemap_urls = [
-        "https://www.standorte.manpower.de/sitemap.xml",
-        "https://oficinas.manpower.es/sitemap.xml",
-        "https://locations.manpower.co.uk/sitemap.xml",
-        "https://interim-branches.manpower.be/sitemap.xml",
-        "https://standorte.manpower.ch/de/sitemap.xml",
-    ]
     wanted_types = ["EmploymentAgency"]
     search_for_facebook = False
     search_for_twitter = False
@@ -28,11 +25,8 @@ class ManpowerSpider(SitemapSpider, StructuredDataSpider):
         urls = [entry["loc"] for entry in entries]
         for entry in entries:
             # Region and city pages are a prefix of another URL, branch pages never are.
-            if any(url.startswith(entry["loc"].rstrip("/") + "/") for url in urls):
-                continue
-            # The Swiss sitemap omits the language prefix, without which its pages are 404.
-            entry["loc"] = entry["loc"].replace("manpower.ch/", "manpower.ch/de/")
-            yield entry
+            if not any(url.startswith(entry["loc"].rstrip("/") + "/") for url in urls):
+                yield entry
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         name = item.pop("name", None) or ""
