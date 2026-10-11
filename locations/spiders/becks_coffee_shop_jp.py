@@ -2,8 +2,7 @@ from typing import Iterable
 
 from locations.categories import Extras, PaymentMethods, apply_yes_no
 from locations.items import Feature
-from locations.spiders.newdays_jp import parse_opening_hours
-from locations.storefinders.location_cloud import LocationCloudSpider
+from locations.storefinders.location_cloud import LocationCloudSpider, parse_opening_hours
 
 
 class BecksCoffeeShopJPSpider(LocationCloudSpider):

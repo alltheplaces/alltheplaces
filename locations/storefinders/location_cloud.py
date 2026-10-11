@@ -1,9 +1,11 @@
+import re
 from collections.abc import AsyncIterator, Iterable
 from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Request, Response
 
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 
 # https://location-cloud.navitime.co.jp/
@@ -64,3 +66,59 @@ class LocationCloudSpider(Spider):
     def parse_detail_page(self, response: Response, item: Feature, source_feature: dict) -> Iterable[Feature]:
         """Override with any pre-processing on the item."""
         yield item
+
+
+def parse_opening_hours(texts: dict[str, str]) -> str | None:
+    """Parse the 営業時間（平日）, 営業時間（土曜） and 営業時間（日祝） detail texts."""
+    oh = OpeningHours()
+    for label, days in (
+        ("営業時間（平日）", DAYS_WEEKDAY),
+        ("営業時間（土曜）", ["Sa"]),
+        ("営業時間（日祝）", ["Su"]),
+    ):
+        value = texts.get(label)
+        if not value:
+            continue
+        value = value.strip()
+        if value in ("休業", "定休"):
+            oh.set_closed(days)
+            continue
+
+        # A few stores open later on Fridays: "6:30～21:00,金　6:30～22:00".
+        if "金　" in value:
+            base, _, friday = value.partition("金　")
+            _add_hours(oh, days[:-1], base)
+            _add_hours(oh, days[-1:], friday)
+        else:
+            _add_hours(oh, days, value)
+
+    if not (oh_string := oh.as_opening_hours()):
+        return None
+
+    # 日祝 is the same hours as Sunday plus public holidays. OpeningHours has no
+    # concept of PH, so append it to the Sunday group (same approach as sushiro_jp).
+    groups = oh_string.split("; ")
+    for index, group in enumerate(groups):
+        day_part, _, hours = group.partition(" ")
+        if "Su" in day_part:
+            groups[index] = f"{day_part},PH {hours}"
+            break
+    return "; ".join(groups)
+
+
+def _add_hours(oh: OpeningHours, days: list[str], value: str) -> None:
+    # Ignore any trailing note: "（4月1日より…）" or "※一時閉店あり".
+    value = re.split(r"[（※]", value, maxsplit=1)[0]
+    # Normalise separators and whitespace: "6:20～10:00, 16:00-21:00", "6:50 ～22:00", "7:00~20:00".
+    value = re.sub(r"[〜～~]", "-", value)
+    value = re.sub(r"\s", "", value)
+    for range_str in value.split(","):
+        if m := re.fullmatch(r"(\d{1,2}:\d{2})-(\d{1,2}:\d{2})", range_str):
+            open_time = _format_time(m.group(1))
+            close_time = _format_time(m.group(2))
+            oh.add_days_range(days, open_time, close_time, time_format="%H:%M")
+
+
+def _format_time(time: str) -> str:
+    hours, _, minutes = time.partition(":")
+    return f"{int(hours):02d}:{minutes}"
