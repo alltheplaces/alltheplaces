@@ -35,6 +35,6 @@ class ManpowerSpider(SitemapSpider, StructuredDataSpider):
         # The locators also list other ManpowerGroup brands (AviationPower, Brook Street).
         if "Manpower" not in item["name"]:
             return
-        item["branch"] = re.sub(r"^Manpower(?: UK| AG)?\b[ -]*", "", item.pop("name")) or None
+        item["branch"] = re.sub(r"\bManpower(?: UK| AG)?\b[ -]*", "", item.pop("name"), count=1) or None
         apply_category(Categories.OFFICE_EMPLOYMENT_AGENCY, item)
         yield item
