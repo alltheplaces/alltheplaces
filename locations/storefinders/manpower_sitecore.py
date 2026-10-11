@@ -32,9 +32,14 @@ class ManpowerSitecoreSpider(Spider):
             if component.get("componentName") == "LocationsFinder"
             for location in component["fields"]["items"]
         ]
+        for location in locations:
+            # Some sites give the branch email in the address instead.
+            location["email"] = (location.get("email") or "").strip() or next(
+                iter(re.findall(r"\S+@\S+", location.get("address") or "")), ""
+            )
         # A phone number or email listed on several branches is a call centre, a regional office or a person.
         phones = Counter(re.sub(r"\D", "", location.get("phone") or "") for location in locations)
-        emails = Counter((location.get("email") or "").strip().lower() for location in locations)
+        emails = Counter(location["email"].lower() for location in locations)
 
         for location in locations:
             # Client sites, head offices and teams are listed but hidden from the locator.
@@ -66,11 +71,10 @@ class ManpowerSitecoreSpider(Spider):
             else:
                 item["addr_full"] = merge_address_lines(lines)
 
-            if phones[re.sub(r"\D", "", location.get("phone") or "")] == 1:
-                item["phone"] = location["phone"]
-            # Some sites give the branch email in the address instead.
-            email = (location.get("email") or "").strip() or next(iter(re.findall(r"\S+@\S+", address)), "")
-            if emails[email.lower()] <= 1 and re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+            if (phone := location.get("phone")) and phones[re.sub(r"\D", "", phone)] == 1:
+                item["phone"] = phone
+            email = location["email"]
+            if emails[email.lower()] == 1 and re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
                 item["email"] = email
 
             # Without days in the text nothing is parsed, which is what we want.
