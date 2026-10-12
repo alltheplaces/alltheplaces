@@ -39,8 +39,9 @@ DAY_FIELD_PREFIXES = {
 
 
 def clean_time(value: str | None) -> str | None:
-    """Normalise the occasional malformed time ("0430", "05;00") to HH:MM, or None when unreadable ("05:0")."""
-    if match := re.fullmatch(r"(\d{1,2})[:;]?(\d{2})", (value or "").strip()):
+    """Normalise a malformed time ("0430", "05;00") to HH:MM; None when unreadable or out of range."""
+    match = re.fullmatch(r"(\d{1,2})[:;]?(\d{2})", (value or "").strip())
+    if match and int(match.group(1)) <= 24 and int(match.group(2)) < 60:
         return f"{match.group(1)}:{match.group(2)}"
     return None
 
@@ -89,10 +90,14 @@ class ShellAUSpider(MapDataServicesSpider):
         if feature.get("open_24_hours") == "1":
             item["opening_hours"] = "24/7"
         else:
+            has_hours = any(feature.get(f"{prefix}_opening") for prefix in DAY_FIELD_PREFIXES.values())
             for day, prefix in DAY_FIELD_PREFIXES.items():
-                item["opening_hours"].add_range(
-                    day, clean_time(feature.get(f"{prefix}_opening")), clean_time(feature.get(f"{prefix}_closing"))
-                )
+                opening, closing = feature.get(f"{prefix}_opening"), feature.get(f"{prefix}_closing")
+                if has_hours and not opening and not closing:
+                    # A blank day on a site whose other days have hours is a closed day (mostly Sundays).
+                    item["opening_hours"].set_closed(day)
+                else:
+                    item["opening_hours"].add_range(day, clean_time(opening), clean_time(closing))
 
         apply_yes_no(Fuel.E10, item, feature.get("unleaded_e10") == "1", "unleaded_e10" not in feature)
         apply_yes_no(Fuel.OCTANE_91, item, feature.get("unleaded_91") == "1" or feature.get("unleaded_91_la") == "1")
