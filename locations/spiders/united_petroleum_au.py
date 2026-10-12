@@ -46,13 +46,6 @@ class UnitedPetroleumAUSpider(Spider):
 
     @staticmethod
     def parse_opening_hours(hours: dict) -> OpeningHours:
-        """
-        The API returns, per day, a string such as "6:00AM - 11:00PM" (null on
-        24 hour sites) together with `open24Hours<Day>` and `closedOn<Day>`
-        flags. A few sites have an `open24Hours<Day>` flag set alongside a
-        specific time range; as it is unclear which one is right, that day is
-        left out.
-        """
         oh = OpeningHours()
         if hours.get("alwaysOpen"):
             oh.add_days_range(DAYS_FULL, "00:00", "23:59")
@@ -62,10 +55,14 @@ class UnitedPetroleumAUSpider(Spider):
             if hours.get(f"closedOn{day_name}"):
                 oh.set_closed(day_name)
             elif hours.get(f"open24Hours{day_name}"):
+                # A 24 hour flag beside a time range is contradictory, so the day is left out.
                 if not day_hours:
                     oh.add_range(day_name, "00:00", "23:59")
             elif match := TIME_RANGE_REGEX.fullmatch(day_hours or ""):
-                oh.add_range(day_name, match.group(1), match.group(2), "%I:%M%p")
+                try:
+                    oh.add_range(day_name, match.group(1), match.group(2), "%I:%M%p")
+                except ValueError:
+                    pass  # An impossible time such as "10:99AM" leaves only that day out.
         return oh
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
