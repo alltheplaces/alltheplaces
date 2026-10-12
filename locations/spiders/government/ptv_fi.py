@@ -2792,7 +2792,7 @@ class PtvFISpider(Spider):
             for one in days:
                 day_spans.setdefault(one, []).append((start, end, overnight))
 
-    def _hours(self, channel: dict, category=None) -> OpeningHours | None:
+    def _hours(self, channel: dict, category=None) -> OpeningHours | str | None:
         # Staff timetables arrive per service desk (nurse, counsellor,
         # psychologist, phone): buffer spans per weekday, drop phone-only
         # sets, union-merge overlaps, then render once. Deterministic
@@ -2833,9 +2833,9 @@ class PtvFISpider(Spider):
                 return None
             for day in ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"):
                 oh.add_range(day, "00:00", "23:59", time_format="%H:%M")
-            # The 24/7 ranges already cover every span; rendering both
-            # would overlap ("Mo 00:00-24:00,08:00-16:00").
-            day_spans = {}
+            # Around-the-clock opening renders as a plain 24/7 string
+            # (cf. other spiders), never overlapping spans.
+            return "24/7"
         for day in ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"):
             spans = day_spans.pop(day, [])
             for start, end, overnight in spans:
@@ -3873,7 +3873,9 @@ class PtvFISpider(Spider):
 
         self._apply_contact(item, channel)
 
-        if (hours := self._hours(channel, category)) and hours.as_opening_hours():
+        hours = self._hours(channel, category)
+        rendered = hours.as_opening_hours() if hasattr(hours, "as_opening_hours") else hours
+        if hours and rendered:
             item["opening_hours"] = hours
         elif hours:
             # Objects rendering empty (closed-only sets) must never emit

@@ -3408,18 +3408,20 @@ def test_pagination_stops_on_repeated_ids():
 
 def test_always_open_suppresses_spans():
     spider = make_spider()
-    oh = spider._hours(
-        {
-            "serviceHours": [
-                {"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True},
-                {
-                    "serviceHourType": "DaysOfTheWeek",
-                    "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
-                },
-            ]
-        }
+    assert (
+        spider._hours(
+            {
+                "serviceHours": [
+                    {"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True},
+                    {
+                        "serviceHourType": "DaysOfTheWeek",
+                        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
+                    },
+                ]
+            }
+        )
+        == "24/7"
     )
-    assert oh.as_opening_hours() == "Mo-Su 00:00-24:00"
 
 
 def test_dangling_preposition_city_kept():
