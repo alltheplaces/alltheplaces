@@ -1,8 +1,8 @@
 import re
-from typing import Any
+from typing import Any, AsyncIterator
 
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
@@ -10,10 +10,16 @@ from locations.linked_data_parser import LinkedDataParser
 BIG4 = {"brand": "BIG4 Holiday Parks", "brand_wikidata": "Q18636678"}
 
 
-class Big4HolidayParksAUSpider(SitemapSpider):
+class Big4HolidayParksAUSpider(Spider):
     name = "big4_holiday_parks_au"
-    sitemap_urls = ["https://www.big4.com.au/sitemap.xml"]
-    sitemap_rules = [(r"https://www.big4.com.au/caravan-parks/\w+/[^/]+/[^/]+$", "parse")]
+
+    async def start(self) -> AsyncIterator[Request]:
+        for state in ["nsw", "nt", "qld", "sa", "tas", "vic", "wa"]:
+            yield Request(f"https://www.big4.com.au/caravan-parks/{state}", callback=self.parse_state)
+
+    def parse_state(self, response: Response, **kwargs: Any) -> Any:
+        for path in set(response.xpath("//a/@href").re(r"^/caravan-parks/\w+/[^/]+/[^/]+$")):
+            yield response.follow(path, callback=self.parse)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = LinkedDataParser.parse(response, "Campground")
