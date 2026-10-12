@@ -27,15 +27,7 @@ SHOP_BRANDS = {
     "Urbanista": None,
 }
 # Day prefixes of the "<day>_opening" and "<day>_closing" fields in the source data.
-DAY_FIELD_PREFIXES = {
-    "Mon": "mon",
-    "Tue": "tues",
-    "Wed": "wed",
-    "Thu": "thurs",
-    "Fri": "fri",
-    "Sat": "sat",
-    "Sun": "sun",
-}
+DAYS = {"mon", "tues", "wed", "thurs", "fri", "sat", "sun"}
 
 
 def clean_time(value: str | None) -> str | None:
@@ -90,9 +82,9 @@ class ShellAUSpider(MapDataServicesSpider):
         if feature.get("open_24_hours") == "1":
             item["opening_hours"] = "24/7"
         else:
-            has_hours = any(feature.get(f"{prefix}_opening") for prefix in DAY_FIELD_PREFIXES.values())
-            for day, prefix in DAY_FIELD_PREFIXES.items():
-                opening, closing = feature.get(f"{prefix}_opening"), feature.get(f"{prefix}_closing")
+            has_hours = any(feature.get(f"{prefix}_opening") for prefix in DAYS)
+            for day in DAYS:
+                opening, closing = feature.get(f"{day}_opening"), feature.get(f"{day}_closing")
                 if has_hours and not opening and not closing:
                     # A blank day on a site whose other days have hours is a closed day (mostly Sundays).
                     item["opening_hours"].set_closed(day)
