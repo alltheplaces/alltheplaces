@@ -51,6 +51,7 @@ class OxfamGBSpider(JSONBlobSpider):
             item["website"] = feature["detail_url"]
             for url, (brand, category) in self.brands.items():
                 if url in item["website"]:
+                    item["branch"] = item.pop("name").removeprefix(brand["brand"]).removeprefix(" Shop").strip()
                     item.update(brand)
                     apply_category(category, item)
                     break
