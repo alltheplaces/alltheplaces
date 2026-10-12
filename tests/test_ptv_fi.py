@@ -3267,3 +3267,172 @@ def test_numberless_bare_streets_stay():
     # carry the name with no number (review12_1 systemic declined).
     assert addressed(make_spider(), "Ulkofantintie", "").get("street") == "Ulkofantintie"
     assert addressed(make_spider(), "Luolavuorenpolku", "").get("street") == "Luolavuorenpolku"
+
+
+# ---- Round 13 + code review: ordering, guards, crawl paths ----
+
+
+def test_specific_halls_outrank_generic():
+    spider = make_spider()
+    assert cat(spider, "Aleksis Kiven peruskoulu / Juhlasali")[0] == Categories.EVENTS_VENUE
+    assert cat(spider, "Stoa / Musiikkisali")[0] == Categories.EVENTS_VENUE
+    assert cat(spider, "Mikkelin jäähalli")[0] == Categories.LEISURE_ICE_RINK
+    assert cat(spider, "Keilahalli")[0] == Categories.LEISURE_BOWLING_ALLEY
+    assert cat(spider, "Tervanapsu autiotupa")[0] == Categories.TOURISM_WILDERNESS_HUT
+    assert cat(spider, "Toppelundinrannan koirauimaranta")[0] == Categories.LEISURE_DOG_PARK
+    assert cat(spider, "Valtuustosali")[0] == Categories.EVENTS_VENUE
+
+
+def test_crematoriums():
+    spider = make_spider()
+    assert cat(spider, "Joensuun krematorio")[1] == {"amenity": "crematorium"}
+    assert cat(spider, "Krematorio")[1] == {"amenity": "crematorium"}
+    # The parking machine on Krematoriontie stays a machine.
+    assert cat(spider, "Pysäköintilippuautomaatti 630, Krematoriontie, korttimaksu")[0] == (Categories.VENDING_MACHINE)
+
+
+def test_exhibition_venues_are_museums():
+    spider = make_spider()
+    assert cat(spider, "Näyttelyhalli")[0] == Categories.MUSEUM
+    assert cat(spider, "Näyttelykeskus WeeGee")[0] == Categories.MUSEUM
+    assert cat(spider, "Leo Torpan kamerakokoelma")[0] == Categories.MUSEUM
+    assert cat(spider, "Sonkajärven kirjaston näyttelysali")[0] == Categories.MUSEUM
+
+
+def test_therapists_are_clinics():
+    spider = make_spider()
+    category, extra = cat(spider, "Jalkaterapeutti, Loimaa")
+    assert category == Categories.CLINIC
+    assert extra == {"healthcare": "podiatrist"}
+    assert cat(spider, "Varhaiskasvatuksen puheterapeutti")[0] == Categories.CLINIC
+
+
+def test_support_centres_are_social():
+    assert cat(make_spider(), "Perhetukikeskus Päiväperho")[0] == Categories.SOCIAL_FACILITY
+    assert cat(make_spider(), "Seri-tukikeskus")[0] == Categories.SOCIAL_FACILITY
+
+
+def test_waste_plurals_are_recycling():
+    assert cat(make_spider(), "Vaarallisten jätteiden autokeräys")[0] == Categories.RECYCLING
+
+
+def test_kodats_are_shelters():
+    assert cat(make_spider(), "Grillikatokset- ja kodat")[0] == Categories.SHELTER
+
+
+def test_office_desk_pairs_keep_whole():
+    spider = make_spider()
+    signed = "Pirkanmaan oikeusaputoimisto, Valkeakosken vastaanotto"
+    assert split(spider, signed) == (signed, None, None)
+    signed = "Tampereen kaupunki, Vastaanotto"
+    assert split(spider, signed) == (signed, None, None)
+
+
+def test_meeting_places_outrank_clientele():
+    spider = make_spider()
+    assert cat(spider, "Mielenterveyskuntoutujien matalan kynnyksen kohtaamispaikka")[0] == (
+        Categories.COMMUNITY_CENTRE
+    )
+    assert cat(spider, "Nuorten ja nuorten aikuisten kohtaamispaikka JOJO")[0] == Categories.COMMUNITY_CENTRE
+
+
+def test_court_chancellery_is_courthouse():
+    assert cat(make_spider(), "Oulun käräjäoikeus, Ylivieskan kanslia")[0] == Categories.COURTHOUSE
+
+
+def test_postcode_only_numbers_drop():
+    item = addressed(make_spider(), "Kalevalantie 13", "90570")
+    assert item.get("street") == "Kalevalantie"
+    assert item.get("housenumber") == "13"
+
+
+def test_pobox_whole_numbers_drop():
+    item = addressed(make_spider(), "Tie", "PL 24")
+    assert item.get("housenumber") is None
+
+
+def test_building_space_tails_keep_unit():
+    item = addressed(make_spider(), "Tie", "15 rak.1 B-rappu")
+    assert item.get("housenumber") == "15"
+    assert item["extras"].get("addr:unit") == "rak.1 B-rappu"
+
+
+def test_lang_value_skips_empty():
+    assert PtvFISpider._lang_value([{"language": "fi", "value": ""}, {"language": "fi", "value": "Katu"}], "fi") == (
+        "Katu"
+    )
+
+
+def test_sculptures_carry_type():
+    category, extra = cat(make_spider(), "Musta graniittiveistos")
+    assert category is None
+    assert extra == {"tourism": "artwork", "artwork_type": "sculpture"}
+    assert cat(make_spider(), "Kauko Kortelaisen veistospuisto")[0] == Categories.LEISURE_PARK
+
+
+def test_swim_hall_gym_is_gym():
+    assert cat(make_spider(), "Itäkeskuksen uimahalli / Liikuntasali")[0] == Categories.GYM
+
+
+def test_uimahalli_inessive_splits():
+    name, located, official = split(make_spider(), "Yhteisökahvila Hollolan uimahallilla")
+    assert name == "Yhteisökahvila"
+    assert located == "Hollolan uimahalli"
+    assert official == "Yhteisökahvila Hollolan uimahallilla"
+
+
+def test_org_bad_shape_flushes_pending():
+    spider = make_spider()
+    item = Feature()
+    item["name"] = "X"
+    spider._pending["org-1"] = [item]
+
+    def _boom():
+        raise ValueError("nope")
+
+    bad = SimpleNamespace(url="https://x/?guids=org-1", json=_boom)
+    assert list(spider.parse_orgs(bad)) == [item]
+    assert spider._pending == {}
+
+
+def test_pagination_stops_on_repeated_ids():
+    from scrapy.http import JsonRequest
+
+    spider = make_spider()
+    page = {"itemList": [{"id": "a"}]}
+    out1 = list(spider.parse(SimpleNamespace(json=lambda: dict(page)), 1))
+    assert any(isinstance(r, JsonRequest) and "page=2" in r.url for r in out1)
+    out2 = list(spider.parse(SimpleNamespace(json=lambda: dict(page)), 2))
+    assert not any("page=3" in getattr(r, "url", "") for r in out2)
+
+
+def test_always_open_suppresses_spans():
+    spider = make_spider()
+    oh = spider._hours(
+        {
+            "serviceHours": [
+                {"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True},
+                {
+                    "serviceHourType": "DaysOfTheWeek",
+                    "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
+                },
+            ]
+        }
+    )
+    assert oh.as_opening_hours() == "Mo-Su 00:00-24:00"
+
+
+def test_dangling_preposition_city_kept():
+    # International School of Helsinki: stripping the city strands "of".
+    signed = "Päiväkoti International School of Helsinki"
+    assert split(make_spider(), signed, "Helsinki") == (signed, None, None)
+
+
+def test_artwork_titles():
+    assert cat(make_spider(), 'Taideteos "Turvapaikka" osa 1')[0] == Categories.TOURISM_ARTWORK
+
+
+def test_district_tails_drop():
+    item = addressed(make_spider(), "Tivolikuja", "1 Alppiharju")
+    assert item.get("street") == "Tivolikuja"
+    assert item.get("housenumber") == "1"
