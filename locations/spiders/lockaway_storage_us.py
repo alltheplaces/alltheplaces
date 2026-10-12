@@ -23,7 +23,6 @@ class LockawayStorageUSSpider(StructuredDataSpider):
                 yield response.follow(href, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["country"] = "US"
         item.pop("name", None)
         apply_category(Categories.SHOP_STORAGE_RENTAL, item)
         yield item

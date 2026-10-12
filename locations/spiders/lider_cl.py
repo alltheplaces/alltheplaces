@@ -42,7 +42,6 @@ class LiderCLSpider(Spider):
             item["addr_full"] = address
             item["city"] = city
             item["state"] = state
-            item["country"] = "CL"
 
             if open_time and close_time:
                 item["opening_hours"] = OpeningHours()

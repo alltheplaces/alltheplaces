@@ -1,9 +1,10 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, apply_category, apply_yes_no
-from locations.hours import DAYS_3_LETTERS, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.spiders.otr_au import OtrAUSpider
 from locations.spiders.shell import ShellSpider
@@ -25,6 +26,18 @@ SHOP_BRANDS = {
     "TAS Petroleum": None,
     "Urbanista": None,
 }
+# Day prefixes of the "<day>_opening" and "<day>_closing" fields in the source data.
+DAYS = {"mon", "tues", "wed", "thurs", "fri", "sat", "sun"}
+
+
+def clean_time(value: str | None) -> str | None:
+    """Normalise a malformed time ("0430", "05;00") to HH:MM; None when unreadable or out of range."""
+    match = re.fullmatch(r"(\d{1,2})[:;]?(\d{2})", (value or "").strip())
+    if match and int(match.group(1)) <= 24 and int(match.group(2)) < 60:
+        return f"{match.group(1)}:{match.group(2)}"
+    return None
+
+
 FUEL_BRANDS = {
     "Advantage": None,
     "Ampol": None,
@@ -69,10 +82,14 @@ class ShellAUSpider(MapDataServicesSpider):
         if feature.get("open_24_hours") == "1":
             item["opening_hours"] = "24/7"
         else:
-            for day in DAYS_3_LETTERS:
-                item["opening_hours"].add_range(
-                    day, feature.get("{}_opening".format(day)), feature.get("{}_closing".format(day))
-                )
+            has_hours = any(feature.get(f"{prefix}_opening") for prefix in DAYS)
+            for day in DAYS:
+                opening, closing = feature.get(f"{day}_opening"), feature.get(f"{day}_closing")
+                if has_hours and not opening and not closing:
+                    # A blank day on a site whose other days have hours is a closed day (mostly Sundays).
+                    item["opening_hours"].set_closed(day)
+                elif (open_time := clean_time(opening)) and (close_time := clean_time(closing)):
+                    item["opening_hours"].add_range(day, open_time, close_time)
 
         apply_yes_no(Fuel.E10, item, feature.get("unleaded_e10") == "1", "unleaded_e10" not in feature)
         apply_yes_no(Fuel.OCTANE_91, item, feature.get("unleaded_91") == "1" or feature.get("unleaded_91_la") == "1")

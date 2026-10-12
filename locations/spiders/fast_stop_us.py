@@ -74,7 +74,6 @@ class FastStopUSSpider(Spider):
             item["city"] = location["location_city"]
             item["state"] = location["location_state"]
             item["postcode"] = location["location_zip"]
-            item["country"] = "US"
             if location["location_phone"] not in CENTRAL_PHONES:
                 item["phone"] = location["location_phone"]
             item["lat"] = location["location_coordinates"]["lat"]
