@@ -116,7 +116,7 @@ class JapanPostJPSpider(EMapSpider):
             yield from self._subdivide(lat, lon, radius, source)
             return
 
-        if offset + rec_count < hit_count:
+        if rec_count and offset + rec_count <= hit_count:
             yield self.make_request(
                 lat, lon, radius, offset + rec_count, tempo_count=tempo_total, post_count=post_total, source=source
             )
@@ -136,7 +136,9 @@ class JapanPostJPSpider(EMapSpider):
             postcode = row[21]
             addr_full = row[7]
             item = Feature()
-            item["ref"] = row[11]
+            # the postbox number (ポスト番号) is only unique within an area, so it cannot be the ref
+            item["ref"] = ref
+            item["extras"]["ref"] = row[11]
             # post detail page is not accessible without `?post=1`
             item["website"] = f"https://map.japanpost.jp/p/{self.map_id}/dtl/{ref}/?post=1"
             item["lat"] = wgs84_lat

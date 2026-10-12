@@ -19,7 +19,6 @@ class PersonalMiniStorageUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = response.url
-        item["country"] = "US"
         item.pop("name", None)
         item["branch"] = item["street_address"]
         apply_category(Categories.SHOP_STORAGE_RENTAL, item)

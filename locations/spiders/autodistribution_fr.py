@@ -32,7 +32,6 @@ class AutodistributionFRSpider(SitemapSpider):
 
         item = DictParser.parse(data)
         apply_category(Categories.SHOP_CAR_REPAIR, item)
-        item["country"] = "FR"
 
         item["branch"] = (item.pop("name", "") or "").removeprefix("autodistribution ")
 

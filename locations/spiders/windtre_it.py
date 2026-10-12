@@ -41,7 +41,6 @@ class WindtreITSpider(scrapy.Spider):
                 item["state"] = state.strip()
             if postcode := store.get("cap"):
                 item["postcode"] = str(postcode).strip()
-            item["country"] = "IT"
 
             if phone := store.get("telefono"):
                 phone = phone.strip()
