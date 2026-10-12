@@ -12,29 +12,20 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
     brands = {
         "albertsons": {"brand": "Albertsons", "brand_wikidata": "Q2831861"},
         "acmemarkets": {"brand": "ACME Markets", "brand_wikidata": "Q341975"},
-        "albertsonsmarket": {
-            "brand": "Albertsons Market",
-            "brand_wikidata": "Q115350320",
-        },
+        "albertsonsmarket": {"brand": "Albertsons Market", "brand_wikidata": "Q115350320"},
         "amigosunited": {"brand": "Amigos", "brand_wikidata": "Q115350331"},
         "andronicos": {"brand": "Andronico's", "brand_wikidata": "Q4759491"},
         "carrsqc": {"brand": "Carrs", "brand_wikidata": "Q5046735"},
         "jewelosco": {"brand": "Jewel-Osco", "brand_wikidata": "Q3178470"},
         "kingsfoodmarkets": {"brand": "Kings", "brand_wikidata": "Q6412914"},
         "luckylowprices": {"brand": "Lucky", "brand_wikidata": "Q6698032"},
-        "marketstreetunited": {
-            "brand": "Market Street",
-            "brand_wikidata": "Q119405196",
-        },
+        "marketstreetunited": {"brand": "Market Street", "brand_wikidata": "Q119405196"},
         "pavilions": {"brand": "Pavilions", "brand_wikidata": "Q7155886"},
         "randalls": {"brand": "Randalls", "brand_wikidata": "Q7291489"},
         "shaws": {"brand": "Shaw's", "brand_wikidata": "Q578387"},
         "starmarket": {"brand": "Star Market", "brand_wikidata": "Q7600795"},
         "tomthumb": {"brand": "Tom Thumb", "brand_wikidata": "Q7817826"},
-        "unitedsupermarkets": {
-            "brand": "United Supermarkets",
-            "brand_wikidata": "Q17108901",
-        },
+        "unitedsupermarkets": {"brand": "United Supermarkets", "brand_wikidata": "Q17108901"},
         "vons": {"brand": "Vons", "brand_wikidata": "Q7941609"},
     }
     item_attributes = {"nsi_id": "-1"}  # Most of these are too small to justify NSI entries
@@ -81,10 +72,7 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
     ]
     sitemap_urls = [f"https://{domain}/robots.txt" for domain in allowed_domains]
     sitemap_rules = [
-        (
-            r"https://local\.(?:fuel\.|pharmacy\.)?\w+\.com/\w\w/[-\w]+/[-\w]+\.html$",
-            "parse_sd",
-        )
+        (r"https://local\.(?:fuel\.|pharmacy\.)?\w+\.com/\w\w/[-\w]+/[-\w]+\.html$", "parse_sd"),
     ]
     wanted_types = ["GroceryStore", "GasStation", "Pharmacy"]
     drop_attributes = {"facebook", "image", "twitter"}
@@ -105,6 +93,7 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
                 if day.get("isClosed"):
                     oh.set_closed(day["day"])
                     continue
+
                 for interval in day.get("intervals", []):
                     oh.add_range(
                         day=day.get("day"),
@@ -121,6 +110,7 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
         elif ld_data["@type"] == "Pharmacy":
             apply_category(Categories.PHARMACY, item)
 
-        item.update(self.brands[response.url.split("/")[2].split(".")[-2]])
+        if brand := self.brands.get(response.url.split("/")[2].split(".")[-2]):
+            item.update(brand)
 
         yield item
