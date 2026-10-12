@@ -3458,6 +3458,7 @@ def test_station_compounds_file_as_facilities():
     assert cat(spider, "Krossin pelastus- ja ensihoitoasema")[0] == Categories.FIRE_STATION
     assert cat(spider, "Tervolan Ekoasema")[0] == Categories.RECYCLING
     assert cat(spider, "ViaDian Kohtaamisasema")[0] == Categories.COMMUNITY_CENTRE
+    assert cat(spider, "Miesten asema")[0] == Categories.COMMUNITY_CENTRE
     assert cat(spider, "BusinessAsema")[0] == Categories.OFFICE_GOVERNMENT
     assert cat(spider, "Purasjoen puolustusasema 1939")[0] == Categories.TOURISM_ATTRACTION
     assert cat(spider, "Asemakaavoitus")[0] == Categories.OFFICE_GOVERNMENT

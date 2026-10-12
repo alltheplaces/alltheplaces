@@ -643,6 +643,7 @@ class PtvFISpider(Spider):
         ("ensihoito", Categories.FIRE_STATION, None),  # Ensihoitoasemat (EMS stations)
         ("ekoasema", Categories.RECYCLING, None),  # Ekoasemat (eco recycling points)
         ("kohtaamisasema", Categories.COMMUNITY_CENTRE, None),  # Kohtaamisasemat (meeting points)
+        ("miesten asema", Categories.COMMUNITY_CENTRE, None),  # Miesten asema (men's support points)
         ("businessasema", Categories.OFFICE_GOVERNMENT, None),  # BusinessAsema (business service point)
         ("puolustusasema", Categories.TOURISM_ATTRACTION, None),  # Puolustusasemat (war-history sites)
         ("kaavoitus", Categories.OFFICE_GOVERNMENT, None),  # Kaavoitus (planning offices)
