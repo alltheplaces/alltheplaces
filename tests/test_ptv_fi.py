@@ -2728,7 +2728,7 @@ def test_seurakunta_operator_public():
     spider._apply_operator(item, "Parikkalan seurakunta")
     assert item["operator"] == "Parikkalan seurakunta"
     assert item["extras"].get("office") == "government"
-    assert item["extras"].get("operator:type") is None
+    assert item["extras"].get("operator:type") == "religious"
 
 
 def test_acronym_unit_is_clinic():

@@ -832,6 +832,14 @@ class PtvFISpider(Spider):
             # Privacy reads the full name so stripped acronyms ("RIKU")
             # don't launder associations public.
             item["extras"]["operator:type"] = "private"
+        elif re.search(r"(seurakunta|församling)", operator, flags=re.IGNORECASE) or re.search(
+            r"\bsrk\b", operator, flags=re.IGNORECASE
+        ):
+            # Parishes are public-law religious bodies: operator:type marks
+            # the religious organizer without claiming anything about the
+            # service itself (seurakuntatalo clubs et al).
+            self._count("operator/religious")
+            item["extras"]["operator:type"] = "religious"
         if private_org and not is_company and self._tag(item, "office") == "government":
             # Association-run desks are association offices, not government
             # ones (office lives in extras; a top-level write would raise).
