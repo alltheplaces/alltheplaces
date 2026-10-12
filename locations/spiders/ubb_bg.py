@@ -8,6 +8,8 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
+ZYTE_API_META = {"zyte_api": {"httpResponseBody": True, "httpResponseHeaders": True}}
+
 
 class UbbBGSpider(Spider):
     name = "ubb_bg"
@@ -16,7 +18,7 @@ class UbbBGSpider(Spider):
 
     async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
-            yield Request(url, cookies={"d41d8cd98f00b204e": "800998ecf8427f"}, callback=self.parse)
+            yield Request(url, meta=ZYTE_API_META, callback=self.parse)
 
     def parse(self, response, **kwargs):
         markers = response.json()["markers"]
