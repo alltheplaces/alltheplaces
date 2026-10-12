@@ -14,9 +14,9 @@ class OxfamGBSpider(JSONBlobSpider):
     item_attributes = {"brand": "Oxfam", "brand_wikidata": "Q267941"}
     locations_key = "results"
     brands = {
-        "oxfam-shop-": {"brand": "Oxfam", "brand_wikidata": "Q267941"},
-        "oxfam-bookshop-": {"brand": "Oxfam Bookshop", "brand_wikidata": "Q7115196"},
-        "oxfam-books-music-": {"brand": "Oxfam Books & Music", "brand_wikidata": "Q117838013"},
+        "oxfam-shop-": ({"brand": "Oxfam", "brand_wikidata": "Q267941"}, Categories.SHOP_CHARITY),
+        "oxfam-bookshop-": ({"brand": "Oxfam Bookshop", "brand_wikidata": "Q7115196"}, Categories.SHOP_BOOKS),
+        "oxfam-books-music-": ({"brand": "Oxfam Books & Music", "brand_wikidata": "Q117838013"}, Categories.SHOP_MUSIC),
         # oxfam-boutique- (4)
         # oxfam-emporium- (1)
         # oxfam-festivals-shop (1)
@@ -49,11 +49,13 @@ class OxfamGBSpider(JSONBlobSpider):
         )
         if feature.get("shop"):
             item["website"] = feature["detail_url"]
-            apply_category(Categories.SHOP_CHARITY, item)
-            for url, brand in self.brands.items():
+            for url, (brand, category) in self.brands.items():
                 if url in item["website"]:
                     item.update(brand)
+                    apply_category(category, item)
                     break
+            else:
+                apply_category(Categories.SHOP_CHARITY, item)
         elif feature.get("donationpoint"):
             if "Book Bank" in feature["name"]:
                 apply_category(Categories.RECYCLING, item)
