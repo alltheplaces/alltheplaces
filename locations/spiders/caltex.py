@@ -29,31 +29,32 @@ class CaltexSpider(Spider):
 
     @staticmethod
     def parse_au_opening_hours(text: str | None) -> OpeningHours | str | None:
-        """
-        Parse the free text `operatingHours` of an Australian station, such as
-        "Mon-Fri 5am - 10pm, Sat-Sun 6am - 9pm", "Daily 5am - 10pm" or
-        "Daily 24 hours". Anything that is not read in full and unambiguously
-        (a time without am/pm, public holiday clauses, "Temporarily Closed",
-        ...) returns None, so that no hours are better than wrong hours.
-        """
+        """Parse the free text `operatingHours` of an Australian station; None unless it is read in full."""
         text = " ".join((text or "").split())
         lower = text.lower()
         if re.fullmatch(r"(daily )?24 hours?", lower):
             return "24/7"
-        if "holiday" in lower:
-            return None
-        # Every time must carry am/pm, otherwise it could be read two ways.
-        if re.search(r"\d", re.sub(r"\d{1,2}(?:[:.]\d{2})?\s*[ap]m", "", lower)):
+        # Times without am/pm, or any word other than days, "daily" and "closed", are not read.
+        leftover = re.sub(r"\d{1,2}(?:[:.]\d{2})?\s*[ap]m", " ", lower)
+        leftover = re.sub(
+            r"\b(?:mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:r(?:s(?:day)?)?)?|fri(?:day)?|sat(?:urday)?"
+            r"|sun(?:day)?|daily|closed|to|and)\b|[-–&,.;:]",
+            " ",
+            leftover,
+        )
+        if re.search(r"[a-z0-9]", leftover):
             return None
         text = re.sub(r"\bsat\s*&\s*sun\b", "Sat-Sun", text, flags=re.IGNORECASE)
         results = OpeningHours.extract_hours_from_string(text)
-        # Each time range (or "closed") in the text must have produced a result.
         if not results or len(results) != len(re.findall(r"[ap]m\s*(?:-|–|to)\s*\d|closed", text, flags=re.IGNORECASE)):
             return None
         oh = OpeningHours()
         for days, open_time, close_time in results:
             for day in days:
-                oh.add_range(day, open_time, close_time)
+                if open_time == "closed":
+                    oh.set_closed(day)
+                else:
+                    oh.add_range(day, open_time, close_time)
         return oh or None
 
     def parse(self, response):
