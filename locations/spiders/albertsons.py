@@ -11,7 +11,7 @@ class AlbertsonsSpider(SitemapSpider, StructuredDataSpider):
     name = "albertsons"
     brands = {
         "albertsons": {"brand": "Albertsons", "brand_wikidata": "Q2831861"},
-        "acmemarkets": {"brand": "ACME Markets", "brand_wikidata": "Q341975"},
+        "acmemarkets": {"brand": "Acme", "brand_wikidata": "Q341975"},
         "albertsonsmarket": {"brand": "Albertsons Market", "brand_wikidata": "Q115350320"},
         "amigosunited": {"brand": "Amigos", "brand_wikidata": "Q115350331"},
         "andronicos": {"brand": "Andronico's", "brand_wikidata": "Q4759491"},
