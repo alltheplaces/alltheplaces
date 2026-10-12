@@ -9,7 +9,10 @@ from locations.storefinders.kibo import KiboSpider
 
 FETCH_PAGE = """
 fetch("/api/commerce/storefront/locationUsageTypes/SP/locations?pageSize=%d&startIndex=%d")
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+    })
     .then(d => {
         d.startIndex = d.totalCount;
         const pre = document.createElement("pre");
