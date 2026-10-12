@@ -96,8 +96,8 @@ class ShellAUSpider(MapDataServicesSpider):
                 if has_hours and not opening and not closing:
                     # A blank day on a site whose other days have hours is a closed day (mostly Sundays).
                     item["opening_hours"].set_closed(day)
-                else:
-                    item["opening_hours"].add_range(day, clean_time(opening), clean_time(closing))
+                elif (open_time := clean_time(opening)) and (close_time := clean_time(closing)):
+                    item["opening_hours"].add_range(day, open_time, close_time)
 
         apply_yes_no(Fuel.E10, item, feature.get("unleaded_e10") == "1", "unleaded_e10" not in feature)
         apply_yes_no(Fuel.OCTANE_91, item, feature.get("unleaded_91") == "1" or feature.get("unleaded_91_la") == "1")
