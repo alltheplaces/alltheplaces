@@ -637,6 +637,17 @@ class PtvFISpider(Spider):
         ("kierrätyspiha", Categories.RECYCLING, None),  # Kierrätyspiha (recycling yards)
         ("siirtokuormausasema", Categories.RECYCLING, None),  # Siirtokuormausasema (transfer stations)
         ("kaatopaikka", None, {"landuse": "landfill"}),  # Kaatopaikka (dump sites, incl. snow dumps)
+        ("lähiasema", Categories.CLINIC, None),  # Lähiasemat (local health stations)
+        ("selviämis", Categories.CLINIC, None),  # Selviämisasemat (sobering-up stations)
+        ("sydänasema", Categories.CLINIC, None),  # Sydänasema (acute cardiac unit)
+        ("ensihoito", Categories.FIRE_STATION, None),  # Ensihoitoasemat (EMS stations)
+        ("ekoasema", Categories.RECYCLING, None),  # Ekoasemat (eco recycling points)
+        ("kohtaamisasema", Categories.COMMUNITY_CENTRE, None),  # Kohtaamisasemat (meeting points)
+        ("businessasema", Categories.OFFICE_GOVERNMENT, None),  # BusinessAsema (business service point)
+        ("puolustusasema", Categories.TOURISM_ATTRACTION, None),  # Puolustusasemat (war-history sites)
+        ("kaavoitus", Categories.OFFICE_GOVERNMENT, None),  # Kaavoitus (planning offices)
+        ("testausasema", None, None),  # Testausasemat (test stations): no precise filing, keep generic
+        ("testiasema", None, None),  # Testiasemat (test stations): no precise filing, keep generic
         ("asema", None, {"railway": "station", "public_transport": "station"}),  # Asema (railway stations)
         ("vuokraamo", Categories.SHOP_RENTAL, None),
         ("kirpputori", Categories.SHOP_SECOND_HAND, None),  # Kirpputori (flea markets)
@@ -666,6 +677,8 @@ class PtvFISpider(Spider):
         ("hätämajoitus", Categories.SHELTER, None),  # Hätämajoitus (emergency housing)
         ("luontokeskus", Categories.MUSEUM, None),  # Luontokeskus (nature centres)  # Laavu (lean-to shelters)
         ("vessa", Categories.TOILETS, None),  # Vessa (toilets)
+        ("talvipuutarha", None, {"leisure": "botanical_garden"}),  # Talvipuutarha (botanical garden)
+        ("kasvitieteelli", None, {"leisure": "botanical_garden"}),  # Kasvitieteelliset puutarhat
         ("puisto", Categories.LEISURE_PARK, None),  # Puisto (parks)
         ("veistos", None, {"tourism": "artwork", "artwork_type": "sculpture"}),  # Veistos (sculptures; parks keep park)
         ("taideteos", Categories.TOURISM_ARTWORK, None),  # Taideteos (artworks)
@@ -766,11 +779,13 @@ class PtvFISpider(Spider):
                 # and school-aged (kouluikäinen, kouluiässä) never match.
                 rx = re.compile(r"\w*koulu(?!tus|ikä|iä)")
             elif k == "asema":
-                # Station words, except airports: customer-service desks at
-                # Helsinki-Vantaa ("...lentoasemalla") are offices, and a bare
-                # Lentoasema is no one's railway station. Rautatieasema keeps
-                # its own earlier rule.
-                rx = re.compile(r"(?<!lento)asema")
+                # Station words, compound-final only: customer-service desks
+                # at Helsinki-Vantaa ("...lentoasemalla") are offices, a bare
+                # Lentoasema is no one's railway station, and inflected
+                # station modifiers ("metroaseman väestönsuoja",
+                # "terveysasemilla" services) must not file as stations.
+                # Rautatieasema keeps its own earlier rule.
+                rx = re.compile(r"(?<!lento)asema\b")
             else:
                 rx = re.compile(re.escape(k))
             self._rules.append((rx, cat, extra))
@@ -2886,6 +2901,8 @@ class PtvFISpider(Spider):
             return ward
         if (group := self._custom_group_use(lowered)) is not None:
             return group
+        if (ground := self._custom_exercise_ground(lowered)) is not None:
+            return ground
         return None
 
     def _custom_machine(self, name_fi: str, lowered: str) -> tuple | None:
@@ -3131,6 +3148,18 @@ class PtvFISpider(Spider):
             lowered,
         ):
             return None, None
+        return None
+
+    def _custom_exercise_ground(self, lowered: str) -> tuple | None:
+        # Neighbourhood exercise grounds mirror the service-map activity
+        # refinement: ball-game arenas are pitches, schoolyards read as
+        # playgrounds (cf. Kungsgårdsskolan).
+        if "lähiliikuntapaikka" not in lowered:
+            return None
+        if re.search(r"(miniareena|ministadion|pallopel|pallokentt|pelikentt|monitoimikentt)\w*", lowered):
+            return Categories.LEISURE_PITCH, None
+        if re.search(r"(koulu|skol)\w*", lowered):
+            return Categories.LEISURE_PLAYGROUND, None
         return None
 
     def _category(self, name_fi: str):

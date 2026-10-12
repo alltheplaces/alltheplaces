@@ -3438,3 +3438,60 @@ def test_district_tails_drop():
     item = addressed(make_spider(), "Tivolikuja", "1 Alppiharju")
     assert item.get("street") == "Tivolikuja"
     assert item.get("housenumber") == "1"
+
+
+def test_shelters_outrank_stations():
+    # Sörnäisten metroaseman yleinen väestönsuoja: the shelter names the
+    # POI, the inflected station modifier must not file it as a station.
+    category, extra = cat(make_spider(), "Sörnäisten metroaseman yleinen väestönsuoja")
+    assert category == Categories.MILITARY_BUNKER
+    assert extra == {"bunker_type": "bomb_shelter"}
+    assert cat(make_spider(), "Kampin metroaseman yleinen väestönsuoja")[0] == Categories.MILITARY_BUNKER
+
+
+def test_station_compounds_file_as_facilities():
+    spider = make_spider()
+    assert cat(spider, "Vesilahden lähiasema")[0] == Categories.CLINIC
+    assert cat(spider, "Selviämishoitoasema")[0] == Categories.CLINIC
+    assert cat(spider, "Selviämisasema")[0] == Categories.CLINIC
+    assert cat(spider, "Sydänasema")[0] == Categories.CLINIC
+    assert cat(spider, "Krossin pelastus- ja ensihoitoasema")[0] == Categories.FIRE_STATION
+    assert cat(spider, "Tervolan Ekoasema")[0] == Categories.RECYCLING
+    assert cat(spider, "ViaDian Kohtaamisasema")[0] == Categories.COMMUNITY_CENTRE
+    assert cat(spider, "BusinessAsema")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Purasjoen puolustusasema 1939")[0] == Categories.TOURISM_ATTRACTION
+    assert cat(spider, "Asemakaavoitus")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Testausasema") == (None, None)
+
+
+def test_station_needs_word_boundary():
+    spider = make_spider()
+    assert cat(spider, "Kampin metroasema")[1] == {"railway": "station", "public_transport": "station"}
+    assert cat(spider, "Leinelän asema")[1] == {"railway": "station", "public_transport": "station"}
+    # Inflected station modifiers without facility words stay generic.
+    assert cat(spider, "Asematien Pysäkki") == (None, None)
+    # Health-station names in inflected form still type health, not stations.
+    assert cat(spider, "Neuvonta terveysasemalla")[0] == Categories.CLINIC
+
+
+def test_schoolyard_exercise_grounds():
+    # Service-map activity refinement: ball arenas are pitches, schoolyards
+    # read as playgrounds, other grounds stay fitness stations.
+    spider = make_spider()
+    assert cat(spider, "Åshöjdens grundskola / Lähiliikuntapaikka")[0] == Categories.LEISURE_PLAYGROUND
+    assert cat(spider, "Porolahden peruskoulu / Lähiliikuntapaikka")[0] == Categories.LEISURE_PLAYGROUND
+    assert cat(spider, "Landbonkenttä / Lähiliikuntapaikka (Miniareena)")[0] == Categories.LEISURE_PITCH
+    assert cat(spider, "Lähiliikuntapaikka")[0] == Categories.LEISURE_FITNESS_STATION
+
+
+def test_botanical_gardens():
+    # Talvipuutarha (Nähtävyydet service, botanical onto): garden, never the
+    # farm service's social facility.
+    garden = {"leisure": "botanical_garden"}
+    assert cat(make_spider(), "Talvipuutarha") == (None, garden)
+    assert cat(make_spider(), "Kasvitieteellinen puutarha") == (None, garden)
+    assert cat(make_spider(), "Koivuhaan arboretum") == (None, garden)
+
+
+def test_event_areas_are_not_parks():
+    assert cat(make_spider(), "Pengerpuisto, tapahtuma-alue")[0] == Categories.EVENTS_VENUE
