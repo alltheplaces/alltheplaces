@@ -83,7 +83,6 @@ class VMarktDESpider(Spider):
             item["street_address"] = street_address
             item["city"] = city
             item["postcode"] = postcode
-            item["country"] = "DE"
             item["phone"] = phone
 
             if store_id in coords_map:

@@ -1,11 +1,12 @@
 import scrapy
 
+from locations.categories import apply_category
 from locations.items import Feature
 
 
 class AureconGroupSpider(scrapy.Spider):
     name = "aurecon_group"
-    item_attributes = {"brand": "Aurecon", "brand_wikidata": "Q2871849", "extras": {"office": "construction_company"}}
+    item_attributes = {"brand": "Aurecon", "brand_wikidata": "Q2871849"}
     allowed_domains = ["www.aurecon.com"]
     start_urls = ("https://www.aurecongroup.com/locations",)
 
@@ -38,4 +39,5 @@ class AureconGroupSpider(scrapy.Spider):
                 coordinates = (coordinates.split("=")[1]).split(",")
                 properties["lat"] = float(coordinates[0])
                 properties["lon"] = float(coordinates[1])
+            apply_category({"office": "construction_company"}, properties)
             yield Feature(**properties)

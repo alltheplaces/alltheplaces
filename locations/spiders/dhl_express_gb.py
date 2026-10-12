@@ -35,9 +35,11 @@ class DhlExpressGBSpider(Spider):
 
             oh = OpeningHours()
             for day in location.get("OpeningTimes"):
-                oh.add_range(
-                    day=DAYS[day.get("Day") - 1], open_time=day.get("OpenTime"), close_time=day.get("CloseTime")
-                )
+                day_code = DAYS[day.get("Day") - 1]
+                if day.get("OpenForBusiness"):
+                    oh.add_range(day=day_code, open_time=day.get("OpenTime"), close_time=day.get("CloseTime"))
+                else:
+                    oh.set_closed(day_code)
             item["opening_hours"] = oh
 
             apply_category(Categories.POST_DEPOT, item)

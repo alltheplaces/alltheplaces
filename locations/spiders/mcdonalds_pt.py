@@ -51,6 +51,7 @@ class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
             apply_category(Categories.CAFE, mccafe)
             yield mccafe
 
+        apply_category(Categories.FAST_FOOD, item)
         yield item
 
     def parse_opening_hours(self, rules: list) -> OpeningHours:

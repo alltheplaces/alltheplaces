@@ -1,7 +1,7 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import FormRequest, Response
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, OpeningHours
@@ -17,7 +17,7 @@ class LewisStoresSpider(Spider):
             formdata={"param1": "Lewis Stores"},
         )
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             if "CLOSED" in location["StoreLocatorName"]:
                 continue
@@ -42,37 +42,18 @@ class LewisStoresSpider(Spider):
             oh = OpeningHours()
             time_format = "%I:%M%p" if "am" in location["TradingMonFri"] else "%H:%M"
 
-            if TradingMonFri := location.get("TradingMonFri"):
-                if TradingMonFri == "CLOSED":
-                    oh.set_closed(DAYS_WEEKDAY)
+            for days, trading in [
+                (DAYS_WEEKDAY, location["TradingMonFri"]),
+                (["Sat"], location["TradingSat"]),
+                (["Sun"], location["TradingSunPub"]),
+            ]:
+                if not trading:
+                    continue
+                if trading.lower() in ["closed", "no"]:
+                    oh.set_closed(days)
                 else:
-                    for day in DAYS_WEEKDAY:
-                        oh.add_range(
-                            day,
-                            TradingMonFri.split("-")[0].strip(),
-                            TradingMonFri.split("-")[1].strip(),
-                            time_format=time_format,
-                        )
-            if TradingSat := location.get("TradingSat"):
-                if TradingSat == "CLOSED":
-                    oh.set_closed("Sat")
-                else:
-                    oh.add_range(
-                        "Sat",
-                        TradingSat.split("-")[0].strip(),
-                        TradingSat.split("-")[1].strip(),
-                        time_format=time_format,
-                    )
-            if TradingSunPub := location.get("TradingSunPub"):
-                if TradingSunPub == "CLOSED":
-                    oh.set_closed("Sun")
-                else:
-                    oh.add_range(
-                        "Sun",
-                        TradingSunPub.split("-")[0].strip(),
-                        TradingSunPub.split("-")[1].strip(),
-                        time_format=time_format,
-                    )
+                    open_time, close_time = trading.replace("h", ":").split("-")
+                    oh.add_days_range(days, open_time.strip(), close_time.strip(), time_format)
 
             item["opening_hours"] = oh
 

@@ -52,7 +52,6 @@ class CoopCHSpider(StructuredDataSpider, CamoufoxSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = re.search(r"/detail\.html/(\d+)/", response.url).group(1)
         item["branch"] = item.pop("name", None)
-        item["country"] = "CH"
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 

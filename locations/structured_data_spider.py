@@ -251,7 +251,7 @@ class StructuredDataSpider(Spider):
     def parse(self, response: TextResponse, **kwargs):
         yield from self.parse_sd(response)
 
-    def parse_sd(self, response: TextResponse):  # noqa: C901
+    def parse_sd(self, response: TextResponse, **kwargs):  # noqa: C901
         selector = response.selector
         if self.convert_microdata:
             MicrodataParser.convert_to_json_ld(response)

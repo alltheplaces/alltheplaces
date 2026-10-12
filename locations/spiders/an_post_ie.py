@@ -46,7 +46,6 @@ class AnPostIESpider(Spider):
                 ]
             )
             item["postcode"] = location["EirCode"]
-            item["country"] = "IE"
             item["website"] = urljoin("https://www.anpost.com/Store-Locator/", location["NameURL"])
             item["extras"]["collection_times"] = location["LastTimeOfPosting"]
 
