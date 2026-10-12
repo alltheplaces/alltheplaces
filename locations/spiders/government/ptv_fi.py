@@ -94,14 +94,17 @@ class PtvFISpider(Spider):
         ("psykiatrinen sairaala", Categories.HOSPITAL, None),  # Psychiatric hospitals
         ("psykiatriasairaala", Categories.HOSPITAL, None),  # Psychiatric hospitals, compound
         ("psykiatri", Categories.CLINIC, None),  # Psykiatri (psychiatry)
+        ("nuorten mielenterveys", Categories.CLINIC, None),  # Youth mental-health services
+        ("nuorten päihde", Categories.CLINIC, None),  # Youth addiction services
+        ("nuorisoasema", Categories.OFFICE_GOVERNMENT, None),  # Nuorisoasema (youth service stations)
         ("nuorisotila", None, {"amenity": "youth_centre"}),  # Nuorisotila (youth rooms)
         ("nuorisotalo", None, {"amenity": "youth_centre"}),  # Nuorisotalo (youth centres)
         ("nuokkari", None, {"amenity": "youth_centre"}),  # Nuokkari (youth hangouts)
         ("ungdomslokal", None, {"amenity": "youth_centre"}),  # Ungdomslokal (youth rooms in Swedish)
         ("ungdomsgård", None, {"amenity": "youth_centre"}),  # Ungdomsgård (youth centres in Swedish)
         ("järjestämispaikka", Categories.COMMUNITY_CENTRE, None),  # Järjestämispaikka (activity venues)
-        ("nuoriso", Categories.COMMUNITY_CENTRE, None),  # Nuoriso (youth centres)
         ("nuorisokoti", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),  # Nuorisokoti (youth homes)
+        ("nuoriso", Categories.COMMUNITY_CENTRE, None),  # Nuoriso (youth centres)
         ("nuorten", Categories.COMMUNITY_CENTRE, None),  # Nuorten (youth rooms)
         ("iltapäivä", Categories.COMMUNITY_CENTRE, None),  # Iltapäivä (after-school clubs)
         ("musiikkiopisto", Categories.MUSIC_SCHOOL, None),  # Musiikkiopisto (music schools)
@@ -184,6 +187,8 @@ class PtvFISpider(Spider):
         ("beach volley", Categories.LEISURE_PITCH, {"sport": "beachvolleyball"}),  # Beach volley (spaced)
         ("volley", Categories.LEISURE_PITCH, {"sport": "volleyball"}),  # Volley (volleyball)
         ("huoltorakennus", None, None),  # Huoltorakennus (service buildings): no precise filing, keep generic
+        ("talviuimari", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimarit (winter swimmers)
+        ("talviuimaranta", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimaranta (winter-swimming beaches)
         ("uimaranta", Categories.NATURAL_BEACH, None),  # Uimaranta (beaches)
         ("uimarannat", Categories.NATURAL_BEACH, None),  # Uimarannat (beaches, plural)
         ("uimapaikka", Categories.NATURAL_BEACH, None),  # Uimapaikka (swimming places)
@@ -365,6 +370,9 @@ class PtvFISpider(Spider):
         ("koulutuskeskus", Categories.COLLEGE, None),  # Koulutuskeskus (training centres)
         ("koulutus", Categories.OFFICE_GOVERNMENT, None),  # Koulutus (education services)
         ("koulu", Categories.SCHOOL, None),  # Koulu (schools)
+        ("lupapalvelu", Categories.OFFICE_GOVERNMENT, None),  # Lupapalvelu (permit services, also at stations)
+        ("erityislupa", Categories.OFFICE_GOVERNMENT, None),  # Erityislupa (special permits, also at stations)
+        ("lupa-asi", Categories.OFFICE_GOVERNMENT, None),  # Lupa-asiat (permit matters, also at stations)
         ("poliisi", Categories.POLICE, None),  # Poliisi (police)
         ("tarkastus", Categories.OFFICE_GOVERNMENT, None),  # Tarkastus (inspection desks)
         ("kriisi", Categories.SOCIAL_FACILITY, None),  # Kriisi (crisis services)
@@ -402,8 +410,6 @@ class PtvFISpider(Spider):
         ("graffitti", Categories.TOURISM_ARTWORK, {"artwork_type": "graffiti"}),  # Graffitti (graffiti variant)
         ("taidekontti", Categories.TOURISM_ARTWORK, None),  # Taidekontti (art containers)
         ("avantouinti", Categories.LEISURE_SWIMMING_AREA, None),  # Avantouinti (winter swimming)
-        ("talviuimari", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimarit (winter swimmers)
-        ("talviuimaranta", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimaranta (winter-swimming beaches)
         ("talviuinti", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuinti (winter swimming)
         ("luistelu", Categories.LEISURE_ICE_RINK, None),  # Luistelu (skating)
         ("toimintakeskus", Categories.COMMUNITY_CENTRE, None),  # Toimintakeskus (activity centres)
@@ -420,6 +426,7 @@ class PtvFISpider(Spider):
         ("kylätalo", Categories.COMMUNITY_CENTRE, None),  # Kylätalo (village halls)
         ("seurantalo", Categories.COMMUNITY_CENTRE, None),  # Seurantalo (association houses)
         ("kotiseututalo", Categories.COMMUNITY_CENTRE, None),  # Kotiseututalo (heritage houses)
+        ("olka-piste", Categories.OFFICE_GOVERNMENT, None),  # OLKA-pisteet (hospital info desks)
         ("yhdistys", Categories.COMMUNITY_CENTRE, None),  # Yhdistys (association houses)
         ("yhteisötalo", Categories.COMMUNITY_CENTRE, None),  # Yhteisötalo (community houses)
         ("yhteisökeskus", Categories.COMMUNITY_CENTRE, None),  # Yhteisökeskus (community centres)
@@ -427,12 +434,13 @@ class PtvFISpider(Spider):
         ("lastenkulttuurikeskus", Categories.ARTS_CENTRE, None),  # Lastenkulttuurikeskus (children's culture centres)
         ("kulttuurikeskus", Categories.COMMUNITY_CENTRE, None),  # Kulttuurikeskus (culture centres)
         ("kulttuuritila", Categories.COMMUNITY_CENTRE, None),  # Kulttuuritila (culture premises)
+        ("yhteisötila", Categories.COMMUNITY_CENTRE, None),  # Yhteisötila (community premises)
         (
             "kokoustila",
             Categories.EVENTS_VENUE,
             None,
         ),  # Kokoustila (meeting rooms)  # Monitoimihalli (multipurpose halls)
-        ("neuvottelu", Categories.EVENTS_VENUE, None),  # Neuvottelu (meeting/negotiation centres)
+        ("neuvottelu", Categories.SOCIAL_FACILITY, None),  # Neuvottelu (negotiation centres, all family-affairs)
         ("poliisiasema", Categories.POLICE, None),  # Poliisiasema (police stations)
         ("pelastusasema", Categories.FIRE_STATION, None),  # Pelastusasema (rescue stations)
         ("vpk", Categories.FIRE_STATION, None),  # VPK (volunteer fire brigades)
@@ -487,10 +495,7 @@ class PtvFISpider(Spider):
         ("työvoima", Categories.OFFICE_GOVERNMENT, None),  # Työvoima (labour services)
         ("rakennusvalvonta", Categories.OFFICE_GOVERNMENT, None),  # Rakennusvalvonta (building control)
         ("rakennusvalvonnan", Categories.OFFICE_GOVERNMENT, None),  # Rakennusvalvonnan (building control, genitive)
-        ("lupapalvelu", Categories.OFFICE_GOVERNMENT, None),  # Lupapalvelu (permit services)
-        ("erityislupa", Categories.OFFICE_GOVERNMENT, None),  # Erityislupa (special permits)
         ("maanmittauslaitos", Categories.OFFICE_GOVERNMENT, None),  # Maanmittauslaitos (land survey offices)
-        ("lupa-asi", Categories.OFFICE_GOVERNMENT, None),  # Lupa-asiat (permit matters)
         ("metsäkeskus", Categories.OFFICE_GOVERNMENT, None),  # Metsäkeskus (forest centre)
         ("ulosotto", Categories.OFFICE_GOVERNMENT, None),
         ("tulli", Categories.OFFICE_GOVERNMENT, None),  # Tulli (customs offices)
@@ -556,7 +561,6 @@ class PtvFISpider(Spider):
         ("tuettu asumi", Categories.ASSISTED_LIVING, None),  # Tuettu asuminen (supported housing)
         ("tukiasuminen", Categories.ASSISTED_LIVING, None),  # Tukiasuminen (support housing)
         ("asumi", Categories.SOCIAL_FACILITY, None),  # Asumi (housing services)
-        ("koti", Categories.SOCIAL_FACILITY, None),  # Koti (group/housing homes)
         ("boende", Categories.SOCIAL_FACILITY, None),
         ("hemmet", Categories.SOCIAL_FACILITY, None),  # Hemmet (housing in Swedish)  # Boende (housing in Swedish)
         ("kuntout", Categories.SOCIAL_FACILITY, None),  # Kuntout (rehabilitation)
@@ -1632,6 +1636,15 @@ class PtvFISpider(Spider):
             # Ulkoilusaari") instead of peeling the island away.
             self._count("name/slash_area_island")
             return " / ".join(segments[:-1]), segments[-1], name
+        if (
+            len(segments) == 2
+            and re.search(r"\w*(saari|luoto)$", segments[0].strip().lower())
+            and self._has_fixture(segments[1])
+        ):
+            # Island-headed facility pairs ("Kaunissaari / Telttailu- ja
+            # leiriytymispaikka 2."): the facility names the POI instead.
+            self._count("name/slash_island_venue")
+            return segments[1].strip(), segments[0].strip(), name
         peeled = self._peel_slash(segments)
         if peeled is None:
             return None
@@ -1864,6 +1877,16 @@ class PtvFISpider(Spider):
             if any(word in head.lower() for word in self.AREA_TAILS):
                 self._count("name/slash_area")
                 return tail, None, name
+            tail_base = tail.split(",")[0].strip()
+            if (
+                "," in tail
+                and re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail_base)
+                and re.search(r"(puisto|keskus|halli|kenttä|stadion|areena|talo|koulu)$", head.lower())
+            ):
+                # Compound facility names ("...Keinupuisto/Hilpi,
+                # Hämeenlinna, ..."): don't split the facility; comma
+                # dispatch strips the city/service tails instead.
+                return None
             if not (self._has_fixture(head) or self._has_fixture(tail)):
                 # No venue evidence on either side: co-titles stay whole.
                 self._count("name/slash_venue_kept")
@@ -1969,7 +1992,10 @@ class PtvFISpider(Spider):
                 return self._resolve_nested(shown, located, official, name)
             return split
         if "/" in name and name.count("/") == 1:
-            return self._split_bare(name)
+            # Bare-slash guards may decline (compound facilities): fall
+            # through to comma shapes instead of stranding None.
+            if (split := self._split_bare(name)) is not None:
+                return split
         if (split := self._split_name_tail(name, city)) is not None:
             return split
         return name, None, None
@@ -2344,7 +2370,23 @@ class PtvFISpider(Spider):
                 # not venues.
                 self._count("name/comma_coverage_inflected")
                 return head, None, name
-            if re.search(r"poliisi", head.lower()):
+            if re.search(r"poliisi", head.lower()) and not any(
+                word in tail.lower()
+                for word in (
+                    "palvelu",
+                    "toiminta",
+                    "hoito",
+                    "huolto",
+                    "työ",
+                    "tuki",
+                    "neuvonta",
+                    "ohjaus",
+                    "kahvila",
+                    "ravintola",
+                    "kioski",
+                    "kauppa",
+                )
+            ):
                 # Police-station desk qualifiers (löytötavarat, lupapalvelut,
                 # asetarkastus, aseen esitys) belong in the name: desk
                 # counters are not separate venues, and branch=* is not
@@ -2358,7 +2400,7 @@ class PtvFISpider(Spider):
                 if not (" ja " in tail and not self._has_fixture(tail) and not re.search(r"\d", tail)):
                     self._count("name/comma_service_host")
                     return head, self._clean_located(tail) or tail, name
-            if (service := self._split_comma_service(head, tail, name)) is not None:
+            if (service := self._split_comma_service(head, tail, name, city)) is not None:
                 return service
             # Bare city tails and appositive descriptors stay whole:
             # the structured address carries the city.
@@ -2425,7 +2467,20 @@ class PtvFISpider(Spider):
             return head, self._clean_located(tail) or tail, name
         return None
 
-    def _split_comma_service(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+    def _locate_venue_head(self, head: str, city: str | None) -> str | None:
+        # Venue heads carrying their own city tail resolve through the
+        # comma dispatch ("Kivari, Riihimäki" → Kivari); multi-venue
+        # heads without a resolvable city ("Riihikoti, Villava") stay whole.
+        if "," not in head:
+            return self._clean_located(head) or head
+        sub = self._split_comma(head, city)
+        if sub[1] is None and sub[0] != head:
+            return sub[0]
+        return head
+
+    def _split_comma_service(
+        self, head: str, tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         # Service/unit comma pairs, both directions, then tail cleaners.
         lowered_head, lowered_tail = head.lower(), tail.lower()
         if self._is_bare_area(head) or self._is_bare_area(tail):
@@ -2454,16 +2509,18 @@ class PtvFISpider(Spider):
             return shown, self._clean_located(tail), name
         if (
             any(word in lowered_tail for word in self.SERVICE_TAILS)
-            and self._has_fixture(head)
+            and (self._has_fixture(head) or (self._is_proper_tail(head) and not self._is_person(head)))
+            and not re.search(r"\b(oy|ab)\b", head, flags=re.IGNORECASE)
+            and not self._is_private_org(head)
             and (not self._is_unit_tail(tail) or self._is_venue_head(head))
             and (not self._is_unit_tail(head) or self._is_venue_head(tail))
         ):
             self._count("name/comma_unit_venue")
             shown = tail[0].upper() + tail[1:] if tail else tail
-            # Multi-venue heads keep every venue ("Riihikoti, Villava"):
-            # cleaning would eat all but the first as a city tail.
-            located = head if "," in head else (self._clean_located(head) or head)
-            return shown, located, name
+            # City-carrying venue heads resolve ("Kivari, Riihimäki");
+            # multi-venue heads without one ("Riihikoti, Villava") stay whole.
+            located = self._locate_venue_head(head, city)
+            return shown, located or head, name
         if (
             tail
             and tail[0].islower()
@@ -2472,8 +2529,12 @@ class PtvFISpider(Spider):
         ):
             # Lowercase service descriptors ("Teuvolan vammaisten
             # asumispalvelut, tilapäishoito ja loma-ajanhoito"): the head
-            # names it, the tail is no venue.
+            # names it, the tail is no venue. Comma heads resolve further
+            # ("Ikifit Oy, ...Keinupuisto/Hilpi, Hämeenlinna, ...").
             self._count("name/comma_descriptor_dropped")
+            if "," in head:
+                sub = self._split_comma(head, city)
+                return sub[0], sub[1], name
             return head, None, name
         if any(word in lowered_tail for word in self.SWEDISH_SERVICE_TAILS) and self._is_institution(head.lower()):
             # Swedish service tails ("Zacharias Topeliusskolan,
@@ -2688,8 +2749,6 @@ class PtvFISpider(Spider):
             return tori
         if (shore := self._custom_shore(lowered)) is not None:
             return shore
-        if (saari := self._custom_saari(lowered)) is not None:
-            return saari
         if (health := self._custom_health(name_fi, lowered)) is not None:
             return health
         if re.search(r"(kirkko|kappeli)$", lowered) and not re.search(
@@ -2763,7 +2822,10 @@ class PtvFISpider(Spider):
         # Islands proper ("Mustasaari", "Malkasaari (saari)"); venues
         # merely ON islands keep their filing (or generic) instead of
         # stealing the island tag. Compound-final only, like the shore nouns.
-        if not re.search(r"\((saari|luoto)\)", lowered) and not re.search(r"\w*(saari|luoto)$", lowered):
+        # Runs AFTER the keyword table so real categories always win.
+        if not re.search(r"\([A-ZÅÄÖa-zåäö-]*?(saari|luoto)\)", lowered) and not re.search(
+            r"\w*(saari|luoto)$", lowered
+        ):
             return None
         if "," in lowered:
             # Venue+place shapes ("Skopiayksikkö, Pietarsaari",
@@ -2808,6 +2870,9 @@ class PtvFISpider(Spider):
             # (Hotelli-ravintolan ranta); Rantala/Rantatie never match.
             # Parking, hospitality and facility venues named after shores
             # ("Pysäköintialue Asemanranta") file as themselves.
+            if "talviuimaranta" in lowered:
+                # Managed winter-swimming beaches are swimming areas.
+                return None
             if re.search(r"(pysäköinti|parkki|kahvila|ravintola|kioski|kauppa)", lowered):
                 return None
             if any(word in lowered for word in self.SHORE_FACILITY_BAIL):
@@ -2970,6 +3035,13 @@ class PtvFISpider(Spider):
                         return Categories.CLINIC_URGENT, None
                     return Categories.CLINIC, None
                 return category, extra
+        if (island := self._custom_saari(lowered)) is not None:
+            # Genuine islands file only when no keyword typed the row.
+            return island
+        if "koti" in lowered:
+            # Home-named places without a sharper filing (islands handled
+            # above) are group/housing homes.
+            return Categories.SOCIAL_FACILITY, None
         return None, None
 
     def _normalize_phone(self, raw: str) -> str | None:
@@ -3451,8 +3523,27 @@ class PtvFISpider(Spider):
             return
         cleaned = self._clean_name(signed)
         shown, located, official = self._split_name(cleaned, city_src)
+        slash_tail = None
+        if " / " in signed and len(signed.split(" / ")) == 2:
+            candidate = signed.rsplit(" / ", 1)[1].strip()
+            if candidate and re.search(self.OPERATOR_END_RE, candidate, flags=re.IGNORECASE):
+                slash_tail = candidate
+        if slash_tail is not None:
+            # Explicit operator companies/associations in the signed name
+            # ("Imatra Bowling Center / Imatran keilahalli Oy") name the
+            # operator; the tail is never a located venue.
+            located = None
+            item["operator"] = slash_tail
+            self._count("operator/slash_tail")
+            is_company = bool(re.search(r"\b(oy|ab)\.?$", slash_tail, flags=re.IGNORECASE))
+            private_org = self._is_private_org(slash_tail)
+            if is_company or private_org:
+                item["extras"]["operator:type"] = "private"
+            if private_org and not is_company and self._tag(item, "office") == "government":
+                self._count("operator/office_demoted")
+                item["extras"]["office"] = "association"
         if city_src:
-            city_match = re.match(re.escape(city_src.strip()) + r"\s*[–—-]\s*(\S)", shown, flags=re.IGNORECASE)
+            city_match = re.match(re.escape(city_src.strip()) + r"\s+[–—-]\s+(\S)", shown, flags=re.IGNORECASE)
         else:
             city_match = None
         if city_match and city_match.group(1).islower():
@@ -3462,7 +3553,7 @@ class PtvFISpider(Spider):
             # ("Salo-Karinan neuvonta-asema") stay whole.
             self._count("name/city_prefix_dropped")
             shown = re.sub(
-                r"^" + re.escape(city_src.strip()) + r"\s*[–—-]\s*",
+                r"^" + re.escape(city_src.strip()) + r"\s+[–—-]\s+",
                 "",
                 shown,
                 flags=re.IGNORECASE,
