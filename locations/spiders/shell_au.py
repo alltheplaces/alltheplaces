@@ -1,9 +1,10 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, apply_category, apply_yes_no
-from locations.hours import DAYS_3_LETTERS, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.spiders.otr_au import OtrAUSpider
 from locations.spiders.shell import ShellSpider
@@ -25,6 +26,25 @@ SHOP_BRANDS = {
     "TAS Petroleum": None,
     "Urbanista": None,
 }
+# Day prefixes of the "<day>_opening" and "<day>_closing" fields in the source data.
+DAY_FIELD_PREFIXES = {
+    "Mon": "mon",
+    "Tue": "tues",
+    "Wed": "wed",
+    "Thu": "thurs",
+    "Fri": "fri",
+    "Sat": "sat",
+    "Sun": "sun",
+}
+
+
+def clean_time(value: str | None) -> str | None:
+    """Normalise the occasional malformed time ("0430", "05;00") to HH:MM, or None when unreadable ("05:0")."""
+    if match := re.fullmatch(r"(\d{1,2})[:;]?(\d{2})", (value or "").strip()):
+        return f"{match.group(1)}:{match.group(2)}"
+    return None
+
+
 FUEL_BRANDS = {
     "Advantage": None,
     "Ampol": None,
@@ -69,9 +89,9 @@ class ShellAUSpider(MapDataServicesSpider):
         if feature.get("open_24_hours") == "1":
             item["opening_hours"] = "24/7"
         else:
-            for day in DAYS_3_LETTERS:
+            for day, prefix in DAY_FIELD_PREFIXES.items():
                 item["opening_hours"].add_range(
-                    day, feature.get("{}_opening".format(day)), feature.get("{}_closing".format(day))
+                    day, clean_time(feature.get(f"{prefix}_opening")), clean_time(feature.get(f"{prefix}_closing"))
                 )
 
         apply_yes_no(Fuel.E10, item, feature.get("unleaded_e10") == "1", "unleaded_e10" not in feature)
