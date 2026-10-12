@@ -89,10 +89,7 @@ class KuraSushiJPSpider(StructuredDataSpider):
             if any(marker in (store.get("name") or "") for marker in CLOSED_MARKERS):
                 self.crawler.stats.inc_value(f"atp/{self.name}/store_closed")
                 continue
-            yield response.follow(href, callback=self.parse_store, cb_kwargs={"store": store})
-
-    def parse_store(self, response: TextResponse, store: dict) -> Iterable[Feature]:
-        yield from self.parse_sd(response)
+            yield response.follow(href, callback=self.parse_sd, cb_kwargs={"store": store})
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         store = response.cb_kwargs.get("store") or {}
