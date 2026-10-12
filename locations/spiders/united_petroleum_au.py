@@ -1,3 +1,4 @@
+import re
 from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
@@ -8,6 +9,7 @@ from locations.categories import Categories, Extras, Fuel, apply_category, apply
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 
+TIME_RANGE_REGEX = re.compile(r"(\d{1,2}:\d{2}[AP]M) - (\d{1,2}:\d{2}[AP]M)")
 SUB_TENANTS = {
     "pieFace": ({"brand": "Pie Face", "brand_wikidata": "Q18166370"}, Categories.COFFEE_SHOP),
     "quickStop": ({"brand": "Quick Stop", "name": "Quick Stop"}, Categories.SHOP_CONVENIENCE),
@@ -42,6 +44,30 @@ class UnitedPetroleumAUSpider(Spider):
             },
         )
 
+    @staticmethod
+    def parse_opening_hours(hours: dict) -> OpeningHours:
+        """
+        The API returns, per day, a string such as "6:00AM - 11:00PM" (null on
+        24 hour sites) together with `open24Hours<Day>` and `closedOn<Day>`
+        flags. A few sites have an `open24Hours<Day>` flag set alongside a
+        specific time range; as it is unclear which one is right, that day is
+        left out.
+        """
+        oh = OpeningHours()
+        if hours.get("alwaysOpen"):
+            oh.add_days_range(DAYS_FULL, "00:00", "23:59")
+            return oh
+        for day_name in DAYS_FULL:
+            day_hours = hours.get(day_name.lower())
+            if hours.get(f"closedOn{day_name}"):
+                oh.set_closed(day_name)
+            elif hours.get(f"open24Hours{day_name}"):
+                if not day_hours:
+                    oh.add_range(day_name, "00:00", "23:59")
+            elif match := TIME_RANGE_REGEX.fullmatch(day_hours or ""):
+                oh.add_range(day_name, match.group(1), match.group(2), "%I:%M%p")
+        return oh
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
@@ -63,33 +89,7 @@ class UnitedPetroleumAUSpider(Spider):
                 item.update(self.UNITED)
             item["website"] = urljoin("https://servicestations.unitedpetroleum.com.au/location/", location["slug"])
             item["phone"] = location["publicPhoneNumber"]
-            item["opening_hours"] = OpeningHours()
-            for day_name in DAYS_FULL:
-                if not location["openingHours"].get("from") or not location["openingHours"].get("to"):
-                    continue
-                if location["openingHours"][f"closedOn{day_name}"]:
-                    continue
-                if (
-                    location["openingHours"][f"open24Hours{day_name}"]
-                    or "24 HOURS" in location["openingHours"][day_name.lower()].upper()
-                ):
-                    item["opening_hours"].add_range(day_name, "00:00", "23:59")
-                else:
-                    open_time, close_time = (
-                        location["openingHours"][day_name.lower()]
-                        .upper()
-                        .replace("TO", "-")
-                        .replace(".", ":")
-                        .replace("`", "")
-                        .split("-", 2)
-                    )
-                    if "AM" in open_time or "AM" in close_time or "PM" in open_time or "PM" in close_time:
-                        if ":" not in open_time:
-                            open_time = open_time.replace("AM", ":00AM").replace("PM", ":00PM")
-                            close_time = close_time.replace("AM", ":00AM").replace("PM", ":00PM")
-                        item["opening_hours"].add_range(day_name, open_time.strip(), close_time.strip(), "%I:%M%p")
-                    else:
-                        item["opening_hours"].add_range(day_name, open_time.strip(), close_time.strip())
+            item["opening_hours"] = self.parse_opening_hours(location["openingHours"])
             apply_category(Categories.FUEL_STATION, item)
             apply_yes_no(Fuel.OCTANE_98, item, location["fuels"]["premium98"], False)
             apply_yes_no(Fuel.OCTANE_95, item, location["fuels"]["premiumULP"], False)
