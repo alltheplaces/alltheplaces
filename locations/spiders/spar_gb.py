@@ -23,7 +23,7 @@ class SparGBSpider(scrapy.Spider):
     # stores offering each service are collected first and then looked up by store id.
     SERVICE_FILTERS = {
         "ATM": Extras.ATM,
-        "Cash Back": "cash_withdrawal",
+        "Cash Back": Extras.CASH_WITHDRAWAL,
         "Off Licence": "sells:alcohol",
         "Lottery": "sells:lottery",
         "Paypoint": "paypoint",
