@@ -1,73 +1,81 @@
-from typing import AsyncIterator, Iterable
+from typing import Any, Iterable
 
-from scrapy.http import JsonRequest, Response
+import chompjs
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS, OpeningHours
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.react_server_components import parse_rsc
 
-LOCATOR_NL = "https://www.qteam.be/nl/onze-service-centers/"
-LOCATOR_FR = "https://www.qteam.be/fr/nos-centres-de-service/"
+LOCATOR_NL = "https://www.qteam.be/nl/onze-service-centers"
+LOCATOR_FR = "https://www.qteam.be/fr/nos-centres-de-service"
 
 SERVICES = {
-    "WsAlign": Extras.VEHICLE_WHEEL_ALIGNMENT_SERVICES,
-    "WsBatteries": Extras.VEHICLE_BATTERY_SERVICES,
-    "WsBrakes": Extras.VEHICLE_BRAKE_SERVICES,
-    "WsOil": Extras.VEHICLE_OIL_CHANGE_SERVICES,
-    "WsShockAbsorbers": Extras.VEHICLE_SUSPENSION_SERVICES,
-    "WsTiresCars": Extras.VEHICLE_TYRE_SERVICES,
+    "wheelAlignment": Extras.VEHICLE_WHEEL_ALIGNMENT_SERVICES,
+    "batteries": Extras.VEHICLE_BATTERY_SERVICES,
+    "brakes": Extras.VEHICLE_BRAKE_SERVICES,
+    "oil": Extras.VEHICLE_OIL_CHANGE_SERVICES,
+    "shockAbsorbers": Extras.VEHICLE_SUSPENSION_SERVICES,
 }
 
 
-# ImageUrl is not mapped: the paths look per-depot, but 45 of the 104 published
-# centres are served a photo of a different branch, either a shared default or
-# one of three pictures reused across 22, 13 and 2 depots.
-class QTeamBESpider(JSONBlobSpider):
+class QTeamBESpider(Spider):
     name = "q_team_be"
-    item_attributes = {"brand": "QTeam", "brand_wikidata": "Q127691554", "name": "QTeam"}
+    item_attributes = {"brand": "QTeam", "brand_wikidata": "Q127691554"}
     allowed_domains = ["www.qteam.be"]
-    start_urls = ["https://www.qteam.be/api/searchgarage/getgaragesbycity"]
+    start_urls = [LOCATOR_NL]
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        # The API reads the Referer: without one it returns no store page URLs.
-        for url in self.start_urls:
-            yield JsonRequest(
-                url=url,
-                data={"PageSize": 1000},
-                headers={"Referer": LOCATOR_NL},
-            )
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        rsc = "".join(chunk for _, chunk in [chompjs.parse_js_object(script) for script in scripts]).encode()
+        garages = next(
+            garages
+            for garages in DictParser.iter_matching_keys(dict(parse_rsc(rsc)), "garages")
+            if isinstance(garages, list)
+        )
 
-    def extract_json(self, response: Response) -> list[dict]:
-        # The Dutch locator also returns legacy and fleet partner rows on top of the
-        # published service centres, which WsWebsite marks. A published centre always
-        # lists opening hours; the lone exception is a depot the source itself says has
-        # relocated, and it offers no services either.
-        return [garage for garage in response.json()["Garages"] if garage["WsWebsite"] and garage["OpeningHours"]]
+        def resolve(value: dict | str) -> dict:
+            # Repeated objects are replaced with references such as "$25:props:garages:0:services:1".
+            if isinstance(value, str):
+                target = garages
+                for key in value.split(":")[3:]:
+                    target = target[int(key) if key.isdigit() else key]
+                return resolve(target)
+            return value
 
-    def pre_process_data(self, feature: dict) -> None:
-        feature["ref"] = feature.pop("Depot")
-        feature["street_address"] = " ".join(feature.pop("Address").split())
-        feature["city"] = feature.pop("Location")
-        feature["postcode"] = str(feature.pop("Zip"))
+        for garage in garages:
+            if garage["segment"] == "FLEET_PARTNER":
+                continue
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name").removeprefix("QTeam").strip(" -")
-        item["operator"] = feature["OfficialName"]
-        item["website"] = item["extras"]["website:nl"] = response.urljoin(feature["Url"])
-        # Each centre has a page in both languages, reachable by swapping the
-        # localised path. One of the 104 uses a slightly different slug in French
-        # and answers with a redirect to it rather than directly.
-        item["extras"]["website:fr"] = item["website"].replace(LOCATOR_NL, LOCATOR_FR)
+            item = Feature()
+            item["ref"] = garage["externalId"]
+            item["lat"] = garage["location"]["lat"]
+            item["lon"] = garage["location"]["lng"]
+            item["branch"] = garage["title"].removeprefix("QTeam").strip(" -")
+            item["addr_full"] = ", ".join([garage["addressLine1"], garage["addressLine2"]])
+            item["country"] = "BE"
+            item["phone"] = garage["phone"]
+            item["website"] = item["extras"]["website:nl"] = response.urljoin(garage["url"])
+            item["extras"]["website:fr"] = item["website"].replace(LOCATOR_NL, LOCATOR_FR)
 
-        item["opening_hours"] = OpeningHours()
-        for rule in feature["OpeningHours"]:
-            item["opening_hours"].add_range(DAYS[rule["Day"] - 1], rule["From"], rule["Until"])
+            item["opening_hours"] = OpeningHours()
+            for rule in garage["openingHours"]:
+                if rule["slots"]:
+                    for slot in rule["slots"]:
+                        item["opening_hours"].add_range(rule["day"], slot["open"], slot["close"])
+                else:
+                    item["opening_hours"].set_closed(rule["day"])
 
-        apply_category(Categories.SHOP_TYRES, item)
-        apply_yes_no("car:tyres", item, feature["WsTiresCars"])
-        apply_yes_no("truck:tyres", item, feature["WsTiresTrucks"])
-        for key, service in SERVICES.items():
-            apply_yes_no(service, item, feature[key])
+            apply_category(Categories.SHOP_TYRES, item)
+            services = {resolve(service)["id"] for service in garage["services"]}
+            vehicles = {resolve(vehicle)["id"] for vehicle in garage["vehicleTypes"]}
+            apply_yes_no("car:tyres", item, "van" in vehicles)
+            apply_yes_no(Extras.VEHICLE_TYRE_SERVICES, item, "van" in vehicles)
+            apply_yes_no("truck:tyres", item, "truck" in vehicles)
+            for key, service in SERVICES.items():
+                apply_yes_no(service, item, key in services)
 
-        yield item
+            yield item
