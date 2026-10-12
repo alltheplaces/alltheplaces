@@ -18,7 +18,7 @@ class ZahirKebabPLPTSpider(Spider):
         data = json.loads(response.xpath('//script[@class="zkm-data"]/text()').get())
         for location in data["locations"]:
             item = DictParser.parse(location)
-            item["street_address"] = item.pop("street")
+            item["street_address"] = item.pop("street", None)
             item["country"] = location["cc"]
 
             item["opening_hours"] = OpeningHours()
