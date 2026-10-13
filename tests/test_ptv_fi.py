@@ -5149,3 +5149,226 @@ def test_bare_postcode_tail_never_units():
     item = addressed(spider, "Tie", "10 11111", postcode="")
     assert item.get("housenumber") == "10"
     assert item["extras"].get("addr:unit") is None
+
+
+def test_kanssa_person_qualifiers_drop():
+    # Guide/contact qualifiers ("Nummelan kimppakävelyt Marin kanssa",
+    # cb8a8804, round-20 B) name the person, never the venue. Plural
+    # markers and lowercase common nouns are integral event text.
+    spider = make_spider()
+    assert (
+        spider._clean_name("Nummelan kimppakävelyt Marin kanssa, yhdistyksen jäsenille. -palvelun järjestämispaikka")
+        == "Nummelan kimppakävelyt yhdistyksen jäsenille."
+    )
+    for kept, want in (
+        ("Tervetuloa tekemään käsitöitä Marttojen kanssa!", "Tervetuloa tekemään käsitöitä Marttojen kanssa!"),
+        # Lowercase-dash descriptors strip independently ("-kurssi" is not
+        # part of the kanssa qualifier).
+        ("Elämää muistisairauden kanssa -kurssi", "Elämää muistisairauden kanssa"),
+        ("Keskusteluryhmä ahdistuksen kanssa kamppaileville", "Keskusteluryhmä ahdistuksen kanssa kamppaileville"),
+    ):
+        assert spider._clean_name(kept) == want
+
+
+def test_dash_training_units_split_from_schools():
+    # Training/info units are hosted services, not school buildings
+    # ("Kaukajärven koulu - Koulutusinfo"); same-institution buildings
+    # ("... - Annalan koulutalo") stay whole.
+    spider = make_spider()
+    assert spider._split_name("Kaukajärven koulu - Koulutusinfo") == (
+        "Koulutusinfo",
+        "Kaukajärven koulu",
+        "Kaukajärven koulu - Koulutusinfo",
+    )
+    assert spider._split_name("Kaukajärven koulu - Annalan koulutalo") == (
+        "Kaukajärven koulu - Annalan koulutalo",
+        None,
+        None,
+    )
+
+
+def test_bare_district_tails_are_not_desks():
+    # Districts ending in desk words ("Vihdin kunnantalo/Keskusta") are
+    # not service desks (SYNTHETIC: zero feed rows, end-anchor guard).
+    spider = make_spider()
+    assert spider._split_name("Vihdin kunnantalo/Keskusta") == ("Vihdin kunnantalo/Keskusta", None, None)
+    assert spider._split_name("Vihdin kunnantalo/sosiaalitoimisto") == (
+        "sosiaalitoimisto",
+        "Vihdin kunnantalo",
+        "Vihdin kunnantalo/sosiaalitoimisto",
+    )
+
+
+def test_inessive_clinic_hosts_split():
+    # Clinic/daycare hosts de-inflect like the other institutions
+    # ("Neuvonta Myyrmäen neuvolassa"; SYNTHETIC shapes).
+    spider = make_spider()
+    assert spider._split_name("Neuvonta Myyrmäen neuvolassa") == (
+        "Neuvonta",
+        "Myyrmäen neuvola",
+        "Neuvonta Myyrmäen neuvolassa",
+    )
+    assert spider._split_name("Koulutusinfo Kuusankosken kirjastossa") == (
+        "Koulutusinfo",
+        "Kuusankosken kirjasto",
+        "Koulutusinfo Kuusankosken kirjastossa",
+    )
+
+
+def test_city_stripped_fused_schools_keep_venue():
+    # City tails on fused school heads strip, then the school still locates
+    # ("Renkomäen koulun luokat Lahti").
+    spider = make_spider()
+    full = "Renkomäen koulun luokat Lahti"
+    assert spider._split_name(full, "Lahti") == ("Luokat", "Renkomäen koulu", full)
+
+
+def test_hyphenated_city_tails_strip():
+    # Hyphenated municipalities strip on exact match; hyphenated proper
+    # nouns never equal the city ("Päiväkoti Pikku-Elli" keeps whole).
+    spider = make_spider()
+    full = "Kuntoutusohjaus Mänttä-Vilppula"
+    assert spider._split_name(full, "Mänttä-Vilppula") == ("Kuntoutusohjaus", None, full)
+    assert spider._split_name("Päiväkoti Pikku-Elli", "Helsinki") == ("Päiväkoti Pikku-Elli", None, None)
+
+
+def test_double_parens_peel_trailing_group():
+    # Double parentheticals resolve the trailing group; the base carrying
+    # the first group re-dispatches ("Kirjasto (Pääkirjasto) (Keskusta)").
+    spider = make_spider()
+    full = "Kirjasto (Pääkirjasto) (Keskusta)"
+    assert spider._split_name(full, None) == ("Kirjasto", "Pääkirjasto", full)
+
+
+def test_paren_numbered_rooms_name_poi():
+    # Numbered rooms/fields in parens name the POI like slash rooms
+    # ("Kirjasto (Sali 2)"); street addresses and ward qualifiers never
+    # qualify (SYNTHETIC shapes).
+    spider = make_spider()
+    assert spider._split_name("Kirjasto (Sali 2)", None) == ("Sali 2", "Kirjasto", "Kirjasto (Sali 2)")
+
+
+def test_dash_rooms_name_poi():
+    # Facility rooms as dash tails name the POI ("Pallokenttä - Sali 2";
+    # SYNTHETIC: zero feed rows, cf. slash rooms).
+    spider = make_spider()
+    assert spider._split_name("Pallokenttä - Sali 2", None) == (
+        "Sali 2",
+        "Pallokenttä",
+        "Pallokenttä - Sali 2",
+    )
+
+
+def test_venue_org_markers_unioned():
+    # Operator tails in all marked forms strip to the venue
+    # ("Kerho / Koulu, Tmi Petri Lehto" keeps routing to Koulu).
+    spider = make_spider()
+    assert spider._strip_venue_org("Koulu, Tmi Petri Lehto") == "Koulu"
+    assert spider._split_name("Kerho / Koulu, Tmi Petri Lehto") == (
+        "Kerho",
+        "Koulu",
+        "Kerho / Koulu, Tmi Petri Lehto",
+    )
+
+
+def test_swedish_simhall_twins_split():
+    # Swedish swim-hall twins split like the other institution words
+    # ("Simhallen - Uimahalli"; SYNTHETIC: zero feed rows).
+    spider = make_spider()
+    assert spider._split_translation("Simhallen - Uimahalli") == ("Uimahalli", "Simhallen")
+
+
+def test_fused_schools_with_place_prefixes():
+    # Multiword place prefixes still resolve the school venue
+    # ("Vanha Ulvilan koulun liikuntasali").
+    spider = make_spider()
+    assert spider._split_name("Vanha Ulvilan koulun liikuntasali") == (
+        "Liikuntasali",
+        "Vanha Ulvilan koulu",
+        "Vanha Ulvilan koulun liikuntasali",
+    )
+
+
+def test_museum_compounds_file_museum():
+    # Profession/villa/hospital museums are museums, not their profession
+    # (koulumuseo precedent: Apteekkimuseo, Huvilamuseo, Sairaalamuseo).
+    spider = make_spider()
+    assert cat(spider, "Apteekkimuseo")[0] == Categories.MUSEUM
+    assert cat(spider, "Apteekkimuseo ja Qwenselin talo")[0] == Categories.MUSEUM
+    assert cat(spider, "Huvilamuseo Villa Rulludd")[0] == Categories.MUSEUM
+    assert cat(spider, "Sairaalamuseo")[0] == Categories.MUSEUM
+
+
+def test_rontgen_ascii_spelling_files_clinic():
+    # ASCII spelling files identically to Röntgen (SYNTHETIC: zero feed rows).
+    spider = make_spider()
+    assert cat(spider, "Rontgen Pori") == (Categories.CLINIC, {"healthcare": "medical_imaging"})
+
+
+def test_paikan_genitive_files_fishing():
+    # The single-k genitive normalizes like its siblings ("Kalastuspaikan
+    # vuokraus" fishes via the extras-only rule; SYNTHETIC shape).
+    spider = make_spider()
+    assert cat(spider, "Kalastuspaikan vuokraus") == (None, {"leisure": "fishing"})
+
+
+def test_genitive_grounds_keep_arena_filings():
+    # Gradation must not shadow specifics: genitive exercise grounds file
+    # like nominative ones (ball arenas pitch, schoolyards playgrounds,
+    # bare grounds fitness).
+    spider = make_spider()
+    assert cat(spider, "Kulomäen lähiliikuntapaikan miniareena")[0] == Categories.LEISURE_PITCH
+    assert cat(spider, "Pallopuiston lähiliikuntapaikan tenniskenttä") == (
+        Categories.LEISURE_PITCH,
+        {"sport": "tennis"},
+    )
+    assert cat(spider, "Jokivarren koulun lähiliikuntapaikan tekonurmi") == (
+        Categories.LEISURE_PITCH,
+        {"sport": "soccer", "surface": "artificial_turf"},
+    )
+
+
+def test_dash_room_guards():
+    # Chained tails, conjunction-led fragments and inflected lookalikes
+    # keep whole; only bare room tails name the POI.
+    spider = make_spider()
+    assert spider._split_name("Tila - Herralan koulu - Liikuntasali") == (
+        "Tila - Herralan koulu - Liikuntasali",
+        None,
+        None,
+    )
+    assert spider._split_name("Rantafutis - ja käsipallokenttä") == (
+        "Rantafutis - ja käsipallokenttä",
+        None,
+        None,
+    )
+    assert spider._split_name("Sydänpiste - tietoa ja tukea sydänpotilaalle") == (
+        "Sydänpiste - tietoa ja tukea sydänpotilaalle",
+        None,
+        None,
+    )
+    # Bare generic heads are no venue either ("Tila - Koskihalli").
+    assert spider._split_name("Tila - Koskihalli") == ("Tila - Koskihalli", None, None)
+
+
+def test_fused_paren_rests_keep_whole():
+    # Parenthesised qualifiers inside the unit keep whole (parens are
+    # metadata, never name parts to strand).
+    spider = make_spider()
+    full = "Tampereen kansainvälisen koulun (FISTA) opiskeluhuolto"
+    assert spider._split_name(full, None) == (full, None, None)
+
+
+def test_bare_qualified_desks_split():
+    # Desk words with city qualifiers still resolve ("Sote-keskus Länsi").
+    spider = make_spider()
+    full = "Vihdin kunnantalo/Sote-keskus Länsi"
+    assert spider._split_name(full) == ("Sote-keskus Länsi", "Vihdin kunnantalo", full)
+
+
+def test_located_street_parens_drop():
+    # Parenthesised street addresses leaked into located_in drop; district
+    # qualifiers stay.
+    spider = make_spider()
+    assert spider._clean_located("Aurinkolahden peruskoulu (Solvindsgatan 11)") == "Aurinkolahden peruskoulu"
+    assert spider._clean_located("Heteniitynkenttä (Vuosaari)") == "Heteniitynkenttä (Vuosaari)"

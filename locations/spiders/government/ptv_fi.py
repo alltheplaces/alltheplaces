@@ -132,7 +132,6 @@ class PtvFISpider(Spider):
         ("konservatorio", Categories.MUSIC_SCHOOL, None),  # Konservatorio (conservatories)
         ("hammashoito", Categories.DENTIST, None),  # Hammashoito (dental care)
         ("hammashoidon", Categories.DENTIST, None),  # Hammashoidon (dental care, genitive)
-        ("hammashoitola", Categories.DENTIST, None),  # Hammashoitola (dental clinics)
         ("suun perusterveydenhuolto", Categories.DENTIST, None),  # Suun perusterveydenhuolto (oral primary care)
         ("suun terveydenhuolto", Categories.DENTIST, None),  # Suun terveydenhuolto (oral health care)
         ("eläinlääkäri", Categories.VETERINARY, None),  # Eläinlääkäri (veterinarians)
@@ -148,13 +147,13 @@ class PtvFISpider(Spider):
         ("terveyskeskus", Categories.CLINIC, None),  # Terveyskeskus (health centres)
         ("sote-asema", Categories.CLINIC, None),  # Sote-asema (wellbeing stations)
         ("fysioterapia", Categories.CLINIC, {"healthcare": "physiotherapist"}),
-        ("hyvinvointiasema", Categories.CLINIC, None),
+        ("hyvinvointiasema", Categories.CLINIC, None),  # Hyvinvointiasema (wellbeing stations)
         ("hyvinvointikeskus", Categories.CLINIC, None),  # Hyvinvointikeskus (wellbeing centres)
         (
             "sote-piste",
             Categories.CLINIC,
             None,
-        ),  # Sote-piste (wellbeing points)  # Hyvinvointiasema (wellbeing stations)
+        ),  # Sote-piste (wellbeing points)
         ("sotekeskus", Categories.CLINIC, None),  # Sotekeskus (wellbeing centres)
         ("sote-keskus", Categories.CLINIC, None),  # Sote-keskus (wellbeing centres)
         ("soteasema", Categories.CLINIC, None),  # Soteasema (wellbeing stations)
@@ -173,7 +172,7 @@ class PtvFISpider(Spider):
         ("lab", Categories.CLINIC, {"healthcare": "laboratory"}),  # Lab (Tykslab/Fimlab/Islab contract labs)
         ("kuvantaminen", Categories.CLINIC, {"healthcare": "medical_imaging"}),  # Kuvantaminen (imaging)
         ("röntgen", Categories.CLINIC, {"healthcare": "medical_imaging"}),  # Röntgen (x-ray clinics)
-        ("rontgen", Categories.MEDICAL_IMAGING, None),
+        ("rontgen", Categories.CLINIC, {"healthcare": "medical_imaging"}),  # Rontgen (ascii spelling, same filing)
         ("terapia", Categories.CLINIC, None),  # Terapia (therapy centres)
         ("jalkaterapeutti", Categories.CLINIC, {"healthcare": "podiatrist"}),  # Jalkaterapeutti (podiatrists)
         ("terapeutti", Categories.CLINIC, None),  # Terapeutti (therapists)
@@ -199,6 +198,7 @@ class PtvFISpider(Spider):
         ("mielialahäiriö", Categories.CLINIC, None),  # Mielialahäiriö (mood disorders)
         ("diabeteskeskus", Categories.CLINIC, None),  # Diabeteskeskus (diabetes centres)
         ("diabeteshoitaja", Categories.CLINIC, {"healthcare": "nurse"}),  # Diabeteshoitaja (diabetes nurses)
+        ("apteekkimuseo", Categories.MUSEUM, None),  # Apteekkimuseo (pharmacy museums, cf. koulumuseo)
         ("apteekki", Categories.PHARMACY, None),  # Apteekki (pharmacies)
         ("apotek", Categories.PHARMACY, None),  # Apotek (pharmacies in Swedish)
         ("tarvikejakelu", Categories.SHOP_MEDICAL_SUPPLY, None),  # Tarvikejakelu (supply distribution)
@@ -233,12 +233,12 @@ class PtvFISpider(Spider):
         ("uimahalli", Categories.LEISURE_SPORTS_CENTRE, {"sport": "swimming"}),  # Uimahalli (swimming halls)
         ("uintikeskus", Categories.LEISURE_SPORTS_CENTRE, None),  # Uintikeskus (swimming centres)
         ("kuntosali", Categories.GYM, None),  # Kuntosali (gyms)
-        ("uimastadion", Categories.LEISURE_SPORTS_CENTRE, None),
+        ("uimastadion", Categories.LEISURE_SPORTS_CENTRE, None),  # Uimastadion (swimming stadiums)
         (
             "uima-allas",
             Categories.LEISURE_SPORTS_HALL,
             None,
-        ),  # Uima-allas (school pools)  # Uimastadion (swimming stadiums)
+        ),  # Uima-allas (school pools)
         ("maauimala", Categories.LEISURE_SPORTS_CENTRE, None),  # Maauimala (outdoor pools)
         ("kahluuallas", Categories.LEISURE_SWIMMING_POOL, None),  # Kahluuallas (wading pools)
         (
@@ -268,13 +268,13 @@ class PtvFISpider(Spider):
         ("pesäpallo", Categories.LEISURE_PITCH, {"sport": "pesapallo"}),  # Pesäpallo (Finnish baseball)
         ("shakkilauta", Categories.LEISURE_PITCH, {"sport": "chess"}),  # Shakkilauta (outdoor chess boards)
         ("shakkilaudat", Categories.LEISURE_PITCH, {"sport": "chess"}),  # Shakkilaudat (chess boards, plural)
-        ("liikuntahalli", Categories.LEISURE_SPORTS_CENTRE, None),
+        ("liikuntahalli", Categories.LEISURE_SPORTS_CENTRE, None),  # Liikuntahalli (sports halls)
         ("liikuntakeskus", Categories.LEISURE_SPORTS_CENTRE, None),  # Liikuntakeskus (sports centres)
         (
             "ulkoilukeskus",
             Categories.LEISURE_SPORTS_CENTRE,
             None,
-        ),  # Ulkoilukeskus (outdoor centres)  # Liikuntahalli (sports halls)
+        ),  # Ulkoilukeskus (outdoor centres)
         ("urheiluhalli", Categories.LEISURE_SPORTS_CENTRE, None),
         ("liikuntasali", Categories.LEISURE_SPORTS_HALL, None),  # Liikuntasali (sports halls)
         ("liikuntatilat", Categories.LEISURE_SPORTS_HALL, None),  # Liikuntatilat (sports facilities)
@@ -297,15 +297,15 @@ class PtvFISpider(Spider):
         ("lehtisali", Categories.LIBRARY, None),  # Lehtisali (library reading rooms)
         ("teatterisali", Categories.THEATRE, None),  # Teatterisali (theatre auditoriums, not sports halls)
         ("sali", Categories.LEISURE_SPORTS_HALL, None),  # Sali (halls)
-        ("jäähalli", Categories.LEISURE_ICE_RINK, None),
+        ("jäähalli", Categories.LEISURE_ICE_RINK, None),  # Jäähalli (ice halls)
         ("keilahalli", Categories.LEISURE_BOWLING_ALLEY, None),  # Keilahalli (bowling halls)
         ("skeittihalli", Categories.LEISURE_SPORTS_CENTRE, {"sport": "skateboard"}),  # Skeittihalli (skate halls)
         ("monitoimihalli", Categories.COMMUNITY_CENTRE, None),  # Monitoimihalli (multipurpose halls)
+        ("palloiluhalli", Categories.LEISURE_SPORTS_HALL, None),  # Palloiluhalli (ball-game halls)
         ("halli", Categories.LEISURE_SPORTS_HALL, None),  # Halli (halls, compound-final)
         ("auditorio", Categories.EVENTS_VENUE, None),  # Auditorio (auditoriums)
         ("konserttitalo", Categories.EVENTS_VENUE, None),  # Konserttitalo (concert halls)
         ("kongressitalo", Categories.EVENTS_VENUE, None),  # Kongressitalo (congress halls)
-        ("palloiluhalli", Categories.LEISURE_SPORTS_HALL, None),  # Palloiluhalli (ball-game halls)
         ("parkour", Categories.LEISURE_PITCH, {"sport": "parkour"}),  # Parkour (parkour areas)
         ("streetworkout", Categories.LEISURE_FITNESS_STATION, None),  # Streetworkout (outdoor gyms)
         ("street workout", Categories.LEISURE_FITNESS_STATION, None),  # Street workout (outdoor gyms, spaced)
@@ -316,14 +316,14 @@ class PtvFISpider(Spider):
         ("seikkailugolf", Categories.LEISURE_MINIATURE_GOLF, None),
         ("puttiparkki", Categories.LEISURE_MINIATURE_GOLF, None),  # Puttiparkki (putting courses)
         ("frisbeegolf", Categories.LEISURE_DISC_GOLF_COURSE, None),
-        ("frisbee", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Frisbee (disc golf)  # Frisbeegolf (disc golf)
+        ("frisbee", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Frisbee (disc golf)
         ("discgolf", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Discgolf (disc golf)
         ("golf", Categories.LEISURE_GOLF_COURSE, None),  # Golf (golf courses)
-        ("pumptrack", Categories.LEISURE_TRACK, None),  # Pumptrack (pump tracks)  # Jäähalli (ice halls)
+        ("pumptrack", Categories.LEISURE_TRACK, None),  # Pumptrack (pump tracks)
         ("pump track", Categories.LEISURE_TRACK, None),  # Pump track (pump tracks, spaced)
-        ("luistelukenttä", Categories.LEISURE_ICE_RINK, None),
+        ("luistelukenttä", Categories.LEISURE_ICE_RINK, None),  # Luistelukenttä (skating rinks)
         ("jääkenttä", Categories.LEISURE_ICE_RINK, None),  # Jääkenttä (ice rinks)
-        ("kaukalo", Categories.LEISURE_ICE_RINK, None),  # Kaukalo (hockey rinks)  # Luistelukenttä (skating rinks)
+        ("kaukalo", Categories.LEISURE_ICE_RINK, None),  # Kaukalo (hockey rinks)
         ("pallokenttä", Categories.LEISURE_PITCH, None),  # Pallokenttä (generic ball fields)
         ("hiekkakenttä", Categories.LEISURE_PITCH, {"surface": "sand"}),  # Hiekkakenttä (sand fields)
         (
@@ -361,6 +361,7 @@ class PtvFISpider(Spider):
         ("lipunmyynti", None, {"shop": "tickets"}),  # Lipunmyynti (ticket sales)
         ("lippukassa", None, {"shop": "tickets"}),  # Lippukassa (ticket offices)
         ("myymälä", None, {"shop": "yes"}),  # Myymälä (shops)
+        ("huvilamuseo", Categories.MUSEUM, None),  # Huvilamuseo (villa museums, cf. koulumuseo)
         ("huvila", None, None),  # Huvila (villas): no precise filing, keep generic
         ("kalastuspaikka", None, {"leisure": "fishing"}),  # Kalastuspaikka (fishing spots, incl. at shores/zoo bays)
         ("kalastuslupa", None, {"leisure": "fishing"}),  # Kalastuslupa-alueet (fishing permit areas)
@@ -395,11 +396,11 @@ class PtvFISpider(Spider):
         ("kansalaisopisto", Categories.COLLEGE, None),  # Kansalaisopisto (civic institutes)
         ("työväenopisto", Categories.COLLEGE, None),  # Työväenopisto (workers' institutes)
         ("kansanopisto", Categories.COLLEGE, None),  # Kansanopisto (folk high schools)
-        ("opisto", Categories.COLLEGE, None),
+        ("opisto", Categories.COLLEGE, None),  # Opisto (institutes)
         ("instituutti", Categories.COLLEGE, None),  # Instituutti (institutes)
         ("äänitysstudio", Categories.MUSIC_SCHOOL, None),  # Äänitysstudio (recording studios)
         ("akatemia", Categories.COLLEGE, None),  # Akatemia (academies)
-        ("academy", Categories.COLLEGE, None),  # Academy (academies)  # Opisto (institutes)
+        ("academy", Categories.COLLEGE, None),  # Academy (academies)
         ("kampus", Categories.COLLEGE, None),  # Kampus (campuses)
         ("keuda", Categories.COLLEGE, None),  # Keuda (vocational consortium)
         ("redu", Categories.COLLEGE, None),  # REDU (Lapland education consortium)
@@ -429,6 +430,7 @@ class PtvFISpider(Spider):
         ("kriisi", Categories.SOCIAL_FACILITY, None),  # Kriisi (crisis services)
         ("tukikeskus", Categories.SOCIAL_FACILITY, None),  # Tukikeskus (support centres)
         ("päivystys", Categories.CLINIC_URGENT, None),  # Päivystys (emergency departments)
+        ("sairaalamuseo", Categories.MUSEUM, None),  # Sairaalamuseo (hospital museums, cf. koulumuseo)
         ("päiväsairaala", Categories.CLINIC, None),  # Päiväsairaala (day hospitals)
         ("kliininen", Categories.CLINIC, None),  # Kliininen (clinical units)
         ("potilasasia", Categories.OFFICE_GOVERNMENT, None),  # Potilasasia (patient-ombudsman desks)
@@ -445,20 +447,20 @@ class PtvFISpider(Spider):
         ("erikoismetsä", None, {"natural": "wood"}),  # Erikoismetsä (designated municipal forests)
         ("teatteri", Categories.THEATRE, None),
         ("teater", Categories.THEATRE, None),  # Teater (Swedish theatre; teatern, teaterstudio)
-        ("kirkko", Categories.PLACE_OF_WORSHIP, None),
+        ("kirkko", Categories.PLACE_OF_WORSHIP, None),  # Kirkko (churches)
         ("rukoushuone", Categories.PLACE_OF_WORSHIP, None),  # Rukoushuone (prayer rooms)
-        ("raamattuhuone", Categories.PLACE_OF_WORSHIP, None),  # Raamattuhuone (prayer rooms)  # Kirkko (churches)
+        ("raamattuhuone", Categories.PLACE_OF_WORSHIP, None),  # Raamattuhuone (prayer rooms)
         ("kappeli", Categories.PLACE_OF_WORSHIP, None),  # Kappeli (chapels)
         ("seurakuntatalo", Categories.COMMUNITY_CENTRE, None),  # Seurakuntatalo (parish halls)
         ("seurakuntakoti", Categories.COMMUNITY_CENTRE, None),  # Seurakuntakoti (parish houses)
         ("seurakuntakeskus", Categories.COMMUNITY_CENTRE, None),  # Seurakuntakeskus (parish centres)
         ("seurakuntatila", Categories.COMMUNITY_CENTRE, None),  # Seurakuntatila (parish premises)
-        ("muistomerkki", Categories.TOURISM_ARTWORK, None),
+        ("muistomerkki", Categories.TOURISM_ARTWORK, None),  # Muistomerkki (memorials)
         ("memorial", Categories.TOURISM_ARTWORK, None),  # Memorial (memorials in English)
         ("minnesmärk", Categories.TOURISM_ARTWORK, None),  # Minnesmärke (memorials in Swedish)
         ("galleria", Categories.ARTS_CENTRE, None),  # Galleria (art galleries)
         ("taiteen perusopetus", Categories.ARTS_CENTRE, None),  # Taiteen perusopetus (basic art education)
-        ("linnoitus", Categories.TOURISM_ATTRACTION, None),  # Linnoitus (fortresses)  # Muistomerkki (memorials)
+        ("linnoitus", Categories.TOURISM_ATTRACTION, None),  # Linnoitus (fortresses)
         ("lammasaitaus", Categories.TOURISM_ATTRACTION, None),  # Lammasaitaus (sheep enclosures)
         ("monumentti", Categories.TOURISM_ARTWORK, None),  # Monumentti (monuments)
         ("patsas", Categories.TOURISM_ARTWORK, {"artwork_type": "sculpture"}),  # Patsas (statues)
@@ -516,7 +518,6 @@ class PtvFISpider(Spider):
             None,
         ),  # Kokoustila (meeting rooms)  # Monitoimihalli (multipurpose halls)
         ("neuvottelu", Categories.SOCIAL_FACILITY, None),  # Neuvottelu (negotiation centres, all family-affairs)
-        ("poliisiasema", Categories.POLICE, None),  # Poliisiasema (police stations)
         ("pelastusasema", Categories.FIRE_STATION, None),  # Pelastusasema (rescue stations)
         ("vpk", Categories.FIRE_STATION, None),  # VPK (volunteer fire brigades)
         ("palokunta", Categories.FIRE_STATION, None),  # Palokunta (fire brigades)
@@ -607,7 +608,6 @@ class PtvFISpider(Spider):
         ("serviceenhet", Categories.OFFICE_GOVERNMENT, None),  # Serviceenhet (service units in Swedish)
         ("palvelutori", Categories.OFFICE_GOVERNMENT, None),  # Palvelutori (service desks)
         ("navigaattori", Categories.OFFICE_GOVERNMENT, None),  # Navigaattori (guidance service desks)
-        ("päivystyksen", Categories.CLINIC_URGENT, None),  # Päivystyksen (on-call duty, genitive)
         ("palvelukeskus", Categories.SOCIAL_FACILITY, None),  # Palvelukeskus (service centres)
         ("palvelutalo", Categories.NURSING_HOME, None),  # Palvelutalo (sheltered housing)
         ("seniori", Categories.SOCIAL_FACILITY, None),  # Seniori (senior centres, outranks info desks below)
@@ -858,6 +858,10 @@ class PtvFISpider(Spider):
                 # Tullisaari, Tullinpuomi, Tullintori, Tullivuorentie,
                 # Tullinaukio squares): those never match.
                 rx = re.compile(r"tulli(?!nkulma|kamari|vuor|saar|npuomi|ntori|aukio|naukio)")
+            elif k == "kioski":
+                # Info kiosks are info points, not shops ("Infokioski",
+                # "kioski eli infopiste"): the info rule below files them.
+                rx = re.compile(r"(?<!info)(?<!info-)kioski(?!\s*eli\s*infopiste)")
             elif k == "skola":
                 # Askola the municipality is not a skola (school); Eskola
                 # farm compounds ("Eskolakoti") are not schools either, while
@@ -1447,7 +1451,10 @@ class PtvFISpider(Spider):
     ACRONYM_UNIT_WORDS = ("keskus", "yksikkö", "osasto", "klinikka", "poliklinikka", "vastaanotto")
     # Swedish institution words for bilingual dash names (cf. Eskola: the
     # boundary keeps Finnish Eskola/places whole).
-    SWEDISH_WORD_RE = re.compile(r"\b(apotek(et)?|skola(n)?|daghem(met)?|bibliotek(et)?)", re.IGNORECASE)
+    SWEDISH_WORD_RE = re.compile(
+        r"\b(apotek(et)?|skola(n)?|daghem(met)?|bibliotek(et)?|simhall(en)?|idrottshall(en)?|servicehem(met)?)",
+        re.IGNORECASE,
+    )
     # Branch-of-agency suffixes name the service provider, never the POI
     # ("Kokemäen Asiointipiste/Kela" is the city's desk serving Kela).
     AGENCY_SUFFIX_RE = re.compile(r"/\s*kela\b(?=,|\s*$)", re.IGNORECASE)
@@ -1496,6 +1503,17 @@ class PtvFISpider(Spider):
         # Contact-detail tails name the contact point's owner, never the
         # details ("Turun kulttuuripaja Casan yhteystiedot" is Casa).
         primary = re.sub(r"\s+yhteystiedot(\s*,\s*[A-ZÅÄÖ][^,]*?)?\s*$", "", primary).strip()
+        # Guide/contact qualifiers ("Nummelan kimppakävelyt Marin kanssa"):
+        # a capitalized genitive-singular proper noun plus kanssa names the
+        # person, never the venue (contact-person doctrine). Plural markers
+        # (-jen/-den/-ien/-tten/-sten) and lowercase common nouns
+        # ("Marttojen kanssa", "muistisairauden kanssa") are integral event
+        # text and stay.
+        kanssa_stripped = re.sub(r"\b[A-ZÅÄÖ][a-zåäö]+n(?<!jen|den|ien)(?<!tten|sten) kanssa,\s*", "", primary)
+        kanssa_stripped = re.sub(r"\s*\b[A-ZÅÄÖ][a-zåäö]+n(?<!jen|den|ien)(?<!tten|sten) kanssa\b", "", kanssa_stripped)
+        if kanssa_stripped != primary:
+            self._count("name/person_dropped")
+            primary = re.sub(r"\s{2,}", " ", re.sub(r"\s+,", ",", kanssa_stripped)).strip()
         primary = re.sub(r"^\S+\s+(?:ry:n|r\.y\.:n)\s+", "", primary).strip()
         if (yhdistys := re.match(r"^(\S+)\s+yhdistyksen\s+(.+)$", primary)) and not self._has_fixture(
             yhdistys.group(1)
@@ -2066,6 +2084,13 @@ class PtvFISpider(Spider):
         ).strip(" ,")
         if loc != located.strip():
             self._count("name/operator_tail_stripped")
+        paren = re.search(r"\s*\(([^()]*)\)$", loc)
+        if paren and self.COMMA_STREET_RE.search(paren.group(1).lower()):
+            # Parenthesised street addresses leaked into the venue
+            # ("...peruskoulu (Solvindsgatan 11)"): the address line
+            # carries them, never located_in.
+            self._count("name/located_paren_address_dropped")
+            loc = loc[: paren.start()].strip(" ,")
         if not loc:
             return None
         if re.search(r"(toiminta|toimintaa|toimintaan)$", loc.lower()) and not self._has_fixture(loc):
@@ -2294,7 +2319,9 @@ class PtvFISpider(Spider):
             return tail
         venue_head, _, venue_org = tail.partition(",")
         if venue_head.strip() and re.search(
-            r"(\b(?:oy|ab|ry|r\.y\.|r\.f\.)\b|(?:yhdistys|förening))", venue_org, flags=re.IGNORECASE
+            r"(\b(?:" + self.OPERATOR_MARKERS + r")\b|(?:yhdistys|förening|seurakunta))",
+            venue_org,
+            flags=re.IGNORECASE,
         ):
             self._count("name/slash_venue_org_stripped")
             return venue_head.strip()
@@ -2444,6 +2471,18 @@ class PtvFISpider(Spider):
             inner = inner[:-1].strip()
         if not base or not inner:
             return None
+        if ") (" in inner or ")(" in inner:
+            # Double parentheticals ("Kirjasto (Pääkirjasto) (Keskusta)"):
+            # the trailing group drops; the base (carrying the first group)
+            # re-dispatches so venue resolution runs on a clean shape.
+            # The full form survives in official_name.
+            outer, _, _trailing = name.rpartition("(")
+            outer = outer.strip()
+            self._count("name/paren_double_peeled")
+            sub = self._split_paren(outer, city)
+            if sub is None:
+                return None
+            return sub[0], sub[1], name
         if (head := self._paren_head(base, inner, name, city)) is not None:
             return head
         if " / " in base and any(word in base.rsplit(" / ", 1)[1].strip().lower() for word in self.ROOM_WORDS):
@@ -2503,6 +2542,17 @@ class PtvFISpider(Spider):
             self._count("name/paren_venue")
             return base, inner, name
         if (
+            re.search(r"\d", inner)
+            and self._has_fixture(inner)
+            and not self.COMMA_STREET_RE.search(inner.lower())
+            and not self.SUBUNIT_RE.search(inner.lower())
+        ):
+            # Numbered rooms/fields ("Kirjasto (Sali 2)"): the room names the
+            # POI like slash rooms do; street addresses and ward/unit
+            # qualifiers never qualify.
+            self._count("name/paren_numbered_room")
+            return inner, self._located_or(base), name
+        if (
             self.COMMA_STREET_RE.search(inner.lower())
             or (re.search(r"\d", inner) and "," in inner)
             or "tekonurmi" in inner.lower()
@@ -2553,14 +2603,48 @@ class PtvFISpider(Spider):
         left, right = left.strip(), right.strip()
         if not left or not right:
             return None
+        if (
+            self._has_fixture(left)
+            and left.strip().lower()
+            not in (
+                "tila",
+                "keskus",
+                "talo",
+                "piste",
+                "huone",
+                "koppi",
+                "katos",
+                "kota",
+                "laavu",
+                "sali",
+                "halli",
+                "kenttä",
+                "allas",
+                "rata",
+            )
+            and "-" not in right
+            and not re.match(r"(ja|tai|sekä|&)\b", right, flags=re.IGNORECASE)
+            and any(tok.endswith(word) for tok in re.split(r"[\s-]+", right.lower()) for word in self.ROOM_WORDS)
+        ):
+            # Facility rooms as dash tails ("Pallokenttä - Sali 2"): the room
+            # names the POI, the facility the venue (cf. slash rooms). Chained
+            # and hyphenated tails, conjunction-led fragments
+            # ("... - ja käsipallokenttä"), inflected lookalikes
+            # ("... - potilaalle") and bare generic heads ("Tila - Koskihalli")
+            # keep whole: room words read as whole tokens, never substrings,
+            # and generic words are no venue.
+            self._count("name/dash_room")
+            return right, self._located_or(left), name
         if re.search(
             r"(toimisto|kerho|ryhmä|klubi|piste|koulu|talo|keskus|asema|neuvonta|ohjaus|apteekki|kahvila)",
             right.lower(),
         ) and self._has_fixture(left):
-            if re.search(r"(koulu|lukio|opisto|skola)", right.lower()):
+            if re.search(r"(koulu(?!tus|tuk|lai)|lukio|opisto|skola)", right.lower()):
                 # School-headed right sides ("Kaukajärven koulu - Annalan
                 # koulutalo") are same-institution buildings, not hosted
                 # units: keep whole rather than housing a school in itself.
+                # Training/info units ("... - Koulutusinfo") are hosted
+                # services, not schools: they split below.
                 self._count("name/dash_school_kept")
                 return None
             if re.search(r"(palvelu|toiminta)", left.lower()) and re.search(
@@ -2582,9 +2666,13 @@ class PtvFISpider(Spider):
         # sosiaalitoimisto", "Lohjan Kaupungintalo/
         # asiakaspalvelukeskus"): the desk names the POI. Role tails are
         # descriptors, not venues ("Rakennusvalvontatoimisto/
-        # lupasihteeri"): keep the head.
-        if any(
-            word in tail_base.lower() for word in ("toimisto", "toimipiste", "toimipaikka", "keskus", "asema")
+        # lupasihteeri"): keep the head. Desk words read as whole tokens:
+        # districts ("Vihdin kunnantalo/Keskusta") and squares
+        # (".../Keskustori") are not desks, while qualified desks
+        # (".../Sote-keskus Länsi") still resolve.
+        if (
+            any(word in tail_base.lower() for word in ("toimisto", "toimipiste", "toimipaikka"))
+            or re.search(r"(keskus|asema)(\s|$)", tail_base.lower())
         ) and self._has_fixture(head):
             self._count("name/slash_service_unit")
             return tail, self._located_or(head), name
@@ -2759,6 +2847,10 @@ class PtvFISpider(Spider):
             "kappeli",
             "opisto",
             "sairaala",
+            "neuvola",
+            "päiväkoti",
+            "päiväkodi",
+            "terveysasema",
             "uimahalli",
             "nuorisotalo",
         ):
@@ -2777,7 +2869,7 @@ class PtvFISpider(Spider):
                 and venue_token[-1].lower() == "n"
                 and head
                 and not re.search(
-                    r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|kirkko|sairaala|neuvola)", head.lower()
+                    r"\b\w*(koulu|lukio|opisto|päiväkoti|kirjasto|museo|kirkko|sairaala|neuvola)\b", head.lower()
                 )
                 and any(not t.lower().endswith("n") for t in head.split())
             ):
@@ -2835,14 +2927,21 @@ class PtvFISpider(Spider):
         if not city or " " not in text:
             return None
         head, _, tail = text.rpartition(" ")
-        if not (
+        city_cf = city.strip().casefold()
+        stripped_head = None
+        if (
             head.strip()
             and tail
-            and re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail)
-            and tail.casefold() == city.strip().casefold()
+            and re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+(?:-[A-ZÅÄÖ][a-zåäö-]+)?", tail)
+            and tail.casefold() == city_cf
         ):
+            stripped_head = head.strip()
+        elif " " in city.strip() and text.lower().endswith(" " + city_cf):
+            # Multiword municipalities ("X Koski Tl") never equal a single
+            # tail token; match the whole tail instead.
+            stripped_head = text[: -len(city.strip())].strip()
+        if not stripped_head:
             return None
-        stripped_head = head.strip()
         if re.search(r"\b(of|av|de|von|van|di|da|le|la)$", stripped_head, flags=re.IGNORECASE):
             # The city completes a foreign proper name
             # ("International School of Helsinki"): stripping
@@ -2885,8 +2984,12 @@ class PtvFISpider(Spider):
         if city and " " in name and "," not in name:
             # Space-separated city tails ("Kuntoutusohjaus Kankaanpää"):
             # the city repeats the structured address. No branch: it
-            # would duplicate the city.
+            # would duplicate the city. Fused school heads re-dispatch so the
+            # venue is not lost ("Renkomäen koulun luokat Lahti" names the
+            # unit, the school locates it).
             if (stripped := self._city_tail_stripped(name, city)) is not None:
+                if (fused := self._split_fused_school(stripped)) is not None:
+                    return fused[0], fused[1], name
                 return stripped, None, name
         if "," not in name and "/" not in name and ":" not in name:
             if (split := self._split_fused_school(name)) is not None:
@@ -2906,13 +3009,22 @@ class PtvFISpider(Spider):
         if len(tokens) < 3:
             return None
         venue = None
-        for genitive, nominative in self.SCHOOL_GENITIVE:
-            if tokens[1].lower().endswith(genitive):
-                venue = f"{tokens[0]} {tokens[1][: -len(genitive)] + nominative}"
+        rest = ""
+        for i in range(1, len(tokens) - 1):
+            for genitive, nominative in self.SCHOOL_GENITIVE:
+                if tokens[i].lower().endswith(genitive):
+                    venue = " ".join(tokens[:i]) + " " + tokens[i][: -len(genitive)] + nominative
+                    rest = " ".join(tokens[i + 1 :])
+                    break
+            if venue is not None:
                 break
         if venue is None:
             return None
-        rest = " ".join(tokens[2:])
+        if "(" in rest or ")" in rest:
+            # Parenthesised qualifiers inside the unit ("... koulun (FISTA)
+            # opiskeluhuolto") keep whole: parens are metadata or venues,
+            # never name parts to strand.
+            return None
         if re.match(r"\d", rest):
             # Numbered course fragments ("Kuivalahden koulun 5 -väyläinen
             # frisbeegolfrata") name one facility: keep whole rather than
@@ -4278,11 +4390,20 @@ class PtvFISpider(Spider):
     def _custom_exercise_ground(self, lowered: str) -> tuple | None:
         # Neighbourhood exercise grounds mirror the service-map activity
         # refinement: ball-game arenas are pitches, schoolyards read as
-        # playgrounds (cf. Kungsgårdsskolan).
-        if "lähiliikuntapaikka" not in lowered:
+        # playgrounds (cf. Kungsgårdsskolan). Genitive grounds
+        # ("...lähiliikuntapaikan miniareena", kk→k gradation) resolve like
+        # nominative ones so specifics are not shadowed by the generic
+        # fitness/table rows below.
+        if "lähiliikuntapaikka" not in lowered and "lähiliikuntapaikan" not in lowered:
             return None
         if re.search(r"(miniareena|ministadion|pallopel|pallokentt|pelikentt|monitoimikentt)\w*", lowered):
             return Categories.LEISURE_PITCH, None
+        if re.search(r"tenniskentt\w*", lowered):
+            # Tennis courts read as pitches with the sport tagged (mirror
+            # the table rule); tennis halls keep their hall filing below.
+            return Categories.LEISURE_PITCH, {"sport": "tennis"}
+        if re.search(r"tekonurmi\w*|tekokentt\w*", lowered):
+            return Categories.LEISURE_PITCH, {"sport": "soccer", "surface": "artificial_turf"}
         if re.search(r"(koulu|skol)\w*", lowered):
             return Categories.LEISURE_PLAYGROUND, None
         return None
@@ -4336,7 +4457,7 @@ class PtvFISpider(Spider):
         # Gradation plurals/genitives never contain their singular
         # (kenttä/kentät/kentän, ranta/rannat/rannan, keskus/keskuksen,
         # seulonta/seulonnat/seulonnan, päiväkoti/päiväkodit/päiväkotien,
-        # paikka/paikat/paikkojen): normalize the known stems first.
+        # paikka/paikat/paikkojen/paikan): normalize the known stems first.
         lowered = re.sub(r"kentät\b", "kenttä", lowered)
         lowered = re.sub(r"kentän\b", "kenttä", lowered)
         lowered = re.sub(r"rannat\b", "ranta", lowered)
@@ -4348,6 +4469,7 @@ class PtvFISpider(Spider):
         lowered = re.sub(r"päiväkotien\b", "päiväkoti", lowered)
         lowered = re.sub(r"paikat\b", "paikka", lowered)
         lowered = re.sub(r"paikkojen\b", "paikka", lowered)
+        lowered = re.sub(r"paikan\b", "paikka", lowered)
         lowered = re.sub(r"yhdistykset\b", "yhdistys", lowered)
         lowered = re.sub(r"taudit\b", "tauti", lowered)
         lowered = re.sub(r"tautien\b", "tauti", lowered)
