@@ -2617,6 +2617,57 @@ class PtvFISpider(Spider):
             return head, self._clean_located(tail) or tail, name
         return None
 
+    def _split_comma_service_head(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
+        # Service-headed pairs ("Perhekeskus, Suvituuli") and hospital
+        # wards ("Raskauden seurantaosasto, Tyks Majakkasairaala"): the
+        # head names the POI, the venue hosts it (wards cf.
+        # comma_service_unit for yksikkö units). Lowercase service tails
+        # without institution words or proper nouns drop instead
+        # (descriptor branch below).
+        if (
+            any(word in lowered_head for word in self.SERVICE_TAILS)
+            and self._has_fixture(tail)
+            and (not self._is_unit_tail(tail) or self._is_venue_head(head))
+            and (not self._is_unit_tail(head) or self._is_venue_head(tail))
+            and (
+                tail[:1].isupper()
+                or re.search(r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|sairaala|neuvola)", lowered_tail)
+                or re.search(r"\s[A-ZÅÄÖ]", tail)
+            )
+        ):
+            self._count("name/comma_service_unit")
+            shown = head[0].upper() + head[1:] if head else head
+            return shown, self._clean_located(tail), name
+        if re.search(r"\w*osasto$", lowered_head) and re.search(
+            r"(sairaala|terveyskeskus|terveysasema|mielenterveyskeskus)$", lowered_tail
+        ):
+            self._count("name/comma_ward_venue")
+            return head, self._clean_located(tail) or tail, name
+        return None
+
+    def _split_comma_unit_venue(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
+        # Venue-headed service pairs ("Perhekeskus, Suvituuli"): the tail
+        # service names the POI, the venue head hosts it.
+        if (
+            any(word in lowered_tail for word in self.SERVICE_TAILS)
+            and (self._has_fixture(head) or (self._is_proper_tail(head) and not self._is_person(head)))
+            and not re.search(r"\b(oy|ab)\b", head, flags=re.IGNORECASE)
+            and not self._is_private_org(head)
+            and (not self._is_unit_tail(tail) or self._is_venue_head(head))
+            and (not self._is_unit_tail(head) or self._is_venue_head(tail))
+        ):
+            self._count("name/comma_unit_venue")
+            shown = tail[0].upper() + tail[1:] if tail else tail
+            # City-carrying venue heads resolve ("Kivari, Riihimäki");
+            # multi-venue heads without one ("Riihikoti, Villava") stay whole.
+            located = self._locate_venue_head(head, city)
+            return shown, located or head, name
+        return None
+
     def _locate_venue_head(self, head: str, city: str | None) -> str | None:
         # Venue heads carrying their own city tail resolve through the
         # comma dispatch ("Kivari, Riihimäki" → Kivari); multi-venue
@@ -2655,37 +2706,10 @@ class PtvFISpider(Spider):
             return kept
         if (school_host := self._split_comma_school_host(head, tail, lowered_head, lowered_tail, name)) is not None:
             return school_host
-        if (
-            any(word in lowered_head for word in self.SERVICE_TAILS)
-            and self._has_fixture(tail)
-            and (not self._is_unit_tail(tail) or self._is_venue_head(head))
-            and (not self._is_unit_tail(head) or self._is_venue_head(tail))
-            and (
-                tail[:1].isupper()
-                or re.search(r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|sairaala|neuvola)", lowered_tail)
-                or re.search(r"\s[A-ZÅÄÖ]", tail)
-            )
-        ):
-            # Lowercase service tails without institution words or proper
-            # nouns drop instead (descriptor branch below); venues like
-            # "perhekeskus Suvituuli" still locate.
-            self._count("name/comma_service_unit")
-            shown = head[0].upper() + head[1:] if head else head
-            return shown, self._clean_located(tail), name
-        if (
-            any(word in lowered_tail for word in self.SERVICE_TAILS)
-            and (self._has_fixture(head) or (self._is_proper_tail(head) and not self._is_person(head)))
-            and not re.search(r"\b(oy|ab)\b", head, flags=re.IGNORECASE)
-            and not self._is_private_org(head)
-            and (not self._is_unit_tail(tail) or self._is_venue_head(head))
-            and (not self._is_unit_tail(head) or self._is_venue_head(tail))
-        ):
-            self._count("name/comma_unit_venue")
-            shown = tail[0].upper() + tail[1:] if tail else tail
-            # City-carrying venue heads resolve ("Kivari, Riihimäki");
-            # multi-venue heads without one ("Riihikoti, Villava") stay whole.
-            located = self._locate_venue_head(head, city)
-            return shown, located or head, name
+        if (svc_unit := self._split_comma_service_head(head, tail, lowered_head, lowered_tail, name)) is not None:
+            return svc_unit
+        if (unit_venue := self._split_comma_unit_venue(head, tail, lowered_head, lowered_tail, name, city)) is not None:
+            return unit_venue
         if (
             tail
             and tail[0].islower()

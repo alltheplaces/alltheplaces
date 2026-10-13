@@ -3548,3 +3548,17 @@ def test_untranslated_venue_copy_is_no_translation():
     item = parsed(make_spider(), channel("Leikkipuisto Jakomäki / Hiekkakenttä", en="Leikkipuisto Jakomäki"))
     assert item.get("located_in") == "Leikkipuisto Jakomäki"
     assert "name:en" not in (item.get("extras") or {})
+
+
+def test_hospital_wards_venue_the_hospital():
+    # Raskauden seurantaosasto, Tyks Majakkasairaala: the ward names the POI
+    # (cf. yksikkö units splitting the same way).
+    spider = make_spider()
+    signed = "Raskauden seurantaosasto, Tyks Majakkasairaala, Turku"
+    assert split(spider, signed, "Turku") == (
+        "Raskauden seurantaosasto",
+        "Tyks Majakkasairaala",
+        signed,
+    )
+    signed = "Lasten ja nuorten osasto, Ahveniston sairaala"
+    assert split(spider, signed) == ("Lasten ja nuorten osasto", "Ahveniston sairaala", signed)
