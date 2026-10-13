@@ -105,6 +105,7 @@ class PtvFISpider(Spider):
         ("nuorten mielenterveys", Categories.CLINIC, None),  # Youth mental-health services
         ("nuorten päihde", Categories.CLINIC, None),  # Youth addiction services
         ("kohtaamispaikka", Categories.COMMUNITY_CENTRE, None),  # Kohtaamispaikka (meeting places outrank clientele)
+        ("mielenterveystyö", Categories.CLINIC, None),  # Mielenterveystyö (mental-health work)
         ("nuorisoasema", Categories.OFFICE_GOVERNMENT, None),  # Nuorisoasema (youth service stations)
         ("nuorisotila", None, {"amenity": "youth_centre"}),  # Nuorisotila (youth rooms)
         ("nuorisotalo", None, {"amenity": "youth_centre"}),  # Nuorisotalo (youth centres)
@@ -131,6 +132,7 @@ class PtvFISpider(Spider):
         ("terveyspalvelu", Categories.CLINIC, None),  # Terveyspalvelu (health services)
         ("terveystalo", Categories.CLINIC, None),  # Terveystalo (private clinics)
         ("terveyspiste", Categories.CLINIC, None),  # Terveyspiste (health points)
+        ("sote-aseman lähitori", Categories.SOCIAL_FACILITY, None),  # Sote-aseman lähitorit (service desks)
         ("terveysasema", Categories.CLINIC, None),  # Terveysasema (health stations)
         ("terveyskeskus", Categories.CLINIC, None),  # Terveyskeskus (health centres)
         ("sote-asema", Categories.CLINIC, None),  # Sote-asema (wellbeing stations)
@@ -520,6 +522,12 @@ class PtvFISpider(Spider):
         ("kuntoutusyksikkö", Categories.CLINIC, None),  # Kuntoutusyksikkö (rehabilitation units)
         ("oy:n toimisto", Categories.OFFICE_COMPANY, None),  # Oy:n toimisto (company offices)
         ("toimisto", Categories.OFFICE_GOVERNMENT, None),  # Toimisto (offices)
+        (
+            "matkailuneuvon",
+            Categories.TOURISM_INFORMATION,
+            {"information": "office"},
+        ),  # Matkailuneuvonta (tourist info)
+        ("matkailuinfo", Categories.TOURISM_INFORMATION, {"information": "office"}),  # Matkailuinfo (tourist info)
         ("toimipiste", Categories.OFFICE_GOVERNMENT, None),
         (
             "palvelupaikka",
@@ -3265,6 +3273,11 @@ class PtvFISpider(Spider):
         # invalid lengths) passes through untouched or drops.
         digits = re.sub(r"\D", "", raw)
         if raw.strip().startswith("+"):
+            if digits.startswith("359") and len(digits) == 12:
+                # Single-digit country typo on a Finnish number
+                # ("+359 447301262" in Ikaalinen): repair to +358.
+                self._count("contact/country_typo")
+                digits = "358" + digits[3:]
             if not digits.startswith("358"):
                 return raw.strip() or None
             digits = digits[3:].lstrip("0")

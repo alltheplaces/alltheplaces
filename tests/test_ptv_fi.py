@@ -3574,3 +3574,32 @@ def test_city_switchboards_drop():
 def test_sininauha_is_private():
     # Satakunnan Sininauha ry (0225013-4): Blue-Ribbon association, no PTV marker.
     assert make_spider()._is_private_org("Satakunnan Sininauha") is True
+
+
+def test_tourist_info_names_beat_office_hosts():
+    # Matkailuneuvonta/matkailuinfo are tourist info desks, not generic
+    # offices — even inside toimipiste/palvelupiste hosts. The luontotupa
+    # dual keeps the hut (tupa rule stays earlier).
+    spider = make_spider()
+    assert cat(spider, "Matkailuneuvontapiste Sulkavalla")[0] == Categories.TOURISM_INFORMATION
+    assert cat(spider, "Laitilan matkailuinfopiste")[0] == Categories.TOURISM_INFORMATION
+    assert cat(spider, "Visit Pori Matkailuneuvonta")[0] == Categories.TOURISM_INFORMATION
+    assert cat(spider, "Matkailuinfon toimipiste")[0] == Categories.TOURISM_INFORMATION
+    assert cat(spider, "Matkailuneuvonnan palvelupiste")[0] == Categories.TOURISM_INFORMATION
+    assert cat(spider, "Koloveden luontotupa ja matkailuneuvonta")[0] == Categories.COMMUNITY_CENTRE
+
+
+def test_hosted_desks_file_as_desks():
+    # Sote-aseman lähitori names the desk (74 sibling lähitori rows file
+    # social_facility); plain youth stations stay offices, but the
+    # mental-health Nuorisoasema is a clinic.
+    spider = make_spider()
+    assert cat(spider, "Pirkkalan sote-aseman lähitori")[0] == Categories.SOCIAL_FACILITY
+    assert cat(spider, "Nuorisoasema mielenterveystyö")[0] == Categories.CLINIC
+    assert cat(spider, "Nuorisoasema Klaara")[0] == Categories.OFFICE_GOVERNMENT
+
+
+def test_single_digit_country_typo_repairs():
+    # "+359 447301262" on an Ikaalinen row: Bulgarian code on a Finnish
+    # mobile shape, one digit off every other row — repair, don't pass on.
+    assert make_spider()._normalize_phone("+359 447301262") == "+358 44 7301262"
