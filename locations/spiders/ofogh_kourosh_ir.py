@@ -17,7 +17,7 @@ class OfoghKouroshIrSpider(Spider):
     """
 
     name = "ofogh_kourosh_ir"
-    item_attributes = {"brand": "Ofogh Kourosh", "brand_wikidata": "Q65199490"}
+    item_attributes = {"brand": "افق کوروش", "brand_wikidata": "Q65199490"}
     # direct requests time out from outside Iran (CI got 0 pages in 120s);
     # fetch via Zyte, IR geolocation is derived from the spider name suffix
     requires_proxy = True
