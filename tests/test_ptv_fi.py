@@ -4064,6 +4064,21 @@ def test_stair_range_units_parse():
     assert spider._split_addr_tokens("Kauppakatu 27b A2-4".split()) == ("Kauppakatu", "27b", "A2-4")
 
 
+def test_municipality_gazetteer_peels_coverage_lists():
+    # a5993eab full cleanup: gazetteer towns peel even mid-list, beating the
+    # fixture substring ("tila" in Laitila); the full form stays official.
+    # Single-town names never enter (count guard); venue tails still venue.
+    spider = make_spider()
+    full = "Ravitsemusterapia, Kustavi, Laitila, Masku, Mynämäki, Naantali, Nousiainen"
+    assert spider._split_name(full, None) == ("Ravitsemusterapia", None, full)
+    assert spider._split_name("Ravintola, Lahti", None) == ("Ravintola, Lahti", None, None)
+    assert spider._split_name("Neuvonta, Reimasali, Lahti", None) == (
+        "Neuvonta",
+        "Reimasali",
+        "Neuvonta, Reimasali, Lahti",
+    )
+
+
 def test_station_compounds_file_as_facilities():
     spider = make_spider()
     assert cat(spider, "Vesilahden lähiasema")[0] == Categories.CLINIC
