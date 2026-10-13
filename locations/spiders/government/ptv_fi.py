@@ -4792,12 +4792,16 @@ class PtvFISpider(Spider):
     def _maybe_upgrade_housing(self, item: Feature, channel: dict, category) -> object:
         # Supported housing beats diagnosis even when the name tier
         # filed bare social ("Onnikoti Apila", "Tervahovin asunnot"
-        # via onto): upgrade to assisted living. Offices, clinics and
-        # schools never upgrade from feed wording alone.
+        # via onto): upgrade to assisted living. Rows that already carry
+        # a specific subtype (group homes, nursing homes) keep it.
+        # Offices, clinics and schools never upgrade from feed wording.
         if category == Categories.SOCIAL_FACILITY and self._supported_housing(channel):
-            self._count("category/supported_housing_upgrade")
-            apply_category(Categories.ASSISTED_LIVING, item)
-            return Categories.ASSISTED_LIVING
+            extras = item.get("extras") or {}
+            if not extras.get("social_facility"):
+                self._count("category/supported_housing_upgrade")
+                apply_category(Categories.ASSISTED_LIVING, item)
+                return Categories.ASSISTED_LIVING
+            self._count("category/supported_housing_kept")
         return category
 
     def parse_channel(self, channel: dict) -> Feature | None:
