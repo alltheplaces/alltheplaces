@@ -605,7 +605,6 @@ class PtvFISpider(Spider):
         ("visitor centre", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
         ("visitor center", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
         ("sosiaali", Categories.SOCIAL_FACILITY, None),  # Sosiaali (social services)
-        ("turvakoti", Categories.SOCIAL_FACILITY, {"social_facility": "shelter"}),
         ("vanhainkoti", Categories.NURSING_HOME, None),  # Vanhainkoti (elderly homes)
         ("hoivakoti", Categories.NURSING_HOME, None),  # Hoivakoti (care homes)
         ("hoiva", Categories.SOCIAL_FACILITY, None),  # Hoiva (care homes)  # Kotihoito (home care)
@@ -625,6 +624,7 @@ class PtvFISpider(Spider):
         ("palveluasunnot", Categories.NURSING_HOME, None),  # Palveluasunnot (service flats, plural)
         ("palvelukodit", Categories.NURSING_HOME, None),  # Palvelukodit (service homes, plural)
         ("palvelu", Categories.OFFICE_GOVERNMENT, None),  # Palvelu (service desks)
+        ("turvakoti", Categories.SOCIAL_FACILITY, {"social_facility": "shelter"}),
         ("päivätoiminta", Categories.SOCIAL_FACILITY, None),  # Päivätoiminta (day activities)
         ("päiväaikainen", Categories.SOCIAL_FACILITY, None),  # Päiväaikainen toiminta (daytime activities)
         ("al-anon", Categories.COMMUNITY_CENTRE, None),  # Al-Anon (peer support)
@@ -2728,7 +2728,7 @@ class PtvFISpider(Spider):
             # names the POI, the school hosts it (cf. service@school).
             self._count("name/comma_school_health_service")
             shown = tail[0].upper() + tail[1:] if tail else tail
-            return shown, head, name
+            return shown, self._clean_located(head) or head, name
         if self._room_tail(lowered_tail) and self._is_institution(head.lower()):
             # Facility rooms/fields at institutions ("Vaajakummun koulu,
             # luistelukenttä"): the room names the POI (cf. slash_room).
@@ -4144,10 +4144,15 @@ class PtvFISpider(Spider):
             # Trailing comma tails duplicating the located venue
             # ("Daghemskök, Päiväkoti Jollas", "Skolrestaurang, Pasilan
             # peruskoulu"): positional match against the signed form, so
-            # translated host copies ("Daycare Jollas") drop too.
+            # translated host copies ("Daycare Jollas") drop too. Stranded
+            # comma-fragments in the shown name mark a mis-split: skip.
             fi_segs = [s.strip() for s in (signed or "").split(",")]
             tr_segs = [s.strip() for s in cleaned_tr.split(",")]
-            if len(fi_segs) == len(tr_segs) and len(tr_segs) >= 2:
+            if (
+                len(fi_segs) == len(tr_segs)
+                and len(tr_segs) >= 2
+                and not re.search(r",\s*[A-ZÅÄÖ][a-zåäö-]+\s*$", shown or "")
+            ):
                 kept = [t for t, f in zip(tr_segs, fi_segs) if f != located]
                 if kept and len(kept) < len(tr_segs):
                     cleaned_tr = ", ".join(kept)
@@ -4173,7 +4178,15 @@ class PtvFISpider(Spider):
         parts = [s.strip() for s in re.split(r"\s*/\s*", cleaned_tr)]
         parts = [s for s in parts if s]
         fi_parts = [s.strip() for s in re.split(r"\s*/\s*", signed or "") if s.strip()]
-        positional = len(fi_parts) == len(parts) and len(parts) >= 2 and bool(shown) and " / " not in (shown or "")
+        # Stranded comma-fragments in the shown name ("..., Helsingin")
+        # mark a mis-split: never trust positional alignment on them.
+        positional = (
+            len(fi_parts) == len(parts)
+            and len(parts) >= 2
+            and bool(shown)
+            and "/" not in (shown or "")
+            and not re.search(r",\s*[A-ZÅÄÖ][a-zåäö-]+\s*$", shown or "")
+        )
         rest = []
         for i, s in enumerate(parts):
             if s in (shown, signed):
