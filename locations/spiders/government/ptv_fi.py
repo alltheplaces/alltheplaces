@@ -733,6 +733,11 @@ class PtvFISpider(Spider):
         ),  # Lintutorni (bird towers)
         ("lintulava", Categories.TOURISM_VIEWPOINT, None),  # Lintulava (birdwatching platforms)
         (
+            "luontotorni",
+            Categories.TOURISM_VIEWPOINT,
+            {"man_made": "tower", "tower:type": "observation"},
+        ),  # Luontotorni (nature towers)
+        (
             "näköalatorni",
             Categories.TOURISM_VIEWPOINT,
             {"man_made": "tower", "tower:type": "observation"},

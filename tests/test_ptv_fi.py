@@ -4233,6 +4233,9 @@ def test_bird_platforms_are_viewpoints():
     assert cat(spider, "Viikki-Vanhankaupunginlahti, Lammassaaren esteetön lintulava")[0] == (
         Categories.TOURISM_VIEWPOINT
     )
+    # Nature towers are observation towers like lintutorni, never catalogue
+    # pitch ("Ison Vasikkasaaren luontotorni" fabe74d8).
+    assert cat(spider, "Ison Vasikkasaaren luontotorni")[0] == Categories.TOURISM_VIEWPOINT
 
 
 def test_grill_tails_name_the_poi():
