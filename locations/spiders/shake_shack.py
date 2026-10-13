@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from scrapy.http import Response
@@ -36,7 +37,7 @@ class ShakeShackSpider(CrawlSpider):
         phone = response.xpath(
             '//*[@id="location-info--left__phone"]//div[contains(@class, "field__item")]/text()'
         ).get()
-        if phone and not phone.endswith("5555555"):
+        if phone and not re.sub(r"\D", "", phone).endswith("5555555"):
             item["phone"] = phone
 
         item["opening_hours"] = OpeningHours()
