@@ -63,9 +63,11 @@ class FordSpider(Spider):
                 yield self.build_service_item(item)
             if is_service_cv:
                 yield self.build_service_cv_item(item)
-            if not is_sales and not is_service and is_parts:
-                yield self.build_parts_item(item)
-            elif not is_sales and not is_service:
+
+            has_vehicle_dept = is_sales or is_sales_cv or is_service or is_service_cv
+            if not has_vehicle_dept and is_parts:
+                 yield self.build_parts_item(item)
+            elif not has_vehicle_dept:
                 # fallback category
                 yield self.build_sales_item(item)
 
@@ -76,6 +78,7 @@ class FordSpider(Spider):
 
     def build_sales_cv_item(self, item: Feature) -> Feature:
         sales_item = deepcopy(item)
+        sales_item["ref"] = f"{item['ref']}-CV"
         apply_category(Categories.SHOP_TRUCK, sales_item)
         return sales_item
 
@@ -87,7 +90,7 @@ class FordSpider(Spider):
 
     def build_service_cv_item(self, item: Feature) -> Feature:
         service_item = deepcopy(item)
-        service_item["ref"] = f"{item['ref']}-SERVICE"
+        service_item["ref"] = f"{item['ref']}-SERVICE-CV"
         apply_category(Categories.SHOP_TRUCK_REPAIR, service_item)
         return service_item
 
