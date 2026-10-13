@@ -2823,46 +2823,71 @@ class PtvFISpider(Spider):
             return split
         return name, None, None
 
+    def _city_tail_stripped(self, text: str, city: str | None) -> str | None:
+        # Trailing exact-municipality tails strip from service/facility heads
+        # ("Fysioterapia Pori", "Kuntoutusohjaus Kankaanpää"): the city repeats
+        # the structured address and would duplicate it. Brand-embedded cities
+        # ("International House Rauma", "SavoGrow Pielavesi") keep the whole;
+        # generic activity heads ("Avoin jumpparyhmä Kouvola") strip like
+        # venues do; proper nouns keep the city. Shared by the space tail and
+        # the comma service-head paths. Returns the stripped head, or None to
+        # keep whole (callers fall through).
+        if not city or " " not in text:
+            return None
+        head, _, tail = text.rpartition(" ")
+        if not (
+            head.strip()
+            and tail
+            and re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail)
+            and tail.casefold() == city.strip().casefold()
+        ):
+            return None
+        stripped_head = head.strip()
+        if re.search(r"\b(of|av|de|von|van|di|da|le|la)$", stripped_head, flags=re.IGNORECASE):
+            # The city completes a foreign proper name
+            # ("International School of Helsinki"): stripping
+            # leaves a dangling preposition, so keep the whole.
+            self._count("name/space_city_kept")
+            return None
+        if (
+            self._has_fixture(stripped_head)
+            or self._category(stripped_head)[0] is not None
+            or self._is_group_activity(stripped_head.lower())
+        ):
+            # Facility heads, categorized heads and generic group
+            # heads ("Peliryhmä Kuopio") strip like venues do;
+            # proper nouns keep the city.
+            self._count("name/space_city")
+            return stripped_head.rstrip("|/,").strip() or stripped_head
+        if self._is_proper_tail(stripped_head) or (
+            re.fullmatch(r"[A-ZÅÄÖ][A-Za-zåäö-]+", stripped_head) and not self._has_fixture(stripped_head)
+        ):
+            self._count("name/space_city_kept")
+            return None
+        self._count("name/space_city")
+        return stripped_head.rstrip("|/,").strip() or stripped_head
+
+    def _strip_service_city(
+        self, split: tuple[str, str | None, str | None], city: str | None, name: str
+    ) -> tuple[str, str | None, str | None]:
+        # Comma service heads carrying an exact-city tail ("Fysioterapia Pori"
+        # from a service@venue pair): strip by the same predicate as space
+        # tails, keeping the venue. Comma-bearing shown forms (kept full
+        # names) never enter: only bare service heads qualify.
+        shown, located, official = split
+        if "," not in shown and (stripped := self._city_tail_stripped(shown, city)) is not None:
+            return stripped, located, official
+        return split
+
     def _split_name_tail(self, name: str, city: str | None) -> tuple[str, str | None, str | None] | None:
         # Space-separated city tails, fused school heads, Swedish venues
         # and comma shapes, in that precedence.
         if city and " " in name and "," not in name:
-            head, _, tail = name.rpartition(" ")
-            if (
-                head.strip()
-                and tail
-                and re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail)
-                and tail.casefold() == city.strip().casefold()
-            ):
-                # Space-separated city tails ("Kuntoutusohjaus Kankaanpää"):
-                # the city repeats the structured address. No branch: it
-                # would duplicate the city. Brand-embedded cities
-                # ("International House Rauma", "SavoGrow Pielavesi") keep
-                # the whole; generic activity heads ("Avoin jumpparyhmä
-                # Kouvola") strip like venues do.
-                stripped_head = head.strip()
-                if re.search(r"\b(of|av|de|von|van|di|da|le|la)$", stripped_head, flags=re.IGNORECASE):
-                    # The city completes a foreign proper name
-                    # ("International School of Helsinki"): stripping
-                    # leaves a dangling preposition, so keep the whole.
-                    self._count("name/space_city_kept")
-                elif (
-                    self._has_fixture(stripped_head)
-                    or self._category(stripped_head)[0] is not None
-                    or self._is_group_activity(stripped_head.lower())
-                ):
-                    # Facility heads, categorized heads and generic group
-                    # heads ("Peliryhmä Kuopio") strip like venues do;
-                    # proper nouns keep the city.
-                    self._count("name/space_city")
-                    return stripped_head.rstrip("|/,").strip() or stripped_head, None, name
-                if self._is_proper_tail(stripped_head) or (
-                    re.fullmatch(r"[A-ZÅÄÖ][A-Za-zåäö-]+", stripped_head) and not self._has_fixture(stripped_head)
-                ):
-                    self._count("name/space_city_kept")
-                else:
-                    self._count("name/space_city")
-                    return stripped_head.rstrip("|/,").strip() or stripped_head, None, name
+            # Space-separated city tails ("Kuntoutusohjaus Kankaanpää"):
+            # the city repeats the structured address. No branch: it
+            # would duplicate the city.
+            if (stripped := self._city_tail_stripped(name, city)) is not None:
+                return stripped, None, name
         if "," not in name and "/" not in name and ":" not in name:
             if (split := self._split_fused_school(name)) is not None:
                 return split
@@ -3404,7 +3429,7 @@ class PtvFISpider(Spider):
             if (city_hit := self._comma_city_police(head, tail, lowered_head, name, city)) is not None:
                 return city_hit
             if (service := self._split_comma_service(head, tail, name, city)) is not None:
-                return service
+                return self._strip_service_city(service, city, name)
             # Bare city tails and appositive descriptors stay whole:
             # the structured address carries the city.
             self._count("name/comma_kept")
@@ -3733,8 +3758,11 @@ class PtvFISpider(Spider):
 
     @staticmethod
     def _to_minutes(value: str | None) -> int | None:
-        match = re.match(r"^(\d{1,2}):(\d{2})", (value or "").strip())
-        if not match:
+        # Strict HH:MM (feed uses HH:MM:SS, which still matches): prefix junk
+        # ("08:00-12:00" in one field) and impossible hours ("25:00") drop
+        # instead of silently truncating into invalid opening_hours.
+        match = re.fullmatch(r"(\d{1,2}):(\d{2})(?::(\d{2}))?", (value or "").strip())
+        if not match or int(match.group(1)) > 23 or int(match.group(2)) > 59:
             return None
         return int(match.group(1)) * 60 + int(match.group(2))
 
@@ -3757,17 +3785,21 @@ class PtvFISpider(Spider):
             if not day:
                 self._count("hours/unknown_day")
                 continue
-            if entry.get("isClosed"):
-                closed_days.add(day)
-                continue
             days = [day]
             last = self.DAY_MAP.get((span.get("dayTo") or "").upper())
             if last and last != day:
-                # Multi-day span (Monday - Friday): expand the range.
+                # Multi-day span (Monday - Friday): expand the range,
+                # wrapping past Sunday when the range wraps the weekend.
                 order = self.WEEK_ORDER
-                days = (
-                    order[order.index(day) : order.index(last) + 1] if order.index(last) > order.index(day) else [day]
-                )
+                if order.index(last) > order.index(day):
+                    days = order[order.index(day) : order.index(last) + 1]
+                else:
+                    days = order[order.index(day) :] + order[: order.index(last) + 1]
+            if entry.get("isClosed"):
+                # Closed marks cover the whole stated range, not just its
+                # first day.
+                closed_days.update(days)
+                continue
             start = self._to_minutes(span.get("from"))
             end = self._to_minutes(span.get("to"))
             if start is None or end is None:
@@ -3825,7 +3857,13 @@ class PtvFISpider(Spider):
             # keeps Tu-Th 09:00-15:00).
             self._count("hours/always_open_with_spans")
         if always_open and not day_spans:
-            if category in (Categories.SOCIAL_FACILITY, Categories.SCHOOL, Categories.COLLEGE, Categories.KINDERGARTEN):
+            if category in (
+                Categories.SOCIAL_FACILITY,
+                Categories.SCHOOL,
+                Categories.COLLEGE,
+                Categories.KINDERGARTEN,
+                Categories.NURSING_HOME,
+            ):
                 # Staffed-around-the-clock care homes and schools are not
                 # publicly walk-in 24/7; a 24/7 tag would mislead.
                 self._count("hours/skipped_always_open_social")
@@ -4357,6 +4395,10 @@ class PtvFISpider(Spider):
                 return raw.strip() or None
             digits = digits[3:].lstrip("0")
         else:
+            if digits.startswith("358") and len(digits) in (9, 10):
+                # Country code without "+" on a short number ("358912345"):
+                # strip it, then repair the trunk like other trunk-less numbers.
+                digits = "0" + digits[3:]
             if digits.startswith("358") and len(digits) in (11, 12):
                 # Country code without "+" ("358 17499111").
                 digits = digits[3:]
@@ -4725,6 +4767,12 @@ class PtvFISpider(Spider):
             # Postcode tails leak into the number field ("3 03100 Nummela").
             self._count("address/postcode_in_number")
             number = stripped
+        bare_tail = re.sub(r"\s+\b\d{5}\b\s*$", "", number).strip()
+        if bare_tail != number.strip() and re.search(r"\d", bare_tail):
+            # Bare postcode tails ("Tie 10 11111" with no postcode field):
+            # postcodes are never housenumbers or units.
+            self._count("address/postcode_in_number")
+            number = bare_tail
         if re.fullmatch(r"\d{5}", number.strip()):
             # A lone postcode leaked into the number field ("90570" while
             # the real number sits inside the street line): no housenumber.
@@ -4742,8 +4790,16 @@ class PtvFISpider(Spider):
             number = lt_stripped
         head, _, slash = number.partition("/")
         if slash.strip():
-            # Venue notes inside the number field ("/ Espoon Keskuspuisto").
-            self._count("address/venue_tail_dropped")
+            if re.fullmatch(r"\d+[A-Za-z]?", head.strip()) and re.fullmatch(
+                r"\d+[A-Za-z]?(?:\s*-\s*\d+[A-Za-z]?)?", slash.strip()
+            ):
+                # Dual housenumbers ("12/14", corner building): both halves
+                # count, folded to the range form.
+                self._count("address/dual_number")
+                number = head.strip() + "-" + slash.strip()
+            else:
+                # Venue notes inside the number field ("/ Espoon Keskuspuisto").
+                self._count("address/venue_tail_dropped")
         raw_head = number.partition("/")[0]
         unclosed = re.sub(r"\s*\([^()]*$", "", raw_head).strip()
         if unclosed != raw_head.strip():
@@ -4990,8 +5046,19 @@ class PtvFISpider(Spider):
             road = self._road_base(road)
         if road and "/" in road:
             # Corner buildings name two streets; no single postal address.
+            # The housenumber has no street to attach to, but unit tails
+            # still parse via the shared token rules ("12 A 1" → "A 1").
             self._count("address/cross")
+            core, units = self._number_parts(number)
+            core, units = self._address_wordled(core, units, road)
+            raw = self._strip_addr_base(f"{road} {core}".strip() if core else road)
+            if raw and (tok := self._split_addr_tokens(raw.split())):
+                if tok[2]:
+                    self._count("address/stair_unit")
+                    units.append(tok[2])
             item["street_address"] = self._strip_addr_base(road) or road
+            if units:
+                item["extras"]["addr:unit"] = " ".join(units)
         elif road:
             core, units = self._number_parts(number)
             core, units = self._address_wordled(core, units, road)

@@ -5048,3 +5048,104 @@ def test_operator_word_reads_past_parens():
     assert spider._has_operator_word("Imatran keilahalli Oy (Helsinki)")
     assert spider._has_operator_word("Daycare Daisy Oy (Ylioppilaskylä 25)")
     assert not spider._has_operator_word("Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)")
+
+
+def test_service_city_tail_strips_from_comma_heads():
+    # Comma service heads carrying an exact-city tail ("Fysioterapia Pori",
+    # d649edee) strip by the space-city predicate, keeping the venue.
+    # Proper-noun heads never enter ("Arvi Pori" keeps whole).
+    spider = make_spider()
+    full = "Fysioterapia Pori, Länsi-Porin sote-keskus"
+    assert spider._split_name(full, "Pori") == ("Fysioterapia", "Länsi-Porin sote-keskus", full)
+    assert spider._split_name("Arvi Pori", "Pori") == ("Arvi Pori", None, None)
+
+
+def test_closed_multiday_marks_whole_range():
+    # Closed marks cover the stated range (SYNTHETIC: zero feed rows with
+    # dayTo≠dayFrom on closed entries).
+    spider = make_spider()
+    ch = channel("X")
+    ch["serviceHours"] = [
+        {
+            "serviceHourType": "DaysOfTheWeek",
+            "isClosed": True,
+            "openingHour": [{"dayFrom": "Monday", "dayTo": "Friday"}],
+        }
+    ]
+    day_spans, closed_days, _ = spider._hours_collect(ch)
+    assert day_spans == {}
+    assert closed_days == {"Mo", "Tu", "We", "Th", "Fr"}
+
+
+def test_wraparound_spans_expand_past_sunday():
+    # Weekend-wrapping ranges (Fr–Mo, feed-realistic) expand past Sunday
+    # instead of stranding Friday alone.
+    spider = make_spider()
+    ch = channel("X")
+    ch["serviceHours"] = [
+        {
+            "serviceHourType": "DaysOfTheWeek",
+            "openingHour": [{"dayFrom": "Friday", "dayTo": "Monday", "from": "12:00:00", "to": "14:00:00"}],
+        }
+    ]
+    rendered = spider._hours(ch, None).as_opening_hours()
+    assert "Fr-Su 12:00-14:00" in rendered
+    assert "Mo 12:00-14:00" in rendered
+
+
+def test_always_open_skipped_for_nursing():
+    # Staffed nursing homes are not walk-in 24/7 either (extends the
+    # social/school/kindergarten skip).
+    spider = make_spider()
+    channel_data = {
+        "serviceHours": [
+            {
+                "serviceHourType": "DaysOfTheWeek",
+                "isAlwaysOpen": True,
+                "openingHour": [{"dayFrom": "Monday", "dayTo": "Sunday", "from": "00:00:00", "to": "23:59:59"}],
+            }
+        ]
+    }
+    assert spider._hours(channel_data, Categories.NURSING_HOME) is None
+    assert spider.crawler.stats.get_value("ptv_fi/hours/skipped_always_open_social") == 1
+
+
+def test_358_prefixed_short_number_repairs():
+    # Country code without "+" on a short number never doubles ("+358 358…").
+    spider = make_spider()
+    assert spider._normalize_phone("358912345") == "+358 9 12345"
+
+
+def test_cross_street_keeps_number_units():
+    # Corner roads keep the whole line as street_address, but number units
+    # still parse via the shared token rules (SYNTHETIC trigger "12 A 1").
+    spider = make_spider()
+    item = addressed(spider, "Mannerheimintie / Runeberginkatu", "12 A 1")
+    assert item.get("street_address") == "Mannerheimintie / Runeberginkatu"
+    assert item["extras"].get("addr:unit") == "A 1"
+
+
+def test_dual_housenumber_slash_folds_to_range():
+    # Dual housenumbers ("12/14") fold to the range form; venue notes after
+    # the slash still drop (test_number_venue_tail guard stands).
+    spider = make_spider()
+    item = addressed(spider, "Katu", "12/14")
+    assert item.get("housenumber") == "12-14"
+
+
+def test_to_minutes_rejects_impossible_hours():
+    # Prefix junk and impossible hours drop instead of rendering ("25:00"
+    # must never reach opening_hours; SYNTHETIC, zero feed rows).
+    spider = make_spider()
+    assert spider._to_minutes("25:00") is None
+    assert spider._to_minutes("08:00-12:00") is None
+    assert spider._to_minutes("08:00:00") == 480
+
+
+def test_bare_postcode_tail_never_units():
+    # Bare postcode tails strip even with no postcode field (SYNTHETIC:
+    # corpus twins always carry the postcode field too).
+    spider = make_spider()
+    item = addressed(spider, "Tie", "10 11111", postcode="")
+    assert item.get("housenumber") == "10"
+    assert item["extras"].get("addr:unit") is None
