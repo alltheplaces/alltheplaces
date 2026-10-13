@@ -66,7 +66,7 @@ class FordSpider(Spider):
 
             has_vehicle_dept = is_sales or is_sales_cv or is_service or is_service_cv
             if not has_vehicle_dept and is_parts:
-                 yield self.build_parts_item(item)
+                yield self.build_parts_item(item)
             elif not has_vehicle_dept:
                 # fallback category
                 yield self.build_sales_item(item)
