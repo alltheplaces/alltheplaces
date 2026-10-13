@@ -3108,6 +3108,18 @@ def test_skola_boundary_and_koulu_streets():
     assert cat(spider, "Lappeenrannan toimipiste, Koulukatu 14")[0] == Categories.OFFICE_GOVERNMENT
 
 
+def test_slash_venue_org_strips_before_pair():
+    # Operator orgs inside the venue strip before pair dispatch: the venue
+    # part locates, and multi-segment chains resolve the same with or
+    # without the org suffix (H2 extraction regression guard).
+    spider = make_spider()
+    assert spider._split_name("Iltapäivätoiminta / Kottby grundskola, Kottbynejdens svenska förening rf") == (
+        "Iltapäivätoiminta",
+        "Kottby grundskola",
+        "Iltapäivätoiminta / Kottby grundskola, Kottbynejdens svenska förening rf",
+    )
+
+
 def test_animal_protection_desk_is_office():
     spider = make_spider()
     assert cat(spider, "Eläinsuojelu")[0] == Categories.OFFICE_GOVERNMENT

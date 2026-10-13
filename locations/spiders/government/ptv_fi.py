@@ -1989,8 +1989,7 @@ class PtvFISpider(Spider):
         self, head: str, tail: str, name: str, segments: list[str]
     ) -> tuple[str, str | None, str | None] | None:
         # Operator heads/tails and memorials resolve between peeling and
-        # pair dispatch.
-        tail = self._strip_venue_org(tail)
+        # pair dispatch. Tail arrives venue-org-stripped from _split_slash.
         if self._is_operator_shaped(head) and len(segments) == 2:
             # Operator-headed records ("Ysti ry / ..."): the head is the
             # maintainer, the tail a service description, not a venue.
@@ -2024,6 +2023,9 @@ class PtvFISpider(Spider):
         head, tail = peeled
         if tail is None:
             return (head, None, name)
+        # Venue-org suffixes strip before every dispatch below (operator,
+        # pair, appositive, venue): the venue part names/locates.
+        tail = self._strip_venue_org(tail)
         if (operator := self._slash_operator_pair(head, tail, name, segments)) is not None:
             return operator
         if (pair := self._resolve_slash_pair(head, tail, name)) is not None:
