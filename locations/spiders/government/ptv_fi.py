@@ -2525,10 +2525,6 @@ class PtvFISpider(Spider):
         # and ontology rescue first, description rescue next, generic last.
         # Returns the resolved category (or None for extras-only rescue).
         # Returns the resolved category (or None for extras-only rescue).
-        if self._supported_housing(channel):
-            self._count("category/rescued/ASSISTED_LIVING")
-            apply_category(Categories.ASSISTED_LIVING, item)
-            return Categories.ASSISTED_LIVING
         rescued = self._rescue_service(channel)
         if rescued is None:
             category = self._rescue_category(channel)
