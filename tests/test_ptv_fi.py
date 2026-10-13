@@ -3406,7 +3406,9 @@ def test_pagination_stops_on_repeated_ids():
     assert not any("page=3" in getattr(r, "url", "") for r in out2)
 
 
-def test_always_open_suppresses_spans():
+def test_always_open_yields_to_spans():
+    # An on-call availability record never overrides real timetables:
+    # spans render instead of 24/7 (cf. Uudenmaan aluetoimisto).
     spider = make_spider()
     assert (
         spider._hours(
@@ -3419,8 +3421,8 @@ def test_always_open_suppresses_spans():
                     },
                 ]
             }
-        )
-        == "24/7"
+        ).as_opening_hours()
+        == "Mo 08:00-16:00"
     )
 
 
@@ -4033,6 +4035,56 @@ def test_contact_placeholder_names_fall_back():
         }
     )
     assert names.get("sv") == "AMS"
+
+
+def test_fax_lines_never_pose_as_phone():
+    # "Konsertti- ja kongressitalo Mikaeli" led with a fax entry; the
+    # first voice line wins, malformed entries fall through to it.
+    spider = make_spider()
+    ch = channel("Konsertti- ja kongressitalo Mikaeli")
+    ch["phoneNumbers"] = [
+        {"type": "Fax", "number": "+358 15 362 757", "prefixNumber": ""},
+        {"type": "Phone", "number": "+358 15 336 080", "prefixNumber": ""},
+    ]
+    assert parsed(spider, ch).get("phone") == "+358 15336080"
+    ch["phoneNumbers"] = [None, {}, {"type": "Phone", "number": "040 123 4567", "prefixNumber": ""}]
+    assert parsed(spider, ch).get("phone") == "+358 40 1234567"
+
+
+def test_placeholder_email_falls_back():
+    # Template first addresses ("etunimi.sukunimi@soini.fi") yield to the
+    # real second entry instead of suppressing it.
+    spider = make_spider()
+    ch = channel("X")
+    ch["emails"] = [{"value": "etunimi.sukunimi@soini.fi"}, {"value": "soinin.kunta@soini.fi"}]
+    assert parsed(spider, ch).get("email") == "soinin.kunta@soini.fi"
+
+
+def test_login_and_mail_urls_fall_back():
+    # SSO redirects, menu SaaS links and email-address URLs are never
+    # websites; the next usable page wins.
+    spider = make_spider()
+    assert spider.LOGIN_URL_RE.search("https://hushag-sso.hus.fi/haglogin/idp-discovery.jsp")
+    assert spider.LOGIN_URL_RE.search("https://aromimenu.cgisaas.fi/X")
+    assert spider.LOGIN_URL_RE.search("https://tyollisyyskokeilu@raahe.fi/")
+    assert not spider.LOGIN_URL_RE.search("https://www.kirjasto.fi/")
+    ch = channel("X")
+    ch["webPages"] = [
+        {"url": "https://aromimenu.cgisaas.fi/X"},
+        {"url": "https://www.kirjasto.fi/"},
+    ]
+    assert parsed(spider, ch).get("website") == "https://www.kirjasto.fi/"
+
+
+def test_phone_normalize_repairs_and_rejects():
+    # Trunk-less feed numbers repair, "null" and over-long strings drop,
+    # country-without-plus folds in, short codes pass through.
+    spider = make_spider()
+    assert spider._normalize_phone("null") is None
+    assert spider._normalize_phone("400395234") == "+358 40 0395234"
+    assert spider._normalize_phone("4578757018") is None
+    assert spider._normalize_phone("358 17499111") == "+358 17499111"
+    assert spider._normalize_phone("116117") == "116117"
 
 
 def test_bare_slash_twins_keep_both_sides():

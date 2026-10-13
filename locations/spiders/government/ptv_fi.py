@@ -2960,7 +2960,7 @@ class PtvFISpider(Spider):
     # per-store data (cf. the JSON-LD hotline lesson): drop on sight.
     GENERIC_PHONES = frozenset({"358981621", "358983911"})  # Espoon/Vantaan vaihteet
     GENERIC_EMAILS = frozenset({"info@esperi.fi"})  # Central corporate inbox
-    LOGIN_URL_RE = re.compile(r"(authentication|/login\b|^https?://menu\.)", re.IGNORECASE)
+    LOGIN_URL_RE = re.compile(r"(authentication|log\s?in|sso|idp|menu\.|@)", re.IGNORECASE)
 
     @classmethod
     def _visible(cls, text: str) -> str:
@@ -3050,7 +3050,12 @@ class PtvFISpider(Spider):
                 always_open = True
                 continue
             self._collect_spans(entry, day_spans, closed_days)
-        if always_open:
+        if always_open and day_spans:
+            # Availability records (on-call duty, shift care) never
+            # override real timetables with 24/7 ("Uudenmaan aluetoimisto"
+            # keeps Tu-Th 09:00-15:00).
+            self._count("hours/always_open_with_spans")
+        if always_open and not day_spans:
             if (
                 category in (Categories.SOCIAL_FACILITY, Categories.SCHOOL, Categories.COLLEGE, Categories.KINDERGARTEN)
                 and not day_spans
@@ -3483,6 +3488,10 @@ class PtvFISpider(Spider):
         # anything else (short codes like 116 006, foreign numbers,
         # invalid lengths) passes through untouched or drops.
         digits = re.sub(r"\D", "", raw)
+        if not digits:
+            # Non-numeric junk ("null", "no phone") is never a phone number.
+            self._count("contact/invalid_phone")
+            return None
         if raw.strip().startswith("+"):
             if digits.startswith("359") and len(digits) == 12:
                 # Single-digit country typo on a Finnish number
@@ -3493,60 +3502,126 @@ class PtvFISpider(Spider):
                 return raw.strip() or None
             digits = digits[3:].lstrip("0")
         else:
-            if not digits.startswith("0"):
-                return raw.strip() or None
+            if digits.startswith("358") and len(digits) in (11, 12):
+                # Country code without "+" ("358 17499111").
+                digits = digits[3:]
+            elif not digits.startswith("0"):
+                if len(digits) in (8, 9):
+                    # Trunk lost in the feed ("400395234"): repair it.
+                    digits = "0" + digits
+                elif len(digits) == 10 and digits[0] in ("4", "5"):
+                    # Trunk-less 10-digit strings ("4578757018") exceed the
+                    # national format: drop, never reformat.
+                    self._count("contact/invalid_phone")
+                    return None
+                else:
+                    return raw.strip() or None
             digits = digits.lstrip("0")
+        if not digits:
+            # Non-numeric junk ("null") is never a phone number.
+            self._count("contact/invalid_phone")
+            return None
         if digits.startswith("358") and len(digits) > 10:
             # Duplicated country code from a feed concat ("+358 358...").
             digits = digits[3:]
         if not digits.isdigit() or not (5 <= len(digits) <= 10):
             self._count("contact/invalid_phone")
             return None
-        if digits[0] in ("4", "5") and len(digits) >= 9:
+        if digits[0] in ("4", "5") and len(digits) == 9:
             # Mobile prefixes stay readable ("+358 50 9119693").
             return "+358 " + digits[:2] + " " + digits[2:]
+        if len(digits) == 10:
+            # Too long for the national format (trunk-less 10-digit strings
+            # like "4578757018" are feed garbage): drop, never reformat.
+            self._count("contact/invalid_phone")
+            return None
         if len(digits) <= 7:
             # Short landlines split the single-digit area ("+358 9 4711").
             return "+358 " + digits[:1] + " " + digits[1:]
         return "+358 " + digits
 
-    def _apply_contact(self, item: Feature, channel: dict) -> None:
-        phones = channel.get("phoneNumbers") or []
-        if isinstance(phones, list) and phones and isinstance(phones[0], dict):
-            number = (phones[0].get("number") or "").strip()
-            prefix = (phones[0].get("prefixNumber") or "").strip()
-            if number:
-                if re.sub(r"\D", "", prefix + number) in self.GENERIC_PHONES:
-                    self._count("contact/generic_hotline")
-                else:
-                    raw = f"{prefix} {number}".strip() if prefix else number
-                    if normalized := self._normalize_phone(raw):
-                        item["phone"] = normalized
-        emails = channel.get("emails") or []
-        if emails and isinstance(emails[0], dict) and emails[0].get("value"):
-            email = emails[0]["value"].strip()
-            local = email.split("@")[0].lower()
+    # Placeholder email locals: template text, never mailboxes.
+    PLACEHOLDER_EMAILS = frozenset(
+        {
+            "etunimi.sukunimi",
+            "firstname.lastname",
+            "nimi.sukunimi",
+            "fornamn.efternamn",
+            "förnamn.efternamn",
+        }
+    )
+
+    @staticmethod
+    def _str_or_empty(value) -> str:
+        return value.strip() if isinstance(value, str) else ""
+
+    def _contact_phone(self, item: Feature, phones: list) -> None:
+        # First voice line wins; fax lines, generic switchboards and
+        # unusable entries fall through to the next candidate.
+        for entry in phones:
+            if not isinstance(entry, dict):
+                continue
+            if (entry.get("type") or "Phone").strip().lower() != "phone":
+                # Fax and other non-voice lines never pose as the phone
+                # ("Konsertti- ja kongressitalo Mikaeli" led with one).
+                continue
+            number = self._str_or_empty(entry.get("number"))
+            prefix = self._str_or_empty(entry.get("prefixNumber"))
+            if not number:
+                continue
+            if re.sub(r"\D", "", prefix + number) in self.GENERIC_PHONES:
+                self._count("contact/generic_hotline")
+                continue
+            raw = f"{prefix} {number}".strip() if prefix else number
+            if normalized := self._normalize_phone(raw):
+                item["phone"] = normalized
+                return
+
+    def _contact_email(self, item: Feature, emails: list) -> None:
+        # First usable mailbox wins; placeholders yield to real seconds.
+        for entry in emails:
+            if not isinstance(entry, dict):
+                continue
+            email = self._str_or_empty(entry.get("value"))
+            if not email or "@" not in email:
+                continue
             if email.lower() in self.GENERIC_EMAILS:
                 self._count("contact/generic_email")
-            elif local in (
-                "etunimi.sukunimi",
-                "firstname.lastname",
-                "nimi.sukunimi",
-                "fornamn.efternamn",
-                "förnamn.efternamn",
-            ):
+                continue
+            if email.split("@")[0].lower() in self.PLACEHOLDER_EMAILS:
                 # Template placeholders, never real contacts.
                 self._count("contact/placeholder_email")
-            else:
-                item["email"] = email
-        pages = channel.get("webPages") or []
-        if pages and isinstance(pages[0], dict) and pages[0].get("url"):
-            url = pages[0]["url"].strip()
+                continue
+            item["email"] = email
+            return
+
+    def _contact_website(self, item: Feature, pages: list) -> None:
+        # First usable page wins; login walls and mailto-shaped URLs fall
+        # through to the institution's own site.
+        for entry in pages:
+            if not isinstance(entry, dict):
+                continue
+            url = self._str_or_empty(entry.get("url"))
+            if not url:
+                continue
             if self.LOGIN_URL_RE.search(url):
-                # Login walls are never websites.
+                # Login walls (and email addresses in the URL field)
+                # are never websites.
                 self._count("contact/login_url")
-            else:
-                item["website"] = url
+                continue
+            item["website"] = url
+            return
+
+    def _apply_contact(self, item: Feature, channel: dict) -> None:
+        phones = channel.get("phoneNumbers") or []
+        if isinstance(phones, list):
+            self._contact_phone(item, phones)
+        emails = channel.get("emails") or []
+        if isinstance(emails, list):
+            self._contact_email(item, emails)
+        pages = channel.get("webPages") or []
+        if isinstance(pages, list):
+            self._contact_website(item, pages)
 
     # Housenumber with optional letter and range ("Katutie 2a" stays whole,
     # "Nummentie 12 - 14" folds to "12-14"). PTV-local copy of the
