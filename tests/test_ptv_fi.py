@@ -2659,6 +2659,9 @@ def test_number_word_tokens_keep_first_house():
     item = addressed(spider, "Metsäautotie välillä Lapinlahdentie 1175 - Pitkämäentie 641", "")
     assert item.get("housenumber") is None
     assert item["street_address"].startswith("Metsäautotie välillä")
+    item = addressed(spider, "Metsäautotie välilla Lapinlahdentie 1175 - Pitkämäentie 641", "")
+    assert item.get("housenumber") is None
+    assert item["street_address"].startswith("Metsäautotie välilla")
 
 
 def test_slash_tail_venue_operator_split():

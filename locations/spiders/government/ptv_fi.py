@@ -4145,8 +4145,9 @@ class PtvFISpider(Spider):
 
     def _address_route(self, item: Feature, road: str | None) -> str | None:
         # Route descriptions ("Metsäautotie välillä Lapinlahdentie 1175
-        # - Pitkämäentie 641") are not postal addresses: keep whole.
-        if road and re.search(r"\bvälillä\b", road, flags=re.IGNORECASE):
+        # - Pitkämäentie 641", feed typo "välilla") are not postal
+        # addresses: keep whole.
+        if road and re.search(r"\bvälil(?:lä|la)\b", road, flags=re.IGNORECASE):
             self._count("address/route_desc")
             item["street_address"] = self._strip_addr_base(road) or road
             return None
