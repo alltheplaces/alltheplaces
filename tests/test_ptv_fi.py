@@ -3603,3 +3603,99 @@ def test_single_digit_country_typo_repairs():
     # "+359 447301262" on an Ikaalinen row: Bulgarian code on a Finnish
     # mobile shape, one digit off every other row — repair, don't pass on.
     assert make_spider()._normalize_phone("+359 447301262") == "+358 44 7301262"
+
+
+def test_supported_housing_beats_diagnosis():
+    # Etu-Töölön asuintalo filed clinic via mental-health rescue; the POI
+    # is supported housing (Mielenterveyskuntoutujien tuettu asuminen).
+    spider = make_spider()
+    assert cat(spider, "Mielenterveyskuntoutujien tuettu asuminen")[0] == Categories.ASSISTED_LIVING
+    ch = channel("Etu-Töölön asuintalo")
+    ch["services"] = [{"service": {"name": "Mielenterveyskuntoutujien tuettu asuminen"}}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "social_facility"
+    assert item["extras"].get("social_facility") == "assisted_living"
+
+
+def test_utility_buildings_stay_generic():
+    # "... / Huoltorakennus" with Urheilukentät services: the building
+    # names the POI, not its services — rescue leaves it generic.
+    spider = make_spider()
+    ch = channel("Eläintarhan urheilukenttä / Huoltorakennus 3")
+    ch["services"] = [{"service": {"name": "Urheilukentät"}}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("leisure") is None
+
+
+def test_room_tails_type_the_poi():
+    # Facility tails name the POI ("Hietarannan uimaranta /
+    # Koripallokenttä"): the tail types it, not the beach host.
+    spider = make_spider()
+    assert cat(spider, "Hietarannan uimaranta / Koripallokenttä")[0] == Categories.LEISURE_PITCH
+    assert named(spider, "Hietarannan uimaranta / Koripallokenttä") == (
+        "Koripallokenttä",
+        "Hietarannan uimaranta",
+        "Hietarannan uimaranta / Koripallokenttä",
+    )
+    assert named(spider, "Väinämöisenkenttä / Ulkokuntoilupaikka") == (
+        "Ulkokuntoilupaikka",
+        "Väinämöisenkenttä",
+        "Väinämöisenkenttä / Ulkokuntoilupaikka",
+    )
+    assert cat(spider, "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)")[0] == (Categories.LEISURE_FITNESS_STATION)
+
+
+def test_compound_and_typeless_tails_keep_full_filing():
+    # "Sipoon opisto / Opintien palvelupiste ja liikuntatila" stays a
+    # college; "Maunulan liikuntahalli / Sisäampumarata" stays a hall.
+    spider = make_spider()
+    assert cat(spider, "Sipoon opisto / Opintien palvelupiste ja liikuntatila")[0] == Categories.COLLEGE
+    assert cat(spider, "Maunulan liikuntahalli / Sisäampumarata")[0] == Categories.LEISURE_SPORTS_CENTRE
+
+
+def test_grill_places_are_picnic_sites():
+    # "Seurasaari / Grillipaikka" filed park via park-service rescue; a
+    # grill place is a picnic site. kota/katos shelters keep shelter.
+    spider = make_spider()
+    assert cat(spider, "Seurasaari / Grillipaikka")[0] == Categories.TOURISM_PICNIC_SITE
+    assert cat(spider, "Meri-Rastila / Grillipaikka")[0] == Categories.TOURISM_PICNIC_SITE
+    assert cat(spider, "Malmin kenttä / Väliaikainen grillipaikka")[0] == Categories.TOURISM_PICNIC_SITE
+
+
+def test_orienteering_controls_stay_generic():
+    # Otaniemen kiintorastit filed shooting_ground via ampumaradat
+    # ontology dumps; fixed controls are markers, not ranges.
+    spider = make_spider()
+    ch = channel("Otaniemen kiintorastit")
+    ch["services"] = [{"service": {"name": "Liikunnan ja urheilun tulosyksikkö"}}]
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ampumaradat"}]}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("leisure") is None
+
+
+def test_outdoor_islands_are_islands():
+    # "Porsas" filed social_facility via a petting-farm service; with
+    # Ulkoilusaaret services it is an island like its siblings.
+    spider = make_spider()
+    ch = channel("Porsas")
+    ch["services"] = [
+        {"service": {"name": "Haltialan kotieläintila"}},
+        {"service": {"name": "Ulkoilusaaret"}},
+    ]
+    item = parsed(spider, ch)
+    assert item["extras"].get("place") == "island"
+
+
+def test_island_titled_artworks_are_art():
+    # "Saari" with Julkinen taide services (HAM) is public art, not land.
+    spider = make_spider()
+    ch = channel("Saari")
+    ch["services"] = [{"service": {"name": "Julkinen taide"}}]
+    ch["ontologyTerms"] = [
+        {"name": [{"language": "fi", "value": "julkinen taide"}]},
+        {"name": [{"language": "fi", "value": "veistokset"}]},
+    ]
+    item = parsed(spider, ch)
+    assert item["extras"].get("tourism") == "artwork"

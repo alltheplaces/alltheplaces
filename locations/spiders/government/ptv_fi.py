@@ -105,6 +105,9 @@ class PtvFISpider(Spider):
         ("nuorten mielenterveys", Categories.CLINIC, None),  # Youth mental-health services
         ("nuorten päihde", Categories.CLINIC, None),  # Youth addiction services
         ("kohtaamispaikka", Categories.COMMUNITY_CENTRE, None),  # Kohtaamispaikka (meeting places outrank clientele)
+        ("tukiasunto", Categories.ASSISTED_LIVING, None),  # Tukiasunto (supported housing)
+        ("tuettu asumi", Categories.ASSISTED_LIVING, None),  # Tuettu asuminen (supported housing)
+        ("tukiasuminen", Categories.ASSISTED_LIVING, None),  # Tukiasuminen (support housing)
         ("mielenterveystyö", Categories.CLINIC, None),  # Mielenterveystyö (mental-health work)
         ("nuorisoasema", Categories.OFFICE_GOVERNMENT, None),  # Nuorisoasema (youth service stations)
         ("nuorisotila", None, {"amenity": "youth_centre"}),  # Nuorisotila (youth rooms)
@@ -334,6 +337,8 @@ class PtvFISpider(Spider):
         ("leikkivä", None, None),  # Leikkivä titles (artworks like Leikkivät karhut): rescue decides
         ("leikki", Categories.LEISURE_PLAYGROUND, None),  # Leikki (play)
         ("keittokatos", Categories.TOURISM_PICNIC_SITE, None),  # Keittokatos (cooking shelters)
+        ("kaupungintalon puisto", Categories.LEISURE_PARK, None),  # Kaupungintalon puisto (city-hall park)
+        ("grillipaikka", Categories.TOURISM_PICNIC_SITE, None),  # Grillipaikka (BBQ spots)
         ("koira-aitaus", Categories.LEISURE_DOG_PARK, None),  # Koira-aitaus (dog enclosures)
         ("koirametsä", Categories.LEISURE_DOG_PARK, None),  # Koirametsä (dog forests)
         ("lippumyymälä", None, {"shop": "tickets"}),  # Lippumyymälä (ticket shops)
@@ -608,9 +613,6 @@ class PtvFISpider(Spider):
         ("vertaisryhm", Categories.COMMUNITY_CENTRE, None),  # Vertaisryhmä (peer-support groups)
         ("sydänkerho", Categories.COMMUNITY_CENTRE, None),  # Sydänkerho (heart clubs)
         ("sydänosasto", Categories.CLINIC, None),  # Sydänosasto (cardiac wards)
-        ("tukiasunto", Categories.ASSISTED_LIVING, None),  # Tukiasunto (supported housing)
-        ("tuettu asumi", Categories.ASSISTED_LIVING, None),  # Tuettu asuminen (supported housing)
-        ("tukiasuminen", Categories.ASSISTED_LIVING, None),  # Tukiasuminen (support housing)
         ("asumi", Categories.SOCIAL_FACILITY, None),  # Asumi (housing services)
         ("boende", Categories.SOCIAL_FACILITY, None),
         ("bostad", Categories.SOCIAL_FACILITY, None),  # Bostad (housing in Swedish)
@@ -1234,6 +1236,7 @@ class PtvFISpider(Spider):
         "laavu",
         "heittopaikka",
         "huoltorakennus",
+        "ulkokuntoilupaikka",
     )
     # Single memorial objects never split (title + designation of one artwork).
     MEMORIAL_WORDS = ("muistomerkki", "monumentti", "patsas", "memorial")
@@ -2357,12 +2360,16 @@ class PtvFISpider(Spider):
         r"(verstas|fiesta|juhla|festivaali|karnevaali|kilpailu|turnaus|ottelu|konsertti|näytelmä|kurssi|leiri|tapahtuma)"
     )
 
-    def _rescue_service(self, channel: dict) -> tuple | None:
-        # Linked PTV services and YSO ontology terms type opaque channels
-        # ("Maya", "Coxa") from feed data. Rescue-tier only: the channel
-        # name already failed, so the first non-generic hit wins. Admin
-        # units ("Liikunnan ja urheilun tulosyksikkö") match nothing and
-        # fall through to the description rescue below.
+    def _rescue_blocked(self, channel: dict) -> bool:
+        # Names rescue never types: utility buildings (typed by hosted
+        # services otherwise) and fixed orienteering controls (typed by
+        # shooting-ontology dumps otherwise). Both stay generic.
+        fi = (self._names(channel).get("fi") or "").lower()
+        return "huoltorakennus" in fi or "kiintorasti" in fi
+
+    def _rescue_candidates(self, channel: dict) -> list:
+        # Feed strings that can type an opaque channel, in precedence
+        # order: linked services, ontology terms, translated names.
         candidates = []
         for row in channel.get("services") or []:
             name = ((row or {}).get("service") or {}).get("name")
@@ -2379,8 +2386,24 @@ class PtvFISpider(Spider):
                 value = (row.get("value") or "").strip()
                 if value:
                     candidates.append(value)
+        return candidates
+
+    def _rescue_service(self, channel: dict) -> tuple | None:
+        # Linked PTV services and YSO ontology terms type opaque channels
+        # ("Maya", "Coxa") from feed data. Rescue-tier only: the channel
+        # name already failed, so the first non-generic hit wins. Admin
+        # units ("Liikunnan ja urheilun tulosyksikkö") match nothing and
+        # fall through to the description rescue below.
+        if self._rescue_blocked(channel):
+            return None
+        candidates = self._rescue_candidates(channel)
         activity = self.ACTIVITY_RE.search(self._clean_name(self._names(channel).get("fi") or "").lower())
         ward_name = self.SUBUNIT_RE.search(self._clean_name(self._names(channel).get("fi") or "").lower())
+        if any(word in (c or "").lower() for c in candidates for word in ("ulkoilusaari", "ulkoilusaaret")):
+            # Outdoor-island channels ("Porsas" with Ulkoilusaaret
+            # services) are islands, whatever the first service types.
+            self._count("category/rescued_island")
+            return None, {"place": "island"}
         for candidate in candidates:
             category, extra = self._category(self._clean_name(candidate))
             if extra == {"place": "island"}:
@@ -2413,9 +2436,31 @@ class PtvFISpider(Spider):
                 return category, extra
         return None
 
+    def _has_art_service(self, channel: dict) -> bool:
+        # Public-art evidence in linked services/ontology ("Julkinen
+        # taide", "veistokset"): artworks titled like islands still file
+        # as art. Bare-"Saari" names only; island-proper names keep land.
+        if self._clean_name((self._names(channel).get("fi") or "")).lower() != "saari":
+            return False
+        for row in channel.get("services") or []:
+            name = ((row or {}).get("service") or {}).get("name") or ""
+            if "taide" in name.lower() or "veistos" in name.lower() or "museo" in name.lower():
+                return True
+        for term in channel.get("ontologyTerms") or []:
+            for term_name in (term or {}).get("name") or []:
+                if term_name.get("language") == "fi" and term_name.get("value"):
+                    value = term_name["value"].lower()
+                    if "taide" in value or "veistos" in value or "museo" in value:
+                        return True
+        return False
+
     def _rescue_category(self, channel: dict):
         text = self._description_text(channel)
         if not text:
+            return None
+        if self._rescue_blocked(channel):
+            # Utility buildings and orienteering controls stay generic
+            # whatever the description says.
             return None
         if any(word in text for word in self.CARE_WORDS):
             if self.CARE_HOUSING_RE.search(text):
@@ -2718,6 +2763,13 @@ class PtvFISpider(Spider):
             return svc_unit
         if (unit_venue := self._split_comma_unit_venue(head, tail, lowered_head, lowered_tail, name, city)) is not None:
             return unit_venue
+        return self._split_comma_tail_rest(head, tail, lowered_head, lowered_tail, name, city)
+
+    def _split_comma_tail_rest(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
+        # Lowercase descriptors, Swedish tails, proper/unit venues and
+        # coverage tails resolve after the service/unit dispatch above.
         if (
             tail
             and tail[0].islower()
@@ -3021,6 +3073,8 @@ class PtvFISpider(Spider):
         "leikki",
         "kalastus",
         "koirauimaranta",
+        "ulkokuntoilu",
+        "kuntoilupiste",
     )
 
     def _custom_saari(self, lowered: str) -> tuple | None:
@@ -3221,12 +3275,38 @@ class PtvFISpider(Spider):
             return Categories.LEISURE_PLAYGROUND, None
         return None
 
+    def _carve_room_tail(self, name_fi: str):
+        # Facility tails name the POI ("Hietarannan uimaranta /
+        # Koripallokenttä"): the tail types it, not the host. Only clean
+        # room-word tails with a real type carve; compound tails ("...
+        # ja ...") and typeless tails keep full-form filing, while utility
+        # buildings (huoltorakennus) stay deliberately generic.
+        if " / " not in name_fi:
+            return None
+        tail = name_fi.rsplit(" / ", 1)[1].strip()
+        if not tail:
+            return None
+        lowered = tail.lower()
+        if "huoltorakennus" in lowered:
+            self._count("category/room_building_generic")
+            return None, None
+        if not any(word in lowered for word in self.ROOM_WORDS):
+            return None
+        if re.search(r"\bja\b|&", lowered):
+            return None
+        category, extra = self._category(tail)
+        if category is None:
+            return None
+        return category, extra
+
     def _category(self, name_fi: str):
         # Invisible characters (zero-width, soft hyphens) never carry
         # matching meaning; strip them so feed dirt can't hide keywords.
         name_fi = self._visible(name_fi)
         if (custom := self._custom_category(name_fi)) is not None:
             return custom
+        if (carved := self._carve_room_tail(name_fi)) is not None:
+            return carved
         lowered = name_fi.lower()
         # Gradation plurals/genitives never contain their singular
         # (kenttä/kentät/kentän, ranta/rannat/rannan, keskus/keskuksen,
@@ -3248,6 +3328,10 @@ class PtvFISpider(Spider):
         lowered = re.sub(r"tautien\b", "tauti", lowered)
         lowered = re.sub(r"radat\b", "rata", lowered)
         lowered = re.sub(r"yksiköt\b", "yksikkö", lowered)
+        lowered = re.sub(r"veistokset\b", "veistos", lowered)
+        lowered = re.sub(r"veistoksen\b", "veistos", lowered)
+        lowered = re.sub(r"taideteokset\b", "taideteos", lowered)
+        lowered = re.sub(r"taideteoksen\b", "taideteos", lowered)
         for rx, category, extra in self._rules:
             if rx.search(lowered):
                 if category == Categories.HOSPITAL and self.SUBUNIT_RE.search(lowered):
@@ -3980,10 +4064,16 @@ class PtvFISpider(Spider):
         category, extra = self._category(self._clean_name(names.get("fi") or name))
         if category is None:
             if extra:
-                # Placement-only tags (squares, youth centres) need no POI category.
-                for key, value in extra.items():
-                    item["extras"][key] = value
-                self._count("category/extras_only")
+                if extra == {"place": "island"} and self._has_art_service(channel):
+                    # Artworks titled like islands ("Saari" with Julkinen
+                    # taide services) are art, not islands: rescue instead.
+                    self._count("category/island_art_rescue")
+                    category = self._resolve_fallback_category(item, channel)
+                else:
+                    # Placement-only tags (squares, youth centres) need no POI category.
+                    for key, value in extra.items():
+                        item["extras"][key] = value
+                    self._count("category/extras_only")
             else:
                 category = self._resolve_fallback_category(item, channel)
         else:
