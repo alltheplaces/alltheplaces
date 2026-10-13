@@ -2960,7 +2960,9 @@ class PtvFISpider(Spider):
     # per-store data (cf. the JSON-LD hotline lesson): drop on sight.
     GENERIC_PHONES = frozenset({"358981621", "358983911"})  # Espoon/Vantaan vaihteet
     GENERIC_EMAILS = frozenset({"info@esperi.fi"})  # Central corporate inbox
-    LOGIN_URL_RE = re.compile(r"(authentication|log\s?in|sso[.-]|idp[-.]|menu\.|safelinks|@)", re.IGNORECASE)
+    LOGIN_URL_RE = re.compile(
+        r"(authentication|/login|login[./?#]|log-in|sso[.-]|idp[-.]|menu\.|safelinks|@)", re.IGNORECASE
+    )
 
     @classmethod
     def _visible(cls, text: str) -> str:

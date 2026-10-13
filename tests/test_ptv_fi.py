@@ -4069,6 +4069,10 @@ def test_login_and_mail_urls_fall_back():
     assert spider.LOGIN_URL_RE.search("https://tyollisyyskokeilu@raahe.fi/")
     assert spider.LOGIN_URL_RE.search("https://eur06.safelinks.protection.outlook.com/?url=x")
     assert not spider.LOGIN_URL_RE.search("https://www.kirjasto.fi/")
+    assert not spider.LOGIN_URL_RE.search("https://biologinenmuseo.fi/")
+    assert not spider.LOGIN_URL_RE.search(
+        "https://www.hus.fi/potilaalle/sairaalat-ja-toimipisteet/neurologinen-kuntoutusosasto-2/"
+    )
     assert not spider.LOGIN_URL_RE.search(
         "https://www.hel.fi/fi/sosiaali-ja-terveyspalvelut/vammaispalvelut/sosiaalityo/"
     )
