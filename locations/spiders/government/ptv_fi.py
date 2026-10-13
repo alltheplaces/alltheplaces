@@ -581,6 +581,7 @@ class PtvFISpider(Spider):
         ("työllisyys", Categories.OFFICE_GOVERNMENT, None),  # Työllisyys (employment services)
         ("työvoima", Categories.OFFICE_GOVERNMENT, None),  # Työvoima (labour services)
         ("rakennusvalvonta", Categories.OFFICE_GOVERNMENT, None),  # Rakennusvalvonta (building control)
+        ("ympäristönsuojelu", Categories.OFFICE_GOVERNMENT, None),  # Ympäristönsuojelu (environmental protection)
         ("rakennusvalvonnan", Categories.OFFICE_GOVERNMENT, None),  # Rakennusvalvonnan (building control, genitive)
         ("maanmittauslaitos", Categories.OFFICE_GOVERNMENT, None),  # Maanmittauslaitos (land survey offices)
         ("metsäkeskus", Categories.OFFICE_GOVERNMENT, None),  # Metsäkeskus (forest centre)
@@ -2495,23 +2496,29 @@ class PtvFISpider(Spider):
             if isinstance(row, dict) and row.get("value")
         )
 
+    # Supported-housing phrases: "tuettu" modifying housing, or 24-hour
+    # residential wording, within a few words ("tuettua asumista",
+    # "ympärivuorokautisen palveluasumisen"). Distant co-occurrence
+    # across topics never counts (employment support beside housing stock).
+    SUPPORTED_HOUSING_RE = re.compile(
+        r"tuettu\w*\W+(?:\w+\W+){0,4}asumi|asumi\w*\W+(?:\w+\W+){0,4}tuettu"
+        r"|ymp\xe4rivuorokautinen\W+(?:\w+\W+){0,4}asumi|asumi\w*\W+(?:\w+\W+){0,4}ymp\xe4rivuorokautinen",
+        re.IGNORECASE,
+    )
+
     def _supported_housing(self, channel: dict) -> bool:
         # Supported-housing evidence beats diagnosis (user doctrine):
-        # "tuettu" housing or 24-hour residential wording anywhere in the
-        # descriptions, linked services or ontology ("Tervahovin asunnot").
-        # Bare "asumi" alone never counts (assessment offices), and
-        # supported employment without housing words never counts
-        # ("Ruukinpaja" youth workshop). Assessment/placement offices
-        # stay offices.
+        # each description, linked service and ontology value carries its
+        # own topic, so the phrase must hold inside one string
+        # ("Tervahovin asunnot"). Bare "asumi" alone never counts
+        # (assessment offices).
         texts = [self._description_text(channel)]
         texts.extend(self._service_names(channel))
         for term in channel.get("ontologyTerms") or []:
             for term_name in (term or {}).get("name") or []:
                 if term_name.get("language") == "fi" and term_name.get("value"):
                     texts.append(term_name["value"])
-        blob = " ".join(texts).lower()
-        housing = "asumi" in blob or "asunto" in blob
-        return ("tuettu" in blob and housing) or ("ymp\xe4rivuorokautinen" in blob and housing)
+        return any(self.SUPPORTED_HOUSING_RE.search(t or "") for t in texts)
 
     def _resolve_fallback_category(self, item: Feature, channel: dict):
         # Category for channels the name leaves generic: linked-service
@@ -2978,6 +2985,7 @@ class PtvFISpider(Spider):
         if (
             any(word in lowered_head for word in self.SERVICE_TAILS)
             and self._has_fixture(tail)
+            and "," not in head
             and not self._shared_service_word(head, tail)
             and (not self._is_unit_tail(tail) or self._is_venue_head(head))
             and (not self._is_unit_tail(head) or self._is_venue_head(tail))
@@ -4781,6 +4789,17 @@ class PtvFISpider(Spider):
             self._count("category/for_senior")
             item["extras"]["social_facility:for"] = "senior"
 
+    def _maybe_upgrade_housing(self, item: Feature, channel: dict, category) -> object:
+        # Supported housing beats diagnosis even when the name tier
+        # filed bare social ("Onnikoti Apila", "Tervahovin asunnot"
+        # via onto): upgrade to assisted living. Offices, clinics and
+        # schools never upgrade from feed wording alone.
+        if category == Categories.SOCIAL_FACILITY and self._supported_housing(channel):
+            self._count("category/supported_housing_upgrade")
+            apply_category(Categories.ASSISTED_LIVING, item)
+            return Categories.ASSISTED_LIVING
+        return category
+
     def parse_channel(self, channel: dict) -> Feature | None:
         if channel.get("serviceChannelType") != "ServiceLocation":
             self._count("dropped/type")
@@ -4847,6 +4866,7 @@ class PtvFISpider(Spider):
             apply_category(category, item)
             for key, value in (extra or {}).items():
                 item["extras"][key] = value
+        category = self._maybe_upgrade_housing(item, channel, category)
         # Category lands before naming so branch/operator demotion read it.
         self._apply_social_for(item, names, name)
         self._apply_naming(item, names, name, city_src)
