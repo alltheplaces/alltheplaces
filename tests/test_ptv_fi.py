@@ -2624,6 +2624,67 @@ def test_description_psych_urgent_split():
     assert spider._resolve_fallback_category(Feature(), ch) == Categories.CLINIC_URGENT
 
 
+def test_number_word_tokens_keep_first_house():
+    # Door/room words inside the number field ("15 ovi 28", "365 E as 5"):
+    # the first housenumber counts, the rest is the unit.
+    spider = make_spider()
+
+    def unit(item):
+        return (item.get("extras") or {}).get("addr:unit")
+
+    item = addressed(spider, "Örninkatu", "15 ovi 28")
+    assert item["housenumber"] == "15"
+    assert unit(item) == "ovi 28"
+    item = addressed(spider, "Kummelivuorentie", "2 ja 4")
+    assert item["housenumber"] == "2"
+    assert unit(item) == "4"
+    item = addressed(spider, "Muurlantie", "365 E as 5")
+    assert item["housenumber"] == "365"
+    assert unit(item) == "E as 5"
+    item = addressed(spider, "Sampsantie", "17a (Metsolantie 18, Peller")
+    assert item["housenumber"] == "17a"
+    item = addressed(spider, "Päiväkodintie", "4 a 7-8")
+    assert item["housenumber"] == "4"
+    assert unit(item) == "a 7-8"
+    # Word-led cores on numbered roads keep the road number.
+    item = addressed(spider, "Tikkamäentie 16", "talo 7, 7 krs.")
+    assert item["housenumber"] == "16"
+    assert unit(item) == "talo 7"
+    assert (item.get("extras") or {}).get("addr:floor") == "7"
+    # Roads repeating the number field parse once; route descriptions whole.
+    item = addressed(spider, "Kauppakuja 2 A 1", "2 A 1")
+    assert item["street"] == "Kauppakuja"
+    assert item["housenumber"] == "2"
+    assert unit(item) == "A 1"
+    item = addressed(spider, "Metsäautotie välillä Lapinlahdentie 1175 - Pitkämäentie 641", "")
+    assert item.get("housenumber") is None
+    assert item["street_address"].startswith("Metsäautotie välillä")
+
+
+def test_slash_tail_venue_operator_split():
+    # Venue-plus-operator tails keep the venue located and take only the
+    # association half as the operator; parishes stay religious.
+    spider = make_spider()
+    item = parsed(spider, channel("Iltapäivätoiminta / Tapanilan urheilukeskus, Tapanilan Erä ry"))
+    assert item["located_in"] == "Tapanilan urheilukeskus"
+    assert item["operator"] == "Tapanilan Erä ry"
+    item = parsed(spider, channel("Iltapäivätoiminta / Päiväkoti Gan Jeladim, Helsingin juutalainen seurakunta"))
+    assert item["located_in"] == "Päiväkoti Gan Jeladim"
+    assert item["operator"] == "Helsingin juutalainen seurakunta"
+    assert (item.get("extras") or {}).get("operator:type") == "religious"
+    # Pure operator tails still null the venue.
+    item = parsed(spider, channel("Imatra Bowling Center / Imatran keilahalli Oy"))
+    assert item["operator"] == "Imatran keilahalli Oy"
+    assert item.get("located_in") is None
+
+
+def test_wgs84_degrees_used_directly():
+    # Degrees filed as TM35FIN ("Sarkkirannan laavu") are already WGS84.
+    spider = make_spider()
+    lon, lat = spider._coords({"latitude": "64.916102", "longitude": "25.47273", "coordinateState": "EnteredByUser"})
+    assert (round(lon, 2), round(lat, 2)) == (25.47, 64.92)
+
+
 def test_animal_protection_desk_is_office():
     spider = make_spider()
     assert cat(spider, "Eläinsuojelu")[0] == Categories.OFFICE_GOVERNMENT

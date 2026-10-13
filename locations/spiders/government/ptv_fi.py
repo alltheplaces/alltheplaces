@@ -1190,6 +1190,13 @@ class PtvFISpider(Spider):
             easting = float(str(street.get("longitude")).strip())
         except (TypeError, ValueError, AttributeError):
             return None
+        if 59.0 <= northing <= 71.0 and 19.0 <= easting <= 32.0:
+            # Degrees filed as TM35FIN ("Sarkkirannan laavu" with
+            # latitude 64.916102, longitude 25.47273): already WGS84,
+            # never transform (TM35FIN eastings/northings never overlap
+            # these ranges).
+            self._count("coords/wgs84_degrees")
+            return easting, northing
         try:
             lon, lat = self._transformer.transform(easting, northing)
         except ValueError:
@@ -3772,6 +3779,10 @@ class PtvFISpider(Spider):
     UNITWORD_TAIL_RE = re.compile(
         r"([A-Za-z]\s+)?(asunto|\bas\b|rappu|huoneisto|liikehuoneisto|porras|ovi)\b\s*[\w.]*$", re.IGNORECASE
     )
+    # Door/room/apartment words inside the number field ("15 ovi 28",
+    # "365 E as 5", "18 A Hki 53", "2 ja 4"): the first housenumber
+    # counts, the rest is the unit.
+    NUMBER_WORD_TAIL_RE = re.compile(r"(ovi|\bas\b|asunto|rappu|tsto|\bhki\b|huoneisto|\bja\b)", re.IGNORECASE)
     # Place suffixes for numberless addresses (squares, islands...), street
     # suffixes for bare streets. PTV-local copies of the service-map lists.
     PLACE_SUFFIXES = (
@@ -3996,6 +4007,12 @@ class PtvFISpider(Spider):
             # Venue notes inside the number field ("/ Espoon Keskuspuisto").
             self._count("address/venue_tail_dropped")
         raw_head = number.partition("/")[0]
+        unclosed = re.sub(r"\s*\([^()]*$", "", raw_head).strip()
+        if unclosed != raw_head.strip():
+            # A second, unterminated address in the number field
+            # ("17a (Metsolantie 18, Peller..."): the first number counts.
+            self._count("address/paren_tail_dropped")
+            raw_head = unclosed
         head = re.sub(r"(?<!,)\s+((?:rak\.?|rakennus)\b)", r", \1", raw_head, flags=re.IGNORECASE).strip()
         if head != raw_head.strip():
             # Space-form building tails ("15 rak.1 B-rappu") resolve like
@@ -4018,6 +4035,19 @@ class PtvFISpider(Spider):
                 core = district.group(1)
                 parts = [core, *parts[1:]]
         if core:
+            worded = re.match(r"^(\d+[A-Za-z]?(?:\s*-\s*\d+[A-Za-z]?)?)\s+(.+)$", core.strip())
+            if (
+                worded
+                and re.search(r"\d", worded.group(2))
+                and "(" not in worded.group(2)
+                and not re.search(r"(krs|kerros|vån|våning)\b", worded.group(2), flags=re.IGNORECASE)
+                and (
+                    self.NUMBER_WORD_TAIL_RE.search(worded.group(2)) or re.match(r"^[A-Za-z]\s+\S*\d", worded.group(2))
+                )
+            ):
+                self._count("address/word_token")
+                core = worded.group(1)
+                parts = [core, re.sub(r"^\bja\b\s+", "", worded.group(2).strip()), *parts[1:]]
             premise = re.match(r"^(\d+[A-Za-z]?(?:\s*-\s*\d+[A-Za-z]?)?)\s+([A-Za-zåäö].*)$", core, flags=re.IGNORECASE)
             if premise and re.search(
                 r"(liiketila|toimitila|toimistotila|toimisto|liikehuoneisto|huoneisto|asunto|asunnot|asunnon|varasto|autotalli)",
@@ -4105,6 +4135,32 @@ class PtvFISpider(Spider):
             self._count("address/road_venue_prefix")
         return parts[best]
 
+    def _address_number_dup(self, road: str | None, number: str) -> str:
+        # The road already ends with the number-field content
+        # ("Kauppakuja 2 A 1" + "2 A 1"): never parse it twice.
+        if road and number and road.strip().endswith(number.strip()):
+            self._count("address/road_number_dup")
+            return ""
+        return number
+
+    def _address_route(self, item: Feature, road: str | None) -> str | None:
+        # Route descriptions ("Metsäautotie välillä Lapinlahdentie 1175
+        # - Pitkämäentie 641") are not postal addresses: keep whole.
+        if road and re.search(r"\bvälillä\b", road, flags=re.IGNORECASE):
+            self._count("address/route_desc")
+            item["street_address"] = self._strip_addr_base(road) or road
+            return None
+        return road
+
+    def _address_wordled(self, core: str, units: list, road: str | None) -> tuple[str, list]:
+        # Word-led cores on already-numbered roads ("talo 7" on
+        # "Tikkamäentie 16"): the road keeps its number, the core
+        # is a unit tail.
+        if core and not re.match(r"^\d", core) and re.search(r"\d", core) and re.search(r"\d[A-Za-z]?\s*$", road or ""):
+            self._count("address/wordled_core_unit")
+            return "", [core, *units]
+        return core, units
+
     def _strip_road_city(self, road: str | None, number: str, city_src: str | None) -> tuple:
         # City tails repeat the structured municipality, never the road:
         # the city leaked into the number field ("Tahtimarssi 3" with
@@ -4134,6 +4190,8 @@ class PtvFISpider(Spider):
             self._count("address/pobox_road")
             road, number = None, ""
         road, number = self._strip_road_city(road, number, city_src)
+        number = self._address_number_dup(road, number)
+        road = self._address_route(item, road)
         # Floors extract from the raw fields before any stripping: the
         # tails below drop the floor text ("7 A (3. kerros)"), while the
         # number survives as addr:floor. Reads the pre-road_base road so
@@ -4147,6 +4205,7 @@ class PtvFISpider(Spider):
             item["street_address"] = self._strip_addr_base(road) or road
         elif road:
             core, units = self._number_parts(number)
+            core, units = self._address_wordled(core, units, road)
             raw = self._strip_addr_base(f"{road} {core}".strip() if core else road)
             if not raw:
                 pass
@@ -4242,6 +4301,20 @@ class PtvFISpider(Spider):
             # ("Imatra Bowling Center / Imatran keilahalli Oy") name the
             # operator; the tail is never a located venue.
             located = None
+            if ", " in slash_tail:
+                venue, _, org = slash_tail.rpartition(", ")
+                if org.strip() and self._has_operator_word(org):
+                    # Venue-plus-operator tails ("Iltapäivätoiminta /
+                    # Tapanilan urheilukeskus, Tapanilan Erä ry"): only the
+                    # association half operates; the venue locates.
+                    self._count("operator/slash_tail_split")
+                    located = venue.strip() or None
+                    slash_tail = org.strip()
+                    if re.search(r"(seurakunta|församling)", slash_tail, flags=re.IGNORECASE):
+                        # Parish operators stay religious even when named by
+                        # the tail ("Päiväkoti Gan Jeladim, Helsingin
+                        # juutalainen seurakunta").
+                        item["extras"]["operator:type"] = "religious"
             item["operator"] = slash_tail
             self._count("operator/slash_tail")
             is_company = bool(re.search(r"\b(oy|ab)\.?$", slash_tail, flags=re.IGNORECASE))
