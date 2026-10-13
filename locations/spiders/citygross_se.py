@@ -31,7 +31,6 @@ class CitygrossSESpider(scrapy.Spider):
             item["street_address"] = store["address"]["streetAddress"]
             item["postcode"] = store["address"]["zipCode"].strip()
             item["city"] = store["address"]["city"]
-            item["country"] = "SE"
             item["phone"] = store.get("contactInformation", {}).get("phone", "").strip() or None
             item["email"] = store.get("contactInformation", {}).get("email", "").strip() or None
             item["website"] = "https://www.citygross.se" + store["url"]

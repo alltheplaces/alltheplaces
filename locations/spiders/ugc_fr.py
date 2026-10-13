@@ -33,7 +33,6 @@ class UgcFRSpider(Spider):
                         item["postcode"], item["city"] = m.groups()
                     else:
                         item["street_address"] = ", ".join(address_lines)
-            item["country"] = "FR"
 
             apply_category(Categories.CINEMA, item)
 

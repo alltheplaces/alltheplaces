@@ -36,7 +36,6 @@ class JoltUSSpider(JSONBlobSpider):
             item["city"] = match.group("city")
             postcode, separator, suffix = match.group("postcode").partition("-")
             item["postcode"] = postcode.zfill(5) + (separator + suffix if separator else "")
-            item["country"] = "US"
         else:
             item["addr_full"] = feature["address"]
             self.crawler.stats.inc_value(f"atp/{self.name}/address_not_parsed")

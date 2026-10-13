@@ -88,6 +88,15 @@ class MorrisonsGBSpider(Spider):
                 continue
             item["branch"] = item.pop("name", None)
 
+            # Forecourts have no store page on the website
+            if location["storeFormat"] == "pfs":
+                # Each forecourt is listed twice: 2xxx duplicates the 1xxx record
+                if re.fullmatch(r"2\d{3}", item["ref"]):
+                    continue
+                item.pop("website")
+                yield item
+                continue
+
             # Fetch store page-data.json for additional services
             page_data_url = "https://www.morrisons.com/storefinder/page-data/{}/{}/page-data.json".format(
                 item["ref"], self.create_slug(location["storeName"])
@@ -140,12 +149,6 @@ class MorrisonsGBSpider(Spider):
             cafe_poi = self.create_cafe_poi(item, cafe_dept)
             if cafe_poi:
                 yield cafe_poi
-
-        # Extract petrol stations from linkedLocations
-        linked_locations = context.get("linkedLocations", [])
-        for linked_loc in linked_locations:
-            if linked_loc.get("category") == "Gas Station" and linked_loc.get("storeFormat") == "pfs":
-                yield self.create_petrol_station_poi(item, linked_loc)
 
     def parse_opening_hours(self, opening_times_data):
         """Parse and validate opening hours from department/location data"""
@@ -211,32 +214,3 @@ class MorrisonsGBSpider(Spider):
     def create_cafe_poi(self, store_item, cafe_dept):
         """Create separate POI for café"""
         return self.create_department_poi(store_item, cafe_dept, "cafe", "Café", Categories.CAFE)
-
-    def create_petrol_station_poi(self, store_item, linked_loc):
-        """Create separate POI for petrol station"""
-        petrol = store_item.copy()
-
-        # Use linked location's own ID and coordinates
-        petrol["ref"] = str(linked_loc["name"])
-        petrol["lat"] = linked_loc["location"]["latitude"]
-        petrol["lon"] = linked_loc["location"]["longitude"]
-
-        # Clear store-specific fields
-        petrol.pop("shop", None)
-
-        # Clear store amenity extras
-        if "extras" in petrol:
-            petrol.pop("extras", None)
-
-        # Set petrol station-specific fields
-        apply_category(Categories.FUEL_STATION, petrol)
-        petrol["name"] = "Morrisons"
-        petrol["branch"] = linked_loc.get("storeName", "Petrol Station")
-        petrol.update(self.MORRISONS)
-
-        # Extract opening hours
-        opening_hours = self.parse_opening_hours(linked_loc.get("openingTimes"))
-        if opening_hours:
-            petrol["opening_hours"] = opening_hours
-
-        return petrol

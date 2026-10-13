@@ -113,7 +113,6 @@ class KopenhagenBRSpider(PlaywrightSpider):
             item = DictParser.parse(feature)
             item["branch"] = re.sub(r"^KO[KP]\s+", "", store["name"], flags=re.IGNORECASE).title()
             item["state"] = BRAZIL_STATES.get(store.get("state"), store.get("state"))
-            item["country"] = "BR"
 
             if district := clean(store.get("district")):
                 item["extras"]["addr:suburb"] = district.title()

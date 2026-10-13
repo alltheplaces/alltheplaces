@@ -1,45 +1,39 @@
-import re
-from typing import Any
+from typing import Iterable
 
-from scrapy.http import Response
-from scrapy.spiders import SitemapSpider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import CLOSED_FR, DAYS_FR, DELIMITERS_FR, OpeningHours
+from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class EstheticCenterFRSpider(SitemapSpider):
+class EstheticCenterFRSpider(JSONBlobSpider):
     name = "esthetic_center_fr"
     item_attributes = {"brand": "Esthetic Center", "brand_wikidata": "Q123321775"}
-    sitemap_urls = ["https://www.esthetic-center.com/institut-sitemap.xml"]
-    sitemap_rules = [("/trouver-institut/", "parse")]
+    start_urls = ["https://www.esthetic-center.com/wp-json/wp/v2/institut?per_page=100"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["ref"] = response.url.strip("/").split("/")[-1]
-        item["website"] = response.url
-        item["branch"] = response.xpath("//h1/span/text()").get("").removeprefix("Esthetic Center ")
-        item["addr_full"] = response.xpath("//div[contains(@id, 'text_block-238')]/span/text()").get()
-        item["phone"] = (
-            response.xpath("//a[contains(@href, 'tel:')]/@href").get("").replace("tel:", "").replace(" ", "")
-        )
+    def parse(self, response: Response) -> Iterable[Feature | JsonRequest]:
+        features = [{**feature.pop("acf"), **feature} for feature in response.json()]
+        yield from self.parse_feature_array(response, features)
+        if response.meta.get("page") is None:
+            for page in range(2, int(response.headers["X-WP-TotalPages"]) + 1):
+                yield JsonRequest(f"{self.start_urls[0]}&page={page}", meta={"page": page})
 
-        script_content = response.text
-        item["lat"] = re.search(r'var latitude = "(.*?)";', script_content).group(1)
-        item["lon"] = re.search(r'var longitude = "(.*?)";', script_content).group(1)
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item.pop("name")
+        item["ref"] = feature["slug"]
+        item["website"] = feature["link"]
+        item["branch"] = feature["titre"].removeprefix("Esthetic Center ")
+        item["addr_full"] = feature["adresse"]
 
-        oh = OpeningHours()
-        for row in response.xpath("//div[contains(@class, 'horaire-row')]"):
-            day = row.xpath(".//span[contains(@class, 'horaire-jour')]/text()").get()
-            time_str = row.xpath(".//span[contains(@class, 'horaire-heures')]/text()").get()
+        item["opening_hours"] = OpeningHours()
+        for day_hours in feature["horaires"].split("|"):
+            day, hours = day_hours.split("=")
+            if hours == "0":
+                item["opening_hours"].set_closed(day)
+            else:
+                item["opening_hours"].add_range(day, *hours.split(" - "))
 
-            if day and time_str:
-                oh.add_ranges_from_string(
-                    f"{day} {time_str.replace('h', ':')}", days=DAYS_FR, closed=CLOSED_FR, delimiters=DELIMITERS_FR
-                )
-
-        item["opening_hours"] = oh
         apply_category(Categories.SHOP_BEAUTY, item)
-
         yield item
