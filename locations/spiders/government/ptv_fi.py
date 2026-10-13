@@ -408,6 +408,7 @@ class PtvFISpider(Spider):
         ("koulutuskeskus", Categories.COLLEGE, None),  # Koulutuskeskus (training centres)
         ("koulutus", Categories.OFFICE_GOVERNMENT, None),  # Koulutus (education services)
         ("koulutukset", Categories.OFFICE_GOVERNMENT, None),  # Koulutukset (training courses)
+        ("uimakoulu", None, None),  # Uimakoulut (swimming lessons): no venue, keep generic
         ("koulumuseo", Categories.MUSEUM, None),  # Koulumuseo (school museums)
         ("koulutoimisto", Categories.OFFICE_GOVERNMENT, None),  # Koulutoimisto (education offices)
         ("koulu", Categories.SCHOOL, None),  # Koulu (schools)
@@ -455,6 +456,7 @@ class PtvFISpider(Spider):
         ("graffitti", Categories.TOURISM_ARTWORK, {"artwork_type": "graffiti"}),  # Graffitti (graffiti variant)
         ("taidekontti", Categories.TOURISM_ARTWORK, None),  # Taidekontti (art containers)
         ("avantouinti", Categories.LEISURE_SWIMMING_AREA, None),  # Avantouinti (winter swimming)
+        ("avanto", Categories.LEISURE_SWIMMING_AREA, None),  # Avanto (ice-swimming holes)
         ("talviuinti", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuinti (winter swimming)
         ("luistelu", Categories.LEISURE_ICE_RINK, None),  # Luistelu (skating)
         ("lastenkoti", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),  # Lastenkoti (children homes)
@@ -597,18 +599,20 @@ class PtvFISpider(Spider):
         ("palvelukeskus", Categories.SOCIAL_FACILITY, None),  # Palvelukeskus (service centres)
         ("palvelutalo", Categories.NURSING_HOME, None),  # Palvelutalo (sheltered housing)
         ("seniori", Categories.SOCIAL_FACILITY, None),  # Seniori (senior centres, outranks info desks below)
-        ("luustoinfo", Categories.CLINIC, None),  # Luustoinfo (bone-health info service)
+        ("luustoinfo", Categories.OFFICE_GOVERNMENT, None),  # Luustoinfo (bone-health info desks)
         ("kansalaisinfo", Categories.OFFICE_GOVERNMENT, None),  # Kansalaisinfo (citizen info desks)
         ("info", Categories.TOURISM_INFORMATION, {"information": "office"}),  # Info (city information desks)
         ("visitor centre", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
         ("visitor center", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
         ("sosiaali", Categories.SOCIAL_FACILITY, None),  # Sosiaali (social services)
+        ("turvakoti", Categories.SOCIAL_FACILITY, {"social_facility": "shelter"}),
         ("vanhainkoti", Categories.NURSING_HOME, None),  # Vanhainkoti (elderly homes)
         ("hoivakoti", Categories.NURSING_HOME, None),  # Hoivakoti (care homes)
         ("hoiva", Categories.SOCIAL_FACILITY, None),  # Hoiva (care homes)  # Kotihoito (home care)
         ("työpaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Työpaja (workshops)
         ("innopaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Innopaja (innovation workshops)
         ("taitopaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Taitopaja (craft workshops)
+        ("ikäihmisten päivätoiminta", Categories.SOCIAL_FACILITY, None),  # Day activities for elderly
         ("ikäihmis", Categories.NURSING_HOME, None),  # Ikäihmis (elderly-care homes)
         ("kehitysvamma", Categories.SOCIAL_FACILITY, None),  # Kehitysvamma (developmental-disability services)
         ("vammais", Categories.SOCIAL_FACILITY, None),  # Vammais (disability services)
@@ -725,6 +729,12 @@ class PtvFISpider(Spider):
             Categories.TOURISM_VIEWPOINT,
             {"man_made": "tower", "tower:type": "observation"},
         ),  # Lintutorni (bird towers)
+        ("lintulava", Categories.TOURISM_VIEWPOINT, None),  # Lintulava (birdwatching platforms)
+        (
+            "näköalatorni",
+            Categories.TOURISM_VIEWPOINT,
+            {"man_made": "tower", "tower:type": "observation"},
+        ),  # Näköalatorni (observation towers)
         ("sairaanhoito", Categories.CLINIC, None),  # Sairaanhoito (nursing care)
         ("korvaushoito", Categories.CLINIC, None),  # Korvaushoito (substitution treatment)
         ("vieroitus", Categories.CLINIC, None),  # Vieroitus (detox units)
@@ -1061,6 +1071,10 @@ class PtvFISpider(Spider):
             self._count("org/unflushed_on_close", sum(leftover.values()))
             self.logger.error("ptv_fi: unflushed org windows on close: %d orgs", len(leftover))
 
+    # Contact-details placeholders filed as names ("Kontaktuppgifter"
+    # with no Finnish name): never POI names, fall back to real ones.
+    NAME_PLACEHOLDERS = frozenset({"kontaktuppgifter"})
+
     def _names(self, channel: dict) -> dict[str, str]:
         # The official Name wins over AlternativeName ("Talaskankaan
         # retkeilyreitti", not "Talaskangas"); displayNameType breaks
@@ -1072,7 +1086,7 @@ class PtvFISpider(Spider):
                 continue
             lang = row.get("language")
             value = self._visible((row.get("value") or "").strip())
-            if lang and value:
+            if lang and value and value.casefold() not in self.NAME_PLACEHOLDERS:
                 by_lang.setdefault(lang, []).append((row.get("type") or "", value))
         display = [
             (row.get("type"), row.get("language"))
@@ -1264,6 +1278,7 @@ class PtvFISpider(Spider):
         "katos",
         "kota",
         "laavu",
+        "grillipaikka",
         "heittopaikka",
         "huoltorakennus",
         "ulkokuntoilupaikka",
@@ -1342,6 +1357,9 @@ class PtvFISpider(Spider):
         # trailing comma (data-entry cut-off) strips first so boilerplate
         # patterns match ("... järjestämispaikka,").
         primary = re.sub(r",\s*$", "", raw.replace("\u00a0", " ").strip()).strip()
+        # Stray spaces before commas are feed dirt ("Prästgårdsbackens
+        # förskola , Gesterby"): collapse so comma patterns match.
+        primary = re.sub(r"\s+,", ",", primary).strip()
         # PTV quality-rating artifacts ("Liina päivätoiminta 2*"): the
         # star drops, the number stays.
         primary = re.sub(r"\s*(\d+)\*\s*$", r" \1", primary).strip()
@@ -1409,17 +1427,22 @@ class PtvFISpider(Spider):
             # branch=* is chain retail, not schools: campus qualifiers
             # stay in the name, never split off (cf. Stadin ammattiopisto).
             return
-        if "," in signed and (
-            any(shown.lower().endswith(word) for word in self.BRANCH_HEADS)
-            or any(
-                signed.split(",")[0].strip().lower() == word
-                or signed.split(",")[0].strip().lower().startswith(word + " ")
-                for word in self.BRANCH_HEADS
+        if (
+            "," in signed
+            and (
+                any(shown.lower().endswith(word) for word in self.BRANCH_HEADS)
+                or any(
+                    signed.split(",")[0].strip().lower() == word
+                    or signed.split(",")[0].strip().lower().startswith(word + " ")
+                    for word in self.BRANCH_HEADS
+                )
             )
+            and not signed.split(",")[0].strip().endswith("-")
         ):
             # Imaging/lab units read "<service>, <place> <unit>"
             # ("Kuvantaminen, Pirkkala Pirkkalan röntgen"): the service
-            # names the POI, the remainder the branch.
+            # names the POI, the remainder the branch. A dash-fragment
+            # comma ("Korva-, nenä- ja ...") never separates.
             tail = signed.rpartition(",")[2].strip()
             first, _, rest = tail.partition(" ")
             if rest.strip() and city_src and first.casefold() == city_src.strip().casefold():
@@ -1455,6 +1478,18 @@ class PtvFISpider(Spider):
                 # A branch duplicating the venue is not a branch.
                 self._count("name/branch_dup_located")
                 del item["branch"]
+        branch = item.get("branch")
+        if branch and (shown or "").casefold() == branch.casefold():
+            # A branch repeating the name word for word ("Poliklinikka")
+            # is not a branch.
+            self._count("name/branch_dup_name")
+            del item["branch"]
+        branch = item.get("branch")
+        if branch and city_src and branch.casefold() == city_src.strip().casefold():
+            # A branch repeating the municipality ("Ivalo") is not a
+            # branch; the city field carries it.
+            self._count("name/branch_dup_city")
+            del item["branch"]
 
     # Company/association markers for operator detection. Dotted forms
     # (r.y./r.f.) consume the trailing dot without a boundary (Derby
@@ -1516,10 +1551,11 @@ class PtvFISpider(Spider):
 
     def _is_private_org(self, operator: str) -> bool:
         # Companies and associations delivering public services, whether
-        # marked (Oy, ry, Tmi, kassa, säätiö, ay/öb partnerships, RIKU,
-        # mid-string "ry") or known bare names (Red Cross, Setlementti,
-        # Attendo). Parishes (seurakunta) are public-law bodies, never
-        # private, unless carrying a company/association marker themselves
+        # marked (Oy, ry, Tmi, kassa, säätiö, seura/kerho societies, ay/öb
+        # partnerships, RIKU, mid-string "ry") or known bare names (Red
+        # Cross, Setlementti, Attendo). Parishes (seurakunta) are
+        # public-law bodies, never private, unless carrying a
+        # company/association marker themselves
         # ("X seurakunta ry" stays private).
         lowered = operator.lower()
         if "seurakunta" in lowered and not re.search(r"\b(oy|ab|ry|r\.y\.?|tmi|toiminimi)\b", lowered):
@@ -1528,6 +1564,8 @@ class PtvFISpider(Spider):
             self._has_operator_word(operator)
             or re.search(r"\bry\b", operator, flags=re.IGNORECASE) is not None
             or re.search(r"\briku\b", operator, flags=re.IGNORECASE) is not None
+            or re.search(r"\w*seura\b", lowered) is not None
+            or re.search(r"\w*kerho\b", lowered) is not None
             or lowered.rstrip(".").endswith("kassa")
             or re.search(r"(jat|jät)$", lowered) is not None
             or any(sub in lowered for sub in self.PRIVATE_SUBSTRINGS)
@@ -2139,21 +2177,28 @@ class PtvFISpider(Spider):
             "uimahalli",
             "nuorisotalo",
         ):
-            if last in (stem + "ssa", stem + "ssä", stem + "lla", stem + "llä"):
-                venue_token = tokens[-2]
-                head = " ".join(tokens[:-2])
-                if (
-                    venue_token
-                    and venue_token[-1].lower() == "n"
-                    and head
-                    and not re.search(
-                        r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|kirkko|sairaala|neuvola)", head.lower()
-                    )
-                    and all(not t.lower().endswith("n") for t in head.split())
-                ):
-                    self._count("name/inessive_host")
-                    return head, f"{venue_token} {stem}", name
-                break
+            compound = re.fullmatch(r"(\w*?)" + stem + r"(ssa|ssä|lla|llä)", last)
+            if compound is None:
+                continue
+            # Compound hosts ("pääkirjastossa") de-inflect like bare
+            # ones; heads mixing genitives with a service word split
+            # ("Lohjan Sydän digiopastusta"), pure genitive chains
+            # ("Helsingin kaupungin") stay whole.
+            host = compound.group(1) + stem
+            venue_token = tokens[-2]
+            head = " ".join(tokens[:-2])
+            if (
+                venue_token
+                and venue_token[-1].lower() == "n"
+                and head
+                and not re.search(
+                    r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|kirkko|sairaala|neuvola)", head.lower()
+                )
+                and any(not t.lower().endswith("n") for t in head.split())
+            ):
+                self._count("name/inessive_host")
+                return head, f"{venue_token} {host}", name
+            break
         return None
 
     def _split_name(self, name: str, city: str | None = None) -> tuple[str, str | None, str | None]:
@@ -2578,6 +2623,14 @@ class PtvFISpider(Spider):
     def _split_comma(self, name: str, city: str | None = None) -> tuple[str, str | None, str | None]:
         head, _, tail = name.rpartition(",")
         head, tail = head.strip(), tail.strip()
+        if head and tail and city:
+            city_lead = re.match(re.escape(city.strip()) + r"\s+[–—-]\s+(.*)$", tail, flags=re.IGNORECASE)
+            if city_lead and city_lead.group(1).strip():
+                # Comma tails leading with the municipality ("Avustajakurssi,
+                # Pori - vapaaehtoistoimintaan mukaan!"): peel the city, the
+                # remainder dispatches as the tail.
+                self._count("name/comma_city_lead")
+                tail = city_lead.group(1).strip()
         if head and tail:
             if (tail_hit := self._split_comma_tail(head, tail, name, city)) is not None:
                 return tail_hit
@@ -2669,6 +2722,13 @@ class PtvFISpider(Spider):
             # the full form stays the name (cf. way/1094085495).
             self._count("name/comma_branch_kept")
             return name, None, None
+        if tail.lower() in self.SERVICE_HEADS and re.search(r"(koulu|lukio|opisto)", lowered_head):
+            # School-hosted health services ("Merilahden peruskoulu,
+            # Jaluspolun toimipiste, kouluterveydenhuolto"): the service
+            # names the POI, the school hosts it (cf. service@school).
+            self._count("name/comma_school_health_service")
+            shown = tail[0].upper() + tail[1:] if tail else tail
+            return shown, head, name
         if self._room_tail(lowered_tail) and self._is_institution(head.lower()):
             # Facility rooms/fields at institutions ("Vaajakummun koulu,
             # luistelukenttä"): the room names the POI (cf. slash_room).
@@ -2795,6 +2855,12 @@ class PtvFISpider(Spider):
             return kept
         if (school_host := self._split_comma_school_host(head, tail, lowered_head, lowered_tail, name)) is not None:
             return school_host
+        if re.search(r"vapaa-aika ?talo$", lowered_tail) and self._has_fixture(head):
+            # Leisure-house venues ("Kuntosali, Kaukajärven vapaa-aika
+            # talo"): the service/room head names the POI, the house
+            # hosts it.
+            self._count("name/comma_leisure_house")
+            return head, self._clean_located(tail) or tail, name
         if (svc_unit := self._split_comma_service_head(head, tail, lowered_head, lowered_tail, name)) is not None:
             return svc_unit
         if (unit_venue := self._split_comma_unit_venue(head, tail, lowered_head, lowered_tail, name, city)) is not None:
@@ -3849,6 +3915,22 @@ class PtvFISpider(Spider):
             self._count("address/road_venue_prefix")
         return parts[best]
 
+    def _strip_road_city(self, road: str | None, number: str, city_src: str | None) -> tuple:
+        # City tails repeat the structured municipality, never the road:
+        # the city leaked into the number field ("Tahtimarssi 3" with
+        # number "Oulu") or rides the road line ("Pappilantie 11,
+        # pielavesi", "Mäntymäentie 55, 13700 hattula").
+        if number and city_src and not re.search(r"\d", number) and number.casefold() == city_src.strip().casefold():
+            self._count("address/city_in_number")
+            number = ""
+        if road and "," in road and not number and city_src:
+            head, _, tail = road.rpartition(",")
+            tail = re.sub(r"^\d{5}\s+", "", tail.strip()).strip()
+            if head.strip() and tail and tail.casefold() == city_src.strip().casefold():
+                self._count("address/road_city_tail")
+                road = head.strip()
+        return road, number
+
     def _apply_address(self, item: Feature, street: dict, postcode: str | None, city_src: str | None) -> None:
         road = self._lang_value(street.get("street") or [], "fi", "sv", "en")
         number = (street.get("streetNumber") or "").strip()
@@ -3861,6 +3943,7 @@ class PtvFISpider(Spider):
             # the channel keeps its city, postcode and coords.
             self._count("address/pobox_road")
             road, number = None, ""
+        road, number = self._strip_road_city(road, number, city_src)
         # Floors extract from the raw fields before any stripping: the
         # tails below drop the floor text ("7 A (3. kerros)"), while the
         # number survives as addr:floor. Reads the pre-road_base road so
@@ -3920,6 +4003,30 @@ class PtvFISpider(Spider):
         item["city"] = city_src.strip().title() if city_src and city_src.strip() else None
         item["country"] = "FI"
 
+    def _clean_located_value(self, located: str | None, city_src: str | None) -> str | None:
+        # Located leftovers that name no venue: registry boilerplate from
+        # slash tails, bare area-type words and municipality duplicates.
+        if not located:
+            return None
+        if located[0].islower():
+            located = located[0].upper() + located[1:]
+        if re.search(r"-palvelun järjestämispaikka", located):
+            # Registry boilerplate leaked into a slash tail
+            # ("Kyläryhmä -palvelun järjestämispaikka, Virolahti 2"):
+            # the sub-unit head is the venue, the rest is record text.
+            self._count("name/slash_tail_registry")
+            located = re.sub(r"\s*-palvelun järjestämispaikka.*$", "", located).strip(" ,") or None
+        if located and located.strip().casefold() in ("ulkoilusaari", "ulkoilusaaret"):
+            # Bare outdoor-island type words locate nothing: the head
+            # ("Bylandet", "Iso Vasikkasaari") already names the island.
+            self._count("name/bare_island_located")
+            located = None
+        if city_src and located and located.casefold() == city_src.strip().casefold():
+            # A venue duplicating the municipality is not a venue.
+            self._count("name/located_is_city")
+            located = None
+        return located
+
     def _apply_naming(self, item: Feature, names: dict[str, str], name: str, city_src: str | None) -> None:
         # Split the Finnish name (venue/host extraction); bureau tails are
         # record metadata stripped before both splitting and categories
@@ -3974,13 +4081,14 @@ class PtvFISpider(Spider):
         if shown and shown[0].islower():
             # Feed names starting lowercase ("vaatelahjoitus...").
             shown = shown[0].upper() + shown[1:]
-        if located:
-            if located[0].islower():
-                located = located[0].upper() + located[1:]
-            if city_src and located.casefold() == city_src.strip().casefold():
-                # A venue duplicating the municipality is not a venue.
-                self._count("name/located_is_city")
-                located = None
+        if city_src:
+            dash_city = re.search(r"\s+[–—-]\s+([A-ZÅÄÖ][a-zåäö-]+)\s*$", shown)
+            if dash_city and dash_city.group(1).casefold() == city_src.strip().casefold():
+                # Dash city tails repeat the municipality ("... - Hollola").
+                self._count("name/dash_city_dropped")
+                shown = shown[: dash_city.start()].strip()
+                official = official or signed
+        located = self._clean_located_value(located, city_src)
         item["name"] = shown
         if located:
             item["located_in"] = located
@@ -4006,7 +4114,7 @@ class PtvFISpider(Spider):
                 cleaned_tr = re.sub(r",?\s*(?:[PN]\s*)?\d+\s*°.*$", "", cleaned_tr).strip()
                 cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, item.get("located_in"))
                 if "/" in cleaned_tr:
-                    split_tr = self._split_bilingual(cleaned_tr, shown, signed)
+                    split_tr = self._split_bilingual(cleaned_tr, shown, signed, item.get("located_in"))
                     if split_tr is None:
                         continue
                     cleaned_tr = split_tr
@@ -4032,10 +4140,23 @@ class PtvFISpider(Spider):
                     # Leading duplicate ("Aninkaisten koulu (...) Gym A"):
                     # the venue repeats the split-off Finnish name.
                     cleaned_tr = rest.strip(" ,–—-/")
+        if located and "," in cleaned_tr and "," in (signed or ""):
+            # Trailing comma tails duplicating the located venue
+            # ("Daghemskök, Päiväkoti Jollas", "Skolrestaurang, Pasilan
+            # peruskoulu"): positional match against the signed form, so
+            # translated host copies ("Daycare Jollas") drop too.
+            fi_segs = [s.strip() for s in (signed or "").split(",")]
+            tr_segs = [s.strip() for s in cleaned_tr.split(",")]
+            if len(fi_segs) == len(tr_segs) and len(tr_segs) >= 2:
+                kept = [t for t, f in zip(tr_segs, fi_segs) if f != located]
+                if kept and len(kept) < len(tr_segs):
+                    cleaned_tr = ", ".join(kept)
         return re.sub(r"\s{2,}", " ", cleaned_tr).strip()
 
     @staticmethod
-    def _split_bilingual(cleaned_tr: str, shown: str | None, signed: str | None) -> str | None:
+    def _split_bilingual(
+        cleaned_tr: str, shown: str | None, signed: str | None, located: str | None = None
+    ) -> str | None:
         # Bilingual feed translations ("Sodanajan naisen
         # muistomerkki / Memorial to Women in Times of War"):
         # segments repeating the applied/signed Finnish name
@@ -4045,15 +4166,27 @@ class PtvFISpider(Spider):
         # full copies skip. Slashes split either spaced or bare, but a
         # segment only drops on an exact or truncated-fi match, so
         # single names with slashes ("Geo/on", "24/7") stay whole.
+        # Slash twins follow the split positionally: segments whose
+        # signed-form counterpart is the located venue (or the
+        # official-only twin) drop, so the applied name's rendering
+        # stays ("Sandkajen", "Volleybollplan").
         parts = [s.strip() for s in re.split(r"\s*/\s*", cleaned_tr)]
         parts = [s for s in parts if s]
+        fi_parts = [s.strip() for s in re.split(r"\s*/\s*", signed or "") if s.strip()]
+        positional = len(fi_parts) == len(parts) and len(parts) >= 2 and bool(shown) and " / " not in (shown or "")
         rest = []
-        for s in parts:
+        for i, s in enumerate(parts):
             if s in (shown, signed):
                 continue
             if s.endswith("...") and len(s) > 6:
                 base = s[:-3].strip().casefold()
                 if any((form or "").strip().casefold().startswith(base) for form in (shown, signed)):
+                    continue
+            if positional:
+                counterpart = fi_parts[i]
+                if located and (counterpart == located or counterpart.startswith(located + ",")):
+                    continue
+                if not located and counterpart != shown and counterpart in (signed or ""):
                     continue
             rest.append(s)
         if not rest:

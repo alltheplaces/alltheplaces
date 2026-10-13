@@ -3802,11 +3802,11 @@ def test_customs_rule_skips_place_names():
 
 def test_service_info_compounds_keep_service():
     # "Seniori-info" and "Kansalaisinfo" filed tourist info; senior and
-    # citizen desks file as themselves. Bone-health info is a clinic.
+    # citizen desks file as themselves. Bone-health info is an association desk, not a clinic.
     spider = make_spider()
     assert cat(spider, "Seniori-info")[0] == Categories.SOCIAL_FACILITY
     assert cat(spider, "Yhteispalvelu Vaasa - Kansalaisinfo")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Luustoinfo osteoporoosia sairastaville / Lahti")[0] == Categories.CLINIC
+    assert cat(spider, "Luustoinfo osteoporoosia sairastaville / Lahti")[0] == Categories.OFFICE_GOVERNMENT
 
 
 def test_square_guard_keeps_venues():
@@ -3836,3 +3836,255 @@ def test_island_titled_artworks_are_art():
     ]
     item = parsed(spider, ch)
     assert item["extras"].get("tourism") == "artwork"
+
+
+def test_stray_space_before_comma_collapses():
+    # "Prästgårdsbackens förskola , Gesterby" carries feed dirt; the
+    # comma still parses the same (village kept, kindergarten kept).
+    spider = make_spider()
+    assert spider._clean_name("Prästgårdsbackens förskola , Gesterby") == ("Prästgårdsbackens förskola, Gesterby")
+    assert cat(spider, "Prästgårdsbackens förskola, Gesterby")[0] == Categories.KINDERGARTEN
+
+
+def test_bone_info_is_an_association_desk():
+    # "Luustoinfo osteoporoosia sairastaville / Lahti" is a patient-association
+    # info desk (Suomen Luustoliitto ry), not a clinic; the operator tier
+    # demotes association desks to office=association.
+    spider = make_spider()
+    assert cat(spider, "Luustoinfo osteoporoosia sairastaville / Lahti")[0] == Categories.OFFICE_GOVERNMENT
+    ch = channel("Luustoinfo osteoporoosia sairastaville / Lahti")
+    item = parsed(spider, ch, org_name="Suomen Luustoliitto ry")
+    assert item["extras"].get("office") == "association"
+
+
+def test_shelters_carry_shelter_subtype():
+    # "Mikkelin turvakoti" is a domestic-violence shelter; desks keep
+    # filing as offices.
+    spider = make_spider()
+    assert cat(spider, "Mikkelin turvakoti") == (
+        Categories.SOCIAL_FACILITY,
+        {"social_facility": "shelter"},
+    )
+    assert cat(spider, "Turvakoti palvelupiste")[0] == Categories.OFFICE_GOVERNMENT
+
+
+def test_branch_duplicating_name_drops():
+    # "Korva-, nenä- ja kurkkutautien poliklinikka" branched to itself;
+    # the name keeps the full form, branch goes null.
+    spider = make_spider()
+    item = parsed(spider, channel("Korva-, nenä- ja kurkkutautien poliklinikka"))
+    assert item.get("branch") is None
+    assert item["name"] == "Korva-, nenä- ja kurkkutautien poliklinikka"
+
+
+def test_elderly_day_activity_is_social():
+    # "Ikäihmisten päivätoiminta, Kihniö" is day activity, not residential
+    # nursing, even with an elderly clientele.
+    spider = make_spider()
+    assert cat(spider, "Ikäihmisten päivätoiminta, Kihniö")[0] == Categories.SOCIAL_FACILITY
+
+
+def test_school_hosted_health_names_service():
+    # "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto":
+    # the service names the POI per service@school, the school hosts it.
+    spider = make_spider()
+    assert named(spider, "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto") == (
+        "Kouluterveydenhuolto",
+        "Merilahden peruskoulu, Jaluspolun toimipiste",
+        "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto",
+    )
+    assert cat(spider, "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto")[0] == Categories.CLINIC
+
+
+def test_road_city_tail_parses():
+    # "Pappilantie 11, pielavesi" with an empty number field: the city tail
+    # repeats the structured city, the head parses as street + number.
+    spider = make_spider()
+    item = addressed(spider, "Pappilantie 11, pielavesi", "", office="PIELAVESI")
+    assert item["street"] == "Pappilantie"
+    assert item["housenumber"] == "11"
+
+
+def test_city_in_number_field_drops():
+    # "Tahtimarssi 3" with number "Oulu": the city leaked into the number
+    # field, the road parses alone.
+    spider = make_spider()
+    item = addressed(spider, "Tahtimarssi 3", "Oulu", office="OULU")
+    assert item["street"] == "Tahtimarssi"
+    assert item["housenumber"] == "3"
+
+
+def test_swim_lessons_stay_generic():
+    # "Uimakoulut" and rescue candidates name lessons, not school buildings;
+    # "Hakolan hiekkamonttu" with beach ontology files as a beach.
+    spider = make_spider()
+    assert cat(spider, "Uimakoulut")[0] is None
+    ch = channel("Hakolan hiekkamonttu")
+    ch["services"] = [{"service": {"name": "Vesiliikunta"}}]
+    ch["ontologyTerms"] = [
+        {"name": [{"language": "fi", "value": v}]} for v in ("uimakoulut", "uimarannat", "uimavesi", "uinti")
+    ]
+    assert parsed(spider, ch)["extras"].get("natural") == "beach"
+
+
+def test_observation_towers_are_viewpoints():
+    # "Vaarniemen näköalatorni" filed allotments via cultivation ontology;
+    # the name keyword types it like its lintutorni siblings.
+    spider = make_spider()
+    assert cat(spider, "Vaarniemen näköalatorni") == (
+        Categories.TOURISM_VIEWPOINT,
+        {"man_made": "tower", "tower:type": "observation"},
+    )
+
+
+def test_ice_holes_are_swimming_areas():
+    # "Haaruksen Jämä-majan avanto" is an ice-swimming hole; pharmacy
+    # compounds containing "avanto" keep filing as pharmacies.
+    spider = make_spider()
+    assert cat(spider, "Haaruksen Jämä-majan avanto")[0] == Categories.LEISURE_SWIMMING_AREA
+    assert cat(spider, "Kirjavantolpan apteekki")[0] == Categories.PHARMACY
+
+
+def test_society_operators_are_private():
+    # "Hollolan Nuorisoseura" and kerho societies are associations, never
+    # public; parishes stay public-law bodies.
+    spider = make_spider()
+    assert spider._is_private_org("Hollolan Nuorisoseura") is True
+    assert spider._is_private_org("Joensuun bridgekerho ry") is True
+    assert spider._is_private_org("Tampereen seurakunnat") is False
+    ch = channel("Kansantanssin aikuisten ryhmä Vilhot ja Vienot - Hollola")
+    item = parsed(spider, ch, org_name="Hollolan Nuorisoseura")
+    assert item["extras"].get("operator:type") == "private"
+
+
+def test_inessive_compound_hosts_split():
+    # "Lohjan Sydän digiopastusta Lohjan pääkirjastossa": compound hosts
+    # de-inflect and genitive-mixed heads split; plain rows keep working.
+    spider = make_spider()
+    assert named(spider, "Lohjan Sydän digiopastusta Lohjan pääkirjastossa") == (
+        "Lohjan Sydän digiopastusta",
+        "Lohjan pääkirjasto",
+        "Lohjan Sydän digiopastusta Lohjan pääkirjastossa",
+    )
+    assert named(spider, "Martat neuvoo Haminan kirjastossa") == (
+        "Martat neuvoo",
+        "Haminan kirjasto",
+        "Martat neuvoo Haminan kirjastossa",
+    )
+
+
+def test_leisure_house_hosts_locate():
+    # "Naisten kuntosaliryhmä, Kaukajärven vapaa-aika talo": the service
+    # head names the POI, the leisure house hosts it.
+    spider = make_spider()
+    assert named(spider, "Naisten kuntosaliryhmä, Kaukajärven vapaa-aika talo") == (
+        "Naisten kuntosaliryhmä",
+        "Kaukajärven vapaa-aika talo",
+        "Naisten kuntosaliryhmä, Kaukajärven vapaa-aika talo",
+    )
+
+
+def test_slash_registry_tails_clean():
+    # "Ite ja yhessä - toiminta/Kyläryhmä -palvelun järjestämispaikka,
+    # Virolahti 2": registry text drops from located_in, the sub-unit stays.
+    spider = make_spider()
+    item = parsed(
+        spider,
+        channel("Ite ja yhessä - toiminta/Kyläryhmä -palvelun järjestämispaikka, Virolahti 2"),
+    )
+    assert item["located_in"] == "Kyläryhmä"
+
+
+def test_dash_city_tail_drops():
+    # "Kansantanssin aikuisten ryhmä Vilhot ja Vienot - Hollola" repeats
+    # the municipality after a dash; the tail drops, official keeps full.
+    spider = make_spider()
+    ch = channel(
+        "Kansantanssin aikuisten ryhmä Vilhot ja Vienot - Hollola -palvelun järjestämispaikka",
+        road="Katu",
+        street_number="1",
+        office="HOLLOLA",
+    )
+    item = parsed(spider, ch)
+    assert item["name"] == "Kansantanssin aikuisten ryhmä Vilhot ja Vienot"
+
+
+def test_comma_city_lead_peels():
+    # "Avustajakurssi, Pori - vapaaehtoistoimintaan mukaan!": the city lead
+    # peels off the comma tail, the tagline drops as a descriptor.
+    spider = make_spider()
+    assert named(spider, "Avustajakurssi, Pori - vapaaehtoistoimintaan mukaan!", city="Pori") == (
+        "Avustajakurssi",
+        None,
+        "Avustajakurssi, Pori - vapaaehtoistoimintaan mukaan!",
+    )
+
+
+def test_contact_placeholder_names_fall_back():
+    # A channel named only "Kontaktuppgifter" (contact details) falls back
+    # to its real alternative name instead of emitting the placeholder.
+    spider = make_spider()
+    names = spider._names(
+        {
+            "serviceChannelNames": [
+                {"language": "sv", "value": "Kontaktuppgifter", "type": "Name"},
+                {"language": "sv", "value": "AMS", "type": "AlternativeName"},
+            ]
+        }
+    )
+    assert names.get("sv") == "AMS"
+
+
+def test_bird_platforms_are_viewpoints():
+    # "Viikki-Vanhankaupunginlahti, Lammassaaren esteetön lintulava" filed
+    # park; a bird platform is a viewpoint like its lintutorni siblings.
+    spider = make_spider()
+    assert cat(spider, "Viikki-Vanhankaupunginlahti, Lammassaaren esteetön lintulava")[0] == (
+        Categories.TOURISM_VIEWPOINT
+    )
+
+
+def test_grill_tails_name_the_poi():
+    # "Stoan aukio / Grillipaikka" kept the square as the name; the grill
+    # facility names the POI wherever it sits, like beach and island hosts.
+    spider = make_spider()
+    assert named(spider, "Stoan aukio / Grillipaikka") == (
+        "Grillipaikka",
+        "Stoan aukio",
+        "Stoan aukio / Grillipaikka",
+    )
+    assert named(spider, "Tullisaari / Grillipaikka") == (
+        "Grillipaikka",
+        "Tullisaari",
+        "Tullisaari / Grillipaikka",
+    )
+
+
+def test_located_duplicates_drop_from_translations():
+    # Trailing located_in copies ride along in feed translations
+    # ("Daghemskök, Päiväkoti Jollas"); the applied name's rendering stays.
+    spider = make_spider()
+    ch = channel(
+        "Päiväkotikeittiö, Päiväkoti Jollas",
+        sv="Daghemskök, Päiväkoti Jollas",
+        en="Daycare centre kitchen, Daycare Jollas",
+    )
+    item = parsed(spider, ch)
+    assert item["extras"].get("name:sv") == "Daghemskök"
+    assert item["extras"].get("name:en") == "Daycare centre kitchen"
+
+
+def test_slash_twins_follow_the_split():
+    # "Oskarinpuisto / Lentopallokenttä" names the field; the Swedish twin
+    # of the park side drops, the field's rendering stays. Venue-only
+    # remainders ("Utfärdsholme" for located Ulkoilusaari) drop entirely.
+    spider = make_spider()
+    item = parsed(spider, channel("Oskarinpuisto / Lentopallokenttä", sv="Oskariparken / Volleybollplan"))
+    assert item["extras"].get("name:sv") == "Volleybollplan"
+    item = parsed(
+        spider,
+        channel("Bylandet / Ulkoilusaari", sv="Bylandet / Utfärdsholme", en="Bylandet / Recreational island"),
+    )
+    assert item["extras"].get("name:sv") is None
+    assert item["extras"].get("name:en") is None
+    assert item.get("located_in") is None
