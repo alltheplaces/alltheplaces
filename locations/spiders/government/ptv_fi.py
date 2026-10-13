@@ -3388,7 +3388,10 @@ class PtvFISpider(Spider):
     # Group-noun compounds where the group IS the institution: the
     # facility prefix files via the table, never generic ("Päiväkotiryhmä
     # Vekkula" is the daycare; "Iltapäiväkerho" is the after-school club).
+    # Pupil words (koululainen), education words (koulutus) and street
+    # words (koulutie) never count as the school.
     GROUP_FACILITY_PREFIX = ("päiväkoti", "esiopetus", "koulu", "iltapäivä")
+    GROUP_FACILITY_RE = re.compile(r"(päiväkoti|esiopetus|koulu|iltapäivä)(?!tie|katu|kuja|polku|väylä|lai|tus|ikä)")
     # Desk nouns elsewhere in a group name file the desk ("Vauvaperheryhmä
     # Untuva toimipiste" is the office); bare group numbers leave the venue
     # filing alone ("Kuntosali, ryhmä 1" stays the gym).
@@ -3423,7 +3426,7 @@ class PtvFISpider(Spider):
                 # Bare group numbers ("Kuntosali, ryhmä 1") leave the venue
                 # filing alone: not activities.
                 continue
-            if any(stem in prefix for stem in self.GROUP_FACILITY_PREFIX):
+            if self.GROUP_FACILITY_RE.search(prefix):
                 # The group is the institution: the table files it.
                 continue
             return True
@@ -3472,17 +3475,15 @@ class PtvFISpider(Spider):
                 # "Kuntosali, ryhmä 1" stays the gym).
                 return None
             if any(stem in remainder for stem in self.GROUP_FACILITY_PREFIX):
-                # Institution nouns outside the group token file the
-                # institution ("Kämmenniemen päiväkoti Terälahden
-                # lisäryhmä" is the daycare). Host tails after a comma
-                # never type ("...-ryhmä, Veittijärven koulu -palvelun
-                # järjestämispaikka" stays generic).
-                head_remainder = " ".join(
-                    token.strip(",.;:")
-                    for token in lowered.split(",")[0].split()
-                    if not re.search(r"[\w-]+(" + "|".join(self.GROUP_NOUNS) + r")$", token.strip(",.;:"))
-                )
-                if any(stem in head_remainder for stem in self.GROUP_FACILITY_PREFIX):
+                # Institution nouns file the institution only when they head
+                # it: before the group token ("Kämmenniemen päiväkoti
+                # Terälahden lisäryhmä" is the daycare). Host schools after
+                # the token ("...-ryhmä Lamminrahkan koulu -palvelun
+                # järjestämispaikka", "...-ryhmä, Veittijärven koulu ...")
+                # and paren addresses ("(Moision koulutie 2)") never type.
+                first_group = re.search(r"[\w-]+(" + "|".join(self.GROUP_NOUNS) + r")", lowered)
+                before = lowered[: first_group.start()] if first_group else ""
+                if self.GROUP_FACILITY_RE.search(before):
                     return None
             if not re.search(
                 r"(psykiatri|terapia|terveys|hoito|huolto|klinikka|sairaala|lääkäri|neuvola|mieli|päihde|vamma|hoiva|kuntout|rokot|hammas)",
