@@ -30,7 +30,7 @@ class HornbachSpider(PlaywrightSpider):
         ("https://www.hornbach.se", "sv_SE", "1442"),
         ("https://www.hornbach.sk", "sk_SK", "1123"),
     ]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"CONCURRENT_REQUESTS": 1}
     requires_proxy = True  # Helps to skip anti bot protection
 
     async def start(self) -> AsyncIterator[Request]:
