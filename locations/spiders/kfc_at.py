@@ -1,33 +1,21 @@
-from typing import AsyncIterator
+from scrapy.spiders import SitemapSpider
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
-
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class KfcATSpider(Spider):
+class KfcATSpider(SitemapSpider, StructuredDataSpider):
     name = "kfc_at"
     item_attributes = KFC_SHARED_ATTRIBUTES
-    allowed_domains = ["www.kfc.co.at"]
-    start_urls = ["https://www.kfc.co.at/api/collections/shops/entries"]
+    sitemap_urls = ["https://kfc.co.at/sitemap.xml"]
+    sitemap_rules = [(r"/restaurants/", "parse")]
+    wanted_types = ["Restaurant"]
+    search_for_image = False
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url)
-
-    def parse(self, response):
-        for location in response.json()["data"]:
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("street")
-            item["website"] = location.get("permalink")
-            item["opening_hours"] = OpeningHours()
-            for day_hours in location.get("opening_hours", []):
-                if day_hours["closed"]:
-                    continue
-                item["opening_hours"].add_range(
-                    day_hours["day_dayname"]["label"], day_hours["start"], day_hours["stop"]
-                )
-            yield item
+    def post_process_item(self, item: Feature, response, ld_data, **kwargs):
+        item["email"] = None
+        item["branch"] = item.pop("name").removeprefix("KFC ")
+        apply_category(Categories.FAST_FOOD, item)
+        yield item

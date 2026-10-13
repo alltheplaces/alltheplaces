@@ -47,7 +47,6 @@ class ApinaJPSpider(CrawlSpider):
         item["ref"] = ref_match.group(1)
         item["name"] = name.strip()
         item["website"] = response.url
-        item["country"] = "JP"
 
         if phone_html := details.get("電話番号"):
             item["phone"] = self._parse_phone(phone_html)

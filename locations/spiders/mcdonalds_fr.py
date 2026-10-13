@@ -33,4 +33,6 @@ class McdonaldsFRSpider(WoosmapSpider):
             apply_category(Categories.CAFE, mccafe)
             yield mccafe
 
+        apply_category(Categories.FAST_FOOD, item)
+
         yield item

@@ -60,7 +60,6 @@ class PeaceLoveAndLittleDonutsUSSpider(Spider):
         item["state"] = state
         if postcodes := re.findall(r"\b\d{5}(?:-\d{4})?\b", address or ""):
             item["postcode"] = postcodes[-1]
-        item["country"] = "US"
         item["phone"] = response.xpath('//div[normalize-space()="Phone"]/following-sibling::a[1]/@href').get()
         item["website"] = response.url
         item["facebook"] = response.xpath('//a[contains(@class, "follow-us-button")]/@href').get()

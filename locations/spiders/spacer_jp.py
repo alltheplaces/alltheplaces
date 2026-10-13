@@ -23,7 +23,6 @@ class SpacerJPSpider(JSONBlobSpider):
             return
 
         item["branch"] = item.pop("name", None)
-        item["country"] = "JP"
         apply_category(Categories.LEFT_LUGGAGE, item)
 
         oh = OpeningHours()

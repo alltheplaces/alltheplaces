@@ -5,6 +5,8 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
+TA = {"brand": "TA", "brand_wikidata": "Q7835892"}
+
 
 class TravelcentersOfAmericaUSSpider(SitemapSpider, StructuredDataSpider):
     name = "travelcenters_of_america_us"
@@ -13,8 +15,8 @@ class TravelcentersOfAmericaUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"\/location\/\w{2}\/[\w\-]+\/$", "parse_sd")]
     brands = {
         "/petro-": {"brand": "Petro", "brand_wikidata": "Q64051305"},
-        "/ta-express-": {"brand": "TA Express", "brand_wikidata": "Q7835892"},
-        "/ta-": {"brand": "TA", "brand_wikidata": "Q7835892"},
+        "/ta-express-": TA,
+        "/ta-": TA,
     }
 
     def post_process_item(self, item, response, ld_data):

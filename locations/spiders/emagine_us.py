@@ -25,7 +25,6 @@ class EmagineUSSpider(Spider):
             item["city"] = theatre["city"]
             item["state"] = theatre["state"]
             item["postcode"] = theatre["postal_code"]
-            item["country"] = "US"
             item["lat"] = theatre["latlng"]["latitude"]
             item["lon"] = theatre["latlng"]["longitude"]
             item["website"] = theatre["permalink"]

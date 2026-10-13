@@ -158,7 +158,6 @@ class RivianUSSpider(Spider):
             item["branch"] = properties.get("name")
             item["lat"] = latitude
             item["lon"] = longitude
-            item["country"] = "US"
             self.parse_address(item, properties["address"])
 
             item["extras"]["brand"] = properties["network"]

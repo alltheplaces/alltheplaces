@@ -1,59 +1,49 @@
-import json
+from typing import Any, Iterable
 
-import scrapy
+import chompjs
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
+from locations.react_server_components import parse_rsc
 
 VODAFONE_SHARED_ATTRIBUTES = {"brand": "Vodafone", "brand_wikidata": "Q122141"}
 
 
-class VodafoneDESpider(scrapy.Spider):
+class VodafoneDESpider(SitemapSpider):
     name = "vodafone_de"
     item_attributes = VODAFONE_SHARED_ATTRIBUTES
-    allowed_domains = ["vodafone.de"]
-    start_urls = ["https://shops.vodafone.de"]
+    allowed_domains = ["shops.vodafone.de"]
+    sitemap_urls = ["https://shops.vodafone.de/sitemap.xml"]
+    sitemap_rules = [(r"/de/[^/]+/[^/]+/\d+$", "parse")]
 
-    def parse(self, response):
-        urls = response.xpath('//a[@class="Directory-listLink"]/@href')
-        for url in urls:
-            yield scrapy.Request(url=response.urljoin(url.get()), callback=self.parse_store)
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        objs = [chompjs.parse_js_object(s) for s in scripts]
+        rsc = "".join(s for _, s in objs).encode()
+        data = dict(parse_rsc(rsc))
+        if not (shop := DictParser.get_nested_key(data, "shop")):
+            return
+        shop = {k: v for k, v in shop.items() if v != "$undefined"}
 
-    def parse_store(self, response):
-        oh = OpeningHours()
-        days = response.xpath('//div[@id="c-hours-collapse"]/div/@data-days').get()
-        if days:
-            days = json.loads(days)
-            for day in days:
-                if day.get("intervals"):
-                    start = str(day.get("intervals")[0].get("start")).zfill(4)
-                    end = str(day.get("intervals")[0].get("end")).zfill(4)
-                    oh.add_range(
-                        day=day.get("day"),
-                        open_time=f"{start[:2]}:{start[2:]}",
-                        close_time=f"{end[:2]}:{end[2:]}",
-                    )
+        item = DictParser.parse(shop)
+        item["ref"] = shop["rmsId"]
+        item["street_address"] = item.pop("addr_full")
+        item["city"] = shop.get("city", {}).get("cityName")
+        item["lon"], item["lat"] = shop["location"]
+        item["website"] = response.url
 
-        if response.xpath('//h1[@id="location-name"]/span[1]/text()').get():
-            if email := response.xpath('//a[@class="Hero-email"]/@href').get():
-                email = email.replace("mailto:", "")
+        item["opening_hours"] = OpeningHours()
+        for day in shop.get("openingHours", []):
+            if day.get("isClosed"):
+                item["opening_hours"].set_closed(DAYS_EN[day["day"].capitalize()])
+                continue
+            for interval in day.get("intervals", []):
+                item["opening_hours"].add_range(DAYS_EN[day["day"].capitalize()], interval["open"], interval["close"])
 
-            properties = {
-                "ref": response.url,
-                "street_address": response.xpath('//span[@class="c-address-street-1"]/text()').get(),
-                "postcode": response.xpath('//span[@class="c-address-postal-code"]/text()').get(),
-                "city": response.xpath('//span[@class="c-address-city"]/text()').get(),
-                "phone": response.xpath('//div[contains(@class, "Phone--main")]/div[1]//a/text()').get(),
-                "email": email,
-                "facebook": response.xpath('//div[@class="Socials-list"]/a[3]/@href').get(),
-                "website": response.url,
-                "lat": response.xpath('//meta[contains(@itemprop, "latitude")]/@content').get(),
-                "lon": response.xpath('//meta[contains(@itemprop, "longitude")]/@content').get(),
-                "opening_hours": oh,
-            }
+        apply_category(Categories.SHOP_MOBILE_PHONE, item)
 
-            yield Feature(**properties)
-
-        urls = response.xpath('//a[contains(@class, "Teaser-link Teaser-locationLink")]/@href')
-        for url in urls:
-            yield scrapy.Request(url=response.urljoin(url.get()), callback=self.parse_store)
+        yield item
