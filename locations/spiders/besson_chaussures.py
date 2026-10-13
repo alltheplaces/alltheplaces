@@ -20,13 +20,10 @@ class BessonChaussuresSpider(JSONBlobSpider):
     name = "besson_chaussures"
     item_attributes = {"brand": "Besson Chaussures", "brand_wikidata": "Q2899930", "name": "Besson Chaussures"}
     start_urls = ["https://www.besson-shoes.com/fr/retailer/retailer"]
-    # DataDome blocks plain requests, robots.txt included.
+    # DataDome blocks plain requests.
     requires_proxy = "FR"
-    custom_settings = {
-        "ROBOTSTXT_OBEY": False,
-        # Let Zyte set its own User-Agent rather than forwarding the project one.
-        "ZYTE_API_SKIP_HEADERS": ["Cookie", "User-Agent"],
-    }
+    # Zyte gets a website ban when the project User-Agent is forwarded, so let it set its own.
+    custom_settings = {"ZYTE_API_SKIP_HEADERS": ["Cookie", "User-Agent"]}
     # The only email is a customer service address shared by the Spanish stores.
     drop_attributes = {"email"}
 
