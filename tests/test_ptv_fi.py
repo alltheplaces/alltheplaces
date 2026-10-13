@@ -1477,7 +1477,7 @@ def test_road_case_fixed():
 
 def test_postcode_in_unit_dropped():
     spider = make_spider()
-    assert spider._number_tail("03100 Nummela") is None
+    assert spider._resolve_number_tail("03100 Nummela") is None
 
 
 def test_dup_number_folded():
@@ -1506,7 +1506,7 @@ def test_bare_letter_unit_rules():
 
 def test_swedish_floor_parsed():
     spider = make_spider()
-    assert spider._number_tail("2 vån") is None
+    assert spider._resolve_number_tail("2 vån") is None
     item = addressed(spider, "Katu", "1, 2 vån")
     assert (item["street"], item["housenumber"]) == ("Katu", "1")
     assert item["extras"]["addr:floor"] == "2"
@@ -3089,6 +3089,23 @@ def test_health_group_keeps_filing():
     # Health-context groups fall through to the table instead of generic.
     spider = make_spider()
     assert cat(spider, "Terveyskeskusryhmä")[0] == Categories.CLINIC
+
+
+def test_school_health_unit_case_insensitive():
+    # The health-unit override reads the name case-insensitively:
+    # capitalised compounds ("Helsingin Yhteiskoulu") file clinic too.
+    spider = make_spider()
+    item = parsed(spider, channel("Helsingin Yhteiskoulu"), "Keski-Suomen hyvinvointialue")
+    assert spider._tag(item, "amenity") == "clinic"
+
+
+def test_skola_boundary_and_koulu_streets():
+    # Eskola farm compounds are not schools (Swedish compounds still file);
+    # street words never file as schools either.
+    spider = make_spider()
+    assert cat(spider, "Eskolakoti 1 ja 2")[0] == Categories.SOCIAL_FACILITY
+    assert cat(spider, "Nordsjö lågstadieskola")[0] == Categories.SCHOOL
+    assert cat(spider, "Lappeenrannan toimipiste, Koulukatu 14")[0] == Categories.OFFICE_GOVERNMENT
 
 
 def test_animal_protection_desk_is_office():
