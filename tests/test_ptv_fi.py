@@ -3706,6 +3706,125 @@ def test_outdoor_islands_are_islands():
     assert item["extras"].get("place") == "island"
 
 
+def test_home_care_beats_local_service_areas():
+    # "Kotihoito/Töölö 2 lähipalvelualue" filed office via lähipalvelu;
+    # home care outranks the coverage-area tail. Genitive näytteenoton
+    # sampling points file as sampling, not offices.
+    spider = make_spider()
+    assert cat(spider, "Kotihoito/Töölö 2 lähipalvelualue")[0] == Categories.SOCIAL_FACILITY
+    assert cat(spider, "Kotihoito/Pitäjänmäki 1 lähipalvelualue")[0] == Categories.SOCIAL_FACILITY
+    assert cat(spider, "Oulun Limingantulli-Meritulli kotihoito")[0] == Categories.SOCIAL_FACILITY
+    assert cat(spider, "Veikkolan näytteenoton lähipalvelu")[0] == Categories.SAMPLE_COLLECTION
+
+
+def test_forskola_is_kindergarten():
+    # "Kyrkoby förskola" filed school via the skola regex; förskola is
+    # a Swedish preschool like daghem/dagis.
+    spider = make_spider()
+    assert cat(spider, "Kyrkoby förskola")[0] == Categories.KINDERGARTEN
+    assert cat(spider, "Söderkulla förskola")[0] == Categories.KINDERGARTEN
+
+
+def test_care_homes_beat_care_desks():
+    # "Hoitokoti Toppila" filed office via the bare hoito desk rule;
+    # care homes are nursing homes. Family daycare homes keep theirs.
+    spider = make_spider()
+    assert cat(spider, "Hoitokoti Toppila")[0] == Categories.NURSING_HOME
+    assert cat(spider, "Hoitokoti, Hyrynsalmen hoitokoti")[0] == Categories.NURSING_HOME
+    assert cat(spider, "Eläinhoitola")[0] == Categories.VETERINARY
+    assert cat(spider, "Heinolan Lintuhoitola")[0] == Categories.VETERINARY
+    assert cat(spider, "Ryhmäperhepäivähoitokoti Rastas")[0] == Categories.KINDERGARTEN
+
+
+def test_training_courses_are_not_schools():
+    # "Koulutukset ja luennot" filed school via the koulu lookahead gap
+    # (koulutuksen/tukset continue with tuk, not tus); courses are desks.
+    spider = make_spider()
+    assert cat(spider, "Koulutukset ja luennot")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Kasvatuksen ja koulutuksen toimiala, hallinto")[0] == Categories.OFFICE_GOVERNMENT
+
+
+def test_school_compounds_keep_facility():
+    # "Koulumuseo" and "Koulutoimisto" filed school; the facility word
+    # is the second compound element (museum, education office).
+    spider = make_spider()
+    assert cat(spider, "Koulumuseo Lagstad")[0] == Categories.MUSEUM
+    assert cat(spider, "Saukkojärven kotiseutu- ja koulumuseo")[0] == Categories.MUSEUM
+    assert cat(spider, "Vesilahden koulutoimisto")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Koulutoimisto")[0] == Categories.OFFICE_GOVERNMENT
+
+
+def test_tupa_yields_to_care_venues():
+    # The compound-end tupa rule shadowed later care/office/park rules:
+    # care homes, day centres, shores, desks and culture houses file as
+    # themselves now. The luontotupa dual keeps the hut (pinned).
+    spider = make_spider()
+    assert cat(spider, "Iin palvelukoti Emmintupa")[0] == Categories.NURSING_HOME
+    assert cat(spider, "Palvelukoti Snällintupa")[0] == Categories.NURSING_HOME
+    assert cat(spider, "Rovaniemen päiväkeskus Veitikantupa")[0] == Categories.SOCIAL_FACILITY
+    assert cat(spider, "Salmen ulkoilualue / Taukotupa")[0] == Categories.LEISURE_PARK
+    assert cat(spider, "Asiakaspalvelupiste Tietotupa")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Lastenkulttuurikeskus Pyykkitupa")[0] == Categories.ARTS_CENTRE
+    assert cat(spider, "Koloveden luontotupa ja matkailuneuvonta")[0] == Categories.COMMUNITY_CENTRE
+
+
+def test_library_reading_rooms_are_libraries():
+    # "Valkeakosken kaupunginkirjaston lehtisali" filed sports hall via
+    # sali; the head is the library, the tail a reading room.
+    spider = make_spider()
+    assert cat(spider, "Valkeakosken kaupunginkirjaston lehtisali")[0] == Categories.LIBRARY
+    assert cat(spider, "Lehtilukusali")[0] == Categories.LIBRARY
+    assert cat(spider, "Lehtisali ja omatoimikirjasto")[0] == Categories.LIBRARY
+
+
+def test_housing_plural_stems():
+    # One unlisted spelling per venue family went untyped: supported
+    # flats, service flats (filed office via palvelu), joint shelters,
+    # parish centres/premises and short-stay units.
+    spider = make_spider()
+    assert cat(spider, "Roihuvuoren tukiasunnot")[0] == Categories.ASSISTED_LIVING
+    assert cat(spider, "Ruusukujan palveluasunnot")[0] == Categories.NURSING_HOME
+    assert cat(spider, "Lehtisaaren yhteiskalliosuoja")[0] == Categories.MILITARY_BUNKER
+    assert cat(spider, "Linnainmaan seurakuntakeskus")[0] == Categories.COMMUNITY_CENTRE
+    assert cat(spider, "Seurakuntatila Kauksun Kulma")[0] == Categories.COMMUNITY_CENTRE
+    assert cat(spider, "Lyhytaikaisyksikkö Selvari, Seinäjoki")[0] == Categories.NURSING_HOME
+
+
+def test_customs_rule_skips_place_names():
+    # "Tullinkulma"/"Tullikamari"/crosswalk filed customs office via the
+    # bare tulli substring; only genuine customs (Lentotulli) keeps it.
+    spider = make_spider()
+    assert cat(spider, "Lentotulli")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Tullinkulma")[0] is None
+    assert cat(spider, "Tullikamari")[0] is None
+    assert cat(spider, "Myllytullin koulu")[0] == Categories.SCHOOL
+
+
+def test_service_info_compounds_keep_service():
+    # "Seniori-info" and "Kansalaisinfo" filed tourist info; senior and
+    # citizen desks file as themselves. Bone-health info is a clinic.
+    spider = make_spider()
+    assert cat(spider, "Seniori-info")[0] == Categories.SOCIAL_FACILITY
+    assert cat(spider, "Yhteispalvelu Vaasa - Kansalaisinfo")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Luustoinfo osteoporoosia sairastaville / Lahti")[0] == Categories.CLINIC
+
+
+def test_square_guard_keeps_venues():
+    # Facility venues at squares filed place=square with no category:
+    # daycares, care homes, pharmacies, coordinators and schools file as
+    # themselves; bare squares stay squares.
+    spider = make_spider()
+    assert cat(spider, "Päiväkoti Vihtori")[0] == Categories.KINDERGARTEN
+    assert cat(spider, "Esperi Hoivakoti Vihtori")[0] == Categories.NURSING_HOME
+    assert cat(spider, "Kotkan 5. Karhulan Tori apteekki")[0] == Categories.PHARMACY
+    assert cat(spider, "Hämeenlinnan I Tori-apteekki")[0] == Categories.PHARMACY
+    assert cat(spider, "Terveyskeskus Mehiläinen Espoontori")[0] == Categories.CLINIC
+    assert cat(spider, "Tiernan koulu, Heinätori")[0] == Categories.SCHOOL
+    assert cat(spider, "Työllisyyskoordinaattori")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Kiuruveden tori")[0] is None
+    assert cat(spider, "Kuusijärven saunat")[0] == Categories.SAUNA
+
+
 def test_island_titled_artworks_are_art():
     # "Saari" with Julkinen taide services (HAM) is public art, not land.
     spider = make_spider()

@@ -107,6 +107,7 @@ class PtvFISpider(Spider):
         ("nuorten päihde", Categories.CLINIC, None),  # Youth addiction services
         ("kohtaamispaikka", Categories.COMMUNITY_CENTRE, None),  # Kohtaamispaikka (meeting places outrank clientele)
         ("tukiasunto", Categories.ASSISTED_LIVING, None),  # Tukiasunto (supported housing)
+        ("tukiasunnot", Categories.ASSISTED_LIVING, None),  # Tukiasunnot (supported housing, plural)
         ("tuettu asumi", Categories.ASSISTED_LIVING, None),  # Tuettu asuminen (supported housing)
         ("tukiasuminen", Categories.ASSISTED_LIVING, None),  # Tukiasuminen (support housing)
         ("mielenterveystyö", Categories.CLINIC, None),  # Mielenterveystyö (mental-health work)
@@ -160,6 +161,7 @@ class PtvFISpider(Spider):
         ("poliklinikat", Categories.CLINIC, None),  # Poliklinikat (outpatient clinics, plural)
         ("klinikat", Categories.CLINIC, None),  # Klinikat (clinics, plural)
         ("näytteenotto", Categories.SAMPLE_COLLECTION, None),  # Näytteenotto (sampling points)
+        ("näytteenoton", Categories.SAMPLE_COLLECTION, None),  # Näytteenoton (sampling points, genitive)
         ("seulonta", Categories.CLINIC, None),  # Seulonta (health screenings)
         ("laboratorio", Categories.CLINIC, {"healthcare": "laboratory"}),  # Laboratorio (laboratories)
         ("lab", Categories.CLINIC, {"healthcare": "laboratory"}),  # Lab (Tykslab/Fimlab/Islab contract labs)
@@ -283,6 +285,8 @@ class PtvFISpider(Spider):
         ("musiikkisali", Categories.EVENTS_VENUE, None),  # Musiikkisali (concert halls)
         ("monitoimisali", Categories.EVENTS_VENUE, None),  # Monitoimisali (multi-purpose halls)
         ("valtuustosali", Categories.EVENTS_VENUE, None),  # Valtuustosali (council chambers)
+        ("lehtilukusali", Categories.LIBRARY, None),  # Lehtilukusali (library reading rooms)
+        ("lehtisali", Categories.LIBRARY, None),  # Lehtisali (library reading rooms)
         ("sali", Categories.LEISURE_SPORTS_HALL, None),  # Sali (halls)
         ("jäähalli", Categories.LEISURE_ICE_RINK, None),
         ("keilahalli", Categories.LEISURE_BOWLING_ALLEY, None),  # Keilahalli (bowling halls)
@@ -399,9 +403,13 @@ class PtvFISpider(Spider):
         ("yläaste", Categories.SCHOOL, None),  # Yläaste (upper comprehensive)
         ("ala-aste", Categories.SCHOOL, None),  # Ala-aste (lower comprehensive)
         ("yhtenäiskoulu", Categories.SCHOOL, None),  # Yhtenäiskoulu (comprehensive schools)
+        ("förskola", Categories.KINDERGARTEN, None),  # Förskola (preschools in Swedish)
         ("skola", Categories.SCHOOL, None),  # Skola (schools in Swedish)
         ("koulutuskeskus", Categories.COLLEGE, None),  # Koulutuskeskus (training centres)
         ("koulutus", Categories.OFFICE_GOVERNMENT, None),  # Koulutus (education services)
+        ("koulutukset", Categories.OFFICE_GOVERNMENT, None),  # Koulutukset (training courses)
+        ("koulumuseo", Categories.MUSEUM, None),  # Koulumuseo (school museums)
+        ("koulutoimisto", Categories.OFFICE_GOVERNMENT, None),  # Koulutoimisto (education offices)
         ("koulu", Categories.SCHOOL, None),  # Koulu (schools)
         ("lupapalvelu", Categories.OFFICE_GOVERNMENT, None),  # Lupapalvelu (permit services, also at stations)
         ("erityislupa", Categories.OFFICE_GOVERNMENT, None),  # Erityislupa (special permits, also at stations)
@@ -432,6 +440,8 @@ class PtvFISpider(Spider):
         ("kappeli", Categories.PLACE_OF_WORSHIP, None),  # Kappeli (chapels)
         ("seurakuntatalo", Categories.COMMUNITY_CENTRE, None),  # Seurakuntatalo (parish halls)
         ("seurakuntakoti", Categories.COMMUNITY_CENTRE, None),  # Seurakuntakoti (parish houses)
+        ("seurakuntakeskus", Categories.COMMUNITY_CENTRE, None),  # Seurakuntakeskus (parish centres)
+        ("seurakuntatila", Categories.COMMUNITY_CENTRE, None),  # Seurakuntatila (parish premises)
         ("muistomerkki", Categories.TOURISM_ARTWORK, None),
         ("memorial", Categories.TOURISM_ARTWORK, None),  # Memorial (memorials in English)
         ("minnesmärk", Categories.TOURISM_ARTWORK, None),  # Minnesmärke (memorials in Swedish)
@@ -468,8 +478,6 @@ class PtvFISpider(Spider):
         ("toimintakeskus", Categories.COMMUNITY_CENTRE, None),  # Toimintakeskus (activity centres)
         ("monitoimitalo", Categories.COMMUNITY_CENTRE, None),  # Monitoimitalo (multipurpose houses)
         ("kohtaamispaikka", Categories.COMMUNITY_CENTRE, None),  # Kohtaamispaikka (meeting places)
-        ("autiotupa", Categories.TOURISM_WILDERNESS_HUT, None),  # Autiotupa (wilderness huts)
-        ("tupa", Categories.COMMUNITY_CENTRE, None),  # Tupa (meeting houses)
         ("kerhotalo", Categories.COMMUNITY_CENTRE, None),  # Kerhotalo (clubhouses)
         ("harrastetila", Categories.COMMUNITY_CENTRE, None),  # Harrastetila (hobby premises)
         ("harrastuskeskus", Categories.COMMUNITY_CENTRE, None),  # Harrastuskeskus (hobby centres)
@@ -530,6 +538,7 @@ class PtvFISpider(Spider):
         ("kuntoutusyksikkö", Categories.CLINIC, None),  # Kuntoutusyksikkö (rehabilitation units)
         ("oy:n toimisto", Categories.OFFICE_COMPANY, None),  # Oy:n toimisto (company offices)
         ("toimisto", Categories.OFFICE_GOVERNMENT, None),  # Toimisto (offices)
+        ("luontotupa", Categories.COMMUNITY_CENTRE, None),  # Luontotupa (nature huts keep the hut over info desks)
         (
             "matkailuneuvon",
             Categories.TOURISM_INFORMATION,
@@ -570,6 +579,7 @@ class PtvFISpider(Spider):
         ("maanmittauslaitos", Categories.OFFICE_GOVERNMENT, None),  # Maanmittauslaitos (land survey offices)
         ("metsäkeskus", Categories.OFFICE_GOVERNMENT, None),  # Metsäkeskus (forest centre)
         ("ulosotto", Categories.OFFICE_GOVERNMENT, None),
+        ("kotihoito", Categories.SOCIAL_FACILITY, None),  # Kotihoito (home care, outranks lähipalvelualue below)
         ("tulli", Categories.OFFICE_GOVERNMENT, None),  # Tulli (customs offices)
         ("kuntoutusohjaus", Categories.SOCIAL_FACILITY, None),  # Kuntoutusohjaus (rehab guidance)
         ("ohjaus", Categories.OFFICE_GOVERNMENT, None),  # Ohjaus (guidance desks)
@@ -586,11 +596,13 @@ class PtvFISpider(Spider):
         ("päivystyksen", Categories.CLINIC_URGENT, None),  # Päivystyksen (on-call duty, genitive)
         ("palvelukeskus", Categories.SOCIAL_FACILITY, None),  # Palvelukeskus (service centres)
         ("palvelutalo", Categories.NURSING_HOME, None),  # Palvelutalo (sheltered housing)
+        ("seniori", Categories.SOCIAL_FACILITY, None),  # Seniori (senior centres, outranks info desks below)
+        ("luustoinfo", Categories.CLINIC, None),  # Luustoinfo (bone-health info service)
+        ("kansalaisinfo", Categories.OFFICE_GOVERNMENT, None),  # Kansalaisinfo (citizen info desks)
         ("info", Categories.TOURISM_INFORMATION, {"information": "office"}),  # Info (city information desks)
         ("visitor centre", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
         ("visitor center", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
         ("sosiaali", Categories.SOCIAL_FACILITY, None),  # Sosiaali (social services)
-        ("kotihoito", Categories.SOCIAL_FACILITY, None),
         ("vanhainkoti", Categories.NURSING_HOME, None),  # Vanhainkoti (elderly homes)
         ("hoivakoti", Categories.NURSING_HOME, None),  # Hoivakoti (care homes)
         ("hoiva", Categories.SOCIAL_FACILITY, None),  # Hoiva (care homes)  # Kotihoito (home care)
@@ -598,14 +610,15 @@ class PtvFISpider(Spider):
         ("innopaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Innopaja (innovation workshops)
         ("taitopaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Taitopaja (craft workshops)
         ("ikäihmis", Categories.NURSING_HOME, None),  # Ikäihmis (elderly-care homes)
-        ("seniori", Categories.SOCIAL_FACILITY, None),  # Seniori (senior centres)
         ("kehitysvamma", Categories.SOCIAL_FACILITY, None),  # Kehitysvamma (developmental-disability services)
         ("vammais", Categories.SOCIAL_FACILITY, None),  # Vammais (disability services)
         ("lyhytaikaishoito", Categories.NURSING_HOME, None),  # Lyhytaikaishoito (respite care)
         ("lyhytaikaishoidon", Categories.NURSING_HOME, None),  # Lyhytaikaishoidon (respite care, genitive)
+        ("lyhytaikaisyksikkö", Categories.NURSING_HOME, None),  # Lyhytaikaisyksikkö (short-stay units)
         ("palvelut", Categories.OFFICE_GOVERNMENT, None),  # Palvelut (municipal service units)
         ("palvelukoti", Categories.NURSING_HOME, None),  # Palvelukoti (service homes)
         ("palveluasumi", Categories.NURSING_HOME, None),  # Palveluasuminen (24h service housing)
+        ("palveluasunnot", Categories.NURSING_HOME, None),  # Palveluasunnot (service flats, plural)
         ("palvelukodit", Categories.NURSING_HOME, None),  # Palvelukodit (service homes, plural)
         ("palvelu", Categories.OFFICE_GOVERNMENT, None),  # Palvelu (service desks)
         ("päivätoiminta", Categories.SOCIAL_FACILITY, None),  # Päivätoiminta (day activities)
@@ -699,6 +712,8 @@ class PtvFISpider(Spider):
         ("veistos", None, {"tourism": "artwork", "artwork_type": "sculpture"}),  # Veistos (sculptures; parks keep park)
         ("taideteos", Categories.TOURISM_ARTWORK, None),  # Taideteos (artworks)
         ("päiväkeskus", Categories.SOCIAL_FACILITY, None),  # Päiväkeskus (day centres)
+        ("autiotupa", Categories.TOURISM_WILDERNESS_HUT, None),  # Autiotupa (wilderness huts)
+        ("tupa", Categories.COMMUNITY_CENTRE, None),  # Tupa (meeting houses, compound-final)
         ("laituri", Categories.MAN_MADE_PIER, None),  # Laituri (piers)
         ("venepaikka", Categories.MARINA, None),  # Venepaikka (boat berths)  # Satama (harbours)
         ("vesipiste", Categories.DRINKING_WATER, None),  # Vesipiste (drinking-water points)
@@ -725,17 +740,22 @@ class PtvFISpider(Spider):
         ("dialyysi", Categories.CLINIC, None),  # Dialyysi (dialysis units)
         ("neulanvaihto", Categories.CLINIC, None),  # Neulanvaihto (needle-exchange points)
         ("tartuntatauti", Categories.CLINIC, None),  # Tartuntataudit (infectious diseases)
+        ("hoitokoti", Categories.NURSING_HOME, None),  # Hoitokoti (care homes)
+        ("hoitokodit", Categories.NURSING_HOME, None),  # Hoitokodit (care homes, plural)
+        ("eläinhoitola", Categories.VETERINARY, None),  # Eläinhoitola (animal-care clinics)
+        ("lintuhoitola", Categories.VETERINARY, None),  # Lintuhoitola (bird-care clinics)
         ("hoito", Categories.OFFICE_GOVERNMENT, None),  # Hoito (care service desks)
         (
             "väestönsuoja",
             Categories.MILITARY_BUNKER,
             {"bunker_type": "bomb_shelter"},
         ),  # Väestönsuoja (civil-defence shelters)
+        ("yhteiskalliosuoja", Categories.MILITARY_BUNKER, {"bunker_type": "bomb_shelter"}),
     )
     # tori matches standalone and market compounds (kauppatori) but never
     # auditorio/laboratorio/toimisto, which do not end in tori.
     TORI_RE = re.compile(r"(?:\btori\b|\w+tori\b)")
-    SAUNA_RE = re.compile(r"(?:\bsauna\b|\w+sauna\b)")
+    SAUNA_RE = re.compile(r"(?:\bsaunat?\b|\w+saunat?\b)")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -787,13 +807,20 @@ class PtvFISpider(Spider):
                 # Info desks read prefix or suffix (Infopiste, Pääinfo);
                 # Sinfonia never matches.
                 rx = re.compile(r"info\b|\binfo")
+            elif k == "tulli":
+                # Customs offices (Lentotulli) share the stem with
+                # district/building names (Tullinkulma, Tullikamari,
+                # Tullisaari, Tullinpuomi, Tullintori, Tullivuorentie):
+                # those never match.
+                rx = re.compile(r"tulli(?!nkulma|kamari|vuor|saar|npuomi|ntori)")
             elif k == "skola":
                 # Askola the municipality is not a skola (school).
                 rx = re.compile(r"(?<!a)skola")
             elif k == "koulu":
                 # Koulutalo, koulukoti and koulun stay schools; koulutus
-                # and school-aged (kouluikäinen, kouluiässä) never match.
-                rx = re.compile(r"\w*koulu(?!tus|ikä|iä)")
+                # and its inflections (koulutuksen, koulutukset) plus
+                # school-aged (kouluikäinen, kouluiässä) never match.
+                rx = re.compile(r"\w*koulu(?!tus|tuk|ikä|iä)")
             elif k == "asema":
                 # Station words, compound-final only: customer-service desks
                 # at Helsinki-Vantaa ("...lentoasemalla") are offices, a bare
@@ -3076,6 +3103,7 @@ class PtvFISpider(Spider):
         "teatteri",
         "kotihoito",
         "hoiva",
+        "lyhytaikais",
         "asumispalvelu",
         "huoltorakennus",
         "rakennus",
@@ -3160,17 +3188,36 @@ class PtvFISpider(Spider):
         # None to fall through to the table (parking), (None, extra) for
         # placement-only squares, or a category.
         if not self.TORI_RE.search(lowered) or re.search(
-            r"(lähitori|konttori|kuraattori|kirpputori|navigaattori|palvelutori"
+            r"(lähitori|konttori|kuraattori|koordinaattori|kirpputori|navigaattori|palvelutori"
             r"|traktori|pastori|kanttori|reaktori)",
             lowered,
         ):
             # Lähitori (senior centres), konttori (offices), kuraattori
-            # (counsellors), kirpputori (flea markets), Navigaattori and
-            # Palvelutori (service desks) end in tori without being squares,
-            # as do tractors, pastors, cantors and reactors.
+            # (counsellors), koordinaattori (coordinator desks), kirpputori
+            # (flea markets), Navigaattori and Palvelutori (service desks)
+            # end in tori without being squares, as do tractors, pastors,
+            # cantors and reactors.
             return None
         if re.search(r"(pysäköinti|parkki)", lowered):
             # Parking at a square is parking, not the square.
+            return None
+        if any(
+            word in lowered
+            for word in (
+                *self.SHORE_FACILITY_BAIL,
+                "kaupungintalo",
+                "neuvonta",
+                "piste",
+                "keskus",
+                "palvelu",
+                "shakki",
+                "työllisyys",
+                "tapahtuma",
+            )
+        ):
+            # Named venues at squares file as themselves ("Kotkan 5.
+            # Karhulan Tori apteekki", "Päiväkoti Vihtori", "Tiernan
+            # koulu, Heinätori"): the square is the address, not the POI.
             return None
         if re.search(r"(kauppa|halli)", lowered):
             # Market halls and kauppa-squares trade; bare squares
