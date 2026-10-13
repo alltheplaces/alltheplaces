@@ -2497,9 +2497,12 @@ class PtvFISpider(Spider):
 
     def _supported_housing(self, channel: dict) -> bool:
         # Supported-housing evidence beats diagnosis (user doctrine):
-        # "tuettu" or 24-hour residential wording anywhere in the
+        # "tuettu" housing or 24-hour residential wording anywhere in the
         # descriptions, linked services or ontology ("Tervahovin asunnot").
-        # Bare "asumi" alone never counts (assessment offices).
+        # Bare "asumi" alone never counts (assessment offices), and
+        # supported employment without housing words never counts
+        # ("Ruukinpaja" youth workshop). Assessment/placement offices
+        # stay offices.
         texts = [self._description_text(channel)]
         texts.extend(self._service_names(channel))
         for term in channel.get("ontologyTerms") or []:
@@ -2507,7 +2510,8 @@ class PtvFISpider(Spider):
                 if term_name.get("language") == "fi" and term_name.get("value"):
                     texts.append(term_name["value"])
         blob = " ".join(texts).lower()
-        return "tuettu" in blob or ("ymp\xe4rivuorokautinen" in blob and "asumi" in blob)
+        housing = "asumi" in blob or "asunto" in blob
+        return ("tuettu" in blob and housing) or ("ymp\xe4rivuorokautinen" in blob and housing)
 
     def _resolve_fallback_category(self, item: Feature, channel: dict):
         # Category for channels the name leaves generic: linked-service
@@ -3139,10 +3143,16 @@ class PtvFISpider(Spider):
             return head, self._clean_located(tail), name
         if " ja " in tail and not self._has_fixture(tail) and not re.search(r"\d", tail):
             swept = re.sub(r"\b(ja|och|eller|tai|sek\xe4)\b", "", tail, flags=re.IGNORECASE)
-            if re.search(r"(?:^|\s)[a-zåäö]{3,}", swept):
+            if re.search(r"(?:^|\s)[a-zåäö]{3,}", swept) and not re.fullmatch(
+                r"(?:iltaisin|aamuisin|p\xe4ivisin|\xf6isin|viikonloppuisin|viikonloppuina|arkisin|arkipyhin\xe4"
+                r"|pyhin\xe4|pyhisin|lomilla|kes\xe4isin|talvisin|aamuin|illoin|\xf6in|[\s,]+)*",
+                swept.strip(),
+                flags=re.IGNORECASE,
+            ):
                 # Content words beyond places ("kahvetta ja kastamista
                 # Kiikassa"): event program, not a coverage list. Bare
-                # place lists ("Oulainen ja Merijärvi") still drop below.
+                # place lists ("Oulainen ja Merijärvi") and pure opening-time
+                # lists ("iltaisin, viikonloppuina ja arkipyhinä") still drop.
                 return None
             if head.rstrip().endswith("-"):
                 # Hyphen-fragment lists ("Sovellettua jooga-, pilates- ja
@@ -4658,6 +4668,22 @@ class PtvFISpider(Spider):
                     w.casefold() for w in shown_words
                 ]:
                     cleaned_tr = " ".join(tr_words[len(tr_words) - len(shown_words) :])
+        if (
+            shown
+            and (signed or "")
+            and "/" in (signed or "")
+            and "/" not in cleaned_tr
+            and "," not in cleaned_tr
+            and located
+            and cleaned_tr not in (shown, signed)
+        ):
+            # Single-segment translations naming the venue instead of the
+            # applied name ("Käpylä sports park" for applied "Opastuspiste"
+            # at "Käpylän liikuntapuisto"): no valid translation is
+            # available, so drop rather than misrender the venue as the POI.
+            loc_first = located.split()[0].rstrip("n").casefold()
+            if cleaned_tr.split()[0].casefold() == loc_first and loc_first:
+                cleaned_tr = ""
         return re.sub(r"\s{2,}", " ", cleaned_tr).strip()
 
     @staticmethod
