@@ -810,7 +810,12 @@ class PtvFISpider(Spider):
                 "opetuspiste",
                 "toimipaikka",
             }
-        )
+        ) - {"telttailu"}
+        # "telttailu" stays out of the fixture vocabulary: as a table key it
+        # would otherwise flip island tent pairs ("Gåsgrund / Telttailupaikka")
+        # into backwards head+located splits via the venue-evidence
+        # fallthrough. The camp_site category is unaffected (table reads the
+        # signed form).
         self.GENERIC_WORDS = {w.lower() for w in venue_words}
         self.FIXTURE_RE = re.compile("|".join(sorted(self.GENERIC_WORDS, key=len, reverse=True)))
         self._rules = []
