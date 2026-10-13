@@ -51,8 +51,11 @@ class FordDealersUSSpider(PlaywrightSpider):
                 item = DictParser.parse(dealer)
                 item["ref"] = f"{dealer.get('PACode')}-{kwargs['brand']}"
                 item["street_address"] = dealer.get("Address").get("Street1")
-                if item["website"] == "http://DealerOn-null":
-                    item.pop("website")
+                if item["website"]:
+                    item["website"] = item["website"].replace("www. ", "www.")
+                    if item["website"] == "http://DealerOn-null":
+                        item.pop("website")
+
                 if brand := self.BRAND_MAPPING[kwargs["brand"]]:
                     item.update(brand)
 
