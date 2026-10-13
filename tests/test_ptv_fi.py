@@ -3126,6 +3126,25 @@ def test_animal_protection_desk_is_office():
     assert cat(spider, "Porvoon kissatalo")[1] == {"amenity": "animal_shelter"}
 
 
+def test_padel_courts_are_pitches():
+    # Säkyläpadel (67a2cb9a, round-17 B): dedicated padel venues file pitch
+    # + sport=padel; kenttä-compounds gain the sport tag too.
+    spider = make_spider()
+    assert cat(spider, "Säkyläpadel") == (Categories.LEISURE_PITCH, {"sport": "padel"})
+    assert cat(spider, "Padel-kentät") == (Categories.LEISURE_PITCH, {"sport": "padel"})
+    assert cat(spider, "Ukonniemen ulkopadelkenttä") == (Categories.LEISURE_PITCH, {"sport": "padel"})
+
+
+def test_paren_shielded_operators_stay_private():
+    # Trailing parenthesised qualifiers hide the marker from the end anchor
+    # (Kuopion NNKY, round-17 B): detection reads past them, the emitted
+    # operator keeps its full form. Parishes stay non-private.
+    spider = make_spider()
+    assert spider._is_private_org("Kuopion Nuorten Naisten Kristillinen Yhdistys (Kuopion NNKY)")
+    assert spider._is_private_org("Pohjanmaan Syöpäyhdistys (Ostrobotnia Cancer organisation)")
+    assert not spider._is_private_org("Turun ja Kaarinan seurakuntayhtymä")
+
+
 def test_depots_are_depots():
     spider = make_spider()
     assert cat(spider, "Kunnanvarikko")[1] == {"amenity": "depot"}

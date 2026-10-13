@@ -256,6 +256,7 @@ class PtvFISpider(Spider):
         ("jalkapallo", Categories.LEISURE_PITCH, {"sport": "soccer"}),  # Jalkapallo (football)
         ("pöytätennis", Categories.LEISURE_PITCH, {"sport": "table_tennis"}),  # Pöytätennis (table tennis)
         ("tenniskenttä", Categories.LEISURE_PITCH, {"sport": "tennis"}),  # Tenniskenttä (tennis courts)
+        ("padel", Categories.LEISURE_PITCH, {"sport": "padel"}),  # Padel (padel courts/halls)
         ("koripallo", Categories.LEISURE_PITCH, {"sport": "basketball"}),  # Koripallo (basketball)
         (
             "rantalentopallo",
@@ -1645,8 +1646,12 @@ class PtvFISpider(Spider):
         lowered = operator.lower()
         if "seurakunta" in lowered and not re.search(r"\b(oy|ab|ry|r\.y\.?|tmi|toiminimi)\b", lowered):
             return False
+        # Trailing parenthesised qualifiers ("Yhdistys (NNKY)") shield the
+        # marker from the end anchor: read past them for detection only
+        # (the emitted operator keeps its full form).
+        deparen = re.sub(r"\s*\([^()]*\)$", "", operator.strip()).strip() or operator
         return (
-            self._has_operator_word(operator)
+            self._has_operator_word(deparen)
             or re.search(r"\bry\b", operator, flags=re.IGNORECASE) is not None
             or re.search(r"\briku\b", operator, flags=re.IGNORECASE) is not None
             or re.search(r"\w*seura\b", lowered) is not None
