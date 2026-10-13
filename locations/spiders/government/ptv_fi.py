@@ -99,6 +99,7 @@ class PtvFISpider(Spider):
         ("stadshus", Categories.OFFICE_GOVERNMENT, None),  # Stadshus (city halls in Swedish)
         ("kommunhus", Categories.OFFICE_GOVERNMENT, None),  # Kommunhus (municipal houses in Swedish)
         ("suunnittelu", Categories.OFFICE_GOVERNMENT, None),  # Suunnittelu (planning offices)
+        ("psykiatrinen palveluasuminen", Categories.SOCIAL_FACILITY, None),  # Psychiatric housing, not wards
         ("psykiatrinen sairaala", Categories.HOSPITAL, None),  # Psychiatric hospitals
         ("psykiatriasairaala", Categories.HOSPITAL, None),  # Psychiatric hospitals, compound
         ("psykiatri", Categories.CLINIC, None),  # Psykiatri (psychiatry)
@@ -182,6 +183,8 @@ class PtvFISpider(Spider):
             {"social_facility": "group_home"},
         ),  # Asumisyhteisö (housing communities)
         ("asumispalvelu", Categories.SOCIAL_FACILITY, None),  # Asumispalvelut (housing services)
+        ("mielenterveyskuntoutujien", Categories.SOCIAL_FACILITY, None),  # Client housing beats diagnosis below
+        ("mielenterveysasiakkaiden", Categories.SOCIAL_FACILITY, None),  # Client housing beats diagnosis below
         ("mielenterveys", Categories.CLINIC, None),  # Mielenterveys (mental health)
         ("muistikeskus", Categories.CLINIC, None),  # Muistikeskus (memory clinics)
         ("mielialahäiriö", Categories.CLINIC, None),  # Mielialahäiriö (mood disorders)
@@ -1889,6 +1892,12 @@ class PtvFISpider(Spider):
             if btail.strip() and self._is_operator_shaped(bhead.strip()):
                 self._count("name/slash_paren_address")
                 return btail.strip(), None, name
+        if " / " in base and any(word in base.rsplit(" / ", 1)[1].strip().lower() for word in self.ROOM_WORDS):
+            # Facility tails with parenthesised qualifiers ("...
+            # / Ulkokuntoilupaikka (Keski)"): the slash dispatch names
+            # the tailed facility, parens included — paren handling
+            # would keep whole or strand the qualifier as the venue.
+            return None
         if not re.search(r"\d", inner) and self._has_fixture(inner):
             # Venue in parens ("... (Oltermannikeskus)").
             self._count("name/paren_venue")
@@ -3291,6 +3300,11 @@ class PtvFISpider(Spider):
             self._count("category/room_building_generic")
             return None, None
         if not any(word in lowered for word in self.ROOM_WORDS):
+            return None
+        if self._is_institution(lowered.split(",")[0].strip()):
+            # Institution tails are venues hosting an activity
+            # ("Iltapäivätoiminta / Puotilan ala-aste, ..."), not rooms:
+            # full-form filing stands (org tails ignored for the test).
             return None
         if re.search(r"\bja\b|&", lowered):
             return None

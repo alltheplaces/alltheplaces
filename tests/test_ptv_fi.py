@@ -3648,10 +3648,28 @@ def test_room_tails_type_the_poi():
 
 def test_compound_and_typeless_tails_keep_full_filing():
     # "Sipoon opisto / Opintien palvelupiste ja liikuntatila" stays a
-    # college; "Maunulan liikuntahalli / Sisäampumarata" stays a hall.
+    # college; "Maunulan liikuntahalli / Sisäampumarata" stays a hall;
+    # institution tails hosting activities keep full-form filing.
     spider = make_spider()
     assert cat(spider, "Sipoon opisto / Opintien palvelupiste ja liikuntatila")[0] == Categories.COLLEGE
     assert cat(spider, "Maunulan liikuntahalli / Sisäampumarata")[0] == Categories.LEISURE_SPORTS_CENTRE
+    assert cat(spider, "Iltapäivätoiminta / Puotilan ala-aste, Saalem-Nuoret ry")[0] == Categories.COMMUNITY_CENTRE
+
+
+def test_parenthesised_room_tails_split():
+    # "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)": the tailed
+    # facility names the POI, parens included, the beach hosts it.
+    spider = make_spider()
+    assert named(spider, "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)") == (
+        "Ulkokuntoilupaikka (Keski)",
+        "Hietarannan uimaranta",
+        "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)",
+    )
+    assert named(spider, "Malmitalo / Esiintymisali (Pieni sali)") == (
+        "Esiintymisali (Pieni sali)",
+        "Malmitalo",
+        "Malmitalo / Esiintymisali (Pieni sali)",
+    )
 
 
 def test_grill_places_are_picnic_sites():
