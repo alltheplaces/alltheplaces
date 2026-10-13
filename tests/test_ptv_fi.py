@@ -2464,7 +2464,7 @@ def test_sorting_stations_are_recycling():
     spider = make_spider()
     assert cat(spider, "Perniön lajitteluasema")[0] == Categories.RECYCLING
     # Dagsmarkin lainausasema: lending station, not railway.
-    assert cat(spider, "Dagsmarkin " + "laina" + "usasema")[0] == Categories.LIBRARY
+    assert cat(spider, "Dagsmarkin lainausasema")[0] == Categories.LIBRARY
     assert cat(spider, "Lentoaseman rautatieasema")[1] == {"railway": "station", "public_transport": "station"}
 
 
@@ -2848,7 +2848,7 @@ def test_visit_address_prefers_single_and_postal_drops():
     assert spider._visit_address({"addresses": [postal, multi, single]}) == single
     ch = channel("X")
     ch["addresses"] = [postal]
-    assert parsed(spider, ch) if False else spider.parse_channel(ch) is None
+    assert spider.parse_channel(ch) is None
     assert spider.crawler.stats.get_value("ptv_fi/dropped/postal_only") == 1
 
 
@@ -4811,6 +4811,7 @@ def test_located_duplicates_drop_from_translations():
     item = parsed(spider, ch)
     assert item["extras"].get("name:sv") == "Daghemskök"
     assert item["extras"].get("name:en") == "Daycare centre kitchen"
+    assert item.get("located_in") == "Päiväkoti Jollas"
 
 
 def test_slash_twins_follow_the_split():
@@ -4827,3 +4828,223 @@ def test_slash_twins_follow_the_split():
     assert item["extras"].get("name:sv") is None
     assert item["extras"].get("name:en") is None
     assert item.get("located_in") is None
+
+
+def test_list_page_bad_payloads_counted():
+    # Malformed list pages never yield requests, but always count.
+    from scrapy.http import TextResponse
+
+    spider = make_spider()
+    assert list(spider.parse(TextResponse(url="https://x/?page=1", body=b"nope", encoding="utf-8"), page=1)) == []
+    assert spider.crawler.stats.get_value("ptv_fi/page/bad_json") == 1
+    assert list(spider.parse(TextResponse(url="https://x/?page=2", body=b"[]", encoding="utf-8"), page=2)) == []
+    assert spider.crawler.stats.get_value("ptv_fi/page/bad_shape") == 1
+
+
+def test_batch_bad_payloads_counted():
+    # Malformed detail batches never yield items, but always count.
+    from scrapy.http import TextResponse
+
+    spider = make_spider()
+    assert list(spider.parse_batch(TextResponse(url="https://x/list", body=b"nope", encoding="utf-8"))) == []
+    assert spider.crawler.stats.get_value("ptv_fi/batch/bad_json") == 1
+    assert list(spider.parse_batch(TextResponse(url="https://x/list", body=b"{}", encoding="utf-8"))) == []
+    assert spider.crawler.stats.get_value("ptv_fi/batch/bad_shape") == 1
+
+
+def test_list_page_queues_only_id_rows():
+    # Id-less list rows never queue (dashboards count queued intake).
+    import json
+
+    from scrapy.http import TextResponse
+
+    spider = make_spider()
+    body = json.dumps({"itemList": [{"id": "a"}, {"noid": 1}, "x"], "pageCount": 1}).encode()
+    out = list(spider.parse(TextResponse(url="https://x/?page=1", body=body, encoding="utf-8"), page=1))
+    assert spider._ids == ["a"]
+    assert spider.crawler.stats.get_value("ptv_fi/list/ids") == 1
+    assert out and all(getattr(r, "errback", None) is not None for r in out)
+
+
+def test_batch_org_join_shared_org():
+    # Two channels sharing one organizationId wait in the pending window and
+    # both resolve once the org batch returns (end-to-end join, no seeding).
+    import json
+
+    from scrapy.http import JsonRequest, TextResponse
+
+    spider = make_spider()
+    a = channel("A-linna", org="org-9")
+    a["id"] = "aaaaaaaa-1111-4111-8111-111111111111"
+    b = channel("B-talo", org="org-9")
+    b["id"] = "bbbbbbbb-1111-4111-8111-111111111111"
+    body = json.dumps([a, b]).encode()
+    out = list(spider.parse_batch(TextResponse(url="https://x/list", body=body, encoding="utf-8")))
+    assert len([r for r in out if isinstance(r, JsonRequest)]) == 1
+    assert sorted(spider._pending) == ["org-9"]
+    org_body = json.dumps(
+        [{"id": "org-9", "organizationNames": [{"language": "fi", "value": "Testiyhdistys ry"}]}]
+    ).encode()
+    items = list(
+        spider.parse_orgs(TextResponse(url="https://x/Organization/list?guids=org-9", body=org_body, encoding="utf-8"))
+    )
+    assert len(items) == 2
+    assert all(i.get("operator") == "Testiyhdistys ry" for i in items)
+    assert all(i["extras"].get("operator:type") == "private" for i in items)
+
+
+def test_org_partial_response_flushes_missing():
+    # Orgs requested but unreturned must not trap their items: leftovers
+    # flush operator-less on the success path like the failure paths.
+    import json
+
+    from scrapy.http import TextResponse
+
+    spider = make_spider()
+    item = spider.parse_channel(channel("X", org="org-9"))
+    spider._pending["org-9"] = [item]
+    body = json.dumps([{"id": "org-1", "organizationNames": [{"language": "fi", "value": "A Oy"}]}]).encode()
+    out = list(
+        spider.parse_orgs(
+            TextResponse(url="https://x/Organization/list?guids=org-1,org-9", body=body, encoding="utf-8")
+        )
+    )
+    assert item in out
+    assert item.get("operator") is None
+    assert spider._pending == {}
+
+
+def test_channel_without_id_drops():
+    # Id-less detail rows cannot key refs: drop with a count, never KeyError.
+    spider = make_spider()
+    ch = channel("X")
+    del ch["id"]
+    assert spider.parse_channel(ch) is None
+    assert spider.crawler.stats.get_value("ptv_fi/dropped/no_id") == 1
+
+
+def test_crawl_errbacks_count_and_continue():
+    # Dead detail batches count; dead list pages continue with collected ids,
+    # exactly once no matter the failure order.
+    spider = make_spider()
+    failure = SimpleNamespace(request=SimpleNamespace(url="https://x/list?guids=a"))
+    assert list(spider.errback_batch(failure)) == []
+    assert spider.crawler.stats.get_value("ptv_fi/batch/failed") == 1
+    spider._ids = ["a", "b"]
+    first = list(spider.errback_list(failure))
+    assert len(first) == 1
+    assert spider.crawler.stats.get_value("ptv_fi/page/failed") == 1
+    assert list(spider.errback_list(failure)) == []
+    assert len(first) == 1
+
+
+def test_closed_loses_to_real_spans_either_order():
+    # Closed marks lose to real spans deterministically, entry order aside.
+    spans = {
+        "serviceHourType": "DaysOfTheWeek",
+        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "09:00:00", "to": "11:00:00"}],
+    }
+    closed = {
+        "serviceHourType": "DaysOfTheWeek",
+        "isClosed": True,
+        "openingHour": [{"dayFrom": "Monday", "dayTo": ""}],
+    }
+    for hours in ([spans, closed], [closed, spans]):
+        ch = channel("Avoin piste")
+        ch["serviceHours"] = [dict(e) for e in hours]
+        item = parsed(make_spider(), ch)
+        assert item["opening_hours"].as_opening_hours() == "Mo 09:00-11:00"
+
+
+def test_rantaraitti_blocked_from_rescue():
+    # Sports-catalogue ontology must not type the trail: blocked names stay
+    # generic even when the ontology names a pitch sport.
+    spider = make_spider()
+    ch = channel("Espoon Rantaraitti")
+    assert spider._rescue_blocked(ch)
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "pallokentät"}]}]
+    item = parsed(spider, ch)
+    assert item.get_tag("leisure") is None
+
+
+def test_supported_housing_upgrades_bare_social():
+    # The upgrade arm itself: bare social + supported-housing wording files
+    # assisted living (keeps and skips pinned separately).
+    spider = make_spider()
+    ch = channel("X", descriptions=[{"language": "fi", "value": "Tuettua asumista tarjolla"}])
+    item = Feature()
+    item["extras"]["amenity"] = "social_facility"
+    assert spider._maybe_upgrade_housing(item, ch, Categories.SOCIAL_FACILITY) == Categories.ASSISTED_LIVING
+    assert item["extras"]["social_facility"] == "assisted_living"
+    assert spider.crawler.stats.get_value("ptv_fi/category/supported_housing_upgrade") == 1
+
+
+def test_hours_dated_and_always_open_counters():
+    # Dated deviations and availability-vs-timetable races count their lanes.
+    spider = make_spider()
+    ch = channel("Avoin piste")
+    ch["serviceHours"] = [
+        {
+            "serviceHourType": "DaysOfTheWeek",
+            "validFrom": "2027-01-01T00:00:00",
+            "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
+        }
+    ]
+    assert spider._hours(ch, None) is None
+    assert spider.crawler.stats.get_value("ptv_fi/hours/dated") == 1
+    ch2 = channel("Päivystävä piste")
+    ch2["serviceHours"] = [
+        {"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True},
+        {
+            "serviceHourType": "DaysOfTheWeek",
+            "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
+        },
+    ]
+    assert spider._hours(ch2, None) is not None
+    assert spider.crawler.stats.get_value("ptv_fi/hours/always_open_with_spans") == 1
+
+
+def test_municipality_beats_post_office_end_to_end():
+    # _city_src precedence through the full channel: visit municipality wins
+    # over the post office, not just in the helper.
+    spider = make_spider()
+    ch = channel("X", office="KYLÄNPÄÄ")
+    ch["addresses"][0]["streetAddress"]["municipality"] = {"name": [{"language": "fi", "value": "Espoo"}]}
+    assert parsed(spider, ch).get("city") == "Espoo"
+
+
+def test_koululainen_pupils_are_not_schools():
+    # Pupil words share the stem but name no building (SYNTHETIC guard test:
+    # zero feed rows, sibling GROUP_FACILITY_RE already guards lai).
+    assert cat(make_spider(), "Koululaisen aamu- ja iltapäivätoiminta")[0] != Categories.SCHOOL
+
+
+def test_tullinaukio_squares_are_not_customs():
+    # Genitive square compounds never file as customs (SYNTHETIC: zero feed
+    # rows; stretches the tulli blocklist to aukio/naukio).
+    assert cat(make_spider(), "Tullinaukio")[0] is None
+
+
+def test_bare_lukio_health_unit():
+    # Bare school words under wellbeing areas are the student-health unit:
+    # the guard reads string-start, not just post-space (SYNTHETIC shape).
+    spider = make_spider()
+    item = parsed(spider, channel("Lukio"), "Keski-Suomen hyvinvointialue")
+    assert spider._tag(item, "amenity") == "clinic"
+
+
+def test_coverage_sister_match_ignores_case():
+    # Municipality match in the paren-coverage branch reads case-insensitively
+    # like the rest of the city comparisons (SYNTHETIC casing).
+    spider = make_spider()
+    full = "Palvelu, helsinki (Nousiainen, Laitila)"
+    assert spider._split_paren(full, "Helsinki") == ("Palvelu", None, full)
+
+
+def test_operator_word_reads_past_parens():
+    # Trailing parenthesised qualifiers hide the marker from the end anchor:
+    # detection reads past them (round-17 B class: NNKY/Pokali/Daisy).
+    spider = make_spider()
+    assert spider._has_operator_word("Imatran keilahalli Oy (Helsinki)")
+    assert spider._has_operator_word("Daycare Daisy Oy (Ylioppilaskylä 25)")
+    assert not spider._has_operator_word("Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)")
