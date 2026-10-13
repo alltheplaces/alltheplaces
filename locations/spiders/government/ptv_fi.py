@@ -788,6 +788,7 @@ class PtvFISpider(Spider):
             {"bunker_type": "bomb_shelter"},
         ),  # Väestönsuoja (civil-defence shelters)
         ("yhteiskalliosuoja", Categories.MILITARY_BUNKER, {"bunker_type": "bomb_shelter"}),
+        ("korsu", Categories.MILITARY_BUNKER, None),  # Korsu (war-history dugouts, e.g. Salpa Line)
     )
     # tori matches standalone and market compounds (kauppatori) but never
     # auditorio/laboratorio/toimisto, which do not end in tori.
@@ -4113,7 +4114,7 @@ class PtvFISpider(Spider):
         (4, 3, r"[A-Za-z]", r"[A-Za-z]", 0, "MID-LAST"),
         (4, 3, r"(?i:as)", r"\d+[A-Za-z]?", re.IGNORECASE, "MID LAST"),
         (3, 2, None, r"[A-Za-z]{1,2}(?:-[A-Za-z]{1,2})?|\d+", 0, "LAST"),
-        (3, 2, None, r"[A-Za-z]{1,2}\d+[A-Za-z]?|[A-Za-z]-(?:ovi|rappu)", re.IGNORECASE, "LAST"),
+        (3, 2, None, r"[A-Za-z]{1,2}\d+[A-Za-z]?(?:-\d+[A-Za-z]?)?|[A-Za-z]-(?:ovi|rappu)", re.IGNORECASE, "LAST"),
     )
     # Tails describing everything but the street address. Finnish floor
     # text strips from the address string; the number is kept separately

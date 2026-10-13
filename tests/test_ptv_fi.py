@@ -4049,6 +4049,21 @@ def test_shelters_outrank_stations():
     assert cat(make_spider(), "Kampin metroaseman yleinen väestönsuoja")[0] == Categories.MILITARY_BUNKER
 
 
+def test_korsu_dugouts_are_bunkers():
+    # Salpalinjan teräsbetoninen korsu (aa8503c3, round-18 C): war-history
+    # dugouts file military=bunker like the other shelters; no bunker_type
+    # guess (a combat dugout is not a bomb_shelter).
+    spider = make_spider()
+    assert cat(spider, "Salpalinjan teräsbetoninen korsu") == (Categories.MILITARY_BUNKER, None)
+
+
+def test_stair_range_units_parse():
+    # Kauppakatu 27b A2-4 (416450a7, round-18 A): staircase-letter +
+    # apartment-range tails parse to housenumber + unit, not freeform.
+    spider = make_spider()
+    assert spider._split_addr_tokens("Kauppakatu 27b A2-4".split()) == ("Kauppakatu", "27b", "A2-4")
+
+
 def test_station_compounds_file_as_facilities():
     spider = make_spider()
     assert cat(spider, "Vesilahden lähiasema")[0] == Categories.CLINIC
