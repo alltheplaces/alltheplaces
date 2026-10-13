@@ -4061,6 +4061,28 @@ def test_dangling_shown_skips_positional_strip():
     )
 
 
+def test_city_and_street_tails_strip_from_translations():
+    # Trailing municipality tails ("Socialbyrå, S:t Karins") and street
+    # tails ("Parkeringbiljettautomat 99, Nervanderinkatu 3") repeat
+    # emitted tags; the applied name's rendering stays. A city-only
+    # remainder ("Letala" for Koivukoto) drops the translation entirely.
+    spider = make_spider()
+    item = parsed(spider, channel("Sosiaalitoimisto, Kaarina", sv="Socialbyrå, S:t Karins", office="KAARINA"))
+    assert item["extras"].get("name:sv") == "Socialbyrå"
+    item = parsed(spider, channel("Koivukoto, Laitila", sv="Koivukoto, Letala", office="LAITILA"))
+    assert item["extras"].get("name:sv") is None
+    item = parsed(
+        spider,
+        channel(
+            "Pysäköintilippuautomaatti 99, Nervanderinkatu 3, korttimaksu",
+            sv="Parkeringbiljettautomat 99, Nervanderinkatu 3",
+            en="Parking ticket machine, Kaisaniemenranta 2",
+        ),
+    )
+    assert item["extras"].get("name:sv") == "Parkeringbiljettautomat 99"
+    assert item["extras"].get("name:en") == "Parking ticket machine"
+
+
 def test_bird_platforms_are_viewpoints():
     # "Viikki-Vanhankaupunginlahti, Lammassaaren esteetön lintulava" filed
     # park; a bird platform is a viewpoint like its lintutorni siblings.

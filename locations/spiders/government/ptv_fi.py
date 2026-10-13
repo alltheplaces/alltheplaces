@@ -4099,9 +4099,11 @@ class PtvFISpider(Spider):
         parsed = bool(official or cleaned != signed)
         if parsed:
             item["extras"]["official_name"] = signed
-        self._apply_translations(item, names, shown, signed)
+        self._apply_translations(item, names, shown, signed, city_src)
 
-    def _apply_translations(self, item: Feature, names: dict[str, str], shown: str | None, signed: str | None) -> None:
+    def _apply_translations(
+        self, item: Feature, names: dict[str, str], shown: str | None, signed: str | None, city: str | None = None
+    ) -> None:
         # Feed translations describe the applied service (Tykslab for
         # Laboratorio): always name:sv/name:en so renderers see them.
         # A copy of the signed form is not a translation
@@ -4112,7 +4114,7 @@ class PtvFISpider(Spider):
             if translation and translation != shown and translation != signed:
                 cleaned_tr = re.sub(r"\s*\d+\*\s*$", "", translation).strip()
                 cleaned_tr = re.sub(r",?\s*(?:[PN]\s*)?\d+\s*°.*$", "", cleaned_tr).strip()
-                cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, item.get("located_in"))
+                cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, item.get("located_in"), city)
                 if "/" in cleaned_tr:
                     split_tr = self._split_bilingual(cleaned_tr, shown, signed, item.get("located_in"))
                     if split_tr is None:
@@ -4126,12 +4128,41 @@ class PtvFISpider(Spider):
                         item["extras"][f"name:{lang}"] = cleaned_tr
 
     @staticmethod
-    def _strip_fi_duplicates(cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
+    def _is_city_tail(segment: str, city: str | None) -> bool:
+        # Trailing municipality tails repeat the structured city.
+        return bool(city) and bool(segment.strip()) and segment.strip().casefold() == city.strip().casefold()
+
+    def _strip_fi_duplicates(
+        self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None, city: str | None = None
+    ) -> str:
         # Exact Finnish duplicates ride along in feed translations
         # ("Korsverk (Ristikko)", "Aninkaisten koulu (Aninkainen
         # School) Gym A"): parenthesised or leading copies of the
         # applied/signed/venue name drop; the translated rest stays
         # verbatim (parens around translations are the feed's own).
+        # Comma tails duplicating split-off content drop positionally:
+        # located venues ("Daghemskök, Päiväkoti Jollas"), municipality
+        # tails ("Socialbyrå, S:t Karins") and street tails
+        # ("Parkeringbiljettautomat 99, Nervanderinkatu 3") repeat
+        # emitted tags, so the applied name's rendering stays.
+        if "," in cleaned_tr and "," in (signed or ""):
+            fi_segs = [s.strip() for s in (signed or "").split(",")]
+            tr_segs = [s.strip() for s in cleaned_tr.split(",")]
+            if (
+                len(fi_segs) == len(tr_segs)
+                and len(tr_segs) >= 2
+                and not re.search(r",\s*[A-ZÅÄÖ][a-zåäö-]+\s*$", shown or "")
+            ):
+                kept = [t for t, f in zip(tr_segs, fi_segs) if f != located and not self._is_city_tail(f, city)]
+                if kept and len(kept) < len(tr_segs):
+                    cleaned_tr = ", ".join(kept)
+        street_stripped = re.sub(
+            r",\s*\S*(?:tie|katu|kuja|polku|väylä|raitti|ranta|kaari|väg|gata|gränd|stig)\s+\d+\s*$", "", cleaned_tr
+        ).strip()
+        if street_stripped and street_stripped != cleaned_tr:
+            # Trailing street tails moved to the address ("...,
+            # Nervanderinkatu 3"): the name translation stays.
+            cleaned_tr = street_stripped
         for form in dict.fromkeys([s for s in (shown, signed, located) if s]):
             cleaned_tr = re.sub(r"\s*\(" + re.escape(form) + r"\)", "", cleaned_tr).strip()
             if " / " not in cleaned_tr:
@@ -4153,7 +4184,7 @@ class PtvFISpider(Spider):
                 and len(tr_segs) >= 2
                 and not re.search(r",\s*[A-ZÅÄÖ][a-zåäö-]+\s*$", shown or "")
             ):
-                kept = [t for t, f in zip(tr_segs, fi_segs) if f != located]
+                kept = [t for t, f in zip(tr_segs, fi_segs) if f != located and not self._is_city_tail(f, city)]
                 if kept and len(kept) < len(tr_segs):
                     cleaned_tr = ", ".join(kept)
         return re.sub(r"\s{2,}", " ", cleaned_tr).strip()
