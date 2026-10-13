@@ -2569,21 +2569,24 @@ class PtvFISpider(Spider):
             # Utility buildings and orienteering controls stay generic
             # whatever the description says.
             return None
+        if self.ART_RE.search(text):
+            # Documented public art wins over institutional history
+            # ("K17" art space in a former psychiatric-hospital greenhouse
+            # mentions both; the art space is the POI).
+            return Categories.TOURISM_ARTWORK
         if re.search(r"(psykiatr|poliklinikk)", text):
             # Psychiatric outpatient units ("Tays Hallituskatu") are
             # clinics, not social facilities.
             return Categories.CLINIC
-        if re.search(r"(päivyst|kiireellis|akuutti)", text):
+        if re.search(r"(kiireellis|akuutti)", text):
             # Urgent-care desks ("Päivystyksellinen kuulokojehuolto")
-            # are urgent clinics.
+            # are urgent clinics. Plain on-call duty ("päivystys" at
+            # utilities, weekly volunteers) is not urgency.
             return Categories.CLINIC_URGENT
         if any(word in text for word in self.CARE_WORDS):
             if self.CARE_HOUSING_RE.search(text):
                 return Categories.ASSISTED_LIVING
             return Categories.SOCIAL_FACILITY
-        if self.ART_RE.search(text):
-            # Documented public art with an opaque name ("Kala ja poika").
-            return Categories.TOURISM_ARTWORK
         return None
 
     def _split_comma_street_head(
@@ -3379,6 +3382,9 @@ class PtvFISpider(Spider):
             return Categories.CLINIC, None
         return None
 
+    # Group nouns describing activities. Performing troupes (orkesteri)
+    # are venues, never activities: orchestras file via their services.
+    GROUP_NOUNS = ("ryhmä", "kerho", "kuoro", "joukkue", "parlamentti")
     # Group-noun compounds where the group IS the institution: the
     # facility prefix files via the table, never generic ("Päiväkotiryhmä
     # Vekkula" is the daycare; "Iltapäiväkerho" is the after-school club).
@@ -3398,12 +3404,19 @@ class PtvFISpider(Spider):
         # calls this when the name tier left the row generic.
         for token in lowered.split():
             clean = token.strip(",.;:")
-            m = re.search(r"[\w-]+(ryhmä|kerho|kuoro|orkesteri|joukkue|parlamentti)$", clean)
+            m = re.search(r"[\w-]+(" + "|".join(self.GROUP_NOUNS) + r")$", clean)
             if not m:
                 continue
-            if clean in ("leikkikerho", "leikkikoulu"):
+            if clean.endswith(("leikkikerho", "leikkikoulu")):
+                # Playgroup compounds ("Urheiluleikkikerho Kanervat") are
+                # kindergartens via the table, never activities.
                 continue
             if any(word in clean for word in ("vertais", "seniori", "sydän", "asumis", "4h-kerho")):
+                continue
+            if clean.startswith("pien"):
+                # Size qualifiers ("pienryhmä") carry no venue info: the
+                # activity/institution filing stands ("Kuparivuoren aamu- ja
+                # iltapäivätoiminta ... pienryhmä" stays the after-school club).
                 continue
             prefix = clean[: m.start(1)]
             if not prefix:
@@ -3451,7 +3464,7 @@ class PtvFISpider(Spider):
             remainder = " ".join(
                 token.strip(",.;:")
                 for token in lowered.split()
-                if not re.search(r"[\w-]+(ryhmä|kerho|kuoro|orkesteri|joukkue|parlamentti)$", token.strip(",.;:"))
+                if not re.search(r"[\w-]+(" + "|".join(self.GROUP_NOUNS) + r")$", token.strip(",.;:"))
             )
             if any(word in remainder for word in self.GROUP_DESK_AMBIENT):
                 # Desk nouns outside the group token file the desk

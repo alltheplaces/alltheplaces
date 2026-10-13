@@ -2556,6 +2556,14 @@ def test_group_institutions_file_via_table():
     # leave the venue filing alone.
     assert cat(spider, "Vauvaperheryhmä Untuva toimipiste")[0] == Categories.OFFICE_GOVERNMENT
     assert cat(spider, "Kuntosali, ryhmä 1")[0] == Categories.GYM
+    # Size-qualified groups keep the institution filing; playgroup compounds
+    # are kindergartens; orchestras are venues, never activities.
+    assert (
+        cat(spider, "Kuparivuoren aamu- ja iltapäivätoiminta sekä iltapäivätoiminnan pienryhmä")[0]
+        == Categories.COMMUNITY_CENTRE
+    )
+    assert cat(spider, "Urheiluleikkikerho Kanervat")[0] == Categories.KINDERGARTEN
+    assert not spider._is_group_activity("helsingin kaupunginorkesteri")
 
 
 def test_group_activities_stay_generic():
