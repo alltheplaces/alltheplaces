@@ -105,6 +105,6 @@ class OkaidiFRSpider(SitemapSpider):
                 oh.add_range(DAYS[time_frame["DayOfWeek"] - 1], open_time, close_time)
         item["opening_hours"] = oh
 
-        if not shop.get("IsActive", True):
+        if shop.get("IsActive") is False:
             set_closed(item)
         return item
