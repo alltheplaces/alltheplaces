@@ -2822,6 +2822,275 @@ def test_round16_translation_batch():
     )
 
 
+def test_org_failed_flushes_pending_operator_less():
+    # A failed org fetch still yields waiting items, operator unset, and
+    # counts the failure; nothing is lost with the window.
+    from locations.items import Feature as _F
+
+    spider = make_spider()
+    item = _F()
+    item["ref"] = "r1"
+    spider._pending["org-1"] = [item]
+    failure = SimpleNamespace(request=SimpleNamespace(url="https://example.fi/api?guids=org-1"))
+    out = list(spider.errback_orgs(failure))
+    assert len(out) == 1
+    assert "operator" not in out[0]
+    assert spider.crawler.stats.get_value("ptv_fi/org/failed") == 1
+
+
+def test_visit_address_prefers_single_and_postal_drops():
+    # Location/Single beats Multi/Postal; a postal-only channel parses to
+    # None with a counter.
+    spider = make_spider()
+    single = {"type": "Location", "subType": "Single", "streetAddress": {"a": 1}}
+    multi = {"type": "Location", "subType": "Multi", "streetAddress": {"b": 2}}
+    postal = {"type": "Postal", "subType": "Single", "streetAddress": {"c": 3}}
+    assert spider._visit_address({"addresses": [postal, multi, single]}) == single
+    ch = channel("X")
+    ch["addresses"] = [postal]
+    assert parsed(spider, ch) if False else spider.parse_channel(ch) is None
+    assert spider.crawler.stats.get_value("ptv_fi/dropped/postal_only") == 1
+
+
+def test_dropped_non_place_names():
+    # Mobile/bookmobile/test/crosswalk/track names never become POIs.
+    spider = make_spider()
+    assert spider._is_dropped_name("Etsivä yksikkö") == "non_place/mobile"
+    assert spider._is_dropped_name("Kirjastoauto Keskusta") == "non_place/bookmobile"
+    assert spider._is_dropped_name("Kuvan testipiste") == "non_place/test_data"
+    assert spider._is_dropped_name("Mannerheimintien suojatie") == "non_place/crosswalk"
+    assert spider._is_dropped_name("Pirkkolan kuntorata") == "non_place/track"
+    ch = channel("Etsivä yksikkö")
+    assert spider.parse_channel(ch) is None
+    assert spider.crawler.stats.get_value("ptv_fi/dropped/non_place/mobile") == 1
+
+
+def test_phone_hours_dropped():
+    # Phone availability is not visit hours; only staffed spans render.
+    spider = make_spider()
+    oh = spider._hours(
+        {
+            "serviceHours": [
+                {
+                    "serviceHourType": "DaysOfTheWeek",
+                    "additionalInformation": [{"value": "Puhelinaika"}],
+                    "openingHour": _spans("08:00:00", "10:00:00"),
+                },
+                {
+                    "serviceHourType": "DaysOfTheWeek",
+                    "additionalInformation": [{"value": "Terveydenhoitaja"}],
+                    "openingHour": _spans("08:00:00", "16:00:00"),
+                },
+            ]
+        },
+        None,
+    )
+    assert oh.as_opening_hours() == "Mo-Fr 08:00-16:00"
+    assert spider.crawler.stats.get_value("ptv_fi/hours/phone_only") == 1
+
+
+def test_supported_housing_keeps_subtype_and_skips_other_categories():
+    # Group homes keep their subtype; offices/clinics/schools never upgrade
+    # from feed wording alone.
+    from locations.items import Feature as _F
+
+    spider = make_spider()
+    ch = channel("X", descriptions=[{"language": "fi", "value": "tuettua asumista"}])
+    item = _F()
+    item["extras"]["amenity"] = "social_facility"
+    item["extras"]["social_facility"] = "group_home"
+    assert spider._maybe_upgrade_housing(item, ch, Categories.SOCIAL_FACILITY) == Categories.SOCIAL_FACILITY
+    assert item["extras"]["social_facility"] == "group_home"
+    assert spider.crawler.stats.get_value("ptv_fi/category/supported_housing_kept") == 1
+    for cat in (Categories.OFFICE_GOVERNMENT, Categories.CLINIC, Categories.SCHOOL):
+        probe = _F()
+        assert spider._maybe_upgrade_housing(probe, ch, cat) == cat
+
+
+def test_slash_area_and_unit_keep_whole():
+    # Coverage areas and bare units on slashes are not venues.
+    spider = make_spider()
+    assert split(spider, "Puheterapia / Tikkurilan alue") == ("Puheterapia / Tikkurilan alue", None, None)
+    assert split(spider, "Fysioterapia / Himangan yksikkö") == ("Fysioterapia / Himangan yksikkö", None, None)
+
+
+def test_slash_paren_address_tail():
+    # Parenthesised street addresses ride along, never locate.
+    spider = make_spider()
+    assert split(spider, "Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)") == (
+        "Musiikkipäiväkoti Sinikello",
+        None,
+        "Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)",
+    )
+
+
+def test_slash_venue_org_stripped():
+    # Operator organisations inside the venue resolve to the venue part.
+    spider = make_spider()
+    assert spider._strip_venue_org("Steiner-koulu, Helsingin Rudolf Steiner -yhdistys") == "Steiner-koulu"
+
+
+def test_slash_bay_venue():
+    # Bay-headed facility pairs name the facility, bay locates.
+    spider = make_spider()
+    assert split(spider, "Tahvonlahti / Hiekkakenttä") == (
+        "Hiekkakenttä",
+        "Tahvonlahti",
+        "Tahvonlahti / Hiekkakenttä",
+    )
+
+
+def test_colon_branch_files():
+    # Non-school colon desks file the branch, keep the name.
+    spider = make_spider()
+    item = parsed(spider, channel("Rakennusvalvontatoimisto: Sampola"))
+    assert item["branch"] == "Sampola"
+    assert item["name"] == "Rakennusvalvontatoimisto: Sampola"
+
+
+def test_branch_dup_name_and_city_drop():
+    # Branches repeating the name or the municipality are not branches.
+    spider = make_spider()
+    item = parsed(spider, channel("Toimisto: Sampola"))
+    item["name"] = "Sampola"
+    spider._apply_branch(item, "Toimisto: Sampola", "Sampola", None, None)
+    assert "branch" not in item
+    spider._apply_branch(item, "Toimisto: Pöytyä", "Toimisto: Pöytyä", None, "Pöytyä")
+    assert "branch" not in item
+    assert spider.crawler.stats.get_value("ptv_fi/name/branch_dup_city") == 1
+
+
+def test_comma_coverage_list_peels():
+    # Multi-municipality coverage lists peel to the head service.
+    spider = make_spider()
+    assert split(spider, "Kuntoutusohjaus, Kaarina, Lieto", "Kaarina") == (
+        "Kuntoutusohjaus",
+        None,
+        "Kuntoutusohjaus, Kaarina, Lieto",
+    )
+
+
+def test_paren_and_comma_memorials_keep_whole():
+    # Memorial title + designation is one artwork, never split.
+    spider = make_spider()
+    assert split(spider, "Mannerheimin muistomerkki, Helsinki") == (
+        "Mannerheimin muistomerkki, Helsinki",
+        None,
+        None,
+    )
+
+
+def test_slash_sculpture_kept():
+    # Single sculpture designations stay whole, never strand fragments.
+    spider = make_spider()
+    assert split(spider, "Moduli / Rakentajaveistos") == ("Moduli / Rakentajaveistos", None, None)
+
+
+def test_bilingual_operator_tail_strips_to_lead():
+    # Two-segment translations with a located second half keep the lead.
+    spider = make_spider()
+    assert (
+        spider._split_bilingual(
+            "After-school activities / Helsinki Christian School",
+            "Iltapäivätoiminta",
+            "Iltapäivätoiminta / Helsingin kristillinen koulu",
+            "Helsingin kristillinen koulu",
+        )
+        == "After-school activities"
+    )
+
+
+def test_hours_edge_branches():
+    # Unknown days, bad ranges and exceptional types skip with counters;
+    # overlapping spans merge; overnight ranges render.
+    spider = make_spider()
+    oh = spider._hours(
+        {
+            "serviceHours": [
+                {"serviceHourType": "Exceptional", "openingHour": _spans("08:00:00", "16:00:00")},
+                {
+                    "serviceHourType": "DaysOfTheWeek",
+                    "openingHour": [{"dayFrom": "Funday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
+                },
+                {
+                    "serviceHourType": "DaysOfTheWeek",
+                    "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "xx", "to": "16:00:00"}],
+                },
+                {
+                    "serviceHourType": "DaysOfTheWeek",
+                    "openingHour": [
+                        {"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "12:00:00"},
+                        {"dayFrom": "Monday", "dayTo": "", "from": "10:00:00", "to": "16:00:00"},
+                    ],
+                },
+                {
+                    "serviceHourType": "OverMidnight",
+                    "openingHour": [{"dayFrom": "Friday", "dayTo": "", "from": "22:00:00", "to": "06:00:00"}],
+                },
+            ]
+        },
+        None,
+    )
+    rendered = oh.as_opening_hours()
+    assert "Mo 08:00-16:00" in rendered
+    assert "22:00" in rendered
+    assert spider.crawler.stats.get_value("ptv_fi/hours/unknown_day") == 1
+    assert spider.crawler.stats.get_value("ptv_fi/hours/bad_range") == 1
+    assert spider.crawler.stats.get_value("ptv_fi/hours/skipped_type/Exceptional") == 1
+    assert spider.crawler.stats.get_value("ptv_fi/hours/merged") == 1
+
+
+def test_coords_dropped_state():
+    # Placeholder coordinate states never become points.
+    spider = make_spider()
+    assert spider._coords({"latitude": "1", "longitude": "2", "coordinateState": "NotReceived"}) is None
+    assert spider._coords({"latitude": "1", "longitude": "2", "coordinateState": "Failed"}) is None
+    assert spider.crawler.stats.get_value("ptv_fi/coords/dropped_state") == 2
+
+
+def test_unknown_post_office_drops():
+    # Register rows without a real visit place never parse.
+    spider = make_spider()
+    assert spider.parse_channel(channel("X", office="TUNTEMATON")) is None
+    assert spider.crawler.stats.get_value("ptv_fi/dropped/non_place/mobile_address") == 1
+
+
+def test_clean_located_drops():
+    # Bare info points, host tails and city duplicates are not venues.
+    spider = make_spider()
+    assert spider._clean_located("Infopiste") is None
+    assert spider._clean_located_value("Helsinki", "Helsinki") is None
+
+
+def test_number_venue_tail_and_place_station():
+    # Venue notes leave the number field; station-like tails never route
+    # numberless roads to addr:place.
+    spider = make_spider()
+    item = addressed(spider, "Tie", "4 / Espoon Keskuspuisto")
+    assert item["housenumber"] == "4"
+    item = addressed(spider, "Pasilan asema", "")
+    assert item["street_address"] == "Pasilan asema"
+    assert "addr:place" not in (item.get("extras") or {})
+
+
+def test_slash_registry_tail_cleans():
+    # Registry boilerplate tails clean to the venue head.
+    spider = make_spider()
+    assert spider._clean_located_value("Kyläryhmä -palvelun järjestämispaikka, Virolahti 2", None) == "Kyläryhmä"
+
+
+def test_room_building_generic_combo():
+    # Untyped heads with utility-building tails stay generic, no rescue type.
+    spider = make_spider()
+    assert spider._carve_room_tail("Alue / Huoltorakennus") == (None, None)
+
+
+def test_health_group_keeps_filing():
+    # Health-context groups fall through to the table instead of generic.
+    spider = make_spider()
+    assert cat(spider, "Terveyskeskusryhmä")[0] == Categories.CLINIC
+
+
 def test_animal_protection_desk_is_office():
     spider = make_spider()
     assert cat(spider, "Eläinsuojelu")[0] == Categories.OFFICE_GOVERNMENT
