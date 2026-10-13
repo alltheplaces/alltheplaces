@@ -15,7 +15,7 @@ class BurgerKingRUSpider(PlaywrightSpider):
     item_attributes = {"brand": "Бургер Кинг", "brand_wikidata": "Q177054"}
     allowed_domains = ["orderapp.burgerkingrus.ru"]
     api_url = "https://orderapp.burgerkingrus.ru/gateway/restaurant-composition/api/v7/restaurants/search?lon=37.621202&lat=55.753544&limit=2000"
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.api_url, cookies={"spid": "", "spsc": ""})
