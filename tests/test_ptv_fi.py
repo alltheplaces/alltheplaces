@@ -4067,7 +4067,11 @@ def test_login_and_mail_urls_fall_back():
     assert spider.LOGIN_URL_RE.search("https://hushag-sso.hus.fi/haglogin/idp-discovery.jsp")
     assert spider.LOGIN_URL_RE.search("https://aromimenu.cgisaas.fi/X")
     assert spider.LOGIN_URL_RE.search("https://tyollisyyskokeilu@raahe.fi/")
+    assert spider.LOGIN_URL_RE.search("https://eur06.safelinks.protection.outlook.com/?url=x")
     assert not spider.LOGIN_URL_RE.search("https://www.kirjasto.fi/")
+    assert not spider.LOGIN_URL_RE.search(
+        "https://www.hel.fi/fi/sosiaali-ja-terveyspalvelut/vammaispalvelut/sosiaalityo/"
+    )
     ch = channel("X")
     ch["webPages"] = [
         {"url": "https://aromimenu.cgisaas.fi/X"},
