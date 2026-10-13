@@ -419,12 +419,13 @@ def test_comma_coverage_dropped():
     assert official is not None
 
 
-def test_comma_dept_number_dropped():
-    # Katriinan toimipiste, osasto 5.
+def test_comma_ward_number_kept():
+    # Katriinan toimipiste, osasto 5: ward qualifiers are part of the signed
+    # name (round-14 ward doctrine), never stranded from it.
     name, located, official = split(make_spider(), "Katriinan toimipiste, osasto 5")
-    assert name == "Katriinan toimipiste"
+    assert name == "Katriinan toimipiste, osasto 5"
     assert located is None
-    assert official is not None
+    assert official is None
 
 
 def test_comma_descriptor_peeled():
@@ -1645,7 +1646,8 @@ def test_shore_facility_bail():
     assert cat(spider, "Päiväkoti Ankkalampi Duckies, Herttoniemenranta")[0] == Categories.KINDERGARTEN
     assert cat(spider, "Kotihoito Lappeenranta Läntinen")[0] == Categories.SOCIAL_FACILITY
     assert cat(spider, "Saunalahden venesatama")[0] == Categories.MARINA
-    assert cat(spider, "Munkkiniemen uimaranta / Huoltorakennus")[0] is None
+    # Utility-building tails never pose as the POI: the venue head types it.
+    assert cat(spider, "Munkkiniemen uimaranta / Huoltorakennus")[0] == Categories.NATURAL_BEACH
 
 
 def test_phone_normalization():
@@ -2686,6 +2688,137 @@ def test_wgs84_degrees_used_directly():
     spider = make_spider()
     lon, lat = spider._coords({"latitude": "64.916102", "longitude": "25.47273", "coordinateState": "EnteredByUser"})
     assert (round(lon, 2), round(lat, 2)) == (25.47, 64.92)
+
+
+def test_round16_category_batch():
+    # Reviewer-verified filings: eating disorders, culture workshops, first
+    # homes, berry patches, Swedish theatres, cardiac units, clubhouses.
+    from locations.categories import Categories as C
+
+    spider = make_spider()
+    assert cat(spider, "Syömishäiriötiimi Verso")[0] == C.CLINIC
+    assert cat(spider, "Turun kulttuuripaja Casa")[0] == C.SOCIAL_FACILITY
+    assert cat(spider, "Ensikotitoiminta")[0] == C.SHELTER
+    assert cat(spider, "Marjapensaspaikka")[0] == C.ALLOTMENTS
+    assert cat(spider, "Lilla Teatern")[0] == C.THEATRE
+    assert cat(spider, "Teaterstudio Pasila")[0] == C.THEATRE
+    assert cat(spider, "Sydänyksikkö")[0] == C.CLINIC
+    assert cat(spider, "Karvetin klubitalo")[0] == C.COMMUNITY_CENTRE
+    assert cat(spider, "Klubitalo Roihulan asiakaspalvelu")[0] == C.OFFICE_GOVERNMENT
+    assert cat(spider, "Sähköauton latauspiste, Nuottaniemen venesatama")[0] == C.CHARGING_STATION
+    assert cat(spider, "Ravitsemusterapia, Kustavi, Laitila")[0] == C.CLINIC
+    assert cat(spider, "Venesatamat")[0] == C.MARINA
+    # Peer-delivered support never rescues to clinic.
+    ch = channel("Suvanto-vertaistiimi")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
+    assert spider._rescue_service(ch) is None
+    # Contact-detail tails strip to the owner in cleaning.
+    assert spider._clean_name("Turun kulttuuripaja Casan yhteystiedot") == "Turun kulttuuripaja Casan"
+
+
+def test_round16_rescue_batch():
+    # Supported housing beats diagnosis; trails never rescue; islands need
+    # channel services; health-area school names are health units.
+    from locations.categories import Categories as C
+    from locations.items import Feature
+
+    spider = make_spider()
+    ch = channel("Tervahovin asunnot")
+    ch["services"] = [{"service": {"name": "Tuettu asuminen, vammaispalvelut"}}]
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "palveluasuminen"}]}]
+    assert spider._resolve_fallback_category(Feature(), ch) == C.ASSISTED_LIVING
+    ch = channel("Espoon Rantaraitti")
+    ch["ontologyTerms"] = [
+        {"name": [{"language": "fi", "value": "ampumaradat"}]},
+        {"name": [{"language": "fi", "value": "kavelyreitit"}]},
+    ]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Porsas")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ulkoilusaaret"}]}]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Porsas")
+    ch["services"] = [{"service": {"name": "Ulkoilusaaret"}}]
+    assert spider._rescue_service(ch) == (None, {"place": "island"})
+    item = parsed(spider, channel("Joutsan lukio"), "Keski-Suomen hyvinvointialue")
+    assert spider._tag(item, "amenity") == "clinic"
+    assert item["operator"] == "Keski-Suomen hyvinvointialue"
+    item = parsed(
+        spider,
+        channel("X"),
+        "Pohjois-Savon Muisti ry / Pohjois-Savon Muistiluotsi",
+    )
+    assert item["operator"] == "Pohjois-Savon Muisti ry"
+
+
+def test_round16_split_batch():
+    # Venue/service re-filings: Peliryhmä city, Masku coverage, Katriinan
+    # wards, utility-building venues, Ilveskoti descriptors, Sivistys
+    # subunits, Kulttuuria programs, unspaced desks, paren descriptors.
+    spider = make_spider()
+    assert named(spider, "Peliryhmä Kuopio -palvelun järjestämispaikka", "Kuopio")[0] == "Peliryhmä"
+    assert (
+        named(spider, "Työllistymistä edistävät palvelut, Masku (Nousiainen, Laitila)", "Masku")[0]
+        == "Työllistymistä edistävät palvelut"
+    )
+    assert named(spider, "Katriinan toimipiste, osasto 7", "Vantaa")[0] == "Katriinan toimipiste, osasto 7"
+    assert named(spider, "Väinämöisenkenttä / Huoltorakennus", None)[0] == "Väinämöisenkenttä"
+    assert cat(spider, "Väinämöisenkenttä / Huoltorakennus")[0] == Categories.LEISURE_PITCH
+    assert named(spider, "Ilveskodin päivätoiminta, Hämeenlinna, Vammaisten päivätoiminta", "Hämeenlinna")[:2] == (
+        "Ilveskodin päivätoiminta",
+        None,
+    )
+    assert named(spider, "Sivistysosasto / Koulutus", None)[0] == "Sivistysosasto / Koulutus"
+    assert (
+        named(spider, "Kulttuuria, kahvetta ja kastamista Kiikassa -palvelun järjestämispaikka", "Sastamala")[0]
+        == "Kulttuuria, kahvetta ja kastamista Kiikassa"
+    )
+    assert named(spider, "Vihdin kunnantalo/ sosiaalitoimisto", "Vihti")[0] == "sosiaalitoimisto"
+    assert named(spider, "Rakennusvalvontatoimisto/lupasihteeri", None)[0] == "Rakennusvalvontatoimisto"
+    assert named(spider, "Touhula Helmiina (yksityinen päiväkoti)", "Ylivieska")[1] is None
+
+
+def test_round16_translation_batch():
+    # Venue/operator/coverage tails strip so translations render the applied
+    # name; word-aligned venue prefixes reduce to the applied tail.
+    spider = make_spider()
+    assert (
+        spider._split_bilingual(
+            "After-school activities / Helsinki Christian School / Association of X",
+            "Iltapäivätoiminta",
+            "Iltapäivätoiminta / Helsingin kristillinen koulu, Yhdistys",
+            "Helsingin kristillinen koulu",
+        )
+        == "After-school activities"
+    )
+    assert (
+        spider._split_bilingual(
+            "Röylän koulu / Ice-skating field",
+            "Luistelukenttä",
+            "Röylän koulun luistelukenttä",
+            "Röylän koulu",
+        )
+        == "Ice-skating field"
+    )
+    assert (
+        spider._strip_fi_duplicates(
+            "Hjälpmedelsutlåningen, Reso, Rusko",
+            "Apuvälinelainaamo",
+            "Apuvälinelainaamo, Raisio, Rusko",
+            None,
+            "Raisio",
+        )
+        == "Hjälpmedelsutlåningen"
+    )
+    assert (
+        spider._strip_fi_duplicates(
+            "Röylän koulu skridskobana",
+            "Luistelukenttä",
+            "Röylän koulun luistelukenttä",
+            "Röylän koulu",
+            "Espoo",
+        )
+        == "skridskobana"
+    )
 
 
 def test_animal_protection_desk_is_office():
@@ -3766,15 +3899,15 @@ def test_supported_housing_beats_diagnosis():
     assert item["extras"].get("social_facility") == "assisted_living"
 
 
-def test_utility_buildings_stay_generic():
-    # "... / Huoltorakennus" with Urheilukentät services: the building
-    # names the POI, not its services — rescue leaves it generic.
+def test_utility_building_venues_name_the_poi():
+    # "... / Huoltorakennus" with Urheilukentät services: the venue field
+    # names and types the POI, never the utility building.
     spider = make_spider()
     ch = channel("Eläintarhan urheilukenttä / Huoltorakennus 3")
     ch["services"] = [{"service": {"name": "Urheilukentät"}}]
     item = parsed(spider, ch)
-    assert item.get_tag("amenity") == "yes"
-    assert item.get_tag("leisure") is None
+    assert item.get_tag("leisure") == "pitch"
+    assert item["name"] == "Eläintarhan urheilukenttä"
 
 
 def test_room_tails_type_the_poi():
