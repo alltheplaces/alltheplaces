@@ -3471,6 +3471,19 @@ class PtvFISpider(Spider):
                 # ("Vauvaperheryhmä Untuva toimipiste" is the office;
                 # "Kuntosali, ryhmä 1" stays the gym).
                 return None
+            if any(stem in remainder for stem in self.GROUP_FACILITY_PREFIX):
+                # Institution nouns outside the group token file the
+                # institution ("Kämmenniemen päiväkoti Terälahden
+                # lisäryhmä" is the daycare). Host tails after a comma
+                # never type ("...-ryhmä, Veittijärven koulu -palvelun
+                # järjestämispaikka" stays generic).
+                head_remainder = " ".join(
+                    token.strip(",.;:")
+                    for token in lowered.split(",")[0].split()
+                    if not re.search(r"[\w-]+(" + "|".join(self.GROUP_NOUNS) + r")$", token.strip(",.;:"))
+                )
+                if any(stem in head_remainder for stem in self.GROUP_FACILITY_PREFIX):
+                    return None
             if not re.search(
                 r"(psykiatri|terapia|terveys|hoito|huolto|klinikka|sairaala|lääkäri|neuvola|mieli|päihde|vamma|hoiva|kuntout|rokot|hammas)",
                 lowered,

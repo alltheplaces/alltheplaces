@@ -2564,6 +2564,7 @@ def test_group_institutions_file_via_table():
     )
     assert cat(spider, "Urheiluleikkikerho Kanervat")[0] == Categories.KINDERGARTEN
     assert not spider._is_group_activity("helsingin kaupunginorkesteri")
+    assert cat(spider, "Kämmenniemen päiväkoti Terälahden lisäryhmä")[0] == Categories.KINDERGARTEN
 
 
 def test_group_activities_stay_generic():
