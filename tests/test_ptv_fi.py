@@ -4035,6 +4035,32 @@ def test_contact_placeholder_names_fall_back():
     assert names.get("sv") == "AMS"
 
 
+def test_bare_slash_twins_keep_both_sides():
+    # "Lauttasaaren silta/ Kaapelitehdas" (bare slash, no spaces) keeps
+    # both translation sides; only spaced-slash twins follow the split.
+    spider = make_spider()
+    item = parsed(
+        spider,
+        channel("Lauttasaaren silta/ Kaapelitehdas", sv="Drumsö bro/ Kabelfabriken"),
+    )
+    assert item["extras"].get("name:sv") == "Drumsö bro/ Kabelfabriken"
+
+
+def test_dangling_shown_skips_positional_strip():
+    # A mis-split shown ending in a comma fragment ("..., Helsingin")
+    # must not drive translation stripping; the full form stays.
+    spider = make_spider()
+    assert (
+        spider._split_bilingual(
+            "After-school activities / University of Helsinki",
+            "Viikin normaalikoulun iltapäivätoiminta, Helsingin",
+            "Iltapäivätoiminta / Viikin normaalikoulun iltapäivätoiminta, Helsingin yliopisto",
+            "Iltapäivätoiminta",
+        )
+        == "After-school activities / University of Helsinki"
+    )
+
+
 def test_bird_platforms_are_viewpoints():
     # "Viikki-Vanhankaupunginlahti, Lammassaaren esteetön lintulava" filed
     # park; a bird platform is a viewpoint like its lintutorni siblings.
