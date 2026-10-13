@@ -79,7 +79,7 @@ class FordSpider(Spider):
     def build_sales_cv_item(self, item: Feature) -> Feature:
         sales_item = deepcopy(item)
         sales_item["ref"] = f"{item['ref']}-CV"
-        apply_category(Categories.SHOP_TRUCK, sales_item)
+        apply_category(Categories.SHOP_CAR, sales_item)
         return sales_item
 
     def build_service_item(self, item: Feature) -> Feature:
@@ -91,7 +91,7 @@ class FordSpider(Spider):
     def build_service_cv_item(self, item: Feature) -> Feature:
         service_item = deepcopy(item)
         service_item["ref"] = f"{item['ref']}-SERVICE-CV"
-        apply_category(Categories.SHOP_TRUCK_REPAIR, service_item)
+        apply_category(Categories.SHOP_CAR_REPAIR, service_item)
         return service_item
 
     def build_parts_item(self, item: Feature) -> Feature:
