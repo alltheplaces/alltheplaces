@@ -2702,6 +2702,7 @@ def test_round16_category_batch():
     assert cat(spider, "Marjapensaspaikka")[0] == C.ALLOTMENTS
     assert cat(spider, "Lilla Teatern")[0] == C.THEATRE
     assert cat(spider, "Teaterstudio Pasila")[0] == C.THEATRE
+    assert cat(spider, "Stoa / Teatterisali")[0] == C.THEATRE
     assert cat(spider, "Sydänyksikkö")[0] == C.CLINIC
     assert cat(spider, "Karvetin klubitalo")[0] == C.COMMUNITY_CENTRE
     assert cat(spider, "Klubitalo Roihulan asiakaspalvelu")[0] == C.OFFICE_GOVERNMENT

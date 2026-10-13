@@ -288,6 +288,7 @@ class PtvFISpider(Spider):
         ("valtuustosali", Categories.EVENTS_VENUE, None),  # Valtuustosali (council chambers)
         ("lehtilukusali", Categories.LIBRARY, None),  # Lehtilukusali (library reading rooms)
         ("lehtisali", Categories.LIBRARY, None),  # Lehtisali (library reading rooms)
+        ("teatterisali", Categories.THEATRE, None),  # Teatterisali (theatre auditoriums, not sports halls)
         ("sali", Categories.LEISURE_SPORTS_HALL, None),  # Sali (halls)
         ("jäähalli", Categories.LEISURE_ICE_RINK, None),
         ("keilahalli", Categories.LEISURE_BOWLING_ALLEY, None),  # Keilahalli (bowling halls)
