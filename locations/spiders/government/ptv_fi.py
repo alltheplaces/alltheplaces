@@ -209,6 +209,8 @@ class PtvFISpider(Spider):
         ("ulkokuntoilu", Categories.LEISURE_FITNESS_STATION, None),  # Ulkokuntoilu (outdoor exercise)
         ("lähiliikuntapaikka", Categories.LEISURE_FITNESS_STATION, None),  # Lähiliikuntapaikka (exercise grounds)
         ("kuntoilupaikka", Categories.LEISURE_FITNESS_STATION, None),  # Kuntoilupaikka (exercise grounds)
+        ("kuntoilupiste", Categories.LEISURE_FITNESS_STATION, None),  # Kuntoilupisteet (exercise points)
+        ("opastuspiste", Categories.TOURISM_INFORMATION, None),  # Opastuspisteet (info points)
         ("kuntoportaat", Categories.LEISURE_FITNESS_STATION, None),  # Kuntoportaat (fitness stairs)
         ("uimahallin", Categories.GYM, None),  # Uimahallin (gym of a swim hall)
         ("uimahalli", Categories.LEISURE_SPORTS_CENTRE, {"sport": "swimming"}),  # Uimahalli (swimming halls)
@@ -1582,6 +1584,28 @@ class PtvFISpider(Spider):
         self._count(tag)
         return tail, self._clean_located(head) or head, name
 
+    def _resolve_slash_institution(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+        # Institution-headed pairs: hosted units, rooms and exercise
+        # grounds name the POI, the institution the venue.
+        if not (self._is_institution(head.lower()) and not self._is_institution(tail.lower())):
+            return None
+        if any(word in tail.lower() for word in (*self.UNIT_TAILS, "toimipiste", "toimipaikka")):
+            # Administrative units hosted at institutions
+            # ("Laihian Keskuskoulu / Yläkoulun yksikkö").
+            self._count("name/slash_facility")
+            return tail, self._clean_located(head), name
+        if (room := self._resolve_slash_room(head, tail, name, "name/slash_room")) is not None:
+            return room
+        if "lähiliikuntapaikka" in tail.lower():
+            # Exercise grounds hosted at institutions ("Vuoniityn
+            # peruskoulu / Lähiliikuntapaikka"): the ground names
+            # the POI, the school the venue (cf. slash_room). Lives
+            # here for Finnish institution heads; Swedish skol heads
+            # resolve in _resolve_slash_pair below.
+            self._count("name/slash_exercise_ground")
+            return tail, self._clean_located(head), name
+        return None
+
     def _resolve_slash_pair(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
         # Institution, service, place and person tails resolve against the
         # head; returns None to fall through to room/appositive handling.
@@ -1596,14 +1620,16 @@ class PtvFISpider(Spider):
             # urheilukenttä / Huoltorakennus 4"): neither venues nor POIs.
             self._count("name/slash_building_kept")
             return head, None, name
-        if self._is_institution(head.lower()) and not self._is_institution(tail.lower()):
-            if any(word in tail.lower() for word in (*self.UNIT_TAILS, "toimipiste", "toimipaikka")):
-                # Administrative units hosted at institutions
-                # ("Laihian Keskuskoulu / Yläkoulun yksikkö").
-                self._count("name/slash_facility")
-                return tail, self._clean_located(head), name
-            if (room := self._resolve_slash_room(head, tail, name, "name/slash_room")) is not None:
-                return room
+        if (inst := self._resolve_slash_institution(head, tail, name)) is not None:
+            return inst
+        if "lähiliikuntapaikka" in tail.lower() and re.search(r"(koulu|skol)\w*", head.lower()):
+            # Exercise grounds at schools, Finnish or Swedish
+            # ("Vuoniityn peruskoulu / ...", "Åshöjdens grundskola /
+            # Lähiliikuntapaikka"): the ground names the POI, the
+            # school the venue (cf. slash_room; skol covers
+            # skola/skolan, which institution tails lack).
+            self._count("name/slash_exercise_ground")
+            return tail, self._clean_located(head), name
         tail_base = tail.split(",")[0].strip()
         if self._is_bare_area(tail_base):
             # Bare coverage areas are not venues ("X / Tikkurilan alue"):
@@ -3796,24 +3822,58 @@ class PtvFISpider(Spider):
             if translation and translation != shown and translation != signed:
                 cleaned_tr = re.sub(r"\s*\d+\*\s*$", "", translation).strip()
                 cleaned_tr = re.sub(r",?\s*(?:[PN]\s*)?\d+\s*°.*$", "", cleaned_tr).strip()
-                if " / " in cleaned_tr:
+                cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, item.get("located_in"))
+                if "/" in cleaned_tr:
                     split_tr = self._split_bilingual(cleaned_tr, shown, signed)
                     if split_tr is None:
                         continue
                     cleaned_tr = split_tr
-                if cleaned_tr and cleaned_tr != shown:
-                    item["extras"][f"name:{lang}"] = cleaned_tr
+                located = item.get("located_in")
+                if cleaned_tr and cleaned_tr not in (shown, signed):
+                    if not (located and cleaned_tr == located and located in (signed or "")):
+                        # An untranslated copy of the Finnish-signed venue is
+                        # not a translation ("Leikkipuisto Jakomäki" as en).
+                        item["extras"][f"name:{lang}"] = cleaned_tr
+
+    @staticmethod
+    def _strip_fi_duplicates(cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
+        # Exact Finnish duplicates ride along in feed translations
+        # ("Korsverk (Ristikko)", "Aninkaisten koulu (Aninkainen
+        # School) Gym A"): parenthesised or leading copies of the
+        # applied/signed/venue name drop; the translated rest stays
+        # verbatim (parens around translations are the feed's own).
+        for form in dict.fromkeys([s for s in (shown, signed, located) if s]):
+            cleaned_tr = re.sub(r"\s*\(" + re.escape(form) + r"\)", "", cleaned_tr).strip()
+            if " / " not in cleaned_tr:
+                head, sep, rest = cleaned_tr.partition(form)
+                if sep and not head.strip() and rest and not rest.strip()[0].isalnum():
+                    # Leading duplicate ("Aninkaisten koulu (...) Gym A"):
+                    # the venue repeats the split-off Finnish name.
+                    cleaned_tr = rest.strip(" ,–—-/")
+        return re.sub(r"\s{2,}", " ", cleaned_tr).strip()
 
     @staticmethod
     def _split_bilingual(cleaned_tr: str, shown: str | None, signed: str | None) -> str | None:
         # Bilingual feed translations ("Sodanajan naisen
         # muistomerkki / Memorial to Women in Times of War"):
         # segments repeating the applied/signed Finnish name
-        # drop; multi-name translations ("Sibbo Institut /
-        # Nickby instituthuset") stay verbatim, full copies skip.
-        parts = [s.strip() for s in cleaned_tr.split(" / ")]
+        # drop; "..."-truncated prefixes of them drop too
+        # ("Filosofia, lääketiede..."); multi-name translations
+        # ("Sibbo Institut / Nickby instituthuset") stay verbatim,
+        # full copies skip. Slashes split either spaced or bare, but a
+        # segment only drops on an exact or truncated-fi match, so
+        # single names with slashes ("Geo/on", "24/7") stay whole.
+        parts = [s.strip() for s in re.split(r"\s*/\s*", cleaned_tr)]
         parts = [s for s in parts if s]
-        rest = [s for s in parts if s not in (shown, signed)]
+        rest = []
+        for s in parts:
+            if s in (shown, signed):
+                continue
+            if s.endswith("...") and len(s) > 6:
+                base = s[:-3].strip().casefold()
+                if any((form or "").strip().casefold().startswith(base) for form in (shown, signed)):
+                    continue
+            rest.append(s)
         if not rest:
             return None
         if len(rest) < len(parts) and len(rest) == 1:

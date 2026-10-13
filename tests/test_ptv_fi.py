@@ -3496,3 +3496,55 @@ def test_botanical_gardens():
 
 def test_event_areas_are_not_parks():
     assert cat(make_spider(), "Pengerpuisto, tapahtuma-alue")[0] == Categories.EVENTS_VENUE
+
+
+def test_institution_hosted_exercise_grounds_name_the_ground():
+    # Vuoniityn peruskoulu / Lähiliikuntapaikka: the ground names the POI,
+    # the school the venue (cf. slash_room). Non-school heads keep head-first.
+    spider = make_spider()
+    signed = "Vuoniityn peruskoulu / Lähiliikuntapaikka"
+    assert named(spider, signed) == ("Lähiliikuntapaikka", "Vuoniityn peruskoulu", signed)
+    signed = "Myllypuron peruskoulu / Lähiliikuntapaikka 2"
+    assert named(spider, signed) == ("Lähiliikuntapaikka 2", "Myllypuron peruskoulu", signed)
+    signed = "Leikkipuisto Lampi / Lähiliikuntapaikka"
+    assert named(spider, signed) == ("Leikkipuisto Lampi", "Lähiliikuntapaikka", signed)
+
+
+def test_info_and_exercise_points_outrank_hosts():
+    spider = make_spider()
+    assert cat(spider, "Talin liikuntapuisto / Opastuspiste")[0] == Categories.TOURISM_INFORMATION
+    assert cat(spider, "Vanhan-Mankkaan puiston kuntoilupiste 1")[0] == Categories.LEISURE_FITNESS_STATION
+
+
+def test_fi_duplicates_strip_from_translations():
+    # Korsverk (Ristikko): the parenthesised fi name drops, the translation stays.
+    item = parsed(make_spider(), channel("Ristikko", sv="Korsverk (Ristikko)", en="Crosses"))
+    assert item["extras"].get("name:sv") == "Korsverk"
+    assert item["extras"].get("name:en") == "Crosses"
+
+
+def test_truncated_fi_segment_splits_from_translation():
+    # Filosofia, lääketiede.../ Philosophy...: the truncated fi segment drops.
+    item = parsed(
+        make_spider(),
+        channel(
+            "Filosofia, Lääketiede, Teologia ja Juridiikka",
+            en="Filosofia, lääketiede.../ Philosophy, Medicine, Theology and Justice",
+        ),
+    )
+    assert item["extras"].get("name:en") == "Philosophy, Medicine, Theology and Justice"
+
+
+def test_venue_prefix_strips_from_translation():
+    # Aninkaisten koulu (Aninkainen School) Gym A: the Finnish venue prefix
+    # duplicates located_in; the translated rest stays verbatim (feed parens kept).
+    item = parsed(make_spider(), channel("Aninkaisten koulun A-sali", en="Aninkaisten koulu (Aninkainen School) Gym A"))
+    assert item.get("located_in") == "Aninkaisten koulu"
+    assert item["extras"].get("name:en") == "(Aninkainen School) Gym A"
+
+
+def test_untranslated_venue_copy_is_no_translation():
+    # Leikkipuisto Jakomäki as en duplicates the Finnish-signed venue: dropped.
+    item = parsed(make_spider(), channel("Leikkipuisto Jakomäki / Hiekkakenttä", en="Leikkipuisto Jakomäki"))
+    assert item.get("located_in") == "Leikkipuisto Jakomäki"
+    assert "name:en" not in (item.get("extras") or {})
