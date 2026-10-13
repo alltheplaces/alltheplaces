@@ -35,7 +35,7 @@ class FordDealersUSSpider(PlaywrightSpider):
         )
 
     def parse_state(self, response: Response, **kwargs):
-        state_list = (re.search(r"var\s*\w+\s*=\s*\"(.+)\"\.split\(\";\"\),", response.text).group(1)).split(";")
+        state_list = re.search(r"var\s*\w+\s*=\s*(.+);", response.text).group(1)
         for make in self.BRAND_MAPPING:
             for state in state_list:
                 yield JsonRequest(
