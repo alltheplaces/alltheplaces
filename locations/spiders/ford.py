@@ -49,14 +49,20 @@ class FordSpider(Spider):
             else:
                 self.logger.error(f"Unknown brand {data.get('Brand')} from {response.url}")
 
-            is_sales = data["HasSalesDepartmentPV"] or data["HasSalesDepartmentCV"]
-            is_service = data["HasServiceDepartmentPV"] or data["HasServiceDepartmentCV"]
+            is_sales = data["HasSalesDepartmentPV"]
+            is_sales_cv = data["HasSalesDepartmentCV"]
+            is_service = data["HasServiceDepartmentPV"]
+            is_service_cv = data["HasServiceDepartmentCV"]
             is_parts = data["HasPartsDepartment"]
 
             if is_sales:
                 yield self.build_sales_item(item)
+            if is_sales_cv:
+                yield self.build_sales_cv_item(item)
             if is_service:
                 yield self.build_service_item(item)
+            if is_service_cv:
+                yield self.build_service_cv_item(item)
             if not is_sales and not is_service and is_parts:
                 yield self.build_parts_item(item)
             elif not is_sales and not is_service:
@@ -68,10 +74,21 @@ class FordSpider(Spider):
         apply_category(Categories.SHOP_CAR, sales_item)
         return sales_item
 
+    def build_sales_cv_item(self, item: Feature) -> Feature:
+        sales_item = deepcopy(item)
+        apply_category(Categories.SHOP_TRUCK, sales_item)
+        return sales_item
+
     def build_service_item(self, item: Feature) -> Feature:
         service_item = deepcopy(item)
         service_item["ref"] = f"{item['ref']}-SERVICE"
         apply_category(Categories.SHOP_CAR_REPAIR, service_item)
+        return service_item
+
+    def build_service_cv_item(self, item: Feature) -> Feature:
+        service_item = deepcopy(item)
+        service_item["ref"] = f"{item['ref']}-SERVICE"
+        apply_category(Categories.SHOP_TRUCK_REPAIR, service_item)
         return service_item
 
     def build_parts_item(self, item: Feature) -> Feature:
