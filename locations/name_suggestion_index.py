@@ -33,11 +33,17 @@ class NSI(metaclass=Singleton):
         self.loaded: bool = False
         self.wikidata_json: dict = {}
         self.nsi_json: dict = {}
+        self.nsi_items_by_wikidata: dict[str, list[dict]] = {}
 
     def _ensure_loaded(self):
         if not self.loaded:
             self.wikidata_json = json.load(open(WIKIDATA_FILE_PATH))["wikidata"]
             self.nsi_json = json.load(open(NSI_FILE_PATH))["nsi"]
+            for v in self.nsi_json.values():
+                for item in v["items"]:
+                    codes = {item["tags"].get("brand:wikidata"), item["tags"].get("operator:wikidata")}
+                    for code in codes - {None}:
+                        self.nsi_items_by_wikidata.setdefault(code, []).append(item)
             self.loaded = True
 
     def get_wikidata_code_from_url(self, url: str) -> str | None:
@@ -129,14 +135,11 @@ class NSI(metaclass=Singleton):
         :return: iterator of matching NSI nsi.json item entries
         """
         self._ensure_loaded()
+        if wikidata_code:
+            yield from self.nsi_items_by_wikidata.get(wikidata_code, [])
+            return
         for v in self.nsi_json.values():
-            for item in v["items"]:
-                if not wikidata_code:
-                    yield item
-                elif wikidata_code == item["tags"].get("brand:wikidata"):
-                    yield item
-                elif wikidata_code == item["tags"].get("operator:wikidata"):
-                    yield item
+            yield from v["items"]
 
     @staticmethod
     def normalise_label(original_label: str) -> str:
