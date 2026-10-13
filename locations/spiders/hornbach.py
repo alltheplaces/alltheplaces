@@ -1,17 +1,16 @@
 from typing import Any, AsyncIterator
 
 import chompjs
-from scrapy import Request
+from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class HornbachSpider(PlaywrightSpider):
+class HornbachSpider(Spider):
     name = "hornbach"
     BRANDS = {
         "bodenhaus": {"name": "Bodenhaus", "brand": "Bodenhaus"},
@@ -30,7 +29,7 @@ class HornbachSpider(PlaywrightSpider):
         ("https://www.hornbach.se", "sv_SE", "1442"),
         ("https://www.hornbach.sk", "sk_SK", "1123"),
     ]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"CONCURRENT_REQUESTS": 1}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True  # Helps to skip anti bot protection
 
     async def start(self) -> AsyncIterator[Request]:
