@@ -14,7 +14,7 @@ class SuitsupplySpider(Spider):
     name = "suitsupply"
     item_attributes = {"brand": "Suitsupply", "brand_wikidata": "Q17149142"}
     start_urls = ["https://suitsupply.com/on/demandware.store/Sites-INT-Site/en_NL/Stores-FindStores"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DEFAULT_REQUEST_HEADERS": {"X-Requested-With": "XMLHttpRequest"}}
 
     def parse(self, response: Response) -> Iterable[Request]:
         for country in response.json()["countryOptions"]:
