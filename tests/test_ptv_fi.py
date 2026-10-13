@@ -3550,8 +3550,7 @@ def test_untranslated_venue_copy_is_no_translation():
     assert "name:en" not in (item.get("extras") or {})
 
 
-def test_hospital_wards_venue_the_hospital():
-    # Raskauden seurantaosasto, Tyks Majakkasairaala: the ward names the POI
+def test_hospital_wards_venue_the_hospital():  # Raskauden seurantaosasto, Tyks Majakkasairaala: the ward names the POI
     # (cf. yksikkö units splitting the same way).
     spider = make_spider()
     signed = "Raskauden seurantaosasto, Tyks Majakkasairaala, Turku"
@@ -3562,3 +3561,16 @@ def test_hospital_wards_venue_the_hospital():
     )
     signed = "Lasten ja nuorten osasto, Ahveniston sairaala"
     assert split(spider, signed) == ("Lasten ja nuorten osasto", "Ahveniston sairaala", signed)
+
+
+def test_city_switchboards_drop():
+    # Vantaan vaihde 09 839 11 serves 145 city rows: never a direct contact.
+    spider = make_spider()
+    item = Feature()
+    spider._apply_contact(item, {"phoneNumbers": [{"prefixNumber": "+358", "number": "983911"}]})
+    assert item.get("phone") is None
+
+
+def test_sininauha_is_private():
+    # Satakunnan Sininauha ry (0225013-4): Blue-Ribbon association, no PTV marker.
+    assert make_spider()._is_private_org("Satakunnan Sininauha") is True

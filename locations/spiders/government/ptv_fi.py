@@ -1424,7 +1424,7 @@ class PtvFISpider(Spider):
     )
     # Bare-name private operators without a marker (Red Cross districts,
     # settlement houses, Attendo care homes, säätiö foundations).
-    PRIVATE_SUBSTRINGS = ("punainen risti", "setlementti", "attendo", "säätiö")
+    PRIVATE_SUBSTRINGS = ("punainen risti", "setlementti", "attendo", "säätiö", "sininauha")
 
     def _post_city(self, office: str | None) -> str | None:
         if not office or not office.strip():
@@ -2796,7 +2796,7 @@ class PtvFISpider(Spider):
     ZW_RE = re.compile("[\u200b-\u200d\ufeff\u00ad]")
     # Switchboard/central contacts stamped across locations are not
     # per-store data (cf. the JSON-LD hotline lesson): drop on sight.
-    GENERIC_PHONES = frozenset({"358981621"})  # Espoon vaihde on sports POIs
+    GENERIC_PHONES = frozenset({"358981621", "358983911"})  # Espoon/Vantaan vaihteet
     GENERIC_EMAILS = frozenset({"info@esperi.fi"})  # Central corporate inbox
     LOGIN_URL_RE = re.compile(r"(authentication|/login\b|^https?://menu\.)", re.IGNORECASE)
 
