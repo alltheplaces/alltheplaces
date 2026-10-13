@@ -2539,6 +2539,80 @@ def test_camp_areas_are_camp_sites():
     assert cat(spider, "Lankarin leirikeskuksen pururata")[0] == Categories.TOURISM_CAMP_SITE
     assert cat(spider, "Vuolahden leirialue")[0] == Categories.TOURISM_CAMP_SITE
     assert cat(spider, "Rastilan leirintäalue")[0] == Categories.TOURISM_CAMP_SITE
+    # Island tent sites camp, whatever the sports-catalogue ontology says.
+    assert cat(spider, "Gåsgrund / Telttailupaikka")[0] == Categories.TOURISM_CAMP_SITE
+    assert cat(spider, "Telttailu- ja leiriytymispaikka 1")[0] == Categories.TOURISM_CAMP_SITE
+
+
+def test_group_institutions_file_via_table():
+    # The group IS the institution: facility prefixes fall through to the
+    # table instead of neutralizing ("Päiväkotiryhmä Vekkula" e3f931ae,
+    # "Alhaisten koulun esiopetusryhmä" b8106b2f).
+    spider = make_spider()
+    assert cat(spider, "Päiväkotiryhmä Vekkula")[0] == Categories.KINDERGARTEN
+    assert cat(spider, "Alhaisten koulun esiopetusryhmä")[0] == Categories.KINDERGARTEN
+    assert cat(spider, "Iltapäivätoiminta / Aurinkolahden peruskoulu")[0] == Categories.COMMUNITY_CENTRE
+    # Desk nouns outside the group token file the desk; bare group numbers
+    # leave the venue filing alone.
+    assert cat(spider, "Vauvaperheryhmä Untuva toimipiste")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Kuntosali, ryhmä 1")[0] == Categories.GYM
+
+
+def test_group_activities_stay_generic():
+    # Activity groups never rescue: caregiver gym groups, peer-club venues
+    # and catalogue-ontology clinics all stay generic (c3a2b4be, 063b81c1,
+    # b345c467, ac79c8fe).
+    spider = make_spider()
+    assert cat(spider, "Sastamala omatoiminen kuntosaliryhmä omaishoitajille") == (None, None)
+    assert cat(spider, "Laiturin Iloa ikäihmisille-ryhmä, Utra") == (None, None)
+    assert cat(spider, "Jyränkölön Setlementti Sireniussalin ystäväryhmä") == (None, None)
+    ch = channel("Laiturin Iloa ikäihmisille-ryhmä, Utra")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Sastamala omatoiminen kuntosaliryhmä omaishoitajille")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
+    assert spider._rescue_service(ch) is None
+
+
+def test_placement_extras_never_rescue():
+    # Catalogue placement tags cannot type opaque channels: sled hills stay
+    # generic (b465c72b), concert halls stay generic, town halls file office
+    # via the name (b93dd463). Real venue services still rescue (motocross).
+    spider = make_spider()
+    ch = channel("Oittaan pulkkamäki")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ampumaradat"}]}]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Finlandia-talo")
+    ch["services"] = [{"service": {"name": "Lipunmyynti kulttuuri- ja taidetapahtumiin"}}]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Raatihuone")
+    ch["services"] = [{"service": {"name": "Tori- ja katumyyntipaikkojen vuokraus"}}]
+    assert spider._rescue_service(ch) is None
+    assert cat(spider, "Raatihuone")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Raatihuone, raatihuonegalleria")[0] == Categories.ARTS_CENTRE
+    ch = channel("Motocross- ja enduroradat")
+    ch["services"] = [{"service": {"name": "Muukon moottori- ja ampumaurheilukeskus"}}]
+    assert spider._rescue_service(ch)[0] == Categories.LEISURE_SPORTS_CENTRE
+
+
+def test_description_psych_urgent_split():
+    # Psychiatric outpatient units are clinics (99ada63f), urgent-care desks
+    # are urgent clinics (a04ff748); plain care still files social.
+    from locations.items import Feature
+
+    spider = make_spider()
+    ch = channel(
+        "Tays Hallituskatu",
+        descriptions=[{"language": "fi", "value": "Tays Hallituskatu on psykiatrisen avohoidon toimipiste"}],
+    )
+    assert spider._resolve_fallback_category(Feature(), ch) == Categories.CLINIC
+    ch = channel(
+        "Päivystyksellinen kuulokojehuolto",
+        descriptions=[
+            {"language": "fi", "value": "Hoidamme päivystyksellisessä kuulokojehuollossa kiireelliset tapaukset"}
+        ],
+    )
+    assert spider._resolve_fallback_category(Feature(), ch) == Categories.CLINIC_URGENT
 
 
 def test_animal_protection_desk_is_office():

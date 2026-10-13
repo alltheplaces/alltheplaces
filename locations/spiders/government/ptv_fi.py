@@ -559,6 +559,7 @@ class PtvFISpider(Spider):
         ("perhekeskus", Categories.OFFICE_GOVERNMENT, None),
         ("perhetyö", Categories.SOCIAL_FACILITY, None),  # Perhetyö (family work)  # Perhekeskus (family centres)
         ("kirjaamo", Categories.OFFICE_GOVERNMENT, None),  # Kirjaamo (registries)
+        ("raatihuone", Categories.OFFICE_GOVERNMENT, None),  # Raatihuone (town halls; galleries keep museum above)
         ("perheoikeudelliset", Categories.OFFICE_GOVERNMENT, None),  # Perheoikeudelliset (family-law services)
         ("vapaa-aikatoimi", Categories.OFFICE_GOVERNMENT, None),  # Vapaa-aikatoimi (leisure administration)
         ("vapaa-aikakeskus", Categories.COMMUNITY_CENTRE, None),  # Vapaa-aikakeskus (leisure centres)
@@ -700,6 +701,7 @@ class PtvFISpider(Spider):
         ("leiriytymispaikka", Categories.TOURISM_CAMP_SITE, None),  # Leiriytymispaikka (camping spots)
         ("ampumarata", None, {"leisure": "shooting_ground", "sport": "shooting"}),  # Ampumarata (shooting ranges)
         ("leirintäalue", Categories.TOURISM_CAMP_SITE, None),  # Leirintäalue (camping grounds)
+        ("telttailu", Categories.TOURISM_CAMP_SITE, None),  # Telttailu (tent sites, island camping)
         ("virkistysalue", Categories.LEISURE_PARK, None),  # Virkistysalue (recreation areas)
         ("laavu", Categories.SHELTER, None),
         (
@@ -2435,18 +2437,31 @@ class PtvFISpider(Spider):
         "kiertotalouspalvelu",
     )
 
-    # Event/activity nouns: care rescue describes their purpose, never
-    # their type ("Nakkifiesta" with mental-health ontology stays generic).
+    # Placement-only extras that misfire from catalogue/service dumps:
+    # shooting grounds (org sports catalogue on sled hills), cemeteries
+    # (parish office desks), ticket shops (venues selling tickets) and
+    # squares (market-rental services on town halls). Other placement tags
+    # from real services (zoo shops, public art, youth centres) still rescue.
+    RESCUE_PLACEMENT_SKIP = (
+        ("leisure", "shooting_ground"),
+        ("landuse", "cemetery"),
+        ("shop", "tickets"),
+        ("place", "square"),
+    )
     ACTIVITY_RE = re.compile(
+        # Event/activity nouns: care rescue describes their purpose, never
+        # their type ("Nakkifiesta" with mental-health ontology stays generic).
         r"(verstas|fiesta|juhla|festivaali|karnevaali|kilpailu|turnaus|ottelu|konsertti|näytelmä|kurssi|leiri|tapahtuma)"
     )
 
     def _rescue_blocked(self, channel: dict) -> bool:
         # Names rescue never types: utility buildings (typed by hosted
-        # services otherwise) and fixed orienteering controls (typed by
-        # shooting-ontology dumps otherwise). Both stay generic.
+        # services otherwise), fixed orienteering controls (typed by
+        # shooting-ontology dumps otherwise) and sled hills (typed by the
+        # same sports-catalogue dumps; pulkkamäki has no enum and stays
+        # generic by design). All stay generic.
         fi = (self._names(channel).get("fi") or "").lower()
-        return "huoltorakennus" in fi or "kiintorasti" in fi
+        return "huoltorakennus" in fi or "kiintorasti" in fi or "pulkkam" in fi or "pulkbacke" in fi
 
     def _rescue_candidates(self, channel: dict) -> list:
         # Feed strings that can type an opaque channel, in precedence
@@ -2485,6 +2500,12 @@ class PtvFISpider(Spider):
             # services) are islands, whatever the first service types.
             self._count("category/rescued_island")
             return None, {"place": "island"}
+        if self._is_group_activity(self._clean_name(self._names(channel).get("fi") or "").lower()):
+            # Group-neutralized names carry no facility keyword: linked
+            # services and catalogue ontology must not override the generic
+            # verdict ("Laiturin Iloa"-groups with mental-health ontology
+            # stay generic, never clinics; canteens never beat päiväkoti).
+            return None
         for candidate in candidates:
             category, extra = self._category(self._clean_name(candidate))
             if extra == {"place": "island"}:
@@ -2496,7 +2517,7 @@ class PtvFISpider(Spider):
                 # purpose, not type ("Nakkifiesta" with mental-health
                 # ontology stays generic).
                 continue
-            if extra or (category is not None and category != Categories.OFFICE_GOVERNMENT):
+            if category is not None and category != Categories.OFFICE_GOVERNMENT:
                 # Specific types rescue; offices wait for the second pass so
                 # a desk label never shadows a real type from a later
                 # candidate ("päiväkotihoito" behind "Asiakaspalvelu").
@@ -2504,6 +2525,11 @@ class PtvFISpider(Spider):
                     # Ward-named channels ("Raaseporin TK vuodeosasto")
                     # are units, never hospitals, whatever the service.
                     return Categories.CLINIC, extra
+                return category, extra
+            if extra is not None and not any(extra.get(key) == value for key, value in self.RESCUE_PLACEMENT_SKIP):
+                # Placement-only extras rescue too (zoo shops, public art),
+                # except the catalogue-junk shapes (shooting grounds,
+                # cemeteries, ticket shops, squares).
                 return category, extra
         for candidate in candidates:
             # Second pass: desk-shaped office hits ("asiointipiste",
@@ -2543,6 +2569,14 @@ class PtvFISpider(Spider):
             # Utility buildings and orienteering controls stay generic
             # whatever the description says.
             return None
+        if re.search(r"(psykiatr|poliklinikk)", text):
+            # Psychiatric outpatient units ("Tays Hallituskatu") are
+            # clinics, not social facilities.
+            return Categories.CLINIC
+        if re.search(r"(päivyst|kiireellis|akuutti)", text):
+            # Urgent-care desks ("Päivystyksellinen kuulokojehuolto")
+            # are urgent clinics.
+            return Categories.CLINIC_URGENT
         if any(word in text for word in self.CARE_WORDS):
             if self.CARE_HOUSING_RE.search(text):
                 return Categories.ASSISTED_LIVING
@@ -3345,6 +3379,43 @@ class PtvFISpider(Spider):
             return Categories.CLINIC, None
         return None
 
+    # Group-noun compounds where the group IS the institution: the
+    # facility prefix files via the table, never generic ("Päiväkotiryhmä
+    # Vekkula" is the daycare; "Iltapäiväkerho" is the after-school club).
+    GROUP_FACILITY_PREFIX = ("päiväkoti", "esiopetus", "koulu", "iltapäivä")
+    # Desk nouns elsewhere in a group name file the desk ("Vauvaperheryhmä
+    # Untuva toimipiste" is the office); bare group numbers leave the venue
+    # filing alone ("Kuntosali, ryhmä 1" stays the gym).
+    GROUP_DESK_AMBIENT = ("toimipiste", "toimipaikka", "kuntosali")
+
+    def _is_group_activity(self, lowered: str) -> bool:
+        # Group-noun names describing an activity, never the venue: compound
+        # group tokens (teatteriryhmä, ystäväryhmä, ulkokerho) and bare group
+        # nouns with no facility filing. Peer-support groups (vertaisryhmä,
+        # vertaistukiryhmä), senior clubs (seniorikerho), heart clubs
+        # (sydänkerho), housing groups (asumis) and 4H clubs are venues and
+        # never group activities. Mirrors _custom_group_use: rescue-tier only
+        # calls this when the name tier left the row generic.
+        for token in lowered.split():
+            clean = token.strip(",.;:")
+            m = re.search(r"[\w-]+(ryhmä|kerho|kuoro|orkesteri|joukkue|parlamentti)$", clean)
+            if not m:
+                continue
+            if clean in ("leikkikerho", "leikkikoulu"):
+                continue
+            if any(word in clean for word in ("vertais", "seniori", "sydän", "asumis", "4h-kerho")):
+                continue
+            prefix = clean[: m.start(1)]
+            if not prefix:
+                # Bare group numbers ("Kuntosali, ryhmä 1") leave the venue
+                # filing alone: not activities.
+                continue
+            if any(stem in prefix for stem in self.GROUP_FACILITY_PREFIX):
+                # The group is the institution: the table files it.
+                continue
+            return True
+        return False
+
     def _custom_group_use(self, lowered: str) -> tuple | None:
         # Inessive host nouns ("Kuusankosken kirjastossa") and group-noun
         # compounds (teatteriryhmä, kirjastoparlamentti) describe a service
@@ -3376,20 +3447,29 @@ class PtvFISpider(Spider):
             if self._has_fixture(remainder) or self._category(remainder)[0] is not None:
                 return None
             return None, None
-        if any(
-            re.search(r"[\w-]+(ryhmä|kerho|kuoro|orkesteri|joukkue|parlamentti)$", token.strip(",.;:"))
-            and token not in ("leikkikerho", "leikkikoulu")
-            and "vertais" not in token
-            and "seniori" not in token
-            and "sydän" not in token
-            and "asumis" not in token
-            and "4h-kerho" not in token
-            for token in lowered.split()
-        ) and not re.search(
-            r"(psykiatri|terapia|terveys|hoito|huolto|klinikka|sairaala|lääkäri|neuvola|mieli|päihde|vamma|hoiva|kuntout|rokot|hammas)",
-            lowered,
-        ):
-            return None, None
+        if self._is_group_activity(lowered):
+            remainder = " ".join(
+                token.strip(",.;:")
+                for token in lowered.split()
+                if not re.search(r"[\w-]+(ryhmä|kerho|kuoro|orkesteri|joukkue|parlamentti)$", token.strip(",.;:"))
+            )
+            if any(word in remainder for word in self.GROUP_DESK_AMBIENT):
+                # Desk nouns outside the group token file the desk
+                # ("Vauvaperheryhmä Untuva toimipiste" is the office;
+                # "Kuntosali, ryhmä 1" stays the gym).
+                return None
+            if not re.search(
+                r"(psykiatri|terapia|terveys|hoito|huolto|klinikka|sairaala|lääkäri|neuvola|mieli|päihde|vamma|hoiva|kuntout|rokot|hammas)",
+                lowered,
+            ):
+                # Activity groups with no health context stay generic; health
+                # contexts keep their table filing.
+                return None, None
+            return None
+        if any(word in lowered for word in self.GROUP_DESK_AMBIENT):
+            # Desk nouns in a group name file the desk; facility-prefixed
+            # groups already fell through via _is_group_activity.
+            return None
         return None
 
     def _custom_exercise_ground(self, lowered: str) -> tuple | None:
