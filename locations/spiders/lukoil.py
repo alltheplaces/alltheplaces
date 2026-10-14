@@ -173,10 +173,14 @@ class LukoilSpider(Spider):
 
     def _is_dead_teboil_fi(self, poi: dict) -> bool:
         # Oy Teboil Ab ended FI fuel sales autumn 2025 (sanctions) and entered restructuring Jan 2026.
-        company = (poi.get("Company") or {}).get("Name", "").lower()
+        if not isinstance(poi, dict):
+            return False
+        company = ((poi.get("Company") or {}).get("Name") or "").lower()
         if "teboil" not in company and "тебойл" not in company:
             return False
         address = (poi.get("Address") or "").lower()
+        if "россия" in address or "russia" in address:
+            return False
         if "финляндия" in address or "finland" in address or "suomi" in address:
             return True
         try:
