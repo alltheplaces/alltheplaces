@@ -318,6 +318,7 @@ class PtvFISpider(Spider):
         ("yleisurheilukeskus", Categories.LEISURE_SPORTS_CENTRE, {"sport": "athletics"}),
         ("yleisurheilu", Categories.LEISURE_TRACK, None),  # Yleisurheilu (athletics)
         ("urheilukenttä", Categories.LEISURE_PITCH, None),  # Urheilukenttä (sports fields)
+        ("kaupunkisoutuvene", Categories.AMENITY_BOAT_RENTAL, None),  # Kaupunkisoutuveneet (borrowable city rowboats)
         ("soutu|melonta|liikuntamylly", Categories.LEISURE_SPORTS_CENTRE, None),  # Soutu (rowing venues)
         ("stadion", Categories.LEISURE_PITCH, None),  # Stadion (stadiums)
         ("skate|skeitti", Categories.LEISURE_PITCH, {"sport": "skateboard"}),  # Skate (skate parks)
@@ -598,12 +599,16 @@ class PtvFISpider(Spider):
         ("luontokeskus", Categories.MUSEUM, None),  # Luontokeskus (nature centres)
         ("vessa", Categories.TOILETS, None),  # Vessa (toilets)
         ("talvipuutarha|kasvitieteelli", None, {"leisure": "botanical_garden"}),  # Talvipuutarha (botanical garden)
+        ("asukaspuiston kerho", None, None),  # Asukaspuiston kerho (park club activities, not the park)
+        ("kiintorasti", None, None),  # Kiintorasti (fixed orienteering controls, not the host park)
+        ("urheilupuisto", Categories.LEISURE_SPORTS_CENTRE, None),  # Urheilupuisto (sports parks, cf. liikuntapuisto)
         ("puisto", Categories.LEISURE_PARK, None),  # Puisto (parks)
         ("veistos", None, {"tourism": "artwork", "artwork_type": "sculpture"}),  # Veistos (sculptures; parks keep park)
         ("taideteos", Categories.TOURISM_ARTWORK, None),  # Taideteos (artworks)
         ("päiväkeskus", Categories.SOCIAL_FACILITY, None),  # Päiväkeskus (day centres)
         ("autiotupa", Categories.TOURISM_WILDERNESS_HUT, None),  # Autiotupa (wilderness huts)
         ("tupa", Categories.COMMUNITY_CENTRE, None),  # Tupa (meeting houses, compound-final)
+        ("talkoolaituri", Categories.TOOL_LIBRARY, None),  # Talkoolaituri (tool-lending clean-up sheds, not piers)
         ("laituri", Categories.MAN_MADE_PIER, None),  # Laituri (piers)
         ("venepaikka", Categories.MARINA, None),  # Venepaikka (boat berths)
         ("vesipiste|vedenjakelu|vesiposti", Categories.DRINKING_WATER, None),  # Vesipiste (drinking-water points)
@@ -738,6 +743,10 @@ class PtvFISpider(Spider):
             # Customs offices (Lentotulli) share the stem with
             # district/building names (Tullinkulma et al): those never match.
             return r"tulli(?!nkulma|kamari|vuor|saar|npuomi|ntori|aukio|naukio)"
+        if k == "käräjä":
+            # Courthouse streets (Käräjätuvankuja) hosting allotment parcels
+            # are allotments, not courts: viljelypalsta tails win.
+            return r"käräjä(?!.*(?:viljelypalsta|marjapensas|siirtolapuutarha))"
         if k == "kioski":
             # Info kiosks are info points, not shops ("Infokioski",
             # "kioski eli infopiste"): the info rule below files them.

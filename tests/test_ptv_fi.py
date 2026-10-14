@@ -5681,3 +5681,27 @@ def test_round22_community_and_social_fixes():
     assert ward.get_tag("amenity") == "clinic"
     assert ward.get("name") == "Lasten ja nuorten päiväsairaala"
     assert ward.get("located_in") == "Ahveniston sairaala"
+
+
+# ---- User-report batch R-A: facility-head compounds --------------------
+def test_user_report_facility_compounds():
+    spider = make_spider()
+    # 1. Fixed orienteering controls are markers, not the host park.
+    assert cat(spider, "Keskuspuiston kiintorastit") == (None, None)
+    item = parsed(spider, channel("Keskuspuiston kiintorastit"))
+    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("leisure") is None
+    # 2. Tool-lending clean-up sheds (sv talkoskjul) are not piers.
+    assert cat(spider, "Kaupunginpuutarhan talkoolaituri")[0] == Categories.TOOL_LIBRARY
+    # 3. Sports parks file with sports centres (cf. liikuntapuisto);
+    # school hosts keep school filing.
+    assert cat(spider, "Keski-Espoon urheilupuisto 2.")[0] == Categories.LEISURE_SPORTS_CENTRE
+    assert cat(spider, "Urheilupuiston koulu")[0] == Categories.SCHOOL
+    # 4. Borrowable city rowboats are boat rentals, not sports venues.
+    assert cat(spider, "Kaupunkisoutuveneet")[0] == Categories.AMENITY_BOAT_RENTAL
+    # 5. Park club activities are not the park.
+    assert cat(spider, "Viherkallion asukaspuiston kerho") == (None, None)
+    # 6. Allotment parcels on courthouse-named streets are allotments;
+    # plain courthouses keep filing.
+    assert cat(spider, "Käräjätuvan- ja Näsinojankuja, viljelypalstat")[0] == Categories.ALLOTMENTS
+    assert cat(spider, "Käräjäoikeus")[0] == Categories.COURTHOUSE
