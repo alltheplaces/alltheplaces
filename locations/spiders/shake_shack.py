@@ -15,7 +15,7 @@ class ShakeShackSpider(CrawlSpider):
     item_attributes = {"brand": "Shake Shack", "brand_wikidata": "Q1058722"}
     start_urls = ["https://shakeshack.com/locations"]
     rules = [Rule(LinkExtractor(allow=r"/node/\d+$"), callback="parse_location")]
-    custom_settings = {"DOWNLOAD_DELAY": 2}
+    custom_settings = {"DOWNLOAD_DELAY": 2, "CONCURRENT_REQUESTS": 2}
 
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
