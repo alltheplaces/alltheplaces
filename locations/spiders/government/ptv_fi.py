@@ -14,11 +14,9 @@ from locations.licenses import Licenses
 # Finnish Service Catalogue (Palvelutietovaranto, PTV), api.palvelutietovaranto.suomi.fi.
 # DVV's CC0 national registry of public-sector services: municipalities, wellbeing
 # counties and state agencies describe services, ServiceLocation channels are the
-# physical visit points (~38k nationally). Complements helsinki_servicemap_fi, which
-# is richer per record (WGS84, Hauki hours, mapped taxonomy) but metro-only and
-# CC-BY-4.0; PTV is thinner (20-40% hours, user-entered TM35FIN coords) but national
-# and CC0. Different refs (UUID vs Servicemap int), so overlap duplicates by design:
-# never conflate across spiders, never exclude here because a brand spider exists.
+# physical visit points (~38k nationally). Complements helsinki_servicemap_fi
+# (metro-only, CC-BY-4.0, different refs): overlap duplicates by design, never
+# conflate across spiders, never exclude here because a brand spider exists.
 #
 # Crawl: id-list pages (?page=N, server default size) then batched detail
 # fetches via /list?guids=<comma-joined> (40/call per batch_size, since
@@ -41,8 +39,6 @@ class PtvFISpider(Spider):
     LIST_PATH = "/ServiceChannel/type/ServiceLocation"
     DETAIL_PATH = "/ServiceChannel/list"
     ORG_PATH = "/Organization/list"
-    # 40 guids per detail call: 100-guid URLs trip Scrapy's 2083-char
-    # urllength middleware and are silently dropped (measured).
     batch_size = 40
 
     _transformer = Transformer.from_crs(3067, 4326, always_xy=True)
@@ -646,8 +642,7 @@ class PtvFISpider(Spider):
     # auditorio/laboratorio/toimisto, which do not end in tori.
     @staticmethod
     def _bare_or_compound(body: str) -> "re.Pattern[str]":
-        # Standalone or compound-final stems ("tori" in kauppatori,
-        # "sauna(t)" in rantasauna): one shape for both site lists.
+        # Standalone or compound-final stems: one shape for both site lists.
         return re.compile(r"(?:\b(?:" + body + r")\b|\w+(?:" + body + r")\b)")
 
     TORI_RE = _bare_or_compound("tori")
@@ -678,8 +673,7 @@ class PtvFISpider(Spider):
         # errback below, which continues with the ids collected so far.
         self._batches_emitted = False
         # Bounded-window org join: channel items wait only for their own
-        # org batch (one round-trip), never the whole crawl. Orgs are ~5k
-        # nationally; the cache keeps each fetched once.
+        # org batch (one round-trip), never the whole crawl.
         self._org_names: dict[str, str | None] = {}
         self._org_types: dict[str, str] = {}
         self._seen_orgs: set[str] = set()
@@ -742,9 +736,7 @@ class PtvFISpider(Spider):
             return r"info\b|\binfo"
         if k == "tulli":
             # Customs offices (Lentotulli) share the stem with
-            # district/building names (Tullinkulma, Tullikamari,
-            # Tullisaari, Tullinpuomi, Tullintori, Tullivuorentie,
-            # Tullinaukio squares): those never match.
+            # district/building names (Tullinkulma et al): those never match.
             return r"tulli(?!nkulma|kamari|vuor|saar|npuomi|ntori|aukio|naukio)"
         if k == "kioski":
             # Info kiosks are info points, not shops ("Infokioski",
@@ -874,15 +866,13 @@ class PtvFISpider(Spider):
     def _org_head(org_name: str) -> str:
         # Department suffixes strip to the legal entity ("Helsingin kaupunki,
         # Kasvatuksen ja koulutuksen toimiala" is the city); bare names
-        # survive via the fallback.
         return org_name.split(",", 1)[0].strip() or org_name
 
     @staticmethod
     def _org_supersedes(named_operator: str, org_name: str) -> bool:
-        # The org record denotes the same entity more fully ("Yhdessä
-        # Selviytymisen Tuki YSTI ry" for signed "Ysti ry"): its tokens
-        # strictly contain the named operator's, so the record wins over
-        # the signed short form. Unrelated maintainers never qualify.
+        # The org record denotes the same entity more fully: its tokens strictly
+        # contain the named operator's, so the record wins; unrelated maintainers
+        # never qualify.
         head_tokens = set(re.findall(r"\w+", (named_operator or "").lower()))
         org_tokens = set(re.findall(r"\w+", (org_name.split(",", 1)[0].strip() or org_name).lower()))
         return len(head_tokens) >= 2 and head_tokens < org_tokens
@@ -891,8 +881,7 @@ class PtvFISpider(Spider):
         self, item: Feature, operator: str, full_org_name: str | None = None, org_type: str | None = None
     ) -> None:
         # Wikidata QID, operator:type (private vs. religious) and
-        # association-office demotion: shared by the org join and the
-        # signed slash-operator pass.
+        # association-office demotion: shared by both operator passes.
         if qid := self.OPERATORS_WIKIDATA.get(operator):
             item["operator_wikidata"] = qid
         else:
@@ -977,12 +966,8 @@ class PtvFISpider(Spider):
         if org_name.split(",", 1)[0].strip() in self.REGISTER_KEEPERS or org_name in self.REGISTER_KEEPERS:
             self._count("operator/register_keeper")
             return
-        # Department suffixes name the desk, not the operator
-        # ("Helsingin kaupunki, Kasvatuksen ja koulutuksen toimiala").
-        # Brand suffixes name the marketing brand, not the operator
-        # ("Pohjois-Karjalan hyvinvointialue – Siun sote"); legal
-        # association tails ("FinFami - Uusimaa ry") and Swedish parallels
-        # stay, short marker-less tails strip.
+        # Department and brand suffixes name the desk/brand, not the operator;
+        # association tails stay, short marker-less tails strip.
         operator = self._org_head(org_name)
         if "/" in operator:
             head_org, _, tail_org = operator.rpartition("/")
@@ -1110,7 +1095,6 @@ class PtvFISpider(Spider):
         # The official Name wins over AlternativeName ("Talaskankaan
         # retkeilyreitti", not "Talaskangas"); displayNameType breaks
         # ties, first-listed wins otherwise. Single-name records behave
-        # exactly as before.
         by_lang: dict[str, list[tuple[str, str]]] = {}
         for row in channel.get("serviceChannelNames") or []:
             if not isinstance(row, dict):
@@ -1206,9 +1190,7 @@ class PtvFISpider(Spider):
                 return value
         return None
 
-    # WGS84 bounds for Finland, used both to spot degree-pairs misfiled as
-    # TM35FIN and to validate converted coordinates (TM35FIN eastings and
-    # northings never overlap these ranges).
+    # WGS84 bounds for Finland: degree-pairs misfiled as TM35FIN never overlap these ranges.
     WGS84_BOUNDS = (59.0, 71.0, 19.0, 32.0)
 
     def _coords(self, street: dict) -> tuple[float, float] | None:
@@ -1247,9 +1229,8 @@ class PtvFISpider(Spider):
         )
         return lon, lat
 
-    # Tails naming institutions are venues; the facility names the POI
-    # ("Laihian Keskuskoulu / Yläkoulun yksikkö"). Narrower than the
-    # service-map list on purpose: PTV shapes are org-branch offices.
+    # Tails naming institutions are venues; the facility names the POI.
+    # Narrower than the service-map list on purpose.
     INSTITUTION_TAILS = tuple(
         "koulu lukio yläaste ala-aste sairaala kirjasto museo teatteri kirkko kappeli päiväkoti opisto "
         "uimahalli terveysasema neuvola virasto hammashoitola poliklinikka skolan ".split()
@@ -1346,19 +1327,14 @@ class PtvFISpider(Spider):
     # Station-village post offices file under their municipality
     # ("ORIVESI AS" -> "Orivesi").
     STATION_SUFFIX_RE = re.compile(r"\s+as$", re.IGNORECASE)
-    # Tails naming a school building (narrower than the category table:
-    # venue evidence, not filing). Wider than CORE_INSTITUTION_RE on purpose
-    # (Swedish skola/daghem/högstadium/lågstadium plus esiopetus/yläaste/
-    # ala-aste school forms) and narrower in the other direction (no
-    # kirjasto/museo/sairaala/neuvola venue evidence): unifying the two sets
-    # would change filing, so the wider alternation stays intact here.
+    # Tails naming a school building (venue evidence, not filing): deliberately
+    # wider/narrower than the neighboring sets (Swedish forms in, kirjasto/museo
+    # out); unifying them would change filing.
     SCHOOL_TAIL_RE = re.compile(
         r"(koulu|lukio|opisto|päiväkoti|esiopetus|yläaste|ala-aste|skola|daghem|högstadium|lågstadium)"
     )
-    # Shared school-host stems for _split_comma_school_host (tail-anchored
-    # and substring forms of the same alternation); deliberately the narrow
-    # 4-stem set, not CORE_INSTITUTION_RE (kirjasto/museo/sairaala/neuvola
-    # tails never locate group activities) nor SCHOOL_TAIL_RE above.
+    # Shared school-host stems for _split_comma_school_host: deliberately the
+    # narrow 4-stem set (other institution tails never locate group activities).
     SCHOOL_HOST_RE = re.compile(r"(koulu|lukio|opisto|päiväkoti)")
     SCHOOL_HOST_TAIL_RE = re.compile(r"(koulu|lukio|opisto|päiväkoti)$")
 
@@ -1366,13 +1342,8 @@ class PtvFISpider(Spider):
         return self.INSTITUTION_RE.search(text) is not None
 
     # Bureau/metadata tails stripped in order before splitting (each
-    # result stripped; first match does not stop the chain). Precompiled.
-    # Split in two around the boilerplate strip: the flag records whether
-    # it fired (lowercase-dash descriptors never strip below a stripped
-    # suffix). The post tails are last because a stripped suffix can only
-    # be followed by arrangement text, never new prefixes — and the corpus
-    # census (40,175 fi names, 0 hits) shows no boilerplate row carries a
-    # palvelupaikka/yhteystiedot tail either.
+    # result stripped; first match does not stop the chain). The post tails
+    # are last because a stripped suffix can only be followed by arrangement text.
     CLEAN_SUBS_PRE = (
         (re.compile(r",\s*$"), ""),
         (re.compile(r"\s+,"), ","),
