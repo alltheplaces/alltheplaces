@@ -910,7 +910,7 @@ class PtvFISpider(Spider):
         )
         if is_company or private_org:
             # Companies and associations delivering public services are
-            # private operators (user ruling extends the Oy/Ab precedent).
+            # private operators, following the Oy/Ab precedent.
             # Privacy reads the full name so stripped acronyms ("RIKU")
             # don't launder associations public.
             item["extras"]["operator:type"] = "private"
@@ -2781,7 +2781,7 @@ class PtvFISpider(Spider):
         return split
 
     def _split_name_tail(self, name: str, city: str | None) -> SplitTriple | None:
-        # Space-separated city tails, fused school heads, Swedish venues
+        # Space-separated city tails, fused school heads
         # and comma shapes, in that precedence.
         if city and " " in name and "," not in name:
             # Space-separated city tails ("Kuntoutusohjaus Kankaanpää"):
@@ -3461,7 +3461,6 @@ class PtvFISpider(Spider):
         # Guard shared by the comma service-head and unit-venue splits:
         # the tail must not redescribe the head's own service, and bare
         # unit qualifiers split only against venue heads (cf. Stadin).
-        # Lifted verbatim from both callers; zero logic change.
         return (
             not self._shared_service_word(head, tail)
             and (not self._is_unit_tail(tail) or self._is_venue_head(head))
@@ -3808,7 +3807,7 @@ class PtvFISpider(Spider):
 
     @staticmethod
     def _to_minutes(value: str | None) -> int | None:
-        # Strict HH:MM (feed uses HH:MM:SS, which still matches): prefix junk
+        # HH:MM with optional :SS (feed uses HH:MM:SS): prefix junk
         # ("08:00-12:00" in one field) and impossible hours ("25:00") drop
         # instead of silently truncating into invalid opening_hours.
         match = re.fullmatch(r"(\d{1,2}):(\d{2})(?::(\d{2}))?", (value or "").strip())
@@ -3871,9 +3870,8 @@ class PtvFISpider(Spider):
             if not isinstance(entry, dict):
                 continue
             if entry.get("serviceHourType") not in ("DaysOfTheWeek", "OverMidnight"):
-                # Exceptional single-date rules are deviations, not timetables.
-                # OverMidnight carries ordinary day ranges under an on-call
-                # label (cf. pharmacy päivystys hours) and parses the same way.
+                # Non-timetable types (single-date exceptions et al) are
+                # deviations, not timetables.
                 self._count("hours/skipped_type/" + str(entry.get("serviceHourType") or "missing"))
                 continue
             if entry.get("validFrom") or entry.get("validTo"):
@@ -3964,7 +3962,7 @@ class PtvFISpider(Spider):
     def _first_hit(resolvers: Iterable[Callable[..., SplitTriple | None]], *args) -> SplitTriple | None:
         # First non-None hit across an ordered precedence table. All
         # dispatch tables below share this shape; the table order IS the
-        # precedence, each entry's docstring the rationale.
+        # precedence, each entry's comment the rationale.
         for resolver in resolvers:
             if (hit := resolver(*args)) is not None:
                 return hit
@@ -4073,7 +4071,8 @@ class PtvFISpider(Spider):
             # Parking, hospitality and facility venues named after shores
             # ("Pysäköintialue Asemanranta") file as themselves.
             if "talviuimaranta" in lowered:
-                # Managed winter-swimming beaches are swimming areas.
+                # Managed winter-swimming shores fall through to the table
+                # instead of filing as beaches here.
                 return None
             if re.search(r"(pysäköinti|parkki|kahvila|ravintola|kioski|kauppa)", lowered):
                 return None
@@ -5555,8 +5554,8 @@ class PtvFISpider(Spider):
                 if located and (counterpart == located or counterpart.startswith(located + ",")):
                     continue
                 if counterpart.endswith("..") and counterpart != shown:
-                    # Feed-truncated operator tails ("... / Villiruu...")
-                    # are dirt on non-name segments: drop.
+                    # Feed-truncated operator tails ("... / Villiruu..."):
+                    # truncation artifacts on non-name segments drop.
                     continue
                 if not located and counterpart != shown and counterpart in (signed or ""):
                     continue
@@ -5671,7 +5670,7 @@ class PtvFISpider(Spider):
             return None
         city_src = self._city_src(street, channel, office)
         if office and self._post_city(office) != office.strip():
-            # Station-village post offices file under their municipality.
+            # Station-village post-office names are noted, not refiled.
             self._count("address/postoffice_station")
         return address, street, postcode, office, coords, city_src
 
