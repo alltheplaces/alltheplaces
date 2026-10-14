@@ -232,7 +232,7 @@ class PtvFISpider(Spider):
         ("kuntosali", Categories.GYM, None),  # Kuntosali (gyms)
         ("uimastadion", Categories.LEISURE_SPORTS_CENTRE, None),  # Uimastadion (swimming stadiums)
         ("uima-allas", Categories.LEISURE_SPORTS_HALL, None),  # Uima-allas (school pools)
-        ("maauimala", Categories.LEISURE_SPORTS_CENTRE, None),  # Maauimala (outdoor pools)
+        ("maauimala", Categories.LEISURE_SPORTS_CENTRE, {"sport": "swimming"}),  # Maauimala (outdoor pools)
         ("kahluuallas", Categories.LEISURE_SWIMMING_POOL, None),  # Kahluuallas (wading pools)
         (
             "koripallohalli",

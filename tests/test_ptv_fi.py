@@ -5705,3 +5705,8 @@ def test_user_report_facility_compounds():
     # plain courthouses keep filing.
     assert cat(spider, "Käräjätuvan- ja Näsinojankuja, viljelypalstat")[0] == Categories.ALLOTMENTS
     assert cat(spider, "Käräjäoikeus")[0] == Categories.COURTHOUSE
+    # 7. Outdoor pools swim like indoor halls.
+    assert cat(spider, "Keravan maauimala") == (
+        Categories.LEISURE_SPORTS_CENTRE,
+        {"sport": "swimming"},
+    )
