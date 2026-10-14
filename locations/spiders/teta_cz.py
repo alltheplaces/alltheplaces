@@ -28,7 +28,7 @@ class TetaCZSpider(SitemapSpider):
         days = {}
         for rule in response.xpath('//ul[contains(@class, "c-store-detail__main-opening-times")]/li'):
             if day := sanitise_day(rule.xpath("./span[1]/text()").get(), DAYS_CZ):
-                days[day] = rule.xpath('normalize-space(.//div[contains(@class, "c-hours__time")])').get()
+                days.setdefault(day, rule.xpath('normalize-space(.//div[contains(@class, "c-hours__time")])').get())
 
         oh = OpeningHours()
         for day, time in days.items():
