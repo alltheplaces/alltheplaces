@@ -812,6 +812,7 @@ class PtvFISpider(Spider):
         # org batch (one round-trip), never the whole crawl. Orgs are ~5k
         # nationally; the cache keeps each fetched once.
         self._org_names: dict[str, str] = {}
+        self._org_types: dict[str, str] = {}
         self._seen_orgs: set[str] = set()
         self._pending: dict[str, list[Feature]] = {}
         venue_words = (
@@ -998,11 +999,26 @@ class PtvFISpider(Spider):
         # survive via the fallback.
         return org_name.split(",", 1)[0].strip() or org_name
 
-    def _apply_operator(self, item: Feature, org_name: str | None) -> None:
+    @staticmethod
+    def _org_supersedes(named_operator: str, org_name: str) -> bool:
+        # The org record denotes the same entity more fully ("Yhdessä
+        # Selviytymisen Tuki YSTI ry" for signed "Ysti ry"): its tokens
+        # strictly contain the named operator's, so the record wins over
+        # the signed short form. Unrelated maintainers never qualify.
+        head_tokens = set(re.findall(r"\w+", (named_operator or "").lower()))
+        org_tokens = set(re.findall(r"\w+", (org_name.split(",", 1)[0].strip() or org_name).lower()))
+        return len(head_tokens) >= 2 and bool(head_tokens) and head_tokens < org_tokens
+
+    def _apply_operator(self, item: Feature, org_name: str | None, org_type: str | None = None) -> None:
         if item.get("operator"):
-            # Branch-agency suffixes ("/Kela") already named the provider.
-            self._count("operator/branch_agency")
-            return
+            if org_name and self._org_supersedes(item["operator"], org_name):
+                # The joined record names the same operator more fully;
+                # fall through and let it replace the signed short form.
+                self._count("operator/org_superseded")
+            else:
+                # Branch-agency suffixes ("/Kela") already named the provider.
+                self._count("operator/branch_agency")
+                return
         if (
             org_name
             and re.search(r"(hyvinvointialue|sairaanhoitopiiri)", org_name, flags=re.IGNORECASE)
@@ -1076,8 +1092,18 @@ class PtvFISpider(Spider):
             item["operator_wikidata"] = qid
         else:
             self._count("operator/no_qid")
-        is_company = bool(re.search(r"\b(oy|ab)\.?$", operator, flags=re.IGNORECASE))
-        private_org = self._is_private_org(operator) or self._is_private_org(org_name.split(",", 1)[0].strip())
+        is_company = bool(
+            re.search(r"\b(oy|ab)\.?$", self._strip_trailing_paren(operator, fallback=True), flags=re.IGNORECASE)
+        )
+        private_org = (
+            self._is_private_org(operator)
+            or self._is_private_org(org_name.split(",", 1)[0].strip())
+            or (
+                org_type == "Company"
+                and "liikelaitos" not in operator.lower()
+                and "liikelaitos" not in org_name.lower()
+            )
+        )
         if is_company or private_org:
             # Companies and associations delivering public services are
             # private operators (user ruling extends the Oy/Ab precedent).
@@ -1092,9 +1118,11 @@ class PtvFISpider(Spider):
             # service itself (seurakuntatalo clubs et al).
             self._count("operator/religious")
             item["extras"]["operator:type"] = "religious"
-        if private_org and not is_company and self._tag(item, "office") == "government":
+        if private_org and not is_company and org_type != "Company" and self._tag(item, "office") == "government":
             # Association-run desks are association offices, not government
             # ones (office lives in extras; a top-level write would raise).
+            # Record-proven companies keep the government office filing
+            # (Oy parity); only the operator type turns private.
             self._count("operator/office_demoted")
             item["extras"]["office"] = "association"
 
@@ -1117,7 +1145,7 @@ class PtvFISpider(Spider):
                     self._apply_operator(item, None)
                     yield item
                 elif org_id in self._org_names:
-                    self._apply_operator(item, self._org_names[org_id])
+                    self._apply_operator(item, self._org_names[org_id], self._org_types.get(str(org_id)))
                     yield item
                 else:
                     self._pending.setdefault(str(org_id), []).append(item)
@@ -1148,8 +1176,9 @@ class PtvFISpider(Spider):
                 continue
             name = self._lang_value(org.get("organizationNames") or [], "fi", "sv", "en")
             self._org_names[str(org["id"])] = name or ""
+            self._org_types[str(org["id"])] = org.get("organizationType") or ""
             for item in self._pending.pop(str(org["id"]), []):
-                self._apply_operator(item, name)
+                self._apply_operator(item, name, org.get("organizationType") or "")
                 yield item
         # Orgs requested but unreturned (deleted/renamed rows) must not trap
         # their items: flush the leftovers operator-less like the failure paths.
@@ -1208,15 +1237,26 @@ class PtvFISpider(Spider):
             if isinstance(row, dict)
         ]
         out: dict[str, str] = {}
-        for lang, variants in by_lang.items():
+        fi_slashes: int | None = None
+        for lang, variants in sorted(by_lang.items(), key=lambda kv: kv[0] != "fi"):
             picked = None
             for dtype, dlang in display:
                 if dlang == lang:
                     picked = next((v for t, v in variants if t == dtype), None)
                     break
             if picked is None:
-                picked = next((v for t, v in variants if t == "Name"), variants[0][1])
+                picked = next((v for t, v in variants if t == "Name"), None)
+                if picked is None and lang != "fi" and fi_slashes is not None:
+                    # No display guidance and no Name type: follow the
+                    # Finnish structure so slash twins stay parallel
+                    # ("Integrationsservice / Vasa stad ..." for a slash
+                    # pair, not the bare "Integrationstjänster").
+                    picked = next((v for _, v in variants if v.count(" / ") == fi_slashes), variants[0][1])
+                elif picked is None:
+                    picked = variants[0][1]
             out[lang] = picked
+            if lang == "fi":
+                fi_slashes = picked.count(" / ")
         return out
 
     def _is_dropped_name(self, name_fi: str) -> str | None:
@@ -1517,6 +1557,9 @@ class PtvFISpider(Spider):
         # Contact-detail tails name the contact point's owner, never the
         # details ("Turun kulttuuripaja Casan yhteystiedot" is Casa).
         primary = re.sub(r"\s+yhteystiedot(\s*,\s*[A-ZÅÄÖ][^,]*?)?\s*$", "", primary).strip()
+        # Duplicated generic heads ("Päiväkoti Luomupäiväkoti Kirsikka"):
+        # the specific daycare name already says päiväkoti.
+        primary = re.sub(r"^päiväkoti[\s-]+(?=.*päiväkoti)", "", primary, flags=re.IGNORECASE).strip()
         # Guide/contact qualifiers ("Nummelan kimppakävelyt Marin kanssa"):
         # a capitalized genitive-singular proper noun plus kanssa names the
         # person, never the venue (contact-person doctrine). Plural markers
@@ -2560,6 +2603,18 @@ class PtvFISpider(Spider):
             self._count("name/paren_coverage_dropped")
             sub = self._split_name(base, city)
             return sub[0], sub[1], name
+        if (
+            "," in inner
+            and all(re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", seg.strip()) for seg in inner.split(","))
+            and city
+            and any(seg.strip().casefold() == city.strip().casefold() for seg in inner.split(","))
+        ):
+            # Coverage municipality lists containing the municipality
+            # ("...Pohjatuuli (Karvia, ..., Kankaanpää, ...)"): the base
+            # names the POI, the full form survives in official_name.
+            self._count("name/paren_coverage_city_dropped")
+            sub = self._split_name(base, city)
+            return sub[0], sub[1], name
         if not re.search(r"\d", inner) and self._has_fixture(inner):
             # Venue in parens ("... (Oltermannikeskus)").
             if re.match(r"(yksityinen|kunnallinen)\b", inner.strip(), flags=re.IGNORECASE):
@@ -3112,8 +3167,11 @@ class PtvFISpider(Spider):
     # Description keywords rescuing otherwise-unmapped opaque names
     # ("Naskali", whose description offers housing for the intellectually
     # disabled): housing + care reads as assisted living, care alone as a
-    # plain social facility. Rescue only, never overrides a name mapping.
+    # plain social facility. Needs assessments never house anyone, so
+    # assessment prose ("tarpeen arviointi") stays social. Rescue only,
+    # never overrides a name mapping.
     CARE_HOUSING_RE = re.compile(r"asumi")
+    NEEDS_ASSESSMENT_RE = re.compile(r"tarpee\w*\W+(?:\w+\W+){0,3}(arvio|selvitys|kartoitus)", re.IGNORECASE)
     CARE_WORDS = (
         "kehitysvamma",
         "vammais",
@@ -3237,9 +3295,10 @@ class PtvFISpider(Spider):
     def _rescue_blocked(self, channel: dict) -> bool:
         # Names rescue never types: utility buildings (typed by hosted
         # services otherwise), fixed orienteering controls (typed by
-        # shooting-ontology dumps otherwise) and sled hills (typed by the
+        # shooting-ontology dumps otherwise), sled hills (typed by the
         # same sports-catalogue dumps; pulkkamäki has no enum and stays
-        # generic by design). All stay generic.
+        # generic by design) and shore paths (Rantaraitti is a route, not
+        # a venue). All stay generic.
         fi = (self._names(channel).get("fi") or "").lower()
         return (
             "huoltorakennus" in fi or "kiintorasti" in fi or "pulkkam" in fi or "pulkbacke" in fi or "rantaraitti" in fi
@@ -3386,7 +3445,7 @@ class PtvFISpider(Spider):
             # utilities, weekly volunteers) is not urgency.
             return Categories.CLINIC_URGENT
         if any(word in text for word in self.CARE_WORDS):
-            if self.CARE_HOUSING_RE.search(text):
+            if self.CARE_HOUSING_RE.search(text) and not self.NEEDS_ASSESSMENT_RE.search(text):
                 return Categories.ASSISTED_LIVING
             return Categories.SOCIAL_FACILITY
         return None
@@ -4403,7 +4462,9 @@ class PtvFISpider(Spider):
             return Categories.LEISURE_PITCH, {"sport": "tennis"}
         if re.search(r"tekonurmi\w*|tekokentt\w*", lowered):
             return Categories.LEISURE_PITCH, {"sport": "soccer", "surface": "artificial_turf"}
-        if re.search(r"(koulu|skol)\w*", lowered):
+        if re.search(r"(koulu|skol|päiväkoti|päiväkodi)\w*", lowered):
+            # Daycare yards read like schoolyards (playgrounds); the
+            # gradation stem (päiväkodin) never contains the nominative.
             return Categories.LEISURE_PLAYGROUND, None
         return None
 
@@ -4444,14 +4505,41 @@ class PtvFISpider(Spider):
             return None
         return category, extra
 
+    def _carve_fused_room(self, name_fi: str) -> tuple[Categories | None, dict | None] | None:
+        # Daycare-hosted rooms ("Hämeenkylän päiväkodin liikuntasali"):
+        # the split names the unit with the daycare located, so the room
+        # types the POI. School hosts already file via the table (sali
+        # keys beat koulu) and never enter here; only the päiväkoti
+        # shadow (which outranks every facility key) needs the carve.
+        m = re.search(r"päiväkodin\s+(\S.*)$", name_fi.lower())
+        if not m:
+            return None
+        tail = m.group(1).strip()
+        if not tail or re.search(r"\bja\b|&", tail):
+            return None
+        if not any(word in tail for word in self.ROOM_WORDS):
+            return None
+        category, extra = self._category(tail)
+        if category is None:
+            return None
+        self._count("category/fused_room_carve")
+        return category, extra
+
     def _category(self, name_fi: str) -> tuple[Categories | None, dict | None]:
         # Invisible characters (zero-width, soft hyphens) never carry
         # matching meaning; strip them so feed dirt can't hide keywords.
         name_fi = self._visible(name_fi)
+        # Purchased-service qualifiers ("..., Hämeenlinna, yhteisöllisen
+        # asumisen ostopalvelut") arrange the service, never the place:
+        # the head types it, so desks behind care-home heads stay homes.
+        name_fi = re.sub(r",\s*[^,]*(?:ostopalvelu\w*)\s*$", "", name_fi).strip()
+        name_fi = re.sub(r"\s+ostopalveluna\s*$", "", name_fi, flags=re.IGNORECASE).strip()
         if (custom := self._custom_category(name_fi)) is not None:
             return custom
         if (carved := self._carve_room_tail(name_fi)) is not None:
             return carved
+        if (fused := self._carve_fused_room(name_fi)) is not None:
+            return fused
         lowered = name_fi.lower()
         # Gradation plurals/genitives never contain their singular
         # (kenttä/kentät/kentän, ranta/rannat/rannan, keskus/keskuksen,
@@ -4515,6 +4603,10 @@ class PtvFISpider(Spider):
             if not digits.startswith("358"):
                 return raw.strip() or None
             digits = digits[3:].lstrip("0")
+            if digits.startswith("358") and len(digits) in (9, 10):
+                # Doubled country code ("+358 358..."): strip and repair
+                # the trunk like other trunk-less numbers.
+                digits = digits[3:]
         else:
             if digits.startswith("358") and len(digits) in (9, 10):
                 # Country code without "+" on a short number ("358912345"):
@@ -4627,6 +4719,10 @@ class PtvFISpider(Spider):
                 # Login walls (and email addresses in the URL field)
                 # are never websites.
                 self._count("contact/login_url")
+                continue
+            if "finlex.fi" in url.lower():
+                # Legislation references are never the venue website.
+                self._count("contact/law_reference")
                 continue
             item["website"] = url
             return
@@ -5215,6 +5311,114 @@ class PtvFISpider(Spider):
             # A venue duplicating the municipality is not a venue.
             self._count("name/located_is_city")
             located = None
+        if city_src and located:
+            # Municipality segments inside the venue repeat the city field
+            # ("Hannes, Hämeenlinna, ..."): the venue reads without them.
+            city_cf = city_src.strip().casefold()
+            segs = [s.strip() for s in located.split(",")]
+            kept = [s for s in segs if s.casefold() != city_cf]
+            if len(kept) != len(segs):
+                self._count("name/located_city_dropped")
+                located = ", ".join(kept).strip(" ,") or None
+        if located:
+            desc_stripped = re.sub(r",\s*[^,]*(?:ostopalvelu\w*)\s*$", "", located).strip(" ,")
+            if desc_stripped and desc_stripped != located:
+                # Purchased-service descriptors ("..., yhteisöllisen
+                # asumisen ostopalvelut") are arrangement text, not venues.
+                self._count("name/located_descriptor_dropped")
+                located = desc_stripped or None
+        return located
+
+    def _apply_slash_operator(self, item: Feature, signed: str, shown: str | None, located: str | None) -> str | None:
+        # Explicit operator companies/associations in the signed name name
+        # the operator (explicit-in-name beats the maintainer): tails
+        # ("Imatra Bowling Center / Imatran keilahalli Oy") are never
+        # located venues of their own, dropped heads ("Pilke päiväkodit
+        # Oy/ Veturi") still operate. Heads surviving in the applied name
+        # stay out: chain brands and org styling keep handling them.
+        # Returns the located venue, possibly overridden.
+        two_seg = len(signed.split(" / ")) == 2
+        slash_tail = None
+        if " / " in signed:
+            candidate = signed.rsplit(" / ", 1)[1].strip()
+            if candidate and re.search(self.OPERATOR_END_RE, candidate, flags=re.IGNORECASE):
+                slash_tail = candidate
+        if slash_tail is not None:
+            if two_seg:
+                # Two-segment tails are never a located venue of their own;
+                # longer tails keep the split's venue (explicit venue halves
+                # relocate below, activity halves do not).
+                located = None
+            if ", " in slash_tail:
+                venue, _, org = slash_tail.rpartition(", ")
+                if org.strip() and self._has_operator_word(org):
+                    # Venue-plus-operator tails ("Iltapäivätoiminta /
+                    # Tapanilan urheilukeskus, Tapanilan Erä ry"): only the
+                    # association half operates; the venue locates. In longer
+                    # tails the venue half relocates only when it names a
+                    # place (toimintapaikka/skola/enhet); activity halves
+                    # ("Linguajoy Language Club") leave the split venue alone.
+                    self._count("operator/slash_tail_split")
+                    if (
+                        two_seg
+                        or self._has_fixture(venue)
+                        or re.search(
+                            r"(toimintapaikka|toimintakeskus|yksikkö|enhet|skola|keskus|talo)",
+                            venue.lower(),
+                        )
+                    ):
+                        located = venue.strip() or None
+                    slash_tail = org.strip()
+                    if re.search(r"(seurakunta|församling)", slash_tail, flags=re.IGNORECASE):
+                        # Parish operators stay religious even when named by
+                        # the tail ("Päiväkoti Gan Jeladim, Helsingin
+                        # juutalainen seurakunta").
+                        item["extras"]["operator:type"] = "religious"
+            item["operator"] = slash_tail
+            self._count("operator/slash_tail")
+            is_company = bool(
+                re.search(r"\b(oy|ab)\.?$", self._strip_trailing_paren(slash_tail, fallback=True), flags=re.IGNORECASE)
+            )
+            private_org = self._is_private_org(slash_tail)
+            if is_company or private_org:
+                item["extras"]["operator:type"] = "private"
+            if private_org and not is_company and self._tag(item, "office") == "government":
+                self._count("operator/office_demoted")
+                item["extras"]["office"] = "association"
+        elif "/" in signed:
+            head = re.split(r"\s*/\s*", signed, maxsplit=1)[0].strip()
+            if (
+                head
+                and (shown or "")
+                and head not in shown
+                and self._is_operator_shaped(head)
+                and not any(re.search(r"\b" + stem + r"\b", (shown or "").lower()) for stem, _ in self.CHAIN_OPERATORS)
+            ):
+                # Dropped heads still operate: the company does, not the
+                # city maintainer. Surviving heads stay out (chain brands,
+                # org styling); units named for a chain ("Päiväkoti Pilke
+                # Äppelbo") keep the brand via the org join instead.
+                item["operator"] = head
+                self._count("operator/slash_head")
+                if qid := self.OPERATORS_WIKIDATA.get(head):
+                    item["operator_wikidata"] = qid
+                else:
+                    self._count("operator/no_qid")
+                if self._is_private_org(head):
+                    item["extras"]["operator:type"] = "private"
+                    head_company = bool(
+                        re.search(
+                            r"\b(oy|ab)\.?$",
+                            self._strip_trailing_paren(head, fallback=True),
+                            flags=re.IGNORECASE,
+                        )
+                    )
+                    if not head_company and self._tag(item, "office") == "government":
+                        # Association-run desks are association offices, not
+                        # government ones (mirrors the tail demotion; the org
+                        # join early-returns behind explicit operators).
+                        self._count("operator/office_demoted")
+                        item["extras"]["office"] = "association"
         return located
 
     def _apply_naming(self, item: Feature, names: dict[str, str], name: str, city_src: str | None) -> None:
@@ -5232,39 +5436,7 @@ class PtvFISpider(Spider):
             return
         cleaned = self._clean_name(signed)
         shown, located, official = self._split_name(cleaned, city_src)
-        slash_tail = None
-        if " / " in signed and len(signed.split(" / ")) == 2:
-            candidate = signed.rsplit(" / ", 1)[1].strip()
-            if candidate and re.search(self.OPERATOR_END_RE, candidate, flags=re.IGNORECASE):
-                slash_tail = candidate
-        if slash_tail is not None:
-            # Explicit operator companies/associations in the signed name
-            # ("Imatra Bowling Center / Imatran keilahalli Oy") name the
-            # operator; the tail is never a located venue.
-            located = None
-            if ", " in slash_tail:
-                venue, _, org = slash_tail.rpartition(", ")
-                if org.strip() and self._has_operator_word(org):
-                    # Venue-plus-operator tails ("Iltapäivätoiminta /
-                    # Tapanilan urheilukeskus, Tapanilan Erä ry"): only the
-                    # association half operates; the venue locates.
-                    self._count("operator/slash_tail_split")
-                    located = venue.strip() or None
-                    slash_tail = org.strip()
-                    if re.search(r"(seurakunta|församling)", slash_tail, flags=re.IGNORECASE):
-                        # Parish operators stay religious even when named by
-                        # the tail ("Päiväkoti Gan Jeladim, Helsingin
-                        # juutalainen seurakunta").
-                        item["extras"]["operator:type"] = "religious"
-            item["operator"] = slash_tail
-            self._count("operator/slash_tail")
-            is_company = bool(re.search(r"\b(oy|ab)\.?$", slash_tail, flags=re.IGNORECASE))
-            private_org = self._is_private_org(slash_tail)
-            if is_company or private_org:
-                item["extras"]["operator:type"] = "private"
-            if private_org and not is_company and self._tag(item, "office") == "government":
-                self._count("operator/office_demoted")
-                item["extras"]["office"] = "association"
+        located = self._apply_slash_operator(item, signed, shown, located)
         city_match = (
             re.match(re.escape(city_src.strip()) + r"\s+[–—-]\s+(\S)", shown, flags=re.IGNORECASE) if city_src else None
         )
@@ -5317,12 +5489,35 @@ class PtvFISpider(Spider):
             if translation and translation != shown and translation != signed:
                 cleaned_tr = re.sub(r"\s*\d+\*\s*$", "", translation).strip()
                 cleaned_tr = re.sub(r",?\s*(?:[PN]\s*)?\d+\s*°.*$", "", cleaned_tr).strip()
+                paren_stripped = re.sub(
+                    r"\s*\([^()]*(tie|katu|kuja|polku|väylä|raitti|ranta|kaari|penger"
+                    r"|vägen|väg|gatan|gata|gränden|gränd|stigen|stig)\b[^()]*\d[^()]*\)\s*$",
+                    "",
+                    cleaned_tr,
+                ).strip()
+                if paren_stripped and paren_stripped != cleaned_tr:
+                    # Translated street-address tails ("...(Kymmenedalsgränden 4)")
+                    # duplicate the address line, never the applied name.
+                    self._count("name/tr_address_dropped")
+                    cleaned_tr = paren_stripped
                 cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, item.get("located_in"), city)
                 if "/" in cleaned_tr:
                     split_tr = self._split_bilingual(cleaned_tr, shown, signed, item.get("located_in"))
                     if split_tr is None:
                         continue
                     cleaned_tr = split_tr
+                if (
+                    re.fullmatch(r"City of\s+[A-ZÅÄÖ][a-zåäö-]+\s*", cleaned_tr, flags=re.IGNORECASE)
+                    and re.search(r"kaupunki|kaupungin", signed or "", flags=re.IGNORECASE)
+                    and not re.fullmatch(r"\S+\s+kaupunki", (shown or "").strip(), flags=re.IGNORECASE)
+                ):
+                    # Bare English tails naming the operating city ("City of
+                    # Vaasa" for applied "...hyvinvointipalvelut" under Vaasan
+                    # kaupunki) render the operator, never the applied name.
+                    # Operator data is not joined yet here, so the signed
+                    # Finnish form carries the evidence instead.
+                    self._count("name/tr_operator_city_dropped")
+                    continue
                 located = item.get("located_in")
                 if cleaned_tr and cleaned_tr not in (shown, signed):
                     if not (located and cleaned_tr == located and located in (signed or "")):
@@ -5373,6 +5568,15 @@ class PtvFISpider(Spider):
                     # Leading duplicate ("Aninkaisten koulu (...) Gym A"):
                     # the venue repeats the split-off Finnish name.
                     cleaned_tr = rest.strip(" ,–—-/")
+                    if re.fullmatch(r"\([^(),]*\)", cleaned_tr) and not self._paren_cognate(cleaned_tr, form):
+                        # Bare descriptor parens ("Päiväkoti Lyyra (private
+                        # ECEC centre)"): the row copied the Finnish name,
+                        # the paren is not a translation. Parens with commas
+                        # are translation twins ("(Turku Lyceum, Kärsämäki
+                        # Unit)") and stay, as do parens cognate with the
+                        # head ("(Sibbo teater)" for "Sipoon teatteri").
+                        self._count("name/tr_descriptor_dropped")
+                        cleaned_tr = ""
         if located and "," in cleaned_tr and "," in (signed or ""):
             # Trailing comma tails duplicating the located venue
             # ("Daghemskök, Päiväkoti Jollas", "Skolrestaurang, Pasilan
@@ -5381,6 +5585,15 @@ class PtvFISpider(Spider):
             # comma-fragments in the shown name mark a mis-split: skip.
             cleaned_tr = self._positional_comma_keep(cleaned_tr, shown, signed)
         return cleaned_tr
+
+    @staticmethod
+    def _paren_cognate(cleaned_tr: str, form: str) -> bool:
+        # Parens translating the head share a word stem with it ("Sibbo
+        # teater" for "Sipoon teatteri"); descriptors ("private ECEC
+        # centre" for "Päiväkoti Lyyra") share nothing.
+        paren_words = re.findall(r"[A-Za-zåäöÅÄÖ]{4,}", cleaned_tr)
+        head_words = re.findall(r"[A-Za-zåäöÅÄÖ]{3,}", form or "")
+        return any(p[:3].casefold() == h[:3].casefold() for p in paren_words for h in head_words if len(p) >= 4)
 
     def _strip_tr_alignment(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         # First-segment, word-aligned and venue-naming translations reduce
@@ -5545,12 +5758,31 @@ class PtvFISpider(Spider):
             self._count("category/for_senior")
             item["extras"]["social_facility:for"] = "senior"
 
+    def _communal_housing(self, channel: dict) -> bool:
+        # Communal-housing services ("Sosiaalihuoltolain mukainen
+        # yhteisöllinen asuminen") name a care home, whatever proper-noun
+        # park or desk the name tier read.
+        if any("yhteisöllinen asuminen" in (s or "").lower() for s in self._service_names(channel)):
+            return True
+        for term in channel.get("ontologyTerms") or []:
+            for term_name in (term or {}).get("name") or []:
+                if (
+                    isinstance(term_name, dict)
+                    and term_name.get("language") == "fi"
+                    and term_name.get("value")
+                    and "yhteisöllinen asuminen" in term_name["value"].lower()
+                ):
+                    return True
+        return False
+
     def _maybe_upgrade_housing(self, item: Feature, channel: dict, category: Categories | None) -> Categories | None:
         # Supported housing beats diagnosis even when the name tier
         # filed bare social ("Onnikoti Apila", "Tervahovin asunnot"
         # via onto): upgrade to assisted living. Rows that already carry
         # a specific subtype (group homes, nursing homes) keep it.
         # Offices, clinics and schools never upgrade from feed wording.
+        # Proper-noun parks over care homes ("Attendo Puistomäki" with a
+        # communal-housing service) upgrade to bare social instead.
         if category == Categories.SOCIAL_FACILITY and self._supported_housing(channel):
             extras = item.get("extras") or {}
             if not extras.get("social_facility"):
@@ -5558,6 +5790,11 @@ class PtvFISpider(Spider):
                 apply_category(Categories.ASSISTED_LIVING, item)
                 return Categories.ASSISTED_LIVING
             self._count("category/supported_housing_kept")
+        if category == Categories.LEISURE_PARK and self._communal_housing(channel):
+            self._count("category/park_housing_upgrade")
+            apply_category(Categories.SOCIAL_FACILITY, item)
+            (item.get("extras") or {}).pop("leisure", None)
+            return Categories.SOCIAL_FACILITY
         return category
 
     def _parse_gate(self, channel: dict) -> tuple[dict[str, str], str] | None:

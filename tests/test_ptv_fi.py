@@ -5372,3 +5372,253 @@ def test_located_street_parens_drop():
     spider = make_spider()
     assert spider._clean_located("Aurinkolahden peruskoulu (Solvindsgatan 11)") == "Aurinkolahden peruskoulu"
     assert spider._clean_located("Heteniitynkenttä (Vuosaari)") == "Heteniitynkenttä (Vuosaari)"
+
+
+# ---- Review round 21: kindergarten/office slices + rescue/opcontact ---------
+
+
+def test_tr_descriptor_parens_drop():
+    # EN rows copying the Finnish name with a descriptor ("Päiväkoti Lyyra
+    # (private ECEC centre)", 25b3fcba) are not translations: the
+    # Finnish-duplicate strip must not strand a bare parenthetical.
+    spider = make_spider()
+    ch = channel("Päiväkoti Lyyra")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Päiväkoti Lyyra", "type": "Name"},
+        {"language": "en", "value": "Päiväkoti Lyyra (private ECEC centre)", "type": "Name"},
+    ]
+    ch["displayNameType"] = [{"type": "Name", "language": "en"}]
+    item = parsed(spider, ch, "Rovaniemen kaupunki")
+    assert item["extras"].get("name:en") is None
+
+
+def test_tr_street_parens_drop():
+    # Translated address tails duplicate the address line (60a737de and
+    # 43 census siblings): the applied name renders without them.
+    spider = make_spider()
+    ch = channel("Haritun päiväkoti (Kymenlaaksonkuja 4)")
+    ch["serviceChannelNames"].append({"language": "sv", "value": "Dagvårdsenheten i Harittu (Kymmenedalsgränden 4)"})
+    item = parsed(spider, ch, "Turun kaupunki")
+    assert item.get("name") == "Haritun päiväkoti"
+    assert item["extras"].get("name:sv") == "Dagvårdsenheten i Harittu"
+
+
+def test_slash_head_operators():
+    # Operator heads dropped by the split ("Pilke päiväkodit Oy/ Veturi
+    # (Bastioninkatu 4)", 7520ec48 + 19 census siblings) still operate:
+    # explicit-in-name beats the city maintainer.
+    spider = make_spider()
+    item = parsed(spider, channel("Pilke päiväkodit Oy/ Veturi (Bastioninkatu 4)"), "Turun kaupunki")
+    assert item.get("name") == "Veturi"
+    assert item.get("operator") == "Pilke päiväkodit Oy"
+    assert item["extras"].get("operator:type") == "private"
+
+
+def test_dup_daycare_prefix_strips():
+    # "Päiväkoti Luomupäiväkoti Kirsikka Laajasalo" (a8811dac + 10 census
+    # siblings): the specific name already says päiväkoti. Bare heads stay.
+    spider = make_spider()
+    assert spider._clean_name("Päiväkoti Luomupäiväkoti Kirsikka Laajasalo") == "Luomupäiväkoti Kirsikka Laajasalo"
+    assert spider._clean_name("Päiväkoti Kirsikka") == "Päiväkoti Kirsikka"
+    assert cat(spider, "Luomupäiväkoti Kirsikka Laajasalo")[0] == Categories.KINDERGARTEN
+
+
+def test_daycare_grounds_are_playgrounds():
+    # "Lapijoen päiväkodin lähiliikuntapaikka" (f1fc87f8): daycare yards
+    # read like schoolyards. No venue split either way (school parity:
+    # "Ilolan koulun lähiliikuntapaikka" also stays whole).
+    spider = make_spider()
+    assert cat(spider, "Lapijoen päiväkodin lähiliikuntapaikka")[0] == Categories.LEISURE_PLAYGROUND
+    assert cat(spider, "Ilolan koulun lähiliikuntapaikka")[0] == Categories.LEISURE_PLAYGROUND
+    full = "Lapijoen päiväkodin lähiliikuntapaikka"
+    assert spider._split_name(full, None) == (full, None, None)
+
+
+def test_daycare_rooms_carve():
+    # Daycare-hosted rooms name the unit with the daycare located, so the
+    # room types the POI (2c8e477b + 41 census siblings): the päiväkoti
+    # table shadow must not beat the room the way koulu never does.
+    spider = make_spider()
+    assert cat(spider, "Hämeenkylän päiväkodin liikuntasali")[0] == Categories.LEISURE_SPORTS_HALL
+    assert cat(spider, "Sangin vanhan koulun liikuntasali")[0] == Categories.LEISURE_SPORTS_HALL
+    assert cat(spider, "Päiväkodin vuorohoitoryhmä")[0] == Categories.KINDERGARTEN
+
+
+def test_ostopalvelut_tails_dont_type():
+    # Purchased-service qualifiers arrange the service, never the place:
+    # care-home heads behind "..., yhteisöllisen asumisen ostopalvelut"
+    # stay homes (b01a5086 + 6 office-filed census siblings).
+    spider = make_spider()
+    assert (
+        cat(spider, "Ikifit Oy, hyvinvointikoti Jukola/Hannes, Hämeenlinna, yhteisöllisen asumisen ostopalvelut")[0]
+        == Categories.SOCIAL_FACILITY
+    )
+    ch = channel("Attendo Puistomäki, Hämeenlinna, yhteisöllisen asumisen ostopalvelut", office="Hämeenlinna")
+    ch["services"] = [{"service": {"name": "Sosiaalihuoltolain mukainen yhteisöllinen asuminen"}}]
+    item = parsed(spider, ch, "Kanta-Hämeen hyvinvointialue")
+    assert item.get_tag("amenity") == "social_facility"
+    assert item.get("name") == "Attendo Puistomäki"
+    # The park filing upgrades away cleanly: no residual leisure tag.
+    assert item.get("leisure") is None
+
+
+def test_located_city_and_descriptor_segments_drop():
+    # "Hannes, Hämeenlinna, yhteisöllisen asumisen ostopalvelut" (b01a5086):
+    # municipality segments repeat the city field, arrangement tails are
+    # not venues; the venue reads alone.
+    spider = make_spider()
+    ch = channel(
+        "Ikifit Oy, hyvinvointikoti Jukola/Hannes, Hämeenlinna, yhteisöllisen asumisen ostopalvelut",
+        office="Hämeenlinna",
+    )
+    item = parsed(spider, ch, "Kanta-Hämeen hyvinvointialue")
+    assert item.get("located_in") == "Hannes"
+
+
+def test_paren_coverage_city_drops():
+    # Coverage municipality lists containing the municipality (d1d28ff8 +
+    # 6 census siblings): the base names the POI, the full form survives
+    # in official_name. Lists without the city stay whole.
+    spider = make_spider()
+    full = "Perheoikeudelliset palvelut perhekeskus Pohjatuuli (Karvia, Siikainen, Pomarkku, Kankaanpää, Jämijärvi)"
+    assert spider._split_name(full, "Kankaanpää") == (
+        "Perheoikeudelliset palvelut perhekeskus Pohjatuuli",
+        None,
+        full,
+    )
+    other = "Perheoikeudelliset palvelut perhekeskus X (Karvia, Pomarkku)"
+    assert spider._split_name(other, "Pori") == (
+        "Perheoikeudelliset palvelut perhekeskus X",
+        "Karvia, Pomarkku",
+        "Perheoikeudelliset palvelut perhekeskus X (Karvia, Pomarkku)",
+    )
+
+
+def test_names_follow_finnish_slash_structure():
+    # Unguided translations follow the Finnish slash structure (83336e4b):
+    # the parallel full form wins over the bare "Integrationstjänster".
+    spider = make_spider()
+    ch = channel("Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut"},
+        {"language": "sv", "value": "Integrationstjänster"},
+        {"language": "sv", "value": "Integrationsservice / Vasa stad Välfärdstjänster"},
+    ]
+    assert spider._names(ch)["sv"] == "Integrationsservice / Vasa stad Välfärdstjänster"
+
+
+def test_vaasa_translation_and_law_link():
+    # 83336e4b end to end: sv renders the applied tail, the operator-city
+    # en drops, and the finlex legislation reference is never a website.
+    spider = make_spider()
+    ch = channel("Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut", office="Vaasa")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut"},
+        {"language": "sv", "value": "Integrationstjänster"},
+        {"language": "sv", "value": "Integrationsservice / Vasa stad Välfärdstjänster"},
+        {"language": "en", "value": "Integration services / City of Vaasa"},
+    ]
+    ch["displayNameType"] = [{"type": "Name", "language": "en"}]
+    ch["webPages"] = [{"url": "http://www.finlex.fi/fi/laki/ajantasa/2010/20101386"}]
+    item = parsed(spider, ch, "Vaasan kaupunki")
+    assert item.get("name") == "Vaasan kaupungin hyvinvointipalvelut"
+    assert item.get("located_in") == "Kotoutumispalvelut"
+    assert item["extras"].get("name:sv") == "Vasa stad Välfärdstjänster"
+    assert item["extras"].get("name:en") is None
+    assert item.get("website") is None
+
+
+def test_assessment_prose_never_houses():
+    # Needs assessments never house anyone: bare "asumi" in description
+    # prose files social, while tuettu-proximity still houses.
+    spider = make_spider()
+    ch = channel("Palveluneuvonta")
+    ch["serviceChannelDescriptions"] = [
+        {"language": "fi", "value": "mielenterveys- ja asumispalvelujen tarpeen arviointi"}
+    ]
+    assert spider._rescue_category(ch) == Categories.SOCIAL_FACILITY
+    ch2 = channel("Palveluneuvonta")
+    ch2["serviceChannelDescriptions"] = [{"language": "fi", "value": "mielenterveyskuntoutujien tuettu asuminen"}]
+    assert spider._rescue_category(ch2) == Categories.ASSISTED_LIVING
+
+
+def test_phone_double_country_repairs():
+    # Doubled country codes ("+358 358...", SYNTHETIC: zero feed rows)
+    # repair like their trunk-less twins, never emit doubled.
+    spider = make_spider()
+    assert spider._normalize_phone("+358 358123456") == "+358 1 23456"
+    assert spider._normalize_phone("00358 9 1234567") == "+358 91234567"
+
+
+def test_company_paren_keeps_company_reading():
+    # "Foo Oy (Espoo)" reads past the qualifier like bare "Foo Oy": a
+    # company desk is never an association one (SYNTHETIC shapes).
+    spider = make_spider()
+    assert spider._is_private_org("Yhdistys (NNKY)") is True
+    item = parsed(spider, channel("Palvelupiste"), "Foo Oy (Espoo)")
+    assert item.get("operator") == "Foo Oy (Espoo)"
+    assert item["extras"].get("operator:type") == "private"
+    # No association demotion: deparened company reads like bare Oy, whose
+    # government office filing stands (SavoGrow precedent).
+    assert item["extras"].get("office") == "government"
+
+
+def test_three_segment_operator_tails():
+    # "Iltapäivätoiminta / Taivallahden peruskoulu, Demo iltapäiväkerho /
+    # Jamkicks Oy": the last-segment company operates (20 census rows).
+    spider = make_spider()
+    item = parsed(
+        spider,
+        channel("Iltapäivätoiminta / Taivallahden peruskoulu, Demo iltapäiväkerho / Jamkicks Oy"),
+        "Helsingin kaupunki",
+    )
+    assert item.get("operator") == "Jamkicks Oy"
+    assert item["extras"].get("operator:type") == "private"
+
+
+def test_company_record_operators_private():
+    # Record-proven companies ("Amuri Hoiva", organizationType Company,
+    # 2eecf044) are private operators even without Oy/ry markers.
+    # Municipal enterprises (liikelaitos) stay out per prior doctrine.
+    spider = make_spider()
+    item = parsed(spider, channel("Palvelupiste"), None)
+    spider._apply_operator(item, "Amuri Hoiva", "Company")
+    assert item.get("operator") == "Amuri Hoiva"
+    assert item["extras"].get("operator:type") == "private"
+    item2 = parsed(spider, channel("Palvelupiste"), None)
+    spider._apply_operator(item2, "Oulun Vesi -liikelaitos", "Company")
+    assert item2["extras"].get("operator:type") is None
+
+
+def test_chain_units_keep_brand_over_full_head():
+    # "Pilke päiväkodit Oy/ Päiväkoti Pilke Äppelbo daghem" (e53fea71):
+    # the unit is named for the chain, so the brand still operates.
+    spider = make_spider()
+    item = parsed(
+        spider,
+        channel("Pilke päiväkodit Oy/ Päiväkoti Pilke Äppelbo daghem (Stålarminkatu 36)"),
+        "Turun kaupunki",
+    )
+    assert item.get("operator") == "Pilke"
+
+
+def test_org_record_supersedes_short_signed_head():
+    # Signed short forms ("Ysti ry") yield to the joined record naming
+    # the same operator more fully (cd60fa6c/d2a74835).
+    spider = make_spider()
+    item = parsed(spider, channel("Ysti ry/ Toimela"), None)
+    spider._apply_operator(item, "Yhdessä Selviytymisen Tuki YSTI ry", "Organization")
+    assert item.get("operator") == "Yhdessä Selviytymisen Tuki YSTI ry"
+
+
+def test_activity_halves_dont_relocate():
+    # Club/activity halves ("Linguajoy Language Club") are no venue:
+    # the split's school stands while the company operates (025c3328).
+    spider = make_spider()
+    item = parsed(
+        spider,
+        channel("Iltapäivätoiminta / Vattuniemen ala-aste / Linguajoy Language Club, Linguajoy Kielikerhot Oy"),
+        "Helsingin kaupunki",
+    )
+    assert item.get("located_in") == "Vattuniemen ala-aste"
+    assert item.get("operator") == "Linguajoy Kielikerhot Oy"
