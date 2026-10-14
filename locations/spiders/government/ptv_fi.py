@@ -59,6 +59,15 @@ class PtvFISpider(Spider):
     MOBILE_RE = re.compile(r"(etsivä|liikkuva|hoitoauto|palveluauto|auto$)")
     TRACK_RE = re.compile(r"\b(kuntorata|kuntopolku|latu|luontopolku|retkeilyreitti|hiihtolatu|pururata)\b")
     TRACK_WORDS = ("lenkki", "juoksu", "latu", "ladut", "polut", "reitti", "reitit", "reitistö")
+    # Track-word rows that still name a visitable venue: sports-hall
+    # running straights ("Töölön kisahalli / Juoksusuora"), outdoor gyms
+    # ("... / Ulkokuntoilupaikka") and facilities at track-named places
+    # ("Reittipuiston lentopallokenttä", "Latupuiston päiväkoti").
+    # School-owned tracks ("... koulun hiihtolatu") and park routes
+    # ("Keskuspuisto 1 latu") carry no venue head and stay dropped.
+    TRACK_VENUE_RE = re.compile(r"(halli|kenttä|stadion|areena|urheilutalo|jäähalli)")
+    TRACK_PLACE_RE = re.compile(r"(reittipuisto|latupuisto|latuka\w*)")
+    TRACK_FACILITY_RE = re.compile(r"(kenttä|päiväkoti|leikki|koulu|kirjasto|halli|sali)")
     KM_RE = re.compile(r"\d\s*km\b")
     KITCHEN_INFIX = tuple("päiväkoti koulu palvelukeskus hoiva sairaala tuotanto ".split())
     COORD_TAIL_RE = re.compile(r",?\s*(?:[PN]\s*)?\d+\s*°.*$")
@@ -369,7 +378,7 @@ class PtvFISpider(Spider):
         ("miniareena", Categories.LEISURE_SPORTS_HALL, None),  # Miniareena (mini arenas)
         ("areena|urheilutalo|liikuntatalo|liikuntapuisto", Categories.LEISURE_SPORTS_CENTRE, None),  # Areena (arenas)
         ("kahvila|kahvio", Categories.CAFE, None),  # Kahvila (cafes)
-        ("urheilukeskus", Categories.LEISURE_SPORTS_CENTRE, None),  # Urheilukeskus (sports centres)
+        ("urheilukeskus|hiihtokeskus", Categories.LEISURE_SPORTS_CENTRE, None),  # Urheilukeskus (sports centres)
         ("monitoimitila", Categories.COMMUNITY_CENTRE, None),  # Monitoimitila (multipurpose rooms)
         ("kirjasto|lainausasema", Categories.LIBRARY, None),  # Kirjasto (libraries)
         ("arkisto", Categories.ARCHIVE, None),  # Arkisto (archives)
@@ -617,7 +626,7 @@ class PtvFISpider(Spider):
         ("asukaspuiston kerho", None, None),  # Asukaspuiston kerho (park club activities, not the park)
         ("kiintorasti", None, None),  # Kiintorasti (fixed orienteering controls, not the host park)
         ("urheilupuisto", Categories.LEISURE_SPORTS_CENTRE, None),  # Urheilupuisto (sports parks, cf. liikuntapuisto)
-        ("puisto", Categories.LEISURE_PARK, None),  # Puisto (parks)
+        ("puisto|puistikko", Categories.LEISURE_PARK, None),  # Puisto (parks)
         ("veistos", None, {"tourism": "artwork", "artwork_type": "sculpture"}),  # Veistos (sculptures; parks keep park)
         ("taideteos", Categories.TOURISM_ARTWORK, None),  # Taideteos (artworks)
         ("päiväkeskus", Categories.SOCIAL_FACILITY, None),  # Päiväkeskus (day centres)
@@ -689,6 +698,7 @@ class PtvFISpider(Spider):
         super().__init__(*args, **kwargs)
         self._ids: list[str] = []
         self._seen_pages: set[int] = set()
+        self._page_skips = 0
         # Detail batches emit once: a dead list page falls through to the
         # errback below, which continues with the ids collected so far.
         self._batches_emitted = False
@@ -794,6 +804,11 @@ class PtvFISpider(Spider):
         if k in ("nuoriso", "nuorten"):
             # Youth councils (Nuorisovaltuusto) are civic offices, not venues.
             return re.escape(k) + r"(?!valtuusto)"
+        if k == "puistikko":
+            # Park streets ("Onnikoti Puistikkotie", a care home on
+            # Puistikko road) are addresses, not parks: only the
+            # diminutive itself files as a park (Lentäjänpuistikko).
+            return r"puistikko(?!tie)"
         return re.escape(k)
 
     def _count(self, key: str, n: int = 1) -> None:
@@ -811,10 +826,20 @@ class PtvFISpider(Spider):
 
     def errback_list(self, failure) -> Iterable[JsonRequest]:
         # A dead list page must not stall the crawl: the retry middleware
-        # already had its chance, so continue with the ids collected so far.
+        # already had its chance, so skip ahead one page (bounded: past-end
+        # pages answer successfully and stop the chain in parse, while
+        # repeated deaths fall through to the ids collected so far).
         request = getattr(failure, "request", None)
         url = getattr(request, "url", "") or ""
         self._count("page/failed")
+        page = (getattr(request, "cb_kwargs", None) or {}).get("page", 0)
+        if isinstance(page, int) and page >= 1 and page + 1 not in self._seen_pages and self._page_skips < 3:
+            self._page_skips += 1
+            self._count("page/skipped")
+            self.logger.error("list page %d failed, skipping ahead: %s", page, url)
+            self._seen_pages.add(page + 1)
+            yield JsonRequest(url=self.list_url(page + 1), cb_kwargs={"page": page + 1}, errback=self.errback_list)
+            return
         self.logger.error("list page failed, continuing with %d ids: %s", len(self._ids), url)
         yield from self._emit_batches()
 
@@ -824,14 +849,21 @@ class PtvFISpider(Spider):
         except ValueError:
             self._count("page/bad_json")
             self.logger.error("bad JSON from %s", response.url)
+            if self._ids:
+                yield from self._emit_batches()
             return
         if not isinstance(payload, dict):
             self._count("page/bad_shape")
+            if self._ids:
+                yield from self._emit_batches()
             return
         self._seen_pages.add(page)
+        self._page_skips = 0
+        before_ids = set(self._ids)
         known_ids = set(self._ids)
         for row in payload.get("itemList") or []:
-            if isinstance(row, dict) and row.get("id"):
+            if isinstance(row, dict) and row.get("id") and str(row["id"]) not in known_ids:
+                known_ids.add(str(row["id"]))
                 self._ids.append(str(row["id"]))
                 self._count("list/ids")
         total = payload.get("pageCount")
@@ -840,7 +872,7 @@ class PtvFISpider(Spider):
             return
         if not isinstance(total, int) and payload.get("itemList"):
             # Server ignoring ?page would loop forever on page 1's shape.
-            if page + 1 not in self._seen_pages and set(self._ids) > known_ids:
+            if page + 1 not in self._seen_pages and set(self._ids) > before_ids:
                 yield JsonRequest(url=self.list_url(page + 1), cb_kwargs={"page": page + 1}, errback=self.errback_list)
                 return
         yield from self._emit_batches()
@@ -958,8 +990,20 @@ class PtvFISpider(Spider):
                 self._count("operator/org_superseded")
                 item.pop("operator_wikidata", None)
                 (item.get("extras") or {}).pop("operator:type", None)
+                # A provisional association demotion never survives a public
+                # record supersede (the pair would claim a public operator
+                # running an association office).
+                (item.get("extras") or {}).pop("office", None)
             else:
-                # Branch-agency suffixes ("/Kela") already named the provider.
+                # Branch-agency suffixes ("/Kela") already named the provider,
+                # as did slash tails: the joined record never replaces them,
+                # and its context never retypes them (the record describes
+                # the maintainer, which may be a company while the named
+                # provider is a national agency). Only the QID enriches.
+                if qid := self.OPERATORS_WIKIDATA.get(item["operator"]):
+                    item["operator_wikidata"] = qid
+                else:
+                    self._count("operator/no_qid")
                 self._count("operator/branch_agency")
                 return
         if (
@@ -1041,7 +1085,13 @@ class PtvFISpider(Spider):
         for channel in payload:
             if not isinstance(channel, dict):
                 continue
-            if item := self.parse_channel(channel):
+            try:
+                item = self.parse_channel(channel)
+            except Exception:  # noqa: BLE001 - one malformed record never kills the batch
+                self._count("batch/record_error")
+                self.logger.error("ptv_fi: dropping malformed record %s", channel.get("id"))
+                continue
+            if item:
                 raw_org_id = channel.get("organizationId")
                 org_id = str(raw_org_id) if raw_org_id else ""
                 if not org_id:
@@ -1092,8 +1142,11 @@ class PtvFISpider(Spider):
     def _flush_request_orgs(self, url: str) -> Iterable[Feature]:
         # Flush the window without operators rather than losing it: recover
         # the org ids from the failed request URL (cf. s-market errback).
+        # Flushed ids leave _seen_orgs so a later batch re-requests them
+        # instead of stranding new items in a never-joined window.
         match = re.search(r"guids=([^&]*)", url or "")
         for org_id in (unquote(match.group(1)).split(",") if match else []):
+            self._seen_orgs.discard(org_id)
             for item in self._pending.pop(org_id, []):
                 self._apply_operator(item, None)
                 yield item
@@ -1189,8 +1242,21 @@ class PtvFISpider(Spider):
             or self.KM_RE.search(lowered)
         ):
             # Tracks, loop trails and distance-marked routes are linear, not places.
+            if self._track_names_venue(lowered):
+                return None
             return "non_place/track"
         return None
+
+    def _track_names_venue(self, lowered: str) -> bool:
+        # Venue heads inside track-word names (running straights of named
+        # halls, outdoor gyms, courts at track-named parks) mark visitable
+        # premises; bare compounds ("Nevanlenkki", "Pakopirtin latu",
+        # school-owned tracks) never qualify.
+        if "ulkokuntoilu" in lowered:
+            return True
+        if re.search(r"juoksu(suora|rata)", lowered) and self.TRACK_VENUE_RE.search(lowered):
+            return True
+        return bool(self.TRACK_PLACE_RE.search(lowered) and self.TRACK_FACILITY_RE.search(lowered))
 
     def _visit_address(self, channel: dict) -> dict | None:
         # Location addresses are visit points; Postal ones are mailing only.
@@ -1463,7 +1529,7 @@ class PtvFISpider(Spider):
         if agency := self._branch_agency(signed):
             # Branches of national agencies carry their provider
             # ("Kokemäen Asiointipiste/Kela"); kept over the maintainer.
-            self._count("operator/branch_agency")
+            # Tags apply at the org join below, which sees the record.
             item["operator"] = agency
         if self._tag(item, "amenity") in ("school", "college", "kindergarten"):
             # branch=* is chain retail, not schools: campus qualifiers
@@ -3822,6 +3888,9 @@ class PtvFISpider(Spider):
         match = re.fullmatch(r"(\d{1,2}):(\d{2})(?::(\d{2}))?", (value or "").strip())
         if not match or int(match.group(1)) > 23 or int(match.group(2)) > 59:
             return None
+        if match.group(3) is not None and int(match.group(3)) > 59:
+            # Feed seconds are real ("10:00:99" is junk, not 10:00).
+            return None
         return int(match.group(1)) * 60 + int(match.group(2))
 
     def _merge_spans(self, spans: list[list[int]]) -> list[tuple[int, int]]:
@@ -5028,7 +5097,7 @@ class PtvFISpider(Spider):
             self._route_placeless(item, raw)
         elif parsed := self._split_addr_tokens(raw.split()):
             addr_street, house, unit = parsed
-            fixed = re.sub(r"[A-Za-z]$", lambda m: m.group(0).lower(), house)
+            fixed = house.lower()
             if fixed != house:
                 self._count("address/letter_case")
                 house = fixed
@@ -5258,7 +5327,7 @@ class PtvFISpider(Spider):
         if located:
             item["located_in"] = located
         self._apply_branch(item, signed, shown, official, city_src)
-        # official_name* holds the unparsed signed form only: when nothing
+        # official_name holds the unparsed signed form only: when nothing
         # was split or cleaned off, translations of the applied name are
         # name:sv/name:en instead (cf. Auroranportin yhteisöllinen asuminen).
         parsed = bool(official or cleaned != signed)
@@ -5294,6 +5363,25 @@ class PtvFISpider(Spider):
             return True
         return False
 
+    TR_COPY_SEP_RE = re.compile(r"[,/()“”\"]+")
+    TR_COPY_DASH_RE = re.compile(r"[-–—]+")
+    TR_COPY_WS_RE = re.compile(r"\s+")
+
+    @classmethod
+    def _tr_same(cls, a: str | None, b: str | None) -> bool:
+        # Copies differ by case and separators only ("Vantaa-info" /
+        # "Vantaa Info, Korso", parenthesised venue restatements):
+        # dashes read as spaces, spaces stay significant so genuine
+        # Swedish compounds ("Minervaskolan" for "Minerva skolan") survive.
+        if not a or not b:
+            return False
+
+        def _norm(s: str) -> str:
+            s = cls.TR_COPY_DASH_RE.sub(" ", s.casefold())
+            return cls.TR_COPY_WS_RE.sub(" ", cls.TR_COPY_SEP_RE.sub("", s)).strip()
+
+        return _norm(a) == _norm(b)
+
     def _translation_value(
         self, translation: str, shown: str | None, signed: str | None, located: str | None
     ) -> str | None:
@@ -5312,7 +5400,8 @@ class PtvFISpider(Spider):
             return None
         if (
             cleaned_tr
-            and cleaned_tr not in (shown, signed)
+            and not self._tr_same(cleaned_tr, shown)
+            and not self._tr_same(cleaned_tr, signed)
             and not (located and cleaned_tr == located and located in (signed or ""))
         ):
             # An untranslated copy of the Finnish-signed venue is
@@ -5330,7 +5419,7 @@ class PtvFISpider(Spider):
         # artifacts ("... 1*") strip off; bilingual pairs split.
         for lang in ("sv", "en"):
             translation = names.get(lang)
-            if translation and translation != shown and translation != signed:
+            if translation and not self._tr_same(translation, shown) and not self._tr_same(translation, signed):
                 if (value := self._translation_value(translation, shown, signed, item.get("located_in"))) is not None:
                     item["extras"][f"name:{lang}"] = value
 
@@ -5469,7 +5558,8 @@ class PtvFISpider(Spider):
 
     def _tr_align_venue_drop(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         if (
-            shown
+            cleaned_tr
+            and shown
             and (signed or "")
             and "/" in (signed or "")
             and "/" not in cleaned_tr
@@ -5554,7 +5644,7 @@ class PtvFISpider(Spider):
             fi_parts = [s.strip() for s in re.split(r"\s*/\s*", signed or "") if s.strip()]
         rest = []
         for i, s in enumerate(parts):
-            if s in (shown, signed):
+            if PtvFISpider._tr_same(s, shown) or PtvFISpider._tr_same(s, signed):
                 continue
             if s.endswith("...") and len(s) > 6:
                 base = s[:-3].strip().casefold()

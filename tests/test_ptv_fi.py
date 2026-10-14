@@ -1325,6 +1325,8 @@ _ADDR_CASES = [
         ("street_address",),
     ),
     ("Katu", "3A", {}, {"street": "Katu", "housenumber": "3a"}, ("street_address", "extras.addr:unit")),
+    # Range halves lowercase together with the plot letter.
+    ("Katu", "12A-14B", {}, {"street": "Katu", "housenumber": "12a-14b"}, ("street_address", "extras.addr:unit")),
     (
         "Kielotie",
         "7 A, 2.kerros",
@@ -1809,6 +1811,8 @@ _SOCIAL_CASES = [
     ("Lohjan päiväaikainen toiminta", C.SOCIAL_FACILITY, _SKIP),
     ("Asumispalvelut kehitysvammaisille lapsille", C.SOCIAL_FACILITY, _SKIP),
     ("Kauklahden asumispalvelut", C.SOCIAL_FACILITY, _SKIP),
+    # Care homes on Puistikko road stay homes, never parks.
+    ("Onnikoti Puistikkotie", C.SOCIAL_FACILITY, None),
     ("Kotihoito Lappeenranta Läntinen", C.SOCIAL_FACILITY, _SKIP),
     ("Kotihoito/Töölö 2 lähipalvelualue", C.SOCIAL_FACILITY, _SKIP),
     ("Kotihoito/Pitäjänmäki 1 lähipalvelualue", C.SOCIAL_FACILITY, _SKIP),
@@ -2030,6 +2034,10 @@ _LEISURE_CASES = [
     ("Keravan maauimala", C.LEISURE_SPORTS_CENTRE, {"sport": "swimming"}),
     ("Savitaipaleen liikuntatalo", C.LEISURE_SPORTS_CENTRE, _SKIP),
     ("Kämärin jääurheilukeskus", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    # Ski centres read as sports centres, not generic.
+    ("Kusiaismäen hiihtokeskus", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Keimolan kilpahiihtokeskus", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Honkalan hiihtokeskus", C.LEISURE_SPORTS_CENTRE, _SKIP),
     ("Melonta Kaartjärvellä", C.LEISURE_SPORTS_CENTRE, _SKIP),
     ("Kaukajärven soutu- ja melontastadion", C.LEISURE_SPORTS_CENTRE, _SKIP),
     ("Yli-Iin yleisurheilukeskus", C.LEISURE_SPORTS_CENTRE, {"sport": "athletics"}),
@@ -2133,6 +2141,8 @@ _PLACE_CASES = [
     # Parks, picnic, shelters, wilderness.
     ("Salmen ulkoilualue / Taukotupa", C.LEISURE_PARK, _SKIP),
     ("Kauko Kortelaisen veistospuisto", C.LEISURE_PARK, _SKIP),
+    # The puistikko diminutive reads as a park; park-road addresses don't.
+    ("Lentäjänpuistikko", C.LEISURE_PARK, _SKIP),
     ("Seurasaari / Grillipaikka", C.TOURISM_PICNIC_SITE, _SKIP),
     ("Meri-Rastila / Grillipaikka", C.TOURISM_PICNIC_SITE, _SKIP),
     ("Malmin kenttä / Väliaikainen grillipaikka", C.TOURISM_PICNIC_SITE, _SKIP),
@@ -2851,7 +2861,17 @@ def test_operator_tiers_end_to_end():
     item["operator"] = "Kela"
     spider._apply_operator(item, "Kokemäen kaupunki")
     assert item["operator"] == "Kela"
-    assert "operator_wikidata" not in item
+    # Branch-agency tags apply at the branch pass (the org join
+    # early-returns behind provisional operators): Kela carries its QID.
+    assert item["operator_wikidata"] == "Q3557354"
+    assert spider.crawler.stats.get_value("ptv_fi/operator/branch_agency") == 1
+    # A provisional association demotion never survives a public record.
+    item = Feature()
+    item["operator"] = "YSTI ry"
+    item["extras"]["office"] = "association"
+    spider._apply_operator(item, "Yhdessä Selviytymisen Tuki YSTI ry", "Organization")
+    assert item.get("operator") == "Yhdessä Selviytymisen Tuki YSTI ry"
+    assert "office" not in (item.get("extras") or {})
     # Associations demote to association desks with private type.
     item = Feature()
     spider._apply_operator(item, "Olka ry")
@@ -3221,6 +3241,18 @@ def test_translation_helpers_strip_venues_and_copies():
         == "After-school activities / University of Helsinki"
     )
     assert spider._split_translation("Simhallen - Uimahalli") == ("Uimahalli", "Simhallen")
+    # Case/separator-only copies are not translations; genuine compounds stay.
+    assert spider._tr_same("Vantaa Info, Korso", "Vantaa-info, Korso")
+    assert spider._tr_same("hiekkakenttä", "Hiekkakenttä")
+    assert not spider._tr_same("Minervaskolan", "Minerva skolan")
+    assert not spider._tr_same("Riksarkivet Helsingfors", "Kansallisarkisto")
+    assert spider._tr_align_venue_drop("", "X", "A / B", "C") == ""
+    item = parsed(make_spider(), channel("Hiekkakenttä", en="hiekkakenttä"))
+    assert "name:en" not in item["extras"]
+    item = parsed(make_spider(), channel("Vantaa-info, Korso", sv="Vantaa Info, Korso", office="KORSO"))
+    assert "name:sv" not in item["extras"]
+    item = parsed(make_spider(), channel("Kansallisarkisto", sv="Riksarkivet Helsingfors"))
+    assert item["extras"].get("name:sv") == "Riksarkivet Helsingfors"
 
 
 def test_translation_city_street_and_located_tails():
@@ -3511,6 +3543,7 @@ def test_hours_edge_branches_and_ranges():
     assert "Fr-Su 12:00-14:00" in rendered
     assert "Mo 12:00-14:00" in rendered
     assert spider._to_minutes("25:00") is None
+    assert spider._to_minutes("10:00:99") is None
     assert spider._to_minutes("08:00-12:00") is None
     assert spider._to_minutes("08:00:00") == 480
 
@@ -3593,6 +3626,18 @@ def test_visit_address_and_gates():
     assert spider._is_dropped_name("Kuvan testipiste") == "non_place/test_data"
     assert spider._is_dropped_name("Mannerheimintien suojatie") == "non_place/crosswalk"
     assert spider._is_dropped_name("Pirkkolan kuntorata") == "non_place/track"
+    # Venue heads inside track-word names keep visitable premises.
+    assert spider._is_dropped_name("Töölön kisahalli / Juoksusuora") is None
+    assert spider._is_dropped_name("Juoksusuora, Kalajoen jäähalli") is None
+    assert spider._is_dropped_name("Vantaan Reittipuiston lentopallokenttä") is None
+    assert spider._is_dropped_name("Latupuiston päiväkoti") is None
+    assert spider._is_dropped_name("Latukankadun leikkikenttä") is None
+    assert spider._is_dropped_name("Pirkkolan liikuntapuisto (Kuntoradan alalenkki) / Ulkokuntoilupaikka") is None
+    # Bare compounds, school tracks and park routes stay dropped.
+    assert spider._is_dropped_name("Päiväkummun koulun juoksusuora ja pituushyppypaikka") == "non_place/track"
+    assert spider._is_dropped_name("Keskuspuisto 1 latu 10,6 km") == "non_place/track"
+    assert spider._is_dropped_name("Nevanlenkki") == "non_place/track"
+    assert spider._is_dropped_name("Aulangon ulkoilumaja - golfkenttä -hiihtolatu (2 km)") == "non_place/track"
     assert spider._is_dropped_name("Sipoon Veden sähköpostiosoite") == "non_place/contact"
     assert spider._is_dropped_name("Seritatyön sähköpostiosoite") == "non_place/contact"
     assert spider.parse_channel(channel("Etsivä yksikkö")) is None
@@ -3713,6 +3758,49 @@ def test_crawl_errbacks_count_and_continue():
     assert spider.crawler.stats.get_value("ptv_fi/page/failed") == 1
     assert list(spider.errback_list(failure)) == []
     assert len(first) == 1
+
+
+def test_crawl_hardening_record_guard_dedupe_and_resume():
+    spider = make_spider()
+    # One malformed record never kills its batch: the good row still joins.
+    good = channel("A-linna", org="org-9")
+    good["id"] = "aaaaaaaa-1111-4111-8111-111111111111"
+    bad = channel("Bad record", org="org-9")
+    bad["id"] = "bbbbbbbb-2222-4222-8222-222222222222"
+    bad["services"] = ["x"]
+    body = json.dumps([good, bad]).encode()
+    out = list(spider.parse_batch(TextResponse(url="https://x/list", body=body, encoding="utf-8")))
+    assert spider.crawler.stats.get_value("ptv_fi/batch/record_error") == 1
+    assert sorted(spider._pending) == ["org-9"]
+    assert any(isinstance(r, JsonRequest) for r in out)
+    # Repeated list pages never duplicate detail fetches.
+    spider = make_spider()
+    page = {"itemList": [{"id": "a"}, {"id": "a"}], "pageCount": 1}
+    list(spider.parse(SimpleNamespace(json=lambda: dict(page)), 1))
+    assert spider._ids == ["a"]
+    assert spider.crawler.stats.get_value("ptv_fi/list/ids") == 1
+    # A dead mid-chain page skips ahead once, then falls through.
+    spider = make_spider()
+    spider._ids = ["a"]
+    failure = SimpleNamespace(request=SimpleNamespace(url="https://x/?page=2", cb_kwargs={"page": 2}))
+    out = list(spider.errback_list(failure))
+    assert len(out) == 1 and "page=3" in out[0].url
+    assert spider.crawler.stats.get_value("ptv_fi/page/skipped") == 1
+    spider._page_skips = 3
+    spider._seen_pages.add(4)
+    resumed = list(
+        spider.errback_list(SimpleNamespace(request=SimpleNamespace(url="https://x/?page=3", cb_kwargs={"page": 3})))
+    )
+    assert len(resumed) == 1  # falls through to the collected ids
+    # Flushed orgs leave the seen set so later batches re-request them.
+    spider = make_spider()
+    item = Feature()
+    item["ref"] = "r1"
+    spider._pending["org-1"] = [item]
+    spider._seen_orgs.add("org-1")
+    failure = SimpleNamespace(request=SimpleNamespace(url="https://example.fi/api?guids=org-1"))
+    assert list(spider.errback_orgs(failure)) == [item]
+    assert "org-1" not in spider._seen_orgs
 
 
 def test_special_exports_and_city_compounds():
