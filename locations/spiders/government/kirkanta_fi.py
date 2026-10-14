@@ -54,6 +54,7 @@ FLOOR_PATTERNS = (FLOOR_TAIL, FLOOR_PAREN, FLOOR_REVERSED)
 class KirkantaFISpider(Spider):
     name = "kirkanta_fi"
     allowed_domains = ["api.kirjastot.fi"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     # API contents CC BY 4.0, attribution required by the v3 terms.
     dataset_attributes = Licenses.CCBY4.value | {
         "source": "api",
@@ -70,28 +71,37 @@ class KirkantaFISpider(Spider):
             raise CloseSpider("no library records")
         candidates = []
         for entry in data["items"]:
-            if result := self.parse_entry(entry):
+            try:
+                result = self.parse_entry(entry)
+            except Exception:
+                ref = entry.get("id") if isinstance(entry, dict) else type(entry).__name__
+                self.logger.warning(f"Skipping malformed record {ref}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/dropped/error")
+                continue
+            if result:
                 candidates.append(result)
         # Same place filed under two ids keeps the lowest id either way the
-        # feed orders them (single case: Kärkölä 86024/86806).
+        # feed orders them (single case: Kärkölä 86024/86806). String
+        # comparison: equal-length numeric ids order identically either way.
         minima = {}
         for item, place_key in candidates:
-            if place_key not in minima or int(item["ref"]) < int(minima[place_key]):
-                minima[place_key] = int(item["ref"])
+            if place_key not in minima or item["ref"] < minima[place_key]:
+                minima[place_key] = item["ref"]
         for item, place_key in candidates:
-            if int(item["ref"]) == minima[place_key]:
+            if item["ref"] == minima[place_key]:
                 yield item
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/dropped/duplicate")
 
     def parse_entry(self, entry: dict) -> tuple[Feature, tuple] | None:
+        if entry.get("id") is None:
+            self.logger.warning("Skipping record without id")
+            self.crawler.stats.inc_value(f"atp/{self.name}/dropped/no_id")
+            return None
         branch_type = entry.get("branch_type")
         self.crawler.stats.inc_value(f"atp/{self.name}/type/{branch_type}")
         names = entry.get("name") or {}
         name_text = " ".join(value for value in names.values() if value).lower()
-        if CLOSED_TOKENS.search(name_text):
-            self.crawler.stats.inc_value(f"atp/{self.name}/dropped/closed")
-            return None
         if (category := self.category_for(entry, branch_type, name_text)) is None:
             return None
 
@@ -115,9 +125,8 @@ class KirkantaFISpider(Spider):
         item = Feature()
         item["ref"] = str(entry.get("id"))
         apply_category(category, item)
-        if branch_type in ACCESS_PRIVATE_TYPES or any(k in name_text for k in MILITARY_KEYWORDS):
-            item["extras"]["access"] = "private"
-            self.crawler.stats.inc_value(f"atp/{self.name}/access/private")
+        if access := self.access_for(branch_type, name_text):
+            item["extras"]["access"] = access
         item["name"] = name
         # Translated names keep identity tails; name:fi mirrors the fi name and
         # is never set from a fallback language.
@@ -161,6 +170,9 @@ class KirkantaFISpider(Spider):
         return item, place_key
 
     def category_for(self, entry: dict, branch_type: str | None, name_text: str) -> Categories | None:
+        if CLOSED_TOKENS.search(name_text):
+            self.crawler.stats.inc_value(f"atp/{self.name}/dropped/closed")
+            return None
         if branch_type in LIBRARY_TYPES or (branch_type == "other" and entry.get("id") in OTHER_INCLUDE):
             return Categories.LIBRARY
         if branch_type == "archive" or (branch_type == "other" and ("arkisto" in name_text or "arkiv" in name_text)):
@@ -168,6 +180,12 @@ class KirkantaFISpider(Spider):
         if branch_type not in ("mobile", "home_service", "other"):
             self.logger.warning(f"Unknown branch_type {branch_type!r} on {entry.get('id')}")
         self.crawler.stats.inc_value(f"atp/{self.name}/dropped/{branch_type}")
+        return None
+
+    def access_for(self, branch_type: str | None, name_text: str) -> str | None:
+        if branch_type in ACCESS_PRIVATE_TYPES or any(k in name_text for k in MILITARY_KEYWORDS):
+            self.crawler.stats.inc_value(f"atp/{self.name}/access/private")
+            return "private"
         return None
 
     @staticmethod
