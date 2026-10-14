@@ -31,7 +31,7 @@ class SushiRokuUSSpider(SitemapSpider, StructuredDataSpider):
         parts = re.split(r"<br[^>]*>|</p>", markup)
         parts = [re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", part))) for part in parts]
         # The pages pepper their headings with zero-width joiners.
-        return [part.replace("‍", "").strip(" | ") for part in parts]
+        return [part.replace("\u200d", "").strip(" |\u00a0") for part in parts]
 
     @staticmethod
     def days(spec: str) -> list[str]:
