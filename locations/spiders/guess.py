@@ -1,17 +1,21 @@
+from typing import Iterable
+
+from scrapy.http import JsonRequest, TextResponse
 from locations.categories import Categories, apply_category
-from locations.storefinders.rio_seo import RioSeoSpider
+from locations.storefinders.uberall import UberallSpider
+from locations.items import Feature
 
-
-class GuessSpider(RioSeoSpider):
+class GuessSpider(UberallSpider):
     name = "guess"
     item_attributes = {"brand": "Guess", "brand_wikidata": "Q2470307", "extras": Categories.SHOP_CLOTHES.value}
-    end_point = "https://maps.stores.guess.com"
+    key = "m8ENkkDpRuAzBfF8t5yWOETCTZ61PY"
 
-    def post_process_feature(self, feature, location):
-        if location["store_type_cs"] == "Guess Accessories":
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
+        print(location)
+        if location["name"] == "Guess Accessories":
             apply_category(Categories.SHOP_FASHION_ACCESSORIES, feature)
-        elif location["store_type_cs"] == "G by Guess":
-            feature["brand_wikidata"] = "Q5515159"
-        if location["store_type_cs"] not in ("Clothing Store,GUESS", ""):
-            feature["brand"] = location["store_type_cs"]
-        yield feature
+        elif location["name"] == "G by Guess":
+            item["brand_wikidata"] = "Q5515159"
+        if location["name"] not in ("Clothing Store,GUESS", ""):
+            item["brand"] = location["name"]
+        yield item
