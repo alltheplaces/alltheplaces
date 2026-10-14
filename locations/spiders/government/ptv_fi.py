@@ -126,7 +126,12 @@ class PtvFISpider(Spider):
         ),  # Kanslia / kansli (admin offices)
         ("psykiatrinen palveluasuminen", Categories.SOCIAL_FACILITY, None),  # Psychiatric housing, not wards
         ("psykiatrinen sairaala|psykiatriasairaala", Categories.HOSPITAL, None),  # Psychiatric hospitals
-        ("psykiatri|nuorten mielenterveys|nuorten päihde", Categories.CLINIC, None),  # Psykiatri (psychiatry)
+        (
+            "psykiatri|nuorten mielenterveys|nuorten päihde|"
+            "nuorten ja aikuisten mielenterveys|nuorten ja aikuisten päihde|tutkimusvastaanotto",
+            Categories.CLINIC,
+            None,
+        ),  # Psykiatri (psychiatry; youth clinical outranks youth centres below)
         ("kohtaamispaikka", Categories.COMMUNITY_CENTRE, None),  # Kohtaamispaikka (meeting places outrank clientele)
         (
             "tukiasunto|tukiasunnot|tuettu asumi|tukiasuminen",
@@ -141,7 +146,11 @@ class PtvFISpider(Spider):
             {"amenity": "youth_centre"},
         ),  # Nuorisotila (youth rooms)
         ("järjestämispaikka", Categories.COMMUNITY_CENTRE, None),  # Järjestämispaikka (activity venues)
-        ("nuorisokoti", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),  # Nuorisokoti (youth homes)
+        (
+            "nuorisokoti|vastaanottokoti",
+            Categories.SOCIAL_FACILITY,
+            {"social_facility": "group_home"},
+        ),  # Nuorisokoti (youth and reception homes house, never clinics or clubs)
         ("nuoriso|nuorten|iltapäivä", Categories.COMMUNITY_CENTRE, None),  # Nuoriso (youth centres)
         ("musiikkiopisto|konservatorio", Categories.MUSIC_SCHOOL, None),  # Musiikkiopisto (music schools)
         (
@@ -152,6 +161,11 @@ class PtvFISpider(Spider):
         ("eläinlääkäri", Categories.VETERINARY, None),  # Eläinlääkäri (veterinarians)
         ("löytöeläi|löytökiss|kissatalo", None, {"amenity": "animal_shelter"}),  # Löytöeläimet (found-animal shelters)
         ("eläinsuojelu", Categories.OFFICE_GOVERNMENT, None),  # Eläinsuojelu (animal-protection desks)
+        (
+            "ympäristöterveyspalvelu",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Ympäristöterveys (supervision branches, not clinics)
         ("terveyspalvelu|terveystalo|terveyspiste", Categories.CLINIC, None),  # Terveyspalvelu (health services)
         ("sote-aseman lähitori", Categories.SOCIAL_FACILITY, None),  # Sote-aseman lähitorit (service desks)
         ("terveysasema|terveyskeskus|sote-asema", Categories.CLINIC, None),  # Terveysasema (health stations)
@@ -498,7 +512,8 @@ class PtvFISpider(Spider):
             "maaseutu|varhaiskasvatus|perusopetus|työllisyys|"
             "työvoima|rakennusvalvonta|ympäristönsuojelu|"
             "rakennusvalvonnan|maanmittauslaitos|metsäkeskus|"
-            "ulosotto|ympäristökeskus|kaupunkikehitys",
+            "ulosotto|ympäristökeskus|kaupunkikehitys|"
+            "ympäristövalvonta|terveysvalvonta|ympäristöterveys|elintarviketurvallisuus|pysäköinninvalvonta",
             Categories.OFFICE_GOVERNMENT,
             None,
         ),  # Kunnan kulttuuri- ja vapaa-aika (municipal culture/leisure depts)
@@ -5324,6 +5339,15 @@ class PtvFISpider(Spider):
         # counterparts fell out of the applied name drop, so the applied name's
         # rendering stays. Both the general and the located-venue passes share
         # these shapes (the latter additionally requires a located venue).
+        # Slash-split rows with matching segment counts align by slash
+        # below instead: comma alignment across a slash-joined chain
+        # keeps only the host tail (Ruuti). Mismatched counts keep the
+        # comma path, which alone trims them correctly.
+        if "/" in (signed or "") and "/" in cleaned_tr:
+            fi_slash = [seg for seg in re.split(r"\s*/\s*", signed or "") if seg.strip()]
+            tr_slash = [seg for seg in re.split(r"\s*/\s*", cleaned_tr) if seg.strip()]
+            if len(fi_slash) == len(tr_slash):
+                return cleaned_tr
         fi_segs = [s.strip() for s in (signed or "").split(",")]
         tr_segs = [s.strip() for s in cleaned_tr.split(",")]
         if (
@@ -5538,15 +5562,35 @@ class PtvFISpider(Spider):
                     continue
             if positional:
                 counterpart = fi_parts[i]
-                if located and (counterpart == located or counterpart.startswith(located + ",")):
+                located_parts = [seg.strip() for seg in re.split(r"\s*/\s*", located or "") if seg.strip()]
+                if located and (
+                    counterpart in located_parts or any(counterpart.startswith(lp + ",") for lp in located_parts)
+                ):
                     continue
-                if counterpart.endswith("..") and counterpart != shown:
+                if counterpart.endswith("..") and counterpart.casefold() != (shown or "").casefold():
                     # Feed-truncated operator tails ("... / Villiruu..."):
                     # truncation artifacts on non-name segments drop.
                     continue
                 if not located and counterpart != shown and counterpart in (signed or ""):
                     continue
             rest.append(s)
+        if len(rest) <= 1:
+            # A lone surviving truncated Finnish copy ("...Mies..") is not
+            # a translation; longer chains keep the lead-segment fallback
+            # below instead of degrading to a verbatim chain.
+            rest = [
+                s
+                for s in rest
+                if not (
+                    s.endswith("..")
+                    and not s.endswith("...")
+                    and len(s) > 6
+                    and any(
+                        (form or "").strip().casefold().startswith(s.rstrip(".").strip().casefold())
+                        for form in (shown, signed, *fi_parts)
+                    )
+                )
+            ]
         if not rest:
             return None
         if len(rest) < len(parts) and len(rest) == 1:

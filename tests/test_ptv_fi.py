@@ -5788,3 +5788,54 @@ def test_user_report_batch_rc():
         Categories.LEISURE_SPORTS_CENTRE,
         {"sport": "swimming"},
     )
+
+
+def test_user_report_batch_rd():
+    spider = make_spider()
+    # Youth/adult mental-health and substance services are clinics, not
+    # youth clubs: the nuoriso rule shadowed them.
+    assert cat(spider, "Perkkaan toimipiste, Nuorten ja Aikuisten mielenterveys- ja päihdepalvelut")[0] == (
+        Categories.CLINIC
+    )
+    assert cat(spider, "Nummelan terveysasema, nuorten ja aikuisten mielenterveys- ja päihdepalvelut")[0] == (
+        Categories.CLINIC
+    )
+    assert cat(spider, "Nuorten sukupuoli-identiteetin tutkimusvastaanotto, Pasila")[0] == Categories.CLINIC
+    # Housing still beats diagnosis without a youth stem; reception homes
+    # house children round-the-clock, they are neither clinics nor clubs.
+    assert cat(spider, "Mielenterveys- ja päihdekuntoutujien asumispalveluyksiköt Tähkä ja Jyvä")[0] == (
+        Categories.SOCIAL_FACILITY
+    )
+    assert cat(spider, "Nuorten vastaanottokoti Havurinne") == (
+        Categories.SOCIAL_FACILITY,
+        {"social_facility": "group_home"},
+    )
+    assert cat(spider, "Uudenkoiviston vastaanottokoti") == (
+        Categories.SOCIAL_FACILITY,
+        {"social_facility": "group_home"},
+    )
+    # Supervision units are government offices, not clinics or generics;
+    # municipal vet branches keep their vet filing.
+    assert cat(spider, "Terveysvalvonta")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Kalajoen kaupungin ympäristövalvonta")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Elintarviketurvallisuusyksikkö")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Ympäristöterveyspalvelut, Paraisten toimipiste")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Ympäristönsuojelu- ja ympäristöterveyspalveluiden Iisalmen toimipiste")[0] == (
+        Categories.OFFICE_GOVERNMENT
+    )
+    assert cat(spider, "Päijät-Hämeen ympäristöterveys, Orimattilan kunnaneläinlääkärin toimipiste")[0] == (
+        Categories.VETERINARY
+    )
+    # Slash-chain translations align per segment: the applied tail keeps
+    # its rendering, located chains and truncated Finnish copies drop.
+    item = parsed(
+        spider,
+        channel(
+            "Iltapäivätoiminta / Vesalan peruskoulu / sivukoulu Ruuti, Helsingin Nuorten Miesten Kristillinen Y..",
+            sv="Finskspråkig eftermiddagsverksamhet / Vesalan peruskoulu / sivukoulu Ruuti, Helsingin Nuorten Mies..",
+            en="After-school activities / Vesala Comprehensive School / Ruuti, Helsinki YMCA",
+        ),
+    )
+    assert item.get("name") == "Sivukoulu Ruuti, Helsingin Nuorten Miesten Kristillinen Y.."
+    assert item["extras"].get("name:en") == "Ruuti, Helsinki YMCA"
+    assert "name:sv" not in item["extras"]
