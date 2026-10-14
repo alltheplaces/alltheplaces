@@ -43,6 +43,8 @@ class MuseotFISpider(SitemapSpider):
     HOURS_RE = re.compile(r"^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$")
     AT_EMAIL_RE = re.compile(r"[\w.+-]+\(at\)[\w.-]+\.[A-Za-z]{2,}")
     STREET_SUFFIX_RE = re.compile(r"(katu|tie|kuja|polku|raitti|väylä)$", re.IGNORECASE)
+    # Empty-filename upstream placeholder shared by 50 pages without a photo.
+    PLACEHOLDER_IMAGE = "https://museot.fi/uploadkuvat/-"
 
     # Source-labelled Museo records whose described primary function is not
     # a museum: a working church, an events venue, an Aalto town hall and an
@@ -178,6 +180,13 @@ class MuseotFISpider(SitemapSpider):
             self._stat("atp/museot_fi/empty/email")
         if hours := self.parse_hours(response):
             item["opening_hours"] = hours
+        if image := (response.xpath("//meta[@property='og:image']/@content").get() or "").strip():
+            if image == self.PLACEHOLDER_IMAGE:
+                self._stat("atp/museot_fi/dropped/placeholder_image")
+            else:
+                item["image"] = image
+        else:
+            self._stat("atp/museot_fi/empty/image")
         self.apply_accessibility(item, response)
         apply_category(self.NON_MUSEUM_CATEGORIES.get(slug, Categories.MUSEUM), item)
         yield item
