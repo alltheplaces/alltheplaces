@@ -27,6 +27,9 @@ from locations.licenses import Licenses
 # needs an API key.
 # PTV latitude/longitude fields are TM35FIN northing/easting, not WGS84.
 
+# Triple returned by every name splitter: (shown name, located venue, official form).
+SplitTriple = tuple[str, str | None, str | None]
+
 
 class PtvFISpider(Spider):
     name = "ptv_fi"
@@ -2239,9 +2242,7 @@ class PtvFISpider(Spider):
         # usable: the venue half of a pair always locates something.
         return self._clean_located(text) or text
 
-    def _split_pair(
-        self, shown: str, venue_text: str, official: str | None, strict: bool = False
-    ) -> tuple[str, str | None, str | None]:
+    def _split_pair(self, shown: str, venue_text: str, official: str | None, strict: bool = False) -> SplitTriple:
         # One triple-return shape for located-venue pairs: fallback keeps the
         # raw venue text when cleaning drops nothing, strict yields None when
         # unusable. Callers preserve their original shape via strict.
@@ -2250,9 +2251,7 @@ class PtvFISpider(Spider):
     def _is_room_tail(self, tail: str) -> bool:
         return any(word in tail.lower() for word in self.ROOM_WORDS)
 
-    def _resolve_slash_room(
-        self, head: str, tail: str, name: str, tag: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _resolve_slash_room(self, head: str, tail: str, name: str, tag: str) -> SplitTriple | None:
         # Rooms/fields are the facility, the host the venue
         # ("Santahaminan ala-asteen koulu / Koripallokenttä").
         # Self-named pairs ("... ulkokuntosali / Ulkokuntosali")
@@ -2268,7 +2267,7 @@ class PtvFISpider(Spider):
         self._count(tag)
         return self._split_pair(tail, head, name)
 
-    def _resolve_slash_institution(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+    def _resolve_slash_institution(self, head: str, tail: str, name: str) -> SplitTriple | None:
         # Institution-headed pairs: hosted units, rooms and exercise
         # grounds name the POI, the institution the venue.
         if not (self._is_institution(head.lower()) and not self._is_institution(tail.lower())):
@@ -2290,7 +2289,7 @@ class PtvFISpider(Spider):
             return self._split_pair(tail, head, name, strict=True)
         return None
 
-    def _slash_street_head(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+    def _slash_street_head(self, head: str, tail: str, name: str) -> SplitTriple | None:
         if self._is_street_head(head):
             # Streets and street addresses are never venues
             # ("Kurkisuontie 2 / Hiekkakenttä"): the facility names
@@ -2299,7 +2298,7 @@ class PtvFISpider(Spider):
             return tail, None, name
         return None
 
-    def _slash_numbered_building(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+    def _slash_numbered_building(self, head: str, tail: str, name: str) -> SplitTriple | None:
         if re.search(r"(rakennus|talo)\s*\d", tail.lower()) or "huoltorakennus" in tail.lower():
             # Numbered buildings qualify the head facility ("Eläintarhan
             # urheilukenttä / Huoltorakennus 4"): neither venues nor POIs.
@@ -2309,9 +2308,7 @@ class PtvFISpider(Spider):
             return head, None, name
         return None
 
-    def _slash_pair_structural(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_pair_structural(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         # Street heads, numbered buildings and hosted units resolve before
         # service/venue dispatch below. tail_base unused; kept for the
         # uniform resolver signature.
@@ -2339,7 +2336,7 @@ class PtvFISpider(Spider):
         return lowered.endswith(tuple(words))
 
     @staticmethod
-    def _keep_official(sub: tuple[str, str | None, str | None], name: str) -> tuple[str, str | None, str | None]:
+    def _keep_official(sub: SplitTriple, name: str) -> SplitTriple:
         # Re-dispatch preserving the signed form as official: the sub-split
         # names/locates, the outer signed form survives in official_name.
         return sub[0], sub[1], name
@@ -2350,7 +2347,7 @@ class PtvFISpider(Spider):
         # starting lowercase: "vaatelahjoitus...", "wetterhoffinkatu").
         return text[0].upper() + text[1:] if text else text
 
-    def _resolve_slash_pair(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+    def _resolve_slash_pair(self, head: str, tail: str, name: str) -> SplitTriple | None:
         # Institution, service, place and person tails resolve against the
         # head; returns None to fall through to room/appositive handling.
         # Ordered precedence table; first non-None hit wins.
@@ -2364,9 +2361,7 @@ class PtvFISpider(Spider):
                 return hit
         return None
 
-    def _slash_exercise_ground(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_exercise_ground(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if "lähiliikuntapaikka" in tail.lower() and re.search(r"(koulu|skol)\w*", head.lower()):
             # Exercise grounds at schools, Finnish or Swedish
             # ("Vuoniityn peruskoulu / ...", "Åshöjdens grundskola /
@@ -2377,9 +2372,7 @@ class PtvFISpider(Spider):
             return self._split_pair(tail, head, name, strict=True)
         return None
 
-    def _slash_subunit_kept(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_subunit_kept(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if tail_base.lower() in ("koulutus",):
             # Education-subunit descriptors ("Sivistysosasto / Koulutus"):
             # the department names it whole; the subunit is not a venue.
@@ -2387,9 +2380,7 @@ class PtvFISpider(Spider):
             return name, None, None
         return None
 
-    def _slash_area_kept(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_area_kept(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._is_bare_area(tail_base):
             # Bare coverage areas are not venues ("X / Tikkurilan alue"):
             # the signed form stays whole, never split into located_in.
@@ -2397,9 +2388,7 @@ class PtvFISpider(Spider):
             return name, None, None
         return None
 
-    def _slash_unit_kept(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_unit_kept(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._is_unit_tail(tail_base) and not self._is_institution(head.lower()):
             # Unit qualifiers of a service without a host venue
             # ("Fysioterapia / Himangan yksikkö") name one service:
@@ -2408,9 +2397,7 @@ class PtvFISpider(Spider):
             return name, None, None
         return None
 
-    def _slash_service_tail(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_service_tail(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if any(word in tail_base.lower() for word in self.SERVICE_TAILS) and not self._is_institution(head.lower()):
             # Service-tailed pairs name the service ("Perhekeskus /
             # Neuvola", "Salmen ulkoilualue / Kalastuspaikka"); the venue
@@ -2422,9 +2409,7 @@ class PtvFISpider(Spider):
             return self._split_pair(tail, head, name)
         return None
 
-    def _slash_pair_service_area(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_pair_service_area(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         # Exercise grounds, subunit descriptors, coverage areas, unit
         # qualifiers and service tails resolve before venue dispatch below.
         # Ordered precedence table; first non-None hit wins.
@@ -2439,9 +2424,7 @@ class PtvFISpider(Spider):
                 return hit
         return None
 
-    def _slash_institution_venue(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_institution_venue(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._is_institution(tail_base.lower()):
             # Named institutions as tails are venues
             # ("Iltapäivätoiminta / Steiner-koulu"); comma descriptors
@@ -2450,9 +2433,7 @@ class PtvFISpider(Spider):
             return self._split_pair(head, tail_base, name)
         return None
 
-    def _slash_place_facility(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_place_facility(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._has_fixture(tail) and re.search(r"(stadion|areena|keskus|puisto)$", head.lower()):
             # Place-headed pairs name the facility ("Uimastadion /
             # Pöytätennisalue"): the sub-area is the POI, the grounds
@@ -2462,9 +2443,7 @@ class PtvFISpider(Spider):
             return self._split_pair(tail, head, name)
         return None
 
-    def _slash_district_facility(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_district_facility(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if re.fullmatch(r"[A-ZÅÄÖ][a-zåäöA-ZÅÄÖ-]+n", head) and " " not in head and self._has_fixture(tail):
             # Bare genitive-district head ("Pohjois-Espoon /
             # Niipperin matonpesupaikka"): the facility is the name.
@@ -2472,9 +2451,7 @@ class PtvFISpider(Spider):
             return tail, None, name
         return None
 
-    def _slash_person_drop(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_person_drop(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._is_person(tail):
             # Contact persons are not venues ("Sari Wicklund"); host-named
             # units share a token with their school ("Sipoon Enter").
@@ -2485,9 +2462,7 @@ class PtvFISpider(Spider):
                 return head, None, name
         return None
 
-    def _slash_office_kept(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_office_kept(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if re.search(r"(toimisto|toimipiste|toimipaikka|virasto)$", head.lower()) and re.search(
             r"(toimipiste|toimipaikka)", tail.lower()
         ):
@@ -2498,9 +2473,7 @@ class PtvFISpider(Spider):
             return name, None, None
         return None
 
-    def _slash_service_proper(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_service_proper(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if (
             any(word in head.lower() for word in self.SERVICE_TAILS)
             and not self._is_institution(head.lower())
@@ -2513,22 +2486,16 @@ class PtvFISpider(Spider):
             return self._split_pair(head, tail, name)
         return None
 
-    def _slash_proper_facility(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_proper_facility(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._is_proper_tail(tail):
             self._count("name/slash_proper_facility")
             return self._split_pair(tail, head, name, strict=True)
         return None
 
-    def _slash_generic_room(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_generic_room(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         return self._resolve_slash_room(head, tail, name, "name/slash_generic_room")
 
-    def _slash_pair_venue_person(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_pair_venue_person(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         # Institution, place and person tails resolve against the head;
         # rooms close the dispatch. Ordered precedence table; first
         # non-None hit wins.
@@ -2591,7 +2558,7 @@ class PtvFISpider(Spider):
             return venue_head.strip()
         return tail
 
-    def _slash_geo_pair(self, segments: list[str], name: str) -> tuple[str, str | None, str | None] | None:
+    def _slash_geo_pair(self, segments: list[str], name: str) -> SplitTriple | None:
         # Geographic pre-checks run before descriptor peeling: addresses,
         # island areas/heads, bay heads and single sculptures.
         tail = segments[-1]
@@ -2639,9 +2606,7 @@ class PtvFISpider(Spider):
             return name, None, None
         return None
 
-    def _slash_operator_pair(
-        self, head: str, tail: str, name: str, segments: list[str]
-    ) -> tuple[str, str | None, str | None] | None:
+    def _slash_operator_pair(self, head: str, tail: str, name: str, segments: list[str]) -> SplitTriple | None:
         # Operator heads/tails and memorials resolve between peeling and
         # pair dispatch. Tail arrives venue-org-stripped from _split_slash.
         if self._is_operator_shaped(head) and len(segments) == 2:
@@ -2664,7 +2629,7 @@ class PtvFISpider(Spider):
             return name, None, None
         return None
 
-    def _split_slash(self, name: str) -> tuple[str, str | None, str | None] | None:
+    def _split_slash(self, name: str) -> SplitTriple | None:
         # Spaced slash chains: peel descriptors, then resolve the pair.
         if " / " not in name:
             return None
@@ -2698,9 +2663,7 @@ class PtvFISpider(Spider):
         self._count("name/slash_venue")
         return self._split_pair(head, tail, name, strict=True)
 
-    def _resolve_nested(
-        self, shown: str, located: str | None, official: str | None, name: str
-    ) -> tuple[str, str | None, str | None]:
+    def _resolve_nested(self, shown: str, located: str | None, official: str | None, name: str) -> SplitTriple:
         # Nested remainder ("Talin puttirata / Mini-Tali" naming a practice
         # area): resolve the inner pair for the name, preferring its venue.
         inner = self._split_slash(shown)
@@ -2709,7 +2672,7 @@ class PtvFISpider(Spider):
             return inner[0], inner[1] or located, official or name
         return shown, located, official
 
-    def _split_machine(self, name: str) -> tuple[str, str | None, str | None] | None:
+    def _split_machine(self, name: str) -> SplitTriple | None:
         # Ticket/vending machines carry address + payment metadata after
         # commas ("Pysäköintilippuautomaatti 222, Pengerkatu 23,
         # korttimaksu"): the machine + id names the POI, the rest survives
@@ -2723,7 +2686,7 @@ class PtvFISpider(Spider):
         self._count("name/comma_machine")
         return head, None, name
 
-    def _split_paren(self, name: str, city: str | None) -> tuple[str, str | None, str | None] | None:
+    def _split_paren(self, name: str, city: str | None) -> SplitTriple | None:
         # Trailing parentheticals are metadata or venues, never name parts.
         # Outermost group so nested coverage areas resolve as one
         # ("Eläinlääkäri (Aura, Pöytyä (Kyrö, Karinainen), ...)").
@@ -2757,9 +2720,7 @@ class PtvFISpider(Spider):
             return None
         return self._paren_tail(base, inner, name, city)
 
-    def _paren_head(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_head(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         # Memorials and slash venue-address pairs resolve before the
         # room-word deferral in the caller _split_paren.
         if self._is_memorial(base, inner):
@@ -2775,9 +2736,7 @@ class PtvFISpider(Spider):
                 return btail.strip(), None, name
         return None
 
-    def _paren_coverage_sisters(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_coverage_sisters(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         if (
             "," in inner
             and all(self._is_single_cap(seg) for seg in inner.split(","))
@@ -2794,9 +2753,7 @@ class PtvFISpider(Spider):
             return self._keep_official(sub, name)
         return None
 
-    def _paren_coverage_city(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_coverage_city(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         if (
             "," in inner
             and all(self._is_single_cap(seg) for seg in inner.split(","))
@@ -2811,9 +2768,7 @@ class PtvFISpider(Spider):
             return self._keep_official(sub, name)
         return None
 
-    def _paren_venue_or_descriptor(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_venue_or_descriptor(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         if self._has_no_digit(inner) and self._has_fixture(inner):
             # Venue in parens ("... (Oltermannikeskus)").
             if re.match(r"(yksityinen|kunnallinen)\b", inner.strip(), flags=re.IGNORECASE):
@@ -2826,9 +2781,7 @@ class PtvFISpider(Spider):
             return base, inner, name
         return None
 
-    def _paren_numbered_room(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_numbered_room(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         if (
             self._has_digit(inner)
             and self._has_fixture(inner)
@@ -2842,9 +2795,7 @@ class PtvFISpider(Spider):
             return self._split_pair(inner, base, name)
         return None
 
-    def _paren_stripped_note(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_stripped_note(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         if (
             self.COMMA_STREET_RE.search(inner.lower())
             or (self._has_digit(inner) and "," in inner)
@@ -2863,9 +2814,7 @@ class PtvFISpider(Spider):
             return self._keep_official(sub, name)
         return None
 
-    def _paren_locality(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_locality(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         if self._is_single_cap(inner):
             # Single localities ("Totto-Halli (Muurola)") strip only when
             # they repeat known address context; village tails stay unless
@@ -2878,9 +2827,7 @@ class PtvFISpider(Spider):
             return self._keep_official(sub, name)
         return None
 
-    def _paren_venue_list(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_venue_list(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         if "," in inner and all(self._is_single_cap(seg) for seg in inner.split(",")):
             # Proper-name venue lists ("...(Masto, Styyrpuuri,Vantti)"):
             # the units locate the POI. Coverage cities stay whole, as do
@@ -2893,9 +2840,7 @@ class PtvFISpider(Spider):
                 return base, listed, name
         return None
 
-    def _paren_tail(
-        self, base: str, inner: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _paren_tail(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         # Coverage sisters, descriptors, stripped notes, localities and
         # venue lists resolve here; the room-word deferral runs first in
         # the caller _split_paren. Ordered precedence table; first
@@ -2916,7 +2861,7 @@ class PtvFISpider(Spider):
         self._count("name/paren_qualifier_kept")
         return name, None, None
 
-    def _split_dash(self, name: str) -> tuple[str, str | None, str | None] | None:
+    def _split_dash(self, name: str) -> SplitTriple | None:
         # Dash-separated venue/unit pairs ("Friemanin talo -
         # nuorisotoimisto"); translation dashes split earlier, lowercase
         # descriptors strip in cleaning.
@@ -2982,9 +2927,7 @@ class PtvFISpider(Spider):
             return self._split_pair(self._cap_first(right), left, name)
         return None
 
-    def _split_bare_desk(
-        self, head: str, tail: str, tail_base: str, name: str
-    ) -> tuple[str, str | None, str | None] | None:
+    def _split_bare_desk(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         # Bare desk tails on facility heads ("Vihdin kunnantalo/
         # sosiaalitoimisto", "Lohjan Kaupungintalo/
         # asiakaspalvelukeskus"): the desk names the POI. Role tails are
@@ -3004,7 +2947,7 @@ class PtvFISpider(Spider):
             return head, None, name
         return None
 
-    def _bare_area_operator(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+    def _bare_area_operator(self, head: str, tail: str, name: str) -> SplitTriple | None:
         # Area and operator heads resolve before service dispatch below.
         if head and tail and any(word in tail.lower() for word in self.AREA_TAILS):
             # Service areas ride bare slashes too ("Kotihoito/Vuosaari 3
@@ -3034,7 +2977,7 @@ class PtvFISpider(Spider):
             return tail, None, name
         return None
 
-    def _bare_service_pair(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+    def _bare_service_pair(self, head: str, tail: str, name: str) -> SplitTriple | None:
         # Genitive rooms, hosted units, desks and roles resolve before the
         # spaced-pair block below.
         if not (head and tail):
@@ -3057,7 +3000,7 @@ class PtvFISpider(Spider):
             return desk
         return None
 
-    def _split_bare(self, name: str) -> tuple[str, str | None, str | None]:
+    def _split_bare(self, name: str) -> SplitTriple:
         # Bare slash: compounds without spaces stay whole (Geo/on),
         # hyphen fragments never split (hiekka-/jääkenttä).
         head, _, tail = name.rpartition("/")
@@ -3079,7 +3022,7 @@ class PtvFISpider(Spider):
     # bare phase".
     _BARE_DEFER = object()
 
-    def _bare_spaced_pair(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None | object:
+    def _bare_spaced_pair(self, head: str, tail: str, name: str) -> SplitTriple | None | object:
         # Pairs with spaces on both sides resolve last.
         if not (
             head
@@ -3175,7 +3118,7 @@ class PtvFISpider(Spider):
         "nuorisotalo",
     )
 
-    def _split_inessive(self, name: str, tokens: list[str]) -> tuple[str, str | None, str | None] | None:
+    def _split_inessive(self, name: str, tokens: list[str]) -> SplitTriple | None:
         # Services hosted AT a venue ("Martat neuvoo Kuusankosken
         # kirjastossa"): exact inessive venue nouns de-inflect to a
         # nominative located_in. Genitive-headed phrases stay whole.
@@ -3205,7 +3148,7 @@ class PtvFISpider(Spider):
             break
         return None
 
-    def _split_acronym_prefix(self, name: str) -> tuple[str, str | None, str | None] | None:
+    def _split_acronym_prefix(self, name: str) -> SplitTriple | None:
         if (m := re.match(r"(oysin|tyksin|husin|taysin|kysin)\s+(.+)$", name, flags=re.IGNORECASE)) and m.group(
             2
         ).strip():
@@ -3214,7 +3157,7 @@ class PtvFISpider(Spider):
             return m.group(2).strip(), m.group(1)[:-2].upper(), name
         return None
 
-    def _split_slash_nested(self, name: str) -> tuple[str, str | None, str | None] | None:
+    def _split_slash_nested(self, name: str) -> SplitTriple | None:
         if (split := self._split_slash(name)) is not None:
             shown, located, official = split
             if " / " in shown:
@@ -3222,7 +3165,7 @@ class PtvFISpider(Spider):
             return split
         return None
 
-    def _split_name(self, name: str, city: str | None = None) -> tuple[str, str | None, str | None]:
+    def _split_name(self, name: str, city: str | None = None) -> SplitTriple:
         # Returns (name, located_in, official_name). Ordered precedence
         # table of (guard, resolver): guards keep resolvers from misfiring
         # on shapes they don't own (colons in URLs, acronym prefixes,
@@ -3297,9 +3240,7 @@ class PtvFISpider(Spider):
         self._count("name/space_city")
         return stripped_head.rstrip("|/,").strip() or stripped_head
 
-    def _strip_service_city(
-        self, split: tuple[str, str | None, str | None], city: str | None, name: str
-    ) -> tuple[str, str | None, str | None]:
+    def _strip_service_city(self, split: SplitTriple, city: str | None, name: str) -> SplitTriple:
         # Comma service heads carrying an exact-city tail ("Fysioterapia Pori"
         # from a service@venue pair): strip by the same predicate as space
         # tails, keeping the venue. Comma-bearing shown forms (kept full
@@ -3309,7 +3250,7 @@ class PtvFISpider(Spider):
             return stripped, located, official
         return split
 
-    def _split_name_tail(self, name: str, city: str | None) -> tuple[str, str | None, str | None] | None:
+    def _split_name_tail(self, name: str, city: str | None) -> SplitTriple | None:
         # Space-separated city tails, fused school heads, Swedish venues
         # and comma shapes, in that precedence.
         if city and " " in name and "," not in name:
@@ -3331,7 +3272,7 @@ class PtvFISpider(Spider):
 
     FUSED_ANCHORS = ("luokka", "luokat")
 
-    def _split_fused_school(self, name: str) -> tuple[str, str | None, str | None] | None:
+    def _split_fused_school(self, name: str) -> SplitTriple | None:
         # Comma-less "<Place-gen> <school-gen> <service/facility>" heads
         # ("Renkomäen koulun vaativan monimuotoisen tuen luokat"): the
         # unit names the POI, the school the venue. Anchored on service,
@@ -3371,7 +3312,7 @@ class PtvFISpider(Spider):
         self._count("name/fused_school")
         return self._cap_first(rest), venue, name
 
-    def _split_colon(self, name: str, city: str | None) -> tuple[str, str | None, str | None] | None:
+    def _split_colon(self, name: str, city: str | None) -> SplitTriple | None:
         # City-first records ("Outokumpu: Vertaisryhmä...") name the tail;
         # operator tails strip to the head ("OLKA-pisteen teemapäivä:
         # Saimaan Syöpäyhdistys ry"). Colon branches ("...: Sampola")
@@ -3695,9 +3636,7 @@ class PtvFISpider(Spider):
             return Categories.SOCIAL_FACILITY
         return None
 
-    def _split_comma_street_head(
-        self, head: str, tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _split_comma_street_head(self, head: str, tail: str, name: str, city: str | None) -> SplitTriple | None:
         # Street+municipality heads ("Pyhämäntie, Janakkala, Vammaisten
         # asumispalvelut"): the service tail names the POI. Length-guarded
         # like street tails; locality heads ("Toivakka, Lapua") stay whole.
@@ -3713,9 +3652,7 @@ class PtvFISpider(Spider):
         self._count("name/comma_street_head")
         return tail, None, name
 
-    def _split_comma_tail(
-        self, head: str, tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    def _split_comma_tail(self, head: str, tail: str, name: str, city: str | None) -> SplitTriple | None:
         # Metadata and coverage tails resolve before venue dispatch.
         # Returns None to fall through to street/city/service handling.
         if self._is_memorial(head, tail):
@@ -3784,7 +3721,7 @@ class PtvFISpider(Spider):
 
     def _comma_tail_pre(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Metadata tails and bare street tails dispatch before mid below.
         if (tail_hit := self._split_comma_tail(head, tail, name, city)) is not None:
             return tail_hit
@@ -3798,7 +3735,7 @@ class PtvFISpider(Spider):
 
     def _comma_city_police(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # City tails, street heads and inflected coverage dispatch before
         # the service split below. Lowered forms unused here (case-sensitive
         # tail shapes); kept for the uniform resolver signature.
@@ -3816,7 +3753,7 @@ class PtvFISpider(Spider):
             return head, None, name
         return None
 
-    def _split_comma(self, name: str, city: str | None = None) -> tuple[str, str | None, str | None]:
+    def _split_comma(self, name: str, city: str | None = None) -> SplitTriple:
         head, _, tail = name.rpartition(",")
         head, tail = head.strip(), tail.strip()
         if head and tail and city:
@@ -3853,7 +3790,7 @@ class PtvFISpider(Spider):
 
     def _split_comma_service_wrapped(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Service split plus exact-city tail strip on bare service heads;
         # wrapped so the top-level precedence table stays uniform.
         if (service := self._split_comma_service(head, tail, lowered_head, lowered_tail, name, city)) is not None:
@@ -3862,7 +3799,7 @@ class PtvFISpider(Spider):
 
     def _split_comma_mid(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Hosted-unit, branch-qualifier, city-first and service-head
         # comma pairs. Returns None to fall through to city tails and
         # the service split.
@@ -3908,7 +3845,7 @@ class PtvFISpider(Spider):
 
     def _split_comma_school_host(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Group activities hosted at schools ("Lempeä selkäjooga-ryhmä,
         # Veittijärven koulu"): the school locates the activity instead
         # of typing it. Daycare hosts stay whole (the daycare is the venue).
@@ -3942,7 +3879,7 @@ class PtvFISpider(Spider):
 
     def _split_comma_service_head(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Service-headed pairs ("Perhekeskus, Suvituuli") and hospital
         # wards ("Raskauden seurantaosasto, Tyks Majakkasairaala"): the
         # head names the POI, the venue hosts it (wards cf.
@@ -3969,7 +3906,7 @@ class PtvFISpider(Spider):
 
     def _split_comma_unit_venue(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Venue-headed service pairs ("Perhekeskus, Suvituuli"): the tail
         # service names the POI, the venue head hosts it.
         if (
@@ -4000,7 +3937,7 @@ class PtvFISpider(Spider):
 
     def _split_comma_keep_whole(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Coverage areas and organisation desks keep the signed form whole,
         # never split into located_in (cf. Stadin, police desks). City unused;
         # kept for the uniform resolver signature.
@@ -4020,7 +3957,7 @@ class PtvFISpider(Spider):
 
     def _comma_leisure_house(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         if re.search(r"vapaa-aika ?talo$", lowered_tail) and self._has_fixture(head):
             # Leisure-house venues ("Kuntosali, Kaukajärven vapaa-aika
             # talo"): the service/room head names the POI, the house
@@ -4031,7 +3968,7 @@ class PtvFISpider(Spider):
 
     def _comma_shared_redundant(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         if self._shared_service_word(head, tail) and not self._is_proper_tail(tail):
             # Service-descriptor tails restating the head's own service
             # ("Ilveskodin päivätoiminta, Vammaisten päivätoiminta"): the
@@ -4044,7 +3981,7 @@ class PtvFISpider(Spider):
 
     def _split_comma_service(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Service/unit comma pairs, both directions, then tail cleaners.
         # Ordered precedence table; first non-None hit wins.
         for resolver in (
@@ -4061,7 +3998,7 @@ class PtvFISpider(Spider):
 
     def _comma_tail_proper(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Swedish tails and proper/unit/water/acronym/facility venues.
         # lowered_head/city unused; kept for the uniform resolver signature.
         if any(word in lowered_tail for word in self.SWEDISH_SERVICE_TAILS) and self._is_institution(head.lower()):
@@ -4112,7 +4049,7 @@ class PtvFISpider(Spider):
 
     def _comma_tail_coverage(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Coverage lists, ward qualifiers and lowercase descriptors.
         # Only head/tail/name read; the rest kept for the uniform signature.
         if " ja " in tail and not self._has_fixture(tail) and self._has_no_digit(tail):
@@ -4139,7 +4076,7 @@ class PtvFISpider(Spider):
 
     def _comma_tail_descriptor(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         if (
             tail
             and tail[0].islower()
@@ -4159,7 +4096,7 @@ class PtvFISpider(Spider):
 
     def _comma_ward_kept(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         if re.fullmatch(r"osasto\s*\d+\.?$", tail, flags=re.IGNORECASE):
             # Ward qualifiers are part of the signed name ("Katriinan
             # toimipiste, osasto 7", cf. the round-14 ward split): keep
@@ -4170,7 +4107,7 @@ class PtvFISpider(Spider):
 
     def _comma_tail_descriptor_bare(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         if (
             tail
             and tail[0].islower()
@@ -4185,7 +4122,7 @@ class PtvFISpider(Spider):
 
     def _split_comma_tail_rest(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
-    ) -> tuple[str, str | None, str | None] | None:
+    ) -> SplitTriple | None:
         # Lowercase descriptors, Swedish tails, proper/unit venues and
         # coverage tails resolve after the service/unit dispatch above.
         # Ordered precedence table; first non-None hit wins.
