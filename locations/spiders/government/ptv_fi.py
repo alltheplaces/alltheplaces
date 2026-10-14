@@ -158,9 +158,9 @@ class PtvFISpider(Spider):
         ("sote-keskus", Categories.CLINIC, None),  # Sote-keskus (wellbeing centres)
         ("soteasema", Categories.CLINIC, None),  # Soteasema (wellbeing stations)
         ("poliklinikka", Categories.CLINIC, None),  # Poliklinikka (outpatient clinics)
-        ("synnytys", Categories.CLINIC, None),
+        ("synnytys", Categories.CLINIC, None),  # Synnytys (maternity units)
         ("naistentauti", Categories.CLINIC, None),  # Naistentauti (women health)
-        ("äitiys", Categories.CLINIC, None),  # Äitiys (maternity)  # Synnytys (maternity units)
+        ("äitiys", Categories.CLINIC, None),  # Äitiys (maternity)
         ("puheterapia", Categories.CLINIC, {"healthcare": "speech_therapist"}),  # Puheterapia (speech therapy)
         ("klinikka", Categories.CLINIC, None),  # Klinikka (clinics)
         ("poliklinikat", Categories.CLINIC, None),  # Poliklinikat (outpatient clinics, plural)
@@ -434,7 +434,6 @@ class PtvFISpider(Spider):
         ("päiväsairaala", Categories.CLINIC, None),  # Päiväsairaala (day hospitals)
         ("kliininen", Categories.CLINIC, None),  # Kliininen (clinical units)
         ("potilasasia", Categories.OFFICE_GOVERNMENT, None),  # Potilasasia (patient-ombudsman desks)
-        ("keskussairaala", Categories.HOSPITAL, None),  # Keskussairaala (central hospitals)
         ("sairaala", Categories.HOSPITAL, None),  # Sairaala (hospitals)
         ("lähitori", Categories.SOCIAL_FACILITY, None),  # Lähitori (senior service points)
         ("konttori", Categories.OFFICE_COMPANY, None),  # Konttori (head offices)
@@ -516,7 +515,7 @@ class PtvFISpider(Spider):
             "kokoustila",
             Categories.EVENTS_VENUE,
             None,
-        ),  # Kokoustila (meeting rooms)  # Monitoimihalli (multipurpose halls)
+        ),  # Kokoustila (meeting rooms)
         ("neuvottelu", Categories.SOCIAL_FACILITY, None),  # Neuvottelu (negotiation centres, all family-affairs)
         ("pelastusasema", Categories.FIRE_STATION, None),  # Pelastusasema (rescue stations)
         ("vpk", Categories.FIRE_STATION, None),  # VPK (volunteer fire brigades)
@@ -542,7 +541,7 @@ class PtvFISpider(Spider):
         ("kunnantalo", Categories.OFFICE_GOVERNMENT, None),  # Kunnantalo (municipal halls)
         ("hallinto", Categories.OFFICE_GOVERNMENT, None),  # Hallinto (administrations)
         ("virasto", Categories.OFFICE_GOVERNMENT, None),  # Virasto (agencies)
-        ("päihde", Categories.CLINIC, None),  # Päihde (substance-abuse care)  # Fysioterapia (physiotherapy)
+        ("päihde", Categories.CLINIC, None),  # Päihde (substance-abuse care)
         ("arviointiyksikkö", Categories.CLINIC, None),  # Arviointiyksikkö (assessment units)
         ("tutkimusyksik", Categories.CLINIC, None),  # Tutkimusyksikkö (examination units, all inflections)
         ("akuuttiosasto", Categories.CLINIC, None),  # Akuuttiosasto (acute wards)
@@ -557,18 +556,18 @@ class PtvFISpider(Spider):
             {"information": "office"},
         ),  # Matkailuneuvonta (tourist info)
         ("matkailuinfo", Categories.TOURISM_INFORMATION, {"information": "office"}),  # Matkailuinfo (tourist info)
-        ("toimipiste", Categories.OFFICE_GOVERNMENT, None),
+        ("toimipiste", Categories.OFFICE_GOVERNMENT, None),  # Toimipiste (service points)
         (
             "palvelupaikka",
             Categories.OFFICE_GOVERNMENT,
             None,
-        ),  # Palvelupaikka (service points)  # Toimipiste (service points)
+        ),  # Palvelupaikka (service points)
         ("toimipaikka", Categories.OFFICE_GOVERNMENT, None),  # Toimipaikka (offices)
         ("museo", Categories.MUSEUM, None),  # Museo (museums)
         ("asiakaspalvelu", Categories.OFFICE_GOVERNMENT, None),  # Asiakaspalvelu (customer service)
         ("klubitalo", Categories.COMMUNITY_CENTRE, None),  # Klubitalo (peer clubhouses, not clinics)
-        ("perhekeskus", Categories.OFFICE_GOVERNMENT, None),
-        ("perhetyö", Categories.SOCIAL_FACILITY, None),  # Perhetyö (family work)  # Perhekeskus (family centres)
+        ("perhekeskus", Categories.OFFICE_GOVERNMENT, None),  # Perhekeskus (family centres)
+        ("perhetyö", Categories.SOCIAL_FACILITY, None),  # Perhetyö (family work)
         ("kirjaamo", Categories.OFFICE_GOVERNMENT, None),  # Kirjaamo (registries)
         ("raatihuone", Categories.OFFICE_GOVERNMENT, None),  # Raatihuone (town halls; galleries keep museum above)
         ("perheoikeudelliset", Categories.OFFICE_GOVERNMENT, None),  # Perheoikeudelliset (family-law services)
@@ -601,9 +600,9 @@ class PtvFISpider(Spider):
         ("neuvonta", Categories.OFFICE_GOVERNMENT, None),  # Neuvonta (advice services)
         ("lähipalvelu", Categories.OFFICE_GOVERNMENT, None),  # Lähipalvelu (local service points)
         ("ohjaamo", Categories.OFFICE_GOVERNMENT, None),  # Ohjaamo (guidance hubs)
-        ("asiointipiste", Categories.OFFICE_GOVERNMENT, None),
+        ("asiointipiste", Categories.OFFICE_GOVERNMENT, None),  # Asiointipiste (service points)
         ("hyvinvointikioski", Categories.OFFICE_GOVERNMENT, None),  # Hyvinvointikioski (wellbeing kiosks)
-        ("kioski", Categories.SHOP_KIOSK, None),  # Kioski (kiosks)  # Asiointipiste (service points)
+        ("kioski", Categories.SHOP_KIOSK, None),  # Kioski (kiosks)
         ("palvelupiste", Categories.OFFICE_GOVERNMENT, None),  # Palvelupiste (service points)
         ("serviceenhet", Categories.OFFICE_GOVERNMENT, None),  # Serviceenhet (service units in Swedish)
         ("palvelutori", Categories.OFFICE_GOVERNMENT, None),  # Palvelutori (service desks)
@@ -619,7 +618,7 @@ class PtvFISpider(Spider):
         ("sosiaali", Categories.SOCIAL_FACILITY, None),  # Sosiaali (social services)
         ("vanhainkoti", Categories.NURSING_HOME, None),  # Vanhainkoti (elderly homes)
         ("hoivakoti", Categories.NURSING_HOME, None),  # Hoivakoti (care homes)
-        ("hoiva", Categories.SOCIAL_FACILITY, None),  # Hoiva (care homes)  # Kotihoito (home care)
+        ("hoiva", Categories.SOCIAL_FACILITY, None),  # Hoiva (care homes)
         ("työpaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Työpaja (workshops)
         (
             "kulttuuripaja",
@@ -652,23 +651,20 @@ class PtvFISpider(Spider):
         ("sydänosasto", Categories.CLINIC, None),  # Sydänosasto (cardiac wards)
         ("sydänyksikkö", Categories.CLINIC, None),  # Sydänyksikkö (cardiac units)
         ("asumi", Categories.SOCIAL_FACILITY, None),  # Asumi (housing services)
-        ("boende", Categories.SOCIAL_FACILITY, None),
+        ("boende", Categories.SOCIAL_FACILITY, None),  # Boende (housing in Swedish)
         ("bostad", Categories.SOCIAL_FACILITY, None),  # Bostad (housing in Swedish)
         ("bostäder", Categories.SOCIAL_FACILITY, None),  # Bostäder (housing in Swedish, plural)
-        ("hemmet", Categories.SOCIAL_FACILITY, None),  # Hemmet (housing in Swedish)  # Boende (housing in Swedish)
+        ("hemmet", Categories.SOCIAL_FACILITY, None),  # Hemmet (housing in Swedish)
         ("kuntout", Categories.SOCIAL_FACILITY, None),  # Kuntout (rehabilitation)
         ("työterveys", Categories.CLINIC, None),  # Työterveys (occupational health)
-        ("matonpesupaikka", Categories.CARPET_WASHING, None),
+        ("matonpesupaikka", Categories.CARPET_WASHING, None),  # Matonpesupaikka (carpet washing)
         (
             "matonpesu",
             Categories.CARPET_WASHING,
             None,
-        ),  # Matonpesu (carpet washing)  # Matonpesupaikka (carpet washing)
+        ),  # Matonpesu (carpet washing)
         ("kierrätys", Categories.RECYCLING, None),  # Kierrätys (recycling)
         ("kiertopiste", Categories.RECYCLING, None),  # Kiertopiste (reuse points)
-        ("jäteasema", Categories.RECYCLING, None),  # Jäteasema (waste stations)
-        ("jätepiste", Categories.RECYCLING, None),  # Jätepiste (waste points)
-        ("puutarhajäte", Categories.RECYCLING, None),  # Puutarhajäte (garden waste)
         ("hyötykäyttö", Categories.RECYCLING, None),  # Hyötykäyttö (reuse stations)
         ("hyödyksi", Categories.RECYCLING, None),  # Hyödyksi-asemat (reuse stations)
         ("hävikkiterminaali", Categories.SOCIAL_FACILITY, None),  # Hävikkiterminaali (surplus-food terminals)
@@ -700,18 +696,17 @@ class PtvFISpider(Spider):
         ("testausasema", None, None),  # Testausasemat (test stations): no precise filing, keep generic
         ("testiasema", None, None),  # Testiasemat (test stations): no precise filing, keep generic
         ("asema", None, {"railway": "station", "public_transport": "station"}),  # Asema (railway stations)
-        ("vuokraamo", Categories.SHOP_RENTAL, None),
+        ("vuokraamo", Categories.SHOP_RENTAL, None),  # Vuokraamo (rental shops)
         ("kirpputori", Categories.SHOP_SECOND_HAND, None),  # Kirpputori (flea markets)
-        ("kirppis", Categories.SHOP_SECOND_HAND, None),  # Kirppis (flea markets)  # Vuokraamo (rental shops)
+        ("kirppis", Categories.SHOP_SECOND_HAND, None),  # Kirppis (flea markets)
         ("reshop", Categories.SHOP_SECOND_HAND, None),  # Reshop (second-hand shops)
-        ("pysäköintialue", Categories.PARKING, None),
         ("viljelypalsta", Categories.ALLOTMENTS, None),  # Viljelypalsta (allotments)
         ("marjapensas", Categories.ALLOTMENTS, None),  # Marjapensas (berry patches, not beaches)
         (
             "siirtolapuutarha",
             Categories.ALLOTMENTS,
             None,
-        ),  # Siirtolapuutarha (allotments)  # Pysäköintialue (parking areas)
+        ),  # Siirtolapuutarha (allotments)
         ("lainaamo", Categories.TOOL_LIBRARY, None),  # Lainaamo (lending libraries)
         ("ulkoilualue", Categories.LEISURE_PARK, None),  # Ulkoilualue (outdoor areas)
         ("leirikeskus", Categories.TOURISM_CAMP_SITE, None),  # Leirikeskus (camp centres)
@@ -721,7 +716,7 @@ class PtvFISpider(Spider):
         ("leirintäalue", Categories.TOURISM_CAMP_SITE, None),  # Leirintäalue (camping grounds)
         ("telttailu", Categories.TOURISM_CAMP_SITE, None),  # Telttailu (tent sites, island camping)
         ("virkistysalue", Categories.LEISURE_PARK, None),  # Virkistysalue (recreation areas)
-        ("laavu", Categories.SHELTER, None),
+        ("laavu", Categories.SHELTER, None),  # Laavu (lean-to shelters)
         (
             "kalastusalue",
             None,
@@ -729,7 +724,7 @@ class PtvFISpider(Spider):
         ),  # Kalastusalue (fishing areas; after laavu so area shelters keep shelter)
         ("hätämajoitus", Categories.SHELTER, None),  # Hätämajoitus (emergency housing)
         ("ensikoti", Categories.SHELTER, None),  # Ensikoti (first homes for mothers and children)
-        ("luontokeskus", Categories.MUSEUM, None),  # Luontokeskus (nature centres)  # Laavu (lean-to shelters)
+        ("luontokeskus", Categories.MUSEUM, None),  # Luontokeskus (nature centres)
         ("vessa", Categories.TOILETS, None),  # Vessa (toilets)
         ("talvipuutarha", None, {"leisure": "botanical_garden"}),  # Talvipuutarha (botanical garden)
         ("kasvitieteelli", None, {"leisure": "botanical_garden"}),  # Kasvitieteelliset puutarhat
@@ -740,7 +735,7 @@ class PtvFISpider(Spider):
         ("autiotupa", Categories.TOURISM_WILDERNESS_HUT, None),  # Autiotupa (wilderness huts)
         ("tupa", Categories.COMMUNITY_CENTRE, None),  # Tupa (meeting houses, compound-final)
         ("laituri", Categories.MAN_MADE_PIER, None),  # Laituri (piers)
-        ("venepaikka", Categories.MARINA, None),  # Venepaikka (boat berths)  # Satama (harbours)
+        ("venepaikka", Categories.MARINA, None),  # Venepaikka (boat berths)
         ("vesipiste", Categories.DRINKING_WATER, None),  # Vesipiste (drinking-water points)
         ("vedenjakelu", Categories.DRINKING_WATER, None),  # Vedenjakelu (water distribution points)
         ("vesiposti", Categories.DRINKING_WATER, None),  # Vesiposti (municipal water posts)
@@ -811,7 +806,7 @@ class PtvFISpider(Spider):
         # Bounded-window org join: channel items wait only for their own
         # org batch (one round-trip), never the whole crawl. Orgs are ~5k
         # nationally; the cache keeps each fetched once.
-        self._org_names: dict[str, str] = {}
+        self._org_names: dict[str, str | None] = {}
         self._org_types: dict[str, str] = {}
         self._seen_orgs: set[str] = set()
         self._pending: dict[str, list[Feature]] = {}
@@ -1007,14 +1002,59 @@ class PtvFISpider(Spider):
         # the signed short form. Unrelated maintainers never qualify.
         head_tokens = set(re.findall(r"\w+", (named_operator or "").lower()))
         org_tokens = set(re.findall(r"\w+", (org_name.split(",", 1)[0].strip() or org_name).lower()))
-        return len(head_tokens) >= 2 and bool(head_tokens) and head_tokens < org_tokens
+        return len(head_tokens) >= 2 and head_tokens < org_tokens
+
+    def _apply_operator_tags(
+        self, item: Feature, operator: str, full_org_name: str | None = None, org_type: str | None = None
+    ) -> None:
+        # Wikidata QID, operator:type (private vs. religious) and
+        # association-office demotion: shared by the org join and the
+        # signed slash-operator pass.
+        if qid := self.OPERATORS_WIKIDATA.get(operator):
+            item["operator_wikidata"] = qid
+        else:
+            self._count("operator/no_qid")
+        is_company = self._is_company_name(operator)
+        private_org = (
+            self._is_private_org(operator)
+            or (bool(full_org_name) and self._is_private_org(full_org_name.split(",", 1)[0].strip()))
+            or (
+                org_type == "Company"
+                and "liikelaitos" not in operator.lower()
+                and "liikelaitos" not in (full_org_name or "").lower()
+            )
+        )
+        if is_company or private_org:
+            # Companies and associations delivering public services are
+            # private operators (user ruling extends the Oy/Ab precedent).
+            # Privacy reads the full name so stripped acronyms ("RIKU")
+            # don't launder associations public.
+            item["extras"]["operator:type"] = "private"
+        elif re.search(r"(seurakunta|församling)", operator, flags=re.IGNORECASE) or re.search(
+            r"\bsrk\b", operator, flags=re.IGNORECASE
+        ):
+            # Parishes are public-law religious bodies: operator:type marks
+            # the religious organizer without claiming anything about the
+            # service itself (seurakuntatalo clubs et al).
+            self._count("operator/religious")
+            item["extras"]["operator:type"] = "religious"
+        if private_org and not is_company and org_type != "Company" and self._tag(item, "office") == "government":
+            # Association-run desks are association offices, not government
+            # ones (office lives in extras; a top-level write would raise).
+            # Record-proven and marker-proven companies keep the government
+            # office filing (Oy parity); only the operator type turns private.
+            self._count("operator/office_demoted")
+            item["extras"]["office"] = "association"
 
     def _apply_operator(self, item: Feature, org_name: str | None, org_type: str | None = None) -> None:
         if item.get("operator"):
             if org_name and self._org_supersedes(item["operator"], org_name):
                 # The joined record names the same operator more fully;
-                # fall through and let it replace the signed short form.
+                # clear the provisional tags and let the record replace the
+                # signed short form.
                 self._count("operator/org_superseded")
+                item.pop("operator_wikidata", None)
+                (item.get("extras") or {}).pop("operator:type", None)
             else:
                 # Branch-agency suffixes ("/Kela") already named the provider.
                 self._count("operator/branch_agency")
@@ -1032,7 +1072,6 @@ class PtvFISpider(Spider):
             # file the clinic, keep the building name.
             self._count("category/school_health_unit")
             apply_category(Categories.CLINIC, item)
-            item["operator"] = self._org_head(org_name)
         for stem, brand in self.CHAIN_OPERATORS:
             if re.match(stem + r"\b", (item.get("name") or "").lower()):
                 self._count("operator/chain_brand")
@@ -1088,43 +1127,7 @@ class PtvFISpider(Spider):
                 operator = operator[: dash.start()].strip() or operator
                 self._count("operator/brand_stripped")
         item["operator"] = operator
-        if qid := self.OPERATORS_WIKIDATA.get(operator):
-            item["operator_wikidata"] = qid
-        else:
-            self._count("operator/no_qid")
-        is_company = bool(
-            re.search(r"\b(oy|ab)\.?$", self._strip_trailing_paren(operator, fallback=True), flags=re.IGNORECASE)
-        )
-        private_org = (
-            self._is_private_org(operator)
-            or self._is_private_org(org_name.split(",", 1)[0].strip())
-            or (
-                org_type == "Company"
-                and "liikelaitos" not in operator.lower()
-                and "liikelaitos" not in org_name.lower()
-            )
-        )
-        if is_company or private_org:
-            # Companies and associations delivering public services are
-            # private operators (user ruling extends the Oy/Ab precedent).
-            # Privacy reads the full name so stripped acronyms ("RIKU")
-            # don't launder associations public.
-            item["extras"]["operator:type"] = "private"
-        elif re.search(r"(seurakunta|församling)", operator, flags=re.IGNORECASE) or re.search(
-            r"\bsrk\b", operator, flags=re.IGNORECASE
-        ):
-            # Parishes are public-law religious bodies: operator:type marks
-            # the religious organizer without claiming anything about the
-            # service itself (seurakuntatalo clubs et al).
-            self._count("operator/religious")
-            item["extras"]["operator:type"] = "religious"
-        if private_org and not is_company and org_type != "Company" and self._tag(item, "office") == "government":
-            # Association-run desks are association offices, not government
-            # ones (office lives in extras; a top-level write would raise).
-            # Record-proven companies keep the government office filing
-            # (Oy parity); only the operator type turns private.
-            self._count("operator/office_demoted")
-            item["extras"]["office"] = "association"
+        self._apply_operator_tags(item, operator, org_name, org_type)
 
     def parse_batch(self, response: TextResponse) -> Iterable[Feature]:
         try:
@@ -1140,18 +1143,19 @@ class PtvFISpider(Spider):
             if not isinstance(channel, dict):
                 continue
             if item := self.parse_channel(channel):
-                org_id = channel.get("organizationId")
+                raw_org_id = channel.get("organizationId")
+                org_id = str(raw_org_id) if raw_org_id else ""
                 if not org_id:
                     self._apply_operator(item, None)
                     yield item
                 elif org_id in self._org_names:
-                    self._apply_operator(item, self._org_names[org_id], self._org_types.get(str(org_id)))
+                    self._apply_operator(item, self._org_names[org_id], self._org_types.get(org_id))
                     yield item
                 else:
-                    self._pending.setdefault(str(org_id), []).append(item)
-                    if str(org_id) not in self._seen_orgs:
-                        self._seen_orgs.add(str(org_id))
-                        fresh_orgs.append(str(org_id))
+                    self._pending.setdefault(org_id, []).append(item)
+                    if org_id not in self._seen_orgs:
+                        self._seen_orgs.add(org_id)
+                        fresh_orgs.append(org_id)
         for i in range(0, len(fresh_orgs), self.batch_size):
             chunk = fresh_orgs[i : i + self.batch_size]
             yield JsonRequest(
@@ -1174,11 +1178,13 @@ class PtvFISpider(Spider):
         for org in payload:
             if not isinstance(org, dict) or not org.get("id"):
                 continue
+            org_id = str(org["id"])
             name = self._lang_value(org.get("organizationNames") or [], "fi", "sv", "en")
-            self._org_names[str(org["id"])] = name or ""
-            self._org_types[str(org["id"])] = org.get("organizationType") or ""
-            for item in self._pending.pop(str(org["id"]), []):
-                self._apply_operator(item, name, org.get("organizationType") or "")
+            org_type = org.get("organizationType") or ""
+            self._org_names[org_id] = name
+            self._org_types[org_id] = org_type
+            for item in self._pending.pop(org_id, []):
+                self._apply_operator(item, name, org_type)
                 yield item
         # Orgs requested but unreturned (deleted/renamed rows) must not trap
         # their items: flush the leftovers operator-less like the failure paths.
@@ -1519,10 +1525,6 @@ class PtvFISpider(Spider):
     # venue evidence, not filing).
     SCHOOL_TAIL_RE = re.compile(
         r"(koulu|lukio|opisto|päiväkoti|esiopetus|yläaste|ala-aste|skola|daghem|högstadium|lågstadium)"
-    )
-    # Comma tails that are street addresses (cf. service-map COMMA_STREET_RE).
-    COMMA_STREET_RE = re.compile(
-        r"(tie|katu|kuja|polku|väylä|raitti|ranta|kaari|esplanadi|bulevardi|vägen|väg|gatan|gata|gränden|gränd|stigen|stig)\s+\d"
     )
 
     def _is_institution(self, text: str) -> bool:
@@ -2068,11 +2070,20 @@ class PtvFISpider(Spider):
         # Tmi marks toiminimi operators ("Tmi Petri Lehto"). Trailing
         # parenthesised qualifiers ("... Oy (Helsinki)") read past for
         # detection, mirroring _is_private_org.
-        t = text.strip()
-        stripped = self._strip_trailing_paren(t, fallback=True)
+        stripped = self._strip_trailing_paren(text, fallback=True)
         return (
             re.search(r"^tmi\b", stripped, flags=re.IGNORECASE) is not None
             or re.search(self.OPERATOR_END_RE, stripped, flags=re.IGNORECASE) is not None
+        )
+
+    def _is_company_name(self, operator: str) -> bool:
+        # Commercial legal forms (Oy, Ab, Tmi/toiminimi, Ky, Ay, Öb):
+        # keep government office filings when running outsourced public
+        # desks, never demote to association offices.
+        stripped = self._strip_trailing_paren(operator, fallback=True)
+        return (
+            re.search(r"^tmi\b", stripped, flags=re.IGNORECASE) is not None
+            or re.search(r"\b(oy|ab|tmi|toiminimi|ky|ay|öb|ö\.b?\.?)\.?$", stripped, flags=re.IGNORECASE) is not None
         )
 
     def _is_private_org(self, operator: str) -> bool:
@@ -2087,12 +2098,10 @@ class PtvFISpider(Spider):
         if "seurakunta" in lowered and not re.search(r"\b(oy|ab|ry|r\.y\.?|tmi|toiminimi)\b", lowered):
             return False
         # Trailing parenthesised qualifiers ("Yhdistys (NNKY)") shield the
-        # marker from the end anchor: read past them for detection only
-        # (the emitted operator keeps its full form).
-        op = operator.strip()
-        deparen = re.sub(r"\s*\([^()]*\)$", "", op).strip() or operator
+        # marker from the end anchor: _has_operator_word reads past them for
+        # detection only (the emitted operator keeps its full form).
         return (
-            self._has_operator_word(deparen)
+            self._has_operator_word(operator)
             or re.search(r"\bry\b", operator, flags=re.IGNORECASE) is not None
             or re.search(r"\briku\b", operator, flags=re.IGNORECASE) is not None
             or re.search(r"\w*seura\b", lowered) is not None
@@ -2917,27 +2926,31 @@ class PtvFISpider(Spider):
     # ("Zacharias Topeliusskolan, Smågruppsundervisning").
     SWEDISH_SERVICE_TAILS = ("undervisning",)
 
+    # Exact inessive venue stems ("Kuusankosken kirjastossa") shared by
+    # _split_inessive and _custom_group_use.
+    INESSIVE_HOST_STEMS = (
+        "kirjasto",
+        "koulu",
+        "lukio",
+        "museo",
+        "kirkko",
+        "kappeli",
+        "opisto",
+        "sairaala",
+        "neuvola",
+        "päiväkoti",
+        "päiväkodi",
+        "terveysasema",
+        "uimahalli",
+        "nuorisotalo",
+    )
+
     def _split_inessive(self, name: str, tokens: list[str]) -> tuple[str, str | None, str | None] | None:
         # Services hosted AT a venue ("Martat neuvoo Kuusankosken
         # kirjastossa"): exact inessive venue nouns de-inflect to a
         # nominative located_in. Genitive-headed phrases stay whole.
         last = tokens[-1].lower()
-        for stem in (
-            "kirjasto",
-            "koulu",
-            "lukio",
-            "museo",
-            "kirkko",
-            "kappeli",
-            "opisto",
-            "sairaala",
-            "neuvola",
-            "päiväkoti",
-            "päiväkodi",
-            "terveysasema",
-            "uimahalli",
-            "nuorisotalo",
-        ):
+        for stem in self.INESSIVE_HOST_STEMS:
             compound = re.fullmatch(r"(\w*?)" + stem + r"(ssa|ssä|lla|llä)", last)
             if compound is None:
                 continue
@@ -3463,10 +3476,7 @@ class PtvFISpider(Spider):
             return None
         if len(m.group(1).strip()) < 7:
             return None
-        if not re.search(
-            r"(tie|katu|kuja|polku|väylä|raitti|kaari|penger|esplanadi|bulevardi" r"|vägen|väg|gatan|gata|gränd|stig)$",
-            m.group(1).strip().lower(),
-        ):
+        if not re.search(r"(" + self.STREET_STEM_ALT + r")$", m.group(1).strip().lower()):
             return None
         self._count("name/comma_street_head")
         return tail, None, name
@@ -3547,11 +3557,7 @@ class PtvFISpider(Spider):
         if (tail_hit := self._split_comma_tail(head, tail, name, city)) is not None:
             return tail_hit
         lowered_tail = tail.lower()
-        if len(tail) >= 7 and re.search(
-            r"(tie|katu|kuja|polku|väylä|raitti|kaari|penger|esplanadi|bulevardi"
-            r"|vägen|väg|gatan|gata|gränden|gränd|stigen|stig|väli|kurvi)$",
-            lowered_tail,
-        ):
+        if len(tail) >= 7 and re.search(r"(" + self.STREET_STEM_ALT + r")$", lowered_tail):
             # Bare street tails are addresses, never venues
             # ("Kouluravintola, ..., Kenttäpolku"). Length-guarded:
             # short names ("Stig") are not streets.
@@ -3900,8 +3906,9 @@ class PtvFISpider(Spider):
             and tail[0].islower()
             and any(word in tail.lower() for word in ("palvelu", "toiminta", "hoito", "huolto", "työ", "tuki"))
         ):
-            # Lowercase service descriptors ("..., ostopalvelut"). Other
-            # lowercase tails (qualifiers like "åk 1–2") stay whole.
+            # Lowercase service descriptors ("..., ostopalvelut", "Novida,
+            # lukion opiskeluhuolto"). Other lowercase tails (qualifiers
+            # like "åk 1–2") stay whole.
             self._count("name/comma_descriptor_dropped")
             return head, None, name
         return None
@@ -4029,6 +4036,7 @@ class PtvFISpider(Spider):
         if always_open and not day_spans:
             if category in (
                 Categories.SOCIAL_FACILITY,
+                Categories.ASSISTED_LIVING,
                 Categories.SCHOOL,
                 Categories.COLLEGE,
                 Categories.KINDERGARTEN,
@@ -4038,8 +4046,6 @@ class PtvFISpider(Spider):
                 # publicly walk-in 24/7; a 24/7 tag would mislead.
                 self._count("hours/skipped_always_open_social")
                 return None
-            for day in self.WEEK_ORDER:
-                oh.add_range(day, "00:00", "23:59", time_format="%H:%M")
             # Around-the-clock opening renders as a plain 24/7 string
             # (cf. other spiders), never overlapping spans.
             return "24/7"
@@ -4385,18 +4391,7 @@ class PtvFISpider(Spider):
         # groups (vertaisryhmä, vertaistukiryhmä) and senior clubs
         # (seniorikerho) are venues and file via the keyword table instead. Bare group numbers ("Kuntosali, ryhmä 1") leave the
         # venue filing alone; health contexts keep theirs.
-        host_stems = (
-            "kirjasto",
-            "koulu",
-            "lukio",
-            "museo",
-            "kirkko",
-            "kappeli",
-            "opisto",
-            "sairaala",
-            "uimahalli",
-            "nuorisotalo",
-        )
+        host_stems = self.INESSIVE_HOST_STEMS
         host_end = r"(?:ssa|ssä|lla|llä)$"
         if any(re.search(rf"{stem}{host_end}", token) for token in lowered.split() for stem in host_stems):
             # Hosted typed facilities ("Rintasyöpäseulonta ... sairaalassa")
@@ -4525,15 +4520,20 @@ class PtvFISpider(Spider):
         self._count("category/fused_room_carve")
         return category, extra
 
+    @staticmethod
+    def _strip_ostopalvelu(text: str) -> str:
+        # Purchased-service qualifiers ("..., Hämeenlinna, yhteisöllisen
+        # asumisen ostopalvelut", "... ostopalveluna") arrange the service,
+        # never the place or venue.
+        stripped = re.sub(r",\s*[^,]*(?:ostopalvelu\w*)\s*$", "", text).strip()
+        return re.sub(r"\s+ostopalveluna\s*$", "", stripped, flags=re.IGNORECASE).strip()
+
     def _category(self, name_fi: str) -> tuple[Categories | None, dict | None]:
         # Invisible characters (zero-width, soft hyphens) never carry
         # matching meaning; strip them so feed dirt can't hide keywords.
-        name_fi = self._visible(name_fi)
-        # Purchased-service qualifiers ("..., Hämeenlinna, yhteisöllisen
-        # asumisen ostopalvelut") arrange the service, never the place:
-        # the head types it, so desks behind care-home heads stay homes.
-        name_fi = re.sub(r",\s*[^,]*(?:ostopalvelu\w*)\s*$", "", name_fi).strip()
-        name_fi = re.sub(r"\s+ostopalveluna\s*$", "", name_fi, flags=re.IGNORECASE).strip()
+        # Purchased-service tails strip so desks behind care-home heads
+        # stay homes.
+        name_fi = self._strip_ostopalvelu(self._visible(name_fi))
         if (custom := self._custom_category(name_fi)) is not None:
             return custom
         if (carved := self._carve_room_tail(name_fi)) is not None:
@@ -4839,6 +4839,13 @@ class PtvFISpider(Spider):
         "linja",
         "kurvi",
     )
+    # Street-stem alternation shared by street-tail/paren regexes
+    # (linja stays STREET_SUFFIXES-only so linja-autoasema never matches;
+    # ranta stays out of numberless street checks because it doubles as
+    # a shore/venue suffix).
+    STREET_STEM_ALT = "|".join(s for s in STREET_SUFFIXES if s not in ("ranta", "linja"))
+    STREET_NUMBERED_ALT = "|".join(s for s in STREET_SUFFIXES if s != "linja")
+    COMMA_STREET_RE = re.compile(r"(" + STREET_NUMBERED_ALT + r")\s+\d")
 
     def _strip_addr_base(self, address: str) -> str:
         address = address.replace("­", "").replace("–", "-").replace("—", "-")
@@ -5321,7 +5328,7 @@ class PtvFISpider(Spider):
                 self._count("name/located_city_dropped")
                 located = ", ".join(kept).strip(" ,") or None
         if located:
-            desc_stripped = re.sub(r",\s*[^,]*(?:ostopalvelu\w*)\s*$", "", located).strip(" ,")
+            desc_stripped = self._strip_ostopalvelu(located).strip(" ,")
             if desc_stripped and desc_stripped != located:
                 # Purchased-service descriptors ("..., yhteisöllisen
                 # asumisen ostopalvelut") are arrangement text, not venues.
@@ -5341,7 +5348,7 @@ class PtvFISpider(Spider):
         slash_tail = None
         if " / " in signed:
             candidate = signed.rsplit(" / ", 1)[1].strip()
-            if candidate and re.search(self.OPERATOR_END_RE, candidate, flags=re.IGNORECASE):
+            if candidate and self._has_operator_word(candidate):
                 slash_tail = candidate
         if slash_tail is not None:
             if two_seg:
@@ -5369,22 +5376,9 @@ class PtvFISpider(Spider):
                     ):
                         located = venue.strip() or None
                     slash_tail = org.strip()
-                    if re.search(r"(seurakunta|församling)", slash_tail, flags=re.IGNORECASE):
-                        # Parish operators stay religious even when named by
-                        # the tail ("Päiväkoti Gan Jeladim, Helsingin
-                        # juutalainen seurakunta").
-                        item["extras"]["operator:type"] = "religious"
             item["operator"] = slash_tail
             self._count("operator/slash_tail")
-            is_company = bool(
-                re.search(r"\b(oy|ab)\.?$", self._strip_trailing_paren(slash_tail, fallback=True), flags=re.IGNORECASE)
-            )
-            private_org = self._is_private_org(slash_tail)
-            if is_company or private_org:
-                item["extras"]["operator:type"] = "private"
-            if private_org and not is_company and self._tag(item, "office") == "government":
-                self._count("operator/office_demoted")
-                item["extras"]["office"] = "association"
+            self._apply_operator_tags(item, slash_tail)
         elif "/" in signed:
             head = re.split(r"\s*/\s*", signed, maxsplit=1)[0].strip()
             if (
@@ -5400,25 +5394,7 @@ class PtvFISpider(Spider):
                 # Äppelbo") keep the brand via the org join instead.
                 item["operator"] = head
                 self._count("operator/slash_head")
-                if qid := self.OPERATORS_WIKIDATA.get(head):
-                    item["operator_wikidata"] = qid
-                else:
-                    self._count("operator/no_qid")
-                if self._is_private_org(head):
-                    item["extras"]["operator:type"] = "private"
-                    head_company = bool(
-                        re.search(
-                            r"\b(oy|ab)\.?$",
-                            self._strip_trailing_paren(head, fallback=True),
-                            flags=re.IGNORECASE,
-                        )
-                    )
-                    if not head_company and self._tag(item, "office") == "government":
-                        # Association-run desks are association offices, not
-                        # government ones (mirrors the tail demotion; the org
-                        # join early-returns behind explicit operators).
-                        self._count("operator/office_demoted")
-                        item["extras"]["office"] = "association"
+                self._apply_operator_tags(item, head)
         return located
 
     def _apply_naming(self, item: Feature, names: dict[str, str], name: str, city_src: str | None) -> None:
@@ -5490,8 +5466,7 @@ class PtvFISpider(Spider):
                 cleaned_tr = re.sub(r"\s*\d+\*\s*$", "", translation).strip()
                 cleaned_tr = re.sub(r",?\s*(?:[PN]\s*)?\d+\s*°.*$", "", cleaned_tr).strip()
                 paren_stripped = re.sub(
-                    r"\s*\([^()]*(tie|katu|kuja|polku|väylä|raitti|ranta|kaari|penger"
-                    r"|vägen|väg|gatan|gata|gränden|gränd|stigen|stig)\b[^()]*\d[^()]*\)\s*$",
+                    r"\s*\([^()]*(" + self.STREET_NUMBERED_ALT + r")\b[^()]*\d[^()]*\)\s*$",
                     "",
                     cleaned_tr,
                 ).strip()
@@ -5553,9 +5528,7 @@ class PtvFISpider(Spider):
         # the translated rest stays verbatim.
         if "," in cleaned_tr and "," in (signed or ""):
             cleaned_tr = self._positional_comma_keep(cleaned_tr, shown, signed)
-        street_stripped = re.sub(
-            r",\s*\S*(?:tie|katu|kuja|polku|väylä|raitti|ranta|kaari|väg|gata|gränd|stig)\s+\d+\s*$", "", cleaned_tr
-        ).strip()
+        street_stripped = re.sub(r",\s*\S*(?:" + self.STREET_NUMBERED_ALT + r")\s+\d+\s*$", "", cleaned_tr).strip()
         if street_stripped and street_stripped != cleaned_tr:
             # Trailing street tails moved to the address ("...,
             # Nervanderinkatu 3"): the name translation stays.

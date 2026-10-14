@@ -5622,3 +5622,27 @@ def test_activity_halves_dont_relocate():
     )
     assert item.get("located_in") == "Vattuniemen ala-aste"
     assert item.get("operator") == "Linguajoy Kielikerhot Oy"
+
+
+def test_holistic_consistency_fixes():
+    # 1. Commercial forms beyond Oy/Ab (Tmi, Ky, Ay) keep government office
+    # filings when running outsourced public desks; bare parish slash-tails
+    # mark religious operator:type; slash-tails also resolve Wikidata QIDs.
+    spider = make_spider()
+    tmi_item = parsed(spider, channel("Palvelupiste / Tmi Petri Lehto"), "Oulun kaupunki")
+    assert tmi_item.get("operator") == "Tmi Petri Lehto"
+    assert tmi_item["extras"].get("operator:type") == "private"
+    assert tmi_item.get_tag("office") == "government"
+
+    parish_item = parsed(spider, channel("Päiväkerho / Helsingin seurakunta"), "Helsingin kaupunki")
+    assert parish_item.get("operator") == "Helsingin seurakunta"
+    assert parish_item["extras"].get("operator:type") == "religious"
+
+    # 2. Upgraded assisted-living homes skip misleading 24/7 always-open flags
+    # just like bare social facilities and nursing homes.
+    ch_al = channel("Onnikoti Apila")
+    ch_al["services"] = [{"service": {"name": "Tuettu asuminen"}}]
+    ch_al["serviceHours"] = [{"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True, "openingHour": []}]
+    al_item = parsed(spider, ch_al, "Hyvinvointialue")
+    assert al_item.get("extras", {}).get("social_facility") == "assisted_living"
+    assert al_item.get("opening_hours") is None
