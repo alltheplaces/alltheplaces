@@ -678,6 +678,11 @@ _COMMA_CASES = [
         "split",
     ),
     ("Vaasa, Ulosottolaitos", "Vaasa", "Ulosottolaitos", None, PRESENT, "split"),
+    # Municipality tails are never rooms; bilingual cities match either form.
+    ("Maarianhamina, Ulosottolaitos", "Maarianhamina - Mariehamn", "Ulosottolaitos", None, PRESENT, "split"),
+    ("Perheneuvola, Laitila", "Laitila", "Perheneuvola", None, PRESENT, "split"),
+    ("Laitilan terveysasema, Laitila", "Laitila", "Laitilan terveysasema", None, PRESENT, "split"),
+    ("Marttilan sote-piste, Marttila", "Marttila", "Marttilan sote-piste", None, PRESENT, "split"),
     (
         "Lasten puheterapia, Perhekeskus Pohjatuuli",
         None,

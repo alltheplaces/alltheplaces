@@ -3433,6 +3433,13 @@ class PtvFISpider(Spider):
     def _comma_room(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> SplitTriple | None:
+        if tail.strip().casefold() in self.MUNICIPALITIES:
+            # Municipality tails are cities, never rooms ("Perheneuvola,
+            # Laitila", "Laitilan terveysasema, Laitila"): the room
+            # substring ("tila" in Laitila/Marttila/Orimattila, the only
+            # such municipalities) must not invert service@city rows.
+            # Falls through to the city-tail rules below.
+            return None
         if self._is_room_tail(lowered_tail) and self._is_institution(head.lower()):
             # Facility rooms/fields at institutions ("Vaajakummun koulu,
             # luistelukenttä"): the room names the POI (cf. slash_room).
@@ -3443,8 +3450,10 @@ class PtvFISpider(Spider):
     def _comma_city_head(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> SplitTriple | None:
-        if city and head.casefold() == city.strip().casefold():
-            # City-first records ("Vaasa, Ulosottolaitos").
+        if city and any(head.casefold() == part.strip().casefold() for part in city.split(" - ")):
+            # City-first records ("Vaasa, Ulosottolaitos"); bilingual
+            # post-office cities match either form ("Maarianhamina" of
+            # "Maarianhamina - Mariehamn").
             self._count("name/comma_city_head")
             return tail, None, name
         return None
