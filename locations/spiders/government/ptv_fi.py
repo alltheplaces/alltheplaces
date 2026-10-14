@@ -3747,7 +3747,7 @@ class PtvFISpider(Spider):
         # of typing it. Daycare hosts stay whole (the daycare is the venue).
         if (
             self.SCHOOL_HOST_TAIL_RE.search(lowered_tail)
-            and self._custom_group_use(lowered_head) is not None
+            and self._custom_group_use(head, lowered_head) is not None
             and not self.SCHOOL_HOST_RE.search(lowered_head)
         ):
             self._count("name/comma_school_host")
@@ -4168,27 +4168,21 @@ class PtvFISpider(Spider):
 
     def _custom_category(self, name_fi: str) -> tuple | None:
         # Pre-table rules: unambiguous machines, shore/market guards and
-        # scoped overrides the keyword table cannot express.
+        # scoped overrides the keyword table cannot express. Ordered
+        # precedence table: first non-None hit wins, in this order.
         lowered = name_fi.lower()
-        if (machine := self._custom_machine(name_fi, lowered)) is not None:
-            return machine
-        if (tori := self._custom_tori(lowered)) is not None:
-            return tori
-        if (shore := self._custom_shore(lowered)) is not None:
-            return shore
-        if (health := self._custom_health(name_fi, lowered)) is not None:
-            return health
-        if re.search(r"(kirkko|kappeli)$", lowered) and not re.search(
-            r"(ortodoks|katol|helluntai|vapaakirkko|advent|baptist|metodist|mormoni|jehov|anglikaan)", lowered
+        for resolver in (
+            self._custom_machine,
+            self._custom_tori,
+            self._custom_shore,
+            self._custom_health,
+            self._custom_church,
+            self._custom_ward,
+            self._custom_group_use,
+            self._custom_exercise_ground,
         ):
-            # Finnish parish churches are Evangelical Lutheran unless signed otherwise.
-            return Categories.PLACE_OF_WORSHIP, {"religion": "christian", "denomination": "lutheran"}
-        if (ward := self._custom_ward(lowered)) is not None:
-            return ward
-        if (group := self._custom_group_use(lowered)) is not None:
-            return group
-        if (ground := self._custom_exercise_ground(lowered)) is not None:
-            return ground
+            if (hit := resolver(name_fi, lowered)) is not None:
+                return hit
         return None
 
     def _custom_machine(self, name_fi: str, lowered: str) -> tuple | None:
@@ -4277,7 +4271,7 @@ class PtvFISpider(Spider):
             return None
         return None, {"place": "island"}
 
-    def _custom_shore(self, lowered: str) -> tuple | None:
+    def _custom_shore(self, name_fi: str, lowered: str) -> tuple | None:
         if self.SAUNA_RE.search(lowered):
             return Categories.SAUNA, None
         if "veneranta" in lowered:
@@ -4324,7 +4318,7 @@ class PtvFISpider(Spider):
             return Categories.SHELTER, None
         return None
 
-    def _custom_tori(self, lowered: str) -> tuple | None:
+    def _custom_tori(self, name_fi: str, lowered: str) -> tuple | None:
         # Market squares, with guards for lookalike compounds. Returns
         # None to fall through to the table (parking), (None, extra) for
         # placement-only squares, or a category.
@@ -4405,7 +4399,15 @@ class PtvFISpider(Spider):
             return Categories.GYM, None
         return None
 
-    def _custom_ward(self, lowered: str) -> tuple | None:
+    def _custom_church(self, name_fi: str, lowered: str) -> tuple | None:
+        if re.search(r"(kirkko|kappeli)$", lowered) and not re.search(
+            r"(ortodoks|katol|helluntai|vapaakirkko|advent|baptist|metodist|mormoni|jehov|anglikaan)", lowered
+        ):
+            # Finnish parish churches are Evangelical Lutheran unless signed otherwise.
+            return Categories.PLACE_OF_WORSHIP, {"religion": "christian", "denomination": "lutheran"}
+        return None
+
+    def _custom_ward(self, name_fi: str, lowered: str) -> tuple | None:
         if re.search(
             r"(lasten\s+ja\s+nuorten|nuorten)\s+.*\b(päiväsairaala|poliklinikka|terapiapoliklinikka|osasto|arviointiosasto|vastaanotto|fysioterapia|toimintaterapia|puheterapia|päivystys)\b",
             lowered,
@@ -4493,7 +4495,7 @@ class PtvFISpider(Spider):
             return True
         return False
 
-    def _custom_group_use(self, lowered: str) -> tuple | None:
+    def _custom_group_use(self, name_fi: str, lowered: str) -> tuple | None:
         # Inessive host nouns ("Kuusankosken kirjastossa") and group-noun
         # compounds (teatteriryhmä, kirjastoparlamentti) describe a service
         # or activity, never the venue: fall through to generic. Peer-support
@@ -4549,7 +4551,7 @@ class PtvFISpider(Spider):
             return None
         return None
 
-    def _custom_exercise_ground(self, lowered: str) -> tuple | None:
+    def _custom_exercise_ground(self, name_fi: str, lowered: str) -> tuple | None:
         # Neighbourhood exercise grounds mirror the service-map activity
         # refinement: ball-game arenas are pitches, schoolyards read as
         # playgrounds (cf. Kungsgårdsskolan). Genitive grounds
