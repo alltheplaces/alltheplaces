@@ -1047,13 +1047,13 @@ class HelsinkiServicemapFISpider(Spider):
                 if num == str(house) and any(sum(1 for a, b in zip(word.lower(), sw)) >= 6 for sw in street_words):
                     # Redundant street tail ("Fosterscreeningar, Bulevarden
                     # 22", unit 72370).
-                    stripped = text[: m.start()].rstrip(" ,-/–").strip()
+                    stripped = self._head_cut(text, m)
                     if stripped:
                         text = stripped
                         item["extras"][f"name:{key}"] = text
-            if city and (m := re.search(r"\(\s*([^()]*?)\s*\)\s*$", text)):
+            if city and (m := self.TRAILING_PAREN_RE.search(text)):
                 if m.group(1).strip().casefold() == city:
-                    stripped = text[: m.start()].rstrip(" ,-/–").strip()
+                    stripped = self._head_cut(text, m)
                     if stripped:
                         item["extras"][f"name:{key}"] = stripped
 
@@ -1069,7 +1069,7 @@ class HelsinkiServicemapFISpider(Spider):
         names = unit.get("name") or {}
         if not isinstance(names, dict):
             return
-        if not (isinstance(names.get("fi"), str) and re.sub(self.ZW_CHARS, "", names["fi"]).strip()):
+        if not (isinstance(names.get("fi"), str) and self._clean_text(names["fi"])):
             return
         item["extras"]["name:fi"] = item["name"]
 
@@ -1148,6 +1148,19 @@ class HelsinkiServicemapFISpider(Spider):
     # ---- closure notes, official designations, translations.
     # Activity/type words, never venues; zero-width chars are feed noise.
     ZW_CHARS = re.compile("[\u200b-\u200d\ufeff]")
+    # Trailing parenthetical qualifier, shared by the fi, translation and
+    # alignment splits.
+    TRAILING_PAREN_RE = re.compile(r"\(\s*([^()]*?)\s*\)\s*$")
+
+    def _clean_text(self, value):
+        # Zero-width feed noise plus surrounding whitespace, gone.
+        return re.sub(self.ZW_CHARS, "", str(value or "")).strip()
+
+    @staticmethod
+    def _head_cut(text, match):
+        # Text before a tail match, separator-stripped.
+        return text[: match.start()].rstrip(" ,-/–").strip()
+
     NO_SPLIT_VENUES = (
         "iltapäivätoiminta",
         "eftermiddagsverksamhet",
@@ -1251,7 +1264,7 @@ class HelsinkiServicemapFISpider(Spider):
         # "Vesalan liikuntapuisto / Pienpelikenttä 2" -> facility in venue.
         # Bare slashes too ("Puolarmaarin ulkoilukeskus/koripallokenttä"),
         # but compounds without spaces stay whole (koripallo/lentopallo).
-        text = re.sub(self.ZW_CHARS, "", str(text)).strip()
+        text = self._clean_text(text)
         masked = self._mask_parens(text)
         if " / " in masked:
             idx = masked.rfind(" / ")
@@ -1394,7 +1407,7 @@ class HelsinkiServicemapFISpider(Spider):
         # Ticket machines are systematic identifiers, not venue names:
         # "Pysäköintilippuautomaatti 591, Eläintarhantie / 1, korttimaksu".
         # Quoted identifiers carry spaces ("Koivukylä 1"), so match them whole.
-        fi = re.sub(self.ZW_CHARS, "", str(name.get("fi") or "")).strip()
+        fi = self._clean_text(name.get("fi"))
         match = re.match(r'^Pysäköintilippuautomaatti\s+("[^"]+"|\S+)', fi)
         if not match:
             return False
@@ -1599,14 +1612,14 @@ class HelsinkiServicemapFISpider(Spider):
     def _strip_translation_paren(self, item, text):
         # Trailing parens in sv/en: venue already captured is redundant,
         # service glosses without head overlap are descriptors, not names.
-        paren_tr = re.search(r"\(\s*([^()]*?)\s*\)\s*$", text)
+        paren_tr = self.TRAILING_PAREN_RE.search(text)
         if not paren_tr:
             return text
         content = paren_tr.group(1).strip()
         located = (item.get("located_in") or "").casefold()
         if content and content.casefold() == located:
             # Venue already captured (fi paren or slash split).
-            return text[: paren_tr.start()].rstrip(" ,-/–").strip()
+            return self._head_cut(text, paren_tr)
         if (
             (" " in content or len(content) > 12)
             and not re.search(r"\d", content)
@@ -1622,7 +1635,7 @@ class HelsinkiServicemapFISpider(Spider):
         ):
             # Service-gloss parens describe the POI type, not its name
             # ("... servicepunkt (hälsostationstjänster)", unit 80698).
-            return text[: paren_tr.start()].rstrip(" ,-/–").strip()
+            return self._head_cut(text, paren_tr)
         return text
 
     def _apply_translations(self, item, name):
@@ -1632,7 +1645,7 @@ class HelsinkiServicemapFISpider(Spider):
         # from the still-full fi name so sv/en strip the same tail.
         fi_prefix, _fi_branch = self._chain_split(item.get("name") or "")
         for key in ("sv", "en"):
-            raw = re.sub(self.ZW_CHARS, "", str(name.get(key) or "")).strip()
+            raw = self._clean_text(name.get(key))
             text = raw
             if fi_venue and (
                 text.lower().endswith((", " + fi_venue).lower()) or text.lower().endswith(("," + fi_venue).lower())
@@ -1650,12 +1663,12 @@ class HelsinkiServicemapFISpider(Spider):
                     text = text[match.start() :].strip()
             service = self.SERVICE_TAIL_RE.search(text)
             service_tail = ""
-            if service and text[: service.start()].rstrip(" ,-/–").strip():
+            if service and self._head_cut(text, service):
                 # Service designations name the POI in sv/en (unit 70202):
                 # remembered for the translated name below, stripped for
                 # venue derivation like the fi split.
                 service_tail = text[service.start() :].strip()
-                text = text[: service.start()].rstrip(" ,-/–").strip()
+                text = self._head_cut(text, service)
             head, _, tail = text.rpartition(",")
             if head.strip() and self.COMMA_STREET_RE.search(tail.strip().lower()):
                 # Same address tails fi drops ("Patotie 8", unit 74944):
@@ -1667,7 +1680,7 @@ class HelsinkiServicemapFISpider(Spider):
                 if "located_in" not in item:
                     item["located_in"] = provider_venue
             text = self._chain_translation_text(text, fi_prefix)
-            text = self._bilingual_translation_text(text, re.sub(self.ZW_CHARS, "", str(name.get("fi") or "")).strip())
+            text = self._bilingual_translation_text(text, self._clean_text(name.get("fi")))
             text = self._strip_translation_paren(item, text)
             if text and (text != item.get("name") or raw != text) and text != official:
                 if re.match(r"^(vesiposti|vattenpost|water post)\b", text.lower()):
@@ -1728,7 +1741,7 @@ class HelsinkiServicemapFISpider(Spider):
         # Trailing parenthetical venue or redundant city paren. Returns the
         # (possibly shortened) name and venue; venue is only filled when
         # still empty, so aliases stay in the name.
-        paren = re.search(r"\(\s*([^()]*?)\s*\)\s*$", primary)
+        paren = self.TRAILING_PAREN_RE.search(primary)
         if venue or not paren:
             return primary, venue
         content = paren.group(1).strip()
@@ -1742,7 +1755,7 @@ class HelsinkiServicemapFISpider(Spider):
         ):
             # Parenthesised venue ("Wigge kuntosali (Gesterbyn koulu)",
             # unit 78931): the hall is the name, the school its host.
-            return primary[: paren.start()].rstrip(" ,-/–").strip(), content
+            return self._head_cut(primary, paren), content
         if (
             isinstance(municipality, str)
             and municipality.strip()
@@ -1750,7 +1763,7 @@ class HelsinkiServicemapFISpider(Spider):
         ):
             # Redundant city paren ("Degerbyn sivukirjasto (Inkoo)",
             # unit 74100): the city field carries it.
-            return primary[: paren.start()].rstrip(" ,-/–").strip(), venue
+            return self._head_cut(primary, paren), venue
         return primary, venue
 
     def _apply_name(self, item, unit):
@@ -1761,7 +1774,7 @@ class HelsinkiServicemapFISpider(Spider):
             return
         primary = name.get("fi") or name.get("sv") or name.get("en")
         if primary and str(primary).strip():
-            raw_primary = re.sub(self.ZW_CHARS, "", str(primary)).strip()
+            raw_primary = self._clean_text(primary)
             base_primary = raw_primary
             municipality = unit.get("municipality")
             if isinstance(municipality, str) and municipality.strip():
