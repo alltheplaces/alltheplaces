@@ -19,11 +19,13 @@ logger = logging.getLogger(__name__)
 # Verified 2026-10-14. Sitemap carries 365 museums x3 languages (1095 locs).
 # Government open-data spiders (ptv_fi, helsinki_servicemap_fi) cover some of
 # the same venues with a narrower field set and coexist per repo convention.
-# A dozen source-labelled Museo records are primarily churches, gardens,
-# galleries, visitor centres or event venues (descriptions checked); they
-# map via NON_MUSEUM_CATEGORIES, and two event/tour records drop with
+# A dozen source-labelled Museo records are primarily a working church,
+# gardens, galleries, visitor centres or event venues (descriptions
+# checked); they map via NON_MUSEUM_CATEGORIES, and two event/tour records
+# drop with documented homes. Castle, ship and science-centre museums keep
 # documented homes. Castle, ship and science-centre museums keep MUSEUM as
 # their primary function; new slugs default to MUSEUM.
+# Step-free access, accessible wc and dogs-allowed tag from formal topic-link criteria.
 # No open license is declared on the directory data, so no
 # dataset_attributes license is declared here.
 
@@ -117,7 +119,7 @@ class MuseotFISpider(SitemapSpider):
                 self._stat("atp/museot_fi/dropped/sitemap_lang")
 
     def closed(self, reason: str) -> None:
-        # A sitemap or format change yielding zero fi entries must fail
+        # A sitemap or format change yielding zero fi entries must log
         # loudly instead of looking like a clean empty run.
         try:
             count = self.crawler.stats.get_value("item_scraped_count", 0)
@@ -235,8 +237,8 @@ class MuseotFISpider(SitemapSpider):
         # "Street 7, 40600 City", "Street 7, City", street-only, venue
         # prefixes ("Venue, Street 7, City"), bilingual repeats joined by
         # ";" (fi part wins; first postcode wins otherwise), ", POSTCODE,"
-        # middles and trailing parking/entrance notes after the
-        # postcode-city tail (dropped).
+        # middles and trailing parking notes after the postcode-city tail
+        # (dropped).
         text = " ".join(raw.split())
         if not text:
             return None, None, None
