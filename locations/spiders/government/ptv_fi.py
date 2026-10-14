@@ -816,6 +816,14 @@ class PtvFISpider(Spider):
     TORI_RE = _bare_or_compound("tori")
     SAUNA_RE = _bare_or_compound(r"saunat?")
 
+    # Single capitalized token ("Sampola", "Muurola"): municipality,
+    # locality and unit tails share one shape.
+    SINGLE_CAP_RE = re.compile(r"[A-ZÅÄÖ][a-zåäö-]+")
+
+    @staticmethod
+    def _is_single_cap(text: str) -> bool:
+        return PtvFISpider.SINGLE_CAP_RE.fullmatch((text or "").strip()) is not None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._ids: list[str] = []
@@ -1417,6 +1425,9 @@ class PtvFISpider(Spider):
         "poliklinikka",
         "skolan",
     )
+    # Precompiled end-anchored institution check shared by _is_institution
+    # (built from INSTITUTION_TAILS so the two can never drift apart).
+    INSTITUTION_RE = re.compile(r"\w*(?:" + "|".join(INSTITUTION_TAILS) + r")$")
     # Branch-office designators name the org's local desk, not a venue
     # ("Pohjanmaan elinvoimakeskus, Kokkolan toimipaikka"): keep the head.
     BRANCH_TAILS = ("toimipiste", "toimipaikka", "toimisto")
@@ -1543,13 +1554,23 @@ class PtvFISpider(Spider):
     # ("ORIVESI AS" -> "Orivesi").
     STATION_SUFFIX_RE = re.compile(r"\s+as$", re.IGNORECASE)
     # Tails naming a school building (narrower than the category table:
-    # venue evidence, not filing).
+    # venue evidence, not filing). Wider than CORE_INSTITUTION_RE on purpose
+    # (Swedish skola/daghem/högstadium/lågstadium plus esiopetus/yläaste/
+    # ala-aste school forms) and narrower in the other direction (no
+    # kirjasto/museo/sairaala/neuvola venue evidence): unifying the two sets
+    # would change filing, so the wider alternation stays intact here.
     SCHOOL_TAIL_RE = re.compile(
         r"(koulu|lukio|opisto|päiväkoti|esiopetus|yläaste|ala-aste|skola|daghem|högstadium|lågstadium)"
     )
+    # Shared school-host stems for _split_comma_school_host (tail-anchored
+    # and substring forms of the same alternation); deliberately the narrow
+    # 4-stem set, not CORE_INSTITUTION_RE (kirjasto/museo/sairaala/neuvola
+    # tails never locate group activities) nor SCHOOL_TAIL_RE above.
+    SCHOOL_HOST_RE = re.compile(r"(koulu|lukio|opisto|päiväkoti)")
+    SCHOOL_HOST_TAIL_RE = re.compile(r"(koulu|lukio|opisto|päiväkoti)$")
 
     def _is_institution(self, text: str) -> bool:
-        return re.search(r"\w*(?:" + "|".join(self.INSTITUTION_TAILS) + r")$", text) is not None
+        return self.INSTITUTION_RE.search(text) is not None
 
     def _clean_name(self, raw: str) -> str:
         # Bureau tails are record metadata, not name parts (cf. service-map
@@ -1649,7 +1670,7 @@ class PtvFISpider(Spider):
         if (
             "," in signed
             and (
-                any(shown.lower().endswith(word) for word in self.BRANCH_HEADS)
+                self._endswith_any(shown.lower(), self.BRANCH_HEADS)
                 or any(comma_low == word or comma_low.startswith(word + " ") for word in self.BRANCH_HEADS)
             )
             and not comma_head.endswith("-")
@@ -1671,7 +1692,7 @@ class PtvFISpider(Spider):
             head, tail = head.strip(), tail.strip()
             if (
                 head
-                and re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail)
+                and self._is_single_cap(tail)
                 and re.search(r"(toimisto|piste|yksikkö|asema|keskus)$", head.lower())
             ):
                 # Colon branches ("...opiston toimisto: Sampola").
@@ -2155,7 +2176,7 @@ class PtvFISpider(Spider):
 
     # Tokenizer shared by person/venue checks ("Sipoon Enter", "Sari
     # Wicklund"): split on whitespace and punctuation alike.
-    TOKEN_SPLIT_RE = r"[\s,./():-]+"
+    TOKEN_SPLIT_RE = re.compile(r"[\s,./():-]+")
 
     def _is_proper_tail(self, text: str) -> bool:
         # A non-initial capitalized tail token outside the generic
@@ -2163,7 +2184,7 @@ class PtvFISpider(Spider):
         # place names ("Pöytätennisalue", "Hiekkakenttä") never match.
         if self._is_operator_shaped(text):
             return False
-        tokens = [t for t in re.split(self.TOKEN_SPLIT_RE, text) if t]
+        tokens = [t for t in self.TOKEN_SPLIT_RE.split(text) if t]
         return any(re.match(r"[A-ZÅÄÖ]", token) and token.lower() not in self.GENERIC_WORDS for token in tokens[1:])
 
     def _clean_located(self, located: str) -> str | None:
@@ -2196,12 +2217,7 @@ class PtvFISpider(Spider):
             return None
         if "," in loc:
             pre, _, city = loc.rpartition(",")
-            if (
-                pre.strip()
-                and self._has_fixture(pre)
-                and not self._has_fixture(city)
-                and re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", city.strip())
-            ):
+            if pre.strip() and self._has_fixture(pre) and not self._has_fixture(city) and self._is_single_cap(city):
                 self._count("name/city_tail_stripped")
                 loc = pre.strip()
         if self._is_person(loc):
@@ -2283,6 +2299,14 @@ class PtvFISpider(Spider):
         # Liikkis" names the school, not the club).
         return text.split(",")[0].strip()
 
+    @staticmethod
+    def _endswith_any(lowered: str, words) -> bool:
+        # str.endswith takes a tuple directly; this folds the repeated
+        # any(x.endswith(w) for w in ...) shapes into one call site.
+        if isinstance(words, str):
+            words = (words,)
+        return lowered.endswith(tuple(words))
+
     def _resolve_slash_pair(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
         # Institution, service, place and person tails resolve against the
         # head; returns None to fall through to room/appositive handling.
@@ -2359,8 +2383,8 @@ class PtvFISpider(Spider):
         if self._is_person(tail):
             # Contact persons are not venues ("Sari Wicklund"); host-named
             # units share a token with their school ("Sipoon Enter").
-            head_tokens = {t.lower() for t in re.split(self.TOKEN_SPLIT_RE, head) if len(t) >= 4}
-            tail_tokens = {t.lower() for t in re.split(self.TOKEN_SPLIT_RE, tail) if len(t) >= 4}
+            head_tokens = {t.lower() for t in self.TOKEN_SPLIT_RE.split(head) if len(t) >= 4}
+            tail_tokens = {t.lower() for t in self.TOKEN_SPLIT_RE.split(tail) if len(t) >= 4}
             if not (head_tokens & tail_tokens):
                 self._count("name/person_dropped")
                 return head, None, name
@@ -2626,7 +2650,7 @@ class PtvFISpider(Spider):
         # the caller _split_paren.
         if (
             "," in inner
-            and all(re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", seg.strip()) for seg in inner.split(","))
+            and all(self._is_single_cap(seg) for seg in inner.split(","))
             and city
             and re.search(r",\s*" + re.escape(city.strip()) + r"\s*$", base, flags=re.IGNORECASE)
         ):
@@ -2640,7 +2664,7 @@ class PtvFISpider(Spider):
             return sub[0], sub[1], name
         if (
             "," in inner
-            and all(re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", seg.strip()) for seg in inner.split(","))
+            and all(self._is_single_cap(seg) for seg in inner.split(","))
             and city
             and any(seg.strip().casefold() == city.strip().casefold() for seg in inner.split(","))
         ):
@@ -2687,7 +2711,7 @@ class PtvFISpider(Spider):
             sub = self._split_name(base, city)
             self._count("name/paren_stripped")
             return sub[0], sub[1], name
-        if re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", inner):
+        if self._is_single_cap(inner):
             # Single localities ("Totto-Halli (Muurola)") strip only when
             # they repeat known address context; village tails stay unless
             # they equal the municipality ("... (Idänpää)", Hämeenlinna).
@@ -2697,7 +2721,7 @@ class PtvFISpider(Spider):
             sub = self._split_name(base, city)
             self._count("name/paren_stripped")
             return sub[0], sub[1], name
-        if "," in inner and all(re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", seg.strip()) for seg in inner.split(",")):
+        if "," in inner and all(self._is_single_cap(seg) for seg in inner.split(",")):
             # Proper-name venue lists ("...(Masto, Styyrpuuri,Vantti)"):
             # the units locate the POI. Coverage cities stay whole, as do
             # lists on names without facility evidence.
@@ -2903,7 +2927,7 @@ class PtvFISpider(Spider):
         tail_base = self._comma_base(tail)
         if (
             "," in tail
-            and re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail_base)
+            and self._is_single_cap(tail_base)
             and re.search(r"(puisto|keskus|halli|kenttä|stadion|areena|talo|koulu)$", head.lower())
         ):
             # Compound facility names ("...Keinupuisto/Hilpi,
@@ -3386,9 +3410,10 @@ class PtvFISpider(Spider):
         if self._rescue_blocked(channel):
             return None
         candidates = self._rescue_candidates(channel)
-        activity = self.ACTIVITY_RE.search(self._clean_name(self._names(channel).get("fi") or "").lower())
-        peer = "vertais" in (self._clean_name(self._names(channel).get("fi") or "").lower())
-        ward_name = self.SUBUNIT_RE.search(self._clean_name(self._names(channel).get("fi") or "").lower())
+        cleaned_fi_lower = self._clean_name(self._names(channel).get("fi") or "").lower()
+        activity = self.ACTIVITY_RE.search(cleaned_fi_lower)
+        peer = "vertais" in cleaned_fi_lower
+        ward_name = self.SUBUNIT_RE.search(cleaned_fi_lower)
         if any(
             word in (c or "").lower()
             for c in self._service_names(channel)
@@ -3398,7 +3423,7 @@ class PtvFISpider(Spider):
             # services) are islands, whatever the first service types.
             self._count("category/rescued_island")
             return None, {"place": "island"}
-        if self._is_group_activity(self._clean_name(self._names(channel).get("fi") or "").lower()):
+        if self._is_group_activity(cleaned_fi_lower):
             # Group-neutralized names carry no facility keyword: linked
             # services and catalogue ontology must not override the generic
             # verdict ("Laiturin Iloa"-groups with mental-health ontology
@@ -3673,10 +3698,10 @@ class PtvFISpider(Spider):
             # City-first records ("Vaasa, Ulosottolaitos").
             self._count("name/comma_city_head")
             return tail, None, name
-        if any(lowered_head.endswith(word) for word in self.SERVICE_HEADS) and self.SCHOOL_TAIL_RE.search(tail.lower()):
+        if self._endswith_any(lowered_head, self.SERVICE_HEADS) and self.SCHOOL_TAIL_RE.search(tail.lower()):
             self._count("name/comma_service_venue")
             return head, self._clean_located(tail), name
-        if any(lowered_head.endswith(word) for word in self.SERVICE_HEADS):
+        if self._endswith_any(lowered_head, self.SERVICE_HEADS):
             # Fused genitive shape ("Rovastinkankaan koulun
             # opiskeluhuolto, Orivesi"): the service names the POI,
             # the school is the venue (cf. the service-map
@@ -3693,9 +3718,9 @@ class PtvFISpider(Spider):
         # Veittijärven koulu"): the school locates the activity instead
         # of typing it. Daycare hosts stay whole (the daycare is the venue).
         if (
-            re.search(r"(koulu|lukio|opisto|päiväkoti)$", lowered_tail)
+            self.SCHOOL_HOST_TAIL_RE.search(lowered_tail)
             and self._custom_group_use(lowered_head) is not None
-            and not re.search(r"(koulu|lukio|opisto|päiväkoti)", lowered_head)
+            and not self.SCHOOL_HOST_RE.search(lowered_head)
         ):
             self._count("name/comma_school_host")
             return head, self._located_or(tail), name
@@ -3707,6 +3732,17 @@ class PtvFISpider(Spider):
     def _shared_service_word(self, head: str, tail: str) -> bool:
         head_words = {t.strip(",.;:") for t in head.lower().split()}
         return any(word in head_words for word in self.SERVICE_TAILS if word in tail.lower())
+
+    def _comma_pair_eligible(self, head: str, tail: str) -> bool:
+        # Guard shared by the comma service-head and unit-venue splits:
+        # the tail must not redescribe the head's own service, and bare
+        # unit qualifiers split only against venue heads (cf. Stadin).
+        # Lifted verbatim from both callers; zero logic change.
+        return (
+            not self._shared_service_word(head, tail)
+            and (not self._is_unit_tail(tail) or self._is_venue_head(head))
+            and (not self._is_unit_tail(head) or self._is_venue_head(tail))
+        )
 
     def _split_comma_service_head(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str
@@ -3721,9 +3757,7 @@ class PtvFISpider(Spider):
             any(word in lowered_head for word in self.SERVICE_TAILS)
             and self._has_fixture(tail)
             and "," not in head
-            and not self._shared_service_word(head, tail)
-            and (not self._is_unit_tail(tail) or self._is_venue_head(head))
-            and (not self._is_unit_tail(head) or self._is_venue_head(tail))
+            and self._comma_pair_eligible(head, tail)
             and (tail[:1].isupper() or self.CORE_INSTITUTION_RE.search(lowered_tail) or re.search(r"\s[A-ZÅÄÖ]", tail))
         ):
             self._count("name/comma_service_unit")
@@ -3744,11 +3778,9 @@ class PtvFISpider(Spider):
         if (
             any(word in lowered_tail for word in self.SERVICE_TAILS)
             and (self._has_fixture(head) or (self._is_proper_tail(head) and not self._is_person(head)))
-            and not self._shared_service_word(head, tail)
+            and self._comma_pair_eligible(head, tail)
             and not re.search(r"\b(oy|ab)\b", head, flags=re.IGNORECASE)
             and not self._is_private_org(head)
-            and (not self._is_unit_tail(tail) or self._is_venue_head(head))
-            and (not self._is_unit_tail(head) or self._is_venue_head(tail))
         ):
             self._count("name/comma_unit_venue")
             shown = tail[0].upper() + tail[1:] if tail else tail
@@ -3777,8 +3809,8 @@ class PtvFISpider(Spider):
             # Bare coverage areas ("Puheterapia, Tikkurilan alue").
             self._count("name/comma_area_kept")
             return name, None, None
-        if lowered_tail.endswith("vastaanotto") and any(
-            lowered_head.endswith(word) for word in ("toimisto", "virasto", "kaupunki", "kunta")
+        if self._endswith_any(lowered_tail, ("vastaanotto",)) and self._endswith_any(
+            lowered_head, ("toimisto", "virasto", "kaupunki", "kunta")
         ):
             # Desks of offices and municipalities ("Pirkanmaan
             # oikeusaputoimisto, Valkeakosken vastaanotto"): the
@@ -3825,7 +3857,7 @@ class PtvFISpider(Spider):
             # Smågruppsundervisning"): the service names the POI.
             self._count("name/comma_unit_venue_sv")
             return tail, self._located_or(head), name
-        if re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail) and self._is_institution(head.lower()):
+        if self._is_single_cap(tail) and self._is_institution(head.lower()):
             if re.search(r"(koulu|lukio|opisto|päiväkoti|esiopetus|yläaste|ala-aste|skola|daghem)", head.lower()):
                 # Named units hosted at schools ("Sipoon lukio, Enter").
                 # Localities at other institutions ("Kalvolan neuvola,
@@ -3834,12 +3866,12 @@ class PtvFISpider(Spider):
                 return tail, self._located_or(head), name
             self._count("name/comma_unit_locality_kept")
             return name, None, None
-        if re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail) and self._has_fixture(tail):
+        if self._is_single_cap(tail) and self._has_fixture(tail):
             # Named venues host the head service ("Neuvonta, Reimasali").
             self._count("name/comma_proper_venue")
             return head, self._clean_located(tail), name
         if (
-            re.fullmatch(r"[A-ZÅÄÖ][a-zåäö-]+", tail)
+            self._is_single_cap(tail)
             and tail.lower().endswith(("järvi", "lampi", "saari", "luoto", "joki", "koski"))
             and self._has_fixture(head)
         ):
@@ -4773,26 +4805,34 @@ class PtvFISpider(Spider):
     # fields, comma/slash tails inside the number field).
     HOUSENUMBER_RE = re.compile(r"\d+[a-zA-Z]?(?:-\d+[a-zA-Z]?)?")
     # Staircase/room/door tails after a housenumber, in priority order:
-    # (min tokens, housenumber offset, middle, last, flags, join).
+    # (min tokens, housenumber offset, middle, last, join). Mid patterns
+    # compiled without flags (the (?i:as) entry carries its own inline
+    # flag, as before); last patterns compiled with their flags.
     STAIRCASE_RULES = (
-        (4, 3, r"\d+[A-Za-z]?", r"[A-Za-z]{1,2}", 0, "MID LAST"),
-        (4, 3, r"[A-Za-z]", r"\d+(?:-\d+)?[A-Za-z]?", 0, "MID LAST"),
-        (4, 3, r"[A-Za-z]", r"[A-Za-z]", 0, "MID-LAST"),
-        (4, 3, r"(?i:as)", r"\d+[A-Za-z]?", re.IGNORECASE, "MID LAST"),
-        (3, 2, None, r"[A-Za-z]{1,2}(?:-[A-Za-z]{1,2})?|\d+", 0, "LAST"),
-        (3, 2, None, r"[A-Za-z]{1,2}\d+[A-Za-z]?(?:-\d+[A-Za-z]?)?|[A-Za-z]-(?:ovi|rappu)", re.IGNORECASE, "LAST"),
+        (4, 3, re.compile(r"\d+[A-Za-z]?"), re.compile(r"[A-Za-z]{1,2}"), "MID LAST"),
+        (4, 3, re.compile(r"[A-Za-z]"), re.compile(r"\d+(?:-\d+)?[A-Za-z]?"), "MID LAST"),
+        (4, 3, re.compile(r"[A-Za-z]"), re.compile(r"[A-Za-z]"), "MID-LAST"),
+        (4, 3, re.compile(r"(?i:as)"), re.compile(r"\d+[A-Za-z]?", re.IGNORECASE), "MID LAST"),
+        (3, 2, None, re.compile(r"[A-Za-z]{1,2}(?:-[A-Za-z]{1,2})?|\d+"), "LAST"),
+        (
+            3,
+            2,
+            None,
+            re.compile(r"[A-Za-z]{1,2}\d+[A-Za-z]?(?:-\d+[A-Za-z]?)?|[A-Za-z]-(?:ovi|rappu)", re.IGNORECASE),
+            "LAST",
+        ),
     )
     # Tails describing everything but the street address. Finnish floor
     # text strips from the address string; the number is kept separately
     # as addr:floor, never OSM level.
     ADDR_STRIP_RULES = (
-        (r"\s*\([^)]*\)", 0),
-        (r",\s*[\d\s&\.,-]*(krs|kerros|vån|våning|rak\.?|rakennus)\b.*$", 0),
-        (r"\s+\d+\.?\s*(krs|kerros|vån|våning)\b.*$", 0),
-        (r"/\s*\d+\.?\s*(krs|kerros|vån|våning)\b.*$", 0),
-        (r"\s+(rak\.?|rakennus|krs|kerros|vån|våning)\b.*$", 0),
-        (r"\s+-\s*(sisään\w*|käynti\w*|sisäpiha|porras|ovi|entrance)\b.*$", re.IGNORECASE),
-        (r"\s+vastapäätä[\s.!]*$", re.IGNORECASE),
+        re.compile(r"\s*\([^)]*\)"),
+        re.compile(r",\s*[\d\s&\.,-]*(krs|kerros|vån|våning|rak\.?|rakennus)\b.*$"),
+        re.compile(r"\s+\d+\.?\s*(krs|kerros|vån|våning)\b.*$"),
+        re.compile(r"/\s*\d+\.?\s*(krs|kerros|vån|våning)\b.*$"),
+        re.compile(r"\s+(rak\.?|rakennus|krs|kerros|vån|våning)\b.*$"),
+        re.compile(r"\s+-\s*(sisään\w*|käynti\w*|sisäpiha|porras|ovi|entrance)\b.*$", re.IGNORECASE),
+        re.compile(r"\s+vastapäätä[\s.!]*$", re.IGNORECASE),
     )
     # PO-box tails inside the number field ("Kolpintie 7, PL 111").
     POBOX_TAIL_RE = re.compile(r"pl\b.*$", re.IGNORECASE)
@@ -4879,8 +4919,8 @@ class PtvFISpider(Spider):
     def _strip_addr_base(self, address: str) -> str:
         address = address.replace("­", "").replace("–", "-").replace("—", "-")
         base = address
-        for pattern, flags in self.ADDR_STRIP_RULES:
-            base = re.sub(pattern, "", base, flags=flags).strip()
+        for rx in self.ADDR_STRIP_RULES:
+            base = rx.sub("", base).strip()
         return base
 
     # Floor markers and ordinal stems for addr:floor extraction. A number
@@ -4964,14 +5004,14 @@ class PtvFISpider(Spider):
             and re.fullmatch(number, tokens[-1])
         ):
             tokens = tokens[:-3] + [tokens[-3] + "-" + tokens[-1]]
-        for min_len, offset, mid, last, flags, join in self.STAIRCASE_RULES:
+        for min_len, offset, mid, last, join in self.STAIRCASE_RULES:
             if len(tokens) < min_len:
                 continue
             if not re.fullmatch(number, tokens[-offset]):
                 continue
-            if mid is not None and not re.fullmatch(mid, tokens[-2]):
+            if mid is not None and not mid.fullmatch(tokens[-2]):
                 continue
-            if not re.fullmatch(last, tokens[-1], flags):
+            if not last.fullmatch(tokens[-1]):
                 continue
             if join == "MID LAST":
                 unit = tokens[-2] + " " + tokens[-1]
@@ -5137,12 +5177,12 @@ class PtvFISpider(Spider):
         # Numberless roads: single-token non-streets and named places go to
         # addr:place, bare streets and the rest stay on the line.
         lowered = raw.lower()
-        if len(raw.split()) == 1 and not lowered.endswith(self.STREET_SUFFIXES):
+        if len(raw.split()) == 1 and not self._endswith_any(lowered, self.STREET_SUFFIXES):
             self._count("address/place")
             item["extras"]["addr:place"] = raw
             return
-        if lowered.endswith(self.PLACE_SUFFIXES):
-            if raw.split()[-1].lower().endswith(("asema", "selkä", "laituri")):
+        if self._endswith_any(lowered, self.PLACE_SUFFIXES):
+            if self._endswith_any(raw.split()[-1].lower(), ("asema", "selkä", "laituri")):
                 # Stations, open water and piers are not addr:place values.
                 self._count("address/place_station")
                 item["street_address"] = raw
@@ -5150,13 +5190,13 @@ class PtvFISpider(Spider):
                 self._count("address/place")
                 item["extras"]["addr:place"] = raw
             return
-        if not lowered.endswith(self.STREET_SUFFIXES) and any(word in lowered for word in self.ISLAND_INFIX):
+        if not self._endswith_any(lowered, self.STREET_SUFFIXES) and any(word in lowered for word in self.ISLAND_INFIX):
             # Island sites whose tail is a zone noun, not a place suffix
             # ("Talholmen virkistysalue").
             self._count("address/place_island")
             item["extras"]["addr:place"] = raw
             return
-        is_street = lowered.endswith(self.STREET_SUFFIXES)
+        is_street = self._endswith_any(lowered, self.STREET_SUFFIXES)
         self._count("address/bare_street" if is_street else "address/freeform")
         if is_street:
             # Bare streets carry the street name with no number.
@@ -5176,9 +5216,9 @@ class PtvFISpider(Spider):
         scored = []
         for part in parts:
             lowered = part.lower()
-            if lowered.endswith(self.STREET_SUFFIXES):
+            if self._endswith_any(lowered, self.STREET_SUFFIXES):
                 scored.append(2)
-            elif lowered.endswith(self.PLACE_SUFFIXES):
+            elif self._endswith_any(lowered, self.PLACE_SUFFIXES):
                 scored.append(1)
             else:
                 scored.append(0)
