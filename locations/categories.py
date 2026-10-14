@@ -726,6 +726,7 @@ class Extras(Enum):
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
     CASH_OUT = "cash_out"
+    CASH_WITHDRAWAL = "cash_withdrawal"
     COMPRESSED_AIR = "compressed_air"
     COMPUTING = "service:computer"
     COPYING = "service:copy"
