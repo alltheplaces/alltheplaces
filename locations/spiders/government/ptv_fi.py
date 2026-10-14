@@ -3158,41 +3158,45 @@ class PtvFISpider(Spider):
             break
         return None
 
-    def _split_name(self, name: str, city: str | None = None) -> tuple[str, str | None, str | None]:
-        # Returns (name, located_in, official_name). Dispatches machine,
-        # paren, dash, colon, acronym-prefix, inessive, spaced-slash (plus
-        # nested), bare-slash, then the city/school/Swedish/comma tail.
-        if (split := self._split_machine(name)) is not None:
-            return split
-        if (split := self._split_paren(name, city)) is not None:
-            return split
-        if (split := self._split_dash(name)) is not None:
-            return split
-        if ":" in name and "://" not in name:
-            if (split := self._split_colon(name, city)) is not None:
-                return split
+    def _split_acronym_prefix(self, name: str) -> tuple[str, str | None, str | None] | None:
         if (m := re.match(r"(oysin|tyksin|husin|taysin|kysin)\s+(.+)$", name, flags=re.IGNORECASE)) and m.group(
             2
         ).strip():
             # Hospital acronym prefixes ("OYSin Keuhkosairauksien poliklinikka").
             self._count("name/acronym_prefix_venue")
             return m.group(2).strip(), m.group(1)[:-2].upper(), name
-        tokens = name.split()
-        if len(tokens) >= 3:
-            if (split := self._split_inessive(name, tokens)) is not None:
-                return split
+        return None
+
+    def _split_slash_nested(self, name: str) -> tuple[str, str | None, str | None] | None:
         if (split := self._split_slash(name)) is not None:
             shown, located, official = split
             if " / " in shown:
                 return self._resolve_nested(shown, located, official, name)
             return split
-        if "/" in name and name.count("/") == 1:
+        return None
+
+    def _split_name(self, name: str, city: str | None = None) -> tuple[str, str | None, str | None]:
+        # Returns (name, located_in, official_name). Ordered precedence
+        # table of (guard, resolver): guards keep resolvers from misfiring
+        # on shapes they don't own (colons in URLs, acronym prefixes,
+        # multi-slash chains); first non-None hit wins. Resolvers stay
+        # lazy behind lambdas so a failed guard never calls them.
+        tokens = name.split()
+        for guard, resolver in (
+            (True, lambda: self._split_machine(name)),
+            (True, lambda: self._split_paren(name, city)),
+            (True, lambda: self._split_dash(name)),
+            (":" in name and "://" not in name, lambda: self._split_colon(name, city)),
+            (True, lambda: self._split_acronym_prefix(name)),
+            (len(tokens) >= 3, lambda: self._split_inessive(name, tokens)),
+            (True, lambda: self._split_slash_nested(name)),
             # Bare-slash guards may decline (compound facilities): fall
             # through to comma shapes instead of stranding None.
-            if (split := self._split_bare(name)) is not None:
+            ("/" in name and name.count("/") == 1, lambda: self._split_bare(name)),
+            (True, lambda: self._split_name_tail(name, city)),
+        ):
+            if guard and (split := resolver()) is not None:
                 return split
-        if (split := self._split_name_tail(name, city)) is not None:
-            return split
         return name, None, None
 
     def _city_tail_stripped(self, text: str, city: str | None) -> str | None:
