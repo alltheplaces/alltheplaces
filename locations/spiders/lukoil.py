@@ -155,6 +155,10 @@ class LukoilSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         if data := response.json()[0]:
             poi = data.get("GasStation")
+            if self._is_dead_teboil_fi(poi):
+                self.logger.warning(f"Skipping dead Teboil FI ghost: {poi.get('GasStationId')}")
+                self.crawler.stats.inc_value("atp/lukoil/skipped/teboil_fi")
+                return
             item = DictParser.parse(poi)
             item["ref"] = poi.get("GasStationId")
             item["image"] = poi.get("StationPhotoUrl")
@@ -166,6 +170,21 @@ class LukoilSpider(Spider):
             self.parse_fuel_types(item, data)
             apply_category(Categories.FUEL_STATION, item)
             yield item
+
+    def _is_dead_teboil_fi(self, poi: dict) -> bool:
+        # Oy Teboil Ab ended FI fuel sales autumn 2025 (sanctions) and entered restructuring Jan 2026.
+        company = (poi.get("Company") or {}).get("Name", "").lower()
+        if "teboil" not in company and "тебойл" not in company:
+            return False
+        address = (poi.get("Address") or "").lower()
+        if "финляндия" in address or "finland" in address or "suomi" in address:
+            return True
+        try:
+            lat = float(poi.get("Latitude"))
+            lon = float(poi.get("Longitude"))
+            return 59.5 <= lat <= 70.5 and 19.0 <= lon <= 32.0
+        except (TypeError, ValueError):
+            return False
 
     def parse_brand(self, item: Feature, poi: dict) -> None:
         if company_name := poi.get("Company", {}).get("Name", ""):
