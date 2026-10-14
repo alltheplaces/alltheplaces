@@ -5919,14 +5919,14 @@ class PtvFISpider(Spider):
         return False
 
     def _translation_value(
-        self, translation: str, shown: str | None, signed: str | None, located: str | None, city: str | None
+        self, translation: str, shown: str | None, signed: str | None, located: str | None
     ) -> str | None:
         # Cleaned translation of the applied name, or None when the row
         # carries no valid translation (copies, venues, operator cities).
         cleaned_tr = re.sub(r"\s*\d+\*\s*$", "", translation).strip()
         cleaned_tr = self.COORD_TAIL_RE.sub("", cleaned_tr).strip()
         cleaned_tr = self._strip_tr_address_paren(cleaned_tr)
-        cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, located, city)
+        cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, located)
         if "/" in cleaned_tr:
             split_tr = self._split_bilingual(cleaned_tr, shown, signed, located)
             if split_tr is None:
@@ -5934,11 +5934,14 @@ class PtvFISpider(Spider):
             cleaned_tr = split_tr
         if self._tr_is_operator_city(cleaned_tr, shown, signed):
             return None
-        if cleaned_tr and cleaned_tr not in (shown, signed):
-            if not (located and cleaned_tr == located and located in (signed or "")):
-                # An untranslated copy of the Finnish-signed venue is
-                # not a translation ("Leikkipuisto Jakomäki" as en).
-                return cleaned_tr
+        if (
+            cleaned_tr
+            and cleaned_tr not in (shown, signed)
+            and not (located and cleaned_tr == located and located in (signed or ""))
+        ):
+            # An untranslated copy of the Finnish-signed venue is
+            # not a translation ("Leikkipuisto Jakomäki" as en).
+            return cleaned_tr
         return None
 
     def _apply_translations(
@@ -5952,9 +5955,7 @@ class PtvFISpider(Spider):
         for lang in ("sv", "en"):
             translation = names.get(lang)
             if translation and translation != shown and translation != signed:
-                if (
-                    value := self._translation_value(translation, shown, signed, item.get("located_in"), city)
-                ) is not None:
+                if (value := self._translation_value(translation, shown, signed, item.get("located_in"))) is not None:
                     item["extras"][f"name:{lang}"] = value
 
     def _positional_comma_keep(self, cleaned_tr: str, shown: str | None, signed: str | None) -> str:
@@ -5975,21 +5976,20 @@ class PtvFISpider(Spider):
                 cleaned_tr = ", ".join(kept)
         return cleaned_tr
 
-    def _strip_tr_commas(
-        self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None, city: str | None = None
-    ) -> str:
-        # Comma tails duplicating split-off content drop positionally:
-        # located venues, municipality tails and street tails repeat
-        # emitted tags, so the applied name's rendering stays. Exact
-        # Finnish duplicates (parenthesised or leading copies) drop too;
-        # the translated rest stays verbatim.
+    def _tr_commas_positional(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         if "," in cleaned_tr and "," in (signed or ""):
             cleaned_tr = self._positional_comma_keep(cleaned_tr, shown, signed)
+        return cleaned_tr
+
+    def _tr_commas_street(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         street_stripped = re.sub(r",\s*\S*(?:" + self.STREET_NUMBERED_ALT + r")\s+\d+\s*$", "", cleaned_tr).strip()
         if street_stripped and street_stripped != cleaned_tr:
             # Trailing street tails moved to the address ("...,
             # Nervanderinkatu 3"): the name translation stays.
-            cleaned_tr = street_stripped
+            return street_stripped
+        return cleaned_tr
+
+    def _tr_commas_fi_forms(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         for form in dict.fromkeys([s for s in (shown, signed, located) if s]):
             cleaned_tr = re.sub(r"\s*\(" + re.escape(form) + r"\)", "", cleaned_tr).strip()
             if " / " not in cleaned_tr:
@@ -6007,6 +6007,9 @@ class PtvFISpider(Spider):
                         # head ("(Sibbo teater)" for "Sipoon teatteri").
                         self._count("name/tr_descriptor_dropped")
                         cleaned_tr = ""
+        return cleaned_tr
+
+    def _tr_commas_located(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         if located and "," in cleaned_tr and "," in (signed or ""):
             # Trailing comma tails duplicating the located venue
             # ("Daghemskök, Päiväkoti Jollas", "Skolrestaurang, Pasilan
@@ -6014,6 +6017,22 @@ class PtvFISpider(Spider):
             # translated host copies ("Daycare Jollas") drop too. Stranded
             # comma-fragments in the shown name mark a mis-split: skip.
             cleaned_tr = self._positional_comma_keep(cleaned_tr, shown, signed)
+        return cleaned_tr
+
+    def _strip_tr_commas(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
+        # Comma tails duplicating split-off content drop positionally:
+        # located venues, municipality tails and street tails repeat
+        # emitted tags, so the applied name's rendering stays. Exact
+        # Finnish duplicates (parenthesised or leading copies) drop too;
+        # the translated rest stays verbatim. Ordered transform pipeline:
+        # each stage rewrites the string for the next.
+        for transform in (
+            self._tr_commas_positional,
+            self._tr_commas_street,
+            self._tr_commas_fi_forms,
+            self._tr_commas_located,
+        ):
+            cleaned_tr = transform(cleaned_tr, shown, signed, located)
         return cleaned_tr
 
     @staticmethod
@@ -6025,9 +6044,9 @@ class PtvFISpider(Spider):
         head_words = re.findall(r"[A-Za-zåäöÅÄÖ]{3,}", form or "")
         return any(p[:3].casefold() == h[:3].casefold() for p in paren_words for h in head_words if len(p) >= 4)
 
-    def _strip_tr_alignment(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
-        # First-segment, word-aligned and venue-naming translations reduce
-        # to (or drop for) the applied name.
+    def _tr_align_first_segment(
+        self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None
+    ) -> str:
         if (
             shown
             and shown.strip() != (signed or "").strip()
@@ -6039,7 +6058,10 @@ class PtvFISpider(Spider):
             # Tails dropped from the Finnish name drop from translations too:
             # the applied name is the first comma segment ("Apuvälinelainaamo"
             # from "..., Raisio, Rusko"), so its translation leads as well.
-            cleaned_tr = cleaned_tr.split(",")[0].strip()
+            return cleaned_tr.split(",")[0].strip()
+        return cleaned_tr
+
+    def _tr_align_word_tail(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         if (
             shown
             and shown.strip() != (signed or "").strip()
@@ -6057,7 +6079,10 @@ class PtvFISpider(Spider):
                 if [w.casefold() for w in fi_words[len(fi_words) - len(shown_words) :]] == [
                     w.casefold() for w in shown_words
                 ]:
-                    cleaned_tr = " ".join(tr_words[len(tr_words) - len(shown_words) :])
+                    return " ".join(tr_words[len(tr_words) - len(shown_words) :])
+        return cleaned_tr
+
+    def _tr_align_venue_drop(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         if (
             shown
             and (signed or "")
@@ -6073,12 +6098,18 @@ class PtvFISpider(Spider):
             # available, so drop rather than misrender the venue as the POI.
             loc_first = located.split()[0].rstrip("n").casefold()
             if cleaned_tr.split()[0].casefold() == loc_first and loc_first:
-                cleaned_tr = ""
+                return ""
         return cleaned_tr
 
-    def _strip_fi_duplicates(
-        self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None, city: str | None = None
-    ) -> str:
+    def _strip_tr_alignment(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
+        # First-segment, word-aligned and venue-naming translations reduce
+        # to (or drop for) the applied name. Ordered transform pipeline:
+        # each stage rewrites the string for the next.
+        for transform in (self._tr_align_first_segment, self._tr_align_word_tail, self._tr_align_venue_drop):
+            cleaned_tr = transform(cleaned_tr, shown, signed, located)
+        return cleaned_tr
+
+    def _strip_fi_duplicates(self, cleaned_tr: str, shown: str | None, signed: str | None, located: str | None) -> str:
         # Exact Finnish duplicates ride along in feed translations
         # ("Korsverk (Ristikko)", "Aninkaisten koulu (Aninkainen
         # School) Gym A"): parenthesised or leading copies of the
@@ -6089,7 +6120,7 @@ class PtvFISpider(Spider):
         # tails ("Socialbyrå, S:t Karins") and street tails
         # ("Parkeringbiljettautomat 99, Nervanderinkatu 3") repeat
         # emitted tags, so the applied name's rendering stays.
-        cleaned_tr = self._strip_tr_commas(cleaned_tr, shown, signed, located, city)
+        cleaned_tr = self._strip_tr_commas(cleaned_tr, shown, signed, located)
         cleaned_tr = self._strip_tr_alignment(cleaned_tr, shown, signed, located)
         return re.sub(r"\s{2,}", " ", cleaned_tr).strip()
 

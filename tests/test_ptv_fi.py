@@ -2806,7 +2806,6 @@ def test_round16_translation_batch():
             "Apuvälinelainaamo",
             "Apuvälinelainaamo, Raisio, Rusko",
             None,
-            "Raisio",
         )
         == "Hjälpmedelsutlåningen"
     )
@@ -2816,7 +2815,6 @@ def test_round16_translation_batch():
             "Luistelukenttä",
             "Röylän koulun luistelukenttä",
             "Röylän koulu",
-            "Espoo",
         )
         == "skridskobana"
     )
