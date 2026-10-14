@@ -37,9 +37,12 @@ class HteaoUSSpider(SitemapSpider):
         item["opening_hours"] = OpeningHours()
         for row in response.xpath('//table[contains(@class, "wpsl-opening-hours")]/tr'):
             day = row.xpath("td[1]//text()").get("")
-            for hours in row.xpath("td[2]//text()").getall():
-                if hours.strip():
-                    item["opening_hours"].add_ranges_from_string(f"{day} {hours}")
+            if "closed" in "".join(row.xpath("td[2]//text()").getall()).lower():
+                item["opening_hours"].set_closed(day)
+                continue
+            times = row.xpath("td[2]//time/@datetime").getall()
+            if len(times) == 2:
+                item["opening_hours"].add_range(day, times[0], times[1])
 
         apply_category(Categories.CAFE, item)
 
