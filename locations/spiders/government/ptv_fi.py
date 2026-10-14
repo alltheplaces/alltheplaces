@@ -5759,6 +5759,57 @@ class PtvFISpider(Spider):
             item["extras"]["official_name"] = signed
         self._apply_translations(item, names, shown, signed, city_src)
 
+    def _strip_tr_address_paren(self, cleaned_tr: str) -> str:
+        paren_stripped = re.sub(
+            r"\s*\([^()]*(" + self.STREET_NUMBERED_ALT + r")\b[^()]*\d[^()]*\)\s*$",
+            "",
+            cleaned_tr,
+        ).strip()
+        if paren_stripped and paren_stripped != cleaned_tr:
+            # Translated street-address tails ("...(Kymmenedalsgränden 4)")
+            # duplicate the address line, never the applied name.
+            self._count("name/tr_address_dropped")
+            return paren_stripped
+        return cleaned_tr
+
+    def _tr_is_operator_city(self, cleaned_tr: str, shown: str | None, signed: str | None) -> bool:
+        if (
+            re.fullmatch(r"City of\s+[A-ZÅÄÖ][a-zåäö-]+\s*", cleaned_tr, flags=re.IGNORECASE)
+            and re.search(r"kaupunki|kaupungin", signed or "", flags=re.IGNORECASE)
+            and not re.fullmatch(r"\S+\s+kaupunki", (shown or "").strip(), flags=re.IGNORECASE)
+        ):
+            # Bare English tails naming the operating city ("City of
+            # Vaasa" for applied "...hyvinvointipalvelut" under Vaasan
+            # kaupunki) render the operator, never the applied name.
+            # Operator data is not joined yet here, so the signed
+            # Finnish form carries the evidence instead.
+            self._count("name/tr_operator_city_dropped")
+            return True
+        return False
+
+    def _translation_value(
+        self, translation: str, shown: str | None, signed: str | None, located: str | None, city: str | None
+    ) -> str | None:
+        # Cleaned translation of the applied name, or None when the row
+        # carries no valid translation (copies, venues, operator cities).
+        cleaned_tr = re.sub(r"\s*\d+\*\s*$", "", translation).strip()
+        cleaned_tr = self.COORD_TAIL_RE.sub("", cleaned_tr).strip()
+        cleaned_tr = self._strip_tr_address_paren(cleaned_tr)
+        cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, located, city)
+        if "/" in cleaned_tr:
+            split_tr = self._split_bilingual(cleaned_tr, shown, signed, located)
+            if split_tr is None:
+                return None
+            cleaned_tr = split_tr
+        if self._tr_is_operator_city(cleaned_tr, shown, signed):
+            return None
+        if cleaned_tr and cleaned_tr not in (shown, signed):
+            if not (located and cleaned_tr == located and located in (signed or "")):
+                # An untranslated copy of the Finnish-signed venue is
+                # not a translation ("Leikkipuisto Jakomäki" as en).
+                return cleaned_tr
+        return None
+
     def _apply_translations(
         self, item: Feature, names: dict[str, str], shown: str | None, signed: str | None, city: str | None = None
     ) -> None:
@@ -5770,42 +5821,10 @@ class PtvFISpider(Spider):
         for lang in ("sv", "en"):
             translation = names.get(lang)
             if translation and translation != shown and translation != signed:
-                cleaned_tr = re.sub(r"\s*\d+\*\s*$", "", translation).strip()
-                cleaned_tr = self.COORD_TAIL_RE.sub("", cleaned_tr).strip()
-                paren_stripped = re.sub(
-                    r"\s*\([^()]*(" + self.STREET_NUMBERED_ALT + r")\b[^()]*\d[^()]*\)\s*$",
-                    "",
-                    cleaned_tr,
-                ).strip()
-                if paren_stripped and paren_stripped != cleaned_tr:
-                    # Translated street-address tails ("...(Kymmenedalsgränden 4)")
-                    # duplicate the address line, never the applied name.
-                    self._count("name/tr_address_dropped")
-                    cleaned_tr = paren_stripped
-                cleaned_tr = self._strip_fi_duplicates(cleaned_tr, shown, signed, item.get("located_in"), city)
-                if "/" in cleaned_tr:
-                    split_tr = self._split_bilingual(cleaned_tr, shown, signed, item.get("located_in"))
-                    if split_tr is None:
-                        continue
-                    cleaned_tr = split_tr
                 if (
-                    re.fullmatch(r"City of\s+[A-ZÅÄÖ][a-zåäö-]+\s*", cleaned_tr, flags=re.IGNORECASE)
-                    and re.search(r"kaupunki|kaupungin", signed or "", flags=re.IGNORECASE)
-                    and not re.fullmatch(r"\S+\s+kaupunki", (shown or "").strip(), flags=re.IGNORECASE)
-                ):
-                    # Bare English tails naming the operating city ("City of
-                    # Vaasa" for applied "...hyvinvointipalvelut" under Vaasan
-                    # kaupunki) render the operator, never the applied name.
-                    # Operator data is not joined yet here, so the signed
-                    # Finnish form carries the evidence instead.
-                    self._count("name/tr_operator_city_dropped")
-                    continue
-                located = item.get("located_in")
-                if cleaned_tr and cleaned_tr not in (shown, signed):
-                    if not (located and cleaned_tr == located and located in (signed or "")):
-                        # An untranslated copy of the Finnish-signed venue is
-                        # not a translation ("Leikkipuisto Jakomäki" as en).
-                        item["extras"][f"name:{lang}"] = cleaned_tr
+                    value := self._translation_value(translation, shown, signed, item.get("located_in"), city)
+                ) is not None:
+                    item["extras"][f"name:{lang}"] = value
 
     def _positional_comma_keep(self, cleaned_tr: str, shown: str | None, signed: str | None) -> str:
         # Shared positional comma-tail drop: translation segments whose Finnish
