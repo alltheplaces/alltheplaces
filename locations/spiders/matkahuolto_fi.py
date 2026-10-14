@@ -166,14 +166,18 @@ class MatkahuoltoFISpider(Spider):
             " ".join(ps.get("normalRemarks").split())
             for office in offices
             for ps in office.get("parcelservices") or []
-            if ps.get("normalRemarks")
+            if isinstance(ps.get("normalRemarks"), str) and ps.get("normalRemarks")
         )
         for office in offices:
             if office.get("officeType") == "HEADQUARTERS":
                 _inc(self, "skipped/headquarters")
                 self.logger.warning("skipping headquarters %s", office.get("officeCode"))
                 continue
-            alerts = [ps.get("alertRemarks") or "" for ps in office.get("parcelservices") or []]
+            alerts = [
+                ps.get("alertRemarks")
+                for ps in office.get("parcelservices") or []
+                if isinstance(ps.get("alertRemarks"), str)
+            ]
             if any("sulkeutunut" in a.casefold() for a in alerts):
                 # Perfect-tense "has closed" marks a permanent closure (Kamppi, 2026-09-18).
                 _inc(self, "skipped/permanently_closed")
@@ -240,7 +244,11 @@ class MatkahuoltoFISpider(Spider):
                 _inc(self, "empty/hours")
             hours = parse_hours(self, open_times)
             if isinstance(hours, OpeningHours):
-                remarks = [ps.get("normalRemarks") or "" for ps in office.get("parcelservices") or []]
+                remarks = [
+                    ps.get("normalRemarks")
+                    for ps in office.get("parcelservices") or []
+                    if isinstance(ps.get("normalRemarks"), str)
+                ]
                 open_days = {day for entry in open_times for day in expand_days(entry.get("weekDay") or "")}
                 for day in remark_closed_days(remarks, open_days):
                     hours.set_closed(day)
@@ -253,7 +261,12 @@ class MatkahuoltoFISpider(Spider):
                 None,
             )
             # Closure statements belong in hours, not in descriptions.
-            if remark and remark_counts[" ".join(remark.split())] == 1 and "suljettu" not in remark.casefold():
+            if (
+                isinstance(remark, str)
+                and remark
+                and remark_counts[" ".join(remark.split())] == 1
+                and "suljettu" not in remark.casefold()
+            ):
                 item["extras"]["description"] = " ".join(remark.split())
 
             yield item
