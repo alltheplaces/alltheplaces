@@ -5752,6 +5752,37 @@ def test_user_report_batch_t():
     assert cat(spider, "Ikäihmisten tehostettu palveluasuminen")[0] == Categories.NURSING_HOME
     assert cat(spider, "Ikäihmisten liikunta") == (None, None)
     assert cat(spider, "Ikäihmisten palvelujen hakemukset")[0] == Categories.OFFICE_GOVERNMENT
+
+
+def test_user_report_batch_rc():
+    spider = make_spider()
+    # Pump-track tails name the POI like other facility tails.
+    assert named(spider, "Malmin kenttä / Väliaikainen Pumptrack", "Helsinki") == (
+        "Väliaikainen Pumptrack",
+        "Malmin kenttä",
+        "Malmin kenttä / Väliaikainen Pumptrack",
+    )
+    # Teaching-point branches of music schools: institution names the
+    # POI, the site is the branch; school-hosted units keep located_in.
+    item = parsed(spider, channel("Vantaan musiikkiopisto, Patotien pääopetuspiste"))
+    assert item.get("name") == "Vantaan musiikkiopisto"
+    assert item.get("branch") == "Patotien pääopetuspiste"
+    assert item.get("located_in") is None
+    assert named(spider, "Vantaan musiikkiopisto, Kartanonkosken koulun opetuspiste", "Vantaa") == (
+        "Kartanonkosken koulun opetuspiste",
+        "Vantaan musiikkiopisto",
+        "Vantaan musiikkiopisto, Kartanonkosken koulun opetuspiste",
+    )
+    # Double-comma site qualifiers ride into located_in.
+    assert named(spider, "Kouluravintola, Merilahden peruskoulu, Kallvikinniementien toimipiste", "Helsinki") == (
+        "Kouluravintola",
+        "Merilahden peruskoulu, Kallvikinniementien toimipiste",
+        "Kouluravintola, Merilahden peruskoulu, Kallvikinniementien toimipiste",
+    )
+    # Senior gyms carry their clientele like senior social facilities.
+    item = parsed(spider, channel("Hakunilan seniorikuntosali"))
+    assert item.get_tag("leisure") == "fitness_centre"
+    assert item["extras"].get("fitness_centre:for") == "senior"
     # 7. Outdoor pools swim like indoor halls.
     assert cat(spider, "Keravan maauimala") == (
         Categories.LEISURE_SPORTS_CENTRE,

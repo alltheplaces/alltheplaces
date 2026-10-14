@@ -1306,7 +1306,7 @@ class PtvFISpider(Spider):
     # Physical rooms/fields: venue-named unless numbered or proper-named.
     ROOM_WORDS = tuple(
         "sali kenttä halli allas rata tila huone koppi katos kota laavu grillipaikka heittopaikka "
-        "huoltorakennus ulkokuntoilupaikka ".split()
+        "huoltorakennus ulkokuntoilupaikka pumptrack ".split()
     )
     # Single memorial objects never split (title + designation of one artwork).
     MEMORIAL_WORDS = tuple("muistomerkki monumentti patsas memorial ".split())
@@ -1316,9 +1316,10 @@ class PtvFISpider(Spider):
     SERVICE_HEADS = tuple("opiskeluhuolto kouluterveydenhuolto opiskeluterveydenhuolto ".split())
     # Generic service words heading "<service>, <unit>" names
     # ("Kuvantaminen, Pirkkala Pirkkalan röntgen"; "Fysiatrian
-    # poliklinikka, Vaasa", the county's Vaasa branch): the service names
-    # the POI, the remainder the branch.
-    BRANCH_HEADS = tuple("kuvantaminen laboratorio näytteenotto poliklinikka ".split())
+    # poliklinikka, Vaasa", the county's Vaasa branch) and branch-carrying
+    # institutions ("Vantaan musiikkiopisto"): the head names the POI,
+    # the remainder the branch.
+    BRANCH_HEADS = tuple("kuvantaminen laboratorio näytteenotto poliklinikka musiikkiopisto ".split())
     # Service/unit nouns for host<>facility inversion, both directions
     # ("Lasten puheterapia, Perhekeskus Pohjatuuli" and its mirror).
     SERVICE_TAILS = tuple(
@@ -3245,6 +3246,18 @@ class PtvFISpider(Spider):
             return head, None, name
         return None
 
+    def _comma_site_recurse(
+        self, head: str, tail: str, lowered_tail: str, name: str, city: str | None
+    ) -> SplitTriple | None:
+        # Double-comma site qualifiers ("Kouluravintola, ... koulu,
+        # ... toimipiste"): resolve the head, the tail rides into located_in.
+        if "," in head and re.search(r"(toimipiste|toimipaikka|sivukoulu|enhet)", lowered_tail):
+            sub = self._split_comma(head, city)
+            if sub[1] is not None:
+                self._count("name/comma_site_tail")
+                return sub[0], sub[1] + ", " + tail, name
+        return None
+
     def _split_comma(self, name: str, city: str | None = None) -> SplitTriple:
         head, _, tail = name.rpartition(",")
         head, tail = head.strip(), tail.strip()
@@ -3277,7 +3290,12 @@ class PtvFISpider(Spider):
                 city,
             )
             if hit is not None:
+                if hit[1] is None:
+                    if (site := self._comma_site_recurse(head, tail, lowered_tail, name, city)) is not None:
+                        return site
                 return hit
+            if (site := self._comma_site_recurse(head, tail, lowered_tail, name, city)) is not None:
+                return site
             # Bare city tails and appositive descriptors stay whole:
             # the structured address carries the city.
             self._count("name/comma_kept")
@@ -3379,6 +3397,7 @@ class PtvFISpider(Spider):
         # the service split.
         return self._first_hit(
             (
+                self._comma_branch_site,
                 self._comma_unit,
                 self._comma_branch_kept,
                 self._comma_school_health_service,
@@ -3394,6 +3413,23 @@ class PtvFISpider(Spider):
             name,
             city,
         )
+
+    def _comma_branch_site(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> SplitTriple | None:
+        # Branch sites of branch-carrying institutions ("Vantaan
+        # musiikkiopisto, Patotien pääopetuspiste"): the institution
+        # names the POI, the site becomes branch below. Hosted units
+        # ("... koulun opetuspiste", "... päiväkodin opetuspiste",
+        # "... opistotalon ... opetuspiste") keep their venue filing.
+        if (
+            head.lower().endswith("musiikkiopisto")
+            and "opetuspiste" in tail.lower()
+            and not re.search(r"(koulu|skola|opisto|päiväkoti|päiväkodi)", tail.lower())
+        ):
+            self._count("name/comma_branch_site")
+            return head, None, name
+        return None
 
     def _split_comma_school_host(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
@@ -5531,18 +5567,22 @@ class PtvFISpider(Spider):
         return cleaned_tr
 
     def _apply_social_for(self, item: Feature, names: dict[str, str], name: str) -> None:
-        # Elderly-targeted social facilities carry their clientele.
-        if self._tag(item, "amenity") != "social_facility":
-            return
-        if "social_facility:for" in (item.get("extras") or {}):
-            return
+        # Elderly-targeted social facilities carry their clientele; senior
+        # gyms carry theirs (novel fitness_centre:for tag, user-approved).
         cleaned_fi = self._clean_name(names.get("fi") or name)
-        if any(
+        senior = any(
             stem in cleaned_fi.lower()
             for stem in ("ikäihmis", "ikäänty", "vanhus", "seniori", "eläkeläis", "pensionär")
-        ):
-            self._count("category/for_senior")
-            item["extras"]["social_facility:for"] = "senior"
+        )
+        if self._tag(item, "amenity") == "social_facility" and "social_facility:for" not in (item.get("extras") or {}):
+            if senior:
+                self._count("category/for_senior")
+                item["extras"]["social_facility:for"] = "senior"
+            return
+        if self._tag(item, "leisure") == "fitness_centre" and "fitness_centre:for" not in (item.get("extras") or {}):
+            if senior:
+                self._count("category/for_senior_gym")
+                item["extras"]["fitness_centre:for"] = "senior"
 
     def _communal_housing(self, channel: dict) -> bool:
         # Communal-housing services ("Sosiaalihuoltolain mukainen
