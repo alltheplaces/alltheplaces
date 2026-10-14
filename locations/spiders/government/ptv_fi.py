@@ -109,155 +109,126 @@ class PtvFISpider(Spider):
             Categories.CLINIC,
             {"healthcare:speciality": "maternal_and_child_health"},
         ),  # Neuvola (maternity/child-health clinics)
-        ("päiväkoti", Categories.KINDERGARTEN, None),  # Päiväkoti (daycare)
-        ("pilke", Categories.KINDERGARTEN, None),  # Pilke (private daycare chain)
-        ("norlandia", Categories.KINDERGARTEN, None),  # Norlandia (private daycare chain)
-        ("päiväkodin", Categories.KINDERGARTEN, None),  # Päiväkodin (daycare, genitive)
-        ("esiopetus", Categories.KINDERGARTEN, None),  # Esiopetus (preschool)
-        ("perhepäivähoito", Categories.KINDERGARTEN, None),  # Perhepäivähoito (family daycare)
-        ("perhepäivähoitaja", Categories.KINDERGARTEN, None),  # Perhepäivähoitaja (family childminders)
-        ("daghem", Categories.KINDERGARTEN, None),  # Daghem (daycare in Swedish)
-        ("dagvård", Categories.KINDERGARTEN, None),  # Dagvård (daycare in Swedish)
-        ("ryhmis", Categories.KINDERGARTEN, None),  # Ryhmis (family daycare)
-        ("dagis", Categories.KINDERGARTEN, None),  # Dagis (daycare in Swedish)
-        ("daycare", Categories.KINDERGARTEN, None),  # Daycare (daycare in English)
-        ("toddler", Categories.KINDERGARTEN, None),  # Toddler (toddler groups)
-        ("preschool", Categories.KINDERGARTEN, None),  # Preschool (preschool in English)
-        ("kindergarten", Categories.KINDERGARTEN, None),  # Kindergarten (international daycare)
+        (
+            "päiväkoti|pilke|norlandia|päiväkodin|esiopetus|"
+            "perhepäivähoito|perhepäivähoitaja|daghem|dagvård|"
+            "ryhmis|dagis|daycare|toddler|preschool|"
+            "kindergarten",
+            Categories.KINDERGARTEN,
+            None,
+        ),  # Päiväkoti (daycare)
         ("school", Categories.SCHOOL, None),  # School (schools in English)
         ("oikeusapu", Categories.OFFICE_LAWYER, None),  # Oikeusapu (legal-aid offices)
-        ("käräjä", Categories.COURTHOUSE, None),  # Käräjä (courts)
-        ("hovioikeus", Categories.COURTHOUSE, None),  # Hovioikeus (courts of appeal)
+        ("käräjä|hovioikeus", Categories.COURTHOUSE, None),  # Käräjä (courts)
         ("oikeustiede", Categories.COLLEGE, None),  # Oikeustiede (university law faculties, not courts)
         ("asumisoikeus", Categories.OFFICE_COMPANY, None),  # Asumisoikeus Oy (housing-right companies)
-        ("oikeuspsykiatr", Categories.CLINIC, None),  # Forensic psychiatry units
-        ("oikeuspsykolog", Categories.CLINIC, None),  # Forensic psychology units
+        ("oikeuspsykiatr|oikeuspsykolog", Categories.CLINIC, None),  # Forensic psychiatry units
         ("oikeus", Categories.COURTHOUSE, None),  # Oikeus (courts: supreme, insurance, administrative)
-        ("kansli", Categories.OFFICE_GOVERNMENT, None),  # Kanslia / kansli (admin offices)
-        ("stadshus", Categories.OFFICE_GOVERNMENT, None),  # Stadshus (city halls in Swedish)
-        ("kommunhus", Categories.OFFICE_GOVERNMENT, None),  # Kommunhus (municipal houses in Swedish)
-        ("suunnittelu", Categories.OFFICE_GOVERNMENT, None),  # Suunnittelu (planning offices)
+        (
+            "kansli|stadshus|kommunhus|suunnittelu",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Kanslia / kansli (admin offices)
         ("psykiatrinen palveluasuminen", Categories.SOCIAL_FACILITY, None),  # Psychiatric housing, not wards
-        ("psykiatrinen sairaala", Categories.HOSPITAL, None),  # Psychiatric hospitals
-        ("psykiatriasairaala", Categories.HOSPITAL, None),  # Psychiatric hospitals, compound
-        ("psykiatri", Categories.CLINIC, None),  # Psykiatri (psychiatry)
-        ("nuorten mielenterveys", Categories.CLINIC, None),  # Youth mental-health services
-        ("nuorten päihde", Categories.CLINIC, None),  # Youth addiction services
+        ("psykiatrinen sairaala|psykiatriasairaala", Categories.HOSPITAL, None),  # Psychiatric hospitals
+        ("psykiatri|nuorten mielenterveys|nuorten päihde", Categories.CLINIC, None),  # Psykiatri (psychiatry)
         ("kohtaamispaikka", Categories.COMMUNITY_CENTRE, None),  # Kohtaamispaikka (meeting places outrank clientele)
-        ("tukiasunto", Categories.ASSISTED_LIVING, None),  # Tukiasunto (supported housing)
-        ("tukiasunnot", Categories.ASSISTED_LIVING, None),  # Tukiasunnot (supported housing, plural)
-        ("tuettu asumi", Categories.ASSISTED_LIVING, None),  # Tuettu asuminen (supported housing)
-        ("tukiasuminen", Categories.ASSISTED_LIVING, None),  # Tukiasuminen (support housing)
+        (
+            "tukiasunto|tukiasunnot|tuettu asumi|tukiasuminen",
+            Categories.ASSISTED_LIVING,
+            None,
+        ),  # Tukiasunto (supported housing)
         ("mielenterveystyö", Categories.CLINIC, None),  # Mielenterveystyö (mental-health work)
         ("nuorisoasema", Categories.OFFICE_GOVERNMENT, None),  # Nuorisoasema (youth service stations)
-        ("nuorisotila", None, {"amenity": "youth_centre"}),  # Nuorisotila (youth rooms)
-        ("nuorisotalo", None, {"amenity": "youth_centre"}),  # Nuorisotalo (youth centres)
-        ("nuokkari", None, {"amenity": "youth_centre"}),  # Nuokkari (youth hangouts)
-        ("ungdomslokal", None, {"amenity": "youth_centre"}),  # Ungdomslokal (youth rooms in Swedish)
-        ("ungdomsgård", None, {"amenity": "youth_centre"}),  # Ungdomsgård (youth centres in Swedish)
+        (
+            "nuorisotila|nuorisotalo|nuokkari|ungdomslokal|" "ungdomsgård",
+            None,
+            {"amenity": "youth_centre"},
+        ),  # Nuorisotila (youth rooms)
         ("järjestämispaikka", Categories.COMMUNITY_CENTRE, None),  # Järjestämispaikka (activity venues)
         ("nuorisokoti", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),  # Nuorisokoti (youth homes)
-        ("nuoriso", Categories.COMMUNITY_CENTRE, None),  # Nuoriso (youth centres)
-        ("nuorten", Categories.COMMUNITY_CENTRE, None),  # Nuorten (youth rooms)
-        ("iltapäivä", Categories.COMMUNITY_CENTRE, None),  # Iltapäivä (after-school clubs)
-        ("musiikkiopisto", Categories.MUSIC_SCHOOL, None),  # Musiikkiopisto (music schools)
-        ("konservatorio", Categories.MUSIC_SCHOOL, None),  # Konservatorio (conservatories)
-        ("hammashoito", Categories.DENTIST, None),  # Hammashoito (dental care)
-        ("hammashoidon", Categories.DENTIST, None),  # Hammashoidon (dental care, genitive)
-        ("oikomishoi", Categories.DENTIST, None),  # Oikomishoito (orthodontic care)
-        ("suun erikoishoi", Categories.DENTIST, None),  # Suun erikoishoito (specialist dental care)
-        ("suun perusterveydenhuolto", Categories.DENTIST, None),  # Suun perusterveydenhuolto (oral primary care)
-        ("suun terveydenhuolto", Categories.DENTIST, None),  # Suun terveydenhuolto (oral health care)
-        ("eläinlääkäri", Categories.VETERINARY, None),  # Eläinlääkäri (veterinarians)
-        ("löytöeläi", None, {"amenity": "animal_shelter"}),  # Löytöeläimet (found-animal shelters)
-        ("löytökiss", None, {"amenity": "animal_shelter"}),  # Löytökissat (found cats)
-        ("kissatalo", None, {"amenity": "animal_shelter"}),  # Kissatalo (cat shelters)
-        ("eläinsuojelu", Categories.OFFICE_GOVERNMENT, None),  # Eläinsuojelu (animal-protection desks)
-        ("terveyspalvelu", Categories.CLINIC, None),  # Terveyspalvelu (health services)
-        ("terveystalo", Categories.CLINIC, None),  # Terveystalo (private clinics)
-        ("terveyspiste", Categories.CLINIC, None),  # Terveyspiste (health points)
-        ("sote-aseman lähitori", Categories.SOCIAL_FACILITY, None),  # Sote-aseman lähitorit (service desks)
-        ("terveysasema", Categories.CLINIC, None),  # Terveysasema (health stations)
-        ("terveyskeskus", Categories.CLINIC, None),  # Terveyskeskus (health centres)
-        ("sote-asema", Categories.CLINIC, None),  # Sote-asema (wellbeing stations)
-        ("fysioterapia", Categories.CLINIC, {"healthcare": "physiotherapist"}),
-        ("hyvinvointiasema", Categories.CLINIC, None),  # Hyvinvointiasema (wellbeing stations)
-        ("hyvinvointikeskus", Categories.CLINIC, None),  # Hyvinvointikeskus (wellbeing centres)
+        ("nuoriso|nuorten|iltapäivä", Categories.COMMUNITY_CENTRE, None),  # Nuoriso (youth centres)
+        ("musiikkiopisto|konservatorio", Categories.MUSIC_SCHOOL, None),  # Musiikkiopisto (music schools)
         (
-            "sote-piste",
+            "hammashoito|hammashoidon|oikomishoi|" "suun erikoishoi|suun perusterveydenhuolto|" "suun terveydenhuolto",
+            Categories.DENTIST,
+            None,
+        ),  # Hammashoito (dental care)
+        ("eläinlääkäri", Categories.VETERINARY, None),  # Eläinlääkäri (veterinarians)
+        ("löytöeläi|löytökiss|kissatalo", None, {"amenity": "animal_shelter"}),  # Löytöeläimet (found-animal shelters)
+        ("eläinsuojelu", Categories.OFFICE_GOVERNMENT, None),  # Eläinsuojelu (animal-protection desks)
+        ("terveyspalvelu|terveystalo|terveyspiste", Categories.CLINIC, None),  # Terveyspalvelu (health services)
+        ("sote-aseman lähitori", Categories.SOCIAL_FACILITY, None),  # Sote-aseman lähitorit (service desks)
+        ("terveysasema|terveyskeskus|sote-asema", Categories.CLINIC, None),  # Terveysasema (health stations)
+        ("fysioterapia", Categories.CLINIC, {"healthcare": "physiotherapist"}),
+        (
+            "hyvinvointiasema|hyvinvointikeskus|sote-piste|"
+            "sotekeskus|sote-keskus|soteasema|poliklinikka|"
+            "synnytys|naistentauti|äitiys",
             Categories.CLINIC,
             None,
-        ),  # Sote-piste (wellbeing points)
-        ("sotekeskus", Categories.CLINIC, None),  # Sotekeskus (wellbeing centres)
-        ("sote-keskus", Categories.CLINIC, None),  # Sote-keskus (wellbeing centres)
-        ("soteasema", Categories.CLINIC, None),  # Soteasema (wellbeing stations)
-        ("poliklinikka", Categories.CLINIC, None),  # Poliklinikka (outpatient clinics)
-        ("synnytys", Categories.CLINIC, None),  # Synnytys (maternity units)
-        ("naistentauti", Categories.CLINIC, None),  # Naistentauti (women health)
-        ("äitiys", Categories.CLINIC, None),  # Äitiys (maternity)
+        ),  # Hyvinvointiasema (wellbeing stations)
         ("puheterapia", Categories.CLINIC, {"healthcare": "speech_therapist"}),  # Puheterapia (speech therapy)
-        ("klinikka", Categories.CLINIC, None),  # Klinikka (clinics)
-        ("klinikat", Categories.CLINIC, None),  # Klinikat / poliklinikat (clinics, plural)
-        ("näytteenotto", Categories.SAMPLE_COLLECTION, None),  # Näytteenotto (sampling points)
-        ("näytteenoton", Categories.SAMPLE_COLLECTION, None),  # Näytteenoton (sampling points, genitive)
+        ("klinikka|klinikat", Categories.CLINIC, None),  # Klinikka (clinics)
+        ("näytteenotto|näytteenoton", Categories.SAMPLE_COLLECTION, None),  # Näytteenotto (sampling points)
         ("seulonta", Categories.CLINIC, None),  # Seulonta (health screenings)
-        ("laboratorio", Categories.CLINIC, {"healthcare": "laboratory"}),  # Laboratorio (laboratories)
-        ("lab", Categories.CLINIC, {"healthcare": "laboratory"}),  # Lab (Tykslab/Fimlab/Islab contract labs)
-        ("kuvantaminen", Categories.CLINIC, {"healthcare": "medical_imaging"}),  # Kuvantaminen (imaging)
-        ("röntgen", Categories.CLINIC, {"healthcare": "medical_imaging"}),  # Röntgen (x-ray clinics)
-        ("rontgen", Categories.CLINIC, {"healthcare": "medical_imaging"}),  # Rontgen (ascii spelling, same filing)
+        ("laboratorio|lab", Categories.CLINIC, {"healthcare": "laboratory"}),  # Laboratorio (laboratories)
+        (
+            "kuvantaminen|röntgen|rontgen",
+            Categories.CLINIC,
+            {"healthcare": "medical_imaging"},
+        ),  # Kuvantaminen (imaging)
         ("terapia", Categories.CLINIC, None),  # Terapia (therapy centres)
         ("jalkaterapeutti", Categories.CLINIC, {"healthcare": "podiatrist"}),  # Jalkaterapeutti (podiatrists)
-        ("terapeutti", Categories.CLINIC, None),  # Terapeutti (therapists)
-        ("kirurgia", Categories.CLINIC, None),  # Kirurgia (surgery units)
-        ("psykoosi", Categories.CLINIC, None),  # Psykoosi (psychosis wards)
-        ("psykologi", Categories.CLINIC, None),  # Psykologi (psychology services)
-        ("maankäyttö", Categories.OFFICE_GOVERNMENT, None),  # Maankäyttö (land-use admin)
-        ("kaupungin asumispalvelu", Categories.OFFICE_GOVERNMENT, None),  # City housing desks
-        ("kunnan asumispalvelu", Categories.OFFICE_GOVERNMENT, None),  # Municipal housing desks
-        ("asumispalveluyksikk", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),
-        ("asumisryhmä", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),  # Asumisryhmä (housing groups)
+        ("terapeutti|kirurgia|psykoosi|psykologi", Categories.CLINIC, None),  # Terapeutti (therapists)
         (
-            "asumisyhteisö",
+            "maankäyttö|kaupungin asumispalvelu|" "kunnan asumispalvelu",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Maankäyttö (land-use admin)
+        (
+            "asumispalveluyksikk|asumisryhmä|asumisyhteisö",
             Categories.SOCIAL_FACILITY,
             {"social_facility": "group_home"},
-        ),  # Asumisyhteisö (housing communities)
-        ("asumispalvelu", Categories.SOCIAL_FACILITY, None),  # Asumispalvelut (housing services)
-        ("mielenterveyskuntoutujien", Categories.SOCIAL_FACILITY, None),  # Client housing beats diagnosis below
-        ("mielenterveysasiakkaiden", Categories.SOCIAL_FACILITY, None),  # Client housing beats diagnosis below
-        ("mielenterveys", Categories.CLINIC, None),  # Mielenterveys (mental health)
-        ("syömishäiriö", Categories.CLINIC, None),  # Syömishäiriö (eating disorders; peer groups guard rescue)
-        ("muistikeskus", Categories.CLINIC, None),  # Muistikeskus (memory clinics)
-        ("mielialahäiriö", Categories.CLINIC, None),  # Mielialahäiriö (mood disorders)
-        ("diabeteskeskus", Categories.CLINIC, None),  # Diabeteskeskus (diabetes centres)
+        ),
+        (
+            "asumispalvelu|mielenterveyskuntoutujien|" "mielenterveysasiakkaiden",
+            Categories.SOCIAL_FACILITY,
+            None,
+        ),  # Asumispalvelut (housing services)
+        (
+            "mielenterveys|syömishäiriö|muistikeskus|" "mielialahäiriö|diabeteskeskus",
+            Categories.CLINIC,
+            None,
+        ),  # Mielenterveys (mental health)
         ("diabeteshoitaja", Categories.CLINIC, {"healthcare": "nurse"}),  # Diabeteshoitaja (diabetes nurses)
         ("apteekkimuseo", Categories.MUSEUM, None),  # Apteekkimuseo (pharmacy museums, cf. koulumuseo)
-        ("apteekki", Categories.PHARMACY, None),  # Apteekki (pharmacies)
-        ("apotek", Categories.PHARMACY, None),  # Apotek (pharmacies in Swedish)
+        ("apteekki|apotek", Categories.PHARMACY, None),  # Apteekki (pharmacies)
         ("tarvikejakelu", Categories.SHOP_MEDICAL_SUPPLY, None),  # Tarvikejakelu (supply distribution)
         ("apuväline", Categories.OFFICE_GOVERNMENT, None),  # Apuväline (assistive-device service points)
         ("vastaanottokeskus", Categories.SOCIAL_FACILITY, None),  # Vastaanottokeskus (reception centres)
-        ("jäte", Categories.RECYCLING, None),  # Jäte (waste services)
-        ("jätte", Categories.RECYCLING, None),  # Jätte- / jätteen (waste compounds, plural/genitive stem)
-        ("sosiaalipalvelu", Categories.OFFICE_GOVERNMENT, None),  # Sosiaalipalvelu (social-service desks)
-        ("elinkeinopalvelu", Categories.OFFICE_GOVERNMENT, None),  # Elinkeinopalvelut (business-service desks)
-        ("elinkeinotoimi", Categories.OFFICE_GOVERNMENT, None),  # Elinkeinotoimi (business-development units)
-        ("vastaanotto", Categories.CLINIC, None),  # Vastaanotto (receptions)
-        ("vastaanotot", Categories.CLINIC, None),  # Vastaanotot (receptions, plural)
-        ("beachvolley", Categories.LEISURE_PITCH, {"sport": "beachvolleyball"}),  # Beachvolley (beach volleyball)
-        ("beach volley", Categories.LEISURE_PITCH, {"sport": "beachvolleyball"}),  # Beach volley (spaced)
+        ("jäte|jätte", Categories.RECYCLING, None),  # Jäte (waste services)
+        (
+            "sosiaalipalvelu|elinkeinopalvelu|elinkeinotoimi",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Sosiaalipalvelu (social-service desks)
+        ("vastaanotto|vastaanotot", Categories.CLINIC, None),  # Vastaanotto (receptions)
+        (
+            "beachvolley|beach volley",
+            Categories.LEISURE_PITCH,
+            {"sport": "beachvolleyball"},
+        ),  # Beachvolley (beach volleyball)
         ("volley", Categories.LEISURE_PITCH, {"sport": "volleyball"}),  # Volley (volleyball)
         ("huoltorakennus", None, None),  # Huoltorakennus (service buildings): no precise filing, keep generic
         ("koirauimaranta", Categories.LEISURE_DOG_PARK, None),  # Koirauimaranta (dog beaches)
-        ("talviuimari", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimarit (winter swimmers)
-        ("talviuimaranta", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimaranta (winter-swimming beaches)
-        ("uimaranta", Categories.NATURAL_BEACH, None),  # Uimaranta / uimarannat (beaches)
-        ("uimapaikka", Categories.NATURAL_BEACH, None),  # Uimapaikka (swimming places)
-        ("ulkokuntosali", Categories.LEISURE_FITNESS_STATION, None),  # Ulkokuntosali (outdoor gyms)
-        ("ulkokuntoilu", Categories.LEISURE_FITNESS_STATION, None),  # Ulkokuntoilu (outdoor exercise)
-        ("lähiliikuntapaikka", Categories.LEISURE_FITNESS_STATION, None),  # Lähiliikuntapaikka (exercise grounds)
-        ("kuntoilupaikka", Categories.LEISURE_FITNESS_STATION, None),  # Kuntoilupaikka (exercise grounds)
-        ("kuntoilupiste", Categories.LEISURE_FITNESS_STATION, None),  # Kuntoilupisteet (exercise points)
+        ("talviuimari|talviuimaranta", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimarit (winter swimmers)
+        ("uimaranta|uimapaikka", Categories.NATURAL_BEACH, None),  # Uimaranta / uimarannat (beaches)
+        (
+            "ulkokuntosali|ulkokuntoilu|lähiliikuntapaikka|" "kuntoilupaikka|kuntoilupiste",
+            Categories.LEISURE_FITNESS_STATION,
+            None,
+        ),  # Ulkokuntosali (outdoor gyms)
         ("opastuspiste", Categories.TOURISM_INFORMATION, None),  # Opastuspisteet (info points)
         ("kuntoportaat", Categories.LEISURE_FITNESS_STATION, None),  # Kuntoportaat (fitness stairs)
         ("uimahallin", Categories.GYM, None),  # Uimahallin (gym of a swim hall)
@@ -265,11 +236,7 @@ class PtvFISpider(Spider):
         ("uintikeskus", Categories.LEISURE_SPORTS_CENTRE, None),  # Uintikeskus (swimming centres)
         ("kuntosali", Categories.GYM, None),  # Kuntosali (gyms)
         ("uimastadion", Categories.LEISURE_SPORTS_CENTRE, None),  # Uimastadion (swimming stadiums)
-        (
-            "uima-allas",
-            Categories.LEISURE_SPORTS_HALL,
-            None,
-        ),  # Uima-allas (school pools)
+        ("uima-allas", Categories.LEISURE_SPORTS_HALL, None),  # Uima-allas (school pools)
         ("maauimala", Categories.LEISURE_SPORTS_CENTRE, None),  # Maauimala (outdoor pools)
         ("kahluuallas", Categories.LEISURE_SWIMMING_POOL, None),  # Kahluuallas (wading pools)
         (
@@ -297,63 +264,50 @@ class PtvFISpider(Spider):
         ("lentopallo", Categories.LEISURE_PITCH, {"sport": "volleyball"}),  # Lentopallo (volleyball)
         ("petanque", Categories.LEISURE_PITCH, {"sport": "petanque"}),  # Petanque (petanque courses)
         ("pesäpallo", Categories.LEISURE_PITCH, {"sport": "pesapallo"}),  # Pesäpallo (Finnish baseball)
-        ("shakkilauta", Categories.LEISURE_PITCH, {"sport": "chess"}),  # Shakkilauta (outdoor chess boards)
-        ("shakkilaudat", Categories.LEISURE_PITCH, {"sport": "chess"}),  # Shakkilaudat (chess boards, plural)
-        ("liikuntahalli", Categories.LEISURE_SPORTS_CENTRE, None),  # Liikuntahalli (sports halls)
-        ("liikuntakeskus", Categories.LEISURE_SPORTS_CENTRE, None),  # Liikuntakeskus (sports centres)
         (
-            "ulkoilukeskus",
+            "shakkilauta|shakkilaudat",
+            Categories.LEISURE_PITCH,
+            {"sport": "chess"},
+        ),  # Shakkilauta (outdoor chess boards)
+        (
+            "liikuntahalli|liikuntakeskus|ulkoilukeskus|" "urheiluhalli",
             Categories.LEISURE_SPORTS_CENTRE,
             None,
-        ),  # Ulkoilukeskus (outdoor centres)
-        ("urheiluhalli", Categories.LEISURE_SPORTS_CENTRE, None),
-        ("liikuntasali", Categories.LEISURE_SPORTS_HALL, None),  # Liikuntasali (sports halls)
-        ("liikuntatilat", Categories.LEISURE_SPORTS_HALL, None),  # Liikuntatilat (sports facilities)
-        ("tapahtuma-alue", Categories.EVENTS_VENUE, None),  # Tapahtuma-alue (event grounds)
-        ("tapahtumalava", Categories.EVENTS_VENUE, None),  # Tapahtumalava (event stages)
-        ("tapahtumatalo", Categories.EVENTS_VENUE, None),  # Tapahtumatalo (event houses)
-        ("tapahtumakeskus", Categories.EVENTS_VENUE, None),  # Tapahtumakeskus (event centres)
-        ("tapahtumasali", Categories.EVENTS_VENUE, None),  # Tapahtumasali (event halls)
+        ),  # Liikuntahalli (sports halls)
+        ("liikuntasali|liikuntatilat", Categories.LEISURE_SPORTS_HALL, None),  # Liikuntasali (sports halls)
+        (
+            "tapahtuma-alue|tapahtumalava|tapahtumatalo|" "tapahtumakeskus|tapahtumasali",
+            Categories.EVENTS_VENUE,
+            None,
+        ),  # Tapahtuma-alue (event grounds)
         ("kiipeily", Categories.LEISURE_PITCH, {"sport": "climbing"}),  # Kiipeily (climbing spots)
         ("salibandy", Categories.LEISURE_PITCH, {"sport": "floorball"}),  # Salibandy (floorball)
         ("moottoriurheilu", Categories.LEISURE_PITCH, {"sport": "motor"}),  # Moottoriurheilu (motorsports)
         ("sähly", Categories.LEISURE_PITCH, {"sport": "floorball"}),  # Sähly (floorball)
-        ("näyttely", Categories.MUSEUM, None),  # Näyttely (exhibition venues)
-        ("kokoelma", Categories.MUSEUM, None),  # Kokoelma (collections)
-        ("juhlasali", Categories.EVENTS_VENUE, None),  # Juhlasali (banquet halls)
-        ("musiikkisali", Categories.EVENTS_VENUE, None),  # Musiikkisali (concert halls)
-        ("monitoimisali", Categories.EVENTS_VENUE, None),  # Monitoimisali (multi-purpose halls)
-        ("valtuustosali", Categories.EVENTS_VENUE, None),  # Valtuustosali (council chambers)
-        ("lehtilukusali", Categories.LIBRARY, None),  # Lehtilukusali (library reading rooms)
-        ("lehtisali", Categories.LIBRARY, None),  # Lehtisali (library reading rooms)
+        ("näyttely|kokoelma", Categories.MUSEUM, None),  # Näyttely (exhibition venues)
+        (
+            "juhlasali|musiikkisali|monitoimisali|" "valtuustosali",
+            Categories.EVENTS_VENUE,
+            None,
+        ),  # Juhlasali (banquet halls)
+        ("lehtilukusali|lehtisali", Categories.LIBRARY, None),  # Lehtilukusali (library reading rooms)
         ("teatterisali", Categories.THEATRE, None),  # Teatterisali (theatre auditoriums, not sports halls)
         ("sali", Categories.LEISURE_SPORTS_HALL, None),  # Sali (halls)
         ("jäähalli", Categories.LEISURE_ICE_RINK, None),  # Jäähalli (ice halls)
         ("keilahalli", Categories.LEISURE_BOWLING_ALLEY, None),  # Keilahalli (bowling halls)
         ("skeittihalli", Categories.LEISURE_SPORTS_CENTRE, {"sport": "skateboard"}),  # Skeittihalli (skate halls)
         ("monitoimihalli", Categories.COMMUNITY_CENTRE, None),  # Monitoimihalli (multipurpose halls)
-        ("palloiluhalli", Categories.LEISURE_SPORTS_HALL, None),  # Palloiluhalli (ball-game halls)
-        ("halli", Categories.LEISURE_SPORTS_HALL, None),  # Halli (halls, compound-final)
-        ("auditorio", Categories.EVENTS_VENUE, None),  # Auditorio (auditoriums)
-        ("konserttitalo", Categories.EVENTS_VENUE, None),  # Konserttitalo (concert halls)
-        ("kongressitalo", Categories.EVENTS_VENUE, None),  # Kongressitalo (congress halls)
+        ("palloiluhalli|halli", Categories.LEISURE_SPORTS_HALL, None),  # Palloiluhalli (ball-game halls)
+        ("auditorio|konserttitalo|kongressitalo", Categories.EVENTS_VENUE, None),  # Auditorio (auditoriums)
         ("parkour", Categories.LEISURE_PITCH, {"sport": "parkour"}),  # Parkour (parkour areas)
-        ("streetworkout", Categories.LEISURE_FITNESS_STATION, None),  # Streetworkout (outdoor gyms)
-        ("street workout", Categories.LEISURE_FITNESS_STATION, None),  # Street workout (outdoor gyms, spaced)
-        ("paini", Categories.LEISURE_SPORTS_HALL, None),  # Paini (wrestling)
-        ("kamppailu", Categories.LEISURE_SPORTS_HALL, None),  # Kamppailu (martial arts)
+        ("streetworkout|street workout", Categories.LEISURE_FITNESS_STATION, None),  # Streetworkout (outdoor gyms)
+        ("paini|kamppailu", Categories.LEISURE_SPORTS_HALL, None),  # Paini (wrestling)
         ("bowling", Categories.LEISURE_BOWLING_ALLEY, None),  # Bowling (bowling halls)
-        ("minigolf", Categories.LEISURE_MINIATURE_GOLF, None),  # Minigolf (miniature golf)
-        ("seikkailugolf", Categories.LEISURE_MINIATURE_GOLF, None),
-        ("puttiparkki", Categories.LEISURE_MINIATURE_GOLF, None),  # Puttiparkki (putting courses)
-        ("frisbee", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Frisbee / frisbeegolf (disc golf)
-        ("discgolf", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Discgolf (disc golf)
+        ("minigolf|seikkailugolf|puttiparkki", Categories.LEISURE_MINIATURE_GOLF, None),  # Minigolf (miniature golf)
+        ("frisbee|discgolf", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Frisbee / frisbeegolf (disc golf)
         ("golf", Categories.LEISURE_GOLF_COURSE, None),  # Golf (golf courses)
-        ("pumptrack", Categories.LEISURE_TRACK, None),  # Pumptrack (pump tracks)
-        ("pump track", Categories.LEISURE_TRACK, None),  # Pump track (pump tracks, spaced)
-        ("luistelukenttä", Categories.LEISURE_ICE_RINK, None),  # Luistelukenttä (skating rinks)
-        ("jääkenttä", Categories.LEISURE_ICE_RINK, None),  # Jääkenttä (ice rinks)
-        ("kaukalo", Categories.LEISURE_ICE_RINK, None),  # Kaukalo (hockey rinks)
+        ("pumptrack|pump track", Categories.LEISURE_TRACK, None),  # Pumptrack (pump tracks)
+        ("luistelukenttä|jääkenttä|kaukalo", Categories.LEISURE_ICE_RINK, None),  # Luistelukenttä (skating rinks)
         ("pallokenttä", Categories.LEISURE_PITCH, None),  # Pallokenttä (generic ball fields)
         ("hiekkakenttä", Categories.LEISURE_PITCH, {"surface": "sand"}),  # Hiekkakenttä (sand fields)
         (
@@ -369,376 +323,275 @@ class PtvFISpider(Spider):
         ("yleisurheilukeskus", Categories.LEISURE_SPORTS_CENTRE, {"sport": "athletics"}),
         ("yleisurheilu", Categories.LEISURE_TRACK, None),  # Yleisurheilu (athletics)
         ("urheilukenttä", Categories.LEISURE_PITCH, None),  # Urheilukenttä (sports fields)
-        ("soutu", Categories.LEISURE_SPORTS_CENTRE, None),  # Soutu (rowing venues)
-        ("melonta", Categories.LEISURE_SPORTS_CENTRE, None),  # Melonta (canoeing venues)
-        ("liikuntamylly", Categories.LEISURE_SPORTS_CENTRE, None),  # Liikuntamylly (sports halls)
+        ("soutu|melonta|liikuntamylly", Categories.LEISURE_SPORTS_CENTRE, None),  # Soutu (rowing venues)
         ("stadion", Categories.LEISURE_PITCH, None),  # Stadion (stadiums)
-        ("skate", Categories.LEISURE_PITCH, {"sport": "skateboard"}),  # Skate (skate parks)
-        ("skeitti", Categories.LEISURE_PITCH, {"sport": "skateboard"}),  # Skeitti (skate parks)
+        ("skate|skeitti", Categories.LEISURE_PITCH, {"sport": "skateboard"}),  # Skate (skate parks)
         ("leikkipuisto", Categories.LEISURE_PLAYGROUND, None),  # Leikkipuisto (playgrounds)
-        ("leikkikerho", Categories.KINDERGARTEN, None),  # Leikkikerho (playgroups)
-        ("leikkikoulu", Categories.KINDERGARTEN, None),  # Leikkikoulu (play schools)
-        ("leikkipaikka", Categories.LEISURE_PLAYGROUND, None),  # Leikkipaikka (play areas)
-        ("leikkikenttä", Categories.LEISURE_PLAYGROUND, None),  # Leikkikenttä (playgrounds)
+        ("leikkikerho|leikkikoulu", Categories.KINDERGARTEN, None),  # Leikkikerho (playgroups)
+        ("leikkipaikka|leikkikenttä", Categories.LEISURE_PLAYGROUND, None),  # Leikkipaikka (play areas)
         ("leikkivä", None, None),  # Leikkivä titles (artworks like Leikkivät karhut): rescue decides
         ("leikki", Categories.LEISURE_PLAYGROUND, None),  # Leikki (play)
         ("keittokatos", Categories.TOURISM_PICNIC_SITE, None),  # Keittokatos (cooking shelters)
         ("kaupungintalon puisto", Categories.LEISURE_PARK, None),  # Kaupungintalon puisto (city-hall park)
         ("grillipaikka", Categories.TOURISM_PICNIC_SITE, None),  # Grillipaikka (BBQ spots)
-        ("koira-aitaus", Categories.LEISURE_DOG_PARK, None),  # Koira-aitaus (dog enclosures)
-        ("koirametsä", Categories.LEISURE_DOG_PARK, None),  # Koirametsä (dog forests)
-        ("lippumyymälä", None, {"shop": "tickets"}),  # Lippumyymälä (ticket shops)
-        ("lipunmyynti", None, {"shop": "tickets"}),  # Lipunmyynti (ticket sales)
-        ("lippukassa", None, {"shop": "tickets"}),  # Lippukassa (ticket offices)
+        ("koira-aitaus|koirametsä", Categories.LEISURE_DOG_PARK, None),  # Koira-aitaus (dog enclosures)
+        ("lippumyymälä|lipunmyynti|lippukassa", None, {"shop": "tickets"}),  # Lippumyymälä (ticket shops)
         ("myymälä", None, {"shop": "yes"}),  # Myymälä (shops)
         ("huvilamuseo", Categories.MUSEUM, None),  # Huvilamuseo (villa museums, cf. koulumuseo)
         ("huvila", None, None),  # Huvila (villas): no precise filing, keep generic
-        ("kalastuspaikka", None, {"leisure": "fishing"}),  # Kalastuspaikka (fishing spots, incl. at shores/zoo bays)
-        ("kalastuslupa", None, {"leisure": "fishing"}),  # Kalastuslupa-alueet (fishing permit areas)
+        (
+            "kalastuspaikka|kalastuslupa",
+            None,
+            {"leisure": "fishing"},
+        ),  # Kalastuspaikka (fishing spots, incl. at shores/zoo bays)
         ("eläintarha", None, {"tourism": "zoo"}),  # Eläintarha (zoos)
-        ("koirapuisto", Categories.LEISURE_DOG_PARK, None),  # Koirapuisto (dog parks)
-        ("koiratarha", Categories.LEISURE_DOG_PARK, None),  # Koiratarha (dog yards)
-        ("hundpark", Categories.LEISURE_DOG_PARK, None),  # Hundpark (dog parks in Swedish)
+        ("koirapuisto|koiratarha|hundpark", Categories.LEISURE_DOG_PARK, None),  # Koirapuisto (dog parks)
         ("koirakäymälä", None, {"amenity": "dog_toilet"}),  # Koirakäymälä (dog toilets)
         ("pysäköinti", Categories.PARKING, None),  # Pysäköinti (parking)
-        ("latauspiste", Categories.CHARGING_STATION, None),  # Latauspiste (charging points)
-        ("latausasema", Categories.CHARGING_STATION, None),  # Latausasema (charging stations)
+        ("latauspiste|latausasema", Categories.CHARGING_STATION, None),  # Latauspiste (charging points)
         ("juhannussalko", Categories.TOURISM_ARTWORK, None),  # Juhannussalko (midsummer poles)
         ("henkilöstöravintola", Categories.CANTEEN, None),  # Henkilöstöravintola (staff canteens)
         ("henkilöstöosasto", Categories.OFFICE_GOVERNMENT, None),  # Henkilöstöosasto (HR departments)
-        ("kouluravintola", Categories.CANTEEN, None),  # Kouluravintola (school canteens)
-        ("ruokapalvelu", Categories.CANTEEN, None),  # Ruokapalvelu (food services)
+        ("kouluravintola|ruokapalvelu", Categories.CANTEEN, None),  # Kouluravintola (school canteens)
         ("ravintola", Categories.RESTAURANT, None),  # Ravintola (restaurants)
         ("ruokala", Categories.CANTEEN, None),  # Ruokala (canteens)
         ("kenttä", Categories.LEISURE_PITCH, None),  # Kenttä (fields)
         ("miniareena", Categories.LEISURE_SPORTS_HALL, None),  # Miniareena (mini arenas)
-        ("areena", Categories.LEISURE_SPORTS_CENTRE, None),  # Areena (arenas)
-        ("urheilutalo", Categories.LEISURE_SPORTS_CENTRE, None),  # Urheilutalo (sports buildings)
-        ("liikuntatalo", Categories.LEISURE_SPORTS_CENTRE, None),  # Liikuntatalo (sports houses)
-        ("liikuntapuisto", Categories.LEISURE_SPORTS_CENTRE, None),  # Liikuntapuisto (sports parks)
-        ("kahvila", Categories.CAFE, None),  # Kahvila (cafes)
-        ("kahvio", Categories.CAFE, None),  # Kahvio (cafe counters)
+        ("areena|urheilutalo|liikuntatalo|liikuntapuisto", Categories.LEISURE_SPORTS_CENTRE, None),  # Areena (arenas)
+        ("kahvila|kahvio", Categories.CAFE, None),  # Kahvila (cafes)
         ("urheilukeskus", Categories.LEISURE_SPORTS_CENTRE, None),  # Urheilukeskus (sports centres)
         ("monitoimitila", Categories.COMMUNITY_CENTRE, None),  # Monitoimitila (multipurpose rooms)
-        ("kirjasto", Categories.LIBRARY, None),  # Kirjasto (libraries)
-        ("lainausasema", Categories.LIBRARY, None),  # Lainausasemat (library branches)
+        ("kirjasto|lainausasema", Categories.LIBRARY, None),  # Kirjasto (libraries)
         ("arkisto", Categories.ARCHIVE, None),  # Arkisto (archives)
-        ("kansalaisopisto", Categories.COLLEGE, None),  # Kansalaisopisto (civic institutes)
-        ("työväenopisto", Categories.COLLEGE, None),  # Työväenopisto (workers' institutes)
-        ("opisto", Categories.COLLEGE, None),  # Opisto / kansanopisto (institutes)
-        ("instituutti", Categories.COLLEGE, None),  # Instituutti (institutes)
+        (
+            "kansalaisopisto|työväenopisto|opisto|instituutti",
+            Categories.COLLEGE,
+            None,
+        ),  # Kansalaisopisto (civic institutes)
         ("äänitysstudio", Categories.MUSIC_SCHOOL, None),  # Äänitysstudio (recording studios)
-        ("akatemia", Categories.COLLEGE, None),  # Akatemia (academies)
-        ("academy", Categories.COLLEGE, None),  # Academy (academies)
-        ("kampus", Categories.COLLEGE, None),  # Kampus (campuses)
-        ("keuda", Categories.COLLEGE, None),  # Keuda (vocational consortium)
-        ("redu", Categories.COLLEGE, None),  # REDU (Lapland education consortium)
+        ("akatemia|academy|kampus|keuda|redu", Categories.COLLEGE, None),  # Akatemia (academies)
         ("gymnasi", Categories.SCHOOL, None),  # Gymnasi (gymnasium schools in Swedish, all inflections)
-        ("gym", Categories.GYM, None),  # Gym (gyms in English)
-        ("fitness", Categories.GYM, None),  # Fitness (fitness centres)
-        ("lukio", Categories.SCHOOL, None),  # Lukio (upper secondary schools)
-        ("lyseo", Categories.SCHOOL, None),  # Lyseo (lyceums, upper secondary schools)
-        ("peruskoulu", Categories.SCHOOL, None),  # Peruskoulu (basic education)
-        ("yläaste", Categories.SCHOOL, None),  # Yläaste (upper comprehensive)
-        ("ala-aste", Categories.SCHOOL, None),  # Ala-aste (lower comprehensive)
-        ("yhtenäiskoulu", Categories.SCHOOL, None),  # Yhtenäiskoulu (comprehensive schools)
+        ("gym|fitness", Categories.GYM, None),  # Gym (gyms in English)
+        (
+            "lukio|lyseo|peruskoulu|yläaste|ala-aste|" "yhtenäiskoulu",
+            Categories.SCHOOL,
+            None,
+        ),  # Lukio (upper secondary schools)
         ("förskola", Categories.KINDERGARTEN, None),  # Förskola (preschools in Swedish)
         ("skola", Categories.SCHOOL, None),  # Skola (schools in Swedish)
         ("koulutuskeskus", Categories.COLLEGE, None),  # Koulutuskeskus (training centres)
-        ("koulutus", Categories.OFFICE_GOVERNMENT, None),  # Koulutus (education services)
-        ("koulutukset", Categories.OFFICE_GOVERNMENT, None),  # Koulutukset (training courses)
+        ("koulutus|koulutukset", Categories.OFFICE_GOVERNMENT, None),  # Koulutus (education services)
         ("uimakoulu", None, None),  # Uimakoulut (swimming lessons): no venue, keep generic
         ("koulumuseo", Categories.MUSEUM, None),  # Koulumuseo (school museums)
         ("koulutoimisto", Categories.OFFICE_GOVERNMENT, None),  # Koulutoimisto (education offices)
         ("koulu", Categories.SCHOOL, None),  # Koulu (schools)
-        ("lupapalvelu", Categories.OFFICE_GOVERNMENT, None),  # Lupapalvelu (permit services, also at stations)
-        ("erityislupa", Categories.OFFICE_GOVERNMENT, None),  # Erityislupa (special permits, also at stations)
-        ("lupa-asi", Categories.OFFICE_GOVERNMENT, None),  # Lupa-asiat (permit matters, also at stations)
+        (
+            "lupapalvelu|erityislupa|lupa-asi",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Lupapalvelu (permit services, also at stations)
         ("poliisi", Categories.POLICE, None),  # Poliisi (police)
         ("tarkastus", Categories.OFFICE_GOVERNMENT, None),  # Tarkastus (inspection desks)
-        ("kriisi", Categories.SOCIAL_FACILITY, None),  # Kriisi (crisis services)
-        ("tukikeskus", Categories.SOCIAL_FACILITY, None),  # Tukikeskus (support centres)
+        ("kriisi|tukikeskus", Categories.SOCIAL_FACILITY, None),  # Kriisi (crisis services)
         ("päivystys", Categories.CLINIC_URGENT, None),  # Päivystys (emergency departments)
         ("sairaalamuseo", Categories.MUSEUM, None),  # Sairaalamuseo (hospital museums, cf. koulumuseo)
-        ("päiväsairaala", Categories.CLINIC, None),  # Päiväsairaala (day hospitals)
-        ("kliininen", Categories.CLINIC, None),  # Kliininen (clinical units)
+        ("päiväsairaala|kliininen", Categories.CLINIC, None),  # Päiväsairaala (day hospitals)
         ("potilasasia", Categories.OFFICE_GOVERNMENT, None),  # Potilasasia (patient-ombudsman desks)
         ("sairaala", Categories.HOSPITAL, None),  # Sairaala (hospitals)
         ("lähitori", Categories.SOCIAL_FACILITY, None),  # Lähitori (senior service points)
-        ("konttori", Categories.OFFICE_COMPANY, None),  # Konttori (head offices)
-        ("kehitysyhtiö", Categories.OFFICE_COMPANY, None),  # Kehitysyhtiö (development companies)
-        ("yritystalo", Categories.OFFICE_COMPANY, None),  # Yritystalo (business houses)
-        ("kiinteistö oy", Categories.OFFICE_COMPANY, None),  # Kiinteistö Oy (property companies)
+        ("konttori|kehitysyhtiö|yritystalo|kiinteistö oy", Categories.OFFICE_COMPANY, None),  # Konttori (head offices)
         ("kuraattori", Categories.SCHOOL, None),  # Kuraattori (school counsellors)
         ("luonnonsuojelualue", Categories.LEISURE_NATURE_RESERVE, None),  # Luonnonsuojelualue (nature reserves)
         ("arboretum", None, {"leisure": "botanical_garden"}),  # Arboretum (arboreta)
         ("erikoismetsä", None, {"natural": "wood"}),  # Erikoismetsä (designated municipal forests)
-        ("teatteri", Categories.THEATRE, None),
-        ("teater", Categories.THEATRE, None),  # Teater (Swedish theatre; teatern, teaterstudio)
-        ("kirkko", Categories.PLACE_OF_WORSHIP, None),  # Kirkko (churches)
-        ("rukoushuone", Categories.PLACE_OF_WORSHIP, None),  # Rukoushuone (prayer rooms)
-        ("raamattuhuone", Categories.PLACE_OF_WORSHIP, None),  # Raamattuhuone (prayer rooms)
-        ("kappeli", Categories.PLACE_OF_WORSHIP, None),  # Kappeli (chapels)
-        ("seurakuntatalo", Categories.COMMUNITY_CENTRE, None),  # Seurakuntatalo (parish halls)
-        ("seurakuntakoti", Categories.COMMUNITY_CENTRE, None),  # Seurakuntakoti (parish houses)
-        ("seurakuntakeskus", Categories.COMMUNITY_CENTRE, None),  # Seurakuntakeskus (parish centres)
-        ("seurakuntatila", Categories.COMMUNITY_CENTRE, None),  # Seurakuntatila (parish premises)
-        ("muistomerkki", Categories.TOURISM_ARTWORK, None),  # Muistomerkki (memorials)
-        ("memorial", Categories.TOURISM_ARTWORK, None),  # Memorial (memorials in English)
-        ("minnesmärk", Categories.TOURISM_ARTWORK, None),  # Minnesmärke (memorials in Swedish)
-        ("galleria", Categories.ARTS_CENTRE, None),  # Galleria (art galleries)
-        ("taiteen perusopetus", Categories.ARTS_CENTRE, None),  # Taiteen perusopetus (basic art education)
-        ("linnoitus", Categories.TOURISM_ATTRACTION, None),  # Linnoitus (fortresses)
-        ("lammasaitaus", Categories.TOURISM_ATTRACTION, None),  # Lammasaitaus (sheep enclosures)
+        ("teatteri|teater", Categories.THEATRE, None),
+        ("kirkko|rukoushuone|raamattuhuone|kappeli", Categories.PLACE_OF_WORSHIP, None),  # Kirkko (churches)
+        (
+            "seurakuntatalo|seurakuntakoti|seurakuntakeskus|" "seurakuntatila",
+            Categories.COMMUNITY_CENTRE,
+            None,
+        ),  # Seurakuntatalo (parish halls)
+        ("muistomerkki|memorial|minnesmärk", Categories.TOURISM_ARTWORK, None),  # Muistomerkki (memorials)
+        ("galleria|taiteen perusopetus", Categories.ARTS_CENTRE, None),  # Galleria (art galleries)
+        ("linnoitus|lammasaitaus", Categories.TOURISM_ATTRACTION, None),  # Linnoitus (fortresses)
         ("monumentti", Categories.TOURISM_ARTWORK, None),  # Monumentti (monuments)
         ("patsas", Categories.TOURISM_ARTWORK, {"artwork_type": "sculpture"}),  # Patsas (statues)
-        ("graffiti", Categories.TOURISM_ARTWORK, {"artwork_type": "graffiti"}),  # Graffiti (graffiti walls)
-        ("graffitti", Categories.TOURISM_ARTWORK, {"artwork_type": "graffiti"}),  # Graffitti (graffiti variant)
+        ("graffiti|graffitti", Categories.TOURISM_ARTWORK, {"artwork_type": "graffiti"}),  # Graffiti (graffiti walls)
         ("taidekontti", Categories.TOURISM_ARTWORK, None),  # Taidekontti (art containers)
-        ("avanto", Categories.LEISURE_SWIMMING_AREA, None),  # Avanto / avantouinti (ice-swimming holes)
-        ("talviuinti", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuinti (winter swimming)
+        ("avanto|talviuinti", Categories.LEISURE_SWIMMING_AREA, None),  # Avanto / avantouinti (ice-swimming holes)
         ("luistelu", Categories.LEISURE_ICE_RINK, None),  # Luistelu (skating)
-        ("lastenkoti", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),  # Lastenkoti (children homes)
-        ("ryhmäkoti", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),  # Ryhmäkoti (group homes)
         (
-            "ryhmäkodit",
+            "lastenkoti|ryhmäkoti|ryhmäkodit|" "yhteisöllinen asuminen",
             Categories.SOCIAL_FACILITY,
             {"social_facility": "group_home"},
-        ),  # Ryhmäkodit (group homes, plural)
-        (
-            "yhteisöllinen asuminen",
-            Categories.SOCIAL_FACILITY,
-            {"social_facility": "group_home"},
-        ),  # Yhteisöllinen asuminen (communal housing)
+        ),  # Lastenkoti (children homes)
         ("palveluasumisyksikkö", Categories.NURSING_HOME, None),  # Palveluasumisyksiköt (service-housing units)
         (
             "asumisyksikkö",
             Categories.SOCIAL_FACILITY,
             {"social_facility": "group_home"},
         ),  # Asumisyksikkö (housing units)
-        ("toimintakeskus", Categories.COMMUNITY_CENTRE, None),  # Toimintakeskus (activity centres)
-        ("monitoimitalo", Categories.COMMUNITY_CENTRE, None),  # Monitoimitalo (multipurpose houses)
-        ("kerhotalo", Categories.COMMUNITY_CENTRE, None),  # Kerhotalo (clubhouses)
-        ("harrastetila", Categories.COMMUNITY_CENTRE, None),  # Harrastetila (hobby premises)
-        ("harrastuskeskus", Categories.COMMUNITY_CENTRE, None),  # Harrastuskeskus (hobby centres)
-        ("kerhohuone", Categories.COMMUNITY_CENTRE, None),  # Kerhohuone (club rooms)
-        ("asukastila", Categories.COMMUNITY_CENTRE, None),  # Asukastilat (resident premises)
-        ("4h-kerho", Categories.COMMUNITY_CENTRE, None),  # 4H-kerho (4H children's clubs)
-        ("kylätalo", Categories.COMMUNITY_CENTRE, None),  # Kylätalo (village halls)
-        ("seurantalo", Categories.COMMUNITY_CENTRE, None),  # Seurantalo (association houses)
-        ("työväentalo", Categories.COMMUNITY_CENTRE, None),  # Työväentalo (workers' halls)
-        ("kotiseututalo", Categories.COMMUNITY_CENTRE, None),  # Kotiseututalo (heritage houses)
-        ("olka-piste", Categories.OFFICE_GOVERNMENT, None),  # OLKA-pisteet (hospital info desks)
-        ("yhdistys", Categories.COMMUNITY_CENTRE, None),  # Yhdistys (association houses)
-        ("kumppanuustalo", Categories.COMMUNITY_CENTRE, None),  # Kumppanuustalo (partnership houses)
-        ("järjestötalo", Categories.COMMUNITY_CENTRE, None),  # Järjestötalo (organisation houses)
-        ("yhteisötalo", Categories.COMMUNITY_CENTRE, None),  # Yhteisötalo (community houses)
-        ("yhteisökeskus", Categories.COMMUNITY_CENTRE, None),  # Yhteisökeskus (community centres)
-        ("kulttuuritalo", Categories.COMMUNITY_CENTRE, None),  # Kulttuuritalo (culture houses)
-        ("lastenkulttuurikeskus", Categories.ARTS_CENTRE, None),  # Lastenkulttuurikeskus (children's culture centres)
-        ("kulttuurikeskus", Categories.COMMUNITY_CENTRE, None),  # Kulttuurikeskus (culture centres)
-        ("kulttuuritila", Categories.COMMUNITY_CENTRE, None),  # Kulttuuritila (culture premises)
-        ("yhteisötila", Categories.COMMUNITY_CENTRE, None),  # Yhteisötila (community premises)
         (
-            "kokoustila",
-            Categories.EVENTS_VENUE,
+            "toimintakeskus|monitoimitalo|kerhotalo|"
+            "harrastetila|harrastuskeskus|kerhohuone|"
+            "asukastila|4h-kerho|kylätalo|seurantalo|"
+            "työväentalo|kotiseututalo",
+            Categories.COMMUNITY_CENTRE,
             None,
-        ),  # Kokoustila (meeting rooms)
+        ),  # Toimintakeskus (activity centres)
+        ("olka-piste", Categories.OFFICE_GOVERNMENT, None),  # OLKA-pisteet (hospital info desks)
+        (
+            "yhdistys|kumppanuustalo|järjestötalo|yhteisötalo|" "yhteisökeskus|kulttuuritalo",
+            Categories.COMMUNITY_CENTRE,
+            None,
+        ),  # Yhdistys (association houses)
+        ("lastenkulttuurikeskus", Categories.ARTS_CENTRE, None),  # Lastenkulttuurikeskus (children's culture centres)
+        (
+            "kulttuurikeskus|kulttuuritila|yhteisötila",
+            Categories.COMMUNITY_CENTRE,
+            None,
+        ),  # Kulttuurikeskus (culture centres)
+        ("kokoustila", Categories.EVENTS_VENUE, None),  # Kokoustila (meeting rooms)
         ("neuvottelu", Categories.SOCIAL_FACILITY, None),  # Neuvottelu (negotiation centres, all family-affairs)
-        ("pelastusasema", Categories.FIRE_STATION, None),  # Pelastusasema (rescue stations)
-        ("vpk", Categories.FIRE_STATION, None),  # VPK (volunteer fire brigades)
-        ("palokunta", Categories.FIRE_STATION, None),  # Palokunta (fire brigades)
-        ("paloasema", Categories.FIRE_STATION, None),  # Paloasema (fire stations)
-        ("linja-autoasema", Categories.BUS_STATION, None),  # Linja-autoasema (bus stations)
-        ("bussiasema", Categories.BUS_STATION, None),  # Bussiasema (bus stations)
+        ("pelastusasema|vpk|palokunta|paloasema", Categories.FIRE_STATION, None),  # Pelastusasema (rescue stations)
+        ("linja-autoasema|bussiasema", Categories.BUS_STATION, None),  # Linja-autoasema (bus stations)
         ("huoltoasema", None, None),  # Huoltoasema (fuel stations): no precise filing, keep generic
         ("rautatieasema", None, {"railway": "station", "public_transport": "station"}),
         ("ilmailukeskus", None, {"aeroway": "aerodrome"}),  # Ilmailukeskus (sport-aviation fields)
-        ("kunnanvirasto", Categories.OFFICE_GOVERNMENT, None),  # Kunnanvirasto (municipal offices)
-        ("kaupungintalo", Categories.OFFICE_GOVERNMENT, None),  # Kaupungintalo (city halls)
-        ("kaupunginvirasto", Categories.OFFICE_GOVERNMENT, None),  # Kaupunginvirasto (city offices)
-        ("office", Categories.OFFICE_GOVERNMENT, None),  # Office (service offices in English)
-        ("lautakunta", Categories.OFFICE_GOVERNMENT, None),  # Lautakunta (municipal boards)
-        ("valtuusto", Categories.OFFICE_GOVERNMENT, None),  # Valtuusto (councils; youth councils keep community above)
-        ("hankinta", Categories.OFFICE_GOVERNMENT, None),  # Hankinta (procurement units)
-        ("hankinnat", Categories.OFFICE_GOVERNMENT, None),  # Hankinnat (procurement units, plural)
-        ("tonttijako", Categories.OFFICE_GOVERNMENT, None),  # Tonttijako (plot-division desks)
-        ("maakuntatalo", Categories.OFFICE_GOVERNMENT, None),  # Maakuntatalo (regional houses)
+        (
+            "kunnanvirasto|kaupungintalo|kaupunginvirasto|"
+            "office|lautakunta|valtuusto|hankinta|hankinnat|"
+            "tonttijako|maakuntatalo",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Kunnanvirasto (municipal offices)
         ("liikelaitos", Categories.OFFICE_COMPANY, None),  # Liikelaitos (municipal business enterprises)
-        ("keskusrekisteri", Categories.OFFICE_GOVERNMENT, None),  # Keskusrekisteri (parish register offices)
-        ("kunnantalo", Categories.OFFICE_GOVERNMENT, None),  # Kunnantalo (municipal halls)
-        ("hallinto", Categories.OFFICE_GOVERNMENT, None),  # Hallinto (administrations)
-        ("virasto", Categories.OFFICE_GOVERNMENT, None),  # Virasto (agencies)
-        ("päihde", Categories.CLINIC, None),  # Päihde (substance-abuse care)
-        ("arviointiyksikkö", Categories.CLINIC, None),  # Arviointiyksikkö (assessment units)
-        ("tutkimusyksik", Categories.CLINIC, None),  # Tutkimusyksikkö (examination units, all inflections)
-        ("akuuttiosasto", Categories.CLINIC, None),  # Akuuttiosasto (acute wards)
-        ("vuodeosasto", Categories.CLINIC, None),  # Vuodeosasto (inpatient wards)
-        ("kuntoutusyksikkö", Categories.CLINIC, None),  # Kuntoutusyksikkö (rehabilitation units)
+        (
+            "keskusrekisteri|kunnantalo|hallinto|virasto",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Keskusrekisteri (parish register offices)
+        (
+            "päihde|arviointiyksikkö|tutkimusyksik|" "akuuttiosasto|vuodeosasto|kuntoutusyksikkö",
+            Categories.CLINIC,
+            None,
+        ),  # Päihde (substance-abuse care)
         ("oy:n toimisto", Categories.OFFICE_COMPANY, None),  # Oy:n toimisto (company offices)
         ("toimisto", Categories.OFFICE_GOVERNMENT, None),  # Toimisto (offices)
         ("luontotupa", Categories.COMMUNITY_CENTRE, None),  # Luontotupa (nature huts keep the hut over info desks)
         (
-            "matkailuneuvon",
+            "matkailuneuvon|matkailuinfo",
             Categories.TOURISM_INFORMATION,
             {"information": "office"},
         ),  # Matkailuneuvonta (tourist info)
-        ("matkailuinfo", Categories.TOURISM_INFORMATION, {"information": "office"}),  # Matkailuinfo (tourist info)
-        ("toimipiste", Categories.OFFICE_GOVERNMENT, None),  # Toimipiste (service points)
-        (
-            "palvelupaikka",
-            Categories.OFFICE_GOVERNMENT,
-            None,
-        ),  # Palvelupaikka (service points)
-        ("toimipaikka", Categories.OFFICE_GOVERNMENT, None),  # Toimipaikka (offices)
+        ("toimipiste|palvelupaikka|toimipaikka", Categories.OFFICE_GOVERNMENT, None),  # Toimipiste (service points)
         ("museo", Categories.MUSEUM, None),  # Museo (museums)
         ("asiakaspalvelu", Categories.OFFICE_GOVERNMENT, None),  # Asiakaspalvelu (customer service)
         ("klubitalo", Categories.COMMUNITY_CENTRE, None),  # Klubitalo (peer clubhouses, not clinics)
         ("perhekeskus", Categories.OFFICE_GOVERNMENT, None),  # Perhekeskus (family centres)
         ("perhetyö", Categories.SOCIAL_FACILITY, None),  # Perhetyö (family work)
-        ("kirjaamo", Categories.OFFICE_GOVERNMENT, None),  # Kirjaamo (registries)
-        ("raatihuone", Categories.OFFICE_GOVERNMENT, None),  # Raatihuone (town halls; galleries keep museum above)
-        ("perheoikeudelliset", Categories.OFFICE_GOVERNMENT, None),  # Perheoikeudelliset (family-law services)
-        ("vapaa-aikatoimi", Categories.OFFICE_GOVERNMENT, None),  # Vapaa-aikatoimi (leisure administration)
+        (
+            "kirjaamo|raatihuone|perheoikeudelliset|" "vapaa-aikatoimi",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Kirjaamo (registries)
         ("vapaa-aikakeskus", Categories.COMMUNITY_CENTRE, None),  # Vapaa-aikakeskus (leisure centres)
         (
-            "kulttuuri- ja vapaa-aika",
+            "kulttuuri- ja vapaa-aika|maistraatti|sivistys|"
+            "maaseutu|varhaiskasvatus|perusopetus|työllisyys|"
+            "työvoima|rakennusvalvonta|ympäristönsuojelu|"
+            "rakennusvalvonnan|maanmittauslaitos|metsäkeskus|"
+            "ulosotto",
             Categories.OFFICE_GOVERNMENT,
             None,
         ),  # Kunnan kulttuuri- ja vapaa-aika (municipal culture/leisure depts)
-        ("maistraatti", Categories.OFFICE_GOVERNMENT, None),  # Maistraatti (magistrates)
-        ("sivistys", Categories.OFFICE_GOVERNMENT, None),  # Sivistys (education admin)
-        ("maaseutu", Categories.OFFICE_GOVERNMENT, None),  # Maaseutu (rural services)
-        ("varhaiskasvatus", Categories.OFFICE_GOVERNMENT, None),  # Varhaiskasvatus (early-education admin)
-        ("perusopetus", Categories.OFFICE_GOVERNMENT, None),  # Perusopetus (basic-education admin)
-        ("työllisyys", Categories.OFFICE_GOVERNMENT, None),  # Työllisyys (employment services)
-        ("työvoima", Categories.OFFICE_GOVERNMENT, None),  # Työvoima (labour services)
-        ("rakennusvalvonta", Categories.OFFICE_GOVERNMENT, None),  # Rakennusvalvonta (building control)
-        ("ympäristönsuojelu", Categories.OFFICE_GOVERNMENT, None),  # Ympäristönsuojelu (environmental protection)
-        ("rakennusvalvonnan", Categories.OFFICE_GOVERNMENT, None),  # Rakennusvalvonnan (building control, genitive)
-        ("maanmittauslaitos", Categories.OFFICE_GOVERNMENT, None),  # Maanmittauslaitos (land survey offices)
-        ("metsäkeskus", Categories.OFFICE_GOVERNMENT, None),  # Metsäkeskus (forest centre)
-        ("ulosotto", Categories.OFFICE_GOVERNMENT, None),
         ("kotihoito", Categories.SOCIAL_FACILITY, None),  # Kotihoito (home care, outranks lähipalvelualue below)
         ("tulli", Categories.OFFICE_GOVERNMENT, None),  # Tulli (customs offices)
         ("kuntoutusohjaus", Categories.SOCIAL_FACILITY, None),  # Kuntoutusohjaus (rehab guidance)
-        ("ohjaus", Categories.OFFICE_GOVERNMENT, None),  # Ohjaus (guidance desks)
-        ("neuvonta", Categories.OFFICE_GOVERNMENT, None),  # Neuvonta (advice services)
-        ("lähipalvelu", Categories.OFFICE_GOVERNMENT, None),  # Lähipalvelu (local service points)
-        ("ohjaamo", Categories.OFFICE_GOVERNMENT, None),  # Ohjaamo (guidance hubs)
-        ("asiointipiste", Categories.OFFICE_GOVERNMENT, None),  # Asiointipiste (service points)
-        ("hyvinvointikioski", Categories.OFFICE_GOVERNMENT, None),  # Hyvinvointikioski (wellbeing kiosks)
+        (
+            "ohjaus|neuvonta|lähipalvelu|ohjaamo|" "asiointipiste|hyvinvointikioski",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Ohjaus (guidance desks)
         ("kioski", Categories.SHOP_KIOSK, None),  # Kioski (kiosks)
-        ("palvelupiste", Categories.OFFICE_GOVERNMENT, None),  # Palvelupiste (service points)
-        ("serviceenhet", Categories.OFFICE_GOVERNMENT, None),  # Serviceenhet (service units in Swedish)
-        ("palvelutori", Categories.OFFICE_GOVERNMENT, None),  # Palvelutori (service desks)
-        ("navigaattori", Categories.OFFICE_GOVERNMENT, None),  # Navigaattori (guidance service desks)
+        (
+            "palvelupiste|serviceenhet|palvelutori|" "navigaattori",
+            Categories.OFFICE_GOVERNMENT,
+            None,
+        ),  # Palvelupiste (service points)
         ("palvelukeskus", Categories.SOCIAL_FACILITY, None),  # Palvelukeskus (service centres)
         ("palvelutalo", Categories.NURSING_HOME, None),  # Palvelutalo (sheltered housing)
         ("seniori", Categories.SOCIAL_FACILITY, None),  # Seniori (senior centres, outranks info desks below)
-        ("luustoinfo", Categories.OFFICE_GOVERNMENT, None),  # Luustoinfo (bone-health info desks)
-        ("kansalaisinfo", Categories.OFFICE_GOVERNMENT, None),  # Kansalaisinfo (citizen info desks)
+        ("luustoinfo|kansalaisinfo", Categories.OFFICE_GOVERNMENT, None),  # Luustoinfo (bone-health info desks)
         ("info", Categories.TOURISM_INFORMATION, {"information": "office"}),  # Info (city information desks)
-        ("visitor centre", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
-        ("visitor center", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
+        ("visitor centre|visitor center", Categories.TOURISM_INFORMATION, {"information": "visitor_centre"}),
         ("sosiaali", Categories.SOCIAL_FACILITY, None),  # Sosiaali (social services)
-        ("vanhainkoti", Categories.NURSING_HOME, None),  # Vanhainkoti (elderly homes)
-        ("hoivakoti", Categories.NURSING_HOME, None),  # Hoivakoti (care homes)
+        ("vanhainkoti|hoivakoti", Categories.NURSING_HOME, None),  # Vanhainkoti (elderly homes)
         ("hoiva", Categories.SOCIAL_FACILITY, None),  # Hoiva (care homes)
-        ("työpaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Työpaja (workshops)
         (
-            "kulttuuripaja",
+            "työpaja|kulttuuripaja|innopaja|taitopaja",
             Categories.SOCIAL_FACILITY,
             {"social_facility": "workshop"},
-        ),  # Kulttuuripaja (culture workshops)
-        ("innopaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Innopaja (innovation workshops)
-        ("taitopaja", Categories.SOCIAL_FACILITY, {"social_facility": "workshop"}),  # Taitopaja (craft workshops)
+        ),  # Työpaja (workshops)
         ("ikäihmisten päivätoiminta", Categories.SOCIAL_FACILITY, None),  # Day activities for elderly
         ("ikäihmis", Categories.NURSING_HOME, None),  # Ikäihmis (elderly-care homes)
-        ("kehitysvamma", Categories.SOCIAL_FACILITY, None),  # Kehitysvamma (developmental-disability services)
-        ("vammais", Categories.SOCIAL_FACILITY, None),  # Vammais (disability services)
-        ("lyhytaikaishoito", Categories.NURSING_HOME, None),  # Lyhytaikaishoito (respite care)
-        ("lyhytaikaishoidon", Categories.NURSING_HOME, None),  # Lyhytaikaishoidon (respite care, genitive)
-        ("lyhytaikaisyksikkö", Categories.NURSING_HOME, None),  # Lyhytaikaisyksikkö (short-stay units)
+        ("kehitysvamma|vammais", Categories.SOCIAL_FACILITY, None),  # Kehitysvamma (developmental-disability services)
+        (
+            "lyhytaikaishoito|lyhytaikaishoidon|" "lyhytaikaisyksikkö",
+            Categories.NURSING_HOME,
+            None,
+        ),  # Lyhytaikaishoito (respite care)
         ("palvelut", Categories.OFFICE_GOVERNMENT, None),  # Palvelut (municipal service units)
-        ("palvelukoti", Categories.NURSING_HOME, None),  # Palvelukoti (service homes)
-        ("palveluasumi", Categories.NURSING_HOME, None),  # Palveluasuminen (24h service housing)
-        ("palveluasunnot", Categories.NURSING_HOME, None),  # Palveluasunnot (service flats, plural)
-        ("palvelukodit", Categories.NURSING_HOME, None),  # Palvelukodit (service homes, plural)
+        (
+            "palvelukoti|palveluasumi|palveluasunnot|" "palvelukodit",
+            Categories.NURSING_HOME,
+            None,
+        ),  # Palvelukoti (service homes)
         ("palvelu", Categories.OFFICE_GOVERNMENT, None),  # Palvelu (service desks)
         ("turvakoti", Categories.SOCIAL_FACILITY, {"social_facility": "shelter"}),
-        ("päivätoiminta", Categories.SOCIAL_FACILITY, None),  # Päivätoiminta (day activities)
-        ("päiväaikainen", Categories.SOCIAL_FACILITY, None),  # Päiväaikainen toiminta (daytime activities)
-        ("al-anon", Categories.COMMUNITY_CENTRE, None),  # Al-Anon (peer support)
-        ("vertaistuki", Categories.COMMUNITY_CENTRE, None),  # Vertaistuki (peer support)
+        ("päivätoiminta|päiväaikainen", Categories.SOCIAL_FACILITY, None),  # Päivätoiminta (day activities)
+        ("al-anon|vertaistuki", Categories.COMMUNITY_CENTRE, None),  # Al-Anon (peer support)
         ("lastensuojelu", Categories.SOCIAL_FACILITY, None),  # Lastensuojelu (child welfare)
-        ("vertaisryhm", Categories.COMMUNITY_CENTRE, None),  # Vertaisryhmä (peer-support groups)
-        ("sydänkerho", Categories.COMMUNITY_CENTRE, None),  # Sydänkerho (heart clubs)
-        ("sydänosasto", Categories.CLINIC, None),  # Sydänosasto (cardiac wards)
-        ("sydänyksikkö", Categories.CLINIC, None),  # Sydänyksikkö (cardiac units)
-        ("asumi", Categories.SOCIAL_FACILITY, None),  # Asumi (housing services)
-        ("boende", Categories.SOCIAL_FACILITY, None),  # Boende (housing in Swedish)
-        ("bostad", Categories.SOCIAL_FACILITY, None),  # Bostad (housing in Swedish)
-        ("bostäder", Categories.SOCIAL_FACILITY, None),  # Bostäder (housing in Swedish, plural)
-        ("hemmet", Categories.SOCIAL_FACILITY, None),  # Hemmet (housing in Swedish)
-        ("kuntout", Categories.SOCIAL_FACILITY, None),  # Kuntout (rehabilitation)
+        ("vertaisryhm|sydänkerho", Categories.COMMUNITY_CENTRE, None),  # Vertaisryhmä (peer-support groups)
+        ("sydänosasto|sydänyksikkö", Categories.CLINIC, None),  # Sydänosasto (cardiac wards)
+        ("asumi|boende|bostad|bostäder|hemmet|kuntout", Categories.SOCIAL_FACILITY, None),  # Asumi (housing services)
         ("työterveys", Categories.CLINIC, None),  # Työterveys (occupational health)
-        (
-            "matonpesu",
-            Categories.CARPET_WASHING,
-            None,
-        ),  # Matonpesu / matonpesupaikka (carpet washing)
-        ("kierrätys", Categories.RECYCLING, None),  # Kierrätys (recycling)
-        ("kiertopiste", Categories.RECYCLING, None),  # Kiertopiste (reuse points)
-        ("hyötykäyttö", Categories.RECYCLING, None),  # Hyötykäyttö (reuse stations)
-        ("hyödyksi", Categories.RECYCLING, None),  # Hyödyksi-asemat (reuse stations)
+        ("matonpesu", Categories.CARPET_WASHING, None),  # Matonpesu / matonpesupaikka (carpet washing)
+        ("kierrätys|kiertopiste|hyötykäyttö|hyödyksi", Categories.RECYCLING, None),  # Kierrätys (recycling)
         ("hävikkiterminaali", Categories.SOCIAL_FACILITY, None),  # Hävikkiterminaali (surplus-food terminals)
         ("terminaali", Categories.FERRY_TERMINAL, None),  # Terminaali (ferry passenger terminals)
-        ("vaateapu", Categories.SOCIAL_FACILITY, None),  # Vaateapu (clothing aid)
-        ("tavara-apu", Categories.SOCIAL_FACILITY, None),  # Tavara-apu (goods aid)
-        ("ruoka-apu", Categories.SOCIAL_FACILITY, None),  # Ruoka-apu (food aid)
-        ("ruokajako", Categories.SOCIAL_FACILITY, None),  # Ruokajako (food distribution)
-        ("hävikki", Categories.SOCIAL_FACILITY, None),  # Hävikki (surplus-food distribution)
+        (
+            "vaateapu|tavara-apu|ruoka-apu|ruokajako|hävikki",
+            Categories.SOCIAL_FACILITY,
+            None,
+        ),  # Vaateapu (clothing aid)
         ("hautausmaa", None, {"landuse": "cemetery"}),  # Hautausmaa (cemeteries, incl. pet cemeteries)
         ("krematorio", None, {"amenity": "crematorium"}),  # Krematorio (crematoriums)
         ("kodat", Categories.SHELTER, None),  # Kodat (kota shelters, plural)
         ("varikko", None, {"amenity": "depot"}),  # Varikko (depots)
-        ("lajitteluasema", Categories.RECYCLING, None),  # Lajitteluasema (sorting stations)
-        ("lajittelupiha", Categories.RECYCLING, None),  # Lajittelupiha (sorting yards)
-        ("siirtokuormausasema", Categories.RECYCLING, None),  # Siirtokuormausasema (transfer stations)
+        (
+            "lajitteluasema|lajittelupiha|siirtokuormausasema",
+            Categories.RECYCLING,
+            None,
+        ),  # Lajitteluasema (sorting stations)
         ("kaatopaikka", None, {"landuse": "landfill"}),  # Kaatopaikka (dump sites, incl. snow dumps)
-        ("lähiasema", Categories.CLINIC, None),  # Lähiasemat (local health stations)
-        ("selviämis", Categories.CLINIC, None),  # Selviämisasemat (sobering-up stations)
-        ("sydänasema", Categories.CLINIC, None),  # Sydänasema (acute cardiac unit)
+        ("lähiasema|selviämis|sydänasema", Categories.CLINIC, None),  # Lähiasemat (local health stations)
         ("ensihoito", Categories.FIRE_STATION, None),  # Ensihoitoasemat (EMS stations)
         ("ekoasema", Categories.RECYCLING, None),  # Ekoasemat (eco recycling points)
-        ("kohtaamisasema", Categories.COMMUNITY_CENTRE, None),  # Kohtaamisasemat (meeting points)
-        ("miesten asema", Categories.COMMUNITY_CENTRE, None),  # Miesten asema (men's support points)
+        ("kohtaamisasema|miesten asema", Categories.COMMUNITY_CENTRE, None),  # Kohtaamisasemat (meeting points)
         ("businessasema", Categories.OFFICE_GOVERNMENT, None),  # BusinessAsema (business service point)
         ("puolustusasema", Categories.TOURISM_ATTRACTION, None),  # Puolustusasemat (war-history sites)
         ("kaavoitus", Categories.OFFICE_GOVERNMENT, None),  # Kaavoitus (planning offices)
-        ("testausasema", None, None),  # Testausasemat (test stations): no precise filing, keep generic
-        ("testiasema", None, None),  # Testiasemat (test stations): no precise filing, keep generic
+        ("testausasema|testiasema", None, None),  # Testausasemat (test stations): no precise filing, keep generic
         ("asema", None, {"railway": "station", "public_transport": "station"}),  # Asema (railway stations)
         ("vuokraamo", Categories.SHOP_RENTAL, None),  # Vuokraamo (rental shops)
-        ("kirpputori", Categories.SHOP_SECOND_HAND, None),  # Kirpputori (flea markets)
-        ("kirppis", Categories.SHOP_SECOND_HAND, None),  # Kirppis (flea markets)
-        ("reshop", Categories.SHOP_SECOND_HAND, None),  # Reshop (second-hand shops)
-        ("viljelypalsta", Categories.ALLOTMENTS, None),  # Viljelypalsta (allotments)
-        ("marjapensas", Categories.ALLOTMENTS, None),  # Marjapensas (berry patches, not beaches)
-        (
-            "siirtolapuutarha",
-            Categories.ALLOTMENTS,
-            None,
-        ),  # Siirtolapuutarha (allotments)
+        ("kirpputori|kirppis|reshop", Categories.SHOP_SECOND_HAND, None),  # Kirpputori (flea markets)
+        ("viljelypalsta|marjapensas|siirtolapuutarha", Categories.ALLOTMENTS, None),  # Viljelypalsta (allotments)
         ("lainaamo", Categories.TOOL_LIBRARY, None),  # Lainaamo (lending libraries)
         ("ulkoilualue", Categories.LEISURE_PARK, None),  # Ulkoilualue (outdoor areas)
-        ("leirikeskus", Categories.TOURISM_CAMP_SITE, None),  # Leirikeskus (camp centres)
-        ("leirialue", Categories.TOURISM_CAMP_SITE, None),  # Leirialue (camp areas)
-        ("leiriytymispaikka", Categories.TOURISM_CAMP_SITE, None),  # Leiriytymispaikka (camping spots)
+        ("leirikeskus|leirialue|leiriytymispaikka", Categories.TOURISM_CAMP_SITE, None),  # Leirikeskus (camp centres)
         ("ampumarata", None, {"leisure": "shooting_ground", "sport": "shooting"}),  # Ampumarata (shooting ranges)
-        ("leirintäalue", Categories.TOURISM_CAMP_SITE, None),  # Leirintäalue (camping grounds)
-        ("telttailu", Categories.TOURISM_CAMP_SITE, None),  # Telttailu (tent sites, island camping)
+        ("leirintäalue|telttailu", Categories.TOURISM_CAMP_SITE, None),  # Leirintäalue (camping grounds)
         ("virkistysalue", Categories.LEISURE_PARK, None),  # Virkistysalue (recreation areas)
         ("laavu", Categories.SHELTER, None),  # Laavu (lean-to shelters)
         (
@@ -746,12 +599,10 @@ class PtvFISpider(Spider):
             None,
             {"leisure": "fishing"},
         ),  # Kalastusalue (fishing areas; after laavu so area shelters keep shelter)
-        ("hätämajoitus", Categories.SHELTER, None),  # Hätämajoitus (emergency housing)
-        ("ensikoti", Categories.SHELTER, None),  # Ensikoti (first homes for mothers and children)
+        ("hätämajoitus|ensikoti", Categories.SHELTER, None),  # Hätämajoitus (emergency housing)
         ("luontokeskus", Categories.MUSEUM, None),  # Luontokeskus (nature centres)
         ("vessa", Categories.TOILETS, None),  # Vessa (toilets)
-        ("talvipuutarha", None, {"leisure": "botanical_garden"}),  # Talvipuutarha (botanical garden)
-        ("kasvitieteelli", None, {"leisure": "botanical_garden"}),  # Kasvitieteelliset puutarhat
+        ("talvipuutarha|kasvitieteelli", None, {"leisure": "botanical_garden"}),  # Talvipuutarha (botanical garden)
         ("puisto", Categories.LEISURE_PARK, None),  # Puisto (parks)
         ("veistos", None, {"tourism": "artwork", "artwork_type": "sculpture"}),  # Veistos (sculptures; parks keep park)
         ("taideteos", Categories.TOURISM_ARTWORK, None),  # Taideteos (artworks)
@@ -760,9 +611,7 @@ class PtvFISpider(Spider):
         ("tupa", Categories.COMMUNITY_CENTRE, None),  # Tupa (meeting houses, compound-final)
         ("laituri", Categories.MAN_MADE_PIER, None),  # Laituri (piers)
         ("venepaikka", Categories.MARINA, None),  # Venepaikka (boat berths)
-        ("vesipiste", Categories.DRINKING_WATER, None),  # Vesipiste (drinking-water points)
-        ("vedenjakelu", Categories.DRINKING_WATER, None),  # Vedenjakelu (water distribution points)
-        ("vesiposti", Categories.DRINKING_WATER, None),  # Vesiposti (municipal water posts)
+        ("vesipiste|vedenjakelu|vesiposti", Categories.DRINKING_WATER, None),  # Vesipiste (drinking-water points)
         ("veneenlaskupaikka", Categories.LEISURE_SLIPWAY, None),  # Veneenlaskupaikka (boat launch ramps)
         (
             "lintutorni",
@@ -771,41 +620,26 @@ class PtvFISpider(Spider):
         ),  # Lintutorni (bird towers)
         ("lintulava", Categories.TOURISM_VIEWPOINT, None),  # Lintulava (birdwatching platforms)
         (
-            "luontotorni",
+            "luontotorni|näköalatorni",
             Categories.TOURISM_VIEWPOINT,
             {"man_made": "tower", "tower:type": "observation"},
         ),  # Luontotorni (nature towers)
         (
-            "näköalatorni",
-            Categories.TOURISM_VIEWPOINT,
-            {"man_made": "tower", "tower:type": "observation"},
-        ),  # Näköalatorni (observation towers)
-        ("sairaanhoito", Categories.CLINIC, None),  # Sairaanhoito (nursing care)
-        ("korvaushoito", Categories.CLINIC, None),  # Korvaushoito (substitution treatment)
-        ("vieroitus", Categories.CLINIC, None),  # Vieroitus (detox units)
-        ("leikkaus", Categories.CLINIC, None),  # Leikkaus (surgery units)
-        ("anestesia", Categories.CLINIC, None),  # Anestesia (anaesthesia units)
-        ("sisätauti", Categories.CLINIC, None),  # Sisätaudit (internal medicine)
-        ("silmätauti", Categories.CLINIC, None),  # Silmätaudit (eye care)
-        ("syöpätauti", Categories.CLINIC, None),  # Syöpätaudit (cancer care)
-        ("sairaansija", Categories.CLINIC, None),  # Sairaansijat (hospital beds)
-        ("tehohoito", Categories.CLINIC, None),  # Tehohoito (intensive care)
-        ("munuais", Categories.CLINIC, None),  # Munuais- (renal units)
-        ("tähystys", Categories.CLINIC, None),  # Tähystys (endoscopy units)
-        ("dialyysi", Categories.CLINIC, None),  # Dialyysi (dialysis units)
-        ("neulanvaihto", Categories.CLINIC, None),  # Neulanvaihto (needle-exchange points)
-        ("tartuntatauti", Categories.CLINIC, None),  # Tartuntataudit (infectious diseases)
-        ("hoitokoti", Categories.NURSING_HOME, None),  # Hoitokoti (care homes)
-        ("hoitokodit", Categories.NURSING_HOME, None),  # Hoitokodit (care homes, plural)
-        ("eläinhoitola", Categories.VETERINARY, None),  # Eläinhoitola (animal-care clinics)
-        ("lintuhoitola", Categories.VETERINARY, None),  # Lintuhoitola (bird-care clinics)
+            "sairaanhoito|korvaushoito|vieroitus|leikkaus|"
+            "anestesia|sisätauti|silmätauti|syöpätauti|"
+            "sairaansija|tehohoito|munuais|tähystys|dialyysi|"
+            "neulanvaihto|tartuntatauti",
+            Categories.CLINIC,
+            None,
+        ),  # Sairaanhoito (nursing care)
+        ("hoitokoti|hoitokodit", Categories.NURSING_HOME, None),  # Hoitokoti (care homes)
+        ("eläinhoitola|lintuhoitola", Categories.VETERINARY, None),  # Eläinhoitola (animal-care clinics)
         ("hoito", Categories.OFFICE_GOVERNMENT, None),  # Hoito (care service desks)
         (
-            "väestönsuoja",
+            "väestönsuoja|yhteiskalliosuoja",
             Categories.MILITARY_BUNKER,
             {"bunker_type": "bomb_shelter"},
         ),  # Väestönsuoja (civil-defence shelters)
-        ("yhteiskalliosuoja", Categories.MILITARY_BUNKER, {"bunker_type": "bomb_shelter"}),
         ("korsu", Categories.MILITARY_BUNKER, None),  # Korsu (war-history dugouts, e.g. Salpa Line)
     )
 
@@ -852,7 +686,7 @@ class PtvFISpider(Spider):
         self._seen_orgs: set[str] = set()
         self._pending: dict[str, list[Feature]] = {}
         venue_words = (
-            {k for k, _, _ in self.CATEGORY_RULES}
+            {w for keys, _, _ in self.CATEGORY_RULES for w in keys.split("|")}
             | set(self.BRANCH_TAILS)
             | set(self.UNIT_TAILS)
             | set(self.SERVICE_HEADS)
@@ -887,50 +721,58 @@ class PtvFISpider(Spider):
         self.GENERIC_WORDS = {w.lower() for w in venue_words}
         self.FIXTURE_RE = re.compile("|".join(sorted(self.GENERIC_WORDS, key=len, reverse=True)))
         self._rules = []
-        for k, cat, extra in self.CATEGORY_RULES:
-            if k in ("lab", "kirkko", "kappeli", "seurakuntatalo", "halli", "tupa"):
-                # Compound-end only: Tykslab/Fimlab, Aurejärven kirkko and
-                # Säkylähalli match; labyrintti, Kirkkojärvi, Kirkkopuisto,
-                # hallitus and maaseutupalvelut (tupa mid-compound) do not.
-                rx = re.compile(r"\w*" + re.escape(k) + r"\b")
-            elif k == "info":
-                # Info desks read prefix or suffix (Infopiste, Pääinfo);
-                # Sinfonia never matches.
-                rx = re.compile(r"info\b|\binfo")
-            elif k == "tulli":
-                # Customs offices (Lentotulli) share the stem with
-                # district/building names (Tullinkulma, Tullikamari,
-                # Tullisaari, Tullinpuomi, Tullintori, Tullivuorentie,
-                # Tullinaukio squares): those never match.
-                rx = re.compile(r"tulli(?!nkulma|kamari|vuor|saar|npuomi|ntori|aukio|naukio)")
-            elif k == "kioski":
-                # Info kiosks are info points, not shops ("Infokioski",
-                # "kioski eli infopiste"): the info rule below files them.
-                rx = re.compile(r"(?<!info)(?<!info-)kioski(?!\s*eli\s*infopiste)")
-            elif k == "skola":
-                # Askola the municipality is not a skola (school); Eskola
-                # farm compounds ("Eskolakoti") are not schools either, while
-                # Swedish school compounds and inflections still file.
-                rx = re.compile(r"(?<!a)skol(a|an|ans|as|or|orna|ornas|anin)?\b")
-            elif k == "koulu":
-                # Koulutalo, koulukoti and koulun stay schools; koulutus
-                # and its inflections (koulutukseen/tukset) plus pupils
-                # (koululainen) and school-aged (kouluikäinen, kouluiässä)
-                # never match. Street words (koulutie, -katu, -kuja,
-                # -polku, -väylä) never file as schools either.
-                rx = re.compile(r"\w*koulu(?!tus|tuk|lai|ikä|iä|tie|katu|kuja|polku|väylä)")
-            elif k == "asema":
-                # Station words, compound-final only: lending the airport
-                # ("...lentoasemalla") never files as a station; desks there
-                # file as offices via their own later rules. A bare
-                # Lentoasema is no one's railway station, and inflected
-                # station modifiers ("metroaseman väestönsuoja",
-                # "terveysasemilla" services) must not file as stations.
-                # Rautatieasema keeps its own earlier rule.
-                rx = re.compile(r"(?<!lento)asema\b")
-            else:
-                rx = re.compile(re.escape(k))
-            self._rules.append((rx, cat, extra))
+        for keys, cat, extra in self.CATEGORY_RULES:
+            # One alternation per same-target group: the table loop only
+            # uses .search() truthiness, and every member shares the target,
+            # so a single regex is exactly equivalent to per-key patterns.
+            self._rules.append((re.compile("|".join(self._key_part(k) for k in keys.split("|"))), cat, extra))
+
+    @staticmethod
+    def _key_part(k: str) -> str:
+        # Alternation branch for one table key: special keys keep their
+        # guards (compound-end, lookarounds, boundaries), plain keys match
+        # as escaped substrings. Shapes mirror the old per-key regexes.
+        if k in ("lab", "kirkko", "kappeli", "seurakuntatalo", "halli", "tupa"):
+            # Compound-end only: Tykslab/Fimlab, Aurejärven kirkko and
+            # Säkylähalli match; labyrintti, Kirkkojärvi, Kirkkopuisto,
+            # hallitus and maaseutupalvelut (tupa mid-compound) do not.
+            return r"\w*" + re.escape(k) + r"\b"
+        if k == "info":
+            # Info desks read prefix or suffix (Infopiste, Pääinfo);
+            # Sinfonia never matches.
+            return r"info\b|\binfo"
+        if k == "tulli":
+            # Customs offices (Lentotulli) share the stem with
+            # district/building names (Tullinkulma, Tullikamari,
+            # Tullisaari, Tullinpuomi, Tullintori, Tullivuorentie,
+            # Tullinaukio squares): those never match.
+            return r"tulli(?!nkulma|kamari|vuor|saar|npuomi|ntori|aukio|naukio)"
+        if k == "kioski":
+            # Info kiosks are info points, not shops ("Infokioski",
+            # "kioski eli infopiste"): the info rule below files them.
+            return r"(?<!info)(?<!info-)kioski(?!\s*eli\s*infopiste)"
+        if k == "skola":
+            # Askola the municipality is not a skola (school); Eskola
+            # farm compounds ("Eskolakoti") are not schools either, while
+            # Swedish school compounds and inflections still file.
+            return r"(?<!a)skol(a|an|ans|as|or|orna|ornas|anin)?\b"
+        if k == "koulu":
+            # Koulutalo, koulukoti and koulun stay schools; koulutus
+            # and its inflections (koulutukseen/tukset) plus pupils
+            # (koululainen) and school-aged (kouluikäinen, kouluiässä)
+            # never match. Street words (koulutie, -katu, -kuja,
+            # -polku, -väylä) never file as schools either.
+            return r"\w*koulu(?!tus|tuk|lai|ikä|iä|tie|katu|kuja|polku|väylä)"
+        if k == "asema":
+            # Station words, compound-final only: lending the airport
+            # ("...lentoasemalla") never files as a station; desks there
+            # file as offices via their own later rules. A bare
+            # Lentoasema is no one's railway station, and inflected
+            # station modifiers ("metroaseman väestönsuoja",
+            # "terveysasemilla" services) must not file as stations.
+            # Rautatieasema keeps its own earlier rule.
+            return r"(?<!lento)asema\b"
+        return re.escape(k)
 
     def _count(self, key: str, n: int = 1) -> None:
         crawler = getattr(self, "crawler", None)
