@@ -3864,7 +3864,44 @@ class PtvFISpider(Spider):
     ZW_RE = re.compile("[\u200b-\u200d\ufeff\u00ad]")
     # Switchboard/central contacts stamped across locations are not
     # per-store data (cf. the JSON-LD hotline lesson): drop on sight.
-    GENERIC_PHONES = frozenset({"358981621", "358983911"})  # Espoon/Vantaan vaihteet
+    # Canonical national-significant digits (country 358 and trunk 0
+    # stripped, so +358/09/no-prefix feed shapes all match). Audited
+    # 2026-10-14: each spans locations citywide or nationally (row counts
+    # are raw locations sharing the number): Helsinki central 09 310 22111
+    # (609, 3 departments), Espoo bulk 09 816 25100 (247, incl. parks),
+    # Helsinki 09 310 1691 (201, 3 departments), Vantaa 09 839 22242
+    # (198, incl. schools), police national permit line 0295 419 800
+    # (139, 11 departments), Varha 02 313 2200/2100 (rows keep alternates),
+    # Kotka 05 23480 (95, incl. beaches), HUS lab central 09 4718 6800
+    # (92), medical helpline 116117 (90, 7 orgs), RIKU helpline 116006
+    # (23, leaves RIKU points phoneless by design), Pori vaihde
+    # 02 621 1100 (77), Turku vaihde 02 330 000, HUS vaihde 09 4711,
+    # Raahe employment 08 439 4000/1 (rows keep alternates), Tyks main
+    # 02 313 0000 (33), Ulosotto 0295 658 800 (rows keep alternates).
+    GENERIC_PHONES = frozenset(
+        {
+            "981621",
+            "983911",
+            "931022111",
+            "981625100",
+            "93101691",
+            "983922242",
+            "295419800",
+            "23132200",
+            "23132100",
+            "523480",
+            "947186800",
+            "116117",
+            "116006",
+            "26211100",
+            "2330000",
+            "94711",
+            "84394000",
+            "84394001",
+            "23130000",
+            "295658800",
+        }
+    )
     GENERIC_EMAILS = frozenset({"info@esperi.fi"})  # Central corporate inbox
     LOGIN_URL_RE = re.compile(
         r"(authentication|/login|login[./?#]|log-in|sso[.-]|idp[-.]|menu\.|safelinks|@)", re.IGNORECASE
@@ -4598,6 +4635,17 @@ class PtvFISpider(Spider):
     def _str_or_empty(value: object) -> str:
         return value.strip() if isinstance(value, str) else ""
 
+    @staticmethod
+    def _canonical_phone_digits(raw: str) -> str:
+        # Feed shapes vary (+358 prefix, 09 trunk, bare local): compare
+        # the national-significant digits so all shapes hit the same set.
+        digits = re.sub(r"\D", "", raw or "")
+        if digits.startswith("358"):
+            digits = digits[3:]
+        if digits.startswith("0"):
+            digits = digits[1:]
+        return digits
+
     def _contact_phone(self, item: Feature, phones: list) -> None:
         # First voice line wins; fax lines, generic switchboards and
         # unusable entries fall through to the next candidate.
@@ -4612,7 +4660,7 @@ class PtvFISpider(Spider):
             prefix = self._str_or_empty(entry.get("prefixNumber"))
             if not number:
                 continue
-            if re.sub(r"\D", "", prefix + number) in self.GENERIC_PHONES:
+            if self._canonical_phone_digits(prefix + number) in self.GENERIC_PHONES:
                 self._count("contact/generic_hotline")
                 continue
             raw = f"{prefix} {number}".strip() if prefix else number

@@ -3073,6 +3073,33 @@ def test_contact_keep_and_drop():
     probe = Feature()
     spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "+358", "number": "983911"}]})
     assert probe.get("phone") is None
+    # Canonical shapes (+358, trunk, bare) all hit the same set.
+    assert spider._canonical_phone_digits("+358 9 81621") == "981621"
+    assert spider._canonical_phone_digits("09 81621") == "981621"
+    assert spider._canonical_phone_digits("981621") == "981621"
+    # Audited centrals drop in every feed shape; ordinary numbers survive.
+    for digits in ("931022111", "983922242", "295419800", "116117", "94711", "2330000"):
+        probe = Feature()
+        spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "+358", "number": digits}]})
+        assert probe.get("phone") is None, digits
+    probe = Feature()
+    spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "", "number": "09 4711"}]})
+    assert probe.get("phone") is None
+    probe = Feature()
+    spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "", "number": "116117"}]})
+    assert probe.get("phone") is None
+    # A generic first line yields to a real second line.
+    probe = Feature()
+    spider._apply_contact(
+        probe,
+        {
+            "phoneNumbers": [
+                {"prefixNumber": "+358", "number": "931022111"},
+                {"prefixNumber": "", "number": "040 123 4567"},
+            ]
+        },
+    )
+    assert probe.get("phone") == "+358 40 1234567"
 
 
 def test_fax_lines_yield_to_voice():
