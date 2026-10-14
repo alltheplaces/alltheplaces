@@ -1,5 +1,5 @@
 import re
-from typing import Iterable
+from typing import Callable, Iterable
 from urllib.parse import unquote, urlencode
 
 from pyproj import Transformer
@@ -2299,14 +2299,12 @@ class PtvFISpider(Spider):
 
     def _resolve_slash_institution(self, head: str, tail: str, name: str) -> SplitTriple | None:
         # Institution-headed pairs: hosted units, rooms and exercise
-        # grounds name the POI, the institution the venue. Ordered
-        # precedence table; first non-None hit wins.
+        # grounds name the POI, the institution the venue.
         if not (self._is_institution(head.lower()) and not self._is_institution(tail.lower())):
             return None
-        for resolver in (self._slash_inst_unit, self._slash_inst_room, self._slash_inst_ground):
-            if (hit := resolver(head, tail, name)) is not None:
-                return hit
-        return None
+        return self._first_hit(
+            (self._slash_inst_unit, self._slash_inst_room, self._slash_inst_ground), head, tail, name
+        )
 
     def _slash_street_head(self, head: str, tail: str, name: str) -> SplitTriple | None:
         if self._is_street_head(head):
@@ -2331,14 +2329,12 @@ class PtvFISpider(Spider):
         # Street heads, numbered buildings and hosted units resolve before
         # service/venue dispatch below. tail_base unused; kept for the
         # uniform resolver signature.
-        for resolver in (
-            self._slash_street_head,
-            self._slash_numbered_building,
-            self._resolve_slash_institution,
-        ):
-            if (hit := resolver(head, tail, name)) is not None:
-                return hit
-        return None
+        return self._first_hit(
+            (self._slash_street_head, self._slash_numbered_building, self._resolve_slash_institution),
+            head,
+            tail,
+            name,
+        )
 
     @staticmethod
     def _comma_base(text: str) -> str:
@@ -2369,16 +2365,14 @@ class PtvFISpider(Spider):
     def _resolve_slash_pair(self, head: str, tail: str, name: str) -> SplitTriple | None:
         # Institution, service, place and person tails resolve against the
         # head; returns None to fall through to room/appositive handling.
-        # Ordered precedence table; first non-None hit wins.
         tail_base = self._comma_base(tail)
-        for resolver in (
-            self._slash_pair_structural,
-            self._slash_pair_service_area,
-            self._slash_pair_venue_person,
-        ):
-            if (hit := resolver(head, tail, tail_base, name)) is not None:
-                return hit
-        return None
+        return self._first_hit(
+            (self._slash_pair_structural, self._slash_pair_service_area, self._slash_pair_venue_person),
+            head,
+            tail,
+            tail_base,
+            name,
+        )
 
     def _slash_exercise_ground(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if "lähiliikuntapaikka" in tail.lower() and re.search(r"(koulu|skol)\w*", head.lower()):
@@ -2431,17 +2425,19 @@ class PtvFISpider(Spider):
     def _slash_pair_service_area(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         # Exercise grounds, subunit descriptors, coverage areas, unit
         # qualifiers and service tails resolve before venue dispatch below.
-        # Ordered precedence table; first non-None hit wins.
-        for resolver in (
-            self._slash_exercise_ground,
-            self._slash_subunit_kept,
-            self._slash_area_kept,
-            self._slash_unit_kept,
-            self._slash_service_tail,
-        ):
-            if (hit := resolver(head, tail, tail_base, name)) is not None:
-                return hit
-        return None
+        return self._first_hit(
+            (
+                self._slash_exercise_ground,
+                self._slash_subunit_kept,
+                self._slash_area_kept,
+                self._slash_unit_kept,
+                self._slash_service_tail,
+            ),
+            head,
+            tail,
+            tail_base,
+            name,
+        )
 
     def _slash_institution_venue(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._is_institution(tail_base.lower()):
@@ -2516,21 +2512,23 @@ class PtvFISpider(Spider):
 
     def _slash_pair_venue_person(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         # Institution, place and person tails resolve against the head;
-        # rooms close the dispatch. Ordered precedence table; first
-        # non-None hit wins.
-        for resolver in (
-            self._slash_institution_venue,
-            self._slash_place_facility,
-            self._slash_district_facility,
-            self._slash_person_drop,
-            self._slash_office_kept,
-            self._slash_service_proper,
-            self._slash_proper_facility,
-            self._slash_generic_room,
-        ):
-            if (hit := resolver(head, tail, tail_base, name)) is not None:
-                return hit
-        return None
+        # rooms close the dispatch.
+        return self._first_hit(
+            (
+                self._slash_institution_venue,
+                self._slash_place_facility,
+                self._slash_district_facility,
+                self._slash_person_drop,
+                self._slash_office_kept,
+                self._slash_service_proper,
+                self._slash_proper_facility,
+                self._slash_generic_room,
+            ),
+            head,
+            tail,
+            tail_base,
+            name,
+        )
 
     def _peel_slash_pair(self, segments: list[str]) -> tuple[str, str | None] | None:
         # Peel trailing descriptor segments from the right (bounded);
@@ -2637,18 +2635,18 @@ class PtvFISpider(Spider):
 
     def _slash_geo_pair(self, segments: list[str], name: str) -> SplitTriple | None:
         # Geographic pre-checks run before descriptor peeling: addresses,
-        # island areas/heads, bay heads and single sculptures. Ordered
-        # precedence table; first non-None hit wins.
-        for resolver in (
-            self._slash_paren_address,
-            self._slash_area_island,
-            self._slash_island_venue,
-            self._slash_bay_venue,
-            self._slash_sculpture_kept,
-        ):
-            if (hit := resolver(segments, name)) is not None:
-                return hit
-        return None
+        # island areas/heads, bay heads and single sculptures.
+        return self._first_hit(
+            (
+                self._slash_paren_address,
+                self._slash_area_island,
+                self._slash_island_venue,
+                self._slash_bay_venue,
+                self._slash_sculpture_kept,
+            ),
+            segments,
+            name,
+        )
 
     def _slash_operator_pair(self, head: str, tail: str, name: str, segments: list[str]) -> SplitTriple | None:
         # Operator heads/tails and memorials resolve between peeling and
@@ -2783,12 +2781,8 @@ class PtvFISpider(Spider):
 
     def _paren_head(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         # Memorials and slash venue-address pairs resolve before the
-        # room-word deferral in the caller _split_paren. Ordered
-        # precedence table; first non-None hit wins.
-        for resolver in (self._paren_memorial, self._paren_slash_address):
-            if (hit := resolver(base, inner, name, city)) is not None:
-                return hit
-        return None
+        # room-word deferral in the caller _split_paren.
+        return self._first_hit((self._paren_memorial, self._paren_slash_address), base, inner, name, city)
 
     def _paren_coverage_sisters(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         if (
@@ -2897,19 +2891,24 @@ class PtvFISpider(Spider):
     def _paren_tail(self, base: str, inner: str, name: str, city: str | None) -> SplitTriple | None:
         # Coverage sisters, descriptors, stripped notes, localities and
         # venue lists resolve here; the room-word deferral runs first in
-        # the caller _split_paren. Ordered precedence table; first
-        # non-None hit wins.
-        for resolver in (
-            self._paren_coverage_sisters,
-            self._paren_coverage_city,
-            self._paren_venue_or_descriptor,
-            self._paren_numbered_room,
-            self._paren_stripped_note,
-            self._paren_locality,
-            self._paren_venue_list,
-        ):
-            if (hit := resolver(base, inner, name, city)) is not None:
-                return hit
+        # the caller _split_paren.
+        hit = self._first_hit(
+            (
+                self._paren_coverage_sisters,
+                self._paren_coverage_city,
+                self._paren_venue_or_descriptor,
+                self._paren_numbered_room,
+                self._paren_stripped_note,
+                self._paren_locality,
+                self._paren_venue_list,
+            ),
+            base,
+            inner,
+            name,
+            city,
+        )
+        if hit is not None:
+            return hit
         # Short qualifiers (target groups, levels, "(ulko)") are part of
         # the signed service name and stay whole.
         self._count("name/paren_qualifier_kept")
@@ -2983,18 +2982,14 @@ class PtvFISpider(Spider):
     def _split_dash(self, name: str) -> SplitTriple | None:
         # Dash-separated venue/unit pairs ("Friemanin talo -
         # nuorisotoimisto"); translation dashes split earlier, lowercase
-        # descriptors strip in cleaning. Ordered precedence table; first
-        # non-None hit wins.
+        # descriptors strip in cleaning.
         if " - " not in name:
             return None
         left, _, right = name.partition(" - ")
         left, right = left.strip(), right.strip()
         if not left or not right:
             return None
-        for resolver in (self._dash_room, self._dash_unit):
-            if (hit := resolver(left, right, name)) is not None:
-                return hit
-        return None
+        return self._first_hit((self._dash_room, self._dash_unit), left, right, name)
 
     def _split_bare_desk(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         # Bare desk tails on facility heads ("Vihdin kunnantalo/
@@ -3837,15 +3832,24 @@ class PtvFISpider(Spider):
             lowered_tail = tail.lower()
             lowered_head = head.lower()
             # Ordered precedence table: metadata → hosted-unit/city →
-            # city-police → service split. First non-None hit wins.
-            for resolver in (
-                self._comma_tail_pre,
-                self._split_comma_mid,
-                self._comma_city_police,
-                self._split_comma_service_wrapped,
-            ):
-                if (hit := resolver(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-                    return hit
+            # city-police → service split. First non-None hit wins; total
+            # misses keep the whole (this method never returns None).
+            hit = self._first_hit(
+                (
+                    self._comma_tail_pre,
+                    self._split_comma_mid,
+                    self._comma_city_police,
+                    self._split_comma_service_wrapped,
+                ),
+                head,
+                tail,
+                lowered_head,
+                lowered_tail,
+                name,
+                city,
+            )
+            if hit is not None:
+                return hit
             # Bare city tails and appositive descriptors stay whole:
             # the structured address carries the city.
             self._count("name/comma_kept")
@@ -3946,18 +3950,23 @@ class PtvFISpider(Spider):
         # comma pairs. Returns None to fall through to city tails and
         # the service split. Ordered precedence table; first non-None
         # hit wins.
-        for resolver in (
-            self._comma_unit,
-            self._comma_branch_kept,
-            self._comma_school_health_service,
-            self._comma_room,
-            self._comma_city_head,
-            self._comma_service_venue,
-            self._comma_service_genitive,
-        ):
-            if (hit := resolver(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-                return hit
-        return None
+        return self._first_hit(
+            (
+                self._comma_unit,
+                self._comma_branch_kept,
+                self._comma_school_health_service,
+                self._comma_room,
+                self._comma_city_head,
+                self._comma_service_venue,
+                self._comma_service_genitive,
+            ),
+            head,
+            tail,
+            lowered_head,
+            lowered_tail,
+            name,
+            city,
+        )
 
     def _split_comma_school_host(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
@@ -4100,16 +4109,24 @@ class PtvFISpider(Spider):
     ) -> SplitTriple | None:
         # Service/unit comma pairs, both directions, then tail cleaners.
         # Ordered precedence table; first non-None hit wins.
-        for resolver in (
-            self._split_comma_keep_whole,
-            self._split_comma_school_host,
-            self._comma_leisure_house,
-            self._comma_shared_redundant,
-            self._split_comma_service_head,
-            self._split_comma_unit_venue,
-        ):
-            if (hit := resolver(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-                return hit
+        hit = self._first_hit(
+            (
+                self._split_comma_keep_whole,
+                self._split_comma_school_host,
+                self._comma_leisure_house,
+                self._comma_shared_redundant,
+                self._split_comma_service_head,
+                self._split_comma_unit_venue,
+            ),
+            head,
+            tail,
+            lowered_head,
+            lowered_tail,
+            name,
+            city,
+        )
+        if hit is not None:
+            return hit
         return self._split_comma_tail_rest(head, tail, lowered_head, lowered_tail, name, city)
 
     def _comma_sv_service(
@@ -4191,17 +4208,22 @@ class PtvFISpider(Spider):
     ) -> SplitTriple | None:
         # Swedish tails and proper/unit/water/acronym/facility venues.
         # Ordered precedence table; first non-None hit wins.
-        for resolver in (
-            self._comma_sv_service,
-            self._comma_unit_proper,
-            self._comma_proper_venue,
-            self._comma_water_venue,
-            self._comma_acronym_venue,
-            self._comma_facility_venue,
-        ):
-            if (hit := resolver(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-                return hit
-        return None
+        return self._first_hit(
+            (
+                self._comma_sv_service,
+                self._comma_unit_proper,
+                self._comma_proper_venue,
+                self._comma_water_venue,
+                self._comma_acronym_venue,
+                self._comma_facility_venue,
+            ),
+            head,
+            tail,
+            lowered_head,
+            lowered_tail,
+            name,
+            city,
+        )
 
     def _comma_tail_coverage(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
@@ -4282,16 +4304,21 @@ class PtvFISpider(Spider):
         # Lowercase descriptors, Swedish tails, proper/unit venues and
         # coverage tails resolve after the service/unit dispatch above.
         # Ordered precedence table; first non-None hit wins.
-        for resolver in (
-            self._comma_tail_descriptor,
-            self._comma_tail_proper,
-            self._comma_tail_coverage,
-            self._comma_ward_kept,
-            self._comma_tail_descriptor_bare,
-        ):
-            if (hit := resolver(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-                return hit
-        return None
+        return self._first_hit(
+            (
+                self._comma_tail_descriptor,
+                self._comma_tail_proper,
+                self._comma_tail_coverage,
+                self._comma_ward_kept,
+                self._comma_tail_descriptor_bare,
+            ),
+            head,
+            tail,
+            lowered_head,
+            lowered_tail,
+            name,
+            city,
+        )
 
     PHONE_HINT_RE = re.compile(r"(puhelin|phone|telefon)", re.IGNORECASE)
     ZW_RE = re.compile("[\u200b-\u200d\ufeff\u00ad]")
@@ -4467,24 +4494,35 @@ class PtvFISpider(Spider):
 
     SUBUNIT_RE = re.compile(r"(osasto|yksikkö|vastaanotto|klinikka|sosiaalityö|säilytys)")
 
+    @staticmethod
+    def _first_hit(resolvers: Iterable[Callable[..., SplitTriple | None]], *args) -> SplitTriple | None:
+        # First non-None hit across an ordered precedence table. All
+        # dispatch tables below share this shape; the table order IS the
+        # precedence, each entry's docstring the rationale.
+        for resolver in resolvers:
+            if (hit := resolver(*args)) is not None:
+                return hit
+        return None
+
     def _custom_category(self, name_fi: str) -> tuple | None:
         # Pre-table rules: unambiguous machines, shore/market guards and
         # scoped overrides the keyword table cannot express. Ordered
         # precedence table: first non-None hit wins, in this order.
         lowered = name_fi.lower()
-        for resolver in (
-            self._custom_machine,
-            self._custom_tori,
-            self._custom_shore,
-            self._custom_health,
-            self._custom_church,
-            self._custom_ward,
-            self._custom_group_use,
-            self._custom_exercise_ground,
-        ):
-            if (hit := resolver(name_fi, lowered)) is not None:
-                return hit
-        return None
+        return self._first_hit(
+            (
+                self._custom_machine,
+                self._custom_tori,
+                self._custom_shore,
+                self._custom_health,
+                self._custom_church,
+                self._custom_ward,
+                self._custom_group_use,
+                self._custom_exercise_ground,
+            ),
+            name_fi,
+            lowered,
+        )
 
     def _custom_machine(self, name_fi: str, lowered: str) -> tuple | None:
         if "keittiö" in lowered and "," in name_fi:
