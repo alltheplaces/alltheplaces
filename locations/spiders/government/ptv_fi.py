@@ -62,6 +62,35 @@ class PtvFISpider(Spider):
     TRACK_RE = re.compile(r"\b(kuntorata|kuntopolku|latu|luontopolku|retkeilyreitti|hiihtolatu|pururata)\b")
     KM_RE = re.compile(r"\d\s*km\b")
     KITCHEN_INFIX = ("päiväkoti", "koulu", "palvelukeskus", "hoiva", "sairaala", "tuotanto")
+    COORD_TAIL_RE = re.compile(r",?\s*(?:[PN]\s*)?\d+\s*°.*$")
+    CORE_INSTITUTION_RE = re.compile(r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|sairaala|neuvola)")
+    # Consonant-gradation plurals/genitives normalizing to their singular
+    # (kenttä/kentät/kentän, ...). Longest-key-first so compound forms match
+    # properly; no leading \b so compounds (pallokentät) match like before.
+    GRADATION_MAP = {
+        "päiväkotien": "päiväkoti",
+        "taideteokset": "taideteos",
+        "taideteoksen": "taideteos",
+        "paikkojen": "paikka",
+        "yhdistykset": "yhdistys",
+        "seulonnat": "seulonta",
+        "seulonnan": "seulonta",
+        "päiväkodit": "päiväkoti",
+        "veistokset": "veistos",
+        "veistoksen": "veistos",
+        "keskuksen": "keskus",
+        "tautien": "tauti",
+        "yksiköt": "yksikkö",
+        "kentät": "kenttä",
+        "kentän": "kenttä",
+        "rannat": "ranta",
+        "rannan": "ranta",
+        "paikat": "paikka",
+        "paikan": "paikka",
+        "taudit": "tauti",
+        "radat": "rata",
+    }
+    GRADATION_RE = re.compile("(" + "|".join(sorted(GRADATION_MAP, key=len, reverse=True)) + r")\b")
 
     # First match wins; order frozen. Matching is prefix-or-compound
     # ((?:\bkw\w*|\w+kw\b)) so Finnish compounds hit from either side:
@@ -100,8 +129,7 @@ class PtvFISpider(Spider):
         ("oikeuspsykiatr", Categories.CLINIC, None),  # Forensic psychiatry units
         ("oikeuspsykolog", Categories.CLINIC, None),  # Forensic psychology units
         ("oikeus", Categories.COURTHOUSE, None),  # Oikeus (courts: supreme, insurance, administrative)
-        ("kanslia", Categories.OFFICE_GOVERNMENT, None),  # Kanslia (admin offices)
-        ("kansli", Categories.OFFICE_GOVERNMENT, None),  # Kansli (admin offices in Swedish)
+        ("kansli", Categories.OFFICE_GOVERNMENT, None),  # Kanslia / kansli (admin offices)
         ("stadshus", Categories.OFFICE_GOVERNMENT, None),  # Stadshus (city halls in Swedish)
         ("kommunhus", Categories.OFFICE_GOVERNMENT, None),  # Kommunhus (municipal houses in Swedish)
         ("suunnittelu", Categories.OFFICE_GOVERNMENT, None),  # Suunnittelu (planning offices)
@@ -163,8 +191,7 @@ class PtvFISpider(Spider):
         ("äitiys", Categories.CLINIC, None),  # Äitiys (maternity)
         ("puheterapia", Categories.CLINIC, {"healthcare": "speech_therapist"}),  # Puheterapia (speech therapy)
         ("klinikka", Categories.CLINIC, None),  # Klinikka (clinics)
-        ("poliklinikat", Categories.CLINIC, None),  # Poliklinikat (outpatient clinics, plural)
-        ("klinikat", Categories.CLINIC, None),  # Klinikat (clinics, plural)
+        ("klinikat", Categories.CLINIC, None),  # Klinikat / poliklinikat (clinics, plural)
         ("näytteenotto", Categories.SAMPLE_COLLECTION, None),  # Näytteenotto (sampling points)
         ("näytteenoton", Categories.SAMPLE_COLLECTION, None),  # Näytteenoton (sampling points, genitive)
         ("seulonta", Categories.CLINIC, None),  # Seulonta (health screenings)
@@ -205,8 +232,7 @@ class PtvFISpider(Spider):
         ("apuväline", Categories.OFFICE_GOVERNMENT, None),  # Apuväline (assistive-device service points)
         ("vastaanottokeskus", Categories.SOCIAL_FACILITY, None),  # Vastaanottokeskus (reception centres)
         ("jäte", Categories.RECYCLING, None),  # Jäte (waste services)
-        ("jätteen", Categories.RECYCLING, None),  # Jätteen (waste services, genitive)
-        ("jätte", Categories.RECYCLING, None),  # Jätte- (waste compounds, plural stem)
+        ("jätte", Categories.RECYCLING, None),  # Jätte- / jätteen (waste compounds, plural/genitive stem)
         ("sosiaalipalvelu", Categories.OFFICE_GOVERNMENT, None),  # Sosiaalipalvelu (social-service desks)
         ("elinkeinopalvelu", Categories.OFFICE_GOVERNMENT, None),  # Elinkeinopalvelut (business-service desks)
         ("elinkeinotoimi", Categories.OFFICE_GOVERNMENT, None),  # Elinkeinotoimi (business-development units)
@@ -219,8 +245,7 @@ class PtvFISpider(Spider):
         ("koirauimaranta", Categories.LEISURE_DOG_PARK, None),  # Koirauimaranta (dog beaches)
         ("talviuimari", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimarit (winter swimmers)
         ("talviuimaranta", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuimaranta (winter-swimming beaches)
-        ("uimaranta", Categories.NATURAL_BEACH, None),  # Uimaranta (beaches)
-        ("uimarannat", Categories.NATURAL_BEACH, None),  # Uimarannat (beaches, plural)
+        ("uimaranta", Categories.NATURAL_BEACH, None),  # Uimaranta / uimarannat (beaches)
         ("uimapaikka", Categories.NATURAL_BEACH, None),  # Uimapaikka (swimming places)
         ("ulkokuntosali", Categories.LEISURE_FITNESS_STATION, None),  # Ulkokuntosali (outdoor gyms)
         ("ulkokuntoilu", Categories.LEISURE_FITNESS_STATION, None),  # Ulkokuntoilu (outdoor exercise)
@@ -315,8 +340,7 @@ class PtvFISpider(Spider):
         ("minigolf", Categories.LEISURE_MINIATURE_GOLF, None),  # Minigolf (miniature golf)
         ("seikkailugolf", Categories.LEISURE_MINIATURE_GOLF, None),
         ("puttiparkki", Categories.LEISURE_MINIATURE_GOLF, None),  # Puttiparkki (putting courses)
-        ("frisbeegolf", Categories.LEISURE_DISC_GOLF_COURSE, None),
-        ("frisbee", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Frisbee (disc golf)
+        ("frisbee", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Frisbee / frisbeegolf (disc golf)
         ("discgolf", Categories.LEISURE_DISC_GOLF_COURSE, None),  # Discgolf (disc golf)
         ("golf", Categories.LEISURE_GOLF_COURSE, None),  # Golf (golf courses)
         ("pumptrack", Categories.LEISURE_TRACK, None),  # Pumptrack (pump tracks)
@@ -395,8 +419,7 @@ class PtvFISpider(Spider):
         ("arkisto", Categories.ARCHIVE, None),  # Arkisto (archives)
         ("kansalaisopisto", Categories.COLLEGE, None),  # Kansalaisopisto (civic institutes)
         ("työväenopisto", Categories.COLLEGE, None),  # Työväenopisto (workers' institutes)
-        ("kansanopisto", Categories.COLLEGE, None),  # Kansanopisto (folk high schools)
-        ("opisto", Categories.COLLEGE, None),  # Opisto (institutes)
+        ("opisto", Categories.COLLEGE, None),  # Opisto / kansanopisto (institutes)
         ("instituutti", Categories.COLLEGE, None),  # Instituutti (institutes)
         ("äänitysstudio", Categories.MUSIC_SCHOOL, None),  # Äänitysstudio (recording studios)
         ("akatemia", Categories.COLLEGE, None),  # Akatemia (academies)
@@ -466,8 +489,7 @@ class PtvFISpider(Spider):
         ("graffiti", Categories.TOURISM_ARTWORK, {"artwork_type": "graffiti"}),  # Graffiti (graffiti walls)
         ("graffitti", Categories.TOURISM_ARTWORK, {"artwork_type": "graffiti"}),  # Graffitti (graffiti variant)
         ("taidekontti", Categories.TOURISM_ARTWORK, None),  # Taidekontti (art containers)
-        ("avantouinti", Categories.LEISURE_SWIMMING_AREA, None),  # Avantouinti (winter swimming)
-        ("avanto", Categories.LEISURE_SWIMMING_AREA, None),  # Avanto (ice-swimming holes)
+        ("avanto", Categories.LEISURE_SWIMMING_AREA, None),  # Avanto / avantouinti (ice-swimming holes)
         ("talviuinti", Categories.LEISURE_SWIMMING_AREA, None),  # Talviuinti (winter swimming)
         ("luistelu", Categories.LEISURE_ICE_RINK, None),  # Luistelu (skating)
         ("lastenkoti", Categories.SOCIAL_FACILITY, {"social_facility": "group_home"}),  # Lastenkoti (children homes)
@@ -583,8 +605,6 @@ class PtvFISpider(Spider):
         ("maaseutu", Categories.OFFICE_GOVERNMENT, None),  # Maaseutu (rural services)
         ("varhaiskasvatus", Categories.OFFICE_GOVERNMENT, None),  # Varhaiskasvatus (early-education admin)
         ("perusopetus", Categories.OFFICE_GOVERNMENT, None),  # Perusopetus (basic-education admin)
-        ("verotoimisto", Categories.OFFICE_GOVERNMENT, None),  # Verotoimisto (tax offices)
-        ("verovirasto", Categories.OFFICE_GOVERNMENT, None),  # Verovirasto (tax offices)
         ("työllisyys", Categories.OFFICE_GOVERNMENT, None),  # Työllisyys (employment services)
         ("työvoima", Categories.OFFICE_GOVERNMENT, None),  # Työvoima (labour services)
         ("rakennusvalvonta", Categories.OFFICE_GOVERNMENT, None),  # Rakennusvalvonta (building control)
@@ -657,12 +677,11 @@ class PtvFISpider(Spider):
         ("hemmet", Categories.SOCIAL_FACILITY, None),  # Hemmet (housing in Swedish)
         ("kuntout", Categories.SOCIAL_FACILITY, None),  # Kuntout (rehabilitation)
         ("työterveys", Categories.CLINIC, None),  # Työterveys (occupational health)
-        ("matonpesupaikka", Categories.CARPET_WASHING, None),  # Matonpesupaikka (carpet washing)
         (
             "matonpesu",
             Categories.CARPET_WASHING,
             None,
-        ),  # Matonpesu (carpet washing)
+        ),  # Matonpesu / matonpesupaikka (carpet washing)
         ("kierrätys", Categories.RECYCLING, None),  # Kierrätys (recycling)
         ("kiertopiste", Categories.RECYCLING, None),  # Kiertopiste (reuse points)
         ("hyötykäyttö", Categories.RECYCLING, None),  # Hyötykäyttö (reuse stations)
@@ -680,7 +699,6 @@ class PtvFISpider(Spider):
         ("varikko", None, {"amenity": "depot"}),  # Varikko (depots)
         ("lajitteluasema", Categories.RECYCLING, None),  # Lajitteluasema (sorting stations)
         ("lajittelupiha", Categories.RECYCLING, None),  # Lajittelupiha (sorting yards)
-        ("kierrätyspiha", Categories.RECYCLING, None),  # Kierrätyspiha (recycling yards)
         ("siirtokuormausasema", Categories.RECYCLING, None),  # Siirtokuormausasema (transfer stations)
         ("kaatopaikka", None, {"landuse": "landfill"}),  # Kaatopaikka (dump sites, incl. snow dumps)
         ("lähiasema", Categories.CLINIC, None),  # Lähiasemat (local health stations)
@@ -835,6 +853,7 @@ class PtvFISpider(Spider):
                 "järjestämispaikka",
                 "opetuspiste",
                 "toimipaikka",
+                "uimarannat",
             }
         ) - {"telttailu"}
         # "telttailu" stays out of the fixture vocabulary: as a table key it
@@ -1544,7 +1563,7 @@ class PtvFISpider(Spider):
         primary = re.sub(r"\s*(\d+)\*\s*$", r" \1", primary).strip()
         # Trailing coordinate tails are location metadata, not name parts
         # ("Mustasaari, P 60° 10,343' ja I 24° 52,123'").
-        primary = re.sub(r",?\s*(?:[PN]\s*)?\d+\s*°.*$", "", primary).strip()
+        primary = self.COORD_TAIL_RE.sub("", primary).strip()
         primary = re.sub(r",\s*Kasvatuksen ja koulutuksen.*$", "", primary).strip()
         primary = re.sub(r",\s*Sektorn för fostran och utbildning.*$", "", primary).strip()
         primary = re.sub(r",\s*Education Division.*$", "", primary).strip()
@@ -3231,10 +3250,7 @@ class PtvFISpider(Spider):
         # (assessment offices).
         texts = [self._description_text(channel)]
         texts.extend(self._service_names(channel))
-        for term in channel.get("ontologyTerms") or []:
-            for term_name in (term or {}).get("name") or []:
-                if term_name.get("language") == "fi" and term_name.get("value"):
-                    texts.append(term_name["value"])
+        texts.extend(self._ontology_names(channel))
         return any(self.SUPPORTED_HOUSING_RE.search(t or "") for t in texts)
 
     def _resolve_fallback_category(self, item: Feature, channel: dict) -> Categories | None:
@@ -3327,6 +3343,15 @@ class PtvFISpider(Spider):
             if ((row or {}).get("service") or {}).get("name")
         ]
 
+    def _ontology_names(self, channel: dict) -> list[str]:
+        return [
+            term_name["value"]
+            for term in channel.get("ontologyTerms") or []
+            if isinstance(term, dict)
+            for term_name in term.get("name") or []
+            if isinstance(term_name, dict) and term_name.get("language") == "fi" and term_name.get("value")
+        ]
+
     def _rescue_candidates(self, channel: dict) -> list[str]:
         # Feed strings that can type an opaque channel, in precedence
         # order: linked services, ontology terms, translated names.
@@ -3335,10 +3360,7 @@ class PtvFISpider(Spider):
             name = ((row or {}).get("service") or {}).get("name")
             if name:
                 candidates.append(name)
-        for term in channel.get("ontologyTerms") or []:
-            for term_name in (term or {}).get("name") or []:
-                if term_name.get("language") == "fi" and term_name.get("value"):
-                    candidates.append(term_name["value"])
+        candidates.extend(self._ontology_names(channel))
         for row in channel.get("serviceChannelNames") or []:
             # Translated names often type opaque Finnish ones ("Daghemmet
             # Karitsa" → kindergarten); untranslated copies fall through.
@@ -3427,13 +3449,7 @@ class PtvFISpider(Spider):
             name = ((row or {}).get("service") or {}).get("name") or ""
             if "taide" in name.lower() or "veistos" in name.lower() or "museo" in name.lower():
                 return True
-        for term in channel.get("ontologyTerms") or []:
-            for term_name in (term or {}).get("name") or []:
-                if term_name.get("language") == "fi" and term_name.get("value"):
-                    value = term_name["value"].lower()
-                    if "taide" in value or "veistos" in value or "museo" in value:
-                        return True
-        return False
+        return any(w in v.lower() for v in self._ontology_names(channel) for w in ("taide", "veistos", "museo"))
 
     def _rescue_category(self, channel: dict) -> Categories | None:
         text = self._description_text(channel)
@@ -3701,11 +3717,7 @@ class PtvFISpider(Spider):
             and not self._shared_service_word(head, tail)
             and (not self._is_unit_tail(tail) or self._is_venue_head(head))
             and (not self._is_unit_tail(head) or self._is_venue_head(tail))
-            and (
-                tail[:1].isupper()
-                or re.search(r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|sairaala|neuvola)", lowered_tail)
-                or re.search(r"\s[A-ZÅÄÖ]", tail)
-            )
+            and (tail[:1].isupper() or self.CORE_INSTITUTION_RE.search(lowered_tail) or re.search(r"\s[A-ZÅÄÖ]", tail))
         ):
             self._count("name/comma_service_unit")
             shown = head[0].upper() + head[1:] if head else head
@@ -3880,7 +3892,7 @@ class PtvFISpider(Spider):
             tail
             and tail[0].islower()
             and any(word in lowered_tail for word in ("palvelu", "toiminta", "hoito", "huolto", "työ", "tuki"))
-            and not re.search(r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|sairaala|neuvola)", lowered_tail)
+            and not self.CORE_INSTITUTION_RE.search(lowered_tail)
         ):
             # Lowercase service descriptors ("Teuvolan vammaisten
             # asumispalvelut, tilapäishoito ja loma-ajanhoito"): the head
@@ -4545,27 +4557,7 @@ class PtvFISpider(Spider):
         # (kenttä/kentät/kentän, ranta/rannat/rannan, keskus/keskuksen,
         # seulonta/seulonnat/seulonnan, päiväkoti/päiväkodit/päiväkotien,
         # paikka/paikat/paikkojen/paikan): normalize the known stems first.
-        lowered = re.sub(r"kentät\b", "kenttä", lowered)
-        lowered = re.sub(r"kentän\b", "kenttä", lowered)
-        lowered = re.sub(r"rannat\b", "ranta", lowered)
-        lowered = re.sub(r"rannan\b", "ranta", lowered)
-        lowered = re.sub(r"keskuksen\b", "keskus", lowered)
-        lowered = re.sub(r"seulonnat\b", "seulonta", lowered)
-        lowered = re.sub(r"seulonnan\b", "seulonta", lowered)
-        lowered = re.sub(r"päiväkodit\b", "päiväkoti", lowered)
-        lowered = re.sub(r"päiväkotien\b", "päiväkoti", lowered)
-        lowered = re.sub(r"paikat\b", "paikka", lowered)
-        lowered = re.sub(r"paikkojen\b", "paikka", lowered)
-        lowered = re.sub(r"paikan\b", "paikka", lowered)
-        lowered = re.sub(r"yhdistykset\b", "yhdistys", lowered)
-        lowered = re.sub(r"taudit\b", "tauti", lowered)
-        lowered = re.sub(r"tautien\b", "tauti", lowered)
-        lowered = re.sub(r"radat\b", "rata", lowered)
-        lowered = re.sub(r"yksiköt\b", "yksikkö", lowered)
-        lowered = re.sub(r"veistokset\b", "veistos", lowered)
-        lowered = re.sub(r"veistoksen\b", "veistos", lowered)
-        lowered = re.sub(r"taideteokset\b", "taideteos", lowered)
-        lowered = re.sub(r"taideteoksen\b", "taideteos", lowered)
+        lowered = self.GRADATION_RE.sub(lambda m: self.GRADATION_MAP[m.group(0)], lowered)
         for rx, category, extra in self._rules:
             if rx.search(lowered):
                 if category == Categories.HOSPITAL and self.SUBUNIT_RE.search(lowered):
@@ -5464,7 +5456,7 @@ class PtvFISpider(Spider):
             translation = names.get(lang)
             if translation and translation != shown and translation != signed:
                 cleaned_tr = re.sub(r"\s*\d+\*\s*$", "", translation).strip()
-                cleaned_tr = re.sub(r",?\s*(?:[PN]\s*)?\d+\s*°.*$", "", cleaned_tr).strip()
+                cleaned_tr = self.COORD_TAIL_RE.sub("", cleaned_tr).strip()
                 paren_stripped = re.sub(
                     r"\s*\([^()]*(" + self.STREET_NUMBERED_ALT + r")\b[^()]*\d[^()]*\)\s*$",
                     "",
@@ -5737,16 +5729,7 @@ class PtvFISpider(Spider):
         # park or desk the name tier read.
         if any("yhteisöllinen asuminen" in (s or "").lower() for s in self._service_names(channel)):
             return True
-        for term in channel.get("ontologyTerms") or []:
-            for term_name in (term or {}).get("name") or []:
-                if (
-                    isinstance(term_name, dict)
-                    and term_name.get("language") == "fi"
-                    and term_name.get("value")
-                    and "yhteisöllinen asuminen" in term_name["value"].lower()
-                ):
-                    return True
-        return False
+        return any("yhteisöllinen asuminen" in v.lower() for v in self._ontology_names(channel))
 
     def _maybe_upgrade_housing(self, item: Feature, channel: dict, category: Categories | None) -> Categories | None:
         # Supported housing beats diagnosis even when the name tier
