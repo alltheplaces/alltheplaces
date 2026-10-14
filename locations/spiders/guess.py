@@ -1,9 +1,11 @@
 from typing import Iterable
 
-from scrapy.http import JsonRequest, TextResponse
+from scrapy.http import TextResponse
+
 from locations.categories import Categories, apply_category
-from locations.storefinders.uberall import UberallSpider
 from locations.items import Feature
+from locations.storefinders.uberall import UberallSpider
+
 
 class GuessSpider(UberallSpider):
     name = "guess"
