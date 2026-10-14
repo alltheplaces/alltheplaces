@@ -55,6 +55,7 @@ class KirkantaFISpider(Spider):
     name = "kirkanta_fi"
     allowed_domains = ["api.kirjastot.fi"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+    IMAGE_SKIP = ("placeholder", "default", "logo", "brand")
     # API contents CC BY 4.0, attribution required by the v3 terms.
     dataset_attributes = Licenses.CCBY4.value | {
         "source": "api",
@@ -68,7 +69,7 @@ class KirkantaFISpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         data = response.json()  # ty: ignore[unresolved-attribute]
         if not data.get("items"):
-            raise CloseSpider("no library records")
+            raise CloseSpider(f"no library records from {response.url}")
         candidates = []
         for entry in data["items"]:
             try:
@@ -81,17 +82,24 @@ class KirkantaFISpider(Spider):
             if result:
                 candidates.append(result)
         # Same place filed under two ids keeps the lowest id either way the
-        # feed orders them (single case: Kärkölä 86024/86806). String
-        # comparison: equal-length numeric ids order identically either way.
-        minima = {}
+        # feed orders them (single case: Kärkölä 86024/86806). Numeric-aware:
+        # plain string comparison misorders mixed-length ids ("10" < "9").
+        minima: dict = {}
         for item, place_key in candidates:
-            if place_key not in minima or item["ref"] < minima[place_key]:
-                minima[place_key] = item["ref"]
+            if place_key is None:
+                continue
+            key = self._ref_key(item["ref"])
+            if place_key not in minima or key < minima[place_key][0]:
+                minima[place_key] = (key, item["ref"])
         for item, place_key in candidates:
-            if item["ref"] == minima[place_key]:
+            if place_key is None or item["ref"] == minima[place_key][1]:
                 yield item
             else:
                 self.crawler.stats.inc_value(f"atp/{self.name}/dropped/duplicate")
+
+    @staticmethod
+    def _ref_key(ref: str) -> tuple:
+        return (0, int(ref)) if ref.isdigit() else (1, ref)
 
     def parse_entry(self, entry: dict) -> tuple[Feature, tuple] | None:
         if entry.get("id") is None:
@@ -128,14 +136,7 @@ class KirkantaFISpider(Spider):
         if access := self.access_for(branch_type, name_text):
             item["extras"]["access"] = access
         item["name"] = name
-        # Translated names keep identity tails; name:fi mirrors the fi name and
-        # is never set from a fallback language.
-        if names.get("sv") and names["sv"] != name:
-            item["extras"]["name:sv"] = names["sv"]
-        if names.get("en") and names["en"] != name:
-            item["extras"]["name:en"] = names["en"]
-        if names.get("fi") and ("name:sv" in item["extras"] or "name:en" in item["extras"]):
-            item["extras"]["name:fi"] = name
+        self.set_names(item, names, name)
 
         if lat is not None:
             item["lat"], item["lon"] = lat, lon
@@ -166,8 +167,12 @@ class KirkantaFISpider(Spider):
         # Same name, street and town under another id is one place filed twice;
         # the lowest id wins in parse(). Coords stay out of the key: re-surveys
         # metres apart are still one place (Hervanta 86747/86774, ~15 m).
-        place_key = (names.get("fi"), street, item.get("city"))
-        return item, place_key
+        # Street-less records skip matching: without an address no confident
+        # match exists. Resolved name, not fi: distinct sv-fallback names on
+        # one street are different places.
+        if not street:
+            return item, None
+        return item, (item["name"], street, item.get("city"))
 
     def category_for(self, entry: dict, branch_type: str | None, name_text: str) -> Categories | None:
         if CLOSED_TOKENS.search(name_text):
@@ -189,6 +194,17 @@ class KirkantaFISpider(Spider):
         return None
 
     @staticmethod
+    def set_names(item: Feature, names: dict, name: str) -> None:
+        # Translated names keep identity tails; name:fi mirrors the fi name and
+        # is never set from a fallback language.
+        if names.get("sv") and names["sv"] != name:
+            item["extras"]["name:sv"] = names["sv"]
+        if names.get("en") and names["en"] != name:
+            item["extras"]["name:en"] = names["en"]
+        if names.get("fi") and ("name:sv" in item["extras"] or "name:en" in item["extras"]):
+            item["extras"]["name:fi"] = name
+
+    @staticmethod
     def split_floor(street: str) -> tuple[str, str | None]:
         # Single unambiguous floor markers only; slash forms stay put (unit
         # numbers are ambiguous) as do ordinal words (zero occurrences here).
@@ -203,8 +219,6 @@ class KirkantaFISpider(Spider):
             if values.get(lang):
                 return values[lang]
         return None
-
-    IMAGE_SKIP = ("placeholder", "default", "logo", "brand")
 
     @staticmethod
     def pick_image(pictures: list) -> str | None:
@@ -223,8 +237,8 @@ class KirkantaFISpider(Spider):
         # dedicated email field covers them. First real number wins (the
         # shared Oulu system number is a legitimate branch phone, not a
         # hotline, so no cross-record filtering).
-        for entry in numbers:
-            number = entry.get("number") or ""
+        for row in numbers:
+            number = row.get("number") or ""
             if "@" not in number and any(char.isdigit() for char in number):
                 return number
         return None
