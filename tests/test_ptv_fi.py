@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 """Behavioural tests for ptv_fi.
 
-Each case pins a load-bearing rule: name splits, branch handling, address
-parsing, category precedence/refinement and operator/contact attribution.
-Cases use real PTV feed shapes (mirror sample or full-crawl records) unless
-marked SYNTHETIC, in which case the input exercises a helper branch
-directly. Helpers (split, named, addressed, categorised) test one method in
-isolation; parsed() runs the full parse_channel path.
+Table-driven: each section pins one pipeline stage with parametrised rows
+(feed string in, filing out). Bespoke multi-step flows (org joins, errbacks,
+stats counters, rescue chains) stay as plain functions. User-report batches
+(R-A..R-D) keep their rows verbatim as the report trail; a few of those
+inputs also appear in the thematic tables as the systematic index.
+
+Helpers: split()/named() isolate _split_name (raw vs cleaned input);
+cat() isolates _category; addressed() isolates _apply_address;
+parsed()/channel() run the full parse_channel path.
 """
 
+import json
 from types import SimpleNamespace
 
-from locations.categories import Categories
+import pytest
+from scrapy.http import JsonRequest, TextResponse
+
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.government.ptv_fi import PtvFISpider
 
@@ -108,804 +115,2899 @@ def parsed(spider, data, org_name=None):
     return item
 
 
-# ---- Quadrant A: name splitting, cleaning and branches ---------------------
+# ---- Table drivers -----------------------------------------------------------
+# _SKIP: don't assert this field. PRESENT: assert is not None.
 
-# Quadrants mirror the spider's pipeline sections: A names/branches,
-# B addresses, C categories, D operator/contact/hours. Helper-level cases
-# pin one method; parsed() runs the full parse_channel path.
-
-
-def test_machine_splits_head_with_official():
-    # Pysäköintilippuautomaatti 222 shape: address + payment metadata.
-    name, located, official = named(make_spider(), "Pysäköintilippuautomaatti 222, Pengerkatu 23, korttimaksu")
-    assert name == "Pysäköintilippuautomaatti 222"
-    assert located is None
-    assert official == "Pysäköintilippuautomaatti 222, Pengerkatu 23, korttimaksu"
+_SKIP = object()
+PRESENT = object()
 
 
-def test_machine_with_slash_location_note():
-    # Mäntymäenkenttä / 2 location note must not mis-split.
-    name, located, official = named(make_spider(), "Pysäköintilippuautomaatti 619, Mäntymäenkenttä / 2, korttimaksu")
-    assert name == "Pysäköintilippuautomaatti 619"
-    assert located is None
-    assert official is not None
+def check_cat(fi, want_cat=_SKIP, want_extra=_SKIP):
+    got_cat, got_extra = make_spider()._category(fi)
+    if want_cat is not _SKIP:
+        assert got_cat == want_cat, fi
+    if want_extra is not _SKIP:
+        assert got_extra == want_extra, fi
 
 
-def test_machine_without_tails_stays_whole():
-    assert split(make_spider(), "Pysäköintilippuautomaatti 591") == (
-        "Pysäköintilippuautomaatti 591",
-        None,
-        None,
-    )
-
-
-def test_paren_venue_names_base():
-    # Host venue buried in trailing parens.
-    name, located, official = split(make_spider(), "Luustoyhdistyksen vesijumppa Helsingissä (Oltermannikeskus)")
-    assert name == "Luustoyhdistyksen vesijumppa Helsingissä"
-    assert located == "Oltermannikeskus"
-    assert official is not None
-
-
-def test_paren_address_stripped_to_base():
-    assert split(make_spider(), "Mäntymäen päiväkoti (Kallelankatu 3)")[0] == "Mäntymäen päiväkoti"
-    assert split(make_spider(), "Totto-Halli (Muurola)")[0] == "Totto-Halli"
-
-
-def test_paren_operator_head_keeps_venue():
-    # Pilke päiväkodit Oy/ Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E).
-    name, located, official = named(
-        make_spider(), "Pilke päiväkodit Oy/ Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)"
-    )
-    assert name == "Musiikkipäiväkoti Sinikello"
-    assert located is None
-    assert official is not None
-
-
-def test_dash_unit_splits_venue():
-    # Friemanin talo - nuorisotoimisto.
-    name, located, official = split(make_spider(), "Friemanin talo - nuorisotoimisto")
-    assert name == "Nuorisotoimisto"
-    assert located == "Friemanin talo"
-    assert official is not None
-
-
-def test_dash_without_unit_stays_whole():
+def check_split(fi, city, name, located, official, via="split"):
     spider = make_spider()
-    assert split(spider, "Malminkartano - Pitäjänmäki")[1] is None
+    got = split(spider, fi, city) if via == "split" else named(spider, fi, city)
+    for got_v, want_v, field in (
+        (got[0], name, "name"),
+        (got[1], located, "located"),
+        (got[2], official, "official"),
+    ):
+        if want_v is _SKIP:
+            continue
+        if want_v is PRESENT:
+            assert got_v is not None, (fi, field, got)
+        else:
+            assert got_v == want_v, (fi, field, got)
 
 
-def test_acronym_prefix_venue():
-    # OYSin Keuhkosairauksien poliklinikka.
-    name, located, official = split(make_spider(), "OYSin Keuhkosairauksien poliklinikka")
-    assert name == "Keuhkosairauksien poliklinikka"
-    assert located == "OYS"
-    assert official is not None
+def check_clean(raw, want):
+    assert make_spider()._clean_name(raw) == want, raw
 
 
-def test_slash_room_names_facility():
-    # Santahaminan ala-asteen koulu / Koripallokenttä.
-    name, located, official = split(make_spider(), "Santahaminan ala-asteen koulu / Koripallokenttä")
-    assert name == "Koripallokenttä"
-    assert located == "Santahaminan ala-asteen koulu"
-    assert official is not None
+def check_addr(road, number, want=None, absent=(), **kw):
+    item = addressed(make_spider(), road, number, **kw)
+    ex = item.get("extras") or {}
+
+    def get(path):
+        if path.startswith("extras."):
+            return ex.get(path[7:])
+        return item.get(path)
+
+    for path, val in (want or {}).items():
+        assert get(path) == val, (road, number, path)
+    for path in absent:
+        if path.startswith("extras."):
+            assert path[7:] not in ex, (road, number, path)
+        else:
+            assert path not in item, (road, number, path)
 
 
-def test_slash_generic_room_names_facility():
-    # Meilahden yläasteen koulu / Juhlasali.
-    name, located, _ = split(make_spider(), "Meilahden yläasteen koulu / Juhlasali")
-    assert name == "Juhlasali"
-    assert located == "Meilahden yläasteen koulu"
+# ---- Names: cleaning -------------------------------------------------------
 
 
-def test_slash_numbered_room_keeps_context():
-    # Kaarelankenttä / Hiekkakenttä 2.
-    name, located, _ = split(make_spider(), "Kaarelankenttä / Hiekkakenttä 2")
-    assert name == "Hiekkakenttä 2"
-    assert located == "Kaarelankenttä"
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("Iltapäivätoiminta / Koulu, Kasvatuksen ja koulutuksen toimiala", "Iltapäivätoiminta / Koulu"),
+        ("Nimi, Education Division", "Nimi"),
+        ("Jorvin Terassikahvio -palvelun järjestämispaikka", "Jorvin Terassikahvio"),
+        ("Nuortenillat-palvelun järjestämispaikka", "Nuortenillat"),
+        ("International House Salo, palvelupaikka", "International House Salo"),
+        ("Emy ry:n Hyvän mielen ryhmä", "Hyvän mielen ryhmä"),
+        ("Walonkulman Klubitalo - yhteisö työikäisille", "Walonkulman Klubitalo"),
+        ("Kokemäen Asiointipiste/Kela", "Kokemäen Asiointipiste"),
+        ("Rikos -ja riita-asioiden sovittelua -palvelun järjestämispaikka", "Rikos -ja riita-asioiden sovittelua"),
+        ("Kuntosali yhdistyksen jäsenille -palvelun järjestämispaikka", "Kuntosali yhdistyksen jäsenille"),
+        ("Mustasaari, P 60° 10,343' ja I 24° 52,123'", "Mustasaari"),
+        ("Seurasaari, 60°10'52'N, 024°53'05'E", "Seurasaari"),
+        (
+            "Nummelan kimppakävelyt Marin kanssa, yhdistyksen jäsenille. -palvelun järjestämispaikka",
+            "Nummelan kimppakävelyt yhdistyksen jäsenille.",
+        ),
+        ("Tervetuloa tekemään käsitöitä Marttojen kanssa!", "Tervetuloa tekemään käsitöitä Marttojen kanssa!"),
+        ("Elämää muistisairauden kanssa -kurssi", "Elämää muistisairauden kanssa"),
+        ("Keskusteluryhmä ahdistuksen kanssa kamppaileville", "Keskusteluryhmä ahdistuksen kanssa kamppaileville"),
+        ("Turun kulttuuripaja Casan yhteystiedot", "Turun kulttuuripaja Casan"),
+        ("Prästgårdsbackens förskola , Gesterby", "Prästgårdsbackens förskola, Gesterby"),
+        ("Päiväkoti Luomupäiväkoti Kirsikka Laajasalo", "Luomupäiväkoti Kirsikka Laajasalo"),
+        ("Päiväkoti Kirsikka", "Päiväkoti Kirsikka"),
+    ],
+)
+def test_clean_boilerplate(raw, want):
+    check_clean(raw, want)
 
 
-def test_slash_proper_facility():
-    # Sipoon lukio / Sipoon Enter.
-    name, located, _ = split(make_spider(), "Sipoon lukio / Sipoon Enter")
-    assert name == "Sipoon Enter"
-    assert located == "Sipoon lukio"
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("Rovastinkankaan koulun opiskeluhuolto", "Rovastinkankaan koulu"),
+        ("Vammalan lukion opiskeluhuolto", "Vammalan lukio"),
+        ("Ammattiopisto Spesian opiskeluhuolto", None),
+        ("Opiskeluhuolto", None),
+    ],
+)
+def test_genitive_school_mapping(raw, want):
+    assert make_spider()._genitive_school(raw) == want, raw
 
 
-def test_slash_institution_tail_is_venue():
-    # Iltapäivätoiminta / Steiner-koulu (operator tail inside venue).
-    name, located, official = split(
-        make_spider(),
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("ORIVESI AS", "ORIVESI"),
+        ("ESPOO", "ESPOO"),
+        (None, None),
+        ("  ", None),
+    ],
+)
+def test_post_city_station_suffix(raw, want):
+    assert make_spider()._post_city(raw) == want, raw
+
+
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("Imatran keilahalli Oy", "Imatran keilahalli"),
+        ("Sari Wicklund", None),
+        ("Infopiste", None),
+        ("Töölön kisahalli", "Töölön kisahalli"),
+    ],
+)
+def test_clean_located_strips_operator_city_person(raw, want):
+    assert make_spider()._clean_located(raw) == want, raw
+
+
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("Sipoon Enter", True),
+        ("Pöytätennisalue", False),
+        ("Hiekkakenttä 2", False),
+        ("Imatran keilahalli Oy", False),
+        ("Virtain toimipiste", False),
+    ],
+)
+def test_is_proper_tail_guards(raw, want):
+    assert make_spider()._is_proper_tail(raw) is want, raw
+
+
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("Kokemäen Asiointipiste/Kela", "Kela"),
+        ("Tavallinen nimi", None),
+        ("Kelan asiointipiste Lapinlahdella", "Kela"),
+        ("Kelankatu 1", None),
+        ("Siimakela", None),
+    ],
+)
+def test_branch_agency(raw, want):
+    assert make_spider()._branch_agency(raw) == want, raw
+
+
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("Didrichsenin taidemuseo, Kuusilahdenkuja", "Kuusilahdenkuja"),
+        ("Castreninkatu, puisto", "Castreninkatu"),
+        ("Rekipellonpuisto, Vesala", "Rekipellonpuisto"),
+    ],
+)
+def test_road_base(raw, want):
+    assert make_spider()._road_base(raw) == want, raw
+
+
+# ---- Names: slash splits -----------------------------------------------------
+# (fi, city, name, located, official, via)
+
+_SLASH_CASES = [
+    (
+        "Pysäköintilippuautomaatti 222, Pengerkatu 23, korttimaksu",
+        None,
+        "Pysäköintilippuautomaatti 222",
+        None,
+        "Pysäköintilippuautomaatti 222, Pengerkatu 23, korttimaksu",
+        "named",
+    ),
+    (
+        "Pysäköintilippuautomaatti 619, Mäntymäenkenttä / 2, korttimaksu",
+        None,
+        "Pysäköintilippuautomaatti 619",
+        None,
+        PRESENT,
+        "named",
+    ),
+    ("Pysäköintilippuautomaatti 591", None, "Pysäköintilippuautomaatti 591", None, None, "split"),
+    (
+        "Santahaminan ala-asteen koulu / Koripallokenttä",
+        None,
+        "Koripallokenttä",
+        "Santahaminan ala-asteen koulu",
+        PRESENT,
+        "split",
+    ),
+    ("Meilahden yläasteen koulu / Juhlasali", None, "Juhlasali", "Meilahden yläasteen koulu", _SKIP, "split"),
+    ("Kaarelankenttä / Hiekkakenttä 2", None, "Hiekkakenttä 2", "Kaarelankenttä", _SKIP, "split"),
+    ("Sipoon lukio / Sipoon Enter", None, "Sipoon Enter", "Sipoon lukio", _SKIP, "split"),
+    (
         "Iltapäivätoiminta / Steiner-koulu, Helsingin Rudolf Steiner-koulun kannatusyhdistys - Underst..",
-    )
-    assert name == "Iltapäivätoiminta"
-    assert located == "Steiner-koulu"
-    assert official is not None
+        None,
+        "Iltapäivätoiminta",
+        "Steiner-koulu",
+        PRESENT,
+        "split",
+    ),
+    (
+        "Iltapäivätoiminta / Kulosaaren ala-aste, Liikkis / Sari Wicklund",
+        None,
+        "Iltapäivätoiminta",
+        "Kulosaaren ala-aste",
+        PRESENT,
+        "split",
+    ),
+    ("Jumppa / Sari Wicklund", None, "Jumppa", None, PRESENT, "split"),
+    ("Pohjois-Espoon / Niipperin matonpesupaikka", None, "Niipperin matonpesupaikka", None, _SKIP, "split"),
+    ("Uimastadion / Pöytätennisalue", None, "Pöytätennisalue", "Uimastadion", _SKIP, "split"),
+    (
+        "Perhekeskus Pohjatuuli / Lasten neuvola",
+        None,
+        "Lasten neuvola",
+        "Perhekeskus Pohjatuuli",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Talin puttirata / Mini-Tali / Frisbeegolfin harjoittelualue",
+        None,
+        "Mini-Tali",
+        "Talin puttirata",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Harjulan Setlementti ry/Liikuntapalvelut -palvelun järjestämispaikka",
+        None,
+        "Harjulan Setlementti ry",
+        None,
+        PRESENT,
+        "named",
+    ),
+    (
+        "Imatra Bowling Center / Imatran keilahalli Oy",
+        None,
+        "Imatra Bowling Center",
+        "Imatran keilahalli",
+        PRESENT,
+        "split",
+    ),
+    ("Linnanlaituri / Vesiliikennelaituri", None, "Linnanlaituri", None, _SKIP, "split"),
+    ("Lähde / UKK-muistomerkki", None, "Lähde", None, "Lähde / UKK-muistomerkki", "split"),
+    ("koripallo/lentopallo", None, "koripallo/lentopallo", None, None, "split"),
+    ("hiekka-/jääkenttä", None, "hiekka-/jääkenttä", None, None, "split"),
+    ("Kotihoito/Vuosaari 3 lähipalvelualue", None, "Kotihoito", None, PRESENT, "split"),
+    ("Kurkisuontie 2 / Hiekkakenttä", None, "Hiekkakenttä", None, "Kurkisuontie 2 / Hiekkakenttä", "split"),
+    ("Kenttäpolku/Kouluravintola", None, "Kouluravintola", _SKIP, _SKIP, "split"),
+    (
+        "Eläintarhan urheilukenttä / Huoltorakennus 4",
+        None,
+        "Eläintarhan urheilukenttä",
+        None,
+        "Eläintarhan urheilukenttä / Huoltorakennus 4",
+        "split",
+    ),
+    (
+        "Linnunlauluntien ulkokuntosali / Ulkokuntosali",
+        None,
+        "Linnunlauluntien ulkokuntosali / Ulkokuntosali",
+        None,
+        None,
+        "split",
+    ),
+    ("Aamulla / Vasikat", None, "Aamulla / Vasikat", None, None, "split"),
+    (
+        "Iltapäivätoiminta / Leikkipuisto Nurkka",
+        None,
+        "Iltapäivätoiminta",
+        "Leikkipuisto Nurkka",
+        "Iltapäivätoiminta / Leikkipuisto Nurkka",
+        "split",
+    ),
+    (
+        "Töölön seniorikeskus/Helmi ryhmäkoti",
+        None,
+        "Helmi ryhmäkoti",
+        "Töölön seniorikeskus",
+        "Töölön seniorikeskus/Helmi ryhmäkoti",
+        "split",
+    ),
+    (
+        "Keuruun yläkoulun/lukion tanssisali",
+        None,
+        "Keuruun yläkoulun/lukion tanssisali",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Hyvät Tuulet ry/MyöhäTuulen kohtaamispaikka",
+        None,
+        "MyöhäTuulen kohtaamispaikka",
+        None,
+        "Hyvät Tuulet ry/MyöhäTuulen kohtaamispaikka",
+        "split",
+    ),
+    (
+        "Harjulan Setlementti ry/Kansalaisopisto",
+        None,
+        "Kansalaisopisto",
+        None,
+        "Harjulan Setlementti ry/Kansalaisopisto",
+        "split",
+    ),
+    (
+        "Harjulan Setlementti ry/Liikuntapalvelut",
+        None,
+        "Harjulan Setlementti ry",
+        None,
+        "Harjulan Setlementti ry/Liikuntapalvelut",
+        "split",
+    ),
+    (
+        "Keurusselän ympäristön- ja terveydensuojelutoimisto / Mänttä-Vilppulan toimipiste",
+        None,
+        "Keurusselän ympäristön- ja terveydensuojelutoimisto / Mänttä-Vilppulan toimipiste",
+        None,
+        None,
+        "split",
+    ),
+    ("Puheterapia / Tikkurilan alue", None, "Puheterapia / Tikkurilan alue", None, None, "split"),
+    ("Fysioterapia / Himangan yksikkö", None, "Fysioterapia / Himangan yksikkö", None, None, "split"),
+    ("Tahvonlahti / Hiekkakenttä", None, "Hiekkakenttä", "Tahvonlahti", "Tahvonlahti / Hiekkakenttä", "split"),
+    (
+        "Töölönlahti / WDC-ulkokuntoilupaikka 1",
+        None,
+        "WDC-ulkokuntoilupaikka 1",
+        "Töölönlahti",
+        "Töölönlahti / WDC-ulkokuntoilupaikka 1",
+        "split",
+    ),
+    ("Lahti / Matkustajasatama", None, "Lahti / Matkustajasatama", None, None, "split"),
+    ("Kahvila / Ulkoilusaari", None, "Kahvila", "Ulkoilusaari", "Kahvila / Ulkoilusaari", "split"),
+    ("Suomenlinna / Kalastuspaikka", None, "Kalastuspaikka", "Suomenlinna", _SKIP, "split"),
+    ("Moduli / Rakentajaveistos", None, "Moduli / Rakentajaveistos", None, None, "split"),
+    (
+        "Salmen ulkoilualue (Pikku-Parikas) / Kalastuspaikka",
+        None,
+        "Kalastuspaikka",
+        "Salmen ulkoilualue (Pikku-Parikas)",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Kaunissaari / Telttailu- ja leiriytymispaikka 2.",
+        None,
+        "Telttailu- ja leiriytymispaikka 2.",
+        "Kaunissaari",
+        _SKIP,
+        "split",
+    ),
+    ("Väinämöisenkenttä / Huoltorakennus", None, "Väinämöisenkenttä", _SKIP, _SKIP, "named"),
+    (
+        "Sateenkaari Koto Oy/ Villasukka",
+        None,
+        "Villasukka",
+        None,
+        "Sateenkaari Koto Oy/ Villasukka",
+        "split",
+    ),
+    (
+        "Iltapäivätoiminta / Kottby grundskola, Kottbynejdens svenska förening rf",
+        None,
+        "Iltapäivätoiminta",
+        "Kottby grundskola",
+        "Iltapäivätoiminta / Kottby grundskola, Kottbynejdens svenska förening rf",
+        "split",
+    ),
+    (
+        "Kerho / Koulu, Tmi Petri Lehto",
+        None,
+        "Kerho",
+        "Koulu",
+        "Kerho / Koulu, Tmi Petri Lehto",
+        "split",
+    ),
+    ("Vihdin kunnantalo/Keskusta", None, "Vihdin kunnantalo/Keskusta", None, None, "split"),
+    (
+        "Vihdin kunnantalo/sosiaalitoimisto",
+        None,
+        "sosiaalitoimisto",
+        "Vihdin kunnantalo",
+        "Vihdin kunnantalo/sosiaalitoimisto",
+        "split",
+    ),
+    (
+        "Vihdin kunnantalo/Sote-keskus Länsi",
+        None,
+        "Sote-keskus Länsi",
+        "Vihdin kunnantalo",
+        "Vihdin kunnantalo/Sote-keskus Länsi",
+        "split",
+    ),
+    (
+        "Vuoniityn peruskoulu / Lähiliikuntapaikka",
+        None,
+        "Lähiliikuntapaikka",
+        "Vuoniityn peruskoulu",
+        "Vuoniityn peruskoulu / Lähiliikuntapaikka",
+        "named",
+    ),
+    (
+        "Myllypuron peruskoulu / Lähiliikuntapaikka 2",
+        None,
+        "Lähiliikuntapaikka 2",
+        "Myllypuron peruskoulu",
+        "Myllypuron peruskoulu / Lähiliikuntapaikka 2",
+        "named",
+    ),
+    (
+        "Leikkipuisto Lampi / Lähiliikuntapaikka",
+        None,
+        "Leikkipuisto Lampi",
+        "Lähiliikuntapaikka",
+        "Leikkipuisto Lampi / Lähiliikuntapaikka",
+        "named",
+    ),
+    (
+        "Hietarannan uimaranta / Koripallokenttä",
+        None,
+        "Koripallokenttä",
+        "Hietarannan uimaranta",
+        "Hietarannan uimaranta / Koripallokenttä",
+        "named",
+    ),
+    (
+        "Väinämöisenkenttä / Ulkokuntoilupaikka",
+        None,
+        "Ulkokuntoilupaikka",
+        "Väinämöisenkenttä",
+        "Väinämöisenkenttä / Ulkokuntoilupaikka",
+        "named",
+    ),
+    (
+        "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)",
+        None,
+        "Ulkokuntoilupaikka (Keski)",
+        "Hietarannan uimaranta",
+        "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)",
+        "named",
+    ),
+    (
+        "Malmitalo / Esiintymisali (Pieni sali)",
+        None,
+        "Esiintymisali (Pieni sali)",
+        "Malmitalo",
+        "Malmitalo / Esiintymisali (Pieni sali)",
+        "named",
+    ),
+    ("Stoan aukio / Grillipaikka", None, "Grillipaikka", "Stoan aukio", "Stoan aukio / Grillipaikka", "named"),
+    ("Tullisaari / Grillipaikka", None, "Grillipaikka", "Tullisaari", "Tullisaari / Grillipaikka", "named"),
+    (
+        "Koskelan monipuolinen palvelukeskus / Hoitoalan ruokapalvelut",
+        None,
+        "Hoitoalan ruokapalvelut",
+        "Koskelan monipuolinen palvelukeskus",
+        "Koskelan monipuolinen palvelukeskus / Hoitoalan ruokapalvelut",
+        "split",
+    ),
+    (
+        "Pikku Huopalahden ala-asteen koulu / Koripallon heittopaikka",
+        None,
+        "Koripallon heittopaikka",
+        "Pikku Huopalahden ala-asteen koulu",
+        "Pikku Huopalahden ala-asteen koulu / Koripallon heittopaikka",
+        "split",
+    ),
+    (
+        "Sivistysosasto / Koulutus",
+        None,
+        "Sivistysosasto / Koulutus",
+        _SKIP,
+        _SKIP,
+        "named",
+    ),
+    ("Vihdin kunnantalo/ sosiaalitoimisto", "Vihti", "sosiaalitoimisto", _SKIP, _SKIP, "named"),
+    ("Rakennusvalvontatoimisto/lupasihteeri", None, "Rakennusvalvontatoimisto", _SKIP, _SKIP, "named"),
+    (
+        "Roihuvuoren seniorikeskus/Liina päivätoiminta 2*",
+        "Helsinki",
+        "Liina päivätoiminta 2",
+        "Roihuvuoren seniorikeskus",
+        "Roihuvuoren seniorikeskus/Liina päivätoiminta 2",
+        "named",
+    ),
+    ("Peliryhmä Kuopio -palvelun järjestämispaikka", "Kuopio", "Peliryhmä", _SKIP, _SKIP, "named"),
+    (
+        "Pilke päiväkodit Oy/ Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)",
+        None,
+        "Musiikkipäiväkoti Sinikello",
+        None,
+        PRESENT,
+        "named",
+    ),
+]
 
 
-def test_slash_institution_comma_descriptor():
-    # ... / Kulosaaren ala-aste, Liikkis resolves to the school, and the
-    # person segment peels first (Sari Wicklund is a contact, not a venue).
-    name, located, official = split(make_spider(), "Iltapäivätoiminta / Kulosaaren ala-aste, Liikkis / Sari Wicklund")
-    assert name == "Iltapäivätoiminta"
-    assert located == "Kulosaaren ala-aste"
-    assert official is not None
-
-
-def test_slash_person_dropped():
-    # SYNTHETIC contact-person tail.
-    name, located, official = split(make_spider(), "Jumppa / Sari Wicklund")
-    assert name == "Jumppa"
-    assert located is None
-    assert official is not None
+@pytest.mark.parametrize("fi,city,name,located,official,via", _SLASH_CASES)
+def test_name_slash(fi, city, name, located, official, via):
+    check_split(fi, city, name, located, official, via)
 
 
 def test_slash_person_sharing_school_token_kept():
-    # Host-named units share a token with their school (Sipoon Enter):
-    # the person guard must not eat them (covered end to end below).
+    # Host-named units share a token with their school: the person guard
+    # must not eat them.
     spider = make_spider()
     assert spider._is_person("Sari Wicklund") is True
     name, located, _ = split(spider, "Sipoon lukio / Sipoon Enter")
     assert (name, located) == ("Sipoon Enter", "Sipoon lukio")
 
 
-def test_slash_district_head_names_facility():
-    # Pohjois-Espoon / Niipperin matonpesupaikka.
-    name, located, _ = split(make_spider(), "Pohjois-Espoon / Niipperin matonpesupaikka")
-    assert name == "Niipperin matonpesupaikka"
-    assert located is None
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("Steiner-koulu, Helsingin Rudolf Steiner -yhdistys", "Steiner-koulu"),
+        ("Koulu, Tmi Petri Lehto", "Koulu"),
+    ],
+)
+def test_strip_venue_org(raw, want):
+    assert make_spider()._strip_venue_org(raw) == want, raw
 
 
-def test_slash_place_head_flips_to_facility():
-    # Uimastadion / Pöytätennisalue.
-    name, located, _ = split(make_spider(), "Uimastadion / Pöytätennisalue")
-    assert name == "Pöytätennisalue"
-    assert located == "Uimastadion"
+# ---- Names: comma splits -------------------------------------------------------
+# (fi, city, name, located, official, via)
 
-
-def test_slash_service_tail_names_service():
-    # SYNTHETIC Perhekeskus / Neuvola shape.
-    name, located, _ = split(make_spider(), "Perhekeskus Pohjatuuli / Lasten neuvola")
-    assert name == "Lasten neuvola"
-    assert located == "Perhekeskus Pohjatuuli"
-
-
-def test_slash_nested_chain():
-    # Talin puttirata / Mini-Tali / Frisbeegolfin harjoittelualue.
-    name, located, _ = split(make_spider(), "Talin puttirata / Mini-Tali / Frisbeegolfin harjoittelualue")
-    assert name == "Mini-Tali"
-    assert located == "Talin puttirata"
-
-
-def test_slash_operator_head():
-    # Harjulan Setlementti ry/Liikuntapalvelut -palvelun järjestämispaikka.
-    name, located, official = named(
-        make_spider(), "Harjulan Setlementti ry/Liikuntapalvelut -palvelun järjestämispaikka"
-    )
-    assert name == "Harjulan Setlementti ry"
-    assert located is None
-    assert official is not None
-
-
-def test_slash_operator_tail_stripped_from_venue():
-    # Imatra Bowling Center / Imatran keilahalli Oy: the Oy suffix strips
-    # to the venue part.
-    name, located, official = split(make_spider(), "Imatra Bowling Center / Imatran keilahalli Oy")
-    assert name == "Imatra Bowling Center"
-    assert located == "Imatran keilahalli"
-    assert official is not None
-
-
-def test_slash_appositive_twins():
-    # Linnanlaituri / Vesiliikennelaituri: the head already names it.
-    name, located, _ = split(make_spider(), "Linnanlaituri / Vesiliikennelaituri")
-    assert name == "Linnanlaituri"
-    assert located is None
-
-
-def test_slash_memorial_stays_whole():
-    # SYNTHETIC single memorial object: the peel drops the dedication tail,
-    # leaving the artwork title as the name (cf. service-map Lähde).
-    assert split(make_spider(), "Lähde / UKK-muistomerkki") == ("Lähde", None, "Lähde / UKK-muistomerkki")
-
-
-def test_bare_slash_compounds_stay_whole():
-    # SYNTHETIC Geo/on shape and hyphen fragments.
-    spider = make_spider()
-    assert split(spider, "koripallo/lentopallo") == ("koripallo/lentopallo", None, None)
-    assert split(spider, "hiekka-/jääkenttä") == ("hiekka-/jääkenttä", None, None)
-
-
-def test_bare_slash_area_drops_to_head():
-    # Kotihoito/Vuosaari 3 lähipalvelualue.
-    name, located, official = split(make_spider(), "Kotihoito/Vuosaari 3 lähipalvelualue")
-    assert name == "Kotihoito"
-    assert located is None
-    assert official is not None
-
-
-def test_comma_service_venue():
-    # Opiskeluhuolto, Karhusuon koulu.
-    name, located, _ = split(make_spider(), "Opiskeluhuolto, Karhusuon koulu")
-    assert name == "Opiskeluhuolto"
-    assert located == "Karhusuon koulu"
-
-
-def test_comma_service_genitive():
-    # Rovastinkankaan koulun opiskeluhuolto, Orivesi.
-    name, located, official = split(make_spider(), "Rovastinkankaan koulun opiskeluhuolto, Orivesi", "Orivesi")
-    assert name == "Opiskeluhuolto"
-    assert located == "Rovastinkankaan koulu"
-    assert official is not None
-
-
-def test_comma_genitive_without_mappable_school_strips_city():
-    # Ammattiopisto Spesian opiskeluhuolto, Salo: Spesian is a proper-noun
-    # genitive with no nominative map, so only the city tail strips.
-    name, located, official = split(make_spider(), "Ammattiopisto Spesian opiskeluhuolto, Salo", "Salo")
-    assert name == "Ammattiopisto Spesian opiskeluhuolto"
-    assert located is None
-    assert official is not None
-
-
-def test_comma_city_strips():
-    # Kiikoisten lähitori, Sastamala.
-    name, located, official = split(make_spider(), "Kiikoisten lähitori, Sastamala", "Sastamala")
-    assert name == "Kiikoisten lähitori"
-    assert located is None
-    assert official is not None
-
-
-def test_comma_city_mismatch_keeps_whole():
-    name, located, official = split(make_spider(), "Mäntymäen perhetukikeskus, Turku", "Helsinki")
-    assert (name, located, official) == ("Mäntymäen perhetukikeskus, Turku", None, None)
-
-
-def test_comma_city_head_names_tail():
-    # Vaasa, Ulosottolaitos.
-    name, located, official = split(make_spider(), "Vaasa, Ulosottolaitos", "Vaasa")
-    assert name == "Ulosottolaitos"
-    assert located is None
-    assert official is not None
-
-
-def test_comma_service_unit_split():
-    # Lasten puheterapia, Perhekeskus Pohjatuuli.
-    name, located, _ = split(make_spider(), "Lasten puheterapia, Perhekeskus Pohjatuuli")
-    assert name == "Lasten puheterapia"
-    assert located == "Perhekeskus Pohjatuuli"
-
-
-def test_comma_unit_venue_split():
-    # Myllypuron seniorikeskus, ryhmäkoti Sonaatti.
-    name, located, _ = split(make_spider(), "Myllypuron seniorikeskus, ryhmäkoti Sonaatti")
-    assert name == "Ryhmäkoti Sonaatti"
-    assert located == "Myllypuron seniorikeskus"
-
-
-def test_comma_school_service_tail_inverts():
-    # Eurooppalainen koulu European Schooling Helsinki, kouluterveydenhuolto.
-    name, located, _ = split(make_spider(), "Eurooppalainen koulu European Schooling Helsinki, kouluterveydenhuolto")
-    assert name == "Kouluterveydenhuolto"
-    assert located == "Eurooppalainen koulu European Schooling Helsinki"
-
-
-def test_comma_institution_unit_split():
-    # Tehostetun avohoidon yksikkö, Lohjan sairaala.
-    name, located, _ = split(make_spider(), "Tehostetun avohoidon yksikkö, Lohjan sairaala")
-    assert name == "Tehostetun avohoidon yksikkö"
-    assert located == "Lohjan sairaala"
-
-
-def test_comma_canteen_split():
-    # Kouluravintola, Pihlajamäen ala-asteen koulu.
-    name, located, _ = split(make_spider(), "Kouluravintola, Pihlajamäen ala-asteen koulu")
-    assert name == "Kouluravintola"
-    assert located == "Pihlajamäen ala-asteen koulu"
-
-
-def test_comma_acronym_venue():
-    # Nuorisopsykiatrian osasto J1, Tyks.
-    name, located, _ = split(make_spider(), "Nuorisopsykiatrian osasto J1, Tyks")
-    assert name == "Nuorisopsykiatrian osasto J1"
-    assert located == "Tyks"
-
-
-def test_comma_coverage_dropped():
-    # Kotihoito, Oulainen ja Merijärvi.
-    name, located, official = split(make_spider(), "Kotihoito, Oulainen ja Merijärvi")
-    assert name == "Kotihoito"
-    assert located is None
-    assert official is not None
-
-
-def test_comma_ward_number_kept():
-    # Katriinan toimipiste, osasto 5: ward qualifiers are part of the signed
-    # name (round-14 ward doctrine), never stranded from it.
-    name, located, official = split(make_spider(), "Katriinan toimipiste, osasto 5")
-    assert name == "Katriinan toimipiste, osasto 5"
-    assert located is None
-    assert official is None
-
-
-def test_comma_descriptor_peeled():
-    # Attendo Ukko-Pekka, Humppila, yhteisöllisen asumisen ostopalvelut.
-    name, located, official = split(make_spider(), "Attendo Ukko-Pekka, Humppila, yhteisöllisen asumisen ostopalvelut")
-    assert name == "Attendo Ukko-Pekka, Humppila"
-    assert located is None
-    assert official is not None
-
-
-def test_comma_branch_office_stays_whole():
-    # Pohjanmaan elinvoimakeskus, Kokkolan toimipaikka: the campus/desk
-    # qualifier is part of the signed name, never stripped (cf. Stadin
-    # ammattiopisto way/1094085495); branch=* is chain-retail, not schools.
-    name, located, official = split(make_spider(), "Pohjanmaan elinvoimakeskus, Kokkolan toimipaikka")
-    assert (name, located, official) == (
+_COMMA_CASES = [
+    ("Opiskeluhuolto, Karhusuon koulu", None, "Opiskeluhuolto", "Karhusuon koulu", _SKIP, "split"),
+    (
+        "Rovastinkankaan koulun opiskeluhuolto, Orivesi",
+        "Orivesi",
+        "Opiskeluhuolto",
+        "Rovastinkankaan koulu",
+        PRESENT,
+        "split",
+    ),
+    (
+        "Ammattiopisto Spesian opiskeluhuolto, Salo",
+        "Salo",
+        "Ammattiopisto Spesian opiskeluhuolto",
+        None,
+        PRESENT,
+        "split",
+    ),
+    ("Kiikoisten lähitori, Sastamala", "Sastamala", "Kiikoisten lähitori", None, PRESENT, "split"),
+    (
+        "Mäntymäen perhetukikeskus, Turku",
+        "Helsinki",
+        "Mäntymäen perhetukikeskus, Turku",
+        None,
+        None,
+        "split",
+    ),
+    ("Vaasa, Ulosottolaitos", "Vaasa", "Ulosottolaitos", None, PRESENT, "split"),
+    (
+        "Lasten puheterapia, Perhekeskus Pohjatuuli",
+        None,
+        "Lasten puheterapia",
+        "Perhekeskus Pohjatuuli",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Myllypuron seniorikeskus, ryhmäkoti Sonaatti",
+        None,
+        "Ryhmäkoti Sonaatti",
+        "Myllypuron seniorikeskus",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Eurooppalainen koulu European Schooling Helsinki, kouluterveydenhuolto",
+        None,
+        "Kouluterveydenhuolto",
+        "Eurooppalainen koulu European Schooling Helsinki",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Tehostetun avohoidon yksikkö, Lohjan sairaala",
+        None,
+        "Tehostetun avohoidon yksikkö",
+        "Lohjan sairaala",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Kouluravintola, Pihlajamäen ala-asteen koulu",
+        None,
+        "Kouluravintola",
+        "Pihlajamäen ala-asteen koulu",
+        _SKIP,
+        "split",
+    ),
+    ("Nuorisopsykiatrian osasto J1, Tyks", None, "Nuorisopsykiatrian osasto J1", "Tyks", _SKIP, "split"),
+    ("Kotihoito, Oulainen ja Merijärvi", None, "Kotihoito", None, PRESENT, "split"),
+    ("Katriinan toimipiste, osasto 5", None, "Katriinan toimipiste, osasto 5", None, None, "split"),
+    ("Katriinan toimipiste, osasto 7", "Vantaa", "Katriinan toimipiste, osasto 7", _SKIP, _SKIP, "named"),
+    (
+        "Attendo Ukko-Pekka, Humppila, yhteisöllisen asumisen ostopalvelut",
+        None,
+        "Attendo Ukko-Pekka, Humppila",
+        None,
+        PRESENT,
+        "split",
+    ),
+    (
+        "Pohjanmaan elinvoimakeskus, Kokkolan toimipaikka",
+        None,
         "Pohjanmaan elinvoimakeskus, Kokkolan toimipaikka",
         None,
         None,
+        "split",
+    ),
+    (
+        "Koskelan ala-asteen koulu, Mäkelänkatu 84",
+        None,
+        "Koskelan ala-asteen koulu",
+        None,
+        PRESENT,
+        "split",
+    ),
+    ("Neuvonta, Reimasali", None, "Neuvonta", "Reimasali", _SKIP, "split"),
+    ("Sipoon lukio, Enter", None, "Enter", "Sipoon lukio", _SKIP, "split"),
+    ("Neuvonta,", None, "Neuvonta", None, "Neuvonta,", "split"),
+    ("Vaajakummun koulu, luistelukenttä", None, "luistelukenttä", "Vaajakummun koulu", _SKIP, "split"),
+    (
+        "Kouluravintola, Pukinmäenkaaren peruskoulu, Kenttäpolku",
+        None,
+        "Kouluravintola, Pukinmäenkaaren peruskoulu",
+        None,
+        "Kouluravintola, Pukinmäenkaaren peruskoulu, Kenttäpolku",
+        "split",
+    ),
+    (
+        "Vojakkalan uimapaikka, Kaartjärvi",
+        None,
+        "Vojakkalan uimapaikka",
+        "Kaartjärvi",
+        "Vojakkalan uimapaikka, Kaartjärvi",
+        "split",
+    ),
+    (
+        "Kahluuallas, Leikkipuisto Traktori",
+        None,
+        "Kahluuallas",
+        "Leikkipuisto Traktori",
+        "Kahluuallas, Leikkipuisto Traktori",
+        "split",
+    ),
+    ("Puheterapia, Tikkurilan alue", "Vantaa", "Puheterapia, Tikkurilan alue", None, None, "split"),
+    ("Fysioterapia, Himangan yksikkö", "Kalajoki", "Fysioterapia, Himangan yksikkö", None, None, "split"),
+    ("Mannerheimin muistomerkki, Helsinki", None, "Mannerheimin muistomerkki, Helsinki", None, None, "split"),
+    (
+        "Kuntoutusohjaus, Kaarina, Lieto",
+        "Kaarina",
+        "Kuntoutusohjaus",
+        None,
+        "Kuntoutusohjaus, Kaarina, Lieto",
+        "split",
+    ),
+    (
+        "Esiopetuksen opiskeluhuolto, Norlandia Linna",
+        None,
+        "Esiopetuksen opiskeluhuolto",
+        "Norlandia Linna",
+        "Esiopetuksen opiskeluhuolto, Norlandia Linna",
+        "split",
+    ),
+    (
+        "Zacharias Topeliusskolan, Smågruppsundervisning",
+        None,
+        "Smågruppsundervisning",
+        "Zacharias Topeliusskolan",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Opiskeluhuolto, Karis svenska högstadium",
+        None,
+        "Opiskeluhuolto",
+        "Karis svenska högstadium",
+        _SKIP,
+        "split",
+    ),
+    (
+        "Kouluravintola, Merilahden peruskoulu, Kallvikinniementien toimipiste",
+        "Helsinki",
+        "Kouluravintola",
+        "Merilahden peruskoulu, Kallvikinniementien toimipiste",
+        "Kouluravintola, Merilahden peruskoulu, Kallvikinniementien toimipiste",
+        "named",
+    ),
+    (
+        "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto",
+        None,
+        "Kouluterveydenhuolto",
+        "Merilahden peruskoulu, Jaluspolun toimipiste",
+        "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto",
+        "named",
+    ),
+    (
+        "Raskauden seurantaosasto, Tyks Majakkasairaala, Turku",
+        "Turku",
+        "Raskauden seurantaosasto",
+        "Tyks Majakkasairaala",
+        "Raskauden seurantaosasto, Tyks Majakkasairaala, Turku",
+        "split",
+    ),
+    (
+        "Lasten ja nuorten osasto, Ahveniston sairaala",
+        None,
+        "Lasten ja nuorten osasto",
+        "Ahveniston sairaala",
+        "Lasten ja nuorten osasto, Ahveniston sairaala",
+        "split",
+    ),
+    (
+        "Lastensuojelun jälkihuolto, mm. Iisalmi, Keitele",
+        None,
+        "Lastensuojelun jälkihuolto",
+        None,
+        "Lastensuojelun jälkihuolto, mm. Iisalmi, Keitele",
+        "split",
+    ),
+    (
+        "Opiskeluterveydenhuolto, keskitetty palvelu Espoo ja Kauniainen",
+        None,
+        "Opiskeluterveydenhuolto, keskitetty palvelu Espoo ja Kauniainen",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Ravitsemusterapia, Kustavi, Laitila, Masku, Mynämäki, Naantali, Nousiainen",
+        None,
+        "Ravitsemusterapia",
+        None,
+        "Ravitsemusterapia, Kustavi, Laitila, Masku, Mynämäki, Naantali, Nousiainen",
+        "split",
+    ),
+    ("Ravintola, Lahti", None, "Ravintola, Lahti", None, None, "split"),
+    (
+        "Neuvonta, Reimasali, Lahti",
+        None,
+        "Neuvonta",
+        "Reimasali",
+        "Neuvonta, Reimasali, Lahti",
+        "split",
+    ),
+    (
+        "Vertaistukea Parkinsonia sairastavalle, K-U:lla",
+        None,
+        "Vertaistukea Parkinsonia sairastavalle",
+        None,
+        _SKIP,
+        "split",
+    ),
+    (
+        "Naisten kuntosaliryhmä, Kaukajärven vapaa-aika talo",
+        None,
+        "Naisten kuntosaliryhmä",
+        "Kaukajärven vapaa-aika talo",
+        "Naisten kuntosaliryhmä, Kaukajärven vapaa-aika talo",
+        "named",
+    ),
+    (
+        "Avustajakurssi, Pori - vapaaehtoistoimintaan mukaan!",
+        "Pori",
+        "Avustajakurssi",
+        None,
+        "Avustajakurssi, Pori - vapaaehtoistoimintaan mukaan!",
+        "named",
+    ),
+    (
+        "Pirkanmaan oikeusaputoimisto, Valkeakosken vastaanotto",
+        None,
+        "Pirkanmaan oikeusaputoimisto, Valkeakosken vastaanotto",
+        None,
+        None,
+        "split",
+    ),
+    ("Tampereen kaupunki, Vastaanotto", None, "Tampereen kaupunki, Vastaanotto", None, None, "split"),
+    ("Kalvolan neuvola, Iittala", None, "Kalvolan neuvola, Iittala", None, None, "split"),
+    (
+        "Fysioterapia Pori, Länsi-Porin sote-keskus",
+        "Pori",
+        "Fysioterapia",
+        "Länsi-Porin sote-keskus",
+        "Fysioterapia Pori, Länsi-Porin sote-keskus",
+        "split",
+    ),
+    ("Arvi Pori", "Pori", "Arvi Pori", None, None, "split"),
+    ("Renkomäen koulun luokat Lahti", "Lahti", "Luokat", "Renkomäen koulu", "Renkomäen koulun luokat Lahti", "split"),
+    (
+        "Työllistymistä edistävät palvelut, Masku (Nousiainen, Laitila)",
+        "Masku",
+        "Työllistymistä edistävät palvelut",
+        _SKIP,
+        _SKIP,
+        "named",
+    ),
+    (
+        "Ilveskodin päivätoiminta, Hämeenlinna, Vammaisten päivätoiminta",
+        "Hämeenlinna",
+        "Ilveskodin päivätoiminta",
+        None,
+        _SKIP,
+        "named",
+    ),
+    (
+        "Kulttuuria, kahvetta ja kastamista Kiikassa -palvelun järjestämispaikka",
+        "Sastamala",
+        "Kulttuuria, kahvetta ja kastamista Kiikassa",
+        _SKIP,
+        _SKIP,
+        "named",
+    ),
+    (
+        "Pyhämäntie, Janakkala, Vammaisten asumispalvelut",
+        "Janakkala",
+        "Vammaisten asumispalvelut",
+        None,
+        "Pyhämäntie, Janakkala, Vammaisten asumispalvelut",
+        "split",
+    ),
+    (
+        "Perheoikeudelliset palvelut perhekeskus Pohjatuuli (Karvia, Siikainen, Pomarkku, Kankaanpää, Jämijärvi)",
+        "Kankaanpää",
+        "Perheoikeudelliset palvelut perhekeskus Pohjatuuli",
+        None,
+        "Perheoikeudelliset palvelut perhekeskus Pohjatuuli (Karvia, Siikainen, Pomarkku, Kankaanpää, Jämijärvi)",
+        "split",
+    ),
+    (
+        "Perheoikeudelliset palvelut perhekeskus X (Karvia, Pomarkku)",
+        "Pori",
+        "Perheoikeudelliset palvelut perhekeskus X",
+        "Karvia, Pomarkku",
+        "Perheoikeudelliset palvelut perhekeskus X (Karvia, Pomarkku)",
+        "split",
+    ),
+    (
+        "Vertaistukiryhmä | Uskontojen uhrien tuki Uut ry | Kokkola",
+        "Kokkola",
+        "Vertaistukiryhmä | Uskontojen uhrien tuki Uut ry",
+        _SKIP,
+        _SKIP,
+        "split",
+    ),
+    ("Touhula Helmiina (yksityinen päiväkoti)", "Ylivieska", _SKIP, None, _SKIP, "named"),
+]
+
+
+@pytest.mark.parametrize("fi,city,name,located,official,via", _COMMA_CASES)
+def test_name_comma(fi, city, name, located, official, via):
+    check_split(fi, city, name, located, official, via)
+
+
+# ---- Names: parens, dashes, colons, city tails --------------------------------
+# (fi, city, name, located, official, via); _NAME_ONLY rows pin [0] only.
+
+_PAREN_DASH_CASES = [
+    (
+        "Luustoyhdistyksen vesijumppa Helsingissä (Oltermannikeskus)",
+        None,
+        "Luustoyhdistyksen vesijumppa Helsingissä",
+        "Oltermannikeskus",
+        PRESENT,
+        "split",
+    ),
+    ("Mäntymäen päiväkoti (Kallelankatu 3)", None, "Mäntymäen päiväkoti", _SKIP, _SKIP, "split"),
+    ("Totto-Halli (Muurola)", None, "Totto-Halli", _SKIP, _SKIP, "split"),
+    (
+        "Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)",
+        None,
+        "Musiikkipäiväkoti Sinikello",
+        None,
+        "Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)",
+        "split",
+    ),
+    ("Daycare Daisy Oy (Ylioppilaskatu 25)", None, "Daycare Daisy Oy", _SKIP, _SKIP, "split"),
+    ("Friemanin talo - nuorisotoimisto", None, "Nuorisotoimisto", "Friemanin talo", PRESENT, "split"),
+    ("Malminkartano - Pitäjänmäki", None, _SKIP, None, _SKIP, "split"),
+    ("OYSin Keuhkosairauksien poliklinikka", None, "Keuhkosairauksien poliklinikka", "OYS", PRESENT, "split"),
+    ("Kuntoilulaitteet (ulko)", None, "Kuntoilulaitteet (ulko)", None, None, "split"),
+    (
+        "Kottby grundskola, Arabia kvartersskola, åk 1–2",
+        None,
+        "Kottby grundskola, Arabia kvartersskola, åk 1–2",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Sovellettua jooga-, pilates- ja faskiaharjoittelua Tesoma",
+        None,
+        "Sovellettua jooga-, pilates- ja faskiaharjoittelua Tesoma",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Virkeät Ikämiehet -toiminnan starttikurssi Sastamala",
+        None,
+        "Virkeät Ikämiehet -toiminnan starttikurssi Sastamala",
+        _SKIP,
+        _SKIP,
+        "split",
+    ),
+    (
+        "Kuivalahden koulun 5 -väyläinen frisbeegolfrata",
+        None,
+        "Kuivalahden koulun 5 -väyläinen frisbeegolfrata",
+        _SKIP,
+        _SKIP,
+        "split",
+    ),
+    ("Ulkokuntoilusalit ja -alueet", None, "Ulkokuntoilusalit ja -alueet", _SKIP, _SKIP, "split"),
+    ("Outokumpu: Vertaisryhmä", "Outokumpu", "Vertaisryhmä", None, "Outokumpu: Vertaisryhmä", "split"),
+    (
+        "OLKA-pisteen teemapäivä: Saimaan Syöpäyhdistys ry",
+        None,
+        "OLKA-pisteen teemapäivä",
+        None,
+        "OLKA-pisteen teemapäivä: Saimaan Syöpäyhdistys ry",
+        "split",
+    ),
+    ("Kuntoutusohjaus Kankaanpää", "Kankaanpää", "Kuntoutusohjaus", None, "Kuntoutusohjaus Kankaanpää", "split"),
+    ("Toimintakeskus Parikkala", "Parikkala", "Toimintakeskus", _SKIP, _SKIP, "split"),
+    (
+        "Martat neuvoo Kuusankosken kirjastossa",
+        None,
+        "Martat neuvoo",
+        "Kuusankosken kirjasto",
+        "Martat neuvoo Kuusankosken kirjastossa",
+        "split",
+    ),
+    (
+        "Yhteisökahvila Hollolan uimahallilla",
+        None,
+        "Yhteisökahvila",
+        "Hollolan uimahalli",
+        "Yhteisökahvila Hollolan uimahallilla",
+        "split",
+    ),
+    (
+        "Lohjan Sydän digiopastusta Lohjan pääkirjastossa",
+        None,
+        "Lohjan Sydän digiopastusta",
+        "Lohjan pääkirjasto",
+        "Lohjan Sydän digiopastusta Lohjan pääkirjastossa",
+        "named",
+    ),
+    (
+        "Martat neuvoo Haminan kirjastossa",
+        None,
+        "Martat neuvoo",
+        "Haminan kirjasto",
+        "Martat neuvoo Haminan kirjastossa",
+        "named",
+    ),
+    (
+        "Neuvonta Myyrmäen neuvolassa",
+        None,
+        "Neuvonta",
+        "Myyrmäen neuvola",
+        "Neuvonta Myyrmäen neuvolassa",
+        "split",
+    ),
+    (
+        "Koulutusinfo Kuusankosken kirjastossa",
+        None,
+        "Koulutusinfo",
+        "Kuusankosken kirjasto",
+        "Koulutusinfo Kuusankosken kirjastossa",
+        "split",
+    ),
+    (
+        "Digiopastusta ikäihmisille Tesoman kirjastossa -palvelun järjestämispaikka",
+        None,
+        "Digiopastusta ikäihmisille",
+        "Tesoman kirjasto",
+        _SKIP,
+        "named",
+    ),
+    ("Päiväkoti Peukalopotti (lakkautettu)", None, "Päiväkoti Peukalopotti", _SKIP, _SKIP, "split"),
+    ("Virkkalan päiväkoti (väistö)", None, "Virkkalan päiväkoti", _SKIP, _SKIP, "split"),
+    (
+        "Hanhikosken ryhmäperhepäivähoito (toiminta loppunut 31.7.2024)",
+        None,
+        "Hanhikosken ryhmäperhepäivähoito",
+        _SKIP,
+        _SKIP,
+        "split",
+    ),
+    (
+        "Luoteis-Savon Maaseutupalvelut - Kiuruveden maataloustoimisto",
+        None,
+        "Luoteis-Savon Maaseutupalvelut - Kiuruveden maataloustoimisto",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Juhananpuiston leikkipaikka (Idänpää)",
+        "Hämeenlinna",
+        "Juhananpuiston leikkipaikka (Idänpää)",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Ylivieskan oikeusaputoimisto, Haapaveden toimipaikka (vain ajanvarauksella)",
+        None,
+        "Ylivieskan oikeusaputoimisto, Haapaveden toimipaikka",
+        None,
+        "Ylivieskan oikeusaputoimisto, Haapaveden toimipaikka (vain ajanvarauksella)",
+        "split",
+    ),
+    (
+        "Kirjasto (Pääkirjasto) (Keskusta)",
+        None,
+        "Kirjasto",
+        "Pääkirjasto",
+        "Kirjasto (Pääkirjasto) (Keskusta)",
+        "split",
+    ),
+    ("Kirjasto (Sali 2)", None, "Sali 2", "Kirjasto", "Kirjasto (Sali 2)", "split"),
+    ("Pallokenttä - Sali 2", None, "Sali 2", "Pallokenttä", "Pallokenttä - Sali 2", "split"),
+    (
+        "Kaukajärven koulu - Koulutusinfo",
+        None,
+        "Koulutusinfo",
+        "Kaukajärven koulu",
+        "Kaukajärven koulu - Koulutusinfo",
+        "split",
+    ),
+    (
+        "Kaukajärven koulu - Annalan koulutalo",
+        None,
+        "Kaukajärven koulu - Annalan koulutalo",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Espoonlahden koulun ja lukion liikuntasali",
+        None,
+        "Espoonlahden koulun ja lukion liikuntasali",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Renkomäen koulun vaativan monimuotoisen tuen luokat",
+        None,
+        "Vaativan monimuotoisen tuen luokat",
+        "Renkomäen koulu",
+        "Renkomäen koulun vaativan monimuotoisen tuen luokat",
+        "split",
+    ),
+    (
+        "Vanha Ulvilan koulun liikuntasali",
+        None,
+        "Liikuntasali",
+        "Vanha Ulvilan koulu",
+        "Vanha Ulvilan koulun liikuntasali",
+        "split",
+    ),
+    (
+        "Tampereen kansainvälisen koulun (FISTA) opiskeluhuolto",
+        None,
+        "Tampereen kansainvälisen koulun (FISTA) opiskeluhuolto",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Tila - Herralan koulu - Liikuntasali",
+        None,
+        "Tila - Herralan koulu - Liikuntasali",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Rantafutis - ja käsipallokenttä",
+        None,
+        "Rantafutis - ja käsipallokenttä",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Sydänpiste - tietoa ja tukea sydänpotilaalle",
+        None,
+        "Sydänpiste - tietoa ja tukea sydänpotilaalle",
+        None,
+        None,
+        "split",
+    ),
+    ("Tila - Koskihalli", None, "Tila - Koskihalli", None, None, "split"),
+    (
+        "Kuntoutusohjaus Mänttä-Vilppula",
+        "Mänttä-Vilppula",
+        "Kuntoutusohjaus",
+        None,
+        "Kuntoutusohjaus Mänttä-Vilppula",
+        "split",
+    ),
+    ("Päiväkoti Pikku-Elli", "Helsinki", "Päiväkoti Pikku-Elli", None, None, "split"),
+    ("Nurmeksen poliisiasema, löytötavarat", None, "Nurmeksen poliisiasema, löytötavarat", None, None, "split"),
+    ("Kuhmon poliisiasema, asetarkastus", None, "Kuhmon poliisiasema, asetarkastus", None, None, "split"),
+    (
+        "Pietarsaaren poliisiasema, aseen esitys",
+        None,
+        "Pietarsaaren poliisiasema, aseen esitys",
+        None,
+        None,
+        "split",
+    ),
+    (
+        "Loimaan poliisiasema, poliisipäivystys",
+        None,
+        "Loimaan poliisiasema, poliisipäivystys",
+        None,
+        None,
+        "split",
+    ),
+    ("Maanmittauslaitos Oulu", "Oulu", "Maanmittauslaitos", None, "Maanmittauslaitos Oulu", "split"),
+    ("Maanmittauslaitos Ivalo", "Inari", "Maanmittauslaitos Ivalo", None, None, "split"),
+    (
+        "Päiväkoti International School of Helsinki",
+        "Helsinki",
+        "Päiväkoti International School of Helsinki",
+        None,
+        None,
+        "split",
+    ),
+    ("SavoGrow Pielavesi", "Pielavesi", "SavoGrow Pielavesi", None, None, "split"),
+    (
+        "Avoin jumpparyhmä Kouvola",
+        "Kouvola",
+        "Avoin jumpparyhmä",
+        None,
+        "Avoin jumpparyhmä Kouvola",
+        "split",
+    ),
+    ("Helsinge skolan liikuntasali", None, "Helsinge skolan liikuntasali", None, None, "split"),
+    ("Lagstads skolan liikuntasali 2", None, "Lagstads skolan liikuntasali 2", None, None, "split"),
+    ("International House Rauma", "Rauma", "International House Rauma", None, None, "split"),
+]
+
+
+@pytest.mark.parametrize("fi,city,name,located,official,via", _PAREN_DASH_CASES)
+def test_name_paren_dash_colon_city(fi, city, name, located, official, via):
+    check_split(fi, city, name, located, official, via)
+
+
+def test_split_name_never_returns_none():
+    # Totality: adversarial punctuation must never crash the unpack in
+    # _apply_naming (trailing-comma batch killer precedent).
+    spider = make_spider()
+    for probe in ("Neuvonta,", ",", " , ", "Kotihoito, ", "/", " / ", "A / B /", ",,,", "Nimi (", "Nimi ()"):
+        result = spider._split_name(spider._clean_name(probe), None)
+        assert result is not None and len(result) == 3, probe
+
+
+def test_city_prefix_only_strips_services():
+    # Salo-Karinan neuvonta-asema: proper compounds stay whole.
+    item = parsed(make_spider(), channel("Salo-Karinan neuvonta-asema", office="SALO"))
+    assert item["name"] == "Salo-Karinan neuvonta-asema"
+    assert item.get_tag("office") == "government"
+
+
+def test_trailing_comma_names_head_and_totality():
+    # Trailing-comma batch killer: head names it, signed form survives;
+    # SYNTHETIC dangling shape included.
+    spider = make_spider()
+    item = parsed(
+        spider,
+        channel("Hae mukaan Hyvän olon polku -ryhmään! -palvelun järjestämispaikka,"),
+        "Jyväskylän kaupunki",
     )
-
-
-def test_campus_tail_stays_whole_end_to_end():
-    # Stadin ammattiopisto, Roihupellon toimipaikka: full form is the name,
-    # no branch, no official_name (nothing parsed off).
-    spider = make_spider()
-    item = parsed(spider, channel("Stadin ammattiopisto, Roihupellon toimipaikka"), "Helsingin kaupunki")
-    assert item["name"] == "Stadin ammattiopisto, Roihupellon toimipaikka"
-    assert item.get("branch") is None
-    assert item["extras"].get("official_name") is None
-
-
-def test_comma_address_dropped():
-    # Koskelan ala-asteen koulu, Mäkelänkatu 84 shape.
-    name, located, official = split(make_spider(), "Koskelan ala-asteen koulu, Mäkelänkatu 84")
-    assert name == "Koskelan ala-asteen koulu"
-    assert located is None
-    assert official is not None
-
-
-def test_comma_proper_venue_single_token():
-    # SYNTHETIC Neuvonta, Reimasali shape (fixture tail as venue).
-    name, located, _ = split(make_spider(), "Neuvonta, Reimasali")
-    assert name == "Neuvonta"
-    assert located == "Reimasali"
-
-
-def test_comma_unit_proper_institution_head():
-    # SYNTHETIC Sipoon lukio, Enter shape.
-    name, located, _ = split(make_spider(), "Sipoon lukio, Enter")
-    assert name == "Enter"
-    assert located == "Sipoon lukio"
-
-
-def test_kela_suffix_cleaned_and_detected():
-    # Kokemäen Asiointipiste/Kela.
-    spider = make_spider()
-    assert spider._clean_name("Kokemäen Asiointipiste/Kela") == "Kokemäen Asiointipiste"
-    assert spider._branch_agency("Kokemäen Asiointipiste/Kela") == "Kela"
-    assert spider._branch_agency("Tavallinen nimi") is None
-
-
-def test_clean_bureau_tails():
-    spider = make_spider()
-    assert (
-        spider._clean_name("Iltapäivätoiminta / Koulu, Kasvatuksen ja koulutuksen toimiala")
-        == "Iltapäivätoiminta / Koulu"
-    )
-    assert spider._clean_name("Nimi, Education Division") == "Nimi"
-
-
-def test_clean_boilerplate_and_org_prefix():
-    spider = make_spider()
-    assert spider._clean_name("Jorvin Terassikahvio -palvelun järjestämispaikka") == "Jorvin Terassikahvio"
-    assert spider._clean_name("Nuortenillat-palvelun järjestämispaikka") == "Nuortenillat"
-    assert spider._clean_name("International House Salo, palvelupaikka") == "International House Salo"
-    assert spider._clean_name("Emy ry:n Hyvän mielen ryhmä") == "Hyvän mielen ryhmä"
-    assert spider._clean_name("Walonkulman Klubitalo - yhteisö työikäisille") == "Walonkulman Klubitalo"
-
-
-def test_genitive_school_mapping():
-    spider = make_spider()
-    assert spider._genitive_school("Rovastinkankaan koulun opiskeluhuolto") == "Rovastinkankaan koulu"
-    assert spider._genitive_school("Vammalan lukion opiskeluhuolto") == "Vammalan lukio"
-    assert spider._genitive_school("Ammattiopisto Spesian opiskeluhuolto") is None
-    assert spider._genitive_school("Opiskeluhuolto") is None
-
-
-def test_post_city_station_suffix():
-    spider = make_spider()
-    assert spider._post_city("ORIVESI AS") == "ORIVESI"
-    assert spider._post_city("ESPOO") == "ESPOO"
-    assert spider._post_city(None) is None
-    assert spider._post_city("  ") is None
-
-
-def test_clean_located_strips_operator_city_person():
-    spider = make_spider()
-    assert spider._clean_located("Imatran keilahalli Oy") == "Imatran keilahalli"
-    assert spider._clean_located("Sari Wicklund") is None
-    assert spider._clean_located("Infopiste") is None
-    assert spider._clean_located("Töölön kisahalli") == "Töölön kisahalli"
-
-
-def test_is_proper_tail_guards():
-    spider = make_spider()
-    assert spider._is_proper_tail("Sipoon Enter") is True
-    assert spider._is_proper_tail("Pöytätennisalue") is False
-    assert spider._is_proper_tail("Hiekkakenttä 2") is False
-    assert spider._is_proper_tail("Imatran keilahalli Oy") is False
-    assert spider._is_proper_tail("Virtain toimipiste") is False
-
-
-# ---- Quadrant B: address parsing -------------------------------------------
-
-
-def test_staircase_unit_split():
-    # Lummetie 2B, A rappu shape.
-    item = addressed(make_spider(), "Lummetie", "2B, A rappu")
-    assert (item["street"], item["housenumber"]) == ("Lummetie", "2b")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "A rappu"
-
-
-def test_attached_letter_lowercased():
-    item = addressed(make_spider(), "Katu", "3A")
-    assert (item["street"], item["housenumber"]) == ("Katu", "3a")
-    assert "street_address" not in item
-    assert "addr:unit" not in item["extras"]
-
-
-def test_floor_tail_parsed_not_level():
-    # Kielotie 7 A, 2.kerros: the floor survives as addr:floor, never level.
-    item = addressed(make_spider(), "Kielotie", "7 A, 2.kerros")
-    assert (item["street"], item["housenumber"]) == ("Kielotie", "7")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "A"
-    assert item["extras"]["addr:floor"] == "2"
-    assert "level" not in item["extras"]
-
-
-def test_pobox_tail_dropped():
-    # Kolpintie 7, PL 111 shape.
-    item = addressed(make_spider(), "Kolpintie", "7, PL 111")
-    assert (item["street"], item["housenumber"]) == ("Kolpintie", "7")
-    assert "street_address" not in item
-    assert "addr:unit" not in item["extras"]
-
-
-def test_venue_slash_tail_dropped():
-    # 14 / Espoon Keskuspuisto shape.
-    item = addressed(make_spider(), "Tie", "14 / Espoon Keskuspuisto")
-    assert (item["street"], item["housenumber"]) == ("Tie", "14")
-
-
-def test_district_tail_dropped():
-    # 70, Töölö shape.
-    item = addressed(make_spider(), "Tie", "70, Töölö")
-    assert (item["street"], item["housenumber"]) == ("Tie", "70")
-
-
-def test_building_tail_kept_as_unit():
-    # Kunnallissairaalantie 20, rakennus 7 shape.
-    item = addressed(make_spider(), "Kunnallissairaalantie", "20, rakennus 7")
-    assert (item["street"], item["housenumber"]) == ("Kunnallissairaalantie", "20")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "rakennus 7"
-
-
-def test_door_tail_kept_as_unit():
-    # 2, A-ovi, 2. krs shape.
-    item = addressed(make_spider(), "Tie", "2, A-ovi, 2. krs")
-    assert (item["street"], item["housenumber"]) == ("Tie", "2")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "A-ovi"
-    assert item["extras"]["addr:floor"] == "2"
-
-
-def test_zero_number_means_numberless():
-    # Hallintoaukio 0: squares carry no housenumber and route to addr:place.
-    item = addressed(make_spider(), "Hallintoaukio", "0")
-    assert item["extras"]["addr:place"] == "Hallintoaukio"
-    assert "street_address" not in item
-
-
-def test_cross_streets_stay_freeform():
-    # Veräjäpellonkatu / Kaivoskallionpolku: no single postal address.
-    item = addressed(make_spider(), "Veräjäpellonkatu / Kaivoskallionpolku", "")
-    assert item["street_address"] == "Veräjäpellonkatu / Kaivoskallionpolku"
-
-
-def test_numberless_place_goes_to_addr_place():
-    # SYNTHETIC island address without a number.
-    item = addressed(make_spider(), "Tiirakari", "")
-    assert item["extras"]["addr:place"] == "Tiirakari"
-    assert "street_address" not in item
-
-
-def test_bare_street_without_number():
-    item = addressed(make_spider(), "Urho Kekkosen katu", "")
-    assert item["street"] == "Urho Kekkosen katu"
-    assert "housenumber" not in item
-    assert "street_address" not in item
-
-
-def test_postcode_city_and_country_pins():
-    item = addressed(make_spider(), "Katu", "1", postcode="00100", office="ESPOO")
-    assert item["postcode"] == "00100"
-    assert item["city"] == "Espoo"
-    assert item["country"] == "FI"
-
-
-def test_station_post_office_files_under_municipality():
-    item = addressed(make_spider(), "Katu", "1", office="ORIVESI AS")
-    assert item["city"] == "Orivesi"
-
-
-def test_fused_staircase_apartment():
-    # Arabianpolku 1A2 shape.
-    item = addressed(make_spider(), "Arabianpolku", "1A2")
-    assert (item["street"], item["housenumber"]) == ("Arabianpolku", "1a")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "2"
-
-
-def test_spaced_housenumber_range():
-    # Nummentie 12 - 14 shape.
-    item = addressed(make_spider(), "Nummentie", "12 - 14")
-    assert (item["street"], item["housenumber"]) == ("Nummentie", "12-14")
-
-
-def test_apartment_before_stair():
-    # Pursimiehenkatu 8 52 A shape.
-    item = addressed(make_spider(), "Pursimiehenkatu", "8 52 A")
-    assert (item["street"], item["housenumber"]) == ("Pursimiehenkatu", "8")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "52 A"
-
-
-def test_spaced_letter_staircase():
-    # 5 A shape: the letter is the staircase, never joined.
-    item = addressed(make_spider(), "Katu", "5 A")
-    assert (item["street"], item["housenumber"]) == ("Katu", "5")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "A"
-
-
-# ---- Quadrant C: category mapping ------------------------------------------
-
-
-def test_police_outranks_on_call():
-    # Rauman poliisiasema, poliisipäivystys: police, never urgent clinic.
-    category, _ = cat(make_spider(), "Rauman poliisiasema, poliisipäivystys")
-    assert category == Categories.POLICE
-
-
-def test_social_on_call_outranks_clinic():
-    # Sosiaali- ja kriisipäivystys.
-    category, _ = cat(make_spider(), "Sosiaali- ja kriisipäivystys")
-    assert category == Categories.SOCIAL_FACILITY
-
-
-def test_plain_on_call_stays_urgent():
-    category, _ = cat(make_spider(), "Päivystys")
-    assert category == Categories.CLINIC_URGENT
-
-
-def test_dental_outranks_on_call():
-    # Forssan hammashoidon arkipäivystys (genitive gradation included).
-    category, _ = cat(make_spider(), "Forssan hammashoidon arkipäivystys")
-    assert category == Categories.DENTIST
-
-
-def test_school_hosted_sports_file_as_sports():
-    spider = make_spider()
-    for fi, category in (
-        ("Saunalahden koulun hiekkakenttä", Categories.LEISURE_PITCH),
-        ("Kaasmarkun koulun kaukalo", Categories.LEISURE_ICE_RINK),
-        ("Kuusikon koulun luistelukenttä", Categories.LEISURE_ICE_RINK),
-        ("Lietsalan koulun liikuntasali", Categories.LEISURE_SPORTS_HALL),
-        ("Tiedonpuiston koulun liikuntatilat", Categories.LEISURE_SPORTS_HALL),
-        ("Opinmäen koulun liikuntahalli", Categories.LEISURE_SPORTS_CENTRE),
-        ("Uittamon koulun sali", Categories.LEISURE_SPORTS_HALL),
-        ("Hirvaskosken koulun frisbeegolfrata", Categories.LEISURE_DISC_GOLF_COURSE),
-        ("Nurmikenttä 1", Categories.LEISURE_PITCH),
+    assert item["name"] == "Hae mukaan Hyvän olon polku -ryhmään!"
+    assert item["extras"]["official_name"] == "Hae mukaan Hyvän olon polku -ryhmään! -palvelun järjestämispaikka,"
+
+
+# ---- Addresses -------------------------------------------------------------------
+# (road, number, kw, want, absent)
+
+_ADDR_CASES = [
+    (
+        "Lummetie",
+        "2B, A rappu",
+        {},
+        {"street": "Lummetie", "housenumber": "2b", "extras.addr:unit": "A rappu"},
+        ("street_address",),
+    ),
+    ("Katu", "3A", {}, {"street": "Katu", "housenumber": "3a"}, ("street_address", "extras.addr:unit")),
+    (
+        "Kielotie",
+        "7 A, 2.kerros",
+        {},
+        {"street": "Kielotie", "housenumber": "7", "extras.addr:unit": "A", "extras.addr:floor": "2"},
+        ("street_address", "extras.level"),
+    ),
+    ("Kolpintie", "7, PL 111", {}, {"street": "Kolpintie", "housenumber": "7"}, ("street_address", "extras.addr:unit")),
+    ("Tie", "14 / Espoon Keskuspuisto", {}, {"street": "Tie", "housenumber": "14"}, ()),
+    ("Tie", "4 / Espoon Keskuspuisto", {}, {"street": "Tie", "housenumber": "4"}, ()),
+    ("Tie", "70, Töölö", {}, {"street": "Tie", "housenumber": "70"}, ()),
+    (
+        "Kunnallissairaalantie",
+        "20, rakennus 7",
+        {},
+        {"street": "Kunnallissairaalantie", "housenumber": "20", "extras.addr:unit": "rakennus 7"},
+        ("street_address",),
+    ),
+    (
+        "Tie",
+        "2, A-ovi, 2. krs",
+        {},
+        {"street": "Tie", "housenumber": "2", "extras.addr:unit": "A-ovi", "extras.addr:floor": "2"},
+        ("street_address",),
+    ),
+    ("Hallintoaukio", "0", {}, {"extras.addr:place": "Hallintoaukio"}, ("street_address",)),
+    (
+        "Veräjäpellonkatu / Kaivoskallionpolku",
+        "",
+        {},
+        {"street_address": "Veräjäpellonkatu / Kaivoskallionpolku"},
+        (),
+    ),
+    ("Tiirakari", "", {}, {"extras.addr:place": "Tiirakari"}, ("street_address",)),
+    ("Urho Kekkosen katu", "", {}, {"street": "Urho Kekkosen katu"}, ("housenumber", "street_address")),
+    (
+        "Katu",
+        "1",
+        {"postcode": "00100", "office": "ESPOO"},
+        {"postcode": "00100", "city": "Espoo", "country": "FI"},
+        (),
+    ),
+    ("Katu", "1", {"office": "ORIVESI AS"}, {"city": "Orivesi"}, ()),
+    (
+        "Arabianpolku",
+        "1A2",
+        {},
+        {"street": "Arabianpolku", "housenumber": "1a", "extras.addr:unit": "2"},
+        ("street_address",),
+    ),
+    ("Nummentie", "12 - 14", {}, {"street": "Nummentie", "housenumber": "12-14"}, ()),
+    (
+        "Pursimiehenkatu",
+        "8 52 A",
+        {},
+        {"street": "Pursimiehenkatu", "housenumber": "8", "extras.addr:unit": "52 A"},
+        ("street_address",),
+    ),
+    ("Katu", "5 A", {}, {"street": "Katu", "housenumber": "5", "extras.addr:unit": "A"}, ("street_address",)),
+    ("Krakantien päässä", "", {}, {"street_address": "Krakantien päässä"}, ()),
+    (
+        "Voimapolku",
+        "3 03100 Nummela",
+        {"postcode": "03100", "office": "NUMMELA"},
+        {"street": "Voimapolku", "housenumber": "3"},
+        (),
+    ),
+    ("Sankarinkurvi", "", {}, {"street": "Sankarinkurvi"}, ("street_address",)),
+    ("wetterhoffinkatu", "2", {}, {"street": "Wetterhoffinkatu", "housenumber": "2"}, ()),
+    ("Painiityntie", "21 ja 21", {}, {"street": "Painiityntie", "housenumber": "21"}, ()),
+    (
+        "Leonkatu",
+        "4 Liiketila 3B-120",
+        {},
+        {"street": "Leonkatu", "housenumber": "4", "extras.addr:unit": "Liiketila 3B-120"},
+        ("street_address",),
+    ),
+    ("Katu", "1, B", {}, {"street": "Katu", "housenumber": "1", "extras.addr:unit": "B"}, ()),
+    (
+        "Laivalahdenkatu",
+        "2B, B",
+        {},
+        {"street": "Laivalahdenkatu", "housenumber": "2b"},
+        ("street_address", "extras.addr:unit"),
+    ),
+    (
+        "Katu",
+        "1, 2 vån",
+        {},
+        {"street": "Katu", "housenumber": "1", "extras.addr:floor": "2"},
+        (),
+    ),
+    (
+        "Tie",
+        "7 A (3. kerros)",
+        {},
+        {"street": "Tie", "housenumber": "7", "extras.addr:unit": "A", "extras.addr:floor": "3"},
+        ("extras.level",),
+    ),
+    (
+        "Tie",
+        "7 A (kolmas kerros)",
+        {},
+        {"street": "Tie", "housenumber": "7", "extras.addr:unit": "A", "extras.addr:floor": "3"},
+        ("extras.level",),
+    ),
+    ("Katu", "4 a, toinen. krs", {}, {"extras.addr:floor": "2"}, ("extras.level",)),
+    ("Tie", "5, 3. ja 4. krs", {}, {"street": "Tie", "housenumber": "5"}, ("extras.addr:floor",)),
+    ("Toinen linja", "", {}, {}, ("extras.addr:floor",)),
+    (
+        "Viides linja",
+        "9, 2. krs",
+        {},
+        {"street": "Viides linja", "housenumber": "9", "extras.addr:floor": "2"},
+        (),
+    ),
+    (
+        "Katu",
+        "13, katutaso",
+        {},
+        {"street": "Katu", "housenumber": "13"},
+        ("extras.addr:floor", "extras.level"),
+    ),
+    ("Talholmen virkistysalue", "", {}, {"extras.addr:place": "Talholmen virkistysalue"}, ("street_address",)),
+    ("Saaristonkatu", "", {}, {"street": "Saaristonkatu"}, ("street_address",)),
+    ("Didrichsenin taidemuseo, Kuusilahdenkuja", "1", {}, {"street": "Kuusilahdenkuja", "housenumber": "1"}, ()),
+    (
+        "Kielotie",
+        "42 asunnot 1-4",
+        {"postcode": "01300", "office": "VANTAA"},
+        {"street": "Kielotie", "housenumber": "42", "extras.addr:unit": "asunnot 1-4"},
+        (),
+    ),
+    (
+        "Oikopolku",
+        "2 as 3",
+        {},
+        {"street": "Oikopolku", "housenumber": "2", "extras.addr:unit": "as 3"},
+        ("street_address",),
+    ),
+    ("Katu", "51, 51", {}, {"street": "Katu", "housenumber": "51"}, ("street_address", "extras.addr:unit")),
+    ("Juurikoskenkatu", "1 lt 7", {}, {"street": "Juurikoskenkatu", "housenumber": "7"}, ()),
+    ("Ulkofantintie", "", {}, {"street": "Ulkofantintie"}, ()),
+    ("Luolavuorenpolku", "", {}, {"street": "Luolavuorenpolku"}, ()),
+    ("Örninkatu", "15 ovi 28", {}, {"housenumber": "15", "extras.addr:unit": "ovi 28"}, ()),
+    ("Kummelivuorentie", "2 ja 4", {}, {"housenumber": "2", "extras.addr:unit": "4"}, ()),
+    ("Muurlantie", "365 E as 5", {}, {"housenumber": "365", "extras.addr:unit": "E as 5"}, ()),
+    ("Sampsantie", "17a (Metsolantie 18, Peller", {}, {"housenumber": "17a"}, ()),
+    ("Päiväkodintie", "4 a 7-8", {}, {"housenumber": "4", "extras.addr:unit": "a 7-8"}, ()),
+    (
+        "Tikkamäentie 16",
+        "talo 7, 7 krs.",
+        {},
+        {"housenumber": "16", "extras.addr:unit": "talo 7", "extras.addr:floor": "7"},
+        (),
+    ),
+    (
+        "Kauppakuja 2 A 1",
+        "2 A 1",
+        {},
+        {"street": "Kauppakuja", "housenumber": "2", "extras.addr:unit": "A 1"},
+        (),
+    ),
+    (
+        "Pappilantie 11, pielavesi",
+        "",
+        {"office": "PIELAVESI"},
+        {"street": "Pappilantie", "housenumber": "11"},
+        (),
+    ),
+    ("Tahtimarssi 3", "Oulu", {"office": "OULU"}, {"street": "Tahtimarssi", "housenumber": "3"}, ()),
+    ("Kalevalantie 13", "90570", {}, {"street": "Kalevalantie", "housenumber": "13"}, ()),
+    ("Tie", "PL 24", {}, {"housenumber": None}, ()),
+    ("Tie", "15 rak.1 B-rappu", {}, {"housenumber": "15", "extras.addr:unit": "rak.1 B-rappu"}, ()),
+    ("Tivolikuja", "1 Alppiharju", {}, {"street": "Tivolikuja", "housenumber": "1"}, ()),
+    (
+        "Mannerheimintie / Runeberginkatu",
+        "12 A 1",
+        {},
+        {"street_address": "Mannerheimintie / Runeberginkatu", "extras.addr:unit": "A 1"},
+        (),
+    ),
+    ("Katu", "12/14", {}, {"housenumber": "12-14"}, ()),
+    ("Tie", "10 11111", {"postcode": ""}, {"housenumber": "10"}, ("extras.addr:unit",)),
+    ("Pasilan asema", "", {}, {"street_address": "Pasilan asema"}, ("extras.addr:place",)),
+    (
+        "Varastotie 4",
+        "67100",
+        {"postcode": "67100", "office": "KOKKOLA"},
+        {"street": "Varastotie"},
+        ("extras.addr:unit",),
+    ),
+    ("Pl 52", "", {"postcode": "20520", "office": "TURKU"}, {"postcode": "20520"}, ("street", "housenumber")),
+]
+
+
+@pytest.mark.parametrize("road,number,kw,want,absent", _ADDR_CASES)
+def test_address(road, number, kw, want, absent):
+    check_addr(road, number, want=want, absent=absent, **kw)
+
+
+def test_route_descriptions_stay_freeform():
+    # Numberless route descriptions carry the name with no number.
+    for road in (
+        "Metsäautotie välillä Lapinlahdentie 1175 - Pitkämäentie 641",
+        "Metsäautotie välilla Lapinlahdentie 1175 - Pitkämäentie 641",
     ):
-        assert cat(spider, fi)[0] == category, fi
+        item = addressed(make_spider(), road, "")
+        assert item.get("housenumber") is None
+        assert item["street_address"] == road
 
 
-def test_school_hosted_health_files_as_health():
-    spider = make_spider()
-    for fi, category in (
-        ("Opiskeluhuolto", Categories.CLINIC),
-        ("Kouluterveydenhuolto", Categories.CLINIC),
-        ("Seminaarikoulun hammashoitola", Categories.DENTIST),
-        ("Pihlajamäen neuvola", Categories.CLINIC),
+def test_postcode_tail_stripped_from_number():
+    assert make_spider()._resolve_number_tail("03100 Nummela") is None
+    assert make_spider()._resolve_number_tail("2 vån") is None
+
+
+def test_stair_range_units_parse():
+    # Kauppakatu 27b A2-4: staircase-letter + apartment-range tails parse
+    # to housenumber + unit, not freeform.
+    assert make_spider()._split_addr_tokens("Kauppakatu 27b A2-4".split()) == ("Kauppakatu", "27b", "A2-4")
+
+
+# ---- Categories: health ----------------------------------------------------------
+C = Categories
+
+_HEALTH_CASES = [
+    # Precedence: police/social/dental outrank on-call; plain stays urgent.
+    ("Rauman poliisiasema, poliisipäivystys", C.POLICE, _SKIP),
+    ("Sosiaali- ja kriisipäivystys", C.SOCIAL_FACILITY, _SKIP),
+    ("Päivystys", C.CLINIC_URGENT, _SKIP),
+    ("Forssan hammashoidon arkipäivystys", C.DENTIST, _SKIP),
+    ("Seminaarikoulun hammashoitola", C.DENTIST, _SKIP),
+    ("Kuopion Canthia, suun perusterveydenhuolto", C.DENTIST, _SKIP),
+    ("Pirkanmaan suun erikoishoidon yksikkö - oikomishoito", C.DENTIST, _SKIP),
+    # School-hosted health files as health; nurse-led carries the extra.
+    ("Opiskeluhuolto", C.CLINIC, {"healthcare": "nurse"}),
+    ("Kouluterveydenhuolto", C.CLINIC, _SKIP),
+    ("Pihlajamäen neuvola", C.CLINIC, _SKIP),
+    ("Esiopetuksen opiskeluhuolto, Laurentius-päiväkoti", C.CLINIC, {"healthcare": "nurse"}),
+    ("Esiopetuksen opiskeluhuolto, Kantvikin päiväkoti", C.CLINIC, {"healthcare": "nurse"}),
+    ("Opiskeluhuolto, Karis svenska högstadium", C.CLINIC, {"healthcare": "nurse"}),
+    ("Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto", C.CLINIC, _SKIP),
+    # Wards, receptions, therapy units.
+    ("Malmin osasto 13", C.CLINIC, _SKIP),
+    ("Laakson osasto 3", C.CLINIC, _SKIP),
+    ("Suursuon osasto 23", C.CLINIC, _SKIP),
+    ("Laakson vuodeosasto 13 (infektio-osasto)", C.CLINIC, _SKIP),
+    ("Pellon vuodeosasto", C.CLINIC, _SKIP),
+    ("Geriatrinen akuuttiosasto", C.CLINIC, _SKIP),
+    ("Terveysaseman vastaanotto", C.CLINIC, _SKIP),
+    ("Akaan lääkärin ja hoitajan vastaanotot", C.CLINIC, _SKIP),
+    ("Kuntoutuksen poliklinikat", C.CLINIC, _SKIP),
+    ("Mielialahäiriötyöryhmä, Tyks, Raisio", C.CLINIC, _SKIP),
+    ("Diabeteskeskus", C.CLINIC, _SKIP),
+    ("Maahanmuuttajien terveyspalvelut", C.CLINIC, _SKIP),
+    ("Fysioterapia Kankaanpää", C.CLINIC, {"healthcare": "physiotherapist"}),
+    ("Oriveden puheterapian vastaanotot", C.CLINIC, {"healthcare": "speech_therapist"}),
+    ("Teerijärven hyvinvointiasema, fysioterapia", _SKIP, {"healthcare": "physiotherapist"}),
+    ("Diabeteshoitaja, Kaarina", _SKIP, {"healthcare": "nurse"}),
+    ("Jalkaterapeutti, Loimaa", C.CLINIC, {"healthcare": "podiatrist"}),
+    ("Varhaiskasvatuksen puheterapeutti", C.CLINIC, _SKIP),
+    ("Koulupsykologi", C.CLINIC, _SKIP),
+    ("Oikeuspsykiatrian vastaanotto, Auroran sairaala", C.CLINIC, _SKIP),
+    ("Lasten ja nuorten oikeuspsykologian yksikkö", C.CLINIC, _SKIP),
+    ("Opioidiriippuvaisten korvaushoito", C.CLINIC, _SKIP),
+    ("Päihdevieroitus", C.CLINIC, _SKIP),
+    ("Leikkaus ja anestesia", C.CLINIC, _SKIP),
+    ("Leikkaushoitokeskus", C.CLINIC, _SKIP),
+    ("Sisätaudit", C.CLINIC, _SKIP),
+    ("Silmätautien hoito", C.CLINIC, _SKIP),
+    ("Syöpätaudit ja sädehoito", C.CLINIC, _SKIP),
+    ("Syöpätautien ja verisairauksien sairaansijat", C.CLINIC, _SKIP),
+    ("Munuaisyksikkö", C.CLINIC, _SKIP),
+    ("Tähystys", C.CLINIC, _SKIP),
+    ("Dialyysi- ja munuaisyksikkö", C.CLINIC, _SKIP),
+    ("Neulanvaihtopiste", C.CLINIC, _SKIP),
+    ("Tartuntataudit", C.CLINIC, _SKIP),
+    ("Vatsakeskus, Tays Hatanpää", C.CLINIC, _SKIP),
+    ("Vaativa kuntoutusyksikkö, Tays Hatanpää", C.CLINIC, _SKIP),
+    ("Arviointiyksikkö", C.CLINIC, _SKIP),
+    ("Katriinan sairaalan röntgen", C.CLINIC, {"healthcare": "medical_imaging"}),
+    ("Rontgen Pori", C.CLINIC, {"healthcare": "medical_imaging"}),
+    ("Kiskon äitiys- ja lastenneuvola", _SKIP, {"healthcare:speciality": "maternal_and_child_health"}),
+    ("Lapin keskussairaalan laboratorio", C.CLINIC, {"healthcare": "laboratory"}),
+    ("Sevettijärven terveystalo", C.CLINIC, _SKIP),
+    ("Kliininen neurofysiologia, Porvoon sairaala", C.CLINIC, _SKIP),
+    ("Hyrynsalmen muistineuvola", C.CLINIC, None),
+    ("Raision Muistikeskus", C.CLINIC, _SKIP),
+    ("Kohdunkaulan syövän seulonta", C.CLINIC, _SKIP),
+    ("Sikiöseulonnat", C.CLINIC, _SKIP),
+    ("Sikiötutkimusyksikkö", C.CLINIC, _SKIP),
+    ("Tutkimusyksiköt, toimipisteet", C.CLINIC, _SKIP),
+    ("Rintasyöpäseulonta Oulun yliopistollisessa sairaalassa", C.CLINIC, _SKIP),
+    ("Terveys- ja hyvinvointikeskus", C.CLINIC, _SKIP),
+    ("Terveyskeskus Mehiläinen Espoontori", C.CLINIC, _SKIP),
+    ("Vesilahden lähiasema", C.CLINIC, _SKIP),
+    ("Selviämishoitoasema", C.CLINIC, _SKIP),
+    ("Selviämisasema", C.CLINIC, _SKIP),
+    ("Sydänasema", C.CLINIC, _SKIP),
+    ("Sydänyksikkö", C.CLINIC, _SKIP),
+    ("Sydänosasto", C.CLINIC, _SKIP),
+    ("Syömishäiriötiimi Verso", C.CLINIC, _SKIP),
+    ("Ravitsemusterapia, Kustavi, Laitila", C.CLINIC, _SKIP),
+    ("Terveyskeskusryhmä", C.CLINIC, _SKIP),
+    ("Neuvonta terveysasemalla", C.CLINIC, _SKIP),
+    ("Nuorisoasema mielenterveystyö", C.CLINIC, _SKIP),
+    ("Nuorisopsykiatrian poliklinikka", C.CLINIC, _SKIP),
+    ("Konneveden, Uuraisten ja Äänekosken nuorten mielenterveys- ja päihdetyön tiimi", C.CLINIC, _SKIP),
+    ("Nuorten päihdepalvelu Pysäkki", C.CLINIC, _SKIP),
+    ("Lasten ja nuorten mielenterveyspalvelut", C.CLINIC, _SKIP),
+    ("Nuorten sukupuoli-identiteetin tutkimusvastaanotto, Pasila", C.CLINIC, _SKIP),
+    ("Terveyspalvelut", C.CLINIC, _SKIP),
+    # Hospitals (subunits downgrade to clinic).
+    ("Satasairaala", C.HOSPITAL, _SKIP),
+    ("Kymenlaakson psykiatrinen sairaala", C.HOSPITAL, _SKIP),
+    ("Palliatiivinen yksikkö, Sastamalan sairaala", C.CLINIC, _SKIP),
+    ("Päiväsairaala", C.CLINIC, _SKIP),
+    # Pharmacies and medical-supply shops.
+    ("Apoteket", C.PHARMACY, _SKIP),
+    ("Kirjavantolpan apteekki", C.PHARMACY, _SKIP),
+    ("Kotkan 5. Karhulan Tori apteekki", C.PHARMACY, _SKIP),
+    ("Hämeenlinnan I Tori-apteekki", C.PHARMACY, _SKIP),
+    ("CPAP-tarvikejakelu", C.SHOP_MEDICAL_SUPPLY, _SKIP),
+    ("Hoitotarvikejakelu", C.SHOP_MEDICAL_SUPPLY, _SKIP),
+    # Vets (municipal vet branches keep vet over supervision).
+    ("Eläinlääkäri Eura", C.VETERINARY, _SKIP),
+    ("Eläinhoitola", C.VETERINARY, _SKIP),
+    ("Heinolan Lintuhoitola", C.VETERINARY, _SKIP),
+    ("Päijät-Hämeen ympäristöterveys, Orimattilan kunnaneläinlääkärin toimipiste", C.VETERINARY, _SKIP),
+    ("Veikkolan näytteenoton lähipalvelu", C.SAMPLE_COLLECTION, _SKIP),
+    # No-enum rows stay generic.
+    ("Vainajansäilytys, Ahveniston sairaala", None, None),
+    ("Helsingin vainajatilat", None, None),
+]
+
+
+@pytest.mark.parametrize("fi,want_cat,want_extra", _HEALTH_CASES)
+def test_category_health(fi, want_cat, want_extra):
+    check_cat(fi, want_cat, want_extra)
+
+
+# ---- Categories: education -----------------------------------------------------
+
+_EDU_CASES = [
+    ("Kouluravintola, Pihlajamäen ala-asteen koulu", C.CANTEEN, _SKIP),
+    ("Kouluravintola, Pukinmäenkaaren peruskoulu", C.CANTEEN, _SKIP),
+    ("Koskelan monipuolinen palvelukeskus / Hoitoalan ruokapalvelut", C.CANTEEN, _SKIP),
+    ("Keuda Kerava", C.COLLEGE, _SKIP),
+    ("Koulutuskeskus Salpaus", C.COLLEGE, _SKIP),
+    ("Kansalaisopisto", C.COLLEGE, _SKIP),
+    ("Sipoon opisto / Opintien palvelupiste ja liikuntatila", C.COLLEGE, _SKIP),
+    ("Koulutalo", C.SCHOOL, _SKIP),
+    ("Helsingin yhteislyseo", C.SCHOOL, _SKIP),
+    ("Myllytullin koulu", C.SCHOOL, _SKIP),
+    ("Tiernan koulu, Heinätori", C.SCHOOL, _SKIP),
+    ("Koulun piha", C.SCHOOL, _SKIP),
+    ("Urheilupuiston koulu", C.SCHOOL, _SKIP),
+    ("Kuvataidekoulu", C.SCHOOL, _SKIP),
+    ("Nordsjö lågstadieskola", C.SCHOOL, _SKIP),
+    ("Gymnasium", C.SCHOOL, _SKIP),
+    ("Gymnasiet i Petalax", C.SCHOOL, _SKIP),
+    ("Koulukuraattori", C.SCHOOL, _SKIP),
+    ("Soveltava temppuilu kouluikäisille", None, _SKIP),
+    ("Koululaisen aamu- ja iltapäivätoiminta", _SKIP, _SKIP),  # asserted as != SCHOOL below
+    ("Happy Toddlers", C.KINDERGARTEN, _SKIP),
+    ("Daycare Daisy Oy", C.KINDERGARTEN, _SKIP),
+    ("Sammontalon päiväkodin Uus-Lavolan toimintayksikkö", C.KINDERGARTEN, _SKIP),
+    ("Pääskyvuoren leikkikerho", C.KINDERGARTEN, _SKIP),
+    ("Leikkikoulu", C.KINDERGARTEN, _SKIP),
+    ("Urheiluleikkikerho Kanervat", C.KINDERGARTEN, _SKIP),
+    ("Päiväkotiryhmä Vekkula", C.KINDERGARTEN, _SKIP),
+    ("Alhaisten koulun esiopetusryhmä", C.KINDERGARTEN, _SKIP),
+    ("Kämmenniemen päiväkoti Terälahden lisäryhmä", C.KINDERGARTEN, _SKIP),
+    ("Päiväkodin vuorohoitoryhmä", C.KINDERGARTEN, _SKIP),
+    ("Perhepäivähoitaja Tiia Ruotsalainen", C.KINDERGARTEN, _SKIP),
+    ("Espoon keskuksen yksityisen hoidon tuen päiväkodit", C.KINDERGARTEN, _SKIP),
+    ("Prästgårdsbackens förskola, Gesterby", C.KINDERGARTEN, _SKIP),
+    ("Kyrkoby förskola", C.KINDERGARTEN, _SKIP),
+    ("Söderkulla förskola", C.KINDERGARTEN, _SKIP),
+    ("Södra familjedagvårdsområden", C.KINDERGARTEN, _SKIP),
+    ("Ryhmäperhepäivähoitokoti Rastas", C.KINDERGARTEN, _SKIP),
+    ("Luomupäiväkoti Kirsikka Laajasalo", C.KINDERGARTEN, _SKIP),
+    ("Päiväkoti Vihtori", C.KINDERGARTEN, _SKIP),
+    ("Pilke Kilonkallio", C.KINDERGARTEN, _SKIP),
+    ("Päiväkoti Ankkalampi Duckies, Herttoniemenranta", C.KINDERGARTEN, _SKIP),
+    ("Norlandia Kärry", C.KINDERGARTEN, _SKIP),
+    ("Iltapäivätoiminta / Aurinkolahden peruskoulu", C.COMMUNITY_CENTRE, _SKIP),
+    (
+        "Kuparivuoren aamu- ja iltapäivätoiminta sekä iltapäivätoiminnan pienryhmä",
+        C.COMMUNITY_CENTRE,
+        _SKIP,
+    ),
+    ("Iltapäivätoiminta / Puotilan ala-aste, Saalem-Nuoret ry", C.COMMUNITY_CENTRE, _SKIP),
+    ("Koulumuseo Lagstad", C.MUSEUM, _SKIP),
+    ("Saukkojärven kotiseutu- ja koulumuseo", C.MUSEUM, _SKIP),
+    ("Apteekkimuseo", C.MUSEUM, _SKIP),
+    ("Apteekkimuseo ja Qwenselin talo", C.MUSEUM, _SKIP),
+    ("Huvilamuseo Villa Rulludd", C.MUSEUM, _SKIP),
+    ("Sairaalamuseo", C.MUSEUM, _SKIP),
+    ("Näyttelyhalli", C.MUSEUM, _SKIP),
+    ("Näyttelykeskus WeeGee", C.MUSEUM, _SKIP),
+    ("Leo Torpan kamerakokoelma", C.MUSEUM, _SKIP),
+    ("Sonkajärven kirjaston näyttelysali", C.MUSEUM, _SKIP),
+    ("Valkeakosken kaupunginkirjaston lehtisali", C.LIBRARY, _SKIP),
+    ("Lehtilukusali", C.LIBRARY, _SKIP),
+    ("Lehtisali ja omatoimikirjasto", C.LIBRARY, _SKIP),
+    ("Dagsmarkin lainausasema", C.LIBRARY, _SKIP),
+    ("Aikuiskoulutus", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Koulutukset ja luennot", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Kasvatuksen ja koulutuksen toimiala, hallinto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Vesilahden koulutoimisto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Koulutoimisto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Perusopetus", C.OFFICE_GOVERNMENT, _SKIP),
+]
+
+
+@pytest.mark.parametrize(
+    "fi,want_cat,want_extra", [c for c in _EDU_CASES if c[0] != "Koululaisen aamu- ja iltapäivätoiminta"]
+)
+def test_category_education(fi, want_cat, want_extra):
+    check_cat(fi, want_cat, want_extra)
+
+
+def test_koululainen_pupils_are_not_schools():
+    assert cat(make_spider(), "Koululaisen aamu- ja iltapäivätoiminta")[0] != Categories.SCHOOL
+
+
+# ---- Categories: social housing and care -------------------------------------------
+C = Categories
+
+_SOCIAL_CASES = [
+    # Group homes house; bare desks don't.
+    ("Ryhmäkoti Karkkula", C.SOCIAL_FACILITY, {"social_facility": "group_home"}),
+    ("Outamon lastenkoti Noko", C.SOCIAL_FACILITY, {"social_facility": "group_home"}),
+    ("Ryhmäkoti Sinfonia", C.SOCIAL_FACILITY, {"social_facility": "group_home"}),
+    ("Hakalan ryhmäkodit", C.SOCIAL_FACILITY, {"social_facility": "group_home"}),
+    ("Asumispalveluyksikkö Virrankoti", _SKIP, {"social_facility": "group_home"}),
+    ("Töölön seniorikeskus/Helmi ryhmäkoti", C.SOCIAL_FACILITY, {"social_facility": "group_home"}),
+    ("Nuorten vastaanottokoti Havurinne", C.SOCIAL_FACILITY, {"social_facility": "group_home"}),
+    ("Uudenkoiviston vastaanottokoti", C.SOCIAL_FACILITY, {"social_facility": "group_home"}),
+    ("Rovaniemen Etelärinteen lapsi- ja nuorisokoti", _SKIP, {"social_facility": "group_home"}),
+    ("Eskolakoti 1 ja 2", C.SOCIAL_FACILITY, _SKIP),
+    ("Lastensuojelulaitos", C.SOCIAL_FACILITY, _SKIP),
+    ("Mielenterveys- ja päihdekuntoutujien asumispalveluyksiköt Tähkä ja Jyvä", C.SOCIAL_FACILITY, _SKIP),
+    ("Lastensuojelun ja perhesosiaalityön vertaisryhmätoiminta", C.SOCIAL_FACILITY, _SKIP),
+    # Nursing needs housing evidence.
+    ("Palvelukoti Osmanrinne", C.NURSING_HOME, _SKIP),
+    ("Ikäihmisten tehostettu palveluasuminen", C.NURSING_HOME, _SKIP),
+    ("Ympärivuorokautinen palveluasuminen", C.NURSING_HOME, _SKIP),
+    ("Koskelan palveluasumisyksikkö", C.NURSING_HOME, _SKIP),
+    ("Linnavuoren palvelukodit", C.NURSING_HOME, _SKIP),
+    ("Hoitokoti Toppila", C.NURSING_HOME, _SKIP),
+    ("Hoitokoti, Hyrynsalmen hoitokoti", C.NURSING_HOME, _SKIP),
+    ("Ruusukujan palveluasunnot", C.NURSING_HOME, _SKIP),
+    ("Lyhytaikaisyksikkö Selvari, Seinäjoki", C.NURSING_HOME, _SKIP),
+    ("Oulun lyhytaikaishoidon yksikkö Elviira", C.NURSING_HOME, _SKIP),
+    ("Esperi Hoivakoti Vihtori", C.NURSING_HOME, _SKIP),
+    ("Iin palvelukoti Emmintupa", C.NURSING_HOME, _SKIP),
+    ("Palvelukoti Snällintupa", C.NURSING_HOME, _SKIP),
+    # Supported housing assists; assessments never house.
+    ("Matinniitty tuettu asuminen", C.ASSISTED_LIVING, _SKIP),
+    ("Mielenterveyskuntoutujien tuettu asuminen", C.ASSISTED_LIVING, _SKIP),
+    ("Roihuvuoren tukiasunnot", C.ASSISTED_LIVING, _SKIP),
+    # Shelters shelter; desks stay desks.
+    ("Ensikotitoiminta", C.SHELTER, _SKIP),
+    ("Hätämajoitusyksikkö Viisikko", C.SHELTER, _SKIP),
+    ("Mikkelin turvakoti", C.SOCIAL_FACILITY, {"social_facility": "shelter"}),
+    ("Turvakoti palvelupiste", C.OFFICE_GOVERNMENT, _SKIP),
+    # Social-facility services.
+    ("Kuntoutusohjaus- ja asiantuntijapalvelut", C.SOCIAL_FACILITY, _SKIP),
+    ("Vaativat kehitysvammapalvelut", C.SOCIAL_FACILITY, _SKIP),
+    ("Perhetukikeskus Päiväperho", C.SOCIAL_FACILITY, _SKIP),
+    ("Seri-tukikeskus", C.SOCIAL_FACILITY, _SKIP),
+    ("Hävikkiruoan jako työttömille ja vähävaraisille", C.SOCIAL_FACILITY, _SKIP),
+    ("Hävikkiruokajakelu", C.SOCIAL_FACILITY, _SKIP),
+    ("Yhteisen pöydän hävikkiterminaali", C.SOCIAL_FACILITY, _SKIP),
+    ("Ruoka-apua (leipää)", C.SOCIAL_FACILITY, _SKIP),
+    ("Ruokajako", C.SOCIAL_FACILITY, _SKIP),
+    ("Naulakko - vaate- ja tavara-apu", C.SOCIAL_FACILITY, _SKIP),
+    ("Turun kulttuuripaja Casa", C.SOCIAL_FACILITY, _SKIP),
+    ("Lohjan päiväaikainen toiminta", C.SOCIAL_FACILITY, _SKIP),
+    ("Asumispalvelut kehitysvammaisille lapsille", C.SOCIAL_FACILITY, _SKIP),
+    ("Kauklahden asumispalvelut", C.SOCIAL_FACILITY, _SKIP),
+    ("Kotihoito Lappeenranta Läntinen", C.SOCIAL_FACILITY, _SKIP),
+    ("Kotihoito/Töölö 2 lähipalvelualue", C.SOCIAL_FACILITY, _SKIP),
+    ("Kotihoito/Pitäjänmäki 1 lähipalvelualue", C.SOCIAL_FACILITY, _SKIP),
+    ("Oulun Limingantulli-Meritulli kotihoito", C.SOCIAL_FACILITY, _SKIP),
+    ("Perheasiain neuvottelukeskus", C.SOCIAL_FACILITY, _SKIP),
+    ("Suomenkielinen seniorikerho", C.SOCIAL_FACILITY, _SKIP),
+    ("Seniorikerho", C.SOCIAL_FACILITY, _SKIP),
+    ("Seniori-info", C.SOCIAL_FACILITY, _SKIP),
+    ("Ikäihmisten päivätoiminta, Kihniö", C.SOCIAL_FACILITY, _SKIP),
+    ("Rovaniemen päiväkeskus Veitikantupa", C.SOCIAL_FACILITY, _SKIP),
+    ("Pirkkalan sote-aseman lähitori", C.SOCIAL_FACILITY, _SKIP),
+    ("Messukylän lähitori, Tampere", C.SOCIAL_FACILITY, _SKIP),
+    ("Innopaja & Kädentaitokeskus", C.SOCIAL_FACILITY, {"social_facility": "workshop"}),
+    ("Kädentaitopaja", _SKIP, {"social_facility": "workshop"}),
+    ("Miehikkälän työpaja", _SKIP, {"social_facility": "workshop"}),
+    ("Palvelut ikäihmisille", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Ikäihmisten palvelujen hakemukset", C.OFFICE_GOVERNMENT, _SKIP),
+    (
+        "Ikifit Oy, hyvinvointikoti Jukola/Hannes, Hämeenlinna, yhteisöllisen asumisen ostopalvelut",
+        C.SOCIAL_FACILITY,
+        _SKIP,
+    ),
+]
+
+
+@pytest.mark.parametrize("fi,want_cat,want_extra", _SOCIAL_CASES)
+def test_category_social(fi, want_cat, want_extra):
+    check_cat(fi, want_cat, want_extra)
+
+
+# ---- Categories: civic offices, courts, companies --------------------------------
+
+_CIVIC_CASES = [
+    ("Apuvälinepalvelu", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Mittauspalvelut", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Sisäinen tarkastus", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Työllistymistä edistävä monialainen palvelu TYM", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Iisalmen poliisiasema", C.POLICE, _SKIP),
+    ("Poliisiasema", C.POLICE, _SKIP),
+    ("Keski-Uudenmaan ympäristökeskus", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Kaupunkikehitys -toimiala", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Terveysvalvonta", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Kalajoen kaupungin ympäristövalvonta", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Elintarviketurvallisuusyksikkö", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Ympäristöterveyspalvelut, Paraisten toimipiste", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Ympäristönsuojelu- ja ympäristöterveyspalveluiden Iisalmen toimipiste", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Lentotulli", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Nuorisoasema", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Nuorisoasema Klaara", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Nuorisotoimisto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Nuorisopalvelujen asiakaspalvelu", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Nuorisovaltuusto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Helsingin keskusvaalilautakunta", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Helsingin kaupunginvaltuusto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Hankinnat ja Kilpailuttaminen", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Tonttijako", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Maakuntatalo", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Welcome Office", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Lastensuojelu", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Oriveden kaupungin asumispalvelut", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Maankäyttö- ja asumispalvelut", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Henkilöstöosasto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Joroisten kunnan elinkeinotoimi", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Vihdin kunnan kulttuuri- ja vapaa-aika", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Työllisyyskoordinaattori", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Maaseutupalvelut", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Maaseutupalvelut, Rovaniemen toimipiste", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Museoiden toimisto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Yläjärven talousneuvola", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Potilasasiavastaava", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Potilasasiamiehen asiointipaikka, Forssan sairaala", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Rikosuhripäivystyksen Keski-Pohjanmaan palvelupiste", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Luustoinfo osteoporoosia sairastaville / Lahti", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Yhteispalvelu Vaasa - Kansalaisinfo", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Stadshus", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Kaupunkitila- ja maisemasuunnittelu", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Kuulolähipalvelu", C.OFFICE_GOVERNMENT, _SKIP),
+    ("OLKA-pisteiltä tietoa yhdistysten toiminnasta", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Elinkeinopalvelut", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Asiakaspalvelupiste Tietotupa", C.OFFICE_GOVERNMENT, _SKIP),
+    ("BusinessAsema", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Asemakaavoitus", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Kokkolan aluekeskusrekisteri", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Espoon aluekeskusrekisteri", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Lappeenrannan toimipiste, Koulukatu 14", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Pargas serviceenhet", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Kaarinan kaupungin rakennusvalvonnan lupa-asiat", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Eläinsuojelu", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Vauvaperheryhmä Untuva toimipiste", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Mänttä-Vilppulan lapsiperheiden sosiaalipalvelujen vastaanotot", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Kaupunginosan toimisto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Maaseutupalvelut", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Haapajärven päihdepalvelujen toimipiste", C.CLINIC, _SKIP),
+    ("Asiakaspalvelupisteet Helsinki-Vantaan lentoasemalla", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Omnian Palvelutori", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Maahanmuuttajien ohjaus- ja palvelupiste Navigaattori", C.OFFICE_GOVERNMENT, None),
+    ("Klubitalo Roihulan asiakaspalvelu", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Raatihuone", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Käräjäoikeus", C.COURTHOUSE, _SKIP),
+    ("Käräjäsali", C.COURTHOUSE, _SKIP),
+    ("Oulun käräjäoikeus, Ruskonselän istuntosali", C.COURTHOUSE, _SKIP),
+    ("Oulun käräjäoikeus, Ylivieskan kanslia", C.COURTHOUSE, _SKIP),
+    ("Vakuutusoikeus", C.COURTHOUSE, _SKIP),
+    ("Korkein oikeus", C.COURTHOUSE, _SKIP),
+    ("Helsingin hallinto-oikeus", C.COURTHOUSE, _SKIP),
+    ("Hovioikeus", C.COURTHOUSE, _SKIP),
+    ("Mikkelin Asumisoikeus Oy:n toimisto", C.OFFICE_COMPANY, _SKIP),
+    ("Helsingin Asumisoikeus Oy", C.OFFICE_COMPANY, _SKIP),
+    ("Imatran Seudun Kehitysyhtiö Oy", C.OFFICE_COMPANY, _SKIP),
+    ("Ylämyllyn yritystalot", C.OFFICE_COMPANY, _SKIP),
+    ("Kiinteistö Oy Keskiväli", C.OFFICE_COMPANY, _SKIP),
+    ("Messilän Pääkonttori", C.OFFICE_COMPANY, _SKIP),
+    ("Kajaanin Vesi -liikelaitos", C.OFFICE_COMPANY, _SKIP),
+    ("Pirkanmaan oikeusaputoimisto", C.OFFICE_LAWYER, _SKIP),
+]
+
+
+@pytest.mark.parametrize("fi,want_cat,want_extra", _CIVIC_CASES)
+def test_category_civic(fi, want_cat, want_extra):
+    check_cat(fi, want_cat, want_extra)
+
+
+# ---- Categories: community venues --------------------------------------------------
+
+_COMMUNITY_CASES = [
+    ("Kerhotalo", C.COMMUNITY_CENTRE, _SKIP),
+    ("Omaisten vertaistukiryhmä", C.COMMUNITY_CENTRE, _SKIP),
+    ("Omaistaan hoitavien vertaisryhmät", C.COMMUNITY_CENTRE, _SKIP),
+    ("Vertaistukiryhmä syöpään sairastuneille", C.COMMUNITY_CENTRE, _SKIP),
+    ("Imatran Sydänkerho", C.COMMUNITY_CENTRE, _SKIP),
+    ("Hervannan vapaa-aikakeskus", C.COMMUNITY_CENTRE, _SKIP),
+    ("Karvetin klubitalo", C.COMMUNITY_CENTRE, _SKIP),
+    ("Stadin yhteisötalo Alppila", C.COMMUNITY_CENTRE, _SKIP),
+    ("Hyvinvointi- ja harrastuskeskus", C.COMMUNITY_CENTRE, _SKIP),
+    ("Hervannan yhteisökeskus", C.COMMUNITY_CENTRE, _SKIP),
+    ("Kulttuuritila Näkkäri", C.COMMUNITY_CENTRE, _SKIP),
+    ("Etappi yhteisötila", C.COMMUNITY_CENTRE, _SKIP),
+    ("Joutsenon kirjaston monitoimitila Olkkari", C.COMMUNITY_CENTRE, _SKIP),
+    ("Kumppanuustalo Artteli", C.COMMUNITY_CENTRE, _SKIP),
+    ("Järjestötalon aukioloaika", C.COMMUNITY_CENTRE, _SKIP),
+    ("Vartsalan työväentalo", C.COMMUNITY_CENTRE, _SKIP),
+    ("Toimintapäivät Lohjan Työväentalolla", C.COMMUNITY_CENTRE, _SKIP),
+    ("Sonkajärven kotiseututalo", C.COMMUNITY_CENTRE, _SKIP),
+    ("Kirkonkylän kylätalo", C.COMMUNITY_CENTRE, _SKIP),
+    ("Pohjanmaan Yhdistykset ry", C.COMMUNITY_CENTRE, _SKIP),
+    ("Mielenterveyskuntoutujien matalan kynnyksen kohtaamispaikka", C.COMMUNITY_CENTRE, _SKIP),
+    ("Nuorten ja nuorten aikuisten kohtaamispaikka JOJO", C.COMMUNITY_CENTRE, _SKIP),
+    ("Koloveden luontotupa ja matkailuneuvonta", C.COMMUNITY_CENTRE, _SKIP),
+    ("ViaDian Kohtaamisasema", C.COMMUNITY_CENTRE, _SKIP),
+    ("Miesten asema", C.COMMUNITY_CENTRE, _SKIP),
+    ("Keiteleen seurakuntatalo", C.COMMUNITY_CENTRE, _SKIP),
+    ("Karhuvuoren seurakuntakoti", C.COMMUNITY_CENTRE, _SKIP),
+    ("Lahjanpuiston kerhohuone", C.COMMUNITY_CENTRE, _SKIP),
+    ("Linnainmaan seurakuntakeskus", C.COMMUNITY_CENTRE, _SKIP),
+    ("Seurakuntatila Kauksun Kulma", C.COMMUNITY_CENTRE, _SKIP),
+    ("Kulttuuritalo Kimara", C.COMMUNITY_CENTRE, _SKIP),
+    ("Itätuulen 4H-kerho", C.COMMUNITY_CENTRE, _SKIP),
+    ("4H-kerho", C.COMMUNITY_CENTRE, _SKIP),
+    ("Harrastetilat", C.COMMUNITY_CENTRE, _SKIP),
+]
+
+
+@pytest.mark.parametrize("fi,want_cat,want_extra", _COMMUNITY_CASES)
+def test_category_community(fi, want_cat, want_extra):
+    check_cat(fi, want_cat, want_extra)
+
+
+# ---- Categories: leisure and sport ----------------------------------------------------
+C = Categories
+
+_LEISURE_CASES = [
+    # School-hosted sports file as sports.
+    ("Saunalahden koulun hiekkakenttä", C.LEISURE_PITCH, _SKIP),
+    ("Kaasmarkun koulun kaukalo", C.LEISURE_ICE_RINK, _SKIP),
+    ("Kuusikon koulun luistelukenttä", C.LEISURE_ICE_RINK, _SKIP),
+    ("Lietsalan koulun liikuntasali", C.LEISURE_SPORTS_HALL, _SKIP),
+    ("Tiedonpuiston koulun liikuntatilat", C.LEISURE_SPORTS_HALL, _SKIP),
+    ("Opinmäen koulun liikuntahalli", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Uittamon koulun sali", C.LEISURE_SPORTS_HALL, _SKIP),
+    ("Hirvaskosken koulun frisbeegolfrata", C.LEISURE_DISC_GOLF_COURSE, _SKIP),
+    ("Nurmikenttä 1", C.LEISURE_PITCH, _SKIP),
+    (
+        "Leppävaaran urheilupuiston tekonurmikenttä 2",
+        C.LEISURE_PITCH,
+        {"sport": "soccer", "surface": "artificial_turf"},
+    ),
+    ("Lounatuulenpuiston koripallokenttä", C.LEISURE_PITCH, _SKIP),  # sport=basketball pinned below
+    ("Haminamäen Valio Areenan nurmikenttä", C.LEISURE_PITCH, _SKIP),
+    ("Tenniskentät", C.LEISURE_PITCH, {"sport": "tennis"}),
+    ("Kangaslammin nurmikentät", C.LEISURE_PITCH, _SKIP),
+    ("Vasaramäen koulu, Tenniskentän yksikkö", C.LEISURE_PITCH, _SKIP),
+    ("Kulomäen lähiliikuntapaikan miniareena", C.LEISURE_PITCH, _SKIP),
+    ("Pallopuiston lähiliikuntapaikan tenniskenttä", C.LEISURE_PITCH, {"sport": "tennis"}),
+    (
+        "Jokivarren koulun lähiliikuntapaikan tekonurmi",
+        C.LEISURE_PITCH,
+        {"sport": "soccer", "surface": "artificial_turf"},
+    ),
+    ("Tikkakosken liikuntapuiston beach volley -kenttä", C.LEISURE_PITCH, _SKIP),
+    ("Velaatan uimarannan beach volley -kenttä", C.LEISURE_PITCH, _SKIP),
+    ("Säkyläpadel", C.LEISURE_PITCH, {"sport": "padel"}),
+    ("Padel-kentät", C.LEISURE_PITCH, {"sport": "padel"}),
+    ("Ukonniemen ulkopadelkenttä", C.LEISURE_PITCH, {"sport": "padel"}),
+    ("Seikkailutalon piha-alueen kiipeilypisteet", C.LEISURE_PITCH, {"sport": "climbing"}),
+    ("Shakkilauta, Hesperianpuisto", C.LEISURE_PITCH, {"sport": "chess"}),
+    ("Shakkilaudat, Hakasalmenpuisto", C.LEISURE_PITCH, {"sport": "chess"}),
+    ("Katajanokan liikuntahalli / Yhden korin koripallokenttä", C.LEISURE_PITCH, _SKIP),
+    ("Hietarannan uimaranta / Koripallokenttä", C.LEISURE_PITCH, _SKIP),
+    ("Väinämöisenkenttä / Huoltorakennus", C.LEISURE_PITCH, _SKIP),
+    ("Landbonkenttä / Lähiliikuntapaikka (Miniareena)", C.LEISURE_PITCH, _SKIP),
+    ("Saarikenttä- pesäpallostadion", _SKIP, {"sport": "pesapallo"}),
+    ("Pisanpuiston petanque-kenttä", _SKIP, {"sport": "petanque"}),
+    ("Kurkvuoren moottoriurheilualue", C.LEISURE_PITCH, {"sport": "motor"}),
+    ("Yleisurheilukenttä", C.LEISURE_TRACK, _SKIP),
+    ("Pump track-rata", C.LEISURE_TRACK, _SKIP),
+    # Halls, pools, ice, gyms.
+    ("Uintikeskus", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Uimahalli", C.LEISURE_SPORTS_CENTRE, {"sport": "swimming"}),
+    ("Keravan maauimala", C.LEISURE_SPORTS_CENTRE, {"sport": "swimming"}),
+    ("Savitaipaleen liikuntatalo", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Kämärin jääurheilukeskus", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Melonta Kaartjärvellä", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Kaukajärven soutu- ja melontastadion", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Yli-Iin yleisurheilukeskus", C.LEISURE_SPORTS_CENTRE, {"sport": "athletics"}),
+    ("Maunulan liikuntahalli / Sisäampumarata", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    ("Säkylähalli", C.LEISURE_SPORTS_HALL, _SKIP),
+    ("Talviharjoitteluhalli", C.LEISURE_SPORTS_HALL, _SKIP),
+    ("Hämeenkylän päiväkodin liikuntasali", C.LEISURE_SPORTS_HALL, _SKIP),
+    ("Sangin vanhan koulun liikuntasali", C.LEISURE_SPORTS_HALL, _SKIP),
+    ("Kampuksen kamppailutila", C.LEISURE_SPORTS_HALL, _SKIP),
+    ("Mikkelin jäähalli", C.LEISURE_ICE_RINK, _SKIP),
+    ("Keilahalli", C.LEISURE_BOWLING_ALLEY, _SKIP),
+    ("Itäkeskuksen uimahalli / Liikuntasali", C.GYM, _SKIP),
+    ("Sportis gym", C.GYM, _SKIP),
+    ("Fitness Center", C.GYM, _SKIP),
+    ("Ahtialan työväentalon kuntosali", C.GYM, _SKIP),
+    ("Kuntosali yhdistyksen jäsenille", C.GYM, _SKIP),
+    ("Kuntosali, ryhmä 1", C.GYM, _SKIP),
+    ("Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)", C.LEISURE_FITNESS_STATION, _SKIP),
+    ("Kirkkokallion kuntoportaat", C.LEISURE_FITNESS_STATION, _SKIP),
+    ("Jokiuomanpuiston kuntoilupaikka", C.LEISURE_FITNESS_STATION, _SKIP),
+    ("Vanhan-Mankkaan puiston kuntoilupiste 1", C.LEISURE_FITNESS_STATION, _SKIP),
+    ("Lähiliikuntapaikka", C.LEISURE_FITNESS_STATION, _SKIP),
+    ("Espoon Kirkkojärven skeittipaikka", C.LEISURE_PITCH, _SKIP),
+    ("Rauma DiscGolfPark", C.LEISURE_DISC_GOLF_COURSE, _SKIP),
+    ("Golfkenttä", C.LEISURE_GOLF_COURSE, _SKIP),
+    # Playgrounds and schoolyards read as playgrounds.
+    ("Varikkotien leikkikenttä", C.LEISURE_PLAYGROUND, _SKIP),
+    ("Leikkipaikka Tokoinranta", C.LEISURE_PLAYGROUND, _SKIP),
+    ("Hovirinnan Rantaleikkipuisto", C.LEISURE_PLAYGROUND, _SKIP),
+    ("Rantapuiston Leikkikenttä", C.LEISURE_PLAYGROUND, _SKIP),
+    ("Åshöjdens grundskola / Lähiliikuntapaikka", C.LEISURE_PLAYGROUND, _SKIP),
+    ("Porolahden peruskoulu / Lähiliikuntapaikka", C.LEISURE_PLAYGROUND, _SKIP),
+    ("Lapijoen päiväkodin lähiliikuntapaikka", C.LEISURE_PLAYGROUND, _SKIP),
+    ("Ilolan koulun lähiliikuntapaikka", C.LEISURE_PLAYGROUND, _SKIP),
+    # Beaches, swim holes, dog beaches.
+    ("Jänissaaren uimapaikka", C.NATURAL_BEACH, None),
+    ("Uimarannat", C.NATURAL_BEACH, _SKIP),
+    ("Pakilan uimaranta", C.NATURAL_BEACH, _SKIP),
+    ("Munkkiniemen uimaranta", C.NATURAL_BEACH, _SKIP),
+    ("Munkkiniemen uimaranta / Huoltorakennus", C.NATURAL_BEACH, _SKIP),
+    ("Lauttasaaren uimaranta / Beachvolleykenttä", _SKIP, {"sport": "beachvolleyball"}),
+    ("Ourit (Talviuimarit)", C.LEISURE_SWIMMING_AREA, _SKIP),
+    ("Talviuimaranta", C.LEISURE_SWIMMING_AREA, _SKIP),
+    ("Haaruksen Jämä-majan avanto", C.LEISURE_SWIMMING_AREA, _SKIP),
+    ("Toppelundinrannan koirauimaranta", C.LEISURE_DOG_PARK, _SKIP),
+    ("Koiratarha", C.LEISURE_DOG_PARK, _SKIP),
+    ("Hundparken", C.LEISURE_DOG_PARK, _SKIP),
+    # Boats, marinas, slipways, fishing.
+    ("Saunalahden venesatama", C.MARINA, _SKIP),
+    ("Venesatamat", C.MARINA, _SKIP),
+    ("Sirkkakosken vene- ja kalasatama", C.MARINA, _SKIP),
+    ("Loppijärvi, Kuljun veneranta", C.MARINA, _SKIP),
+    ("Halsuan keskustan uimaranta ja veneranta", C.MARINA, _SKIP),
+    ("Veneranta, Leppävesi", C.MARINA, _SKIP),
+    ("Tuomalan rannan venepaikat", C.MARINA, _SKIP),
+    ("Kaupunkisoutuveneet", C.AMENITY_BOAT_RENTAL, _SKIP),
+    ("Ipo-Kiusalan veneenlaskupaikka", C.LEISURE_SLIPWAY, _SKIP),
+    ("Salmen ulkoilualue / Kalastuspaikka", _SKIP, {"leisure": "fishing"}),
+    ("Arabianranta / Kalastuspaikka", _SKIP, {"leisure": "fishing"}),
+    ("Eläintarhanlahti ja Tokoinranta / Kalastuspaikka", _SKIP, {"leisure": "fishing"}),
+    ("Tikkurilankosken kalastuslupa-alue", _SKIP, {"leisure": "fishing"}),
+    ("Mykänlammen virkistys ja kalastusalue", _SKIP, {"leisure": "fishing"}),
+    ("Kalastuspaikan vuokraus", None, {"leisure": "fishing"}),
+    # Shooting grounds (never fixed orienteering controls).
+    ("Ampumarata", _SKIP, {"leisure": "shooting_ground", "sport": "shooting"}),
+    ("Ampumaradat", _SKIP, {"leisure": "shooting_ground", "sport": "shooting"}),
+]
+
+
+@pytest.mark.parametrize("fi,want_cat,want_extra", _LEISURE_CASES)
+def test_category_leisure(fi, want_cat, want_extra):
+    check_cat(fi, want_cat, want_extra)
+
+
+def test_court_keeps_sport():
+    # Pallokenttä shadowed koripallo until the reorder; spaced beach-volley
+    # compounds carry beachvolleyball.
+    category, extra = cat(make_spider(), "Lounatuulenpuiston koripallokenttä")
+    assert category == C.LEISURE_PITCH
+    assert extra["sport"] == "basketball"
+    category, extra = cat(make_spider(), "Koripallohalli")
+    assert extra["sport"] == "basketball"
+    for fi in (
+        "Tikkakosken liikuntapuiston beach volley -kenttä",
+        "Velaatan uimarannan beach volley -kenttä",
     ):
-        assert cat(spider, fi)[0] == category, fi
-    # Nurse-led: the healthcare extra survives alongside the clinic.
-    assert cat(spider, "Opiskeluhuolto")[1] == {"healthcare": "nurse"}
+        category, extra = cat(make_spider(), fi)
+        assert category == C.LEISURE_PITCH, fi
+        assert extra["sport"] == "beachvolleyball", fi
 
 
-def test_school_kitchen_unit_files_as_canteen():
-    # Kouluravintola, Pihlajamäen ala-asteen koulu.
-    category, _ = cat(make_spider(), "Kouluravintola, Pihlajamäen ala-asteen koulu")
-    assert category == Categories.CANTEEN
+# ---- Categories: outdoors, tourism, culture, infra ----------------------------------
+
+_PLACE_CASES = [
+    # Camp stays camp.
+    ("Vuolahden leirialue", C.TOURISM_CAMP_SITE, _SKIP),
+    ("Rastilan leirintäalue", C.TOURISM_CAMP_SITE, _SKIP),
+    ("Gåsgrund / Telttailupaikka", C.TOURISM_CAMP_SITE, _SKIP),
+    ("Telttailu- ja leiriytymispaikka 1", C.TOURISM_CAMP_SITE, _SKIP),
+    ("Näätähiekan leirikeskus", C.TOURISM_CAMP_SITE, _SKIP),
+    # Parks, picnic, shelters, wilderness.
+    ("Salmen ulkoilualue / Taukotupa", C.LEISURE_PARK, _SKIP),
+    ("Kauko Kortelaisen veistospuisto", C.LEISURE_PARK, _SKIP),
+    ("Seurasaari / Grillipaikka", C.TOURISM_PICNIC_SITE, _SKIP),
+    ("Meri-Rastila / Grillipaikka", C.TOURISM_PICNIC_SITE, _SKIP),
+    ("Malmin kenttä / Väliaikainen grillipaikka", C.TOURISM_PICNIC_SITE, _SKIP),
+    ("Vareskota", C.SHELTER, _SKIP),
+    ("Grillikatokset- ja kodat", C.SHELTER, _SKIP),
+    ("Niemisjärven kalastusalueen laavu (Evo)", C.SHELTER, _SKIP),
+    ("Tervanapsu autiotupa", C.TOURISM_WILDERNESS_HUT, _SKIP),
+    ("Marjapensaspaikka", C.ALLOTMENTS, _SKIP),
+    ("Käräjätuvan- ja Näsinojankuja, viljelypalstat", C.ALLOTMENTS, _SKIP),
+    # Art and memorials.
+    ("Juhannussalko", C.TOURISM_ARTWORK, _SKIP),
+    ('Taideteos "Turvapaikka" osa 1', C.TOURISM_ARTWORK, _SKIP),
+    ("Lausteen taidekontti", C.TOURISM_ARTWORK, _SKIP),
+    ("Taidekontit ja graffitiseinä", _SKIP, {"artwork_type": "graffiti"}),
+    ("Musta graniittiveistos", None, {"tourism": "artwork", "artwork_type": "sculpture"}),
+    ("Lastenkulttuurikeskus", C.ARTS_CENTRE, _SKIP),
+    ("Taiteen perusopetus", C.ARTS_CENTRE, _SKIP),
+    ("Lastenkulttuurikeskus Pyykkitupa", C.ARTS_CENTRE, _SKIP),
+    ("Raatihuone, raatihuonegalleria", C.ARTS_CENTRE, _SKIP),
+    # Stages and screens.
+    ("Lilla Teatern", C.THEATRE, _SKIP),
+    ("Teaterstudio Pasila", C.THEATRE, _SKIP),
+    ("Stoa / Teatterisali", C.THEATRE, _SKIP),
+    ("Konserttitalo", C.EVENTS_VENUE, _SKIP),
+    ("Konsertti- ja kongressitalo Mikaeli", C.EVENTS_VENUE, _SKIP),
+    ("Tapahtumatalo", C.EVENTS_VENUE, _SKIP),
+    ("Tapahtuma-alue", C.EVENTS_VENUE, _SKIP),
+    ("Tapahtumalava", C.EVENTS_VENUE, _SKIP),
+    ("Auditorio", C.EVENTS_VENUE, _SKIP),
+    ("Aleksis Kiven peruskoulu / Juhlasali", C.EVENTS_VENUE, _SKIP),
+    ("Stoa / Musiikkisali", C.EVENTS_VENUE, _SKIP),
+    ("Valtuustosali", C.EVENTS_VENUE, _SKIP),
+    ("Pengerpuisto, tapahtuma-alue", C.EVENTS_VENUE, _SKIP),
+    # Faith, cemeteries, attractions, viewpoints.
+    ("Aurejärven kirkko", C.PLACE_OF_WORSHIP, _SKIP),
+    ("Pielaveden kirkko", C.PLACE_OF_WORSHIP, {"religion": "christian", "denomination": "lutheran"}),
+    ("Lepolan hautausmaan kappeli", C.PLACE_OF_WORSHIP, _SKIP),
+    ("Riihimäen hautausmaan toimisto", C.OFFICE_GOVERNMENT, _SKIP),
+    ("Pieneläinten hautausmaa", _SKIP, {"landuse": "cemetery"}),
+    ("Pieneläinhautausmaa", _SKIP, {"landuse": "cemetery"}),
+    ("Korkeasaaren eläintarha", _SKIP, {"tourism": "zoo"}),
+    ("Koivuhaan lammasaitaus", C.TOURISM_ATTRACTION, _SKIP),
+    ("Purasjoen puolustusasema 1939", C.TOURISM_ATTRACTION, _SKIP),
+    ("Vaarniemen näköalatorni", C.TOURISM_VIEWPOINT, {"man_made": "tower", "tower:type": "observation"}),
+    ("Viikki-Vanhankaupunginlahti, Lammassaaren esteetön lintulava", C.TOURISM_VIEWPOINT, _SKIP),
+    ("Ison Vasikkasaaren luontotorni", C.TOURISM_VIEWPOINT, _SKIP),
+    ("Sörnäisten metroaseman yleinen väestönsuoja", C.MILITARY_BUNKER, {"bunker_type": "bomb_shelter"}),
+    ("Kampin metroaseman yleinen väestönsuoja", C.MILITARY_BUNKER, _SKIP),
+    ("Salpalinjan teräsbetoninen korsu", C.MILITARY_BUNKER, None),
+    ("Lehtisaaren yhteiskalliosuoja", C.MILITARY_BUNKER, _SKIP),
+    ("Villaluodot Läntinen saari", _SKIP, {"place": "island"}),
+    ("Malkasaari (saari)", _SKIP, {"place": "island"}),
+    ("Kotiluoto (saari)", _SKIP, {"place": "island"}),
+    ("Tiirakari (saari)", _SKIP, {"place": "island"}),
+    ("Talvipuutarha", None, {"leisure": "botanical_garden"}),
+    ("Kasvitieteellinen puutarha", None, {"leisure": "botanical_garden"}),
+    ("Koivuhaan arboretum", None, {"leisure": "botanical_garden"}),
+    ("Lapinlahden Erikoismetsä", _SKIP, {"natural": "wood"}),
+    ("Lumenkaatopaikka", _SKIP, {"landuse": "landfill"}),
+    ("Pielaveden maankaatopaikka", _SKIP, {"landuse": "landfill"}),
+    # Tourist info desks (never generic offices).
+    ("Infopiste", C.TOURISM_INFORMATION, _SKIP),
+    ("Pääinfo", C.TOURISM_INFORMATION, _SKIP),
+    ("Talin liikuntapuisto / Opastuspiste", C.TOURISM_INFORMATION, _SKIP),
+    ("Matkailuneuvontapiste Sulkavalla", C.TOURISM_INFORMATION, _SKIP),
+    ("Laitilan matkailuinfopiste", C.TOURISM_INFORMATION, _SKIP),
+    ("Visit Pori Matkailuneuvonta", C.TOURISM_INFORMATION, _SKIP),
+    ("Matkailuinfon toimipiste", C.TOURISM_INFORMATION, _SKIP),
+    ("Matkailuneuvonnan palvelupiste", C.TOURISM_INFORMATION, _SKIP),
+    ("Saimaa Geopark visitor center", C.TOURISM_INFORMATION, {"information": "visitor_centre"}),
+    ("Saimaa Geopark visitor centre", C.TOURISM_INFORMATION, {"information": "visitor_centre"}),
+    ("Korkeasaaren eläintarhan lipunmyynti", _SKIP, {"shop": "tickets"}),
+    ("Lahden kaupunginteatterin lippumyymälä", _SKIP, {"shop": "tickets"}),
+    ("Roihupellon myymälä, Stadin ammattiopisto", _SKIP, {"shop": "yes"}),
+    # Food, drink, everyday infra.
+    ("Ravintola Dakota", C.RESTAURANT, _SKIP),
+    ("Jorvin Terassikahvio", C.CAFE, _SKIP),
+    ("Topeliuksen puiston yleisövessa", C.TOILETS, _SKIP),
+    ("Kuusijärven saunat", C.SAUNA, _SKIP),
+    ("Vesipiste veneilijöille", C.DRINKING_WATER, _SKIP),
+    ("Pielaveden kunnan yleinen vedenjakelupiste", C.DRINKING_WATER, _SKIP),
+    ("Virolahden kunnan vesiposti Virojoella", C.DRINKING_WATER, _SKIP),
+    ("Kokkomäen puutarhajätealue", C.RECYCLING, _SKIP),
+    ("Korvenmäen jätekeskus", C.RECYCLING, _SKIP),
+    ("Kempeleen vaarallisen jätteen vastaanotto", C.RECYCLING, _SKIP),
+    ("Perniön lajitteluasema", C.RECYCLING, _SKIP),
+    ("Tervolan Ekoasema", C.RECYCLING, _SKIP),
+    ("Vaarallisten jätteiden autokeräys", C.RECYCLING, _SKIP),
+    ("Kiertopisteen materiaali- ja tekstiilipankki", C.RECYCLING, _SKIP),
+    ("Taavetin Hyödyksi-asema", C.RECYCLING, _SKIP),
+    ("Sähköauton latauspiste", C.CHARGING_STATION, _SKIP),
+    ("Sähköauton latauspiste, Nuottaniemen venesatama", C.CHARGING_STATION, _SKIP),
+    ("Esteetön pysäköintialue Kivenlahdentori", C.PARKING, _SKIP),
+    ("Kauppatori", C.MARKETPLACE, _SKIP),
+    ("Töölöntori", _SKIP, {"place": "square"}),
+    ("Senaatintori", _SKIP, {"place": "square"}),
+    ("Kiuruveden tori", None, _SKIP),
+    ("Hansaterminaali", C.FERRY_TERMINAL, _SKIP),
+    ("Länsiterminaali 1", C.FERRY_TERMINAL, _SKIP),
+    ("Kaupunginpuutarhan talkoolaituri", C.TOOL_LIBRARY, _SKIP),
+    ("Keski-Espoon urheilupuisto 2.", C.LEISURE_SPORTS_CENTRE, _SKIP),
+    # Stations and civic guards.
+    ("Vehkalan asema", _SKIP, {"railway": "station", "public_transport": "station"}),
+    ("Kampin metroasema", _SKIP, {"railway": "station", "public_transport": "station"}),
+    ("Leinelän asema", _SKIP, {"railway": "station", "public_transport": "station"}),
+    ("Lentoaseman rautatieasema", _SKIP, {"railway": "station", "public_transport": "station"}),
+    ("Linja-autoasema", C.BUS_STATION, _SKIP),
+    ("Paloasema", C.FIRE_STATION, _SKIP),
+    ("Mellunkylän pelastusasema", C.FIRE_STATION, _SKIP),
+    ("Kiviniemen VPK", C.FIRE_STATION, _SKIP),
+    ("Kakskerran Sopimuspalokunta", C.FIRE_STATION, _SKIP),
+    ("Krossin pelastus- ja ensihoitoasema", C.FIRE_STATION, _SKIP),
+    ("Joensuun krematorio", _SKIP, {"amenity": "crematorium"}),
+    ("Krematorio", _SKIP, {"amenity": "crematorium"}),
+    ("Kunnanvarikko", _SKIP, {"amenity": "depot"}),
+    ("Vantaan kaupungin varikko", _SKIP, {"amenity": "depot"}),
+    ("Nuorisotila Varikko", _SKIP, {"amenity": "youth_centre"}),
+    ("Punkalaitumen Nuorisotila", None, {"amenity": "youth_centre"}),
+    ("Puokkarin nuokkari", _SKIP, {"amenity": "youth_centre"}),
+    ("Sökö ungdomslokal", _SKIP, {"amenity": "youth_centre"}),
+    ("Nuorisotilat ja -toimisto", None, {"amenity": "youth_centre"}),
+    ("Pudasjärven Ilmailukeskus", _SKIP, {"aeroway": "aerodrome"}),
+    ("Porvoon kissatalo", _SKIP, {"amenity": "animal_shelter"}),
+    ("Löytöeläimet Eura", _SKIP, {"amenity": "animal_shelter"}),
+    ("Porin löytökissat", _SKIP, {"amenity": "animal_shelter"}),
+    ("Agricolanpuistikon koirakäymälä", _SKIP, {"amenity": "dog_toilet"}),
+]
 
 
-def test_tori_guard_and_square_default():
+@pytest.mark.parametrize("fi,want_cat,want_extra", _PLACE_CASES)
+def test_category_places(fi, want_cat, want_extra):
+    check_cat(fi, want_cat, want_extra)
+
+
+# ---- Categories: untyped stays untyped -------------------------------------------------
+
+_GENERIC_CASES = [
+    ("Leikkivät karhut", None, None),
+    ("Pelataan yhdessä shakkia", None, None),
+    ("Uimakoulut", None, _SKIP),
+    ("Ikäihmisten liikunta", None, None),
+    ("Keskuspuiston kiintorastit", None, None),
+    ("Viherkallion asukaspuiston kerho", None, None),
+    ("Melontareitti", None, None),
+    ("Väriaattori", None, None),
+    ("Sastamala omatoiminen kuntosaliryhmä omaishoitajille", None, None),
+    ("Laiturin Iloa ikäihmisille-ryhmä, Utra", None, None),
+    ("Jyränkölön Setlementti Sireniussalin ystäväryhmä", None, None),
+    ("Anniksen enkelit -teatteriryhmä", None, _SKIP),
+    ("Miesten kirjastoparlamentti", None, _SKIP),
+    ("Tapahtumayksikkö", None, _SKIP),
+    ("Jäsentapahtumat ja luennot", None, _SKIP),
+    ("Joen Severin digiopastus", None, _SKIP),
+    ("Joen Severin digiopastus Karsikon kirjastolla", None, _SKIP),
+    ("Testausasema", None, None),
+    ("Kalasatama", None, _SKIP),
+    ("Huoltoasema", None, _SKIP),
+    ("Hallitus", None, _SKIP),
+    ("Tullinkulma", None, _SKIP),
+    ("Tullikamari", None, _SKIP),
+    ("Tullinaukio", None, _SKIP),
+    ("Asematien Pysäkki", None, None),
+    ("Eläintarhan huvila", None, _SKIP),
+    ("Martat neuvoo Kuusankosken kirjastossa", None, _SKIP),
+    ("Sinfonia", None, _SKIP),
+    ("Rulla", None, _SKIP),
+    ("Saarentie 5", None, _SKIP),
+]
+
+
+@pytest.mark.parametrize("fi,want_cat,want_extra", _GENERIC_CASES)
+def test_category_generic(fi, want_cat, want_extra):
+    check_cat(fi, want_cat, want_extra)
+
+
+def test_camp_track_gate_pin():
+    # Table-level only: the exact pururata name never emits, the track gate
+    # drops fitness trails before categorising.
     spider = make_spider()
-    assert cat(spider, "Messukylän lähitori, Tampere")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Messilän Pääkonttori")[0] == Categories.OFFICE_COMPANY
-    assert cat(spider, "Koulukuraattori")[0] == Categories.SCHOOL
-    assert cat(spider, "Kiuruveden tori")[0] is None  # place=square via extras
-    assert cat(spider, "Töölöntori")[1] == {"place": "square"}
-    assert cat(spider, "Senaatintori")[1] == {"place": "square"}
-    assert cat(spider, "Kauppatori")[0] == Categories.MARKETPLACE
+    assert cat(spider, "Lankarin leirikeskuksen pururata")[0] == C.TOURISM_CAMP_SITE
+    assert spider._is_dropped_name(spider._clean_name("Lankarin leirikeskuksen pururata")) == "non_place/track"
 
 
-def test_kirkko_compound_end_only():
-    spider = make_spider()
-    assert cat(spider, "Aurejärven kirkko")[0] == Categories.PLACE_OF_WORSHIP
-    assert cat(spider, "Espoon Kirkkojärven skeittipaikka")[0] == Categories.LEISURE_PITCH
-    assert cat(spider, "Kirkkokallion kuntoportaat")[0] == Categories.LEISURE_FITNESS_STATION
-
-
-def test_discgolf_split_from_golf():
-    spider = make_spider()
-    assert cat(spider, "Rauma DiscGolfPark")[0] == Categories.LEISURE_DISC_GOLF_COURSE
-    assert cat(spider, "Golfkenttä")[0] == Categories.LEISURE_GOLF_COURSE
-
-
-def test_hospital_subunit_downgrade():
-    spider = make_spider()
-    assert cat(spider, "Satasairaala")[0] == Categories.HOSPITAL
-    assert cat(spider, "Palliatiivinen yksikkö, Sastamalan sairaala")[0] == Categories.CLINIC
-    assert cat(spider, "Päiväsairaala")[0] == Categories.CLINIC
-
-
-def test_ticket_machine_with_payment():
+def test_parking_machine_with_payment():
     category, extra = cat(make_spider(), "Pysäköintilippuautomaatti 322, Töölöntori, korttimaksu")
-    assert category == Categories.VENDING_MACHINE
+    assert category == C.VENDING_MACHINE
     assert extra["vending"] == "parking_tickets"
     assert extra["payment:credit_cards"] == "yes"
-
-
-def test_lastensuojelu_service_is_office():
-    spider = make_spider()
-    assert cat(spider, "Lastensuojelu")[0] == Categories.OFFICE_GOVERNMENT
-    # Genitive residential compounds keep the facility filing.
-    assert cat(spider, "Lastensuojelulaitos")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_group_home_subtypes():
-    spider = make_spider()
-    for fi in ("Ryhmäkoti Karkkula", "Outamon lastenkoti Noko"):
-        category, extra = cat(spider, fi)
-        assert category == Categories.SOCIAL_FACILITY, fi
-        assert extra["social_facility"] == "group_home", fi
-    assert cat(spider, "Palvelukoti Osmanrinne")[0] == Categories.NURSING_HOME
+    assert cat(make_spider(), "Pysäköintilippuautomaatti 630, Krematoriontie, korttimaksu")[0] == C.VENDING_MACHINE
 
 
 def test_church_denomination_scoped():
     category, extra = cat(make_spider(), "Pielaveden kirkko")
-    assert category == Categories.PLACE_OF_WORSHIP
+    assert category == C.PLACE_OF_WORSHIP
     assert extra == {"religion": "christian", "denomination": "lutheran"}
 
 
-def test_youth_centre_without_enum():
-    # Nuorisotila/talo resolve to extras-only youth tags, never generic.
-    category, extra = cat(make_spider(), "Punkalaitumen Nuorisotila")
-    assert category is None
-    assert extra == {"amenity": "youth_centre"}
+def test_kirkko_compound_end_only():
+    check_cat("Aurejärven kirkko", C.PLACE_OF_WORSHIP)
+    check_cat("Espoon Kirkkojärven skeittipaikka", C.LEISURE_PITCH)
+    check_cat("Kirkkokallion kuntoportaat", C.LEISURE_FITNESS_STATION)
 
 
-def test_medical_supply_shop():
+# ---- Rescue and fallback ------------------------------------------------------------
+# Opaque proper names type via linked services, ontology terms and
+# descriptions. Name tier always wins; generic admin labels never shadow
+# specific services; placement-only extras never rescue a venue filing.
+
+
+def test_rescue_from_descriptions():
     spider = make_spider()
-    assert cat(spider, "CPAP-tarvikejakelu")[0] == Categories.SHOP_MEDICAL_SUPPLY
-    assert cat(spider, "Hoitotarvikejakelu")[0] == Categories.SHOP_MEDICAL_SUPPLY
-
-
-def test_keuda_college_not_office():
-    assert cat(make_spider(), "Keuda Kerava")[0] == Categories.COLLEGE
-
-
-def test_unmapped_stays_generic():
-    # Opaque proper names with no evidence route to generic, never dropped.
-    spider = make_spider()
-    item = parsed(spider, channel("Tukipuu"))
-    assert item.get_tag("amenity") == "yes"
-
-
-def test_numberless_descriptive_road_stays_freeform():
-    # Krakantien päässä shape: descriptive, kept freeform like service-map.
-    item = addressed(make_spider(), "Krakantien päässä", "")
-    assert item["street_address"] == "Krakantien päässä"
-
-
-def test_rescue_assisted_living_from_description():
-    # Naskali (channel d9355aeb): housing for the intellectually disabled.
-    spider = make_spider()
-    channel = {
+    housing = {
         "serviceChannelDescriptions": [
             {"language": "fi", "value": "Naskali tarjoaa asumista ja siihen liittyviä palveluita kehitysvammaisille."}
         ]
     }
-    assert spider._rescue_category(channel) == Categories.ASSISTED_LIVING
-
-
-def test_rescue_plain_social_without_housing():
-    spider = make_spider()
-    channel = {"serviceChannelDescriptions": [{"language": "fi", "value": "Päivätoimintaa kehitysvammaisille."}]}
-    assert spider._rescue_category(channel) == Categories.SOCIAL_FACILITY
-
-
-def test_rescue_artwork_from_description():
-    # Kala ja poika: Essi Renvallin veistos.
-    spider = make_spider()
-    channel = {"serviceChannelDescriptions": [{"language": "fi", "value": "Essi Renvallin Kala ja poika -veistos."}]}
-    assert spider._rescue_category(channel) == Categories.TOURISM_ARTWORK
-
-
-def test_rescue_ignores_unrelated_descriptions():
-    spider = make_spider()
+    assert spider._rescue_category(housing) == Categories.ASSISTED_LIVING
+    social = {"serviceChannelDescriptions": [{"language": "fi", "value": "Päivätoimintaa kehitysvammaisille."}]}
+    assert spider._rescue_category(social) == Categories.SOCIAL_FACILITY
+    art = {"serviceChannelDescriptions": [{"language": "fi", "value": "Essi Renvallin Kala ja poika -veistos."}]}
+    assert spider._rescue_category(art) == Categories.TOURISM_ARTWORK
     assert (
         spider._rescue_category({"serviceChannelDescriptions": [{"language": "fi", "value": "Avoinna arkisin."}]})
         is None
     )
     assert spider._rescue_category({}) is None
+    # Needs assessments never house; tuettu-proximity still houses.
+    ch = channel("Palveluneuvonta")
+    ch["serviceChannelDescriptions"] = [
+        {"language": "fi", "value": "mielenterveys- ja asumispalvelujen tarpeen arviointi"}
+    ]
+    assert spider._rescue_category(ch) == Categories.SOCIAL_FACILITY
+    ch2 = channel("Palveluneuvonta")
+    ch2["serviceChannelDescriptions"] = [{"language": "fi", "value": "mielenterveyskuntoutujien tuettu asuminen"}]
+    assert spider._rescue_category(ch2) == Categories.ASSISTED_LIVING
 
 
-# ---- Quadrant D: operator, contact, hours ----------------------------------
-
-
-def test_register_keeper_carries_no_operator():
-    from locations.items import Feature as _F
-
+def test_rescue_from_services_and_ontology():
     spider = make_spider()
-    item = _F()
+    # Opaque name via its linked service name.
+    ch = channel("Maya")
+    ch["services"] = [{"service": {"name": "Maya tukiasunto Pietarsaaressa"}}]
+    assert parsed(spider, ch)["extras"]["social_facility"] == "assisted_living"
+    # Admin-shaped services fall through to YSO ontology terms.
+    ch = channel("Maya")
+    ch["services"] = [{"service": {"name": "Liikunnan ja urheilun tulosyksikkö"}}]
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "päiväkotihoito"}]}]
+    assert parsed(spider, ch).get_tag("amenity") == "kindergarten"
+    # Placement-only rescue carries tags without a POI category.
+    ch = channel("Maya")
+    ch["services"] = [{"service": {"name": "Eläintarhan myymälä"}}]
+    assert parsed(spider, ch)["extras"]["shop"] == "yes"
+    # Supported housing beats diagnosis at the POI.
+    ch = channel("Etu-Töölön asuintalo")
+    ch["services"] = [{"service": {"name": "Mielenterveyskuntoutujien tuettu asuminen"}}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "social_facility"
+    assert item["extras"].get("social_facility") == "assisted_living"
+    # Desk-shaped opaque names rescue, care homes keep theirs.
+    ch = channel("Pirtin Kohtaamo")
+    ch["services"] = [
+        {"service": {"name": "Kunnan viralliset ilmoitukset"}},
+        {"service": {"name": "Asiakaspalvelu"}},
+        {"service": {"name": "Kelan asiointipiste Pudasjärvellä"}},
+    ]
+    assert parsed(spider, ch).get_tag("office") == "government"
+    ch = channel("Kolpeneen tuki- ja osaamiskeskus")
+    ch["services"] = [{"service": {"name": "Kuntoutusohjaus- ja asiantuntijapalvelut"}}]
+    assert parsed(spider, ch).get_tag("amenity") == "social_facility"
+    ch = channel("OYS Konsti")
+    ch["services"] = [{"service": {"name": "Vaativat kehitysvammapalvelut"}}]
+    assert parsed(spider, ch).get_tag("amenity") == "social_facility"
+
+
+def test_rescue_skips_generic_labels_and_activities():
+    spider = make_spider()
+    # "Varhaiskasvatus" files as an office, so it must not shadow the
+    # specific ontology behind it. Activity groups never rescue either.
+    for name in ("Lastentalo Kuusipiha", "Satukontti"):
+        ch = channel(name)
+        ch["services"] = [{"service": {"name": "Varhaiskasvatus"}}]
+        ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "päiväkotihoito"}]}]
+        assert parsed(spider, ch).get_tag("amenity") == "kindergarten", name
+    for name in ("Laiturin Iloa ikäihmisille-ryhmä, Utra", "Sastamala omatoiminen kuntosaliryhmä omaishoitajille"):
+        ch = channel(name)
+        ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
+        assert spider._rescue_service(ch) is None, name
+    # Peer-delivered support never rescues to clinic.
+    ch = channel("Suvanto-vertaistiimi")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
+    assert spider._rescue_service(ch) is None
+    # Care-named activities stay generic; mental-health purpose doesn't clinic them.
+    ch = channel("Nakkifiesta")
+    ch["services"] = [{"service": {"name": "Nakkifiesta"}}]
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
+    assert parsed(spider, ch).get_tag("amenity") == "yes"
+
+
+def test_rescue_placement_extras_never_type():
+    # Catalogue placement tags cannot type opaque channels; real venue
+    # services still rescue.
+    spider = make_spider()
+    ch = channel("Oittaan pulkkamäki")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ampumaradat"}]}]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Finlandia-talo")
+    ch["services"] = [{"service": {"name": "Lipunmyynti kulttuuri- ja taidetapahtumiin"}}]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Raatihuone")
+    ch["services"] = [{"service": {"name": "Tori- ja katumyyntipaikkojen vuokraus"}}]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Motocross- ja enduroradat")
+    ch["services"] = [{"service": {"name": "Muukon moottori- ja ampumaurheilukeskus"}}]
+    assert spider._rescue_service(ch)[0] == Categories.LEISURE_SPORTS_CENTRE
+    ch = channel("Espoon Rantaraitti")
+    assert spider._rescue_blocked(ch)
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "pallokentät"}]}]
+    assert parsed(spider, ch).get_tag("leisure") is None
+    ch = channel("Espoon Rantaraitti")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": v}]} for v in ("ampumaradat", "kavelyreitit")]
+    assert spider._rescue_service(ch) is None
+
+
+def test_rescue_routes_trails_and_islands():
+    spider = make_spider()
+    ch = channel("Otaniemen kiintorastit")
+    ch["services"] = [{"service": {"name": "Liikunnan ja urheilun tulosyksikkö"}}]
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ampumaradat"}]}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("leisure") is None
+    ch = channel("Porsas")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ulkoilusaaret"}]}]
+    assert spider._rescue_service(ch) is None
+    ch = channel("Porsas")
+    ch["services"] = [{"service": {"name": "Ulkoilusaaret"}}]
+    assert spider._rescue_service(ch) == (None, {"place": "island"})
+    ch = channel("Porsas")
+    ch["services"] = [{"service": {"name": "Haltialan kotieläintila"}}, {"service": {"name": "Ulkoilusaaret"}}]
+    assert parsed(spider, ch)["extras"].get("place") == "island"
+    # Supported housing next to a diagnosis rescues assisted living.
+    ch = channel("Tervahovin asunnot")
+    ch["services"] = [{"service": {"name": "Tuettu asuminen, vammaispalvelut"}}]
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "palveluasuminen"}]}]
+    assert spider._resolve_fallback_category(Feature(), ch) == Categories.ASSISTED_LIVING
+
+
+def test_rescue_multilingual_and_special_hosts():
+    spider = make_spider()
+    # Public art documented outside Finnish still rescues.
+    ch = channel("Eino Leino")
+    ch["serviceChannelDescriptions"] = [
+        {"language": "fi", "value": "Eino Leino julkista taidetta."},
+        {"language": "en", "value": "Eino Leino is a work of public art."},
+    ]
+    assert parsed(spider, ch).get_tag("tourism") == "artwork"
+    # Memorial sv/en names type the opaque fi one.
+    ch = channel("Mortuis")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Mortuis", "type": "Name"},
+        {"language": "sv", "value": "Mortius, minnesmärke över explosionen", "type": "Name"},
+        {"language": "en", "value": "Mortuis memorial", "type": "Name"},
+    ]
+    item = parsed(spider, ch)
+    assert item.get_tag("tourism") == "artwork"
+    assert "place" not in item["extras"]
+    # Disability-ontology competence centres rescue social, never islands.
+    ch = channel("Osaamiskeskus, Pietarsaari")
+    ch["services"] = [{"service": {"name": "Osaamiskeskus"}}]
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "kehitysvammaiset"}]}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "social_facility"
+    assert "place" not in item["extras"]
+    # Island-titled public art files as art.
+    ch = channel("Saari")
+    ch["services"] = [{"service": {"name": "Julkinen taide"}}]
+    ch["ontologyTerms"] = [
+        {"name": [{"language": "fi", "value": "julkinen taide"}]},
+        {"name": [{"language": "fi", "value": "veistokset"}]},
+    ]
+    assert parsed(spider, ch)["extras"].get("tourism") == "artwork"
+    # Swedish daycare names type opaque fi ones.
+    ch = channel("Karitsa")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Karitsa", "type": "Name"},
+        {"language": "sv", "value": "Daghemmet Karitsa", "type": "Name"},
+    ]
+    assert parsed(spider, ch).get_tag("amenity") == "kindergarten"
+    # Wellbeing-area school words are the student-health unit.
+    assert parsed(spider, channel("Joutsan lukio"), "Keski-Suomen hyvinvointialue").get_tag("amenity") == "clinic"
+    assert parsed(spider, channel("Lukio"), "Keski-Suomen hyvinvointialue").get_tag("amenity") == "clinic"
+    assert (
+        parsed(spider, channel("Helsingin Yhteiskoulu"), "Keski-Suomen hyvinvointialue").get_tag("amenity") == "clinic"
+    )
+    # Wards cap rescue at clinic: hospital ontology doesn't outrank.
+    ch = channel("Raaseporin TK vuodeosasto")
+    ch["services"] = [{"service": {"name": "Perustason osastohoito"}}]
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "sairaalat"}]}]
+    assert parsed(spider, ch).get_tag("amenity") == "clinic"
+    # Beach ontology on a sand pit files a beach.
+    ch = channel("Hakolan hiekkamonttu")
+    ch["services"] = [{"service": {"name": "Vesiliikunta"}}]
+    ch["ontologyTerms"] = [
+        {"name": [{"language": "fi", "value": v}]} for v in ("uimakoulut", "uimarannat", "uimavesi", "uinti")
+    ]
+    assert parsed(spider, ch)["extras"].get("natural") == "beach"
+
+
+def test_rescue_place_beats_desk_and_upgrades():
+    # A care home with a customer-service desk still files by place.
+    spider = make_spider()
+    ch = channel("Maya", descriptions=[{"language": "fi", "value": "Ikääntyvien asumispalveluyksikkö"}])
+    ch["services"] = [{"service": {"name": "Asiakaspalvelu"}}]
+    assert spider._resolve_fallback_category(Feature(), ch) == Categories.ASSISTED_LIVING
+    # Psychiatric outpatient units are clinics; urgent-care desks are urgent.
+    ch = channel(
+        "Tays Hallituskatu",
+        descriptions=[{"language": "fi", "value": "Tays Hallituskatu on psykiatrisen avohoidon toimipiste"}],
+    )
+    assert spider._resolve_fallback_category(Feature(), ch) == Categories.CLINIC
+    ch = channel(
+        "Päivystyksellinen kuulokojehuolto",
+        descriptions=[
+            {"language": "fi", "value": "Hoidamme päivystyksellisessä kuulokojehuollossa kiireelliset tapaukset"}
+        ],
+    )
+    assert spider._resolve_fallback_category(Feature(), ch) == Categories.CLINIC_URGENT
+    # Bare social + supported-housing wording upgrades; nothing else does.
+    ch = channel("X", descriptions=[{"language": "fi", "value": "Tuettua asumista tarjolla"}])
+    item = Feature()
+    item["extras"]["amenity"] = "social_facility"
+    assert spider._maybe_upgrade_housing(item, ch, Categories.SOCIAL_FACILITY) == Categories.ASSISTED_LIVING
+    assert item["extras"]["social_facility"] == "assisted_living"
+    assert spider.crawler.stats.get_value("ptv_fi/category/supported_housing_upgrade") == 1
+    bare = Feature()
+    bare["extras"]["amenity"] = "social_facility"
+    bare["extras"]["social_facility"] = "group_home"
+    ch_kept = channel("X", descriptions=[{"language": "fi", "value": "tuettua asumista"}])
+    assert spider._maybe_upgrade_housing(bare, ch_kept, Categories.SOCIAL_FACILITY) == Categories.SOCIAL_FACILITY
+    assert bare["extras"]["social_facility"] == "group_home"
+    assert spider.crawler.stats.get_value("ptv_fi/category/supported_housing_kept") == 1
+    for pinned in (Categories.OFFICE_GOVERNMENT, Categories.CLINIC, Categories.SCHOOL):
+        assert spider._maybe_upgrade_housing(Feature(), ch, pinned) == pinned
+
+
+def test_group_activity_guard_and_table_shadow():
+    # The group IS the institution for facility prefixes; bare activity
+    # groups stay generic and the orchestra is not an activity.
+    spider = make_spider()
+    assert not spider._is_group_activity("helsingin kaupunginorkesteri")
+    assert cat(spider, "Terveyskeskusryhmä")[0] == Categories.CLINIC
+
+
+def test_utility_building_venues_name_the_poi():
+    # "... / Huoltorakennus" with Urheilukentät services: the venue field
+    # names and types the POI, never the utility building.
+    spider = make_spider()
+    ch = channel("Eläintarhan urheilukenttä / Huoltorakennus 3")
+    ch["services"] = [{"service": {"name": "Urheilukentät"}}]
+    item = parsed(spider, ch)
+    assert item.get_tag("leisure") == "pitch"
+    assert item["name"] == "Eläintarhan urheilukenttä"
+    assert spider._carve_room_tail("Alue / Huoltorakennus") == (None, None)
+
+
+# ---- End to end: venues, operators, located_in -----------------------------------
+
+
+def test_operator_tail_venues_drop():
+    # Association tails are no venue; venue+operator tails keep the venue
+    # located and take only the association half as operator.
+    spider = make_spider()
+    item = parsed(spider, channel("Löytöeläimet Eura, Säkylä ja Rauma / Eläinten hyväksi EHY ry"))
+    assert item["name"] == "Löytöeläimet Eura, Säkylä ja Rauma"
+    assert item.get("located_in") is None
+    assert item["extras"]["amenity"] == "animal_shelter"
+    item = parsed(spider, channel("Iltapäivätoiminta / Tapanilan urheilukeskus, Tapanilan Erä ry"))
+    assert item["located_in"] == "Tapanilan urheilukeskus"
+    assert item["operator"] == "Tapanilan Erä ry"
+    item = parsed(spider, channel("Iltapäivätoiminta / Päiväkoti Gan Jeladim, Helsingin juutalainen seurakunta"))
+    assert item["located_in"] == "Päiväkoti Gan Jeladim"
+    assert item["operator"] == "Helsingin juutalainen seurakunta"
+    assert (item.get("extras") or {}).get("operator:type") == "religious"
+    item = parsed(spider, channel("Imatra Bowling Center / Imatran keilahalli Oy"), "Imatran kaupunki")
+    assert item["name"] == "Imatra Bowling Center"
+    assert item.get("located_in") is None
+    assert item["operator"] == "Imatran keilahalli Oy"
+    assert item["extras"].get("operator:type") == "private"
+
+
+def test_venue_hosts_locate_end_to_end():
+    spider = make_spider()
+    item = parsed(spider, channel("Hansakallion ympärivuorokautinen asumispalvelu (Masto, Styyrpuuri,Vantti)"))
+    assert item["name"] == "Hansakallion ympärivuorokautinen asumispalvelu"
+    assert item["located_in"] == "Masto, Styyrpuuri, Vantti"
+    assert (
+        item["extras"]["official_name"] == "Hansakallion ympärivuorokautinen asumispalvelu (Masto, Styyrpuuri,Vantti)"
+    )
+    item = parsed(spider, channel("Riihikoti, Villava, ikäihmisten asumispalvelut", office="RIIHIMÄKI"))
+    assert item["name"] == "Ikäihmisten asumispalvelut"
+    assert item["located_in"] == "Riihikoti, Villava"
+    item = parsed(
+        spider, channel("Teuvolan vammaisten asumispalvelut, tilapäishoito ja loma-ajanhoito, Forssa", office="FORSSA")
+    )
+    assert item["name"] == "Teuvolan vammaisten asumispalvelut"
+    assert item.get("located_in") is None
+    item = parsed(spider, channel("Lempeä selkäjooga-ryhmä, Veittijärven koulu -palvelun järjestämispaikka"))
+    assert item["name"] == "Lempeä selkäjooga-ryhmä"
+    assert item["located_in"] == "Veittijärven koulu"
+    assert item.get_tag("amenity") == "yes"
+    item = parsed(spider, channel("Kivari, Riihimäki, Vammaisten asumispalvelut", office="RIIHIMÄKI"))
+    assert item["name"] == "Vammaisten asumispalvelut"
+    assert item["located_in"] == "Kivari"
+    item = parsed(
+        spider,
+        channel(
+            "Ikifit Oy, hyvinvointikeskus Keinupuisto/Hilpi, Hämeenlinna, yhteisöllisen asumisen ostopalvelut",
+            office="HÄMEENLINNA",
+        ),
+    )
+    assert item["name"] == "Ikifit Oy, hyvinvointikeskus Keinupuisto/Hilpi"
+    assert item.get("located_in") is None
+    item = parsed(spider, channel("Jumppa / Lahti", road="Katu", street_number="1", office="LAHTI"), "Lahden kaupunki")
+    assert item.get("located_in") is None
+    assert item["city"] == "Lahti"
+
+
+def test_service_names_at_hosts_end_to_end():
+    spider = make_spider()
+    item = parsed(spider, channel("Äänekosken poliisiasema, lupapalvelut", office="ÄÄNEKOSKI"))
+    assert item["name"] == "Lupapalvelut"
+    assert item["located_in"] == "Äänekosken poliisiasema"
+    assert item.get_tag("office") == "government"
+    item = parsed(
+        spider, channel("Lastentautien poliklinikka, Forssan sairaala", office="FORSSA"), "Kanta-Hämeen hyvinvointialue"
+    )
+    assert item["name"] == "Lastentautien poliklinikka"
+    assert item["located_in"] == "Forssan sairaala"
+    assert item.get("branch") is None
+    item = parsed(
+        spider,
+        channel("Rovastinkankaan koulun opiskeluhuolto, Orivesi", office="ORIVESI"),
+        "Pirkanmaan hyvinvointialue",
+    )
+    assert item["name"] == "Opiskeluhuolto"
+    assert item["located_in"] == "Rovastinkankaan koulu"
+    assert item["extras"]["official_name"] == "Rovastinkankaan koulun opiskeluhuolto, Orivesi"
+    item = parsed(spider, channel("Ite ja yhessä - toiminta/Kyläryhmä -palvelun järjestämispaikka, Virolahti 2"))
+    assert item["located_in"] == "Kyläryhmä"
+    assert spider._clean_located_value("Kyläryhmä -palvelun järjestämispaikka, Virolahti 2", None) == "Kyläryhmä"
+
+
+def test_names_capitalize_and_keep_compounds():
+    spider = make_spider()
+    assert parsed(spider, channel("vaatelahjoitus"), "Verso ry")["name"] == "Vaatelahjoitus"
+    item = parsed(
+        spider,
+        channel("Kokemäen äitiysneuvola, perhekeskus Suvituuli", office="KOKEMÄKI"),
+        "Satakunnan hyvinvointialue",
+    )
+    assert item["located_in"] == "Perhekeskus Suvituuli"
+    assert parsed(spider, channel("Pertunmaa-talo"))["name"] == "Pertunmaa-talo"
+    assert parsed(spider, channel("Kajaanin Vesi -liikelaitos"))["name"] == "Kajaanin Vesi -liikelaitos"
+    assert parsed(spider, channel("Kajaanin Vesi -liikelaitos")).get_tag("office") == "company"
+    item = parsed(spider, channel("Näe hyvä mussa -leirit lapsille -palvelun järjestämispaikka, 1"))
+    assert item["name"] == "Näe hyvä mussa -leirit lapsille"
+    assert item["extras"]["official_name"] == "Näe hyvä mussa -leirit lapsille -palvelun järjestämispaikka, 1"
+    item = parsed(spider, channel("Kuntosali yhdistyksen jäsenille -palvelun järjestämispaikka"))
+    assert item["name"] == "Kuntosali yhdistyksen jäsenille"
+    item = parsed(spider, channel("Rikos -ja riita-asioiden sovittelua -palvelun järjestämispaikka"))
+    assert item["name"] == "Rikos -ja riita-asioiden sovittelua"
+    assert parsed(spider, channel("Språkcafé på svenska i Ode bibliotek - Syksy 2026 -palvelun järjestämispaikka"))[
+        "name"
+    ] == ("Språkcafé på svenska i Ode bibliotek - Syksy 2026")
+
+
+def test_ostopalvelut_and_coverage_tails_end_to_end():
+    # Purchased-service qualifiers arrange the service, never the place;
+    # municipality segments repeat the city field, never locate.
+    spider = make_spider()
+    ch = channel("Attendo Puistomäki, Hämeenlinna, yhteisöllisen asumisen ostopalvelut", office="Hämeenlinna")
+    ch["services"] = [{"service": {"name": "Sosiaalihuoltolain mukainen yhteisöllinen asuminen"}}]
+    item = parsed(spider, ch, "Kanta-Hämeen hyvinvointialue")
+    assert item.get_tag("amenity") == "social_facility"
+    assert item.get("name") == "Attendo Puistomäki"
+    assert item["extras"].get("leisure") is None
+    ch = channel(
+        "Ikifit Oy, hyvinvointikoti Jukola/Hannes, Hämeenlinna, yhteisöllisen asumisen ostopalvelut",
+        office="Hämeenlinna",
+    )
+    assert parsed(spider, ch, "Kanta-Hämeen hyvinvointialue").get("located_in") == "Hannes"
+
+
+def test_dash_city_and_located_hygiene():
+    spider = make_spider()
+    ch = channel(
+        "Kansantanssin aikuisten ryhmä Vilhot ja Vienot - Hollola -palvelun järjestämispaikka",
+        road="Katu",
+        street_number="1",
+        office="HOLLOLA",
+    )
+    assert parsed(spider, ch)["name"] == "Kansantanssin aikuisten ryhmä Vilhot ja Vienot"
+
+
+def test_daycare_ground_and_room_splits():
+    # Daycare yards read like schoolyards with no venue split either way.
+    spider = make_spider()
+    for full in ("Lapijoen päiväkodin lähiliikuntapaikka", "Ilolan koulun lähiliikuntapaikka"):
+        assert spider._split_name(full, None) == (full, None, None)
+
+
+def test_unmapped_and_opaque_stays_generic():
+    spider = make_spider()
+    assert parsed(spider, channel("Tukipuu")).get_tag("amenity") == "yes"
+    ch = channel("Söderkullan kartano")
+    ch["services"] = [{"service": {"name": "Matonpesupaikat"}}]
+    assert parsed(spider, ch).get_tag("amenity") == "yes"
+
+
+def test_senior_housing_carries_for_senior():
+    spider = make_spider()
+    item = parsed(spider, channel("Ikäihmisten asumispalvelut"))
+    assert item.get_tag("amenity") == "social_facility"
+    assert item["extras"].get("social_facility:for") == "senior"
+    item = parsed(spider, channel("Bromarv pensionärsbostäder"))
+    assert item.get_tag("amenity") == "social_facility"
+    assert item["extras"].get("social_facility:for") == "senior"
+
+
+def test_city_dash_prefix_drops():
+    # "Jämsä – päivätoimintaa kuntoutujille": the city prefix drops, the
+    # full signed form survives in official_name.
+    item = Feature()
+    make_spider()._apply_naming(
+        item,
+        {"fi": "Jämsä – päivätoimintaa kuntoutujille"},
+        "Jämsä – päivätoimintaa kuntoutujille",
+        "Jämsä",
+    )
+    assert item["name"] == "Päivätoimintaa kuntoutujille"
+    assert item["extras"]["official_name"] == "Jämsä – päivätoimintaa kuntoutujille"
+
+
+def test_source_and_check_date_pins():  # Every channel carries its stable Suomi.fi page and update date.
+    ch = channel("Vojakkalan uimapaikka, Kaartjärvi")
+    ch["modified"] = "2026-10-08T08:00:00.000000"
+    item = parsed(make_spider(), ch)
+    assert item["extras"]["source"] == (
+        "https://www.suomi.fi/palvelut/palvelupiste/11111111-1111-4111-8111-111111111111"
+    )
+    assert item["extras"]["check_date"] == "2026-10-08"
+
+
+# ---- Operators ----------------------------------------------------------------------
+# Explicit-in-name beats the city maintainer; associations, companies and
+# parishes mark operator:type; the Kela agency survives maintainers.
+
+
+@pytest.mark.parametrize(
+    "org,want",
+    [
+        ("Teatterikoulu ILMI Ö.", True),
+        ("Rikosuhripäivystys - RIKU", True),
+        ("Eerikinkatu 1", False),
+        ("Kuopion Nuorten Naisten Kristillinen Yhdistys (Kuopion NNKY)", True),
+        ("Pohjanmaan Syöpäyhdistys (Ostrobotnia Cancer organisation)", True),
+        ("Turun ja Kaarinan seurakuntayhtymä", False),
+        ("Kirkkonummen suomalainen seurakunta", False),
+        ("Helsingin vapaaseurakunta ry", True),
+        ("Hollolan Nuorisoseura", True),
+        ("Joensuun bridgekerho ry", True),
+        ("Tampereen seurakunnat", False),
+        ("Palvelualojen Työttömyyskassa", True),
+        ("Suomen Punainen Risti Kuopion osasto", True),
+        ("SANL ry / Luetaan yhdessä -verkosto", True),
+        ("Keravan kansantanssijat", True),
+        ("Attendo", True),
+        ("Helsingin kaupunki", False),
+        ("Satakunnan Sininauha", True),
+        ("Yhdistys (NNKY)", True),
+    ],
+)
+def test_private_org_markers(org, want):
+    assert make_spider()._is_private_org(org) is want, org
+
+
+@pytest.mark.parametrize(
+    "org,want",
+    [
+        ("Al-Anon Keskuspalvelu r.y.", True),
+        ("Barnavårdsföreningen i Finland r.f.", True),
+        ("Tmi Petri Lehto", True),
+        ("Derby", False),
+        ("Imatran keilahalli Oy (Helsinki)", True),
+        ("Daycare Daisy Oy (Ylioppilaskylä 25)", True),
+        ("Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)", False),
+    ],
+)
+def test_operator_word_markers(org, want):
+    assert make_spider()._has_operator_word(org) is want, org
+
+
+def test_operator_tiers_end_to_end():
+    spider = make_spider()
+    # Register keepers carry no operator.
+    item = Feature()
     spider._apply_operator(item, "Suomen Apteekkariliitto")
     assert "operator" not in item
     assert spider.crawler.stats.get_value("ptv_fi/operator/register_keeper") == 1
-
-
-def test_municipal_operator_with_wikidata():
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
+    # Municipalities carry Wikidata; the Kela agency beats maintainers.
+    item = Feature()
     spider._apply_operator(item, "Helsingin kaupunki")
     assert item["operator"] == "Helsingin kaupunki"
     assert item["operator_wikidata"] == "Q1757"
-
-
-def test_branch_agency_kept_over_maintainer():
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
+    item = Feature()
     item["operator"] = "Kela"
     spider._apply_operator(item, "Kokemäen kaupunki")
     assert item["operator"] == "Kela"
     assert "operator_wikidata" not in item
-
-
-def test_association_operator_flagged_private():
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
+    # Associations demote to association desks with private type.
+    item = Feature()
     spider._apply_operator(item, "Olka ry")
     assert item["operator"] == "Olka ry"
     assert item["extras"]["operator:type"] == "private"
+    item = Feature()
+    apply_category(Categories.OFFICE_GOVERNMENT, item)
+    spider._apply_operator(item, "Pirkanmaan Sydänyhdistys ry")
+    assert item["extras"]["office"] == "association"
+    assert item["extras"]["operator:type"] == "private"
+    # Parishes are public-law bodies, never associations.
+    item = Feature()
+    apply_category(Categories.OFFICE_GOVERNMENT, item)
+    spider._apply_operator(item, "Parikkalan seurakunta")
+    assert item["operator"] == "Parikkalan seurakunta"
+    assert item["extras"].get("office") == "government"
+    assert item["extras"].get("operator:type") == "religious"
+    ch = channel("Kansantanssin aikuisten ryhmä Vilhot ja Vienot - Hollola")
+    assert parsed(make_spider(), ch, org_name="Hollolan Nuorisoseura")["extras"].get("operator:type") == "private"
 
 
-def test_generic_hotline_dropped():
-    from locations.items import Feature as _F
-
+def test_operator_names_and_brands():
     spider = make_spider()
-    item = _F()
+    # Chain brand heads operate over purchaser cities.
+    for name, brand in (("Pilke Kilonkallio", "Pilke"), ("Norlandia Kärry", "Norlandia")):
+        item = parsed(spider, channel(name), "Espoon kaupunki")
+        assert item["operator"] == brand
+        assert item["extras"].get("operator:type") == "private"
+    # Mid-name chain brands and dropped slash-head operators still operate.
+    item = parsed(
+        spider, channel("Päiväkoti Pilke Äppelbo daghem"), "Turun kaupunki, Kasvatuksen ja koulutuksen toimiala"
+    )
+    assert item["operator"] == "Pilke"
+    item = parsed(spider, channel("Pilke päiväkodit Oy/ Veturi (Bastioninkatu 4)"), "Turun kaupunki")
+    assert item.get("name") == "Veturi"
+    assert item.get("operator") == "Pilke päiväkodit Oy"
+    assert item["extras"].get("operator:type") == "private"
+    item = parsed(
+        spider, channel("Pilke päiväkodit Oy/ Päiväkoti Pilke Äppelbo daghem (Stålarminkatu 36)"), "Turun kaupunki"
+    )
+    assert item.get("operator") == "Pilke"
+    # Record-proven companies are private; liikelaitos stays out.
+    item = parsed(spider, channel("Palvelupiste"), None)
+    spider._apply_operator(item, "Amuri Hoiva", "Company")
+    assert item["extras"].get("operator:type") == "private"
+    item2 = parsed(spider, channel("Palvelupiste"), None)
+    spider._apply_operator(item2, "Oulun Vesi -liikelaitos", "Company")
+    assert item2["extras"].get("operator:type") is None
+    # Signed short forms yield to the fuller joined record.
+    item = parsed(spider, channel("Ysti ry/ Toimela"), None)
+    spider._apply_operator(item, "Yhdessä Selviytymisen Tuki YSTI ry", "Organization")
+    assert item.get("operator") == "Yhdessä Selviytymisen Tuki YSTI ry"
+    # Last-segment companies operate; activity halves never relocate.
+    item = parsed(
+        spider,
+        channel("Iltapäivätoiminta / Taivallahden peruskoulu, Demo iltapäiväkerho / Jamkicks Oy"),
+        "Helsingin kaupunki",
+    )
+    assert item.get("operator") == "Jamkicks Oy"
+    assert item["extras"].get("operator:type") == "private"
+    item = parsed(
+        spider,
+        channel("Iltapäivätoiminta / Vattuniemen ala-aste / Linguajoy Language Club, Linguajoy Kielikerhot Oy"),
+        "Helsingin kaupunki",
+    )
+    assert item.get("located_in") == "Vattuniemen ala-aste"
+    assert item.get("operator") == "Linguajoy Kielikerhot Oy"
+    # Commercial forms keep government filings; parish slash-tails mark religious.
+    tmi_item = parsed(spider, channel("Palvelupiste / Tmi Petri Lehto"), "Oulun kaupunki")
+    assert tmi_item.get("operator") == "Tmi Petri Lehto"
+    assert tmi_item["extras"].get("operator:type") == "private"
+    assert tmi_item.get_tag("office") == "government"
+    parish_item = parsed(spider, channel("Päiväkerho / Helsingin seurakunta"), "Helsingin kaupunki")
+    assert parish_item.get("operator") == "Helsingin seurakunta"
+    assert parish_item["extras"].get("operator:type") == "religious"
+    # Patient-association desks demote to office=association.
+    item = parsed(spider, channel("Luustoinfo osteoporoosia sairastaville / Lahti"), org_name="Suomen Luustoliitto ry")
+    assert item["extras"].get("office") == "association"
+    item = parsed(spider, channel("X"), "Pohjois-Savon Muisti ry / Pohjois-Savon Muistiluotsi")
+    assert item["operator"] == "Pohjois-Savon Muisti ry"
+    # Deparened companies read like bare Oy.
+    item = parsed(spider, channel("Palvelupiste"), "Foo Oy (Espoo)")
+    assert item.get("operator") == "Foo Oy (Espoo)"
+    assert item["extras"].get("operator:type") == "private"
+    assert item["extras"].get("office") == "government"
+    # Brand suffixes and company markers: explicit-in-name wins.
+    item = parsed(spider, channel("TestPlace"), "Pohjois-Karjalan hyvinvointialue – Siun sote")
+    assert item["operator"] == "Pohjois-Karjalan hyvinvointialue"
+    assert item["extras"].get("operator:type") is None
+    item = parsed(spider, channel("TestPlace"), "Brottsofferjouren - RIKU")
+    assert item["operator"] == "Brottsofferjouren"
+    assert item["extras"].get("operator:type") == "private"
+    item = parsed(spider, channel("TestPlace"), "FinFami - Uusimaa ry")
+    assert item["operator"] == "FinFami - Uusimaa ry"
+    assert item["extras"].get("operator:type") == "private"
+    # Foundations without markers are private by record shape.
+    assert (
+        parsed(spider, channel("Viherlaakson asumispalveluyksikkö", org="Mente säätiö sr"), "Mente säätiö sr")[
+            "extras"
+        ].get("operator:type")
+        == "private"
+    )
+
+
+def test_kela_names_the_provider():
+    spider = make_spider()
+    item = parsed(spider, channel("Kokemäen Asiointipiste/Kela"), "Kokemäen kaupunki")
+    assert item["name"] == "Kokemäen Asiointipiste"
+    assert item["operator"] == "Kela"
+    assert item["extras"]["official_name"] == "Kokemäen Asiointipiste/Kela"
+    assert item["city"] == "Helsinki"
+    assert parsed(spider, channel("Kelan asiointipiste Lapinlahdella"), "Lapinlahden kunta")["operator"] == "Kela"
+
+
+def test_branches_file_or_drop():
+    spider = make_spider()
+    # Non-school colon desks file the branch and keep the name.
+    item = parsed(spider, channel("Rakennusvalvontatoimisto: Sampola"))
+    assert item["branch"] == "Sampola"
+    assert item["name"] == "Rakennusvalvontatoimisto: Sampola"
+    # Schools never branch; city-repeat branches are not branches.
+    item = parsed(
+        spider, channel("Tampereen seudun työväenopiston toimisto: Sampola", office="TAMPERE"), "Tampereen kaupunki"
+    )
+    assert item.get("branch") is None
+    item = parsed(spider, channel("Stadin ammattiopisto, Roihupellon toimipaikka"), "Helsingin kaupunki")
+    assert item.get("branch") is None
+    assert item["extras"].get("official_name") is None
+    item = parsed(spider, channel("Korva-, nenä- ja kurkkutautien poliklinikka"))
+    assert item.get("branch") is None
+    assert item["name"] == "Korva-, nenä- ja kurkkutautien poliklinikka"
+    # Imaging branches: city repeats drop, unit remainders branch.
+    item = parsed(spider, channel("Kuvantaminen, Pirkkala", office="PIRKKALA"), "Pirkanmaan hyvinvointialue")
+    assert item["name"] == "Kuvantaminen"
+    assert item.get("branch") is None
+    assert item["city"] == "Pirkkala"
+    item = parsed(
+        spider, channel("Kuvantaminen, Pirkkala Pirkkalan röntgen", office="PIRKKALA"), "Pirkanmaan hyvinvointialue"
+    )
+    assert item["branch"] == "Pirkkalan röntgen"
+    # Name/city duplicating branches drop with a count.
+    item = parsed(spider, channel("Toimisto: Sampola"))
+    item["name"] = "Sampola"
+    spider._apply_branch(item, "Toimisto: Sampola", "Sampola", None, None)
+    assert "branch" not in item
+    spider._apply_branch(item, "Toimisto: Pöytyä", "Toimisto: Pöytyä", None, "Pöytyä")
+    assert "branch" not in item
+    assert spider.crawler.stats.get_value("ptv_fi/name/branch_dup_city") == 1
+
+
+# ---- Contact: phones, emails, websites -------------------------------------------------
+
+
+def test_contact_keep_and_drop():
+    spider = make_spider()
+    item = Feature()
     spider._apply_contact(
         item,
         {
@@ -917,13 +3019,7 @@ def test_generic_hotline_dropped():
     assert "phone" not in item
     assert "email" not in item
     assert "website" not in item
-
-
-def test_per_location_contact_kept():
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
+    item = Feature()
     spider._apply_contact(
         item,
         {
@@ -935,6 +3031,296 @@ def test_per_location_contact_kept():
     assert item["phone"] == "+358 50 9119693"
     assert item["email"] == "mouhijarvi.kirjasto@sastamala.fi"
     assert item["website"] == "https://www.sastamala.fi/kirjasto"
+    # Placeholder and template addresses drop or yield to real entries.
+    for bad in ("etunimi.sukunimi@kalajoki.fi", "nimi.sukunimi@kunta.fi"):
+        probe = Feature()
+        spider._apply_contact(probe, {"emails": [{"value": bad}]})
+        assert "email" not in probe, bad
+    ch = channel("X")
+    ch["emails"] = [{"value": "etunimi.sukunimi@soini.fi"}, {"value": "soinin.kunta@soini.fi"}]
+    assert parsed(spider, ch).get("email") == "soinin.kunta@soini.fi"
+    # Menu SaaS hosts never pose as websites; the next usable page wins.
+    probe = Feature()
+    spider._apply_contact(probe, {"webPages": [{"url": "https://menu.kaarea.fi/KaareaAromieMenus/FI/Default"}]})
+    assert "website" not in probe
+    ch = channel("X")
+    ch["webPages"] = [{"url": "https://aromimenu.cgisaas.fi/X"}, {"url": "https://www.kirjasto.fi/"}]
+    assert parsed(spider, ch).get("website") == "https://www.kirjasto.fi/"
+    ch = channel("Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut", office="Vaasa")
+    ch["webPages"] = [{"url": "http://www.finlex.fi/fi/laki/ajantasa/2010/20101386"}]
+    assert parsed(spider, ch, "Vaasan kaupunki").get("website") is None
+    # The city switchboard serves 145 rows: never a direct contact.
+    probe = Feature()
+    spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "+358", "number": "983911"}]})
+    assert probe.get("phone") is None
+
+
+def test_fax_lines_yield_to_voice():
+    spider = make_spider()
+    ch = channel("Konsertti- ja kongressitalo Mikaeli")
+    ch["phoneNumbers"] = [
+        {"type": "Fax", "number": "+358 15 362 757", "prefixNumber": ""},
+        {"type": "Phone", "number": "+358 15 336 080", "prefixNumber": ""},
+    ]
+    assert parsed(spider, ch).get("phone") == "+358 15336080"
+    ch["phoneNumbers"] = [None, {}, {"type": "Phone", "number": "040 123 4567", "prefixNumber": ""}]
+    assert parsed(spider, ch).get("phone") == "+358 40 1234567"
+
+
+def test_login_and_mail_urls_never_win():
+    spider = make_spider()
+    for bad in (
+        "https://hushag-sso.hus.fi/haglogin/idp-discovery.jsp",
+        "https://aromimenu.cgisaas.fi/X",
+        "https://tyollisyyskokeilu@raahe.fi/",
+        "https://eur06.safelinks.protection.outlook.com/?url=x",
+    ):
+        assert spider.LOGIN_URL_RE.search(bad), bad
+    for good in (
+        "https://www.kirjasto.fi/",
+        "https://biologinenmuseo.fi/",
+        "https://www.hus.fi/potilaalle/sairaalat-ja-toimipisteet/neurologinen-kuntoutusosasto-2/",
+        "https://www.hel.fi/fi/sosiaali-ja-terveyspalvelut/vammaispalvelut/sosiaalityo/",
+    ):
+        assert not spider.LOGIN_URL_RE.search(good), good
+
+
+@pytest.mark.parametrize(
+    "raw,want",
+    [
+        ("094711", "+358 9 4711"),
+        ("0206156605", "+358 206156605"),
+        ("+358 0503273734", "+358 50 3273734"),
+        ("+358 358447851490", "+358 44 7851490"),
+        ("+358 49460076255", None),
+        ("116006", "116006"),
+        ("null", None),
+        ("400395234", "+358 40 0395234"),
+        ("4578757018", None),
+        ("358 17499111", "+358 17499111"),
+        ("116117", "116117"),
+        ("+359 447301262", "+358 44 7301262"),
+        ("+358 358123456", "+358 1 23456"),
+        ("00358 9 1234567", "+358 91234567"),
+        ("358912345", "+358 9 12345"),
+    ],
+)
+def test_phone_normalize(raw, want):
+    assert make_spider()._normalize_phone(raw) == want, raw
+
+
+# ---- Translations ------------------------------------------------------------------------
+# name:sv/name:en render only the applied name, feed-verbatim: venue,
+# operator, city and street tails strip; truncated Finnish copies drop.
+
+
+def test_translations_render_the_applied_name():
+    spider = make_spider()
+    item = parsed(
+        spider,
+        channel("Laboratorio, Taivassalo", office="TAIVASSALO", sv="Tykslab"),
+        "Turun yliopistollinen keskussairaala",
+    )
+    assert item["extras"]["name:sv"] == "Tykslab"
+    assert item["extras"].get("official_name:sv") is None
+    item = parsed(spider, channel("Myllypuron liikuntapuisto", en="Myllypuro sports park 1*"), "Helsingin kaupunki")
+    assert item["extras"]["name:en"] == "Myllypuro sports park"
+    item = parsed(
+        spider,
+        channel(
+            "Sodanajan naisen muistomerkki",
+            en="Sodanajan naisen muistomerkki / Memorial to Women in Times of War",
+            sv="Den krigstida kvinnans minnesmärke",
+        ),
+    )
+    assert item["extras"].get("name:en") == "Memorial to Women in Times of War"
+    assert item["extras"].get("name:sv") == "Den krigstida kvinnans minnesmärke"
+    item = parsed(
+        spider,
+        channel(
+            "Moduli / Rakentajaveistos", en="Moduli (Rakentajaveistos) / The Module", sv="Modul / Byggarnas minnesmärke"
+        ),
+    )
+    assert item["name"] == "Moduli / Rakentajaveistos"
+    assert item.get("located_in") is None
+    item = parsed(spider, channel("Ristikko", sv="Korsverk (Ristikko)", en="Crosses"))
+    assert item["extras"].get("name:sv") == "Korsverk"
+    assert item["extras"].get("name:en") == "Crosses"
+    item = parsed(
+        spider,
+        channel(
+            "Filosofia, Lääketiede, Teologia ja Juridiikka",
+            en="Filosofia, lääketiede.../ Philosophy, Medicine, Theology and Justice",
+        ),
+    )
+    assert item["extras"].get("name:en") == "Philosophy, Medicine, Theology and Justice"
+    item = parsed(spider, channel("Aninkaisten koulun A-sali", en="Aninkaisten koulu (Aninkainen School) Gym A"))
+    assert item.get("located_in") == "Aninkaisten koulu"
+    assert item["extras"].get("name:en") == "(Aninkainen School) Gym A"
+    item = parsed(spider, channel("Leikkipuisto Jakomäki / Hiekkakenttä", en="Leikkipuisto Jakomäki"))
+    assert item.get("located_in") == "Leikkipuisto Jakomäki"
+    assert "name:en" not in (item.get("extras") or {})
+    item = parsed(
+        spider,
+        channel(
+            "Steinergymnasiet (Rudolf Steinerskolan i Helsingfors)",
+            sv="Steinergymnasiet (Rudolf Steinerskolan i Helsingfors)",
+            en="Steinergymnasiet (Rudolf Steinerskolan i Helsingfors)",
+        ),
+    )
+    assert item["name"] == "Steinergymnasiet"
+    assert "name:sv" not in item["extras"]
+    assert "name:en" not in item["extras"]
+
+
+def test_translation_helpers_strip_venues_and_copies():
+    spider = make_spider()
+    assert (
+        spider._split_bilingual(
+            "After-school activities / Helsinki Christian School / Association of X",
+            "Iltapäivätoiminta",
+            "Iltapäivätoiminta / Helsingin kristillinen koulu, Yhdistys",
+            "Helsingin kristillinen koulu",
+        )
+        == "After-school activities"
+    )
+    assert (
+        spider._split_bilingual(
+            "Röylän koulu / Ice-skating field", "Luistelukenttä", "Röylän koulun luistelukenttä", "Röylän koulu"
+        )
+        == "Ice-skating field"
+    )
+    assert (
+        spider._strip_fi_duplicates(
+            "Hjälpmedelsutlåningen, Reso, Rusko", "Apuvälinelainaamo", "Apuvälinelainaamo, Raisio, Rusko", None
+        )
+        == "Hjälpmedelsutlåningen"
+    )
+    assert (
+        spider._strip_fi_duplicates(
+            "Röylän koulu skridskobana", "Luistelukenttä", "Röylän koulun luistelukenttä", "Röylän koulu"
+        )
+        == "skridskobana"
+    )
+    assert (
+        spider._split_bilingual(
+            "After-school activities / Helsinki Christian School",
+            "Iltapäivätoiminta",
+            "Iltapäivätoiminta / Helsingin kristillinen koulu",
+            "Helsingin kristillinen koulu",
+        )
+        == "After-school activities"
+    )
+    assert (
+        spider._split_bilingual(
+            "After-school activities / University of Helsinki",
+            "Viikin normaalikoulun iltapäivätoiminta, Helsingin",
+            "Iltapäivätoiminta / Viikin normaalikoulun iltapäivätoiminta, Helsingin yliopisto",
+            "Iltapäivätoiminta",
+        )
+        == "After-school activities / University of Helsinki"
+    )
+    assert spider._split_translation("Simhallen - Uimahalli") == ("Uimahalli", "Simhallen")
+
+
+def test_translation_city_street_and_located_tails():
+    spider = make_spider()
+    item = parsed(spider, channel("Sosiaalitoimisto, Kaarina", sv="Socialbyrå, S:t Karins", office="KAARINA"))
+    assert item["extras"].get("name:sv") == "Socialbyrå"
+    item = parsed(spider, channel("Koivukoto, Laitila", sv="Koivukoto, Letala", office="LAITILA"))
+    assert item["extras"].get("name:sv") is None
+    item = parsed(
+        spider,
+        channel(
+            "Pysäköintilippuautomaatti 99, Nervanderinkatu 3, korttimaksu",
+            sv="Parkeringbiljettautomat 99, Nervanderinkatu 3",
+            en="Parking ticket machine, Kaisaniemenranta 2",
+        ),
+    )
+    assert item["extras"].get("name:sv") == "Parkeringbiljettautomat 99"
+    assert item["extras"].get("name:en") == "Parking ticket machine"
+    ch = channel(
+        "Päiväkotikeittiö, Päiväkoti Jollas",
+        sv="Daghemskök, Päiväkoti Jollas",
+        en="Daycare centre kitchen, Daycare Jollas",
+    )
+    item = parsed(spider, ch)
+    assert item["extras"].get("name:sv") == "Daghemskök"
+    assert item["extras"].get("name:en") == "Daycare centre kitchen"
+    assert item.get("located_in") == "Päiväkoti Jollas"
+    item = parsed(spider, channel("Oskarinpuisto / Lentopallokenttä", sv="Oskariparken / Volleybollplan"))
+    assert item["extras"].get("name:sv") == "Volleybollplan"
+    item = parsed(
+        spider, channel("Bylandet / Ulkoilusaari", sv="Bylandet / Utfärdsholme", en="Bylandet / Recreational island")
+    )
+    assert item["extras"].get("name:sv") is None
+    assert item["extras"].get("name:en") is None
+    assert item.get("located_in") is None
+    # Bare-slash twins keep both sides; only spaced twins follow the split.
+    item = parsed(spider, channel("Lauttasaaren silta/ Kaapelitehdas", sv="Drumsö bro/ Kabelfabriken"))
+    assert item["extras"].get("name:sv") == "Drumsö bro/ Kabelfabriken"
+
+
+def test_translation_descriptor_and_address_parens_drop():
+    spider = make_spider()
+    ch = channel("Päiväkoti Lyyra")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Päiväkoti Lyyra", "type": "Name"},
+        {"language": "en", "value": "Päiväkoti Lyyra (private ECEC centre)", "type": "Name"},
+    ]
+    ch["displayNameType"] = [{"type": "Name", "language": "en"}]
+    assert parsed(spider, ch, "Rovaniemen kaupunki")["extras"].get("name:en") is None
+    ch = channel("Haritun päiväkoti (Kymenlaaksonkuja 4)")
+    ch["serviceChannelNames"].append({"language": "sv", "value": "Dagvårdsenheten i Harittu (Kymmenedalsgränden 4)"})
+    item = parsed(spider, ch, "Turun kaupunki")
+    assert item.get("name") == "Haritun päiväkoti"
+    assert item["extras"].get("name:sv") == "Dagvårdsenheten i Harittu"
+
+
+def test_name_selection_prefers_parallel_forms():
+    spider = make_spider()
+    ch = channel("Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut"},
+        {"language": "sv", "value": "Integrationstjänster"},
+        {"language": "sv", "value": "Integrationsservice / Vasa stad Välfärdstjänster"},
+    ]
+    assert spider._names(ch)["sv"] == "Integrationsservice / Vasa stad Välfärdstjänster"
+    ch = channel("Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut", office="Vaasa")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut"},
+        {"language": "sv", "value": "Integrationstjänster"},
+        {"language": "sv", "value": "Integrationsservice / Vasa stad Välfärdstjänster"},
+        {"language": "en", "value": "Integration services / City of Vaasa"},
+    ]
+    ch["displayNameType"] = [{"type": "Name", "language": "en"}]
+    ch["webPages"] = [{"url": "http://www.finlex.fi/fi/laki/ajantasa/2010/20101386"}]
+    item = parsed(spider, ch, "Vaasan kaupunki")
+    assert item.get("name") == "Vaasan kaupungin hyvinvointipalvelut"
+    assert item.get("located_in") == "Kotoutumispalvelut"
+    assert item["extras"].get("name:sv") == "Vasa stad Välfärdstjänster"
+    assert item["extras"].get("name:en") is None
+    assert item.get("website") is None
+    # Official Name beats AlternativeName; placeholders fall back.
+    ch = channel("Talaskangas")
+    ch["serviceChannelNames"] = [
+        {"language": "fi", "value": "Talaskangas", "type": "AlternativeName"},
+        {"language": "fi", "value": "Talaskankaan retkeilyreitti", "type": "Name"},
+    ]
+    ch["displayNameType"] = [{"type": "Name", "language": "fi"}]
+    assert spider._names(ch)["fi"] == "Talaskankaan retkeilyreitti"
+    names = spider._names(
+        {
+            "serviceChannelNames": [
+                {"language": "sv", "value": "Kontaktuppgifter", "type": "Name"},
+                {"language": "sv", "value": "AMS", "type": "AlternativeName"},
+            ]
+        }
+    )
+    assert names.get("sv") == "AMS"
+
+
+# ---- Hours ---------------------------------------------------------------------------------
 
 
 def _spans(open_from, open_to):
@@ -944,9 +3330,8 @@ def _spans(open_from, open_to):
     ]
 
 
-def test_hours_union_merge_overlapping_desks():
-    # Nurse/counsellor/psychologist timetables union into visit hours;
-    # phone-only sets are skipped.
+def test_hours_union_skips_phone_only():
+    # Nurse/counsellor/psychologist timetables union; phone-only sets skip.
     spider = make_spider()
     oh = spider._hours(
         {
@@ -971,1909 +3356,8 @@ def test_hours_union_merge_overlapping_desks():
         None,
     )
     assert oh.as_opening_hours() == "Mo-Fr 08:00-16:00"
-
-
-def test_hours_dated_and_closed_shapes():
-    spider = make_spider()
-    assert (
-        spider._hours(
-            {
-                "serviceHours": [
-                    {
-                        "serviceHourType": "DaysOfTheWeek",
-                        "validFrom": "2027-01-01T00:00:00",
-                        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
-                    },
-                ]
-            },
-            None,
-        )
-        is None
-    )
-    assert (
-        spider._hours(
-            {
-                "serviceHours": [
-                    {
-                        "serviceHourType": "DaysOfTheWeek",
-                        "isClosed": True,
-                        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "", "to": ""}],
-                    },
-                ]
-            },
-            None,
-        )
-        is None
-    )
-
-
-def test_kela_branch_end_to_end():
-    # Kokemäen Asiointipiste/Kela, maintained by the city.
-    spider = make_spider()
-    item = parsed(spider, channel("Kokemäen Asiointipiste/Kela"), "Kokemäen kaupunki")
-    assert item["name"] == "Kokemäen Asiointipiste"
-    assert item["operator"] == "Kela"
-    assert item["extras"]["official_name"] == "Kokemäen Asiointipiste/Kela"
-    assert item["city"] == "Helsinki"
-
-
-def test_imaging_branch_end_to_end():
-    # Kuvantaminen, Pirkkala: the branch merely repeats the city, so no
-    # branch (reviewer catch); the unit remainder still branches.
-    spider = make_spider()
-    item = parsed(spider, channel("Kuvantaminen, Pirkkala", office="PIRKKALA"), "Pirkanmaan hyvinvointialue")
-    assert item["name"] == "Kuvantaminen"
-    assert item.get("branch") is None
-    assert item["city"] == "Pirkkala"
-    item = parsed(
-        spider, channel("Kuvantaminen, Pirkkala Pirkkalan röntgen", office="PIRKKALA"), "Pirkanmaan hyvinvointialue"
-    )
-    assert item["branch"] == "Pirkkalan röntgen"
-
-
-def test_youth_exports_without_generic():
-    spider = make_spider()
-    item = parsed(spider, channel("Punkalaitumen Nuorisotila"), "Punkalaitumen kunta")
-    assert item["extras"]["amenity"] == "youth_centre"
-    assert item.get("amenity") is None
-
-
-def test_square_exports_place_without_amenity():
-    spider = make_spider()
-    item = parsed(spider, channel("Töölöntori"), "Helsingin kaupunki")
-    assert item["extras"]["place"] == "square"
-    assert item.get("amenity") is None
-
-
-def test_genitive_service_end_to_end():
-    spider = make_spider()
-    item = parsed(
-        spider,
-        channel("Rovastinkankaan koulun opiskeluhuolto, Orivesi", office="ORIVESI"),
-        "Pirkanmaan hyvinvointialue",
-    )
-    assert item["name"] == "Opiskeluhuolto"
-    assert item["located_in"] == "Rovastinkankaan koulu"
-    assert item["extras"]["official_name"] == "Rovastinkankaan koulun opiskeluhuolto, Orivesi"
-
-
-# ---- Address/city batch ----------------------------------------------------
-# Municipality outranks the postal town; post office is fallback only.
-
-
-def test_city_prefers_street_municipality():
-    spider = make_spider()
-    street = {"municipality": {"name": [{"language": "fi", "value": "Seinäjoki"}]}}
-    assert spider._city_src(street, {"areas": []}, "KYLÄNPÄÄ") == "Seinäjoki"
-
-
-def test_city_uses_single_area_municipality():
-    spider = make_spider()
-    channel = {"areas": [{"municipalities": [{"name": [{"language": "fi", "value": "Kuusamo"}]}]}]}
-    assert spider._city_src({}, channel, "KUUSAMO") == "Kuusamo"
-
-
-def test_city_multi_area_falls_back_to_post_office():
-    spider = make_spider()
-    channel = {
-        "areas": [
-            {
-                "municipalities": [
-                    {"name": [{"language": "fi", "value": "Helsinki"}]},
-                    {"name": [{"language": "fi", "value": "Espoo"}]},
-                ]
-            }
-        ]
-    }
-    assert spider._city_src({}, channel, "HELSINKI") == "HELSINKI"
-
-
-def test_city_station_post_office_strips():
-    assert make_spider()._city_src({}, {"areas": []}, "ORIVESI AS") == "ORIVESI"
-
-
-def test_municipality_end_to_end():
-    # Postal village Kylänpää must not leak into addr:city or name splits.
-    spider = make_spider()
-    data = channel("Neuvonta", road="Kylänpääntie", street_number="200", postcode="60420", office="KYLÄNPÄÄ")
-    street = data["addresses"][0]["streetAddress"]
-    street["municipality"] = {"name": [{"language": "fi", "value": "Seinäjoki"}]}
-    item = parsed(spider, data, "Seinäjoen kaupunki")
-    assert item["city"] == "Seinäjoki"
-
-
-def test_coords_notreceived_and_failed_drop():
-    spider = make_spider()
-    base = {"latitude": "6672010", "longitude": "385128"}
-    assert spider._coords({**base, "coordinateState": "NotReceived"}) is None
-    assert spider._coords({**base, "coordinateState": "Failed"}) is None
-    assert spider._coords({**base, "coordinateState": "Ok"}) is not None
-
-
-def test_postcode_tail_stripped_from_number():
-    # Voimapolku 3 03100 Nummela shape.
-    item = addressed(make_spider(), "Voimapolku", "3 03100 Nummela", postcode="03100", office="NUMMELA")
-    assert (item["street"], item["housenumber"]) == ("Voimapolku", "3")
-
-
-def test_road_venue_prefix_split():
-    spider = make_spider()
-    assert spider._road_base("Didrichsenin taidemuseo, Kuusilahdenkuja") == "Kuusilahdenkuja"
-    assert spider._road_base("Castreninkatu, puisto") == "Castreninkatu"
-    assert spider._road_base("Rekipellonpuisto, Vesala") == "Rekipellonpuisto"
-
-
-def test_road_venue_prefix_end_to_end():
-    item = addressed(make_spider(), "Didrichsenin taidemuseo, Kuusilahdenkuja", "1")
-    assert (item["street"], item["housenumber"]) == ("Kuusilahdenkuja", "1")
-
-
-def test_island_zone_routes_to_place():
-    # Talholmen virkistysalue: island site, zone-noun tail.
-    item = addressed(make_spider(), "Talholmen virkistysalue", "")
-    assert item["extras"]["addr:place"] == "Talholmen virkistysalue"
-    assert "street_address" not in item
-
-
-def test_island_street_suffix_stays_street():
-    # Saaristonkatu contains saari but reads as a street.
-    item = addressed(make_spider(), "Saaristonkatu", "")
-    assert item["street"] == "Saaristonkatu"
-    assert "street_address" not in item
-
-
-def test_trailing_comma_boilerplate_end_to_end():
-    # Live crasher (c052becb): trailing comma dodged the boilerplate strip,
-    # then _split_comma fell off the end returning None and killed its
-    # whole 40-batch. Name keeps the campaign title, signed form survives.
-    spider = make_spider()
-    item = parsed(
-        spider,
-        channel("Hae mukaan Hyvän olon polku -ryhmään! -palvelun järjestämispaikka,"),
-        "Jyväskylän kaupunki",
-    )
-    assert item["name"] == "Hae mukaan Hyvän olon polku -ryhmään!"
-    assert item["extras"]["official_name"] == "Hae mukaan Hyvän olon polku -ryhmään! -palvelun järjestämispaikka,"
-
-
-def test_dangling_comma_names_head():
-    # SYNTHETIC "Neuvonta," shape: empty tail, head names it.
-    name, located, official = split(make_spider(), "Neuvonta,")
-    assert name == "Neuvonta"
-    assert located is None
-    assert official == "Neuvonta,"
-
-
-def test_split_name_never_returns_none():
-    # Totality: adversarial punctuation must never crash the unpack in
-    # _apply_naming (cf. the trailing-comma batch killer above).
-    spider = make_spider()
-    for probe in ("Neuvonta,", ",", " , ", "Kotihoito, ", "/", " / ", "A / B /", ",,,", "Nimi (", "Nimi ()"):
-        result = spider._split_name(spider._clean_name(probe), None)
-        assert result is not None and len(result) == 3, probe
-
-
-# ---- Review round 6: categories ------------------------------------------------
-# Ten subagents reviewed 1,000 fresh-crawl rows; everyadopt below was
-# verified against the spider before implementation. Declined findings
-# (Kiiminki tails, invented station names, official_name purism beyond
-# the always-name:sv rule, city-homepage websites, switchboard phones,
-# feed-error rows) are documented in the review triage, not here.
-
-
-def test_tekonurmi_outranks_nurmikentta():
-    # Leppävaaran urheilupuiston tekonurmikenttä 2: artificial, not grass.
-    category, extra = cat(make_spider(), "Leppävaaran urheilupuiston tekonurmikenttä 2")
-    assert category == Categories.LEISURE_PITCH
-    assert extra == {"sport": "soccer", "surface": "artificial_turf"}
-
-
-def test_beach_without_resort_and_plural():
-    # Finnish swimming spots are not resorts (reviewer: resort invented).
-    spider = make_spider()
-    assert cat(spider, "Jänissaaren uimapaikka") == (Categories.NATURAL_BEACH, None)
-    assert cat(spider, "Uimarannat")[0] == Categories.NATURAL_BEACH
-
-
-def test_info_guards_and_matches():
-    spider = make_spider()
-    # Ryhmäkoti Sinfonia is a group home (ryhmäkoti wins); the info guard
-    # only stops the tourism filing Sinfonia alone would trigger.
-    category, extra = cat(spider, "Ryhmäkoti Sinfonia")
-    assert category == Categories.SOCIAL_FACILITY
-    assert extra == {"social_facility": "group_home"}
-    assert cat(spider, "Sinfonia")[0] is None
-    assert cat(spider, "Infopiste")[0] == Categories.TOURISM_INFORMATION
-    assert cat(spider, "Pääinfo")[0] == Categories.TOURISM_INFORMATION
-
-
-def test_tori_service_and_parking_guards():
-    spider = make_spider()
-    assert cat(spider, "Maahanmuuttajien ohjaus- ja palvelupiste Navigaattori")[1] != {"place": "square"}
-    assert cat(spider, "Omnian Palvelutori")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Esteetön pysäköintialue Kivenlahdentori")[0] == Categories.PARKING
-
-
-def test_koulu_compound_guards():
-    spider = make_spider()
-    assert cat(spider, "Koulutuskeskus Salpaus")[0] == Categories.COLLEGE
-    assert cat(spider, "Aikuiskoulutus")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Koulutalo")[0] == Categories.SCHOOL
-    assert cat(spider, "Soveltava temppuilu kouluikäisille")[0] is None  # school-aged, not a school
-
-
-def test_seurakuntatalo_is_community():
-    assert cat(make_spider(), "Keiteleen seurakuntatalo")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_group_words_never_file_as_venue():
-    spider = make_spider()
-    assert cat(spider, "Anniksen enkelit -teatteriryhmä")[0] is None
-    assert cat(spider, "Miesten kirjastoparlamentti")[0] is None
-    # Peer-support groups are community venues, not generic activities.
-    assert cat(spider, "Omaisten vertaistukiryhmä")[0] == Categories.COMMUNITY_CENTRE
-    # Real venues sharing the words keep their filing.
-    assert cat(spider, "Ryhmäkoti Karkkula")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Kerhotalo")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_nurse_guard_outranks_daycare_host():
-    spider = make_spider()
-    for fi in (
-        "Esiopetuksen opiskeluhuolto, Laurentius-päiväkoti",
-        "Esiopetuksen opiskeluhuolto, Kantvikin päiväkoti",
-        "Opiskeluhuolto, Karis svenska högstadium",
-    ):
-        category, extra = cat(spider, fi)
-        assert category == Categories.CLINIC, fi
-        assert extra == {"healthcare": "nurse"}, fi
-
-
-def test_pool_track_vet_rows():
-    spider = make_spider()
-    assert cat(spider, "Uintikeskus")[0] == Categories.LEISURE_SPORTS_CENTRE
-    assert cat(spider, "Pump track-rata")[0] == Categories.LEISURE_TRACK
-    assert cat(spider, "Eläinlääkäri Eura")[0] == Categories.VETERINARY
-    assert cat(spider, "Kampuksen kamppailutila")[0] == Categories.LEISURE_SPORTS_HALL
-    assert cat(spider, "Stadin yhteisötalo Alppila")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Käräjäsali")[0] == Categories.COURTHOUSE
-    assert cat(spider, "Oulun käräjäoikeus, Ruskonselän istuntosali")[0] == Categories.COURTHOUSE
-    assert cat(spider, "Kokkomäen puutarhajätealue")[0] == Categories.RECYCLING
-    assert cat(spider, "Puokkarin nuokkari")[1] == {"amenity": "youth_centre"}
-
-
-def test_kota_compound_final():
-    spider = make_spider()
-    assert cat(spider, "Vareskota")[0] == Categories.SHELTER
-    assert cat(spider, "Ravintola Dakota")[0] == Categories.RESTAURANT
-
-
-def test_ward_and_reception_rows():
-    spider = make_spider()
-    assert cat(spider, "Malmin osasto 13")[0] == Categories.CLINIC
-    assert cat(spider, "Laakson osasto 3")[0] == Categories.CLINIC
-    assert cat(spider, "Suursuon osasto 23")[0] == Categories.CLINIC
-    assert cat(spider, "Kaupunginosan toimisto")[0] == Categories.OFFICE_GOVERNMENT
-    # Morgues have no enum entry: generic, even at hospitals.
-    assert cat(spider, "Vainajansäilytys, Ahveniston sairaala") == (None, None)
-    assert cat(spider, "Terveysaseman vastaanotto")[0] == Categories.CLINIC
-    assert cat(spider, "Akaan lääkärin ja hoitajan vastaanotot")[0] == Categories.CLINIC
-    assert cat(spider, "Kuntoutuksen poliklinikat")[0] == Categories.CLINIC
-    assert cat(spider, "Mielialahäiriötyöryhmä, Tyks, Raisio")[0] == Categories.CLINIC
-    assert cat(spider, "Diabeteskeskus")[0] == Categories.CLINIC
-    assert cat(spider, "Maahanmuuttajien terveyspalvelut")[0] == Categories.CLINIC
-    assert cat(spider, "Kuopion Canthia, suun perusterveydenhuolto")[0] == Categories.DENTIST
-
-
-def test_therapy_rows_carry_clinic():
-    spider = make_spider()
-    assert cat(spider, "Fysioterapia Kankaanpää") == (
-        Categories.CLINIC,
-        {"healthcare": "physiotherapist"},
-    )
-    assert cat(spider, "Oriveden puheterapian vastaanotot") == (
-        Categories.CLINIC,
-        {"healthcare": "speech_therapist"},
-    )
-
-
-def test_care_home_rows():
-    spider = make_spider()
-    # Bare service labels are desks, not care homes: nursing needs
-    # housing evidence (cf. tehostettu palveluasuminen below).
-    assert cat(spider, "Palvelut ikäihmisille")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Ikäihmisten tehostettu palveluasuminen")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Töölön seniorikeskus/Helmi ryhmäkoti")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Töölön seniorikeskus/Helmi ryhmäkoti")[1] == {"social_facility": "group_home"}
-
-
-def test_court_keeps_sport():
-    # Pallokenttä shadowed koripallo until the reorder.
-    category, extra = cat(make_spider(), "Lounatuulenpuiston koripallokenttä")
-    assert category == Categories.LEISURE_PITCH
-    assert extra["sport"] == "basketball"
-    assert cat(make_spider(), "Haminamäen Valio Areenan nurmikenttä")[0] == Categories.LEISURE_PITCH
-
-
-def test_halli_end_anchored():
-    spider = make_spider()
-    assert cat(spider, "Säkylähalli")[0] == Categories.LEISURE_SPORTS_HALL
-    assert cat(spider, "Talviharjoitteluhalli")[0] == Categories.LEISURE_SPORTS_HALL
-    assert cat(spider, "Hallitus")[0] is None
-
-
-def test_apuvaline_and_paja_filings():
-    spider = make_spider()
-    assert cat(spider, "Apuvälinepalvelu")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Miehikkälän työpaja")[1] == {"social_facility": "workshop"}
-
-
-def test_inessive_host_category():
-    # Services AT a venue never inherit it.
-    assert cat(make_spider(), "Martat neuvoo Kuusankosken kirjastossa")[0] is None
-
-
-# ---- Review round 6: names ----------------------------------------------------
-
-
-def test_police_desk_qualifiers_stay_whole():
-    spider = make_spider()
-    for fi in (
-        "Nurmeksen poliisiasema, löytötavarat",
-        "Kuhmon poliisiasema, asetarkastus",
-        "Pietarsaaren poliisiasema, aseen esitys",
-        "Loimaan poliisiasema, poliisipäivystys",
-    ):
-        assert split(spider, fi) == (fi, None, None), fi
-    # Permit desks split instead (service names, station locates).
-
-
-def test_service_host_without_school_words():
-    # Norlandia Linna hosts, like Karamzinin and Solglimtens before it.
-    name, located, official = split(make_spider(), "Esiopetuksen opiskeluhuolto, Norlandia Linna")
-    assert name == "Esiopetuksen opiskeluhuolto"
-    assert located == "Norlandia Linna"
-    assert official == "Esiopetuksen opiskeluhuolto, Norlandia Linna"
-
-
-def test_swedish_service_tail():
-    name, located, _ = split(make_spider(), "Zacharias Topeliusskolan, Smågruppsundervisning")
-    assert name == "Smågruppsundervisning"
-    assert located == "Zacharias Topeliusskolan"
-
-
-def test_hogstadium_school_tail():
-    name, located, _ = split(make_spider(), "Opiskeluhuolto, Karis svenska högstadium")
-    assert name == "Opiskeluhuolto"
-    assert located == "Karis svenska högstadium"
-
-
-def test_qualifier_parens_stay_whole():
-    spider = make_spider()
-    assert split(spider, "Kuntoilulaitteet (ulko)") == ("Kuntoilulaitteet (ulko)", None, None)
-    assert split(spider, "Kottby grundskola, Arabia kvartersskola, åk 1–2") == (
-        "Kottby grundskola, Arabia kvartersskola, åk 1–2",
-        None,
-        None,
-    )
-
-
-def test_coverage_hyphen_fragment_kept():
-    # Hyphen-fragment lists are one name, not municipality coverage.
-    name, located, official = split(make_spider(), "Sovellettua jooga-, pilates- ja faskiaharjoittelua Tesoma")
-    assert (name, located) == ("Sovellettua jooga-, pilates- ja faskiaharjoittelua Tesoma", None)
-    assert official is None
-
-
-def test_dash_facility_kept_whole():
-    spider = make_spider()
-    assert split(spider, "Virkeät Ikämiehet -toiminnan starttikurssi Sastamala")[0] == (
-        "Virkeät Ikämiehet -toiminnan starttikurssi Sastamala"
-    )
-    assert split(spider, "Kuivalahden koulun 5 -väyläinen frisbeegolfrata")[0] == (
-        "Kuivalahden koulun 5 -väyläinen frisbeegolfrata"
-    )
-    assert split(spider, "Ulkokuntoilusalit ja -alueet")[0] == "Ulkokuntoilusalit ja -alueet"
-
-
-def test_colon_city_and_operator():
-    spider = make_spider()
-    assert split(spider, "Outokumpu: Vertaisryhmä", "Outokumpu") == ("Vertaisryhmä", None, "Outokumpu: Vertaisryhmä")
-    assert split(spider, "OLKA-pisteen teemapäivä: Saimaan Syöpäyhdistys ry") == (
-        "OLKA-pisteen teemapäivä",
-        None,
-        "OLKA-pisteen teemapäivä: Saimaan Syöpäyhdistys ry",
-    )
-
-
-def test_space_city_tail():
-    spider = make_spider()
-    assert split(spider, "Kuntoutusohjaus Kankaanpää", "Kankaanpää") == (
-        "Kuntoutusohjaus",
-        None,
-        "Kuntoutusohjaus Kankaanpää",
-    )
-    assert split(spider, "Toimintakeskus Parikkala", "Parikkala")[0] == "Toimintakeskus"
-
-
-def test_no_branch_on_schools():
-    spider = make_spider()
-    item = parsed(
-        spider, channel("Tampereen seudun työväenopiston toimisto: Sampola", office="TAMPERE"), "Tampereen kaupunki"
-    )
-    assert item["name"] == "Tampereen seudun työväenopiston toimisto: Sampola"
-    assert item.get("branch") is None
-
-
-def test_inessive_host_split():
-    name, located, official = split(make_spider(), "Martat neuvoo Kuusankosken kirjastossa")
-    assert name == "Martat neuvoo"
-    assert located == "Kuusankosken kirjasto"
-    assert official == "Martat neuvoo Kuusankosken kirjastossa"
-
-
-def test_bare_slash_service_and_genitive():
-    spider = make_spider()
-    assert split(spider, "Töölön seniorikeskus/Helmi ryhmäkoti") == (
-        "Helmi ryhmäkoti",
-        "Töölön seniorikeskus",
-        "Töölön seniorikeskus/Helmi ryhmäkoti",
-    )
-    assert split(spider, "Keuruun yläkoulun/lukion tanssisali") == (
-        "Keuruun yläkoulun/lukion tanssisali",
-        None,
-        None,
-    )
-
-
-def test_located_is_city_dropped():
-    spider = make_spider()
-    item = parsed(spider, channel("Jumppa / Lahti", road="Katu", street_number="1", office="LAHTI"), "Lahden kaupunki")
-    assert item.get("located_in") is None
-    assert item["city"] == "Lahti"
-
-
-def test_name_and_located_capitalized():
-    spider = make_spider()
-    item = parsed(spider, channel("vaatelahjoitus"), "Verso ry")
-    assert item["name"] == "Vaatelahjoitus"
-    item = parsed(
-        spider,
-        channel("Kokemäen äitiysneuvola, perhekeskus Suvituuli", office="KOKEMÄKI"),
-        "Satakunnan hyvinvointialue",
-    )
-    assert item["located_in"] == "Perhekeskus Suvituuli"
-
-
-# ---- Review round 6: addresses ------------------------------------------------
-
-
-def test_kurvi_street_suffix():
-    item = addressed(make_spider(), "Sankarinkurvi", "")
-    assert item["street"] == "Sankarinkurvi"
-    assert "street_address" not in item
-
-
-def test_road_case_fixed():
-    item = addressed(make_spider(), "wetterhoffinkatu", "2")
-    assert (item["street"], item["housenumber"]) == ("Wetterhoffinkatu", "2")
-
-
-def test_postcode_in_unit_dropped():
-    spider = make_spider()
-    assert spider._resolve_number_tail("03100 Nummela") is None
-
-
-def test_dup_number_folded():
-    item = addressed(make_spider(), "Painiityntie", "21 ja 21")
-    assert (item["street"], item["housenumber"]) == ("Painiityntie", "21")
-
-
-def test_premise_unit_split():
-    item = addressed(make_spider(), "Leonkatu", "4 Liiketila 3B-120")
-    assert (item["street"], item["housenumber"]) == ("Leonkatu", "4")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "Liiketila 3B-120"
-
-
-def test_bare_letter_unit_rules():
-    spider = make_spider()
-    item = addressed(spider, "Katu", "1, B")
-    assert (item["street"], item["housenumber"]) == ("Katu", "1")
-    assert item["extras"]["addr:unit"] == "B"
-    # Folded duplication ("2B, B" feeds both paths): the unit drops.
-    item = addressed(spider, "Laivalahdenkatu", "2B, B")
-    assert (item["street"], item["housenumber"]) == ("Laivalahdenkatu", "2b")
-    assert "street_address" not in item
-    assert "addr:unit" not in item["extras"]
-
-
-def test_swedish_floor_parsed():
-    spider = make_spider()
-    assert spider._resolve_number_tail("2 vån") is None
-    item = addressed(spider, "Katu", "1, 2 vån")
-    assert (item["street"], item["housenumber"]) == ("Katu", "1")
-    assert item["extras"]["addr:floor"] == "2"
-
-
-def test_paren_floor_parsed():
-    # 7 A (3. kerros), including the word-form 7 A (kolmas kerros).
-    for number, expected in (("7 A (3. kerros)", "3"), ("7 A (kolmas kerros)", "3")):
-        item = addressed(make_spider(), "Tie", number)
-        assert (item["street"], item["housenumber"]) == ("Tie", "7"), number
-        assert item["extras"]["addr:unit"] == "A", number
-        assert item["extras"]["addr:floor"] == expected, number
-        assert "level" not in item["extras"]
-
-
-def test_word_ordinal_floor_parsed():
-    # 4 a, toinen. krs shape (live feed row).
-    item = addressed(make_spider(), "Katu", "4 a, toinen. krs")
-    assert item["extras"]["addr:floor"] == "2"
-    assert "level" not in item["extras"]
-
-
-def test_multi_floor_list_dropped():
-    # 5, 3. ja 4. krs: ambiguous across floors, no addr:floor.
-    item = addressed(make_spider(), "Tie", "5, 3. ja 4. krs")
-    assert (item["street"], item["housenumber"]) == ("Tie", "5")
-    assert "addr:floor" not in item["extras"]
-
-
-def test_ordinal_street_name_not_floor():
-    # Toinen linja is a street, never a floor: markers are required.
-    item = addressed(make_spider(), "Toinen linja", "")
-    assert "addr:floor" not in item["extras"]
-
-
-def test_ordinal_street_with_real_floor():
-    # Viides linja 9, 2. krs: the street ordinal is not a floor, the
-    # marker-anchored 2 is.
-    item = addressed(make_spider(), "Viides linja", "9, 2. krs")
-    assert (item["street"], item["housenumber"]) == ("Viides linja", "9")
-    assert item["extras"]["addr:floor"] == "2"
-
-
-def test_street_level_note_dropped():
-    # 13, katutaso: ambiguous numbering, stays dropped, never level.
-    item = addressed(make_spider(), "Katu", "13, katutaso")
-    assert (item["street"], item["housenumber"]) == ("Katu", "13")
-    assert "addr:floor" not in item["extras"]
-    assert "level" not in item["extras"]
-
-
-def test_centralized_service_kept_whole():
-    # Opiskeluterveydenhuolto, keskitetty palvelu Espoo ja Kauniainen:
-    # coverage descriptors are not venues; the signed form stays whole.
-    signed = "Opiskeluterveydenhuolto, keskitetty palvelu Espoo ja Kauniainen"
-    assert split(make_spider(), signed) == (signed, None, None)
-
-
-def test_source_links_suomi_fi_service_point():
-    # Every channel carries its stable Suomi.fi service-point page.
-    item = parsed(make_spider(), channel("Vojakkalan uimapaikka, Kaartjärvi"))
-    assert item["extras"]["source"] == (
-        "https://www.suomi.fi/palvelut/palvelupiste/11111111-1111-4111-8111-111111111111"
-    )
-
-
-def test_check_date_from_modified():
-    # The Suomi.fi "Päivitetty" date rides along as check_date.
-    ch = channel("Vojakkalan uimapaikka, Kaartjärvi")
-    ch["modified"] = "2026-10-08T08:00:00.000000"
-    assert parsed(make_spider(), ch)["extras"]["check_date"] == "2026-10-08"
-
-
-# ---- Review round 8: categories ----------------------------------------------
-
-
-def test_rescue_station_rows():
-    spider = make_spider()
-    assert cat(spider, "Mellunkylän pelastusasema")[0] == Categories.FIRE_STATION
-    assert cat(spider, "Kiviniemen VPK")[0] == Categories.FIRE_STATION
-    assert cat(spider, "Savitaipaleen liikuntatalo")[0] == Categories.LEISURE_SPORTS_CENTRE
-
-
-def test_sport_facility_outranks_hall():
-    spider = make_spider()
-    category, extra = cat(spider, "Katajanokan liikuntahalli / Yhden korin koripallokenttä")
-    assert category == Categories.LEISURE_PITCH
-    assert extra["sport"] == "basketball"
-    assert cat(spider, "Koripallohalli")[1]["sport"] == "basketball"
-
-
-def test_waste_and_desk_rows():
-    spider = make_spider()
-    assert cat(spider, "Korvenmäen jätekeskus")[0] == Categories.RECYCLING
-    assert cat(spider, "Kempeleen vaarallisen jätteen vastaanotto")[0] == Categories.RECYCLING
-    assert cat(spider, "Mänttä-Vilppulan lapsiperheiden sosiaalipalvelujen vastaanotot")[0] == (
-        Categories.OFFICE_GOVERNMENT
-    )
-    assert cat(spider, "Pirkanmaan oikeusaputoimisto")[0] == Categories.OFFICE_LAWYER
-    assert cat(spider, "Haapajärven päihdepalvelujen toimipiste")[0] == Categories.CLINIC
-    assert cat(spider, "Museoiden toimisto")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Teerijärven hyvinvointiasema, fysioterapia")[1] == {"healthcare": "physiotherapist"}
-
-
-def test_host_facility_reorders():
-    spider = make_spider()
-    assert cat(spider, "Korkeasaaren eläintarhan lipunmyynti")[1] == {"shop": "tickets"}
-    assert cat(spider, "Topeliuksen puiston yleisövessa")[0] == Categories.TOILETS
-    assert cat(spider, "Maaseutupalvelut, Rovaniemen toimipiste")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Eläintarhan huvila")[0] is None
-    assert cat(spider, "Linnavuoren palvelukodit")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Perhepäivähoitaja Tiia Ruotsalainen")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Agricolanpuistikon koirakäymälä")[1] == {"amenity": "dog_toilet"}
-    assert cat(spider, "Kämärin jääurheilukeskus")[0] == Categories.LEISURE_SPORTS_CENTRE
-    assert cat(spider, "Kädentaitopaja")[1] == {"social_facility": "workshop"}
-    assert cat(spider, "Jokiuomanpuiston kuntoilupaikka")[0] == Categories.LEISURE_FITNESS_STATION
-    assert cat(spider, "Kliininen neurofysiologia, Porvoon sairaala")[0] == Categories.CLINIC
-    assert cat(spider, "Karhuvuoren seurakuntakoti")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Lahjanpuiston kerhohuone")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Kouluravintola, Pukinmäenkaaren peruskoulu")[0] == Categories.CANTEEN
-
-
-def test_sport_and_clinic_specials():
-    spider = make_spider()
-    assert cat(spider, "Saarikenttä- pesäpallostadion")[1] == {"sport": "pesapallo"}
-    assert cat(spider, "Pisanpuiston petanque-kenttä")[1] == {"sport": "petanque"}
-    assert cat(spider, "Rikosuhripäivystyksen Keski-Pohjanmaan palvelupiste")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Yläjärven talousneuvola")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Hyrynsalmen muistineuvola") == (Categories.CLINIC, None)
-    assert cat(spider, "Lentotulli")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Kiskon äitiys- ja lastenneuvola")[1] == {"healthcare:speciality": "maternal_and_child_health"}
-
-
-def test_shore_facility_bail():
-    spider = make_spider()
-    assert cat(spider, "Lauttasaaren uimaranta / Beachvolleykenttä")[1] == {"sport": "beachvolleyball"}
-    assert cat(spider, "Päiväkoti Ankkalampi Duckies, Herttoniemenranta")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Kotihoito Lappeenranta Läntinen")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Saunalahden venesatama")[0] == Categories.MARINA
-    # Utility-building tails never pose as the POI: the venue head types it.
-    assert cat(spider, "Munkkiniemen uimaranta / Huoltorakennus")[0] == Categories.NATURAL_BEACH
-
-
-def test_phone_normalization():
-    spider = make_spider()
-    assert spider._normalize_phone("094711") == "+358 9 4711"
-    assert spider._normalize_phone("0206156605") == "+358 206156605"
-    assert spider._normalize_phone("+358 0503273734") == "+358 50 3273734"
-    assert spider._normalize_phone("+358 358447851490") == "+358 44 7851490"
-    assert spider._normalize_phone("+358 49460076255") is None
-    assert spider._normalize_phone("116006") == "116006"
-
-
-def test_partnership_and_acronym_operators():
-    spider = make_spider()
-    assert spider._is_private_org("Teatterikoulu ILMI Ö.") is True
-    assert spider._is_private_org("Rikosuhripäivystys - RIKU") is True
-    assert spider._is_private_org("Eerikinkatu 1") is False
-
-
-# ---- Review round 8: names ----------------------------------------------------
-
-
-def test_slash_street_head_drops():
-    spider = make_spider()
-    name, located, official = split(spider, "Kurkisuontie 2 / Hiekkakenttä")
-    assert name == "Hiekkakenttä"
-    assert located is None
-    assert official == "Kurkisuontie 2 / Hiekkakenttä"
-    assert split(spider, "Kenttäpolku/Kouluravintola")[0] == "Kouluravintola"
-
-
-def test_slash_numbered_building_qualifies():
-    name, located, official = split(make_spider(), "Eläintarhan urheilukenttä / Huoltorakennus 4")
-    assert name == "Eläintarhan urheilukenttä"
-    assert located is None
-    assert official == "Eläintarhan urheilukenttä / Huoltorakennus 4"
-
-
-def test_slash_self_named_kept():
-    signed = "Linnunlauluntien ulkokuntosali / Ulkokuntosali"
-    assert split(make_spider(), signed) == (signed, None, None)
-
-
-def test_slash_venue_needs_evidence():
-    assert split(make_spider(), "Aamulla / Vasikat") == ("Aamulla / Vasikat", None, None)
-
-
-def test_slash_service_proper_names_service():
-    name, located, official = split(make_spider(), "Iltapäivätoiminta / Leikkipuisto Nurkka")
-    assert name == "Iltapäivätoiminta"
-    assert located == "Leikkipuisto Nurkka"
-    assert official == "Iltapäivätoiminta / Leikkipuisto Nurkka"
-
-
-def test_comma_room_names_facility():
-    name, located, _ = split(make_spider(), "Vaajakummun koulu, luistelukenttä")
-    assert name == "luistelukenttä"
-    assert located == "Vaajakummun koulu"
-
-
-def test_comma_street_tail_drops():
-    name, located, official = split(make_spider(), "Kouluravintola, Pukinmäenkaaren peruskoulu, Kenttäpolku")
-    assert name == "Kouluravintola, Pukinmäenkaaren peruskoulu"
-    assert located is None
-    assert official == "Kouluravintola, Pukinmäenkaaren peruskoulu, Kenttäpolku"
-
-
-def test_paren_village_kept_with_city():
-    name, located, official = split(make_spider(), "Juhananpuiston leikkipaikka (Idänpää)", "Hämeenlinna")
-    assert (name, located, official) == ("Juhananpuiston leikkipaikka (Idänpää)", None, None)
-
-
-def test_paren_status_notes_strip():
-    spider = make_spider()
-    assert split(spider, "Päiväkoti Peukalopotti (lakkautettu)")[0] == "Päiväkoti Peukalopotti"
-    assert split(spider, "Virkkalan päiväkoti (väistö)")[0] == "Virkkalan päiväkoti"
-    assert split(spider, "Hanhikosken ryhmäperhepäivähoito (toiminta loppunut 31.7.2024)")[0] == (
-        "Hanhikosken ryhmäperhepäivähoito"
-    )
-
-
-def test_mm_coverage_drops():
-    name, located, official = split(make_spider(), "Lastensuojelun jälkihuolto, mm. Iisalmi, Keitele")
-    assert name == "Lastensuojelun jälkihuolto"
-    assert located is None
-    assert official == "Lastensuojelun jälkihuolto, mm. Iisalmi, Keitele"
-
-
-def test_dash_org_kept():
-    signed = "Luoteis-Savon Maaseutupalvelut - Kiuruveden maataloustoimisto"
-    assert split(make_spider(), signed) == (signed, None, None)
-
-
-def test_city_dash_prefix_dropped():
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
-    spider._apply_naming(
-        item,
-        {"fi": "Jämsä – päivätoimintaa kuntoutujille"},
-        "Jämsä – päivätoimintaa kuntoutujille",
-        "Jämsä",
-    )
-    assert item["name"] == "Päivätoimintaa kuntoutujille"
-    assert item["extras"]["official_name"] == "Jämsä – päivätoimintaa kuntoutujille"
-
-
-def test_comma_facility_venue():
-    name, located, official = split(make_spider(), "Kahluuallas, Leikkipuisto Traktori")
-    assert name == "Kahluuallas"
-    assert located == "Leikkipuisto Traktori"
-    assert official == "Kahluuallas, Leikkipuisto Traktori"
-
-
-def test_comma_area_unit_kept():
-    spider = make_spider()
-    assert split(spider, "Puheterapia, Tikkurilan alue", "Vantaa") == (
-        "Puheterapia, Tikkurilan alue",
-        None,
-        None,
-    )
-    assert split(spider, "Fysioterapia, Himangan yksikkö", "Kalajoki") == (
-        "Fysioterapia, Himangan yksikkö",
-        None,
-        None,
-    )
-
-
-def test_ajanvaraus_stem_strips():
-    name, located, official = split(
-        make_spider(), "Ylivieskan oikeusaputoimisto, Haapaveden toimipaikka (vain ajanvarauksella)"
-    )
-    assert name == "Ylivieskan oikeusaputoimisto, Haapaveden toimipaikka"
-    assert located is None
-    assert official == "Ylivieskan oikeusaputoimisto, Haapaveden toimipaikka (vain ajanvarauksella)"
-
-
-# ---- Service/ontology rescue --------------------------------------------------
-
-
-def test_rescue_service_types_opaque():
-    # Maya (opaque proper name) via its linked service name.
-    ch = channel("Maya")
-    ch["services"] = [{"service": {"name": "Maya tukiasunto Pietarsaaressa"}}]
-    item = parsed(make_spider(), ch)
-    assert item["extras"]["social_facility"] == "assisted_living"
-
-
-def test_rescue_ontology_types_opaque():
-    # Admin-shaped services fall through to the YSO ontology terms.
-    ch = channel("Maya")
-    ch["services"] = [{"service": {"name": "Liikunnan ja urheilun tulosyksikkö"}}]
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "päiväkotihoito"}]}]
-    item = parsed(make_spider(), ch)
-    assert item.get_tag("amenity") == "kindergarten"
-
-
-def test_rescue_service_extras():
-    # Placement-only rescue carries tags without a POI category.
-    ch = channel("Maya")
-    ch["services"] = [{"service": {"name": "Eläintarhan myymälä"}}]
-    item = parsed(make_spider(), ch)
-    assert item["extras"]["shop"] == "yes"
-
-
-def test_rescue_art_from_any_language():
-    # Eino Leino documents public art outside Finnish; rescue reads all.
-    ch = channel("Eino Leino")
-    ch["serviceChannelDescriptions"] = [
-        {"language": "fi", "value": "Eino Leino julkista taidetta."},
-        {"language": "en", "value": "Eino Leino is a work of public art."},
-    ]
-    assert parsed(make_spider(), ch).get_tag("tourism") == "artwork"
-
-
-def test_rescue_skips_generic_admin_labels():
-    # "Varhaiskasvatus" files as an office, so it must not shadow the
-    # specific ontology behind it ("päiväkotihoito" → kindergarten).
-    # Covers Lastentalo Kuusipiha and Satukontti (c4926d69).
-    for name in ("Lastentalo Kuusipiha", "Satukontti"):
-        ch = channel(name)
-        ch["services"] = [{"service": {"name": "Varhaiskasvatus"}}]
-        ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "päiväkotihoito"}]}]
-        assert parsed(make_spider(), ch).get_tag("amenity") == "kindergarten", name
-
-
-def test_maaseutupalvelut_is_office():
-    # Mid-compound tupa ("maaseuTUPAlvelut") must not file community.
-    assert cat(make_spider(), "Maaseutupalvelut")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_comma_water_venue_split():
-    # Lakes and waters name venues ("Vojakkalan uimapaikka, Kaartjärvi").
-    name, located, official = split(make_spider(), "Vojakkalan uimapaikka, Kaartjärvi")
-    assert name == "Vojakkalan uimapaikka"
-    assert located == "Kaartjärvi"
-    assert official == "Vojakkalan uimapaikka, Kaartjärvi"
-
-
-def test_veneranta_is_marina():
-    spider = make_spider()
-    assert cat(spider, "Loppijärvi, Kuljun veneranta")[0] == Categories.MARINA
-    assert cat(spider, "Halsuan keskustan uimaranta ja veneranta")[0] == Categories.MARINA
-    assert cat(spider, "Veneranta, Leppävesi")[0] == Categories.MARINA
-    # Named facilities at the shore still file as themselves.
-    assert cat(spider, "Munkkiniemen uimaranta")[0] == Categories.NATURAL_BEACH
-
-
-def test_camp_centre_is_camp_site():
-    # Näätähiekan leirikeskus: camp centres are unambiguous.
-    assert cat(make_spider(), "Näätähiekan leirikeskus")[0] == Categories.TOURISM_CAMP_SITE
-
-
-def test_boat_launch_ramp_is_slipway():
-    # Ipo-Kiusalan veneenlaskupaikka: boat launch ramps are unambiguous.
-    assert cat(make_spider(), "Ipo-Kiusalan veneenlaskupaikka")[0] == Categories.LEISURE_SLIPWAY
-
-
-def test_court_and_concert_rows():
-    spider = make_spider()
-    assert cat(spider, "Hovioikeus")[0] == Categories.COURTHOUSE
-    assert cat(spider, "Konserttitalo")[0] == Categories.EVENTS_VENUE
-
-
-def test_hobby_premises_are_community():
-    # Maskutalo (4fac6e98) via its Harrastetilat service.
-    assert cat(make_spider(), "Harrastetilat")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_graffiti_wall_is_artwork():
-    spider = make_spider()
-    assert cat(spider, "Lausteen taidekontti")[0] == Categories.TOURISM_ARTWORK
-    assert cat(spider, "Taidekontit ja graffitiseinä")[1] == {"artwork_type": "graffiti"}
-
-
-def test_aid_distribution_is_social():
-    assert cat(make_spider(), "Naulakko - vaate- ja tavara-apu")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_memory_clinic_is_clinic():
-    # Muistikeskus (0ea339f6): memory clinics are health care.
-    assert cat(make_spider(), "Raision Muistikeskus")[0] == Categories.CLINIC
-
-
-def test_4h_clubs_are_community():
-    spider = make_spider()
-    assert cat(spider, "Itätuulen 4H-kerho")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "4H-kerho")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_peer_support_groups_are_community():
-    spider = make_spider()
-    assert cat(spider, "Omaistaan hoitavien vertaisryhmät")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Vertaistukiryhmä syöpään sairastuneille")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Imatran Sydänkerho")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Sydänosasto")[0] == Categories.CLINIC
-    # Child-welfare framing keeps its existing filing.
-    assert cat(spider, "Lastensuojelun ja perhesosiaalityön vertaisryhmätoiminta")[0] == (Categories.SOCIAL_FACILITY)
-
-
-def test_senior_clubs_are_social():
-    spider = make_spider()
-    assert cat(spider, "Suomenkielinen seniorikerho")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Seniorikerho")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_found_animals_are_shelters():
-    spider = make_spider()
-    assert cat(spider, "Löytöeläimet Eura")[1] == {"amenity": "animal_shelter"}
-    assert cat(spider, "Porin löytökissat")[1] == {"amenity": "animal_shelter"}
-
-
-def test_patient_ombudsman_is_office():
-    spider = make_spider()
-    assert cat(spider, "Potilasasiavastaava")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Potilasasiamiehen asiointipaikka, Forssan sairaala")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_food_aid_is_social():
-    spider = make_spider()
-    assert cat(spider, "Ruoka-apua (leipää)")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Ruokajako")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_service_housing_is_nursing():
-    # Ympärivuorokautinen palveluasuminen (8752969f): 24h service housing.
-    spider = make_spider()
-    assert cat(spider, "Ympärivuorokautinen palveluasuminen")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Koskelan palveluasumisyksikkö")[0] == Categories.NURSING_HOME
-
-
-def test_housing_services_are_social():
-    spider = make_spider()
-    assert cat(spider, "Asumispalvelut kehitysvammaisille lapsille")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Kauklahden asumispalvelut")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Asumispalveluyksikkö Virrankoti")[1] == {"social_facility": "group_home"}
-
-
-def test_event_venues_need_venue_nouns():
-    spider = make_spider()
-    assert cat(spider, "Tapahtumatalo")[0] == Categories.EVENTS_VENUE
-    assert cat(spider, "Tapahtuma-alue")[0] == Categories.EVENTS_VENUE
-    assert cat(spider, "Tapahtumalava")[0] == Categories.EVENTS_VENUE
-    assert cat(spider, "Tapahtumayksikkö")[0] is None
-    assert cat(spider, "Jäsentapahtumat ja luennot")[0] is None
-
-
-def test_admin_units_are_offices():
-    spider = make_spider()
-    assert cat(spider, "Perusopetus")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Henkilöstöosasto")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Joroisten kunnan elinkeinotoimi")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Vihdin kunnan kulttuuri- ja vapaa-aika")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Maankäyttö- ja asumispalvelut")[0] == Categories.OFFICE_GOVERNMENT
-    # Digiopastus is an activity, never a desk (26 rows at libraries).
-    assert cat(spider, "Joen Severin digiopastus")[0] is None
-
-
-def test_adessive_hosts_split_and_generic():
-    spider = make_spider()
-    name, located, official = named(
-        spider, "Digiopastusta ikäihmisille Tesoman kirjastossa -palvelun järjestämispaikka"
-    )
-    assert name == "Digiopastusta ikäihmisille"
-    assert located == "Tesoman kirjasto"
-    assert cat(spider, "Joen Severin digiopastus Karsikon kirjastolla")[0] is None
-    name, located, official = split(spider, "Vertaistukea Parkinsonia sairastavalle, K-U:lla")
-    assert name == "Vertaistukea Parkinsonia sairastavalle"
-    assert located is None
-
-
-def test_association_houses_are_community():
-    assert cat(make_spider(), "Pohjanmaan Yhdistykset ry")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_ward_units_are_clinics():
-    spider = make_spider()
-    assert cat(spider, "Leikkaus ja anestesia")[0] == Categories.CLINIC
-    assert cat(spider, "Leikkaushoitokeskus")[0] == Categories.CLINIC
-    assert cat(spider, "Sisätaudit")[0] == Categories.CLINIC
-    assert cat(spider, "Silmätautien hoito")[0] == Categories.CLINIC
-    assert cat(spider, "Syöpätaudit ja sädehoito")[0] == Categories.CLINIC
-    assert cat(spider, "Syöpätautien ja verisairauksien sairaansijat")[0] == Categories.CLINIC
-    assert cat(spider, "Munuaisyksikkö")[0] == Categories.CLINIC
-    assert cat(spider, "Tähystys")[0] == Categories.CLINIC
-    assert cat(spider, "Dialyysi- ja munuaisyksikkö")[0] == Categories.CLINIC
-    assert cat(spider, "Neulanvaihtopiste")[0] == Categories.CLINIC
-    assert cat(spider, "Tartuntataudit")[0] == Categories.CLINIC
-
-
-def test_daycare_plurals_rescue():
-    # Kauklahden Ankkalampi-Duckies (2b14fde0): päiväkodit gradation.
-    assert cat(make_spider(), "Espoon keskuksen yksityisen hoidon tuen päiväkodit")[0] == (Categories.KINDERGARTEN)
-
-
-def test_harbour_berths_are_marinas():
-    assert cat(make_spider(), "Tuomalan rannan venepaikat")[0] == Categories.MARINA
-
-
-def test_emergency_housing_is_shelter():
-    assert cat(make_spider(), "Hätämajoitusyksikkö Viisikko")[0] == Categories.SHELTER
-
-
-def test_meeting_centres_are_social():
-    # All 9 neuvottelukeskus rows are family-affairs desks.
-    assert cat(make_spider(), "Perheasiain neuvottelukeskus")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_company_names_are_company_offices():
-    spider = make_spider()
-    assert cat(spider, "Imatran Seudun Kehitysyhtiö Oy")[0] == Categories.OFFICE_COMPANY
-    assert cat(spider, "Ylämyllyn yritystalot")[0] == Categories.OFFICE_COMPANY
-    assert cat(spider, "Kiinteistö Oy Keskiväli")[0] == Categories.OFFICE_COMPANY
-
-
-def test_wellbeing_and_range_rows():
-    spider = make_spider()
-    assert cat(spider, "Terveys- ja hyvinvointikeskus")[0] == Categories.CLINIC
-    assert cat(spider, "Ampumarata")[1] == {"leisure": "shooting_ground", "sport": "shooting"}
-    assert cat(spider, "Ampumaradat")[1] == {"leisure": "shooting_ground", "sport": "shooting"}
-    assert cat(spider, "Kurkvuoren moottoriurheilualue")[0] == Categories.LEISURE_PITCH
-    assert cat(spider, "Kurkvuoren moottoriurheilualue")[1] == {"sport": "motor"}
-
-
-def test_day_centres_and_brigades():
-    spider = make_spider()
-    assert cat(spider, "Lohjan päiväaikainen toiminta")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Hervannan vapaa-aikakeskus")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Kakskerran Sopimuspalokunta")[0] == Categories.FIRE_STATION
-
-
-def test_islands_are_islands():
-    spider = make_spider()
-    assert cat(spider, "Villaluodot Läntinen saari")[1] == {"place": "island"}
-    assert cat(spider, "Saarentie 5")[0] is None
-    assert cat(spider, "Koivuhaan arboretum")[1] == {"leisure": "botanical_garden"}
-
-
-def test_audience_genitive_names_stay_whole():
-    # Kuntosali yhdistyksen jäsenille (96a7762e): audience, not operator.
-    spider = make_spider()
-    assert spider._clean_name("Kuntosali yhdistyksen jäsenille -palvelun järjestämispaikka") == (
-        "Kuntosali yhdistyksen jäsenille"
-    )
-    item = parsed(spider, channel("Kuntosali yhdistyksen jäsenille -palvelun järjestämispaikka"))
-    assert item["name"] == "Kuntosali yhdistyksen jäsenille"
-    assert cat(spider, "Kuntosali yhdistyksen jäsenille")[0] == Categories.GYM
-
-
-def test_street_head_city_drops():
-    # Pyhämäntie, Janakkala, Vammaisten asumispalvelut (b27207e0).
-    name, located, official = split(make_spider(), "Pyhämäntie, Janakkala, Vammaisten asumispalvelut", "Janakkala")
-    assert name == "Vammaisten asumispalvelut"
-    assert located is None
-    assert official == "Pyhämäntie, Janakkala, Vammaisten asumispalvelut"
-
-
-def test_translation_suffix_is_not_bilingual():
-    # Språkcafé season qualifier (4dcbc7d6): suffix strips, rest stays whole.
-    signed = "Språkcafé på svenska i Ode bibliotek - Syksy 2026 -palvelun järjestämispaikka"
-    item = parsed(make_spider(), channel(signed))
-    assert item["name"] == "Språkcafé på svenska i Ode bibliotek - Syksy 2026"
-    assert item["extras"]["official_name"] == signed
-
-
-def test_copied_translations_skip():
-    # Steinergymnasiet (8006efd6): sv/en copies of the signed form drop.
-    signed = "Steinergymnasiet (Rudolf Steinerskolan i Helsingfors)"
-    item = parsed(make_spider(), channel(signed, sv=signed, en=signed))
-    assert item["name"] == "Steinergymnasiet"
-    assert "name:sv" not in item["extras"]
-    assert "name:en" not in item["extras"]
-
-
-def test_survey_offices_split_by_municipality():
-    spider = make_spider()
-    assert split(spider, "Maanmittauslaitos Oulu", "Oulu") == (
-        "Maanmittauslaitos",
-        None,
-        "Maanmittauslaitos Oulu",
-    )
-    # Ivalo is a village in Inari: the qualifier stays.
-    assert split(spider, "Maanmittauslaitos Ivalo", "Inari") == ("Maanmittauslaitos Ivalo", None, None)
-
-
-def test_trailing_pipe_strips():
-    # Vertaistukiryhmä pipe record (cb9faf25) after the Kokkola strip.
-    name, _, _ = split(make_spider(), "Vertaistukiryhmä | Uskontojen uhrien tuki Uut ry | Kokkola", "Kokkola")
-    assert name == "Vertaistukiryhmä | Uskontojen uhrien tuki Uut ry"
-
-
-def test_visitor_centres_inform():
-    # Saimaa Geopark visitor center (9b1b77ec).
-    for name in ("Saimaa Geopark visitor center", "Saimaa Geopark visitor centre"):
-        category, extra = cat(make_spider(), name)
-        assert category == Categories.TOURISM_INFORMATION
-        assert extra == {"information": "visitor_centre"}
-
-
-def test_dog_yards_are_dog_parks():
-    assert cat(make_spider(), "Koiratarha")[0] == Categories.LEISURE_DOG_PARK
-    assert cat(make_spider(), "Södra familjedagvårdsområden")[0] == Categories.KINDERGARTEN
-    assert cat(make_spider(), "Helsingin yhteislyseo")[0] == Categories.SCHOOL
-
-
-def test_premise_units_split():
-    # Kielotie 42 asunnot 1-4 (b8c6383d): lowercase premise words split too.
-    item = addressed(make_spider(), "Kielotie", "42 asunnot 1-4", postcode="01300", office="VANTAA")
-    assert item["street"] == "Kielotie"
-    assert item["housenumber"] == "42"
-    assert item["extras"].get("addr:unit") == "asunnot 1-4"
-
-
-def test_slash_venue_tails_name_poi():
-    spider = make_spider()
-    assert split(spider, "Hyvät Tuulet ry/MyöhäTuulen kohtaamispaikka") == (
-        "MyöhäTuulen kohtaamispaikka",
-        None,
-        "Hyvät Tuulet ry/MyöhäTuulen kohtaamispaikka",
-    )
-    assert split(spider, "Harjulan Setlementti ry/Kansalaisopisto") == (
-        "Kansalaisopisto",
-        None,
-        "Harjulan Setlementti ry/Kansalaisopisto",
-    )
-    assert split(spider, "Harjulan Setlementti ry/Liikuntapalvelut") == (
-        "Harjulan Setlementti ry",
-        None,
-        "Harjulan Setlementti ry/Liikuntapalvelut",
-    )
-    assert cat(spider, "Kansalaisopisto")[0] == Categories.COLLEGE
-
-
-def test_space_city_brands_and_activities():
-    spider = make_spider()
-    assert split(spider, "SavoGrow Pielavesi", "Pielavesi") == ("SavoGrow Pielavesi", None, None)
-    assert split(spider, "Avoin jumpparyhmä Kouvola", "Kouvola") == (
-        "Avoin jumpparyhmä",
-        None,
-        "Avoin jumpparyhmä Kouvola",
-    )
-
-
-def test_operator_tail_venues_drop():
-    # Löytöeläimet Eura (60cff49b): association tail is no venue.
-    item = parsed(make_spider(), channel("Löytöeläimet Eura, Säkylä ja Rauma / Eläinten hyväksi EHY ry"))
-    assert item["name"] == "Löytöeläimet Eura, Säkylä ja Rauma"
-    assert item.get("located_in") is None
-    assert item["extras"]["amenity"] == "animal_shelter"
-
-
-def test_paren_venue_lists_locate():
-    # Hansakallion units (7de02537): proper-name lists locate the POI.
-    signed = "Hansakallion ympärivuorokautinen asumispalvelu (Masto, Styyrpuuri,Vantti)"
-    item = parsed(make_spider(), channel(signed))
-    assert item["name"] == "Hansakallion ympärivuorokautinen asumispalvelu"
-    assert item["located_in"] == "Masto, Styyrpuuri, Vantti"
-    assert item["extras"]["official_name"] == signed
-
-
-def test_multi_venue_heads_keep_all():
-    # Riihikoti, Villava (a2fe8ab0): no venue is eaten as a city tail.
-    item = parsed(make_spider(), channel("Riihikoti, Villava, ikäihmisten asumispalvelut", office="RIIHIMÄKI"))
-    assert item["name"] == "Ikäihmisten asumispalvelut"
-    assert item["located_in"] == "Riihikoti, Villava"
-
-
-def test_service_descriptor_tails_drop():
-    # Teuvolan vammaisten asumispalvelut (4ac9bfce): services don't locate.
-    item = parsed(
-        make_spider(),
-        channel("Teuvolan vammaisten asumispalvelut, tilapäishoito ja loma-ajanhoito, Forssa", office="FORSSA"),
-    )
-    assert item["name"] == "Teuvolan vammaisten asumispalvelut"
-    assert item.get("located_in") is None
-
-
-def test_school_hosted_groups_locate():
-    # Lempeä selkäjooga-ryhmä (f46f7e7e): generic activity at its school.
-    item = parsed(make_spider(), channel("Lempeä selkäjooga-ryhmä, Veittijärven koulu -palvelun järjestämispaikka"))
-    assert item["name"] == "Lempeä selkäjooga-ryhmä"
-    assert item["located_in"] == "Veittijärven koulu"
-    assert item.get_tag("amenity") == "yes"
-
-
-def test_care_rescue_skips_activity_names():
-    # Nakkifiesta (601455b7): mental-health ontology describes purpose.
-    spider = make_spider()
-    ch = channel("Nakkifiesta")
-    ch["services"] = [{"service": {"name": "Nakkifiesta"}}]
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
-    assert parsed(spider, ch).get_tag("amenity") == "yes"
-
-
-def test_memorial_translations_rescue():
-    # Mortuis (980f0c61): sv/en memorial names type the opaque one.
-    spider = make_spider()
-    ch = channel("Mortuis")
-    ch["serviceChannelNames"] = [
-        {"language": "fi", "value": "Mortuis", "type": "Name"},
-        {"language": "sv", "value": "Mortius, minnesmärke över explosionen", "type": "Name"},
-        {"language": "en", "value": "Mortuis memorial", "type": "Name"},
-    ]
-    item = parsed(spider, ch)
-    assert item.get_tag("tourism") == "artwork"
-    assert "place" not in item["extras"]
-
-
-def test_competence_centre_rescues_social():
-    # Osaamiskeskus, Pietarsaari (dff872d6): no island tag on venues.
-    spider = make_spider()
-    ch = channel("Osaamiskeskus, Pietarsaari")
-    ch["services"] = [{"service": {"name": "Osaamiskeskus"}}]
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "kehitysvammaiset"}]}]
-    item = parsed(spider, ch)
-    assert item.get_tag("amenity") == "social_facility"
-    assert "place" not in item["extras"]
-
-
-def test_coordinate_tails_strip():
-    spider = make_spider()
-    assert spider._clean_name("Mustasaari, P 60° 10,343' ja I 24° 52,123'") == "Mustasaari"
-    assert spider._clean_name("Seurasaari, 60°10'52'N, 024°53'05'E") == "Seurasaari"
-
-
-def test_pobox_roads_drop():
-    # Tyks T-sairaala (db72a7ee): "PL 52" is no street.
-    item = Feature()
-    make_spider()._apply_address(
-        item,
-        {
-            "street": [{"language": "fi", "value": "Pl 52"}],
-            "streetNumber": "",
-            "postalCode": "20520",
-            "postOffice": [{"language": "fi", "value": "TURKU"}],
-        },
-        "20520",
-        "Turku",
-    )
-    assert item.get("street") is None
-    assert item.get("housenumber") is None
-    assert item["postcode"] == "20520"
-
-
-def test_postcode_units_drop():
-    # Varikko (413aecc1): the postcode is never a unit.
-    item = Feature()
-    make_spider()._apply_address(
-        item,
-        {
-            "street": [{"language": "fi", "value": "Varastotie 4"}],
-            "streetNumber": "67100",
-            "postalCode": "67100",
-            "postOffice": [{"language": "fi", "value": "KOKKOLA"}],
-        },
-        "67100",
-        "Kokkola",
-    )
-    assert item["street"] == "Varastotie"
-    assert item.get("extras", {}).get("addr:unit") is None
-
-
-def test_foundation_operators_are_private():
-    item = parsed(make_spider(), channel("Viherlaakson asumispalveluyksikkö", org="Mente säätiö sr"), "Mente säätiö sr")
-    assert item["extras"].get("operator:type") == "private"
-
-
-def test_operator_brand_suffixes():
-    spider = make_spider()
-    item = parsed(spider, channel("TestPlace"), "Pohjois-Karjalan hyvinvointialue – Siun sote")
-    assert item["operator"] == "Pohjois-Karjalan hyvinvointialue"
-    assert item["extras"].get("operator:type") is None
-    item = parsed(spider, channel("TestPlace"), "Brottsofferjouren - RIKU")
-    assert item["operator"] == "Brottsofferjouren"
-    assert item["extras"].get("operator:type") == "private"
-    item = parsed(spider, channel("TestPlace"), "FinFami - Uusimaa ry")
-    assert item["operator"] == "FinFami - Uusimaa ry"
-    assert item["extras"].get("operator:type") == "private"
-
-
-def test_hobby_and_culture_centres():
-    spider = make_spider()
-    assert cat(spider, "Hyvinvointi- ja harrastuskeskus")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Hervannan yhteisökeskus")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Kulttuuritila Näkkäri")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Rulla")[0] is None
-    assert cat(spider, "Lastenkulttuurikeskus")[0] == Categories.ARTS_CENTRE
-    assert cat(spider, "Taiteen perusopetus")[0] == Categories.ARTS_CENTRE
-    assert cat(spider, "Kuvataidekoulu")[0] == Categories.SCHOOL
-
-
-def test_city_housing_services_desk():
-    # Oriveden kaupungin asumispalvelut (af9ea7a6): municipal desks stay offices.
-    assert cat(make_spider(), "Oriveden kaupungin asumispalvelut")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_addiction_care_is_clinic():
-    spider = make_spider()
-    assert cat(spider, "Opioidiriippuvaisten korvaushoito")[0] == Categories.CLINIC
-    assert cat(spider, "Päihdevieroitus")[0] == Categories.CLINIC
-
-
-def test_psychiatric_hospitals_are_hospitals():
-    assert cat(make_spider(), "Kymenlaakson psykiatrinen sairaala")[0] == Categories.HOSPITAL
-
-
-def test_pool_halls_have_swimming():
-    category, extra = cat(make_spider(), "Uimahalli")
-    assert category == Categories.LEISURE_SPORTS_CENTRE
-    assert extra == {"sport": "swimming"}
-
-
-def test_reuse_stations_are_recycling():
-    assert cat(make_spider(), "Taavetin Hyödyksi-asema")[0] == Categories.RECYCLING
-
-
-def test_resident_premises_are_community():
-    assert cat(make_spider(), "Etappi yhteisötila")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_multipurpose_rooms_are_community():
-    assert cat(make_spider(), "Joutsenon kirjaston monitoimitila Olkkari")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_supported_housing_is_assisted():
-    assert cat(make_spider(), "Matinniitty tuettu asuminen")[0] == Categories.ASSISTED_LIVING
-
-
-def test_elderly_housing_carries_for_senior():
-    item = parsed(make_spider(), channel("Ikäihmisten asumispalvelut"))
-    assert item.get_tag("amenity") == "social_facility"
-    assert item["extras"].get("social_facility:for") == "senior"
-
-
-def test_climbing_spots():
-    category, extra = cat(make_spider(), "Seikkailutalon piha-alueen kiipeilypisteet")
-    assert category == Categories.LEISURE_PITCH
-    assert extra == {"sport": "climbing"}
-
-
-def test_island_markers():
-    spider = make_spider()
-    assert cat(spider, "Malkasaari (saari)")[1] == {"place": "island"}
-    assert cat(spider, "Kotiluoto (saari)")[1] == {"place": "island"}
-    assert cat(spider, "Tiirakari (saari)")[1] == {"place": "island"}
-
-
-def test_winter_swimmers():
-    spider = make_spider()
-    assert cat(spider, "Ourit (Talviuimarit)")[0] == Categories.LEISURE_SWIMMING_AREA
-    assert cat(spider, "Talviuimaranta")[0] == Categories.LEISURE_SWIMMING_AREA
-
-
-def test_youth_homes_are_group_homes():
-    spider = make_spider()
-    assert cat(spider, "Rovaniemen Etelärinteen lapsi- ja nuorisokoti")[1] == {"social_facility": "group_home"}
-    assert cat(spider, "Sonkajärven kotiseututalo")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_company_office_genitive():
-    assert cat(make_spider(), "Mikkelin Asumisoikeus Oy:n toimisto")[0] == Categories.OFFICE_COMPANY
-
-
-def test_venue_tails_keep_house():
-    # Pertunmaa-talo (57c60fa7): hyphenated house compounds stay whole.
-    item = parsed(make_spider(), channel("Pertunmaa-talo"))
-    assert item["name"] == "Pertunmaa-talo"
-
-
-def test_island_head_venues_split():
-    # Kaunissaari camping (9ddfc82f): facility names, island locates.
-    name, located, official = split(make_spider(), "Kaunissaari / Telttailu- ja leiriytymispaikka 2.")
-    assert name == "Telttailu- ja leiriytymispaikka 2."
-    assert located == "Kaunissaari"
-
-
-def test_operator_tail_names_operator():
-    # Imatra Bowling Center: tail company operates, located stays null.
-    item = parsed(
-        make_spider(),
-        channel("Imatra Bowling Center / Imatran keilahalli Oy"),
-        "Imatran kaupunki",
-    )
-    assert item["name"] == "Imatra Bowling Center"
-    assert item.get("located_in") is None
-    assert item["operator"] == "Imatran keilahalli Oy"
-    assert item["extras"].get("operator:type") == "private"
-
-
-def test_venue_head_with_city_tail_splits():
-    # Kivari, Riihimäki (70f3e324): proper venue heads resolve their city.
-    item = parsed(make_spider(), channel("Kivari, Riihimäki, Vammaisten asumispalvelut", office="RIIHIMÄKI"))
-    assert item["name"] == "Vammaisten asumispalvelut"
-    assert item["located_in"] == "Kivari"
-
-
-def test_compound_facility_slash_keeps_whole():
-    # Ikifit Keinupuisto/Hilpi (8a345091): facility compounds don't split.
-    item = parsed(
-        make_spider(),
-        channel(
-            "Ikifit Oy, hyvinvointikeskus Keinupuisto/Hilpi, Hämeenlinna, yhteisöllisen asumisen ostopalvelut",
-            office="HÄMEENLINNA",
-        ),
-    )
-    assert item["name"] == "Ikifit Oy, hyvinvointikeskus Keinupuisto/Hilpi"
-    assert item.get("located_in") is None
-
-
-def test_olka_desks_are_offices():
-    # OLKA-pisteiltä (d8fb52c1): desks, not association houses.
-    assert cat(make_spider(), "OLKA-pisteiltä tietoa yhdistysten toiminnasta")[0] == (Categories.OFFICE_GOVERNMENT)
-
-
-def test_youth_care_services_are_clinics():
-    spider = make_spider()
-    assert cat(spider, "Konneveden, Uuraisten ja Äänekosken nuorten mielenterveys- ja päihdetyön tiimi")[0] == (
-        Categories.CLINIC
-    )
-    assert cat(spider, "Nuorten päihdepalvelu Pysäkki")[0] == Categories.CLINIC
-    assert cat(spider, "Lasten ja nuorten mielenterveyspalvelut")[0] == Categories.CLINIC
-    assert cat(spider, "Nuorisoasema")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_police_desk_splits_to_service():
-    # Äänekosken poliisiasema, lupapalvelut: desk names, station locates.
-    spider = make_spider()
-    item = parsed(spider, channel("Äänekosken poliisiasema, lupapalvelut", office="ÄÄNEKOSKI"))
-    assert item["name"] == "Lupapalvelut"
-    assert item["located_in"] == "Äänekosken poliisiasema"
-    assert item.get_tag("office") == "government"
-    assert cat(spider, "Poliisiasema")[0] == Categories.POLICE
-
-
-def test_ward_names_cap_rescue_at_clinic():
-    # Raaseporin TK vuodeosasto (b43f874c): hospital ontology doesn't outrank the ward.
-    spider = make_spider()
-    ch = channel("Raaseporin TK vuodeosasto")
-    ch["services"] = [{"service": {"name": "Perustason osastohoito"}}]
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "sairaalat"}]}]
-    assert parsed(spider, ch).get_tag("amenity") == "clinic"
-
-
-def test_city_prefix_only_strips_services():
-    # Salo-Karinan neuvonta-asema: proper compounds stay whole.
-    item = parsed(make_spider(), channel("Salo-Karinan neuvonta-asema", office="SALO"))
-    assert item["name"] == "Salo-Karinan neuvonta-asema"
-    assert item.get_tag("office") == "government"
-
-
-def test_sorting_stations_are_recycling():
-    # LSJH Perniön lajitteluasema: no railway station.
-    spider = make_spider()
-    assert cat(spider, "Perniön lajitteluasema")[0] == Categories.RECYCLING
-    # Dagsmarkin lainausasema: lending station, not railway.
-    assert cat(spider, "Dagsmarkin lainausasema")[0] == Categories.LIBRARY
-    assert cat(spider, "Lentoaseman rautatieasema")[1] == {"railway": "station", "public_transport": "station"}
-
-
-def test_sheep_pens_are_attractions():
-    assert cat(make_spider(), "Koivuhaan lammasaitaus")[0] == Categories.TOURISM_ATTRACTION
-
-
-def test_mediation_service_name_kept():
-    # Rikos -ja riita-asioiden sovittelua: suffix strips, remainder stays.
-    signed = "Rikos -ja riita-asioiden sovittelua -palvelun järjestämispaikka"
-    item = parsed(make_spider(), channel(signed))
-    assert item["name"] == "Rikos -ja riita-asioiden sovittelua"
-    assert item["extras"]["official_name"] == signed
-    assert cat(make_spider(), "Elinkeinopalvelut")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_screenings_and_exam_units_are_clinics():
-    spider = make_spider()
-    assert cat(spider, "Kohdunkaulan syövän seulonta")[0] == Categories.CLINIC
-    assert cat(spider, "Sikiöseulonnat")[0] == Categories.CLINIC
-    assert cat(spider, "Sikiötutkimusyksikkö")[0] == Categories.CLINIC
-    assert cat(spider, "Tutkimusyksiköt, toimipisteet")[0] == Categories.CLINIC
-    # Screening hosted by a hospital files as the screening unit.
-    assert cat(spider, "Rintasyöpäseulonta Oulun yliopistollisessa sairaalassa")[0] == Categories.CLINIC
-
-
-def test_rehab_guidance_is_social():
-    spider = make_spider()
-    assert cat(spider, "Kuntoutusohjaus- ja asiantuntijapalvelut")[0] == Categories.SOCIAL_FACILITY
-    # Kolpeneen tuki- ja osaamiskeskus (9e7d7841) rescues via its service.
-    ch = channel("Kolpeneen tuki- ja osaamiskeskus")
-    ch["services"] = [{"service": {"name": "Kuntoutusohjaus- ja asiantuntijapalvelut"}}]
-    assert parsed(spider, ch).get_tag("amenity") == "social_facility"
-
-
-def test_disability_services_are_social():
-    # OYS Konsti (45f088c7) rescues via Vaativat kehitysvammapalvelut.
-    spider = make_spider()
-    assert cat(spider, "Vaativat kehitysvammapalvelut")[0] == Categories.SOCIAL_FACILITY
-    ch = channel("OYS Konsti")
-    ch["services"] = [{"service": {"name": "Vaativat kehitysvammapalvelut"}}]
-    assert parsed(spider, ch).get_tag("amenity") == "social_facility"
-
-
-def test_service_desks_rescue_offices():
-    # Pirtin Kohtaamo (4ed0941b): opaque name, desk-shaped services.
-    spider = make_spider()
-    ch = channel("Pirtin Kohtaamo")
-    ch["services"] = [
-        {"service": {"name": "Kunnan viralliset ilmoitukset"}},
-        {"service": {"name": "Asiakaspalvelu"}},
-        {"service": {"name": "Kelan asiointipiste Pudasjärvellä"}},
-    ]
-    assert parsed(spider, ch).get_tag("office") == "government"
-
-
-def test_place_description_beats_desk_label():
-    # A care home with a customer-service desk still files by place
-    # (assisted_living renders as amenity=social_facility).
-    from locations.items import Feature
-
-    spider = make_spider()
-    ch = channel("Maya", descriptions=[{"language": "fi", "value": "Ikääntyvien asumispalveluyksikkö"}])
-    ch["services"] = [{"service": {"name": "Asiakaspalvelu"}}]
-    assert spider._resolve_fallback_category(Feature(), ch) == Categories.ASSISTED_LIVING
-
-
-def test_event_houses_are_venues():
-    assert cat(make_spider(), "Tapahtumatalo")[0] == Categories.EVENTS_VENUE
-
-
-def test_camp_areas_are_camp_sites():
-    spider = make_spider()
-    assert cat(spider, "Lankarin leirikeskuksen pururata")[0] == Categories.TOURISM_CAMP_SITE
-    # Table-level only: the exact pururata name never emits, the track gate
-    # drops fitness trails before categorising.
-    assert spider._is_dropped_name(spider._clean_name("Lankarin leirikeskuksen pururata")) == "non_place/track"
-    assert cat(spider, "Vuolahden leirialue")[0] == Categories.TOURISM_CAMP_SITE
-    assert cat(spider, "Rastilan leirintäalue")[0] == Categories.TOURISM_CAMP_SITE
-    # Island tent sites camp, whatever the sports-catalogue ontology says.
-    assert cat(spider, "Gåsgrund / Telttailupaikka")[0] == Categories.TOURISM_CAMP_SITE
-    assert cat(spider, "Telttailu- ja leiriytymispaikka 1")[0] == Categories.TOURISM_CAMP_SITE
-
-
-def test_group_institutions_file_via_table():
-    # The group IS the institution: facility prefixes fall through to the
-    # table instead of neutralizing ("Päiväkotiryhmä Vekkula" e3f931ae,
-    # "Alhaisten koulun esiopetusryhmä" b8106b2f).
-    spider = make_spider()
-    assert cat(spider, "Päiväkotiryhmä Vekkula")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Alhaisten koulun esiopetusryhmä")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Iltapäivätoiminta / Aurinkolahden peruskoulu")[0] == Categories.COMMUNITY_CENTRE
-    # Desk nouns outside the group token file the desk; bare group numbers
-    # leave the venue filing alone.
-    assert cat(spider, "Vauvaperheryhmä Untuva toimipiste")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Kuntosali, ryhmä 1")[0] == Categories.GYM
-    # Size-qualified groups keep the institution filing; playgroup compounds
-    # are kindergartens; orchestras are venues, never activities.
-    assert (
-        cat(spider, "Kuparivuoren aamu- ja iltapäivätoiminta sekä iltapäivätoiminnan pienryhmä")[0]
-        == Categories.COMMUNITY_CENTRE
-    )
-    assert cat(spider, "Urheiluleikkikerho Kanervat")[0] == Categories.KINDERGARTEN
-    assert not spider._is_group_activity("helsingin kaupunginorkesteri")
-    assert cat(spider, "Kämmenniemen päiväkoti Terälahden lisäryhmä")[0] == Categories.KINDERGARTEN
-
-
-def test_group_activities_stay_generic():
-    # Activity groups never rescue: caregiver gym groups, peer-club venues
-    # and catalogue-ontology clinics all stay generic (c3a2b4be, 063b81c1,
-    # b345c467, ac79c8fe).
-    spider = make_spider()
-    assert cat(spider, "Sastamala omatoiminen kuntosaliryhmä omaishoitajille") == (None, None)
-    assert cat(spider, "Laiturin Iloa ikäihmisille-ryhmä, Utra") == (None, None)
-    assert cat(spider, "Jyränkölön Setlementti Sireniussalin ystäväryhmä") == (None, None)
-    ch = channel("Laiturin Iloa ikäihmisille-ryhmä, Utra")
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
-    assert spider._rescue_service(ch) is None
-    ch = channel("Sastamala omatoiminen kuntosaliryhmä omaishoitajille")
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
-    assert spider._rescue_service(ch) is None
-
-
-def test_placement_extras_never_rescue():
-    # Catalogue placement tags cannot type opaque channels: sled hills stay
-    # generic (b465c72b), concert halls stay generic, town halls file office
-    # via the name (b93dd463). Real venue services still rescue (motocross).
-    spider = make_spider()
-    ch = channel("Oittaan pulkkamäki")
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ampumaradat"}]}]
-    assert spider._rescue_service(ch) is None
-    ch = channel("Finlandia-talo")
-    ch["services"] = [{"service": {"name": "Lipunmyynti kulttuuri- ja taidetapahtumiin"}}]
-    assert spider._rescue_service(ch) is None
-    ch = channel("Raatihuone")
-    ch["services"] = [{"service": {"name": "Tori- ja katumyyntipaikkojen vuokraus"}}]
-    assert spider._rescue_service(ch) is None
-    assert cat(spider, "Raatihuone")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Raatihuone, raatihuonegalleria")[0] == Categories.ARTS_CENTRE
-    ch = channel("Motocross- ja enduroradat")
-    ch["services"] = [{"service": {"name": "Muukon moottori- ja ampumaurheilukeskus"}}]
-    assert spider._rescue_service(ch)[0] == Categories.LEISURE_SPORTS_CENTRE
-
-
-def test_description_psych_urgent_split():
-    # Psychiatric outpatient units are clinics (99ada63f), urgent-care desks
-    # are urgent clinics (a04ff748); plain care still files social.
-    from locations.items import Feature
-
-    spider = make_spider()
-    ch = channel(
-        "Tays Hallituskatu",
-        descriptions=[{"language": "fi", "value": "Tays Hallituskatu on psykiatrisen avohoidon toimipiste"}],
-    )
-    assert spider._resolve_fallback_category(Feature(), ch) == Categories.CLINIC
-    ch = channel(
-        "Päivystyksellinen kuulokojehuolto",
-        descriptions=[
-            {"language": "fi", "value": "Hoidamme päivystyksellisessä kuulokojehuollossa kiireelliset tapaukset"}
-        ],
-    )
-    assert spider._resolve_fallback_category(Feature(), ch) == Categories.CLINIC_URGENT
-
-
-def test_number_word_tokens_keep_first_house():
-    # Door/room words inside the number field ("15 ovi 28", "365 E as 5"):
-    # the first housenumber counts, the rest is the unit.
-    spider = make_spider()
-
-    def unit(item):
-        return (item.get("extras") or {}).get("addr:unit")
-
-    item = addressed(spider, "Örninkatu", "15 ovi 28")
-    assert item["housenumber"] == "15"
-    assert unit(item) == "ovi 28"
-    item = addressed(spider, "Kummelivuorentie", "2 ja 4")
-    assert item["housenumber"] == "2"
-    assert unit(item) == "4"
-    item = addressed(spider, "Muurlantie", "365 E as 5")
-    assert item["housenumber"] == "365"
-    assert unit(item) == "E as 5"
-    item = addressed(spider, "Sampsantie", "17a (Metsolantie 18, Peller")
-    assert item["housenumber"] == "17a"
-    item = addressed(spider, "Päiväkodintie", "4 a 7-8")
-    assert item["housenumber"] == "4"
-    assert unit(item) == "a 7-8"
-    # Word-led cores on numbered roads keep the road number.
-    item = addressed(spider, "Tikkamäentie 16", "talo 7, 7 krs.")
-    assert item["housenumber"] == "16"
-    assert unit(item) == "talo 7"
-    assert (item.get("extras") or {}).get("addr:floor") == "7"
-    # Roads repeating the number field parse once; route descriptions whole.
-    item = addressed(spider, "Kauppakuja 2 A 1", "2 A 1")
-    assert item["street"] == "Kauppakuja"
-    assert item["housenumber"] == "2"
-    assert unit(item) == "A 1"
-    item = addressed(spider, "Metsäautotie välillä Lapinlahdentie 1175 - Pitkämäentie 641", "")
-    assert item.get("housenumber") is None
-    assert item["street_address"].startswith("Metsäautotie välillä")
-    item = addressed(spider, "Metsäautotie välilla Lapinlahdentie 1175 - Pitkämäentie 641", "")
-    assert item.get("housenumber") is None
-    assert item["street_address"].startswith("Metsäautotie välilla")
-
-
-def test_slash_tail_venue_operator_split():
-    # Venue-plus-operator tails keep the venue located and take only the
-    # association half as the operator; parishes stay religious.
-    spider = make_spider()
-    item = parsed(spider, channel("Iltapäivätoiminta / Tapanilan urheilukeskus, Tapanilan Erä ry"))
-    assert item["located_in"] == "Tapanilan urheilukeskus"
-    assert item["operator"] == "Tapanilan Erä ry"
-    item = parsed(spider, channel("Iltapäivätoiminta / Päiväkoti Gan Jeladim, Helsingin juutalainen seurakunta"))
-    assert item["located_in"] == "Päiväkoti Gan Jeladim"
-    assert item["operator"] == "Helsingin juutalainen seurakunta"
-    assert (item.get("extras") or {}).get("operator:type") == "religious"
-    # Pure operator tails still null the venue.
-    item = parsed(spider, channel("Imatra Bowling Center / Imatran keilahalli Oy"))
-    assert item["operator"] == "Imatran keilahalli Oy"
-    assert item.get("located_in") is None
-
-
-def test_wgs84_degrees_used_directly():
-    # Degrees filed as TM35FIN ("Sarkkirannan laavu") are already WGS84.
-    spider = make_spider()
-    lon, lat = spider._coords({"latitude": "64.916102", "longitude": "25.47273", "coordinateState": "EnteredByUser"})
-    assert (round(lon, 2), round(lat, 2)) == (25.47, 64.92)
-
-
-def test_round16_category_batch():
-    # Reviewer-verified filings: eating disorders, culture workshops, first
-    # homes, berry patches, Swedish theatres, cardiac units, clubhouses.
-    from locations.categories import Categories as C
-
-    spider = make_spider()
-    assert cat(spider, "Syömishäiriötiimi Verso")[0] == C.CLINIC
-    assert cat(spider, "Turun kulttuuripaja Casa")[0] == C.SOCIAL_FACILITY
-    assert cat(spider, "Ensikotitoiminta")[0] == C.SHELTER
-    assert cat(spider, "Marjapensaspaikka")[0] == C.ALLOTMENTS
-    assert cat(spider, "Lilla Teatern")[0] == C.THEATRE
-    assert cat(spider, "Teaterstudio Pasila")[0] == C.THEATRE
-    assert cat(spider, "Stoa / Teatterisali")[0] == C.THEATRE
-    assert cat(spider, "Sydänyksikkö")[0] == C.CLINIC
-    assert cat(spider, "Karvetin klubitalo")[0] == C.COMMUNITY_CENTRE
-    assert cat(spider, "Klubitalo Roihulan asiakaspalvelu")[0] == C.OFFICE_GOVERNMENT
-    assert cat(spider, "Sähköauton latauspiste, Nuottaniemen venesatama")[0] == C.CHARGING_STATION
-    assert cat(spider, "Ravitsemusterapia, Kustavi, Laitila")[0] == C.CLINIC
-    assert cat(spider, "Venesatamat")[0] == C.MARINA
-    # Peer-delivered support never rescues to clinic.
-    ch = channel("Suvanto-vertaistiimi")
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "mielenterveys"}]}]
-    assert spider._rescue_service(ch) is None
-    # Contact-detail tails strip to the owner in cleaning.
-    assert spider._clean_name("Turun kulttuuripaja Casan yhteystiedot") == "Turun kulttuuripaja Casan"
-
-
-def test_round16_rescue_batch():
-    # Supported housing beats diagnosis; trails never rescue; islands need
-    # channel services; health-area school names are health units.
-    from locations.categories import Categories as C
-    from locations.items import Feature
-
-    spider = make_spider()
-    ch = channel("Tervahovin asunnot")
-    ch["services"] = [{"service": {"name": "Tuettu asuminen, vammaispalvelut"}}]
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "palveluasuminen"}]}]
-    assert spider._resolve_fallback_category(Feature(), ch) == C.ASSISTED_LIVING
-    ch = channel("Espoon Rantaraitti")
-    ch["ontologyTerms"] = [
-        {"name": [{"language": "fi", "value": "ampumaradat"}]},
-        {"name": [{"language": "fi", "value": "kavelyreitit"}]},
-    ]
-    assert spider._rescue_service(ch) is None
-    ch = channel("Porsas")
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ulkoilusaaret"}]}]
-    assert spider._rescue_service(ch) is None
-    ch = channel("Porsas")
-    ch["services"] = [{"service": {"name": "Ulkoilusaaret"}}]
-    assert spider._rescue_service(ch) == (None, {"place": "island"})
-    item = parsed(spider, channel("Joutsan lukio"), "Keski-Suomen hyvinvointialue")
-    assert spider._tag(item, "amenity") == "clinic"
-    assert item["operator"] == "Keski-Suomen hyvinvointialue"
-    item = parsed(
-        spider,
-        channel("X"),
-        "Pohjois-Savon Muisti ry / Pohjois-Savon Muistiluotsi",
-    )
-    assert item["operator"] == "Pohjois-Savon Muisti ry"
-
-
-def test_round16_split_batch():
-    # Venue/service re-filings: Peliryhmä city, Masku coverage, Katriinan
-    # wards, utility-building venues, Ilveskoti descriptors, Sivistys
-    # subunits, Kulttuuria programs, unspaced desks, paren descriptors.
-    spider = make_spider()
-    assert named(spider, "Peliryhmä Kuopio -palvelun järjestämispaikka", "Kuopio")[0] == "Peliryhmä"
-    assert (
-        named(spider, "Työllistymistä edistävät palvelut, Masku (Nousiainen, Laitila)", "Masku")[0]
-        == "Työllistymistä edistävät palvelut"
-    )
-    assert named(spider, "Katriinan toimipiste, osasto 7", "Vantaa")[0] == "Katriinan toimipiste, osasto 7"
-    assert named(spider, "Väinämöisenkenttä / Huoltorakennus", None)[0] == "Väinämöisenkenttä"
-    assert cat(spider, "Väinämöisenkenttä / Huoltorakennus")[0] == Categories.LEISURE_PITCH
-    assert named(spider, "Ilveskodin päivätoiminta, Hämeenlinna, Vammaisten päivätoiminta", "Hämeenlinna")[:2] == (
-        "Ilveskodin päivätoiminta",
-        None,
-    )
-    assert named(spider, "Sivistysosasto / Koulutus", None)[0] == "Sivistysosasto / Koulutus"
-    assert (
-        named(spider, "Kulttuuria, kahvetta ja kastamista Kiikassa -palvelun järjestämispaikka", "Sastamala")[0]
-        == "Kulttuuria, kahvetta ja kastamista Kiikassa"
-    )
-    assert named(spider, "Vihdin kunnantalo/ sosiaalitoimisto", "Vihti")[0] == "sosiaalitoimisto"
-    assert named(spider, "Rakennusvalvontatoimisto/lupasihteeri", None)[0] == "Rakennusvalvontatoimisto"
-    assert named(spider, "Touhula Helmiina (yksityinen päiväkoti)", "Ylivieska")[1] is None
-
-
-def test_round16_translation_batch():
-    # Venue/operator/coverage tails strip so translations render the applied
-    # name; word-aligned venue prefixes reduce to the applied tail.
-    spider = make_spider()
-    assert (
-        spider._split_bilingual(
-            "After-school activities / Helsinki Christian School / Association of X",
-            "Iltapäivätoiminta",
-            "Iltapäivätoiminta / Helsingin kristillinen koulu, Yhdistys",
-            "Helsingin kristillinen koulu",
-        )
-        == "After-school activities"
-    )
-    assert (
-        spider._split_bilingual(
-            "Röylän koulu / Ice-skating field",
-            "Luistelukenttä",
-            "Röylän koulun luistelukenttä",
-            "Röylän koulu",
-        )
-        == "Ice-skating field"
-    )
-    assert (
-        spider._strip_fi_duplicates(
-            "Hjälpmedelsutlåningen, Reso, Rusko",
-            "Apuvälinelainaamo",
-            "Apuvälinelainaamo, Raisio, Rusko",
-            None,
-        )
-        == "Hjälpmedelsutlåningen"
-    )
-    assert (
-        spider._strip_fi_duplicates(
-            "Röylän koulu skridskobana",
-            "Luistelukenttä",
-            "Röylän koulun luistelukenttä",
-            "Röylän koulu",
-        )
-        == "skridskobana"
-    )
-
-
-def test_org_failed_flushes_pending_operator_less():
-    # A failed org fetch still yields waiting items, operator unset, and
-    # counts the failure; nothing is lost with the window.
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
-    item["ref"] = "r1"
-    spider._pending["org-1"] = [item]
-    failure = SimpleNamespace(request=SimpleNamespace(url="https://example.fi/api?guids=org-1"))
-    out = list(spider.errback_orgs(failure))
-    assert len(out) == 1
-    assert "operator" not in out[0]
-    assert spider.crawler.stats.get_value("ptv_fi/org/failed") == 1
-
-
-def test_visit_address_prefers_single_and_postal_drops():
-    # Location/Single beats Multi/Postal; a postal-only channel parses to
-    # None with a counter.
-    spider = make_spider()
-    single = {"type": "Location", "subType": "Single", "streetAddress": {"a": 1}}
-    multi = {"type": "Location", "subType": "Multi", "streetAddress": {"b": 2}}
-    postal = {"type": "Postal", "subType": "Single", "streetAddress": {"c": 3}}
-    assert spider._visit_address({"addresses": [postal, multi, single]}) == single
-    ch = channel("X")
-    ch["addresses"] = [postal]
-    assert spider.parse_channel(ch) is None
-    assert spider.crawler.stats.get_value("ptv_fi/dropped/postal_only") == 1
-
-
-def test_dropped_non_place_names():
-    # Mobile/bookmobile/test/crosswalk/track names never become POIs.
-    spider = make_spider()
-    assert spider._is_dropped_name("Etsivä yksikkö") == "non_place/mobile"
-    assert spider._is_dropped_name("Kirjastoauto Keskusta") == "non_place/bookmobile"
-    assert spider._is_dropped_name("Kuvan testipiste") == "non_place/test_data"
-    assert spider._is_dropped_name("Mannerheimintien suojatie") == "non_place/crosswalk"
-    assert spider._is_dropped_name("Pirkkolan kuntorata") == "non_place/track"
-    ch = channel("Etsivä yksikkö")
-    assert spider.parse_channel(ch) is None
-    assert spider.crawler.stats.get_value("ptv_fi/dropped/non_place/mobile") == 1
-
-
-def test_phone_hours_dropped():
-    # Phone availability is not visit hours; only staffed spans render.
-    spider = make_spider()
-    oh = spider._hours(
+    spider2 = make_spider()
+    oh = spider2._hours(
         {
             "serviceHours": [
                 {
@@ -2891,123 +3375,96 @@ def test_phone_hours_dropped():
         None,
     )
     assert oh.as_opening_hours() == "Mo-Fr 08:00-16:00"
-    assert spider.crawler.stats.get_value("ptv_fi/hours/phone_only") == 1
+    assert spider2.crawler.stats.get_value("ptv_fi/hours/phone_only") == 1
 
 
-def test_supported_housing_keeps_subtype_and_skips_other_categories():
-    # Group homes keep their subtype; offices/clinics/schools never upgrade
-    # from feed wording alone.
-    from locations.items import Feature as _F
-
+def test_hours_dated_closed_and_always_open():
     spider = make_spider()
-    ch = channel("X", descriptions=[{"language": "fi", "value": "tuettua asumista"}])
-    item = _F()
-    item["extras"]["amenity"] = "social_facility"
-    item["extras"]["social_facility"] = "group_home"
-    assert spider._maybe_upgrade_housing(item, ch, Categories.SOCIAL_FACILITY) == Categories.SOCIAL_FACILITY
-    assert item["extras"]["social_facility"] == "group_home"
-    assert spider.crawler.stats.get_value("ptv_fi/category/supported_housing_kept") == 1
-    for cat in (Categories.OFFICE_GOVERNMENT, Categories.CLINIC, Categories.SCHOOL):
-        probe = _F()
-        assert spider._maybe_upgrade_housing(probe, ch, cat) == cat
+    dated = {
+        "serviceHourType": "DaysOfTheWeek",
+        "validFrom": "2027-01-01T00:00:00",
+        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
+    }
+    assert spider._hours({"serviceHours": [dated]}, None) is None
+    assert spider.crawler.stats.get_value("ptv_fi/hours/dated") == 1
+    closed = {
+        "serviceHourType": "DaysOfTheWeek",
+        "isClosed": True,
+        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "", "to": ""}],
+    }
+    assert spider._hours({"serviceHours": [closed]}, None) is None
+    ch = channel("Suljettu piste")
+    ch["serviceHours"] = [
+        {
+            "serviceHourType": "DaysOfTheWeek",
+            "isClosed": True,
+            "openingHour": [{"dayFrom": "Monday", "dayTo": "Monday"}],
+        }
+    ]
+    item = parsed(spider, ch)
+    assert "opening_hours" not in item
+    assert "opening_hours" not in (item.get("extras") or {})
+    # Closed marks lose to real spans either order; multiday marks cover ranges.
+    spans = {
+        "serviceHourType": "DaysOfTheWeek",
+        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "09:00:00", "to": "11:00:00"}],
+    }
+    closed_mark = {
+        "serviceHourType": "DaysOfTheWeek",
+        "isClosed": True,
+        "openingHour": [{"dayFrom": "Monday", "dayTo": ""}],
+    }
+    for hours in ([spans, closed_mark], [closed_mark, spans]):
+        ch = channel("Avoin piste")
+        ch["serviceHours"] = [dict(e) for e in hours]
+        assert parsed(make_spider(), ch)["opening_hours"].as_opening_hours() == "Mo 09:00-11:00"
+    ch = channel("X")
+    ch["serviceHours"] = [
+        {
+            "serviceHourType": "DaysOfTheWeek",
+            "isClosed": True,
+            "openingHour": [{"dayFrom": "Monday", "dayTo": "Friday"}],
+        }
+    ]
+    day_spans, closed_days, _ = spider._hours_collect(ch)
+    assert day_spans == {}
+    assert closed_days == {"Mo", "Tu", "We", "Th", "Fr"}
+    # Staffed care/education is not walk-in 24/7; availability never overrides spans.
+    always = {
+        "serviceHours": [
+            {
+                "serviceHourType": "DaysOfTheWeek",
+                "isAlwaysOpen": True,
+                "openingHour": [{"dayFrom": "Monday", "dayTo": "Sunday", "from": "00:00:00", "to": "23:59:59"}],
+            }
+        ]
+    }
+    fresh = make_spider()
+    for category in (Categories.SCHOOL, Categories.KINDERGARTEN, Categories.NURSING_HOME, Categories.SOCIAL_FACILITY):
+        assert fresh._hours(always, category) is None
+    assert fresh.crawler.stats.get_value("ptv_fi/hours/skipped_always_open_social") == 4
+    ch2 = channel("Päivystävä piste")
+    ch2["serviceHours"] = [
+        {"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True},
+        {
+            "serviceHourType": "DaysOfTheWeek",
+            "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
+        },
+    ]
+    assert spider._hours(ch2, None) is not None
+    assert spider.crawler.stats.get_value("ptv_fi/hours/always_open_with_spans") == 1
+    # Upgraded assisted-living homes skip 24/7 flags like other care.
+    ch_al = channel("Onnikoti Apila")
+    ch_al["services"] = [{"service": {"name": "Tuettu asuminen"}}]
+    ch_al["serviceHours"] = [{"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True, "openingHour": []}]
+    al_item = parsed(spider, ch_al, "Hyvinvointialue")
+    assert al_item.get("extras", {}).get("social_facility") == "assisted_living"
+    assert al_item.get("opening_hours") is None
 
 
-def test_slash_area_and_unit_keep_whole():
-    # Coverage areas and bare units on slashes are not venues.
-    spider = make_spider()
-    assert split(spider, "Puheterapia / Tikkurilan alue") == ("Puheterapia / Tikkurilan alue", None, None)
-    assert split(spider, "Fysioterapia / Himangan yksikkö") == ("Fysioterapia / Himangan yksikkö", None, None)
-
-
-def test_slash_paren_address_tail():
-    # Parenthesised street addresses ride along, never locate.
-    spider = make_spider()
-    assert split(spider, "Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)") == (
-        "Musiikkipäiväkoti Sinikello",
-        None,
-        "Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)",
-    )
-
-
-def test_slash_venue_org_stripped():
-    # Operator organisations inside the venue resolve to the venue part.
-    spider = make_spider()
-    assert spider._strip_venue_org("Steiner-koulu, Helsingin Rudolf Steiner -yhdistys") == "Steiner-koulu"
-
-
-def test_slash_bay_venue():
-    # Bay-headed facility pairs name the facility, bay locates.
-    spider = make_spider()
-    assert split(spider, "Tahvonlahti / Hiekkakenttä") == (
-        "Hiekkakenttä",
-        "Tahvonlahti",
-        "Tahvonlahti / Hiekkakenttä",
-    )
-
-
-def test_colon_branch_files():
-    # Non-school colon desks file the branch, keep the name.
-    spider = make_spider()
-    item = parsed(spider, channel("Rakennusvalvontatoimisto: Sampola"))
-    assert item["branch"] == "Sampola"
-    assert item["name"] == "Rakennusvalvontatoimisto: Sampola"
-
-
-def test_branch_dup_name_and_city_drop():
-    # Branches repeating the name or the municipality are not branches.
-    spider = make_spider()
-    item = parsed(spider, channel("Toimisto: Sampola"))
-    item["name"] = "Sampola"
-    spider._apply_branch(item, "Toimisto: Sampola", "Sampola", None, None)
-    assert "branch" not in item
-    spider._apply_branch(item, "Toimisto: Pöytyä", "Toimisto: Pöytyä", None, "Pöytyä")
-    assert "branch" not in item
-    assert spider.crawler.stats.get_value("ptv_fi/name/branch_dup_city") == 1
-
-
-def test_comma_coverage_list_peels():
-    # Multi-municipality coverage lists peel to the head service.
-    spider = make_spider()
-    assert split(spider, "Kuntoutusohjaus, Kaarina, Lieto", "Kaarina") == (
-        "Kuntoutusohjaus",
-        None,
-        "Kuntoutusohjaus, Kaarina, Lieto",
-    )
-
-
-def test_paren_and_comma_memorials_keep_whole():
-    # Memorial title + designation is one artwork, never split.
-    spider = make_spider()
-    assert split(spider, "Mannerheimin muistomerkki, Helsinki") == (
-        "Mannerheimin muistomerkki, Helsinki",
-        None,
-        None,
-    )
-
-
-def test_slash_sculpture_kept():
-    # Single sculpture designations stay whole, never strand fragments.
-    spider = make_spider()
-    assert split(spider, "Moduli / Rakentajaveistos") == ("Moduli / Rakentajaveistos", None, None)
-
-
-def test_bilingual_operator_tail_strips_to_lead():
-    # Two-segment translations with a located second half keep the lead.
-    spider = make_spider()
-    assert (
-        spider._split_bilingual(
-            "After-school activities / Helsinki Christian School",
-            "Iltapäivätoiminta",
-            "Iltapäivätoiminta / Helsingin kristillinen koulu",
-            "Helsingin kristillinen koulu",
-        )
-        == "After-school activities"
-    )
-
-
-def test_hours_edge_branches():
+def test_hours_edge_branches_and_ranges():
     # Unknown days, bad ranges and exceptional types skip with counters;
-    # overlapping spans merge; overnight ranges render.
+    # overlapping spans merge; overnight and wraparound ranges render.
     spider = make_spider()
     oh = spider._hours(
         {
@@ -3043,958 +3500,148 @@ def test_hours_edge_branches():
     assert spider.crawler.stats.get_value("ptv_fi/hours/bad_range") == 1
     assert spider.crawler.stats.get_value("ptv_fi/hours/skipped_type/Exceptional") == 1
     assert spider.crawler.stats.get_value("ptv_fi/hours/merged") == 1
-
-
-def test_coords_dropped_state():
-    # Placeholder coordinate states never become points.
-    spider = make_spider()
-    assert spider._coords({"latitude": "1", "longitude": "2", "coordinateState": "NotReceived"}) is None
-    assert spider._coords({"latitude": "1", "longitude": "2", "coordinateState": "Failed"}) is None
-    assert spider.crawler.stats.get_value("ptv_fi/coords/dropped_state") == 2
-
-
-def test_unknown_post_office_drops():
-    # Register rows without a real visit place never parse.
-    spider = make_spider()
-    assert spider.parse_channel(channel("X", office="TUNTEMATON")) is None
-    assert spider.crawler.stats.get_value("ptv_fi/dropped/non_place/mobile_address") == 1
-
-
-def test_clean_located_drops():
-    # Bare info points, host tails and city duplicates are not venues.
-    spider = make_spider()
-    assert spider._clean_located("Infopiste") is None
-    assert spider._clean_located_value("Helsinki", "Helsinki") is None
-
-
-def test_number_venue_tail_and_place_station():
-    # Venue notes leave the number field; station-like tails never route
-    # numberless roads to addr:place.
-    spider = make_spider()
-    item = addressed(spider, "Tie", "4 / Espoon Keskuspuisto")
-    assert item["housenumber"] == "4"
-    item = addressed(spider, "Pasilan asema", "")
-    assert item["street_address"] == "Pasilan asema"
-    assert "addr:place" not in (item.get("extras") or {})
-
-
-def test_slash_registry_tail_cleans():
-    # Registry boilerplate tails clean to the venue head.
-    spider = make_spider()
-    assert spider._clean_located_value("Kyläryhmä -palvelun järjestämispaikka, Virolahti 2", None) == "Kyläryhmä"
-
-
-def test_room_building_generic_combo():
-    # Untyped heads with utility-building tails stay generic, no rescue type.
-    spider = make_spider()
-    assert spider._carve_room_tail("Alue / Huoltorakennus") == (None, None)
-
-
-def test_health_group_keeps_filing():
-    # Health-context groups fall through to the table instead of generic.
-    spider = make_spider()
-    assert cat(spider, "Terveyskeskusryhmä")[0] == Categories.CLINIC
-
-
-def test_school_health_unit_case_insensitive():
-    # The health-unit override reads the name case-insensitively:
-    # capitalised compounds ("Helsingin Yhteiskoulu") file clinic too.
-    spider = make_spider()
-    item = parsed(spider, channel("Helsingin Yhteiskoulu"), "Keski-Suomen hyvinvointialue")
-    assert spider._tag(item, "amenity") == "clinic"
-
-
-def test_skola_boundary_and_koulu_streets():
-    # Eskola farm compounds are not schools (Swedish compounds still file);
-    # street words never file as schools either.
-    spider = make_spider()
-    assert cat(spider, "Eskolakoti 1 ja 2")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Nordsjö lågstadieskola")[0] == Categories.SCHOOL
-    assert cat(spider, "Lappeenrannan toimipiste, Koulukatu 14")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_slash_venue_org_strips_before_pair():
-    # Operator orgs inside the venue strip before pair dispatch: the venue
-    # part locates, and multi-segment chains resolve the same with or
-    # without the org suffix (H2 extraction regression guard).
-    spider = make_spider()
-    assert spider._split_name("Iltapäivätoiminta / Kottby grundskola, Kottbynejdens svenska förening rf") == (
-        "Iltapäivätoiminta",
-        "Kottby grundskola",
-        "Iltapäivätoiminta / Kottby grundskola, Kottbynejdens svenska förening rf",
-    )
-
-
-def test_animal_protection_desk_is_office():
-    spider = make_spider()
-    assert cat(spider, "Eläinsuojelu")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Porvoon kissatalo")[1] == {"amenity": "animal_shelter"}
-
-
-def test_padel_courts_are_pitches():
-    # Säkyläpadel (67a2cb9a, round-17 B): dedicated padel venues file pitch
-    # + sport=padel; kenttä-compounds gain the sport tag too.
-    spider = make_spider()
-    assert cat(spider, "Säkyläpadel") == (Categories.LEISURE_PITCH, {"sport": "padel"})
-    assert cat(spider, "Padel-kentät") == (Categories.LEISURE_PITCH, {"sport": "padel"})
-    assert cat(spider, "Ukonniemen ulkopadelkenttä") == (Categories.LEISURE_PITCH, {"sport": "padel"})
-
-
-def test_paren_shielded_operators_stay_private():
-    # Trailing parenthesised qualifiers hide the marker from the end anchor
-    # (Kuopion NNKY, round-17 B): detection reads past them, the emitted
-    # operator keeps its full form. Parishes stay non-private.
-    spider = make_spider()
-    assert spider._is_private_org("Kuopion Nuorten Naisten Kristillinen Yhdistys (Kuopion NNKY)")
-    assert spider._is_private_org("Pohjanmaan Syöpäyhdistys (Ostrobotnia Cancer organisation)")
-    assert not spider._is_private_org("Turun ja Kaarinan seurakuntayhtymä")
-
-
-def test_depots_are_depots():
-    spider = make_spider()
-    assert cat(spider, "Kunnanvarikko")[1] == {"amenity": "depot"}
-    assert cat(spider, "Vantaan kaupungin varikko")[1] == {"amenity": "depot"}
-    # Venues named after depots keep their filings.
-    assert cat(spider, "Nuorisotila Varikko")[1] == {"amenity": "youth_centre"}
-    assert cat(spider, "Varikkotien leikkikenttä")[0] == Categories.LEISURE_PLAYGROUND
-
-
-def test_chain_daycares():
-    # Pilke Kilonkallio (6781665c), Norlandia Kärry (048c0165): brand heads
-    # type the unit and name the private operator over the purchaser city.
-    spider = make_spider()
-    for name, brand in (("Pilke Kilonkallio", "Pilke"), ("Norlandia Kärry", "Norlandia")):
-        assert cat(spider, name)[0] == Categories.KINDERGARTEN
-        item = parsed(spider, channel(name), "Espoon kaupunki")
-        assert item["operator"] == brand
-        assert item["extras"].get("operator:type") == "private"
-
-
-def test_aviation_centre_is_aerodrome():
-    # Pudasjärven Ilmailukeskus (29789472), on Lentäjäntie.
-    assert cat(make_spider(), "Pudasjärven Ilmailukeskus")[1] == {"aeroway": "aerodrome"}
-
-
-def test_airport_desks_are_not_railway():
-    spider = make_spider()
-    assert cat(spider, "Asiakaspalvelupisteet Helsinki-Vantaan lentoasemalla")[0] == (Categories.OFFICE_GOVERNMENT)
-    assert cat(spider, "Lentoaseman rautatieasema")[1] == {"railway": "station", "public_transport": "station"}
-
-
-def test_combined_boat_harbour_is_marina():
-    spider = make_spider()
-    assert cat(spider, "Sirkkakosken vene- ja kalasatama")[0] == Categories.MARINA
-    assert cat(spider, "Kalasatama")[0] is None
-
-
-def test_culture_houses_are_community():
-    assert cat(make_spider(), "Kulttuuritalo Kimara")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_cemeteries_are_cemeteries():
-    spider = make_spider()
-    assert cat(spider, "Pieneläinten hautausmaa")[1] == {"landuse": "cemetery"}
-    assert cat(spider, "Pieneläinhautausmaa")[1] == {"landuse": "cemetery"}
-    # Offices and chapels at cemeteries keep their filings.
-    assert cat(spider, "Riihimäen hautausmaan toimisto")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Lepolan hautausmaan kappeli")[0] == Categories.PLACE_OF_WORSHIP
-
-
-def test_english_gym_is_fitness_centre():
-    spider = make_spider()
-    assert cat(spider, "Sportis gym")[0] == Categories.GYM
-    assert cat(spider, "Fitness Center")[0] == Categories.GYM
-    assert cat(spider, "Gymnasium")[0] == Categories.SCHOOL
-    assert cat(spider, "Gymnasiet i Petalax")[0] == Categories.SCHOOL
-
-
-def test_brand_city_kept():
-    # International House Rauma (4a7e76d8): the city is part of the brand.
-    assert split(make_spider(), "International House Rauma", "Rauma") == ("International House Rauma", None, None)
-
-
-def test_boilerplate_leaves_service_name():
-    # Näe hyvä mussa -leirit lapsille (c096c655): only the suffix strips.
-    item = parsed(make_spider(), channel("Näe hyvä mussa -leirit lapsille -palvelun järjestämispaikka, 1"))
-    assert item["name"] == "Näe hyvä mussa -leirit lapsille"
-    assert item["extras"]["official_name"] == "Näe hyvä mussa -leirit lapsille -palvelun järjestämispaikka, 1"
-
-
-def test_playgroups_are_kindergartens():
-    spider = make_spider()
-    assert cat(spider, "Pääskyvuoren leikkikerho")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Leikkikoulu")[0] == Categories.KINDERGARTEN
-
-
-def test_swedish_daycare_name_rescues():
-    # Daghemmet Karitsa (6e910728): the Swedish name types the opaque one.
-    ch = channel("Karitsa")
-    ch["serviceChannelNames"] = [
-        {"language": "fi", "value": "Karitsa", "type": "Name"},
-        {"language": "sv", "value": "Daghemmet Karitsa", "type": "Name"},
-    ]
-    assert parsed(make_spider(), ch).get_tag("amenity") == "kindergarten"
-
-
-def test_service_desk_swedish_and_nurse_rows():
-    spider = make_spider()
-    assert cat(spider, "Pargas serviceenhet")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Diabeteshoitaja, Kaarina")[1] == {"healthcare": "nurse"}
-    assert cat(spider, "Kaarinan kaupungin rakennusvalvonnan lupa-asiat")[0] == (Categories.OFFICE_GOVERNMENT)
-
-
-def test_bare_operator_unit_names_unit():
-    # Sateenkaari Koto Oy/ Villasukka: the proper unit names the POI,
-    # the company is the operator, never the name.
-    name, located, official = split(make_spider(), "Sateenkaari Koto Oy/ Villasukka")
-    assert name == "Villasukka"
-    assert located is None
-    assert official == "Sateenkaari Koto Oy/ Villasukka"
-
-
-def test_apoteket_is_pharmacy():
-    # Apoteket (the pharmacy, in Swedish) files like apteekki.
-    assert cat(make_spider(), "Apoteket")[0] == Categories.PHARMACY
-
-
-def test_official_name_wins_over_alternative():
-    # "Talaskangas" (AlternativeName) must lose to "Talaskankaan
-    # retkeilyreitti" (Name): suomi.fi renders per displayNameType.
-    spider = make_spider()
-    ch = channel("Talaskangas")
-    ch["serviceChannelNames"] = [
-        {"language": "fi", "value": "Talaskangas", "type": "AlternativeName"},
-        {"language": "fi", "value": "Talaskankaan retkeilyreitti", "type": "Name"},
-    ]
-    ch["displayNameType"] = [{"type": "Name", "language": "fi"}]
-    assert spider._names(ch)["fi"] == "Talaskankaan retkeilyreitti"
-
-
-# ---- Review round 6: operator and contact -------------------------------------
-
-
-def test_association_demote_end_to_end():
-    from locations.items import Feature as _F
-    from locations.categories import apply_category as _apply
-
-    spider = make_spider()
-    item = _F()
-    _apply(Categories.OFFICE_GOVERNMENT, item)
-    spider._apply_operator(item, "Pirkanmaan Sydänyhdistys ry")
-    assert item["extras"]["office"] == "association"
-    assert item["extras"]["operator:type"] == "private"
-
-
-def test_dotted_and_bare_operator_markers():
-    spider = make_spider()
-    assert spider._has_operator_word("Al-Anon Keskuspalvelu r.y.") is True
-    assert spider._has_operator_word("Barnavårdsföreningen i Finland r.f.") is True
-    assert spider._has_operator_word("Tmi Petri Lehto") is True
-    assert spider._is_private_org("Palvelualojen Työttömyyskassa") is True
-    assert spider._has_operator_word("Derby") is False
-    assert spider._is_private_org("Suomen Punainen Risti Kuopion osasto") is True
-    assert spider._is_private_org("SANL ry / Luetaan yhdessä -verkosto") is True
-    assert spider._is_private_org("Keravan kansantanssijat") is True
-    assert spider._is_private_org("Attendo") is True
-    assert spider._is_private_org("Helsingin kaupunki") is False
-
-
-def test_placeholder_email_dropped():
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
-    spider._apply_contact(item, {"emails": [{"value": "etunimi.sukunimi@kalajoki.fi"}]})
-    assert "email" not in item
-
-
-def test_menu_host_dropped():
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
-    spider._apply_contact(item, {"webPages": [{"url": "https://menu.kaarea.fi/KaareaAromieMenus/FI/Default"}]})
-    assert "website" not in item
-
-
-def test_translations_always_name_lang():
-    spider = make_spider()
-    item = parsed(
-        spider,
-        channel("Laboratorio, Taivassalo", office="TAIVASSALO", sv="Tykslab"),
-        "Turun yliopistollinen keskussairaala",
-    )
-    assert item["extras"]["name:sv"] == "Tykslab"
-    assert item["extras"].get("official_name:sv") is None
-    item = parsed(spider, channel("Myllypuron liikuntapuisto", en="Myllypuro sports park 1*"), "Helsingin kaupunki")
-    assert item["extras"]["name:en"] == "Myllypuro sports park"
-
-
-# ---- Review round 7: categories ------------------------------------------------
-
-
-def test_health_service_rows():
-    spider = make_spider()
-    assert cat(spider, "Sevettijärven terveystalo")[0] == Categories.CLINIC
-    assert cat(spider, "Lapin keskussairaalan laboratorio") == (
-        Categories.CLINIC,
-        {"healthcare": "laboratory"},
-    )
-    assert cat(spider, "Happy Toddlers")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Daycare Daisy Oy")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Kaupunkitila- ja maisemasuunnittelu")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Stadshus")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Sähköauton latauspiste")[0] == Categories.CHARGING_STATION
-    assert cat(spider, "Juhannussalko")[0] == Categories.TOURISM_ARTWORK
-    assert cat(spider, "Koulun piha")[0] == Categories.SCHOOL
-    assert cat(spider, "Kirkonkylän kylätalo")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Auditorio")[0] == Categories.EVENTS_VENUE
-    assert cat(spider, "Kuulolähipalvelu")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Sammontalon päiväkodin Uus-Lavolan toimintayksikkö")[0] == Categories.KINDERGARTEN
-
-
-def test_service_tail_substring_inversion():
-    # Plural service tails invert like singulars (Hoitoalan ruokapalvelut).
-    name, located, official = split(make_spider(), "Koskelan monipuolinen palvelukeskus / Hoitoalan ruokapalvelut")
-    assert name == "Hoitoalan ruokapalvelut"
-    assert located == "Koskelan monipuolinen palvelukeskus"
-    assert official == "Koskelan monipuolinen palvelukeskus / Hoitoalan ruokapalvelut"
-    assert cat(make_spider(), "Koskelan monipuolinen palvelukeskus / Hoitoalan ruokapalvelut")[0] == (
-        Categories.CANTEEN
-    )
-
-
-def test_fishing_spot_facility():
-    spider = make_spider()
-    assert cat(spider, "Salmen ulkoilualue / Kalastuspaikka")[1] == {"leisure": "fishing"}
-    name, located, _ = split(spider, "Salmen ulkoilualue (Pikku-Parikas) / Kalastuspaikka")
-    assert name == "Kalastuspaikka"
-    assert located == "Salmen ulkoilualue (Pikku-Parikas)"
-
-
-def test_paren_address_strips_english_names():
-    # Daycare Daisy Oy (Ylioppilaskatu 25): the sample row predates the
-    # fix; current code strips the address paren (verified live).
-    assert split(make_spider(), "Daycare Daisy Oy (Ylioppilaskatu 25)")[0] == "Daycare Daisy Oy"
-
-
-def test_always_open_skipped_for_schools():
-    spider = make_spider()
-    channel = {
-        "serviceHours": [
-            {
-                "serviceHourType": "DaysOfTheWeek",
-                "isAlwaysOpen": True,
-                "openingHour": [{"dayFrom": "Monday", "dayTo": "Sunday", "from": "00:00:00", "to": "23:59:59"}],
-            }
-        ]
-    }
-    assert spider._hours(channel, Categories.SCHOOL) is None
-    assert spider._hours(channel, Categories.KINDERGARTEN) is None
-
-
-def test_closed_only_hours_emit_no_tag():
-    # Closed-only sets render empty: no opening_hours key, never "".
-    spider = make_spider()
-    ch = channel("Suljettu piste")
+    ch = channel("X")
     ch["serviceHours"] = [
         {
             "serviceHourType": "DaysOfTheWeek",
-            "isClosed": True,
-            "openingHour": [{"dayFrom": "Monday", "dayTo": "Monday"}],
+            "openingHour": [{"dayFrom": "Friday", "dayTo": "Monday", "from": "12:00:00", "to": "14:00:00"}],
         }
     ]
-    item = parsed(spider, ch)
-    assert "opening_hours" not in item
-    assert "opening_hours" not in (item.get("extras") or {})
+    rendered = spider._hours(ch, None).as_opening_hours()
+    assert "Fr-Su 12:00-14:00" in rendered
+    assert "Mo 12:00-14:00" in rendered
+    assert spider._to_minutes("25:00") is None
+    assert spider._to_minutes("08:00-12:00") is None
+    assert spider._to_minutes("08:00:00") == 480
 
 
-# ---- Review rounds 8-10: names, categories, addresses -------------------------
+# ---- Crawl plumbing: cities, coords, gates, joins --------------------------------------
+# Municipality outranks the postal town; post office is fallback only.
 
 
-def test_office_desk_pair_stays_whole():
-    # Keurusselän joint office + Mänttä-Vilppula desk: Stadin rule for
-    # offices (schools still split hosted units).
-    name, located, official = split(
-        make_spider(), "Keurusselän ympäristön- ja terveydensuojelutoimisto / Mänttä-Vilppulan toimipiste"
+def test_city_src_prefers_municipality():
+    spider = make_spider()
+    street = {"municipality": {"name": [{"language": "fi", "value": "Seinäjoki"}]}}
+    assert spider._city_src(street, {"areas": []}, "KYLÄNPÄÄ") == "Seinäjoki"
+    assert (
+        spider._city_src(
+            {}, {"areas": [{"municipalities": [{"name": [{"language": "fi", "value": "Kuusamo"}]}]}]}, "KUUSAMO"
+        )
+        == "Kuusamo"
     )
-    signed = "Keurusselän ympäristön- ja terveydensuojelutoimisto / Mänttä-Vilppulan toimipiste"
-    assert (name, located, official) == (signed, None, None)
+    multi = {
+        "areas": [
+            {
+                "municipalities": [
+                    {"name": [{"language": "fi", "value": "Helsinki"}]},
+                    {"name": [{"language": "fi", "value": "Espoo"}]},
+                ]
+            }
+        ]
+    }
+    assert spider._city_src({}, multi, "HELSINKI") == "HELSINKI"
+    assert make_spider()._city_src({}, {"areas": []}, "ORIVESI AS") == "ORIVESI"
 
 
-def test_fused_school_splits_anchored():
+def test_municipality_beats_post_office_end_to_end():
+    # Postal village Kylänpää must not leak into addr:city or name splits.
     spider = make_spider()
-    name, located, official = split(spider, "Renkomäen koulun vaativan monimuotoisen tuen luokat")
-    assert name == "Vaativan monimuotoisen tuen luokat"
-    assert located == "Renkomäen koulu"
-    assert official == "Renkomäen koulun vaativan monimuotoisen tuen luokat"
+    data = channel("Neuvonta", road="Kylänpääntie", street_number="200", postcode="60420", office="KYLÄNPÄÄ")
+    data["addresses"][0]["streetAddress"]["municipality"] = {"name": [{"language": "fi", "value": "Seinäjoki"}]}
+    assert parsed(spider, data, "Seinäjoen kaupunki")["city"] == "Seinäjoki"
+    ch = channel("X", office="KYLÄNPÄÄ")
+    ch["addresses"][0]["streetAddress"]["municipality"] = {"name": [{"language": "fi", "value": "Espoo"}]}
+    assert parsed(spider, ch).get("city") == "Espoo"
 
 
-def test_swedish_school_concatenation_kept_whole():
-    # Swedish "<Place> skolan <facility>" heads ("Helsinge skolan
-    # liikuntasali", "Lagstads skolan liikuntasali 2") stay whole:
-    # splitting would glue a genitive place to a de-inflected skola,
-    # inventing a venue ("Lagstads skola") that appears nowhere.
+def test_coords_gates_and_wgs84():
     spider = make_spider()
-    for signed in ("Helsinge skolan liikuntasali", "Lagstads skolan liikuntasali 2"):
-        assert split(spider, signed) == (signed, None, None), signed
+    base = {"latitude": "6672010", "longitude": "385128"}
+    assert spider._coords({**base, "coordinateState": "NotReceived"}) is None
+    assert spider._coords({**base, "coordinateState": "Failed"}) is None
+    assert spider._coords({**base, "coordinateState": "Ok"}) is not None
+    fresh = make_spider()
+    assert fresh._coords({"latitude": "1", "longitude": "2", "coordinateState": "NotReceived"}) is None
+    assert fresh._coords({"latitude": "1", "longitude": "2", "coordinateState": "Failed"}) is None
+    assert fresh.crawler.stats.get_value("ptv_fi/coords/dropped_state") == 2
+    # Degrees filed as TM35FIN are already WGS84.
+    lon, lat = spider._coords({"latitude": "64.916102", "longitude": "25.47273", "coordinateState": "EnteredByUser"})
+    assert (round(lon, 2), round(lat, 2)) == (25.47, 64.92)
 
 
-def test_dash_school_kept_whole():
-    # A school housed inside itself is one name, not a hosted unit.
-    signed = "Kaukajärven koulu - Annalan koulutalo"
-    assert split(make_spider(), signed) == (signed, None, None)
-
-
-def test_kela_in_name_names_provider():
-    from locations.items import Feature as _F
-
+def test_visit_address_and_gates():
     spider = make_spider()
-    assert spider._branch_agency("Kelan asiointipiste Lapinlahdella") == "Kela"
-    assert spider._branch_agency("Kelankatu 1") is None
-    assert spider._branch_agency("Siimakela") is None
-    item = parsed(spider, channel("Kelan asiointipiste Lapinlahdella"), "Lapinlahden kunta")
-    assert item["operator"] == "Kela"
+    single = {"type": "Location", "subType": "Single", "streetAddress": {"a": 1}}
+    multi = {"type": "Location", "subType": "Multi", "streetAddress": {"b": 2}}
+    postal = {"type": "Postal", "subType": "Single", "streetAddress": {"c": 3}}
+    assert spider._visit_address({"addresses": [postal, multi, single]}) == single
+    ch = channel("X")
+    ch["addresses"] = [postal]
+    assert spider.parse_channel(ch) is None
+    assert spider.crawler.stats.get_value("ptv_fi/dropped/postal_only") == 1
+    # Register rows without a real visit place never parse.
+    assert spider.parse_channel(channel("X", office="TUNTEMATON")) is None
+    assert spider.crawler.stats.get_value("ptv_fi/dropped/non_place/mobile_address") == 1
+    # Id-less detail rows drop with a count, never KeyError.
+    ch = channel("X")
+    del ch["id"]
+    assert spider.parse_channel(ch) is None
+    assert spider.crawler.stats.get_value("ptv_fi/dropped/no_id") == 1
+    # Mobile/bookmobile/test/crosswalk/track names never become POIs.
+    assert spider._is_dropped_name("Etsivä yksikkö") == "non_place/mobile"
+    assert spider._is_dropped_name("Kirjastoauto Keskusta") == "non_place/bookmobile"
+    assert spider._is_dropped_name("Kuvan testipiste") == "non_place/test_data"
+    assert spider._is_dropped_name("Mannerheimintien suojatie") == "non_place/crosswalk"
+    assert spider._is_dropped_name("Pirkkolan kuntorata") == "non_place/track"
+    assert spider._is_dropped_name("Sipoon Veden sähköpostiosoite") == "non_place/contact"
+    assert spider._is_dropped_name("Seritatyön sähköpostiosoite") == "non_place/contact"
+    assert spider.parse_channel(channel("Etsivä yksikkö")) is None
+    assert spider.crawler.stats.get_value("ptv_fi/dropped/non_place/mobile") == 1
 
 
-def test_seurakunta_operator_public():
-    from locations.items import Feature as _F
-    from locations.categories import apply_category as _apply
-
+def test_located_value_hygiene():
     spider = make_spider()
-    # Parishes are public-law bodies, not associations.
-    assert spider._is_private_org("Kirkkonummen suomalainen seurakunta") is False
-    assert spider._is_private_org("Helsingin vapaaseurakunta ry") is True
-    item = _F()
-    _apply(Categories.OFFICE_GOVERNMENT, item)
-    spider._apply_operator(item, "Parikkalan seurakunta")
-    assert item["operator"] == "Parikkalan seurakunta"
-    assert item["extras"].get("office") == "government"
-    assert item["extras"].get("operator:type") == "religious"
-
-
-def test_acronym_unit_is_clinic():
-    spider = make_spider()
-    assert cat(spider, "Vatsakeskus, Tays Hatanpää")[0] == Categories.CLINIC
-    assert cat(spider, "Vaativa kuntoutusyksikkö, Tays Hatanpää")[0] == Categories.CLINIC
-    assert cat(spider, "Arviointiyksikkö")[0] == Categories.CLINIC
-
-
-def test_service_desk_office_rows():
-    spider = make_spider()
-    assert cat(spider, "Mittauspalvelut")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Sisäinen tarkastus")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Terveyspalvelut")[0] == Categories.CLINIC  # terveyspalvelu outranks palvelut
-    assert cat(spider, "Iisalmen poliisiasema")[0] == Categories.POLICE  # police outranks tarkastus
-
-
-def test_plural_fields_normalize():
-    spider = make_spider()
-    assert cat(spider, "Tenniskentät") == (Categories.LEISURE_PITCH, {"sport": "tennis"})
-    assert cat(spider, "Kangaslammin nurmikentät")[0] == Categories.LEISURE_PITCH
-
-
-def test_beach_volley_spaced():
-    spider = make_spider()
-    for fi in (
-        "Tikkakosken liikuntapuiston beach volley -kenttä",
-        "Velaatan uimarannan beach volley -kenttä",
-    ):
-        category, extra = cat(spider, fi)
-        assert category == Categories.LEISURE_PITCH, fi
-        assert extra["sport"] == "beachvolleyball", fi
-
-
-def test_apartment_abbr_unit():
-    item = addressed(make_spider(), "Oikopolku", "2 as 3")
-    assert (item["street"], item["housenumber"]) == ("Oikopolku", "2")
-    assert "street_address" not in item
-    assert item["extras"]["addr:unit"] == "as 3"
-
-
-def test_numeric_dup_unit_dropped():
-    item = addressed(make_spider(), "Katu", "51, 51")
-    assert (item["street"], item["housenumber"]) == ("Katu", "51")
-    assert "street_address" not in item
-    assert "addr:unit" not in item["extras"]
-
-
-def test_nimi_placeholder_email_dropped():
-    from locations.items import Feature as _F
-
-    spider = make_spider()
-    item = _F()
-    spider._apply_contact(item, {"emails": [{"value": "nimi.sukunimi@kunta.fi"}]})
-    assert "email" not in item
-
-
-def test_island_area_tails_locate():
-    # Island service areas locate the POI instead of dropping the island.
-    name, located, official = split(make_spider(), "Kahvila / Ulkoilusaari")
-    assert name == "Kahvila"
-    assert located == "Ulkoilusaari"
-    assert official == "Kahvila / Ulkoilusaari"
-
-
-# ---- Review rounds 9-11: remaining categories ---------------------------------
-
-
-def test_zoo_athletics_gallery_shops():
-    spider = make_spider()
-    assert cat(spider, "Korkeasaaren eläintarha")[1] == {"tourism": "zoo"}
-    assert cat(spider, "Yli-Iin yleisurheilukeskus") == (
-        Categories.LEISURE_SPORTS_CENTRE,
-        {"sport": "athletics"},
-    )
-    assert cat(spider, "Yleisurheilukenttä")[0] == Categories.LEISURE_TRACK
-    assert cat(spider, "Raatihuone, raatihuonegalleria")[0] == Categories.ARTS_CENTRE
-    assert cat(spider, "Roihupellon myymälä, Stadin ammattiopisto")[1] == {"shop": "yes"}
-    assert cat(spider, "Lahden kaupunginteatterin lippumyymälä")[1] == {"shop": "tickets"}
-
-
-def test_stations():
-    spider = make_spider()
-    assert cat(spider, "Vehkalan asema")[1] == {"railway": "station", "public_transport": "station"}
-    assert cat(spider, "Linja-autoasema")[0] == Categories.BUS_STATION
-    assert cat(spider, "Huoltoasema")[0] is None
-    assert cat(spider, "Paloasema")[0] == Categories.FIRE_STATION
-
-
-def test_youth_and_wards_swedish():
-    spider = make_spider()
-    assert cat(spider, "Sökö ungdomslokal")[1] == {"amenity": "youth_centre"}
-    assert cat(spider, "Geriatrinen akuuttiosasto")[0] == Categories.CLINIC
-    assert cat(spider, "Oulun lyhytaikaishoidon yksikkö Elviira")[0] == Categories.NURSING_HOME
-
-
-def test_service_desk_rows():
-    spider = make_spider()
-    assert cat(spider, "Mittauspalvelut")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Sisäinen tarkastus")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Työllistymistä edistävä monialainen palvelu TYM")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Iisalmen poliisiasema")[0] == Categories.POLICE
-
-
-def test_roihuvara_day_unit_and_star():
-    # Bare-slash day-activity unit inverts; the rating star drops in cleaning.
-    name, located, official = named(make_spider(), "Roihuvuoren seniorikeskus/Liina päivätoiminta 2*", "Helsinki")
-    assert name == "Liina päivätoiminta 2"
-    assert located == "Roihuvuoren seniorikeskus"
-    assert official == "Roihuvuoren seniorikeskus/Liina päivätoiminta 2"
-
-
-def test_suomenlinna_fishing_inverts():
-    name, located, _ = split(make_spider(), "Suomenlinna / Kalastuspaikka")
-    assert name == "Kalastuspaikka"
-    assert located == "Suomenlinna"
-
-
-# ---- Review round 7 rerun: fused joints and gradation -------------------------
-
-
-def test_fused_joint_school_stays_whole():
-    # Espoonlahden koulun ja lukion liikuntasali: one joint venue.
-    signed = "Espoonlahden koulun ja lukion liikuntasali"
-    assert split(make_spider(), signed) == (signed, None, None)
-
-
-def test_throwing_spot_inverts():
-    name, located, official = split(make_spider(), "Pikku Huopalahden ala-asteen koulu / Koripallon heittopaikka")
-    assert name == "Koripallon heittopaikka"
-    assert located == "Pikku Huopalahden ala-asteen koulu"
-    assert official == "Pikku Huopalahden ala-asteen koulu / Koripallon heittopaikka"
-
-
-def test_genitive_field_shore_normalize():
-    spider = make_spider()
-    assert cat(spider, "Vasaramäen koulu, Tenniskentän yksikkö")[0] == Categories.LEISURE_PITCH
-
-
-# ---- Review rounds 8-11: remaining names --------------------------------------
-
-
-def test_locality_tail_at_health_host_stays_whole():
-    # Kalvolan neuvola, Iittala: single-capital tails at non-school
-    # institutions are localities, not named units (cf. Sipoon Enter).
-    signed = "Kalvolan neuvola, Iittala"
-    assert split(make_spider(), signed) == (signed, None, None)
-
-
-def test_branch_located_dedup_end_to_end():
-    spider = make_spider()
-    item = parsed(
-        spider, channel("Lastentautien poliklinikka, Forssan sairaala", office="FORSSA"), "Kanta-Hämeen hyvinvointialue"
-    )
-    assert item["name"] == "Lastentautien poliklinikka"
-    assert item["located_in"] == "Forssan sairaala"
-    assert item.get("branch") is None
-
-
-def test_rontgen_carries_clinic():
-    assert cat(make_spider(), "Katriinan sairaalan röntgen") == (
-        Categories.CLINIC,
-        {"healthcare": "medical_imaging"},
+    assert spider._clean_located_value("Kyläryhmä -palvelun järjestämispaikka, Virolahti 2", None) == "Kyläryhmä"
+    assert spider._clean_located("Aurinkolahden peruskoulu (Solvindsgatan 11)") == "Aurinkolahden peruskoulu"
+    assert spider._clean_located("Heteniitynkenttä (Vuosaari)") == "Heteniitynkenttä (Vuosaari)"
+    assert spider._clean_located("Infopiste") is None
+    assert spider._clean_located_value("Helsinki", "Helsinki") is None
+    assert (
+        PtvFISpider._lang_value([{"language": "fi", "value": ""}, {"language": "fi", "value": "Katu"}], "fi") == "Katu"
     )
 
 
-# ---- Round 12: generic-pool rescue (reviews 12_1..12_6 + user reports) ----
-
-
-def test_chess_boards_are_pitches():
+def test_gazetteer_coverage_lists():
+    # Gazetteer towns peel even mid-list; single-town names never enter;
+    # venue tails still venue; paren coverage matches case-insensitively.
     spider = make_spider()
-    category, extra = cat(spider, "Shakkilauta, Hesperianpuisto")
-    assert category == Categories.LEISURE_PITCH
-    assert extra == {"sport": "chess"}
-    category, extra = cat(spider, "Shakkilaudat, Hakasalmenpuisto")
-    assert category == Categories.LEISURE_PITCH
-    assert extra == {"sport": "chess"}
-    # The activity is not the venue.
-    assert cat(spider, "Pelataan yhdessä shakkia") == (None, None)
-
-
-def test_bay_headed_facilities_split():
-    spider = make_spider()
-    name, located, official = split(spider, "Töölönlahti / WDC-ulkokuntoilupaikka 1")
-    assert name == "WDC-ulkokuntoilupaikka 1"
-    assert located == "Töölönlahti"
-    assert official == "Töölönlahti / WDC-ulkokuntoilupaikka 1"
-    name, located, _ = split(spider, "Tahvonlahti / Hiekkakenttä")
-    assert name == "Hiekkakenttä"
-    assert located == "Tahvonlahti"
-    # The city of Lahti is never a bay head.
-    assert split(spider, "Lahti / Matkustajasatama") == ("Lahti / Matkustajasatama", None, None)
-
-
-def test_playgrounds_at_shores():
-    spider = make_spider()
-    assert cat(spider, "Leikkipaikka Tokoinranta")[0] == Categories.LEISURE_PLAYGROUND
-    assert cat(spider, "Hovirinnan Rantaleikkipuisto")[0] == Categories.LEISURE_PLAYGROUND
-    assert cat(spider, "Rantapuiston Leikkikenttä")[0] == Categories.LEISURE_PLAYGROUND
-    assert cat(spider, "Pakilan uimaranta")[0] == Categories.NATURAL_BEACH
-
-
-def test_fishing_spots():
-    spider = make_spider()
-    assert cat(spider, "Arabianranta / Kalastuspaikka")[1] == {"leisure": "fishing"}
-    assert cat(spider, "Eläintarhanlahti ja Tokoinranta / Kalastuspaikka")[1] == {"leisure": "fishing"}
-    assert cat(spider, "Tikkurilankosken kalastuslupa-alue")[1] == {"leisure": "fishing"}
-    assert cat(spider, "Mykänlammen virkistys ja kalastusalue")[1] == {"leisure": "fishing"}
-    # Area shelters keep shelter.
-    assert cat(spider, "Niemisjärven kalastusalueen laavu (Evo)")[0] == Categories.SHELTER
-
-
-def test_courts_and_their_guards():
-    spider = make_spider()
-    assert cat(spider, "Vakuutusoikeus")[0] == Categories.COURTHOUSE
-    assert cat(spider, "Korkein oikeus")[0] == Categories.COURTHOUSE
-    assert cat(spider, "Helsingin hallinto-oikeus")[0] == Categories.COURTHOUSE
-    assert cat(spider, "Mikkelin Asumisoikeus Oy:n toimisto")[0] == Categories.OFFICE_COMPANY
-    assert cat(spider, "Helsingin Asumisoikeus Oy")[0] == Categories.OFFICE_COMPANY
-    assert cat(spider, "Oikeuspsykiatrian vastaanotto, Auroran sairaala")[0] == Categories.CLINIC
-    assert cat(spider, "Lasten ja nuorten oikeuspsykologian yksikkö")[0] == Categories.CLINIC
-    assert cat(spider, "Koulupsykologi")[0] == Categories.CLINIC
-
-
-def test_civic_boards_are_offices():
-    spider = make_spider()
-    assert cat(spider, "Helsingin keskusvaalilautakunta")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Helsingin kaupunginvaltuusto")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Hankinnat ja Kilpailuttaminen")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Tonttijako")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Maakuntatalo")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Welcome Office")[0] == Categories.OFFICE_GOVERNMENT
-    # Youth councils are civic offices like the city council above.
-    assert cat(spider, "Nuorisovaltuusto")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_group_home_gradation():
-    category, extra = cat(make_spider(), "Hakalan ryhmäkodit")
-    assert category == Categories.SOCIAL_FACILITY
-    assert extra == {"social_facility": "group_home"}
-
-
-def test_terminals_are_ferry():
-    spider = make_spider()
-    assert cat(spider, "Hansaterminaali")[0] == Categories.FERRY_TERMINAL
-    assert cat(spider, "Länsiterminaali 1")[0] == Categories.FERRY_TERMINAL
-    # The food-distribution terminal keeps its social filing.
-    assert cat(spider, "Yhteisen pöydän hävikkiterminaali")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_inpatient_wards_are_clinics():
-    assert cat(make_spider(), "Laakson vuodeosasto 13 (infektio-osasto)")[0] == Categories.CLINIC
-    assert cat(make_spider(), "Pellon vuodeosasto")[0] == Categories.CLINIC
-
-
-def test_congress_halls_are_venues():
-    assert cat(make_spider(), "Konsertti- ja kongressitalo Mikaeli")[0] == Categories.EVENTS_VENUE
-
-
-def test_surplus_food_is_social():
-    spider = make_spider()
-    assert cat(spider, "Hävikkiruoan jako työttömille ja vähävaraisille")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Hävikkiruokajakelu")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_dump_sites_are_landfill():
-    assert cat(make_spider(), "Lumenkaatopaikka")[1] == {"landuse": "landfill"}
-    assert cat(make_spider(), "Pielaveden maankaatopaikka")[1] == {"landuse": "landfill"}
-
-
-def test_contact_channels_drop():
-    assert make_spider()._is_dropped_name("Sipoon Veden sähköpostiosoite") == "non_place/contact"
-    assert make_spider()._is_dropped_name("Seritatyön sähköpostiosoite") == "non_place/contact"
-
-
-def test_water_points():
-    spider = make_spider()
-    assert cat(spider, "Vesipiste veneilijöille")[0] == Categories.DRINKING_WATER
-    assert cat(spider, "Pielaveden kunnan yleinen vedenjakelupiste")[0] == Categories.DRINKING_WATER
-    assert cat(spider, "Virolahden kunnan vesiposti Virojoella")[0] == Categories.DRINKING_WATER
-
-
-def test_swedish_housing_is_social():
-    item = parsed(make_spider(), channel("Bromarv pensionärsbostäder"))
-    assert item.get_tag("amenity") == "social_facility"
-    assert item["extras"].get("social_facility:for") == "senior"
-
-
-def test_register_offices_are_government():
-    spider = make_spider()
-    assert cat(spider, "Kokkolan aluekeskusrekisteri")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Espoon aluekeskusrekisteri")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_municipal_enterprises_are_company_offices():
-    spider = make_spider()
-    assert cat(spider, "Kajaanin Vesi -liikelaitos")[0] == Categories.OFFICE_COMPANY
-    item = parsed(spider, channel("Kajaanin Vesi -liikelaitos"))
-    assert item["name"] == "Kajaanin Vesi -liikelaitos"
-    assert item.get_tag("office") == "company"
-
-
-def test_partnership_houses_are_community():
-    spider = make_spider()
-    assert cat(spider, "Kumppanuustalo Artteli")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Järjestötalon aukioloaika")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_designated_forests_are_wood():
-    assert cat(make_spider(), "Lapinlahden Erikoismetsä")[1] == {"natural": "wood"}
-
-
-def test_innovation_workshops():
-    category, extra = cat(make_spider(), "Innopaja & Kädentaitokeskus")
-    assert category == Categories.SOCIAL_FACILITY
-    assert extra == {"social_facility": "workshop"}
-
-
-def test_reuse_points_are_recycling():
-    assert cat(make_spider(), "Kiertopisteen materiaali- ja tekstiilipankki")[0] == Categories.RECYCLING
-
-
-def test_workers_halls_are_community():
-    spider = make_spider()
-    assert cat(spider, "Vartsalan työväentalo")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Toimintapäivät Lohjan Työväentalolla")[0] == Categories.COMMUNITY_CENTRE
-    # The gym inside still files as a gym.
-    assert cat(spider, "Ahtialan työväentalon kuntosali")[0] == Categories.GYM
-
-
-def test_swedish_dog_parks():
-    assert cat(make_spider(), "Hundparken")[0] == Categories.LEISURE_DOG_PARK
-
-
-def test_cafe_counters_are_cafes():
-    assert cat(make_spider(), "Jorvin Terassikahvio")[0] == Categories.CAFE
-
-
-def test_artwork_titles_stay_generic_for_rescue():
-    # Leikkivät karhut (9aa637ca): the title is not a playground;
-    # services/ontology rescue it to artwork instead.
-    assert cat(make_spider(), "Leikkivät karhut") == (None, None)
-
-
-def test_bilingual_translations_split():
-    item = parsed(
-        make_spider(),
-        channel(
-            "Sodanajan naisen muistomerkki",
-            en="Sodanajan naisen muistomerkki / Memorial to Women in Times of War",
-            sv="Den krigstida kvinnans minnesmärke",
-        ),
-    )
-    assert item["extras"].get("name:en") == "Memorial to Women in Times of War"
-    assert item["extras"].get("name:sv") == "Den krigstida kvinnans minnesmärke"
-
-
-def test_memorial_slash_names_stay_whole():
-    # Moduli / Rakentajaveistos: one artwork under two names, not host+venue.
-    item = parsed(
-        make_spider(),
-        channel(
-            "Moduli / Rakentajaveistos",
-            en="Moduli (Rakentajaveistos) / The Module",
-            sv="Modul / Byggarnas minnesmärke",
-        ),
-    )
-    assert item["name"] == "Moduli / Rakentajaveistos"
-    assert item.get("located_in") is None
-
-
-def test_mid_name_chain_brands_operate():
-    # Päiväkoti Pilke Äppelbo: city-purchased but Pilke-operated.
-    item = parsed(
-        make_spider(),
-        channel("Päiväkoti Pilke Äppelbo daghem"),
-        "Turun kaupunki, Kasvatuksen ja koulutuksen toimiala",
-    )
-    assert item["operator"] == "Pilke"
-    assert item["extras"].get("operator:type") == "private"
-
-
-def test_lt_numbers_keep_last():
-    item = addressed(make_spider(), "Juurikoskenkatu", "1 lt 7")
-    assert item.get("street") == "Juurikoskenkatu"
-    assert item.get("housenumber") == "7"
-
-
-def test_numberless_bare_streets_stay():
-    # Raahen rantaraitti / Luolavuoren pulkkamäki rows: bare streets
-    # carry the name with no number (review12_1 systemic declined).
-    assert addressed(make_spider(), "Ulkofantintie", "").get("street") == "Ulkofantintie"
-    assert addressed(make_spider(), "Luolavuorenpolku", "").get("street") == "Luolavuorenpolku"
-
-
-# ---- Round 13 + code review: ordering, guards, crawl paths ----
-
-
-def test_specific_halls_outrank_generic():
-    spider = make_spider()
-    assert cat(spider, "Aleksis Kiven peruskoulu / Juhlasali")[0] == Categories.EVENTS_VENUE
-    assert cat(spider, "Stoa / Musiikkisali")[0] == Categories.EVENTS_VENUE
-    assert cat(spider, "Mikkelin jäähalli")[0] == Categories.LEISURE_ICE_RINK
-    assert cat(spider, "Keilahalli")[0] == Categories.LEISURE_BOWLING_ALLEY
-    assert cat(spider, "Tervanapsu autiotupa")[0] == Categories.TOURISM_WILDERNESS_HUT
-    assert cat(spider, "Toppelundinrannan koirauimaranta")[0] == Categories.LEISURE_DOG_PARK
-    assert cat(spider, "Valtuustosali")[0] == Categories.EVENTS_VENUE
-
-
-def test_crematoriums():
-    spider = make_spider()
-    assert cat(spider, "Joensuun krematorio")[1] == {"amenity": "crematorium"}
-    assert cat(spider, "Krematorio")[1] == {"amenity": "crematorium"}
-    # The parking machine on Krematoriontie stays a machine.
-    assert cat(spider, "Pysäköintilippuautomaatti 630, Krematoriontie, korttimaksu")[0] == (Categories.VENDING_MACHINE)
-
-
-def test_exhibition_venues_are_museums():
-    spider = make_spider()
-    assert cat(spider, "Näyttelyhalli")[0] == Categories.MUSEUM
-    assert cat(spider, "Näyttelykeskus WeeGee")[0] == Categories.MUSEUM
-    assert cat(spider, "Leo Torpan kamerakokoelma")[0] == Categories.MUSEUM
-    assert cat(spider, "Sonkajärven kirjaston näyttelysali")[0] == Categories.MUSEUM
-
-
-def test_therapists_are_clinics():
-    spider = make_spider()
-    category, extra = cat(spider, "Jalkaterapeutti, Loimaa")
-    assert category == Categories.CLINIC
-    assert extra == {"healthcare": "podiatrist"}
-    assert cat(spider, "Varhaiskasvatuksen puheterapeutti")[0] == Categories.CLINIC
-
-
-def test_support_centres_are_social():
-    assert cat(make_spider(), "Perhetukikeskus Päiväperho")[0] == Categories.SOCIAL_FACILITY
-    assert cat(make_spider(), "Seri-tukikeskus")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_waste_plurals_are_recycling():
-    assert cat(make_spider(), "Vaarallisten jätteiden autokeräys")[0] == Categories.RECYCLING
-
-
-def test_kodats_are_shelters():
-    assert cat(make_spider(), "Grillikatokset- ja kodat")[0] == Categories.SHELTER
-
-
-def test_office_desk_pairs_keep_whole():
-    spider = make_spider()
-    signed = "Pirkanmaan oikeusaputoimisto, Valkeakosken vastaanotto"
-    assert split(spider, signed) == (signed, None, None)
-    signed = "Tampereen kaupunki, Vastaanotto"
-    assert split(spider, signed) == (signed, None, None)
-
-
-def test_meeting_places_outrank_clientele():
-    spider = make_spider()
-    assert cat(spider, "Mielenterveyskuntoutujien matalan kynnyksen kohtaamispaikka")[0] == (
-        Categories.COMMUNITY_CENTRE
-    )
-    assert cat(spider, "Nuorten ja nuorten aikuisten kohtaamispaikka JOJO")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_court_chancellery_is_courthouse():
-    assert cat(make_spider(), "Oulun käräjäoikeus, Ylivieskan kanslia")[0] == Categories.COURTHOUSE
-
-
-def test_postcode_only_numbers_drop():
-    item = addressed(make_spider(), "Kalevalantie 13", "90570")
-    assert item.get("street") == "Kalevalantie"
-    assert item.get("housenumber") == "13"
-
-
-def test_pobox_whole_numbers_drop():
-    item = addressed(make_spider(), "Tie", "PL 24")
-    assert item.get("housenumber") is None
-
-
-def test_building_space_tails_keep_unit():
-    item = addressed(make_spider(), "Tie", "15 rak.1 B-rappu")
-    assert item.get("housenumber") == "15"
-    assert item["extras"].get("addr:unit") == "rak.1 B-rappu"
-
-
-def test_lang_value_skips_empty():
-    assert PtvFISpider._lang_value([{"language": "fi", "value": ""}, {"language": "fi", "value": "Katu"}], "fi") == (
-        "Katu"
+    full = "Ravitsemusterapia, Kustavi, Laitila, Masku, Mynämäki, Naantali, Nousiainen"
+    assert spider._split_name(full, None) == ("Ravitsemusterapia", None, full)
+    assert spider._split_paren("Palvelu, helsinki (Nousiainen, Laitila)", "Helsinki") == (
+        "Palvelu",
+        None,
+        "Palvelu, helsinki (Nousiainen, Laitila)",
     )
 
 
-def test_sculptures_carry_type():
-    category, extra = cat(make_spider(), "Musta graniittiveistos")
-    assert category is None
-    assert extra == {"tourism": "artwork", "artwork_type": "sculpture"}
-    assert cat(make_spider(), "Kauko Kortelaisen veistospuisto")[0] == Categories.LEISURE_PARK
-
-
-def test_swim_hall_gym_is_gym():
-    assert cat(make_spider(), "Itäkeskuksen uimahalli / Liikuntasali")[0] == Categories.GYM
-
-
-def test_uimahalli_inessive_splits():
-    name, located, official = split(make_spider(), "Yhteisökahvila Hollolan uimahallilla")
-    assert name == "Yhteisökahvila"
-    assert located == "Hollolan uimahalli"
-    assert official == "Yhteisökahvila Hollolan uimahallilla"
-
-
-def test_org_bad_shape_flushes_pending():
+def test_list_and_batch_counters():
     spider = make_spider()
-    item = Feature()
-    item["name"] = "X"
-    spider._pending["org-1"] = [item]
-
-    def _boom():
-        raise ValueError("nope")
-
-    bad = SimpleNamespace(url="https://x/?guids=org-1", json=_boom)
-    assert list(spider.parse_orgs(bad)) == [item]
-    assert spider._pending == {}
+    assert list(spider.parse(TextResponse(url="https://x/?page=1", body=b"nope", encoding="utf-8"), page=1)) == []
+    assert spider.crawler.stats.get_value("ptv_fi/page/bad_json") == 1
+    assert list(spider.parse(TextResponse(url="https://x/?page=2", body=b"[]", encoding="utf-8"), page=2)) == []
+    assert spider.crawler.stats.get_value("ptv_fi/page/bad_shape") == 1
+    assert list(spider.parse_batch(TextResponse(url="https://x/list", body=b"nope", encoding="utf-8"))) == []
+    assert spider.crawler.stats.get_value("ptv_fi/batch/bad_json") == 1
+    assert list(spider.parse_batch(TextResponse(url="https://x/list", body=b"{}", encoding="utf-8"))) == []
+    assert spider.crawler.stats.get_value("ptv_fi/batch/bad_shape") == 1
+    body = json.dumps({"itemList": [{"id": "a"}, {"noid": 1}, "x"], "pageCount": 1}).encode()
+    out = list(spider.parse(TextResponse(url="https://x/?page=1", body=body, encoding="utf-8"), page=1))
+    assert spider._ids == ["a"]
+    assert spider.crawler.stats.get_value("ptv_fi/list/ids") == 1
+    assert out and all(getattr(r, "errback", None) is not None for r in out)
 
 
 def test_pagination_stops_on_repeated_ids():
-    from scrapy.http import JsonRequest
-
     spider = make_spider()
     page = {"itemList": [{"id": "a"}]}
     out1 = list(spider.parse(SimpleNamespace(json=lambda: dict(page)), 1))
@@ -4003,875 +3650,7 @@ def test_pagination_stops_on_repeated_ids():
     assert not any("page=3" in getattr(r, "url", "") for r in out2)
 
 
-def test_always_open_yields_to_spans():
-    # An on-call availability record never overrides real timetables:
-    # spans render instead of 24/7 (cf. Uudenmaan aluetoimisto).
-    spider = make_spider()
-    assert (
-        spider._hours(
-            {
-                "serviceHours": [
-                    {"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True},
-                    {
-                        "serviceHourType": "DaysOfTheWeek",
-                        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
-                    },
-                ]
-            }
-        ).as_opening_hours()
-        == "Mo 08:00-16:00"
-    )
-
-
-def test_dangling_preposition_city_kept():
-    # International School of Helsinki: stripping the city strands "of".
-    signed = "Päiväkoti International School of Helsinki"
-    assert split(make_spider(), signed, "Helsinki") == (signed, None, None)
-
-
-def test_artwork_titles():
-    assert cat(make_spider(), 'Taideteos "Turvapaikka" osa 1')[0] == Categories.TOURISM_ARTWORK
-
-
-def test_district_tails_drop():
-    item = addressed(make_spider(), "Tivolikuja", "1 Alppiharju")
-    assert item.get("street") == "Tivolikuja"
-    assert item.get("housenumber") == "1"
-
-
-def test_shelters_outrank_stations():
-    # Sörnäisten metroaseman yleinen väestönsuoja: the shelter names the
-    # POI, the inflected station modifier must not file it as a station.
-    category, extra = cat(make_spider(), "Sörnäisten metroaseman yleinen väestönsuoja")
-    assert category == Categories.MILITARY_BUNKER
-    assert extra == {"bunker_type": "bomb_shelter"}
-    assert cat(make_spider(), "Kampin metroaseman yleinen väestönsuoja")[0] == Categories.MILITARY_BUNKER
-
-
-def test_korsu_dugouts_are_bunkers():
-    # Salpalinjan teräsbetoninen korsu (aa8503c3, round-18 C): war-history
-    # dugouts file military=bunker like the other shelters; no bunker_type
-    # guess (a combat dugout is not a bomb_shelter).
-    spider = make_spider()
-    assert cat(spider, "Salpalinjan teräsbetoninen korsu") == (Categories.MILITARY_BUNKER, None)
-
-
-def test_stair_range_units_parse():
-    # Kauppakatu 27b A2-4 (416450a7, round-18 A): staircase-letter +
-    # apartment-range tails parse to housenumber + unit, not freeform.
-    spider = make_spider()
-    assert spider._split_addr_tokens("Kauppakatu 27b A2-4".split()) == ("Kauppakatu", "27b", "A2-4")
-
-
-def test_municipality_gazetteer_peels_coverage_lists():
-    # a5993eab full cleanup: gazetteer towns peel even mid-list, beating the
-    # fixture substring ("tila" in Laitila); the full form stays official.
-    # Single-town names never enter (count guard); venue tails still venue.
-    spider = make_spider()
-    full = "Ravitsemusterapia, Kustavi, Laitila, Masku, Mynämäki, Naantali, Nousiainen"
-    assert spider._split_name(full, None) == ("Ravitsemusterapia", None, full)
-    assert spider._split_name("Ravintola, Lahti", None) == ("Ravintola, Lahti", None, None)
-    assert spider._split_name("Neuvonta, Reimasali, Lahti", None) == (
-        "Neuvonta",
-        "Reimasali",
-        "Neuvonta, Reimasali, Lahti",
-    )
-
-
-def test_station_compounds_file_as_facilities():
-    spider = make_spider()
-    assert cat(spider, "Vesilahden lähiasema")[0] == Categories.CLINIC
-    assert cat(spider, "Selviämishoitoasema")[0] == Categories.CLINIC
-    assert cat(spider, "Selviämisasema")[0] == Categories.CLINIC
-    assert cat(spider, "Sydänasema")[0] == Categories.CLINIC
-    assert cat(spider, "Krossin pelastus- ja ensihoitoasema")[0] == Categories.FIRE_STATION
-    assert cat(spider, "Tervolan Ekoasema")[0] == Categories.RECYCLING
-    assert cat(spider, "ViaDian Kohtaamisasema")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Miesten asema")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "BusinessAsema")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Purasjoen puolustusasema 1939")[0] == Categories.TOURISM_ATTRACTION
-    assert cat(spider, "Asemakaavoitus")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Testausasema") == (None, None)
-
-
-def test_station_needs_word_boundary():
-    spider = make_spider()
-    assert cat(spider, "Kampin metroasema")[1] == {"railway": "station", "public_transport": "station"}
-    assert cat(spider, "Leinelän asema")[1] == {"railway": "station", "public_transport": "station"}
-    # Inflected station modifiers without facility words stay generic.
-    assert cat(spider, "Asematien Pysäkki") == (None, None)
-    # Health-station names in inflected form still type health, not stations.
-    assert cat(spider, "Neuvonta terveysasemalla")[0] == Categories.CLINIC
-
-
-def test_schoolyard_exercise_grounds():
-    # Service-map activity refinement: ball arenas are pitches, schoolyards
-    # read as playgrounds, other grounds stay fitness stations.
-    spider = make_spider()
-    assert cat(spider, "Åshöjdens grundskola / Lähiliikuntapaikka")[0] == Categories.LEISURE_PLAYGROUND
-    assert cat(spider, "Porolahden peruskoulu / Lähiliikuntapaikka")[0] == Categories.LEISURE_PLAYGROUND
-    assert cat(spider, "Landbonkenttä / Lähiliikuntapaikka (Miniareena)")[0] == Categories.LEISURE_PITCH
-    assert cat(spider, "Lähiliikuntapaikka")[0] == Categories.LEISURE_FITNESS_STATION
-
-
-def test_botanical_gardens():
-    # Talvipuutarha (Nähtävyydet service, botanical onto): garden, never the
-    # farm service's social facility.
-    garden = {"leisure": "botanical_garden"}
-    assert cat(make_spider(), "Talvipuutarha") == (None, garden)
-    assert cat(make_spider(), "Kasvitieteellinen puutarha") == (None, garden)
-    assert cat(make_spider(), "Koivuhaan arboretum") == (None, garden)
-
-
-def test_event_areas_are_not_parks():
-    assert cat(make_spider(), "Pengerpuisto, tapahtuma-alue")[0] == Categories.EVENTS_VENUE
-
-
-def test_institution_hosted_exercise_grounds_name_the_ground():
-    # Vuoniityn peruskoulu / Lähiliikuntapaikka: the ground names the POI,
-    # the school the venue (cf. slash_room). Non-school heads keep head-first.
-    spider = make_spider()
-    signed = "Vuoniityn peruskoulu / Lähiliikuntapaikka"
-    assert named(spider, signed) == ("Lähiliikuntapaikka", "Vuoniityn peruskoulu", signed)
-    signed = "Myllypuron peruskoulu / Lähiliikuntapaikka 2"
-    assert named(spider, signed) == ("Lähiliikuntapaikka 2", "Myllypuron peruskoulu", signed)
-    signed = "Leikkipuisto Lampi / Lähiliikuntapaikka"
-    assert named(spider, signed) == ("Leikkipuisto Lampi", "Lähiliikuntapaikka", signed)
-
-
-def test_info_and_exercise_points_outrank_hosts():
-    spider = make_spider()
-    assert cat(spider, "Talin liikuntapuisto / Opastuspiste")[0] == Categories.TOURISM_INFORMATION
-    assert cat(spider, "Vanhan-Mankkaan puiston kuntoilupiste 1")[0] == Categories.LEISURE_FITNESS_STATION
-
-
-def test_fi_duplicates_strip_from_translations():
-    # Korsverk (Ristikko): the parenthesised fi name drops, the translation stays.
-    item = parsed(make_spider(), channel("Ristikko", sv="Korsverk (Ristikko)", en="Crosses"))
-    assert item["extras"].get("name:sv") == "Korsverk"
-    assert item["extras"].get("name:en") == "Crosses"
-
-
-def test_truncated_fi_segment_splits_from_translation():
-    # Filosofia, lääketiede.../ Philosophy...: the truncated fi segment drops.
-    item = parsed(
-        make_spider(),
-        channel(
-            "Filosofia, Lääketiede, Teologia ja Juridiikka",
-            en="Filosofia, lääketiede.../ Philosophy, Medicine, Theology and Justice",
-        ),
-    )
-    assert item["extras"].get("name:en") == "Philosophy, Medicine, Theology and Justice"
-
-
-def test_venue_prefix_strips_from_translation():
-    # Aninkaisten koulu (Aninkainen School) Gym A: the Finnish venue prefix
-    # duplicates located_in; the translated rest stays verbatim (feed parens kept).
-    item = parsed(make_spider(), channel("Aninkaisten koulun A-sali", en="Aninkaisten koulu (Aninkainen School) Gym A"))
-    assert item.get("located_in") == "Aninkaisten koulu"
-    assert item["extras"].get("name:en") == "(Aninkainen School) Gym A"
-
-
-def test_untranslated_venue_copy_is_no_translation():
-    # Leikkipuisto Jakomäki as en duplicates the Finnish-signed venue: dropped.
-    item = parsed(make_spider(), channel("Leikkipuisto Jakomäki / Hiekkakenttä", en="Leikkipuisto Jakomäki"))
-    assert item.get("located_in") == "Leikkipuisto Jakomäki"
-    assert "name:en" not in (item.get("extras") or {})
-
-
-def test_hospital_wards_venue_the_hospital():  # Raskauden seurantaosasto, Tyks Majakkasairaala: the ward names the POI
-    # (cf. yksikkö units splitting the same way).
-    spider = make_spider()
-    signed = "Raskauden seurantaosasto, Tyks Majakkasairaala, Turku"
-    assert split(spider, signed, "Turku") == (
-        "Raskauden seurantaosasto",
-        "Tyks Majakkasairaala",
-        signed,
-    )
-    signed = "Lasten ja nuorten osasto, Ahveniston sairaala"
-    assert split(spider, signed) == ("Lasten ja nuorten osasto", "Ahveniston sairaala", signed)
-
-
-def test_city_switchboards_drop():
-    # Vantaan vaihde 09 839 11 serves 145 city rows: never a direct contact.
-    spider = make_spider()
-    item = Feature()
-    spider._apply_contact(item, {"phoneNumbers": [{"prefixNumber": "+358", "number": "983911"}]})
-    assert item.get("phone") is None
-
-
-def test_sininauha_is_private():
-    # Satakunnan Sininauha ry (0225013-4): Blue-Ribbon association, no PTV marker.
-    assert make_spider()._is_private_org("Satakunnan Sininauha") is True
-
-
-def test_tourist_info_names_beat_office_hosts():
-    # Matkailuneuvonta/matkailuinfo are tourist info desks, not generic
-    # offices — even inside toimipiste/palvelupiste hosts. The luontotupa
-    # dual keeps the hut (tupa rule stays earlier).
-    spider = make_spider()
-    assert cat(spider, "Matkailuneuvontapiste Sulkavalla")[0] == Categories.TOURISM_INFORMATION
-    assert cat(spider, "Laitilan matkailuinfopiste")[0] == Categories.TOURISM_INFORMATION
-    assert cat(spider, "Visit Pori Matkailuneuvonta")[0] == Categories.TOURISM_INFORMATION
-    assert cat(spider, "Matkailuinfon toimipiste")[0] == Categories.TOURISM_INFORMATION
-    assert cat(spider, "Matkailuneuvonnan palvelupiste")[0] == Categories.TOURISM_INFORMATION
-    assert cat(spider, "Koloveden luontotupa ja matkailuneuvonta")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_hosted_desks_file_as_desks():
-    # Sote-aseman lähitori names the desk (74 sibling lähitori rows file
-    # social_facility); plain youth stations stay offices, but the
-    # mental-health Nuorisoasema is a clinic.
-    spider = make_spider()
-    assert cat(spider, "Pirkkalan sote-aseman lähitori")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Nuorisoasema mielenterveystyö")[0] == Categories.CLINIC
-    assert cat(spider, "Nuorisoasema Klaara")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_single_digit_country_typo_repairs():
-    # "+359 447301262" on an Ikaalinen row: Bulgarian code on a Finnish
-    # mobile shape, one digit off every other row — repair, don't pass on.
-    assert make_spider()._normalize_phone("+359 447301262") == "+358 44 7301262"
-
-
-def test_supported_housing_beats_diagnosis():
-    # Etu-Töölön asuintalo filed clinic via mental-health rescue; the POI
-    # is supported housing (Mielenterveyskuntoutujien tuettu asuminen).
-    spider = make_spider()
-    assert cat(spider, "Mielenterveyskuntoutujien tuettu asuminen")[0] == Categories.ASSISTED_LIVING
-    ch = channel("Etu-Töölön asuintalo")
-    ch["services"] = [{"service": {"name": "Mielenterveyskuntoutujien tuettu asuminen"}}]
-    item = parsed(spider, ch)
-    assert item.get_tag("amenity") == "social_facility"
-    assert item["extras"].get("social_facility") == "assisted_living"
-
-
-def test_utility_building_venues_name_the_poi():
-    # "... / Huoltorakennus" with Urheilukentät services: the venue field
-    # names and types the POI, never the utility building.
-    spider = make_spider()
-    ch = channel("Eläintarhan urheilukenttä / Huoltorakennus 3")
-    ch["services"] = [{"service": {"name": "Urheilukentät"}}]
-    item = parsed(spider, ch)
-    assert item.get_tag("leisure") == "pitch"
-    assert item["name"] == "Eläintarhan urheilukenttä"
-
-
-def test_room_tails_type_the_poi():
-    # Facility tails name the POI ("Hietarannan uimaranta /
-    # Koripallokenttä"): the tail types it, not the beach host.
-    spider = make_spider()
-    assert cat(spider, "Hietarannan uimaranta / Koripallokenttä")[0] == Categories.LEISURE_PITCH
-    assert named(spider, "Hietarannan uimaranta / Koripallokenttä") == (
-        "Koripallokenttä",
-        "Hietarannan uimaranta",
-        "Hietarannan uimaranta / Koripallokenttä",
-    )
-    assert named(spider, "Väinämöisenkenttä / Ulkokuntoilupaikka") == (
-        "Ulkokuntoilupaikka",
-        "Väinämöisenkenttä",
-        "Väinämöisenkenttä / Ulkokuntoilupaikka",
-    )
-    assert cat(spider, "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)")[0] == (Categories.LEISURE_FITNESS_STATION)
-
-
-def test_compound_and_typeless_tails_keep_full_filing():
-    # "Sipoon opisto / Opintien palvelupiste ja liikuntatila" stays a
-    # college; "Maunulan liikuntahalli / Sisäampumarata" stays a hall;
-    # institution tails hosting activities keep full-form filing.
-    spider = make_spider()
-    assert cat(spider, "Sipoon opisto / Opintien palvelupiste ja liikuntatila")[0] == Categories.COLLEGE
-    assert cat(spider, "Maunulan liikuntahalli / Sisäampumarata")[0] == Categories.LEISURE_SPORTS_CENTRE
-    assert cat(spider, "Iltapäivätoiminta / Puotilan ala-aste, Saalem-Nuoret ry")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_parenthesised_room_tails_split():
-    # "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)": the tailed
-    # facility names the POI, parens included, the beach hosts it.
-    spider = make_spider()
-    assert named(spider, "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)") == (
-        "Ulkokuntoilupaikka (Keski)",
-        "Hietarannan uimaranta",
-        "Hietarannan uimaranta / Ulkokuntoilupaikka (Keski)",
-    )
-    assert named(spider, "Malmitalo / Esiintymisali (Pieni sali)") == (
-        "Esiintymisali (Pieni sali)",
-        "Malmitalo",
-        "Malmitalo / Esiintymisali (Pieni sali)",
-    )
-
-
-def test_grill_places_are_picnic_sites():
-    # "Seurasaari / Grillipaikka" filed park via park-service rescue; a
-    # grill place is a picnic site. kota/katos shelters keep shelter.
-    spider = make_spider()
-    assert cat(spider, "Seurasaari / Grillipaikka")[0] == Categories.TOURISM_PICNIC_SITE
-    assert cat(spider, "Meri-Rastila / Grillipaikka")[0] == Categories.TOURISM_PICNIC_SITE
-    assert cat(spider, "Malmin kenttä / Väliaikainen grillipaikka")[0] == Categories.TOURISM_PICNIC_SITE
-
-
-def test_orienteering_controls_stay_generic():
-    # Otaniemen kiintorastit filed shooting_ground via ampumaradat
-    # ontology dumps; fixed controls are markers, not ranges.
-    spider = make_spider()
-    ch = channel("Otaniemen kiintorastit")
-    ch["services"] = [{"service": {"name": "Liikunnan ja urheilun tulosyksikkö"}}]
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "ampumaradat"}]}]
-    item = parsed(spider, ch)
-    assert item.get_tag("amenity") == "yes"
-    assert item.get_tag("leisure") is None
-
-
-def test_outdoor_islands_are_islands():
-    # "Porsas" filed social_facility via a petting-farm service; with
-    # Ulkoilusaaret services it is an island like its siblings.
-    spider = make_spider()
-    ch = channel("Porsas")
-    ch["services"] = [
-        {"service": {"name": "Haltialan kotieläintila"}},
-        {"service": {"name": "Ulkoilusaaret"}},
-    ]
-    item = parsed(spider, ch)
-    assert item["extras"].get("place") == "island"
-
-
-def test_home_care_beats_local_service_areas():
-    # "Kotihoito/Töölö 2 lähipalvelualue" filed office via lähipalvelu;
-    # home care outranks the coverage-area tail. Genitive näytteenoton
-    # sampling points file as sampling, not offices.
-    spider = make_spider()
-    assert cat(spider, "Kotihoito/Töölö 2 lähipalvelualue")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Kotihoito/Pitäjänmäki 1 lähipalvelualue")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Oulun Limingantulli-Meritulli kotihoito")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Veikkolan näytteenoton lähipalvelu")[0] == Categories.SAMPLE_COLLECTION
-
-
-def test_forskola_is_kindergarten():
-    # "Kyrkoby förskola" filed school via the skola regex; förskola is
-    # a Swedish preschool like daghem/dagis.
-    spider = make_spider()
-    assert cat(spider, "Kyrkoby förskola")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Söderkulla förskola")[0] == Categories.KINDERGARTEN
-
-
-def test_care_homes_beat_care_desks():
-    # "Hoitokoti Toppila" filed office via the bare hoito desk rule;
-    # care homes are nursing homes. Family daycare homes keep theirs.
-    spider = make_spider()
-    assert cat(spider, "Hoitokoti Toppila")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Hoitokoti, Hyrynsalmen hoitokoti")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Eläinhoitola")[0] == Categories.VETERINARY
-    assert cat(spider, "Heinolan Lintuhoitola")[0] == Categories.VETERINARY
-    assert cat(spider, "Ryhmäperhepäivähoitokoti Rastas")[0] == Categories.KINDERGARTEN
-
-
-def test_training_courses_are_not_schools():
-    # "Koulutukset ja luennot" filed school via the koulu lookahead gap
-    # (koulutuksen/tukset continue with tuk, not tus); courses are desks.
-    spider = make_spider()
-    assert cat(spider, "Koulutukset ja luennot")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Kasvatuksen ja koulutuksen toimiala, hallinto")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_school_compounds_keep_facility():
-    # "Koulumuseo" and "Koulutoimisto" filed school; the facility word
-    # is the second compound element (museum, education office).
-    spider = make_spider()
-    assert cat(spider, "Koulumuseo Lagstad")[0] == Categories.MUSEUM
-    assert cat(spider, "Saukkojärven kotiseutu- ja koulumuseo")[0] == Categories.MUSEUM
-    assert cat(spider, "Vesilahden koulutoimisto")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Koulutoimisto")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_tupa_yields_to_care_venues():
-    # The compound-end tupa rule shadowed later care/office/park rules:
-    # care homes, day centres, shores, desks and culture houses file as
-    # themselves now. The luontotupa dual keeps the hut (pinned).
-    spider = make_spider()
-    assert cat(spider, "Iin palvelukoti Emmintupa")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Palvelukoti Snällintupa")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Rovaniemen päiväkeskus Veitikantupa")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Salmen ulkoilualue / Taukotupa")[0] == Categories.LEISURE_PARK
-    assert cat(spider, "Asiakaspalvelupiste Tietotupa")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Lastenkulttuurikeskus Pyykkitupa")[0] == Categories.ARTS_CENTRE
-    assert cat(spider, "Koloveden luontotupa ja matkailuneuvonta")[0] == Categories.COMMUNITY_CENTRE
-
-
-def test_library_reading_rooms_are_libraries():
-    # "Valkeakosken kaupunginkirjaston lehtisali" filed sports hall via
-    # sali; the head is the library, the tail a reading room.
-    spider = make_spider()
-    assert cat(spider, "Valkeakosken kaupunginkirjaston lehtisali")[0] == Categories.LIBRARY
-    assert cat(spider, "Lehtilukusali")[0] == Categories.LIBRARY
-    assert cat(spider, "Lehtisali ja omatoimikirjasto")[0] == Categories.LIBRARY
-
-
-def test_housing_plural_stems():
-    # One unlisted spelling per venue family went untyped: supported
-    # flats, service flats (filed office via palvelu), joint shelters,
-    # parish centres/premises and short-stay units.
-    spider = make_spider()
-    assert cat(spider, "Roihuvuoren tukiasunnot")[0] == Categories.ASSISTED_LIVING
-    assert cat(spider, "Ruusukujan palveluasunnot")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Lehtisaaren yhteiskalliosuoja")[0] == Categories.MILITARY_BUNKER
-    assert cat(spider, "Linnainmaan seurakuntakeskus")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Seurakuntatila Kauksun Kulma")[0] == Categories.COMMUNITY_CENTRE
-    assert cat(spider, "Lyhytaikaisyksikkö Selvari, Seinäjoki")[0] == Categories.NURSING_HOME
-
-
-def test_customs_rule_skips_place_names():
-    # "Tullinkulma"/"Tullikamari"/crosswalk filed customs office via the
-    # bare tulli substring; only genuine customs (Lentotulli) keeps it.
-    spider = make_spider()
-    assert cat(spider, "Lentotulli")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Tullinkulma")[0] is None
-    assert cat(spider, "Tullikamari")[0] is None
-    assert cat(spider, "Myllytullin koulu")[0] == Categories.SCHOOL
-
-
-def test_service_info_compounds_keep_service():
-    # "Seniori-info" and "Kansalaisinfo" filed tourist info; senior and
-    # citizen desks file as themselves. Bone-health info is an association desk, not a clinic.
-    spider = make_spider()
-    assert cat(spider, "Seniori-info")[0] == Categories.SOCIAL_FACILITY
-    assert cat(spider, "Yhteispalvelu Vaasa - Kansalaisinfo")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Luustoinfo osteoporoosia sairastaville / Lahti")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_square_guard_keeps_venues():
-    # Facility venues at squares filed place=square with no category:
-    # daycares, care homes, pharmacies, coordinators and schools file as
-    # themselves; bare squares stay squares.
-    spider = make_spider()
-    assert cat(spider, "Päiväkoti Vihtori")[0] == Categories.KINDERGARTEN
-    assert cat(spider, "Esperi Hoivakoti Vihtori")[0] == Categories.NURSING_HOME
-    assert cat(spider, "Kotkan 5. Karhulan Tori apteekki")[0] == Categories.PHARMACY
-    assert cat(spider, "Hämeenlinnan I Tori-apteekki")[0] == Categories.PHARMACY
-    assert cat(spider, "Terveyskeskus Mehiläinen Espoontori")[0] == Categories.CLINIC
-    assert cat(spider, "Tiernan koulu, Heinätori")[0] == Categories.SCHOOL
-    assert cat(spider, "Työllisyyskoordinaattori")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Kiuruveden tori")[0] is None
-    assert cat(spider, "Kuusijärven saunat")[0] == Categories.SAUNA
-
-
-def test_island_titled_artworks_are_art():
-    # "Saari" with Julkinen taide services (HAM) is public art, not land.
-    spider = make_spider()
-    ch = channel("Saari")
-    ch["services"] = [{"service": {"name": "Julkinen taide"}}]
-    ch["ontologyTerms"] = [
-        {"name": [{"language": "fi", "value": "julkinen taide"}]},
-        {"name": [{"language": "fi", "value": "veistokset"}]},
-    ]
-    item = parsed(spider, ch)
-    assert item["extras"].get("tourism") == "artwork"
-
-
-def test_stray_space_before_comma_collapses():
-    # "Prästgårdsbackens förskola , Gesterby" carries feed dirt; the
-    # comma still parses the same (village kept, kindergarten kept).
-    spider = make_spider()
-    assert spider._clean_name("Prästgårdsbackens förskola , Gesterby") == ("Prästgårdsbackens förskola, Gesterby")
-    assert cat(spider, "Prästgårdsbackens förskola, Gesterby")[0] == Categories.KINDERGARTEN
-
-
-def test_bone_info_is_an_association_desk():
-    # "Luustoinfo osteoporoosia sairastaville / Lahti" is a patient-association
-    # info desk (Suomen Luustoliitto ry), not a clinic; the operator tier
-    # demotes association desks to office=association.
-    spider = make_spider()
-    assert cat(spider, "Luustoinfo osteoporoosia sairastaville / Lahti")[0] == Categories.OFFICE_GOVERNMENT
-    ch = channel("Luustoinfo osteoporoosia sairastaville / Lahti")
-    item = parsed(spider, ch, org_name="Suomen Luustoliitto ry")
-    assert item["extras"].get("office") == "association"
-
-
-def test_shelters_carry_shelter_subtype():
-    # "Mikkelin turvakoti" is a domestic-violence shelter; desks keep
-    # filing as offices.
-    spider = make_spider()
-    assert cat(spider, "Mikkelin turvakoti") == (
-        Categories.SOCIAL_FACILITY,
-        {"social_facility": "shelter"},
-    )
-    assert cat(spider, "Turvakoti palvelupiste")[0] == Categories.OFFICE_GOVERNMENT
-
-
-def test_branch_duplicating_name_drops():
-    # "Korva-, nenä- ja kurkkutautien poliklinikka" branched to itself;
-    # the name keeps the full form, branch goes null.
-    spider = make_spider()
-    item = parsed(spider, channel("Korva-, nenä- ja kurkkutautien poliklinikka"))
-    assert item.get("branch") is None
-    assert item["name"] == "Korva-, nenä- ja kurkkutautien poliklinikka"
-
-
-def test_elderly_day_activity_is_social():
-    # "Ikäihmisten päivätoiminta, Kihniö" is day activity, not residential
-    # nursing, even with an elderly clientele.
-    spider = make_spider()
-    assert cat(spider, "Ikäihmisten päivätoiminta, Kihniö")[0] == Categories.SOCIAL_FACILITY
-
-
-def test_school_hosted_health_names_service():
-    # "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto":
-    # the service names the POI per service@school, the school hosts it.
-    spider = make_spider()
-    assert named(spider, "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto") == (
-        "Kouluterveydenhuolto",
-        "Merilahden peruskoulu, Jaluspolun toimipiste",
-        "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto",
-    )
-    assert cat(spider, "Merilahden peruskoulu, Jaluspolun toimipiste, kouluterveydenhuolto")[0] == Categories.CLINIC
-
-
-def test_road_city_tail_parses():
-    # "Pappilantie 11, pielavesi" with an empty number field: the city tail
-    # repeats the structured city, the head parses as street + number.
-    spider = make_spider()
-    item = addressed(spider, "Pappilantie 11, pielavesi", "", office="PIELAVESI")
-    assert item["street"] == "Pappilantie"
-    assert item["housenumber"] == "11"
-
-
-def test_city_in_number_field_drops():
-    # "Tahtimarssi 3" with number "Oulu": the city leaked into the number
-    # field, the road parses alone.
-    spider = make_spider()
-    item = addressed(spider, "Tahtimarssi 3", "Oulu", office="OULU")
-    assert item["street"] == "Tahtimarssi"
-    assert item["housenumber"] == "3"
-
-
-def test_swim_lessons_stay_generic():
-    # "Uimakoulut" and rescue candidates name lessons, not school buildings;
-    # "Hakolan hiekkamonttu" with beach ontology files as a beach.
-    spider = make_spider()
-    assert cat(spider, "Uimakoulut")[0] is None
-    ch = channel("Hakolan hiekkamonttu")
-    ch["services"] = [{"service": {"name": "Vesiliikunta"}}]
-    ch["ontologyTerms"] = [
-        {"name": [{"language": "fi", "value": v}]} for v in ("uimakoulut", "uimarannat", "uimavesi", "uinti")
-    ]
-    assert parsed(spider, ch)["extras"].get("natural") == "beach"
-
-
-def test_observation_towers_are_viewpoints():
-    # "Vaarniemen näköalatorni" filed allotments via cultivation ontology;
-    # the name keyword types it like its lintutorni siblings.
-    spider = make_spider()
-    assert cat(spider, "Vaarniemen näköalatorni") == (
-        Categories.TOURISM_VIEWPOINT,
-        {"man_made": "tower", "tower:type": "observation"},
-    )
-
-
-def test_ice_holes_are_swimming_areas():
-    # "Haaruksen Jämä-majan avanto" is an ice-swimming hole; pharmacy
-    # compounds containing "avanto" keep filing as pharmacies.
-    spider = make_spider()
-    assert cat(spider, "Haaruksen Jämä-majan avanto")[0] == Categories.LEISURE_SWIMMING_AREA
-    assert cat(spider, "Kirjavantolpan apteekki")[0] == Categories.PHARMACY
-
-
-def test_society_operators_are_private():
-    # "Hollolan Nuorisoseura" and kerho societies are associations, never
-    # public; parishes stay public-law bodies.
-    spider = make_spider()
-    assert spider._is_private_org("Hollolan Nuorisoseura") is True
-    assert spider._is_private_org("Joensuun bridgekerho ry") is True
-    assert spider._is_private_org("Tampereen seurakunnat") is False
-    ch = channel("Kansantanssin aikuisten ryhmä Vilhot ja Vienot - Hollola")
-    item = parsed(spider, ch, org_name="Hollolan Nuorisoseura")
-    assert item["extras"].get("operator:type") == "private"
-
-
-def test_inessive_compound_hosts_split():
-    # "Lohjan Sydän digiopastusta Lohjan pääkirjastossa": compound hosts
-    # de-inflect and genitive-mixed heads split; plain rows keep working.
-    spider = make_spider()
-    assert named(spider, "Lohjan Sydän digiopastusta Lohjan pääkirjastossa") == (
-        "Lohjan Sydän digiopastusta",
-        "Lohjan pääkirjasto",
-        "Lohjan Sydän digiopastusta Lohjan pääkirjastossa",
-    )
-    assert named(spider, "Martat neuvoo Haminan kirjastossa") == (
-        "Martat neuvoo",
-        "Haminan kirjasto",
-        "Martat neuvoo Haminan kirjastossa",
-    )
-
-
-def test_leisure_house_hosts_locate():
-    # "Naisten kuntosaliryhmä, Kaukajärven vapaa-aika talo": the service
-    # head names the POI, the leisure house hosts it.
-    spider = make_spider()
-    assert named(spider, "Naisten kuntosaliryhmä, Kaukajärven vapaa-aika talo") == (
-        "Naisten kuntosaliryhmä",
-        "Kaukajärven vapaa-aika talo",
-        "Naisten kuntosaliryhmä, Kaukajärven vapaa-aika talo",
-    )
-
-
-def test_slash_registry_tails_clean():
-    # "Ite ja yhessä - toiminta/Kyläryhmä -palvelun järjestämispaikka,
-    # Virolahti 2": registry text drops from located_in, the sub-unit stays.
-    spider = make_spider()
-    item = parsed(
-        spider,
-        channel("Ite ja yhessä - toiminta/Kyläryhmä -palvelun järjestämispaikka, Virolahti 2"),
-    )
-    assert item["located_in"] == "Kyläryhmä"
-
-
-def test_dash_city_tail_drops():
-    # "Kansantanssin aikuisten ryhmä Vilhot ja Vienot - Hollola" repeats
-    # the municipality after a dash; the tail drops, official keeps full.
-    spider = make_spider()
-    ch = channel(
-        "Kansantanssin aikuisten ryhmä Vilhot ja Vienot - Hollola -palvelun järjestämispaikka",
-        road="Katu",
-        street_number="1",
-        office="HOLLOLA",
-    )
-    item = parsed(spider, ch)
-    assert item["name"] == "Kansantanssin aikuisten ryhmä Vilhot ja Vienot"
-
-
-def test_comma_city_lead_peels():
-    # "Avustajakurssi, Pori - vapaaehtoistoimintaan mukaan!": the city lead
-    # peels off the comma tail, the tagline drops as a descriptor.
-    spider = make_spider()
-    assert named(spider, "Avustajakurssi, Pori - vapaaehtoistoimintaan mukaan!", city="Pori") == (
-        "Avustajakurssi",
-        None,
-        "Avustajakurssi, Pori - vapaaehtoistoimintaan mukaan!",
-    )
-
-
-def test_contact_placeholder_names_fall_back():
-    # A channel named only "Kontaktuppgifter" (contact details) falls back
-    # to its real alternative name instead of emitting the placeholder.
-    spider = make_spider()
-    names = spider._names(
-        {
-            "serviceChannelNames": [
-                {"language": "sv", "value": "Kontaktuppgifter", "type": "Name"},
-                {"language": "sv", "value": "AMS", "type": "AlternativeName"},
-            ]
-        }
-    )
-    assert names.get("sv") == "AMS"
-
-
-def test_fax_lines_never_pose_as_phone():
-    # "Konsertti- ja kongressitalo Mikaeli" led with a fax entry; the
-    # first voice line wins, malformed entries fall through to it.
-    spider = make_spider()
-    ch = channel("Konsertti- ja kongressitalo Mikaeli")
-    ch["phoneNumbers"] = [
-        {"type": "Fax", "number": "+358 15 362 757", "prefixNumber": ""},
-        {"type": "Phone", "number": "+358 15 336 080", "prefixNumber": ""},
-    ]
-    assert parsed(spider, ch).get("phone") == "+358 15336080"
-    ch["phoneNumbers"] = [None, {}, {"type": "Phone", "number": "040 123 4567", "prefixNumber": ""}]
-    assert parsed(spider, ch).get("phone") == "+358 40 1234567"
-
-
-def test_placeholder_email_falls_back():
-    # Template first addresses ("etunimi.sukunimi@soini.fi") yield to the
-    # real second entry instead of suppressing it.
-    spider = make_spider()
-    ch = channel("X")
-    ch["emails"] = [{"value": "etunimi.sukunimi@soini.fi"}, {"value": "soinin.kunta@soini.fi"}]
-    assert parsed(spider, ch).get("email") == "soinin.kunta@soini.fi"
-
-
-def test_login_and_mail_urls_fall_back():
-    # SSO redirects, menu SaaS links and email-address URLs are never
-    # websites; the next usable page wins.
-    spider = make_spider()
-    assert spider.LOGIN_URL_RE.search("https://hushag-sso.hus.fi/haglogin/idp-discovery.jsp")
-    assert spider.LOGIN_URL_RE.search("https://aromimenu.cgisaas.fi/X")
-    assert spider.LOGIN_URL_RE.search("https://tyollisyyskokeilu@raahe.fi/")
-    assert spider.LOGIN_URL_RE.search("https://eur06.safelinks.protection.outlook.com/?url=x")
-    assert not spider.LOGIN_URL_RE.search("https://www.kirjasto.fi/")
-    assert not spider.LOGIN_URL_RE.search("https://biologinenmuseo.fi/")
-    assert not spider.LOGIN_URL_RE.search(
-        "https://www.hus.fi/potilaalle/sairaalat-ja-toimipisteet/neurologinen-kuntoutusosasto-2/"
-    )
-    assert not spider.LOGIN_URL_RE.search(
-        "https://www.hel.fi/fi/sosiaali-ja-terveyspalvelut/vammaispalvelut/sosiaalityo/"
-    )
-    ch = channel("X")
-    ch["webPages"] = [
-        {"url": "https://aromimenu.cgisaas.fi/X"},
-        {"url": "https://www.kirjasto.fi/"},
-    ]
-    assert parsed(spider, ch).get("website") == "https://www.kirjasto.fi/"
-
-
-def test_phone_normalize_repairs_and_rejects():
-    # Trunk-less feed numbers repair, "null" and over-long strings drop,
-    # country-without-plus folds in, short codes pass through.
-    spider = make_spider()
-    assert spider._normalize_phone("null") is None
-    assert spider._normalize_phone("400395234") == "+358 40 0395234"
-    assert spider._normalize_phone("4578757018") is None
-    assert spider._normalize_phone("358 17499111") == "+358 17499111"
-    assert spider._normalize_phone("116117") == "116117"
-
-
-def test_bare_slash_twins_keep_both_sides():
-    # "Lauttasaaren silta/ Kaapelitehdas" (bare slash, no spaces) keeps
-    # both translation sides; only spaced-slash twins follow the split.
-    spider = make_spider()
-    item = parsed(
-        spider,
-        channel("Lauttasaaren silta/ Kaapelitehdas", sv="Drumsö bro/ Kabelfabriken"),
-    )
-    assert item["extras"].get("name:sv") == "Drumsö bro/ Kabelfabriken"
-
-
-def test_dangling_shown_skips_positional_strip():
-    # A mis-split shown ending in a comma fragment ("..., Helsingin")
-    # must not drive translation stripping; the full form stays.
-    spider = make_spider()
-    assert (
-        spider._split_bilingual(
-            "After-school activities / University of Helsinki",
-            "Viikin normaalikoulun iltapäivätoiminta, Helsingin",
-            "Iltapäivätoiminta / Viikin normaalikoulun iltapäivätoiminta, Helsingin yliopisto",
-            "Iltapäivätoiminta",
-        )
-        == "After-school activities / University of Helsinki"
-    )
-
-
-def test_city_and_street_tails_strip_from_translations():
-    # Trailing municipality tails ("Socialbyrå, S:t Karins") and street
-    # tails ("Parkeringbiljettautomat 99, Nervanderinkatu 3") repeat
-    # emitted tags; the applied name's rendering stays. A city-only
-    # remainder ("Letala" for Koivukoto) drops the translation entirely.
-    spider = make_spider()
-    item = parsed(spider, channel("Sosiaalitoimisto, Kaarina", sv="Socialbyrå, S:t Karins", office="KAARINA"))
-    assert item["extras"].get("name:sv") == "Socialbyrå"
-    item = parsed(spider, channel("Koivukoto, Laitila", sv="Koivukoto, Letala", office="LAITILA"))
-    assert item["extras"].get("name:sv") is None
-    item = parsed(
-        spider,
-        channel(
-            "Pysäköintilippuautomaatti 99, Nervanderinkatu 3, korttimaksu",
-            sv="Parkeringbiljettautomat 99, Nervanderinkatu 3",
-            en="Parking ticket machine, Kaisaniemenranta 2",
-        ),
-    )
-    assert item["extras"].get("name:sv") == "Parkeringbiljettautomat 99"
-    assert item["extras"].get("name:en") == "Parking ticket machine"
-
-
-def test_bird_platforms_are_viewpoints():
-    # "Viikki-Vanhankaupunginlahti, Lammassaaren esteetön lintulava" filed
-    # park; a bird platform is a viewpoint like its lintutorni siblings.
-    spider = make_spider()
-    assert cat(spider, "Viikki-Vanhankaupunginlahti, Lammassaaren esteetön lintulava")[0] == (
-        Categories.TOURISM_VIEWPOINT
-    )
-    # Nature towers are observation towers like lintutorni, never catalogue
-    # pitch ("Ison Vasikkasaaren luontotorni" fabe74d8).
-    assert cat(spider, "Ison Vasikkasaaren luontotorni")[0] == Categories.TOURISM_VIEWPOINT
-
-
-def test_grill_tails_name_the_poi():
-    # "Stoan aukio / Grillipaikka" kept the square as the name; the grill
-    # facility names the POI wherever it sits, like beach and island hosts.
-    spider = make_spider()
-    assert named(spider, "Stoan aukio / Grillipaikka") == (
-        "Grillipaikka",
-        "Stoan aukio",
-        "Stoan aukio / Grillipaikka",
-    )
-    assert named(spider, "Tullisaari / Grillipaikka") == (
-        "Grillipaikka",
-        "Tullisaari",
-        "Tullisaari / Grillipaikka",
-    )
-
-
-def test_located_duplicates_drop_from_translations():
-    # Trailing located_in copies ride along in feed translations
-    # ("Daghemskök, Päiväkoti Jollas"); the applied name's rendering stays.
-    spider = make_spider()
-    ch = channel(
-        "Päiväkotikeittiö, Päiväkoti Jollas",
-        sv="Daghemskök, Päiväkoti Jollas",
-        en="Daycare centre kitchen, Daycare Jollas",
-    )
-    item = parsed(spider, ch)
-    assert item["extras"].get("name:sv") == "Daghemskök"
-    assert item["extras"].get("name:en") == "Daycare centre kitchen"
-    assert item.get("located_in") == "Päiväkoti Jollas"
-
-
-def test_slash_twins_follow_the_split():
-    # "Oskarinpuisto / Lentopallokenttä" names the field; the Swedish twin
-    # of the park side drops, the field's rendering stays. Venue-only
-    # remainders ("Utfärdsholme" for located Ulkoilusaari) drop entirely.
-    spider = make_spider()
-    item = parsed(spider, channel("Oskarinpuisto / Lentopallokenttä", sv="Oskariparken / Volleybollplan"))
-    assert item["extras"].get("name:sv") == "Volleybollplan"
-    item = parsed(
-        spider,
-        channel("Bylandet / Ulkoilusaari", sv="Bylandet / Utfärdsholme", en="Bylandet / Recreational island"),
-    )
-    assert item["extras"].get("name:sv") is None
-    assert item["extras"].get("name:en") is None
-    assert item.get("located_in") is None
-
-
-def test_list_page_bad_payloads_counted():
-    # Malformed list pages never yield requests, but always count.
-    from scrapy.http import TextResponse
-
-    spider = make_spider()
-    assert list(spider.parse(TextResponse(url="https://x/?page=1", body=b"nope", encoding="utf-8"), page=1)) == []
-    assert spider.crawler.stats.get_value("ptv_fi/page/bad_json") == 1
-    assert list(spider.parse(TextResponse(url="https://x/?page=2", body=b"[]", encoding="utf-8"), page=2)) == []
-    assert spider.crawler.stats.get_value("ptv_fi/page/bad_shape") == 1
-
-
-def test_batch_bad_payloads_counted():
-    # Malformed detail batches never yield items, but always count.
-    from scrapy.http import TextResponse
-
-    spider = make_spider()
-    assert list(spider.parse_batch(TextResponse(url="https://x/list", body=b"nope", encoding="utf-8"))) == []
-    assert spider.crawler.stats.get_value("ptv_fi/batch/bad_json") == 1
-    assert list(spider.parse_batch(TextResponse(url="https://x/list", body=b"{}", encoding="utf-8"))) == []
-    assert spider.crawler.stats.get_value("ptv_fi/batch/bad_shape") == 1
-
-
-def test_list_page_queues_only_id_rows():
-    # Id-less list rows never queue (dashboards count queued intake).
-    import json
-
-    from scrapy.http import TextResponse
-
-    spider = make_spider()
-    body = json.dumps({"itemList": [{"id": "a"}, {"noid": 1}, "x"], "pageCount": 1}).encode()
-    out = list(spider.parse(TextResponse(url="https://x/?page=1", body=body, encoding="utf-8"), page=1))
-    assert spider._ids == ["a"]
-    assert spider.crawler.stats.get_value("ptv_fi/list/ids") == 1
-    assert out and all(getattr(r, "errback", None) is not None for r in out)
-
-
-def test_batch_org_join_shared_org():
-    # Two channels sharing one organizationId wait in the pending window and
-    # both resolve once the org batch returns (end-to-end join, no seeding).
-    import json
-
-    from scrapy.http import JsonRequest, TextResponse
-
+def test_org_join_and_flush_paths():
     spider = make_spider()
     a = channel("A-linna", org="org-9")
     a["id"] = "aaaaaaaa-1111-4111-8111-111111111111"
@@ -4890,16 +3669,7 @@ def test_batch_org_join_shared_org():
     assert len(items) == 2
     assert all(i.get("operator") == "Testiyhdistys ry" for i in items)
     assert all(i["extras"].get("operator:type") == "private" for i in items)
-
-
-def test_org_partial_response_flushes_missing():
-    # Orgs requested but unreturned must not trap their items: leftovers
-    # flush operator-less on the success path like the failure paths.
-    import json
-
-    from scrapy.http import TextResponse
-
-    spider = make_spider()
+    # Unreturned orgs flush operator-less on success like on failure.
     item = spider.parse_channel(channel("X", org="org-9"))
     spider._pending["org-9"] = [item]
     body = json.dumps([{"id": "org-1", "organizationNames": [{"language": "fi", "value": "A Oy"}]}]).encode()
@@ -4911,20 +3681,28 @@ def test_org_partial_response_flushes_missing():
     assert item in out
     assert item.get("operator") is None
     assert spider._pending == {}
+    # Failed fetches still yield waiting items operator-less.
+    item = Feature()
+    item["ref"] = "r1"
+    spider._pending["org-1"] = [item]
+    failure = SimpleNamespace(request=SimpleNamespace(url="https://example.fi/api?guids=org-1"))
+    out = list(spider.errback_orgs(failure))
+    assert len(out) == 1
+    assert "operator" not in out[0]
+    assert spider.crawler.stats.get_value("ptv_fi/org/failed") == 1
+    # Bad org payloads flush pending instead of trapping.
+    item = Feature()
+    item["name"] = "X"
+    spider._pending["org-1"] = [item]
 
+    def _boom():
+        raise ValueError("nope")
 
-def test_channel_without_id_drops():
-    # Id-less detail rows cannot key refs: drop with a count, never KeyError.
-    spider = make_spider()
-    ch = channel("X")
-    del ch["id"]
-    assert spider.parse_channel(ch) is None
-    assert spider.crawler.stats.get_value("ptv_fi/dropped/no_id") == 1
+    assert list(spider.parse_orgs(SimpleNamespace(url="https://x/?guids=org-1", json=_boom))) == [item]
+    assert spider._pending == {}
 
 
 def test_crawl_errbacks_count_and_continue():
-    # Dead detail batches count; dead list pages continue with collected ids,
-    # exactly once no matter the failure order.
     spider = make_spider()
     failure = SimpleNamespace(request=SimpleNamespace(url="https://x/list?guids=a"))
     assert list(spider.errback_batch(failure)) == []
@@ -4937,720 +3715,23 @@ def test_crawl_errbacks_count_and_continue():
     assert len(first) == 1
 
 
-def test_closed_loses_to_real_spans_either_order():
-    # Closed marks lose to real spans deterministically, entry order aside.
-    spans = {
-        "serviceHourType": "DaysOfTheWeek",
-        "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "09:00:00", "to": "11:00:00"}],
-    }
-    closed = {
-        "serviceHourType": "DaysOfTheWeek",
-        "isClosed": True,
-        "openingHour": [{"dayFrom": "Monday", "dayTo": ""}],
-    }
-    for hours in ([spans, closed], [closed, spans]):
-        ch = channel("Avoin piste")
-        ch["serviceHours"] = [dict(e) for e in hours]
-        item = parsed(make_spider(), ch)
-        assert item["opening_hours"].as_opening_hours() == "Mo 09:00-11:00"
-
-
-def test_rantaraitti_blocked_from_rescue():
-    # Sports-catalogue ontology must not type the trail: blocked names stay
-    # generic even when the ontology names a pitch sport.
+def test_special_exports_and_city_compounds():
     spider = make_spider()
-    ch = channel("Espoon Rantaraitti")
-    assert spider._rescue_blocked(ch)
-    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "pallokentät"}]}]
-    item = parsed(spider, ch)
-    assert item.get_tag("leisure") is None
+    item = parsed(spider, channel("Punkalaitumen Nuorisotila"), "Punkalaitumen kunta")
+    assert item["extras"]["amenity"] == "youth_centre"
+    assert item.get("amenity") is None
+    item = parsed(spider, channel("Töölöntori"), "Helsingin kaupunki")
+    assert item["extras"]["place"] == "square"
+    assert item.get("amenity") is None
+    # Salo-Karinan: proper compounds stay whole.
+    item = parsed(make_spider(), channel("Salo-Karinan neuvonta-asema", office="SALO"))
+    assert item["name"] == "Salo-Karinan neuvonta-asema"
+    assert item.get_tag("office") == "government"
 
 
-def test_supported_housing_upgrades_bare_social():
-    # The upgrade arm itself: bare social + supported-housing wording files
-    # assisted living (keeps and skips pinned separately).
+def test_round22_flows():
     spider = make_spider()
-    ch = channel("X", descriptions=[{"language": "fi", "value": "Tuettua asumista tarjolla"}])
-    item = Feature()
-    item["extras"]["amenity"] = "social_facility"
-    assert spider._maybe_upgrade_housing(item, ch, Categories.SOCIAL_FACILITY) == Categories.ASSISTED_LIVING
-    assert item["extras"]["social_facility"] == "assisted_living"
-    assert spider.crawler.stats.get_value("ptv_fi/category/supported_housing_upgrade") == 1
-
-
-def test_hours_dated_and_always_open_counters():
-    # Dated deviations and availability-vs-timetable races count their lanes.
-    spider = make_spider()
-    ch = channel("Avoin piste")
-    ch["serviceHours"] = [
-        {
-            "serviceHourType": "DaysOfTheWeek",
-            "validFrom": "2027-01-01T00:00:00",
-            "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
-        }
-    ]
-    assert spider._hours(ch, None) is None
-    assert spider.crawler.stats.get_value("ptv_fi/hours/dated") == 1
-    ch2 = channel("Päivystävä piste")
-    ch2["serviceHours"] = [
-        {"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True},
-        {
-            "serviceHourType": "DaysOfTheWeek",
-            "openingHour": [{"dayFrom": "Monday", "dayTo": "", "from": "08:00:00", "to": "16:00:00"}],
-        },
-    ]
-    assert spider._hours(ch2, None) is not None
-    assert spider.crawler.stats.get_value("ptv_fi/hours/always_open_with_spans") == 1
-
-
-def test_municipality_beats_post_office_end_to_end():
-    # _city_src precedence through the full channel: visit municipality wins
-    # over the post office, not just in the helper.
-    spider = make_spider()
-    ch = channel("X", office="KYLÄNPÄÄ")
-    ch["addresses"][0]["streetAddress"]["municipality"] = {"name": [{"language": "fi", "value": "Espoo"}]}
-    assert parsed(spider, ch).get("city") == "Espoo"
-
-
-def test_koululainen_pupils_are_not_schools():
-    # Pupil words share the stem but name no building (SYNTHETIC guard test:
-    # zero feed rows, sibling GROUP_FACILITY_RE already guards lai).
-    assert cat(make_spider(), "Koululaisen aamu- ja iltapäivätoiminta")[0] != Categories.SCHOOL
-
-
-def test_tullinaukio_squares_are_not_customs():
-    # Genitive square compounds never file as customs (SYNTHETIC: zero feed
-    # rows; stretches the tulli blocklist to aukio/naukio).
-    assert cat(make_spider(), "Tullinaukio")[0] is None
-
-
-def test_bare_lukio_health_unit():
-    # Bare school words under wellbeing areas are the student-health unit:
-    # the guard reads string-start, not just post-space (SYNTHETIC shape).
-    spider = make_spider()
-    item = parsed(spider, channel("Lukio"), "Keski-Suomen hyvinvointialue")
-    assert spider._tag(item, "amenity") == "clinic"
-
-
-def test_coverage_sister_match_ignores_case():
-    # Municipality match in the paren-coverage branch reads case-insensitively
-    # like the rest of the city comparisons (SYNTHETIC casing).
-    spider = make_spider()
-    full = "Palvelu, helsinki (Nousiainen, Laitila)"
-    assert spider._split_paren(full, "Helsinki") == ("Palvelu", None, full)
-
-
-def test_operator_word_reads_past_parens():
-    # Trailing parenthesised qualifiers hide the marker from the end anchor:
-    # detection reads past them (round-17 B class: NNKY/Pokali/Daisy).
-    spider = make_spider()
-    assert spider._has_operator_word("Imatran keilahalli Oy (Helsinki)")
-    assert spider._has_operator_word("Daycare Daisy Oy (Ylioppilaskylä 25)")
-    assert not spider._has_operator_word("Musiikkipäiväkoti Sinikello (Tuureporinkatu 5 E)")
-
-
-def test_service_city_tail_strips_from_comma_heads():
-    # Comma service heads carrying an exact-city tail ("Fysioterapia Pori",
-    # d649edee) strip by the space-city predicate, keeping the venue.
-    # Proper-noun heads never enter ("Arvi Pori" keeps whole).
-    spider = make_spider()
-    full = "Fysioterapia Pori, Länsi-Porin sote-keskus"
-    assert spider._split_name(full, "Pori") == ("Fysioterapia", "Länsi-Porin sote-keskus", full)
-    assert spider._split_name("Arvi Pori", "Pori") == ("Arvi Pori", None, None)
-
-
-def test_closed_multiday_marks_whole_range():
-    # Closed marks cover the stated range (SYNTHETIC: zero feed rows with
-    # dayTo≠dayFrom on closed entries).
-    spider = make_spider()
-    ch = channel("X")
-    ch["serviceHours"] = [
-        {
-            "serviceHourType": "DaysOfTheWeek",
-            "isClosed": True,
-            "openingHour": [{"dayFrom": "Monday", "dayTo": "Friday"}],
-        }
-    ]
-    day_spans, closed_days, _ = spider._hours_collect(ch)
-    assert day_spans == {}
-    assert closed_days == {"Mo", "Tu", "We", "Th", "Fr"}
-
-
-def test_wraparound_spans_expand_past_sunday():
-    # Weekend-wrapping ranges (Fr–Mo, feed-realistic) expand past Sunday
-    # instead of stranding Friday alone.
-    spider = make_spider()
-    ch = channel("X")
-    ch["serviceHours"] = [
-        {
-            "serviceHourType": "DaysOfTheWeek",
-            "openingHour": [{"dayFrom": "Friday", "dayTo": "Monday", "from": "12:00:00", "to": "14:00:00"}],
-        }
-    ]
-    rendered = spider._hours(ch, None).as_opening_hours()
-    assert "Fr-Su 12:00-14:00" in rendered
-    assert "Mo 12:00-14:00" in rendered
-
-
-def test_always_open_skipped_for_nursing():
-    # Staffed nursing homes are not walk-in 24/7 either (extends the
-    # social/school/kindergarten skip).
-    spider = make_spider()
-    channel_data = {
-        "serviceHours": [
-            {
-                "serviceHourType": "DaysOfTheWeek",
-                "isAlwaysOpen": True,
-                "openingHour": [{"dayFrom": "Monday", "dayTo": "Sunday", "from": "00:00:00", "to": "23:59:59"}],
-            }
-        ]
-    }
-    assert spider._hours(channel_data, Categories.NURSING_HOME) is None
-    assert spider.crawler.stats.get_value("ptv_fi/hours/skipped_always_open_social") == 1
-
-
-def test_358_prefixed_short_number_repairs():
-    # Country code without "+" on a short number never doubles ("+358 358…").
-    spider = make_spider()
-    assert spider._normalize_phone("358912345") == "+358 9 12345"
-
-
-def test_cross_street_keeps_number_units():
-    # Corner roads keep the whole line as street_address, but number units
-    # still parse via the shared token rules (SYNTHETIC trigger "12 A 1").
-    spider = make_spider()
-    item = addressed(spider, "Mannerheimintie / Runeberginkatu", "12 A 1")
-    assert item.get("street_address") == "Mannerheimintie / Runeberginkatu"
-    assert item["extras"].get("addr:unit") == "A 1"
-
-
-def test_dual_housenumber_slash_folds_to_range():
-    # Dual housenumbers ("12/14") fold to the range form; venue notes after
-    # the slash still drop (test_number_venue_tail guard stands).
-    spider = make_spider()
-    item = addressed(spider, "Katu", "12/14")
-    assert item.get("housenumber") == "12-14"
-
-
-def test_to_minutes_rejects_impossible_hours():
-    # Prefix junk and impossible hours drop instead of rendering ("25:00"
-    # must never reach opening_hours; SYNTHETIC, zero feed rows).
-    spider = make_spider()
-    assert spider._to_minutes("25:00") is None
-    assert spider._to_minutes("08:00-12:00") is None
-    assert spider._to_minutes("08:00:00") == 480
-
-
-def test_bare_postcode_tail_never_units():
-    # Bare postcode tails strip even with no postcode field (SYNTHETIC:
-    # corpus twins always carry the postcode field too).
-    spider = make_spider()
-    item = addressed(spider, "Tie", "10 11111", postcode="")
-    assert item.get("housenumber") == "10"
-    assert item["extras"].get("addr:unit") is None
-
-
-def test_kanssa_person_qualifiers_drop():
-    # Guide/contact qualifiers ("Nummelan kimppakävelyt Marin kanssa",
-    # cb8a8804, round-20 B) name the person, never the venue. Plural
-    # markers and lowercase common nouns are integral event text.
-    spider = make_spider()
-    assert (
-        spider._clean_name("Nummelan kimppakävelyt Marin kanssa, yhdistyksen jäsenille. -palvelun järjestämispaikka")
-        == "Nummelan kimppakävelyt yhdistyksen jäsenille."
-    )
-    for kept, want in (
-        ("Tervetuloa tekemään käsitöitä Marttojen kanssa!", "Tervetuloa tekemään käsitöitä Marttojen kanssa!"),
-        # Lowercase-dash descriptors strip independently ("-kurssi" is not
-        # part of the kanssa qualifier).
-        ("Elämää muistisairauden kanssa -kurssi", "Elämää muistisairauden kanssa"),
-        ("Keskusteluryhmä ahdistuksen kanssa kamppaileville", "Keskusteluryhmä ahdistuksen kanssa kamppaileville"),
-    ):
-        assert spider._clean_name(kept) == want
-
-
-def test_dash_training_units_split_from_schools():
-    # Training/info units are hosted services, not school buildings
-    # ("Kaukajärven koulu - Koulutusinfo"); same-institution buildings
-    # ("... - Annalan koulutalo") stay whole.
-    spider = make_spider()
-    assert spider._split_name("Kaukajärven koulu - Koulutusinfo") == (
-        "Koulutusinfo",
-        "Kaukajärven koulu",
-        "Kaukajärven koulu - Koulutusinfo",
-    )
-    assert spider._split_name("Kaukajärven koulu - Annalan koulutalo") == (
-        "Kaukajärven koulu - Annalan koulutalo",
-        None,
-        None,
-    )
-
-
-def test_bare_district_tails_are_not_desks():
-    # Districts ending in desk words ("Vihdin kunnantalo/Keskusta") are
-    # not service desks (SYNTHETIC: zero feed rows, end-anchor guard).
-    spider = make_spider()
-    assert spider._split_name("Vihdin kunnantalo/Keskusta") == ("Vihdin kunnantalo/Keskusta", None, None)
-    assert spider._split_name("Vihdin kunnantalo/sosiaalitoimisto") == (
-        "sosiaalitoimisto",
-        "Vihdin kunnantalo",
-        "Vihdin kunnantalo/sosiaalitoimisto",
-    )
-
-
-def test_inessive_clinic_hosts_split():
-    # Clinic/daycare hosts de-inflect like the other institutions
-    # ("Neuvonta Myyrmäen neuvolassa"; SYNTHETIC shapes).
-    spider = make_spider()
-    assert spider._split_name("Neuvonta Myyrmäen neuvolassa") == (
-        "Neuvonta",
-        "Myyrmäen neuvola",
-        "Neuvonta Myyrmäen neuvolassa",
-    )
-    assert spider._split_name("Koulutusinfo Kuusankosken kirjastossa") == (
-        "Koulutusinfo",
-        "Kuusankosken kirjasto",
-        "Koulutusinfo Kuusankosken kirjastossa",
-    )
-
-
-def test_city_stripped_fused_schools_keep_venue():
-    # City tails on fused school heads strip, then the school still locates
-    # ("Renkomäen koulun luokat Lahti").
-    spider = make_spider()
-    full = "Renkomäen koulun luokat Lahti"
-    assert spider._split_name(full, "Lahti") == ("Luokat", "Renkomäen koulu", full)
-
-
-def test_hyphenated_city_tails_strip():
-    # Hyphenated municipalities strip on exact match; hyphenated proper
-    # nouns never equal the city ("Päiväkoti Pikku-Elli" keeps whole).
-    spider = make_spider()
-    full = "Kuntoutusohjaus Mänttä-Vilppula"
-    assert spider._split_name(full, "Mänttä-Vilppula") == ("Kuntoutusohjaus", None, full)
-    assert spider._split_name("Päiväkoti Pikku-Elli", "Helsinki") == ("Päiväkoti Pikku-Elli", None, None)
-
-
-def test_double_parens_peel_trailing_group():
-    # Double parentheticals resolve the trailing group; the base carrying
-    # the first group re-dispatches ("Kirjasto (Pääkirjasto) (Keskusta)").
-    spider = make_spider()
-    full = "Kirjasto (Pääkirjasto) (Keskusta)"
-    assert spider._split_name(full, None) == ("Kirjasto", "Pääkirjasto", full)
-
-
-def test_paren_numbered_rooms_name_poi():
-    # Numbered rooms/fields in parens name the POI like slash rooms
-    # ("Kirjasto (Sali 2)"); street addresses and ward qualifiers never
-    # qualify (SYNTHETIC shapes).
-    spider = make_spider()
-    assert spider._split_name("Kirjasto (Sali 2)", None) == ("Sali 2", "Kirjasto", "Kirjasto (Sali 2)")
-
-
-def test_dash_rooms_name_poi():
-    # Facility rooms as dash tails name the POI ("Pallokenttä - Sali 2";
-    # SYNTHETIC: zero feed rows, cf. slash rooms).
-    spider = make_spider()
-    assert spider._split_name("Pallokenttä - Sali 2", None) == (
-        "Sali 2",
-        "Pallokenttä",
-        "Pallokenttä - Sali 2",
-    )
-
-
-def test_venue_org_markers_unioned():
-    # Operator tails in all marked forms strip to the venue
-    # ("Kerho / Koulu, Tmi Petri Lehto" keeps routing to Koulu).
-    spider = make_spider()
-    assert spider._strip_venue_org("Koulu, Tmi Petri Lehto") == "Koulu"
-    assert spider._split_name("Kerho / Koulu, Tmi Petri Lehto") == (
-        "Kerho",
-        "Koulu",
-        "Kerho / Koulu, Tmi Petri Lehto",
-    )
-
-
-def test_swedish_simhall_twins_split():
-    # Swedish swim-hall twins split like the other institution words
-    # ("Simhallen - Uimahalli"; SYNTHETIC: zero feed rows).
-    spider = make_spider()
-    assert spider._split_translation("Simhallen - Uimahalli") == ("Uimahalli", "Simhallen")
-
-
-def test_fused_schools_with_place_prefixes():
-    # Multiword place prefixes still resolve the school venue
-    # ("Vanha Ulvilan koulun liikuntasali").
-    spider = make_spider()
-    assert spider._split_name("Vanha Ulvilan koulun liikuntasali") == (
-        "Liikuntasali",
-        "Vanha Ulvilan koulu",
-        "Vanha Ulvilan koulun liikuntasali",
-    )
-
-
-def test_museum_compounds_file_museum():
-    # Profession/villa/hospital museums are museums, not their profession
-    # (koulumuseo precedent: Apteekkimuseo, Huvilamuseo, Sairaalamuseo).
-    spider = make_spider()
-    assert cat(spider, "Apteekkimuseo")[0] == Categories.MUSEUM
-    assert cat(spider, "Apteekkimuseo ja Qwenselin talo")[0] == Categories.MUSEUM
-    assert cat(spider, "Huvilamuseo Villa Rulludd")[0] == Categories.MUSEUM
-    assert cat(spider, "Sairaalamuseo")[0] == Categories.MUSEUM
-
-
-def test_rontgen_ascii_spelling_files_clinic():
-    # ASCII spelling files identically to Röntgen (SYNTHETIC: zero feed rows).
-    spider = make_spider()
-    assert cat(spider, "Rontgen Pori") == (Categories.CLINIC, {"healthcare": "medical_imaging"})
-
-
-def test_paikan_genitive_files_fishing():
-    # The single-k genitive normalizes like its siblings ("Kalastuspaikan
-    # vuokraus" fishes via the extras-only rule; SYNTHETIC shape).
-    spider = make_spider()
-    assert cat(spider, "Kalastuspaikan vuokraus") == (None, {"leisure": "fishing"})
-
-
-def test_genitive_grounds_keep_arena_filings():
-    # Gradation must not shadow specifics: genitive exercise grounds file
-    # like nominative ones (ball arenas pitch, schoolyards playgrounds,
-    # bare grounds fitness).
-    spider = make_spider()
-    assert cat(spider, "Kulomäen lähiliikuntapaikan miniareena")[0] == Categories.LEISURE_PITCH
-    assert cat(spider, "Pallopuiston lähiliikuntapaikan tenniskenttä") == (
-        Categories.LEISURE_PITCH,
-        {"sport": "tennis"},
-    )
-    assert cat(spider, "Jokivarren koulun lähiliikuntapaikan tekonurmi") == (
-        Categories.LEISURE_PITCH,
-        {"sport": "soccer", "surface": "artificial_turf"},
-    )
-
-
-def test_dash_room_guards():
-    # Chained tails, conjunction-led fragments and inflected lookalikes
-    # keep whole; only bare room tails name the POI.
-    spider = make_spider()
-    assert spider._split_name("Tila - Herralan koulu - Liikuntasali") == (
-        "Tila - Herralan koulu - Liikuntasali",
-        None,
-        None,
-    )
-    assert spider._split_name("Rantafutis - ja käsipallokenttä") == (
-        "Rantafutis - ja käsipallokenttä",
-        None,
-        None,
-    )
-    assert spider._split_name("Sydänpiste - tietoa ja tukea sydänpotilaalle") == (
-        "Sydänpiste - tietoa ja tukea sydänpotilaalle",
-        None,
-        None,
-    )
-    # Bare generic heads are no venue either ("Tila - Koskihalli").
-    assert spider._split_name("Tila - Koskihalli") == ("Tila - Koskihalli", None, None)
-
-
-def test_fused_paren_rests_keep_whole():
-    # Parenthesised qualifiers inside the unit keep whole (parens are
-    # metadata, never name parts to strand).
-    spider = make_spider()
-    full = "Tampereen kansainvälisen koulun (FISTA) opiskeluhuolto"
-    assert spider._split_name(full, None) == (full, None, None)
-
-
-def test_bare_qualified_desks_split():
-    # Desk words with city qualifiers still resolve ("Sote-keskus Länsi").
-    spider = make_spider()
-    full = "Vihdin kunnantalo/Sote-keskus Länsi"
-    assert spider._split_name(full) == ("Sote-keskus Länsi", "Vihdin kunnantalo", full)
-
-
-def test_located_street_parens_drop():
-    # Parenthesised street addresses leaked into located_in drop; district
-    # qualifiers stay.
-    spider = make_spider()
-    assert spider._clean_located("Aurinkolahden peruskoulu (Solvindsgatan 11)") == "Aurinkolahden peruskoulu"
-    assert spider._clean_located("Heteniitynkenttä (Vuosaari)") == "Heteniitynkenttä (Vuosaari)"
-
-
-# ---- Review round 21: kindergarten/office slices + rescue/opcontact ---------
-
-
-def test_tr_descriptor_parens_drop():
-    # EN rows copying the Finnish name with a descriptor ("Päiväkoti Lyyra
-    # (private ECEC centre)", 25b3fcba) are not translations: the
-    # Finnish-duplicate strip must not strand a bare parenthetical.
-    spider = make_spider()
-    ch = channel("Päiväkoti Lyyra")
-    ch["serviceChannelNames"] = [
-        {"language": "fi", "value": "Päiväkoti Lyyra", "type": "Name"},
-        {"language": "en", "value": "Päiväkoti Lyyra (private ECEC centre)", "type": "Name"},
-    ]
-    ch["displayNameType"] = [{"type": "Name", "language": "en"}]
-    item = parsed(spider, ch, "Rovaniemen kaupunki")
-    assert item["extras"].get("name:en") is None
-
-
-def test_tr_street_parens_drop():
-    # Translated address tails duplicate the address line (60a737de and
-    # 43 census siblings): the applied name renders without them.
-    spider = make_spider()
-    ch = channel("Haritun päiväkoti (Kymenlaaksonkuja 4)")
-    ch["serviceChannelNames"].append({"language": "sv", "value": "Dagvårdsenheten i Harittu (Kymmenedalsgränden 4)"})
-    item = parsed(spider, ch, "Turun kaupunki")
-    assert item.get("name") == "Haritun päiväkoti"
-    assert item["extras"].get("name:sv") == "Dagvårdsenheten i Harittu"
-
-
-def test_slash_head_operators():
-    # Operator heads dropped by the split ("Pilke päiväkodit Oy/ Veturi
-    # (Bastioninkatu 4)", 7520ec48 + 19 census siblings) still operate:
-    # explicit-in-name beats the city maintainer.
-    spider = make_spider()
-    item = parsed(spider, channel("Pilke päiväkodit Oy/ Veturi (Bastioninkatu 4)"), "Turun kaupunki")
-    assert item.get("name") == "Veturi"
-    assert item.get("operator") == "Pilke päiväkodit Oy"
-    assert item["extras"].get("operator:type") == "private"
-
-
-def test_dup_daycare_prefix_strips():
-    # "Päiväkoti Luomupäiväkoti Kirsikka Laajasalo" (a8811dac + 10 census
-    # siblings): the specific name already says päiväkoti. Bare heads stay.
-    spider = make_spider()
-    assert spider._clean_name("Päiväkoti Luomupäiväkoti Kirsikka Laajasalo") == "Luomupäiväkoti Kirsikka Laajasalo"
-    assert spider._clean_name("Päiväkoti Kirsikka") == "Päiväkoti Kirsikka"
-    assert cat(spider, "Luomupäiväkoti Kirsikka Laajasalo")[0] == Categories.KINDERGARTEN
-
-
-def test_daycare_grounds_are_playgrounds():
-    # "Lapijoen päiväkodin lähiliikuntapaikka" (f1fc87f8): daycare yards
-    # read like schoolyards. No venue split either way (school parity:
-    # "Ilolan koulun lähiliikuntapaikka" also stays whole).
-    spider = make_spider()
-    assert cat(spider, "Lapijoen päiväkodin lähiliikuntapaikka")[0] == Categories.LEISURE_PLAYGROUND
-    assert cat(spider, "Ilolan koulun lähiliikuntapaikka")[0] == Categories.LEISURE_PLAYGROUND
-    full = "Lapijoen päiväkodin lähiliikuntapaikka"
-    assert spider._split_name(full, None) == (full, None, None)
-
-
-def test_daycare_rooms_carve():
-    # Daycare-hosted rooms name the unit with the daycare located, so the
-    # room types the POI (2c8e477b + 41 census siblings): the päiväkoti
-    # table shadow must not beat the room the way koulu never does.
-    spider = make_spider()
-    assert cat(spider, "Hämeenkylän päiväkodin liikuntasali")[0] == Categories.LEISURE_SPORTS_HALL
-    assert cat(spider, "Sangin vanhan koulun liikuntasali")[0] == Categories.LEISURE_SPORTS_HALL
-    assert cat(spider, "Päiväkodin vuorohoitoryhmä")[0] == Categories.KINDERGARTEN
-
-
-def test_ostopalvelut_tails_dont_type():
-    # Purchased-service qualifiers arrange the service, never the place:
-    # care-home heads behind "..., yhteisöllisen asumisen ostopalvelut"
-    # stay homes (b01a5086 + 6 office-filed census siblings).
-    spider = make_spider()
-    assert (
-        cat(spider, "Ikifit Oy, hyvinvointikoti Jukola/Hannes, Hämeenlinna, yhteisöllisen asumisen ostopalvelut")[0]
-        == Categories.SOCIAL_FACILITY
-    )
-    ch = channel("Attendo Puistomäki, Hämeenlinna, yhteisöllisen asumisen ostopalvelut", office="Hämeenlinna")
-    ch["services"] = [{"service": {"name": "Sosiaalihuoltolain mukainen yhteisöllinen asuminen"}}]
-    item = parsed(spider, ch, "Kanta-Hämeen hyvinvointialue")
-    assert item.get_tag("amenity") == "social_facility"
-    assert item.get("name") == "Attendo Puistomäki"
-    # The park filing upgrades away cleanly: no residual leisure tag.
-    assert item["extras"].get("leisure") is None
-
-
-def test_located_city_and_descriptor_segments_drop():
-    # "Hannes, Hämeenlinna, yhteisöllisen asumisen ostopalvelut" (b01a5086):
-    # municipality segments repeat the city field, arrangement tails are
-    # not venues; the venue reads alone.
-    spider = make_spider()
-    ch = channel(
-        "Ikifit Oy, hyvinvointikoti Jukola/Hannes, Hämeenlinna, yhteisöllisen asumisen ostopalvelut",
-        office="Hämeenlinna",
-    )
-    item = parsed(spider, ch, "Kanta-Hämeen hyvinvointialue")
-    assert item.get("located_in") == "Hannes"
-
-
-def test_paren_coverage_city_drops():
-    # Coverage municipality lists containing the municipality (d1d28ff8 +
-    # 6 census siblings): the base names the POI, the full form survives
-    # in official_name. Other-town lists split with the towns as located_in.
-    spider = make_spider()
-    full = "Perheoikeudelliset palvelut perhekeskus Pohjatuuli (Karvia, Siikainen, Pomarkku, Kankaanpää, Jämijärvi)"
-    assert spider._split_name(full, "Kankaanpää") == (
-        "Perheoikeudelliset palvelut perhekeskus Pohjatuuli",
-        None,
-        full,
-    )
-    other = "Perheoikeudelliset palvelut perhekeskus X (Karvia, Pomarkku)"
-    assert spider._split_name(other, "Pori") == (
-        "Perheoikeudelliset palvelut perhekeskus X",
-        "Karvia, Pomarkku",
-        "Perheoikeudelliset palvelut perhekeskus X (Karvia, Pomarkku)",
-    )
-
-
-def test_names_follow_finnish_slash_structure():
-    # Unguided translations follow the Finnish slash structure (83336e4b):
-    # the parallel full form wins over the bare "Integrationstjänster".
-    spider = make_spider()
-    ch = channel("Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut")
-    ch["serviceChannelNames"] = [
-        {"language": "fi", "value": "Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut"},
-        {"language": "sv", "value": "Integrationstjänster"},
-        {"language": "sv", "value": "Integrationsservice / Vasa stad Välfärdstjänster"},
-    ]
-    assert spider._names(ch)["sv"] == "Integrationsservice / Vasa stad Välfärdstjänster"
-
-
-def test_vaasa_translation_and_law_link():
-    # 83336e4b end to end: sv renders the applied tail, the operator-city
-    # en drops, and the finlex legislation reference is never a website.
-    spider = make_spider()
-    ch = channel("Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut", office="Vaasa")
-    ch["serviceChannelNames"] = [
-        {"language": "fi", "value": "Kotoutumispalvelut / Vaasan kaupungin hyvinvointipalvelut"},
-        {"language": "sv", "value": "Integrationstjänster"},
-        {"language": "sv", "value": "Integrationsservice / Vasa stad Välfärdstjänster"},
-        {"language": "en", "value": "Integration services / City of Vaasa"},
-    ]
-    ch["displayNameType"] = [{"type": "Name", "language": "en"}]
-    ch["webPages"] = [{"url": "http://www.finlex.fi/fi/laki/ajantasa/2010/20101386"}]
-    item = parsed(spider, ch, "Vaasan kaupunki")
-    assert item.get("name") == "Vaasan kaupungin hyvinvointipalvelut"
-    assert item.get("located_in") == "Kotoutumispalvelut"
-    assert item["extras"].get("name:sv") == "Vasa stad Välfärdstjänster"
-    assert item["extras"].get("name:en") is None
-    assert item.get("website") is None
-
-
-def test_assessment_prose_never_houses():
-    # Needs assessments never house anyone: bare "asumi" in description
-    # prose files social, while tuettu-proximity still houses.
-    spider = make_spider()
-    ch = channel("Palveluneuvonta")
-    ch["serviceChannelDescriptions"] = [
-        {"language": "fi", "value": "mielenterveys- ja asumispalvelujen tarpeen arviointi"}
-    ]
-    assert spider._rescue_category(ch) == Categories.SOCIAL_FACILITY
-    ch2 = channel("Palveluneuvonta")
-    ch2["serviceChannelDescriptions"] = [{"language": "fi", "value": "mielenterveyskuntoutujien tuettu asuminen"}]
-    assert spider._rescue_category(ch2) == Categories.ASSISTED_LIVING
-
-
-def test_phone_double_country_repairs():
-    # Doubled country codes ("+358 358...", SYNTHETIC: zero feed rows)
-    # repair like their trunk-less twins, never emit doubled.
-    spider = make_spider()
-    assert spider._normalize_phone("+358 358123456") == "+358 1 23456"
-    assert spider._normalize_phone("00358 9 1234567") == "+358 91234567"
-
-
-def test_company_paren_keeps_company_reading():
-    # "Foo Oy (Espoo)" reads past the qualifier like bare "Foo Oy": a
-    # company desk is never an association one (SYNTHETIC shapes).
-    spider = make_spider()
-    assert spider._is_private_org("Yhdistys (NNKY)") is True
-    item = parsed(spider, channel("Palvelupiste"), "Foo Oy (Espoo)")
-    assert item.get("operator") == "Foo Oy (Espoo)"
-    assert item["extras"].get("operator:type") == "private"
-    # No association demotion: deparened company reads like bare Oy, whose
-    # government office filing stands (SavoGrow precedent).
-    assert item["extras"].get("office") == "government"
-
-
-def test_three_segment_operator_tails():
-    # "Iltapäivätoiminta / Taivallahden peruskoulu, Demo iltapäiväkerho /
-    # Jamkicks Oy": the last-segment company operates (20 census rows).
-    spider = make_spider()
-    item = parsed(
-        spider,
-        channel("Iltapäivätoiminta / Taivallahden peruskoulu, Demo iltapäiväkerho / Jamkicks Oy"),
-        "Helsingin kaupunki",
-    )
-    assert item.get("operator") == "Jamkicks Oy"
-    assert item["extras"].get("operator:type") == "private"
-
-
-def test_company_record_operators_private():
-    # Record-proven companies ("Amuri Hoiva", organizationType Company,
-    # 2eecf044) are private operators even without Oy/ry markers.
-    # Municipal enterprises (liikelaitos) stay out per prior doctrine.
-    spider = make_spider()
-    item = parsed(spider, channel("Palvelupiste"), None)
-    spider._apply_operator(item, "Amuri Hoiva", "Company")
-    assert item.get("operator") == "Amuri Hoiva"
-    assert item["extras"].get("operator:type") == "private"
-    item2 = parsed(spider, channel("Palvelupiste"), None)
-    spider._apply_operator(item2, "Oulun Vesi -liikelaitos", "Company")
-    assert item2["extras"].get("operator:type") is None
-
-
-def test_chain_units_keep_brand_over_full_head():
-    # "Pilke päiväkodit Oy/ Päiväkoti Pilke Äppelbo daghem" (e53fea71):
-    # the unit is named for the chain, so the brand still operates.
-    spider = make_spider()
-    item = parsed(
-        spider,
-        channel("Pilke päiväkodit Oy/ Päiväkoti Pilke Äppelbo daghem (Stålarminkatu 36)"),
-        "Turun kaupunki",
-    )
-    assert item.get("operator") == "Pilke"
-
-
-def test_org_record_supersedes_short_signed_head():
-    # Signed short forms ("Ysti ry") yield to the joined record naming
-    # the same operator more fully (cd60fa6c/d2a74835).
-    spider = make_spider()
-    item = parsed(spider, channel("Ysti ry/ Toimela"), None)
-    spider._apply_operator(item, "Yhdessä Selviytymisen Tuki YSTI ry", "Organization")
-    assert item.get("operator") == "Yhdessä Selviytymisen Tuki YSTI ry"
-
-
-def test_activity_halves_dont_relocate():
-    # Club/activity halves ("Linguajoy Language Club") are no venue:
-    # the split's school stands while the company operates (025c3328).
-    spider = make_spider()
-    item = parsed(
-        spider,
-        channel("Iltapäivätoiminta / Vattuniemen ala-aste / Linguajoy Language Club, Linguajoy Kielikerhot Oy"),
-        "Helsingin kaupunki",
-    )
-    assert item.get("located_in") == "Vattuniemen ala-aste"
-    assert item.get("operator") == "Linguajoy Kielikerhot Oy"
-
-
-def test_holistic_consistency_fixes():
-    # 1. Commercial forms beyond Oy/Ab (Tmi, Ky, Ay) keep government office
-    # filings when running outsourced public desks; bare parish slash-tails
-    # mark religious operator:type; slash-tails also resolve Wikidata QIDs.
-    spider = make_spider()
-    tmi_item = parsed(spider, channel("Palvelupiste / Tmi Petri Lehto"), "Oulun kaupunki")
-    assert tmi_item.get("operator") == "Tmi Petri Lehto"
-    assert tmi_item["extras"].get("operator:type") == "private"
-    assert tmi_item.get_tag("office") == "government"
-
-    parish_item = parsed(spider, channel("Päiväkerho / Helsingin seurakunta"), "Helsingin kaupunki")
-    assert parish_item.get("operator") == "Helsingin seurakunta"
-    assert parish_item["extras"].get("operator:type") == "religious"
-
-    # 2. Upgraded assisted-living homes skip misleading 24/7 always-open flags
-    # just like bare social facilities and nursing homes.
-    ch_al = channel("Onnikoti Apila")
-    ch_al["services"] = [{"service": {"name": "Tuettu asuminen"}}]
-    ch_al["serviceHours"] = [{"serviceHourType": "DaysOfTheWeek", "isAlwaysOpen": True, "openingHour": []}]
-    al_item = parsed(spider, ch_al, "Hyvinvointialue")
-    assert al_item.get("extras", {}).get("social_facility") == "assisted_living"
-    assert al_item.get("opening_hours") is None
-
-
-def test_round22_community_and_social_fixes():
-    spider = make_spider()
-    # 1. Bare single-token street segments in slash paths peel before room
-    # resolution so "Kenttäkuja" never poses as a kenttä room (5bc42170).
+    # Bare single-token street segments peel before room resolution.
     kentta = parsed(
         spider,
         channel("Iltapäivätoiminta / Pukinmäenkaaren peruskoulu / Kenttäkuja / Toiminta-alueittain"),
@@ -5658,33 +3739,23 @@ def test_round22_community_and_social_fixes():
     )
     assert kentta.get("name") == "Iltapäivätoiminta"
     assert kentta.get("located_in") == "Pukinmäenkaaren peruskoulu"
-
-    # 2. Specialist dental and orthodontic units file as dentist (969467f0).
-    dent = parsed(
-        spider,
-        channel("Pirkanmaan suun erikoishoidon yksikkö - oikomishoito"),
-        "Pirkanmaan hyvinvointialue",
-    )
+    # Specialist dental units file dentist end to end.
+    dent = parsed(spider, channel("Pirkanmaan suun erikoishoidon yksikkö - oikomishoito"), "Pirkanmaan hyvinvointialue")
     assert dent.get_tag("amenity") == "dentist"
-
-    # 3. Youth offices/desks file as government offices, while youth/pediatric
-    # wards/clinics file as clinics and split hospital hosts (ae9637ed, ba770f69, ee475753).
-    assert cat(spider, "Nuorisotoimisto")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Nuorisopalvelujen asiakaspalvelu")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Nuorisopsykiatrian poliklinikka")[0] == Categories.CLINIC
-    assert cat(spider, "Nuorisotilat ja -toimisto") == (None, {"amenity": "youth_centre"})
-
+    # Youth/pediatric wards file clinic and split hospital hosts.
     ward = parsed(
-        spider,
-        channel("Lasten ja nuorten päiväsairaala, Ahveniston sairaala"),
-        "Kanta-Hämeen hyvinvointialue",
+        spider, channel("Lasten ja nuorten päiväsairaala, Ahveniston sairaala"), "Kanta-Hämeen hyvinvointialue"
     )
     assert ward.get_tag("amenity") == "clinic"
     assert ward.get("name") == "Lasten ja nuorten päiväsairaala"
     assert ward.get("located_in") == "Ahveniston sairaala"
 
 
-# ---- User-report batch R-A: facility-head compounds --------------------
+# ---- User-report batches ---------------------------------------------------------------
+# One row per reported misparse, replay-verified. Static pins live here (not
+# in the thematic tables) to keep a single home per feed string.
+
+
 def test_user_report_facility_compounds():
     spider = make_spider()
     # 1. Fixed orienteering controls are markers, not the host park.
@@ -5694,18 +3765,15 @@ def test_user_report_facility_compounds():
     assert item.get_tag("leisure") is None
     # 2. Tool-lending clean-up sheds (sv talkoskjul) are not piers.
     assert cat(spider, "Kaupunginpuutarhan talkoolaituri")[0] == Categories.TOOL_LIBRARY
-    # 3. Sports parks file with sports centres (cf. liikuntapuisto);
-    # school hosts keep school filing.
+    # 3. Sports parks file with sports centres; school hosts keep school filing.
     assert cat(spider, "Keski-Espoon urheilupuisto 2.")[0] == Categories.LEISURE_SPORTS_CENTRE
     assert cat(spider, "Urheilupuiston koulu")[0] == Categories.SCHOOL
     # 4. Borrowable city rowboats are boat rentals, not sports venues.
     assert cat(spider, "Kaupunkisoutuveneet")[0] == Categories.AMENITY_BOAT_RENTAL
     # 5. Park club activities are not the park.
     assert cat(spider, "Viherkallion asukaspuiston kerho") == (None, None)
-    # 6. Allotment parcels on courthouse-named streets are allotments;
-    # plain courthouses keep filing.
+    # 6. Allotment parcels on courthouse-named streets are allotments.
     assert cat(spider, "Käräjätuvan- ja Näsinojankuja, viljelypalstat")[0] == Categories.ALLOTMENTS
-    assert cat(spider, "Käräjäoikeus")[0] == Categories.COURTHOUSE
 
 
 def test_user_report_batch_rb():
@@ -5719,8 +3787,7 @@ def test_user_report_batch_rb():
     item = parsed(spider, ch)
     assert item.get_tag("amenity") == "yes"
     assert item.get_tag("leisure") is None
-    # 4. Canoeing routes are routes, not rowing venues; genuine
-    # venues keep sports filing.
+    # 4. Canoeing routes are routes, not rowing venues; genuine venues keep sports filing.
     assert cat(spider, "Melontareitti") == (None, None)
     ch = channel("Myyrmäen suuralueen kierros")
     ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "melontareitit"}]}]
@@ -5731,16 +3798,8 @@ def test_user_report_batch_rb():
     assert cat(spider, "Kaukajärven soutu- ja melontastadion")[0] == Categories.LEISURE_SPORTS_CENTRE
     # 5. -aattori coinages are not squares; documented art files as art.
     assert cat(spider, "Väriaattori") == (None, None)
-    ch = channel(
-        "Väriaattori",
-        descriptions=[{"language": "en", "value": "Väriaattori is a work of public art"}],
-    )
+    ch = channel("Väriaattori", descriptions=[{"language": "en", "value": "Väriaattori is a work of public art"}])
     assert parsed(spider, ch).get_tag("tourism") == "artwork"
-    # 6. Manor venues are not their hosted laundry services.
-    ch = channel("Söderkullan kartano")
-    ch["services"] = [{"service": {"name": "Matonpesupaikat"}}]
-    item = parsed(spider, ch)
-    assert item.get_tag("amenity") == "yes"
 
 
 def test_user_report_batch_t():
@@ -5786,28 +3845,28 @@ def test_user_report_batch_rc():
     item = parsed(spider, channel("Hakunilan seniorikuntosali"))
     assert item.get_tag("leisure") == "fitness_centre"
     assert item["extras"].get("fitness_centre:for") == "senior"
-    # 7. Outdoor pools swim like indoor halls.
-    assert cat(spider, "Keravan maauimala") == (
-        Categories.LEISURE_SPORTS_CENTRE,
-        {"sport": "swimming"},
-    )
+    # Outdoor pools swim like indoor halls.
+    assert cat(spider, "Keravan maauimala") == (Categories.LEISURE_SPORTS_CENTRE, {"sport": "swimming"})
 
 
 def test_user_report_batch_rd():
     spider = make_spider()
     # Youth/adult mental-health and substance services are clinics, not
     # youth clubs: the nuoriso rule shadowed them.
-    assert cat(spider, "Perkkaan toimipiste, Nuorten ja Aikuisten mielenterveys- ja päihdepalvelut")[0] == (
-        Categories.CLINIC
+    assert (
+        cat(spider, "Perkkaan toimipiste, Nuorten ja Aikuisten mielenterveys- ja päihdepalvelut")[0]
+        == Categories.CLINIC
     )
-    assert cat(spider, "Nummelan terveysasema, nuorten ja aikuisten mielenterveys- ja päihdepalvelut")[0] == (
-        Categories.CLINIC
+    assert (
+        cat(spider, "Nummelan terveysasema, nuorten ja aikuisten mielenterveys- ja päihdepalvelut")[0]
+        == Categories.CLINIC
     )
     assert cat(spider, "Nuorten sukupuoli-identiteetin tutkimusvastaanotto, Pasila")[0] == Categories.CLINIC
     # Housing still beats diagnosis without a youth stem; reception homes
     # house children round-the-clock, they are neither clinics nor clubs.
-    assert cat(spider, "Mielenterveys- ja päihdekuntoutujien asumispalveluyksiköt Tähkä ja Jyvä")[0] == (
-        Categories.SOCIAL_FACILITY
+    assert (
+        cat(spider, "Mielenterveys- ja päihdekuntoutujien asumispalveluyksiköt Tähkä ja Jyvä")[0]
+        == Categories.SOCIAL_FACILITY
     )
     assert cat(spider, "Nuorten vastaanottokoti Havurinne") == (
         Categories.SOCIAL_FACILITY,
@@ -5817,17 +3876,25 @@ def test_user_report_batch_rd():
         Categories.SOCIAL_FACILITY,
         {"social_facility": "group_home"},
     )
+    assert (
+        cat(spider, "Konneveden, Uuraisten ja Äänekosken nuorten mielenterveys- ja päihdetyön tiimi")[0]
+        == Categories.CLINIC
+    )
+    assert cat(spider, "Nuorten päihdepalvelu Pysäkki")[0] == Categories.CLINIC
+    assert cat(spider, "Lasten ja nuorten mielenterveyspalvelut")[0] == Categories.CLINIC
     # Supervision units are government offices, not clinics or generics;
     # municipal vet branches keep their vet filing.
     assert cat(spider, "Terveysvalvonta")[0] == Categories.OFFICE_GOVERNMENT
     assert cat(spider, "Kalajoen kaupungin ympäristövalvonta")[0] == Categories.OFFICE_GOVERNMENT
     assert cat(spider, "Elintarviketurvallisuusyksikkö")[0] == Categories.OFFICE_GOVERNMENT
     assert cat(spider, "Ympäristöterveyspalvelut, Paraisten toimipiste")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Ympäristönsuojelu- ja ympäristöterveyspalveluiden Iisalmen toimipiste")[0] == (
-        Categories.OFFICE_GOVERNMENT
+    assert (
+        cat(spider, "Ympäristönsuojelu- ja ympäristöterveyspalveluiden Iisalmen toimipiste")[0]
+        == Categories.OFFICE_GOVERNMENT
     )
-    assert cat(spider, "Päijät-Hämeen ympäristöterveys, Orimattilan kunnaneläinlääkärin toimipiste")[0] == (
-        Categories.VETERINARY
+    assert (
+        cat(spider, "Päijät-Hämeen ympäristöterveys, Orimattilan kunnaneläinlääkärin toimipiste")[0]
+        == Categories.VETERINARY
     )
     # Slash-chain translations align per segment: the applied tail keeps
     # its rendering, located chains and truncated Finnish copies drop.
