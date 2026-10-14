@@ -18,5 +18,6 @@ class AlohaPokeCompanyUSSpider(WPStoreLocatorSpider):
     days = DAYS_EN
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", None)
         apply_category(Categories.FAST_FOOD, item)
         yield item
