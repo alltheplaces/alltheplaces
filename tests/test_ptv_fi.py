@@ -2543,6 +2543,9 @@ def test_event_houses_are_venues():
 def test_camp_areas_are_camp_sites():
     spider = make_spider()
     assert cat(spider, "Lankarin leirikeskuksen pururata")[0] == Categories.TOURISM_CAMP_SITE
+    # Table-level only: the exact pururata name never emits, the track gate
+    # drops fitness trails before categorising.
+    assert spider._is_dropped_name(spider._clean_name("Lankarin leirikeskuksen pururata")) == "non_place/track"
     assert cat(spider, "Vuolahden leirialue")[0] == Categories.TOURISM_CAMP_SITE
     assert cat(spider, "Rastilan leirintäalue")[0] == Categories.TOURISM_CAMP_SITE
     # Island tent sites camp, whatever the sports-catalogue ontology says.
@@ -5455,7 +5458,7 @@ def test_ostopalvelut_tails_dont_type():
     assert item.get_tag("amenity") == "social_facility"
     assert item.get("name") == "Attendo Puistomäki"
     # The park filing upgrades away cleanly: no residual leisure tag.
-    assert item.get("leisure") is None
+    assert item["extras"].get("leisure") is None
 
 
 def test_located_city_and_descriptor_segments_drop():
