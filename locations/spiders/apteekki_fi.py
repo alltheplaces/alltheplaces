@@ -77,8 +77,10 @@ class ApteekkiFISpider(Spider):
             if partial is None:
                 continue
             partials.append(partial)
+        if next_url := response.css("div.apteekki-pagination a.seur::attr(href)").get():
+            yield response.follow(next_url, callback=self.parse_listing, errback=self.errback)
         if not partials:
-            self._count("empty_page")
+            self._count("dropped/page_all_dropped")
             logger.warning("apteekki_fi: all records dropped on %s", response.url)
             return
         query = urlencode([("id[]", partial["ref"]) for partial in partials])
@@ -91,12 +93,10 @@ class ApteekkiFISpider(Spider):
             errback=self.errback_hours,
             cb_kwargs={"partials": partials},
         )
-        if next_url := response.css("div.apteekki-pagination a.seur::attr(href)").get():
-            yield response.follow(next_url, callback=self.parse_listing, errback=self.errback)
 
     def _partial(self, div: Any) -> dict[str, Any] | None:
         raw_id = div.attrib.get("id", "")
-        ref = raw_id.removeprefix("apteekki-")
+        ref = raw_id.removeprefix("apteekki-").strip()
         if not ref:
             self._count("dropped/no_ref")
             logger.warning("apteekki_fi: item div without apteekki id")
@@ -175,14 +175,38 @@ class ApteekkiFISpider(Spider):
         return result
 
     @staticmethod
-    def _clean_phone(text: str) -> str | None:
+    def _next_after(url: str) -> str | None:
+        # Next listing page after a failed one: page 1 carries no page param.
+        if match := re.search(r"[?&]p945=(\d+)", url):
+            return f"https://www.apteekki.fi/apteekkihaku.html?p945={int(match.group(1)) + 1}"
+        if url.rstrip("/").endswith("apteekkihaku.html"):
+            return "https://www.apteekki.fi/apteekkihaku.html?p945=2"
+        return None
+
+    def _clean_phone(self, text: str) -> str | None:
         match = re.search(r"Puhelin:\s*(.+)", text)
         if not match:
             return None
         # Rate tails always follow a space (cf. "(pvm/mpm)"), while area
         # codes open the number itself (cf. 2597 "(03) 410 92280").
-        number = match.group(1).split(" (", 1)[0].strip()
-        return number if re.search(r"\d", number) else None
+        head, _, tail = match.group(1).partition(" (")
+        number = head.strip()
+        if not re.search(r"\d", number):
+            return None
+        seen = {re.sub(r"\D", "", number)}
+        extras = []
+        for group in re.findall(r"\d[\d\s]{4,}\d", tail):
+            digits = re.sub(r"\D", "", group)
+            if not (5 <= len(digits) <= 13 and digits.startswith("0")):
+                continue
+            if digits in seen or any(digits in kept or kept in digits for kept in seen):
+                continue
+            seen.add(digits)
+            extras.append(group.strip())
+        if extras:
+            self._count("phone/extra_numbers", len(extras))  # Second number inside rate notes (cf. 2800).
+            number = "; ".join([number, *extras])
+        return number
 
     def _clean_website(self, href: str | None, ref: str) -> str | None:
         if not href:
@@ -192,7 +216,7 @@ class ApteekkiFISpider(Spider):
         url = re.split(r"[,\s]", text, maxsplit=1)[0].strip()
         if url != text:
             self._count("website/truncated")
-        if not url.startswith(("http://", "https://")) or "." not in url or " " in url:
+        if not url.lower().startswith(("http://", "https://")) or "." not in url or " " in url:
             self._count("website/invalid")
             logger.warning("apteekki_fi: ref %s with invalid website %r", ref, href)
             return None
@@ -200,7 +224,8 @@ class ApteekkiFISpider(Spider):
             self._count("website/invalid")  # Doubled scheme (17x, cf. 2597); no valid URL nests a scheme.
             logger.warning("apteekki_fi: ref %s with doubled scheme %r", ref, href)
             return None
-        if (urlparse(url).hostname or "").casefold().endswith(self.SOCIAL_HOSTS):
+        host = (urlparse(url).hostname or "").casefold()
+        if host in self.SOCIAL_HOSTS or any(host.endswith(f".{social}") for social in self.SOCIAL_HOSTS):
             self._count("website/social")  # Pharmacies without a site link their Facebook page instead.
             logger.warning("apteekki_fi: ref %s links social page %r, not a website", ref, href)
             return None
@@ -232,9 +257,13 @@ class ApteekkiFISpider(Spider):
                 self._count("hours/bad_entry")
                 logger.warning("apteekki_fi: skipping hours entry without pharmacy")
                 continue
-            records[str(pharmacy.get("id"))] = pharmacy
+            records[str(pharmacy.get("id")).strip()] = pharmacy
         for partial in partials:
-            yield self._build_item(partial, records.get(partial["ref"]))
+            try:
+                yield self._build_item(partial, records.get(partial["ref"]))
+            except Exception:
+                self._count("dropped/crashed")
+                logger.warning("apteekki_fi: dropping crashed hours item for ref %s", partial.get("ref"), exc_info=True)
 
     def _build_item(self, partial: dict[str, Any], pharmacy: dict[str, Any] | None) -> Feature:
         item = Feature()
@@ -256,10 +285,11 @@ class ApteekkiFISpider(Spider):
         item["extras"]["dispensing"] = "yes"  # All records are licensed dispensing pharmacies.
         normal = None
         if isinstance(pharmacy, dict):
+            open_hours = pharmacy.get("openHoursNormal")
             normal = next(
                 (
                     record
-                    for record in pharmacy.get("openHoursNormal") or []
+                    for record in (open_hours if isinstance(open_hours, list) else [])
                     if isinstance(record, dict) and record.get("luokittelu") == "normaali"
                 ),
                 None,
@@ -278,8 +308,8 @@ class ApteekkiFISpider(Spider):
         for prefix, day in self.DAY_FIELDS:
             opens = record.get(f"{prefix}Aukeaa")
             closes = record.get(f"{prefix}Sulkeutuu")
-            opens_norm = opens.casefold() if isinstance(opens, str) else ""
-            closes_norm = closes.casefold() if isinstance(closes, str) else ""
+            opens_norm = opens.strip().casefold() if isinstance(opens, str) else ""
+            closes_norm = closes.strip().casefold() if isinstance(closes, str) else ""
             if opens_norm in self.CLOSED_TOKENS or closes_norm in self.CLOSED_TOKENS:
                 if opens_norm != closes_norm:
                     self._count("hours/contradiction")  # CLOSED wins (cf. 2800 Sat Suljettu/10:45).
@@ -303,18 +333,27 @@ class ApteekkiFISpider(Spider):
             logger.warning("apteekki_fi: bad hours range %r-%r", opens, closes)
         return oh if oh.day_hours else None  # All-closed weeks emit nothing.
 
-    def errback(self, failure) -> None:
+    def errback(self, failure) -> Iterable[Request]:
         request = getattr(failure, "request", None)
         url = getattr(request, "url", "") or ""
         self._count("failed")
         logger.warning("apteekki_fi: listing request failed: %s", url)
+        # The next page is only discoverable from its predecessor, so a dead
+        # page must not truncate the tail behind it.
+        if next_url := self._next_after(url):
+            yield Request(url=next_url, callback=self.parse_listing, errback=self.errback)
 
     def errback_hours(self, failure) -> Iterable[Feature]:
         # Scrapy calls errbacks as errback(failure): cb_kwargs are NOT passed
         # as arguments, so partials are recovered from the failed request.
         request = getattr(failure, "request", None)
         cb_kwargs = getattr(request, "cb_kwargs", None) or {}
-        for partial in cb_kwargs.get("partials") or []:
+        partials = cb_kwargs.get("partials") or []
+        if not partials:
+            self._count("hours/unrecoverable")
+            logger.warning("apteekki_fi: hours failed with no recoverable partials")
+            return
+        for partial in partials:
             self._count("hours/failed_flush")
             logger.warning("apteekki_fi: hours failed for ref %s, flushing without hours", partial.get("ref"))
             yield self._build_item(partial, None)
