@@ -160,9 +160,13 @@ class MatkahuoltoFISpider(Spider):
         offices = response.json()  # ty: ignore[unresolved-attribute]
         if not offices:
             raise CloseSpider("matkahuolto_fi: empty area response")
-        # Descriptions only for remarks unique in the feed (boilerplate repeats stay out).
+        # Descriptions only for remarks unique in the feed (boilerplate repeats stay out; keys
+        # whitespace-normalised so double-space variants cannot pass as unique).
         remark_counts = Counter(
-            ps.get("normalRemarks") for office in offices for ps in office.get("parcelservices") or []
+            " ".join(ps.get("normalRemarks").split())
+            for office in offices
+            for ps in office.get("parcelservices") or []
+            if ps.get("normalRemarks")
         )
         for office in offices:
             if office.get("officeType") == "HEADQUARTERS":
@@ -249,7 +253,7 @@ class MatkahuoltoFISpider(Spider):
                 None,
             )
             # Closure statements belong in hours, not in descriptions.
-            if remark and remark_counts[remark] == 1 and "suljettu" not in remark.casefold():
-                item["extras"]["description"] = remark
+            if remark and remark_counts[" ".join(remark.split())] == 1 and "suljettu" not in remark.casefold():
+                item["extras"]["description"] = " ".join(remark.split())
 
             yield item
