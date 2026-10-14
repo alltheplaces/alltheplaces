@@ -3878,6 +3878,9 @@ class PtvFISpider(Spider):
     # 02 621 1100 (77), Turku vaihde 02 330 000, HUS vaihde 09 4711,
     # Raahe employment 08 439 4000/1 (rows keep alternates), Tyks main
     # 02 313 0000 (33), Ulosotto 0295 658 800 (rows keep alternates).
+    # Round-24 fallback review: Ulosotto 0295 658 807/801 share across
+    # 12+ cities nationwide (Espoo–Kouvola), and bare 112 (the national
+    # emergency code, emitted on 5 päivystys rows) is never a unit number.
     GENERIC_PHONES = frozenset(
         {
             "981621",
@@ -3900,6 +3903,9 @@ class PtvFISpider(Spider):
             "84394001",
             "23130000",
             "295658800",
+            "295658807",
+            "295658801",
+            "112",
         }
     )
     GENERIC_EMAILS = frozenset({"info@esperi.fi"})  # Central corporate inbox

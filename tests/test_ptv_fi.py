@@ -3082,6 +3082,14 @@ def test_contact_keep_and_drop():
         probe = Feature()
         spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "+358", "number": digits}]})
         assert probe.get("phone") is None, digits
+    # Round-24 fallback findings: shared Ulosotto lines and bare 112 drop.
+    for digits in ("295658807", "295658801"):
+        probe = Feature()
+        spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "+358", "number": digits}]})
+        assert probe.get("phone") is None, digits
+    probe = Feature()
+    spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "", "number": "112"}]})
+    assert probe.get("phone") is None
     probe = Feature()
     spider._apply_contact(probe, {"phoneNumbers": [{"prefixNumber": "", "number": "09 4711"}]})
     assert probe.get("phone") is None
