@@ -2775,12 +2775,9 @@ class PtvFISpider(Spider):
                 return btail.strip(), None, name
         return None
 
-    def _paren_tail(
+    def _paren_coverage_sisters(
         self, base: str, inner: str, name: str, city: str | None
     ) -> tuple[str, str | None, str | None] | None:
-        # Coverage sisters, descriptors, stripped notes, localities and
-        # venue lists resolve here; the room-word deferral runs first in
-        # the caller _split_paren.
         if (
             "," in inner
             and all(self._is_single_cap(seg) for seg in inner.split(","))
@@ -2795,6 +2792,11 @@ class PtvFISpider(Spider):
             self._count("name/paren_coverage_dropped")
             sub = self._split_name(base, city)
             return self._keep_official(sub, name)
+        return None
+
+    def _paren_coverage_city(
+        self, base: str, inner: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if (
             "," in inner
             and all(self._is_single_cap(seg) for seg in inner.split(","))
@@ -2807,6 +2809,11 @@ class PtvFISpider(Spider):
             self._count("name/paren_coverage_city_dropped")
             sub = self._split_name(base, city)
             return self._keep_official(sub, name)
+        return None
+
+    def _paren_venue_or_descriptor(
+        self, base: str, inner: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if self._has_no_digit(inner) and self._has_fixture(inner):
             # Venue in parens ("... (Oltermannikeskus)").
             if re.match(r"(yksityinen|kunnallinen)\b", inner.strip(), flags=re.IGNORECASE):
@@ -2817,6 +2824,11 @@ class PtvFISpider(Spider):
                 return self._keep_official(sub, name)
             self._count("name/paren_venue")
             return base, inner, name
+        return None
+
+    def _paren_numbered_room(
+        self, base: str, inner: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if (
             self._has_digit(inner)
             and self._has_fixture(inner)
@@ -2828,6 +2840,11 @@ class PtvFISpider(Spider):
             # qualifiers never qualify.
             self._count("name/paren_numbered_room")
             return self._split_pair(inner, base, name)
+        return None
+
+    def _paren_stripped_note(
+        self, base: str, inner: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if (
             self.COMMA_STREET_RE.search(inner.lower())
             or (self._has_digit(inner) and "," in inner)
@@ -2844,6 +2861,11 @@ class PtvFISpider(Spider):
             sub = self._split_name(base, city)
             self._count("name/paren_stripped")
             return self._keep_official(sub, name)
+        return None
+
+    def _paren_locality(
+        self, base: str, inner: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if self._is_single_cap(inner):
             # Single localities ("Totto-Halli (Muurola)") strip only when
             # they repeat known address context; village tails stay unless
@@ -2854,6 +2876,11 @@ class PtvFISpider(Spider):
             sub = self._split_name(base, city)
             self._count("name/paren_stripped")
             return self._keep_official(sub, name)
+        return None
+
+    def _paren_venue_list(
+        self, base: str, inner: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if "," in inner and all(self._is_single_cap(seg) for seg in inner.split(",")):
             # Proper-name venue lists ("...(Masto, Styyrpuuri,Vantti)"):
             # the units locate the POI. Coverage cities stay whole, as do
@@ -2864,6 +2891,26 @@ class PtvFISpider(Spider):
             ):
                 self._count("name/paren_venue_list")
                 return base, listed, name
+        return None
+
+    def _paren_tail(
+        self, base: str, inner: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
+        # Coverage sisters, descriptors, stripped notes, localities and
+        # venue lists resolve here; the room-word deferral runs first in
+        # the caller _split_paren. Ordered precedence table; first
+        # non-None hit wins.
+        for resolver in (
+            self._paren_coverage_sisters,
+            self._paren_coverage_city,
+            self._paren_venue_or_descriptor,
+            self._paren_numbered_room,
+            self._paren_stripped_note,
+            self._paren_locality,
+            self._paren_venue_list,
+        ):
+            if (hit := resolver(base, inner, name, city)) is not None:
+                return hit
         # Short qualifiers (target groups, levels, "(ulko)") are part of
         # the signed service name and stay whole.
         self._count("name/paren_qualifier_kept")
