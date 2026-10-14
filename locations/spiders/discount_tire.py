@@ -3,15 +3,14 @@ import json
 from scrapy import Request
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
-from locations.user_agents import BROWSER_DEFAULT
+from locations.hours import OpeningHours
 
 
 class DiscountTireSpider(SitemapSpider):
     name = "discount_tire"
     item_attributes = {"brand": "Discount Tire", "brand_wikidata": "Q5281735"}
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
     sitemap_urls = ["https://sitemaps.discounttire.com/store.xml"]
 
     def parse(self, response, **kwargs):
@@ -40,22 +39,19 @@ class DiscountTireSpider(SitemapSpider):
         item["email"] = poi.get("address", {}).get("email")
         item["state"] = poi.get("address", {}).get("region", {}).get("name")
         self.parse_hours(item, poi.get("weekDays", []))
+        apply_category(Categories.SHOP_TYRES, item)
 
         yield item
 
     def parse_hours(self, item, week_days):
-        try:
-            oh = OpeningHours()
-            for day in week_days:
-                if day.get("closed"):
-                    continue
-                opening_time = day.get("openingTime", {})
-                closing_time = day.get("closingTime", {})
-                oh.add_range(
-                    DAYS_EN[day.get("dayOfWeek").capitalize()],
-                    opening_time.get("formattedHour"),
-                    closing_time.get("formattedHour"),
-                    "%H:%M %p",
-                ).as_opening_hours()
-        except Exception:
-            pass
+        item["opening_hours"] = oh = OpeningHours()
+        for day in week_days:
+            if day["closed"]:
+                oh.set_closed(day["dayOfWeek"])
+                continue
+            oh.add_range(
+                day["dayOfWeek"],
+                day["openingTime"]["formattedHour"],
+                day["closingTime"]["formattedHour"],
+                "%I:%M %p",
+            )
