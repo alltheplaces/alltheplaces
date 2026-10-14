@@ -56,7 +56,6 @@ class PtvFISpider(Spider):
         "SATURDAY": "Sa",
         "SUNDAY": "Su",
     }
-    # Weekday iteration order, derived from DAY_MAP (insertion-ordered Mo-Su).
     WEEK_ORDER: tuple[str, ...] = tuple(DAY_MAP.values())
 
     # Road furniture, institutional kitchens, bookmobiles and mobile/outreach
@@ -1084,7 +1083,6 @@ class PtvFISpider(Spider):
                 yield item
 
     def errback_orgs(self, failure) -> Iterable[Feature]:
-        # Delegate to _flush_request_orgs on org fetch failure.
         request = getattr(failure, "request", None)
         url = getattr(request, "url", "") or ""
         self._count("org/failed")
@@ -3091,9 +3089,6 @@ class PtvFISpider(Spider):
                 # på Skanslandet..."); the Finnish name carries the tag.
                 continue
             if activity and extra is None and category in (Categories.CLINIC, Categories.SOCIAL_FACILITY):
-                # Care-typed rescue on activity-named channels describes
-                # purpose, not type ("Nakkifiesta" with mental-health
-                # ontology stays generic).
                 continue
             if peer and extra is None and category == Categories.CLINIC:
                 # Peer-delivered support ("Suvanto-vertaistiimi" with
@@ -3414,8 +3409,7 @@ class PtvFISpider(Spider):
     ) -> SplitTriple | None:
         # Hosted-unit, branch-qualifier, city-first and service-head
         # comma pairs. Returns None to fall through to city tails and
-        # the service split. Ordered precedence table; first non-None
-        # hit wins.
+        # the service split.
         return self._first_hit(
             (
                 self._comma_unit,
@@ -3573,7 +3567,6 @@ class PtvFISpider(Spider):
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> SplitTriple | None:
         # Service/unit comma pairs, both directions, then tail cleaners.
-        # Ordered precedence table; first non-None hit wins.
         hit = self._first_hit(
             (
                 self._split_comma_keep_whole,
@@ -3672,7 +3665,6 @@ class PtvFISpider(Spider):
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> SplitTriple | None:
         # Swedish tails and proper/unit/water/acronym/facility venues.
-        # Ordered precedence table; first non-None hit wins.
         return self._first_hit(
             (
                 self._comma_sv_service,
@@ -3768,7 +3760,6 @@ class PtvFISpider(Spider):
     ) -> SplitTriple | None:
         # Lowercase descriptors, Swedish tails, proper/unit venues and
         # coverage tails resolve after the service/unit dispatch above.
-        # Ordered precedence table; first non-None hit wins.
         return self._first_hit(
             (
                 self._comma_tail_descriptor,
@@ -3875,7 +3866,6 @@ class PtvFISpider(Spider):
                 self._count("hours/skipped_type/" + str(entry.get("serviceHourType") or "missing"))
                 continue
             if entry.get("validFrom") or entry.get("validTo"):
-                # Dated rules are deviations, never the timetable.
                 self._count("hours/dated")
                 continue
             if self._entry_is_phone(entry):
@@ -4555,7 +4545,6 @@ class PtvFISpider(Spider):
                 self._count("contact/generic_email")
                 continue
             if email.split("@")[0].lower() in self.PLACEHOLDER_EMAILS:
-                # Template placeholders, never real contacts.
                 self._count("contact/placeholder_email")
                 continue
             item["email"] = email
@@ -4571,8 +4560,6 @@ class PtvFISpider(Spider):
             if not url:
                 continue
             if self.LOGIN_URL_RE.search(url):
-                # Login walls (and email addresses in the URL field)
-                # are never websites.
                 self._count("contact/login_url")
                 continue
             if "finlex.fi" in url.lower():
@@ -4909,7 +4896,6 @@ class PtvFISpider(Spider):
         return core, units
 
     def _number_parts(self, number: str) -> tuple[str, list[str]]:
-        # Returns (core, units): sanitize the field, then split core/units.
         return self._number_core_units(self._number_sanitize(number))
 
     # Island infixes routing numberless sites to addr:place
@@ -4942,7 +4928,6 @@ class PtvFISpider(Spider):
         is_street = self._endswith_any(lowered, self.STREET_SUFFIXES)
         self._count("address/bare_street" if is_street else "address/freeform")
         if is_street:
-            # Bare streets carry the street name with no number.
             item["street"] = raw
         else:
             item["street_address"] = raw
@@ -5100,7 +5085,6 @@ class PtvFISpider(Spider):
             raw = self._strip_addr_base(f"{road} {core}".strip() if core else road)
             self._address_token_assign(item, raw, units, postcode)
         if floor is not None:
-            # Local floor numbering survives as addr:floor, never level.
             self._count("address/floor")
             item["extras"]["addr:floor"] = floor
         item["postcode"] = postcode or None
