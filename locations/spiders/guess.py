@@ -15,7 +15,7 @@ class GuessSpider(UberallSpider):
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         print(location)
         if location["name"] == "Guess Accessories":
-            apply_category(Categories.SHOP_FASHION_ACCESSORIES, feature)
+            apply_category(Categories.SHOP_FASHION_ACCESSORIES, item)
         elif location["name"] == "G by Guess":
             item["brand_wikidata"] = "Q5515159"
         if location["name"] not in ("Clothing Store,GUESS", ""):
