@@ -1,5 +1,4 @@
 import json
-from collections import Counter
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_ES, OpeningHours, sanitise_day
@@ -13,17 +12,11 @@ class McdonaldsGTSpider(JSONBlobSpider):
     start_urls = ["https://mcdonalds.com.gt/restaurantes"]
 
     def extract_json(self, response):
-        restaurants = json.loads(response.xpath("//@data-page").get())["props"]["restaurants"]
-        self.shared_contacts = {
-            key: {value for value, count in Counter(r.get(key) for r in restaurants).items() if count > 1}
-            for key in ("phone", "email")
-        }
-        return restaurants
+        return json.loads(response.xpath("//@data-page").get())["props"]["restaurants"]
 
     def post_process_item(self, item, response, location):
-        for key in ("phone", "email"):
-            if location.get(key) in self.shared_contacts[key]:
-                item[key] = None
+        item.pop("phone", None)
+        item.pop("email", None)
         item["branch"] = item.pop("name")
         apply_yes_no(Extras.DELIVERY, item, "Delivery" in location["categorias"])
 
