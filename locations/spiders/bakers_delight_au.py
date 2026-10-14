@@ -8,12 +8,15 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class BakersDelightAUSpider(JSONBlobSpider):
+class BakersDelightAUSpider(JSONBlobSpider, PlaywrightSpider):
     name = "bakers_delight_au"
     item_attributes = {"brand": "Bakers Delight", "brand_wikidata": "Q4849261"}
     locations_key = "locations"
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[Request]:
         # The store locator page references a versioned, theme-asset-hosted
