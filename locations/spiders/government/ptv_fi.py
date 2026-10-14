@@ -63,8 +63,9 @@ class PtvFISpider(Spider):
     # services are not visitable fixed POIs (cf. service-map excluded subtrees).
     MOBILE_RE = re.compile(r"(etsivä|liikkuva|hoitoauto|palveluauto|auto$)")
     TRACK_RE = re.compile(r"\b(kuntorata|kuntopolku|latu|luontopolku|retkeilyreitti|hiihtolatu|pururata)\b")
+    TRACK_WORDS = ("lenkki", "juoksu", "latu", "ladut", "polut", "reitti", "reitit", "reitistö")
     KM_RE = re.compile(r"\d\s*km\b")
-    KITCHEN_INFIX = ("päiväkoti", "koulu", "palvelukeskus", "hoiva", "sairaala", "tuotanto")
+    KITCHEN_INFIX = tuple("päiväkoti koulu palvelukeskus hoiva sairaala tuotanto ".split())
     COORD_TAIL_RE = re.compile(r",?\s*(?:[PN]\s*)?\d+\s*°.*$")
     CORE_INSTITUTION_RE = re.compile(r"(koulu|lukio|opisto|päiväkoti|kirjasto|museo|sairaala|neuvola)")
     # Consonant-gradation plurals/genitives normalizing to their singular
@@ -1329,14 +1330,7 @@ class PtvFISpider(Spider):
             return "non_place/mobile"
         if (
             self.TRACK_RE.search(lowered)
-            or "lenkki" in lowered
-            or "juoksu" in lowered
-            or "latu" in lowered
-            or "ladut" in lowered
-            or "polut" in lowered
-            or "reitti" in lowered
-            or "reitit" in lowered
-            or "reitistö" in lowered
+            or any(word in lowered for word in self.TRACK_WORDS)
             or self.KM_RE.search(lowered)
         ):
             # Tracks, loop trails and distance-marked routes are linear, not places.
@@ -1416,38 +1410,21 @@ class PtvFISpider(Spider):
     # Tails naming institutions are venues; the facility names the POI
     # ("Laihian Keskuskoulu / Yläkoulun yksikkö"). Narrower than the
     # service-map list on purpose: PTV shapes are org-branch offices.
-    INSTITUTION_TAILS = (
-        "koulu",
-        "lukio",
-        "yläaste",
-        "ala-aste",
-        "sairaala",
-        "kirjasto",
-        "museo",
-        "teatteri",
-        "kirkko",
-        "kappeli",
-        "päiväkoti",
-        "opisto",
-        "uimahalli",
-        "terveysasema",
-        "neuvola",
-        "virasto",
-        "hammashoitola",
-        "poliklinikka",
-        "skolan",
+    INSTITUTION_TAILS = tuple(
+        "koulu lukio yläaste ala-aste sairaala kirjasto museo teatteri kirkko kappeli päiväkoti opisto "
+        "uimahalli terveysasema neuvola virasto hammashoitola poliklinikka skolan ".split()
     )
     # Precompiled end-anchored institution check shared by _is_institution
     # (built from INSTITUTION_TAILS so the two can never drift apart).
     INSTITUTION_RE = re.compile(r"\w*(?:" + "|".join(INSTITUTION_TAILS) + r")$")
     # Branch-office designators name the org's local desk, not a venue
     # ("Pohjanmaan elinvoimakeskus, Kokkolan toimipaikka"): keep the head.
-    BRANCH_TAILS = ("toimipiste", "toimipaikka", "toimisto")
+    BRANCH_TAILS = tuple("toimipiste toimipaikka toimisto ".split())
     # Hosted school units: the unit is the POI, the school the venue
     # ("Kellon koulu, Kiviniemen yksikkö").
-    UNIT_TAILS = ("yksikkö", "opetuspiste", "ryhmäkoti")
+    UNIT_TAILS = tuple("yksikkö opetuspiste ryhmäkoti ".split())
     # Service areas and category-descriptors are designations, never venues.
-    AREA_TAILS = ("lähipalvelualue", "palvelualue", "toiminta-alue", "ulkoilusaari")
+    AREA_TAILS = tuple("lähipalvelualue palvelualue toiminta-alue ulkoilusaari ".split())
 
     def _island_area(self, text: str) -> bool:
         # Island service areas are places, not designations
@@ -1490,69 +1467,33 @@ class PtvFISpider(Spider):
         return len(tokens) == 1 and tokens[0].lower().endswith(suffixes)
 
     # Physical rooms/fields: venue-named unless numbered or proper-named.
-    ROOM_WORDS = (
-        "sali",
-        "kenttä",
-        "halli",
-        "allas",
-        "rata",
-        "tila",
-        "huone",
-        "koppi",
-        "katos",
-        "kota",
-        "laavu",
-        "grillipaikka",
-        "heittopaikka",
-        "huoltorakennus",
-        "ulkokuntoilupaikka",
+    ROOM_WORDS = tuple(
+        "sali kenttä halli allas rata tila huone koppi katos kota laavu grillipaikka heittopaikka "
+        "huoltorakennus ulkokuntoilupaikka ".split()
     )
     # Single memorial objects never split (title + designation of one artwork).
-    MEMORIAL_WORDS = ("muistomerkki", "monumentti", "patsas", "memorial")
+    MEMORIAL_WORDS = tuple("muistomerkki monumentti patsas memorial ".split())
     # Service heads hosted at schools: the service names the POI, the
     # school is the venue ("Opiskeluhuolto, Karhusuon koulu", cf. the
     # service-map comma-venue rule). Slash pairs already resolve this way.
-    SERVICE_HEADS = ("opiskeluhuolto", "kouluterveydenhuolto", "opiskeluterveydenhuolto")
+    SERVICE_HEADS = tuple("opiskeluhuolto kouluterveydenhuolto opiskeluterveydenhuolto ".split())
     # Generic service words heading "<service>, <unit>" names
     # ("Kuvantaminen, Pirkkala Pirkkalan röntgen"; "Fysiatrian
     # poliklinikka, Vaasa", the county's Vaasa branch): the service names
     # the POI, the remainder the branch.
-    BRANCH_HEADS = ("kuvantaminen", "laboratorio", "näytteenotto", "poliklinikka")
+    BRANCH_HEADS = tuple("kuvantaminen laboratorio näytteenotto poliklinikka ".split())
     # Service/unit nouns for host<>facility inversion, both directions
     # ("Lasten puheterapia, Perhekeskus Pohjatuuli" and its mirror).
-    SERVICE_TAILS = (
-        "yksikkö",
-        "ryhmäkoti",
-        "lastenkoti",
-        "opetuspiste",
-        "neuvola",
-        "terapia",
-        "poliklinikka",
-        "hammashoitola",
-        "kuntoutus",
-        "rokotus",
-        "vastaanotto",
-        "ravintola",
-        "keittiö",
-        "kahvila",
-        "kioski",
-        "kauppa",
-        "apteekki",
-        "neuvonta",
-        "ohjaus",
-        "palvelu",
-        "opastus",
-        "päivätoiminta",
-        "kalastuspaikka",
-        "opiskeluhuolto",
-        "kouluterveydenhuolto",
-        "opiskeluterveydenhuolto",
+    SERVICE_TAILS = tuple(
+        "yksikkö ryhmäkoti lastenkoti opetuspiste neuvola terapia poliklinikka hammashoitola kuntoutus "
+        "rokotus vastaanotto ravintola keittiö kahvila kioski kauppa apteekki neuvonta ohjaus palvelu opastus "
+        "päivätoiminta kalastuspaikka opiskeluhuolto kouluterveydenhuolto opiskeluterveydenhuolto ".split()
     )
     # Hospital acronyms name venues, never services (", Tyks"; "OYSin ...").
-    HOSPITAL_ACRONYMS = frozenset({"TYKS", "OYS", "HUS", "TAYS", "KYS"})
+    HOSPITAL_ACRONYMS = frozenset("TYKS OYS HUS TAYS KYS ".split())
     # Bare acronym units at hospital heads ("Vatsakeskus, Tays Hatanpää")
     # are hospital departments: unit words licensing the clinic filing.
-    ACRONYM_UNIT_WORDS = ("keskus", "yksikkö", "osasto", "klinikka", "poliklinikka", "vastaanotto")
+    ACRONYM_UNIT_WORDS = tuple("keskus yksikkö osasto klinikka poliklinikka vastaanotto ".split())
     # Swedish institution words for bilingual dash names (cf. Eskola: the
     # boundary keeps Finnish Eskola/places whole).
     SWEDISH_WORD_RE = re.compile(
@@ -1585,10 +1526,14 @@ class PtvFISpider(Spider):
         return self.INSTITUTION_RE.search(text) is not None
 
     # Bureau/metadata tails stripped in order before splitting (each
-    # result stripped; first match does not stop the chain). Precompiled;
-    # the boilerplate/person/association/dash shapes below stay explicit
-    # (counters ride along with them).
-    CLEAN_SUBS = (
+    # result stripped; first match does not stop the chain). Precompiled.
+    # Split in two around the boilerplate strip: the flag records whether
+    # it fired (lowercase-dash descriptors never strip below a stripped
+    # suffix). The post tails are last because a stripped suffix can only
+    # be followed by arrangement text, never new prefixes — and the corpus
+    # census (40,175 fi names, 0 hits) shows no boilerplate row carries a
+    # palvelupaikka/yhteystiedot tail either.
+    CLEAN_SUBS_PRE = (
         (re.compile(r",\s*$"), ""),
         (re.compile(r"\s+,"), ","),
         (re.compile(r"\s*(\d+)\*\s*$"), r" \1"),
@@ -1597,10 +1542,12 @@ class PtvFISpider(Spider):
         (re.compile(r",\s*Sektorn för fostran och utbildning.*$"), ""),
         (re.compile(r",\s*Education Division.*$"), ""),
         (AGENCY_SUFFIX_RE, ""),
+    )
+    CLEAN_SUBS_POST = (
+        (re.compile(r"\s*-palvelun järjestämispaikka\s*(?:,\s*\d+)?\s*$"), ""),
         (re.compile(r",\s*palvelupaikka\s*$"), ""),
         (re.compile(r"\s+yhteystiedot(\s*,\s*[A-ZÅÄÖ][^,]*?)?\s*$"), ""),
         (re.compile(r"^päiväkoti[\s-]+(?=.*päiväkoti)", re.IGNORECASE), ""),
-        (re.compile(r"^\S+\s+(?:ry:n|r\.y\.:n)\s+"), ""),
     )
 
     def _clean_name(self, raw: str) -> str:
@@ -1609,21 +1556,15 @@ class PtvFISpider(Spider):
         # trailing comma (data-entry cut-off) strips first so boilerplate
         # patterns match ("... järjestämispaikka,").
         primary = raw.replace("\u00a0", " ").strip()
-        for rx, repl in self.CLEAN_SUBS:
+        for rx, repl in self.CLEAN_SUBS_PRE:
             primary = rx.sub(repl, primary).strip()
         before_boilerplate = primary
-        primary = re.sub(r"\s*-palvelun järjestämispaikka\s*(?:,\s*\d+)?\s*$", "", primary).strip()
+        for rx, repl in self.CLEAN_SUBS_POST:
+            primary = rx.sub(repl, primary).strip()
         # A stripped suffix leaves the service's own name as-is ("Näe hyvä
         # mussa -leirit lapsille"): the remainder names the service, so
         # lowercase-dash descriptors never strip below.
         boilerplate_stripped = primary != before_boilerplate
-        primary = re.sub(r",\s*palvelupaikka\s*$", "", primary).strip()
-        # Contact-detail tails name the contact point's owner, never the
-        # details ("Turun kulttuuripaja Casan yhteystiedot" is Casa).
-        primary = re.sub(r"\s+yhteystiedot(\s*,\s*[A-ZÅÄÖ][^,]*?)?\s*$", "", primary).strip()
-        # Duplicated generic heads ("Päiväkoti Luomupäiväkoti Kirsikka"):
-        # the specific daycare name already says päiväkoti.
-        primary = re.sub(r"^päiväkoti[\s-]+(?=.*päiväkoti)", "", primary, flags=re.IGNORECASE).strip()
         # Guide/contact qualifiers ("Nummelan kimppakävelyt Marin kanssa"):
         # a capitalized genitive-singular proper noun plus kanssa names the
         # person, never the venue (contact-person doctrine). Plural markers
@@ -1734,18 +1675,16 @@ class PtvFISpider(Spider):
                 # A branch duplicating the venue is not a branch.
                 self._count("name/branch_dup_located")
                 del item["branch"]
-        branch = item.get("branch")
-        if branch and (shown or "").casefold() == branch.casefold():
-            # A branch repeating the name word for word ("Poliklinikka")
-            # is not a branch.
-            self._count("name/branch_dup_name")
-            del item["branch"]
-        branch = item.get("branch")
-        if branch and city_src and branch.casefold() == city_src.strip().casefold():
-            # A branch repeating the municipality ("Ivalo") is not a
-            # branch; the city field carries it.
-            self._count("name/branch_dup_city")
-            del item["branch"]
+            elif (shown or "").casefold() == branch.casefold():
+                # A branch repeating the name word for word ("Poliklinikka")
+                # is not a branch.
+                self._count("name/branch_dup_name")
+                del item["branch"]
+            elif city_src and branch.casefold() == city_src.strip().casefold():
+                # A branch repeating the municipality ("Ivalo") is not a
+                # branch; the city field carries it.
+                self._count("name/branch_dup_city")
+                del item["branch"]
 
     # Company/association markers for operator detection. Dotted forms
     # (r.y./r.f.) consume the trailing dot without a boundary (Derby
@@ -1766,319 +1705,34 @@ class PtvFISpider(Spider):
     # contains "tila") peel as towns instead of filing as venues. Gaps err
     # safe: unknown towns keep the old heuristic path.
     MUNICIPALITIES = frozenset(
-        {
-            "akaa",
-            "alajärvi",
-            "alavieska",
-            "alavus",
-            "asikkala",
-            "askola",
-            "aura",
-            "brändö",
-            "eckerö",
-            "enonkoski",
-            "enontekiö",
-            "espoo",
-            "eura",
-            "eurajoki",
-            "evijärvi",
-            "finström",
-            "forssa",
-            "föglö",
-            "geta",
-            "haapajärvi",
-            "haapavesi",
-            "hailuoto",
-            "halsua",
-            "hamina",
-            "hammarland",
-            "hankasalmi",
-            "hanko",
-            "harjavalta",
-            "hartola",
-            "hattula",
-            "hausjärvi",
-            "heinola",
-            "heinävesi",
-            "helsinki",
-            "hirvensalmi",
-            "hollola",
-            "huittinen",
-            "humppila",
-            "hyrynsalmi",
-            "hyvinkää",
-            "hämeenkyrö",
-            "hämeenlinna",
-            "ii",
-            "iisalmi",
-            "iitti",
-            "ikaalinen",
-            "ilmajoki",
-            "ilomantsi",
-            "imatra",
-            "inari",
-            "inkoo",
-            "isojoki",
-            "isokyrö",
-            "janakkala",
-            "joensuu",
-            "jokioinen",
-            "jomala",
-            "joroinen",
-            "joutsa",
-            "juuka",
-            "juupajoki",
-            "juva",
-            "jyväskylä",
-            "jämijärvi",
-            "jämsä",
-            "järvenpää",
-            "kaarina",
-            "kaavi",
-            "kajaani",
-            "kalajoki",
-            "kangasala",
-            "kangasniemi",
-            "kankaanpää",
-            "kannonkoski",
-            "kannus",
-            "karijoki",
-            "karkkila",
-            "karstula",
-            "karvia",
-            "kaskinen",
-            "kauhajoki",
-            "kauhava",
-            "kauniainen",
-            "kaustinen",
-            "keitele",
-            "kemi",
-            "kemijärvi",
-            "keminmaa",
-            "kemiönsaari",
-            "kempele",
-            "kerava",
-            "keuruu",
-            "kihniö",
-            "kinnula",
-            "kirkkonummi",
-            "kitee",
-            "kittilä",
-            "kiuruvesi",
-            "kivijärvi",
-            "kokemäki",
-            "kokkola",
-            "kolari",
-            "konnevesi",
-            "kontiolahti",
-            "korsnäs",
-            "koski tl",
-            "kotka",
-            "kouvola",
-            "kristiinankaupunki",
-            "kruunupyy",
-            "kuhmo",
-            "kuhmoinen",
-            "kumlinge",
-            "kuopio",
-            "kuortane",
-            "kurikka",
-            "kustavi",
-            "kuusamo",
-            "kyyjärvi",
-            "kärkölä",
-            "kärsämäki",
-            "kökar",
-            "lahti",
-            "laihia",
-            "laitila",
-            "lapinjärvi",
-            "lapinlahti",
-            "lappajärvi",
-            "lappeenranta",
-            "lapua",
-            "laukaa",
-            "lemi",
-            "lemland",
-            "lempäälä",
-            "leppävirta",
-            "lestijärvi",
-            "lieksa",
-            "lieto",
-            "liminka",
-            "liperi",
-            "lohja",
-            "loimaa",
-            "loppi",
-            "loviisa",
-            "luhanka",
-            "lumijoki",
-            "lumparland",
-            "luoto",
-            "luumäki",
-            "maalahti",
-            "maarianhamina",
-            "maarianhamina - mariehamn",
-            "marttila",
-            "masku",
-            "merijärvi",
-            "merikarvia",
-            "miehikkälä",
-            "mikkeli",
-            "muhos",
-            "multia",
-            "muonio",
-            "mustasaari",
-            "muurame",
-            "mynämäki",
-            "myrskylä",
-            "mäntsälä",
-            "mänttä-vilppula",
-            "mäntyharju",
-            "naantali",
-            "nakkila",
-            "nivala",
-            "nokia",
-            "nousiainen",
-            "nurmes",
-            "nurmijärvi",
-            "närpiö",
-            "orimattila",
-            "oripää",
-            "orivesi",
-            "oulainen",
-            "oulu",
-            "outokumpu",
-            "padasjoki",
-            "paimio",
-            "paltamo",
-            "parainen",
-            "parikkala",
-            "parkano",
-            "pedersören",
-            "pedersören kunta",
-            "pelkosenniemi",
-            "pello",
-            "perho",
-            "pertunmaa",
-            "petäjävesi",
-            "pieksämäki",
-            "pielavesi",
-            "pietarsaari",
-            "pihtipudas",
-            "pirkkala",
-            "polvijärvi",
-            "pomarkku",
-            "pori",
-            "pornainen",
-            "porvoo",
-            "posio",
-            "pudasjärvi",
-            "pukkila",
-            "punkalaidun",
-            "puolanka",
-            "puumala",
-            "pyhtää",
-            "pyhäjoki",
-            "pyhäjärvi",
-            "pyhäntä",
-            "pyhäranta",
-            "pälkäne",
-            "pöytyä",
-            "raahe",
-            "raasepori",
-            "raisio",
-            "rantasalmi",
-            "ranua",
-            "rauma",
-            "rautalampi",
-            "rautavaara",
-            "rautjärvi",
-            "reisjärvi",
-            "riihimäki",
-            "ristijärvi",
-            "rovaniemi",
-            "ruokolahti",
-            "ruovesi",
-            "rusko",
-            "rääkkylä",
-            "saarijärvi",
-            "salla",
-            "salo",
-            "saltvik",
-            "sastamala",
-            "sauvo",
-            "savitaipale",
-            "savonlinna",
-            "savukoski",
-            "seinäjoki",
-            "sievi",
-            "siikainen",
-            "siikajoki",
-            "siikalatva",
-            "siilinjärvi",
-            "simo",
-            "sipoo",
-            "siuntio",
-            "sodankylä",
-            "soini",
-            "somero",
-            "sonkajärvi",
-            "sotkamo",
-            "sottunga",
-            "sulkava",
-            "sund",
-            "suomussalmi",
-            "suonenjoki",
-            "sysmä",
-            "säkylä",
-            "taipalsaari",
-            "taivalkoski",
-            "taivassalo",
-            "tammela",
-            "tampere",
-            "tervo",
-            "tervola",
-            "teuva",
-            "tohmajärvi",
-            "toholampi",
-            "toivakka",
-            "tornio",
-            "turku",
-            "tuusniemi",
-            "tuusula",
-            "tyrnävä",
-            "ulvila",
-            "urjala",
-            "utajärvi",
-            "utsjoki",
-            "uurainen",
-            "uusikaarlepyy",
-            "uusikaupunki",
-            "vaala",
-            "vaasa",
-            "valkeakoski",
-            "vantaa",
-            "varkaus",
-            "vehmaa",
-            "vesanto",
-            "vesilahti",
-            "veteli",
-            "vieremä",
-            "vihti",
-            "viitasaari",
-            "vimpeli",
-            "virolahti",
-            "virrat",
-            "vårdö",
-            "vöyri",
-            "ylitornio",
-            "ylivieska",
-            "ylöjärvi",
-            "ypäjä",
-            "ähtäri",
-            "äänekoski",
-        }
+        "akaa alajärvi alavieska alavus asikkala askola aura brändö eckerö enonkoski enontekiö espoo eura "
+        "eurajoki evijärvi finström forssa föglö geta haapajärvi haapavesi hailuoto halsua hamina hammarland "
+        "hankasalmi hanko harjavalta hartola hattula hausjärvi heinola heinävesi helsinki hirvensalmi hollola "
+        "huittinen humppila hyrynsalmi hyvinkää hämeenkyrö hämeenlinna ii iisalmi iitti ikaalinen ilmajoki "
+        "ilomantsi imatra inari inkoo isojoki isokyrö janakkala joensuu jokioinen jomala joroinen joutsa "
+        "juuka juupajoki juva jyväskylä jämijärvi jämsä järvenpää kaarina kaavi kajaani kalajoki kangasala "
+        "kangasniemi kankaanpää kannonkoski kannus karijoki karkkila karstula karvia kaskinen kauhajoki "
+        "kauhava kauniainen kaustinen keitele kemi kemijärvi keminmaa kemiönsaari kempele kerava keuruu "
+        "kihniö kinnula kirkkonummi kitee kittilä kiuruvesi kivijärvi kokemäki kokkola kolari konnevesi "
+        "kontiolahti korsnäs kotka kouvola kristiinankaupunki kruunupyy kuhmo kuhmoinen kumlinge kuopio "
+        "kuortane kurikka kustavi kuusamo kyyjärvi kärkölä kärsämäki kökar lahti laihia laitila lapinjärvi "
+        "lapinlahti lappajärvi lappeenranta lapua laukaa lemi lemland lempäälä leppävirta lestijärvi lieksa "
+        "lieto liminka liperi lohja loimaa loppi loviisa luhanka lumijoki lumparland luoto luumäki maalahti "
+        "maarianhamina marttila masku merijärvi merikarvia miehikkälä mikkeli muhos multia muonio mustasaari "
+        "muurame mynämäki myrskylä mäntsälä mänttä-vilppula mäntyharju naantali nakkila nivala nokia "
+        "nousiainen nurmes nurmijärvi närpiö orimattila oripää orivesi oulainen oulu outokumpu padasjoki "
+        "paimio paltamo parainen parikkala parkano pedersören pelkosenniemi pello perho pertunmaa petäjävesi "
+        "pieksämäki pielavesi pietarsaari pihtipudas pirkkala polvijärvi pomarkku pori pornainen porvoo posio "
+        "pudasjärvi pukkila punkalaidun puolanka puumala pyhtää pyhäjoki pyhäjärvi pyhäntä pyhäranta pälkäne "
+        "pöytyä raahe raasepori raisio rantasalmi ranua rauma rautalampi rautavaara rautjärvi reisjärvi "
+        "riihimäki ristijärvi rovaniemi ruokolahti ruovesi rusko rääkkylä saarijärvi salla salo saltvik "
+        "sastamala sauvo savitaipale savonlinna savukoski seinäjoki sievi siikainen siikajoki siikalatva "
+        "siilinjärvi simo sipoo siuntio sodankylä soini somero sonkajärvi sotkamo sottunga sulkava sund "
+        "suomussalmi suonenjoki sysmä säkylä taipalsaari taivalkoski taivassalo tammela tampere tervo tervola "
+        "teuva tohmajärvi toholampi toivakka tornio turku tuusniemi tuusula tyrnävä ulvila urjala utajärvi "
+        "utsjoki uurainen uusikaarlepyy uusikaupunki vaala vaasa valkeakoski vantaa varkaus vehmaa vesanto "
+        "vesilahti veteli vieremä vihti viitasaari vimpeli virolahti virrat vårdö vöyri ylitornio ylivieska "
+        "ylöjärvi ypäjä ähtäri äänekoski ".split() + ["koski tl", "maarianhamina - mariehamn", "pedersören kunta"]
     )
 
     def _post_city(self, office: str | None) -> str | None:
@@ -2269,10 +1923,7 @@ class PtvFISpider(Spider):
         if head.lower().endswith(tail.lower()):
             self._count("name/slash_self_kept")
             return name, None, None
-        if self._has_digit(tail):
-            self._count("name/slash_numbered_room")
-            return self._split_pair(tail, head, name)
-        self._count(tag)
+        self._count("name/slash_numbered_room" if self._has_digit(tail) else tag)
         return self._split_pair(tail, head, name)
 
     def _slash_inst_unit(self, head: str, tail: str, name: str) -> SplitTriple | None:
@@ -2917,22 +2568,7 @@ class PtvFISpider(Spider):
     # Bare generic heads that are no venue for dash-room splits
     # ("Tila - Koskihalli" keeps whole).
     DASH_GENERIC_HEADS = frozenset(
-        {
-            "tila",
-            "keskus",
-            "talo",
-            "piste",
-            "huone",
-            "koppi",
-            "katos",
-            "kota",
-            "laavu",
-            "sali",
-            "halli",
-            "kenttä",
-            "allas",
-            "rata",
-        }
+        "tila keskus talo piste huone koppi katos kota laavu sali halli kenttä allas rata ".split()
     )
 
     def _dash_room(self, left: str, right: str, name: str) -> SplitTriple | None:
@@ -3165,21 +2801,9 @@ class PtvFISpider(Spider):
 
     # Exact inessive venue stems ("Kuusankosken kirjastossa") shared by
     # _split_inessive and _custom_group_use.
-    INESSIVE_HOST_STEMS = (
-        "kirjasto",
-        "koulu",
-        "lukio",
-        "museo",
-        "kirkko",
-        "kappeli",
-        "opisto",
-        "sairaala",
-        "neuvola",
-        "päiväkoti",
-        "päiväkodi",
-        "terveysasema",
-        "uimahalli",
-        "nuorisotalo",
+    INESSIVE_HOST_STEMS = tuple(
+        "kirjasto koulu lukio museo kirkko kappeli opisto sairaala neuvola päiväkoti päiväkodi terveysasema "
+        "uimahalli nuorisotalo ".split()
     )
 
     def _split_inessive(self, name: str, tokens: list[str]) -> SplitTriple | None:
@@ -4547,45 +4171,11 @@ class PtvFISpider(Spider):
     # as itself, never the water ("Lauttasaaren uimaranta /
     # Beachvolleykenttä", "Päiväkoti Ankkalampi Duckies,
     # Herttoniemenranta").
-    SHORE_FACILITY_BAIL = (
-        "kenttä",
-        "volley",
-        "pallo",
-        "kaukalo",
-        "luistelu",
-        "sali",
-        "halli",
-        "koulu",
-        "lukio",
-        "opisto",
-        "päiväkoti",
-        "kirjasto",
-        "museo",
-        "kirkko",
-        "kappeli",
-        "sairaala",
-        "neuvola",
-        "terveysasema",
-        "vastaanotto",
-        "eläinlääkäri",
-        "toimisto",
-        "virasto",
-        "poliisi",
-        "apteekki",
-        "teatteri",
-        "terapia",
-        "lataus",
-        "kotihoito",
-        "hoiva",
-        "lyhytaikais",
-        "asumispalvelu",
-        "huoltorakennus",
-        "rakennus",
-        "leikki",
-        "kalastus",
-        "koirauimaranta",
-        "ulkokuntoilu",
-        "kuntoilupiste",
+    SHORE_FACILITY_BAIL = tuple(
+        "kenttä volley pallo kaukalo luistelu sali halli koulu lukio opisto päiväkoti kirjasto museo kirkko "
+        "kappeli sairaala neuvola terveysasema vastaanotto eläinlääkäri toimisto virasto poliisi apteekki "
+        "teatteri terapia lataus kotihoito hoiva lyhytaikais asumispalvelu huoltorakennus rakennus leikki "
+        "kalastus koirauimaranta ulkokuntoilu kuntoilupiste ".split()
     )
 
     def _custom_saari(self, lowered: str) -> tuple | None:
@@ -5082,14 +4672,8 @@ class PtvFISpider(Spider):
 
     # Placeholder email locals: template text, never mailboxes.
     PLACEHOLDER_EMAILS = frozenset(
-        {
-            "etunimi.sukunimi",
-            "firstname.lastname",
-            "nimi.sukunimi",
-            "fornamn.efternamn",
-            "förnamn.efternamn",
-            "förnamn.släktnamn",
-        }
+        "etunimi.sukunimi firstname.lastname nimi.sukunimi fornamn.efternamn förnamn.efternamn "
+        "förnamn.släktnamn ".split()
     )
 
     @staticmethod
@@ -5217,65 +4801,14 @@ class PtvFISpider(Spider):
     NUMBER_WORD_TAIL_RE = re.compile(r"(ovi|\bas\b|asunto|rappu|tsto|\bhki\b|huoneisto|\bja\b)", re.IGNORECASE)
     # Place suffixes for numberless addresses (squares, islands...), street
     # suffixes for bare streets. PTV-local copies of the service-map lists.
-    PLACE_SUFFIXES = (
-        "saari",
-        "luoto",
-        "niemi",
-        "lahti",
-        "järvi",
-        "lampi",
-        "koski",
-        "joki",
-        "kanava",
-        "salmi",
-        "puisto",
-        "tori",
-        "aukio",
-        "kenttä",
-        "metsä",
-        "niitty",
-        "pelto",
-        "vaara",
-        "mäki",
-        "kallio",
-        "asema",
-        "ö",
-        "kari",
-        "selkä",
-        "laituri",
-        "saaristo",
-        "holme",
-        "holmen",
-        "viken",
-        "sjö",
-        "sjön",
-        "parken",
-        "torget",
-        "skär",
+    PLACE_SUFFIXES = tuple(
+        "saari luoto niemi lahti järvi lampi koski joki kanava salmi puisto tori aukio kenttä metsä niitty "
+        "pelto vaara mäki kallio asema ö kari selkä laituri saaristo holme holmen viken sjö sjön parken "
+        "torget skär ".split()
     )
-    STREET_SUFFIXES = (
-        "tie",
-        "katu",
-        "kuja",
-        "polku",
-        "väylä",
-        "raitti",
-        "ranta",
-        "kaari",
-        "penger",
-        "esplanadi",
-        "bulevardi",
-        "vägen",
-        "väg",
-        "gatan",
-        "gata",
-        "gränden",
-        "gränd",
-        "stigen",
-        "stig",
-        "väli",
-        "linja",
-        "kurvi",
+    STREET_SUFFIXES = tuple(
+        "tie katu kuja polku väylä raitti ranta kaari penger esplanadi bulevardi vägen väg gatan gata gränden "
+        "gränd stigen stig väli linja kurvi ".split()
     )
     # Street-stem alternation shared by street-tail/paren regexes
     # (linja stays STREET_SUFFIXES-only so linja-autoasema never matches;
