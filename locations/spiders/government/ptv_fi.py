@@ -1487,8 +1487,6 @@ class PtvFISpider(Spider):
                 self._count("name/branch_dup_located")
                 del item["branch"]
             elif (shown or "").casefold() == branch.casefold():
-                # A branch repeating the name word for word ("Poliklinikka")
-                # is not a branch.
                 self._count("name/branch_dup_name")
                 del item["branch"]
             elif city_src and branch.casefold() == city_src.strip().casefold():
@@ -1498,23 +1496,15 @@ class PtvFISpider(Spider):
                 del item["branch"]
 
     # Company/association markers for operator detection. Dotted forms
-    # (r.y./r.f.) consume the trailing dot without a boundary (Derby
-    # still stays whole via the leading boundary). Ay (avoin yhtiö) and
-    # öb (Swedish öppet bolag, often truncated to Ö.) mark partnerships.
-    # Shared operator-marker alternation for OPERATOR_END_RE and the
-    # _clean_located inline pattern below (sr stays END_RE-only: a bare
-    # "Sr" tail is a name suffix, never an operator marker).
+    # consume the trailing dot (Derby stays whole via the leading boundary).
+    # Shared alternation (sr stays END_RE-only: a bare "Sr" tail is a name suffix).
     OPERATOR_MARKERS = r"oy|ab|ry|r\.y\.?|r\.f\.?|tmi|toiminimi|ky|ay|öb|ö\.b?\.?|säätiö"
     OPERATOR_END_RE = r"(\b(" + OPERATOR_MARKERS + r"|sr)|(yhdistys|förening|seurakunta))\.?$"
-    # Bare-name private operators without a marker (Red Cross districts,
-    # settlement houses, Attendo care homes, säätiö foundations).
     PRIVATE_SUBSTRINGS = ("punainen risti", "setlementti", "attendo", "säätiö", "sininauha")
     # Municipalities (fi names, casefolded) derived from the CC0 raw dump
-    # itself (visit-point + service-area municipalities, 309 distinct;
-    # variants split off " - " parallels and " kunta" suffixes). Coverage-list
-    # tails match against these exactly, so fixture-bearing towns (Laitila
-    # contains "tila") peel as towns instead of filing as venues. Gaps err
-    # safe: unknown towns keep the old heuristic path.
+    # itself. Coverage-list tails match against these exactly, so fixture-bearing
+    # towns peel as towns instead of filing as venues. Gaps err safe:
+    # unknown towns keep the old heuristic path.
     MUNICIPALITIES = frozenset(
         "akaa alajärvi alavieska alavus asikkala askola aura brändö eckerö enonkoski enontekiö espoo eura "
         "eurajoki evijärvi finström forssa föglö geta haapajärvi haapavesi hailuoto halsua hamina hammarland "
@@ -1592,11 +1582,9 @@ class PtvFISpider(Spider):
         return stripped or (text.strip() if fallback else stripped)
 
     def _has_operator_word(self, text: str) -> bool:
-        # Short forms need word boundaries (Derby stays whole); yhdistys
-        # and förening match inside compounds (kannatusyhdistys). A leading
-        # Tmi marks toiminimi operators ("Tmi Petri Lehto"). Trailing
-        # parenthesised qualifiers ("... Oy (Helsinki)") read past for
-        # detection, mirroring _is_private_org.
+        # Short forms need word boundaries; longer forms match inside compounds.
+        # A leading Tmi marks toiminimi operators. Trailing parenthesised
+        # qualifiers read past for detection.
         stripped = self._strip_trailing_paren(text, fallback=True)
         return (
             re.search(r"^tmi\b", stripped, flags=re.IGNORECASE) is not None
@@ -1614,13 +1602,9 @@ class PtvFISpider(Spider):
         )
 
     def _is_private_org(self, operator: str) -> bool:
-        # Companies and associations delivering public services, whether
-        # marked (Oy, ry, Tmi, kassa, säätiö, seura/kerho societies, ay/öb
-        # partnerships, RIKU, mid-string "ry") or known bare names (Red
-        # Cross, Setlementti, Attendo). Parishes (seurakunta) are
-        # public-law bodies, never private, unless carrying a
-        # company/association marker themselves
-        # ("X seurakunta ry" stays private).
+        # Companies and associations delivering public services, marked or known
+        # bare names. Parishes (seurakunta) are public-law bodies, never private,
+        # unless carrying a company/association marker themselves.
         lowered = operator.lower()
         if "seurakunta" in lowered and not re.search(r"\b(oy|ab|ry|r\.y\.?|tmi|toiminimi)\b", lowered):
             return False
@@ -1665,8 +1649,7 @@ class PtvFISpider(Spider):
 
     def _is_proper_tail(self, text: str) -> bool:
         # A non-initial capitalized tail token outside the generic
-        # vocabulary names a distinctive unit ("Sipoon Enter"); leading
-        # place names ("Pöytätennisalue", "Hiekkakenttä") never match.
+        # vocabulary names a distinctive unit.
         if self._is_operator_shaped(text):
             return False
         tokens = [t for t in self.TOKEN_SPLIT_RE.split(text) if t]
@@ -1717,18 +1700,15 @@ class PtvFISpider(Spider):
 
     def _split_pair(self, shown: str, venue_text: str, official: str | None, strict: bool = False) -> SplitTriple:
         # One triple-return shape for located-venue pairs: fallback keeps the
-        # raw venue text when cleaning drops nothing, strict yields None when
-        # unusable. Callers preserve their original shape via strict.
+        # raw venue text, strict yields None when unusable.
         return shown, self._clean_located(venue_text) if strict else self._located_or(venue_text), official
 
     def _is_room_tail(self, tail: str) -> bool:
         return any(word in tail.lower() for word in self.ROOM_WORDS)
 
     def _resolve_slash_room(self, head: str, tail: str, name: str, tag: str) -> SplitTriple | None:
-        # Rooms/fields are the facility, the host the venue
-        # ("Santahaminan ala-asteen koulu / Koripallokenttä").
-        # Self-named pairs ("... ulkokuntosali / Ulkokuntosali")
-        # stay whole instead. Returns None when the tail is no room.
+        # Rooms/fields are the facility, the host the venue.
+        # Self-named pairs stay whole instead.
         if not self._is_room_tail(tail):
             return None
         if head.lower().endswith(tail.lower()):
@@ -1750,11 +1730,8 @@ class PtvFISpider(Spider):
 
     def _slash_inst_ground(self, head: str, tail: str, name: str) -> SplitTriple | None:
         if "lähiliikuntapaikka" in tail.lower():
-            # Exercise grounds hosted at institutions ("Vuoniityn
-            # peruskoulu / Lähiliikuntapaikka"): the ground names
-            # the POI, the school the venue (cf. slash_room). Lives
-            # here for Finnish institution heads; Swedish skol heads
-            # resolve in _resolve_slash_pair below.
+            # Exercise grounds hosted at institutions: the ground names
+            # the POI, the school the venue; Swedish heads resolve below.
             self._count("name/slash_exercise_ground")
             return self._split_pair(tail, head, name, strict=True)
         return None
@@ -1790,7 +1767,6 @@ class PtvFISpider(Spider):
     def _slash_pair_structural(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         # Street heads, numbered buildings and hosted units resolve before
         # service/venue dispatch below. tail_base unused; kept for the
-        # uniform resolver signature.
         return self._first_hit(
             (self._slash_street_head, self._slash_numbered_building, self._resolve_slash_institution),
             head,
@@ -1820,8 +1796,7 @@ class PtvFISpider(Spider):
 
     @staticmethod
     def _cap_first(text: str | None) -> str | None:
-        # Capitalize-first with the empty guard folded in (feed rows
-        # starting lowercase: "vaatelahjoitus...", "wetterhoffinkatu").
+        # Capitalize-first with the empty guard folded in.
         return text[0].upper() + text[1:] if text else text
 
     def _resolve_slash_pair(self, head: str, tail: str, name: str) -> SplitTriple | None:
@@ -1866,8 +1841,7 @@ class PtvFISpider(Spider):
     def _slash_unit_kept(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._is_unit_tail(tail_base) and not self._is_institution(head.lower()):
             # Unit qualifiers of a service without a host venue
-            # ("Fysioterapia / Himangan yksikkö") name one service:
-            # keep whole (cf. Stadin).
+            # name one service: keep whole.
             self._count("name/slash_unit_kept")
             return name, None, None
         return None
@@ -1912,10 +1886,8 @@ class PtvFISpider(Spider):
 
     def _slash_place_facility(self, head: str, tail: str, tail_base: str, name: str) -> SplitTriple | None:
         if self._has_fixture(tail) and re.search(r"(stadion|areena|keskus|puisto)$", head.lower()):
-            # Place-headed pairs name the facility ("Uimastadion /
-            # Pöytätennisalue"): the sub-area is the POI, the grounds
-            # the venue. Precedes the district guess: stadiums end in
-            # -n without being districts.
+            # Place-headed pairs name the facility, preceding the district
+            # guess: stadiums end in -n without being districts.
             self._count("name/slash_place_facility")
             return self._split_pair(tail, head, name)
         return None
@@ -2073,10 +2045,8 @@ class PtvFISpider(Spider):
             and re.search(r"\w+lahti$", segments[0].strip().lower())
             and self._has_fixture(segments[1])
         ):
-            # Bay-headed facility pairs ("Töölönlahti /
-            # WDC-ulkokuntoilupaikka 1", "Tahvonlahti / Hiekkakenttä"):
-            # the facility names the POI, the bay locates it. Compound
-            # heads only, so the city of Lahti never matches.
+            # Bay-headed facility pairs: the facility names the POI, the bay
+            # locates it. Compound heads only, so the city of Lahti never matches.
             self._count("name/slash_bay_venue")
             return segments[1].strip(), segments[0].strip(), name
         return None
