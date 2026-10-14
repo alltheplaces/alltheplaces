@@ -183,12 +183,7 @@ class LukoilSpider(Spider):
             return False
         if "финляндия" in address or "finland" in address or "suomi" in address:
             return True
-        try:
-            lat = float(poi.get("Latitude"))
-            lon = float(poi.get("Longitude"))
-            return 59.5 <= lat <= 70.5 and 19.0 <= lon <= 32.0
-        except (TypeError, ValueError):
-            return False
+        return False
 
     def parse_brand(self, item: Feature, poi: dict) -> None:
         if company_name := poi.get("Company", {}).get("Name", ""):
