@@ -25,6 +25,36 @@ POSTCODE_RE = re.compile(r"%2C(\d{5})%2C", re.IGNORECASE)
 HOURS_SEGMENT_RE = re.compile(
     r"(?:(?P<days>(?!klo\b)[a-z]+(?:-[a-z]+)?)\s+)?(?:klo\s+)?(?P<open>\d{1,2}(?::\d{2})?)\s*-\s*(?P<close>\d{1,2}(?::\d{2})?)"
 )
+# Uppercase tokens that keep their shape (banks, chains, area/level codes);
+# VON/JA fold low. Everything else title-cases (verified against the full feed vocabulary).
+CASE_KEEP = frozenset(
+    [
+        "OP",
+        "ABC",
+        "POP",
+        "SP",
+        "T2",
+        "P1",
+        "KRS",
+        "IKEA",
+        "JYSK",
+        "HYKS",
+        "TAYS",
+        "GW",
+        "CM",
+        "ICCO",
+        "III",
+    ]
+)
+CASE_LOWER = {"VON": "von", "JA": "ja"}
+
+
+def title_fi(value: str) -> str:
+    titled = "".join(
+        CASE_LOWER.get(part, part if part in CASE_KEEP or re.fullmatch(r"\d*KRS\.?", part) else part.title())
+        for part in re.split(r"(\W+)", value)
+    )
+    return titled.replace("S-Market", "S-market")
 
 
 class OttoFISpider(Spider):
@@ -113,13 +143,13 @@ class OttoFISpider(Spider):
         except ValueError:
             self.logger.warning("Skipping %r: bad coordinates", ref)
             return None
-        item["street_address"] = street
-        item["city"] = addr.group("city")
+        item["street_address"] = title_fi(street)
+        item["city"] = title_fi(addr.group("city"))
         if postcode := POSTCODE_RE.search(info):
             item["postcode"] = postcode.group(1)
         else:
             self.logger.warning("No postcode for %r", marker.group("ref"))
-        item["branch"] = lines[1]
+        item["branch"] = title_fi(lines[1])
         located_in, located_in_wikidata = extract_located_in(item["branch"], self.LOCATED_IN_MAPPINGS)
         if located_in:
             item["located_in"] = located_in
@@ -148,14 +178,13 @@ class OttoFISpider(Spider):
         except ValueError:
             return True
 
-    def parse_hours(self, text: str) -> OpeningHours | None:
+    def parse_hours(self, text: str) -> OpeningHours | str | None:
         if text in ("LIIKETILAN AUKIOLO", "ITSEPALVELUALUEEN AUKIOLO"):
             return None  # host shop hours without stated times; timed suffixes are the ATM's effective hours
         rules = text.split("AUKIOLO", 1)[1].strip().replace("&#8211;", "-").replace("–", "-").lower()
         hours = OpeningHours()
         if text == "24 H AUKIOLO" or rules in ("24 h", "24/7"):
-            hours.add_days_range(DAYS, "00:00", "23:59")
-            return hours
+            return "24/7"
         segments = list(HOURS_SEGMENT_RE.finditer(rules))
         if not segments:
             self.logger.warning("Could not parse hours %r", text)
