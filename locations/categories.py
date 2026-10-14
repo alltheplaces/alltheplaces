@@ -99,7 +99,6 @@ class Categories(Enum):
     LEISURE_NATURE_RESERVE = {"leisure": "nature_reserve"}
     LEISURE_PARK = {"leisure": "park"}
     LEISURE_PADDLING_POOL = {"leisure": "paddling_pool"}
-    LEISURE_PARKOUR = {"leisure": "parkour_park"}
     LEISURE_PICNIC_SHELTER = {"amenity": "shelter", "shelter_type": "picnic_shelter"}
     LEISURE_PICNIC_TABLE = {"leisure": "picnic_table"}
     TOURISM_PICNIC_SITE = {"tourism": "picnic_site"}

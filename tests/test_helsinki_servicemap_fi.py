@@ -2946,8 +2946,8 @@ def test_swedish_name_in_fi_field_stays_whole():
     assert item.get_tag("amenity") == "school"
 
 
-def test_translated_service_tails_stripped():  # Unit 70202: the service designation lives only in sv/en; strip it to
-    # the translated venue.
+def test_translated_service_tails_kept():  # Unit 70202: the service designation lives only in sv/en; keep it in
+    # the translated name (it names the POI, unlike venue/address tails).
     item = named(
         make_spider(),
         "Hämeenkylän koulu",
@@ -2957,13 +2957,44 @@ def test_translated_service_tails_stripped():  # Unit 70202: the service designa
     )
     assert item["name"] == "Opiskeluhuolto"
     assert item["located_in"] == "Hämeenkylän koulu"
-    assert item["extras"]["name:sv"] == "Hämeenkylä skola"
-    assert item["extras"]["name:en"] == "Hämeenkylä School"
-    assert item["extras"]["official_name:sv"] == "Hämeenkylä skola skolhälsovård"
+    assert item["extras"]["name:sv"] == "Hämeenkylä skola skolhälsovård"
+    assert item["extras"]["name:en"] == "Hämeenkylä School school health care"
+    # Full translations duplicate their official forms: no separate copy kept.
+    assert "official_name:sv" not in item["extras"]
     assert item["extras"]["official_name:en"] == "Hämeenkylä School, school health care"
     # Bare service words stay names, never strip to nothing.
     item = named(make_spider(), "Opiskeluhuolto", [2164, 2165], en="Student welfare")
     assert item["extras"]["name:en"] == "Student welfare"
+
+
+def test_name_fi_explicit_with_translations():
+    # SYNTHETIC units through _build_item (named() skips brand, which runs
+    # before the name:fi assignment): every translated name gets its Finnish
+    # counterpart, which is the applied name itself.
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 900001,
+            "name": {"fi": "Sugoi", "sv": "Sugoi hallen", "en": "Sugoi hall"},
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [155],
+        }
+    )
+    assert item["extras"]["name:sv"] == "Sugoi hallen"
+    assert item["extras"]["name:en"] == "Sugoi hall"
+    assert item["extras"]["name:fi"] == item["name"]
+    # Fi-less units fall back to sv/en for the name: those must never mistag
+    # as name:fi.
+    item = spider._build_item(
+        {
+            "id": 900002,
+            "name": {"sv": "Sugoi hallen", "en": "Sugoi hall"},
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [155],
+        }
+    )
+    assert item["extras"]["name:en"] == "Sugoi hall"
+    assert "name:fi" not in item["extras"]
 
 
 def test_translated_address_tails_stripped_like_fi():

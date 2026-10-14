@@ -1029,6 +1029,22 @@ class HelsinkiServicemapFISpider(Spider):
             return None
         return lon, lat
 
+    def _apply_name_fi(self, item, unit):
+        # Every translated name gets its Finnish counterpart explicitly.
+        # The applied name is Finnish exactly when the feed named it in
+        # Finnish; fi-less units fall back to sv/en and must not mistag
+        # those as name:fi. Runs after brand, which may shorten the name.
+        if not item.get("name"):
+            return
+        if not (item["extras"].get("name:sv") or item["extras"].get("name:en")):
+            return
+        names = unit.get("name") or {}
+        if not isinstance(names, dict):
+            return
+        if not (isinstance(names.get("fi"), str) and re.sub(self.ZW_CHARS, "", names["fi"]).strip()):
+            return
+        item["extras"]["name:fi"] = item["name"]
+
     def _build_item(self, unit):
         if not isinstance(unit, dict) or unit.get("id") is None:
             self._stat("dropped/invalid")
@@ -1078,6 +1094,7 @@ class HelsinkiServicemapFISpider(Spider):
         self._apply_category(item, unit)
         self._apply_operator(item, unit)
         self._apply_brand(item, unit)
+        self._apply_name_fi(item, unit)
         self._apply_contact(item, unit)
         self._apply_media(item, unit)
         self._apply_lipas_extras(item, unit)
@@ -1564,7 +1581,12 @@ class HelsinkiServicemapFISpider(Spider):
                 if match and match.start() > 0:
                     text = text[match.start() :].strip()
             service = self.SERVICE_TAIL_RE.search(text)
+            service_tail = ""
             if service and text[: service.start()].rstrip(" ,-/–").strip():
+                # Service designations name the POI in sv/en (unit 70202):
+                # remembered for the translated name below, stripped for
+                # venue derivation like the fi split.
+                service_tail = text[service.start() :].strip()
                 text = text[: service.start()].rstrip(" ,-/–").strip()
             head, _, tail = text.rpartition(",")
             if head.strip() and self.COMMA_STREET_RE.search(tail.strip().lower()):
@@ -1616,6 +1638,11 @@ class HelsinkiServicemapFISpider(Spider):
                     else:
                         item["located_in"] = venue
                 if facility:
+                    if service_tail and service_tail.lower() not in facility.lower():
+                        # The stripped service tail is the POI's identity in
+                        # this language (cf. "skolhälsovård"): keep it in the
+                        # translated name, unlike venue/address tails.
+                        facility = f"{facility} {service_tail}"
                     if facility != item.get("name") and facility != fi_prefix:
                         # Chain-stripped translations equal the post-brand
                         # fi name, not the still-full applied name: suppress
