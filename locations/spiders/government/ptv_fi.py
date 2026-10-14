@@ -2290,15 +2290,16 @@ class PtvFISpider(Spider):
             return self._split_pair(tail, head, name, strict=True)
         return None
 
-    def _slash_pair_structural(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
-        # Street heads, numbered buildings and hosted units resolve before
-        # service/venue dispatch below.
+    def _slash_street_head(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
         if self._is_street_head(head):
             # Streets and street addresses are never venues
             # ("Kurkisuontie 2 / Hiekkakenttä"): the facility names
             # the POI, the address line carries the street.
             self._count("name/slash_street_head")
             return tail, None, name
+        return None
+
+    def _slash_numbered_building(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
         if re.search(r"(rakennus|talo)\s*\d", tail.lower()) or "huoltorakennus" in tail.lower():
             # Numbered buildings qualify the head facility ("Eläintarhan
             # urheilukenttä / Huoltorakennus 4"): neither venues nor POIs.
@@ -2306,8 +2307,21 @@ class PtvFISpider(Spider):
             # venue head names it ("Väinämöisenkenttä / Huoltorakennus").
             self._count("name/slash_building_kept")
             return head, None, name
-        if (inst := self._resolve_slash_institution(head, tail, name)) is not None:
-            return inst
+        return None
+
+    def _slash_pair_structural(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
+        # Street heads, numbered buildings and hosted units resolve before
+        # service/venue dispatch below. tail_base unused; kept for the
+        # uniform resolver signature.
+        for resolver in (
+            self._slash_street_head,
+            self._slash_numbered_building,
+            self._resolve_slash_institution,
+        ):
+            if (hit := resolver(head, tail, name)) is not None:
+                return hit
         return None
 
     @staticmethod
@@ -2339,18 +2353,20 @@ class PtvFISpider(Spider):
     def _resolve_slash_pair(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
         # Institution, service, place and person tails resolve against the
         # head; returns None to fall through to room/appositive handling.
-        if (structural := self._slash_pair_structural(head, tail, name)) is not None:
-            return structural
+        # Ordered precedence table; first non-None hit wins.
         tail_base = self._comma_base(tail)
-        if (area := self._slash_pair_service_area(head, tail, tail_base, name)) is not None:
-            return area
-        return self._slash_pair_venue_person(head, tail, tail_base, name)
+        for resolver in (
+            self._slash_pair_structural,
+            self._slash_pair_service_area,
+            self._slash_pair_venue_person,
+        ):
+            if (hit := resolver(head, tail, tail_base, name)) is not None:
+                return hit
+        return None
 
-    def _slash_pair_service_area(
+    def _slash_exercise_ground(
         self, head: str, tail: str, tail_base: str, name: str
     ) -> tuple[str, str | None, str | None] | None:
-        # Exercise grounds, subunit descriptors, coverage areas, unit
-        # qualifiers and service tails resolve before venue dispatch below.
         if "lähiliikuntapaikka" in tail.lower() and re.search(r"(koulu|skol)\w*", head.lower()):
             # Exercise grounds at schools, Finnish or Swedish
             # ("Vuoniityn peruskoulu / ...", "Åshöjdens grundskola /
@@ -2359,22 +2375,42 @@ class PtvFISpider(Spider):
             # skola/skolan, which institution tails lack).
             self._count("name/slash_exercise_ground")
             return self._split_pair(tail, head, name, strict=True)
+        return None
+
+    def _slash_subunit_kept(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if tail_base.lower() in ("koulutus",):
             # Education-subunit descriptors ("Sivistysosasto / Koulutus"):
             # the department names it whole; the subunit is not a venue.
             self._count("name/slash_subunit_kept")
             return name, None, None
+        return None
+
+    def _slash_area_kept(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if self._is_bare_area(tail_base):
             # Bare coverage areas are not venues ("X / Tikkurilan alue"):
             # the signed form stays whole, never split into located_in.
             self._count("name/slash_area_kept")
             return name, None, None
+        return None
+
+    def _slash_unit_kept(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if self._is_unit_tail(tail_base) and not self._is_institution(head.lower()):
             # Unit qualifiers of a service without a host venue
             # ("Fysioterapia / Himangan yksikkö") name one service:
             # keep whole (cf. Stadin).
             self._count("name/slash_unit_kept")
             return name, None, None
+        return None
+
+    def _slash_service_tail(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if any(word in tail_base.lower() for word in self.SERVICE_TAILS) and not self._is_institution(head.lower()):
             # Service-tailed pairs name the service ("Perhekeskus /
             # Neuvola", "Salmen ulkoilualue / Kalastuspaikka"); the venue
@@ -2386,17 +2422,37 @@ class PtvFISpider(Spider):
             return self._split_pair(tail, head, name)
         return None
 
-    def _slash_pair_venue_person(
+    def _slash_pair_service_area(
         self, head: str, tail: str, tail_base: str, name: str
     ) -> tuple[str, str | None, str | None] | None:
-        # Institution, place and person tails resolve against the head;
-        # rooms close the dispatch.
+        # Exercise grounds, subunit descriptors, coverage areas, unit
+        # qualifiers and service tails resolve before venue dispatch below.
+        # Ordered precedence table; first non-None hit wins.
+        for resolver in (
+            self._slash_exercise_ground,
+            self._slash_subunit_kept,
+            self._slash_area_kept,
+            self._slash_unit_kept,
+            self._slash_service_tail,
+        ):
+            if (hit := resolver(head, tail, tail_base, name)) is not None:
+                return hit
+        return None
+
+    def _slash_institution_venue(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if self._is_institution(tail_base.lower()):
             # Named institutions as tails are venues
             # ("Iltapäivätoiminta / Steiner-koulu"); comma descriptors
             # ride along ("... / Kulosaaren ala-aste, Liikkis").
             self._count("name/slash_institution_venue")
             return self._split_pair(head, tail_base, name)
+        return None
+
+    def _slash_place_facility(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if self._has_fixture(tail) and re.search(r"(stadion|areena|keskus|puisto)$", head.lower()):
             # Place-headed pairs name the facility ("Uimastadion /
             # Pöytätennisalue"): the sub-area is the POI, the grounds
@@ -2404,11 +2460,21 @@ class PtvFISpider(Spider):
             # -n without being districts.
             self._count("name/slash_place_facility")
             return self._split_pair(tail, head, name)
+        return None
+
+    def _slash_district_facility(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if re.fullmatch(r"[A-ZÅÄÖ][a-zåäöA-ZÅÄÖ-]+n", head) and " " not in head and self._has_fixture(tail):
             # Bare genitive-district head ("Pohjois-Espoon /
             # Niipperin matonpesupaikka"): the facility is the name.
             self._count("name/slash_district_facility")
             return tail, None, name
+        return None
+
+    def _slash_person_drop(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if self._is_person(tail):
             # Contact persons are not venues ("Sari Wicklund"); host-named
             # units share a token with their school ("Sipoon Enter").
@@ -2417,6 +2483,11 @@ class PtvFISpider(Spider):
             if not (head_tokens & tail_tokens):
                 self._count("name/person_dropped")
                 return head, None, name
+        return None
+
+    def _slash_office_kept(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if re.search(r"(toimisto|toimipiste|toimipaikka|virasto)$", head.lower()) and re.search(
             r"(toimipiste|toimipaikka)", tail.lower()
         ):
@@ -2425,6 +2496,11 @@ class PtvFISpider(Spider):
             # the name (Stadin rule for offices).
             self._count("name/slash_office_kept")
             return name, None, None
+        return None
+
+    def _slash_service_proper(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if (
             any(word in head.lower() for word in self.SERVICE_TAILS)
             and not self._is_institution(head.lower())
@@ -2435,11 +2511,39 @@ class PtvFISpider(Spider):
             # venue hosts it.
             self._count("name/slash_service_proper")
             return self._split_pair(head, tail, name)
+        return None
+
+    def _slash_proper_facility(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
         if self._is_proper_tail(tail):
             self._count("name/slash_proper_facility")
             return self._split_pair(tail, head, name, strict=True)
-        if (room := self._resolve_slash_room(head, tail, name, "name/slash_generic_room")) is not None:
-            return room
+        return None
+
+    def _slash_generic_room(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
+        return self._resolve_slash_room(head, tail, name, "name/slash_generic_room")
+
+    def _slash_pair_venue_person(
+        self, head: str, tail: str, tail_base: str, name: str
+    ) -> tuple[str, str | None, str | None] | None:
+        # Institution, place and person tails resolve against the head;
+        # rooms close the dispatch. Ordered precedence table; first
+        # non-None hit wins.
+        for resolver in (
+            self._slash_institution_venue,
+            self._slash_place_facility,
+            self._slash_district_facility,
+            self._slash_person_drop,
+            self._slash_office_kept,
+            self._slash_service_proper,
+            self._slash_proper_facility,
+            self._slash_generic_room,
+        ):
+            if (hit := resolver(head, tail, tail_base, name)) is not None:
+                return hit
         return None
 
     def _peel_slash_pair(self, segments: list[str]) -> tuple[str, str | None] | None:
