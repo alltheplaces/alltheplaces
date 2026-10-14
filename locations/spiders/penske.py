@@ -23,11 +23,13 @@ class PenskeSpider(SitemapSpider, StructuredDataSpider):
     @staticmethod
     def clean_hours_rule(rule: str) -> str:
         # Times are mostly 24-hour with a stray AM/PM suffix; "00:00 AM - 00:00 PM" means closed
-        if m := re.fullmatch(r"(\S+) (\d+):(\d+) [AP]M - (\d+):(\d+) ([AP])M", rule.strip()):
-            days, open_h, open_m, close_h, close_m, meridiem = m.groups()
+        if m := re.fullmatch(r"(\S+) (\d+):(\d+) ([AP])M - (\d+):(\d+) ([AP])M", rule.strip()):
+            days, open_h, open_m, open_meridiem, close_h, close_m, close_meridiem = m.groups()
             if int(open_h) == int(open_m) == int(close_h) == int(close_m) == 0:
                 return f"{days} closed"
-            if meridiem == "P" and 0 < int(close_h) < 12:
+            if open_meridiem == "P" and 0 < int(open_h) < 12:
+                open_h = str(int(open_h) + 12)
+            if close_meridiem == "P" and 0 < int(close_h) < 12:
                 close_h = str(int(close_h) + 12)
             return f"{days} {open_h}:{open_m}-{close_h}:{close_m}"
         return rule
