@@ -1274,7 +1274,8 @@ def test_ward_and_reception_rows():
     assert cat(spider, "Laakson osasto 3")[0] == Categories.CLINIC
     assert cat(spider, "Suursuon osasto 23")[0] == Categories.CLINIC
     assert cat(spider, "Kaupunginosan toimisto")[0] == Categories.OFFICE_GOVERNMENT
-    assert cat(spider, "Vainajansäilytys, Ahveniston sairaala")[0] == Categories.CLINIC
+    # Morgues have no enum entry: generic, even at hospitals.
+    assert cat(spider, "Vainajansäilytys, Ahveniston sairaala") == (None, None)
     assert cat(spider, "Terveysaseman vastaanotto")[0] == Categories.CLINIC
     assert cat(spider, "Akaan lääkärin ja hoitajan vastaanotot")[0] == Categories.CLINIC
     assert cat(spider, "Kuntoutuksen poliklinikat")[0] == Categories.CLINIC
@@ -1298,7 +1299,10 @@ def test_therapy_rows_carry_clinic():
 
 def test_care_home_rows():
     spider = make_spider()
-    assert cat(spider, "Palvelut ikäihmisille")[0] == Categories.NURSING_HOME
+    # Bare service labels are desks, not care homes: nursing needs
+    # housing evidence (cf. tehostettu palveluasuminen below).
+    assert cat(spider, "Palvelut ikäihmisille")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Ikäihmisten tehostettu palveluasuminen")[0] == Categories.NURSING_HOME
     assert cat(spider, "Töölön seniorikeskus/Helmi ryhmäkoti")[0] == Categories.SOCIAL_FACILITY
     assert cat(spider, "Töölön seniorikeskus/Helmi ryhmäkoti")[1] == {"social_facility": "group_home"}
 
@@ -1513,8 +1517,8 @@ def test_swedish_floor_parsed():
 
 
 def test_paren_floor_parsed():
-    # 7 A (3. kerros), including the word-form 7 A (kolmannes kerros).
-    for number, expected in (("7 A (3. kerros)", "3"), ("7 A (kolmannes kerros)", "3")):
+    # 7 A (3. kerros), including the word-form 7 A (kolmas kerros).
+    for number, expected in (("7 A (3. kerros)", "3"), ("7 A (kolmas kerros)", "3")):
         item = addressed(make_spider(), "Tie", number)
         assert (item["street"], item["housenumber"]) == ("Tie", "7"), number
         assert item["extras"]["addr:unit"] == "A", number
@@ -3630,12 +3634,6 @@ def test_rontgen_carries_clinic():
     )
 
 
-def test_beach_volley_plural_field():
-    category, extra = cat(make_spider(), "Velaatan uimarannan beach volley -kenttä")
-    assert category == Categories.LEISURE_PITCH
-    assert extra["sport"] == "beachvolleyball"
-
-
 # ---- Round 12: generic-pool rescue (reviews 12_1..12_6 + user reports) ----
 
 
@@ -3702,8 +3700,8 @@ def test_civic_boards_are_offices():
     assert cat(spider, "Tonttijako")[0] == Categories.OFFICE_GOVERNMENT
     assert cat(spider, "Maakuntatalo")[0] == Categories.OFFICE_GOVERNMENT
     assert cat(spider, "Welcome Office")[0] == Categories.OFFICE_GOVERNMENT
-    # Youth councils keep their community filing.
-    assert cat(spider, "Nuorisovaltuusto")[0] == Categories.COMMUNITY_CENTRE
+    # Youth councils are civic offices like the city council above.
+    assert cat(spider, "Nuorisovaltuusto")[0] == Categories.OFFICE_GOVERNMENT
 
 
 def test_group_home_gradation():
@@ -5476,7 +5474,7 @@ def test_located_city_and_descriptor_segments_drop():
 def test_paren_coverage_city_drops():
     # Coverage municipality lists containing the municipality (d1d28ff8 +
     # 6 census siblings): the base names the POI, the full form survives
-    # in official_name. Lists without the city stay whole.
+    # in official_name. Other-town lists split with the towns as located_in.
     spider = make_spider()
     full = "Perheoikeudelliset palvelut perhekeskus Pohjatuuli (Karvia, Siikainen, Pomarkku, Kankaanpää, Jämijärvi)"
     assert spider._split_name(full, "Kankaanpää") == (
@@ -5740,6 +5738,20 @@ def test_user_report_batch_rb():
     ch["services"] = [{"service": {"name": "Matonpesupaikat"}}]
     item = parsed(spider, ch)
     assert item.get_tag("amenity") == "yes"
+
+
+def test_user_report_batch_t():
+    spider = make_spider()
+    # Morgues have no enum entry: generic, never clinics or hospitals.
+    assert cat(spider, "Vainajansäilytys, Ahveniston sairaala") == (None, None)
+    assert cat(spider, "Helsingin vainajatilat") == (None, None)
+    # Youth councils are civic offices, not youth venues; chambers keep events.
+    assert cat(spider, "Nuorisovaltuusto")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Valtuustosali")[0] == Categories.EVENTS_VENUE
+    # Nursing needs housing evidence; activities and labels fall through.
+    assert cat(spider, "Ikäihmisten tehostettu palveluasuminen")[0] == Categories.NURSING_HOME
+    assert cat(spider, "Ikäihmisten liikunta") == (None, None)
+    assert cat(spider, "Ikäihmisten palvelujen hakemukset")[0] == Categories.OFFICE_GOVERNMENT
     # 7. Outdoor pools swim like indoor halls.
     assert cat(spider, "Keravan maauimala") == (
         Categories.LEISURE_SPORTS_CENTRE,

@@ -393,6 +393,7 @@ class PtvFISpider(Spider):
         ("sairaalamuseo", Categories.MUSEUM, None),  # Sairaalamuseo (hospital museums, cf. koulumuseo)
         ("päiväsairaala|kliininen", Categories.CLINIC, None),  # Päiväsairaala (day hospitals)
         ("potilasasia", Categories.OFFICE_GOVERNMENT, None),  # Potilasasia (patient-ombudsman desks)
+        ("vainaja", None, None),  # Vainaja (morgues: no enum, stay generic)
         ("sairaala", Categories.HOSPITAL, None),  # Sairaala (hospitals)
         ("lähitori", Categories.SOCIAL_FACILITY, None),  # Lähitori (senior service points)
         ("konttori|kehitysyhtiö|yritystalo|kiinteistö oy", Categories.OFFICE_COMPANY, None),  # Konttori (head offices)
@@ -530,7 +531,6 @@ class PtvFISpider(Spider):
             {"social_facility": "workshop"},
         ),  # Työpaja (workshops)
         ("ikäihmisten päivätoiminta", Categories.SOCIAL_FACILITY, None),  # Day activities for elderly
-        ("ikäihmis", Categories.NURSING_HOME, None),  # Ikäihmis (elderly-care homes)
         ("kehitysvamma|vammais", Categories.SOCIAL_FACILITY, None),  # Kehitysvamma (developmental-disability services)
         (
             "lyhytaikaishoito|lyhytaikaishoidon|" "lyhytaikaisyksikkö",
@@ -776,6 +776,9 @@ class PtvFISpider(Spider):
             # "terveysasemilla" services) must not file as stations.
             # Rautatieasema keeps its own earlier rule.
             return r"(?<!lento)asema\b"
+        if k in ("nuoriso", "nuorten"):
+            # Youth councils (Nuorisovaltuusto) are civic offices, not venues.
+            return re.escape(k) + r"(?!valtuusto)"
         return re.escape(k)
 
     def _count(self, key: str, n: int = 1) -> None:
