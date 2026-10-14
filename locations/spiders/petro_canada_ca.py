@@ -36,6 +36,7 @@ class PetroCanadaCASpider(CamoufoxSpider):
     start_urls = [
         "https://www.petro-canada.ca/en/api/petrocanada/locations?limit=10000000&range=10000000",
     ]
+    requires_proxy = True
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
