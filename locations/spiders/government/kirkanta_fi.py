@@ -33,6 +33,18 @@ LIBRARY_TYPES = {
     "institutional",
 }
 
+# Hospital patient and school libraries serve restricted populations, as do
+# the military academy libraries (Maasotakoulu, Maanpuolustuskorkeakoulu);
+# those get access=private rather than a public tag.
+ACCESS_PRIVATE_TYPES = {"institutional", "school"}
+MILITARY_KEYWORDS = ("sotakoulu", "puolustus")
+# Permanently closed units name themselves (single case: the Skanssi desk,
+# SULJETTU/CLOSED/STÄNGT in three languages).
+CLOSED_TOKENS = re.compile(r"\b(suljettu|closed|stängt)\b", re.IGNORECASE)
+# Real libraries the branch_type enum misfiles (single case: Skibban, a
+# Swedish-language library in Pori filed as other).
+OTHER_INCLUDE = {86797}
+
 FLOOR_TAIL = re.compile(r",\s*(?P<floor>\d+)\.\s*(?:krs|kerros)\.?\s*(?:\([^)]*\))?$", re.IGNORECASE)
 FLOOR_PAREN = re.compile(r"\s*\(\s*(?P<floor>\d+)\.\s*(?:krs|kerros)\.?\s*\)$", re.IGNORECASE)
 FLOOR_REVERSED = re.compile(r",\s*(?:krs|kerros)\s*(?P<floor>\d+)\.?$", re.IGNORECASE)
@@ -56,31 +68,43 @@ class KirkantaFISpider(Spider):
         data = response.json()  # ty: ignore[unresolved-attribute]
         if not data.get("items"):
             raise CloseSpider("no library records")
+        candidates = []
         for entry in data["items"]:
-            if item := self.parse_entry(entry):
+            if result := self.parse_entry(entry):
+                candidates.append(result)
+        # Same place filed under two ids keeps the lowest id either way the
+        # feed orders them (single case: Kärkölä 86024/86806).
+        minima = {}
+        for item, place_key in candidates:
+            if place_key not in minima or int(item["ref"]) < int(minima[place_key]):
+                minima[place_key] = int(item["ref"])
+        for item, place_key in candidates:
+            if int(item["ref"]) == minima[place_key]:
                 yield item
+            else:
+                self.crawler.stats.inc_value(f"atp/{self.name}/dropped/duplicate")
 
-    def parse_entry(self, entry: dict) -> Feature | None:
+    def parse_entry(self, entry: dict) -> tuple[Feature, tuple] | None:
         branch_type = entry.get("branch_type")
         self.crawler.stats.inc_value(f"atp/{self.name}/type/{branch_type}")
         names = entry.get("name") or {}
         name_text = " ".join(value for value in names.values() if value).lower()
-        if branch_type in LIBRARY_TYPES:
-            category = Categories.LIBRARY
-        elif branch_type == "archive" or (branch_type == "other" and ("arkisto" in name_text or "arkiv" in name_text)):
-            category = Categories.ARCHIVE
-        else:
-            if branch_type not in ("mobile", "home_service", "other"):
-                self.logger.warning(f"Unknown branch_type {branch_type!r} on {entry.get('id')}")
-            self.crawler.stats.inc_value(f"atp/{self.name}/dropped/{branch_type}")
+        if CLOSED_TOKENS.search(name_text):
+            self.crawler.stats.inc_value(f"atp/{self.name}/dropped/closed")
+            return None
+        if (category := self.category_for(entry, branch_type, name_text)) is None:
             return None
 
         address = entry.get("address") or {}
         coords = address.get("coordinates") or {}
-        if coords.get("lat") is None or coords.get("lon") is None:
-            self.logger.warning(f"No coords on {branch_type} {entry.get('id')}")
-            self.crawler.stats.inc_value(f"atp/{self.name}/dropped/no_coords")
-            return None
+        try:
+            lat, lon = float(coords.get("lat")), float(coords.get("lon"))
+        except (TypeError, ValueError):
+            if branch_type == "institutional":
+                self.logger.warning(f"No coords on {branch_type} {entry.get('id')}")
+                self.crawler.stats.inc_value(f"atp/{self.name}/dropped/no_coords")
+                return None
+            lat, lon = None, None
 
         name = self.pick_lang(names)
         if not name:
@@ -91,6 +115,9 @@ class KirkantaFISpider(Spider):
         item = Feature()
         item["ref"] = str(entry.get("id"))
         apply_category(category, item)
+        if branch_type in ACCESS_PRIVATE_TYPES or any(k in name_text for k in MILITARY_KEYWORDS):
+            item["extras"]["access"] = "private"
+            self.crawler.stats.inc_value(f"atp/{self.name}/access/private")
         item["name"] = name
         # Translated names keep identity tails; name:fi mirrors the fi name and
         # is never set from a fallback language.
@@ -101,8 +128,10 @@ class KirkantaFISpider(Spider):
         if names.get("fi") and ("name:sv" in item["extras"] or "name:en" in item["extras"]):
             item["extras"]["name:fi"] = name
 
-        item["lat"] = float(coords["lat"])
-        item["lon"] = float(coords["lon"])
+        if lat is not None:
+            item["lat"], item["lon"] = lat, lon
+        else:
+            self.crawler.stats.inc_value(f"atp/{self.name}/emitted/no_coords")
 
         street = self.pick_lang(address.get("street") or {}) or ""
         street, floor = self.split_floor(street)
@@ -122,7 +151,21 @@ class KirkantaFISpider(Spider):
             item["email"] = email
         if website := self.pick_lang(entry.get("homepage") or {}):
             item["website"] = website
-        return item
+
+        # Same name, street, town and coords under another id is one place
+        # filed twice; the lowest id wins in parse().
+        place_key = (names.get("fi"), street, item.get("city"), coords.get("lat"), coords.get("lon"))
+        return item, place_key
+
+    def category_for(self, entry: dict, branch_type: str | None, name_text: str) -> Categories | None:
+        if branch_type in LIBRARY_TYPES or (branch_type == "other" and entry.get("id") in OTHER_INCLUDE):
+            return Categories.LIBRARY
+        if branch_type == "archive" or (branch_type == "other" and ("arkisto" in name_text or "arkiv" in name_text)):
+            return Categories.ARCHIVE
+        if branch_type not in ("mobile", "home_service", "other"):
+            self.logger.warning(f"Unknown branch_type {branch_type!r} on {entry.get('id')}")
+        self.crawler.stats.inc_value(f"atp/{self.name}/dropped/{branch_type}")
+        return None
 
     @staticmethod
     def split_floor(street: str) -> tuple[str, str | None]:
