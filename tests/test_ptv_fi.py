@@ -5705,6 +5705,41 @@ def test_user_report_facility_compounds():
     # plain courthouses keep filing.
     assert cat(spider, "Käräjätuvan- ja Näsinojankuja, viljelypalstat")[0] == Categories.ALLOTMENTS
     assert cat(spider, "Käräjäoikeus")[0] == Categories.COURTHOUSE
+
+
+def test_user_report_batch_rb():
+    spider = make_spider()
+    # 1-2. Supervised-industry offices file as offices, not their topics.
+    assert cat(spider, "Keski-Uudenmaan ympäristökeskus")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Kaupunkikehitys -toimiala")[0] == Categories.OFFICE_GOVERNMENT
+    # 3. Power plants stay generic (wastewater-utility dumps).
+    ch = channel("Vuosaaren voimalaitokset")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "jätevedenpuhdistamot"}]}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("leisure") is None
+    # 4. Canoeing routes are routes, not rowing venues; genuine
+    # venues keep sports filing.
+    assert cat(spider, "Melontareitti") == (None, None)
+    ch = channel("Myyrmäen suuralueen kierros")
+    ch["ontologyTerms"] = [{"name": [{"language": "fi", "value": "melontareitit"}]}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("leisure") is None
+    assert cat(spider, "Melonta Kaartjärvellä")[0] == Categories.LEISURE_SPORTS_CENTRE
+    assert cat(spider, "Kaukajärven soutu- ja melontastadion")[0] == Categories.LEISURE_SPORTS_CENTRE
+    # 5. -aattori coinages are not squares; documented art files as art.
+    assert cat(spider, "Väriaattori") == (None, None)
+    ch = channel(
+        "Väriaattori",
+        descriptions=[{"language": "en", "value": "Väriaattori is a work of public art"}],
+    )
+    assert parsed(spider, ch).get_tag("tourism") == "artwork"
+    # 6. Manor venues are not their hosted laundry services.
+    ch = channel("Söderkullan kartano")
+    ch["services"] = [{"service": {"name": "Matonpesupaikat"}}]
+    item = parsed(spider, ch)
+    assert item.get_tag("amenity") == "yes"
     # 7. Outdoor pools swim like indoor halls.
     assert cat(spider, "Keravan maauimala") == (
         Categories.LEISURE_SPORTS_CENTRE,

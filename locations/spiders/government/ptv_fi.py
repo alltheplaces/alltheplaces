@@ -497,7 +497,7 @@ class PtvFISpider(Spider):
             "maaseutu|varhaiskasvatus|perusopetus|työllisyys|"
             "työvoima|rakennusvalvonta|ympäristönsuojelu|"
             "rakennusvalvonnan|maanmittauslaitos|metsäkeskus|"
-            "ulosotto",
+            "ulosotto|ympäristökeskus|kaupunkikehitys",
             Categories.OFFICE_GOVERNMENT,
             None,
         ),  # Kunnan kulttuuri- ja vapaa-aika (municipal culture/leisure depts)
@@ -743,6 +743,10 @@ class PtvFISpider(Spider):
             # Customs offices (Lentotulli) share the stem with
             # district/building names (Tullinkulma et al): those never match.
             return r"tulli(?!nkulma|kamari|vuor|saar|npuomi|ntori|aukio|naukio)"
+        if k == "melonta":
+            # Canoeing routes (melontareitti, melontareitit) are routes,
+            # not venues: tracks and trails stay generic like retkeilyreitti.
+            return r"melonta(?!reit)"
         if k == "käräjä":
             # Courthouse streets (Käräjätuvankuja) hosting allotment parcels
             # are allotments, not courts: viljelypalsta tails win.
@@ -2960,11 +2964,18 @@ class PtvFISpider(Spider):
         # services otherwise), fixed orienteering controls (typed by
         # shooting-ontology dumps otherwise), sled hills (typed by the
         # same sports-catalogue dumps; pulkkamäki has no enum and stays
-        # generic by design) and shore paths (Rantaraitti is a route, not
-        # a venue). All stay generic.
+        # generic by design), power plants (typed by wastewater-utility
+        # dumps; no power-plant enum; bare Voimala venues and Voimalantie
+        # streets never contain the plant stem) and shore paths (Rantaraitti is
+        # a route, not a venue). All stay generic.
         fi = (self._names(channel).get("fi") or "").lower()
         return (
-            "huoltorakennus" in fi or "kiintorasti" in fi or "pulkkam" in fi or "pulkbacke" in fi or "rantaraitti" in fi
+            "huoltorakennus" in fi
+            or "kiintorasti" in fi
+            or "pulkkam" in fi
+            or "pulkbacke" in fi
+            or "voimalaito" in fi
+            or "rantaraitti" in fi
         )
 
     def _service_names(self, channel: dict) -> list[str]:
@@ -3044,6 +3055,9 @@ class PtvFISpider(Spider):
                 # Peer-delivered support ("Suvanto-vertaistiimi" with
                 # mental-health ontology) is not a clinic; social rescue
                 # below still applies.
+                continue
+            if "kartano" in cleaned_fi_lower and category == Categories.CARPET_WASHING:
+                # Manor venues host laundry services; the manor is the POI.
                 continue
             if category is not None and category != Categories.OFFICE_GOVERNMENT:
                 # Specific types rescue; offices wait for the second pass so
@@ -4034,14 +4048,14 @@ class PtvFISpider(Spider):
         # placement-only squares, or a category.
         if not self.TORI_RE.search(lowered) or re.search(
             r"(lähitori|konttori|kuraattori|koordinaattori|kirpputori|navigaattori|palvelutori"
-            r"|traktori|pastori|kanttori|reaktori)",
+            r"|traktori|pastori|kanttori|reaktori|aattori)",
             lowered,
         ):
             # Lähitori (senior centres), konttori (offices), kuraattori
             # (counsellors), koordinaattori (coordinator desks), kirpputori
             # (flea markets), Navigaattori and Palvelutori (service desks)
             # end in tori without being squares, as do tractors, pastors,
-            # cantors and reactors.
+            # cantors, reactors and -aattori coinages (Väriaattori artworks).
             return None
         if re.search(r"(pysäköinti|parkki)", lowered):
             # Parking at a square is parking, not the square.
