@@ -10,12 +10,11 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class BilgroDESpider(WPStoreLocatorSpider):
     name = "bilgro_de"
-    item_attributes = {"brand_wikidata": "Q108029888", "brand": "bilgro"}
-    allowed_domains = [
-        "www.bilgro.de",
-    ]
+    item_attributes = {"brand": "bilgro", "brand_wikidata": "Q108029888"}
+    start_urls = ["https://www.bilgro.de/wp-admin/admin-ajax.php?action=store_search&autoload=1&lat=51&lng=10"]
     days = DAYS_DE
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item.pop("name", None)
         apply_category(Categories.SHOP_BEVERAGES, item)
         yield item
