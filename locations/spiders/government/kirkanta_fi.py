@@ -14,7 +14,7 @@ from locations.licenses import Licenses
 # the whole directory. Docs and CC BY 4.0 terms: https://api.kirjastot.fi/
 # No opening_hours: schedules need period params and the staffed/self-service
 # split has no opening_hours representation.
-API_URL = "https://api.kirjastot.fi/v3/library?limit=2000&with=phone_numbers"
+API_URL = "https://api.kirjastot.fi/v3/library?limit=2000&with=phone_numbers,pictures"
 
 # Branch types filed as visitable libraries. Mobiles are excluded (a vehicle at
 # a depot address, not an outlet); home_service has no visitable venue; other
@@ -151,10 +151,13 @@ class KirkantaFISpider(Spider):
             item["email"] = email
         if website := self.pick_lang(entry.get("homepage") or {}):
             item["website"] = website
+        if image := self.pick_image(entry.get("pictures") or []):
+            item["image"] = image
 
-        # Same name, street, town and coords under another id is one place
-        # filed twice; the lowest id wins in parse().
-        place_key = (names.get("fi"), street, item.get("city"), coords.get("lat"), coords.get("lon"))
+        # Same name, street and town under another id is one place filed twice;
+        # the lowest id wins in parse(). Coords stay out of the key: re-surveys
+        # metres apart are still one place (Hervanta 86747/86774, ~15 m).
+        place_key = (names.get("fi"), street, item.get("city"))
         return item, place_key
 
     def category_for(self, entry: dict, branch_type: str | None, name_text: str) -> Categories | None:
@@ -181,6 +184,19 @@ class KirkantaFISpider(Spider):
         for lang in ("fi", "sv", "en", "se", "ru"):
             if values.get(lang):
                 return values[lang]
+        return None
+
+    IMAGE_SKIP = ("placeholder", "default", "logo", "brand")
+
+    @staticmethod
+    def pick_image(pictures: list) -> str | None:
+        # Per-location building photos; hashes cannot spell the skip words so
+        # only human-named logo files match. Default photo first, else first.
+        ordered = sorted(pictures, key=lambda p: not p.get("default"))
+        for photo in ordered:
+            url = (photo.get("files") or {}).get("large") or ""
+            if url and not any(s in url.lower() for s in KirkantaFISpider.IMAGE_SKIP):
+                return url
         return None
 
     @staticmethod
