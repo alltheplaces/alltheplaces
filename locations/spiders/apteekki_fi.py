@@ -45,6 +45,11 @@ class ApteekkiFISpider(Spider):
     ZERO_TOKENS = frozenset({"00:00"})
     SOCIAL_HOSTS = ("facebook.com", "instagram.com", "twitter.com", "x.com")
     HOURS_URL = "https://www.apteekki.fi/apteekkihaku/ajax/aukioloajat"
+    MAX_CONSECUTIVE_FAILURES = 3
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.consecutive_failures = 0
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
@@ -66,6 +71,7 @@ class ApteekkiFISpider(Spider):
             # No valid listing page is ever empty (the last one holds 4
             # records and no next link), so any empty page is an outage.
             raise CloseSpider(f"apteekki_fi: zero records on {response.url}")
+        self.consecutive_failures = 0
         partials = []
         for div in divs:
             try:
@@ -224,12 +230,18 @@ class ApteekkiFISpider(Spider):
             self._count("website/invalid")  # Doubled scheme (17x, cf. 2597); no valid URL nests a scheme.
             logger.warning("apteekki_fi: ref %s with doubled scheme %r", ref, href)
             return None
-        host = (urlparse(url).hostname or "").casefold()
+        try:
+            host = (urlparse(url).hostname or "").casefold()
+            username = urlparse(url).username
+        except ValueError:
+            self._count("website/invalid")  # Unparseable host (cf. bracketed literals); keep the pharmacy.
+            logger.warning("apteekki_fi: ref %s with unparseable website %r", ref, href)
+            return None
         if host in self.SOCIAL_HOSTS or any(host.endswith(f".{social}") for social in self.SOCIAL_HOSTS):
             self._count("website/social")  # Pharmacies without a site link their Facebook page instead.
             logger.warning("apteekki_fi: ref %s links social page %r, not a website", ref, href)
             return None
-        if urlparse(url).username:
+        if username:
             self._count("website/email")  # Email address entered into the website field (cf. 4495).
             logger.warning("apteekki_fi: ref %s links email %r, not a website", ref, href)
             return None
@@ -339,7 +351,11 @@ class ApteekkiFISpider(Spider):
         self._count("failed")
         logger.warning("apteekki_fi: listing request failed: %s", url)
         # The next page is only discoverable from its predecessor, so a dead
-        # page must not truncate the tail behind it.
+        # page must not truncate the tail behind it. Persistent failures stop
+        # the crawl instead of advancing page numbers forever.
+        self.consecutive_failures += 1
+        if self.consecutive_failures >= self.MAX_CONSECUTIVE_FAILURES:
+            raise CloseSpider(f"apteekki_fi: {self.consecutive_failures} consecutive listing failures")
         if next_url := self._next_after(url):
             yield Request(url=next_url, callback=self.parse_listing, errback=self.errback)
 
