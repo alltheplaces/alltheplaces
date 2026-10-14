@@ -1,8 +1,11 @@
+import json
+
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -26,5 +29,13 @@ class ScrewfixGBSpider(CrawlSpider, StructuredDataSpider):
             item["name"] = "Screwfix"
 
         apply_category(Categories.SHOP_DOITYOURSELF, item)
+
+        if hours := response.xpath('//script[@id="__NEXT_DATA__"]/text()').re_first(r'"openingHours":(\{[^}]*\})'):
+            hours = json.loads(hours)
+            item["opening_hours"] = OpeningHours()
+            for key, days in [("mondayToFriday", DAYS_WEEKDAY), ("saturday", ["Sa"]), ("sunday", ["Su"])]:
+                if times := hours.get(key):
+                    open_time, close_time = times.split(" - ")
+                    item["opening_hours"].add_days_range(days, open_time, close_time, "%I:%M%p")
 
         yield item
