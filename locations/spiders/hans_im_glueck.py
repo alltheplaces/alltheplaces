@@ -3,6 +3,7 @@ from typing import Iterable
 import chompjs
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -17,6 +18,11 @@ class HansImGlueckSpider(JSONBlobSpider):
         return chompjs.parse_js_object(response.text)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        hours = feature.get("c_websiteÖffnungszeiten", {})
+        if "reopenDate" in hours or "reopenDate" in feature.get("hours", {}):
+            return
+        if hours and all(hours.get(day, {}).get("isClosed") for day in map(str.lower, DAYS_FULL)):
+            return
         if item.get("name"):
             if item["name"].startswith("HANS IM GLÜCK - "):
                 item["branch"] = item["name"].removeprefix("HANS IM GLÜCK - ").title()
@@ -34,12 +40,14 @@ class HansImGlueckSpider(JSONBlobSpider):
         if "c_websiteÖffnungszeiten" in feature:
             oh = OpeningHours()
             for day in map(str.lower, DAYS_FULL):
-                rule = feature["c_websiteÖffnungszeiten"]
+                rule = feature["c_websiteÖffnungszeiten"].get(day, {})
                 if rule.get("isClosed") is True:
                     oh.set_closed(day)
                     continue
                 for interval in rule.get("openIntervals", []):
                     oh.add_range(day, interval["start"], interval["end"])
             item["opening_hours"] = oh
+
+        apply_category(Categories.RESTAURANT, item)
 
         yield item
