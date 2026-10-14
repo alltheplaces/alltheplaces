@@ -1,12 +1,14 @@
 import re
+from collections import Counter
 from typing import Any, AsyncIterator, Iterable
+from urllib.parse import urlsplit
 
 from scrapy import Spider
 from scrapy.exceptions import CloseSpider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.items import Feature
+from locations.items import Feature, SocialMedia, set_social_media
 from locations.licenses import Licenses
 
 # Kirjastohakemisto (Kirkanta), the Finnish Library Database: public, academic
@@ -14,7 +16,7 @@ from locations.licenses import Licenses
 # the whole directory. Docs and CC BY 4.0 terms: https://api.kirjastot.fi/
 # No opening_hours: schedules need period params and the staffed/self-service
 # split has no opening_hours representation.
-API_URL = "https://api.kirjastot.fi/v3/library?limit=2000&with=phone_numbers,pictures"
+API_URL = "https://api.kirjastot.fi/v3/library?limit=2000&with=phone_numbers,pictures,links,services"
 
 # Branch types filed as visitable libraries. Mobiles are excluded (a vehicle at
 # a depot address, not an outlet); home_service has no visitable venue; other
@@ -44,6 +46,18 @@ CLOSED_TOKENS = re.compile(r"\b(suljettu|closed|stängt)\b", re.IGNORECASE)
 # Real libraries the branch_type enum misfiles (single case: Skibban, a
 # Swedish-language library in Pori filed as other).
 OTHER_INCLUDE = {86797}
+
+# Social handles stamped on many branches (city-system pages) are popped;
+# only handles unique to one record are emitted. Persons sections and staff
+# contacts stay out (privacy); service blurbs have no OSM vocabulary, except
+# the wi-fi template slug which maps to internet_access=wlan.
+SOCIAL_DOMAINS = (
+    (SocialMedia.FACEBOOK, ("facebook.com",)),
+    (SocialMedia.INSTAGRAM, ("instagram.com",)),
+    (SocialMedia.YOUTUBE, ("youtube.com", "youtu.be")),
+    (SocialMedia.TWITTER, ("twitter.com", "x.com")),
+)
+WIFI_SLUG = "wi-fi"
 
 FLOOR_TAIL = re.compile(r",\s*(?P<floor>\d+)\.\s*(?:krs|kerros)\.?\s*(?:\([^)]*\))?$", re.IGNORECASE)
 FLOOR_PAREN = re.compile(r"\s*\(\s*(?P<floor>\d+)\.\s*(?:krs|kerros)\.?\s*\)$", re.IGNORECASE)
@@ -81,27 +95,46 @@ class KirkantaFISpider(Spider):
                 continue
             if result:
                 candidates.append(result)
+        counts = self.social_counts(candidates)
         # Same place filed under two ids keeps the lowest id either way the
         # feed orders them (single case: Kärkölä 86024/86806). Numeric-aware:
         # plain string comparison misorders mixed-length ids ("10" < "9").
         minima: dict = {}
-        for item, place_key in candidates:
+        for item, place_key, _ in candidates:
             if place_key is None:
                 continue
             key = self._ref_key(item["ref"])
             if place_key not in minima or key < minima[place_key][0]:
                 minima[place_key] = (key, item["ref"])
-        for item, place_key in candidates:
-            if place_key is None or item["ref"] == minima[place_key][1]:
-                yield item
-            else:
+        for item, place_key, social in candidates:
+            if place_key is not None and item["ref"] != minima[place_key][1]:
                 self.crawler.stats.inc_value(f"atp/{self.name}/dropped/duplicate")
+                continue
+            self.apply_social(item, social, counts)
+            yield item
+
+    @staticmethod
+    def social_counts(candidates: list) -> Counter:
+        counts: Counter = Counter()
+        for _, _, social in candidates:
+            for network, urls in social.items():
+                for url in urls:
+                    if key := KirkantaFISpider.social_key(url):
+                        counts[key] += 1
+        return counts
+
+    def apply_social(self, item: Feature, social: dict, counts: Counter) -> None:
+        for network, urls in social.items():
+            unique = [u for u in urls if counts.get(self.social_key(u), 0) == 1]
+            if unique:
+                set_social_media(item, network, unique[0])
+                self.crawler.stats.inc_value(f"atp/{self.name}/social/{network.value}")
 
     @staticmethod
     def _ref_key(ref: str) -> tuple:
         return (0, int(ref)) if ref.isdigit() else (1, ref)
 
-    def parse_entry(self, entry: dict) -> tuple[Feature, tuple] | None:
+    def parse_entry(self, entry: dict) -> tuple | None:
         if entry.get("id") is None:
             self.logger.warning("Skipping record without id")
             self.crawler.stats.inc_value(f"atp/{self.name}/dropped/no_id")
@@ -163,6 +196,9 @@ class KirkantaFISpider(Spider):
             item["website"] = website
         if image := self.pick_image(entry.get("pictures") or []):
             item["image"] = image
+        if self.has_wifi(entry.get("services") or []):
+            item["extras"]["internet_access"] = "wlan"
+            self.crawler.stats.inc_value(f"atp/{self.name}/wifi")
 
         # Same name, street and town under another id is one place filed twice;
         # the lowest id wins in parse(). Coords stay out of the key: re-surveys
@@ -171,8 +207,8 @@ class KirkantaFISpider(Spider):
         # match exists. Resolved name, not fi: distinct sv-fallback names on
         # one street are different places.
         if not street:
-            return item, None
-        return item, (item["name"], street, item.get("city"))
+            return item, None, self.collect_social(entry)
+        return item, (item["name"], street, item.get("city")), self.collect_social(entry)
 
     def category_for(self, entry: dict, branch_type: str | None, name_text: str) -> Categories | None:
         if CLOSED_TOKENS.search(name_text):
@@ -203,6 +239,53 @@ class KirkantaFISpider(Spider):
             item["extras"]["name:en"] = names["en"]
         if names.get("fi") and ("name:sv" in item["extras"] or "name:en" in item["extras"]):
             item["extras"]["name:fi"] = name
+
+    @staticmethod
+    def collect_social(entry: dict) -> dict:
+        social: dict = {}
+        links = entry.get("links")
+        if not isinstance(links, list):
+            return social
+        for link in links:
+            if not isinstance(link, dict):
+                continue
+            for url in (link.get("url") or {}).values():
+                if not isinstance(url, str):
+                    continue
+                for network, domains in SOCIAL_DOMAINS:
+                    try:
+                        host = urlsplit(url.strip()).netloc.lower().split("@")[-1].split(":")[0]
+                    except ValueError:
+                        continue
+                    if any(host == d or host.endswith("." + d) for d in domains):
+                        if url not in social.setdefault(network, []):
+                            social[network].append(url)
+        return social
+
+    @staticmethod
+    def social_key(url: str) -> tuple | None:
+        try:
+            parts = urlsplit(url.strip())
+        except ValueError:
+            return None
+        host = parts.netloc.lower().split("@")[-1].split(":")[0]
+        path = parts.path.lower().rstrip("/") or "/"
+        for network, domains in SOCIAL_DOMAINS:
+            if any(host == d or host.endswith("." + d) for d in domains):
+                return network.value, path
+        return None
+
+    @staticmethod
+    def has_wifi(services: list) -> bool:
+        if not isinstance(services, list):
+            return False
+        for service in services:
+            if not isinstance(service, dict):
+                continue
+            for slug in (service.get("slug") or {}).values():
+                if isinstance(slug, str) and WIFI_SLUG in slug:
+                    return True
+        return False
 
     @staticmethod
     def split_floor(street: str) -> tuple[str, str | None]:
