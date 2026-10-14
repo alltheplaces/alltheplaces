@@ -6,7 +6,7 @@ from typing import Iterable
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FI, OpeningHours
 from locations.items import Feature
 
@@ -63,6 +63,43 @@ class MuseotFISpider(SitemapSpider):
     # Recurring biennale event and guided-tour product, not POIs; homes are
     # the event listings and the ahlstrom-ruukki museum record respectively.
     NON_MUSEUM_DROPS = {"fiskars-village-art-design-biennale", "ahlstrom-ruukki-ruukkikierrokset"}
+
+    # Formal per-museum accessibility/service criteria as topic-link ids
+    # (1:1 with labels across all pages): full and partial step-free
+    # access, accessible wc, dogs allowed.
+    ACCESS_FULL_ID = "33"
+    ACCESS_PARTIAL_ID = "38"
+    ACCESS_WC_ID = "19"
+    DOG_ID = "217"
+    KNOWN_ACCESS_IDS = frozenset(
+        {
+            "9",
+            "10",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "33",
+            "34",
+            "35",
+            "36",
+            "37",
+            "38",
+            "46",
+            "93",
+            "94",
+            "95",
+            "96",
+            "97",
+            "98",
+            "99",
+            "137",
+            "217",
+            "225",
+        }
+    )
 
     def _stat(self, key: str) -> None:
         try:
@@ -139,8 +176,27 @@ class MuseotFISpider(SitemapSpider):
             self._stat("atp/museot_fi/empty/email")
         if hours := self.parse_hours(response):
             item["opening_hours"] = hours
+        self.apply_accessibility(item, response)
         apply_category(self.NON_MUSEUM_CATEGORIES.get(slug, Categories.MUSEUM), item)
         yield item
+
+    def apply_accessibility(self, item: Feature, response: Response) -> None:
+        # Topic ids from the accessibility/service blocks only (theme links
+        # use topic ids too, so a page-wide collection would overmatch).
+        # Partial step-free access is the narrower claim and wins over full.
+        ids = set()
+        for box in response.xpath("//div[@class='lisatiedot'][h2[@class='esteettomyys' or @class='palvelut']]"):
+            ids.update(box.xpath(".//a/@href").re(r"topic_(\d+)"))
+        for tid in sorted(ids - self.KNOWN_ACCESS_IDS):
+            self._stat(f"atp/museot_fi/access/unmapped_topic/{tid}")
+        if self.ACCESS_PARTIAL_ID in ids:
+            apply_yes_no(Extras.WHEELCHAIR_LIMITED, item, True)
+        elif self.ACCESS_FULL_ID in ids:
+            apply_yes_no(Extras.WHEELCHAIR, item, True)
+        if self.ACCESS_WC_ID in ids:
+            apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, True)
+        if self.DOG_ID in ids:
+            apply_yes_no(Extras.DOG, item, True)
 
     def parse_coords(self, response: Response) -> tuple | None:
         raw = response.xpath("//input[@id='mh_osoite2']/@value").get()
