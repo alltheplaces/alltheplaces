@@ -1,17 +1,18 @@
 import csv
 from io import StringIO
 
-from scrapy import Spider
-
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class BettsAUSpider(Spider):
+class BettsAUSpider(PlaywrightSpider):
     name = "betts_au"
     item_attributes = {"brand": "Betts", "brand_wikidata": "Q118555401"}
     start_urls = ["https://www.betts.com.au/pages/store-locator"]
     allowed_domains = ["www.betts.com.au"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
     no_refs = True
 
     def parse(self, response):
