@@ -5,6 +5,7 @@ from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.hours import sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -24,10 +25,13 @@ class TokmanniFISpider(SitemapSpider, StructuredDataSpider):
         for rule in hours or []:
             if not isinstance(rule, str):
                 continue
-            parts = re.split(r"\s+", rule.strip(), maxsplit=1)
-            days = parts[0]
-            times = parts[1] if len(parts) > 1 else ""
-            if not times:
+            days, sep, times = rule.strip().partition(" ")
+            if not sep:
+                retry = re.split(r"\s+", rule.strip(), maxsplit=1)
+                if len(retry) > 1:
+                    days, times = retry
+            days = re.sub(r"\s+", "", days)
+            if not times or not all(sanitise_day(p) for p in re.split(r"[,-]", days) if p):
                 continue
             if "suljettu" in times.lower():
                 fixed.append(f"{days} closed")
