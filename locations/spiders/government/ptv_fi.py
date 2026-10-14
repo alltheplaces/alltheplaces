@@ -3642,10 +3642,11 @@ class PtvFISpider(Spider):
         return None
 
     def _comma_city_police(
-        self, head: str, tail: str, name: str, city: str | None
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> tuple[str, str | None, str | None] | None:
         # City tails, street heads and inflected coverage dispatch before
-        # the service split below.
+        # the service split below. Lowered forms unused here (case-sensitive
+        # tail shapes); kept for the uniform resolver signature.
         if city and tail.casefold() == city.strip().casefold():
             # The tail repeats the structured post office
             # ("Kiikoisten lähitori, Sastamala").
@@ -3674,14 +3675,16 @@ class PtvFISpider(Spider):
         if head and tail:
             lowered_tail = tail.lower()
             lowered_head = head.lower()
-            if (pre := self._comma_tail_pre(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-                return pre
-            if (mid := self._split_comma_mid(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-                return mid
-            if (city_hit := self._comma_city_police(head, tail, name, city)) is not None:
-                return city_hit
-            if (service := self._split_comma_service(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-                return self._strip_service_city(service, city, name)
+            # Ordered precedence table: metadata → hosted-unit/city →
+            # city-police → service split. First non-None hit wins.
+            for resolver in (
+                self._comma_tail_pre,
+                self._split_comma_mid,
+                self._comma_city_police,
+                self._split_comma_service_wrapped,
+            ):
+                if (hit := resolver(head, tail, lowered_head, lowered_tail, name, city)) is not None:
+                    return hit
             # Bare city tails and appositive descriptors stay whole:
             # the structured address carries the city.
             self._count("name/comma_kept")
@@ -3692,6 +3695,15 @@ class PtvFISpider(Spider):
             self._count("name/comma_dangling")
             return head, None, name
         return name, None, None
+
+    def _split_comma_service_wrapped(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
+        # Service split plus exact-city tail strip on bare service heads;
+        # wrapped so the top-level precedence table stays uniform.
+        if (service := self._split_comma_service(head, tail, lowered_head, lowered_tail, name, city)) is not None:
+            return self._strip_service_city(service, city, name)
+        return None
 
     def _split_comma_mid(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
@@ -3740,11 +3752,12 @@ class PtvFISpider(Spider):
         return None
 
     def _split_comma_school_host(
-        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> tuple[str, str | None, str | None] | None:
         # Group activities hosted at schools ("Lempeä selkäjooga-ryhmä,
         # Veittijärven koulu"): the school locates the activity instead
         # of typing it. Daycare hosts stay whole (the daycare is the venue).
+        # City unused; kept for the uniform resolver signature.
         if (
             self.SCHOOL_HOST_TAIL_RE.search(lowered_tail)
             and self._custom_group_use(head, lowered_head) is not None
@@ -3773,14 +3786,15 @@ class PtvFISpider(Spider):
         )
 
     def _split_comma_service_head(
-        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> tuple[str, str | None, str | None] | None:
         # Service-headed pairs ("Perhekeskus, Suvituuli") and hospital
         # wards ("Raskauden seurantaosasto, Tyks Majakkasairaala"): the
         # head names the POI, the venue hosts it (wards cf.
         # comma_service_unit for yksikkö units). Lowercase service tails
         # without institution words or proper nouns drop instead
-        # (descriptor branch below).
+        # (descriptor branch below). City unused; kept for the uniform
+        # resolver signature.
         if (
             any(word in lowered_head for word in self.SERVICE_TAILS)
             and self._has_fixture(tail)
@@ -3830,10 +3844,11 @@ class PtvFISpider(Spider):
         return head
 
     def _split_comma_keep_whole(
-        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> tuple[str, str | None, str | None] | None:
         # Coverage areas and organisation desks keep the signed form whole,
-        # never split into located_in (cf. Stadin, police desks).
+        # never split into located_in (cf. Stadin, police desks). City unused;
+        # kept for the uniform resolver signature.
         if self._is_bare_area(head) or self._is_bare_area(tail):
             # Bare coverage areas ("Puheterapia, Tikkurilan alue").
             self._count("name/comma_area_kept")
@@ -3848,20 +3863,20 @@ class PtvFISpider(Spider):
             return name, None, None
         return None
 
-    def _split_comma_service(
+    def _comma_leisure_house(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> tuple[str, str | None, str | None] | None:
-        # Service/unit comma pairs, both directions, then tail cleaners.
-        if (kept := self._split_comma_keep_whole(head, tail, lowered_head, lowered_tail, name)) is not None:
-            return kept
-        if (school_host := self._split_comma_school_host(head, tail, lowered_head, lowered_tail, name)) is not None:
-            return school_host
         if re.search(r"vapaa-aika ?talo$", lowered_tail) and self._has_fixture(head):
             # Leisure-house venues ("Kuntosali, Kaukajärven vapaa-aika
             # talo"): the service/room head names the POI, the house
             # hosts it.
             self._count("name/comma_leisure_house")
             return self._split_pair(head, tail, name)
+        return None
+
+    def _comma_shared_redundant(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if self._shared_service_word(head, tail) and not self._is_proper_tail(tail):
             # Service-descriptor tails restating the head's own service
             # ("Ilveskodin päivätoiminta, Vammaisten päivätoiminta"): the
@@ -3870,16 +3885,30 @@ class PtvFISpider(Spider):
             if city:
                 head = re.sub(r",\s*" + re.escape(city.strip()) + r"(?=\s*,|\s*$)", "", head).strip()
             return head, None, name
-        if (svc_unit := self._split_comma_service_head(head, tail, lowered_head, lowered_tail, name)) is not None:
-            return svc_unit
-        if (unit_venue := self._split_comma_unit_venue(head, tail, lowered_head, lowered_tail, name, city)) is not None:
-            return unit_venue
+        return None
+
+    def _split_comma_service(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
+        # Service/unit comma pairs, both directions, then tail cleaners.
+        # Ordered precedence table; first non-None hit wins.
+        for resolver in (
+            self._split_comma_keep_whole,
+            self._split_comma_school_host,
+            self._comma_leisure_house,
+            self._comma_shared_redundant,
+            self._split_comma_service_head,
+            self._split_comma_unit_venue,
+        ):
+            if (hit := resolver(head, tail, lowered_head, lowered_tail, name, city)) is not None:
+                return hit
         return self._split_comma_tail_rest(head, tail, lowered_head, lowered_tail, name, city)
 
     def _comma_tail_proper(
-        self, head: str, tail: str, lowered_tail: str, name: str
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> tuple[str, str | None, str | None] | None:
         # Swedish tails and proper/unit/water/acronym/facility venues.
+        # lowered_head/city unused; kept for the uniform resolver signature.
         if any(word in lowered_tail for word in self.SWEDISH_SERVICE_TAILS) and self._is_institution(head.lower()):
             # Swedish service tails ("Zacharias Topeliusskolan,
             # Smågruppsundervisning"): the service names the POI.
@@ -3926,8 +3955,11 @@ class PtvFISpider(Spider):
             return self._split_pair(head, tail, name, strict=True)
         return None
 
-    def _comma_tail_coverage(self, head: str, tail: str, name: str) -> tuple[str, str | None, str | None] | None:
+    def _comma_tail_coverage(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         # Coverage lists, ward qualifiers and lowercase descriptors.
+        # Only head/tail/name read; the rest kept for the uniform signature.
         if " ja " in tail and not self._has_fixture(tail) and self._has_no_digit(tail):
             swept = re.sub(r"\b(ja|och|eller|tai|sek\xe4)\b", "", tail, flags=re.IGNORECASE)
             if re.search(r"(?:^|\s)[a-zåäö]{3,}", swept) and not re.fullmatch(
@@ -3950,11 +3982,9 @@ class PtvFISpider(Spider):
             return head, None, name
         return None
 
-    def _split_comma_tail_rest(
+    def _comma_tail_descriptor(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> tuple[str, str | None, str | None] | None:
-        # Lowercase descriptors, Swedish tails, proper/unit venues and
-        # coverage tails resolve after the service/unit dispatch above.
         if (
             tail
             and tail[0].islower()
@@ -3970,16 +4000,22 @@ class PtvFISpider(Spider):
                 sub = self._split_comma(head, city)
                 return self._keep_official(sub, name)
             return head, None, name
-        if (proper := self._comma_tail_proper(head, tail, lowered_tail, name)) is not None:
-            return proper
-        if (coverage := self._comma_tail_coverage(head, tail, name)) is not None:
-            return coverage
+        return None
+
+    def _comma_ward_kept(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if re.fullmatch(r"osasto\s*\d+\.?$", tail, flags=re.IGNORECASE):
             # Ward qualifiers are part of the signed name ("Katriinan
             # toimipiste, osasto 7", cf. the round-14 ward split): keep
             # whole, never strand the department number.
             self._count("name/comma_ward_kept")
             return name, None, None
+        return None
+
+    def _comma_tail_descriptor_bare(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
         if (
             tail
             and tail[0].islower()
@@ -3990,6 +4026,23 @@ class PtvFISpider(Spider):
             # like "åk 1–2") stay whole.
             self._count("name/comma_descriptor_dropped")
             return head, None, name
+        return None
+
+    def _split_comma_tail_rest(
+        self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
+    ) -> tuple[str, str | None, str | None] | None:
+        # Lowercase descriptors, Swedish tails, proper/unit venues and
+        # coverage tails resolve after the service/unit dispatch above.
+        # Ordered precedence table; first non-None hit wins.
+        for resolver in (
+            self._comma_tail_descriptor,
+            self._comma_tail_proper,
+            self._comma_tail_coverage,
+            self._comma_ward_kept,
+            self._comma_tail_descriptor_bare,
+        ):
+            if (hit := resolver(head, tail, lowered_head, lowered_tail, name, city)) is not None:
+                return hit
         return None
 
     PHONE_HINT_RE = re.compile(r"(puhelin|phone|telefon)", re.IGNORECASE)
