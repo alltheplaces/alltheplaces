@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 from typing import Any, Iterable
 
 from scrapy import Spider
@@ -22,6 +23,20 @@ TIME_RE = re.compile(r"^\d{2}:\d{2}$")
 SERVICE_RE = re.compile(r"^(pakettipiste|pakettiautomaatti|ulkoautomaatti)\b[\s.,]*", re.IGNORECASE)
 # Whole-word locker-type tokens (FI automaatti, SV automat); a bare substring would also match e.g. "Automarket".
 AUTOMA_RE = re.compile(r"(automaatti|automat)\b", re.IGNORECASE)
+# Explicit weekday-closure shapes in remarks: day-day ranges ("La-Su suljettu") and full weekday
+# words incl. inflections ("Liike suljettu maanantaisin"). Loose 2-letter tokens are deliberately
+# unsupported: they self-match inside "suljettu" itself and inside words like "kesalla" or "toisin".
+DAY_PAIR_RE = re.compile(r"\b(ma|ti|ke|to|pe|la|su)\s*[-–—]\s*(ma|ti|ke|to|pe|la|su)\b", re.IGNORECASE)
+DAY_WORD_RE = re.compile(r"\b(maanantai|tiistai|keskiviikko|torstai|perjantai|lauantai|sunnuntai)\w*", re.IGNORECASE)
+DAY_WORDS = (
+    ("maanantai", "Mo"),
+    ("tiistai", "Tu"),
+    ("keskiviikko", "We"),
+    ("torstai", "Th"),
+    ("perjantai", "Fr"),
+    ("lauantai", "Sa"),
+    ("sunnuntai", "Su"),
+)
 
 
 def _inc(spider: Spider, suffix: str, n: int = 1) -> None:
@@ -62,6 +77,25 @@ def expand_days(token: str) -> list[str]:
             return WEEK_ORDER[start:] + WEEK_ORDER[: end + 1]
         return WEEK_ORDER[start : end + 1]
     return days
+
+
+def remark_closed_days(remarks: list[str], open_days: set[str]) -> list[str]:
+    # Explicit weekday closures ("La-Su suljettu", 7448) become set_closed days, but only for days
+    # with no structured hours (never contradict the feed) and never from remarks carrying their
+    # own dates/schedules (seasonal, e.g. 9695) or bare holiday notes ("Arkipyhat suljettu").
+    closed = []
+    for remark in remarks:
+        if "suljettu" not in remark.casefold() or re.search(r"\d", remark):
+            continue
+        days = set()
+        for start, end in DAY_PAIR_RE.findall(remark):
+            days.update(expand_days(f"{start.title()}-{end.title()}"))
+        for token in DAY_WORD_RE.findall(remark):
+            days.update(day for name, day in DAY_WORDS if token.casefold().startswith(name))
+        for day in WEEK_ORDER:
+            if day in days and day not in open_days and day not in closed:
+                closed.append(day)
+    return [day for day in WEEK_ORDER if day in closed]
 
 
 def parse_hours(spider: Spider, open_times: list[dict[str, Any]]) -> OpeningHours | str | None:
@@ -126,6 +160,10 @@ class MatkahuoltoFISpider(Spider):
         offices = response.json()  # ty: ignore[unresolved-attribute]
         if not offices:
             raise CloseSpider("matkahuolto_fi: empty area response")
+        # Descriptions only for remarks unique in the feed (boilerplate repeats stay out).
+        remark_counts = Counter(
+            ps.get("normalRemarks") for office in offices for ps in office.get("parcelservices") or []
+        )
         for office in offices:
             if office.get("officeType") == "HEADQUARTERS":
                 _inc(self, "skipped/headquarters")
@@ -196,7 +234,22 @@ class MatkahuoltoFISpider(Spider):
             ]
             if not open_times:
                 _inc(self, "empty/hours")
-            if hours := parse_hours(self, open_times):
+            hours = parse_hours(self, open_times)
+            if isinstance(hours, OpeningHours):
+                remarks = [ps.get("normalRemarks") or "" for ps in office.get("parcelservices") or []]
+                open_days = {day for entry in open_times for day in expand_days(entry.get("weekDay") or "")}
+                for day in remark_closed_days(remarks, open_days):
+                    hours.set_closed(day)
+                    _inc(self, "hours/closed_from_remarks")
+            if hours:
                 item["opening_hours"] = hours
+
+            remark = next(
+                (ps.get("normalRemarks") for ps in office.get("parcelservices") or [] if ps.get("normalRemarks")),
+                None,
+            )
+            # Closure statements belong in hours, not in descriptions.
+            if remark and remark_counts[remark] == 1 and "suljettu" not in remark.casefold():
+                item["extras"]["description"] = remark
 
             yield item
