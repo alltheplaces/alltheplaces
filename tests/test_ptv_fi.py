@@ -5646,3 +5646,40 @@ def test_holistic_consistency_fixes():
     al_item = parsed(spider, ch_al, "Hyvinvointialue")
     assert al_item.get("extras", {}).get("social_facility") == "assisted_living"
     assert al_item.get("opening_hours") is None
+
+
+def test_round22_community_and_social_fixes():
+    spider = make_spider()
+    # 1. Bare single-token street segments in slash paths peel before room
+    # resolution so "Kenttäkuja" never poses as a kenttä room (5bc42170).
+    kentta = parsed(
+        spider,
+        channel("Iltapäivätoiminta / Pukinmäenkaaren peruskoulu / Kenttäkuja / Toiminta-alueittain"),
+        "Helsingin kaupunki",
+    )
+    assert kentta.get("name") == "Iltapäivätoiminta"
+    assert kentta.get("located_in") == "Pukinmäenkaaren peruskoulu"
+
+    # 2. Specialist dental and orthodontic units file as dentist (969467f0).
+    dent = parsed(
+        spider,
+        channel("Pirkanmaan suun erikoishoidon yksikkö - oikomishoito"),
+        "Pirkanmaan hyvinvointialue",
+    )
+    assert dent.get_tag("amenity") == "dentist"
+
+    # 3. Youth offices/desks file as government offices, while youth/pediatric
+    # wards/clinics file as clinics and split hospital hosts (ae9637ed, ba770f69, ee475753).
+    assert cat(spider, "Nuorisotoimisto")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Nuorisopalvelujen asiakaspalvelu")[0] == Categories.OFFICE_GOVERNMENT
+    assert cat(spider, "Nuorisopsykiatrian poliklinikka")[0] == Categories.CLINIC
+    assert cat(spider, "Nuorisotilat ja -toimisto") == (None, {"amenity": "youth_centre"})
+
+    ward = parsed(
+        spider,
+        channel("Lasten ja nuorten päiväsairaala, Ahveniston sairaala"),
+        "Kanta-Hämeen hyvinvointialue",
+    )
+    assert ward.get_tag("amenity") == "clinic"
+    assert ward.get("name") == "Lasten ja nuorten päiväsairaala"
+    assert ward.get("located_in") == "Ahveniston sairaala"

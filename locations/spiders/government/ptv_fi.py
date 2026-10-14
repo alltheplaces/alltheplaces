@@ -160,6 +160,8 @@ class PtvFISpider(Spider):
         ("konservatorio", Categories.MUSIC_SCHOOL, None),  # Konservatorio (conservatories)
         ("hammashoito", Categories.DENTIST, None),  # Hammashoito (dental care)
         ("hammashoidon", Categories.DENTIST, None),  # Hammashoidon (dental care, genitive)
+        ("oikomishoi", Categories.DENTIST, None),  # Oikomishoito (orthodontic care)
+        ("suun erikoishoi", Categories.DENTIST, None),  # Suun erikoishoito (specialist dental care)
         ("suun perusterveydenhuolto", Categories.DENTIST, None),  # Suun perusterveydenhuolto (oral primary care)
         ("suun terveydenhuolto", Categories.DENTIST, None),  # Suun terveydenhuolto (oral health care)
         ("eläinlääkäri", Categories.VETERINARY, None),  # Eläinlääkäri (veterinarians)
@@ -2400,6 +2402,11 @@ class PtvFISpider(Spider):
             lowered = tail.lower()
             if (
                 self.COMMA_STREET_RE.search(lowered)
+                or (
+                    len(tail) >= 7
+                    and " " not in tail.strip()
+                    and re.search(r"(" + self.STREET_STEM_ALT + r")$", lowered)
+                )
                 or any(word in lowered for word in self.AREA_TAILS)
                 or self._is_memorial(tail)
             ):
@@ -3722,7 +3729,7 @@ class PtvFISpider(Spider):
             self._count("name/comma_service_unit")
             shown = head[0].upper() + head[1:] if head else head
             return shown, self._clean_located(tail), name
-        if re.search(r"\w*osasto$", lowered_head) and re.search(
+        if re.search(r"\w*(osasto|päiväsairaala)$", lowered_head) and re.search(
             r"(sairaala|terveyskeskus|terveysasema|mielenterveyskeskus)$", lowered_tail
         ):
             self._count("name/comma_ward_venue")
@@ -4339,6 +4346,36 @@ class PtvFISpider(Spider):
         return None
 
     def _custom_ward(self, lowered: str) -> tuple | None:
+        if re.search(
+            r"(lasten\s+ja\s+nuorten|nuorten)\s+.*\b(päiväsairaala|poliklinikka|terapiapoliklinikka|osasto|arviointiosasto|vastaanotto|fysioterapia|toimintaterapia|puheterapia|päivystys)\b",
+            lowered,
+        ):
+            # Youth/pediatric clinical units ("Lasten ja nuorten
+            # päiväsairaala", "Nuorten vastaanotto") are clinics, not
+            # youth centres (outranking the nuorten community rule).
+            if "päivystys" in lowered:
+                return Categories.CLINIC_URGENT, None
+            if "fysioterapia" in lowered:
+                return Categories.CLINIC, {"healthcare": "physiotherapist"}
+            if "puheterapia" in lowered:
+                return Categories.CLINIC, {"healthcare": "speech_therapist"}
+            return Categories.CLINIC, None
+        if (
+            re.search(
+                r"\b(nuorisotyön|nuorisopalvelu\w*|nuorten)\b.*\b(toimisto|toimipiste|palvelupiste|asiakaspalvelu|ohjauspiste|neuvonta)",
+                lowered,
+            )
+            or re.search(r"\bnuoriso-?\s*(?:ja\s+)?(?:liikunta)?toimisto\b", lowered)
+        ) and not re.search(
+            r"(psykiatr|poliklinikka|terapia|sairaala|klinikka|mielenterveys|päihde|nuorisotila|nuorisotalo|nuokkari|ungdomslokal|ungdomsgård)",
+            lowered,
+        ):
+            # Youth administrative offices and guidance desks
+            # ("Nuorisotoimisto", "Nuorisopalvelujen asiakaspalvelu",
+            # "Nuoriso- ja liikuntatoimisto") are government offices,
+            # not youth clubs; psychiatric clinics and youth rooms keep
+            # their earlier table filings.
+            return Categories.OFFICE_GOVERNMENT, None
         if re.search(r"(?:^|[\s-])osasto(?=\s|$)", lowered):
             # Bare wards/departments ("Malmin osasto 13", "Keuhko-osasto"):
             # hospital departments, not hospitals. Separator-anchored so
