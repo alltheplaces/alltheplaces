@@ -13,8 +13,9 @@ class GuessSpider(UberallSpider):
     key = "m8ENkkDpRuAzBfF8t5yWOETCTZ61PY"
 
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
-        if location["name"] == "GUESS ACCESSORIES":
+        name = location["name"].casefold()
+        if name == "guess accessories":
             apply_category(Categories.SHOP_FASHION_ACCESSORIES, item)
-        elif location["name"] == "G BY GUESS":
+        elif name == "g by guess":
             item["brand_wikidata"] = "Q5515159"
         yield item
