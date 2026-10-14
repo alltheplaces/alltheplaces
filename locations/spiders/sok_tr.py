@@ -1,42 +1,33 @@
 import re
-from typing import AsyncIterator
+from typing import Any, Iterable
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
-
-PROVINCES_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/sehirler"
-DISTRICTS_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/ilceler?city={province}"
-STORES_URL = "https://kurumsal.sokmarket.com.tr/ajax/servis/magazalarimiz?city={province}&district={district}"
 
 
 class SokTRSpider(Spider):
     name = "sok_tr"
     item_attributes = {"brand": "Şok", "brand_wikidata": "Q19613992"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    STORES_API = "https://kurumsal.sokmarket.com.tr/api/public/stores"
+    start_urls = [f"{STORES_API}/cities"]
+    no_refs = True
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(url=PROVINCES_URL, callback=self.parse_provinces)
-
-    def parse_provinces(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for province in response.json()["cities"]:
-            yield Request(
-                url=DISTRICTS_URL.format(province=province), callback=self.parse_districts, meta={"province": province}
-            )
-
-    def parse_districts(self, response):
-        province = response.meta["province"]
-        for district in response.json()["districts"]:
-            yield Request(
-                url=STORES_URL.format(province=province, district=district),
+            yield JsonRequest(
+                url=f"{self.STORES_API}?city={province}",
                 callback=self.parse_stores,
-                meta={"province": province, "district": district},
+                cb_kwargs=dict(province=province),
             )
 
-    def parse_stores(self, response):
-        for store in response.json()["subeler"]:
+    def parse_stores(self, response: Response, province: str) -> Iterable[Feature]:
+        for store in response.json().get("subeler", []):
             item = DictParser.parse(store)
             name, branch_name = self.parse_branch_name(store["name"])
 
@@ -45,8 +36,8 @@ class SokTRSpider(Spider):
             # SOK API returns lat and lon in the wrong order
             item["lat"] = self.parse_float(store["lng"])
             item["lon"] = self.parse_float(store["ltd"])
-            item["state"] = response.meta["province"]
-            item["city"] = response.meta["district"]
+            item["state"] = province
+            item["city"] = store.get("ilce")
             item["phone"] = store.get("phone")
             item["street_address"] = clean_address(item.pop("addr_full", store["address"]))
             apply_category(Categories.SHOP_SUPERMARKET, item)
