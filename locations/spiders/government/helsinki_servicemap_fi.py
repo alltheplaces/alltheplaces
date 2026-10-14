@@ -1029,6 +1029,34 @@ class HelsinkiServicemapFISpider(Spider):
             return None
         return lon, lat
 
+    def _align_translation_tails(self, item):
+        # Runs after _apply_address: street, housenumber and city are set.
+        # Strips translation tails the structured fields already carry:
+        # redundant street tails and city parens. Branch designations
+        # ("Polishus 2", "avdelning 6") share no street stem and stay.
+        street = (item.get("street") or "").lower()
+        street_words = re.findall(r"[a-zåäö-]+", street)
+        house = item.get("housenumber")
+        city = (item.get("city") or "").casefold()
+        for key in ("sv", "en"):
+            text = item["extras"].get(f"name:{key}")
+            if not text:
+                continue
+            if house and (m := re.search(r",\s*([\wåäöÅÄÖ-]+)\s+(\S+)\s*$", text)):
+                word, num = m.group(1), m.group(2)
+                if num == str(house) and any(sum(1 for a, b in zip(word.lower(), sw)) >= 6 for sw in street_words):
+                    # Redundant street tail ("Fosterscreeningar, Bulevarden
+                    # 22", unit 72370).
+                    stripped = text[: m.start()].rstrip(" ,-/–").strip()
+                    if stripped:
+                        text = stripped
+                        item["extras"][f"name:{key}"] = text
+            if city and (m := re.search(r"\(\s*([^()]*?)\s*\)\s*$", text)):
+                if m.group(1).strip().casefold() == city:
+                    stripped = text[: m.start()].rstrip(" ,-/–").strip()
+                    if stripped:
+                        item["extras"][f"name:{key}"] = stripped
+
     def _apply_name_fi(self, item, unit):
         # Every translated name gets its Finnish counterpart explicitly.
         # The applied name is Finnish exactly when the feed named it in
@@ -1094,6 +1122,7 @@ class HelsinkiServicemapFISpider(Spider):
         self._apply_category(item, unit)
         self._apply_operator(item, unit)
         self._apply_brand(item, unit)
+        self._align_translation_tails(item)
         self._apply_name_fi(item, unit)
         self._apply_contact(item, unit)
         self._apply_media(item, unit)
@@ -1557,6 +1586,45 @@ class HelsinkiServicemapFISpider(Spider):
                 return rest
         return text
 
+    @staticmethod
+    def _paren_shares_stem(head, paren):
+        # 4-letter stem overlap between paren content and head: descriptor
+        # parens ("(health station services)") share nothing, true
+        # qualifiers and venue names usually do.
+        def stems(s):
+            return {w[i : i + 4] for w in re.findall(r"[a-zåäö]+", s.lower()) for i in range(len(w) - 3)}
+
+        return bool(stems(head) & stems(paren))
+
+    def _strip_translation_paren(self, item, text):
+        # Trailing parens in sv/en: venue already captured is redundant,
+        # service glosses without head overlap are descriptors, not names.
+        paren_tr = re.search(r"\(\s*([^()]*?)\s*\)\s*$", text)
+        if not paren_tr:
+            return text
+        content = paren_tr.group(1).strip()
+        located = (item.get("located_in") or "").casefold()
+        if content and content.casefold() == located:
+            # Venue already captured (fi paren or slash split).
+            return text[: paren_tr.start()].rstrip(" ,-/–").strip()
+        if (
+            (" " in content or len(content) > 12)
+            and not re.search(r"\d", content)
+            and re.search(
+                r"(palvelu|service|h\xe4lso|tj\xe4nst|verksamhet|station|point|\bunit\b|care|piste|toiminta|terveys|neuvonta|ohjaus)",
+                content,
+                flags=re.IGNORECASE,
+            )
+            and not re.search(self.INSTITUTION_TAIL_RE, content)
+            and not re.search(self.VENUE_WORDS_RE, content)
+            and not re.search(r"(torget|square|plats|tori)\b", content, flags=re.IGNORECASE)
+            and not self._paren_shares_stem(text[: paren_tr.start()], content)
+        ):
+            # Service-gloss parens describe the POI type, not its name
+            # ("... servicepunkt (hälsostationstjänster)", unit 80698).
+            return text[: paren_tr.start()].rstrip(" ,-/–").strip()
+        return text
+
     def _apply_translations(self, item, name):
         official = item["extras"].get("official_name", "")
         fi_venue = item.get("located_in") or ""
@@ -1600,6 +1668,7 @@ class HelsinkiServicemapFISpider(Spider):
                     item["located_in"] = provider_venue
             text = self._chain_translation_text(text, fi_prefix)
             text = self._bilingual_translation_text(text, re.sub(self.ZW_CHARS, "", str(name.get("fi") or "")).strip())
+            text = self._strip_translation_paren(item, text)
             if text and (text != item.get("name") or raw != text) and text != official:
                 if re.match(r"^(vesiposti|vattenpost|water post)\b", text.lower()):
                     # Water posts: tails repeat the parsed street address.
@@ -1655,6 +1724,35 @@ class HelsinkiServicemapFISpider(Spider):
                         item["extras"][f"official_name:{key}"] = raw
                 # Same name after cleaning, but keep the venue set above.
 
+    def _split_name_paren(self, primary, venue, municipality):
+        # Trailing parenthetical venue or redundant city paren. Returns the
+        # (possibly shortened) name and venue; venue is only filled when
+        # still empty, so aliases stay in the name.
+        paren = re.search(r"\(\s*([^()]*?)\s*\)\s*$", primary)
+        if venue or not paren:
+            return primary, venue
+        content = paren.group(1).strip()
+        if (
+            " " in content
+            and "," not in content
+            and not re.search(r"\d", content)
+            and not content.lower().startswith(("entinen ", "ent."))
+            and not re.fullmatch(r"\w+n\s+keskus", content, flags=re.IGNORECASE)
+            and (re.search(self.INSTITUTION_TAIL_RE, content) or re.search(self.VENUE_WORDS_RE, content))
+        ):
+            # Parenthesised venue ("Wigge kuntosali (Gesterbyn koulu)",
+            # unit 78931): the hall is the name, the school its host.
+            return primary[: paren.start()].rstrip(" ,-/–").strip(), content
+        if (
+            isinstance(municipality, str)
+            and municipality.strip()
+            and content.casefold() == municipality.strip().casefold()
+        ):
+            # Redundant city paren ("Degerbyn sivukirjasto (Inkoo)",
+            # unit 74100): the city field carries it.
+            return primary[: paren.start()].rstrip(" ,-/–").strip(), venue
+        return primary, venue
+
     def _apply_name(self, item, unit):
         name = unit.get("name") or {}
         if not isinstance(name, dict):
@@ -1690,6 +1788,7 @@ class HelsinkiServicemapFISpider(Spider):
                 if welfare := self._welfare_venue(unit, primary):
                     venue = welfare
                     primary = "Opiskeluhuolto"
+            primary, venue = self._split_name_paren(primary, venue, municipality)
             if venue:
                 for prefix in (
                     "Iltapäivätoiminta / ",
@@ -1894,6 +1993,25 @@ class HelsinkiServicemapFISpider(Spider):
     def _parse_address_tokens(self, item, tokens):
         number = self.HOUSENUMBER_RE
         tokens = [clean for t in tokens if (clean := t.strip().strip(",.;"))]
+        collapsed = []
+        skip = 0
+        for i, token in enumerate(tokens):
+            if skip:
+                skip -= 1
+                continue
+            if (
+                token.casefold() == "ja"
+                and collapsed
+                and re.fullmatch(number, collapsed[-1])
+                and i + 1 < len(tokens)
+                and re.fullmatch(number, tokens[i + 1].strip().strip(",.;"))
+            ):
+                # Dual housenumbers ("Painiityntie 21 ja 21 B", unit 78100):
+                # the first number wins, the street stays clean.
+                skip = 1
+                continue
+            collapsed.append(token)
+        tokens = collapsed
         if len(tokens) >= 3 and re.fullmatch(r"\d+", tokens[-3]) and re.fullmatch(r"[a-zåäö]", tokens[-2]):
             # Spaced housenumber letter ("Mannerheimintie 13 a A", unit
             # 26123; "Paasikuja 3 b A", unit 68882): the lowercase appendix
@@ -1948,6 +2066,7 @@ class HelsinkiServicemapFISpider(Spider):
     STRIP_RULES = (
         (r"\s*\((?![A-Za-z]\))[^)]*\)", 0, "parenthetical wings/floors (single-letter staircase spared)"),
         (r",\s*[\d\s&\.,-]*(krs|kerros|rak\.?|rakennus)\b.*$", 0, "comma floor/building tail"),
+        (r",\s*PL\s+\d+.*$", 0, "PO box tail (unit 69320)"),
         (r"\s+\d+\.?\s*(krs|kerros)\b.*$", 0, "numbered floor tail"),
         (r"/\s*\d+\.?\s*(krs|kerros)\b.*$", 0, "slash floor tail"),
         (r"\s+(rak\.?|rakennus|krs|kerros)\b.*$", 0, "bare building/floor word"),
@@ -2007,10 +2126,43 @@ class HelsinkiServicemapFISpider(Spider):
             return True
         return self._parse_address_tokens(item, address.split())
 
+    @staticmethod
+    def _extract_floor_number(address):
+        # Single unambiguous floor markers only ("2. krs", "(2. krs)",
+        # "8/2. krs", "krs 24", "toinen krs"): multi-floor tails
+        # ("3. & 4. krs", "2. krs, 3. krs") keep no floor.
+        if re.search(
+            r"(\d+)\s*\.?\s*(?:&|ja)\s*,?\s*(\d+)\s*\.?\s*(?:krs|kerros)\b",
+            address,
+            flags=re.IGNORECASE,
+        ):
+            return None
+        numbers = set(re.findall(r"(\d+)\s*\.?\s*(?:krs|kerros)\b", address, flags=re.IGNORECASE))
+        numbers.update(re.findall(r"(?:krs|kerros)\s*(\d+)\b", address, flags=re.IGNORECASE))
+        for word, num in (
+            ("ensimm\xe4inen", "1"),
+            ("toinen", "2"),
+            ("kolmas", "3"),
+            ("nelj\xe4s", "4"),
+            ("viides", "5"),
+        ):
+            if re.search(rf"\b{word}\b\.?\s*(?:krs|kerros)\b", address, flags=re.IGNORECASE):
+                numbers.add(num)
+        if len(numbers) == 1:
+            return numbers.pop()
+        return None
+
+    @staticmethod
+    def _set_floor(item, floor):
+        if floor and (item.get("street") or item.get("housenumber")):
+            item["extras"]["addr:floor"] = floor
+
     def _apply_street_address(self, item, address):
         # "Aarnivalkeantie 9 E" is street + housenumber + staircase unit;
         # "Katutie 2a" is a whole housenumber, never split the letter off.
-        # Finnish floor numbers don't convert to OSM level, so they are dropped.
+        # Finnish floor numbers are kept as addr:floor (they never convert
+        # to OSM level); ambiguous multi-floor tails keep no floor.
+        floor = self._extract_floor_number(address)
         address = self._strip_address_base(address)
         if not address:
             return
@@ -2026,13 +2178,16 @@ class HelsinkiServicemapFISpider(Spider):
         tokens = address.split()
         if "," in address:
             if self._apply_comma_address(item, address):
+                self._set_floor(item, floor)
                 return
         elif self._parse_address_tokens(item, tokens):
+            self._set_floor(item, floor)
             return
         stripped = list(tokens)
         while len(stripped) >= 3 and re.fullmatch(r"[A-Za-zåäöÅÄÖ-]{3,}", stripped[-1]):
             # Trailing district words ("Ratakatu 6 Kaartinkaupunki Helsinki").
             if self._parse_address_tokens(item, stripped[:-1]):
+                self._set_floor(item, floor)
                 return
             stripped = stripped[:-1]
         if len(tokens) == 1:

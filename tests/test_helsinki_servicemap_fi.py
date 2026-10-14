@@ -403,6 +403,7 @@ def test_door_suffix_with_floor_tail():
     item = addressed(make_spider(), "Sairaalatie 8, A-ovi, 2. krs")
     assert item["housenumber"] == "8"
     assert item["unit"] == "A-ovi"
+    assert item["extras"]["addr:floor"] == "2"
 
 
 def test_staircase_word_tail():
@@ -425,11 +426,35 @@ def test_attached_housenumber_range():
     assert item["housenumber"] == "33-39"
 
 
-def test_parenthetical_floor_stripped():
-    # Unit 80776: Jakomäenpolku 5 (2. krs).
+def test_parenthetical_floor_kept():
+    # Unit 80776: Jakomäenpolku 5 (2. krs). The tail strips from the base
+    # but the floor is kept as addr:floor.
     item = addressed(make_spider(), "Jakomäenpolku 5 (2. krs)")
     assert item["housenumber"] == "5"
     assert "unit" not in item
+    assert item["extras"]["addr:floor"] == "2"
+
+
+def test_multi_floor_keeps_no_floor():
+    # Unit 80791: Kultasepänkatu 7, 3. &, 4. krs. Ambiguous tails keep
+    # the house but no floor.
+    item = addressed(make_spider(), "Kultasepänkatu 7, 3. &, 4. krs")
+    assert item["housenumber"] == "7"
+    assert "addr:floor" not in item["extras"]
+
+
+def test_reversed_floor_marker_kept():
+    # Unit 78342: Hermannin rantatie 9A,. krs 24.
+    item = addressed(make_spider(), "Hermannin rantatie 9A,. krs 24")
+    assert item["housenumber"] == "9A"
+    assert item["extras"]["addr:floor"] == "24"
+
+
+def test_ordinal_floor_kept():
+    # Unit 69241: Merikansantie 4 a, toinen. krs.
+    item = addressed(make_spider(), "Merikansantie 4 a, toinen. krs")
+    assert item["housenumber"] == "4a"
+    assert item["extras"]["addr:floor"] == "2"
 
 
 def test_parenthetical_building_stripped():
@@ -438,11 +463,12 @@ def test_parenthetical_building_stripped():
     assert item["housenumber"] == "4-6"
 
 
-def test_comma_floor_stripped():
+def test_comma_floor_kept():
     # Unit 80918: Kielotie 7 A, 2.kerros.
     item = addressed(make_spider(), "Kielotie 7 A, 2.kerros")
     assert item["housenumber"] == "7"
     assert item["unit"] == "A"
+    assert item["extras"]["addr:floor"] == "2"
 
 
 def test_comma_building_stripped():
@@ -2150,6 +2176,22 @@ def test_slash_krs_tail_stripped():
     # SYNTHETIC floor-tail address.
     item = addressed(make_spider(), "Katu 5 / 2. krs")
     assert item["housenumber"] == "5"
+    assert item["extras"]["addr:floor"] == "2"
+
+
+def test_dual_housenumber_keeps_first():
+    # Unit 78100: Painiityntie 21 ja 21 B. Unit 69635: Ratakatu 107 ja 109.
+    # Dual numbers collapse to the first; the street stays clean.
+    item = addressed(make_spider(), "Painiityntie 21 ja 21 B")
+    assert (item["street"], item["housenumber"], item["unit"]) == ("Painiityntie", "21", "B")
+    item = addressed(make_spider(), "Ratakatu 107 ja 109")
+    assert (item["street"], item["housenumber"]) == ("Ratakatu", "107")
+
+
+def test_po_box_tail_stripped():
+    # Unit 69320: Turuntie 150, PL 2704. The PO box is not a housenumber.
+    item = addressed(make_spider(), "Turuntie 150, PL 2704")
+    assert (item["street"], item["housenumber"]) == ("Turuntie", "150")
 
 
 def test_dash_entrance_tail_stripped():
@@ -3522,3 +3564,99 @@ def test_malformed_department_rows_are_skipped():
     )
     assert list(spider.parse_departments(response)) == []
     assert spider.departments == {4: "Kasvatus"}
+
+
+def test_paren_venue_becomes_located_in():
+    # Unit 78931: parenthesised venues name the host.
+    item = named(make_spider(), "Wigge kuntosali (Gesterbyn koulu)")
+    assert item["name"] == "Wigge kuntosali"
+    assert item["located_in"] == "Gesterbyn koulu"
+    # Aliases and bare qualifiers stay in the name: no venue words, or the
+    # venue slot is already taken (units 78970, 75041, 59979 shapes).
+    item = named(make_spider(), "Harjoitusjäähalli (Kivikko Areena)")
+    assert item["name"] == "Harjoitusjäähalli (Kivikko Areena)"
+    assert "located_in" not in item
+    item = named(make_spider(), "Kuitinmäen koulun liikuntasali (alakoulu)")
+    assert item["name"] == "Kuitinmäen koulun liikuntasali (alakoulu)"
+    assert "located_in" not in item
+    item = named(make_spider(), "Kanniston koulun monitoimisali (entinen nuorisotilan sali)")
+    assert item["name"] == "Kanniston koulun monitoimisali (entinen nuorisotilan sali)"
+    assert "located_in" not in item
+    # Multi-name paren lists stay whole (unit 70349 shape).
+    item = named(make_spider(), "Ingaksenmäki asumispalvelu (Käpälämäki, Jänismäki)")
+    assert item["name"] == "Ingaksenmäki asumispalvelu (Käpälämäki, Jänismäki)"
+    assert "located_in" not in item
+    # Downtown district parens are qualifiers, not venues (unit 75710 shape).
+    item = named(make_spider(), "Koto-Espoo kotoutumispalvelut (Espoon keskus)")
+    assert item["name"] == "Koto-Espoo kotoutumispalvelut (Espoon keskus)"
+    assert "located_in" not in item
+
+
+def test_redundant_city_paren_stripped():
+    # SYNTHETIC through _build_item (needs municipality): the city field
+    # carries the qualifier (cf. unit 74100 "Degerbyn sivukirjasto (Inkoo)").
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 900004,
+            "name": {"fi": "Degerbyn sivukirjasto (Inkoo)"},
+            "municipality": "inkoo",
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [108],
+        }
+    )
+    assert item["name"] == "Degerbyn sivukirjasto"
+    assert item["city"] == "Inkoo"
+
+
+def test_service_gloss_paren_dropped_from_translation():
+    # Unit 80698 shape: descriptor parens are not names.
+    item = named(
+        make_spider(),
+        "Lähilääkärit Leppävaara -palvelupiste",
+        [848],
+        sv="Lähilääkärit Alberga servicepunkt (hälsostationstjänster)",
+    )
+    assert item["extras"]["name:sv"] == "Lähilääkärit Alberga servicepunkt"
+    # ...but type glosses that name the venue stay (unit 8083 shape: the
+    # "unit" in "Community" must not read as a service word).
+    item = named(
+        make_spider(),
+        "Ungdomsgården Rastis",
+        [375],
+        en="Ungdomsgården Rastis (Community Centre)",
+    )
+    assert item["extras"]["name:en"] == "Ungdomsgården Rastis (Community Centre)"
+
+
+def test_redundant_street_tail_stripped_from_translation():
+    # SYNTHETIC through _build_item (needs structured address): unit 72370
+    # shape, sv carries the street the address fields hold.
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 900005,
+            "name": {"fi": "Sikiöseulonnat", "sv": "Fosterscreeningar, Bulevarden 22"},
+            "street_address": {"fi": "Bulevardi 22"},
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [848],
+        }
+    )
+    assert item["extras"]["name:sv"] == "Fosterscreeningar"
+    assert (item["street"], item["housenumber"]) == ("Bulevardi", "22")
+
+
+def test_city_paren_stripped_from_translation():
+    # SYNTHETIC through _build_item (needs city): district/city parens
+    # duplicating the city field go.
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 900006,
+            "name": {"fi": "Sugoi", "sv": "Sugoi hallen (Helsinki)"},
+            "municipality": "helsinki",
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [155],
+        }
+    )
+    assert item["extras"]["name:sv"] == "Sugoi hallen"
