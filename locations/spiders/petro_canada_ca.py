@@ -39,6 +39,7 @@ class PetroCanadaCASpider(CamoufoxSpider):
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
     }
 
     def parse(self, response: Response) -> Iterable[JsonRequest]:
