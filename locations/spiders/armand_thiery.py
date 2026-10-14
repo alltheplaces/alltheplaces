@@ -1,8 +1,10 @@
+import re
+
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_FR
+from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -16,18 +18,11 @@ class ArmandThierySpider(CrawlSpider, StructuredDataSpider):
     rules = [Rule(LinkExtractor(allow=["/fr/magasins/"]), callback="parse_sd")]
 
     def pre_process_data(self, ld_data, **kwargs):
-        formatted_rules = []
-        for rule in ld_data.get("openingHours", []):
-            if rule.endswith(" : -"):  # Closed, currently errors in add_range
-                continue
-            for fr, en in DAYS_FR.items():
-                rule = rule.replace(fr, en)  # Translate
-            rule = rule.replace(" : ", " ")  # Fix seperator
-            formatted_rules.append(rule)
-        ld_data["openingHours"] = formatted_rules
+        ld_data["rules"] = ld_data.pop("openingHours", [])
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("image")
+        item["opening_hours"] = self.parse_hours(ld_data.get("rules", []))
         apply_category(Categories.SHOP_CLOTHES, item)
         store_type, item["branch"] = item.pop("name").split(" - ", 1)
         clothes = set()
@@ -37,3 +32,17 @@ class ArmandThierySpider(CrawlSpider, StructuredDataSpider):
             clothes.add("men")
         item["extras"]["clothes"] = ";".join(sorted(clothes))
         yield item
+
+    @staticmethod
+    def parse_hours(rules: list[str]) -> OpeningHours:
+        oh = OpeningHours()
+        for rule in rules:
+            day, _, times = rule.partition(" : ")
+            if not (day := sanitise_day(day, DAYS_FR)):
+                continue
+            if times.strip() == "-":
+                oh.set_closed(day)
+                continue
+            for start_time, end_time in re.findall(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", times):
+                oh.add_range(day, start_time, end_time)
+        return oh
