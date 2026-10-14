@@ -1905,6 +1905,12 @@ def test_email_invalid_rejected():
     assert "email" not in item
 
 
+def test_email_placeholder_rejected():
+    # Unit 70202: etunimi.sukunimi@ is a template, not a contact.
+    item = contacted({"email": "etunimi.sukunimi@vakehyva.fi"})
+    assert "email" not in item
+
+
 def test_parking_plain_capacity():
     # Unit 80707.
     item = parked("Pysäköintialue Soukankuja", "5 pysäköintipaikkaa")

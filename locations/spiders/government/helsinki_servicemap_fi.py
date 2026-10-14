@@ -2619,6 +2619,11 @@ class HelsinkiServicemapFISpider(Spider):
         value = re.sub(r"\(at\)|\[at\]| at ", "@", value, flags=re.IGNORECASE)
         value = re.sub(r"\(dot\)|\[dot\]| dot ", ".", value, flags=re.IGNORECASE)
         value = value.replace(" ", "").replace(chr(0xFEFF), "")
+        local, _, _ = value.partition("@")
+        if local.casefold() == "etunimi.sukunimi":
+            # Template placeholder, never a real contact (475 feed rows
+            # share the exact local part across 25 domains).
+            return None
         if "@" in value and "." in value.split("@")[-1]:
             return value
         return None
