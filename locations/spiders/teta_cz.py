@@ -25,17 +25,19 @@ class TetaCZSpider(SitemapSpider):
         extract_email(item, response)
         extract_phone(item, response.xpath('//div[@class="c-store-detail"]'))
 
+        days = {}
+        for rule in response.xpath('//ul[contains(@class, "c-store-detail__main-opening-times")]/li'):
+            if day := sanitise_day(rule.xpath("./span[1]/text()").get(), DAYS_CZ):
+                days.setdefault(day, rule.xpath('normalize-space(.//div[contains(@class, "c-hours__time")])').get())
+
         oh = OpeningHours()
-        for rule in response.xpath('//*[@class="c-hours c-store-detail__main-opening-times"]//li'):
-            day = sanitise_day(rule.xpath(".//text()").get(), DAYS_CZ)
-            time = rule.xpath(r"./span/text()").get()
-
-            if (time == "Zavřeno") or (day is None):
-                continue
-
-            for period in time.split(","):
-                open_time, close_time = period.split("-")
-                oh.add_range(day, open_time.strip(), close_time.strip())
+        for day, time in days.items():
+            if time == "Zavřeno":
+                oh.set_closed(day)
+            else:
+                for period in time.split(","):
+                    open_time, close_time = period.split("-")
+                    oh.add_range(day, open_time.strip(), close_time.strip())
 
         item["opening_hours"] = oh
 
