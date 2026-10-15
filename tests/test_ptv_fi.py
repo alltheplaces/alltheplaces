@@ -3797,11 +3797,11 @@ def test_unreturned_orgs_join_without_rerequest():
     reqs = [r for r in out if isinstance(r, JsonRequest)]
     assert len(reqs) == 1
     assert reqs[0].dont_filter is True
-    # The API answers without org-9: the item flushes operator-less and
-    # org-9 is remembered as known-missing.
-    items = list(
-        spider.parse_orgs(TextResponse(url="https://x/Organization/list?guids=org-9", body=b"[]", encoding="utf-8"))
-    )
+    # The API answers without org-9 (dispatched the way Scrapy does, with
+    # the request's cb_kwargs as callback keywords): the item flushes
+    # operator-less and org-9 is remembered as known-missing.
+    req = reqs[0]
+    items = list(req.callback(TextResponse(url=req.url, body=b"[]", encoding="utf-8"), **req.cb_kwargs))
     assert len(items) == 1
     assert items[0].get("operator") is None
     assert spider._org_names["org-9"] is None

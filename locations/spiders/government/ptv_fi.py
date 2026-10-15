@@ -1121,7 +1121,7 @@ class PtvFISpider(Spider):
                 cb_kwargs={"org_ids": chunk},
             )
 
-    def parse_orgs(self, response: TextResponse) -> Iterable[JsonRequest | Feature]:
+    def parse_orgs(self, response: TextResponse, org_ids=None) -> Iterable[JsonRequest | Feature]:
         try:
             payload = response.json()  # ty: ignore[unresolved-attribute]
         except ValueError:
@@ -1149,7 +1149,7 @@ class PtvFISpider(Spider):
         # re-requesting, because a re-request with the same URL would die
         # in the dupefilter and strand its items until close. Flush the
         # leftovers like the failure paths.
-        requested = self._request_org_ids(response)
+        requested = list(org_ids) if org_ids is not None else self._request_org_ids(response)
         for org_id in requested:
             self._org_names.setdefault(org_id, None)
         yield from self._flush_request_orgs(requested)
@@ -1197,10 +1197,11 @@ class PtvFISpider(Spider):
         leftover = {org_id: len(items) for org_id, items in self._pending.items() if items}
         if leftover:
             self._count("org/unflushed_on_close", sum(leftover.values()))
-            # CI smoke runs always end in closespider_timeout with a partial
-            # queue: expected truncation, not data loss. Anything else means
+            # Operator-imposed early stops always truncate the queue:
+            # expected truncation, not data loss. Anything else means
             # org joins genuinely never arrived.
-            log = self.logger.warning if reason == "closespider_timeout" else self.logger.error
+            truncated = reason in ("closespider_timeout", "closespider_itemcount")
+            log = self.logger.warning if truncated else self.logger.error
             log("ptv_fi: unflushed org windows on close: %d orgs (reason=%s)", len(leftover), reason)
 
     # Contact-details placeholders filed as names ("Kontaktuppgifter"
