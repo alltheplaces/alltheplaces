@@ -11,18 +11,11 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature, SocialMedia, set_social_media
 from locations.licenses import Licenses
 
-# Kirjastohakemisto (Kirkanta), the Finnish Library Database: public, academic
-# and special libraries plus archives, via the v3 JSON API. One request returns
-# the whole directory. Docs and CC BY 4.0 terms: https://api.kirjastot.fi/
-# No opening_hours: schedules need period params and the staffed/self-service
-# split has no opening_hours representation.
+# Kirjastohakemisto (Kirkanta), the Finnish Library Database, via the v3 JSON API. Docs and CC BY 4.0 terms: https://api.kirjastot.fi/
+# No opening_hours: schedules need period params with no staffed/self-service mapping.
 API_URL = "https://api.kirjastot.fi/v3/library?limit=2000&with=phone_numbers,pictures,links,services"
 
-# Branch types filed as visitable libraries. Mobiles are excluded (a vehicle at
-# a depot address, not an outlet); home_service has no visitable venue; other
-# mixes archives with digital-only and art organisations (handled below). The
-# feed status (0/1/2) is the live open state from daily schedules, not
-# lifecycle, so it is ignored.
+# Mobiles/home_service lack visitable venues; other mixes archives with the rest (see below); status is daily open state, ignored.
 LIBRARY_TYPES = {
     "library",
     "main_library",
@@ -35,22 +28,16 @@ LIBRARY_TYPES = {
     "institutional",
 }
 
-# Hospital patient and school libraries serve restricted populations, as do
-# the military academy libraries (Maasotakoulu, Maanpuolustuskorkeakoulu);
-# those get access=private rather than a public tag.
+# Institutional/school/military libraries serve restricted populations, hence access=private.
 ACCESS_PRIVATE_TYPES = {"institutional", "school"}
 MILITARY_KEYWORDS = ("sotakoulu", "puolustus")
-# Permanently closed units name themselves (single case: the Skanssi desk,
-# SULJETTU/CLOSED/STÄNGT in three languages).
+# Closed units signal only via name tokens (single case: Skanssi desk 85148).
 CLOSED_TOKENS = re.compile(r"\b(suljettu|closed|stängt)\b", re.IGNORECASE)
-# Real libraries the branch_type enum misfiles (single case: Skibban, a
-# Swedish-language library in Pori filed as other).
+# Skibban (86797) is a real library misfiled as other.
 OTHER_INCLUDE = {86797}
 
-# Social handles stamped on many branches (city-system pages) are popped;
-# only handles unique to one record are emitted. Persons sections and staff
-# contacts stay out (privacy); service blurbs have no OSM vocabulary, except
-# the wi-fi template slug which maps to internet_access=wlan.
+# City-system handles repeat across branches, hence uniqueness filter; staff contacts excluded for privacy.
+# Only the wi-fi template slug maps to an OSM tag; other service blurbs have no vocabulary.
 SOCIAL_DOMAINS = (
     (SocialMedia.FACEBOOK, ("facebook.com",)),
     (SocialMedia.INSTAGRAM, ("instagram.com",)),
@@ -68,7 +55,7 @@ FLOOR_PATTERNS = (FLOOR_TAIL, FLOOR_PAREN, FLOOR_REVERSED)
 class KirkantaFISpider(Spider):
     name = "kirkanta_fi"
     allowed_domains = ["api.kirjastot.fi"]
-    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 120}
     IMAGE_SKIP = ("placeholder", "default", "logo", "brand")
     # API contents CC BY 4.0, attribution required by the v3 terms.
     dataset_attributes = Licenses.CCBY4.value | {
@@ -96,9 +83,7 @@ class KirkantaFISpider(Spider):
             if result:
                 candidates.append(result)
         counts = self.social_counts(candidates)
-        # Same place filed under two ids keeps the lowest id either way the
-        # feed orders them (single case: Kärkölä 86024/86806). Numeric-aware:
-        # plain string comparison misorders mixed-length ids ("10" < "9").
+        # Dup ids keep lowest id order-independently; numeric-aware since "10" < "9" as strings.
         minima: dict = {}
         for item, place_key, _ in candidates:
             if place_key is None:
@@ -182,8 +167,7 @@ class KirkantaFISpider(Spider):
             item["extras"]["addr:floor"] = floor
         if street:
             item["street_address"] = street
-        # area is the post town, city the municipality; OSM addr:city is the
-        # post town, falling back to the municipality where area is empty.
+        # area is post town, city is municipality; addr:city prefers post town.
         item["city"] = self.pick_lang(address.get("area") or {}) or self.pick_lang(address.get("city") or {})
         item["postcode"] = address.get("zipcode")
         item["country"] = "FI"
@@ -200,12 +184,8 @@ class KirkantaFISpider(Spider):
             item["extras"]["internet_access"] = "wlan"
             self.crawler.stats.inc_value(f"atp/{self.name}/wifi")
 
-        # Same name, street and town under another id is one place filed twice;
-        # the lowest id wins in parse(). Coords stay out of the key: re-surveys
-        # metres apart are still one place (Hervanta 86747/86774, ~15 m).
-        # Street-less records skip matching: without an address no confident
-        # match exists. Resolved name, not fi: distinct sv-fallback names on
-        # one street are different places.
+        # Same place filed twice keeps lowest id (Kärkölä 86024/86806); coords excluded (Hervanta pair ~15 m apart).
+        # Street-less records and sv-fallback names skip matching to avoid false merges.
         if not street:
             return item, None, self.collect_social(entry)
         return item, (item["name"], street, item.get("city")), self.collect_social(entry)
@@ -231,8 +211,7 @@ class KirkantaFISpider(Spider):
 
     @staticmethod
     def set_names(item: Feature, names: dict, name: str) -> None:
-        # Translated names keep identity tails; name:fi mirrors the fi name and
-        # is never set from a fallback language.
+        # name:fi mirrors the fi name, never a fallback language.
         if names.get("sv") and names["sv"] != name:
             item["extras"]["name:sv"] = names["sv"]
         if names.get("en") and names["en"] != name:
@@ -289,8 +268,7 @@ class KirkantaFISpider(Spider):
 
     @staticmethod
     def split_floor(street: str) -> tuple[str, str | None]:
-        # Single unambiguous floor markers only; slash forms stay put (unit
-        # numbers are ambiguous) as do ordinal words (zero occurrences here).
+        # Only unambiguous floor markers; slash forms and ordinal words stay put.
         for pattern in FLOOR_PATTERNS:
             if match := pattern.search(street):
                 return street[: match.start()], match.group("floor")
@@ -305,8 +283,7 @@ class KirkantaFISpider(Spider):
 
     @staticmethod
     def pick_image(pictures: list) -> str | None:
-        # Per-location building photos; hashes cannot spell the skip words so
-        # only human-named logo files match. Default photo first, else first.
+        # Skip-word match is safe (hashes can't spell them); default photo preferred.
         ordered = sorted(pictures, key=lambda p: not p.get("default"))
         for photo in ordered:
             url = (photo.get("files") or {}).get("large") or ""
@@ -316,10 +293,7 @@ class KirkantaFISpider(Spider):
 
     @staticmethod
     def pick_phone(numbers: list) -> str | None:
-        # The phone list also carries email addresses; those stay out, the
-        # dedicated email field covers them. First real number wins (the
-        # shared Oulu system number is a legitimate branch phone, not a
-        # hotline, so no cross-record filtering).
+        # Numbers list mixes in emails; shared Oulu system number is legitimate, so no cross-record filtering.
         for row in numbers:
             number = row.get("number") or ""
             if "@" not in number and any(char.isdigit() for char in number):
