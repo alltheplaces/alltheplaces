@@ -1,6 +1,7 @@
 import re
+from typing import Iterable
 
-from scrapy.http import Response
+from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -50,7 +51,7 @@ class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
             kept = [t for t in tel if isinstance(t, str) and t and not self._is_hotline(t)]
             ld_data["telephone"] = kept or None
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if "Toimipaikka aukeaa" in response.text:
             # Unopened unit (only Lahti Trio, opening 11.11.2026); skip until it opens.
             self.logger.warning("Skipping unopened unit: %s", response.url)
@@ -80,7 +81,7 @@ class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.CLINIC, item)
         yield item
 
-    def _page_phone(self, response: Response) -> str | None:
+    def _page_phone(self, response: TextResponse) -> str | None:
         for href in response.xpath('//a[contains(@href, "tel:")]/@href').getall():
             number = href.split("tel:", 1)[-1].strip()
             if number and not self._is_hotline(number):
