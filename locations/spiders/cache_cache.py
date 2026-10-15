@@ -11,7 +11,7 @@ from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 POP_UP = re.compile(r"pop[- ]?up|[ée]ph[ée]m[èe]re|ef[íi]mer", re.IGNORECASE)
 
@@ -22,8 +22,8 @@ class CacheCacheSpider(JSONBlobSpider, CamoufoxSpider):
     start_urls = [
         "https://www.cache-cache.fr/on/demandware.store/Sites-CCH_FR_SFRA-Site/fr_FR/Stores-FindStores?lat=46.6&long=2.4&radius=20000&showMap=false"
     ]
-    # Cloudflare challenges plain requests; Camoufox passes the challenge.
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS
+    # Cloudflare challenge; its scripts must be allowed to load.
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         data = response.json()
@@ -43,13 +43,16 @@ class CacheCacheSpider(JSONBlobSpider, CamoufoxSpider):
             return
 
         item["branch"] = item.pop("name", None)
-        if item.get("country") == "ES":
-            item["branch"] = re.sub(r"\s*-\s*ES$", "", item["branch"] or "")
         item["street_address"] = merge_address_lines([feature.get("address1"), feature.get("address2")])
-        item["website"] = self.websites.get(item["ref"])
-        if not item.get("phone") or not re.search(r"/magasins-[^/]+-\d+\.html$", item.get("website") or ""):
+        website = self.websites.get(item["ref"])
+        if not item.get("phone") or not re.search(r"/magasins-[^/]+-\d+\.html$", website or ""):
             # Pop-ups seen so far have neither a phone nor a regular store page.
             self.logger.warning(f"Store {item['ref']} ({item['branch']}) lacks a phone or store page")
+        if item.get("country") == "ES":
+            item["branch"] = re.sub(r"\s*-\s*ES$", "", item["branch"] or "")
+        else:
+            # Spanish store pages are empty (their Stores-Detail include returns HTTP 500).
+            item["website"] = website
 
         oh = OpeningHours()
         for day, hours in json.loads(custom.get("BMNR_horaires") or "{}").items():
