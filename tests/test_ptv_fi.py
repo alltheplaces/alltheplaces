@@ -724,7 +724,7 @@ _COMMA_CASES = [
         _SKIP,
         "split",
     ),
-    ("Nuorisopsykiatrian osasto J1, Tyks", None, "Nuorisopsykiatrian osasto J1", "Tyks", _SKIP, "split"),
+    ("Nuorisopsykiatrian osasto J1, Tyks", None, "Nuorisopsykiatrian osasto J1", None, _SKIP, "split"),
     ("Kotihoito, Oulainen ja Merijärvi", None, "Kotihoito", None, PRESENT, "split"),
     ("Katriinan toimipiste, osasto 5", None, "Katriinan toimipiste, osasto 5", None, None, "split"),
     ("Katriinan toimipiste, osasto 7", "Vantaa", "Katriinan toimipiste, osasto 7", _SKIP, _SKIP, "named"),
@@ -1014,7 +1014,7 @@ _PAREN_DASH_CASES = [
     ("Daycare Daisy Oy (Ylioppilaskatu 25)", None, "Daycare Daisy Oy", _SKIP, _SKIP, "split"),
     ("Friemanin talo - nuorisotoimisto", None, "Nuorisotoimisto", "Friemanin talo", PRESENT, "split"),
     ("Malminkartano - Pitäjänmäki", None, _SKIP, None, _SKIP, "split"),
-    ("OYSin Keuhkosairauksien poliklinikka", None, "Keuhkosairauksien poliklinikka", "OYS", PRESENT, "split"),
+    ("OYSin Keuhkosairauksien poliklinikka", None, "Keuhkosairauksien poliklinikka", None, PRESENT, "split"),
     ("Kuntoilulaitteet (ulko)", None, "Kuntoilulaitteet (ulko)", None, None, "split"),
     (
         "Kottby grundskola, Arabia kvartersskola, åk 1–2",
@@ -3888,6 +3888,10 @@ def test_acronym_hosts_are_not_located():
     # Hospital-district acronyms operate the unit; they name no venue.
     item = parsed(make_spider(), channel("OYSin Keuhkosairauksien poliklinikka"))
     assert item.get("located_in") is None
+    assert item["name"] == "Keuhkosairauksien poliklinikka"
+    item = parsed(make_spider(), channel("Nuorisopsykiatrian osasto J1, Tyks"))
+    assert item.get("located_in") is None
+    assert item["name"] == "Nuorisopsykiatrian osasto J1"
 
 
 def test_coordless_channels_are_kept():

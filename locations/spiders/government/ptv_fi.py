@@ -742,7 +742,7 @@ class PtvFISpider(Spider):
         # fallthrough. The camp_site category is unaffected (table reads the
         # signed form).
         self.GENERIC_WORDS = {w.lower() for w in venue_words}
-        self.FIXTURE_RE = re.compile("|".join(sorted(self.GENERIC_WORDS, key=len, reverse=True)))
+        self.FIXTURE_RE = re.compile("|".join(re.escape(w) for w in sorted(self.GENERIC_WORDS, key=len, reverse=True)))
         self._rules = []
         for keys, cat, extra in self.CATEGORY_RULES:
             # One alternation per same-target group: the table loop only
@@ -1446,7 +1446,8 @@ class PtvFISpider(Spider):
         "rokotus vastaanotto ravintola keittiö kahvila kioski kauppa apteekki neuvonta ohjaus palvelu opastus "
         "päivätoiminta kalastuspaikka opiskeluhuolto kouluterveydenhuolto opiskeluterveydenhuolto ".split()
     )
-    # Hospital acronyms name venues, never services (", Tyks"; "OYSin ...").
+    # Hospital acronyms operate the unit; they name no venue (", Tyks";
+    # "OYSin ..."). Prefixes and comma tails strip off the applied name.
     HOSPITAL_ACRONYMS = frozenset("TYKS OYS HUS TAYS KYS ".split())
     # Bare acronym units at hospital heads ("Vatsakeskus, Tays Hatanpää")
     # are hospital departments: unit words licensing the clinic filing.
@@ -2757,9 +2758,11 @@ class PtvFISpider(Spider):
         if (m := re.match(r"(oysin|tyksin|husin|taysin|kysin)\s+(.+)$", name, flags=re.IGNORECASE)) and m.group(
             2
         ).strip():
-            # Hospital acronym prefixes ("OYSin Keuhkosairauksien poliklinikka").
-            self._count("name/acronym_prefix_venue")
-            return m.group(2).strip(), m.group(1)[:-2].upper(), name
+            # Hospital acronym prefixes ("OYSin Keuhkosairauksien
+            # poliklinikka"): the acronym operates the unit, never a venue,
+            # so it strips off the name.
+            self._count("name/acronym_prefix_dropped")
+            return m.group(2).strip(), None, name
         return None
 
     def _split_slash_nested(self, name: str) -> SplitTriple | None:
@@ -3765,13 +3768,14 @@ class PtvFISpider(Spider):
             return self._split_pair(head, tail, name)
         return None
 
-    def _comma_acronym_venue(
+    def _comma_acronym_dropped(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> SplitTriple | None:
         if len(tail) >= 3 and tail.upper() in self.HOSPITAL_ACRONYMS:
-            # Hospital acronyms are venues ("... osasto J1, Tyks").
-            self._count("name/comma_acronym_venue")
-            return head, tail, name
+            # Hospital acronym tails operate the unit ("... osasto J1,
+            # Tyks"): the tail strips off the name, never a venue.
+            self._count("name/comma_acronym_dropped")
+            return head, None, name
         return None
 
     def _comma_facility_venue(
@@ -3795,14 +3799,14 @@ class PtvFISpider(Spider):
     def _comma_tail_proper(
         self, head: str, tail: str, lowered_head: str, lowered_tail: str, name: str, city: str | None
     ) -> SplitTriple | None:
-        # Swedish tails and proper/unit/water/acronym/facility venues.
+        # Swedish tails, proper/unit/water/facility venues and acronym strips.
         return self._first_hit(
             (
                 self._comma_sv_service,
                 self._comma_unit_proper,
                 self._comma_proper_venue,
                 self._comma_water_venue,
-                self._comma_acronym_venue,
+                self._comma_acronym_dropped,
                 self._comma_facility_venue,
             ),
             head,
@@ -4835,7 +4839,7 @@ class PtvFISpider(Spider):
     COMMA_STREET_RE = re.compile(r"(" + STREET_NUMBERED_ALT + r")\s+\d")
 
     def _strip_addr_base(self, address: str) -> str:
-        address = address.replace("­", "").replace("–", "-").replace("—", "-")
+        address = self._visible(address).replace("–", "-").replace("—", "-")
         base = address
         for rx in self.ADDR_STRIP_RULES:
             base = rx.sub("", base).strip()
@@ -5878,10 +5882,8 @@ class PtvFISpider(Spider):
             return None
         return names, name
 
-    def _parse_place(
-        self, channel: dict
-    ) -> tuple[dict, dict, str | None, str | None, tuple[float, float], str | None] | None:
-        # Visit address, postcode/office, coordinates and municipality:
+    def _parse_place(self, channel: dict) -> tuple[dict, str | None, tuple[float, float] | None, str | None] | None:
+        # Visit address (street, postcode, coordinates, municipality):
         # drop postal-only rows and mobile units; coordless rows are kept
         # (the pipeline strips bad geometry but keeps the item).
         address = self._visit_address(channel)
@@ -5902,7 +5904,7 @@ class PtvFISpider(Spider):
         if office and self._post_city(office) != office.strip():
             # Station-village post-office names are noted, not refiled.
             self._count("address/postoffice_station")
-        return address, street, postcode, office, coords, city_src
+        return street, postcode, coords, city_src
 
     def _parse_category(self, item: Feature, channel: dict, names: dict[str, str], name: str) -> Categories | None:
         # Category dispatch (table, rescue tiers, extras-only) plus the
@@ -5940,7 +5942,7 @@ class PtvFISpider(Spider):
         placed = self._parse_place(channel)
         if placed is None:
             return None
-        address, street, postcode, office, coords, city_src = placed
+        street, postcode, coords, city_src = placed
 
         item = Feature()
         item["ref"] = str(channel["id"])
@@ -5961,10 +5963,6 @@ class PtvFISpider(Spider):
 
         hours = self._hours(channel, category)
         rendered = hours.as_opening_hours() if hasattr(hours, "as_opening_hours") else hours
-        if hours and rendered:
+        if rendered:
             item["opening_hours"] = hours
-        elif hours:
-            # Objects rendering empty (closed-only sets) must never emit
-            # an empty opening_hours tag.
-            self._count("hours/empty_render")
         return item
