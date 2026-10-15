@@ -192,6 +192,7 @@ class PakettipisteFISpider(Spider):
             item["branch"] = venue
             apply_yes_no(Extras.PARCEL_PICKUP, item, True)
             apply_yes_no(Extras.PARCEL_MAIL_IN, item, True)
+            apply_yes_no("indoor", item, attrs.get("Sijoituspaikka") == "Sisällä", False)
             if placement:
                 item["extras"]["description"] = placement
             else:
