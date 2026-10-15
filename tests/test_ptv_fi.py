@@ -3787,6 +3787,36 @@ def test_org_join_and_flush_paths():
     assert spider._pending == {}
 
 
+def test_unreturned_orgs_join_without_rerequest():
+    # An org the API never returns (deleted/renamed row) must not trap
+    # later batches: a re-request with the same URL dies in Scrapy's
+    # dupefilter, stranding its items until close.
+    spider = make_spider()
+    a = channel("A-linna", org="org-9")
+    a["id"] = "aaaaaaaa-1111-4111-8111-111111111111"
+    out = list(spider.parse_batch(TextResponse(url="https://x/list", body=json.dumps([a]).encode(), encoding="utf-8")))
+    reqs = [r for r in out if isinstance(r, JsonRequest)]
+    assert len(reqs) == 1
+    assert reqs[0].dont_filter is True
+    # The API answers without org-9: the item flushes operator-less and
+    # org-9 is remembered as known-missing.
+    items = list(
+        spider.parse_orgs(TextResponse(url="https://x/Organization/list?guids=org-9", body=b"[]", encoding="utf-8"))
+    )
+    assert len(items) == 1
+    assert items[0].get("operator") is None
+    assert spider._org_names["org-9"] is None
+    # A later batch for the same org joins at once: no new request, so
+    # nothing for the dupefilter to swallow.
+    b = channel("B-talo", org="org-9")
+    b["id"] = "bbbbbbbb-1111-4111-8111-111111111111"
+    out = list(spider.parse_batch(TextResponse(url="https://x/list", body=json.dumps([b]).encode(), encoding="utf-8")))
+    assert not any(isinstance(r, JsonRequest) for r in out)
+    assert len(out) == 1
+    assert out[0].get("operator") is None
+    assert spider._pending == {}
+
+
 def test_crawl_errbacks_count_and_continue():
     spider = make_spider()
     failure = SimpleNamespace(request=SimpleNamespace(url="https://x/list?guids=a"))

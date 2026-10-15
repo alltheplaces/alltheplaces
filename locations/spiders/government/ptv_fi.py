@@ -1111,6 +1111,10 @@ class PtvFISpider(Spider):
                 url=f"{self.api_base_url}{self.ORG_PATH}?" + urlencode({"guids": ",".join(chunk)}),
                 callback=self.parse_orgs,
                 errback=self.errback_orgs,
+                # Retries after a failure must not die in the dupefilter:
+                # a re-request with the same URL would silently drop its
+                # callback/errback and strand the waiting items.
+                dont_filter=True,
             )
 
     def parse_orgs(self, response: TextResponse) -> Iterable[JsonRequest | Feature]:
@@ -1135,9 +1139,16 @@ class PtvFISpider(Spider):
             for item in self._pending.pop(org_id, []):
                 self._apply_operator(item, name, org_type)
                 yield item
-        # Orgs requested but unreturned (deleted/renamed rows) must not trap
-        # their items: flush the leftovers operator-less like the failure paths.
-        yield from self._flush_request_orgs(getattr(response, "url", "") or "")
+        # Orgs requested but unreturned (deleted/renamed rows) are known
+        # operator-less from here on: later items join at once instead of
+        # re-requesting, because a re-request with the same URL would die
+        # in the dupefilter and strand its items until close. Flush the
+        # leftovers like the failure paths.
+        url = getattr(response, "url", "") or ""
+        match = re.search(r"guids=([^&]*)", url)
+        for org_id in (unquote(match.group(1)).split(",") if match else []):
+            self._org_names.setdefault(org_id, None)
+        yield from self._flush_request_orgs(url)
 
     def _flush_request_orgs(self, url: str) -> Iterable[Feature]:
         # Flush the window without operators rather than losing it: recover
