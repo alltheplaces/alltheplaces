@@ -52,9 +52,6 @@ class SeurantalotFISpider(Spider):
     NUMBER_RE = re.compile(r"^(\d+)$")
     OPERATOR_ID_RE = re.compile(r"^\d{7}-\d$")
     COUNTER_RE = re.compile(r"(\d+)\s+seurantataloa\s*\((\d+)-(\d+)\)")
-    # Template local-parts observed feed-wide drop by exact casefolded
-    # match after de-obfuscation (populated by the Counter pass).
-    TEMPLATE_EMAILS = frozenset()
 
     def _stat(self, key: str) -> None:
         try:
@@ -353,9 +350,6 @@ class SeurantalotFISpider(Spider):
             if deobfuscated != email:
                 self._stat("atp/seurantalot_fi/email/deobfuscated")
                 email = deobfuscated
-            if email.casefold() in self.TEMPLATE_EMAILS:
-                self._stat("atp/seurantalot_fi/dropped/template_email")
-                continue
             if "@" in email:
                 return email
             self._stat("atp/seurantalot_fi/dropped/bad_email")
