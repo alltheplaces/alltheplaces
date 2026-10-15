@@ -5,27 +5,28 @@ from typing import Iterable
 from scrapy import Selector
 from scrapy.http import TextResponse
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 POP_UP = re.compile(r"pop[- ]?up|[ée]ph[ée]m[èe]re|ef[íi]mer", re.IGNORECASE)
 
 
-class CacheCacheSpider(JSONBlobSpider, CamoufoxSpider):
+class CacheCacheSpider(JSONBlobSpider):
     name = "cache_cache"
     item_attributes = {"brand": "Cache Cache", "brand_wikidata": "Q63064086", "name": "Cache Cache"}
     start_urls = [
         "https://www.cache-cache.fr/on/demandware.store/Sites-CCH_FR_SFRA-Site/fr_FR/Stores-FindStores?lat=46.6&long=2.4&radius=20000&showMap=false"
     ]
-    captcha_type = "cloudflare_turnstile"
-    captcha_selector_indicating_success = '//pre[contains(text(), "storesResultsHtml")]'
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
-    handle_httpstatus_list = [403]
+    # Cloudflare challenges plain requests, and Camoufox from CI IPs.
+    requires_proxy = "FR"
+    custom_settings = {
+        # robots.txt disallows /on/demandware.store/.
+        "ROBOTSTXT_OBEY": False,
+        "ZYTE_API_SKIP_HEADERS": ["Cookie", "User-Agent"],
+    }
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         data = response.json()
