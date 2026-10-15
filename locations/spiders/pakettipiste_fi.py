@@ -33,31 +33,39 @@ class PakettipisteFISpider(Spider):
     PAGE_SIZE = 1000  # Server maxRecordCount.
     # Every site page embeds window.allLockers (id -> detail link); the index is the stablest carrier.
     SLUG_URL = "https://www.pakettipiste.fi/noutopaikat/"
-    ORIGIN = "https://www.pakettipiste.fi"
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(self.SLUG_URL, callback=self.parse_slugs, errback=self.err_slugs, dont_filter=True)
 
     def err_slugs(self, failure) -> Iterable[Request]:
         self.logger.warning(f"Slug page failed, continuing without websites: {failure.value}")
+        self._inc("slug_page_error")
         yield self.make_api_request(0, {})
 
     def parse_slugs(self, response: Response) -> Iterable[Request]:
         slugs: dict[str, str] = {}
         match = re.search(r"window\.allLockers\s*=\s*(\{.*?\});", response.text, re.S)
-        if match:
+        if not match:
+            self.logger.warning("Slug blob not found, continuing without websites")
+            self._inc("unmapped/slug_blob")
+        else:
             try:
-                for key, entry in json.loads(match.group(1)).items():
-                    if href := HREF_RE.search(entry.get("link") or ""):
-                        slugs[str(key)] = href.group(1)
+                blob = json.loads(match.group(1))
             except json.JSONDecodeError as e:
                 self.logger.warning(f"Could not parse slug blob: {e}")
                 self._inc("unmapped/slug_blob")
-        else:
-            self.logger.warning("Slug blob not found, continuing without websites")
-            self._inc("unmapped/slug_blob")
-        self.logger.info(f"Parsed {len(slugs)} slug links")
-        self._inc("slugs_parsed")
+            else:
+                if not isinstance(blob, dict):
+                    self.logger.warning("Unexpected slug blob shape, continuing without websites")
+                    self._inc("unmapped/slug_blob")
+                else:
+                    for key, entry in blob.items():
+                        if isinstance(entry, dict) and (href := HREF_RE.search(entry.get("link") or "")):
+                            slugs[str(key)] = response.urljoin(href.group(1))
+                        else:
+                            self._inc("unmapped/slug_entry")
+                    self.logger.info(f"Parsed {len(slugs)} slug links")
+                    self._inc("slugs_parsed")
         yield self.make_api_request(0, slugs)
 
     def make_api_request(self, offset: int, slugs: dict[str, str]) -> Request:
@@ -86,14 +94,24 @@ class PakettipisteFISpider(Spider):
         yield  # Make this a generator so Scrapy accepts the errback.
 
     def parse_features(self, response: Response, offset: int, slugs: dict[str, str]) -> Iterable[Request | Feature]:
-        data = response.json()  # ty: ignore[unresolved-attribute]
+        try:
+            data = response.json()  # ty: ignore[unresolved-attribute]
+        except json.JSONDecodeError:
+            self._inc("api_bad_json")
+            raise CloseSpider("pakettipiste_fi: feature query returned non-JSON")
+        if data.get("error"):
+            self._inc("api_error_response")
+            raise CloseSpider(f"pakettipiste_fi: API error {data['error']}")
         features = data.get("features") or []
         if not features:
             if offset == 0:
+                self._inc("empty_first_page")
                 raise CloseSpider("pakettipiste_fi: no features on first page")
+            self._inc("empty_page")
             self.logger.warning(f"No features at offset {offset}")
             return
-        if data.get("exceededTransferLimit"):
+        # Length fallback mirrors the shared ArcGIS finder; the flag alone is trusted otherwise.
+        if data.get("exceededTransferLimit") or len(features) >= self.PAGE_SIZE:
             yield self.make_api_request(offset + len(features), slugs)
         for feature in features:
             item = self.parse_feature(feature, slugs)
@@ -122,6 +140,7 @@ class PakettipisteFISpider(Spider):
             venue = lokaatio
             for prefix in LOCKER_PREFIXES:
                 venue = venue.removeprefix(prefix)
+        venue = venue.strip()
         if venue == lokaatio or not venue:
             self._inc(f"unmapped/lokaatio/{lokaatio.replace('/', '-') or 'empty'}")
             return None
@@ -157,8 +176,8 @@ class PakettipisteFISpider(Spider):
                 item["extras"]["description"] = placement
             else:
                 self._inc("empty/placement")
-        if href := slugs.get(str(attrs["ID"])):
-            item["website"] = f"{self.ORIGIN}{href}"
+        if website := slugs.get(str(attrs["ID"])):
+            item["website"] = website
         else:
             self._inc("empty/website")
         return item
@@ -172,7 +191,7 @@ class PakettipisteFISpider(Spider):
                 oh.set_closed(day)
                 continue
             compact = re.sub(r"\s+", "", str(raw)).replace("–", "-").replace("—", "-").replace(".", ":")
-            if compact in ("", "-", "–", "—"):
+            if compact in ("", "-"):
                 oh.set_closed(day)
                 continue
             if compact.casefold() == "24h":
@@ -189,7 +208,7 @@ class PakettipisteFISpider(Spider):
                 continue
             open_time = f"{times[0][0]:02d}:{times[0][1]:02d}"
             close_time = f"{times[1][0]:02d}:{times[1][1]:02d}"
-            if close_time == "23:59":
+            if open_time == "00:00" and close_time == "23:59":  # Only a midnight open implies 24h.
                 close_time = "24:00"
             try:
                 oh.add_range(day, open_time, close_time)
