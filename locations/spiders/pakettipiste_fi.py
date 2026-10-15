@@ -171,8 +171,9 @@ class PakettipisteFISpider(Spider):
             ("Postinumero", "postcode"),
             ("Postitoimipaikka", "city"),
         ):
-            # Two feed rows carry short postcodes ("2280", "1150"); passed through as published.
             if value := str(attrs.get(source) or "").strip():
+                if target == "postcode" and value.isdigit() and len(value) < 5:
+                    value = value.zfill(5)  # Finnish postcodes are five digits; feed drops the leading zero.
                 item[target] = value
             else:
                 self._inc(f"empty/addr/{target}")
@@ -209,9 +210,8 @@ class PakettipisteFISpider(Spider):
         for field in DAY_FIELDS:
             day = DAYS_FI[field]
             raw = attrs.get(field)
-            if raw is None:  # Blank is ambiguous (closed vs renamed field), so count it.
+            if raw is None:  # Absence is not closure, so count it and skip the day.
                 self._inc(f"empty/hours/{day}")
-                oh.set_closed(day)
                 continue
             if str(raw).strip() in ("", "-"):
                 oh.set_closed(day)
