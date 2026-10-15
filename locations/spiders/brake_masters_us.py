@@ -6,7 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import OpeningHours
 
 
 class BrakeMastersUSSpider(Spider):
