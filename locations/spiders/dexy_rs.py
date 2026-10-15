@@ -16,8 +16,8 @@ class DexyRSSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item.pop("name", None)
         item["street_address"] = item.pop("street", None)
-        item["lat"] = feature["coordinatesGoogleMapWidth"]
-        item["lon"] = feature["coordinatesGoogleMapHeight"]
+        item["lat"] = feature["coordinatesGoogleMapWidth"] or None
+        item["lon"] = feature["coordinatesGoogleMapHeight"] or None
         item["website"] = feature["f_permalink"]
 
         item["opening_hours"] = OpeningHours()
