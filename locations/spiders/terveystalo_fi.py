@@ -11,13 +11,18 @@ from locations.structured_data_spider import StructuredDataSpider
 class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
     name = "terveystalo_fi"
     # Brand pending NSI brand entry (osmlab#12971); operator entry already live.
-    item_attributes = {"brand": "Terveystalo", "operator": "Terveystalo", "operator_wikidata": "Q11897034"}
+    item_attributes = {
+        "brand": "Terveystalo",
+        "name": "Terveystalo",
+        "operator": "Terveystalo",
+        "operator_wikidata": "Q11897034",
+    }
     sitemap_urls = ["https://www.terveystalo.com/sitemap.xml"]
     # Two slugs break the prefix convention (partner venue / short name).
     sitemap_rules = [
-        (r"/fi/toimipaikat/terveystalo-[^/]+/?$", "parse"),
-        (r"/fi/toimipaikat/--ikaalinen-e-avenue/?$", "parse"),
-        (r"/fi/toimipaikat/tikkurila-varitehtaankatu/?$", "parse"),
+        (r"/fi/toimipaikat/(terveystalo-[^/]+)/?$", "parse"),
+        (r"/fi/toimipaikat/(--ikaalinen-e-avenue)/?$", "parse"),
+        (r"/fi/toimipaikat/(tikkurila-varitehtaankatu)/?$", "parse"),
     ]
     wanted_types = ["MedicalClinic"]
     # Page tel:/social/og:image are shared brand-level assets.
