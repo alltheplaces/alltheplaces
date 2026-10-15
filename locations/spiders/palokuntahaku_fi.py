@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from scrapy import FormRequest, Request, Spider
+from scrapy import FormRequest, Spider
 from scrapy.exceptions import CloseSpider
 from scrapy.http import TextResponse
 from scrapy.selector import Selector
@@ -70,9 +70,6 @@ class PalokuntahakuFISpider(Spider):
 
     def _stat(self, suffix: str, n: int = 1) -> None:
         self.crawler.stats.inc_value(f"atp/{self.name}/{suffix}", n)
-
-    async def start(self):
-        yield Request(url=self.start_urls[0], callback=self.parse)
 
     def parse(self, response: TextResponse, **kwargs: Any) -> Any:
         rows = response.xpath("//div[contains(concat(' ', normalize-space(@class), ' '), ' line ')]")
@@ -190,6 +187,11 @@ class PalokuntahakuFISpider(Spider):
                     if city is None and i + 1 < len(lines):
                         city = lines[i + 1] or None
                     break
+        if street and postcode and postcode in street:
+            # Care-of addresses put the postcode on the street line; it is
+            # already extracted above, so drop it from street_address.
+            street = street.replace(postcode, "", 1).strip().rstrip(",;").strip() or None
+            self._stat("address/postcode_in_street")
         if postcode is None:
             self._stat("address/no_postcode")
         if city is None:
@@ -222,7 +224,7 @@ class PalokuntahakuFISpider(Spider):
                     self._stat("contact/bad_website")
             elif digits := re.sub(r"\D", "", line):
                 if len(digits) >= 7:
-                    phones.append(line)
+                    phones.extend(part.strip() for part in line.split(",") if part.strip())
                 else:
                     self._stat("contact/short_phone")
         links = block.xpath('.//a[starts-with(@href, "http")]/@href').getall()
