@@ -58,7 +58,7 @@ class RinkiFISpider(Spider):
             props = {}
         # ref is the public RINKI ID shown on point pages; vingo_id/id are internal keys.
         ref = props.get("rinki_id")
-        if not ref:
+        if not isinstance(ref, str) or not ref:
             self._count("skipped/no_ref")
             self.logger.warning("Skipping feature without rinki_id: %r", props.get("street"))
             return None
@@ -67,7 +67,9 @@ class RinkiFISpider(Spider):
             self.logger.warning("Unexpected rinki_id format: %r", ref)
         if props.get("text") is not None:
             self._count("unmapped/text")
-        street = " / ".join(part for part in [props.get("street"), props.get("intersection")] if part)
+        street = " / ".join(
+            part for part in [props.get("street"), props.get("intersection")] if isinstance(part, str) and part
+        )
         if not street:
             self._count("empty/street")
         city = props.get("post_office")
