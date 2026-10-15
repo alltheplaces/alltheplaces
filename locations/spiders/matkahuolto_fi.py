@@ -18,14 +18,11 @@ MATKAHUOLTO_OP = {"operator": "Matkahuolto", "operator_wikidata": "Q2740294"}
 AREA_URL = "https://wwwservice.matkahuolto.fi/search/offices/area?left=19&right=32&top=71&bottom=59"
 
 WEEK_ORDER = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-TIME_RE = re.compile(r"^\d{2}:\d{2}$")
 # Stray service-type wording left after the brand strip, e.g. "ulkoautomaatti Lidl Hamina".
 SERVICE_RE = re.compile(r"^(pakettipiste|pakettiautomaatti|ulkoautomaatti)\b[\s.,]*", re.IGNORECASE)
-# Whole-word locker-type tokens (FI automaatti, SV automat); a bare substring would also match e.g. "Automarket".
+# Whole-word locker tokens; a bare substring would also match e.g. "Automarket".
 AUTOMA_RE = re.compile(r"(automaatti|automat)\b", re.IGNORECASE)
-# Explicit weekday-closure shapes in remarks: day-day ranges ("La-Su suljettu") and full weekday
-# words incl. inflections ("Liike suljettu maanantaisin"). Loose 2-letter tokens are deliberately
-# unsupported: they self-match inside "suljettu" itself and inside words like "kesalla" or "toisin".
+# Tight closure shapes only; loose tokens self-match inside "suljettu" itself.
 DAY_PAIR_RE = re.compile(r"\b(ma|ti|ke|to|pe|la|su)\s*[-–—]\s*(ma|ti|ke|to|pe|la|su)\b", re.IGNORECASE)
 DAY_WORD_RE = re.compile(r"\b(maanantai|tiistai|keskiviikko|torstai|perjantai|lauantai|sunnuntai)\w*", re.IGNORECASE)
 DAY_WORDS = (
@@ -39,20 +36,11 @@ DAY_WORDS = (
 )
 
 
-def _inc(spider: Spider, suffix: str, n: int = 1) -> None:
-    # Guarded: the offline harness drives parse() with no crawler attached.
-    try:
-        spider.crawler.stats.inc_value(f"atp/{spider.name}/{suffix}", n)
-    except AttributeError:
-        pass
-
-
 def extract_branch(name: str) -> str:
     if name.startswith("Matkahuolto "):
         rest = name[len("Matkahuolto ") :].strip()
         if ", " in rest:
             venue = SERVICE_RE.sub("", rest.split(", ", 1)[1]).strip() or name.strip()
-            # Outdoor lockers at own stations repeat the brand (e.g. 6817).
             return venue.removeprefix("Matkahuolto ").strip() or name.strip()
         return SERVICE_RE.sub("", rest).strip() or name.strip()
     for prefix in ("Postombud ", "Paketautomat, ", "Lantbrevbärare, "):
@@ -80,9 +68,7 @@ def expand_days(token: str) -> list[str]:
 
 
 def remark_closed_days(remarks: list[str], open_days: set[str]) -> list[str]:
-    # Explicit weekday closures ("La-Su suljettu", 7448) become set_closed days, but only for days
-    # with no structured hours (never contradict the feed) and never from remarks carrying their
-    # own dates/schedules (seasonal, e.g. 9695) or bare holiday notes ("Arkipyhat suljettu").
+    # Explicit weekday closures only; dated/seasonal notes and bare holiday closures stay hands-off.
     closed = []
     for remark in remarks:
         if "suljettu" not in remark.casefold() or re.search(r"\d", remark):
@@ -105,14 +91,10 @@ def parse_hours(spider: Spider, open_times: list[dict[str, Any]]) -> OpeningHour
         token = entry.get("weekDay") or ""
         days = expand_days(token)
         if not days:
-            if isinstance(token, str):
-                _inc(spider, f"unmapped/weekday/{re.sub(r'[^A-Za-z0-9_-]+', '-', token).strip('-') or 'empty'}")
-            else:
-                _inc(spider, "unmapped/weekday/non-string")
             continue
         for day in days:
             if day in last:
-                _inc(spider, "duplicate/weekday")
+                spider.crawler.stats.inc_value("atp/matkahuolto_fi/duplicate/weekday")
             last[day] = (entry.get("openTime"), entry.get("closeTime"))
     oh = OpeningHours()
     all_day = True
@@ -123,18 +105,11 @@ def parse_hours(spider: Spider, open_times: list[dict[str, Any]]) -> OpeningHour
         if not open_time or not close_time:
             all_day = False
             continue
-        if not isinstance(open_time, str) or not isinstance(close_time, str):
-            all_day = False
-            continue
-        if not TIME_RE.match(open_time) or not TIME_RE.match(close_time):
-            all_day = False
-            continue
         if (open_time, close_time) != ("00:00", "24:00"):
             all_day = False
         try:
             oh.add_range(day, open_time, close_time)
-        except ValueError:
-            _inc(spider, "bad_range")
+        except (TypeError, ValueError):
             all_day = False
     if all_day and len(last) == 7:
         return "24/7"
@@ -160,8 +135,7 @@ class MatkahuoltoFISpider(Spider):
         offices = response.json()  # ty: ignore[unresolved-attribute]
         if not offices:
             raise CloseSpider("matkahuolto_fi: empty area response")
-        # Descriptions only for remarks unique in the feed (boilerplate repeats stay out; keys
-        # whitespace-normalised so double-space variants cannot pass as unique).
+        # Descriptions only for feed-unique remarks (normalised, so near-dupes cannot pass).
         remark_counts = Counter(
             " ".join(ps.get("normalRemarks").split())
             for office in offices
@@ -170,7 +144,7 @@ class MatkahuoltoFISpider(Spider):
         )
         for office in offices:
             if office.get("officeType") == "HEADQUARTERS":
-                _inc(self, "skipped/headquarters")
+                self.crawler.stats.inc_value("atp/matkahuolto_fi/skipped/headquarters")
                 self.logger.warning("skipping headquarters %s", office.get("officeCode"))
                 continue
             alerts = [
@@ -180,12 +154,12 @@ class MatkahuoltoFISpider(Spider):
             ]
             if any("sulkeutunut" in a.casefold() for a in alerts):
                 # Perfect-tense "has closed" marks a permanent closure (Kamppi, 2026-09-18).
-                _inc(self, "skipped/permanently_closed")
+                self.crawler.stats.inc_value("atp/matkahuolto_fi/skipped/permanently_closed")
                 self.logger.warning("skipping permanently closed %s", office.get("officeCode"))
                 continue
             if any("asiakaspalvelupiste p\u00e4\u00e4ttynyt" in a.casefold() for a in alerts):
                 # Public counter ended, contract-only terminal drop-off remains (52, 73).
-                _inc(self, "skipped/contract_only")
+                self.crawler.stats.inc_value("atp/matkahuolto_fi/skipped/contract_only")
                 self.logger.warning("skipping contract-only terminal %s", office.get("officeCode"))
                 continue
             item = Feature()
@@ -218,9 +192,8 @@ class MatkahuoltoFISpider(Spider):
             else:
                 # Partner counters (KESKO, RKIOSKI, ...) run by the host shop: no operator set, unknown types land here too.
                 if office_type not in ("FETCHOFFICE", "RKIOSK", "AGENT"):
-                    _inc(
-                        self,
-                        f"unmapped/officeType/{re.sub(r'[^A-Za-z0-9_-]+', '-', str(office_type)).strip('-') or 'empty'}",
+                    self.crawler.stats.inc_value(
+                        f"atp/matkahuolto_fi/unmapped/officeType/{re.sub(r'[^A-Za-z0-9_-]+', '-', str(office_type)).strip('-') or 'empty'}"
                     )
                     self.logger.warning("unmapped office type %s (%s)", office_type, office.get("officeCode"))
                 apply_category(Categories.GENERIC_POI, item)
@@ -229,7 +202,7 @@ class MatkahuoltoFISpider(Spider):
                 item["extras"]["post_office:brand"] = MATKAHUOLTO["brand"]
                 item["extras"]["post_office:brand:wikidata"] = MATKAHUOLTO["brand_wikidata"]
 
-            # Only one record carries a phone, so no hotline to null.
+            # Per-location numbers only; no shared hotline to null.
             phone = next(
                 (ps.get("phoneNumber") for ps in office.get("parcelservices") or [] if ps.get("phoneNumber")),
                 None,
@@ -241,7 +214,7 @@ class MatkahuoltoFISpider(Spider):
                 entry for services in office.get("parcelservices") or [] for entry in services.get("openTimes") or []
             ]
             if not open_times:
-                _inc(self, "empty/hours")
+                self.crawler.stats.inc_value("atp/matkahuolto_fi/empty/hours")
             hours = parse_hours(self, open_times)
             if isinstance(hours, OpeningHours):
                 remarks = [
@@ -252,7 +225,7 @@ class MatkahuoltoFISpider(Spider):
                 open_days = {day for entry in open_times for day in expand_days(entry.get("weekDay") or "")}
                 for day in remark_closed_days(remarks, open_days):
                     hours.set_closed(day)
-                    _inc(self, "hours/closed_from_remarks")
+                    self.crawler.stats.inc_value("atp/matkahuolto_fi/hours/closed_from_remarks")
             if hours:
                 item["opening_hours"] = hours
 
