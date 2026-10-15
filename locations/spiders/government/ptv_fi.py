@@ -1084,6 +1084,7 @@ class PtvFISpider(Spider):
         fresh_orgs: list[str] = []
         for channel in payload:
             if not isinstance(channel, dict):
+                self._count("batch/skipped_row")
                 continue
             try:
                 item = self.parse_channel(channel)
@@ -1115,6 +1116,9 @@ class PtvFISpider(Spider):
                 # a re-request with the same URL would silently drop its
                 # callback/errback and strand the waiting items.
                 dont_filter=True,
+                # Snapshot the chunk: response URLs cannot be trusted to
+                # still carry guids= (redirects may strip the query).
+                cb_kwargs={"org_ids": chunk},
             )
 
     def parse_orgs(self, response: TextResponse) -> Iterable[JsonRequest | Feature]:
@@ -1122,14 +1126,15 @@ class PtvFISpider(Spider):
             payload = response.json()  # ty: ignore[unresolved-attribute]
         except ValueError:
             self._count("org/bad_json")
-            yield from self._flush_request_orgs(getattr(response, "url", "") or "")
+            yield from self._flush_request_orgs(self._request_org_ids(response))
             return
         if not isinstance(payload, list):
             self._count("org/bad_shape")
-            yield from self._flush_request_orgs(getattr(response, "url", "") or "")
+            yield from self._flush_request_orgs(self._request_org_ids(response))
             return
         for org in payload:
             if not isinstance(org, dict) or not org.get("id"):
+                self._count("org/skipped_row")
                 continue
             org_id = str(org["id"])
             name = self._lang_value(org.get("organizationNames") or [], "fi", "sv", "en")
@@ -1144,29 +1149,41 @@ class PtvFISpider(Spider):
         # re-requesting, because a re-request with the same URL would die
         # in the dupefilter and strand its items until close. Flush the
         # leftovers like the failure paths.
-        url = getattr(response, "url", "") or ""
-        match = re.search(r"guids=([^&]*)", url)
-        for org_id in (unquote(match.group(1)).split(",") if match else []):
+        requested = self._request_org_ids(response)
+        for org_id in requested:
             self._org_names.setdefault(org_id, None)
-        yield from self._flush_request_orgs(url)
+        yield from self._flush_request_orgs(requested)
 
-    def _flush_request_orgs(self, url: str) -> Iterable[Feature]:
-        # Flush the window without operators rather than losing it: recover
-        # the org ids from the failed request URL (cf. s-market errback).
+    def _request_org_ids(self, response_or_failure) -> list[str]:
+        # Requested org ids, snapshotted from the request first: response
+        # URLs cannot be trusted to carry guids= (redirects may strip the
+        # query, and a missing param would strand items exactly like the
+        # fixed dupefilter bug). Falls back to the URL for harness doubles.
+        request = getattr(response_or_failure, "request", None)
+        cb_ids = (getattr(request, "cb_kwargs", None) or {}).get("org_ids")
+        if cb_ids:
+            return list(cb_ids)
+        url = getattr(request, "url", "") or ""
+        if not url:
+            url = getattr(response_or_failure, "url", "") or ""
+        match = re.search(r"guids=([^&]*)", url)
+        return unquote(match.group(1)).split(",") if match else []
+
+    def _flush_request_orgs(self, org_ids: Iterable[str]) -> Iterable[Feature]:
+        # Flush the window without operators rather than losing it.
         # Flushed ids leave _seen_orgs so a later batch re-requests them
-        # instead of stranding new items in a never-joined window.
-        match = re.search(r"guids=([^&]*)", url or "")
-        for org_id in (unquote(match.group(1)).split(",") if match else []):
+        # on the failure paths instead of stranding new items in a
+        # never-joined window; ids already known-missing join at once via
+        # _org_names without re-requesting.
+        for org_id in org_ids:
             self._seen_orgs.discard(org_id)
             for item in self._pending.pop(org_id, []):
                 self._apply_operator(item, None)
                 yield item
 
     def errback_orgs(self, failure) -> Iterable[Feature]:
-        request = getattr(failure, "request", None)
-        url = getattr(request, "url", "") or ""
         self._count("org/failed")
-        yield from self._flush_request_orgs(url)
+        yield from self._flush_request_orgs(self._request_org_ids(failure))
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -1176,11 +1193,15 @@ class PtvFISpider(Spider):
         crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
         return spider
 
-    def spider_closed(self, spider) -> None:
+    def spider_closed(self, spider, reason=None) -> None:
         leftover = {org_id: len(items) for org_id, items in self._pending.items() if items}
         if leftover:
             self._count("org/unflushed_on_close", sum(leftover.values()))
-            self.logger.error("ptv_fi: unflushed org windows on close: %d orgs", len(leftover))
+            # CI smoke runs always end in closespider_timeout with a partial
+            # queue: expected truncation, not data loss. Anything else means
+            # org joins genuinely never arrived.
+            log = self.logger.warning if reason == "closespider_timeout" else self.logger.error
+            log("ptv_fi: unflushed org windows on close: %d orgs (reason=%s)", len(leftover), reason)
 
     # Contact-details placeholders filed as names ("Kontaktuppgifter"
     # with no Finnish name): never POI names, fall back to real ones.
@@ -1309,8 +1330,8 @@ class PtvFISpider(Spider):
             self._count("coords/dropped_state")
             return None
         try:
-            northing = float(str(street.get("latitude")).strip())
-            easting = float(str(street.get("longitude")).strip())
+            northing = float(str(street.get("latitude")))
+            easting = float(str(street.get("longitude")))
         except (TypeError, ValueError, AttributeError):
             return None
         lat_lo, lat_hi, lon_lo, lon_hi = self.WGS84_BOUNDS
@@ -4635,7 +4656,7 @@ class PtvFISpider(Spider):
         if digits.startswith("358") and len(digits) > 10:
             # Duplicated country code from a feed concat ("+358 358...").
             digits = digits[3:]
-        if not digits.isdigit() or not (5 <= len(digits) <= 10):
+        if not (5 <= len(digits) <= 10):
             self._count("contact/phone_bad_length")
             return None
         if digits[0] in ("4", "5") and len(digits) == 9:
