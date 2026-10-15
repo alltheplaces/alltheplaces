@@ -19,8 +19,7 @@ def _clean(value: object) -> str | None:
 
 class RinkiFISpider(Spider):
     name = "rinki_fi"
-    # No brand: NSI carries Rinki as an operator (not a brand), so attribution rides on the operator.
-    item_attributes = {"country": "FI", "operator": "Suomen Pakkauskierrätys Rinki", "operator_wikidata": "Q11886224"}
+    item_attributes = {"operator": "Suomen Pakkauskierrätys Rinki", "operator_wikidata": "Q11886224"}
     allowed_domains = ["rinkiin.fi"]
     start_urls = ["https://rinkiin.fi/wp-content/uploads/rinkiin-map/geo.json"]
 
@@ -46,20 +45,6 @@ class RinkiFISpider(Spider):
         stats = crawler.stats if crawler else None
         if stats is not None:
             stats.inc_value(f"{self.name}/{key}", n)
-
-    def _coordinates(self, feature: dict) -> tuple | None:
-        geometry = feature.get("geometry")
-        coords = geometry.get("coordinates") if isinstance(geometry, dict) else None
-        if (
-            not isinstance(coords, (list, tuple))
-            or len(coords) < 2
-            or isinstance(coords[0], bool)
-            or isinstance(coords[1], bool)
-            or not isinstance(coords[0], (int, float))
-            or not isinstance(coords[1], (int, float))
-        ):
-            return None
-        return coords[0], coords[1]
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         data = response.json()  # ty: ignore[unresolved-attribute]
@@ -88,16 +73,6 @@ class RinkiFISpider(Spider):
         if not re.match(r"^\d{2}-\d{5}$", ref):
             self._count("ref/unexpected_format")
             self.logger.warning("Unexpected rinki_id format: %r", ref)
-        lonlat = self._coordinates(feature)
-        if lonlat is None:
-            self._count("skipped/no_coords")
-            self.logger.warning("Skipping %s without usable coordinates", ref)
-            return None
-        lon, lat = lonlat
-        if not (59 <= lat <= 71 and 18 <= lon <= 33):
-            self._count("skipped/coords_out_of_range")
-            self.logger.warning("Skipping %s outside Finland bbox: %r, %r", ref, lat, lon)
-            return None
         if props.get("text") is not None:
             self._count("unmapped/text")
         street = " / ".join(part for part in [_clean(props.get("street")), _clean(props.get("intersection"))] if part)
@@ -106,7 +81,9 @@ class RinkiFISpider(Spider):
         city = _clean(props.get("post_office"))
         if not city:
             self._count("empty/city")
-        item = Feature(ref=ref, name="Rinki-ekopiste", street_address=street or None, city=city, lat=lat, lon=lon)
+        item = Feature(
+            ref=ref, name="Rinki-ekopiste", street_address=street or None, city=city, geometry=feature.get("geometry")
+        )
         if note := _clean(props.get("note")):
             item["located_in"] = note
         apply_category(Categories.RECYCLING, item)
