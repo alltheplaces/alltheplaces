@@ -73,11 +73,11 @@ class PakettipisteFISpider(Spider):
 
     def make_api_request(self, offset: int, slugs: dict[str, str]) -> Request:
         params = {
-            "where": "1=1",
+            "where": "1=1",  # ArcGIS requires a where clause; 1=1 matches all rows.
             "outFields": "*",
             "returnGeometry": "true",
             "outSR": "4326",
-            "orderByFields": "FID",
+            "orderByFields": "FID",  # Stable order so offset pages neither skip nor repeat rows.
             "resultOffset": offset,
             "resultRecordCount": self.PAGE_SIZE,
             "f": "json",
@@ -91,7 +91,8 @@ class PakettipisteFISpider(Spider):
         )
 
     def err_api(self, failure) -> Iterable[None]:
-        self.logger.error(f"Feature query failed: {failure.value}")
+        offset = failure.request.cb_kwargs.get("offset")
+        self.logger.error(f"Feature query failed at offset {offset}: {failure.value}")
         self._inc("api_error")
         return
         yield  # Make this a generator so Scrapy accepts the errback.
@@ -102,6 +103,9 @@ class PakettipisteFISpider(Spider):
         except json.JSONDecodeError:
             self._inc("api_bad_json")
             raise CloseSpider("pakettipiste_fi: feature query returned non-JSON")
+        if not isinstance(data, dict):
+            self._inc("api_bad_shape")
+            raise CloseSpider("pakettipiste_fi: feature query returned non-object JSON")
         if data.get("error"):
             self._inc("api_error_response")
             raise CloseSpider(f"pakettipiste_fi: API error {data['error']}")
@@ -152,8 +156,9 @@ class PakettipisteFISpider(Spider):
         if kind is None or not venue:
             self._inc(f"unmapped/lokaatio/{lokaatio.replace('/', '-') or 'empty'}")
             return None
-        if attrs.get("Sijoituspaikka") != PLACEMENT_BY_KIND[kind]:
-            self._inc(f"mismatch/sijoituspaikka/{kind}/{attrs.get('Sijoituspaikka')}")
+        sijoituspaikka = str(attrs.get("Sijoituspaikka") or "").strip()
+        if sijoituspaikka != PLACEMENT_BY_KIND[kind]:
+            self._inc(f"mismatch/sijoituspaikka/{kind}/{sijoituspaikka.replace('/', '-') or 'empty'}")
         is_pickup = kind == "Noutopiste"
 
         item = Feature()
@@ -208,6 +213,7 @@ class PakettipisteFISpider(Spider):
             if str(raw).strip() in ("", "-"):
                 oh.set_closed(day)
                 continue
+            # Finnish dot-times and dash variants collapse to HH:MM-HH:MM for the shared parser.
             compact = re.sub(r"\s+", "", str(raw)).replace("–", "-").replace("—", "-").replace(".", ":")
             if compact in ("", "-"):
                 oh.set_closed(day)
