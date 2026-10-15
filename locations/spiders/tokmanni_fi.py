@@ -14,7 +14,7 @@ class TokmanniFISpider(SitemapSpider, StructuredDataSpider):
     name = "tokmanni_fi"
     item_attributes = {"brand": "Tokmanni", "brand_wikidata": "Q13423470"}
     sitemap_urls = ["https://www.tokmanni.fi/sitemap/sitemap.xml"]
-    sitemap_rules = [("/store/", "parse_sd")]
+    sitemap_rules = [(r"/store/[^/]+/?$", "parse_sd")]
 
     def pre_process_data(self, ld_data: dict, **kwargs):
         # "Suljettu" marks an explicitly closed day and bare hours ("8-20:00") break strptime.
