@@ -3,7 +3,7 @@ from typing import Any
 
 from scrapy import FormRequest, Request, Spider
 from scrapy.exceptions import CloseSpider
-from scrapy.http import Response, TextResponse
+from scrapy.http import TextResponse
 from scrapy.selector import Selector
 
 from locations.categories import Categories, apply_category
