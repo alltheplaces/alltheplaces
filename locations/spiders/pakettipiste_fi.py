@@ -102,7 +102,7 @@ class PakettipisteFISpider(Spider):
             data = response.json()  # ty: ignore[unresolved-attribute]
         except json.JSONDecodeError:
             self._inc("api_bad_json")
-            raise CloseSpider("pakettipiste_fi: feature query returned non-JSON")
+            raise CloseSpider("pakettipiste_fi: feature query returned non-JSON") from None
         if not isinstance(data, dict):
             self._inc("api_bad_shape")
             raise CloseSpider("pakettipiste_fi: feature query returned non-object JSON")
