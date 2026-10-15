@@ -175,9 +175,23 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
         else:
             self._inc_stat("atp/neste_fi/ref/missing")
             return
+
         if name := item.pop("name", None):
-            if branch := re.sub(r"\s+", " ", name.removeprefix("Neste ").strip()):
-                item["branch"] = branch
+            if name.startswith("Neste Express "):
+                item["branch"] = name.removeprefix("Neste Express ")
+                item["name"] = "Neste Express"
+            elif name.startswith("Neste Truck "):
+                item["branch"] = name.removeprefix("Neste Truck ")
+                item["name"] = "Neste Truck"
+            elif name.startswith("Neste veneasema "):
+                item["branch"] = name.removeprefix("Neste veneasema ")
+                item["name"] = "Neste veneasema"
+            elif name.startswith("Neste "):
+                item["branch"] = name.removeprefix("Neste ")
+                item["name"] = "Neste"
+            else:
+                item["name"] = name
+
         if item.get("phone"):
             item["phone"] = self._clean_phone(item.get("phone"))
         item.pop("image", None)
