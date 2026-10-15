@@ -18,11 +18,12 @@ class GdkSpider(scrapy.Spider):
     ]
 
     def parse(self, response, **kwargs):
+        print(response.url)
         data = response.xpath("//div[contains(@class, 'location-item')]")
         for location in data:
             item = Feature()
             item["branch"] = location.xpath(".//h3//text()").get()
-            item["country"] = re.search(r"https://www.gdk.com/(\w+)/", response.url).group(1)
+            item["country"] = re.search(r"https://gdk.com/(\w+)/", response.url).group(1)
             if location.xpath(".//a[contains(@href, 'https://www.google.com/maps')]//@href"):
                 item["addr_full"] = (
                     location.xpath(".//a[contains(@href, 'https://www.google.com/maps/dir/Current+Location/')]//@href")
