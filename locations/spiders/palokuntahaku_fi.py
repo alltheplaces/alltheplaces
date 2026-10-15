@@ -239,11 +239,10 @@ class PalokuntahakuFISpider(Spider):
 
     def _extract_emails(self, text: str, emails: list) -> None:
         found = [e.rstrip(".,;") for e in self.EMAIL_FIND_RE.findall(text)]
-        valid = [e for e in found if self.EMAIL_RE.match(e) and e not in emails]
-        if valid:
-            emails.extend(valid)
-        else:
+        if not found:
             self._stat("contact/bad_email")
+            return
+        emails.extend(e for e in found if self.EMAIL_RE.match(e) and e not in emails)
 
     def _parse_operator(self, block: Selector, ref: str) -> str | None:
         lines = [line.strip() for line in block.xpath("./text()").getall() if line.strip()]
