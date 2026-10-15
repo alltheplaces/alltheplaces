@@ -22,8 +22,10 @@ class CacheCacheSpider(JSONBlobSpider, CamoufoxSpider):
     start_urls = [
         "https://www.cache-cache.fr/on/demandware.store/Sites-CCH_FR_SFRA-Site/fr_FR/Stores-FindStores?lat=46.6&long=2.4&radius=20000&showMap=false"
     ]
-    # Cloudflare challenge; its scripts must be allowed to load.
+    captcha_type = "cloudflare_turnstile"
+    captcha_selector_indicating_success = '//pre[contains(text(), "storesResultsHtml")]'
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
+    handle_httpstatus_list = [403]
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         data = response.json()
