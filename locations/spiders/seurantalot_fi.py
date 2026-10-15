@@ -208,11 +208,11 @@ class SeurantalotFISpider(Spider):
                 self._stat("atp/seurantalot_fi/dropped/bad_website")
                 continue
             url = match.group(0).split(",")[0].rstrip(".,;")
-            host = urlsplit(url).hostname or ""
+            parts = urlsplit(url)
+            host = parts.hostname or ""
             if not host or "." not in host:
                 self._stat("atp/seurantalot_fi/dropped/placeholder_website")
                 continue
-            parts = urlsplit(url)
             netloc = host.lower()
             if parts.port:
                 netloc += f":{parts.port}"
