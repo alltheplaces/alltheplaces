@@ -3,6 +3,7 @@ import binascii
 import logging
 import re
 from typing import Iterable
+from urllib.parse import urlsplit
 
 from scrapy.http import Response
 from scrapy.spiders import Spider
@@ -207,13 +208,20 @@ class SeurantalotFISpider(Spider):
                 self._stat("atp/seurantalot_fi/dropped/bad_website")
                 continue
             url = match.group(0).split(",")[0].rstrip(".,;")
-            scheme, _, rest = url.partition("://")
-            host, _, path = rest.partition("/")
+            host = urlsplit(url).hostname or ""
             if not host or "." not in host:
                 self._stat("atp/seurantalot_fi/dropped/placeholder_website")
                 continue
-            url = scheme + "://" + host.lower() + ("/" + path if path else "")
-            if host.lower() == "seurantalot.fi" or host.lower().endswith(".seurantalot.fi"):
+            parts = urlsplit(url)
+            netloc = host.lower()
+            if parts.port:
+                netloc += f":{parts.port}"
+            url = f"{parts.scheme}://{netloc}{parts.path}"
+            if parts.query:
+                url += f"?{parts.query}"
+            if parts.fragment:
+                url += f"#{parts.fragment}"
+            if host == "seurantalot.fi" or host.endswith(".seurantalot.fi"):
                 self._stat("atp/seurantalot_fi/dropped/self_website")
                 continue
             website = url
