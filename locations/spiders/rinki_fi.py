@@ -8,6 +8,7 @@ from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.settings import ITEM_PIPELINES
 
 
 def _clean(value: object) -> str | None:
@@ -22,6 +23,9 @@ class RinkiFISpider(Spider):
     item_attributes = {"operator": "Suomen Pakkauskierrätys Rinki", "operator_wikidata": "Q11886224"}
     allowed_domains = ["rinkiin.fi"]
     start_urls = ["https://rinkiin.fi/wp-content/uploads/rinkiin-map/geo.json"]
+    custom_settings = {
+        "ITEM_PIPELINES": ITEM_PIPELINES | {"locations.pipelines.count_located_in.CountLocatedInPipeline": None}
+    }
 
     # Fraction -> OSM tag; *_type ids are container hardware (same digits span fractions), presence means collected.
     MATERIAL_EXTRAS = {
