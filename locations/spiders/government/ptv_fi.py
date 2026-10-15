@@ -833,6 +833,13 @@ class PtvFISpider(Spider):
         url = getattr(request, "url", "") or ""
         self._count("page/failed")
         page = (getattr(request, "cb_kwargs", None) or {}).get("page", 0)
+        yield from self._skip_or_emit(page, url)
+
+    def _skip_or_emit(self, page: int, url: str) -> Iterable[JsonRequest]:
+        # A dead list page must not stall the crawl: skip ahead (bounded),
+        # else fall through to the ids collected so far. Shared by failed
+        # pages and 200-but-garbage bodies, which the retry middleware
+        # never retries.
         if isinstance(page, int) and page >= 1 and page + 1 not in self._seen_pages and self._page_skips < 3:
             self._page_skips += 1
             self._count("page/skipped")
@@ -849,13 +856,11 @@ class PtvFISpider(Spider):
         except ValueError:
             self._count("page/bad_json")
             self.logger.error("bad JSON from %s", response.url)
-            if self._ids:
-                yield from self._emit_batches()
+            yield from self._skip_or_emit(page, response.url)
             return
         if not isinstance(payload, dict):
             self._count("page/bad_shape")
-            if self._ids:
-                yield from self._emit_batches()
+            yield from self._skip_or_emit(page, response.url)
             return
         self._seen_pages.add(page)
         self._page_skips = 0

@@ -3709,9 +3709,11 @@ def test_gazetteer_coverage_lists():
 
 def test_list_and_batch_counters():
     spider = make_spider()
-    assert list(spider.parse(TextResponse(url="https://x/?page=1", body=b"nope", encoding="utf-8"), page=1)) == []
+    out = list(spider.parse(TextResponse(url="https://x/?page=1", body=b"nope", encoding="utf-8"), page=1))
+    assert len(out) == 1 and "page=2" in out[0].url
     assert spider.crawler.stats.get_value("ptv_fi/page/bad_json") == 1
-    assert list(spider.parse(TextResponse(url="https://x/?page=2", body=b"[]", encoding="utf-8"), page=2)) == []
+    out = list(spider.parse(TextResponse(url="https://x/?page=2", body=b"[]", encoding="utf-8"), page=2))
+    assert len(out) == 1 and "page=3" in out[0].url
     assert spider.crawler.stats.get_value("ptv_fi/page/bad_shape") == 1
     assert list(spider.parse_batch(TextResponse(url="https://x/list", body=b"nope", encoding="utf-8"))) == []
     assert spider.crawler.stats.get_value("ptv_fi/batch/bad_json") == 1
