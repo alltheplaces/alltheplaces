@@ -17,6 +17,7 @@ class TotalToolsAUSpider(PlaywrightSpider):
     allowed_domains = ["www.totaltools.com.au"]
     start_urls = ["https://www.totaltools.com.au/totaltools_storelocator/index/loadStoreRewrite"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = "AU"  # Cloudflare Managed Challenge site-wide (cf-mitigated: challenge)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.json()["storesjson"]:
