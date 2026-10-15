@@ -15,6 +15,7 @@ class JuicePressUSSpider(Spider):
     name = "juice_press_us"
     item_attributes = {"brand": "Juice Press", "brand_wikidata": "Q27150131"}
     start_urls = ["https://www.juicepress.com/pages/location"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         raw_data = list(
