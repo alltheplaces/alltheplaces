@@ -15,9 +15,11 @@ from locations.items import Feature
 BRAND = "Pakettipiste"
 OPERATOR = {"brand": BRAND, "operator": BRAND}
 
-# Lokaatio prefixes: indoor/outdoor lockers vs manned pickup counters (Sijoituspaikka agrees 1:1).
+# Lokaatio prefixes: indoor/outdoor lockers vs manned pickup counters.
 LOCKER_PREFIXES = ("Sisäautomaatti ", "Ulkoautomaatti ")
 PICKUP_PREFIX = "Noutopiste "
+# Sijoituspaikka must agree with the Lokaatio kind; mismatches are counted but Lokaatio still rules.
+PLACEMENT_BY_KIND = {"Sisäautomaatti": "Sisällä", "Ulkoautomaatti": "Ulkona", "Noutopiste": "MSP"}
 MANNED_LABEL = "Miehitetty noutopiste"  # Type restatement, not placement info.
 
 DAY_FIELDS = ("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai", "Lauantai", "Sunnuntai")
@@ -60,7 +62,8 @@ class PakettipisteFISpider(Spider):
                     self._inc("unmapped/slug_blob")
                 else:
                     for key, entry in blob.items():
-                        if isinstance(entry, dict) and (href := HREF_RE.search(entry.get("link") or "")):
+                        link = entry.get("link") if isinstance(entry, dict) else None
+                        if isinstance(link, str) and (href := HREF_RE.search(link)):
                             slugs[str(key)] = response.urljoin(href.group(1))
                         else:
                             self._inc("unmapped/slug_entry")
@@ -133,31 +136,42 @@ class PakettipisteFISpider(Spider):
         if geometry.get("x") is None or geometry.get("y") is None:
             self._inc("empty/coords")
             return None
-        lokaatio = (attrs.get("Lokaatio") or "").strip()
-        venue = lokaatio.removeprefix(PICKUP_PREFIX)
-        is_pickup = venue != lokaatio
-        if not is_pickup:
+        lokaatio = str(attrs.get("Lokaatio") or "").strip()
+        kind = None
+        if lokaatio.startswith(PICKUP_PREFIX):
+            kind = PICKUP_PREFIX.strip()
+            venue = lokaatio[len(PICKUP_PREFIX) :]
+        else:
             venue = lokaatio
             for prefix in LOCKER_PREFIXES:
-                venue = venue.removeprefix(prefix)
+                if lokaatio.startswith(prefix):
+                    kind = prefix.strip()
+                    venue = lokaatio[len(prefix) :]
+                    break
         venue = venue.strip()
-        if venue == lokaatio or not venue:
+        if kind is None or not venue:
             self._inc(f"unmapped/lokaatio/{lokaatio.replace('/', '-') or 'empty'}")
             return None
+        if attrs.get("Sijoituspaikka") != PLACEMENT_BY_KIND[kind]:
+            self._inc(f"mismatch/sijoituspaikka/{kind}/{attrs.get('Sijoituspaikka')}")
+        is_pickup = kind == "Noutopiste"
 
         item = Feature()
         item["ref"] = str(attrs["ID"])
         item["lon"] = geometry["x"]
         item["lat"] = geometry["y"]
         item["country"] = "FI"
-        if street_address := attrs.get("Katuosoite"):
-            item["street_address"] = street_address
-        if postcode := attrs.get("Postinumero"):
-            item["postcode"] = postcode
-        if city := attrs.get("Postitoimipaikka"):
-            item["city"] = city
+        for source, target in (
+            ("Katuosoite", "street_address"),
+            ("Postinumero", "postcode"),
+            ("Postitoimipaikka", "city"),
+        ):
+            if value := str(attrs.get(source) or "").strip():
+                item[target] = value
+            else:
+                self._inc(f"empty/addr/{target}")
         item["opening_hours"] = self.parse_opening_hours(attrs)
-        placement = (attrs.get("Sijainti") or "").strip()
+        placement = str(attrs.get("Sijainti") or "").strip()
         if is_pickup:  # Manned counter run by the host shop.
             apply_category(Categories.GENERIC_POI, item)
             item["name"] = venue
@@ -187,7 +201,11 @@ class PakettipisteFISpider(Spider):
         for field in DAY_FIELDS:
             day = DAYS_FI[field]
             raw = attrs.get(field)
-            if raw is None or str(raw).strip() in ("", "-"):
+            if raw is None:  # Blank is ambiguous (closed vs renamed field), so count it.
+                self._inc(f"empty/hours/{day}")
+                oh.set_closed(day)
+                continue
+            if str(raw).strip() in ("", "-"):
                 oh.set_closed(day)
                 continue
             compact = re.sub(r"\s+", "", str(raw)).replace("–", "-").replace("—", "-").replace(".", ":")
