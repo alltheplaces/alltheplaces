@@ -31,12 +31,8 @@ class RinkiFISpider(Spider):
     }
     # Operational-only drops: team, contractors, collection/cleanup dates, municipality, vingo_id/id, text.
 
-    def _count(self, key: str, n: int = 1) -> None:
-        # Offline direct calls have no crawler; production always does.
-        crawler = getattr(self, "crawler", None)
-        if crawler is None or crawler.stats is None:
-            return
-        crawler.stats.inc_value(f"{self.name}/{key}", n)
+    def _count(self, key: str) -> None:
+        self.crawler.stats.inc_value(f"{self.name}/{key}")
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         data = response.json()  # ty: ignore[unresolved-attribute]
