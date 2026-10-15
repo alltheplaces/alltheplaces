@@ -282,6 +282,7 @@ class Categories(Enum):
     SHOP_WINE = {"shop": "wine"}
 
     OFFICE_ARCHITECT = {"office": "architect"}
+    OFFICE_ASSOCIATION = {"office": "association"}
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_CONSULTING = {"office": "consulting"}
     OFFICE_COURIER = {"office": "courier"}
