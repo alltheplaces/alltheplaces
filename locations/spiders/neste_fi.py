@@ -92,7 +92,8 @@ HOTLINE_NUMBERS = {"+358800196196", "+35880020100"}
 
 class NesteFISpider(SitemapSpider, StructuredDataSpider):
     name = "neste_fi"
-    item_attributes = {"brand": "Neste", "brand_wikidata": "Q616376", "name": "Neste"}
+    item_attributes = {"brand": "Neste", "brand_wikidata": "Q616376"}
+    drop_attributes = {"image"}
     allowed_domains = ["asemat.neste.fi"]
     sitemap_urls = ["https://asemat.neste.fi/sitemap/fi.xml"]
     sitemap_rules = [(r"/neste-", "parse_sd")]
@@ -181,14 +182,13 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
 
         if item.get("phone"):
             item["phone"] = self._clean_phone(item.get("phone"))
-        item.pop("image", None)
-        item.pop("twitter", None)
-        item.pop("facebook", None)
+
         url = (response.url or "").lower()
         if "-veneasema-" in url:
             apply_category(Categories.BOAT_FUEL_STATION, item)
         else:
             apply_category(Categories.FUEL_STATION, item)
+
         for fuel in self._fuel_names(ld_data):
             if fuel not in FUEL_TYPES_MAPPING:
                 self.crawler.stats.inc_value("atp/neste_fi/fuel/unmapped/{}".format(fuel.replace("/", "-")))
@@ -200,6 +200,7 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
                 self.crawler.stats.inc_value("atp/neste_fi/service/unmapped/{}".format(service.replace("/", "-")))
             elif tag := SERVICES_MAPPING[service]:
                 apply_yes_no(tag, item, True)
+
         if "-truck-" in url:
             apply_yes_no(Access.HGV, item, True)
         yield item
