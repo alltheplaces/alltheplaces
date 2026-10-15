@@ -5,7 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
-from locations.items import Feature
+from locations.items import Feature, set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -20,12 +20,15 @@ class GiantFoodUSSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if "CLOSED" in response.xpath("//title/text()").get(""):
-            return
+            set_closed(item)
 
         item["ref"] = response.xpath('//div[@class="StoreDetails-storeNum"]/text()').get()
         item["branch"] = item.pop("name").removeprefix("Giant Food ")
 
-        item["opening_hours"] = self.parse_opening_hours(response)
+        try:
+            item["opening_hours"] = self.parse_opening_hours(response)
+        except Exception:
+            pass
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
