@@ -42,6 +42,7 @@ class SeurantalotFISpider(Spider):
     POSTCODE_RE = re.compile(r"(?<!\d)(\d{5})(?!\d)")
     WEBSITE_RE = re.compile(r"https?://\S+")
     PHONE_RE = re.compile(r"[+\d(][\d\s\-()/]*\d")
+    EMAIL_RE = re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}")
     POBOX_RE = re.compile(r"^(PL|P\.L\.|Postilokero|PO\s*Box|Postbox|PB)\s*\.?\s*\d", re.IGNORECASE)
     CARE_OF_RE = re.compile(r"^c/o\b", re.IGNORECASE)
     STREET_SUFFIX_RE = re.compile(
@@ -345,14 +346,18 @@ class SeurantalotFISpider(Spider):
             except (binascii.Error, ValueError):
                 self._stat("atp/seurantalot_fi/dropped/bad_email")
                 continue
-            # Anti-spam obfuscations decode to the same address.
-            deobfuscated = email.replace("<@>", "@").replace("(at)", "@")
+            # Anti-spam obfuscations ("<@>", "(at)", "(a)") decode to the
+            # same address; role prose jammed after the address
+            # ("addr, varaukset...") is cut by taking the first token.
+            deobfuscated = email.replace("<@>", "@").replace("(at)", "@").replace("(a)", "@")
             if deobfuscated != email:
                 self._stat("atp/seurantalot_fi/email/deobfuscated")
                 email = deobfuscated
-            if "@" in email:
-                return email
-            self._stat("atp/seurantalot_fi/dropped/bad_email")
+            match = self.EMAIL_RE.search(email)
+            if not match:
+                self._stat("atp/seurantalot_fi/dropped/bad_email")
+                continue
+            return match.group(0)
         return None
 
     FACT_TITLES = frozenset({"Rakennusvuosi", "Henkilömäärä"})
