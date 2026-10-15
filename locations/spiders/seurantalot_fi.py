@@ -348,6 +348,11 @@ class SeurantalotFISpider(Spider):
             except (binascii.Error, ValueError):
                 self._stat("atp/seurantalot_fi/dropped/bad_email")
                 continue
+            # Anti-spam obfuscations decode to the same address.
+            deobfuscated = email.replace("<@>", "@").replace("(at)", "@")
+            if deobfuscated != email:
+                self._stat("atp/seurantalot_fi/email/deobfuscated")
+                email = deobfuscated
             if email.casefold() in self.TEMPLATE_EMAILS:
                 self._stat("atp/seurantalot_fi/dropped/template_email")
                 continue
