@@ -82,7 +82,6 @@ class KirkantaFISpider(Spider):
                 continue
             if result:
                 candidates.append(result)
-        counts = self.social_counts(candidates)
         # Dup ids keep lowest id order-independently; numeric-aware since "10" < "9" as strings.
         minima: dict = {}
         for item, place_key, _ in candidates:
@@ -91,21 +90,30 @@ class KirkantaFISpider(Spider):
             key = self._ref_key(item["ref"])
             if place_key not in minima or key < minima[place_key][0]:
                 minima[place_key] = (key, item["ref"])
+        kept = []
         for item, place_key, social in candidates:
             if place_key is not None and item["ref"] != minima[place_key][1]:
                 self.crawler.stats.inc_value(f"atp/{self.name}/dropped/duplicate")
                 continue
+            kept.append((item, social))
+        # Counted after dedup, once per record: dropped dupes must not steal
+        # the survivor's handle, nor may two URL variants in one record.
+        counts = self.social_counts([social for _, social in kept])
+        for item, social in kept:
             self.apply_social(item, social, counts)
             yield item
 
     @staticmethod
-    def social_counts(candidates: list) -> Counter:
+    def social_counts(socials: list) -> Counter:
         counts: Counter = Counter()
-        for _, _, social in candidates:
-            for network, urls in social.items():
+        for social in socials:
+            keys = set()
+            for urls in social.values():
                 for url in urls:
                     if key := KirkantaFISpider.social_key(url):
-                        counts[key] += 1
+                        keys.add(key)
+            for key in keys:
+                counts[key] += 1
         return counts
 
     def apply_social(self, item: Feature, social: dict, counts: Counter) -> None:
