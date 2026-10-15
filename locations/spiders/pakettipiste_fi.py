@@ -46,30 +46,33 @@ class PakettipisteFISpider(Spider):
 
     def parse_slugs(self, response: Response) -> Iterable[Request]:
         slugs: dict[str, str] = {}
-        match = re.search(r"window\.allLockers\s*=\s*(\{.*?\});", response.text, re.S)
-        if not match:
-            self.logger.warning("Slug blob not found, continuing without websites")
+        blob = self.find_slug_blob(response.text)
+        if not isinstance(blob, dict):
+            self.logger.warning("Slug blob not found or not an object, continuing without websites")
             self._inc("unmapped/slug_blob")
         else:
-            try:
-                blob = json.loads(match.group(1))
-            except json.JSONDecodeError as e:
-                self.logger.warning(f"Could not parse slug blob: {e}")
-                self._inc("unmapped/slug_blob")
-            else:
-                if not isinstance(blob, dict):
-                    self.logger.warning("Unexpected slug blob shape, continuing without websites")
-                    self._inc("unmapped/slug_blob")
+            for key, entry in blob.items():
+                link = entry.get("link") if isinstance(entry, dict) else None
+                if isinstance(link, str) and (href := HREF_RE.search(link)):
+                    slugs[str(key)] = response.urljoin(href.group(1))
                 else:
-                    for key, entry in blob.items():
-                        link = entry.get("link") if isinstance(entry, dict) else None
-                        if isinstance(link, str) and (href := HREF_RE.search(link)):
-                            slugs[str(key)] = response.urljoin(href.group(1))
-                        else:
-                            self._inc("unmapped/slug_entry")
-                    self.logger.info(f"Parsed {len(slugs)} slug links")
-                    self._inc("slugs_parsed")
+                    self._inc("unmapped/slug_entry")
+            self.logger.info(f"Parsed {len(slugs)} slug links")
+            self._inc("slugs_parsed")
         yield self.make_api_request(0, slugs)
+
+    def find_slug_blob(self, html: str) -> object:
+        # Decode from the assignment start rather than regexing to ";": a non-greedy regex
+        # would stop at a "};" inside a string value and lose every website.
+        anchor = re.search(r"window\.allLockers\s*=\s*", html)
+        if not anchor:
+            return None
+        try:
+            blob, _ = json.JSONDecoder().raw_decode(html, anchor.end())
+        except json.JSONDecodeError as e:
+            self.logger.warning(f"Could not parse slug blob: {e}")
+            return None
+        return blob
 
     def make_api_request(self, offset: int, slugs: dict[str, str]) -> Request:
         params = {
@@ -90,12 +93,13 @@ class PakettipisteFISpider(Spider):
             dont_filter=True,
         )
 
-    def err_api(self, failure) -> Iterable[None]:
+    def err_api(self, failure) -> None:
+        # Scrapy's retry middleware runs first; this fires only once retries are exhausted.
+        # Items already yielded are kept and any later page is lost, so a nonzero api_error
+        # counter is the signal that a run was truncated rather than genuinely empty.
         offset = failure.request.cb_kwargs.get("offset")
         self.logger.error(f"Feature query failed at offset {offset}: {failure.value}")
         self._inc("api_error")
-        return
-        yield  # Make this a generator so Scrapy accepts the errback.
 
     def parse_features(self, response: Response, offset: int, slugs: dict[str, str]) -> Iterable[Request | Feature]:
         try:
@@ -216,7 +220,7 @@ class PakettipisteFISpider(Spider):
             if str(raw).strip() in ("", "-"):
                 oh.set_closed(day)
                 continue
-            # Finnish dot-times and dash variants collapse to HH:MM-HH:MM for the shared parser.
+            # Finnish dot-times and dash variants collapse to comma-separated HH:MM-HH:MM ranges.
             compact = re.sub(r"\s+", "", str(raw)).replace("–", "-").replace("—", "-").replace(".", ":")
             if compact in ("", "-"):
                 oh.set_closed(day)
@@ -224,24 +228,44 @@ class PakettipisteFISpider(Spider):
             if compact.casefold() == "24h":
                 oh.add_range(day, "00:00", "24:00")
                 continue
-            match = RANGE_RE.fullmatch(compact)
+            ranges = self.day_ranges(compact)
+            if ranges is None:
+                continue
+            for open_time, close_time in ranges:
+                try:
+                    oh.add_range(day, open_time, close_time)
+                except ValueError:
+                    self._inc("bad_range")
+        return oh
+
+    def day_ranges(self, compact: str) -> list[tuple[str, str]] | None:
+        # A day may hold one range ("07:00-21:00") or a split shift ("09:00-12:00,13:00-17:00").
+        ranges = []
+        for part in re.split(r"[,;]", compact):
+            match = RANGE_RE.fullmatch(part)
             if not match:
                 self._inc(f"unmapped/hours/{compact.replace('/', '-')}")
-                continue
+                return None
+            start = (int(match.group(1)), int(match.group(2)))
+            end = (int(match.group(3)), int(match.group(4)))
             # add_range wraps absurd times onto other days instead of raising, so validate first.
-            times = ((int(match.group(1)), int(match.group(2))), (int(match.group(3)), int(match.group(4))))
-            if times[0] == times[1] or not all(0 <= h <= 24 and 0 <= m <= 59 and (h != 24 or m == 0) for h, m in times):
+            if start == end or not self.valid_time(*start) or not self.valid_time(*end, end_of_day=True):
                 self._inc("bad_range")
-                continue
-            open_time = f"{times[0][0]:02d}:{times[0][1]:02d}"
-            close_time = f"{times[1][0]:02d}:{times[1][1]:02d}"
+                return None
+            open_time = f"{start[0]:02d}:{start[1]:02d}"
+            close_time = f"{end[0]:02d}:{end[1]:02d}"
             if open_time == "00:00" and close_time == "23:59":  # Only a midnight open implies 24h.
                 close_time = "24:00"
-            try:
-                oh.add_range(day, open_time, close_time)
-            except ValueError:
-                self._inc("bad_range")
-        return oh
+            ranges.append((open_time, close_time))
+        return ranges
+
+    @staticmethod
+    def valid_time(hour: int, minute: int, *, end_of_day: bool = False) -> bool:
+        if not 0 <= minute <= 59:
+            return False
+        if hour == 24:
+            return end_of_day and minute == 0  # 24:00 ends a day; it never starts one.
+        return 0 <= hour <= 23
 
     def _inc(self, key: str) -> None:
         stats = getattr(getattr(self, "crawler", None), "stats", None)
