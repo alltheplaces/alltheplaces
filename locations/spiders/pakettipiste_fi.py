@@ -171,6 +171,7 @@ class PakettipisteFISpider(Spider):
             ("Postinumero", "postcode"),
             ("Postitoimipaikka", "city"),
         ):
+            # Two feed rows carry short postcodes ("2280", "1150"); passed through as published.
             if value := str(attrs.get(source) or "").strip():
                 item[target] = value
             else:
@@ -227,7 +228,7 @@ class PakettipisteFISpider(Spider):
                 continue
             # add_range wraps absurd times onto other days instead of raising, so validate first.
             times = ((int(match.group(1)), int(match.group(2))), (int(match.group(3)), int(match.group(4))))
-            if not all(0 <= h <= 24 and 0 <= m <= 59 and (h != 24 or m == 0) for h, m in times):
+            if times[0] == times[1] or not all(0 <= h <= 24 and 0 <= m <= 59 and (h != 24 or m == 0) for h, m in times):
                 self._inc("bad_range")
                 continue
             open_time = f"{times[0][0]:02d}:{times[0][1]:02d}"
