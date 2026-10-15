@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from scrapy import Spider
 from scrapy.http import Request
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
@@ -26,17 +27,15 @@ class DollaramaSpider(Spider):
                 params |= {"latitude": lat, "longitude": lon}
                 yield Request(url=base_url + urlencode(params), method="POST")
 
-    def parse_hours(self, hours):
-        hrs = hours.split("|")
-
+    def parse_hours(self, hours: dict) -> OpeningHours:
         opening_hours = OpeningHours()
-
-        for day, hour in zip(DAYS, hrs):
-            if hour == "Closed":
+        for day in DAYS:
+            rule = hours[day]
+            if rule["State"] == 1:
+                opening_hours.set_closed(day)
                 continue
-            open_time, close_time = hour.split("-")
-            opening_hours.add_range(day, open_time, close_time, "%I:%M%p")
-
+            for time_range in rule["Ranges"]:
+                opening_hours.add_range(day, time_range["StartTime"], time_range["EndTime"], "%I:%M%p")
         return opening_hours
 
     def parse(self, response):
@@ -53,13 +52,14 @@ class DollaramaSpider(Spider):
                 "country": row["ExtraData"]["Address"]["CountryCode"],
                 "lat": row["Location"]["coordinates"][1],
                 "lon": row["Location"]["coordinates"][0],
-                "phone": row["ExtraData"]["Phone"],
             }
 
-            if opening_hours := row["ExtraData"].get("Hours of operations"):
+            if hours := row["ExtraData"].get("HoursOfOpStruct"):
                 try:
-                    properties["opening_hours"] = self.parse_hours(opening_hours)
+                    properties["opening_hours"] = self.parse_hours(hours)
                 except Exception as e:
-                    self.logger.warning(f"Failed to parse opening hours for {opening_hours}, {e}")
+                    self.logger.warning(f"Failed to parse opening hours for {hours}, {e}")
                     self.crawler.stats.inc_value(f"atp/{self.name}/hours/failed")
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
+            yield item
