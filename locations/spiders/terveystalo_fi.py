@@ -10,27 +10,22 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
     name = "terveystalo_fi"
-    # NSI lists the chain as operator only, so brand carries no wikidata yet.
+    # Brand pending NSI brand entry (osmlab#12971); operator entry already live.
     item_attributes = {"brand": "Terveystalo", "operator": "Terveystalo", "operator_wikidata": "Q11897034"}
     sitemap_urls = ["https://www.terveystalo.com/sitemap.xml"]
+    # Two slugs break the prefix convention (partner venue / short name).
     sitemap_rules = [
         (r"/fi/toimipaikat/terveystalo-[^/]+/?$", "parse"),
         (r"/fi/toimipaikat/--ikaalinen-e-avenue/?$", "parse"),
         (r"/fi/toimipaikat/tikkurila-varitehtaankatu/?$", "parse"),
     ]
     wanted_types = ["MedicalClinic"]
-    # No phone/social/image harvesting: page tel:/social/og:image are shared brand-level assets.
+    # Page tel:/social/og:image are shared brand-level assets.
     search_for_phone = False
     search_for_facebook = False
     search_for_twitter = False
     search_for_image = False
     # No hours: LD carries none and page prose mixes per-department hours with by-appointment tokens.
-
-    def _stats(self, key: str) -> None:
-        try:
-            self.crawler.stats.inc_value(key)
-        except AttributeError:
-            pass
 
     @staticmethod
     def _is_hotline(value: str) -> bool:
@@ -48,23 +43,15 @@ class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
             tel = [tel]
         if isinstance(tel, list):
             kept = [t for t in tel if isinstance(t, str) and t and not self._is_hotline(t)]
-            if len(kept) != len(tel):
-                self._stats("atp/terveystalo_fi/phone/hotline_popped")
             ld_data["telephone"] = kept or None
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if "Toimipaikka aukeaa" in response.text:
             # Unopened unit (only Lahti Trio, opening 11.11.2026); skip until it opens.
-            self._stats("atp/terveystalo_fi/skip/future")
             self.logger.warning("Skipping unopened unit: %s", response.url)
             return
-        if item.get("lat") == 0 and item.get("lon") == 0:
-            # Feed Null Island for units without coordinates; never emit 0,0.
-            item["lat"] = None
-            item["lon"] = None
-        if not item.get("street_address") and item.get("lat") is None:
-            # Digital-only service (Digityoterveys): no street, no coords.
-            self._stats("atp/terveystalo_fi/skip/digital")
+        if not item.get("street_address") and item.get("lat") in (None, 0):
+            # Digital-only service: no street and no usable coords.
             self.logger.warning("Skipping digital-only unit: %s", response.url)
             return
         phone = item.get("phone") or ""
@@ -98,13 +85,12 @@ class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
     def _split_branch(self, item: Feature) -> str:
         # Uniform chain: the remainder after the brand token is the branch.
         name = (item.get("name") or "").strip()
-        item["name"] = name
         low = name.casefold()
         if low == "terveystalo" or low.startswith("terveystalo "):
             branch = name[len("Terveystalo") :].strip()
-            if not branch:
-                return low
-            item.pop("name", None)
-            item["branch"] = branch
-            return branch.casefold()
+            if branch:
+                item.pop("name", None)
+                item["branch"] = branch
+                return branch.casefold()
+        item["name"] = name
         return low
