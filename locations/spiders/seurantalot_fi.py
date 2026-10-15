@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # the map-pin id (stable ref). Pins are DB-stored (Maps renders only).
 # Contacts come from the address widget, never the persons widget. No
 # recurring hours exist (booking-only rental). Coords-less records with
-# address/contact are kept deliberately. Self-site links pop as websites.
+# address/contact are kept deliberately. Self-site homepage links are dropped.
 
 
 class SeurantalotFISpider(Spider):
@@ -208,14 +208,20 @@ class SeurantalotFISpider(Spider):
                 self._stat("atp/seurantalot_fi/dropped/bad_website")
                 continue
             url = match.group(0).split(",")[0].rstrip(".,;")
-            parts = urlsplit(url)
-            host = (parts.hostname or "").rstrip(".")
+            try:
+                parts = urlsplit(url)
+                host = (parts.hostname or "").rstrip(".")
+                port = parts.port
+            except ValueError:
+                # urlsplit rejects malformed netlocs (bad IPv6, out-of-range port).
+                self._stat("atp/seurantalot_fi/dropped/bad_website")
+                continue
             if not host or "." not in host:
                 self._stat("atp/seurantalot_fi/dropped/placeholder_website")
                 continue
             netloc = host.lower()
-            if parts.port:
-                netloc += f":{parts.port}"
+            if port:
+                netloc += f":{port}"
             url = f"{parts.scheme}://{netloc}{parts.path}"
             if parts.query:
                 url += f"?{parts.query}"
