@@ -18,7 +18,6 @@ class GdkSpider(scrapy.Spider):
     ]
 
     def parse(self, response, **kwargs):
-        print(response.url)
         data = response.xpath("//div[contains(@class, 'location-item')]")
         for location in data:
             item = Feature()
