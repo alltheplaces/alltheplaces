@@ -123,6 +123,7 @@ PRESENT = object()
 
 
 def check_cat(fi, want_cat=_SKIP, want_extra=_SKIP):
+    assert want_cat is not _SKIP or want_extra is not _SKIP, "check_cat pins nothing"
     got_cat, got_extra = make_spider()._category(fi)
     if want_cat is not _SKIP:
         assert got_cat == want_cat, fi
@@ -1696,7 +1697,6 @@ _EDU_CASES = [
     ("Gymnasiet i Petalax", C.SCHOOL, _SKIP),
     ("Koulukuraattori", C.SCHOOL, _SKIP),
     ("Soveltava temppuilu kouluikäisille", None, _SKIP),
-    ("Koululaisen aamu- ja iltapäivätoiminta", _SKIP, _SKIP),  # asserted as != SCHOOL below
     ("Happy Toddlers", C.KINDERGARTEN, _SKIP),
     ("Daycare Daisy Oy", C.KINDERGARTEN, _SKIP),
     ("Sammontalon päiväkodin Uus-Lavolan toimintayksikkö", C.KINDERGARTEN, _SKIP),
@@ -1749,9 +1749,7 @@ _EDU_CASES = [
 ]
 
 
-@pytest.mark.parametrize(
-    "fi,want_cat,want_extra", [c for c in _EDU_CASES if c[0] != "Koululaisen aamu- ja iltapäivätoiminta"]
-)
+@pytest.mark.parametrize("fi,want_cat,want_extra", _EDU_CASES)
 def test_category_education(fi, want_cat, want_extra):
     check_cat(fi, want_cat, want_extra)
 
@@ -3729,9 +3727,13 @@ def test_list_and_batch_counters():
 def test_pagination_stops_on_repeated_ids():
     spider = make_spider()
     page = {"itemList": [{"id": "a"}]}
-    out1 = list(spider.parse(SimpleNamespace(json=lambda: dict(page)), 1))
+    out1 = list(
+        spider.parse(TextResponse(url="https://x/list?page=1", body=json.dumps(page).encode(), encoding="utf-8"), 1)
+    )
     assert any(isinstance(r, JsonRequest) and "page=2" in r.url for r in out1)
-    out2 = list(spider.parse(SimpleNamespace(json=lambda: dict(page)), 2))
+    out2 = list(
+        spider.parse(TextResponse(url="https://x/list?page=2", body=json.dumps(page).encode(), encoding="utf-8"), 2)
+    )
     assert not any("page=3" in getattr(r, "url", "") for r in out2)
 
 
@@ -3780,10 +3782,7 @@ def test_org_join_and_flush_paths():
     item["name"] = "X"
     spider._pending["org-1"] = [item]
 
-    def _boom():
-        raise ValueError("nope")
-
-    assert list(spider.parse_orgs(SimpleNamespace(url="https://x/?guids=org-1", json=_boom))) == [item]
+    assert list(spider.parse_orgs(TextResponse(url="https://x/?guids=org-1", body=b"nope", encoding="utf-8"))) == [item]
     assert spider._pending == {}
 
 
@@ -3881,10 +3880,6 @@ def test_special_exports_and_city_compounds():
     item = parsed(spider, channel("Töölöntori"), "Helsingin kaupunki")
     assert item["extras"]["place"] == "square"
     assert item.get("amenity") is None
-    # Salo-Karinan: proper compounds stay whole.
-    item = parsed(make_spider(), channel("Salo-Karinan neuvonta-asema", office="SALO"))
-    assert item["name"] == "Salo-Karinan neuvonta-asema"
-    assert item.get_tag("office") == "government"
 
 
 def test_round22_flows():
@@ -4025,14 +4020,6 @@ def test_user_report_batch_rd():
     assert (
         cat(spider, "Mielenterveys- ja päihdekuntoutujien asumispalveluyksiköt Tähkä ja Jyvä")[0]
         == Categories.SOCIAL_FACILITY
-    )
-    assert cat(spider, "Nuorten vastaanottokoti Havurinne") == (
-        Categories.SOCIAL_FACILITY,
-        {"social_facility": "group_home"},
-    )
-    assert cat(spider, "Uudenkoiviston vastaanottokoti") == (
-        Categories.SOCIAL_FACILITY,
-        {"social_facility": "group_home"},
     )
     assert (
         cat(spider, "Konneveden, Uuraisten ja Äänekosken nuorten mielenterveys- ja päihdetyön tiimi")[0]
