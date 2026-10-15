@@ -37,20 +37,19 @@ class SeurantalotFISpider(Spider):
         r'"id":\s*(\d+),\s*"location":\s*\{\s*"lat":\s*(-?\d+(?:\.\d+)?),\s*"lng":\s*(-?\d+(?:\.\d+)?)\s*\}'
     )
     POSTCODE_RE = re.compile(r"(?<![\dA-Za-z])(\d{5})(?![\dA-Za-z])")
-    WEBSITE_RE = re.compile(r"https?://\S+")
+    WEBSITE_RE = re.compile(r"https?://\S+", re.IGNORECASE)
     PHONE_RE = re.compile(r"[+\d(][\d\s\-()]*\d")
-    EMAIL_RE = re.compile(r"[A-Za-z0-9_%+-][\w.+-]*@[\w.-]+\.[A-Za-z]{2,}")
+    EMAIL_RE = re.compile(r"[\w%+-][\w.+-]*@[\w.-]+\.[A-Za-z]{2,}")
     DEOBFUSCATE_RE = re.compile(r"<@>|\(at\)|\(a\)", re.IGNORECASE)
-    POBOX_RE = re.compile(
-        r"^(?:PL|P\.L\.|Postilokero|PO\s*Box|Postbox|PB)(?:\b|\s*\.?\s*\d)|^PL\s+Box\b", re.IGNORECASE
-    )
+    POBOX_RE = re.compile(r"^(?:PL|P\.L\.|Postilokero|PO\s*Box|Postbox|PB)(?:\b|\s*\.?\s*\d)", re.IGNORECASE)
     CARE_OF_RE = re.compile(r"^c/o\b", re.IGNORECASE)
     STREET_SUFFIX_RE = re.compile(r"(katu|tie|kuja|polku|raitti|väylä|tori|aukio|vägen|gatan)$", re.IGNORECASE)
     MUNI_TAIL_RE = re.compile(r"\s+(?:[A-ZÄÖÅ]{2,}[A-ZÄÖÅ\s\-]*|[A-ZÄÖÅ]\s+[A-ZÄÖÅ][A-ZÄÖÅ\s\-]*)$")
+    # Long caps runs strip; lone "X Y" prefixes strip with the tail (house letters are single).
     YEAR_RE = re.compile(r"^(\d{4})$")
     NUMBER_RE = re.compile(r"^(\d+)$")
     OPERATOR_ID_RE = re.compile(r"\d{7}\s*-\s*\d")
-    COUNTER_RE = re.compile(r"(\d[\d\s]*)\s+seurantataloa\s*\((\d+)\s*[-–]\s*(\d[\d\s]*)\)")
+    COUNTER_RE = re.compile(r"(\d[\d\s]*)\s+seurantatalo[a-z]*\s*\((\d[\d\s]*)\s*[-–—]\s*(\d[\d\s]*)\)")
 
     def _stat(self, key: str) -> None:
         try:
@@ -181,6 +180,7 @@ class SeurantalotFISpider(Spider):
         runs = []
         for href in widget.xpath(".//li[contains(@class, 'tel')]/a/@href").getall():
             for run in self.PHONE_RE.findall((href or "").split("tel:", 1)[-1]):
+                # Six digits minimum filters extensions and fragments.
                 if len(re.sub(r"\D", "", run)) >= 6:
                     runs.append(run.strip())
         if not runs:
@@ -209,7 +209,7 @@ class SeurantalotFISpider(Spider):
                 continue
             url = match.group(0).split(",")[0].rstrip(".,;")
             parts = urlsplit(url)
-            host = parts.hostname or ""
+            host = (parts.hostname or "").rstrip(".")
             if not host or "." not in host:
                 self._stat("atp/seurantalot_fi/dropped/placeholder_website")
                 continue
@@ -241,6 +241,7 @@ class SeurantalotFISpider(Spider):
         except ValueError:
             self._stat("atp/seurantalot_fi/dropped/bad_coords")
             return None, None, None
+        # Finland bbox; pins landing on other continents are upstream typos.
         if not (59 <= lat <= 71 and 19 <= lon <= 32):
             self._stat("atp/seurantalot_fi/dropped/bad_coords")
             return None, None, None
