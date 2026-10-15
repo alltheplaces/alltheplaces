@@ -12,20 +12,16 @@ from locations.items import Feature
 
 logger = logging.getLogger(__name__)
 
-# Seurantalot.fi is the joint directory of Finnish community halls
-# (seurantalot), maintained by Suomen Kotiseutuliitto with eight member
-# organisations (youth, workers, temperance, fire-brigade, rural and
-# heritage associations). Owner associations maintain their own records,
-# so each hall is an independent POI with no shared brand or operator
-# (brand_wikidata omitted; per-hall operator set from the owner heading).
-# No reuse license is declared on the directory data, so no
-# dataset_attributes license is declared here. Crawl is the paginated
-# search (18/page) plus one detail page per hall; the leading /talot/<id>
-# matches the map-pin id and is the stable ref. Coordinates are DB-stored
-# pins rendered via Google Maps, not spider-side geocoding. Contact
-# numbers are scoped to the address widget so chair/secretary personal
-# numbers in the contact widget never leak in. Self-referential
-# seurantalot.fi "kotisivut" links are popped as websites.
+# Seurantalot.fi (Suomen Kotiseutuliitto + 8 member organisations) lists
+# ~1600 Finnish community halls; owners maintain their own records, so
+# halls are independent POIs with per-hall operator and no brand
+# (brand_wikidata omitted: the only Wikidata hit, Q1103285, is the generic
+# "clubhouse" concept, not a brand). No reuse license is declared.
+# Paginated search (18/page) + /talot/<id> detail pages; the URL id equals
+# the map-pin id (stable ref). Pins are DB-stored (Maps renders only).
+# Contacts come from the address widget, never the persons widget. No
+# recurring hours exist (booking-only rental). Coords-less records with
+# address/contact are kept deliberately. Self-site links pop as websites.
 
 
 class SeurantalotFISpider(Spider):
@@ -39,20 +35,21 @@ class SeurantalotFISpider(Spider):
     PIN_RE = re.compile(
         r'"id":\s*(\d+),\s*"location":\s*\{\s*"lat":\s*(-?\d+(?:\.\d+)?),\s*"lng":\s*(-?\d+(?:\.\d+)?)\s*\}'
     )
-    POSTCODE_RE = re.compile(r"(?<!\d)(\d{5})(?!\d)")
+    POSTCODE_RE = re.compile(r"(?<![\dA-Za-z])(\d{5})(?![\dA-Za-z])")
     WEBSITE_RE = re.compile(r"https?://\S+")
-    PHONE_RE = re.compile(r"[+\d(][\d\s\-()/]*\d")
-    EMAIL_RE = re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}")
-    POBOX_RE = re.compile(r"^(PL|P\.L\.|Postilokero|PO\s*Box|Postbox|PB)\s*\.?\s*\d", re.IGNORECASE)
-    CARE_OF_RE = re.compile(r"^c/o\b", re.IGNORECASE)
-    STREET_SUFFIX_RE = re.compile(
-        r"(katu|tie|kuja|polku|raitti|v\u00e4yl\u00e4|tori|aukio|v\u00e4gen|gatan)$", re.IGNORECASE
+    PHONE_RE = re.compile(r"[+\d(][\d\s\-()]*\d")
+    EMAIL_RE = re.compile(r"[A-Za-z0-9_%+-][\w.+-]*@[\w.-]+\.[A-Za-z]{2,}")
+    DEOBFUSCATE_RE = re.compile(r"<@>|\(at\)|\(a\)", re.IGNORECASE)
+    POBOX_RE = re.compile(
+        r"^(?:PL|P\.L\.|Postilokero|PO\s*Box|Postbox|PB)(?:\b|\s*\.?\s*\d)|^PL\s+Box\b", re.IGNORECASE
     )
+    CARE_OF_RE = re.compile(r"^c/o\b", re.IGNORECASE)
+    STREET_SUFFIX_RE = re.compile(r"(katu|tie|kuja|polku|raitti|väylä|tori|aukio|vägen|gatan)$", re.IGNORECASE)
     MUNI_TAIL_RE = re.compile(r"\s+(?:[A-ZÄÖÅ]{2,}[A-ZÄÖÅ\s\-]*|[A-ZÄÖÅ]\s+[A-ZÄÖÅ][A-ZÄÖÅ\s\-]*)$")
     YEAR_RE = re.compile(r"^(\d{4})$")
     NUMBER_RE = re.compile(r"^(\d+)$")
-    OPERATOR_ID_RE = re.compile(r"^\d{7}-\d$")
-    COUNTER_RE = re.compile(r"(\d+)\s+seurantataloa\s*\((\d+)-(\d+)\)")
+    OPERATOR_ID_RE = re.compile(r"\d{7}\s*-\s*\d")
+    COUNTER_RE = re.compile(r"(\d[\d\s]*)\s+seurantataloa\s*\((\d+)\s*[-–]\s*(\d[\d\s]*)\)")
 
     def _stat(self, key: str) -> None:
         try:
@@ -63,8 +60,7 @@ class SeurantalotFISpider(Spider):
             stats.inc_value(key)
 
     def closed(self, reason: str) -> None:
-        # A finder or format change yielding zero items must log loudly
-        # instead of looking like a clean empty run.
+        # Zero items means a finder/format break, never a clean empty run.
         try:
             count = self.crawler.stats.get_value("item_scraped_count", 0)
         except AttributeError:
@@ -72,38 +68,41 @@ class SeurantalotFISpider(Spider):
         if reason == "finished" and not count:
             logger.error("seurantalot_fi: finished with zero items scraped")
 
+    @staticmethod
+    def _num(text: str) -> int:
+        # Counter uses fi thousand separators ("1 606").
+        return int(re.sub(r"\s", "", text))
+
     def parse(self, response: Response) -> Iterable[Feature]:
         for href in response.xpath("//div[@class='product']/a/@href").getall():
             if self.REF_RE.search(href or ""):
                 yield response.follow(href, callback=self.parse_hall, errback=self.errback)
             else:
                 self._stat("atp/seurantalot_fi/dropped/bad_list_link")
-        counts = response.xpath("//strong[@class='counter']/text()").get()
+        counts = response.xpath("normalize-space(//strong[@class='counter'])").get()
         if not response.xpath("//div[@class='product']").getall():
             self._stat("atp/seurantalot_fi/dropped/zero_product_page")
             logger.warning("seurantalot_fi: list page with zero products: %s", response.url)
-        # Both pager directions share btn-next, so select by label: the
-        # first match is "Edellinen sivu" everywhere past page 1.
-        if next_href := response.xpath("//a[contains(@class, 'btn-next')][contains(., 'Seuraava sivu')]/@href").get():
+        # Prev/next share btn-next: select by label, since the first class match is Edellinen past page 1.
+        if next_href := response.xpath(
+            "//a[contains(@class, 'btn-next')][contains(normalize-space(.), 'Seuraava sivu')]/@href"
+        ).get():
             yield response.follow(next_href, callback=self.parse, errback=self.errback)
             return
-        # No onward link is only legitimate on the last page, where the
-        # counter range reaches the total; anything else is a truncated
-        # crawl (e.g. a pager label change) and must trip loudly.
+        # A missing next-link is legitimate only when the counter range reaches the total.
         match = self.COUNTER_RE.search(counts or "")
-        if counts is None:
+        if not counts:
             self._stat("atp/seurantalot_fi/empty/result_counter")
             logger.warning("seurantalot_fi: no result counter on %s", response.url)
-        elif not match or int(match.group(3)) < int(match.group(1)):
+        elif not match or self._num(match.group(3)) < self._num(match.group(1)):
             self._stat("atp/seurantalot_fi/dropped/no_next_page")
             logger.warning("seurantalot_fi: products but no next page: %s", response.url)
 
     def errback(self, failure) -> None:
-        # 500s and timeouts never reach a callback (four persistently
-        # broken detail pages observed); count them so lost halls are
-        # explainable in stats, not just logs.
+        # Failed requests never reach callbacks; count them so losses stay explainable.
         self._stat("atp/seurantalot_fi/dropped/request_error")
-        logger.warning("seurantalot_fi: request failed: %s", failure.request.url)
+        url = getattr(getattr(failure, "request", None), "url", "?")
+        logger.warning("seurantalot_fi: request failed: %s", url)
 
     def parse_hall(self, response: Response) -> Iterable[Feature]:
         if not response.xpath("//aside[@id='sidebar']").get():
@@ -122,9 +121,8 @@ class SeurantalotFISpider(Spider):
         item["name"] = name
         widget = response.xpath("//aside[@id='sidebar']/div[@class='widget'][1]")
         if operator := (widget.xpath("./h2/text()").get() or "").strip():
-            if self.OPERATOR_ID_RE.match(operator):
-                # Upstream data entry put the business ID where the owner
-                # association name belongs; an ID is not an operator.
+            if self.OPERATOR_ID_RE.search(operator):
+                # A business ID is not an operator name.
                 self._stat("atp/seurantalot_fi/dropped/operator_is_business_id")
             else:
                 item["operator"] = operator
@@ -148,15 +146,13 @@ class SeurantalotFISpider(Spider):
         lat, lon, pin_id = self.parse_coords(response)
         if lat is not None and lon is not None:
             if pin_id is not None and pin_id != item["ref"]:
-                # Wrong pin on the right page: keep the address record
-                # coords-less rather than losing the hall over it.
+                # Suspect pin: keep the address record coords-less.
                 self._stat("atp/seurantalot_fi/hall/ref_pin_mismatch")
             else:
                 item["lat"], item["lon"] = lat, lon
         else:
             self._stat("atp/seurantalot_fi/empty/coords")
         self.parse_contact(widget, item)
-        # Taloryhma lives directly under <aside>, after the widgets.
         group = (response.xpath("//aside[@id='sidebar']/h5/following-sibling::a[1]/text()").get() or "").strip()
         if group:
             self._stat(f"atp/seurantalot_fi/group/{group}")
@@ -171,21 +167,16 @@ class SeurantalotFISpider(Spider):
             item["image"] = response.urljoin(image)
         else:
             self._stat("atp/seurantalot_fi/empty/image")
-        if not any(
-            item.get(field) for field in ("street_address", "city", "postcode", "lat", "phone", "email", "website")
-        ):
-            # A name/operator/category shell with no location or contact is
-            # a ghost record, not a POI.
+        if not any(item.get(field) for field in ("street_address", "lat", "phone", "email", "website")):
+            # A shell with no street, coords or contact is a ghost record,
+            # not a POI (city/postcode alone can neither place nor reach it).
             self._stat("atp/seurantalot_fi/dropped/empty_record")
             return
         apply_category(Categories.COMMUNITY_CENTRE, item)
         yield item
 
     def parse_phone(self, widget) -> str | None:
-        # tel: hrefs jam roles and extra numbers into one attribute
-        # ("0442410026Toimisto,...", "0458661992tai0400440265",
-        # "0451556070/TapioJärvinen"): extract digit runs of call length,
-        # first wins, extras only count.
+        # tel: hrefs jam roles and extra numbers into one attribute; first digit-run wins.
         runs = []
         for href in widget.xpath(".//li[contains(@class, 'tel')]/a/@href").getall():
             for run in self.PHONE_RE.findall((href or "").split("tel:", 1)[-1]):
@@ -198,8 +189,7 @@ class SeurantalotFISpider(Spider):
         return runs[0]
 
     def parse_contact(self, widget, item: Feature) -> None:
-        # Booking contact only; chair/secretary numbers live in the second
-        # widget and never match these selectors.
+        # Address-widget contacts only; the persons widget is excluded.
         if phone := self.parse_phone(widget):
             item["phone"] = phone
         else:
@@ -209,9 +199,7 @@ class SeurantalotFISpider(Spider):
         else:
             self._stat("atp/seurantalot_fi/empty/email")
         websites = widget.xpath(".//li[contains(@class, 'email')]/a[@target='_blank']/@href").getall()
-        # Hrefs carry upstream junk: bare "http://" placeholders, a "/Talon
-        # kotisivut: " prefix jammed into the attribute, and
-        # self-referential /talot/ links. Extract a real URL or pop.
+        # Homepage hrefs carry placeholders, label junk and self-links; extract a real URL or pop.
         website = None
         for href in websites:
             match = self.WEBSITE_RE.search(href or "")
@@ -225,7 +213,7 @@ class SeurantalotFISpider(Spider):
                 self._stat("atp/seurantalot_fi/dropped/placeholder_website")
                 continue
             url = scheme + "://" + host.lower() + ("/" + path if path else "")
-            if "seurantalot.fi" in host.lower():
+            if host.lower() == "seurantalot.fi" or host.lower().endswith(".seurantalot.fi"):
                 self._stat("atp/seurantalot_fi/dropped/self_website")
                 continue
             website = url
@@ -236,8 +224,7 @@ class SeurantalotFISpider(Spider):
             self._stat("atp/seurantalot_fi/empty/website")
 
     def parse_coords(self, response: Response) -> tuple:
-        # Single DB-stored pin per page; the negated span keeps one
-        # malformed record from merging two.
+        # One DB-stored pin per page; match spans the pin only.
         match = self.PIN_RE.search(response.text)
         if not match:
             return None, None, None
@@ -252,10 +239,7 @@ class SeurantalotFISpider(Spider):
         return lat, lon, match.group(1)
 
     def _street_or_none(self, text: str | None) -> str | None:
-        # PO boxes and c/o addresses are never streets, and descriptor
-        # lines without any digit or street suffix ("SIEPPIJÄRVEN
-        # TYÖVÄENTALO", "PPA 2 60", "Heikki Rauta", "Viasvesi") are venue,
-        # admin-code or village/personal names, not streets.
+        # PO boxes, c/o and digit/suffix-less descriptors are never streets.
         street = (text or "").strip(" ,")
         if not street:
             return None
@@ -274,8 +258,7 @@ class SeurantalotFISpider(Spider):
 
     @staticmethod
     def _collapse_dupes(text: str) -> str:
-        # Doubled localities collapse ("Torvinen Torvinen" from the
-        # doubled-postcode strip above, "Iisalmi Iisalmi" upstream).
+        # Doubled localities collapse ("Torvinen Torvinen").
         out = []
         for token in text.split():
             if not out or token.casefold() != out[-1].casefold():
@@ -283,10 +266,7 @@ class SeurantalotFISpider(Spider):
         return " ".join(out)
 
     def _strip_district(self, text: str) -> str:
-        # Trailing mixed-case district tails ("Pajulahdentie 28 Tottijärvi")
-        # are localities, not street; single-letter house/stair tails
-        # are localities, not street; single-letter house/stair tails
-        # ("Kaduntie 34 B") are protected by the length guard.
+        # Trailing district tails strip; single-letter house tails survive.
         tokens = text.split()
         while len(tokens) > 1 and len(tokens[-1]) > 1 and not re.search(r"\d", tokens[-1]):
             if self.STREET_SUFFIX_RE.search(tokens[-1]):
@@ -295,24 +275,16 @@ class SeurantalotFISpider(Spider):
         return " ".join(tokens)
 
     def parse_address(self, raw: str | None) -> tuple:
-        # Single-line FI shapes: "Street 1 00100 City MUNICIPALITY" with an
-        # uppercase municipality tail, or district-first variants ("Street 1
-        # DISTRICT 00100 City MUNICIPALITY"). The postcode splits the line;
-        # trailing all-caps tokens are district/municipality names, never
-        # housenumbers or stairs, and the postal locality after the postcode
-        # is the city. Postcode-less lines are locality-only ("RAUTALAMPI")
-        # or street+municipality: never invent a street from a bare
-        # municipality, and title-case all-caps localities ("HELSINKI" is
-        # the municipality Helsinki, not a street).
+        # "Street 1 00100 City MUNI" (or district-first): the postcode
+        # splits; caps tails strip; the postal locality is the city.
+        # Postcode-less bare municipalities yield city-only records.
         text = " ".join((raw or "").split())
         if not text:
             return None, None, None
         match = self.POSTCODE_RE.search(text)
         if not match:
-            # Locality-only or street+municipality without postcode: never
-            # invent a street from a bare municipality. The only observed
-            # mixed shapes carry an uppercase municipality tail; anything
-            # else is an unknown shape and drops loudly.
+            # Dash-stripped lone localities yield city-only; other tailless shapes drop loudly.
+            text = re.sub(r"^(?:\s*[-–—])+", "", text).strip()
             tail = self.MUNI_TAIL_RE.search(text)
             if not tail and len(text.split()) > 1:
                 self._stat("atp/seurantalot_fi/dropped/unmapped_address_shape")
@@ -326,8 +298,10 @@ class SeurantalotFISpider(Spider):
             self._strip_district(self.MUNI_TAIL_RE.sub("", text[: match.start()]).strip(" ,"))
         )
         after_raw = text[match.end() :].strip(" ,")
-        # Doubled postcodes are upstream typos ("99540 Torvinen 99540").
-        city = re.sub(r"(?<!\d)\d{5}(?!\d)", " ", self.MUNI_TAIL_RE.sub("", after_raw)).strip(" ,") or None
+        # Doubled postcodes are upstream typos.
+        city = (
+            re.sub(r"(?<![\dA-Za-z])\d{5}(?![\dA-Za-z])", " ", self.MUNI_TAIL_RE.sub("", after_raw)).strip(" ,") or None
+        )
         if city is None:
             tail = self.MUNI_TAIL_RE.search(after_raw)
             if tail:
@@ -340,16 +314,15 @@ class SeurantalotFISpider(Spider):
 
     def parse_email(self, widget) -> str | None:
         raws = widget.xpath(".//joomla-hidden-mail/@text").getall()
+        found = []
         for raw in raws:
             try:
                 email = base64.b64decode(raw).decode("utf-8", "replace").strip()
             except (binascii.Error, ValueError):
                 self._stat("atp/seurantalot_fi/dropped/bad_email")
                 continue
-            # Anti-spam obfuscations ("<@>", "(at)", "(a)") decode to the
-            # same address; role prose jammed after the address
-            # ("addr, varaukset...") is cut by taking the first token.
-            deobfuscated = email.replace("<@>", "@").replace("(at)", "@").replace("(a)", "@")
+            # Anti-spam masks decode to the same address; first match wins.
+            deobfuscated = self.DEOBFUSCATE_RE.sub("@", email)
             if deobfuscated != email:
                 self._stat("atp/seurantalot_fi/email/deobfuscated")
                 email = deobfuscated
@@ -357,15 +330,15 @@ class SeurantalotFISpider(Spider):
             if not match:
                 self._stat("atp/seurantalot_fi/dropped/bad_email")
                 continue
-            return match.group(0)
-        return None
+            found.append(match.group(0))
+        if len(found) > 1:
+            self._stat("atp/seurantalot_fi/hall/multiple_emails")
+        return found[0] if found else None
 
     FACT_TITLES = frozenset({"Rakennusvuosi", "Henkilömäärä"})
 
     def parse_facts(self, response: Response) -> dict:
-        # "Talon perustiedot" and rental tables share one shape: title cell
-        # plus value cell; first occurrence wins on repeated titles.
-        # Unconsumed titles stat so upstream additions surface in CI.
+        # Title/value tables; unconsumed titles stat for drift.
         facts = {}
         for row in response.xpath("//table[contains(@class, 'table')]/tr"):
             title = " ".join(row.xpath("./td[1]//text()").getall()).strip()
@@ -376,8 +349,7 @@ class SeurantalotFISpider(Spider):
         return facts
 
     def parse_start_date(self, raw: str | None) -> str | None:
-        # Building year only when the cell is exactly a year; designer
-        # credits and renovation histories stay out.
+        # Exact years only; prose histories excluded.
         if not raw:
             self._stat("atp/seurantalot_fi/empty/start_date")
             return None
@@ -388,8 +360,7 @@ class SeurantalotFISpider(Spider):
         return None
 
     def parse_capacity(self, raw: str | None) -> str | None:
-        # Headcount only when the cell is exactly a number; chair counts
-        # and "max 240 henkeä" prose stay out (chair != person capacity).
+        # Exact headcounts only; chair counts and prose excluded.
         if not raw:
             self._stat("atp/seurantalot_fi/empty/capacity")
             return None
