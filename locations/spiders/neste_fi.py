@@ -101,6 +101,7 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
     search_for_twitter = False
     search_for_facebook = False
     search_for_image = False
+    wanted_types = ["GasStation"]
 
     def sitemap_filter(self, entries: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:
         for entry in entries:
@@ -164,12 +165,6 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(
         self, item: Feature, response: TextResponse, ld_data: dict, **kwargs: Any
     ) -> Iterable[Feature]:
-        ld_types = ld_data.get("@type")
-        if isinstance(ld_types, str):
-            ld_types = [ld_types]
-        if not isinstance(ld_types, list) or "GasStation" not in ld_types:
-            self._inc_stat("atp/neste_fi/type/skip/{}".format(str(ld_data.get("@type")).replace("/", "-")))
-            return
         if m := re.search(r"Asemanumero:\s*(\d+)", response.text):
             item["ref"] = m.group(1)
         else:
