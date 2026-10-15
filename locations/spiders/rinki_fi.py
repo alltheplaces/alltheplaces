@@ -1,5 +1,4 @@
 import re
-from collections import Counter
 from typing import Iterable
 
 from scrapy import Spider
@@ -9,13 +8,6 @@ from scrapy.http import TextResponse
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.settings import ITEM_PIPELINES
-
-
-def _clean(value: object) -> str | None:
-    # Feed strings are clean today; this guards edge whitespace and invisible chars.
-    if not isinstance(value, str):
-        return None
-    return value.strip().strip("\u200b\u200c\ufeff").strip() or None
 
 
 class RinkiFISpider(Spider):
@@ -39,16 +31,12 @@ class RinkiFISpider(Spider):
     }
     # Operational-only drops: team, contractors, collection/cleanup dates, municipality, vingo_id/id, text.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._counts: Counter = Counter()
-
     def _count(self, key: str, n: int = 1) -> None:
-        self._counts[key] += n
+        # Offline direct calls have no crawler; production always does.
         crawler = getattr(self, "crawler", None)
-        stats = crawler.stats if crawler else None
-        if stats is not None:
-            stats.inc_value(f"{self.name}/{key}", n)
+        if crawler is None or crawler.stats is None:
+            return
+        crawler.stats.inc_value(f"{self.name}/{key}", n)
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         data = response.json()  # ty: ignore[unresolved-attribute]
@@ -69,7 +57,7 @@ class RinkiFISpider(Spider):
         if not isinstance(props, dict):
             props = {}
         # ref is the public RINKI ID shown on point pages; vingo_id/id are internal keys.
-        ref = _clean(props.get("rinki_id"))
+        ref = props.get("rinki_id")
         if not ref:
             self._count("skipped/no_ref")
             self.logger.warning("Skipping feature without rinki_id: %r", props.get("street"))
@@ -79,16 +67,16 @@ class RinkiFISpider(Spider):
             self.logger.warning("Unexpected rinki_id format: %r", ref)
         if props.get("text") is not None:
             self._count("unmapped/text")
-        street = " / ".join(part for part in [_clean(props.get("street")), _clean(props.get("intersection"))] if part)
+        street = " / ".join(part for part in [props.get("street"), props.get("intersection")] if part)
         if not street:
             self._count("empty/street")
-        city = _clean(props.get("post_office"))
+        city = props.get("post_office")
         if not city:
             self._count("empty/city")
         item = Feature(
             ref=ref, name="Rinki-ekopiste", street_address=street or None, city=city, geometry=feature.get("geometry")
         )
-        if note := _clean(props.get("note")):
+        if note := props.get("note"):
             item["located_in"] = note
         apply_category(Categories.RECYCLING, item)
         # Unstaffed outdoor container clusters, never staffed centres.
