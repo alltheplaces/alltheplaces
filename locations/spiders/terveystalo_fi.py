@@ -1,6 +1,7 @@
 import re
 from typing import Iterable
 
+import phonenumbers
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
@@ -48,8 +49,14 @@ class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
         if isinstance(tel, str):
             tel = [tel]
         if isinstance(tel, list):
-            kept = [t for t in tel if isinstance(t, str) and t and not self._is_hotline(t)]
+            kept = [self._first_phone(t) for t in tel if isinstance(t, str) and t and not self._is_hotline(t)]
             ld_data["telephone"] = kept or None
+
+    @staticmethod
+    def _first_phone(value: str) -> str:
+        # LD packs a sentence or several numbers into one string; keep the first real number.
+        match = next(iter(phonenumbers.PhoneNumberMatcher(value, "FI")), None)
+        return match.raw_string.strip() if match else value.strip()
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         if "Toimipaikka aukeaa" in response.text:
@@ -66,10 +73,6 @@ class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
             if not item.get("email"):
                 item["email"] = phone.strip()
             item["phone"] = None
-            phone = ""
-        if phone.startswith("Palvelemme sinua"):
-            # Rehab-unit template sentence; the page tel: link holds the clean number.
-            item["phone"] = self._page_phone(response)
         label = self._split_branch(item)
         if "hammas" in label or "crossdental" in label:
             apply_category(Categories.DENTIST, item)
@@ -81,22 +84,16 @@ class TerveystaloFISpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.CLINIC, item)
         yield item
 
-    def _page_phone(self, response: TextResponse) -> str | None:
-        for href in response.xpath('//a[contains(@href, "tel:")]/@href').getall():
-            number = href.split("tel:", 1)[-1].strip()
-            if number and not self._is_hotline(number):
-                return number
-        return None
-
     def _split_branch(self, item: Feature) -> str:
-        # Uniform chain: the remainder after the brand token is the branch.
+        # Brand is the feature name; the remaining per-location text is the branch.
         name = (item.get("name") or "").strip()
         low = name.casefold()
         if low == "terveystalo" or low.startswith("terveystalo "):
             branch = name[len("Terveystalo") :].strip()
-            if branch:
-                item.pop("name", None)
-                item["branch"] = branch
-                return branch.casefold()
-        item["name"] = name
+        else:
+            branch = name
+        if branch:
+            item.pop("name", None)
+            item["branch"] = branch
+            return branch.casefold()
         return low
