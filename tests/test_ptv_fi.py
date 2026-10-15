@@ -1363,7 +1363,7 @@ _ADDR_CASES = [
         "Veräjäpellonkatu / Kaivoskallionpolku",
         "",
         {},
-        {"street_address": "Veräjäpellonkatu / Kaivoskallionpolku"},
+        {"addr_full": "Veräjäpellonkatu / Kaivoskallionpolku"},
         (),
     ),
     ("Tiirakari", "", {}, {"extras.addr:place": "Tiirakari"}, ("street_address",)),
@@ -1392,7 +1392,7 @@ _ADDR_CASES = [
         ("street_address",),
     ),
     ("Katu", "5 A", {}, {"street": "Katu", "housenumber": "5", "extras.addr:unit": "A"}, ("street_address",)),
-    ("Krakantien päässä", "", {}, {"street_address": "Krakantien päässä"}, ()),
+    ("Krakantien päässä", "", {}, {"addr_full": "Krakantien päässä"}, ()),
     (
         "Voimapolku",
         "3 03100 Nummela",
@@ -1512,12 +1512,12 @@ _ADDR_CASES = [
         "Mannerheimintie / Runeberginkatu",
         "12 A 1",
         {},
-        {"street_address": "Mannerheimintie / Runeberginkatu", "extras.addr:unit": "A 1"},
+        {"addr_full": "Mannerheimintie / Runeberginkatu", "extras.addr:unit": "A 1"},
         (),
     ),
     ("Katu", "12/14", {}, {"housenumber": "12-14"}, ()),
     ("Tie", "10 11111", {"postcode": ""}, {"housenumber": "10"}, ("extras.addr:unit",)),
-    ("Pasilan asema", "", {}, {"street_address": "Pasilan asema"}, ("extras.addr:place",)),
+    ("Pasilan asema", "", {}, {"addr_full": "Pasilan asema"}, ("extras.addr:place",)),
     (
         "Varastotie 4",
         "67100",
@@ -1542,7 +1542,7 @@ def test_route_descriptions_stay_freeform():
     ):
         item = addressed(make_spider(), road, "")
         assert item.get("housenumber") is None
-        assert item["street_address"] == road
+        assert item["addr_full"] == road
 
 
 def test_postcode_tail_stripped_from_number():
@@ -3880,6 +3880,25 @@ def test_special_exports_and_city_compounds():
     item = parsed(spider, channel("Töölöntori"), "Helsingin kaupunki")
     assert item["extras"]["place"] == "square"
     assert item.get("amenity") is None
+
+
+def test_acronym_hosts_are_not_located():
+    # Hospital-district acronyms operate the unit; they name no venue.
+    item = parsed(make_spider(), channel("OYSin Keuhkosairauksien poliklinikka"))
+    assert item.get("located_in") is None
+
+
+def test_coordless_channels_are_kept():
+    # Rows without usable coords stay as coordless items; the pipeline
+    # strips bad geometry downstream instead of losing the service.
+    data = channel("A-linna", org="org-9")
+    data["id"] = "cccccccc-1111-4111-8111-111111111111"
+    street = data["addresses"][0]["streetAddress"]
+    street.pop("latitude", None)
+    street.pop("longitude", None)
+    item = parsed(make_spider(), data)
+    assert item is not None
+    assert item.get("lat") is None and item.get("lon") is None
 
 
 def test_round22_flows():

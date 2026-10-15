@@ -5096,7 +5096,7 @@ class PtvFISpider(Spider):
             if self._endswith_any(raw.split()[-1].lower(), ("asema", "selkä", "laituri")):
                 # Stations, open water and piers are not addr:place values.
                 self._count("address/place_station")
-                item["street_address"] = raw
+                item["addr_full"] = raw
             else:
                 self._count("address/place")
                 item["extras"]["addr:place"] = raw
@@ -5112,7 +5112,7 @@ class PtvFISpider(Spider):
         if is_street:
             item["street"] = raw
         else:
-            item["street_address"] = raw
+            item["addr_full"] = raw
 
     def _road_base(self, road: str) -> str:
         # Venue-prefixed roads ("Didrichsenin taidemuseo, Kuusilahdenkuja"):
@@ -5156,7 +5156,7 @@ class PtvFISpider(Spider):
         # addresses: keep whole.
         if road and re.search(r"\bvälil(?:lä|la)\b", road, flags=re.IGNORECASE):
             self._count("address/route_desc")
-            item["street_address"] = self._strip_addr_base(road) or road
+            item["addr_full"] = self._strip_addr_base(road) or road
             return None
         return road
 
@@ -5220,7 +5220,7 @@ class PtvFISpider(Spider):
                 item["extras"]["addr:unit"] = " ".join(units)
         else:
             self._count("address/unparsed")
-            item["street_address"] = raw
+            item["addr_full"] = raw
             if units:
                 item["extras"]["addr:unit"] = " ".join(units)
 
@@ -5258,7 +5258,7 @@ class PtvFISpider(Spider):
                 if tok[2]:
                     self._count("address/stair_unit")
                     units.append(tok[2])
-            item["street_address"] = self._strip_addr_base(road) or road
+            item["addr_full"] = self._strip_addr_base(road) or road
             if units:
                 item["extras"]["addr:unit"] = " ".join(units)
         elif road:
@@ -5291,6 +5291,10 @@ class PtvFISpider(Spider):
             # Bare outdoor-island type words locate nothing: the head
             # ("Bylandet", "Iso Vasikkasaari") already names the island.
             self._count("name/bare_island_located")
+            located = None
+        if located and located.strip().upper() in ("OYS", "TYKS", "HUS", "TAYS", "KYS"):
+            # Hospital-district acronyms operate the unit; they name no venue.
+            self._count("name/located_acronym")
             located = None
         if city_src and located and located.casefold() == city_src.strip().casefold():
             # A venue duplicating the municipality is not a venue.
@@ -5872,7 +5876,8 @@ class PtvFISpider(Spider):
         self, channel: dict
     ) -> tuple[dict, dict, str | None, str | None, tuple[float, float], str | None] | None:
         # Visit address, postcode/office, coordinates and municipality:
-        # drop postal-only rows, mobile units and coordless rows.
+        # drop postal-only rows and mobile units; coordless rows are kept
+        # (the pipeline strips bad geometry but keeps the item).
         address = self._visit_address(channel)
         if address is None:
             self._count("dropped/postal_only")
@@ -5886,8 +5891,7 @@ class PtvFISpider(Spider):
             return None
         coords = self._coords(street)
         if coords is None:
-            self._count("dropped/no_coords")
-            return None
+            self._count("address/no_coords_kept")
         city_src = self._city_src(street, channel, office)
         if office and self._post_city(office) != office.strip():
             # Station-village post-office names are noted, not refiled.
@@ -5944,7 +5948,8 @@ class PtvFISpider(Spider):
         self._apply_naming(item, names, name, city_src)
 
         self._apply_address(item, street, postcode, city_src)
-        item["lon"], item["lat"] = coords
+        if coords is not None:
+            item["lon"], item["lat"] = coords
 
         self._apply_contact(item, channel)
 
