@@ -54,7 +54,7 @@ class RinkiFISpider(Spider):
             props = {}
         # ref is the public RINKI ID shown on point pages; vingo_id/id are internal keys.
         ref = props.get("rinki_id")
-        if not isinstance(ref, str) or not ref:
+        if not isinstance(ref, str) or not ref.strip():
             self._count("skipped/no_ref")
             self.logger.warning("Skipping feature without rinki_id: %r", props.get("street"))
             return None
