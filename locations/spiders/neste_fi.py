@@ -115,11 +115,6 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
             entry["loc"] = loc
             yield entry
 
-    def _inc_stat(self, key: str) -> None:
-        stats = getattr(getattr(self, "crawler", None), "stats", None)
-        if stats is not None:
-            stats.inc_value(key)
-
     @staticmethod
     def _fuel_names(ld_data: dict) -> list[str]:
         catalogs = ld_data.get("hasOfferCatalog")
@@ -167,9 +162,6 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
     ) -> Iterable[Feature]:
         if m := re.search(r"Asemanumero:\s*(\d+)", response.text):
             item["ref"] = m.group(1)
-        else:
-            self._inc_stat("atp/neste_fi/ref/missing")
-            return
 
         if name := item.pop("name", None):
             if name.startswith("Neste Express "):
@@ -199,15 +191,13 @@ class NesteFISpider(SitemapSpider, StructuredDataSpider):
             apply_category(Categories.FUEL_STATION, item)
         for fuel in self._fuel_names(ld_data):
             if fuel not in FUEL_TYPES_MAPPING:
-                self._inc_stat("atp/neste_fi/fuel/unmapped/{}".format(fuel.replace("/", "-")))
+                self.crawler.stats.inc_value("atp/neste_fi/fuel/unmapped/{}".format(fuel.replace("/", "-")))
             elif tag := FUEL_TYPES_MAPPING[fuel]:
                 apply_yes_no(tag, item, True)
         services = response.xpath('//*[contains(@class, "ServiceIcon_text")]/text()').getall()
-        if not services:
-            self._inc_stat("atp/neste_fi/service/empty")
         for service in [s.strip() for s in services if s.strip()]:
             if service not in SERVICES_MAPPING:
-                self._inc_stat("atp/neste_fi/service/unmapped/{}".format(service.replace("/", "-")))
+                self.crawler.stats.inc_value("atp/neste_fi/service/unmapped/{}".format(service.replace("/", "-")))
             elif tag := SERVICES_MAPPING[service]:
                 apply_yes_no(tag, item, True)
         if "-truck-" in url:
