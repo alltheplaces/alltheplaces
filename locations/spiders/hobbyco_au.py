@@ -26,10 +26,10 @@ class HobbycoAUSpider(PlaywrightSpider):
 
         for feature in data.get("features", []):
             props = feature.get("properties", {})
-            coords = feature.get("geometry", {}).get("coordinates", [])
-
             item = Feature()
+            item["geometry"] = feature["geometry"]
             item["ref"] = props.get("email", "").split("@")[0] or props.get("address")
+            item["name"] = self.item_attributes["brand"]
             item["branch"] = props.get("address").removeprefix("HOBBYCO ")
             city = props.get("city") or ""
             # The city field also contains the state and postcode, e.g., 'RHODES NSW 2138'.
@@ -41,8 +41,6 @@ class HobbycoAUSpider(PlaywrightSpider):
             item["phone"] = props.get("phone") or None
             item["email"] = props.get("email") or None
             item["website"] = props.get("maps") or None
-            if len(coords) == 2:
-                item["lon"], item["lat"] = coords
 
             if hours_raw := props.get("hours"):
                 oh = OpeningHours()
