@@ -1,5 +1,6 @@
 import json
 from typing import Any, Iterable
+from urllib.parse import urljoin
 
 from scrapy import Spider
 from scrapy.http import Response
@@ -30,8 +31,7 @@ class HarmonieMutuelleFRSpider(Spider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        # The API sends JSON with a text/html content type.
-        for agency in json.loads(response.text):
+        for agency in response.json():
             if self.value(agency, "field_definitive_closure"):
                 continue
 
@@ -45,21 +45,28 @@ class HarmonieMutuelleFRSpider(Spider):
             item["city"] = self.value(agency, "field_ville") or city.strip()
             item["postcode"] = self.value(agency, "field_address_postal_code")
             if path := (agency.get("path") or [{}])[0].get("alias"):
-                item["website"] = "https://agences.harmonie-mutuelle.fr" + path
+                item["website"] = urljoin("https://agences.harmonie-mutuelle.fr", path)
 
-            item["opening_hours"] = OpeningHours()
-            for day, field in self.day_fields.items():
-                hours = json.loads(self.value(agency, field) or "{}")
-                if not isinstance(hours, dict):
-                    continue
-                for time_range in hours.values():
-                    # Most ranges look like "09:00-12:30", a few use "09h00 - 12h30".
-                    start_time, end_time = time_range.replace(" ", "").replace("h", ":").split("-")
-                    if start_time != end_time:
-                        item["opening_hours"].add_range(day, start_time, end_time)
+            try:
+                item["opening_hours"] = self.parse_opening_hours(agency)
+            except Exception:
+                pass
 
             apply_category(Categories.OFFICE_INSURANCE, item)
             yield item
+
+    def parse_opening_hours(self, agency: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day, field in self.day_fields.items():
+            hours = json.loads(self.value(agency, field) or "{}")
+            if not isinstance(hours, dict):
+                continue
+            for time_range in hours.values():
+                # Most ranges look like "09:00-12:30", a few use "09h00 - 12h30".
+                start_time, end_time = time_range.replace(" ", "").replace("h", ":").split("-")
+                if start_time != end_time:
+                    oh.add_range(day, start_time, end_time)
+        return oh
 
     @staticmethod
     def value(agency: dict, field: str) -> str | None:
