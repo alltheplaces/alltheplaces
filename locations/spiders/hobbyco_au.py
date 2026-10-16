@@ -1,7 +1,7 @@
-import json
 import re
 from typing import Any, Iterable
 
+from chompjs import chompjs
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -22,40 +22,7 @@ class HobbycoAUSpider(PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        # The page embeds a JS FeatureCollection using single-quoted syntax.
-        # Use brace-counting to extract the full object reliably.
-        idx = response.text.find("const stores =")
-        if idx < 0:
-            self.logger.error("Could not find 'const stores' in page")
-            return
-
-        start = response.text.find("{", idx)
-        if start < 0:
-            return
-
-        depth = 0
-        end = start
-        for i, c in enumerate(response.text[start:], start):
-            if c == "{":
-                depth += 1
-            elif c == "}":
-                depth -= 1
-                if depth == 0:
-                    end = i + 1
-                    break
-
-        raw = response.text[start:end]
-
-        # Convert single-quoted JS object to valid JSON
-        raw = re.sub(r"'([^']*?)'", lambda mo: '"' + mo.group(1).replace('"', '\\"') + '"', raw)
-        raw = re.sub(r",\s*\}", "}", raw)
-        raw = re.sub(r",\s*\]", "]", raw)
-
-        try:
-            data = json.loads(raw)
-        except json.JSONDecodeError as e:
-            self.logger.error("Failed to parse Hobbyco store JSON: %s", e)
-            return
+        data = chompjs.parse_js_object(re.search(r"const stores = (.+?);", response.text, re.DOTALL).group(1))
 
         for feature in data.get("features", []):
             props = feature.get("properties", {})
