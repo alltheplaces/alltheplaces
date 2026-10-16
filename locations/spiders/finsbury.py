@@ -1,16 +1,20 @@
 import re
+from typing import Any
 
-from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_FR, DAYS_FR, DELIMITERS_FR, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class FinsburySpider(Spider):
+class FinsburySpider(PlaywrightSpider):
     name = "finsbury"
     item_attributes = {"brand": "Finsbury", "brand_wikidata": "Q141242163", "name": "Finsbury"}
     start_urls = ["https://www.finsbury-shoes.com/pages/nos-boutiques"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     # These two are mislabelled "France" on the source page despite their address
     # and coordinates clearly being elsewhere.
@@ -35,7 +39,7 @@ class FinsburySpider(Spider):
         "976": "YT",
     }
 
-    def parse(self, response):
+    def parse(self, response: Response) -> Any:
         for template in response.css('template[name^="store_"]'):
             store_id = template.attrib["name"]
             block = response.css(f'.map-place-list__list-store[map-target="{store_id}"]')
