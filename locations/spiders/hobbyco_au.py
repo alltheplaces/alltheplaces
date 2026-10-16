@@ -2,15 +2,16 @@ import json
 import re
 from typing import Any, Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class HobbycoAUSpider(Spider):
+class HobbycoAUSpider(PlaywrightSpider):
     """Spider for Hobbyco hobby stores (Australia).
     Closes #6546
     """
@@ -18,6 +19,7 @@ class HobbycoAUSpider(Spider):
     name = "hobbyco_au"
     item_attributes = {"brand": "Hobbyco", "brand_wikidata": "Q124003864"}
     start_urls = ["https://www.hobbyco.com.au/pages/stores"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         # The page embeds a JS FeatureCollection using single-quoted syntax.
