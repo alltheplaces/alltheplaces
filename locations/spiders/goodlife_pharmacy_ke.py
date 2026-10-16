@@ -11,7 +11,6 @@ class GoodlifePharmacyKESpider(AgileStoreLocatorSpider):
     name = "goodlife_pharmacy_ke"
     item_attributes = {"brand": "Goodlife Pharmacy", "brand_wikidata": "Q120783615"}
     allowed_domains = ["www.goodlife.co.ke"]
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
