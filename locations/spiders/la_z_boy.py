@@ -29,6 +29,7 @@ class LaZBoySpider(PlaywrightSpider):
     item_attributes = {"brand": "La-Z-Boy", "brand_wikidata": "Q6391583"}
     start_urls = ["https://www.la-z-boy.com/img/storepages.xml"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
         for url in response.xpath("//*[local-name()='loc']/text()").getall():
