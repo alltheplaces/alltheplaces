@@ -38,7 +38,7 @@ class VulcoFRSpider(Spider):
             dealer_name = dealer["name"]
             item["name"] = "Vulco"
             if dealer_name.upper().startswith("VULCO "):
-                item["branch"] = dealer_name[6:].strip().title()
+                item["branch"] = dealer_name[6:].strip("- ").title()
 
             item["website"] = "https://www.vulco.fr/all-dealers/{}/{}-{}.html".format(
                 dealer["cityWebsafe"], dealer["nameWebsafe"], dealer["agencyId"]
