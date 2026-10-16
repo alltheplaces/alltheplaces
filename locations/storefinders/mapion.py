@@ -34,7 +34,7 @@ class MapionSpider(Spider):
     `post_process_item`.
     """
 
-    feature_url_template: str | None = None
+    feature_url_template: str
 
     api_group: str | None = None
     api_page_size: int = 500  # the API errors on anything larger
