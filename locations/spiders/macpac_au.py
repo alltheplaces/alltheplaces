@@ -39,8 +39,9 @@ class MacpacAUSpider(Spider):
             for line in response.xpath('//div[@class="store-details"]/div[@class="main-info"][1]/text()').getall()
             if line.strip()
         ]
-        item["postcode"] = address_lines.pop()
-        item["city"] = address_lines.pop()
+        if len(address_lines) >= 2:
+            item["postcode"] = address_lines.pop()
+            item["city"] = address_lines.pop()
         item["street_address"] = merge_address_lines(address_lines)
 
         item["opening_hours"] = OpeningHours()
