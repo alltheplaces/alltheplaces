@@ -63,7 +63,7 @@ class HobbycoAUSpider(PlaywrightSpider):
 
             item = Feature()
             item["ref"] = props.get("email", "").split("@")[0] or props.get("address")
-            item["branch"] = props.get("address")
+            item["branch"] = props.get("address").removeprefix("HOBBYCO ")
             item["city"] = props.get("city")
             item["postcode"] = props.get("postalCode")
             item["phone"] = props.get("phone") or None
