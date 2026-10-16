@@ -1,7 +1,7 @@
 import re
 from typing import Any, Iterable
 
-from scrapy import Request, Spider
+from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
