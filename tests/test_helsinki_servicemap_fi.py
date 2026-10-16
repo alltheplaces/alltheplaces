@@ -8,9 +8,12 @@ count) unless marked SYNTHETIC, in which case the feed has no occurrence
 and the input exercises a helper branch directly.
 """
 
+import json
 from types import SimpleNamespace
 
-from locations.categories import Categories, apply_category
+from scrapy.http import JsonResponse
+
+from locations.categories import Categories, apply_category, get_category_tags
 from locations.items import Feature
 from locations.spiders.government.helsinki_servicemap_fi import HelsinkiServicemapFISpider
 
@@ -400,6 +403,7 @@ def test_door_suffix_with_floor_tail():
     item = addressed(make_spider(), "Sairaalatie 8, A-ovi, 2. krs")
     assert item["housenumber"] == "8"
     assert item["unit"] == "A-ovi"
+    assert item["extras"]["addr:floor"] == "2"
 
 
 def test_staircase_word_tail():
@@ -422,11 +426,35 @@ def test_attached_housenumber_range():
     assert item["housenumber"] == "33-39"
 
 
-def test_parenthetical_floor_stripped():
-    # Unit 80776: Jakomäenpolku 5 (2. krs).
+def test_parenthetical_floor_kept():
+    # Unit 80776: Jakomäenpolku 5 (2. krs). The tail strips from the base
+    # but the floor is kept as addr:floor.
     item = addressed(make_spider(), "Jakomäenpolku 5 (2. krs)")
     assert item["housenumber"] == "5"
     assert "unit" not in item
+    assert item["extras"]["addr:floor"] == "2"
+
+
+def test_multi_floor_keeps_no_floor():
+    # Unit 80791: Kultasepänkatu 7, 3. &, 4. krs. Ambiguous tails keep
+    # the house but no floor.
+    item = addressed(make_spider(), "Kultasepänkatu 7, 3. &, 4. krs")
+    assert item["housenumber"] == "7"
+    assert "addr:floor" not in item["extras"]
+
+
+def test_reversed_floor_marker_kept():
+    # Unit 78342: Hermannin rantatie 9A,. krs 24.
+    item = addressed(make_spider(), "Hermannin rantatie 9A,. krs 24")
+    assert item["housenumber"] == "9A"
+    assert item["extras"]["addr:floor"] == "24"
+
+
+def test_ordinal_floor_kept():
+    # Unit 69241: Merikansantie 4 a, toinen. krs.
+    item = addressed(make_spider(), "Merikansantie 4 a, toinen. krs")
+    assert item["housenumber"] == "4a"
+    assert item["extras"]["addr:floor"] == "2"
 
 
 def test_parenthetical_building_stripped():
@@ -435,11 +463,12 @@ def test_parenthetical_building_stripped():
     assert item["housenumber"] == "4-6"
 
 
-def test_comma_floor_stripped():
+def test_comma_floor_kept():
     # Unit 80918: Kielotie 7 A, 2.kerros.
     item = addressed(make_spider(), "Kielotie 7 A, 2.kerros")
     assert item["housenumber"] == "7"
     assert item["unit"] == "A"
+    assert item["extras"]["addr:floor"] == "2"
 
 
 def test_comma_building_stripped():
@@ -616,6 +645,17 @@ def test_university_lab_beats_medical_lab():
     # SYNTHETIC: university lab is research, not a medical lab.
     item = full(make_spider(), "Kielilaboratorio", [1359])
     assert item.get_tag("office") == "research"
+
+
+def test_university_buildings_stay_generic():
+    # Units 76785 (Biokeskus 1), 75353 (Päärakennus): individual buildings
+    # are not the institution, and with no building category available
+    # they stay generic rather than mistagging.
+    item = full(make_spider(), "Biokeskus 1", [1359])
+    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("building") is None
+    item = full(make_spider(), "Helsingin yliopiston päärakennus", [1359])
+    assert item.get_tag("amenity") == "yes"
 
 
 def test_youth_guidance_is_office():
@@ -803,11 +843,26 @@ def test_laavu_is_shelter():
     assert item.get_tag("amenity") == "shelter"
 
 
+def test_civil_defence_shelter_is_bomb_shelter():
+    # Units 68539/68494 (nodes 1086/1084 inherit from 1083): civilian
+    # shelters tag amenity=shelter + shelter_type=bomb_shelter, never
+    # military=bunker.
+    item = categorised(make_spider({1086: 1083}), "Koivusaaren metroaseman yleinen väestönsuoja", [1086])
+    assert item.get_tag("amenity") == "shelter"
+    assert item["extras"]["shelter_type"] == "bomb_shelter"
+    assert item.get_tag("military") is None
+
+
 def test_memorial_named_artwork_is_memorial():
     # Unit 55958: national Winter War memorial filed as public art.
     item = full(make_spider(), "Talvisodan kansallinen muistomerkki", [2006])
     assert item.get_tag("historic") == "memorial"
     assert item.get_tag("tourism") is None
+    # memorial=* subtypes by noun (units 23494, 23142).
+    item = full(make_spider(), "Tove Janssonin muistolaatta", [2006])
+    assert item["extras"]["memorial"] == "plaque"
+    item = full(make_spider(), "Marsalkka Mannerheimin ratsastajapatsas", [2006])
+    assert item["extras"]["memorial"] == "statue"
 
 
 def test_talkoolaituri_is_tool_library():  # Unit 79897: Clean-up station, not a pier.
@@ -840,23 +895,23 @@ def test_church_filed_as_sight_stays_church():
 
 
 def test_church_tower_has_no_premises():
-    # Unit 77517 shape: Kallion kirkon torni. A tower is a building part
-    # with no independent premises, so no worship tag — but the named record
-    # is still yielded as amenity=yes per docs/CATEGORIES.md rather than
-    # dropped outright.
-    spider = make_spider()
-    item = Feature()
-    unit = {"name": {"fi": "Kallion kirkon torni"}, "service_nodes": [350, 749]}
-    spider._apply_name(item, unit)
-    spider._apply_category(item, unit)
-    assert item.get_tag("amenity") == "yes"
+    # Unit 77517 shape: Kallion kirkon torni. A tower is not a visitable
+    # church, so no worship tag — but the guided tower visits (273 steps,
+    # city views) make it a sight, not a generic record.
+    item = full(make_spider(), "Kallion kirkon torni", [350, 749])
+    assert item.get_tag("tourism") == "attraction"
     assert item["name"] == "Kallion kirkon torni"
 
 
-def test_boat_berths_stay_uncategorised():
-    # Unit 59456: no honest tag, so amenity=yes (generic), never tagless.
+def test_boat_berths_are_moorings_not_marinas():
+    # Unit 59456: short-term mooring basins tag mooring=yes, never marina.
     item = full(make_spider(), "Kauppatori, Vironallas", [2198, 2199])
-    assert item.get_tag("amenity") == "yes"
+    assert item.get_tag("mooring") == "yes"
+    assert item.get_tag("leisure") is None
+    # mooring=yes is a recognised top-level category (clears the CI
+    # "category is not set" check) and trips the _has_category gate.
+    assert get_category_tags(item) == {"mooring": "yes"}
+    assert make_spider()._has_category(item)
 
 
 def test_company_hq_beats_recycling_filing():
@@ -1115,12 +1170,21 @@ def test_hired_venue_at_library_keeps_program():
 
 
 def test_wellness_studio_without_sauna_word_keeps_table():
-    # SYNTHETIC studio names: wellness filing stands, while rental-sauna
-    # rows (155/264/511) yield to a co-filed events venue.
+    # Pranama Kallio (unit 78519) is a yoga studio, not a sauna: a 2168
+    # filing without sauna evidence or an owned trade word is generic.
+    # Rental-sauna rows (155/264/511) still yield to a co-filed events venue.
     item = full(make_spider(), "Pranama Kallio", [2168, 2173])
-    assert item.get_tag("leisure") == "sauna"
+    assert item.get_tag("amenity") == "yes"
+    # Unit 78500 is literally named "Hyvinvointitila".
+    item = full(make_spider(), "Hyvinvointitila", [2168])
+    assert item.get_tag("amenity") == "yes"
     item = full(make_spider(), "Teurastamo", [155, 2173])
     assert item.get_tag("amenity") == "events_venue"
+    # A rental-sauna filing with an opaque name keeps its sauna: the node
+    # itself identifies the venue (SYNTHETIC — no single-filed rental unit
+    # lacks sauna terms).
+    item = full(make_spider(), "Sugoi", [155])
+    assert item.get_tag("leisure") == "sauna"
 
 
 def test_retail_shop_filed_as_repair_uses_name():
@@ -1390,6 +1454,7 @@ def test_chain_branch_splits():
         ("SPR Kontti", "SPR Kontti Espoo Galleria", "Espoo Galleria", 76073),
         ("Picnic", "Picnic Columbus", "Columbus", 79353),
         ("Musti ja Mirri", "Musti ja Mirri Stockmann", "Stockmann", 79233),
+        ("Musti ja Murri", "Musti ja Murri Munkkivuori", "Munkkivuori", 79231),
         ("Robert's Coffee", "Robert's Coffee Arabia", "Arabia", 78779),
         ("24 Pesula", "24 Pesula Easton", "Easton", 79348),
         ("Eat Poke", "Eat Poke Kaari", "Kaari", 79305),
@@ -1496,7 +1561,6 @@ def test_chain_branch_splits():
         "Partioaitta Outlet",
         "Partioaitta Outlet Helsinki",
         "Fazer 8th Floor",
-        "Musti ja Murri Munkkivuori",
         "Minibuffet",
         "Amarillo",
         "Ravintola Rioni",
@@ -1841,6 +1905,12 @@ def test_email_invalid_rejected():
     assert "email" not in item
 
 
+def test_email_placeholder_rejected():
+    # Unit 70202: etunimi.sukunimi@ is a template, not a contact.
+    item = contacted({"email": "etunimi.sukunimi@vakehyva.fi"})
+    assert "email" not in item
+
+
 def test_parking_plain_capacity():
     # Unit 80707.
     item = parked("Pysäköintialue Soukankuja", "5 pysäköintipaikkaa")
@@ -2112,6 +2182,22 @@ def test_slash_krs_tail_stripped():
     # SYNTHETIC floor-tail address.
     item = addressed(make_spider(), "Katu 5 / 2. krs")
     assert item["housenumber"] == "5"
+    assert item["extras"]["addr:floor"] == "2"
+
+
+def test_dual_housenumber_keeps_first():
+    # Unit 78100: Painiityntie 21 ja 21 B. Unit 69635: Ratakatu 107 ja 109.
+    # Dual numbers collapse to the first; the street stays clean.
+    item = addressed(make_spider(), "Painiityntie 21 ja 21 B")
+    assert (item["street"], item["housenumber"], item["unit"]) == ("Painiityntie", "21", "B")
+    item = addressed(make_spider(), "Ratakatu 107 ja 109")
+    assert (item["street"], item["housenumber"]) == ("Ratakatu", "107")
+
+
+def test_po_box_tail_stripped():
+    # Unit 69320: Turuntie 150, PL 2704. The PO box is not a housenumber.
+    item = addressed(make_spider(), "Turuntie 150, PL 2704")
+    assert (item["street"], item["housenumber"]) == ("Turuntie", "150")
 
 
 def test_dash_entrance_tail_stripped():
@@ -2165,7 +2251,14 @@ def test_wellness_branches():
         ("joogastudio a16", Categories.GYM),
     ]
     for text, expected in cases:
-        assert spider._wellness_category(Categories.SAUNA, text) == expected, text
+        assert spider._wellness_category(Categories.SAUNA, [2168], text) == expected, text
+    # Keepers fall through to their owning rules (spa, trade) or the default.
+    assert spider._wellness_category(Categories.SAUNA, [2168], "kellumo") is None
+    assert spider._wellness_category(Categories.SAUNA, [2168], "hilla helsinki - day spa & shop") is None
+    assert spider._wellness_category(Categories.SAUNA, [2168], "pranama kallio") is Categories.GENERIC_POI
+    # Rental-sauna nodes identify the venue themselves: opaque names keep
+    # their sauna (SYNTHETIC — no single-filed rental unit lacks sauna terms).
+    assert spider._wellness_category(Categories.SAUNA, [155], "pranama kallio") is None
 
 
 def test_activity_branches():
@@ -2304,6 +2397,8 @@ def test_university_branches():
     assert spider._university_category(cat, "terveystalo") == Categories.CLINIC
     assert spider._university_category(cat, "vierastalo") == Categories.TOURISM_GUEST_HOUSE
     assert spider._university_category(cat, "dipoli") is False
+    assert spider._university_category(cat, "kandidaattikeskus") is False
+    assert spider._university_category(cat, "aalto arts kandidaattikeskus") == Categories.OFFICE_ADMINISTRATIVE
     assert spider._university_category(cat, "fysiikan laitos") is None
 
 
@@ -2340,7 +2435,7 @@ def test_activity_playground_with_gear():
 def test_wellness_barber():
     # SYNTHETIC barber filing name.
     spider = make_spider()
-    assert spider._wellness_category(Categories.SAUNA, "parturi next century") == Categories.SHOP_HAIRDRESSER
+    assert spider._wellness_category(Categories.SAUNA, [2168], "parturi next century") == Categories.SHOP_HAIRDRESSER
 
 
 def test_civic_resident_room_and_parish_house():
@@ -2899,8 +2994,8 @@ def test_swedish_name_in_fi_field_stays_whole():
     assert item.get_tag("amenity") == "school"
 
 
-def test_translated_service_tails_stripped():  # Unit 70202: the service designation lives only in sv/en; strip it to
-    # the translated venue.
+def test_translated_service_tails_kept():  # Unit 70202: the service designation lives only in sv/en; keep it in
+    # the translated name (it names the POI, unlike venue/address tails).
     item = named(
         make_spider(),
         "Hämeenkylän koulu",
@@ -2910,13 +3005,44 @@ def test_translated_service_tails_stripped():  # Unit 70202: the service designa
     )
     assert item["name"] == "Opiskeluhuolto"
     assert item["located_in"] == "Hämeenkylän koulu"
-    assert item["extras"]["name:sv"] == "Hämeenkylä skola"
-    assert item["extras"]["name:en"] == "Hämeenkylä School"
-    assert item["extras"]["official_name:sv"] == "Hämeenkylä skola skolhälsovård"
+    assert item["extras"]["name:sv"] == "Hämeenkylä skola skolhälsovård"
+    assert item["extras"]["name:en"] == "Hämeenkylä School school health care"
+    # Full translations duplicate their official forms: no separate copy kept.
+    assert "official_name:sv" not in item["extras"]
     assert item["extras"]["official_name:en"] == "Hämeenkylä School, school health care"
     # Bare service words stay names, never strip to nothing.
     item = named(make_spider(), "Opiskeluhuolto", [2164, 2165], en="Student welfare")
     assert item["extras"]["name:en"] == "Student welfare"
+
+
+def test_name_fi_explicit_with_translations():
+    # SYNTHETIC units through _build_item (named() skips brand, which runs
+    # before the name:fi assignment): every translated name gets its Finnish
+    # counterpart, which is the applied name itself.
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 900001,
+            "name": {"fi": "Sugoi", "sv": "Sugoi hallen", "en": "Sugoi hall"},
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [155],
+        }
+    )
+    assert item["extras"]["name:sv"] == "Sugoi hallen"
+    assert item["extras"]["name:en"] == "Sugoi hall"
+    assert item["extras"]["name:fi"] == item["name"]
+    # Fi-less units fall back to sv/en for the name: those must never mistag
+    # as name:fi.
+    item = spider._build_item(
+        {
+            "id": 900002,
+            "name": {"sv": "Sugoi hallen", "en": "Sugoi hall"},
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [155],
+        }
+    )
+    assert item["extras"]["name:en"] == "Sugoi hall"
+    assert "name:fi" not in item["extras"]
 
 
 def test_translated_address_tails_stripped_like_fi():
@@ -3175,3 +3301,368 @@ def test_tenant_gets_private_type():
     )
     assert item is not None
     assert item["extras"].get("operator:type") == "private"
+
+
+def test_cross_street_kept_whole():
+    # SYNTHETIC: letter streets on both sides of the dash name no single
+    # street; numbered ranges still parse.
+    item = addressed(make_spider(), "Katu 5 - Katu 6")
+    assert item["street_address"] == "Katu 5 - Katu 6"
+    assert "housenumber" not in item
+
+
+def test_parenthesised_staircase_is_unit():
+    # SYNTHETIC: single-letter parens are staircases, not wings.
+    item = addressed(make_spider(), "Katu 5 (A)")
+    assert (item["street"], item["housenumber"], item["unit"]) == ("Katu", "5", "A")
+    item = addressed(make_spider(), "Sairaalatie 8, (A)")
+    assert (item["street"], item["housenumber"], item["unit"]) == ("Sairaalatie", "8", "A")
+
+
+def test_paren_without_number_leaves_no_stray_unit():
+    # SYNTHETIC: a parenthesised letter with no housenumber is not a unit;
+    # the address stays whole and no unit leaks onto the item.
+    item = addressed(make_spider(), "Katu (A)")
+    assert "unit" not in item
+    assert "housenumber" not in item
+    assert item["street_address"] == "Katu (A)"
+
+
+def test_provider_tail_tolerates_trailing_space():
+    # SYNTHETIC: feed trailing space must not break the end anchor.
+    spider = make_spider()
+    assert (
+        spider._provider_tail_operator({"name": {"fi": "Iltap\u00e4kerho, Puuhala Oy "}})
+        == "Puuhala iltap\u00e4iv\u00e4kerhot Oy"
+    )
+
+
+def test_velodrome_is_track_and_spa_keeper():
+    # Node 651 Pyöräilyrata is a track like 670 Karting-rata, not a pitch.
+    # Unit 41334 is the Käpylä velodrome; Hilla Helsinki is unit 80697.
+    item = full(make_spider(), "Velodromi", [651])
+    assert item.get_tag("leisure") == "track"
+    assert item.get_tag("sport") == "cycling"
+    # Spa trade word falls through to its owning rule (unit: Hilla Helsinki).
+    item = full(make_spider(), "Hilla Helsinki - Day Spa & Shop", [2168])
+    assert item.get_tag("shop") == "beauty"
+
+
+def test_generic_coverage_table_rows():
+    # Node-anchored coverage for previously generic units (live unit ids).
+    cases = [
+        ("Shakkilauta, Hesperianpuisto", [2237, 2236], "leisure", "pitch", 73192),
+        ("Saukonpaadenpuiston koirakäymälä", [495, 18, 64], "amenity", "dog_toilet", 66782),
+        ("Keskuspuiston kiintorastit", [600], "leisure", "sports_centre", 64640),
+        ("Metsäpirtin multa, Viikin noutomyyntipiste", [88, 296], "shop", "garden_centre", 22722),
+        ("Leppävaaran pulkkamäki", [2424], "leisure", "playground", 79627),
+        ("Keimolan kilpahiihtokeskus", [596], "leisure", "sports_centre", 42552),
+        ("Laskettelurinne", [576], "leisure", "sports_centre", 45164),
+        ("Inkoon ampumarata", [560], "leisure", "pitch", 79567),
+        ("Inkoon ilma-aserata", [628], "leisure", "sports_hall", 79619),
+        ("Inkoon ampumahiihtoalue", [593], "leisure", "pitch", 79608),
+        ("Torbackan lentopaikka", [676], "aeroway", "aerodrome", 79561),
+        ("Vanhankaupungin vesivoimalaitos", [275, 27], "power", "plant", 7210),
+        ("Perheneuvola pohjoinen työryhmä", [2318], "amenity", "social_facility", 3132),
+        ("Helsingin edunvalvontatoimisto, Helsingin toimipaikka", [775], "office", "government", 28931),
+        ("Hekan asiakaspalvelupiste", [247, 135, 9], "office", "government", 10010),
+        ("Tonttiyksikkö", [249, 137, 536, 76], "office", "government", 21975),
+        ("Asemakaavoitus", [225, 331], "office", "government", 53388),
+        ("Kaupunkitekniikan keskus", [2159], "office", "government", 21971),
+        ("Terveydensuojelu", [104, 109, 119, 114], "office", "government", 8207),
+        ("Tartuntatautien ja infektioiden torjuntayksikkö", [998], "office", "government", 69965),
+        ("Rekrytointipalvelut", [124, 185], "office", "employment_agency", 64078),
+        ("Seure", [124, 185], "office", "employment_agency", 9292),
+        ("VillageWorks Ruoholahti", [157, 2021], "office", "property_management", 79262),
+        ("Energiatori", [274, 26], "office", "consulting", 7206),
+        ("Kaupunkiympäristön arkisto", [313, 331], "amenity", "archive", 57308),
+        ("Ravitsemusterapia, Tikkurilan terveysasema", [1039], "healthcare", "nutrition_counselling", 71847),
+        ("Oulunkylän kuntoutuskeskus sr", [1037], "healthcare", "rehabilitation", 10079),
+        ("Mielenterveystyön perhehoito", [2386, 2385], "amenity", "social_facility", 6030),
+        ("Malminiityn kerhotila", [404], "amenity", "community_centre", 43161),
+        ("EestiMaja Viro-keskus", [355], "amenity", "community_centre", 68933),
+        ("Paloheinän ulkoilumaja", [704], "amenity", "shelter", 41518),
+        ("Pitäjänmäen moottorihalli", [389], "amenity", "community_centre", 8076),
+        ("Nuorten liikennekoulutusalue Tattarisuo", [389, 440], "amenity", "community_centre", 8034),
+        ("Musik- och kulturskolan Sandels", [2417], "amenity", "music_school", 80919),
+        ("Pukinmäen sirkuskoulu", [2412, 2414, 2416, 2417], "amenity", "training", 77595),
+        ("Käsityökoulu", [2401], "amenity", "training", 76961),
+        ("Torra Lövö", [548], "place", "island", 22257),
+        ("Porsas", [548, 71, 502], "place", "island", 50872),
+    ]
+    spider = make_spider()
+    for fi, nodes, tag, value, ref in cases:
+        assert full(spider, fi, nodes).get_tag(tag) == value, (ref, fi)
+
+
+def test_generic_coverage_rescue_nouns():
+    # Bare nouns on fake node 99999 isolate the rescue layer. Rows with ref
+    # None are SYNTHETIC (Mallila names avoid testi*).
+    cases = [
+        ("Rush-trampoliinipuisto", "leisure", "trampoline_park", 53151),
+        ("Seikkailupuisto Korkee", "leisure", "sports_centre", 53144),
+        ("Paloheinän pulkkamäki", "leisure", "playground", 41884),
+        ("Paloheinän ulkoilumaja", "amenity", "shelter", 41518),
+        ("Hiihtomaja", "amenity", "shelter", 40125),
+        ("Pukinmäen mopohalli", "amenity", "community_centre", None),
+        ("Perheneuvola pohjoinen", "amenity", "social_facility", None),
+        ("Nuorisovaltuusto", "office", "government", 20042),
+        ("Helsingin kaupunginhallitus", "office", "government", 25726),
+        ("Kulttuuripaja Kitee", "amenity", "community_centre", None),
+        ("Kansalaistoimintakerros", "amenity", "community_centre", 45057),
+        ("Yleisökassa", "amenity", "payment_centre", 8260),
+        ("Helsinki Kamppi matkatavarasäilytys", "amenity", "luggage_locker", 75621),
+        ("Musiikkistudio Kobra", "amenity", "studio", 75040),
+        ("Lasistudio Hytti", "amenity", "arts_centre", 79711),
+        ("UDUMBARA keramiikka studio", "shop", "pottery", 57095),
+        ("Kontulan askartelupaja", "amenity", "arts_centre", 7992),
+        ("Base Catering", "craft", "caterer", 77038),
+        ("Energiatori", "office", "consulting", 7206),
+        ("Puolustusvoimat, Uudenmaan aluetoimisto", "office", "government", 60154),
+        ("Keski-Uudenmaan ympäristökeskus", "office", "government", 60142),
+        ("Apuvälinemyymälä Aviris", "shop", "medical_supply", 34705),
+        ("Sirkuskoulu Tapanila", "amenity", "training", None),
+        ("Musiikkiopisto Juvenalia", "amenity", "music_school", None),
+        ("Koirakäymälä Mallipuisto", "amenity", "dog_toilet", None),
+        ("Voimalaitos Mallilä", "power", "plant", None),
+        ("Kuntoutuskeskus Mallila", "healthcare", "rehabilitation", None),
+        ("Ravitsemusterapia Mallila", "healthcare", "nutrition_counselling", None),
+        ("Metsäkeskus Mallila", "office", "government", None),
+        ("Exit Room Helsinki", "leisure", "escape_game", 54733),
+        ("Leo's Leikkimaa Mallila", "leisure", "playground", None),
+        ("CityKatsastus Mallila", "amenity", "vehicle_inspection", 68147),
+        ("Pakastus Mallila", "shop", "storage_rental", None),
+        ("Tukisuhdetoiminta Mallila", "amenity", "social_facility", 79223),
+        ("Tiny Wonders", "amenity", "kindergarten", 78360),
+        ("Silmälasistudio", "shop", "optician", 68607),
+        ("Monistamo Mallila", "shop", "copyshop", None),
+    ]
+    spider = make_spider()
+    for fi, tag, value, ref in cases:
+        assert full(spider, fi, [99999]).get_tag(tag) == value, (ref, fi)
+
+
+def test_generic_coverage_sport_venues():
+    # Sport-carrying rescues (untabled names on fake node 99999; Mallila
+    # names are SYNTHETIC and avoid testi* so the test-data filter stays quiet).
+    cases = [
+        ("Joogastudio Mallila", ["yoga"], 78519),
+        ("Pilates Studio Mallila", ["pilates"], 79686),
+        ("Ampumarata Mallila", ["shooting"], 79567),
+        ("Ampumahiihto Mallila", ["biathlon"], 79608),
+        ("Hiihtokeskus Mallila", ["cross_country_skiing"], 42552),
+        ("Shakkilauta Mallipuisto", ["chess"], 73192),
+        ("Kiintorastit Mallila", ["orienteering"], 64640),
+        ("Kiipeilyhalli Mallila", ["climbing"], 78899),
+        ("Padelhalli Mallila", ["padel"], None),
+        ("Arena Center Mallila", ["floorball"], None),
+        ("Laskettelurinne Mallila", ["skiing"], 45164),
+    ]
+    spider = make_spider()
+    for fi, sports, ref in cases:
+        assert full(spider, fi, [99999]).get_tag("sport") == ";".join(sorted(sports)), (ref, fi)
+
+
+def test_island_venue_overrides():
+    # SYNTHETIC: names constructed; cf. live units Klippan 57111 and Särkkä
+    # 57113, whose descs confirm the restaurant villa and yacht club;
+    # Tullisaari passes via the node-503 table row rather than the island branch.
+    spider = make_spider()
+    assert full(spider, "Suomenlinna", [548]).get_tag("tourism") == "attraction"
+    assert full(spider, "Klippan", [548]).get_tag("amenity") == "restaurant"
+    assert full(spider, "Särkkä", [548]).get_tag("leisure") == "marina"
+    assert full(spider, "Tullisaari, viljelypalstat", [503, 73]).get_tag("landuse") == "allotments"
+    assert full(spider, "Helsinki Taxi Boat", [748, 548]).get_tag("tourism") == "tours"
+
+
+def test_wellness_desc_trades():
+    # SYNTHETIC: hand-written descs exercising the helper directly; the
+    # feed has no such description strings.
+    spider = make_spider()
+    assert (
+        spider._wellness_desc_category(
+            Categories.SAUNA, [2168], "kauneushoitola, laaja valikoima kauneushoitopalveluita"
+        )
+        is Categories.SHOP_BEAUTY
+    )
+    assert (
+        spider._wellness_desc_category(Categories.SAUNA, [2168], "parturi-kampaamo, meikkaus- ja stailauspalvelut")
+        is Categories.SHOP_HAIRDRESSER
+    )
+    assert (
+        spider._wellness_desc_category(Categories.SAUNA, [2168], "joogastudio, yinjoogaa ja pilatesta")
+        is Categories.GYM
+    )
+    assert spider._wellness_desc_category(Categories.SAUNA, [155], "kauneushoitola") is None
+
+
+def test_rescue_desc_venue():
+    # Description evidence for 2246-filed activity venues (descs verbatim
+    # from live units Sugoi 78852, EXITE 64714, OLiO VR 79328, HELAXE 68658,
+    # Fööni 57705, Takeoff 44848, Eagle Club 78988, Social Sports 78253,
+    # SuperPark 53150, Laguuni 77927; unit dicts hand-built).
+    spider = make_spider()
+
+    def rescued(fi, nodes, desc):
+        item = Feature()
+        unit = {"name": {"fi": fi}, "service_nodes": nodes, "description": {"fi": desc}}
+        assert spider._rescue_desc_venue(item, unit) is True, fi
+        return item
+
+    assert rescued("Sugoi", [2246], "pelihalli, noin 80 videopeliautomaattia").get_tag("leisure") == "amusement_arcade"
+    assert rescued("EXITE Live Games", [2246], "escape room-pelikeskus").get_tag("leisure") == "escape_game"
+    assert (
+        rescued("OLiO VR", [2246], "VR-areena, pakohuoneet virtuaaliareenalla").get_tag("leisure") == "amusement_arcade"
+    )
+    item = rescued("HELAXE", [2246], "urbaani kirveenheittorata")
+    assert (item.get_tag("leisure"), item.get_tag("sport")) == ("sports_centre", "axe_throwing")
+    assert rescued("Fööni", [2246], "vapaalentotunneli").get_tag("leisure") == "sports_centre"
+    assert (
+        rescued("Takeoff Simulations", [2246], "matkustajalentokonesimulaattorielämys").get_tag("tourism")
+        == "attraction"
+    )
+    item = rescued("Eagle Club", [2246], "TrackMan golf- ja ammuntasimulaattorit")
+    assert (item.get_tag("leisure"), item.get_tag("sport")) == ("sports_centre", "golf")
+    item = rescued("Social Sports Club", [2246], "pelata padelia, golfata simulaattorissa")
+    assert (item.get_tag("leisure"), item.get_tag("sport")) == ("sports_hall", "padel")
+    assert rescued("SuperPark Vantaa", [2246], "temppuile trampoliineilla").get_tag("leisure") == "trampoline_park"
+    assert rescued("Laguuni", [2246], "vuokrattavaksi polkuveneet, SUP-laudat").get_tag("amenity") == "boat_rental"
+    item = rescued(
+        "Outshine Center", [2246], "tennis- ja sulkapallohalli, kolme tenniskenttää ja neljä sulkapallokenttää"
+    )
+    assert (item.get_tag("leisure"), item.get_tag("sport")) == ("sports_hall", "badminton;tennis")
+    assert rescued("Muikku Photo", [2246], "vintage-henkinen photobooth ja luova studio").get_tag("amenity") == "studio"
+    # Gate: other nodes never fire, empty descs never fire (SYNTHETIC units).
+    item = Feature()
+    assert (
+        spider._rescue_desc_venue(
+            item, {"name": {"fi": "Sugoi"}, "service_nodes": [99999], "description": {"fi": "pelihalli"}}
+        )
+        is False
+    )
+    item = Feature()
+    assert (
+        spider._rescue_desc_venue(item, {"name": {"fi": "Sugoi"}, "service_nodes": [2246], "description": {"fi": ""}})
+        is False
+    )
+
+
+def test_malformed_department_rows_are_skipped():
+    # SYNTHETIC: the feed has no non-string fi values (all 689 department
+    # rows probed), but one malformed row must not kill pagination.
+    spider = make_spider()
+    spider.seen_next = set()
+    spider.bootstrap_pending = {"departments", "service_nodes"}
+    payload = {
+        "results": [
+            {"id": 1, "name": {"fi": 123}},
+            {"id": 2, "name": "not-a-dict"},
+            {"id": 3, "name": {"fi": "  "}},
+            {"id": 4, "name": {"fi": "Kasvatus"}},
+            "not-a-dict",
+        ],
+        "next": None,
+    }
+    response = JsonResponse(
+        url="https://www.hel.fi/palvelukarttaws/rest/v4/department/",
+        body=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    assert list(spider.parse_departments(response)) == []
+    assert spider.departments == {4: "Kasvatus"}
+
+
+def test_paren_venue_becomes_located_in():
+    # Unit 78931: parenthesised venues name the host.
+    item = named(make_spider(), "Wigge kuntosali (Gesterbyn koulu)")
+    assert item["name"] == "Wigge kuntosali"
+    assert item["located_in"] == "Gesterbyn koulu"
+    # Aliases and bare qualifiers stay in the name: no venue words, or the
+    # venue slot is already taken (units 78970, 75041, 59979 shapes).
+    item = named(make_spider(), "Harjoitusjäähalli (Kivikko Areena)")
+    assert item["name"] == "Harjoitusjäähalli (Kivikko Areena)"
+    assert "located_in" not in item
+    item = named(make_spider(), "Kuitinmäen koulun liikuntasali (alakoulu)")
+    assert item["name"] == "Kuitinmäen koulun liikuntasali (alakoulu)"
+    assert "located_in" not in item
+    item = named(make_spider(), "Kanniston koulun monitoimisali (entinen nuorisotilan sali)")
+    assert item["name"] == "Kanniston koulun monitoimisali (entinen nuorisotilan sali)"
+    assert "located_in" not in item
+    # Multi-name paren lists stay whole (unit 70349 shape).
+    item = named(make_spider(), "Ingaksenmäki asumispalvelu (Käpälämäki, Jänismäki)")
+    assert item["name"] == "Ingaksenmäki asumispalvelu (Käpälämäki, Jänismäki)"
+    assert "located_in" not in item
+    # Downtown district parens are qualifiers, not venues (unit 75710 shape).
+    item = named(make_spider(), "Koto-Espoo kotoutumispalvelut (Espoon keskus)")
+    assert item["name"] == "Koto-Espoo kotoutumispalvelut (Espoon keskus)"
+    assert "located_in" not in item
+
+
+def test_redundant_city_paren_stripped():
+    # SYNTHETIC through _build_item (needs municipality): the city field
+    # carries the qualifier (cf. unit 74100 "Degerbyn sivukirjasto (Inkoo)").
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 900004,
+            "name": {"fi": "Degerbyn sivukirjasto (Inkoo)"},
+            "municipality": "inkoo",
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [108],
+        }
+    )
+    assert item["name"] == "Degerbyn sivukirjasto"
+    assert item["city"] == "Inkoo"
+
+
+def test_service_gloss_paren_dropped_from_translation():
+    # Unit 80698 shape: descriptor parens are not names.
+    item = named(
+        make_spider(),
+        "Lähilääkärit Leppävaara -palvelupiste",
+        [848],
+        sv="Lähilääkärit Alberga servicepunkt (hälsostationstjänster)",
+    )
+    assert item["extras"]["name:sv"] == "Lähilääkärit Alberga servicepunkt"
+    # ...but type glosses that name the venue stay (unit 8083 shape: the
+    # "unit" in "Community" must not read as a service word).
+    item = named(
+        make_spider(),
+        "Ungdomsgården Rastis",
+        [375],
+        en="Ungdomsgården Rastis (Community Centre)",
+    )
+    assert item["extras"]["name:en"] == "Ungdomsgården Rastis (Community Centre)"
+
+
+def test_redundant_street_tail_stripped_from_translation():
+    # SYNTHETIC through _build_item (needs structured address): unit 72370
+    # shape, sv carries the street the address fields hold.
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 900005,
+            "name": {"fi": "Sikiöseulonnat", "sv": "Fosterscreeningar, Bulevarden 22"},
+            "street_address": {"fi": "Bulevardi 22"},
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [848],
+        }
+    )
+    assert item["extras"]["name:sv"] == "Fosterscreeningar"
+    assert (item["street"], item["housenumber"]) == ("Bulevardi", "22")
+
+
+def test_city_paren_stripped_from_translation():
+    # SYNTHETIC through _build_item (needs city): district/city parens
+    # duplicating the city field go.
+    spider = make_spider()
+    item = spider._build_item(
+        {
+            "id": 900006,
+            "name": {"fi": "Sugoi", "sv": "Sugoi hallen (Helsinki)"},
+            "municipality": "helsinki",
+            "location": {"coordinates": [24.9, 60.2]},
+            "service_nodes": [155],
+        }
+    )
+    assert item["extras"]["name:sv"] == "Sugoi hallen"
