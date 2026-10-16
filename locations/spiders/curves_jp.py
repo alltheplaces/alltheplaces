@@ -10,9 +10,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 
-# Tokyo (EPSG:4301) -> WGS 84 (EPSG:4326) via EPSG:15484 (Tokyo to WGS 84 (108))
-TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
-
 
 class CurvesJPSpider(Spider):
     name = "curves_jp"
@@ -21,6 +18,7 @@ class CurvesJPSpider(Spider):
     start_urls = ["https://www.curves.co.jp/search/shops.json"]
 
     def parse(self, response: Response) -> Iterable[Feature]:
+        transformer = Transformer.from_pipeline("EPSG:15484")
         for shop in response.json():
             # Upcoming clubs carry the opening date in the name,
             # e.g. "大塚駅前 ＜2026年10月13日オープン＞" or "町田三和小川 ＜2027年オープン予定＞"
@@ -32,7 +30,7 @@ class CurvesJPSpider(Spider):
             item["ref"] = shop["url"].rsplit("/", 1)[-1].removesuffix(".php")
             item["branch"] = branch.strip()
             # The coordinates are in the Tokyo datum, about 450 m off from WGS 84
-            item["lat"], item["lon"] = TOKYO_TO_WGS84.transform(float(shop["lat"]), float(shop["long"]))
+            item["lat"], item["lon"] = transformer.transform(float(shop["lat"]), float(shop["long"]))
             item["postcode"] = shop["zipcode"]
             item["state"] = shop["pref"]
             item["city"] = shop["city"]
