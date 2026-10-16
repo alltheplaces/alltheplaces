@@ -15,6 +15,7 @@ class PipoosBENLSpider(CrawlSpider, StructuredDataSpider):
     wanted_types = ["LocalBusiness"]
     search_for_twitter = False
     search_for_facebook = False
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         name = item.pop("name", "") or ""
