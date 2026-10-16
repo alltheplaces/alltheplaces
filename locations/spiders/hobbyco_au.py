@@ -64,8 +64,13 @@ class HobbycoAUSpider(PlaywrightSpider):
             item = Feature()
             item["ref"] = props.get("email", "").split("@")[0] or props.get("address")
             item["branch"] = props.get("address").removeprefix("HOBBYCO ")
-            item["city"] = props.get("city")
-            item["postcode"] = props.get("postalCode")
+            city = props.get("city") or ""
+            # The city field also contains the state and postcode, e.g., 'RHODES NSW 2138'.
+            if match := re.match(r"^(.*?)\s+([A-Z]{2,3})\s+(\d{4})$", city.strip()):
+                item["city"] = match.group(1).title()
+                item["state"] = match.group(2)
+                item["postcode"] = match.group(3)
+            # props.get("postalCode") appears to be a US ZIP code.
             item["phone"] = props.get("phone") or None
             item["email"] = props.get("email") or None
             item["website"] = props.get("maps") or None
