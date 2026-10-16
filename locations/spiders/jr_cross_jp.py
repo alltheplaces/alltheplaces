@@ -4,6 +4,7 @@ from typing import Iterable
 from locations.categories import Categories, Drink, Extras, PaymentMethods, Sells, apply_category, apply_yes_no
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
+from locations.lang_utils import katakana_to_hiragana
 from locations.storefinders.location_cloud import LocationCloudSpider
 
 NEWDAYS = {"brand": "NewDays", "brand_wikidata": "Q11234763"}
@@ -44,14 +45,18 @@ class JrCrossJPSpider(LocationCloudSpider):
         item.update(BECKS)
         item["branch"] = source_feature["name"].removeprefix(BECKS["brand"]).strip()
         if ruby := source_feature.get("ruby"):
-            item["extras"]["branch:ja-Kana"] = ruby.removeprefix("ベックスコーヒーショップ").strip()
+            item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(
+                ruby.removeprefix("ベックスコーヒーショップ").strip()
+            )
         yield item
 
     def parse_newdays(self, item: Feature, source_feature: dict, flags: dict) -> Iterable[Feature]:
         item.update(NEWDAYS)
         item["branch"] = _strip_brand(source_feature["name"])
         if ruby := source_feature.get("ruby"):
-            item["extras"]["branch:ja-Hira"] = re.sub(r"^[0-9]+", "", ruby).removeprefix("ニューデイズ")
+            item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(
+                re.sub(r"^[0-9]+", "", ruby).removeprefix("ニューデイズ")
+            )
 
         apply_yes_no(Sells.ALCOHOL, item, flags.get("お酒"))
         apply_yes_no(Sells.TOBACCO, item, flags.get("たばこ"))
