@@ -103,7 +103,7 @@ NAME_PREFIXES = [
     ("ロルフベンツ", "ロルフベンツ"),
 ]
 
-TIME_SEGMENT_RE = re.compile(r"([^\d]*?)(\d{1,2}:\d{2})[～~](\d{1,2}:\d{2})")
+TIME_SEGMENT_RE = re.compile(r"([^\d]*?)(\d{1,2}:\d{2})[～~](\d{1,2}:\d{2})(?:[（(]([^)）]*)[)）])?")
 
 
 class YamadaDenkiJPSpider(Spider):
@@ -230,7 +230,8 @@ class YamadaDenkiJPSpider(Spider):
         scoped: list[tuple[set[str], str, str]] = []
         covered: set[str] = set()
         holiday_ranges: list[tuple[str, str]] = []
-        for dayspec, open_t, close_t in time_segments:
+        for dayspec, open_t, close_t, trail in time_segments:
+            dayspec = f"{dayspec} {trail}".strip()
             if "祝" in dayspec:
                 holiday_ranges.append((open_t, close_t))
             codes = YamadaDenkiJPSpider._day_codes(dayspec)
@@ -253,7 +254,7 @@ class YamadaDenkiJPSpider(Spider):
     @staticmethod
     def _day_codes(dayspec: str) -> set[str] | None:
         """Expand a japanese day spec into day codes. None means 'all days' (base)."""
-        dayspec = dayspec.strip("、/，, \u3000")
+        dayspec = dayspec.strip("、/，, \u3000()（）")
         if not dayspec:
             return None
         codes: set[str] = set()
@@ -266,8 +267,24 @@ class YamadaDenkiJPSpider(Spider):
                 codes |= set(DAYS_WEEKDAY)
             elif token == "土日":
                 codes |= set(DAYS_WEEKEND)
-            elif token in DAYS_JP:
-                codes.add(DAYS_JP[token])
+            elif "～" in token or "~" in token:
+                start, end = re.split(r"[～~]", token)
+                if start.endswith("曜"):
+                    start += "日"
+                if end.endswith("曜"):
+                    end += "日"
+                start_index = DAYS.index(DAYS_JP[start])
+                end_index = DAYS.index(DAYS_JP[end])
+                codes |= set(
+                    DAYS[start_index : end_index + 1]
+                    if start_index <= end_index
+                    else DAYS[start_index:] + DAYS[: end_index + 1]
+                )
+            else:
+                if token.endswith("曜"):
+                    token += "日"
+                if token in DAYS_JP:
+                    codes.add(DAYS_JP[token])
         return codes
 
     @staticmethod
@@ -293,4 +310,6 @@ class YamadaDenkiJPSpider(Spider):
         for weekday in plain_weekdays:
             if weekday not in nth_weekdays:
                 clauses.append(f"{DAYS_JP[weekday]} off")
+        if "祝日" in closing:
+            clauses.append("PH off")
         return clauses
