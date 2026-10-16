@@ -15,14 +15,14 @@ class PepeJeansSpider(Spider):
 
     async def start(self) -> AsyncIterator[FormRequest]:
         yield FormRequest(
-            url=f"https://www.pepejeans.com/mobify/slas/private/shopper/auth/v1/organizations/f_ecom_blrq_prd/oauth2/token",
+            url="https://www.pepejeans.com/mobify/slas/private/shopper/auth/v1/organizations/f_ecom_blrq_prd/oauth2/token",
             formdata={"grant_type": "client_credentials", "channel_id": "PJG-ES"},
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         token = response.json()["access_token"]
         yield JsonRequest(
-            url=f"https://www.pepejeans.com/mobify/proxy/api/store/shopper-stores/v1/organizations/f_ecom_blrq_prd/store-search?distanceUnit=km&latitude=0&longitude=0&maxDistance=20000&siteId=PJG-ES&limit=200",
+            url="https://www.pepejeans.com/mobify/proxy/api/store/shopper-stores/v1/organizations/f_ecom_blrq_prd/store-search?distanceUnit=km&latitude=0&longitude=0&maxDistance=20000&siteId=PJG-ES&limit=200",
             headers={"Authorization": f"Bearer {token}"},
             callback=self.parse_locations,
         )
@@ -33,6 +33,8 @@ class PepeJeansSpider(Spider):
                 [location.pop("address1", None), location.pop("address2", None)]
             )
             item = DictParser.parse(location)
+            item.pop("phone", None)
+            item.pop("email", None)
             item.pop("state", None)
 
             name = location["name"]
