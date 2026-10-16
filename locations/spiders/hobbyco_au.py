@@ -37,6 +37,8 @@ class HobbycoAUSpider(PlaywrightSpider):
                 item["city"] = match.group(1).title()
                 item["state"] = match.group(2)
                 item["postcode"] = match.group(3)
+            else:
+                item["city"] = city
             # props.get("postalCode") appears to be a US ZIP code.
             item["phone"] = props.get("phone") or None
             item["email"] = props.get("email") or None
