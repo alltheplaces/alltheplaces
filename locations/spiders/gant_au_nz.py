@@ -1,19 +1,21 @@
 import re
 from typing import Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class GantAUNZSpider(Spider):
+class GantAUNZSpider(PlaywrightSpider):
     name = "gant_au_nz"
     item_attributes = {"brand": "GANT", "brand_wikidata": "Q1493667"}
     allowed_domains = ["gant.com.au"]
     start_urls = ["https://gant.com.au/pages/stores"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for location in response.xpath("//store-locator-marker"):
