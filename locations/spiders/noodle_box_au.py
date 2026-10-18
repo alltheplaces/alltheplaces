@@ -32,8 +32,8 @@ class NoodleBoxAUSpider(Spider):
             item["city"] = location.get("suburb")
             item["state"] = location.get("state")
             item["postcode"] = location.get("postcode")
-            if not item["postcode"] or not item["state"]:
-                self.extract_state_and_postcode(item, location.get("address") or [])
+            if not item["city"] or not item["state"] or not item["postcode"]:
+                self.extract_address_parts(item, location.get("address") or [])
             item["phone"] = (location.get("contact") or {}).get("phone")
 
             apply_category(Categories.FAST_FOOD, item)
@@ -42,12 +42,18 @@ class NoodleBoxAUSpider(Spider):
             yield item
 
     @staticmethod
-    def extract_state_and_postcode(item: Feature, address_lines: list[str]) -> None:
+    def extract_address_parts(item: Feature, address_lines: list[str]) -> None:
         # Some brands only provide address lines, ending with e.g. "Altona North VIC 3025"
         last_line = next((line for line in reversed(address_lines) if line and line.strip()), "")
         if not item["postcode"]:
             if postcodes := POSTCODE.findall(last_line):
                 item["postcode"] = postcodes[-1]
-        if not item["state"]:
-            if m := STATE.search(last_line):
+        if m := STATE.search(last_line):
+            if not item["state"]:
                 item["state"] = m.group(1).upper().replace("VICTORIA", "VIC")
+            if not item["city"]:
+                # City is the last comma separated part before the state, e.g. "Shop 3, 440 Brisbane Road, Arundel QLD"
+                before_state = POSTCODE.sub("", last_line[: m.start()]).split(",")
+                city = next((part.strip() for part in reversed(before_state) if part.strip()), "")
+                if city and not re.search(r"\d", city):
+                    item["city"] = city
