@@ -65,7 +65,7 @@ class AdeccoSitecoreSpider(Spider):
         )
 
     async def start(self) -> AsyncIterator[Request]:
-        state = {"entries": {}, "origins": {}, "total": 0, "requests": 0, "new_in_pass": 0, "retries": 0}
+        state = {"entries": {}, "origins": {}, "total": 0, "requests": 0, "new_in_pass": 0, "retries": 0, "tried": []}
         yield self.make_request(state | {"distrusted": None}, 0)
 
     def parse(self, response: TextResponse, state: dict) -> Iterable[Feature | Request]:
@@ -106,13 +106,18 @@ class AdeccoSitecoreSpider(Spider):
             # Both servers returned degraded pages: no preference left.
             state["distrusted"] = ""
         untrusted = degraded or (origin and origin == state["distrusted"])
+        state["tried"].append(origin or "?")
         if untrusted and state["retries"] < self.max_retries:
             state["retries"] += 1
             yield self.make_request(state, state["requests"] % max(ceil(state["total"] / self.page_size), 1))
             return
         if untrusted:
-            self.logger.warning(f"Keeping a page from origin server {origin!r} (degraded: {degraded})")
+            self.logger.warning(
+                f"Keeping a page with no acceptable answer in {len(state['tried'])} tries"
+                f" (origin servers: {dict(Counter(state['tried']))}, last one degraded: {degraded})"
+            )
         state["retries"] = 0
+        state["tried"] = []
         # A degraded page's total is wrong either way: only use it when there is no other one yet.
         if not degraded or not state["total"]:
             state["total"] = max(state["total"], results.get("total") or 0)
