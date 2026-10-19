@@ -63,7 +63,8 @@ class MapionSpider(Spider):
         text = response.text.strip()
         data = json.loads(text[text.index("(") + 1 : text.rindex(")")])["mbml"]
 
-        if page * self.api_page_size < int(data["Property"]["hit"]):
+        # if page * self.api_page_size <= int(data["Property"]["hit"]):
+        if int(data["Property"]["end-index"]) < int(data["Property"]["hit"]):
             yield self.make_api_request(page + 1)
 
         pois = data["PoiList"].get("Poi", [])

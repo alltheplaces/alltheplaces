@@ -59,4 +59,7 @@ class NorthPacificBankJPSpider(MapionSpider):
             if hours := re.match(r"(\d{1,2}:\d{2})[~〜～](\d{1,2}:\d{2})", segment.strip()):
                 open_time = f"{hours.group(1)}"
                 close_time = f"{hours.group(2)}"
-                oh.add_days_range(days, open_time, close_time)
+                try:
+                    oh.add_days_range(days, open_time, close_time)
+                except:
+                    pass
