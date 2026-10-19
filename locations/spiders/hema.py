@@ -1,10 +1,11 @@
+import re
 from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.google_url import extract_google_position
-from locations.hours import DAYS_NL, OpeningHours, sanitise_day
+from locations.hours import DAYS_DE, DAYS_FR, DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
@@ -19,17 +20,19 @@ class HemaSpider(Spider):
         "https://www.hema.com/on/demandware.store/Sites-HemaDE-Site/de_DE/Stores-Load",
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
+    DAYS = {"NL": DAYS_NL, "BE": DAYS_NL, "FR": DAYS_FR, "DE": DAYS_DE}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         country = response.url.split("/Stores-Load", 1)[0].split("_")[-1]
         for location in response.xpath('//li[contains(@class, "store")]'):
             item = Feature()
-            item["ref"] = location.xpath('.//input[@name="stores"]/@value').get()
-            item["branch"] = location.xpath(".//h4/text()").get()
-            item["street_address"], item["postcode"], item["city"], *_ = location.xpath(
-                './/div[@class="store-info-main store-info js-selected-store-info"]/span/span/text()'
-            ).getall()
-            item["phone"] = response.xpath('.//a[@class="store-info-phone"]/text()').get()
+            item["ref"] = location.xpath('.//input[contains(@class, "js-store-select")]/@value').get()
+            info = location.xpath('.//div[contains(@class, "js-selected-store-info")]')[0]
+            item["branch"] = info.xpath("./h4/text()").get()
+            item["street_address"] = info.xpath('.//span[@class="js-store-address"]/text()').get()
+            item["postcode"], item["city"] = info.xpath('.//span[@class="row-break"]/span/text()').getall()
+            item["city"] = re.sub(r"\s*\([A-Z]{2}\)$", "", item["city"])
+            item["phone"] = info.xpath('.//a[@class="store-info-phone"]/text()').get()
             extract_google_position(item, location)
             item["country"] = country
 
@@ -37,9 +40,9 @@ class HemaSpider(Spider):
             for rule in location.xpath(
                 './/ul[@class="selected-store-opening-hours js-selected-store-opening-hours"]/li'
             ):
-                if day := sanitise_day(rule.xpath('span[@class="day"]/text()').get(), DAYS_NL):
+                if day := sanitise_day(rule.xpath('span[@class="day"]/text()').get(), self.DAYS[country]):
                     times = rule.xpath('span[@class="time"]/text()').get().strip()
-                    if times == "gesloten":
+                    if " - " not in times:  # closed
                         continue
                     item["opening_hours"].add_range(day, *times.split(" - "))
 
