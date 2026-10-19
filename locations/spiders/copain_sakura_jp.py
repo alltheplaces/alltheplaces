@@ -96,6 +96,8 @@ class CopainSakuraJPSpider(CrawlSpider):
                 continue
             if not (m := TIME_RANGE_RE.search(line)):
                 return None
+            if line[m.end() :].strip(" \u3000"):
+                return None  # e.g. a lunch break "（13:00～14:00除く）"
             label = line[: m.start()].strip(" \u3000")
             days = self.parse_days(label)
             if days is None or not label:

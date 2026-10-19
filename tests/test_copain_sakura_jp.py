@@ -34,5 +34,6 @@ def test_day_ranges_and_sunday_note():
 def test_unclear_hours_are_skipped():
     assert hours(["9：00～18：00", "※12/31～1/3を除く"]) is None
     assert hours(["平日9：30～18：30（13：00～14：00除く）", "学校休業日9：30～18：30"]) is None
+    assert hours(["平日9：30～18：30（13：00～14：00除く）"]) is None
     assert hours(["平日　9：00～18：00", "土・日・祝日　9：00～18：00", "※第一日曜日のみ営業"]) is None
     assert hours([]) is None
