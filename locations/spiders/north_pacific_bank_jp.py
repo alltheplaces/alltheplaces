@@ -13,7 +13,9 @@ class NorthPacificBankJPSpider(MapionSpider):
     name = "north_pacific_bank_jp"
     item_attributes = {"brand": "北洋銀行", "brand_wikidata": "Q11402354"}
     allowed_domains = ["hokuyo.mapion.co.jp"]
-    feature_url_template = "https://hokuyo.mapion.co.jp/b/hokuyo/attr/?t=attr_con&start={}"
+    api_group = "hokuyo"
+    website_template = "https://hokuyo.mapion.co.jp/b/hokuyo/info/{}/"
+    # feature_url_template = "https://hokuyo.mapion.co.jp/b/hokuyo/attr/?t=attr_con&start={}"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
 
