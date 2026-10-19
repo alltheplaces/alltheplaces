@@ -104,6 +104,12 @@ class DaihatsuJPSpider(Spider):
         if re.search(r"第|隔週|不定|一部|カレンダー|祝|変更|異な|指定|追加|\d回", closed):
             return None  # closed on some weeks only, or on dates we don't have
         closed = re.sub(r"\(.*?\)|【.*?】", "", closed)
+        # e.g. "毎週月〜水曜日" becomes "毎週月・火・水曜日"
+        closed = re.sub(
+            r"([月火水木金土日])曜?日?\s*[〜~ー−-]\s*([月火水木金土日])",
+            lambda m: "・".join("月火水木金土日"["月火水木金土日".index(m[1]) : "月火水木金土日".index(m[2]) + 1]),
+            closed,
+        )
         # e.g. "毎週月・火曜日", "毎週月曜日、火曜日"
         named = "".join(re.findall(r"(?<!曜)((?:[月火水木金土日][・、]?)+)曜", closed))
         closed_days = {DAYS[i] for i, d in enumerate("月火水木金土日") if d in named}
