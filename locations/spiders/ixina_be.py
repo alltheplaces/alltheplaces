@@ -4,6 +4,7 @@ from typing import Iterable
 from scrapy import Request
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
+from twisted.python.failure import Failure
 
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
@@ -27,35 +28,47 @@ class IxinaBESpider(SitemapSpider, StructuredDataSpider):
         (r"/trouvez-votre-magasin/magasin-de-cuisine-ixina-", "parse_sd"),
     ]
 
-    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Request]:
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable:
         self.clean_item(item)
-        nl_url = response.xpath('//link[@rel="alternate"][@hreflang="nl-BE"]/@href').get()
-        yield Request(nl_url, callback=self.parse_nl, cb_kwargs={"item": item})
+        if nl_url := response.xpath('//link[@rel="alternate"][@hreflang="nl-BE"]/@href').get():
+            yield Request(nl_url, callback=self.parse_nl, errback=self.parse_nl_error, cb_kwargs={"item": item})
+        else:
+            # Without its Dutch page the store is still worth keeping, in French.
+            self.logger.warning("No Dutch page for %s", response.url)
+            yield item
+
+    def parse_nl_error(self, failure: Failure) -> Iterable[Feature]:
+        self.logger.warning("Dutch page failed for %s", failure.request.url)
+        yield failure.request.cb_kwargs["item"]
 
     def parse_nl(self, response: TextResponse, item: Feature) -> Iterable[Feature]:
-        for ld_data in self.iter_linked_data(response):
-            nl_item = LinkedDataParser.parse_ld(ld_data)
-            self.clean_item(nl_item)
-            nl_item["website"] = response.url
-            localised = {"fr": item.copy(), "nl": nl_item}
-
-            postcode = int(item.get("postcode") or 0)
-            language = "nl" if any(postcode in r for r in DUTCH_POSTCODES) else "fr"
-            for field in ("branch", "city", "street_address", "website"):
-                item[field] = localised[language][field]
-
-            for code in ("fr", "nl"):
-                item["extras"][f"website:{code}"] = localised[code]["website"]
-                # A translation is only worth recording where it differs from the local name.
-                for field, key in (
-                    ("branch", "branch"),
-                    ("city", "addr:city"),
-                    ("street_address", "addr:street_address"),
-                ):
-                    if localised["fr"][field] != localised["nl"][field]:
-                        item["extras"][f"{key}:{code}"] = localised[code][field]
-
+        if (ld_data := next(self.iter_linked_data(response), None)) is None:
+            self.logger.warning("No linked data on %s", response.url)
             yield item
+            return
+
+        nl_item = LinkedDataParser.parse_ld(ld_data)
+        self.clean_item(nl_item)
+        nl_item["website"] = response.url
+        localised = {"fr": item.copy(), "nl": nl_item}
+
+        postcode = int(item.get("postcode") or 0)
+        language = "nl" if any(postcode in r for r in DUTCH_POSTCODES) else "fr"
+        for field in ("branch", "city", "street_address", "website"):
+            item[field] = localised[language][field]
+
+        for code in ("fr", "nl"):
+            item["extras"][f"website:{code}"] = localised[code]["website"]
+            # A translation is only worth recording where it differs from the local name.
+            for field, key in (
+                ("branch", "branch"),
+                ("city", "addr:city"),
+                ("street_address", "addr:street_address"),
+            ):
+                if localised["fr"][field] != localised["nl"][field]:
+                    item["extras"][f"{key}:{code}"] = localised[code][field]
+
+        yield item
 
     @staticmethod
     def clean_item(item: Feature) -> None:
