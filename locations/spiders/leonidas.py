@@ -19,8 +19,7 @@ class LeonidasSpider(JSONBlobSpider):
         item["branch"] = item.pop("name").upper().removeprefix("LEONIDAS ")
         try:
             oh = OpeningHours()
-            for key, value in feature.get("opening_hours", []).items():
-                day = key
+            for day, value in feature.get("opening_hours", []).items():
                 if value:
                     for open_close_time in value:
                         open_time = open_close_time["opens"]
