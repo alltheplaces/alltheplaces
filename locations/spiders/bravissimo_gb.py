@@ -23,7 +23,7 @@ class BravissimoGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        if item.get("address3"):
+        if feature.get("address3"):
             item["street_address"] = merge_address_lines(
                 [feature["address"]["address2"], feature["address"]["address3"]]
             )
