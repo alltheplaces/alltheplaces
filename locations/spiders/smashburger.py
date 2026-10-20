@@ -30,16 +30,17 @@ class SmashburgerSpider(CrawlSpider, StructuredDataSpider):
         page_props = response.xpath('//script[contains(text(), "decodeURIComponent")]/text()').re_first(
             r'JSON\.parse\(decodeURIComponent\("([^"]+)"\)'
         )
-        document = json.loads(unquote(page_props))["document"]
-        item["phone"] = document.get("mainPhone")
-        hours = document.get("hours", {})
-        item["opening_hours"] = oh = OpeningHours()
-        for day in DAYS_FULL:
-            day_hours = hours.get(day.lower(), {})
-            if day_hours.get("isClosed"):
-                oh.set_closed(day)
-            for interval in day_hours.get("openIntervals", []):
-                oh.add_range(day, interval["start"], interval["end"])
+        if page_props:
+            document = json.loads(unquote(page_props))["document"]
+            item["phone"] = document.get("mainPhone")
+            hours = document.get("hours", {})
+            item["opening_hours"] = oh = OpeningHours()
+            for day in DAYS_FULL:
+                day_hours = hours.get(day.lower(), {})
+                if day_hours.get("isClosed"):
+                    oh.set_closed(day)
+                for interval in day_hours.get("openIntervals", []):
+                    oh.add_range(day, interval["start"], interval["end"])
 
         apply_category(Categories.FAST_FOOD, item)
         yield item
