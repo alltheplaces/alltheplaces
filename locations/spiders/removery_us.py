@@ -22,7 +22,7 @@ class RemoveryUSSpider(SitemapSpider, StructuredDataSpider):
         item["twitter"] = None
         item.pop("name", None)
         item["opening_hours"] = self.parse_hours(response)
-        apply_category(Categories.SHOP_BEAUTY.value | {"beauty": "tattoo_removal"}, item)
+        apply_category(Categories.SHOP_BEAUTY_TATTOO_REMOVAL, item)
         yield item
 
     @staticmethod
