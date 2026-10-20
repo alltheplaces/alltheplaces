@@ -43,8 +43,9 @@ class HemaSpider(Spider):
                 if day := sanitise_day(rule.xpath('span[@class="day"]/text()').get(), self.DAYS[country]):
                     times = rule.xpath('span[@class="time"]/text()').get().strip()
                     if " - " not in times:  # closed
-                        continue
-                    item["opening_hours"].add_range(day, *times.split(" - "))
+                        item["opening_hours"].set_closed(day)
+                    else:
+                        item["opening_hours"].add_range(day, *times.split(" - "))
 
             yield item
 
