@@ -18,7 +18,7 @@ class HruskaCZSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for store in response.xpath('//div[@class="prodejny"]/div[position()>1]'):
             item = Feature()
-            item["ref"] = store.xpath("normalize-space(./div[1])").re_first(r"č\.\s*(\d+)")
+            item["name"], item["ref"] = store.xpath("normalize-space(./div[1])").get().split(" č.", 1)
             item["addr_full"] = store.xpath("normalize-space(./div[2])").get()
             item["phone"] = store.xpath("normalize-space(./div[4])").get()
             item["opening_hours"] = oh = OpeningHours()
