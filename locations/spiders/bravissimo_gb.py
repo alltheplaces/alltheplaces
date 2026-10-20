@@ -14,7 +14,7 @@ from locations.categories import Categories, apply_category, Clothes, apply_clot
 
 class BravissimoGBSpider(JSONBlobSpider):
     name = "bravissimo_gb"
-    item_attributes = {"brand": "Bravissimo", "brand_wikidata": "Q4958430"}
+    item_attributes = {"name": "Bravissimo", "brand": "Bravissimo", "brand_wikidata": "Q4958430"}
     start_urls = ["https://www.bravissimo.com/shops/all/"]
 
     def extract_json(self, response):
