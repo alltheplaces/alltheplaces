@@ -19,6 +19,7 @@ HEALTHCARE_CATEGORIES = {
     "Behavioral and Mental Health": (Categories.PSYCHOTHERAPIST, [HealthcareSpecialities.PSYCHOTHERAPHY_BEHAVIOR]),
     "Breast Health Centers": (Categories.CLINIC, [HealthcareSpecialities.ONCOLOGY]),
     "Cancer Care and Oncology": (Categories.CLINIC, [HealthcareSpecialities.ONCOLOGY]),
+    "Dental Care": (Categories.DENTIST, []),
     "Dermatology": (Categories.CLINIC, [HealthcareSpecialities.DERMATOLOGY]),
     "Endocrinology and Diabetes": (Categories.CLINIC, [HealthcareSpecialities.ENDOCRINOLOGY]),
     "Ear, Nose and Throat (ENT)": (Categories.CLINIC, [HealthcareSpecialities.OTOLARYNGOLOGY]),
@@ -87,13 +88,13 @@ class MercyHealthUSSpider(Spider):
             else:
                 facility_type = location.get("FacilityType", {}).get("Name")
             if category := HEALTHCARE_CATEGORIES.get(facility_type):
-                for top_level_category, specialities in category:
-                    apply_category(top_level_category, item)
-                    if specialities:
-                        apply_healthcare_specialities(specialities, item)
+                top_level_category, specialities = category
+                apply_category(top_level_category, item)
+                if specialities:
+                    apply_healthcare_specialities(specialities, item)
                 if facility_type == "Home Health Care":
                     apply_yes_no("home_visit", item, True)
+                yield item
             else:
                 self.logger.warning("Unknown facility type: {}".format(facility_type))
                 self.crawler.stats.inc_value(f"atp/{self.name}/unmapped_category/{facility_type}")
-            yield item

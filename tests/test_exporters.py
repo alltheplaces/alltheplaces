@@ -49,18 +49,18 @@ def test_has_geom():
     geojson_exporter = GeoJsonExporter(None)
     ld_geojson_exporter = LineDelimitedGeoJsonExporter(None)
 
-    assert has_geom(geojson_exporter._get_serialized_fields(item))
-    assert has_geom(ld_geojson_exporter._get_serialized_fields(item))
+    assert has_geom(geojson_exporter.get_serialized_fields(item))
+    assert has_geom(ld_geojson_exporter.get_serialized_fields(item))
 
     item["lat"] = item["lon"] = 1
 
-    assert has_geom(geojson_exporter._get_serialized_fields(item))
-    assert has_geom(ld_geojson_exporter._get_serialized_fields(item))
+    assert has_geom(geojson_exporter.get_serialized_fields(item))
+    assert has_geom(ld_geojson_exporter.get_serialized_fields(item))
 
     item["lat"] = item["lon"] = 0
 
-    assert has_geom(geojson_exporter._get_serialized_fields(item))
-    assert has_geom(ld_geojson_exporter._get_serialized_fields(item))
+    assert has_geom(geojson_exporter.get_serialized_fields(item))
+    assert has_geom(ld_geojson_exporter.get_serialized_fields(item))
 
 
 def test_item_socials():

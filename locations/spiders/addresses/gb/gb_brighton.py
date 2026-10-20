@@ -5,7 +5,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbBrightonSpider(OwenBaseSpider):
-    name = "gb_brighton"
+    # name = "gb_brighton"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Contains public sector information from Brighton & Hove City Council licensed under the Open Government Licence v3.0."
         + " Contains OS data © Crown copyright and database right 2025."

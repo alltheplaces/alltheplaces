@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -36,7 +37,9 @@ class FraserHealthSpider(scrapy.Spider):
             "website": response.url,
         }
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.HOSPITAL, item)
+        yield item
 
     def parse(self, response):
         places = response.json()

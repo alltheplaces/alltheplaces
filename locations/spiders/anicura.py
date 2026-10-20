@@ -2,6 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -43,6 +44,18 @@ class AnicuraSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name").removeprefix("AniCura ")
         extract_google_position(item, response)
+
+        place = ld_data.get("location") or {}
+        address = place.get("address") or {}
+        item["street_address"] = address.get("streetAddress")
+        item["postcode"] = address.get("postalCode")
+        item["city"] = address.get("addressLocality")
+        item["opening_hours"] = oh = OpeningHours()
+        for rule in place.get("openingHoursSpecification") or []:
+            opens, closes = rule["opens"], rule["closes"]
+            if opens == closes == "00:00":
+                closes = "24:00"
+            oh.add_range(rule["dayOfWeek"], opens, closes)
 
         apply_category(Categories.VETERINARY, item)
 

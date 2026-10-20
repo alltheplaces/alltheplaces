@@ -17,13 +17,12 @@ class MilletsGBSpider(Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store_id in json.loads(
-            response.xpath('//*[@id="app-store-locator"]//*[@type="application/json"]//text()').get()
-        )["stores"]:
-            yield JsonRequest(
-                url=f"https://integrations-c3f9339ff060a907cbd8.o2.myshopify.dev/api/stores?fid={store_id['id']}",
-                callback=self.parse_location,
-            )
+        config = json.loads(response.xpath('//*[@id="app-store-locator"]//*[@type="application/json"]//text()').get())
+        store_ids = ",".join(store["id"] for store in config["stores"])
+        yield JsonRequest(
+            url=f'{config["api"]["origin"]}{config["api"]["pathname"]}?fid={store_ids}',
+            callback=self.parse_location,
+        )
 
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
         for raw_data in response.json()["stores"]:

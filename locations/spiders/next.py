@@ -7,6 +7,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.linked_data_parser import LinkedDataParser
 from locations.pipelines.address_clean_up import clean_address
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class NextSpider(Spider):
@@ -18,6 +19,7 @@ class NextSpider(Spider):
     item_attributes = NEXT
     start_urls = ["https://www.next.co.uk/countryselect"]
     handle_httpstatus_all = True
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     @staticmethod
     def get_time(time: str) -> str:
@@ -88,15 +90,11 @@ class NextSpider(Spider):
                 if item["phone"].replace(" ", "").startswith("+443"):
                     item.pop("phone", None)
             yield item
-        elif data := response.xpath('//script[@type="application/ld+json"]/text()').get():
+        elif data := response.xpath('//*[contains(text(),"postalCode")]/text()').get():
             location = json.loads(data)
             item = LinkedDataParser.parse_ld(location)
             item["ref"] = location["url"].split("/")[-1]
             item["branch"] = item.pop("name")
-            item["street_address"] = location["address"]["streetAddress"]
-            item["city"] = location["address"]["addressLocality"]
-            item["postcode"] = location["address"]["postalCode"]
-            item["country"] = location["address"]["addressCountry"]
             coords = (
                 response.xpath('//script[contains(.,"storeLocator.mapSelectedStore")]/text()')
                 .re_first(r"storeLocator\.mapSelectedStore\((.+)\)")

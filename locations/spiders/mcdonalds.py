@@ -1,6 +1,5 @@
 from typing import AsyncIterator, Iterable
 
-from scrapy import Spider
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -9,16 +8,19 @@ from locations.geo import city_locations, country_iseadgg_centroids
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsSpider(Spider):
+class McdonaldsSpider(PlaywrightSpider):
     name = "mcdonalds"
     item_attributes = {
         "brand": "McDonald's",
         "brand_wikidata": "Q38076",
-        "extras": Categories.FAST_FOOD.value,
     }
     allowed_domains = ["www.mcdonalds.com"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     ISEADGG_COUNTRIES = {"AU", "CA", "NZ", "US"}
 
@@ -136,6 +138,10 @@ class McdonaldsSpider(Spider):
             apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in filter_type)
             apply_yes_no(Extras.WIFI, item, "WIFI" in filter_type)
             apply_yes_no(Extras.DELIVERY, item, "MCDELIVERYSERVICE" in filter_type)
+            # The separate indoorPlayGround/outDoorPlayGround fields can be "0"
+            # even when filterType advertises a PlayPlace.
+            apply_yes_no(Extras.KIDS_AREA, item, bool({"PLAYPLACEPRESENCE", "INDOORPLAYGROUND"} & set(filter_type)))
+            apply_yes_no("kids_area:indoor", item, "INDOORPLAYGROUND" in filter_type)
 
             if "MCCAFE" in filter_type:
                 mccafe = item.deepcopy()

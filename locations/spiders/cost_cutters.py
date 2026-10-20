@@ -1,0 +1,53 @@
+from typing import AsyncIterator
+
+from scrapy import Spider
+from scrapy.http import JsonRequest, Request
+
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
+
+
+class CostCuttersSpider(Spider):
+    name = "cost_cutters"
+    item_attributes = {"brand": "Cost Cutters", "brand_wikidata": "Q62029366"}
+    allowed_domains = ["api.regiscorp.com"]
+
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield JsonRequest(
+            "https://api.regiscorp.com/sis/api/salon/get-states-by-brand?brand=coc",
+            callback=self.parse_index,
+        )
+
+    def parse_index(self, response):
+        for country in response.json().values():
+            for state in country:
+                st = state["state_abbreviation"].lower()
+                yield JsonRequest(
+                    "https://api.regiscorp.com/sis/api/salon/search-by-location?brand=coc&state={}".format(st),
+                    callback=self.parse_state,
+                )
+
+    def parse_state(self, response):
+        for salon in response.json():
+            yield Request(
+                url="https://api.regiscorp.com/sis/api/salon?salon-number={}".format(int(salon["salonId"])),
+                callback=self.parse_salon,
+            )
+
+    def parse_salon(self, response):
+        data = response.json()
+        item = DictParser.parse(data)
+        item["ref"] = data["salon_number"]
+        item["branch"] = (
+            item.pop("name").replace(str(data["salon_number"]) + "-", "").replace(str(data["salon_number"]) + " - ", "")
+        )
+        if address2 := data["address2"]:
+            item["street_address"] = merge_address_lines([item["street_address"], address2])
+        item["website"] = data["booking_url"]
+        item["opening_hours"] = OpeningHours()
+        for day, time in data["store_hours"].items():
+            open_time = time["open"]
+            close_time = time["close"]
+            item["opening_hours"].add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p")
+        yield item

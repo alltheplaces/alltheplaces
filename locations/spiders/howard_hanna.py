@@ -1,4 +1,3 @@
-import json
 import re
 from typing import Any, AsyncIterator
 
@@ -45,8 +44,7 @@ class HowardHannaSpider(PlaywrightSpider):
         yield scrapy.FormRequest(url=url, method="POST", formdata=formdata, callback=self.parse)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        # This fixes the JSONDecodeError by stripping the <pre> tag
-        for office in json.loads(response.xpath("//pre/text()").get()).get("Properties", []):
+        for office in response.json().get("Properties", []):
             branch = office.get("OfficeName")
             mls_number = office.get("MlsNumber")
 

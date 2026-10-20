@@ -8,6 +8,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_SI, OpeningHours
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class T2SISpider(CrawlSpider):
@@ -20,9 +21,7 @@ class T2SISpider(CrawlSpider):
             callback="parse_store",
         ),
     ]
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse_store(self, response: Response, **kwargs: Any) -> Any:
         geo_text = response.xpath('//div[@class="geo-data"]/text()').getall()
@@ -44,7 +43,6 @@ class T2SISpider(CrawlSpider):
         item["city"] = response.xpath('//span[@itemprop="addressLocality"]/text()').get("").strip() or None
         item["phone"] = response.xpath('//span[@itemprop="telephone"]/text()').get("").strip() or None
         item["email"] = response.xpath('//span[@itemprop="email"]/a/text()').get("").strip() or None
-        item["country"] = "SI"
 
         hours_html = response.xpath(
             '//div[contains(@class,"label-inline") and contains(text(),"Delovni")]/following-sibling::p'

@@ -1,10 +1,9 @@
-import json
 import re
 from typing import Any
 
 from scrapy.http import Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.playwright_spider import PlaywrightSpider
@@ -21,7 +20,7 @@ class McdonaldsBESpider(PlaywrightSpider):
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre/text()").get()):
+        for location in response.json():
             item = DictParser.parse(location)
             item["branch"] = re.sub(r"\(\s*(Drive|Mall|In-Store)\s*\)", "", item.pop("name"), re.IGNORECASE).strip()
             item["housenumber"] = location.get("nr")
@@ -51,4 +50,5 @@ class McdonaldsBESpider(PlaywrightSpider):
             apply_yes_no(Extras.DELIVERY, item, 15 in service_ids, False)
             apply_yes_no(Extras.WIFI, item, 1 in service_ids, False)
 
+            apply_category(Categories.FAST_FOOD, item)
             yield item

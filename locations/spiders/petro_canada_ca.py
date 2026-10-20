@@ -1,13 +1,14 @@
 from typing import Iterable
 
-import scrapy
-from scrapy import Request
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
+from locations.user_agents import BROWSER_DEFAULT
 
 FUEL_TYPES_MAPPING = {
     "Supreme": Fuel.OCTANE_91,
@@ -29,18 +30,23 @@ FUEL_TYPES_MAPPING = {
 }
 
 
-class PetroCanadaCASpider(scrapy.Spider):
+class PetroCanadaCASpider(CamoufoxSpider):
     name = "petro_canada_ca"
-    requires_proxy = True
     item_attributes = {"brand": "Petro-Canada", "brand_wikidata": "Q1208279"}
     start_urls = [
         "https://www.petro-canada.ca/en/api/petrocanada/locations?limit=10000000&range=10000000",
     ]
+    requires_proxy = True
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+    }
 
-    def parse(self, response: Response) -> Iterable[Request]:
+    def parse(self, response: Response) -> Iterable[JsonRequest]:
         data = response.json()
         for store in data:
-            yield scrapy.Request(
+            yield JsonRequest(
                 "https://www.petro-canada.ca/en/api/petrocanada/locations/{}".format(store["Id"]),
                 callback=self.parse_store,
             )

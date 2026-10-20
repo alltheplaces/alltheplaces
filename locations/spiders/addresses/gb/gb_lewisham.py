@@ -5,7 +5,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbLewishamSpider(OwenBaseSpider):
-    name = "gb_lewisham"
+    # name = "gb_lewisham"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Contains public sector information provided by Lewisham Council on 28/01/2026 and licensed under the Open Government Licence v3.0."
         + " Contains OS data © Crown copyright and database right 2025."

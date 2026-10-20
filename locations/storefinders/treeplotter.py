@@ -69,8 +69,7 @@ class TreePlotterSpider(Spider):
         }
         yield FormRequest(
             url=f"https://{self.host}/main/server/db.php",
-            formdata=formdata,  # ty: ignore[invalid-argument-type]
-            method="POST",
+            formdata=formdata,
             callback=self.parse_species_list,
         )
 
@@ -103,8 +102,7 @@ class TreePlotterSpider(Spider):
         self.add_organisation_filter_to_query(formdata)
         yield FormRequest(
             url=f"https://{self.host}/main/server/db.php",
-            formdata=formdata,  # ty: ignore[invalid-argument-type]
-            method="POST",
+            formdata=formdata,
             callback=self.parse_tree_count,
         )
 
@@ -148,8 +146,7 @@ class TreePlotterSpider(Spider):
         self.add_organisation_filter_to_query(formdata, api_function_call=True)
         yield FormRequest(
             url=f"https://{self.host}/main/server/db.php",
-            formdata=formdata,  # ty: ignore[invalid-argument-type]
-            method="POST",
+            formdata=formdata,
             callback=self.parse_tree_ids,
         )
 
@@ -182,8 +179,7 @@ class TreePlotterSpider(Spider):
         }
         yield FormRequest(
             url=f"https://{self.host}/main/server/db.php",
-            formdata=formdata,  # ty: ignore[invalid-argument-type]
-            method="POST",
+            formdata=formdata,
             callback=self.parse_tree_details,
         )
 

@@ -1,39 +1,21 @@
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from typing import Any, Iterable
 
-from locations.categories import Categories
-from locations.google_url import extract_google_position
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class TheBarreCodeUSSpider(CrawlSpider):
+class TheBarreCodeUSSpider(StructuredDataSpider):
     name = "the_barre_code_us"
-    item_attributes = {
-        "brand": "The Barre Code",
-        "brand_wikidata": "Q118870170",
-        "extras": Categories.GYM.value,
-    }
-    allowed_domains = ["thebarrecode.com"]
-    start_urls = ["https://thebarrecode.com/locations/"]
-    rules = [
-        Rule(
-            LinkExtractor(restrict_xpaths='//ul[@id="maplocationsectionbottom"]//a[contains(text(), "Visit Site")]'),
-            callback="parse",
-        )
-    ]
+    item_attributes = {"brand": "The Barre Code", "brand_wikidata": "Q118870170"}
+    start_urls = ["https://thebarrecode.com/"]
+    wanted_types = ["LocalBusiness"]
 
-    def parse(self, response):
-        properties = {
-            "name": response.xpath('//span[@id="site_title"]/text()').get().strip(),
-            "phone": response.xpath('//div[@class="info-container"]/div/div[1]//a[contains(@href, "tel:")]/@href')
-            .get()
-            .strip(),
-            "addr_full": ", ".join(
-                filter(None, response.xpath('//div[@class="info-container"]/div/div[2]//p/text()').getall())
-            ).strip(),
-            "email": response.xpath('//div[@class="info-container"]/div/div[4]//p/text()').get().strip(),
-            "website": response.url.replace("/contact-us/", "/"),
-            "ref": response.url.replace("/contact-us/", "/"),
-        }
-        extract_google_position(properties, response)
-        yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
+        item["ref"] = item["website"]
+
+        apply_category(Categories.GYM, item)
+        yield item

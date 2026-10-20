@@ -1,6 +1,6 @@
 import json
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_ES, OpeningHours, sanitise_day
 from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.mcdonalds import McdonaldsSpider
@@ -15,16 +15,20 @@ class McdonaldsGTSpider(JSONBlobSpider):
         return json.loads(response.xpath("//@data-page").get())["props"]["restaurants"]
 
     def post_process_item(self, item, response, location):
+        item.pop("phone", None)
+        item.pop("email", None)
         item["branch"] = item.pop("name")
         apply_yes_no(Extras.DELIVERY, item, "Delivery" in location["categorias"])
 
         for oh_rules in (
             location["horarios"].values() if isinstance(location["horarios"], dict) else location["horarios"]
         ):
-            if oh_rules["name"] == "Restaurante":
+            if oh_rules["name"].startswith("Restaurante"):
                 item["opening_hours"] = OpeningHours()
                 for rule in oh_rules["horarios"]:
                     if day := sanitise_day(rule["description"], DAYS_ES):
                         item["opening_hours"].add_range(day, rule["start_time"], rule["end_time"])
+
+        apply_category(Categories.FAST_FOOD, item)
 
         yield item

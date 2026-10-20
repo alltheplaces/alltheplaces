@@ -7,13 +7,14 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_CZ, OpeningHours
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class BalaCZSpider(Spider):
     name = "bala_cz"
     item_attributes = {"brand": "Bala"}
     start_urls = ["https://www.mojebala.cz/mapa"]
-    custom_settings = {"USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response):
         # All store data is embedded as a JavaScript variable in the page
@@ -48,7 +49,6 @@ class BalaCZSpider(Spider):
             item["street_address"] = contact.get("ulice")
             item["city"] = contact.get("mesto")
             item["postcode"] = contact.get("psc")
-            item["country"] = "CZ"
             item["lat"] = contact.get("gpsLat")
             item["lon"] = contact.get("gpsLng")
             item["phone"] = contact.get("telefon")

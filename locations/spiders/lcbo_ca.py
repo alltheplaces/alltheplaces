@@ -7,7 +7,6 @@ from scrapy.http import Request, Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
 from locations.storefinders.amasty_store_locator import AmastyStoreLocatorSpider
 
 
@@ -29,13 +28,9 @@ class LcboCASpider(AmastyStoreLocatorSpider):
         item["state"] = (
             popup_html.xpath('(.//div[@class="amlocator-info-popup"]/text())[2]').get("").strip(", ").split(" ", 1)[0]
         )
-        item["addr_full"] = merge_address_lines(
-            [
-                popup_html.xpath('.//span[@class="amlocator-info-address"]/text()').get(),
-                item.get("state"),
-                item.get("postcode"),
-            ]
-        )
+        # Fallback in case the follow-up request below fails to find a matching store;
+        # normally overwritten with a cleaner value from that response.
+        item["street_address"] = popup_html.xpath('.//span[@class="amlocator-info-address"]/text()').get()
         item["website"] = popup_html.xpath('.//a[@class="amlocator-link-store-details"]/@href').get()
         item["phone"] = (
             popup_html.xpath('.//a[@class="amlocator-phone-number"]/@href').get("").replace("tel:", "").strip("[]")

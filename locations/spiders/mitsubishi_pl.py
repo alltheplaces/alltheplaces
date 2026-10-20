@@ -50,7 +50,7 @@ class MitsubishiPLSpider(JSONBlobSpider):
         if sales_available:
             sales_item = self.build_sales_item(item)
             if service_available:
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, True)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, True)
             yield sales_item
 
         if service_available:

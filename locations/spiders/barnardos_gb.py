@@ -1,4 +1,3 @@
-import json
 import re
 from typing import AsyncIterator
 from urllib.parse import unquote
@@ -29,7 +28,7 @@ class BarnardosGBSpider(PlaywrightSpider):
         )
 
     def parse(self, response, **kwargs):
-        for poi in json.loads(response.xpath("//pre/text()").get()):
+        for poi in response.json():
             item = Feature()
             item["ref"] = poi.get("yourId")
             item["branch"] = poi.get("name").replace("+", " ")

@@ -4,6 +4,7 @@ from geonamescache import GeonamesCache
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -31,4 +32,6 @@ class DavitaUSSpider(Spider):
             ] = f'https://davita.com/locations/{item["state"]}/{item["city"]}/{location["address1"]}--{location["facilityid"]}'.lower().replace(
                 " ", "-"
             )
+            apply_category(Categories.CLINIC, item)
+            apply_healthcare_specialities(HealthcareSpecialities.NEPHROLOGY, item)
             yield item

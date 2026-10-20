@@ -1,35 +1,43 @@
 from typing import Any
 
+from chompjs import chompjs
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, apply_category
-from locations.google_url import extract_google_position
-from locations.hours import OpeningHours
-from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.dict_parser import DictParser
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
 class BurgerKingQASpider(Spider):
     name = "burger_king_qa"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    start_urls = ["https://burgerkingdelivery.qa/locate-us"]
+    start_urls = ["https://burgerkingdelivery.qa/order-online/menu"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath('//*[contains(@class, "address-details")]'):
-            item = Feature()
-            item["ref"] = item["branch"] = location.xpath('.//*[contains(@class, "address-head")]/text()').get()
-            item["addr_full"] = clean_address(location.xpath('.//*[@class="address"]//text()').getall()).removesuffix(
-                " -"
+        data = chompjs.parse_js_object(response.xpath('//script[contains(text(), "cityOutlets")]').get())
+        outlet_ids = set()
+        for city_outlets in DictParser.iter_matching_keys(data, "cityOutletsV2"):
+            for outlet in city_outlets:
+                outlet_ids.add(outlet["outletId"])
+        for outlet_id in outlet_ids:
+            yield JsonRequest(
+                url=f"https://burgerkingdelivery.qa/order-online/api/outlets/{outlet_id}/?orderType=",
+                callback=self.parse_location,
             )
-            item["phone"] = location.xpath('normalize-space(.//*[@class="phone-no"]/h6/text())').get()
-            item["email"] = location.xpath('normalize-space(.//*[contains(@class, "email-id-name")]/text())').get()
-            item["website"] = response.url
-            extract_google_position(item, location)
-            item["opening_hours"] = OpeningHours()
-            days = location.xpath('.//*[contains(@class, "opening-days")]/text()').get()
-            timing = " ".join(location.xpath('.//*[contains(@class, "hours-timing")]/text()').getall())
-            item["opening_hours"].add_ranges_from_string(f"{days} {timing}")
-            apply_category(Categories.FAST_FOOD, item)
-            yield item
+
+    def parse_location(self, response: Response, **kwargs: Any) -> Any:
+        location = response.json()["outlet"]
+        if "Test Store" in location["outletName"]:
+            return
+        item = DictParser.parse(location)
+        item["ref"] = location["outletId"]
+        item["branch"] = location["outletName"].removeprefix("Burger King - ")
+        item["street"] = item.pop("addr_full", None)
+        item["phone"] = location.get("outletPhone")
+        apply_category(Categories.FAST_FOOD, item)
+        services = [service.get("serviceName") for service in location.get("outletServices", [])]
+        apply_yes_no(Extras.DELIVERY, item, "delivery" in services)
+        apply_yes_no(Extras.INDOOR_SEATING, item, "dine_in" in services)
+        apply_yes_no(Extras.TAKEAWAY, item, "take_away" in services)
+        yield item

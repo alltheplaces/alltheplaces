@@ -1,0 +1,19 @@
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.structured_data_spider import StructuredDataSpider
+
+
+class AutosurFRSpider(SitemapSpider, StructuredDataSpider):
+    name = "autosur_fr"
+    item_attributes = {"brand": "Autosur", "brand_wikidata": "Q64224807"}
+    sitemap_urls = ["https://controle-technique.autosur.fr/sitemap.xml"]
+    sitemap_rules = [(r"/\d+[^/]+$", "parse")]
+
+    def post_process_item(self, item, response, ld_data, **kwargs):
+        item["branch"] = item.pop("name", "").removeprefix("AUTOSUR ")
+
+        item["facebook"] = item["twitter"] = None
+        apply_category(Categories.VEHICLE_INSPECTION, item)
+
+        yield item

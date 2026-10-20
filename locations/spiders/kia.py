@@ -61,7 +61,7 @@ class KiaSpider(scrapy.Spider):
                 sales_item = item.deepcopy()
                 sales_item["ref"] = f"{item['ref']}-sales"
                 apply_category(Categories.SHOP_CAR, sales_item)
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, "service" in dealer_type)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, "service" in dealer_type)
                 yield sales_item
 
             if "service" in dealer_type:

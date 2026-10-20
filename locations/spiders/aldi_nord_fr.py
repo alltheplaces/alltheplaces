@@ -9,6 +9,7 @@ class AldiNordFRSpider(UberallSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").removeprefix("ALDI").strip()
+        item["phone"] = None  # national customer service number, identical for every store
 
         apply_category(Categories.SHOP_SUPERMARKET, item)
 

@@ -1,41 +1,249 @@
-import reverse_geocoder
+from typing import Any, AsyncIterator
 
+import scrapy
+from scrapy.http import JsonRequest, Response
+
+from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.storefinders.where2getit import Where2GetItSpider
 
 
-class MoneygramSpider(Where2GetItSpider):
+class MoneygramSpider(scrapy.Spider):
     name = "moneygram"
     item_attributes = {"brand": "MoneyGram", "brand_wikidata": "Q1944412"}
-    api_brand_name = "moneygram"
-    api_key = "46493320-D5C3-11E1-A25A-4A6F97B4DA77"
-    api_filter_admin_level = 1
-    api_limit = 60000
-    custom_settings = {
-        "DOWNLOAD_WARNSIZE": 134217728,  # 128 MiB needed as some results are ~ 90 MiB
-        "DOWNLOAD_TIMEOUT": 60,  # Some countries have large result sets and responses are slow
-    }
 
-    def parse_item(self, item, location):
-        # MoneyGram compiles location information provided by
-        # franchises that provide MoneyGram services. Some of these
-        # franchises are providing bad location information which
-        # should be ignored.
-        #
-        # 1. Ignore Polish post office locations outside of Poland.
-        if item["country"] == "PL" and item["name"][:3] == "UP ":
-            if result := reverse_geocoder.get(
-                (float(location["latitude"]), float(location["longitude"])), mode=1, verbose=False
-            ):
-                if result["cc"] != "PL":
-                    item.pop("lat")
-                    item.pop("lon")
+    async def start(self) -> AsyncIterator[Any]:
+        for country in [
+            "AE",
+            "AF",
+            "AG",
+            "AI",
+            "AL",
+            "AM",
+            "AO",
+            "AR",
+            "AT",
+            "AU",
+            "AW",
+            "BA",
+            "BB",
+            "BD",
+            "BE",
+            "BF",
+            "BG",
+            "BH",
+            "BI",
+            "BJ",
+            "BL",
+            "BM",
+            "BN",
+            "BO",
+            "BR",
+            "BS",
+            "BT",
+            "BW",
+            "BY",
+            "BZ",
+            "CA",
+            "CD",
+            "CF",
+            "CG",
+            "CH",
+            "CI",
+            "CL",
+            "CM",
+            "CN",
+            "CO",
+            "CR",
+            "CV",
+            "CW",
+            "CY",
+            "CZ",
+            "DE",
+            "DJ",
+            "DK",
+            "DM",
+            "DO",
+            "EC",
+            "EE",
+            "EG",
+            "ES",
+            "ET",
+            "FJ",
+            "FM",
+            "FR",
+            "GA",
+            "GB",
+            "GD",
+            "GE",
+            "GF",
+            "GH",
+            "GI",
+            "GM",
+            "GN",
+            "GP",
+            "GQ",
+            "GR",
+            "GT",
+            "GW",
+            "GY",
+            "HK",
+            "HN",
+            "HR",
+            "HT",
+            "HU",
+            "ID",
+            "IE",
+            "IL",
+            "IN",
+            "IQ",
+            "IT",
+            "JM",
+            "JO",
+            "JP",
+            "KE",
+            "KG",
+            "KH",
+            "KM",
+            "KN",
+            "KR",
+            "KW",
+            "KY",
+            "KZ",
+            "LA",
+            "LB",
+            "LC",
+            "LK",
+            "LR",
+            "LS",
+            "LT",
+            "LU",
+            "LV",
+            "LY",
+            "MA",
+            "MD",
+            "ME",
+            "MF",
+            "MG",
+            "MH",
+            "MK",
+            "ML",
+            "MM",
+            "MN",
+            "MQ",
+            "MR",
+            "MS",
+            "MT",
+            "MU",
+            "MV",
+            "MW",
+            "MX",
+            "MY",
+            "MZ",
+            "NA",
+            "NE",
+            "NG",
+            "NI",
+            "NL",
+            "NO",
+            "NP",
+            "NZ",
+            "OM",
+            "PA",
+            "PE",
+            "PG",
+            "PH",
+            "PK",
+            "PL",
+            "PR",
+            "PS",
+            "PT",
+            "PY",
+            "QA",
+            "RE",
+            "RO",
+            "RS",
+            "RW",
+            "SA",
+            "SB",
+            "SC",
+            "SD",
+            "SE",
+            "SG",
+            "SL",
+            "SM",
+            "SN",
+            "SR",
+            "SS",
+            "ST",
+            "SV",
+            "SX",
+            "SZ",
+            "TC",
+            "TD",
+            "TG",
+            "TH",
+            "TJ",
+            "TL",
+            "TN",
+            "TO",
+            "TR",
+            "TT",
+            "TV",
+            "TZ",
+            "UA",
+            "UG",
+            "US",
+            "UY",
+            "UZ",
+            "VC",
+            "VE",
+            "VG",
+            "VI",
+            "VN",
+            "VU",
+            "WS",
+            "XK",
+            "YE",
+            "YT",
+            "ZA",
+            "ZM",
+            "ZW",
+        ]:
+            yield JsonRequest(
+                url=f"https://www.moneygram.com/locations/api/locations/states?country={country}",
+                cb_kwargs={"country": country},
+            )
 
-        hours_string = ""
-        for day_name in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
-            if location.get(day_name + "_hours"):
-                hours_string = f"{hours_string} {day_name}: " + location.get(day_name + "_hours")
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for state in response.json()["states"]:
+            yield JsonRequest(
+                url=f'https://www.moneygram.com/locations/api/locations/cities?country={kwargs["country"]}&state={state["code"]}',
+                callback=self.parse_cities,
+                cb_kwargs={"country": kwargs["country"]},
+            )
 
-        yield item
+    def parse_cities(self, response, **kwargs):
+        for city in response.json()["cities"]:
+            yield JsonRequest(
+                url=f'https://www.moneygram.com/locations/api/locations?address={city["city"]}&country={kwargs["country"]}',
+                callback=self.parse_details,
+                cb_kwargs={"country": kwargs["country"]},
+            )
+
+    def parse_details(self, response, **kwargs):
+        for location in response.json().get("locations"):
+            location.update(location.pop("locationDetails"))
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
+            item["ref"] = " - ".join([item["ref"], kwargs["country"]])
+            try:
+                oh = OpeningHours()
+                for key, value in location.get("locationOperatingHours").items():
+                    day = key.replace("Hours", "")
+                    open_time, close_time = value.split(" - ")
+                    oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p")
+                item["opening_hours"] = oh
+            except:
+                pass
+
+            yield item

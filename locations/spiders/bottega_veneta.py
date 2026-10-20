@@ -1,7 +1,6 @@
-import json
-
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.playwright_spider import PlaywrightSpider
@@ -23,7 +22,7 @@ class BottegaVenetaSpider(PlaywrightSpider):
             yield scrapy.Request(url=url, callback=self.store_parse)
 
     def store_parse(self, response):
-        for store in json.loads(response.xpath("//pre//text()").get())["storesData"]["stores"]:
+        for store in response.json()["storesData"]["stores"]:
             item = DictParser.parse(store)
             item["website"] = store.get("detailsUrl")
             item["branch"] = item.pop("name")
@@ -33,4 +32,6 @@ class BottegaVenetaSpider(PlaywrightSpider):
                     continue
                 oh.add_range(day, hour.get("openFromTo").split(" - ")[0], hour.get("openFromTo").split(" - ")[1])
             item["opening_hours"] = oh
+
+            apply_category(Categories.SHOP_FASHION_ACCESSORIES, item)
             yield item

@@ -1,19 +1,19 @@
-from typing import Iterable
-
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.tom_wahls_us import TomWahlsUSSpider
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
-class AbbottsFrozenCustardUSSpider(WPStoreLocatorSpider):
+class AbbottsFrozenCustardUSSpider(SitemapSpider):
     name = "abbotts_frozen_custard_us"
     item_attributes = {"brand": "Abbott's Frozen Custard", "brand_wikidata": "Q4664334"}
-    allowed_domains = ["www.abbottscustard.com"]
+    sitemap_urls = ["https://www.abbottscustard.com/sitemap_index.xml"]
+    sitemap_rules = [("/location/", "parse")]
     days = DAYS_EN
 
     LOCATED_IN_MAPPINGS = [
@@ -21,8 +21,12 @@ class AbbottsFrozenCustardUSSpider(WPStoreLocatorSpider):
         (["tom-wahls", "tom wahl"], TomWahlsUSSpider.item_attributes),
     ]
 
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name")
+    def parse(self, response: Response, **kwargs):
+        item = Feature()
+        item["branch"] = response.xpath("//h1/text()").get()
+        item["addr_full"] = merge_address_lines(response.xpath("//address//text()").getall())
+        item["phone"] = response.xpath("//h2[text()='Phone']/following-sibling::p/text()").get()
+        item["ref"] = item["website"] = response.url
 
         # All Abbott's locations are ice cream shops
         apply_category(Categories.ICE_CREAM, item)

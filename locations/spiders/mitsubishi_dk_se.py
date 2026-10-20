@@ -29,7 +29,7 @@ class MitsubishiDKSESpider(JSONBlobSpider):
             shop_item = deepcopy(item)
             shop_item["ref"] = f"{item['ref']}-shop"
             apply_category(Categories.SHOP_CAR, shop_item)
-            apply_yes_no(Extras.CAR_REPAIR, shop_item, has_repair)
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, shop_item, has_repair)
             yield shop_item
 
         if has_repair:

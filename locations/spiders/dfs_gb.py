@@ -1,9 +1,8 @@
-import json
 from typing import Any
 
 from scrapy.http import Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -15,10 +14,10 @@ class DfsGBSpider(PlaywrightSpider):
     name = "dfs_gb"
     item_attributes = {"brand": "DFS", "brand_wikidata": "Q5204927"}
     start_urls = ["https://www.dfs.co.uk/wcs/resources/store/10202/stores?langId=-1"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = json.loads(response.xpath("//pre/text()").get())
+        data = response.json()
         for location in data["stores"]:
             item = DictParser.parse(location)
             item["phone"] = None
@@ -32,6 +31,7 @@ class DfsGBSpider(PlaywrightSpider):
                 location["storeImageName"].replace("?$store_ss$", "")
             )
 
+            apply_category(Categories.SHOP_FURNITURE, item)
             apply_yes_no(Extras.WHEELCHAIR, item, "Wheelchair Access" in location["services"])
 
             yield item

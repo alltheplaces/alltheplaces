@@ -1,6 +1,6 @@
 # AllThePlaces Session Prompt
 
-You are working in /Users/iandees/SynologyDrive/Projects/AllThePlaces/alltheplaces (the alltheplaces repo).
+You are working in the local clone of the alltheplaces repo.
 
 Read `.claude/REVIEW_RULES.md` carefully before starting — it contains all conventions, preferred patterns, and decisions made in prior sessions.
 
@@ -52,7 +52,7 @@ Use the prompt template below, substituting a single issue number.
 ---
 **Agent prompt template:**
 
-  In /Users/iandees/SynologyDrive/Projects/AllThePlaces/alltheplaces, triage GitHub issue
+  In the local clone of the alltheplaces repo, triage GitHub issue
   #NNNN. Read `.claude/REVIEW_RULES.md` first.
 
   For this issue:
@@ -77,7 +77,7 @@ Use the prompt template below, substituting a single issue number.
   # commit ONLY the spider file(s)
   git push -u origin BRANCH
   gh pr create --head BRANCH --title "..." --body "...\n\nCloses #NNN"
-  cd /Users/iandees/SynologyDrive/Projects/AllThePlaces/alltheplaces
+  cd -
   git worktree remove /tmp/wt-BRANCH
   ```
 

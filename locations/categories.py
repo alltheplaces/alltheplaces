@@ -13,6 +13,7 @@ from locations.items import Feature
 # of lots of string bashing. If ever NSI / ATP were to change / augment the category scheme
 # then the level of indirection provided here may also be of help!
 class Categories(Enum):
+    GENERIC_HISTORIC = {"historic": "yes"}
     GENERIC_POI = {"amenity": "yes"}
     GENERIC_SHOP = {"shop": "yes"}
 
@@ -22,9 +23,11 @@ class Categories(Enum):
     CAR_RENTAL = {"amenity": "car_rental"}
     CAR_WASH = {"amenity": "car_wash"}
     CAR_SHARING = {"amenity": "car_sharing"}
+    VEHICLE_INSPECTION = {"amenity": "vehicle_inspection"}
     KICK_SCOOTER_RENTAL = {"amenity": "kick-scooter_rental"}
     LEFT_LUGGAGE = {"amenity": "left_luggage"}
     LUGGAGE_LOCKER = {"amenity": "luggage_locker"}
+    MOTORCYCLE_PARKING = {"amenity": "motorcycle_parking"}
     MOTORCYCLE_RENTAL = {"amenity": "motorcycle_rental"}
     PARKING = {"amenity": "parking"}
     PARKING_SPACE = {"amenity": "parking_space"}
@@ -36,11 +39,14 @@ class Categories(Enum):
     LANGUAGE_SCHOOL = {"amenity": "language_school"}
     NATURE_SCHOOL = {"education": "nature_school"}
     TRAINING = {"amenity": "training"}
+    DRIVING_SCHOOL = {"amenity": "driving_school"}
 
     BUS_STOP = {"highway": "bus_stop", "public_transport": "platform"}
     BUS_STATION = {"amenity": "bus_station", "public_transport": "station"}
     TRAIN_STATION = {"railway": "station"}
+    RAILWAY_SUBWAY_ENTRANCE = {"railway": "subway_entrance"}
 
+    AMUSEMENT_ARCADE = {"leisure": "amusement_arcade"}
     BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
     SAUNA = {"leisure": "sauna"}
@@ -57,41 +63,61 @@ class Categories(Enum):
 
     CLUB_SCOUT = {"club": "scout"}
 
+    CRAFT_BUILDER = {"craft": "builder"}
     CRAFT_CAR_PAINTER = {"craft": "car_painter"}
     CRAFT_CARPENTER = {"craft": "carpenter"}
     CRAFT_CATERER = {"craft": "caterer"}
+    CRAFT_CLEANING = {"craft": "cleaning"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
+    CRAFT_GARDENER = {"craft": "gardener"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
     CRAFT_KEY_CUTTER = {"craft": "key_cutter"}
     CRAFT_LOCKSMITH = {"craft": "locksmith"}
+    CRAFT_PLUMBER = {"craft": "plumber"}
     CRAFT_SHOEMAKER = {"craft": "shoemaker"}
+    CRAFT_SIGNMAKER = {"craft": "signmaker"}
     CRAFT_TAILOR = {"craft": "tailor"}
+    CRAFT_UPHOLSTERER = {"craft": "upholsterer"}
     CRAFT_WATCHMAKER = {"craft": "watchmaker"}
     CRAFT_WINERY = {"craft": "winery"}
 
     DARK_STORE_GROCERY = {"dark_store": "grocery"}
+    ALLOTMENTS = {"landuse": "allotments"}
 
     INDUSTRIAL_WAREHOUSE = {"landuse": "industrial", "industrial": "warehouse"}
     RESIDENTIAL_APARTMENTS = {"landuse": "residential", "residential": "apartments"}
 
     LEISURE_GARDEN = {"leisure": "garden"}
+    LEISURE_DANCE = {"leisure": "dance"}
     LEISURE_DOG_PARK = {"leisure": "dog_park"}
+    LEISURE_DISC_GOLF_COURSE = {"leisure": "disc_golf_course"}
     LEISURE_FITNESS_STATION = {"leisure": "fitness_station"}
+    LEISURE_FISHING = {"leisure": "fishing"}
     LEISURE_GAZEBO = {"amenity": "shelter", "shelter_type": "gazebo"}
+    LEISURE_ICE_RINK = {"leisure": "ice_rink"}
     LEISURE_INDOOR_PLAY = {"leisure": "indoor_play"}
     LEISURE_NATURE_RESERVE = {"leisure": "nature_reserve"}
     LEISURE_PARK = {"leisure": "park"}
+    LEISURE_PADDLING_POOL = {"leisure": "paddling_pool"}
     LEISURE_PICNIC_SHELTER = {"amenity": "shelter", "shelter_type": "picnic_shelter"}
     LEISURE_PICNIC_TABLE = {"leisure": "picnic_table"}
+    TOURISM_PICNIC_SITE = {"tourism": "picnic_site"}
     LEISURE_PITCH = {"leisure": "pitch"}
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
     LEISURE_SLIPWAY = {"leisure": "slipway"}
+    LEISURE_BOWLING_ALLEY = {"leisure": "bowling_alley"}
     LEISURE_SPORTS_CENTRE = {"leisure": "sports_centre"}
+    LEISURE_SPORTS_HALL = {"leisure": "sports_hall"}
     LEISURE_SWIMMING_POOL = {"leisure": "swimming_pool"}
+    LEISURE_SWIMMING_AREA = {"leisure": "swimming_area"}
+    LEISURE_TRACK = {"leisure": "track"}
     LEISURE_TRAMPOLINE_PARK = {"leisure": "trampoline_park"}
     LEISURE_WATER_PARK = {"leisure": "water_park"}
+    LEISURE_MINIATURE_GOLF = {"leisure": "miniature_golf"}
+    LEISURE_GOLF_COURSE = {"leisure": "golf_course"}
+    LEISURE_ESCAPE_GAME = {"leisure": "escape_game"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -103,6 +129,7 @@ class Categories(Enum):
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BATHROOM_FURNISHING = {"shop": "bathroom_furnishing"}
     SHOP_BEAUTY = {"shop": "beauty"}
+    SHOP_BEAUTY_LASER_HAIR_REMOVAL = {"shop": "beauty", "beauty": "laser_hair_removal"}
     SHOP_BEAUTY_SPA = {"shop": "beauty", "beauty": "spa"}
     SHOP_BED = {"shop": "bed"}
     SHOP_BEVERAGES = {"shop": "beverages"}
@@ -208,6 +235,7 @@ class Categories(Enum):
     SHOP_PERFUMERY = {"shop": "perfumery"}
     SHOP_PEST_CONTROL = {"shop": "pest_control"}
     SHOP_PET = {"shop": "pet"}
+    SHOP_PET_GROOMING = {"shop": "pet_grooming"}
     SHOP_PHOTO = {"shop": "photo"}
     SHOP_PLANT_HIRE = {"shop": "plant_hire"}
     SHOP_POTTERY = {"shop": "pottery"}
@@ -247,24 +275,33 @@ class Categories(Enum):
     SHOP_VIDEO = {"shop": "video"}
     SHOP_VIDEO_GAMES = {"shop": "video_games"}
     SHOP_WATCHES = {"shop": "watches"}
+    SHOP_WATER = {"shop": "water"}
     SHOP_WHOLESALE = {"shop": "wholesale"}
     SHOP_WINDOW_BLIND = {"shop": "window_blind"}
     SHOP_WINE = {"shop": "wine"}
 
     OFFICE_ARCHITECT = {"office": "architect"}
+    OFFICE_ASSOCIATION = {"office": "association"}
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_CONSULTING = {"office": "consulting"}
     OFFICE_COURIER = {"office": "courier"}
     OFFICE_COWORKING = {"office": "coworking"}
+    OFFICE_EMPLOYMENT_AGENCY = {"office": "employment_agency"}
     OFFICE_ENERGY_SUPPLIER = {"office": "energy_supplier"}
     OFFICE_ENGINEER = {"office": "engineer"}
     OFFICE_ESTATE_AGENT = {"office": "estate_agent"}
     OFFICE_FINANCIAL = {"office": "financial"}
     OFFICE_FINANCIAL_ADVISOR = {"office": "financial_advisor"}
+    OFFICE_GOVERNMENT = {"office": "government"}
     OFFICE_HEALTHCARE = {"office": "healthcare"}
     OFFICE_INSURANCE = {"office": "insurance"}
     OFFICE_IT = {"office": "it"}
+    OFFICE_LAWYER = {"office": "lawyer"}
     OFFICE_MORTGAGE = {"office": "mortgage"}
+    OFFICE_PROPERTY_MANAGEMENT = {"office": "property_management"}
+    OFFICE_RESEARCH = {"office": "research"}
+    OFFICE_ADMINISTRATIVE = {"office": "administrative"}
+    OFFICE_SECURITY = {"office": "security"}
     OFFICE_SUPERVISED_INJECTION_SITE = {"office": "supervised_injection_site"}
     OFFICE_TUTORING = {"office": "tutoring"}
 
@@ -274,12 +311,14 @@ class Categories(Enum):
     TOURISM_ATTRACTION_SQUARE = {"tourism": "attraction", "place": "square"}
     TOURISM_ATTRACTION_STREET = {"tourism": "attraction", "highway": "street"}
     TOURISM_BED_AND_BREAKFAST = {"tourism": "guest_house", "guest_house": "bed_and_breakfast"}
+    TOURISM_GUEST_HOUSE = {"tourism": "guest_house"}
     TOURISM_BOAT_TOURS = {"tourism": "tours", "tours": "boat"}
     TOURISM_CAMP_SITE = {"tourism": "camp_site"}
     TOURISM_CHALET = {"tourism": "chalet"}
     TOURISM_GALLERY = {"tourism": "gallery"}
     TOURISM_HOSTEL = {"tourism": "hostel"}
     TOURISM_INFORMATION = {"tourism": "information"}
+    TOURISM_THEME_PARK = {"tourism": "theme_park"}
     TOURISM_VIEWPOINT = {"tourism": "viewpoint"}
     TOURISM_WILDERNESS_HUT = {"tourism": "wilderness_hut"}
     TOURISM_ZOO = {"tourism": "zoo"}
@@ -287,6 +326,7 @@ class Categories(Enum):
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
     AIRCRAFT_FUELLING_STATION = {"aeroway": "fuel"}
+    AERODROME = {"aeroway": "aerodrome"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
     ARCHIVE = {"amenity": "archive"}
     ARTS_CENTRE = {"amenity": "arts_centre"}
@@ -308,6 +348,7 @@ class Categories(Enum):
     BUREAU_DE_CHANGE = {"amenity": "bureau_de_change"}
     CAFE = {"amenity": "cafe"}
     CANTEEN = {"amenity": "canteen"}
+    CARPET_WASHING = {"amenity": "carpet_washing"}
     CARAVAN_SITE = {"tourism": "caravan_site"}
     CASINO = {"amenity": "casino"}
     CHARGE_POINT = {"man_made": "charge_point"}
@@ -326,23 +367,31 @@ class Categories(Enum):
     DIALYSIS = {"healthcare": "dialysis"}
     DISASTER_HELP_POINT = {"emergency": "disaster_help_point"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare:speciality": "community"}
+    DRINKING_WATER = {"amenity": "drinking_water"}
     DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
+    DOG_TOILET = {"amenity": "dog_toilet"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     EVENTS_VENUE = {"amenity": "events_venue"}
     FAST_FOOD = {"amenity": "fast_food"}
+    FERRY_TERMINAL = {"amenity": "ferry_terminal"}
     FIRE_STATION = {"amenity": "fire_station"}
     FUEL_STATION = {"amenity": "fuel"}
     GRAVE = {"cemetery": "grave"}
     GRIT_BIN = {"amenity": "grit_bin"}
     HIGHWAY_SERVICES = {"highway": "services"}
+    HISTORIC_BUILDING = {"historic": "building"}
+    HISTORIC_DISTRICT = {"historic": "district"}
     HOSPICE = {"healthcare": "hospice"}
     HOSPITAL = {"amenity": "hospital"}
     HOTEL = {"tourism": "hotel"}
     INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
     LIBRARY = {"amenity": "library"}
+    LOADING_DOCK = {"amenity": "loading_dock"}
     MAILROOM = {"amenity": "mailroom"}
     MANHOLE = {"man_made": "manhole"}
+    MARINA = {"leisure": "marina"}
+    MOORING = {"mooring": "yes"}
     MARKETPLACE = {"amenity": "marketplace"}
     MEDICAL_IMAGING = {
         "healthcare": "medical_imaging"
@@ -350,9 +399,11 @@ class Categories(Enum):
     MEDICAL_LABORATORY = {"healthcare": "laboratory"}
     MONEY_TRANSFER = {"amenity": "money_transfer"}
     MONUMENT = {"historic": "monument"}
+    HISTORIC_MEMORIAL = {"historic": "memorial"}
     MORTUARY = {"amenity": "mortuary"}
     MOTEL = {"tourism": "motel"}
     MUSEUM = {"tourism": "museum"}
+    MUSIC_SCHOOL = {"amenity": "music_school"}
     MUSIC_VENUE = {"amenity": "music_venue"}
     NIGHTCLUB = {"amenity": "nightclub"}
     NURSE_CLINIC = {"healthcare": "nurse"}
@@ -365,8 +416,11 @@ class Categories(Enum):
     PHARMACY = {"amenity": "pharmacy"}
     PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
+    PLACE_ISLAND = {"place": "island"}
+    PLACE_NEIGHBOURHOOD = {"place": "neighbourhood"}
     PLACE_OF_WORSHIP = {"amenity": "place_of_worship"}
     PODIATRIST = {"healthcare": "podiatrist"}
+    POLICE = {"amenity": "police"}
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
@@ -381,13 +435,18 @@ class Categories(Enum):
     RESTAURANT = {"amenity": "restaurant"}
     SAMPLE_COLLECTION = {"healthcare": "sample_collection"}
     SHARPS_WASTE_BASKET = {"amenity": "waste_basket", "waste": "sharps"}
+    SHELTER = {"amenity": "shelter"}
     SOCIAL_CENTRE = {"amenity": "social_centre"}
     SOCIAL_FACILITY = {"amenity": "social_facility"}
+    SOCIAL_FACILITY_OUTREACH = {"amenity": "social_facility", "social_facility": "outreach"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
     TAXI = {"amenity": "taxi"}
     TELEPHONE = {"amenity": "telephone"}
     TOILETS = {"amenity": "toilets"}
     THEATRE = {"amenity": "theatre"}
+    AMENITY_BOAT_RENTAL = {"amenity": "boat_rental"}
+    AMENITY_STUDIO = {"amenity": "studio"}
+    TOOL_LIBRARY = {"amenity": "tool_library"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VENDING_MACHINE = {"amenity": "vending_machine"}
     VETERINARY = {"amenity": "veterinary"}
@@ -410,6 +469,7 @@ class Categories(Enum):
 
     ANTENNA = {"man_made": "antenna"}
     BOREHOLE = {"man_made": "borehole"}
+    MILITARY_BUNKER = {"military": "bunker"}
     CULVERT = {"tunnel": "culvert"}
     FIRE_HYDRANT = {"emergency": "fire_hydrant"}
     KERB_GRATE = {
@@ -426,8 +486,10 @@ class Categories(Enum):
         "substance": "rainwater",
     }
     PETROLEUM_WELL = {"man_made": "petroleum_well"}
+    MAN_MADE_PIER = {"man_made": "pier"}
     POWER_POLE = {"power": "pole"}
     POWER_TOWER = {"power": "tower"}
+    POWER_PLANT = {"power": "plant"}
     PUMPING_STATION_SEWAGE = {
         "man_made": "pumping_station",
         "pumping_station": "sewage",
@@ -467,9 +529,11 @@ class Categories(Enum):
     SURVEILLANCE_CAMERA = {"man_made": "surveillance", "surveillance:type": "camera"}
     TRANSFORMER = {"power": "transformer"}
     WASTEWATER_PLANT = {"man_made": "wastewater_plant", "utility": "sewerage", "substance": "sewage;wastewater"}
+    WATER_WORKS = {"man_made": "water_works"}
     WATER_WELL = {"man_made": "water_well"}
 
     NATURAL_BASIN = {"natural": "water", "water": "basin"}
+    NATURAL_BEACH = {"natural": "beach"}
     NATURAL_LANDFORM = {"natural": "landform"}
     NATURAL_TREE = {"natural": "tree"}
 
@@ -533,6 +597,7 @@ top_level_tags = [
     "landuse",
     "leisure",
     "man_made",
+    "mooring",
     "natural",
     "office",
     "power",
@@ -669,14 +734,18 @@ class Extras(Enum):
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
     CASH_OUT = "cash_out"
+    CASH_WITHDRAWAL = "cash_withdrawal"
     COMPRESSED_AIR = "compressed_air"
     COMPUTING = "service:computer"
     COPYING = "service:copy"
     DELIVERY = "delivery"
+    DISPENSING = "dispensing"
     DOG = "dog"
     DRINKING_WATER = "drinking_water"
     DRIVE_THROUGH = "drive_through"
+    DUTY_FREE = "duty_free"
     FAST_FOOD = "fast_food"
+    FAX = "fax"
     FAXING = "service:fax"
     FEE = "fee"
     FEMALE = "female"
@@ -686,26 +755,29 @@ class Extras(Enum):
     INDOOR_SEATING = "indoor_seating"
     KIDS_AREA = "kids_area"
     KOSHER = "diet:kosher"
+    LAUNDRY = "laundry"
     LIVE_MUSIC = "live_music"
     LUNCH = "lunch"
     MALE = "male"
     MONEYGRAM = "money_transfer=moneygram"
     MOTOR_VEHICLES = "motor_vehicle"
-    USED_MOTORCYCLE_SALES = "motorcycle:sales=used"
     MOTORCYCLE_REPAIR = "motorcycle:repair"
     OUTDOOR_SEATING = "outdoor_seating"
     PARCEL_MAIL_IN = "parcel_mail_in"
     PARCEL_PICKUP = "parcel_pickup"
+    PARKING = "parking"
     PARKING_PARENT = "capacity:parent"
     PARKING_WHEELCHAIR = "capacity:disabled"
     PETS_ALLOWED = "pets_allowed"
     PHOTO_PRINTING = "service:photo_printing"
     PICNIC_TABLES = "picnic_table"
+    POWER_SUPPLY = "power_supply"
     PRINTING = "service:print"
     RESERVATION = "reservation"
     RESERVATION_REQUIRED = "reservation=required"
-    SELF_CHECKOUT = "self_checkout"
+    SANITARY_DUMP_STATION = "sanitary_dump_station"
     SCANING = "service:scan"
+    SELF_CHECKOUT = "self_checkout"
     SHOWERS = "shower"
     SMOKING = "smoking"
     SMOKING_AREA = "smoking=isolated"
@@ -713,9 +785,11 @@ class Extras(Enum):
     TAKEAWAY = "takeaway"
     TENT_SITES = "tents"
     TOILETS = "toilets"
+    TOILETS_OSTOMY = "toilets:ostomy"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
     UNISEX = "unisex"
+    USED_MOTORCYCLE_SALES = "motorcycle:sales=used"
     VACUUM_CLEANER = "vacuum_cleaner"
     VEGAN = "diet:vegan"
     VEGETARIAN = "diet:vegetarian"
@@ -733,8 +807,8 @@ class Extras(Enum):
     VEHICLE_PAINTING_SERVICES = "service:vehicle:painting"
     VEHICLE_PLANNED_MAINTENANCE_SERVICES = "service:vehicle:servicing"
     VEHICLE_SUSPENSION_SERVICES = "service:vehicle:suspension"
-    VEHICLE_TYRE_SERVICES = "service:vehicle:tyres"
     VEHICLE_TYRE_REPAIR_SERVICES = "service:vehicle:tyres_repair"
+    VEHICLE_TYRE_SERVICES = "service:vehicle:tyres"
     VEHICLE_USED_CAR_SALES = "service:vehicle:used_car_sales"
     VEHICLE_WHEEL_ALIGNMENT_SERVICES = "service:vehicle:alignment"
     VEHICLE_WINDSCREEN_REPLACEMENT_SERVICES = "service:vehicle:glass"
@@ -748,20 +822,23 @@ class PaymentMethods(Enum):
     Payment method categories per https://wiki.openstreetmap.org/wiki/Key:payment:*
     """
 
+    AEON_PAY = "payment:aeon_pay"
     ALIPAY = "payment:alipay"
     AMERICAN_EXPRESS = "payment:american_express"
     AMERICAN_EXPRESS_CONTACTLESS = "payment:american_express_contactless"
     APP = "payment:app"
     APPLE_PAY = "payment:apple_pay"
+    AU_PAY = "payment:au_pay"
     BANCOMAT = "payment:bancomat"
     BANCONTACT = "payment:bancontact"
     BANCOPOSTA = "payment:bancoposta"
+    BANK_PAY = "payment:bank_pay"
     BCA_CARD = "payment:bca_card"
     BLIK = "payment:blik"
     BRUNO = "payment:bruno"
     CAPS = "payment:caps"
-    CARFOOD = "payment:carfood"
     CARDS = "payment:cards"
+    CARFOOD = "payment:carfood"
     CASH = "payment:cash"
     CASH_ONLY = "payment:cash=only"
     CHEQUE = "payment:cheque"
@@ -776,6 +853,7 @@ class PaymentMethods(Enum):
     DISCOVER_CARD = "payment:discover_card"
     EDY = "payment:edy"
     EG = "payment:eg"
+    FAMI_PAY = "payment:fami_pay"
     FLEETPASS = "payment:fleetpass"
     GCASH = "payment:gcash"
     GIFT_CARD = "payment:gift_card"
@@ -784,9 +862,13 @@ class PaymentMethods(Enum):
     GOOGLE_PAY = "payment:google_pay"
     HAAN_CARD = "payment:haan_card"
     HUAWEI_PAY = "payment:huawei_pay"
+    ICOCA = "payment:icoca"
+    ICSF = "payment:icsf"
     ID = "payment:id"
+    J_COIN_PAY = "payment:j_coin_pay"
     JCB = "payment:jcb"
     KAKAO_PAY = "payment:kakaopay"
+    KITACA = "payment:kitaca"
     KUSTERS = "payment:kusters"
     LINE_PAY = "payment:line_pay"
     MAES = "payment:maes"
@@ -795,6 +877,7 @@ class PaymentMethods(Enum):
     MAES_HYBRID_CARD = "payment:maes_hybrid_card"
     MAES_PREPAID = "payment:maes_prepaid"
     MAESTRO = "payment:maestro"
+    MANACA = "payment:manaca"
     MASTER_CARD = "payment:mastercard"
     MASTER_CARD_CONTACTLESS = "payment:mastercard_contactless"
     MASTER_CARD_DEBIT = "payment:mastercard_debit"
@@ -807,34 +890,43 @@ class PaymentMethods(Enum):
     NAVER_PAY = "payment:naver_pay"
     NOTES = "payment:notes"
     OCTA_PLUS = "payment:octa_plus"
+    PASMO = "payment:pasmo"
     PAYCO = "payment:payco"
     PAYPAL = "payment:paypal"
     PAYPAY = "payment:paypay"
-    POWERCARD = "payment:powercard"
+    PITAPA = "payment:pitapa"
     POSTEPAY = "payment:postepay"
     POSTFINANCE_CARD = "payment:postfinance_card"
+    POWERCARD = "payment:powercard"
     QUICPAY = "payment:quicpay"
+    QUO_PAY = "payment:quo_pay"
     RAKUTEN_PAY = "payment:rakuten_pay"
+    RESONA_WALLET = "payment:resona_wallet"
     SAMSUNG_PAY = "payment:samsung_pay"
     SATISPAY = "payment:satispay"
     SBP = "payment:sbp"  # https://www.cbr.ru/eng/psystem/sfp/
+    SMART_CODE = "payment:smart_code"
     SMART_REPORTING = "payment:smart_reporting"
     SODEXO = "payment:sodexo"
+    SUGOCA = "payment:sugoca"
+    SUICA = "payment:suica"
     TANX = "payment:tanx"
+    TOICA = "payment:toica"
     TRAVELCARD = "payment:travelcard"
     TWINT = "payment:twint"
     UNIONPAY = "payment:unionpay"
     UPI = "payment:upi"  # https://www.upichalega.com/
+    V_PAY = "payment:v_pay"
     VAB = "payment:vab"
+    VIPPS = "payment:vipps"
     VISA = "payment:visa"
     VISA_CONTACTLESS = "payment:visa_contactless"
     VISA_DEBIT = "payment:visa_debit"
     VISA_ELECTRON = "payment:visa_electron"
-    V_PAY = "payment:v_pay"
-    VIPPS = "payment:vipps"
     WAON = "payment:waon"
     WECHAT = "payment:wechat"
     XXIMO = "payment:xximo"
+    YUCHO_PAY = "payment:yucho_pay"
     ZERO_PAY = "payment:zero_pay"
 
 
@@ -1040,6 +1132,34 @@ class Sport(Enum):
     EQUESTRIAN = "equestrian"
     AMERICAN_FOOTBALL = "american_football"
     CRICKET = "cricket"
+    MARTIAL_ARTS = "martial_arts"
+    ATHLETICS = "athletics"
+    BADMINTON = "badminton"
+    FLOORBALL = "floorball"
+    HANDBALL = "handball"
+    RUGBY = "rugby"
+    ICE_HOCKEY = "ice_hockey"
+    CYCLING = "cycling"
+    PARKOUR = "parkour"
+    TABLE_TENNIS = "table_tennis"
+    PADEL = "padel"
+    ICE_SKATING = "ice_skating"
+    SKATEBOARD = "skateboard"
+    VOLLEYBALL = "volleyball"
+    BEACH_VOLLEYBALL = "beachvolleyball"
+    CLIMBING = "climbing"
+    KARTING = "karting"
+    WAKEBOARDING = "wakeboarding"
+    AXE_THROWING = "axe_throwing"
+    BIATHLON = "biathlon"
+    CHESS = "chess"
+    CROSS_COUNTRY_SKIING = "cross_country_skiing"
+    GOLF = "golf"
+    ORIENTEERING = "orienteering"
+    PILATES = "pilates"
+    SHOOTING = "shooting"
+    SKIING = "skiing"
+    YOGA = "yoga"
 
 
 def add_sport(sport: Sport | Iterable[Sport], item: Feature | dict) -> None:
@@ -1280,6 +1400,7 @@ class Sells(Enum):
     https://wiki.openstreetmap.org/wiki/Proposal:Sells:
     """
 
+    ALCOHOL = "sells:alcohol"
     BOOKS = "sells:books"
     CLOTHES = "sells:clothes"
     CONTACT_LENSES = "sells:contact_lenses"

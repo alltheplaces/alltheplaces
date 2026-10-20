@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -57,4 +58,6 @@ class CleanHarborsSpider(scrapy.Spider):
             "lon": float(lon),
         }
 
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.WASTEWATER_PLANT, item)
+        yield item

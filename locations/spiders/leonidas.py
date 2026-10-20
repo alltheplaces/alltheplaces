@@ -1,33 +1,31 @@
-import json
-from typing import Any
+from typing import Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class LeonidasSpider(scrapy.Spider):
+class LeonidasSpider(JSONBlobSpider):
     name = "leonidas"
     item_attributes = {"brand": "Leonidas", "brand_wikidata": "Q80335"}
-    start_urls = ["https://www.leonidas.com/en/shops/"]
+    start_urls = ["https://my-leonidas.com/api/public/store-locator"]
+    locations_key = "shops"
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for data in json.loads(response.xpath("//@data-shops").get()):
-            item = DictParser.parse(data)
-            item["street_address"] = item.pop("street")
-            if item.get("email"):
-                item["email"] = item["email"][0]
-            try:
-                oh = OpeningHours()
-                for key, value in data.get("schedule").items():
-                    if value:
-                        for time in value:
-                            open_time = time[0]
-                            close_time = time[1]
-                            oh.add_range(day=key, open_time=open_time, close_time=close_time, time_format="%H:%M:%S")
-                item["opening_hours"] = oh
-            except:
-                pass
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["street_address"] = item.pop("addr_full")
+        item["website"] = feature.get("official_page_urls").get("en")
+        item["branch"] = item.pop("name").upper().removeprefix("LEONIDAS ")
+        try:
+            oh = OpeningHours()
+            for day, times in (feature.get("opening_hours") or {}).items():
+                for time in times or []:
+                    oh.add_range(day, time["opens"], time["closes"])
+            item["opening_hours"] = oh
+        except:
+            pass
+
+        apply_category(Categories.SHOP_CHOCOLATE, item)
+        yield item

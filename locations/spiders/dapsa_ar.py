@@ -8,7 +8,7 @@ from locations.storefinders.storepoint import StorepointSpider
 
 class DapsaARSpider(StorepointSpider):
     name = "dapsa_ar"
-    item_attributes = {"brand": "Dapsa", "brand_wikidata": "Q140480567"}
+    item_attributes = {"brand": "DAPSA", "brand_wikidata": "Q140480567"}
     key = "163ea721fda366"
 
     def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:

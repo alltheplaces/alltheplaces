@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -27,4 +28,6 @@ class UclaHealthSpider(scrapy.Spider):
                 "website": place["Website"],
             }
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.CLINIC, item)
+            yield item

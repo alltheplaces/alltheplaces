@@ -8,10 +8,9 @@ from locations.storefinders.yext_answers import YextAnswersSpider
 class FamilyDollarUSSpider(YextAnswersSpider):
     name = "family_dollar_us"
     item_attributes = {"brand": "Family Dollar", "brand_wikidata": "Q5433101"}
-    api_key = "7a860787290ef5396ebe3ffe229d96c3"
+    api_key = "44e1b47364aeb26451d60b447563b305"
     experience_key = "pages-locator-usa-only"
     feature_type = "family-dollar"
-    requires_proxy = True
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
         item.pop("facebook", None)

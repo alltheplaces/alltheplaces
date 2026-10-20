@@ -3,6 +3,7 @@ import re
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 from locations.structured_data_spider import StructuredDataSpider
@@ -53,5 +54,7 @@ class GameGBSpider(CrawlSpider, StructuredDataSpider):
             item["opening_hours"] = OpeningHours()
             for hours in ld_data["openingHours"]:
                 item["opening_hours"].add_ranges_from_string(hours)
+
+        apply_category(Categories.SHOP_VIDEO_GAMES, item)
 
         yield item

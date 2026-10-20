@@ -46,8 +46,8 @@ class CashExpressZASpider(JSONBlobSpider):
             {"brand": SPAR_BRANDS["Savemor"][0], "brand_wikidata": SPAR_BRANDS["Savemor"][1]["brand_wikidata"]},
         ),
         (["SPAR"], SPAR_BRANDS["SPAR"][1]),
-        (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"]),
-        (["CHECKERS"], SHOPRITE_BRANDS["Checkers"]),
+        (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"][0]),
+        (["CHECKERS"], SHOPRITE_BRANDS["Checkers"][0]),
         (["7-11"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["BUILD IT", "BUILD-IT", "BUILDIT"], BuilditSpider.item_attributes),
         (["PICK N PAY", "PNP"], PICK_N_PAY_BRANDS["PNP"]),
@@ -71,6 +71,6 @@ class CashExpressZASpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["located_in"], item["located_in_wikidata"] = extract_located_in(
-            location.get("branch", ""), self.LOCATED_IN_MAPPINGS, self
+            location.get("branch", "").upper(), self.LOCATED_IN_MAPPINGS, self
         )
         yield item

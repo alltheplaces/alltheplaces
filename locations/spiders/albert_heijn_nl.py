@@ -1,4 +1,3 @@
-import json
 from typing import Any
 from urllib.parse import urljoin
 
@@ -63,7 +62,7 @@ class AlbertHeijnNLSpider(PlaywrightSpider):
         )
 
     def parse_api(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.xpath("//pre/text()").get())["data"]["storesSearch"]["result"]:
+        for location in response.json()["data"]["storesSearch"]["result"]:
             item = DictParser.parse(location)
             self.parse_hours(item, location)
             item.update(self.brand_map.get(location["storeType"]))

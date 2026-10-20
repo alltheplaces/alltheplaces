@@ -5,7 +5,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbRushcliffeSpider(OwenBaseSpider):
-    name = "gb_rushcliffe"
+    # name = "gb_rushcliffe"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Council Tax bands of properties in the Rushcliffe Borough Council area, (c) Rushcliffe Borough Council, 2025. This information is licensed under the terms of the Open Government Licence."
         + " Contains OS data © Crown copyright and database right 2025."

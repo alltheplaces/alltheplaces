@@ -83,3 +83,10 @@ class Licenses(Enum):
         "attribution": "optional",
         "use:commercial": "yes",
     }
+    US_PUBLIC_DOMAIN = {
+        "license": "United States Government Work",
+        "license:website": "https://www.usa.gov/government-works",
+        "license:wikidata": "Q60671452",
+        "attribution": "optional",
+        "use:commercial": "permit",
+    }

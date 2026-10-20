@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -31,4 +32,5 @@ class AfcUrgentCareSpider(JSONBlobSpider):
             for (h, _), day in zip(hours, DAYS):
                 if h:
                     item["opening_hours"].add_range(day, h[0], h[1], "%H:%M:%S")
+        apply_category(Categories.CLINIC, item)
         yield item

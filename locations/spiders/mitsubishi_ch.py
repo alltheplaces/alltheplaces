@@ -26,7 +26,7 @@ class MitsubishiCHSpider(JSONBlobSpider):
             sales_item = deepcopy(item)
             sales_item["ref"] = f"{item['ref']}-sales"
             apply_category(Categories.SHOP_CAR, sales_item)
-            apply_yes_no(Extras.CAR_REPAIR, sales_item, mitsubishi.get("service", False))
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, mitsubishi.get("service", False))
             sales_item["opening_hours"] = self.parse_hours(opening_hours.get("sales"))
             yield sales_item
 

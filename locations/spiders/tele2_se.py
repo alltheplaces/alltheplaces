@@ -1,29 +1,35 @@
-from scrapy import Spider
+from typing import Iterable
 
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from scrapy.http import Response
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+
+from locations.categories import Categories, apply_category
+from locations.hours import CLOSED_SE, DAYS_SE, OpeningHours
+from locations.items import Feature
 
 
-class Tele2SESpider(Spider):
+class Tele2SESpider(CrawlSpider):
     name = "tele2_se"
     item_attributes = {"brand": "Tele2", "brand_wikidata": "Q309865"}
-    allowed_domains = [""]
-    start_urls = ["https://api-web.tele2.se/content/store/collection"]
+    start_urls = ["https://www.tele2.se/butiker"]
+    rules = [Rule(LinkExtractor(allow=r"/butiker/[a-z0-9\-]+$"), follow=False, callback="parse_store")]
 
-    def parse(self, response):
-        for location in response.json()["items"]:
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full", None)
-            item.pop("phone", None)
-            item["website"] = "https://www.tele2.se/butiker/" + location["slug"]
-            hours_string = (
-                "Mo-Fr: "
-                + location.get("weekdayOpenTimes", "")
-                + " Sa: "
-                + location.get("saturdayOpenTimes", "")
-                + " Su: "
-                + location.get("sundayOpenTimes", "")
-            )
-            item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(hours_string)
-            yield item
+    def parse_store(self, response: Response) -> Iterable[Feature]:
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["branch"] = response.xpath("//h1/text()").get()
+
+        details = response.xpath('//div[@id="oppettider"]')
+        item["addr_full"] = details.xpath('.//h2[text()="Besöksadress"]/following-sibling::span[1]/text()').get()
+
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(
+            details.xpath('.//h2[text()="Öppettider"]/following::span[normalize-space(text())][1]/text()').get(),
+            days=DAYS_SE,
+            closed=CLOSED_SE,
+        )
+
+        apply_category(Categories.SHOP_MOBILE_PHONE, item)
+
+        yield item

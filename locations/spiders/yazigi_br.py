@@ -1,36 +1,46 @@
-from typing import AsyncIterator
+import json
+import re
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import FormRequest
+import chompjs
+from scrapy import Request
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.react_server_components import parse_rsc
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class YazigiBRSpider(Spider):
+class YazigiBRSpider(StructuredDataSpider):
     name = "yazigi_br"
     item_attributes = {"brand": "Yázigi", "brand_wikidata": "Q10394813"}
+    start_urls = ["https://escolas.yazigi.com.br/"]
+    wanted_types = ["Place"]
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        url = "https://www.yazigi.com.br/BuscaUnidadesMapa"
-        yield FormRequest(
-            url=url,
-            formdata={"isLead": "false", "isMapa": "true", "isTeste": "false"},
-        )
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
+        for url in re.findall(r'\\"siteUrl\\":\\"(https://escolas\.yazigi\.com\.br/[^\\"]+)\\"', response.text):
+            yield Request(url, callback=self.parse_sd)
 
-    def parse(self, response, **kwargs):
-        data = response.json()["Unidades"]
-        for poi in data:
-            poi["Unidade"].update(poi["Unidade"].pop("Coordenadas"))
-            item = DictParser.parse(poi["Unidade"])
-            item["ref"] = poi["Unidade"].get("CodigoEmitente")
-            item["branch"] = poi["Unidade"].get("NomeFantasia")
-            item["phone"] = poi["Unidade"].get("Telefone")
-            address = poi["Unidade"]["Endereco"]
-            item["street_address"] = address.get("Logradouro")
-            item["city"] = address.get("CidadeNome")
-            item["state"] = address.get("EstadoNome")
-            item["postcode"] = address.get("CEP")
-            apply_category(Categories.LANGUAGE_SCHOOL, item)
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item.pop("image", None)
+        branch = re.sub(r"^\s*y[áa]zigi\b[\s\-–:]*", "", item.get("name") or "", flags=re.IGNORECASE)
+        if branch:
+            item["branch"] = branch.title()
 
-            yield item
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        rsc = "".join(chunk for _, chunk in [chompjs.parse_js_object(script) for script in scripts]).encode()
+        if hours := next(DictParser.iter_matching_keys(dict(parse_rsc(rsc)), "horariosJson"), None):
+            schedule = json.loads(hours)
+            if any(schedule.values()):
+                item["opening_hours"] = OpeningHours()
+                for day, slots in schedule.items():
+                    if not slots:
+                        item["opening_hours"].set_closed(day)
+                    for slot in slots:
+                        item["opening_hours"].add_range(day, slot["open"], slot["close"])
+
+        apply_category(Categories.LANGUAGE_SCHOOL, item)
+        yield item

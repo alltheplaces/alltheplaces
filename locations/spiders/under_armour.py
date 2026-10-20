@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BOT_USER_AGENT_REQUESTS
 
 
 class UnderArmourSpider(Spider):
@@ -15,7 +16,10 @@ class UnderArmourSpider(Spider):
     allowed_domains = ["store-locator.underarmour.com"]
 
     async def start(self) -> AsyncIterator[Any]:
-        yield JsonRequest(url="https://store-locator.underarmour.com/api/stores/nearby/?lat=0&lng=0&radius=50000")
+        yield JsonRequest(
+            url="https://store-locator.underarmour.com/api/stores/nearby/?lat=0&lng=0&radius=50000",
+            headers={"User-Agent": BOT_USER_AGENT_REQUESTS},
+        )
 
     def parse(self, response: Response, **kwargs: Any):
         for store in response.json()["stores"]:

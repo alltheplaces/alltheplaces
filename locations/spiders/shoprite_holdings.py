@@ -1,56 +1,34 @@
-from json.decoder import JSONDecodeError
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories, Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
 SHOPRITE_BRANDS = {
-    "Checkers": {"brand": "Checkers", "brand_wikidata": "Q5089126", "extras": Categories.SHOP_SUPERMARKET.value},
-    "Checkers Hyper": {
-        "brand": "Checkers Hyper",
-        "brand_wikidata": "Q116518886",
-        "extras": Categories.SHOP_SUPERMARKET.value,
-    },
-    "Checkers LiquorShop": {
-        "brand": "Checkers",
-        "brand_wikidata": "Q5089126",
-        "extras": Categories.SHOP_ALCOHOL.value,
-    },
-    "MediRite": {
-        "brand": "MediRite",
-        "brand_wikidata": "Q115696233",
-        "located_in": "Checkers",
-        "located_in_wikidata": "Q5089126",
-        "extras": Categories.PHARMACY.value,
-    },
-    "MediRite Plus": {"brand": "MediRite Plus", "brand_wikidata": "Q115696233", "extras": Categories.PHARMACY.value},
-    "Shoprite": {"brand": "Shoprite", "brand_wikidata": "Q1857639", "extras": Categories.SHOP_SUPERMARKET.value},
-    "Shoprite Hyper": {
-        "brand": "Shoprite Hyper",
-        "brand_wikidata": "Q1857639",
-        "extras": Categories.SHOP_SUPERMARKET.value,
-    },
-    "Shoprite LiquorShop": {
-        "brand": "LiquorShop Shoprite",
-        "brand_wikidata": "Q1857639",
-        "extras": Categories.SHOP_ALCOHOL.value,
-    },
-    "Shoprite Mini": {
-        "brand": "Shoprite Mini",
-        "brand_wikidata": "Q1857639",
-        "extras": Categories.SHOP_CONVENIENCE.value,
-    },
-    "Super Usave": {
-        "brand": "Super Usave",
-        "brand_wikidata": "Q115696368",
-        "extras": Categories.SHOP_SUPERMARKET.value,
-    },
-    "Usave": {"brand": "Usave", "brand_wikidata": "Q115696368", "extras": Categories.SHOP_SUPERMARKET.value},
+    "Checkers": ({"brand": "Checkers", "brand_wikidata": "Q5089126"}, Categories.SHOP_SUPERMARKET),
+    "Checkers Hyper": ({"brand": "Checkers Hyper", "brand_wikidata": "Q116518886"}, Categories.SHOP_SUPERMARKET),
+    "Checkers LiquorShop": ({"brand": "Checkers", "brand_wikidata": "Q5089126"}, Categories.SHOP_ALCOHOL),
+    "MediRite": (
+        {
+            "brand": "MediRite",
+            "brand_wikidata": "Q115696233",
+            "located_in": "Checkers",
+            "located_in_wikidata": "Q5089126",
+        },
+        Categories.PHARMACY,
+    ),
+    "MediRite Plus": ({"brand": "MediRite Plus", "brand_wikidata": "Q115696233"}, Categories.PHARMACY),
+    "Shoprite": ({"brand": "Shoprite", "brand_wikidata": "Q1857639"}, Categories.SHOP_SUPERMARKET),
+    "Shoprite Hyper": ({"brand": "Shoprite Hyper", "brand_wikidata": "Q1857639"}, Categories.SHOP_SUPERMARKET),
+    "Shoprite LiquorShop": ({"brand": "LiquorShop Shoprite", "brand_wikidata": "Q1857639"}, Categories.SHOP_ALCOHOL),
+    "Shoprite Mini": ({"brand": "Shoprite Mini", "brand_wikidata": "Q1857639"}, Categories.SHOP_CONVENIENCE),
+    "Super Usave": ({"brand": "Super Usave", "brand_wikidata": "Q115696368"}, Categories.SHOP_SUPERMARKET),
+    "Usave": ({"brand": "Usave", "brand_wikidata": "Q115696368"}, Categories.SHOP_SUPERMARKET),
 }
 
 COUNTRY_IDS = {
@@ -66,6 +44,8 @@ COUNTRY_IDS = {
     "239": "ZM",
 }
 
+STORES_API = "https://www.medirite.co.za/bin/commons/stores.json"
+
 
 class ShopriteHoldingsSpider(Spider):
     name = "shoprite_holdings"
@@ -75,40 +55,33 @@ class ShopriteHoldingsSpider(Spider):
     ]
 
     start_urls = [
-        f"https://www.shopriteholdings.co.za/bin/stores.json?national=yes&brand={brand}&country={country}"
+        f"{STORES_API}?national=yes&brand={brand}&country={country}"
         for brand in brand_filters
         for country in COUNTRY_IDS
     ]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
-            yield JsonRequest(url=url, callback=self.parse_store_list, encoding="ISO-8859-1")
+            yield JsonRequest(url=url, callback=self.parse_store_list)
 
-    def parse_store_list(self, response):
-        try:
-            locations = response.json()["stores"]
-        except (UnicodeEncodeError, UnicodeDecodeError, JSONDecodeError):
-            locations = response.replace(body=response.text.encode("ASCII", "ignore").decode("utf-8", "ignore")).json()[
-                "stores"
-            ]
+    def parse_store_list(self, response: Response) -> Iterable[JsonRequest]:
+        store_list = response.json()
+        if not isinstance(store_list, dict):
+            # A brand/country pair with no stores returns a bare status list, e.g. [204]
+            return
 
-        for location in locations:
+        for location in store_list["stores"]:
             location["ref"] = location.pop("uid")
 
-            location = {k: v for k, v in location.items() if v != "null"}
+            location = {k: v for k, v in location.items() if v not in ("null", "")}
 
-            if "phoneInternationalCode" in location:
-                if location["phoneInternationalCode"].startswith("00"):
-                    location["phoneNumber"] = (
-                        "+"
-                        + location["phoneInternationalCode"].lstrip("00")
-                        + " "
-                        + location["phoneNumber"].lstrip("0")
-                    )
-                else:
-                    location["phoneNumber"] = (
-                        "+" + location["phoneInternationalCode"] + " " + location["phoneNumber"].lstrip("0")
-                    )
+            if location.get("phoneInternationalCode") and location.get("phoneNumber"):
+                location["phoneNumber"] = (
+                    "+"
+                    + location["phoneInternationalCode"].removeprefix("00")
+                    + " "
+                    + location["phoneNumber"].lstrip("0")
+                )
 
             location["street-address"] = clean_address(
                 [location.get("physicalAdd1"), location.get("physicalAdd2"), location.get("physicalAdd3")]
@@ -122,20 +95,20 @@ class ShopriteHoldingsSpider(Spider):
             item = DictParser.parse(location)
 
             item["branch"] = location["branch"]
-            item.update(SHOPRITE_BRANDS.get(location.get("brand")))
+            brand, cat = SHOPRITE_BRANDS[location["brand"]]
+            apply_category(cat, item)
+            item.update(brand)
             item["website"] = self.get_website(item)
 
             yield JsonRequest(
-                url=f"https://www.shopriteholdings.co.za/bin/stores.json?uid={item['ref']}",
+                url=f"{STORES_API}?uid={item['ref']}",
                 meta={"item": item},
                 callback=self.parse_store,
             )
 
-    def parse_store(self, response):
+    def parse_store(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
-        response = response.replace(body=response.text.encode("ASCII", "ignore").decode("utf-8", "ignore"))
-        # Same info as main stores.json response:
-        # location = response.json()["singleStoreData"][0]
+        # response.json()["singleStoreData"][0] repeats the main stores.json record, so it is ignored
 
         services = [service["FacilityTypeName"] for service in response.json()["services"]]
         # Many other services can be listed for Checkers and LiquorShop, but not all refer to in-store facilities, some are just available nearby
@@ -151,11 +124,9 @@ class ShopriteHoldingsSpider(Spider):
                 item["opening_hours"].set_closed(day_hours["TradingDay"])
             else:
                 item["opening_hours"].add_range(day_hours["TradingDay"], day_hours["StartTime"], day_hours["EndTime"])
-
-        item["extras"]["@source_uri"] = f"https://www.shopriteholdings.co.za/bin/stores.json?uid={item['ref']}"
         yield item
 
-    def get_website(self, item):
+    def get_website(self, item: Feature) -> str | None:
         # Checkers/Shoprite ZA redirect to fuller urls, but this seems simpler
         # e.g. https://www.shoprite.co.za/Western-Cape/Cape-Town/Durbanville/Shoprite-Durbanville/store-details/1894
         # i.e. /province/city/suburb/brand-branch/ref

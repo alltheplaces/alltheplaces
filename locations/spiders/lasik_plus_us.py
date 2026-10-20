@@ -1,25 +1,35 @@
-from scrapy.spiders import SitemapSpider
+import json
+import re
+from typing import Any
 
-from locations.items import SocialMedia, get_social_media, set_social_media
-from locations.structured_data_spider import StructuredDataSpider
+from scrapy.http import Response
+
+from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class LasikPlusUSSpider(SitemapSpider, StructuredDataSpider):
+class LasikPlusUSSpider(JSONBlobSpider):
     name = "lasik_plus_us"
     item_attributes = {"brand": "LasikPlus", "brand_wikidata": "Q126111242"}
-    sitemap_urls = ["https://www.lasikplus.com/robots.txt"]
-    sitemap_follow = ["lasik_location.xml"]
-    sitemap_rules = [(r"/location/([^/]+-lasik-center)/$", "parse")]
-    requires_proxy = True
+    start_urls = ["https://www.lasikplus.com/locations/"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        item["website"] = response.url
+    def extract_json(self, response: Response) -> list[dict]:
+        return json.loads(
+            re.search(
+                r"locationsData\s*=\s*(\[.+?\]);",
+                response.xpath('//*[@id="meta-locations-map-js-extra"]/text()').get(),
+                re.DOTALL,
+            ).group(1)
+        )
 
-        if get_social_media(item, SocialMedia.FACEBOOK) == "https://www.facebook.com/LasikPlus/":
-            return  # SEO spam
-
-        yelp, fb, *_ = get_social_media(item, SocialMedia.FACEBOOK).split(", ")
-        set_social_media(item, SocialMedia.YELP, yelp)
-        set_social_media(item, SocialMedia.FACEBOOK, fb)
-
+    def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Any:
+        item["ref"] = str(feature["id"])
+        item["branch"] = item.pop("name")
+        item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address_2")])
+        item["addr_full"] = None
+        item["website"] = feature.get("link")
+        apply_category(Categories.CLINIC, item)
+        apply_healthcare_specialities([HealthcareSpecialities.OPHTHALMOLOGY], item)
         yield item

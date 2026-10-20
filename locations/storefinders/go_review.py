@@ -27,15 +27,26 @@ class GoReviewSpider(CrawlSpider):
         Rule(
             LinkExtractor(allow=r"^https:\/\/.+\.goreview\.co\.za\/store-information.+$"),
             callback="parse",
-        )
+        ),
+        # Some sites only link to the "goreview/default" landing page for a
+        # store rather than directly to "store-information"; rewrite those
+        # links to the store-information URL before following them.
+        Rule(
+            LinkExtractor(allow=r"^https:\/\/.+\.goreview\.co\.za\/goreview\/default$"),
+            process_links="process_goreview_default_links",
+            callback="parse",
+        ),
     ]
     days: dict = DAYS_EN
 
     async def start(self) -> AsyncIterator[Request]:
-        if len(self.start_urls) != 1:
-            raise ValueError("Specify one URL in the start_urls list attribute.")
-            return
-        yield Request(url=self.start_urls[0])
+        for url in self.start_urls:
+            yield Request(url=url)
+
+    def process_goreview_default_links(self, links: list) -> list:
+        for link in links:
+            link.url = link.url.replace("goreview.co.za/goreview/default", "goreview.co.za/store-information")
+        return links
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         item = Feature()

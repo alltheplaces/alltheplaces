@@ -9,7 +9,7 @@ class ZeemanSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Zeeman", "brand_wikidata": "Q184399"}
     sitemap_urls = ["https://www.zeeman.com/robots.txt"]
     sitemap_follow = ["/nl-nl/sitemap/stores.xml"]
-    sitemap_rules = [("/nl-nl/stores/", "parse_sd")]
+    sitemap_rules = [("/nl-nl/winkels/", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")

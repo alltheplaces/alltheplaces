@@ -45,13 +45,16 @@ class HondaAUSpider(Spider):
                 item["postcode"] = feature.get("AddressPostcode")
                 if dealership.get("Website"):
                     item["website"] = "https://www.honda.com.au" + dealership["Website"]
-
-                item["opening_hours"] = OpeningHours()
-                hours_string = ""
-                for day_hours in feature["WorkingHoursArray"]:
-                    day_name = day_hours["day"]
-                    time_ranges = ", ".join(day_hours["time"])
-                    hours_string = f"{hours_string} {day_name}: {time_ranges}"
-                item["opening_hours"].add_ranges_from_string(hours_string)
+                try:
+                    item["opening_hours"] = OpeningHours()
+                    item["opening_hours"].add_ranges_from_string(
+                        feature["workingHoursFormatted"]
+                        .replace("<b>", "")
+                        .replace("</b>", "")
+                        .replace("<br>", "")
+                        .replace("<br/>", "")
+                    )
+                except:
+                    pass
 
                 yield item

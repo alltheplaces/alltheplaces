@@ -10,7 +10,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbNeathPortTalbotSpider(OwenBaseSpider):
-    name = "gb_neath_port_talbot"
+    # name = "gb_neath_port_talbot"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         # Address strings are released without restrictions
         "attribution:name": "Contains OS data © Crown copyright and database right 2025."  # OS Open UPRN, coords

@@ -137,6 +137,7 @@ DAYS_BR = {
     "Sex": "Fr",
     "Sábado": "Sa",
     "Sáb": "Sa",
+    "Domingo": "Su",
     "Domingos": "Su",
     "Dom": "Su",
 }
@@ -240,18 +241,25 @@ DAYS_CZ = {
 DAYS_EE = {
     "Esmaspäev": "Mo",
     "Es": "Mo",
+    "E": "Mo",
     "Teisipäev": "Tu",
     "Te": "Tu",
+    "T": "Tu",
     "Kolmapäev": "We",
     "Ko": "We",
+    "K": "We",
     "Neljapäev": "Th",
     "Ne": "Th",
+    "N": "Th",
     "Reede": "Fr",
     "Re": "Fr",
+    "R": "Fr",
     "Laupäev": "Sa",
     "La": "Sa",
+    "L": "Sa",
     "Pühapäev": "Su",
     "Pü": "Su",
+    "P": "Su",
 }
 
 DAYS_GR = {
@@ -271,11 +279,23 @@ DAYS_GR = {
     "Κυριακή": "Su",
 }
 
+DAYS_AL = {
+    "E Hënë": "Mo",
+    "E Martë": "Tu",
+    "E Mërkurë": "We",
+    "E Enjte": "Th",
+    "E Premte": "Fr",
+    "E Shtunë": "Sa",
+    "E Diel": "Su",
+}
+
 DAYS_HR = {
     "Ponedjeljak": "Mo",
     "Pon": "Mo",
     "Utorak": "Tu",
+    "Uto": "Tu",
     "Srijeda": "We",
+    "Sri": "We",
     "Četvrtak": "Th",
     "Čet": "Th",
     "Petak": "Fr",
@@ -363,25 +383,39 @@ DAYS_LT = {
 }
 
 DAYS_SE = {
+    "Måndagar": "Mo",
     "Måndag": "Mo",
+    "Månd": "Mo",
     "Mån": "Mo",
     "Må": "Mo",
+    "Tisdagar": "Tu",
     "Tisdag": "Tu",
+    "Tisd": "Tu",
     "Tis": "Tu",
     "Ti": "Tu",
+    "Onsdagar": "We",
     "Onsdag": "We",
+    "Onsd": "We",
     "Ons": "We",
     "On": "We",
+    "Torsdagar": "Th",
     "Torsdag": "Th",
+    "Torsd": "Th",
     "Tors": "Th",
     "To": "Th",
+    "Fredagar": "Fr",
     "Fredag": "Fr",
+    "Fred": "Fr",
     "Fre": "Fr",
     "Fr": "Fr",
+    "Lördagar": "Sa",
     "Lördag": "Sa",
+    "Lörd": "Sa",
     "Lör": "Sa",
     "Lö": "Sa",
+    "Söndagar": "Su",
     "Söndag": "Su",
+    "Sönd": "Su",
     "Sön": "Su",
     "Sö": "Su",
 }
@@ -534,14 +568,24 @@ DAYS_PT = {
     # "Feriado": "PH",
     # "Se": "Mo",
     "Segunda": "Mo",
+    "Segunda-Feira": "Mo",
+    "2ª": "Mo",
     "Te": "Tu",
     "Terça": "Tu",
+    "Terça-Feira": "Tu",
+    "3ª": "Tu",
     # "Qu": "We",
     "Quarta": "We",
+    "Quarta-Feira": "We",
+    "4ª": "We",
     # "Qu": "Th",
     "Quinta": "Th",
+    "Quinta-Feira": "Th",
+    "5ª": "Th",
     # "Se": "Fr",
     "Sexta": "Fr",
+    "Sexta-Feira": "Fr",
+    "6ª": "Fr",
     "Sábado": "Sa",
     "Sa": "Sa",
     "Sá": "Sa",
@@ -589,6 +633,15 @@ DAYS_RU = {
     "Субботу": "Sa",
     "Вс": "Su",
     "Воскресенье": "Su",
+}
+DAYS_GE = {
+    "ორშაბათი": "Mo",
+    "სამშაბათი": "Tu",
+    "ოთხშაბათი": "We",
+    "ხუთშაბათი": "Th",
+    "პარასკევი": "Fr",
+    "შაბათი": "Sa",
+    "კვირა": "Su",
 }
 DAYS_RS = {
     "Ponedeljak": "Mo",
@@ -665,6 +718,7 @@ DAYS_ES = {
     "Lunes": "Mo",
     "Lun": "Mo",
     "Lu": "Mo",
+    "L": "Mo",
     "Martes": "Tu",
     "Mar": "Tu",
     "Ma": "Tu",
@@ -679,26 +733,41 @@ DAYS_ES = {
     "Viernes": "Fr",
     "Vie": "Fr",
     "Vi": "Fr",
+    "V": "Fr",
     "Sabado": "Sa",
     "Sábado": "Sa",
+    "Sabados": "Sa",
     "Sábados": "Sa",
     "Sab": "Sa",
     "Sáb": "Sa",
     "Sa": "Sa",
+    "S": "Sa",
     "Domingo": "Su",
     "Domingos": "Su",
     "Dom": "Su",
     "Do": "Su",
+    "D": "Su",
 }
 
 DAYS_RO = {
     "Luni": "Mo",
+    "L": "Mo",
     "Marți": "Tu",
+    "Marti": "Tu",
+    "Ma": "Tu",
     "Miercuri": "We",
+    "Mi": "We",
     "Joi": "Th",
+    "J": "Th",
     "Vineri": "Fr",
+    "Vi": "Fr",
+    "V": "Fr",
     "Sâmbătă": "Sa",
+    "Sambata": "Sa",
+    "S": "Sa",
     "Duminică": "Su",
+    "Duminica": "Su",
+    "D": "Su",
 }
 
 DAYS_SR = {
@@ -790,6 +859,7 @@ DAYS_IS = {
     "Fim": "Th",
     "Fimmtudagur": "Th",
     "Fös": "Fr",
+    "Föst": "Fr",
     "Föstudagur": "Fr",
     "Lau": "Sa",
     "Laugardagur": "Sa",
@@ -813,18 +883,32 @@ DAYS_AR = {
 DAYS_UA = {
     "понеділок": "Mo",
     "Понеділок": "Mo",
+    "пн": "Mo",
+    "Пн": "Mo",
     "вівторок": "Tu",
     "Вівторок": "Tu",
+    "вт": "Tu",
+    "Вт": "Tu",
     "середа": "We",
     "Середа": "We",
+    "ср": "We",
+    "Ср": "We",
     "четвер": "Th",
     "Четвер": "Th",
+    "чт": "Th",
+    "Чт": "Th",
     "п’ятниця": "Fr",
     "П’ятниця": "Fr",
+    "пт": "Fr",
+    "Пт": "Fr",
     "субота": "Sa",
     "Субота": "Sa",
+    "сб": "Sa",
+    "Сб": "Sa",
     "неділя": "Su",
     "Неділя": "Su",
+    "нд": "Su",
+    "Нд": "Su",
 }
 
 # See https://github.com/alltheplaces/alltheplaces/issues/7360
@@ -866,6 +950,11 @@ DAYS_BY_FREQUENCY = [
 
 NAMED_DAY_RANGES_DK = {
     "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
+}
+
+NAMED_DAY_RANGES_SE = {
+    "Vardagar": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
+    "Vardag": ["Mo", "Tu", "We", "Th", "Fr"],
 }
 
 NAMED_DAY_RANGES_EN = {
@@ -1051,6 +1140,28 @@ def sanitise_day(day: str, days: dict[str, str] = DAYS_EN) -> str | None:
     return days.get(day)
 
 
+def _normalise_hour_over_24(value: str) -> tuple[str, bool]:
+    """
+    Reduce the hour of a time string by 24 when it is 24 or later.
+
+    A value like 24:00, 25:00 or 26:30 denotes a time after midnight on the
+    following day and is reduced to 00:00, 01:00 or 02:30.
+
+    :param value: time string in a ``%H``-based format.
+    :returns: the normalised time string and whether the hour was 24 or later.
+    """
+    hour, sep, rest = value.partition(":")
+    if not sep:
+        return value, False
+    try:
+        hour_int = int(hour)
+    except ValueError:
+        return value, False
+    if hour_int < 24:
+        return value, False
+    return f"{hour_int - 24:02d}{sep}{rest}", True
+
+
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
@@ -1134,10 +1245,24 @@ class OpeningHours:
                 # Invalid range supplied. Probably the source data uses this
                 # notation for closed days.
                 return
+
+        # A time of 24:00 or later denotes a time after midnight. A close of
+        # exactly 24:00 means "until midnight" and becomes 23:59. Any other
+        # time of 24:00 or later (e.g. an open of 24:00, or 25:00/26:30) is
+        # reduced by 24 hours so it fits %H. An opening time past 24:00 places
+        # the whole range on the following day.
+        open_after_midnight = False
+        if isinstance(open_time, str):
+            open_time, open_after_midnight = _normalise_hour_over_24(open_time)
+        if isinstance(close_time, str):
             if close_time in ("24:00", "00:00", "0:00"):
                 close_time = "23:59"
-            if close_time in ("24:00:00", "00:00:00"):
+            elif close_time in ("24:00:00", "00:00:00"):
                 close_time = "23:59:00"
+            else:
+                close_time, _ = _normalise_hour_over_24(close_time)
+        if open_after_midnight:
+            day = DAYS[(DAYS.index(day) + 1) % len(DAYS)]
         if not isinstance(open_time, time.struct_time):
             open_time = time.strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):

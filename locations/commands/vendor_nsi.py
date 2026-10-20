@@ -23,7 +23,7 @@ class VendorDataCommand(ScrapyCommand):
             "-w",
             "--wikidata",
             dest="wikidata_url",
-            default="https://cdn.jsdelivr.net/npm/name-suggestion-index@7/dist/wikidata/wikidata.json",
+            default="https://cdn.jsdelivr.net/npm/name-suggestion-index@8/dist/wikidata/wikidata.json",
             type=str,
             help="wikidata.json to be vendored [default: %(default)s]",
         )
@@ -31,7 +31,7 @@ class VendorDataCommand(ScrapyCommand):
             "-n",
             "--nsi",
             dest="nsi_url",
-            default="https://cdn.jsdelivr.net/npm/name-suggestion-index@7/dist/json/nsi.json",
+            default="https://cdn.jsdelivr.net/npm/name-suggestion-index@8/dist/json/nsi.json",
             type=str,
             help="nsi.json to be vendored [default: %(default)s]",
         )
@@ -69,5 +69,11 @@ class VendorDataCommand(ScrapyCommand):
         data = json.load(open(file, encoding="utf-8"))
         print(f"{file.stem.upper()} version: {data['_meta']['version']}")
 
+    def _fr_replacement_overrides(self, nsi: dict):
+        for tree in nsi["nsi"].values():
+            for entry in tree["items"]:
+                if "include" in entry["locationSet"] and "fx" in entry["locationSet"]["include"]:
+                    entry["locationSet"]["include"].append("fr")
+
     _wikidata_overrides = []
-    _nsi_overrides = []
+    _nsi_overrides = [_fr_replacement_overrides]

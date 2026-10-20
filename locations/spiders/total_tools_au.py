@@ -1,4 +1,3 @@
-import json
 from typing import Any, Iterable
 
 import scrapy
@@ -18,9 +17,10 @@ class TotalToolsAUSpider(PlaywrightSpider):
     allowed_domains = ["www.totaltools.com.au"]
     start_urls = ["https://www.totaltools.com.au/totaltools_storelocator/index/loadStoreRewrite"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = "AU"  # Cloudflare Managed Challenge site-wide (cf-mitigated: challenge)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in json.loads(response.xpath("//pre/text()").get())["storesjson"]:
+        for store in response.json()["storesjson"]:
             item = DictParser.parse(store)
             item["branch"] = item.pop("name").removeprefix("Total Tools ")
             item["ref"] = store["storelocator_id"]

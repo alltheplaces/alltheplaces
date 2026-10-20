@@ -16,15 +16,12 @@ class PudoTRSpider(scrapy.Spider):
             d["name"] = f"{self.item_attributes['brand']} {item['name']}"
             d["state"] = item["city"]  # this is province / il in Turkish
             d["city"] = item["county"]  # this is district / ilçe in Turkish
+            d["street_address"] = item["addressText"]
             neighborhood = item["district"]
             addr_desc = item["addressDescription"]
 
-            # if no neighborhood, address text only contains ilçe and il
             if neighborhood:
-                d["addr_full"] = f"{item['addressText']} {item['county']} {item['city']}"
                 d.set_tag("addr:neighborhood", neighborhood)  # mahalle in Turkish
-            else:
-                d["addr_full"] = item["addressText"]
 
             if addr_desc and addr_desc != neighborhood:
                 d.set_tag("addr:desc", addr_desc)

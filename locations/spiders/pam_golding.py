@@ -1,70 +1,89 @@
-import re
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
-from scrapy.linkextractors import LinkExtractor
+from scrapy.http import JsonRequest, Response
 
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+
+# ISO 3166-2 subdivision codes for the provinces/regions observed in this
+# spider's data, keyed by the raw "countryName" values returned by the API.
+# Countries or provinces without an unambiguous subdivision code (e.g.
+# Mozambique's "Maputo", which is ambiguous between Maputo City and Maputo
+# Province, or Seychelles/Mauritius regions that aren't ISO subdivisions) are
+# intentionally omitted so item["state"] is left unset rather than storing a
+# raw display name.
+STATE_CODES = {
+    "South Africa": {
+        "Eastern Cape": "EC",
+        "Free State": "FS",
+        "Gauteng": "GP",
+        "KwaZulu-Natal": "KZN",
+        "Limpopo Province": "LP",
+        "Mpumalanga": "MP",
+        "North West Province": "NW",
+        "Northern Cape": "NC",
+        "Western Cape": "WC",
+    },
+    "United Arab Emirates": {
+        "Dubai": "DU",
+    },
+    "Zimbabwe": {
+        "Harare": "HA",
+        "Matabeleland South": "MS",
+    },
+    "Namibia": {
+        "Erongo": "ER",
+        "Khomas": "KH",
+    },
+    "Botswana": {
+        "South East": "SE",
+    },
+    "Zambia": {
+        "Lusaka": "09",
+    },
+    "Uganda": {
+        "Central": "C",
+    },
+    "Kenya": {
+        "Nairobi": "30",
+    },
+}
 
 
-class PamGoldingSpider(Spider):
+class PamGoldingSpider(JSONBlobSpider):
     name = "pam_golding"
-    item_attributes = {
-        "brand": "Pam Golding Properties",
-        "brand_wikidata": "Q65051429",
-    }
-    start_urls = [
-        "https://www.pamgolding.co.za/contact-us/offices",
-        "https://www.pamgolding.co.za/contact-us/international-offices",
-    ]
+    item_attributes = {"brand": "Pam Golding Properties", "brand_wikidata": "Q65051429"}
+    skip_auto_cc_domain = True
 
-    def parse(self, response):
-        links = LinkExtractor(
-            allow=r"^https:\/\/www\.pamgolding\.co\.za\/contact-us\/office-details/.+/\d+$"
-        ).extract_links(response)
-        for link in links:
-            ref = re.sub(r"^https:\/\/www\.pamgolding\.co\.za\/contact-us\/office-details/.+/(\d+)$", r"\1", link.url)
-            json_url = f"https://www.pamgolding.co.za/customapi/ContactUs/GetOfficeById/{ref}"
-            yield JsonRequest(url=json_url, callback=self.parse_item, meta={"ref": ref, "website": link.url})
+    async def start(self) -> Any:
+        yield JsonRequest("https://webapi.pamgolding.co.za/api/agentsoffices/search-offices", data={})
 
-    def parse_item(self, response):
-        location = response.json()
-        item = Feature()
+    def extract_json(self, response: Response) -> list[dict]:
+        return [
+            office for country in response.json() for section in country["sections"] for office in section["offices"]
+        ]
 
-        item["ref"] = response.meta["ref"]
-        item["website"] = response.meta["website"]
-        item["lat"] = location.get("decLatitude")
-        item["lon"] = location.get("decLongitude")
+    def post_process_item(self, item: Feature, response: Response, location: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["ref"] = str(location["id"])
+        item["branch"] = item.pop("name")
+        item["website"] = "https://www.pamgolding.co.za" + location["url"]
+        item["addr_full"] = location.get("address")
+        item["lat"] = location["geoPoint"]["lat"]
+        item["lon"] = location["geoPoint"]["lon"]
 
-        item["branch"] = location.get("nvcName")
-        item["email"] = location.get("nvcEmailAddress")
-        item["phone"] = location.get("nvcTelephoneNumber")
-        item["extras"]["fax"] = location.get("nvcFaxNumber")
+        country_name = location["location"]["countryName"]
+        province_name = location["location"]["provinceName"]
+        # item["country"] is left as the raw display name here: the
+        # CountryCodeCleanUpPipeline (which runs on every item) resolves it
+        # to an ISO alpha-2 code via the same country name matching logic
+        # exposed by locations.country_utils.CountryUtils, so all countries
+        # observed in this dataset already come out correctly as e.g. "ZA".
+        item["country"] = country_name
+        if state := STATE_CODES.get(country_name, {}).get(province_name):
+            item["state"] = state
 
-        address = location.get("dtlAddress")
-        item["addr_full"] = address.get("nvcSingleLineDisplayAddress")
-        item["housenumber"] = address.get("nvcStreetNumber")
-        item["street"] = address.get("nvcStreetName")
-        item["postcode"] = address.get("nvcPostalCode")
-        item["city"] = address.get("nvcCity")
-        item["state"] = address.get("nvcProvince")
-        item["country"] = address.get("nvcCountry")
-
-        item["opening_hours"] = OpeningHours()
-        for day in location["dtlOfficeOperatingTimes"]:
-            if day["bitIsActive"]:
-                item["opening_hours"].add_ranges_from_string(
-                    day["refOperatingTimeType"]["nvcOperatingTImeType"]
-                    + " "
-                    + day["tmeOpeningTime"]
-                    + " - "
-                    + day["tmeClosingTime"]
-                )
-            else:
-                try:
-                    item["opening_hours"].set_closed(day["refOperatingTimeType"]["nvcOperatingTImeType"])
-                except ValueError:
-                    pass
-
+        item["phone"] = location.get("number")
+        item["email"] = location.get("email")
+        apply_category(Categories.OFFICE_ESTATE_AGENT, item)
         yield item

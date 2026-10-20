@@ -1,34 +1,24 @@
-import chompjs
+from typing import Iterable
+
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
 class FasolRUSpider(JSONBlobSpider):
     name = "fasol_ru"
-    item_attributes = {
-        "brand": "Фасоль",
-        "brand_wikidata": "Q132005368",
-    }
-    start_urls = ["https://myfasol.ru/stores/"]
+    item_attributes = {"brand": "Фасоль", "brand_wikidata": "Q132005368"}
+    start_urls = ["https://api.metro-cc.ru/api/v1/C98BB1B547ECCC17D8AEBEC7116D6/fasol/stores"]
+    locations_key = "data"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    def extract_json(self, response):
-        return chompjs.parse_js_object(response.xpath("//div[@data-slide-id='map']/script/text()").get())
-
-    def post_process_item(self, item, response, location):
-        item.pop("city")
-
-        try:
-            work_from, work_till = location.get("work_from"), location.get("work_till")
-            if work_from and work_till:
-                oh = OpeningHours()
-                oh.add_days_range(DAYS, work_from, work_till)
-                item["opening_hours"] = oh
-        except ValueError as e:
-            self.logger.warning(f"Error parsing hours: {e}")
-            self.crawler.stats.inc_value("atp/hours/failed")
-
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
+        item.pop("name")
+        item["addr_full"] = location["address"]
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_days_range(DAYS, *location["work_mode"].split("-"))
         apply_category(Categories.SHOP_CONVENIENCE, item)
-
         yield item

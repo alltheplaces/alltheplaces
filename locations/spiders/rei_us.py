@@ -17,7 +17,6 @@ class ReiUSSpider(JSONBlobSpider, PlaywrightSpider):
     item_attributes = {"brand": "REI", "brand_wikidata": "Q3414933"}
 
     start_urls = ["https://www.rei.com/stores/map"]
-    requires_proxy = True
 
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 

@@ -1,4 +1,7 @@
+from typing import Any
+
 import scrapy
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -12,10 +15,10 @@ BRANDS = {
 
 class ErciyesAnadoluHoldingTRSpider(scrapy.Spider):
     name = "erciyes_anadolu_holding_tr"
-    custom_settings = {"DOWNLOAD_DELAY": 3}
+    requires_proxy = "TR"
     start_urls = ["https://brandapi.erciyes.com/api/ContactApi/GetCities"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for brand in BRANDS.keys():
             for city in response.json():
                 yield scrapy.Request(
@@ -24,13 +27,16 @@ class ErciyesAnadoluHoldingTRSpider(scrapy.Spider):
                     cb_kwargs={"brand": brand},
                 )
 
-    def parse_store(self, response, **kwargs):
+    def parse_store(self, response: Response, **kwargs: Any) -> Any:
+        brand = BRANDS[kwargs["brand"]]
         for details in response.json():
             details["city"] = details.pop("Province")
-            details["name"] = details.pop("FirmName")
             details["address"] = details.pop("Adres")
-            details["email"] = details.pop("EMailAddress")
+            ref = f"{brand['brand']}-{details['Coordinates']}"
+            branch = details.pop("FirmName")
             item = DictParser.parse(details)
-            item.update(BRANDS[kwargs["brand"]])
+            item.update(brand)
+            item["branch"] = branch
+            item["ref"] = ref
             apply_category(Categories.SHOP_FURNITURE, item)
             yield item

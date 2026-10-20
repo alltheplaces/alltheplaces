@@ -3,8 +3,8 @@ from typing import Any
 import scrapy
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class YoungsGBSpider(scrapy.Spider):
@@ -23,8 +23,7 @@ class YoungsGBSpider(scrapy.Spider):
             item["website"] = (
                 data.get("pubExternalUrl").replace("https://https://", "https://").replace("http://", "https://")
             )
-            item["branch"] = data.get("venueName")
-            item["addr_full"] = merge_address_lines([item["city"], item["postcode"]])
+            item["name"] = data.get("venueName")
             lon = item.get("lon", "")
             if isinstance(lon, str):
                 lon_clean = lon.replace(",", "").replace(" ", "")
@@ -33,5 +32,7 @@ class YoungsGBSpider(scrapy.Spider):
                     item["postcode"] = data.get("longitude")
                 else:
                     item["lon"] = lon_clean
+
+            apply_category(Categories.PUB, item)
 
             yield item

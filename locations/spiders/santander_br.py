@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 import chompjs
@@ -30,7 +29,7 @@ class SantanderBRSpider(PlaywrightSpider):
             )
 
     def parse_locations(self, response: Response, **kwargs: Any) -> Any:
-        if locations := json.loads(response.xpath("//pre/text()").get()).get("agencias"):
+        if locations := response.json().get("agencias"):
             for location in locations:
                 item = Feature()
                 item["ref"] = location.get("codigo")

@@ -4,7 +4,7 @@ from locations.storefinders.uberall import UberallSpider
 
 class FirstHawaiianBankSpider(UberallSpider):
     name = "first_hawaiian_bank"
-    item_attributes = {"brand": "Hawaiian First Bank", "brand_wikidata": "Q3072937"}
+    item_attributes = {"brand": "First Hawaiian Bank", "brand_wikidata": "Q3072937"}
     key = "YBDTqfImunUKrrrbIivdwT2rDp8h2q"
 
     def post_process_item(self, item, response, location):

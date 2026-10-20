@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import FormRequest
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 
@@ -46,4 +47,6 @@ class AtriumHealthSpider(Spider):
                 "website": "https://atriumhealth.org" + place["ClickableUri"],
             }
 
-            yield Feature(**properties)
+            item = Feature(**properties)
+            apply_category(Categories.HOSPITAL, item)
+            yield item

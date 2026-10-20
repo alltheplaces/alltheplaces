@@ -1,4 +1,3 @@
-import json
 from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, TextResponse
@@ -14,7 +13,6 @@ from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 class CaseysGeneralStoreUSSpider(PlaywrightSpider):
     name = "caseys_general_store_us"
     item_attributes = {"brand": "Casey's General Store", "brand_wikidata": "Q2940968"}
-    requires_proxy = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[Any]:
@@ -79,7 +77,7 @@ class CaseysGeneralStoreUSSpider(PlaywrightSpider):
             yield JsonRequest(url=url, data=payload)
 
     def parse(self, response: TextResponse, **kwargs):
-        for location in json.loads(response.xpath("//pre//text()").get())["data"]["storesByCoordinate"]:
+        for location in response.json()["data"]["storesByCoordinate"]:
             location.update(location.pop("store"))
             item = DictParser.parse(location)
             item["ref"] = item.pop("name")

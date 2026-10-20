@@ -5,7 +5,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbDurhamSpider(OwenBaseSpider):
-    name = "gb_durham"
+    # name = "gb_durham"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Council tax data, (c) Durham County Council, 2025. This information is licensed under the terms of the Open Government Licence."
         + " Contains OS data © Crown copyright and database right 2025."

@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from scrapy.http import Response
@@ -20,7 +19,7 @@ class DouglasPLSpider(PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for data in json.loads(response.xpath("//pre//text()").get()).get("stores"):
+        for data in response.json().get("stores"):
             data.update(data.pop("address"))
             item = DictParser.parse(data)
             item["phone"] = None

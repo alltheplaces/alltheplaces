@@ -1,4 +1,5 @@
 import json
+import re
 
 import scrapy
 
@@ -32,15 +33,24 @@ class IonnaUSSpider(scrapy.Spider):
     start_urls = ["https://www.ionna.com/rechargeries/find-a-rechargery/"]
 
     def parse(self, response):
-        locations = extract_text_between(response.text, "var locations = ", "for(var key in locations) {")
-        # There is a trailing semicolon at the end of the string, so we need to remove it.
-        locations = locations.rstrip(";")
+        # The page used to assign the location dict straight to "var locations", but it's now
+        # assigned to "window.allLocations" first and "var locations" just references that. Find
+        # the start of the JSON object and let the JSON decoder work out where it ends, since
+        # there's no longer a following "for(var key in locations) {" to use as an end marker
+        # (and using a fixed end string is fragile if the object contains that substring).
+        marker = "window.allLocations = "
+        start_index = response.text.find(marker)
+        if start_index == -1:
+            self.logger.error("Could not find location data in page")
+            return
+        start_index += len(marker)
 
-        json_data = json.loads(locations)
+        json_data, _ = json.JSONDecoder().raw_decode(response.text, start_index)
 
         for location_id, location in json_data.items():
-            # Skip locations that are coming soon. They indicate this with "Coming Soon" in the note field.
-            if "Coming Soon" in location["note"]:
+            # Skip locations that are not yet open. They indicate this with "Coming Soon" or
+            # "Opening Soon" in the note field.
+            if "Coming Soon" in location["note"] or "Opening Soon" in location["note"]:
                 continue
 
             item = Feature(
@@ -68,12 +78,17 @@ class IonnaUSSpider(scrapy.Spider):
             # "<div class="find_map_info_specs"><strong>Connectors</strong>4 NACS | 6 CCS</div>"
             specs = extract_text_between(location["specs"], "<strong>Connectors</strong>", "</div>")
             if specs:
-                nacs_text, ccs_text = specs.split(" | ")
-                nacs_count = nacs_text.rstrip(" NACS")
-                ccs_count = ccs_text.rstrip(" CCS")
+                nacs_count = 0
+                ccs_count = 0
+                for part in specs.split(" | "):
+                    part = part.strip()
+                    if m := re.match(r"(\d+)\s*NACS", part):
+                        nacs_count = int(m.group(1))
+                    elif m := re.match(r"(\d+)\s*CCS", part):
+                        ccs_count = int(m.group(1))
 
-                item["extras"]["socket:type1_combo"] = ccs_count
-                item["extras"]["socket:nacs"] = nacs_count
-                item["extras"]["capacity"] = str(int(ccs_count) + int(nacs_count))
+                item["extras"]["socket:type1_combo"] = str(ccs_count)
+                item["extras"]["socket:nacs"] = str(nacs_count)
+                item["extras"]["capacity"] = str(ccs_count + nacs_count)
             apply_category(Categories.CHARGING_STATION, item)
             yield item

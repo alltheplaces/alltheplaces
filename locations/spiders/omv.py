@@ -1,11 +1,12 @@
-from typing import Any
+from typing import AsyncIterator, Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, FuelCards, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 # List of brands and countries where they operate:
 # https://www.omv.com/en/customers/services/filling-stations
@@ -100,21 +101,15 @@ PAYMENT_METHODS_MAP = {
 }
 
 
-class OmvSpider(scrapy.Spider):
+class OmvSpider(Spider):
     name = "omv"
-    start_urls = ["https://app.wigeogis.com/kunden/omv/data/getconfig.php"]
     api_url = "https://app.wigeogis.com/kunden/omv/data/getresults.php"
     details_url = "https://app.wigeogis.com/kunden/omv/data/details.php"
-    hash = ""
-    ts = ""
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        self.hash = str(response.json()["hash"])
-        self.ts = str(response.json()["ts"])
-
+    async def start(self) -> AsyncIterator[FormRequest]:
         for brand, brand_data in BRANDS_AND_COUNTRIES.items():
             for country in brand_data["countries"]:
-                yield scrapy.FormRequest(
+                yield FormRequest(
                     url=self.api_url,
                     formdata={
                         "CTRISO": country,
@@ -122,8 +117,6 @@ class OmvSpider(scrapy.Spider):
                         "VEHICLE": "CAR",
                         "MODE": "NEXTDOOR",
                         "ANZ": "1000",
-                        "HASH": self.hash,
-                        "TS": self.ts,
                     },
                     callback=self.parse_pois,
                     meta={
@@ -133,20 +126,16 @@ class OmvSpider(scrapy.Spider):
                     },
                 )
 
-    def parse_pois(self, response: Response, **kwargs: Any) -> Any:
+    def parse_pois(self, response: Response) -> Iterable[FormRequest]:
         for poi in response.json():
-            yield scrapy.FormRequest(
+            yield FormRequest(
                 url=self.details_url,
-                formdata={
-                    "ID": poi["sid"],
-                    "HASH": self.hash,
-                    "TS": self.ts,
-                },
+                formdata={"ID": poi["sid"]},
                 callback=self.parse_poi,
                 meta=response.meta,
             )
 
-    def parse_poi(self, response: Response, **kwargs: Any) -> Any:
+    def parse_poi(self, response: Response) -> Iterable[Feature]:
         data = response.json()
         details = data.get("siteDetails", {})
         item = DictParser.parse(details)
@@ -166,7 +155,7 @@ class OmvSpider(scrapy.Spider):
         # TODO: fuel types are provided as images, parse them somehow. OCR?
         yield item
 
-    def parse_hours(self, item, opening_hours):
+    def parse_hours(self, item: Feature, opening_hours: str | None) -> None:
         """
         Example opening hours string:
             "dayOfWeek=1,closed=FALSE,from=05:00,to=22:00#dayOfWeek=2,closed=FALSE,from=05:00,to=22:00"
@@ -192,7 +181,7 @@ class OmvSpider(scrapy.Spider):
         except Exception as e:
             self.logger.error(f"Error parsing hours: {opening_hours}, {e}")
 
-    def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict):
+    def parse_attribute(self, item: Feature, data: dict, attribute_name: str, mapping: dict) -> None:
         for attribute in data.get(attribute_name, []):
             title = attribute.get("title")
             # Some titles have brackets at the end of the string - remove them.

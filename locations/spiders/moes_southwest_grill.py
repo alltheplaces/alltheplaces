@@ -1,6 +1,11 @@
+from typing import Any, Iterable
+
+import chompjs
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.items import set_closed
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,14 +19,24 @@ class MoesSouthwestGrillSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [
         (r"locations\.moes\.com/.*/.*/.*$", "parse_sd"),
     ]
-    drop_attributes = {"image"}
+    drop_attributes = {"image", "twitter", "facebook"}
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        if name := item.get("name"):
-            if name.endswith("- Temporarily Closed"):
-                pass  # TODO?
-            elif item["name"].endswith("- Closed"):
-                set_closed(item)
-            item["branch"] = item.pop("name").removeprefix("Moe's Southwest Grill ")
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        if "coming soon" in response.text.lower():
+            return
 
+        item["name"] = None
+        item["branch"] = (
+            (response.xpath('//meta[@property="og:title"]/@content').get() or "")
+            .split(" | ")[0]
+            .replace("Moe's Southwest Grill", "")
+            .strip()
+        )
+
+        for block in response.xpath('//script[@type="application/ld+json"]/text()').getall():
+            if geo := chompjs.parse_js_object(block).get("credentialSubject", {}).get("geo"):
+                item["lat"] = geo.get("latitude")
+                item["lon"] = geo.get("longitude")
+
+        apply_category(Categories.FAST_FOOD, item)
         yield item

@@ -1,6 +1,11 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.bp import BpSpider
@@ -15,7 +20,6 @@ from locations.spiders.shoprite_holdings import SHOPRITE_BRANDS
 from locations.spiders.spar_bw_mz_na_sz_za import BRANDS as SPAR_BRANDS
 from locations.spiders.total_energies import TotalEnergiesSpider
 from locations.spiders.tymebank_za import PICK_N_PAY_BRANDS
-from locations.spiders.usave_gb import UsaveGBSpider
 from locations.spiders.woolworths_za import WoolworthsZASpider
 
 
@@ -36,25 +40,24 @@ class AbsaZASpider(JSONBlobSpider):
         (["KWIKSPAR"], SPAR_BRANDS["KWIKSPAR"][1]),
         (["PNP"], PICK_N_PAY_BRANDS["PNP"]),
         (["BOXER"], PICK_N_PAY_BRANDS["BOXER"]),
-        (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"]),
-        (["CHECKERS"], SHOPRITE_BRANDS["Checkers"]),
+        (["SHOPRITE"], SHOPRITE_BRANDS["Shoprite"][0]),
+        (["CHECKERS"], SHOPRITE_BRANDS["Checkers"][0]),
         (["WOOLWORTHS"], WoolworthsZASpider.item_attributes),
         (["7 ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),
         (["SASOL"], SasolZASpider.item_attributes),
         (["BUILDERS"], {"brand": "Builders", "brand_wikidata": "Q133971381"}),
-        (["U SAVE"], UsaveGBSpider.item_attributes),
+        (["U SAVE"], SHOPRITE_BRANDS["Usave"][0]),
         (["OK VALUE"], OK_FOODS_BRANDS["OK VALUE"]),
         (["OK GROCER"], OK_FOODS_BRANDS["OK GROCER"]),
         (["OK MINI", "OK MINIMARKET"], OK_FOODS_BRANDS["OK MINIMARK"]),
         (["GAME"], GameZASpider.item_attributes),
     ]
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         if location["type"] == "branch":
             apply_category(Categories.BANK, item)
         elif location["type"] == "atm":
             apply_category(Categories.ATM, item)
-            # Extract retail brand from name field for ATMs (before it's moved to branch)
             item["located_in"], item["located_in_wikidata"] = extract_located_in(
                 item.get("name", ""), self.LOCATED_IN_MAPPINGS, self
             )
@@ -70,7 +73,7 @@ class AbsaZASpider(JSONBlobSpider):
         except ValueError:
             pass
 
-        item["branch"] = item.pop("name")
+        item["branch"] = item.pop("name").removesuffix(", " + location["suberb"])
         if "weekdayHours" in location and "weekendHours" in location:
             oh = OpeningHours()
             for times in location.get("weekdayHours").split(";"):

@@ -55,8 +55,8 @@ class AxionARSpider(Spider):
             apply_yes_no(
                 Extras.FAST_FOOD, item, poi.get("ParadaSanguchera") == "1"
             )  # Parada Sanguchera sandwich counter
-            apply_yes_no(Extras.CAR_REPAIR, item, poi.get("BoschCarService") == "1")
-            apply_yes_no(Extras.OIL_CHANGE, item, poi.get("CastrolOilExpress") == "1")
+            apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, item, poi.get("BoschCarService") == "1")
+            apply_yes_no(Extras.VEHICLE_OIL_CHANGE_SERVICES, item, poi.get("CastrolOilExpress") == "1")
             yield item
 
     @staticmethod

@@ -31,7 +31,7 @@ class ValoraSpider(JSONBlobSpider):
         # local mapping community if and how exactly the conflicting NSI rules
         # should be cleaned up for "k kiosk" and "Press & Books". Meanwhile,
         # we make a call for AllThePlaces.
-        "kkiosk": ("k kiosk", "Q60381703", Categories.SHOP_NEWSAGENT),
+        "kkiosk": ("k kiosk", "Q60381703", Categories.SHOP_CONVENIENCE),
         "pressAndBooks": ("Press & Books", "Q100407277", Categories.SHOP_BOOKS),
         # In real life, the stores formerly called “K presse + books” have been
         # re-branded as “Press & Books”. But, the Valora JSON feed still uses the old name.

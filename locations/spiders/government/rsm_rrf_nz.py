@@ -27,6 +27,10 @@ class RsmRrfNZSpider(Spider):
     # possibly be used to create a unique antenna ID. However, this would
     # require hundreds of thousands of API calls.
     no_refs = True
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,  # HTTP 401
+        "DOWNLOAD_DELAY": 2,
+    }
     _transformer = Transformer.from_crs(4167, 4326)
 
     @staticmethod

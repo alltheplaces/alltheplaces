@@ -22,7 +22,6 @@ class PurdysChocolatierCASpider(AmastyStoreLocatorSpider):
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         item["ref"] = feature["id"]
         item["branch"] = feature["name"]
-        item["country"] = "CA"
 
         for line in popup_html.xpath('//div[@class="amlocator-info-popup"]/text()').getall():
             line = line.strip()

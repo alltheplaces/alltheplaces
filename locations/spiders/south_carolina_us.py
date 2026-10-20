@@ -1,44 +1,27 @@
-import json
+from typing import Iterable
 
-import scrapy
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import clean_address
 
 
-class SouthCarolinaUSSpider(scrapy.Spider):
+class SouthCarolinaUSSpider(JSONBlobSpider):
     name = "south_carolina_us"
     allowed_domains = ["sc.gov"]
-    start_urls = ("https://applications.sc.gov/PortalMapApi/api/Map/GetMapItemsByCategoryId/1,2,3,4,5,6,7",)
+    start_urls = ["https://sc.gov/google-maps-api/data"]
 
-    def parse(self, response):
-        cat = (
-            "State Park",
-            "Library",
-            "Department of Health and Human Resources",
-            "Court House",
-            "Department of Mental Health",
-            "Department of Motor Vehicles",
-            "SC Works",
-        )
-        data = json.loads(json.dumps(response.json()))
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["placeId"]
+        item["name"] = feature["layerPlaceName"]
+        item["street_address"] = clean_address([feature["address1"], feature["address2"]])
+        item["city"] = feature["cityOrTown"]
 
-        for i in data:
-            try:
-                item = DictParser.parse(i)
-                item["lon"] = -abs(float(i["Longitude"]))
-                item["name"] = i["Description"]
+        if feature["layerId"] == 31:  # STATE PARKS LAYER ID
+            apply_category(Categories.LEISURE_PARK, item)
+        else:
+            apply_category({"office": "government"}, item)
 
-                category_mapping = cat[int(i["CategoryId"]) - 1]
-
-                if category_mapping == "Libary":
-                    apply_category(Categories.LIBRARY, item)
-                elif category_mapping == "Court House":
-                    apply_category(Categories.COURTHOUSE, item)
-                else:
-                    item["extras"] = {"category": category_mapping}
-
-                yield item
-
-            except:
-                pass
+        yield item

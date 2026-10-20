@@ -1,59 +1,76 @@
-from typing import Any, Iterable, Iterator
+import html as html_module
+import re
+from typing import Any, Iterator
 
-from scrapy.http import Request, Response
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
+REF = re.compile(r"-(\d+)/?$")
+ADDR = re.compile(r"EVgo EV Charging Station in (.+?)\s*\|")
+STALLS = re.compile(r"There are (\d+) electric vehicle stalls")
+H1 = re.compile(r"<h1[^>]*>(.*?)</h1>", re.DOTALL)
+TAGS = re.compile(r"<[^>]+>")
 
-class EvgoUSSpider(SitemapSpider, PlaywrightSpider):
+SOCKETS = {
+    "CCS1": "socket:type1_combo",
+    "CHAdeMO": "socket:chademo",
+    "NACS": "socket:nacs",
+    "J1772": "socket:type1",
+}
+
+
+def parse_site(url: str, page: str) -> dict[str, Any] | None:
+    match = REF.search(url.split("?")[0])
+    if not match:
+        return None
+
+    site: dict[str, Any] = {"ref": match.group(1), "website": url}
+
+    if found := H1.search(page):
+        site["name"] = html_module.unescape(TAGS.sub(" ", found.group(1))).replace("\xa0", " ").strip()
+
+    if found := ADDR.search(page):
+        site["addr_full"] = addr = html_module.unescape(found.group(1)).strip()
+        parts = [part.strip() for part in addr.split(",")]
+        if len(parts) >= 4:
+            site["street_address"], site["city"] = parts[0], parts[1]
+            site["state"] = parts[2].split()[0]
+
+    if found := STALLS.search(page):
+        site["capacity"] = found.group(1)
+
+    site["sockets"] = sorted({key for label, key in SOCKETS.items() if label in page})
+    return site
+
+
+class EvgoUSSpider(SitemapSpider):
     name = "evgo_us"
     item_attributes = {"brand": "EVgo", "brand_wikidata": "Q61803820"}
-    sitemap_urls = ["https://evgo.com/find-a-charger/sites-sitemap.xml"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
-
-    def start_requests(self) -> Iterable[Request]:
-        # Route the sitemap fetch through Playwright to bypass the Vercel security checkpoint
-        for url in self.sitemap_urls:
-            yield Request(
-                url,
-                callback=self._parse_sitemap,
-                meta={"playwright": True, "playwright_include_page": True},
-            )
-
-    def _parse_sitemap(self, response: Response) -> Iterable[Request]:
-        for request in super()._parse_sitemap(response):
-            request.meta["playwright"] = True
-            request.meta["playwright_include_page"] = True
-            yield request
+    sitemap_urls = ["https://www.evgo.com/find-a-charger/sites-sitemap.xml"]
+    requires_proxy = "US"  # Vercel security checkpoint blocks datacentre IPs
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Iterator[Feature]:
-        # Skip the root overview page if it comes through the sitemap
-        if response.url.strip("/").endswith("find-a-charger"):
+        site = parse_site(response.url, response.text)
+        if not site:
+            self.crawler.stats.inc_value(f"atp/{self.name}/no_ref_in_url")
             return
 
         item = Feature()
-        item["website"] = response.url
-        item["ref"] = response.url.rsplit("-", 1)[1].strip("/")
-        item["branch"] = response.xpath("//h1/text()").get()
-        item["street_address"] = response.xpath("//ol/li[last()]//span/text()").get()
-        item["state"] = response.xpath("//ol/li[2]//a/text()").get("").upper()
-        item["addr_full"] = (
-            response.xpath("//title/text()").get().split(" | ", 1)[0].removeprefix("EVgo EV Charging Station in ")
-        )
-        item["extras"]["capacity"] = (
-            response.xpath('//div[contains(@title, " stalls at this location")]/@title')
-            .get("")
-            .removesuffix(" stalls at this location")
-        )
+        for field in ("ref", "website", "addr_full", "street_address", "city", "state"):
+            item[field] = site.get(field)
+        item["branch"] = site.get("name")
+        if capacity := site.get("capacity"):
+            item["extras"]["capacity"] = capacity
+        for socket in site["sockets"]:
+            item["extras"][socket] = "yes"
 
         extract_google_position(item, response)
 
         apply_category(Categories.CHARGING_STATION, item)
-
         yield item

@@ -201,7 +201,7 @@ class GeoJsonExporter(JsonItemExporter):
 
         super().export_item(item)
 
-    def _get_serialized_fields(
+    def get_serialized_fields(
         self, item: Item, default_value: Any = None, include_empty: bool | None = None
     ) -> list[tuple]:
         feature = [

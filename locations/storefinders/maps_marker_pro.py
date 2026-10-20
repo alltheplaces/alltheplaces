@@ -48,15 +48,9 @@ class MapsMarkerProSpider(Spider):
             "type": "map",
         }
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            yield FormRequest(
-                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php",
-                method="POST",
-                formdata=formdata,  # ty: ignore[invalid-argument-type]
-            )
+            yield FormRequest(url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php", formdata=formdata)
         elif len(self.start_urls) == 1:
-            yield FormRequest(
-                url=self.start_urls[0], method="POST", formdata=formdata  # ty: ignore[invalid-argument-type]
-            )
+            yield FormRequest(url=self.start_urls[0], formdata=formdata)
         else:
             raise ValueError(
                 "Specify one domain name in the allowed_domains list attribute or one URL in the start_urls list attribute."

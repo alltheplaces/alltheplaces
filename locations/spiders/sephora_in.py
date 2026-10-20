@@ -28,7 +28,6 @@ class SephoraINSpider(SitemapSpider):
         branch = name.removeprefix("Sephora-").removeprefix("Sephora ").strip().strip("- ")
         item["branch"] = branch
         item["website"] = response.url
-        item["country"] = "IN"
 
         addr_text = response.xpath(
             '//div[contains(@class, "store-details-item")][contains(text(), "Address")]/text()'

@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 
 state = {
@@ -48,4 +49,5 @@ class GenesisRehabUSSpider(scrapy.Spider):
             item["street_address"] = data["field_address_fl"]
             item["postcode"] = data["field_zip"]
             item["website"] = item["ref"] = "https://www.genesishcc.com" + data["path"]["alias"]
+            apply_category(Categories.SOCIAL_FACILITY, item)
             yield item

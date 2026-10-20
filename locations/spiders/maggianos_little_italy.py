@@ -1,46 +1,41 @@
-# -*- coding: utf-8 -*-
+from typing import Any
 
-import scrapy
+from pycountry import subdivisions
+from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
+
+US_STATES = {subdivision.code.removeprefix("US-") for subdivision in subdivisions.get(country_code="US")}
 
 
-class MaggianosLittleItalySpider(scrapy.Spider):
+class MaggianosLittleItalySpider(JSONBlobSpider):
     name = "maggianos_little_italy"
     item_attributes = {"brand": "Maggiano's Little Italy", "brand_wikidata": "Q6730149"}
-    allowed_domains = ["maggianos.com"]
+    allowed_domains = ["green.maggianos.com"]
     start_urls = [
-        "https://www.maggianos.com/api//restaurant-data/",
+        f"https://green.maggianos.com/api/v1/search/restaurants/by-state?state={state}" for state in US_STATES
     ]
 
-    def parse_hours(self, hours):
-        opening_hours = OpeningHours()
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("properties"))
+        feature.update(feature.pop("geometry")["coordinates"])
+        feature["address"] = feature.pop("slug")
+        feature["address"]["country"] = feature.pop("country")
 
-        for hour in hours:
-            day = hour["day_name"][:2]
-            opening_hours.add_range(day, open_time=hour["open_time"], close_time=hour["end_time"])
-
-        return opening_hours
-
-    def parse(self, response):
-        data = response.json()
-
-        for place in data:
-            properties = {
-                "name": place["properties"]["business_name"],
-                "ref": place["properties"]["store_code"],
-                "addr_full": place["properties"]["full_address"],
-                "street_address": place["properties"]["slug"]["address_line_1"],
-                "city": place["properties"]["slug"]["city"],
-                "state": place["properties"]["slug"]["state_abbreviation"],
-                "postcode": place["properties"]["slug"]["postal_code"],
-                "country": place["properties"]["country"],
-                "phone": place["properties"]["primary_phone"],
-                "lat": place["geometry"]["coordinates"]["latitude"],
-                "lon": place["geometry"]["coordinates"]["longitude"],
-            }
-
-            properties["opening_hours"] = self.parse_hours(place["properties"]["store_hours"])
-
-            yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, feature: dict, **kwargs: Any) -> Any:
+        if feature["status"] != "O":
+            return
+        item["branch"] = item.pop("name")
+        item["website"] = "https://www.maggianos.com/locations/{}/{}/{}".format(
+            feature["address"]["state"].lower().replace(" ", "-"),
+            feature["address"]["city"].lower().replace(" ", "-"),
+            feature["urlSlug"],
+        )
+        item["opening_hours"] = OpeningHours()
+        for rule in feature["storeHours"]:
+            item["opening_hours"].add_range(rule["dayName"], rule["openTime"], rule["endTime"])
+        apply_category(Categories.RESTAURANT, item)
+        yield item

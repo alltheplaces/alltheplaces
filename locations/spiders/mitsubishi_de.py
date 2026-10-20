@@ -14,10 +14,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class MitsubishiDESpider(JSONBlobSpider):
     name = "mitsubishi_de"
-    item_attributes = {
-        "brand": "Mitsubishi",
-        "brand_wikidata": "Q36033",
-    }
+    item_attributes = {"brand": "Mitsubishi", "brand_wikidata": "Q36033"}
     start_urls = ["https://www.mitsubishi-motors.de/haendlersuche"]
 
     def extract_json(self, response: Response) -> dict | list[dict]:
@@ -26,7 +23,7 @@ class MitsubishiDESpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
         yield from self.get_details(item, location)
 
-    def get_details(self, item, location) -> Iterable[Request]:
+    def get_details(self, item: Feature, location: dict) -> Iterable[Request]:
         yield Request(
             url="https://www.mitsubishi-motors.de/api/psearchPartnerDetailedById?partnerId={}".format(
                 location.get("id")
@@ -35,13 +32,13 @@ class MitsubishiDESpider(JSONBlobSpider):
             meta={"item": item},
         )
 
-    def build_sales_item(self, item):
+    def build_sales_item(self, item: Feature) -> Feature:
         sales_item = deepcopy(item)
         sales_item["ref"] = f"{item['ref']}-sales"
         apply_category(Categories.SHOP_CAR, sales_item)
         return sales_item
 
-    def build_service_item(self, item):
+    def build_service_item(self, item: Feature) -> Feature:
         service_item = deepcopy(item)
         service_item["ref"] = f"{item['ref']}-service"
         apply_category(Categories.SHOP_CAR_REPAIR, service_item)
@@ -70,7 +67,7 @@ class MitsubishiDESpider(JSONBlobSpider):
                 sales_item = self.build_sales_item(item)
                 # if hours:=poi.get("openingSales"):
                 sales_item["opening_hours"] = self.parse_hours((poi.get("openingSales") or {}))
-                apply_yes_no(Extras.CAR_REPAIR, sales_item, service_available)
+                apply_yes_no(Extras.VEHICLE_CAR_REPAIR_SERVICES, sales_item, service_available)
                 yield sales_item
 
             if service_available and type_id in ["1", "2", "3", "5", "6", "7"]:

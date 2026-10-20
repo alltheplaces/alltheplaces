@@ -10,7 +10,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbBroadlandSpider(OwenBaseSpider):
-    name = "gb_broadland"
+    # name = "gb_broadland"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0."
         + " Contains OS data © Crown copyright and database right 2026."

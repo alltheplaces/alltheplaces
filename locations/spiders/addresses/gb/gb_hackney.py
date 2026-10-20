@@ -4,7 +4,7 @@ from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
 class GbHackneySpider(OwenBaseSpider):
-    name = "gb_hackney"
+    # name = "gb_hackney"
     dataset_attributes = Licenses.GB_OGLv3.value | {
         "attribution:name": "Council tax bands of all properties in the London Borough of Hackney, (c) London Borough of Hackney, 2025. This information is licensed under the terms of the Open Government Licence."
         + " Contains OS data © Crown copyright and database right 2025."

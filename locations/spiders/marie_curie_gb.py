@@ -76,7 +76,6 @@ class MarieCurieGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("Marie Curie Charity Shop ", "")
-        item["country"] = "GB"
         item.pop("lat", None)
         item.pop("lon", None)
         apply_category(Categories.SHOP_CHARITY, item)

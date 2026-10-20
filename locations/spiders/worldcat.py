@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
@@ -25,18 +26,19 @@ class WorldcatSpider(JSONBlobSpider):
 
     def parse(self, response):
         features = self.extract_json(response)
-        yield from self.parse_feature_array(response, features) or []
         next_offset = response.meta["offset"] + 50
-        if len(response.json()["libraries"]) == 50:
+        if next_offset <= response.json()["pagination"]["totalEntries"]:
             yield from self.request_page(next_offset)
+        yield from self.parse_feature_array(response, features) or []
 
     def post_process_item(self, item, response, location):
         apply_category(Categories.LIBRARY, item)
 
-        if location["institutionType"] != "PUBLIC":
-            item["extras"]["access"] = "private"
-        item["extras"]["worldcat:type"] = location["institutionType"]
-        self.crawler.stats.inc_value(f"atp/{self.name}/type/{location['institutionType']}")
+        if institution_type := location.get("institutionType"):
+            if institution_type != "PUBLIC":
+                item["extras"]["access"] = "private"
+            item["extras"]["worldcat:type"] = institution_type
+        self.crawler.stats.inc_value(f"atp/{self.name}/type/{institution_type}")
 
         item["ref"] = location["registryId"]
         item["name"] = location["institutionName"]
@@ -46,9 +48,12 @@ class WorldcatSpider(JSONBlobSpider):
 
         item["street_address"] = clean_address([location.get("street1"), location.get("street2")])
 
-        if "emails" in location:
-            item["email"] = "; ".join(location["emails"])
-        if "homePageUrl" in location:
-            item["website"] = location["homePageUrl"]
+        if emails := location.get("emails"):
+            if address := re.search(r"[-\w.+]+@[-\w]+\.[-\w.]+", emails[0]):
+                item["email"] = address.group(0)
+        if website := location.get("homePageUrl"):
+            website = re.sub(r"^(https?):/?(?!/)", r"\1://", website)
+            if re.fullmatch(r"https?://[\w-]+(\.[\w-]+)+(:\d+)?(/\S*)?", website):
+                item["website"] = website
 
         yield item

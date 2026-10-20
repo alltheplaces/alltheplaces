@@ -45,9 +45,25 @@ class TravelIQSpider(Spider):
 
     async def start(self) -> AsyncIterator[Request]:
         url_parts = urlparse(self.api_endpoint)
-        yield Request(url=f"{url_parts.scheme}://{url_parts.netloc}/developers/doc", callback=self.parse_feature_types)
+        yield Request(
+            url=f"{url_parts.scheme}://{url_parts.netloc}/developers/doc",
+            callback=self.parse_feature_types,
+            meta={"handle_httpstatus_list": [404]},
+        )
 
     def parse_feature_types(self, response: Response) -> Iterable[JsonRequest]:
+        if response.status == 404:
+            # Many Travel-IQ deployments have removed the developer
+            # documentation page used to discover available feature types.
+            # Fall back to probing directly for the only feature type
+            # currently extracted by this storefinder.
+            yield JsonRequest(
+                url=f"{self.api_endpoint}get/groupedcameras?key={self.api_key}",
+                callback=self.parse_probed_cameras,
+                meta={"handle_httpstatus_list": [404]},
+            )
+            return
+
         feature_types = response.xpath('//td[@class="api-name"]/a/text()').getall()
 
         if ("Cameras" in feature_types or "Traffic Cameras" in feature_types) and "Grouped Cameras" in feature_types:
@@ -96,6 +112,14 @@ class TravelIQSpider(Spider):
                     self.logger.warning(
                         "New type of feature detected for Travel-IQ storefinder: {}".format(feature_type)
                     )
+
+    def parse_probed_cameras(self, response: TextResponse) -> Iterable[JsonRequest | Feature]:
+        if response.status == 404:
+            # This deployment does not support "Grouped Cameras", fall back
+            # to plain "Cameras" instead.
+            yield JsonRequest(url=f"{self.api_endpoint}get/cameras?key={self.api_key}", callback=self.parse_cameras)
+            return
+        yield from self.parse_cameras(response)
 
     def parse_cameras(self, response: TextResponse) -> Iterable[Feature]:
         cameras = response.json()

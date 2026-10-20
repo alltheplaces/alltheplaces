@@ -9,7 +9,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class KieserTrainingSpider(SitemapSpider, StructuredDataSpider):
     name = "kieser_training"
-    item_attributes = {"brand": "Kieser Training", "brand_wikidata": "Q1112367"}
+    item_attributes = {"brand": "Kieser", "brand_wikidata": "Q1112367"}
     sitemap_urls = [
         "https://www.kieser.com/de-en/tx_kieserstudio/sitemap.xml",
         "https://www.kieser.com/ch-en/tx_kieserstudio/sitemap.xml",

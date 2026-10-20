@@ -1,5 +1,4 @@
 from locations.categories import Categories
-from locations.hours import DAYS_EN
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -10,7 +9,6 @@ class KitchenConnectionAUSpider(WPStoreLocatorSpider):
         "brand": "Kitchen Connection",
         "extras": Categories.SHOP_KITCHEN.value,
     }
-    allowed_domains = [
-        "kitchenconnection.com.au",
+    start_urls = [
+        "https://kitchenconnection.com.au/wp-admin/admin-ajax.php?action=store_search&lat=-27.470453&lng=153.026034&max_results=100&search_radius=100&distance_unit=km"
     ]
-    days = DAYS_EN
