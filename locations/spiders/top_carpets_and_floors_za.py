@@ -24,8 +24,12 @@ class TopCarpetsAndFloorsZASpider(GoReviewApiSpider):
 
     def parse_opening_hours(self, response: Response) -> Iterable[Feature]:
         item = response.meta["item"]
-        hours_string = " ".join(response.xpath('//div[contains(@class, "operating-hours")]//text()').getall())
-        hours_string = hours_string.replace("|", "-").replace("day ", ":")
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours_string)
+        for row in response.xpath('//div[contains(@class, "md:hidden")]/div[.//h3]'):
+            day = row.xpath("normalize-space(.//h3/text())").get()
+            times = row.xpath('normalize-space(.//span[contains(@class, "text-nowrap")])').get()
+            if times.lower() == "closed":
+                item["opening_hours"].set_closed(day)
+            else:
+                item["opening_hours"].add_ranges_from_string(f"{day} {times.replace(' - ', '-')}")
         yield item

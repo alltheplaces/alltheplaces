@@ -1,6 +1,7 @@
-from typing import Iterable
+import re
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -10,8 +11,19 @@ from locations.json_blob_spider import JSONBlobSpider
 class SaqueEPagueBRSpider(JSONBlobSpider):
     name = "saque_e_pague_br"
     item_attributes = {"brand": "Saque e Pague"}
-    # The store locator at https://www.saqueepague.com.br/encontre-um-ponto fetches its ATM list from this gist.
-    start_urls = ["https://gist.githack.com/mktsep/e9478103e6bfdf55dc1fe6f50305161f/raw/atms4.json"]
+    # The store locator fetches its ATM list from a gist, whose URL changes from time to time.
+    start_urls = ["https://www.saqueepague.com.br/encontre-um-ponto"]
+
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(self.start_urls[0], callback=self.parse_locator)
+
+    def parse_locator(self, response: Response, **kwargs: Any) -> Any:
+        yield response.follow(
+            response.xpath('//script[contains(@src, "gist.githack.com")]/@src').get(), callback=self.parse_script
+        )
+
+    def parse_script(self, response: Response, **kwargs: Any) -> Any:
+        yield Request(re.search(r'URL_JSON\s*=\s*"([^"]+)"', response.text).group(1))
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["numero_logico"]
