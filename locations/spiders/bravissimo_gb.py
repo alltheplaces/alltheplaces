@@ -1,16 +1,13 @@
-import json
+from typing import Iterable
+
 import chompjs
-from scrapy.spiders import SitemapSpider
+from scrapy.http import TextResponse
 
-from typing import AsyncIterator, Iterable
-
-from scrapy.http import JsonRequest, Request, TextResponse
-
-from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.categories import Categories, Clothes, apply_category, apply_clothes
 from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.categories import Categories, apply_category, Clothes, apply_clothes
+
 
 class BravissimoGBSpider(JSONBlobSpider):
     name = "bravissimo_gb"
@@ -28,7 +25,9 @@ class BravissimoGBSpider(JSONBlobSpider):
         print(feature)
         item["branch"] = item.pop("name")
         if item.get("address3"):
-            item["street_address"] = merge_address_lines([feature["address"]["address2"],feature["address"]["address3"]])
+            item["street_address"] = merge_address_lines(
+                [feature["address"]["address2"], feature["address"]["address3"]]
+            )
         else:
             item["street_address"] = feature["address"]["address2"]
         item["website"] = "https://www.bravissimo.com/shops/" + feature["slug"] + "/"
