@@ -11,7 +11,9 @@ class SaqueEPagueBRSpider(JSONBlobSpider):
     name = "saque_e_pague_br"
     item_attributes = {"brand": "Saque e Pague"}
     # The store locator at https://www.saqueepague.com.br/encontre-um-ponto fetches its ATM list from this gist.
-    start_urls = ["https://gist.githack.com/mktsep/e9478103e6bfdf55dc1fe6f50305161f/raw/atms4.json"]
+    start_urls = [
+        "https://gist.githack.com/mktsep/1d73f0c30b1786b046e7d818a8b49e70/raw/3880eddec0db71b5f65d59e43246e449a15cd083/atms.json"
+    ]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["numero_logico"]
