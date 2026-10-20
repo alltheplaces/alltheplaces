@@ -33,7 +33,7 @@ class RemoveryUSSpider(SitemapSpider, StructuredDataSpider):
             times = rule.xpath("normalize-space(text()[normalize-space()])").get()
             if times == "Closed":
                 oh.set_closed(day)
-            else:
+            elif " - " in times:
                 open_time, close_time = times.split(" - ")
                 oh.add_range(day, open_time, close_time, "%I:%M %p")
         return oh
