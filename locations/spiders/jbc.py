@@ -3,7 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Request, TextResponse
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -11,7 +11,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class JbcSpider(JSONBlobSpider):
     name = "jbc"
-    item_attributes = {"brand": "JBC", "brand_wikidata": "Q2671470", "extras": Categories.SHOP_CLOTHES.value}
+    item_attributes = {"brand": "JBC", "brand_wikidata": "Q2671470"}
     start_urls = [
         "https://www.jbc.be/on/demandware.store/Sites-JBC-Webshop-BE-Site/nl_BE/Stores-FindStores?lat=50.85&long=4.35&radius=1000&limit=1000"
     ]
@@ -46,11 +46,11 @@ class JbcSpider(JSONBlobSpider):
                 continue
             # The list covers the coming 7 days; skip exceptional openings/closings so only regular hours are kept
             if "is-special-day" in day.xpath("@class").get("").split():
-                self.crawler.stats.inc_value("atp/jbc/special_day_skipped")
                 continue
             if hours := json.loads(day.xpath("@data-hours").get()):
                 for times in hours:
                     item["opening_hours"].add_range(day_name, times["open"], times["close"])
             else:
                 item["opening_hours"].set_closed(day_name)
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item
