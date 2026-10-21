@@ -1,4 +1,5 @@
 import json
+import re
 
 from scrapy.spiders import SitemapSpider
 
@@ -24,9 +25,14 @@ class LapperreBESpider(SitemapSpider):
         if not store:
             return
 
-        store["location"] = store.get("coordinate")
+        store["location"] = self._find_coordinate(data, store.get("id"))
         item = DictParser.parse(store)
-        item["email"] = (store.get("emails") or [None])[0]
+        branch = re.sub(r"^(?:World of Hearing )?Lapp+erre (?:hoorcentrum )?", "", item.pop("name"))
+        if " bij " in branch:
+            branch, item["located_in"] = branch.split(" bij ", 1)
+        item["branch"] = branch
+        email = (store.get("emails") or [None])[0]
+        item["email"] = None if email == "contact@lapperre.be" else email
         item["street_address"] = store.get("addressLine1")
         item["website"] = response.url
         item["opening_hours"] = self.parse_hours(store.get("hours"))
@@ -55,6 +61,15 @@ class LapperreBESpider(SitemapSpider):
         for component in components:
             for slide in component.get("slides") or []:
                 store = (slide.get("storeConfig") or {}).get("storeData")
-                if store and "coordinate" in store:
+                if store:
                     return store
+        return None
+
+    @staticmethod
+    def _find_coordinate(data: dict, store_id: str | None) -> dict | None:
+        components = data.get("props", {}).get("pageProps", {}).get("data", {}).get("components", [])
+        for component in components:
+            active = component.get("activeElement") or {}
+            if active.get("id") == store_id:
+                return active.get("coordinate")
         return None
