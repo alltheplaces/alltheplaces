@@ -90,6 +90,8 @@ class CopainSakuraJPSpider(CrawlSpider):
         notes = [line for line in lines if line.startswith(("※", "（", "休所日"))]
         if any("のみ営業" in note for note in notes):
             return None  # e.g. "only open on the first Sunday"
+        if any(re.search(r"\d{1,2}:\d{2}", note) for note in notes):
+            return None  # e.g. a lunch break on its own line "（13:00～14:00除く）"
         closed = {"Su"} if any("日曜" in n and ("定休" in n or "休み" in n) for n in notes) else set()
         for line in lines:
             if line in notes or "定休日" in line:
