@@ -11,7 +11,6 @@ from locations.items import Feature
 class A1ATSpider(Spider):
     name = "a1_at"
     item_attributes = {"brand": "A1", "brand_wikidata": "Q688755"}
-    requires_proxy = True
     allowed_domains = ["www.a1.net"]
     start_urls = ["https://www.a1.net/o/gucci/widgets/apis/shopfinder/bff/microservice-shopfinder/shop/basicData"]
     custom_settings = {"ROBOTSTXT_OBEY": False}
