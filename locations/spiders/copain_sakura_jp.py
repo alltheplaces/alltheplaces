@@ -44,9 +44,12 @@ class CopainSakuraJPSpider(CrawlSpider):
         if src := self.info_row(response, "所在地").xpath(".//iframe/@src").get():
             # The Google Maps embed is centred a little west of the classroom's
             # pin, by about 7% of the map span ("!1d", in metres). Street level
-            # embeds land within a few hundred metres, so only use those.
-            if (m := re.search(r"!1d([\d.]+)!2d(-?[\d.]+)!3d(-?[\d.]+)", src)) and float(m.group(1)) < 5000:
+            # embeds land within a few hundred metres. Wider ones are flagged
+            # so that the point can be checked before it is used.
+            if m := re.search(r"!1d([\d.]+)!2d(-?[\d.]+)!3d(-?[\d.]+)", src):
                 item["lon"], item["lat"] = m.group(2), m.group(3)
+                if float(m.group(1)) >= 5000:
+                    item["extras"]["fixme"] = "low precision coordinates"
 
         tel = self.info_row(response, "電話番号")
         if "開所前" in tel.get(""):  # not open yet
