@@ -40,7 +40,7 @@ class GreggsGBSpider(Spider):
             item["website"] = f'https://www.greggs.com/shop-finder?shop-code={store["shopCode"]}'
             item["opening_hours"] = self.decode_hours(store)
             item["extras"]["cuisine"] = "sandwich;bakery"
-            apply_yes_no(Extras.DRIVE_THROUGH, item, store["driveThrough"])
+            apply_yes_no(Extras.DRIVE_THROUGH, item, store.get("driveThrough"))
 
             apply_category(Categories.FAST_FOOD, item)
 
