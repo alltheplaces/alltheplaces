@@ -33,7 +33,8 @@ class FotoprixESSpider(SitemapSpider, StructuredDataSpider):
         item["opening_hours"] = oh = OpeningHours()
         for line in response.xpath('//p[text()="Horario:"]/following-sibling::p/text()').getall():
             day_group, _, hours = line.partition(":")
-            days = DAY_GROUPS[day_group.strip()]
+            if not (days := DAY_GROUPS.get(day_group.strip())):
+                continue
             hours = re.sub(r"\(.*?\)", "", hours)
             if re.search(r"cerrado|no abrimos", hours, re.IGNORECASE):
                 oh.set_closed(days)
