@@ -1,12 +1,11 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy import Spider
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 
 # "Alabaster, AL 35007-3112"
 LOCALITY = re.compile(r"^(?P<city>.+),\s*(?P<state>[A-Z]{2})\s+(?P<postcode>\d{5}(?:-\d{4})?)$")
@@ -33,9 +32,18 @@ class BelkSpider(Spider):
     name = "belk"
     item_attributes = {"brand": "Belk", "brand_wikidata": "Q127428"}
     allowed_domains = ["www.belk.com"]
-    start_urls = ["https://www.belk.com/customer-service/store-directory/"]
-    requires_proxy = True
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    # The chain only trades in the United States.
+    requires_proxy = "US"
+
+    async def start(self) -> AsyncIterator[Request]:
+        # Belk's edge answers 403 to an ordinary request, and bans the proxy's plain
+        # fetch of the page, so the directory is asked for through a browser. No user
+        # agent is set either: Zyte warns that one of our own weakens its ban
+        # avoidance, and this site is where that shows.
+        yield Request(
+            "https://www.belk.com/customer-service/store-directory/",
+            meta={"zyte_api": {"browserHtml": True, "geolocation": "US"}},
+        )
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for row in response.xpath('//table[contains(@class, "data-table")]//tr[.//a[contains(@href, "StoreID=")]]'):
