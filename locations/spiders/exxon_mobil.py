@@ -41,7 +41,6 @@ class ExxonMobilSpider(SitemapSpider, PlaywrightSpider):
         "https://saipan.mobil.com/robots.txt",
         "https://www.exxon.com/robots.txt",
         "https://www.esso.be/robots.txt",
-        "https://carburant.esso.fr/robots.txt",
         "https://www.esso.nl/robots.txt",
     ]
     sitemap_rules = [(r"/find-station/.+-\d+$", "parse")]
