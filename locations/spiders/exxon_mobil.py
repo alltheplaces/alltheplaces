@@ -31,7 +31,6 @@ class ExxonMobilSpider(SitemapSpider, PlaywrightSpider):
         "https://www.esso.no/robots.txt",
         "https://www.esso.lu/robots.txt",
         "https://www.esso.com.cy/robots.txt",
-        "https://www.fuels.esso.co.th/robots.txt",
         "https://www.esso.com.sg/robots.txt",
         "https://www.mobil.co.nz/sitemap.xml",
         "https://www.esso.com.hk/robots.txt",
