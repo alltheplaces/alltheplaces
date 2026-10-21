@@ -27,7 +27,7 @@ class IgaAUSpider(CrawlSpider):
     ]
     rules = [
         Rule(
-            LinkExtractor(allow=r"\/stores\/", restrict_xpaths='//ul[contains(@class, "states-list")]'),
+            LinkExtractor(allow=r"\/stores\/", restrict_xpaths='//h4[contains(@class, "store-card-title")]'),
             callback="parse_store",
         )
     ]
