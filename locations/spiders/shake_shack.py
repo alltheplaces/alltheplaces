@@ -16,6 +16,7 @@ class ShakeShackSpider(CrawlSpider):
     start_urls = ["https://shakeshack.com/locations"]
     rules = [Rule(LinkExtractor(allow=r"/node/\d+$"), callback="parse_location")]
     custom_settings = {"DOWNLOAD_DELAY": 2, "CONCURRENT_REQUESTS": 2}
+    requires_proxy = True
 
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
