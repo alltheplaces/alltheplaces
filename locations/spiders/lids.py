@@ -17,6 +17,10 @@ class LidsSpider(Spider):
     name = "lids"
     item_attributes = {"brand": "Lids", "brand_wikidata": "Q19841609"}
     allowed_domains = ["lids.com"]
+    # The site answers 403 "Access Denied" to everything but robots.txt, whatever user
+    # agent is asked with, so the store API is reached through the proxy. Runs have
+    # been coming back with that 403 and no stores at all.
+    requires_proxy = True
     custom_settings = {
         "COOKIES_ENABLED": True,
         "USER_AGENT": BROWSER_DEFAULT,
