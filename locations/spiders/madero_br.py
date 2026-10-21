@@ -15,8 +15,8 @@ class MaderoBRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("name", None)
-        item["lat"] = response.xpath("//@data-lat").get()
-        item["lon"] = response.xpath("//@data-lng").get()
+        item["lat"] = response.xpath("//@data-lat").get() or None
+        item["lon"] = response.xpath("//@data-lng").get() or None
 
         # Dine-in hours come first, followed by take away, delivery and drive-thru hours
         hours = " ".join(response.xpath('//*[@itemprop="openingHours"]//text()').getall())
