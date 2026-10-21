@@ -7,7 +7,6 @@ from twisted.python.failure import Failure
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.user_agents import BROWSER_DEFAULT
 
 DIRECTORY = "https://www.belk.com/customer-service/store-directory/"
 # "Alabaster, AL 35007-3112"
@@ -31,9 +30,10 @@ class BelkSpider(Spider):
     is an unresolved server-side include to a path robots.txt disallows, and Jackson
     TN is listed under the ID that belongs to Cape Coral FL, whose page it is served.
 
-    The site's edge turns the proxy away at random: the same request has returned all
-    291 stores on one run and nothing on the next. The directory is the only page
-    asked for, so it is asked for again rather than finishing with no stores at all.
+    The directory itself is refused as well, often enough that a plain fetch of it
+    returned all 291 stores earlier in a day and nothing but bans later the same day.
+    It is the only page asked for and there is no second source for it, so it is
+    rendered in a browser and asked for again when a refusal comes back.
     """
 
     name = "belk"
@@ -41,13 +41,20 @@ class BelkSpider(Spider):
     allowed_domains = ["www.belk.com"]
     requires_proxy = True
     custom_settings = {
-        "USER_AGENT": BROWSER_DEFAULT,
-        # Spaces out the attempts, so they are not all made inside one refusal.
+        # A plain fetch of this site through the proxy is answered with a website ban,
+        # so the page is rendered in a browser instead. It has to be set here rather
+        # than on the request: the proxy middleware overwrites zyte_api_automap on
+        # every request, and naming the parameters on the request itself is refused
+        # for mixing manual and mapped parameters.
+        "ZYTE_API_AUTOMAP_PARAMS": {"browserHtml": True},
+        # No user agent of our own is set: the proxy warns on every request that one
+        # weakens its ban avoidance, and a ban is what this site answers with.
+        # Spaces the attempts out, so they are not all made inside one refusal.
         "DOWNLOAD_DELAY": 3,
     }
-    # Each attempt costs the proxy about ten seconds, so this is as many as fit in the
-    # time a run is given.
-    max_attempts = 5
+    # A render costs the proxy around twenty seconds and it retries each one itself,
+    # so this is as many attempts as fit in the time a run is given.
+    max_attempts = 3
 
     async def start(self) -> AsyncIterator[Request]:
         # The first attempt needs the errback too: a refused request is how the run
@@ -93,7 +100,13 @@ class BelkSpider(Spider):
 
     def on_error(self, failure: Failure) -> Iterable[Request]:
         """Ask again when the request itself failed, which is how a ban arrives."""
-        yield from self.again(failure.request.cb_kwargs.get("attempt", 1), repr(failure.value)[:200])
+        # The reason a proxy error gives is at the end of it, past a long repeat of the
+        # request, so the end is what gets logged.
+        error = repr(failure.value)
+        yield from self.again(
+            failure.request.cb_kwargs.get("attempt", 1),
+            f"{type(failure.value).__name__} ending {error[-400:]}" if len(error) > 400 else error,
+        )
 
     def again(self, attempt: int, reason: str) -> Iterable[Request]:
         if attempt >= self.max_attempts:
