@@ -33,8 +33,9 @@ class BuffaloWildWingsUSSpider(Spider):
                 item = DictParser.parse(restaurant["contactDetails"])
                 item["ref"] = restaurant["id"]
                 item["branch"] = restaurant["displayName"]
-                item["lat"] = restaurant["geoDetails"]["latitude"]
-                item["lon"] = restaurant["geoDetails"]["longitude"]
+                geo = restaurant.get("geoDetails") or {}
+                item["lat"] = geo.get("latitude")
+                item["lon"] = geo.get("longitude")
                 item["opening_hours"] = parse_opening_hours(restaurant["locationHours"])
                 yield item
 
