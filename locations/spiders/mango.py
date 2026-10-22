@@ -1,23 +1,21 @@
 from typing import Any, Iterable
 
 import chompjs
-from scrapy import Request
+from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
 from locations.react_server_components import parse_rsc
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class MangoSpider(PlaywrightSpider):
+class MangoSpider(Spider):
     name = "mango"
     item_attributes = {"brand": "Mango", "brand_wikidata": "Q136503"}
     start_urls = ["https://api.shop.mango.com/cs/online-configuration/v1/country?channelId=shop"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
     requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
