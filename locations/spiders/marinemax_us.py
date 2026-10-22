@@ -13,6 +13,7 @@ class MarinemaxUSSpider(Spider):
     name = "marinemax_us"
     item_attributes = {"brand": "MarineMax", "brand_wikidata": "Q119140995"}
     start_urls = ["https://www.marinemax.com/pages/locations"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath("//*[@data-location-index]"):
