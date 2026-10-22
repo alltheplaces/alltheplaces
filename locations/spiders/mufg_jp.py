@@ -9,11 +9,12 @@ from locations.items import Feature
 from locations.storefinders.mapion import MapionSpider
 
 
-class MufjJPSpider(MapionSpider):
-    name = "mufj_jp"
+class MufgJPSpider(MapionSpider):
+    name = "mufg_jp"
     item_attributes = {"brand": "三菱UFJ銀行", "brand_wikidata": "Q988284"}
-    allowed_domains = ["map.bk.mufg.jp"]
-    feature_url_template = "https://map.bk.mufg.jp/b/bk_mufg/attr/?t=attr_con&start={}"
+    allowed_domains = ["lbs.mapion.co.jp"]
+    api_group = "bk_mufg"
+    website_template = "https://map.bk.mufg.jp/b/bk_mufg/info/{}/"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
 
