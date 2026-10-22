@@ -5,6 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 from locations.spiders.albertsons import AlbertsonsSpider
@@ -198,6 +199,20 @@ class CitiSpider(Spider):
                 properties["located_in_wikidata"] = brand_data.get("brand_wikidata")
                 break
 
+    DAYS = {"M": "Mo", "T": "Tu", "W": "We", "Th": "Th", "F": "Fr", "S": "Sa", "Su": "Su"}
+
+    def parse_hours(self, hours: dict | None) -> OpeningHours | None:
+        if not hours:
+            return None
+        oh = OpeningHours()
+        for day, value in hours.items():
+            open_time, close_time = (t.strip() for t in value.split("-"))
+            # Times have no am/pm marker; closing times are in the afternoon.
+            if int(close_time.split(":")[0]) < int(open_time.split(":")[0]):
+                close_time = f"{int(close_time.split(':')[0]) + 12}:{close_time.split(':')[1]}"
+            oh.add_range(self.DAYS[day], open_time, close_time)
+        return oh
+
     async def start(self) -> AsyncIterator[JsonRequest]:
         with open_searchable_points("us_centroids_100mile_radius_state.csv") as points:
             next(points)
@@ -275,6 +290,8 @@ class CitiSpider(Spider):
 
             elif feature["properties"]["type"] in ["branch", "citifinancial", "private bank"]:
                 apply_category(Categories.BANK, properties)
+                properties["phone"] = additional.get("contactDetails", {}).get("branchPhone")
+                properties["opening_hours"] = self.parse_hours(additional.get("hours", {}).get("hoursTeller"))
                 apply_yes_no(Extras.ATM, properties, additional.get("hasATM") or additional.get("atm24HR"))
 
             apply_yes_no(Extras.WHEELCHAIR, properties, additional.get("Wheelchair") or additional.get("ADA"))
