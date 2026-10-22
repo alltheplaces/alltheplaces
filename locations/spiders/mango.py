@@ -18,6 +18,7 @@ class MangoSpider(PlaywrightSpider):
     item_attributes = {"brand": "Mango", "brand_wikidata": "Q136503"}
     start_urls = ["https://api.shop.mango.com/cs/online-configuration/v1/country?channelId=shop"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for country in response.json()["countries"]:
