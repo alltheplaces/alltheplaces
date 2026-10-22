@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, Iterable
 
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
@@ -14,11 +14,15 @@ class InvitroRUSpider(SitemapSpider, StructuredDataSpider):
     name = "invitro_ru"
     item_attributes = {"brand": "Инвитро", "brand_wikidata": "Q4200546"}
     sitemap_urls = ["https://www.invitro.ru/sitemap/offices.xml"]
-    sitemap_rules = [(r"/offices/[-\w]+/clinic\.php\?ID=\d+$", "parse_sd")]
+    sitemap_rules = [(r"/offices/[-\w]+/?$", "parse")]
     wanted_types = ["MedicalBusiness"]
     json_parser = "chompjs"
     search_for_email = False
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 300, "RETRY_TIMES": 5}
+
+    def parse(self, response: TextResponse) -> Any:
+        if url := response.xpath('//a[contains(@href, "clinic.php?ID=")]/@href').get():
+            yield response.follow(url, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["name"] = None

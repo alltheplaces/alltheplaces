@@ -6,7 +6,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, day_range
 from locations.user_agents import BROWSER_DEFAULT
 
 DEPARTMENTS = {
@@ -47,14 +47,16 @@ class MeijerUSSpider(SitemapSpider):
         item["opening_hours"] = self.parse_opening_hours(location["openingHours"])
 
         for dept in location["storeLocatorFeatures"]:
-            cat = DEPARTMENTS.get(dept["storeFeatureServiceType"])
+            cat = DEPARTMENTS.get(dept.get("storeFeatureServiceType"))
             if not cat:
                 continue
 
             i = item.deepcopy()
             i["ref"] = "{}-{}".format(dept["storeFeatureServiceType"], i["ref"])
 
-            i["opening_hours"] = self.parse_opening_hours(dept.get("openingSchedule", {}))
+            i["opening_hours"] = (
+                self.parse_opening_hours(dept["openingSchedule"]) if "openingSchedule" in dept else None
+            )
             apply_category(cat, i)
 
             yield i
@@ -71,7 +73,7 @@ class MeijerUSSpider(SitemapSpider):
             oh = OpeningHours()
             for rule in rules["weekDayOpeningList"]:
                 if " - " in rule["weekDay"]:
-                    days_range = rule["weekDay"].split(" - ")
+                    days_range = day_range(*rule["weekDay"].split(" - "))
                 else:
                     days_range = [rule["weekDay"]]
                 if rule["closed"]:

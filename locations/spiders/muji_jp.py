@@ -70,7 +70,6 @@ class MujiJPSpider(Spider):
         item["ref"] = shop_cd
         item["name"] = store.get("shopname")
         item["addr_full"] = store.get("shopaddress")
-        item["country"] = "JP"
         item["lat"] = store.get("latitude")
         item["lon"] = store.get("longitude")
         item["phone"] = store.get("tel")

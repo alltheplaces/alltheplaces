@@ -53,7 +53,6 @@ class YvesThuriesFRSpider(scrapy.Spider):
             item["street_address"] = m.group(1)
             item["postcode"] = m.group(2)
             item["city"] = m.group(3)
-        item["country"] = "FR"
 
         item["opening_hours"] = self.parse_hours(response)
 

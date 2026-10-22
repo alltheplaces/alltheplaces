@@ -45,7 +45,6 @@ class TjoyJPSpider(Spider):
         item["addr_full"] = addr
         item["postcode"] = postcode
         item["phone"] = phone
-        item["country"] = "JP"
         item["website"] = f"https://tjoy.jp/{ref}"
 
         extract_google_position(item, response)

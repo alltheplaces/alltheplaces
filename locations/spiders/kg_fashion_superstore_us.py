@@ -22,7 +22,6 @@ class KgFashionSuperstoreUSSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         # The site's own markup always reports addressCountry as "CA", which is
         # incorrect for this US-only chain.
-        item["country"] = "US"
 
         # The site combines brand and city into a single name field, e.g.
         # "K&G Fashion Superstore ORLANDO, FL - Orlando". Use the neatly

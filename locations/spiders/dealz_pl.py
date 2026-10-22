@@ -4,8 +4,9 @@ from typing import AsyncIterator, Iterable
 from scrapy import Spider
 from scrapy.http import Request, Response
 
+from locations.categories import Categories, apply_category
 from locations.geo import country_iseadgg_centroids
-from locations.hours import DAYS_PL, OpeningHours
+from locations.hours import DAYS_PL, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
@@ -48,8 +49,19 @@ class DealzPLSpider(Spider):
             properties["postcode"] = post_code_city.split(" ")[0]
             properties["city"] = " ".join(post_code_city.split(" ")[1:])
 
-            properties["opening_hours"] = OpeningHours()
-            for hours in shop_div.xpath("div/div[contains(@class, 'leaflet-popup__footer')]/text()").getall():
-                properties["opening_hours"].add_ranges_from_string(hours, days=DAYS_PL)
+            shop_box = response.xpath(f'//div[@shops-map-marker-anchor={feature["shop_id"]}]')
+            properties["website"] = shop_box.xpath('.//a[@class="find-shop-box__link"]/@href').get()
 
-            yield Feature(**properties)
+            properties["opening_hours"] = OpeningHours()
+            for row in shop_box.xpath(".//table[contains(@class, 'find-shop-box__content__table--hours')]//tr"):
+                day = sanitise_day(row.xpath("normalize-space(td[1])").get(), DAYS_PL)
+                hours = row.xpath("normalize-space(td[2])").get()
+                if hours == "Zamknięte":
+                    properties["opening_hours"].set_closed(day)
+                else:
+                    open_time, close_time = hours.split(" - ")
+                    properties["opening_hours"].add_range(day, open_time, close_time)
+
+            item = Feature(**properties)
+            apply_category(Categories.SHOP_VARIETY_STORE, item)
+            yield item

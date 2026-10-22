@@ -1,5 +1,6 @@
 from scrapy import Request
 
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -30,4 +31,7 @@ class SbarroSpider(StructuredDataSpider):
         item["name"] = None
         item["lat"] = response.meta["lat"]
         item["lon"] = response.meta["lon"]
+        item["opening_hours"] = OpeningHours()
+        for rule in response.xpath('//meta[@itemprop="openingHours"]/@content').getall():
+            item["opening_hours"].add_ranges_from_string(rule)
         yield item

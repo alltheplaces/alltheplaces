@@ -15,6 +15,7 @@ class ArkNOSpider(Spider):
     allowed_domains = ["www.ark.no"]
     start_urls = ["https://www.ark.no/butikker"]
     item_attributes = {"brand": "Ark bokhandel", "brand_wikidata": "Q11958706"}
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()

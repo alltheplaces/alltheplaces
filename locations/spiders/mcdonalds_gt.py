@@ -15,13 +15,15 @@ class McdonaldsGTSpider(JSONBlobSpider):
         return json.loads(response.xpath("//@data-page").get())["props"]["restaurants"]
 
     def post_process_item(self, item, response, location):
+        item.pop("phone", None)
+        item.pop("email", None)
         item["branch"] = item.pop("name")
         apply_yes_no(Extras.DELIVERY, item, "Delivery" in location["categorias"])
 
         for oh_rules in (
             location["horarios"].values() if isinstance(location["horarios"], dict) else location["horarios"]
         ):
-            if oh_rules["name"] == "Restaurante":
+            if oh_rules["name"].startswith("Restaurante"):
                 item["opening_hours"] = OpeningHours()
                 for rule in oh_rules["horarios"]:
                     if day := sanitise_day(rule["description"], DAYS_ES):

@@ -4,6 +4,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -24,6 +25,17 @@ class CircleKIrelandSpider(CrawlSpider, StructuredDataSpider):
             item["branch"] = item.pop("name").removeprefix("CIRCLE K ")
 
         item["lat"], item["lon"] = url_to_coords(response.xpath('//a[@class="google-map"]/@href').get())
+
+        item["opening_hours"] = oh = OpeningHours()
+        for row in response.xpath('//td[@itemprop="openingHours"]'):
+            day, _, times = row.xpath("@content").get("").partition(" ")
+            if row.xpath("normalize-space()").get() == "Open 24h":
+                oh.add_range(day, "00:00", "24:00")
+            elif times:
+                oh.add_range(day, *times.split("-"))
+
+        item.pop("facebook", None)
+        item.pop("twitter", None)
 
         apply_category(Categories.FUEL_STATION, item)
 

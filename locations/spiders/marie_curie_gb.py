@@ -1,10 +1,12 @@
 import json
+import re
 from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
@@ -76,8 +78,27 @@ class MarieCurieGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("Marie Curie Charity Shop ", "")
-        item["country"] = "GB"
         item.pop("lat", None)
         item.pop("lon", None)
+        item["opening_hours"] = self.parse_hours(feature.get("hours"))
         apply_category(Categories.SHOP_CHARITY, item)
         yield item
+
+    @staticmethod
+    def parse_hours(hours: str | None) -> OpeningHours | None:
+        if not hours:
+            return None
+
+        def to_24h(match: re.Match) -> str:
+            hour, minute, meridiem = int(match[1]), match[2] or "00", (match[3] or "").lower()
+            if meridiem.startswith("p") and hour < 12:
+                hour += 12
+            elif meridiem.startswith("a") and hour == 12:
+                hour = 0
+            return f" {hour:02d}:{minute} "
+
+        text = " ".join(json.loads(hours))
+        text = re.sub(r"(\d{1,2})(?:[:.](\d{2}))?\s*([ap]?m)\b", to_24h, text, flags=re.I)
+        oh = OpeningHours()
+        oh.add_ranges_from_string(text.replace(".", " "))
+        return oh
