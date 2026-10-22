@@ -2,6 +2,7 @@ from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -59,5 +60,7 @@ class UniqloSpider(JSONBlobSpider):
         item["opening_hours"] = oh
         item["website"] = f'https://map.uniqlo.com/{response.meta["country"]}/en/detail/{feature["id"]}'
         item["branch"] = item.pop("name")
+
+        apply_category(Categories.SHOP_CLOTHES, item)
 
         yield item
