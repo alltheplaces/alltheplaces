@@ -32,9 +32,8 @@ class JackInTheBoxSpider(SitemapSpider, StructuredDataSpider):
     Asked for a page a second the site answers about a hundred of them and then
     refuses this caller everything, the sitemap and robots.txt included, for a
     good while afterwards. That is what held earlier runs to a twentieth of the
-    chain. The requests are therefore spread across the proxy pool, so that no
-    one address carries enough of them to be counted out, and paced as well,
-    which on its own was enough to keep a single address under the count.
+    chain, so the requests are spread across the proxy pool, no one address
+    carrying enough of them to be counted out.
 
     The chain writes the hours of a store that trades right through a day as a
     single time at both ends of that day, four in the morning being the hour its
@@ -50,11 +49,17 @@ class JackInTheBoxSpider(SitemapSpider, StructuredDataSpider):
     json_parser = "chompjs"
     time_format = "%I:%M %p"
     requires_proxy = True
-    custom_settings = {"DOWNLOAD_DELAY": 3}
     # Every page's footer links the chain's own social accounts, which say
     # nothing about the store whose page it is.
     search_for_twitter = False
     search_for_facebook = False
+
+    def pre_process_data(self, ld_data, **kwargs):
+        # Times are written with the stops left in, as "04:00 A.M.", which the
+        # library cannot read.
+        for rule in ld_data.get("openingHoursSpecification", []):
+            rule["opens"] = (rule.get("opens") or "").replace(".", "")
+            rule["closes"] = (rule.get("closes") or "").replace(".", "")
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         specification = ld_data.get("openingHoursSpecification") or []
