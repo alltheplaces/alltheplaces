@@ -1,5 +1,3 @@
-import html
-import re
 from typing import Iterable
 
 from scrapy.http import TextResponse
@@ -23,25 +21,22 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class BestFriendsPetCareUSSpider(WPStoreLocatorSpider):
     name = "best_friends_pet_care_us"
-    allowed_domains = ["www.bestfriendspetcare.com"]
+    allowed_domains = ["bestfriendspetcare.com"]
     days = DAYS_EN
+    start_urls = [
+        "https://bestfriendspetcare.com/wp-admin/admin-ajax.php?action=store_search&lat=41.88325&lng=-87.6323879&max_results=500&search_radius=500"
+    ]
 
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
-        store = html.unescape(location.get("store") or "").strip()
 
-        if "best friends pet" in store.lower():
+        if "best friends pet" in location.get("store").lower():
             item["brand"] = "Best Friends Pet Hotel"
             item["name"] = None
             item["branch"] = location.get("city")
         else:
-            item["name"] = store
+            item["name"] = location.get("store")
 
         item["website"] = location.get("permalink")
-
-        # One record carries "Denver" as its state and "CO" as its city.
-        if not re.fullmatch(r"[A-Z]{2}", item.get("state") or "") and re.fullmatch(r"[A-Z]{2}", item.get("city") or ""):
-            item["city"], item["state"] = item["state"], item["city"]
-
         apply_category(Categories.ANIMAL_BOARDING, item)
 
         yield item
