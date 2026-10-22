@@ -3,6 +3,7 @@ from typing import AsyncIterator
 import chompjs
 from scrapy.http import JsonRequest, Request
 
+from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 
 
@@ -33,4 +34,5 @@ class BuilditSpider(JSONBlobSpider):
         item["branch"] = item.pop("name")
         item["website"] = f"https://www.buildit.co.za/Stores/View/{location['Alias']}"
         item["street_address"] = item.pop("addr_full", None)
+        apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item
