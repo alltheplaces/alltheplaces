@@ -6,6 +6,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Extras, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.dunkin_at import DUNKIN_SHARED_ATTRIBUTES
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -24,7 +25,10 @@ class DunkinUSSpider(SitemapSpider):
         location_data.update(location_data.pop("contactDetails"))
         location_data.update(location_data.pop("geoDetails"))
         item = DictParser.parse(location_data)
-        item["housenumber"] = location_data.get("address").get("line2")
+        item["website"] = response.url
+        item["street_address"] = merge_address_lines(
+            [item.get("street_address"), location_data["address"].get("line2")]
+        )
         oh = OpeningHours()
         for day_time in location_data.get("locationHours"):
             day = day_time.get("dayOfWeek")
