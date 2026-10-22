@@ -4,7 +4,6 @@ from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -24,22 +23,6 @@ class FortyWinksAUSpider(SitemapSpider, PlaywrightSpider, StructuredDataSpider):
         item["ref"] = response.url.strip("/").split("/")[-1]
         item["branch"] = item.pop("name").removeprefix("Forty Winks ")
         item["image"] = None
-
-        # Opening hours in JSON-LD is not the actual values
-        # Extract real opening hours directly from the HTML list elements
-        oh = OpeningHours()
-        if hours_elements := response.xpath("//ul[contains(@class, 'mb-6')]/li"):
-            for li in hours_elements:
-                day_text = "".join(li.xpath("./div[1]/text()").getall()).strip()
-                time_text = "".join(li.xpath("./div[2]/text()").getall()).strip()
-
-                if not day_text or not time_text:
-                    continue
-
-                open_t, close_t = time_text.split(" - ")
-                oh.add_range(day_text, open_t, close_t, "%I:%M%p")
-
-        item["opening_hours"] = oh
 
         apply_category(Categories.SHOP_BED, item)
 
