@@ -3,17 +3,19 @@ from typing import Any
 
 import scrapy
 from scrapy.http import JsonRequest, Response
-from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class AmeripriseUSSpider(Spider):
+class AmeripriseUSSpider(PlaywrightSpider):
     name = "ameriprise_us"
     item_attributes = {"brand": "Ameriprise Financial", "brand_wikidata": "Q2843129"}
     start_urls = ["https://www.ameripriseadvisors.com/find-a-financial-advisor-by-state/"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for state in response.xpath('//*[@class="public-sitemap-list"]//a/text()').getall():
