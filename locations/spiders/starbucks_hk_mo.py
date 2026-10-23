@@ -16,6 +16,7 @@ from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 class StarbucksHKMOSpider(JSONBlobSpider):
     name = "starbucks_hk_mo"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
+    requires_proxy = "HK"
 
     def make_request(self, page: int, limit: int = 100) -> JsonRequest:
         return JsonRequest(
