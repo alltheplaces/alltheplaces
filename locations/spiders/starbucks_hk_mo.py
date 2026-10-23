@@ -1,47 +1,66 @@
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS_3_LETTERS, OpeningHours
+from datetime import datetime
+from typing import Any, AsyncIterator, Iterable
+
+import chompjs
+from scrapy.http import JsonRequest, TextResponse
+
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.react_server_components import parse_rsc
 from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
 class StarbucksHKMOSpider(JSONBlobSpider):
     name = "starbucks_hk_mo"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
-    start_urls = ["https://www.starbucks.com.hk/rest/V1/mxstarbucks-getSBStoreList"]
-    needs_json_request = True
-    locations_key = "data"
 
-    def post_process_item(self, item, response, location):
-        if location["locates_hk_or_mc"] == "Hong Kong":
-            item["country"] = "HK"
-        elif location["locates_hk_or_mc"] == "Macau":
-            item["country"] = "MO"
+    def make_request(self, page: int, limit: int = 100) -> JsonRequest:
+        return JsonRequest(
+            url=f"https://www.starbucks.com.hk/en/find-a-store?page={page}&limit={limit}",
+            cb_kwargs=dict(page=page, limit=limit),
+        )
 
-        item["extras"]["branch:en"] = location["name_en"]
-        item["extras"]["branch:zh"] = location["name_cn"]
-        item["branch"] = item["extras"]["branch:zh"] + " " + item["extras"]["branch:en"]
+    async def start(self) -> AsyncIterator[JsonRequest]:
+        yield self.make_request(1)
 
-        item["extras"]["addr:full:en"] = location["address1_en"]
-        item["extras"]["addr:full:zh"] = location["address1_cn"]
-        item["addr_full"] = item["extras"]["addr:full:zh"] + " " + item["extras"]["addr:full:en"]
+    def extract_json(self, response: TextResponse) -> list[dict]:
+        scripts = response.xpath(
+            "//script[starts-with(text(), 'self.__next_f.push')][contains(text(), 'items')]/text()"
+        ).getall()
+        data = dict(parse_rsc("".join([s for n, s in [chompjs.parse_js_object(s) for s in scripts]]).encode()))
+        return DictParser.get_nested_key(data, "items")
+
+    def parse(self, response: TextResponse, page: int, limit: int) -> Any:
+        features = self.extract_json(response)
+        yield from self.parse_feature_array(response, features) or []
+        if len(features) == limit:
+            yield self.make_request(page + 1)
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["ref"] = feature["MasterStoreID"]
+        item["branch"] = item.pop("name")
+        item["extras"]["branch:en"] = feature["CommonStoreName"]
+        item["extras"]["branch:zh"] = feature["CommonStoreNameTH"]
+        item["street_address"] = feature["Sub_District"]
+        item["city"] = feature["District"]
+        item["phone"] = feature.get("Mobile")
 
         apply_category(Categories.COFFEE_SHOP, item)
-        apply_yes_no(Extras.WIFI, item, location["is_free_wifi"] == "1")
-        apply_yes_no(Extras.TAKEAWAY, item, location["has_starbucks_take_away"] == "1")
 
         item["opening_hours"] = OpeningHours()
-        if location["is24_hours"] == "1":
-            item["opening_hours"] = "Mo-Su 00:00-24:00"
-        else:
-            for day in DAYS_3_LETTERS:
-                day = day.lower()
-                if day == "thu":
-                    day = "thurs"
-                if location["enable_mon"] == "0":
-                    item["opening_hours"].set_closed(day)
-                if location[f"{day}_is24_hour"] == "1":
-                    item["opening_hours"].add_range(day, "00:00", "23:59")
-                else:
-                    item["opening_hours"].add_range(day, location[f"{day}_open_hour"], location[f"{day}_close_hour"])
+        for day in DAYS_FULL:
+            key = day.lower()
+            open_time = feature.get(f"{key}OpeningTime", "")
+            close_time = feature.get(f"{key}ClosingTime", "")
+            if open_time and close_time:
+                open_time = datetime.strptime(open_time, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%H:%M")
+                close_time = (
+                    datetime.strptime(close_time, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%H:%M").replace("00:00", "23:59")
+                )
+
+                item["opening_hours"].add_range(day, open_time, close_time)
 
         yield item
