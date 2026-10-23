@@ -52,6 +52,8 @@ class CathayUnitedBankTWSpider(Spider):
                         item["name"] = "-".join(["國泰世華商業銀行", "ATM"])
                         item["ref"] = "-".join([details["Sno"], "ATM"])
                         item["street"] = details["SetAddressKind"]
+                        if details["Type"]["H24"] == "1":
+                            item["opening_hours"] = "24/7"
                         apply_category(Categories.ATM, item)
                         # Extract retail brand from SetAddressKind field for ATMs
                         item["located_in"], item["located_in_wikidata"] = extract_located_in(
