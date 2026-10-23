@@ -1,17 +1,19 @@
 from typing import Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class DollarsAndSenseAUSpider(Spider):
+class DollarsAndSenseAUSpider(PlaywrightSpider):
     name = "dollars_and_sense_au"
     item_attributes = {"brand": "Dollars and Sense", "brand_wikidata": "Q133520267"}
     allowed_domains = ["www.dollarsense.au"]
     start_urls = ["https://www.dollarsense.au/pages/store-locations"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for store in response.xpath('//*[@class="ds-location-card__meta"]'):
