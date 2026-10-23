@@ -14,7 +14,7 @@ class CityPlumbingGBSpider(JSONBlobSpider):
     name = "city_plumbing_gb"
     item_attributes = {
         "name": "City Plumbing Supplies",
-        "brand": "City Plumbing Supplies",
+        "brand": "City Plumbing",
         "brand_wikidata": "Q105089893",
     }
     start_urls = ["https://www.cityplumbing.co.uk/branch-locator"]
