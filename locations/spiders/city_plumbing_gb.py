@@ -22,6 +22,8 @@ class CityPlumbingGBSpider(JSONBlobSpider):
     def extract_json(self, response: Response) -> list[dict]:
         searchstr = '"allBranches":'
         script = response.xpath(f"//script[contains(text(), '{searchstr}')]/text()").get()
+        if script is None:
+            return []
         start = script.find(searchstr) + len(searchstr)
         locations = chompjs.parse_js_object(script[start:])
         return locations
@@ -35,7 +37,8 @@ class CityPlumbingGBSpider(JSONBlobSpider):
             + "/"
             + item["branch"].lower().replace(" ", "-")
         )
-        item["street_address"] = merge_address_lines([feature.get("address")["line2"], feature.get("address")["line3"]])
+        address = feature.get("address") or {}
+        item["street_address"] = merge_address_lines([address.get("line2"), address.get("line3")])
         if feature.get("branchSchedule"):
             item["opening_hours"] = OpeningHours()
             for day in feature["branchSchedule"]:
