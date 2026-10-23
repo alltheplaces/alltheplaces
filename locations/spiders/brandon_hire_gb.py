@@ -29,9 +29,8 @@ class BrandonHireGBSpider(JSONBlobSpider):
         feature.pop("address")
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        #        item["lat"], item["lon"] = feature["coordinates"]["latitude"],feature["coordinates"]["longitude"]
         item["branch"] = item.pop("name").removeprefix("Brandon Hire Station").strip()
-        if opening_hours := feature.get("opening_hours"):
+        if feature.get("opening_hours"):
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 if "-" in feature["opening_hours"][day.lower()]:
