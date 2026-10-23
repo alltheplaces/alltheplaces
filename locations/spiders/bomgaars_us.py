@@ -1,5 +1,7 @@
+import json
 from datetime import datetime
 from typing import AsyncIterator, Iterable
+from urllib.parse import urlencode
 
 from scrapy.http import JsonRequest, TextResponse
 
@@ -7,7 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 GRAPHQL_QUERY = """
 query ba_stores($page: Int, $pageSize: Int) {
@@ -66,19 +67,11 @@ class BomgaarsUSSpider(JSONBlobSpider):
     item_attributes = {"brand": "Bomgaars", "brand_wikidata": "Q22059070", "name": "Bomgaars"}
     allowed_domains = ["www.bomgaars.com"]
     requires_proxy = "US"  # Imperva
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(
-            url="https://www.bomgaars.com/graphql",
-            method="POST",
-            data={"query": GRAPHQL_QUERY, "variables": {"page": 1, "pageSize": PAGE_SIZE}},
-            headers={
-                "Origin": "https://www.bomgaars.com",
-                "Referer": "https://www.bomgaars.com/storelocator/",
-                "X-Requested-With": "XMLHttpRequest",
-            },
-        )
+        params = {"query": GRAPHQL_QUERY, "variables": json.dumps({"page": 1, "pageSize": PAGE_SIZE})}
+        yield JsonRequest(url=f"https://www.bomgaars.com/graphql?{urlencode(params)}")
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         stores = response.json()["data"]["ba_stores"]
@@ -94,6 +87,8 @@ class BomgaarsUSSpider(JSONBlobSpider):
             return
 
         item["branch"] = item.pop("name", None)
+        item["street_address"] = item.pop("addr_full", None)
+        item.pop("email", None)
         apply_category(Categories.SHOP_COUNTRY_STORE, item)
 
         item["opening_hours"] = OpeningHours()
