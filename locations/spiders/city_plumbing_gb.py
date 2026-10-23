@@ -32,8 +32,8 @@ class CityPlumbingGBSpider(JSONBlobSpider):
         item["ref"] = feature.get("code")
         if item["name"].endswith("PTS"):
             item["brand"] = "Plumbing Trade Supplies"
-            item["name"] = "Plumbing Trade Supplies"
             item["branch"] = item.pop("name").removesuffix("PTS").strip()
+            item["name"] = "Plumbing Trade Supplies"
         else:
             item["branch"] = item.pop("name").removesuffix("CPS").strip()
         item["website"] = (
