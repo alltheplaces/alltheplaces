@@ -2,8 +2,8 @@ import json
 import re
 from typing import Iterable
 
-import scrapy
-from scrapy.http import Response
+from scrapy import Spider
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -15,7 +15,7 @@ SITEMAP_URL = "https://cdn.avbportal.com/magento-media/sitemaps/bigs1/sitemap.xm
 WANTED_TYPES = {"FurnitureStore", "HomeGoodsStore", "LocalBusiness"}
 
 
-class BigSandySuperstoreUSSpider(scrapy.Spider):
+class BigSandySuperstoreUSSpider(Spider):
     name = "big_sandy_superstore_us"
     item_attributes = {
         "brand_wikidata": "Q4906290",
@@ -23,8 +23,9 @@ class BigSandySuperstoreUSSpider(scrapy.Spider):
     }
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     start_urls = ["https://www.bigsandysuperstore.com/"]
+    requires_proxy = True
 
-    def parse(self, response: Response) -> Iterable[scrapy.Request]:
+    def parse(self, response: Response) -> Iterable[Request]:
         # A JSON blob embedded on every page lists all "main" stores with an
         # accurate phone/lat/lon per store. Individual store landing pages
         # sometimes carry stale copy-pasted phone/postcode/geo data (e.g. the
@@ -39,9 +40,9 @@ class BigSandySuperstoreUSSpider(scrapy.Spider):
             if m := re.match(r"(\d+)", store["address"]):
                 self.store_by_housenumber[m.group(1)] = store
 
-        yield scrapy.Request(SITEMAP_URL, callback=self.parse_sitemap)
+        yield Request(SITEMAP_URL, callback=self.parse_sitemap)
 
-    def parse_sitemap(self, response: Response) -> Iterable[scrapy.Request]:
+    def parse_sitemap(self, response: Response) -> Iterable[Request]:
         response.selector.remove_namespaces()
         for url in response.xpath("//loc/text()").getall():
             if "/locations/" not in url:
@@ -51,7 +52,7 @@ class BigSandySuperstoreUSSpider(scrapy.Spider):
                 # therefore the same physical building) as their parent
                 # superstore page, so they are not separate locations.
                 continue
-            yield scrapy.Request(url, callback=self.parse_store)
+            yield Request(url, callback=self.parse_store)
 
     def parse_store(self, response: Response) -> Iterable[Feature]:
         store_ld = self.extract_store_ld(response)
