@@ -290,8 +290,8 @@ class CitiSpider(Spider):
 
             elif feature["properties"]["type"] in ["branch", "citifinancial", "private bank"]:
                 apply_category(Categories.BANK, properties)
-                properties["phone"] = additional.get("contactDetails", {}).get("branchPhone")
-                properties["opening_hours"] = self.parse_hours(additional.get("hours", {}).get("hoursTeller"))
+                properties["phone"] = (additional.get("contactDetails") or {}).get("branchPhone")
+                properties["opening_hours"] = self.parse_hours((additional.get("hours") or {}).get("hoursTeller"))
                 apply_yes_no(Extras.ATM, properties, additional.get("hasATM") or additional.get("atm24HR"))
 
             apply_yes_no(Extras.WHEELCHAIR, properties, additional.get("Wheelchair") or additional.get("ADA"))
