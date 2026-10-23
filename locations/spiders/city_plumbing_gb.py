@@ -30,10 +30,12 @@ class CityPlumbingGBSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature.get("code")
-        if "PTS" in item["name"]:
+        if item["name"].endswith("PTS"):
             item["brand"] = "Plumbing Trade Supplies"
             item["name"] = "Plumbing Trade Supplies"
-        item["branch"] = item.pop("name").removesuffix("CPS").removesuffix("PTS").strip()
+            item["branch"] = item.pop("name").removesuffix("PTS").strip()
+        else:
+            item["branch"] = item.pop("name").removesuffix("CPS").strip()
         item["website"] = (
             "https://www.cityplumbing.co.uk/branch-locator/"
             + item["ref"]
