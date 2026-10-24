@@ -71,7 +71,11 @@ class ShizuokaBankJPSpider(MapionSpider):
         if not time_range:
             return
         for segment in re.split(r"<BR\s*/?>", time_range.replace("：", ":")):
-            if hours := re.match(r"(\d{1,2}:\d{2})[~〜～](\d{1,2}:\d{2})", segment.strip()):
+            segment = segment.strip()
+            if segment == "ご利用できません":
+                oh.set_closed(days)
+                continue
+            if hours := re.match(r"(\d{1,2}:\d{2})[~〜～](\d{1,2}:\d{2})", segment):
                 open_time = f"{hours.group(1)}"
                 close_time = f"{hours.group(2)}"
                 try:
