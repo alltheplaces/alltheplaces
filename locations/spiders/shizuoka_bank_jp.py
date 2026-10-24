@@ -21,10 +21,11 @@ class ShizuokaBankJPSpider(MapionSpider):
         item["name"] = "静岡銀行"
         item["branch"] = data.get("name")
         item.set_tag("branch:ja-Hira", data.get("poi_name_yomi"))
-        if "お問い合わせ先" in data.get("tel"):
+        if "お問い合わせ先" in (data.get("tel") or ""):
             item["phone"] = None
 
         oh = OpeningHours()
+        holiday_oh = OpeningHours()
         if data.get("store_div") == "3":
             if week := data.get("atm_hour_week"):
                 self.add_hours(oh, DAYS_WEEKDAY, week)
@@ -32,6 +33,7 @@ class ShizuokaBankJPSpider(MapionSpider):
                 self.add_hours(oh, ["Sa"], sat)
             if sun := data.get("atm_hour_sun"):
                 self.add_hours(oh, ["Su"], sun)
+                self.add_hours(holiday_oh, ["Su"], sun)
             apply_category(Categories.ATM, item)
         elif data.get("store_div") == "1":
             handle_time = data.get("open_hour_week")
@@ -43,17 +45,39 @@ class ShizuokaBankJPSpider(MapionSpider):
                 self.add_hours(oh_atm, ["Sa"], sat)
             if sun := data.get("atm_hour_sun"):
                 self.add_hours(oh_atm, ["Su"], sun)
+                self.add_hours(holiday_oh, ["Su"], sun)
             if oh_atm:
                 apply_yes_no(Extras.ATM, item, oh_atm)
-                item.set_tag("opening_hours:atm", oh_atm.as_opening_hours())
+                atm_hours = oh_atm.as_opening_hours()
+                if holiday_oh:
+                    atm_hours += "; " + holiday_oh.as_opening_hours().replace("Su", "PH")
+                item.set_tag("opening_hours:atm", atm_hours)
             item.set_tag("branch:en", data.get("poi_name_en").removesuffix(" BRANCH").capitalize())
             if wheel := data.get("wheelchair"):
                 apply_yes_no(Extras.WHEELCHAIR, item, wheel == "1")
             apply_category(Categories.BANK, item)
+        elif data.get("store_div") == "4":
+            item["name"] = "静銀ティーエム証券"
+            item["branch"] = data.get("name").removeprefix("静銀ティーエム証券")
+            if week := data.get("open_hour_week"):
+                self.add_hours(oh, DAYS_WEEKDAY, week)
+            apply_category(Categories.OFFICE_FINANCIAL_ADVISOR, item)
         else:
-            apply_category(Categories.OFFICE_FINANCIAL, item)
+            if week := data.get("open_hour_week"):
+                self.add_hours(oh, DAYS_WEEKDAY, week)
+            if sat := data.get("open_hour_sat"):
+                self.add_hours(oh, ["Sa"], sat)
+            if sun := data.get("open_hour_sun"):
+                self.add_hours(oh, ["Su"], sun)
+                self.add_hours(holiday_oh, ["Su"], sun)
+            apply_category(Categories.OFFICE_FINANCIAL_ADVISOR, item)
         if oh:
-            item["opening_hours"] = oh
+            if data.get("store_div") == "3" and holiday_oh:
+                hours = oh.as_opening_hours()
+                hours += "; " + holiday_oh.as_opening_hours().replace("Su", "PH")
+                item["opening_hours"] = hours
+            else:
+                item["opening_hours"] = oh
 
         yield item
 
