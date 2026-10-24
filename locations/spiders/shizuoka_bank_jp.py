@@ -26,6 +26,13 @@ class ShizuokaBankJPSpider(MapionSpider):
 
         oh = OpeningHours()
         holiday_oh = OpeningHours()
+        if week := data.get("open_hour_week"):
+            self.add_hours(oh, DAYS_WEEKDAY, week)
+        if sat := data.get("open_hour_sat"):
+            self.add_hours(oh, ["Sa"], sat)
+        if sun := data.get("open_hour_sun"):
+            self.add_hours(oh, ["Su"], sun)
+            self.add_hours(holiday_oh, ["Su"], sun)
         if data.get("store_div") == "3":
             if week := data.get("atm_hour_week"):
                 self.add_hours(oh, DAYS_WEEKDAY, week)
@@ -36,8 +43,6 @@ class ShizuokaBankJPSpider(MapionSpider):
                 self.add_hours(holiday_oh, ["Su"], sun)
             apply_category(Categories.ATM, item)
         elif data.get("store_div") == "1":
-            handle_time = data.get("open_hour_week")
-            self.add_hours(oh, DAYS_WEEKDAY, handle_time)
             oh_atm = OpeningHours()
             if week := data.get("atm_hour_week"):
                 self.add_hours(oh_atm, DAYS_WEEKDAY, week)
@@ -59,20 +64,11 @@ class ShizuokaBankJPSpider(MapionSpider):
         elif data.get("store_div") == "4":
             item["name"] = "静銀ティーエム証券"
             item["branch"] = data.get("name").removeprefix("静銀ティーエム証券")
-            if week := data.get("open_hour_week"):
-                self.add_hours(oh, DAYS_WEEKDAY, week)
             apply_category(Categories.OFFICE_FINANCIAL_ADVISOR, item)
         else:
-            if week := data.get("open_hour_week"):
-                self.add_hours(oh, DAYS_WEEKDAY, week)
-            if sat := data.get("open_hour_sat"):
-                self.add_hours(oh, ["Sa"], sat)
-            if sun := data.get("open_hour_sun"):
-                self.add_hours(oh, ["Su"], sun)
-                self.add_hours(holiday_oh, ["Su"], sun)
             apply_category(Categories.OFFICE_FINANCIAL_ADVISOR, item)
         if oh:
-            if data.get("store_div") == "3" and holiday_oh:
+            if holiday_oh:
                 hours = oh.as_opening_hours()
                 hours += "; " + holiday_oh.as_opening_hours().replace("Su", "PH")
                 item["opening_hours"] = hours
