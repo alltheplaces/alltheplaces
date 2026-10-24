@@ -12,8 +12,9 @@ from locations.storefinders.mapion import MapionSpider
 class BankOfYokohamaJPSpider(MapionSpider):
     name = "bank_of_yokohama_jp"
     item_attributes = {"brand": "横浜銀行", "brand_wikidata": "Q2744340"}
-    allowed_domains = ["sasp.mapion.co.jp"]
-    feature_url_template = "https://sasp.mapion.co.jp/b/boy/attr/?t=attr_con&start={}"
+    allowed_domains = ["lbs.mapion.co.jp"]
+    api_group = "boy_hn"
+    website_template = "https://sasp.mapion.co.jp/b/boy/info/{}/"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
 
