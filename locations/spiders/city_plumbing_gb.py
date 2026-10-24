@@ -13,8 +13,8 @@ from locations.pipelines.address_clean_up import merge_address_lines
 class CityPlumbingGBSpider(JSONBlobSpider):
     name = "city_plumbing_gb"
     BRAND_MAPPING = {
-        "CPS": {"brand": "City Plumbing", "name":"City Plumging Supplies", "brand_wikidata": "Q105089893"},
-        "PTS": {"brand": "Plumbing Trade Supplies", "name":"Plumbing Trade Supplies", "brand_wikidata": "Q141831571"},
+        "CPS": {"brand": "City Plumbing", "name": "City Plumging Supplies", "brand_wikidata": "Q105089893"},
+        "PTS": {"brand": "Plumbing Trade Supplies", "name": "Plumbing Trade Supplies", "brand_wikidata": "Q141831571"},
     }
     start_urls = ["https://www.cityplumbing.co.uk/branch-locator"]
 
