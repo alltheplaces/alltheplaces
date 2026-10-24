@@ -27,7 +27,9 @@ class ChibaBankJPSpider(MapionSpider):
             self.add_hours(oh, ["Sa"], data.get("sat_atm"))
             self.add_hours(oh, ["Su"], data.get("sun_atm"))
             apply_category(Categories.ATM, item)
-        elif data.get("store_kind") == "0" and data.get("foreign_flg") == "1":  # foreign exchange counter, no opening hours in data.
+        elif (
+            data.get("store_kind") == "0" and data.get("foreign_flg") == "1"
+        ):  # foreign exchange counter, no opening hours in data.
             item.set_tag("branch:ja-Hira", data.get("poi_name_yomi").removeprefix("（").removesuffix("）"))
             apply_category(Categories.BUREAU_DE_CHANGE, item)
         else:
