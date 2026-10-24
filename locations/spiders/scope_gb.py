@@ -3,8 +3,8 @@ from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Request, Response, TextResponse
 
-from locations.hours import OpeningHours
 from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
 
