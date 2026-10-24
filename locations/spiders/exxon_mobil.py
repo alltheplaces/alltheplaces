@@ -31,7 +31,6 @@ class ExxonMobilSpider(SitemapSpider, PlaywrightSpider):
         "https://www.esso.no/robots.txt",
         "https://www.esso.lu/robots.txt",
         "https://www.esso.com.cy/robots.txt",
-        "https://www.fuels.esso.co.th/robots.txt",
         "https://www.esso.com.sg/robots.txt",
         "https://www.mobil.co.nz/sitemap.xml",
         "https://www.esso.com.hk/robots.txt",
@@ -42,16 +41,17 @@ class ExxonMobilSpider(SitemapSpider, PlaywrightSpider):
         "https://saipan.mobil.com/robots.txt",
         "https://www.exxon.com/robots.txt",
         "https://www.esso.be/robots.txt",
-        "https://carburant.esso.fr/robots.txt",
         "https://www.esso.nl/robots.txt",
     ]
     sitemap_rules = [(r"/find-station/.+-\d+$", "parse")]
-    custom_settings = {
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 120 * 1000,
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
         "RETRY_HTTP_CODES": [403],  # Sometimes server blocks and sometimes allows
         "RETRY_TIMES": 5,
-    } | DEFAULT_PLAYWRIGHT_SETTINGS
+        "CONCURRENT_REQUESTS": 1,
+    }
 
     brands = {
         "Exxon": {"brand": "Exxon", "brand_wikidata": "Q109675651"},
