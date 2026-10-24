@@ -50,7 +50,6 @@ class ShizuokaBankJPSpider(MapionSpider):
                 self.add_hours(oh_atm, ["Sa"], sat)
             if sun := data.get("atm_hour_sun"):
                 self.add_hours(oh_atm, ["Su"], sun)
-                self.add_hours(holiday_oh, ["Su"], sun)
             if oh_atm:
                 apply_yes_no(Extras.ATM, item, oh_atm)
                 atm_hours = oh_atm.as_opening_hours()
