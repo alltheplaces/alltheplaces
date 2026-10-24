@@ -15,7 +15,7 @@ class SkisetSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://www.skiset.com/sitemap.xml"]
     sitemap_rules = [(r"https://www\.skiset\.com/.*/magasins/.*", "parse_sd")]
     wanted_types = ["LocalBusiness"]
-    drop_attributes = {"image", "facebook"}
+    drop_attributes = {"image", "facebook", "phone"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Skiset ")
