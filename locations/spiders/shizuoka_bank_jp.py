@@ -25,14 +25,12 @@ class ShizuokaBankJPSpider(MapionSpider):
             item["phone"] = None
 
         oh = OpeningHours()
-        holiday_oh = OpeningHours()
         if week := data.get("open_hour_week"):
             self.add_hours(oh, DAYS_WEEKDAY, week)
         if sat := data.get("open_hour_sat"):
             self.add_hours(oh, ["Sa"], sat)
         if sun := data.get("open_hour_sun"):
             self.add_hours(oh, ["Su"], sun)
-            self.add_hours(holiday_oh, ["Su"], sun)
         if data.get("store_div") == "3":
             if week := data.get("atm_hour_week"):
                 self.add_hours(oh, DAYS_WEEKDAY, week)
@@ -40,7 +38,6 @@ class ShizuokaBankJPSpider(MapionSpider):
                 self.add_hours(oh, ["Sa"], sat)
             if sun := data.get("atm_hour_sun"):
                 self.add_hours(oh, ["Su"], sun)
-                self.add_hours(holiday_oh, ["Su"], sun)
             apply_category(Categories.ATM, item)
         elif data.get("store_div") == "1":
             oh_atm = OpeningHours()
@@ -53,8 +50,6 @@ class ShizuokaBankJPSpider(MapionSpider):
             if oh_atm:
                 apply_yes_no(Extras.ATM, item, oh_atm)
                 atm_hours = oh_atm.as_opening_hours()
-                if holiday_oh:
-                    atm_hours += "; " + holiday_oh.as_opening_hours().replace("Su", "PH")
                 item.set_tag("opening_hours:atm", atm_hours)
             item.set_tag("branch:en", data.get("poi_name_en").removesuffix(" BRANCH").capitalize())
             if wheel := data.get("wheelchair"):
@@ -67,12 +62,7 @@ class ShizuokaBankJPSpider(MapionSpider):
         else:
             apply_category(Categories.OFFICE_FINANCIAL_ADVISOR, item)
         if oh:
-            if holiday_oh:
-                hours = oh.as_opening_hours()
-                hours += "; " + holiday_oh.as_opening_hours().replace("Su", "PH")
-                item["opening_hours"] = hours
-            else:
-                item["opening_hours"] = oh
+            item["opening_hours"] = oh
 
         yield item
 
