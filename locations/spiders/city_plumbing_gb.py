@@ -34,6 +34,7 @@ class CityPlumbingGBSpider(JSONBlobSpider):
             item["brand"] = "Plumbing Trade Supplies"
             item["branch"] = item.pop("name").removesuffix("PTS").strip()
             item["name"] = "Plumbing Trade Supplies"
+            item["brand:wikidata"] = "Q141831571"
         else:
             item["branch"] = item.pop("name").removesuffix("CPS").strip()
         item["website"] = (
