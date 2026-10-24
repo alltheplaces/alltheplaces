@@ -41,6 +41,7 @@ class MapionSpider(Spider):
     # The API refuses requests without a Referer from a Mapion hosted page.
     api_referer: str = "https://sasp.mapion.co.jp/"
     website_template: str | None = None
+    additional_args: str = ""
 
     async def start(self) -> AsyncIterator[Request]:
         if self.api_group:
@@ -52,7 +53,7 @@ class MapionSpider(Spider):
         # "start" is a page number, the bounding box covers all of Japan.
         return Request(
             f"https://lbs.mapion.co.jp/map/uc/PoiWithin?grp={self.api_group}&scl=1&crd=0&json=1&entref=1&dtm=wgs"
-            f"&start={page}&pm={self.api_page_size}&nl=35&el=138&minnl=0&minel=0&maxnl=89&maxel=179&poi_status=1",
+            f"&start={page}&pm={self.api_page_size}&nl=35&el=138&minnl=0&minel=0&maxnl=89&maxel=179&poi_status=1{self.additional_args}",
             headers={"Referer": self.api_referer},
             cb_kwargs={"page": page},
             callback=self.parse_api,
