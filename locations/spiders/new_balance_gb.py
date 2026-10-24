@@ -13,7 +13,7 @@ class NewBalanceGBSpider(SitemapSpider, StructuredDataSpider):
     name = "new_balance_gb"
     item_attributes = {"brand": "New Balance", "brand_wikidata": "Q742988"}
     sitemap_urls = ["https://stores.newbalance.co.uk/sitemap1.xml"]
-    sitemap_rules = [(r"^https:\/\/stores\.newbalance\.co\.uk\/[\w-]+(?:/[\w-]+)+$", "parse_sd")]
+    sitemap_rules = [(r"^https:\/\/stores\.newbalance\.co\.uk\/[\w-]+(?:/[\w-]+)+\.?$", "parse_sd")]
     drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict) -> Iterable[Feature]:
