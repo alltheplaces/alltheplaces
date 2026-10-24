@@ -77,6 +77,17 @@ def clean_address(address: list[Any] | str, min_length=2) -> str:
                 return_addr.append(line)
     assembled_address = ", ".join(return_addr)
 
+    # Punctuation-only strings ("-", "--", "..") are never valid
+    # addresses, at any threshold. CJK is exempt (handled below).
+    if not re.search(r"\w", assembled_address) and not is_primarily_cjk(assembled_address):
+        return ""
+
+    # Single-letter place names are real (Y in France, Å in the
+    # Nordics): keep them where the caller accepts short values
+    # (city/state), while longer-minimum fields still drop them.
+    if len(assembled_address) == 1 and min_length <= 1 and assembled_address.isalpha():
+        return assembled_address
+
     # If after all of the cleaning our address is very short, its likely to be "-" or similar dud content.
     # Don't discard valid CJK characters, which may be short.
     if len(assembled_address) <= min_length and not is_primarily_cjk(assembled_address):
@@ -89,7 +100,9 @@ class AddressCleanUpPipeline:
     def process_item(self, item: Feature):
         targeted_fields = {
             "street": 2,
-            "city": 2,
+            # Ii (Finland) is a real 2-char municipality; threshold 1
+            # keeps it while still dropping "-" and whitespace.
+            "city": 1,
             "postcode": 2,
             "state": 1,
             "street_address": 2,
