@@ -3,6 +3,7 @@ from typing import Any, AsyncIterator
 
 from scrapy.http import JsonRequest, Request, Response, TextResponse
 
+from locations.hours import OpeningHours
 from locations.categories import Categories, apply_category
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import clean_address
@@ -47,6 +48,8 @@ class ScopeGBSpider(JSONBlobSpider):
         item["name"] = location["title"]
         item["addr_full"] = clean_address(location.get("address"))
         item["phone"] = location.get("phone")
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(location.get("hours"))
 
         if "bank" in location["subtitle"].lower():
             apply_category(
