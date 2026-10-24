@@ -48,4 +48,5 @@ class CityPlumbingGBSpider(JSONBlobSpider):
             for day in feature["branchSchedule"]:
                 item["opening_hours"].add_range(day["dayOfWeek"], day["openingTime"], day["closingTime"])
         apply_category(Categories.TRADE_PLUMBING, item)
+        apply_category(Categories.SHOP_TRADE, item)
         yield item
