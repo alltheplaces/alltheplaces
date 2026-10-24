@@ -1,13 +1,15 @@
 import re
 from typing import Any, Iterable
 
-from scrapy import Request, Spider
+from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 # La-Z-Boy's store finder (https://www.la-z-boy.com/storeLocator/storeLocator.jsp)
 # lists three kinds of location: La-Z-Boy branded "Furniture Galleries"
@@ -22,10 +24,12 @@ from locations.items import Feature
 # Knowledge API location document, fetched here directly.
 
 
-class LaZBoySpider(Spider):
+class LaZBoySpider(PlaywrightSpider):
     name = "la_z_boy"
     item_attributes = {"brand": "La-Z-Boy", "brand_wikidata": "Q6391583"}
     start_urls = ["https://www.la-z-boy.com/img/storepages.xml"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
         for url in response.xpath("//*[local-name()='loc']/text()").getall():
