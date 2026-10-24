@@ -1,4 +1,5 @@
 from typing import Iterable
+
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
@@ -19,6 +20,6 @@ class SherpaFRSpider(SitemapSpider, StructuredDataSpider):
         if item.get("facebook") == "https://www.facebook.com/sherpa.supermarche":
             item["facebook"] = None
         item["branch"] = item.pop("name").removeprefix("Sherpa d'").removeprefix("Sherpa de")
-        
+
         apply_category(Categories.CONVENIENCE, item)
         yield item
