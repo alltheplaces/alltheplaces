@@ -12,10 +12,9 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class CityPlumbingGBSpider(JSONBlobSpider):
     name = "city_plumbing_gb"
-    item_attributes = {
-        "name": "City Plumbing Supplies",
-        "brand": "City Plumbing",
-        "brand_wikidata": "Q105089893",
+    BRAND_MAPPING = {
+        "CPS": {"brand": "City Plumbing", "name":"City Plumging Supplies", "brand_wikidata": "Q105089893"},
+        "PTS": {"brand": "Plumbing Trade Supplies", "name":"Plumbing Trade Supplies", "brand_wikidata": "Q141831571"},
     }
     start_urls = ["https://www.cityplumbing.co.uk/branch-locator"]
 
@@ -31,11 +30,10 @@ class CityPlumbingGBSpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature.get("code")
         if item["name"].endswith("PTS"):
-            item["brand"] = "Plumbing Trade Supplies"
+            item.update(self.BRAND_MAPPING.get("PTS"))
             item["branch"] = item.pop("name").removesuffix("PTS").strip()
-            item["name"] = "Plumbing Trade Supplies"
-            item["brand_wikidata"] = "Q141831571"
         else:
+            item.update(self.BRAND_MAPPING.get("CPS"))
             item["branch"] = item.pop("name").removesuffix("CPS").strip()
         item["website"] = (
             "https://www.cityplumbing.co.uk/branch-locator/"
