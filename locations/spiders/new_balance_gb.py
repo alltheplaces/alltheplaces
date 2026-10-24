@@ -17,6 +17,8 @@ class NewBalanceGBSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"facebook", "twitter"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict) -> Iterable[Feature]:
-        item["geometry"] = loads(response.xpath('//script[contains(text(), "latitude")]/text()').get())["credentialSubject"]["geo"]
+        item["geometry"] = loads(response.xpath('//script[contains(text(), "latitude")]/text()').get())[
+            "credentialSubject"
+        ]["geo"]
         apply_category(Categories.SHOP_SHOES, item)
         yield item
