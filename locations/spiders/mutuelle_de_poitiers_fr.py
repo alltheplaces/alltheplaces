@@ -45,11 +45,15 @@ class MutuelleDePoitiersFRSpider(SitemapSpider):
             day_name = sanitise_day(day.xpath('./p[@class="day-name"]/text()').get(""), DAYS_FR)
             if not day_name:
                 continue
-            ranges = day.xpath('.//p[@class="day-period-value"]/text()').getall()
-            if not ranges:
+            periods = day.xpath('./div[p[@class="day-period-value"]]')
+            if not periods:
                 oh.set_closed(day_name)
-            for time_range in ranges:
-                if m := re.fullmatch(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", time_range.strip()):
+            for period in periods:
+                # Periods marked "sur RDV" are by appointment only
+                if "RDV" in period.xpath('normalize-space(./p[@class="day-hour-info"])').get("").upper():
+                    continue
+                time_range = period.xpath('normalize-space(./p[@class="day-period-value"])').get("")
+                if m := re.fullmatch(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", time_range):
                     oh.add_range(day_name, *m.groups())
         item["opening_hours"] = oh
         yield item
