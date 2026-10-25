@@ -1,5 +1,3 @@
-
-
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
 
