@@ -74,3 +74,5 @@ dev = [
 
 [tool.ty.rules]
 invalid-method-override = "ignore"
+invalid-attribute-override = "ignore"
+invalid-mutable-override = "ignore"
