@@ -14,7 +14,7 @@ class MenkindGBSpider(JSONBlobSpider):
         item["branch"] = item.pop("name").replace("MENKIND", "").strip()
         item["opening_hours"] = OpeningHours()
         for day in DAYS_3_LETTERS:
-            hours = location.get("hours").get(day.lower())
+            hours = (location.get("hours") or {}).get(day.lower())
             if hours and "-" in hours:
                 open_time, close_time = (t.strip() for t in hours.split("-", 1))
                 item["opening_hours"].add_range(day, open_time, close_time)
