@@ -1,19 +1,14 @@
-from itertools import chain
-from typing import Any, AsyncIterator
 
-from scrapy.http import JsonRequest, Request, Response, TextResponse
 
-from locations.hours import OpeningHours, DAYS_3_LETTERS
-from locations.categories import Categories, apply_category
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-from locations.pipelines.address_clean_up import clean_address
 
 
 class MenkindGBSpider(JSONBlobSpider):
     name = "menkind_gb"
     item_attributes = {"brand": "Menkind", "brand_wikidata": "Q66725844"}
     start_urls = ["https://storerocket.io/api/user/VyJzzwEJ6M/locations?radius=350&units=miles"]
-    locations_key = ["results","locations"]
+    locations_key = ["results", "locations"]
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name").replace("MENKIND", "").strip()
