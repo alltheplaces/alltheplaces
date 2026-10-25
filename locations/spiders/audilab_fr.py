@@ -10,7 +10,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class AudilabFRSpider(SitemapSpider, StructuredDataSpider):
     name = "audilab_fr"
-    item_attributes = {"brand": "Audilab", "brand_wikidata": "Q117352010"}
+    item_attributes = {"brand": "Audilab", "brand_wikidata": "Q117352010", "name": "Audilab"}
     sitemap_urls = ["https://www.audilab.fr/center-sitemap.xml"]
     sitemap_rules = [(r"^https://www\.audilab\.fr/centre/[^/]+/$", "parse_sd")]
     search_for_facebook = False
