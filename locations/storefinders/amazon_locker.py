@@ -103,7 +103,7 @@ class AmazonLockerSpider(JSONBlobSpider):
         "brand": "Amazon Locker",
         "brand_wikidata": "Q16974764",
     }
-    locations_key: str | list[str] = "locationList"
+    locations_key = "locationList"
 
     async def start(self) -> AsyncIterator[Request]:
         country_utils = CountryUtils()

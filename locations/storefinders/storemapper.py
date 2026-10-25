@@ -26,7 +26,7 @@ class StoremapperSpider(Spider):
     """
 
     dataset_attributes: dict = {"source": "api", "api": "storemapper.com"}
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     company_id: str
 
