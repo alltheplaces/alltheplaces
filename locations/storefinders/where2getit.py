@@ -71,7 +71,7 @@ class Where2GetItSpider(Spider):
     """
 
     dataset_attributes: dict = {"source": "api", "api": "where2getit.com"}
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     api_endpoint: str | None = None
     api_brand_name: str = ""

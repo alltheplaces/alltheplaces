@@ -20,7 +20,7 @@ class EasyLocatorSpider(JSONBlobSpider):
 
     dataset_attributes: dict = {"source": "api", "api": "easylocator.net"}
     api_brand_name: str
-    locations_key: str | list[str] = "physical"
+    locations_key = "physical"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(

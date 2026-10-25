@@ -21,7 +21,7 @@ class MetaLocatorSpider(Spider):
     dataset_attributes: dict = {"source": "api", "api": "metalocator.com"}
     allowed_domains: list[str] = ["code.metalocator.com"]
     brand_id: str
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&limit=100000")

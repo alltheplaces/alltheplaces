@@ -21,7 +21,7 @@ class MapDataServicesSpider(Spider):
     """
 
     dataset_attributes: dict = {"source": "api", "api": "nowwhere.com.au"}
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}  # Invalid robots.txt causes parsing errors
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # Invalid robots.txt causes parsing errors
 
     api_brand_name: str
     api_key: str

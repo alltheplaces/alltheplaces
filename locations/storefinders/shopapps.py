@@ -19,7 +19,7 @@ class ShopAppsSpider(Spider):
 
     dataset_attributes: dict = {"source": "api", "api": "shopapps.site"}
     key: str
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(

@@ -12,7 +12,7 @@ from locations.storefinders.yext_answers import YextAnswersSpider
 
 class YextSearchSpider(Spider):
     dataset_attributes: dict = {"source": "api", "api": "yext"}
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     host: str = "https://locator.example-brand.yext-cdn.com"
     page_size: int = 50

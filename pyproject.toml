@@ -74,3 +74,6 @@ dev = [
 
 [tool.ty.rules]
 invalid-method-override = "ignore"
+# Scrapy declares `parse: CallbackT`, so every `def parse` on a Spider subclass trips these
+invalid-attribute-override = "ignore"
+invalid-mutable-override = "ignore"
