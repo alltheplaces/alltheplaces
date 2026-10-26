@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class RoadchefGBSpider(StructuredDataSpider):
     name = "roadchef_gb"
-    item_attributes = {"brand": "Roadchef", "brand_wikidata": "Q7339591 "}
+    item_attributes = {"brand": "Roadchef", "brand_wikidata": "Q7339582"}
     start_urls = ["https://www.roadchef.com/motorway-services"]
     wanted_types = ["LocalBusiness"]
 
