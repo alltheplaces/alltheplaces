@@ -2,6 +2,7 @@ from typing import Any
 
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
+from twisted.python.failure import Failure
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
@@ -40,6 +41,7 @@ class JerseyMikesUSSpider(Spider):
                 url="https://bapi.prd.jerseymikes.com/api/v0/stores/{}".format(location["id"]),
                 cb_kwargs={"item": item},
                 callback=self.parse_details,
+                errback=self.errback_item,
             )
 
     def parse_details(self, response: Response, item: Feature, **kwargs: Any) -> Any:
@@ -50,3 +52,6 @@ class JerseyMikesUSSpider(Spider):
             if contact["type"] == "PHONE":
                 item["phone"] = contact["value"]
         yield item
+
+    def errback_item(self, failure: Failure) -> Any:
+        yield failure.request.cb_kwargs["item"]
