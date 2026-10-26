@@ -13,8 +13,11 @@ from locations.structured_data_spider import StructuredDataSpider
 class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     name = "famous_footwear"
     item_attributes = {"brand": "Famous Footwear", "brand_wikidata": "Q5433457"}
-    sitemap_urls = ["https://ecomprdsharedstorage.blob.core.windows.net/sitemaps/20000/stores-sitemap.xml"]
+    sitemap_urls = ["https://www.famousfootwear.com/sitemap.xml", "https://www.famousfootwear.ca/sitemap.xml"]
+    sitemap_follow = "stores"
+    sitemap_rules = [(r"stores/[a-z]{2}/[-\w]+/[-\w]+/[-\w]+-(\d+)", "parse_sd")]
     wanted_types = ["Store"]
+    search_for_facebook = False
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
