@@ -7,20 +7,15 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class FamousFootwearSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
+class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     name = "famous_footwear"
     item_attributes = {"brand": "Famous Footwear", "brand_wikidata": "Q5433457"}
     sitemap_urls = ["https://ecomprdsharedstorage.blob.core.windows.net/sitemaps/20000/stores-sitemap.xml"]
     wanted_types = ["Store"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 120 * 1000,
-        "CONCURRENT_REQUESTS": 1,
-    }
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         matches = re.search(r'location: \["(.*)", "(.*)"\],', response.text)
