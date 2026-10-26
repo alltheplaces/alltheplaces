@@ -1,4 +1,3 @@
-import re
 from typing import Iterable
 
 from scrapy.http import TextResponse
@@ -15,14 +14,14 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Famous Footwear", "brand_wikidata": "Q5433457"}
     sitemap_urls = ["https://www.famousfootwear.com/sitemap.xml", "https://www.famousfootwear.ca/sitemap.xml"]
     sitemap_follow = "stores"
-    sitemap_rules = [(r"stores/[a-z]{2}/[-\w]+/[-\w]+/[-\w]+-(\d+)", "parse_sd")]
+    sitemap_rules = [(r"/stores/[a-z]{2}/[-\w]+/[-\w]+/[-\w]+-(\d+)", "parse_sd")]
     wanted_types = ["Store"]
     search_for_facebook = False
     requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        matches = re.search(r'location: \["(.*)", "(.*)"\],', response.text)
-        item["lat"], item["lon"] = matches[1], matches[2]
+        item["lat"] = response.xpath("//@data-store-latitude").get("")
+        item["lon"] = response.xpath("//@data-store-longitude").get("")
 
         oh = OpeningHours()
         if raw_hours := ld_data.get("openingHours"):
