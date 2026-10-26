@@ -13,7 +13,7 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Famous Footwear", "brand_wikidata": "Q5433457"}
     sitemap_urls = ["https://www.famousfootwear.com/sitemap.xml", "https://www.famousfootwear.ca/sitemap.xml"]
     sitemap_follow = "stores"
-    sitemap_rules = [(r"/stores/[a-z]{2}/[-\w]+/[-\w]+/[-\w]+-(\d+)", "parse_sd")]
+    sitemap_rules = [(r"famousfootwear\.(?:ca|com)/stores/[a-z]{2}/[-\w]+/[-\w]+/[-\w]+-(\d+)", "parse_sd")]
     wanted_types = ["Store"]
     search_for_facebook = False
     time_format = "%I:%M%p"
