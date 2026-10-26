@@ -22,6 +22,7 @@ class FamousFootwearSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["lat"] = response.xpath("//@data-store-latitude").get("")
         item["lon"] = response.xpath("//@data-store-longitude").get("")
+        item["branch"] = response.xpath("//@data-store-name").get("")
 
         oh = OpeningHours()
         if raw_hours := ld_data.get("openingHours"):
