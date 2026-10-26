@@ -18,7 +18,7 @@ class RoadchefGBSpider(StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.rstrip("/").split("/")[-1]
         item["website"] = response.url
-        item.pop("twitter")
+        item.pop("twitter", None)
         item["street_address"] = None
         item["city"] = (item.get("city") or "").strip() or None
         item["postcode"] = (item.get("postcode") or "").strip() or None
