@@ -1,19 +1,16 @@
-from locations.hours import DAYS_3_LETTERS, OpeningHours
-from locations.json_blob_spider import JSONBlobSpider
+from typing import Iterable
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.storerocket import StoreRocketSpider
 
 
-class MenkindGBSpider(JSONBlobSpider):
+class MenkindGBSpider(StoreRocketSpider):
     name = "menkind_gb"
     item_attributes = {"brand": "Menkind", "brand_wikidata": "Q66725844"}
-    start_urls = ["https://storerocket.io/api/user/VyJzzwEJ6M/locations?radius=350&units=miles"]
-    locations_key = ["results", "locations"]
+    storerocket_id = "VyJzzwEJ6M"
 
-    def post_process_item(self, item, response, location):
+    def parse_item(self, item: Feature, location: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").replace("MENKIND", "").strip()
-        item["opening_hours"] = OpeningHours()
-        for day in DAYS_3_LETTERS:
-            hours = (location.get("hours") or {}).get(day.lower())
-            if hours and "-" in hours:
-                open_time, close_time = (t.strip() for t in hours.split("-", 1))
-                item["opening_hours"].add_range(day, open_time, close_time)
+        apply_category(Categories.SHOP_GIFT, item)
         yield item
