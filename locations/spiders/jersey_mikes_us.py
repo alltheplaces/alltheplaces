@@ -4,6 +4,7 @@ from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 from twisted.python.failure import Failure
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
@@ -36,6 +37,8 @@ class JerseyMikesUSSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for day, times in location["standardHours"].items():
                 item["opening_hours"].add_range(day, times["open"], times["close"])
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield JsonRequest(
                 url="https://bapi.prd.jerseymikes.com/api/v0/stores/{}".format(location["id"]),
