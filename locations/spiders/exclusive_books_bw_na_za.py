@@ -2,6 +2,7 @@ from typing import Any
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 from locations.playwright_spider import PlaywrightSpider
@@ -45,4 +46,5 @@ class ExclusiveBooksBWNAZASpider(PlaywrightSpider):
                 self.crawler.stats.inc_value(
                     f"atp/{self.name}/failed_state_match/{location.xpath('@class').get().split('--block')[0]}"
                 )
+            apply_category(Categories.SHOP_BOOKS, item)
             yield item
