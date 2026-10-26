@@ -5,6 +5,7 @@ from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -35,4 +36,17 @@ class JerseyMikesUSSpider(Spider):
             for day, times in location["standardHours"].items():
                 item["opening_hours"].add_range(day, times["open"], times["close"])
 
-            yield item
+            yield JsonRequest(
+                url="https://bapi.prd.jerseymikes.com/api/v0/stores/{}".format(location["id"]),
+                cb_kwargs={"item": item},
+                callback=self.parse_details,
+            )
+
+    def parse_details(self, response: Response, item: Feature, **kwargs: Any) -> Any:
+        location = response.json()["data"]
+        item["lat"] = location["location"]["latitude"]
+        item["lon"] = location["location"]["longitude"]
+        for contact in location["contactInfos"]:
+            if contact["type"] == "PHONE":
+                item["phone"] = contact["value"]
+        yield item
