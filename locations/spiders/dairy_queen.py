@@ -77,8 +77,8 @@ class DairyQueenSpider(Spider):
         Mexico City codes arrive without their leading zero ("9910" for 09910),
         one carries a prefix ("C.P 35090"), and one is just ".".
         """
-        if match := re.search(r"\b\d{4,5}\b", str(value or "")):
-            return match.group().zfill(5)
+        if match := re.fullmatch(r"(?:C\.?\s*P\.?\s*)?(\d{4,5})", str(value or "").strip(), re.IGNORECASE):
+            return match.group(1).zfill(5)
         return None
 
     def parse_opening_hours(self, rules: str) -> OpeningHours | None:
