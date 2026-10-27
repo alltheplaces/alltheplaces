@@ -1,4 +1,5 @@
 import html
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -24,6 +25,7 @@ class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = html.unescape(item.pop("name")).removeprefix("McDonald's ")
+        self.clean_address(item)
 
         services = response.xpath("//div/@data-content").getall()
         apply_yes_no(Extras.DELIVERY, item, "McDelivery" in services)
@@ -54,6 +56,29 @@ class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
         apply_category(Categories.FAST_FOOD, item)
         yield item
 
+    @staticmethod
+    def clean_address(item: Feature) -> None:
+        """Keep only the code in the postcode and take the town from the postal line.
+
+        ``postalCode`` sometimes carries the postal town ("4560-264 Penafiel",
+        "1900–806 Lisboa"), and ``addressLocality`` is often the restaurant's
+        mall or street ("Norte Shopping"). ``addressRegion`` is the postal town
+        shown after the postcode on the page ("4464-001 Senhora da Hora
+        MATOSINHOS"), so it is the better city unless the street line itself
+        ends with ", <locality>" ("Rua da Paz nºs/n, Cartaxo").
+        """
+        postal_town = None
+        if match := POSTCODE.fullmatch((item.get("postcode") or "").strip()):
+            code, extension, postal_town = match.groups()
+            item["postcode"] = f"{code}-{extension}" if extension else code
+            if postal_town and postal_town.isdigit():
+                postal_town = None  # "1234 5678": a stray number, not a town
+        locality = item.get("city")
+        street_parts = (item.get("street_address") or "").rsplit(",", 1)
+        if locality and len(street_parts) == 2 and street_parts[1].strip() == locality:
+            return
+        item["city"] = title_case_town(postal_town) or title_case_town(item.get("state")) or locality
+
     def parse_opening_hours(self, rules: list) -> OpeningHours:
         oh = OpeningHours()
         for rule in rules:
@@ -64,3 +89,18 @@ class McdonaldsPTSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
                 oh.add_range(day, start_time, end_time, time_format="%Hh%M")
 
         return oh
+
+
+POSTCODE = re.compile(r"(\d{4})(?:\s*[-\u2010\u2011\u2013\u2014]\s*(\d{3}))?(?:\s+(.+))?")
+LOWERCASE_PARTICLES = {"de", "da", "do", "das", "dos", "e"}
+
+
+def title_case_town(value: str | None) -> str | None:
+    """Return a town, unescaped and title-cased ("VILA NOVA DE GAIA"); None for "SÃO MIGUEL, AÇORES"."""
+    value = html.unescape(value or "").strip()
+    if not value or "," in value:
+        return None
+    if value.isupper():
+        words = value.title().split()
+        value = " ".join([words[0]] + [w.lower() if w.lower() in LOWERCASE_PARTICLES else w for w in words[1:]])
+    return value
