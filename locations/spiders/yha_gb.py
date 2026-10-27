@@ -29,9 +29,10 @@ class YhaGBSpider(SitemapSpider, CamoufoxSpider):
             .removesuffix(" Hostel"),
             "lat": response.xpath("//@data-lat").get(),
             "lon": response.xpath("//@data-lng").get(),
-            "addr_full": merge_address_lines(response.xpath('//div[@class="map-overlay__section"]/a/text()').getall()),
+            "addr_full": merge_address_lines(response.xpath('//div[@class="map-overlay__section"]/a/text()').getall()).removesuffix(", Get directions"),
             "phone": response.xpath('//dd/a[contains(@href, "tel:")]/@href').get(),
             "website": response.url,
+            "name": "YHA",
         }
         apply_category(Categories.TOURISM_HOSTEL, properties)
         yield Feature(**properties)
