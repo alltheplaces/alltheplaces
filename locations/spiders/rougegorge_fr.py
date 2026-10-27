@@ -31,7 +31,8 @@ class RougegorgeFRSpider(SitemapSpider, StructuredDataSpider):
         item["street_address"] = response.xpath('normalize-space(//div[@class="store-details"]//address/div[1])').get()
         item["opening_hours"] = OpeningHours()
         item["opening_hours"].add_ranges_from_string(
-            " ".join(response.xpath('//div[@class="store-hours"]/text()').getall()),
+            # Split days look like "10:00 à 13:00 et 14:00 à 19:00"
+            " ".join(response.xpath('//div[@class="store-hours"]/text()').getall()).replace(" et ", ", "),
             days=DAYS_FR,
             delimiters=DELIMITERS_FR,
             closed=CLOSED_FR,
