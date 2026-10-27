@@ -22,7 +22,7 @@ class KorianFRSpider(CrawlSpider, StructuredDataSpider, CamoufoxSpider):
         )
     ]
     requires_proxy = True
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {"CONCURRENT_REQUESTS": 1}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["name"] = item["name"].removeprefix("Korian ")
