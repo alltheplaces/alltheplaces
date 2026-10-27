@@ -2,13 +2,34 @@ import json
 import re
 from typing import Any, AsyncIterator, Iterable
 
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from scrapy.http import Request, Response
+from scrapy.settings.default_settings import RETRY_EXCEPTIONS
+from scrapy_camoufox.page import PageMethod
 
 from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.spiders.bricodepot_fr import CAMOUFOX_SETTINGS_FOR_AWS_WAF, WAIT_FOR_WAF_CHALLENGE
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
+
+# Every URL here is first served an AWS WAF challenge that resolves itself via
+# JS and reloads; wait for that instead of trusting the first response.
+WAIT_FOR_WAF_CHALLENGE = PageMethod(
+    "wait_for_function",
+    "() => !document.documentElement.outerHTML.includes('AwsWafIntegration')",
+    timeout=20000,
+)
+
+CAMOUFOX_SETTINGS_FOR_AWS_WAF = DEFAULT_CAMOUFOX_SETTINGS | {
+    # Default blocks everything but the document, including the WAF's own challenge.js.
+    "CAMOUFOX_ABORT_REQUEST": lambda request: not request.resource_type == "document"
+    and not (request.resource_type in ["script", "xhr", "fetch"] and ".awswaf.com" in request.url),
+    # Concurrent challenge-solving above this starts timing out.
+    "CONCURRENT_REQUESTS_PER_DOMAIN": 2,
+    # WAF challenge timeouts aren't retried by default.
+    "RETRY_EXCEPTIONS": RETRY_EXCEPTIONS + [PlaywrightTimeoutError],
+}
 
 # "2650 NE University Village St., Seattle, WA. 98105" or
 # "650A Stanford Shopping Center, Palo Alto, CA 94304 | (650) 382-0230"
@@ -23,7 +44,7 @@ class BackcountryUSSpider(CamoufoxSpider):
     """Backcountry's retail and outlet stores, from its Contentstack-built pages.
 
     Every page is behind an AWS WAF challenge, which Camoufox lets resolve
-    itself (see bricodepot_fr). The pages carry no coordinates or structured
+    itself. The pages carry no coordinates or structured
     data, only free-text address, phone and hours paragraphs.
     """
 
