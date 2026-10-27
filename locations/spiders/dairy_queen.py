@@ -44,19 +44,20 @@ class DairyQueenSpider(Spider):
 
             concept_type = location.get("conceptType")
 
-            if not concept_type:
-                self.logger.error("Store concept type not available")
+            if concept_type in ["Food and Treat", "Treat & Food"]:
+                item.update(DQ_GRILL_CHILL)
+                apply_category(Categories.FAST_FOOD, item)
+                item["extras"]["cuisine"] = "ice_cream;burger"
+            elif concept_type == "Treat Only":
+                item.update(DQ)
+                apply_category(Categories.FAST_FOOD, item)
+                item["extras"]["cuisine"] = "ice_cream"
             else:
-                if concept_type in ["Food and Treat", "Treat & Food"]:
-                    item.update(DQ_GRILL_CHILL)
-                    apply_category(Categories.FAST_FOOD, item)
-                    item["extras"]["cuisine"] = "ice_cream;burger"
-                elif concept_type == "Treat Only":
-                    item.update(DQ)
-                    apply_category(Categories.FAST_FOOD, item)
-                    item["extras"]["cuisine"] = "ice_cream"
-                else:
+                # Stores outside North America (all of Qatar) have no concept type.
+                if concept_type:
                     self.logger.error("Unexpected type: {}".format(concept_type))
+                item.update(DQ)
+                apply_category(Categories.FAST_FOOD, item)
 
             item["street_address"] = location.get("address3")
             if item["country"] == "MX":
