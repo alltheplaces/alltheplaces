@@ -1,6 +1,7 @@
 import json
+import re
 from typing import Any
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import scrapy
 from scrapy import Spider
@@ -30,15 +31,24 @@ class DunhamsSportsUSSpider(Spider):
                 item = Feature()
                 item["lat"] = lat_lon_data["lat"]
                 item["lon"] = lat_lon_data["lng"]
-                item["branch"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]/div[1]/text()').get()
-                item["street_address"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]/div[2]/text()').get()
-                item["city"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]//span[1]/text()').get()
-                item["state"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]//span[2]/text()').get()
-                item["postcode"] = location.xpath('.//*[@class="fs-13px mb-2 fw-medium"]//span[3]/text()').get()
+                lines = [
+                    (location.xpath(f'.//*[@class="fs-13px mb-2 fw-medium"]/div[{i}]/text()').get() or "").strip()
+                    for i in (1, 2)
+                ]
+                item["branch"], item["street_address"] = self.split_address_lines(lines)
+                city, state, postcode = (
+                    (location.xpath(f'.//*[@class="fs-13px mb-2 fw-medium"]//span[{i}]/text()').get() or "")
+                    .strip()
+                    .rstrip(",.")
+                    .strip()
+                    for i in (1, 2, 3)
+                )
+                item["city"], item["postcode"] = city or None, postcode or None
                 item["phone"] = location.xpath('.//*[contains(@href,"tel:")]/text()').get()
                 item["ref"] = item["website"] = urljoin(
                     "https://www.dunhamssports.com/", location.xpath(".//span//@href").get().replace(" ", "")
                 )
+                item["state"] = state or parse_qs(urlparse(item["website"]).query).get("state", [None])[0]
                 try:
                     oh = OpeningHours()
                     for day_time in location.xpath('.//*[@class="store-hours-table fs-13px mb-2"]//tr'):
@@ -47,3 +57,21 @@ class DunhamsSportsUSSpider(Spider):
                 except:
                     pass
                 yield item
+
+    @staticmethod
+    def split_address_lines(lines: list[str]) -> tuple[str | None, str | None]:
+        """Return (branch, street) from the two lines above the city line.
+
+        The first line is a shopping-centre name or the street; the second is
+        the street, a unit ("Suite B"), a centre name, or empty.
+        """
+        unit = next((line for line in lines if UNIT.match(line)), None)
+        street = next((line for line in lines if STREET.match(line)), None)
+        if street is None and lines[1] and lines[1] != unit:
+            street = lines[1]  # "Highway 50 W": a street without a house number
+        branch = next((line for line in lines if line and line not in (street, unit)), None)
+        return branch, ", ".join(filter(None, [street, unit])) or None
+
+
+STREET = re.compile(r"^[A-Z]?-?\d")
+UNIT = re.compile(r"^\(?(?:(?:suite|ste|unit|space|room)\b|#)", re.IGNORECASE)
