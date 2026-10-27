@@ -113,7 +113,7 @@ class BackcountryUSSpider(CamoufoxSpider):
     def cms_data(response: Response) -> Any:
         try:
             next_data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-            return next_data["props"]["pageProps"]["cmsData"]
+            return next_data["props"]["pageProps"]["cmsData"] or None
         except (json.JSONDecodeError, KeyError, TypeError):
             return None
 
