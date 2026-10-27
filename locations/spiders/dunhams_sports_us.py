@@ -72,6 +72,8 @@ class DunhamsSportsUSSpider(Spider):
         street = next((line for line in lines if STREET.match(line)), None)
         if street is None and lines[1] and lines[1] != unit_line:
             street = lines[1]  # "Highway 50 W": a street without a house number
+        elif street is None and lines[0] and not lines[1] and not CENTRE.search(lines[0]):
+            street = lines[0]  # a lone unnumbered line is the street unless it names a centre
         branch = next((line for line in lines if line and line not in (street, unit_line)), centre)
         return branch, ", ".join(filter(None, [street, unit])) or None
 
@@ -80,3 +82,6 @@ STREET = re.compile(r"^[A-Z]?-?\d")
 UNIT = re.compile(r"^\(?(?:(?:suite|ste|unit|space|room)\b|#)", re.IGNORECASE)
 # A "#" unit followed by a shopping-centre name: "#74 Colony Square Mall".
 NUMBERED_UNIT = re.compile(r"^(#\s*[\w-]+)\s+(\D.*)$")
+CENTRE = re.compile(
+    r"\b(?:mall|plaza|cent(?:er|re)|square|shopping|shoppes|crossing|commons|marketplace)\b", re.IGNORECASE
+)
