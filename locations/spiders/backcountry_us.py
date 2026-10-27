@@ -1,8 +1,10 @@
 import json
+import random
 import re
 from typing import Any, AsyncIterator, Iterable
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import Request, Response
 from scrapy.settings.default_settings import RETRY_EXCEPTIONS
 from scrapy_camoufox.page import PageMethod
@@ -62,7 +64,10 @@ class BackcountryUSSpider(CamoufoxSpider):
         return Request(url, callback=callback, meta={"camoufox_page_methods": [WAIT_FOR_WAF_CHALLENGE]})
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature | Request]:
-        for card in self.cards(self.cms_data(response)):
+        if (cms_data := self.cms_data(response)) is None:
+            yield from self.retry(response)
+            return
+        for card in self.cards(cms_data):
             link = card.get("link") or ""
             if "/retail-store-" in link:
                 yield self.waf_request(response.urljoin(link), self.parse_store)
@@ -75,8 +80,11 @@ class BackcountryUSSpider(CamoufoxSpider):
                     item["website"] = response.url
                     yield item
 
-    def parse_store(self, response: Response) -> Iterable[Feature]:
-        if item := self.parse_lines(self.text_lines(self.cms_data(response))):
+    def parse_store(self, response: Response) -> Iterable[Feature | Request]:
+        if (cms_data := self.cms_data(response)) is None:
+            yield from self.retry(response)
+            return
+        if item := self.parse_lines(self.text_lines(cms_data)):
             item["ref"] = response.url.rstrip("/").rsplit("/retail-store-", 1)[1]
             item["branch"] = response.xpath("//title/text()").get("").split(" Retail Store")[0].strip()
             item["website"] = response.url
@@ -103,8 +111,19 @@ class BackcountryUSSpider(CamoufoxSpider):
 
     @staticmethod
     def cms_data(response: Response) -> Any:
-        next_data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
-        return next_data["props"]["pageProps"]["cmsData"]
+        try:
+            next_data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())
+            return next_data["props"]["pageProps"]["cmsData"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            return None
+
+    def retry(self, response: Response) -> Iterable[Request]:
+        # A settled render occasionally still lacks the CMS payload.
+        if response.request is not None:
+            if retry := get_retry_request(
+                response.request, spider=self, reason="no CMS data found", priority_adjust=random.randint(-20, -1)
+            ):
+                yield retry
 
     @classmethod
     def cards(cls, node: Any) -> Iterable[dict]:
