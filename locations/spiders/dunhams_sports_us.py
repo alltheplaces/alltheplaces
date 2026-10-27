@@ -65,13 +65,18 @@ class DunhamsSportsUSSpider(Spider):
         The first line is a shopping-centre name or the street; the second is
         the street, a unit ("Suite B"), a centre name, or empty.
         """
-        unit = next((line for line in lines if UNIT.match(line)), None)
+        unit_line = next((line for line in lines if UNIT.match(line)), None)
+        unit, centre = unit_line, None
+        if unit_line and (numbered := NUMBERED_UNIT.match(unit_line)):
+            unit, centre = numbered.groups()  # "#74 Colony Square Mall"
         street = next((line for line in lines if STREET.match(line)), None)
-        if street is None and lines[1] and lines[1] != unit:
+        if street is None and lines[1] and lines[1] != unit_line:
             street = lines[1]  # "Highway 50 W": a street without a house number
-        branch = next((line for line in lines if line and line not in (street, unit)), None)
+        branch = next((line for line in lines if line and line not in (street, unit_line)), centre)
         return branch, ", ".join(filter(None, [street, unit])) or None
 
 
 STREET = re.compile(r"^[A-Z]?-?\d")
 UNIT = re.compile(r"^\(?(?:(?:suite|ste|unit|space|room)\b|#)", re.IGNORECASE)
+# A "#" unit followed by a shopping-centre name: "#74 Colony Square Mall".
+NUMBERED_UNIT = re.compile(r"^(#\s*[\w-]+)\s+(\D.*)$")
