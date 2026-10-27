@@ -14,6 +14,7 @@ class SaraCampbellUSSpider(Spider):
     name = "sara_campbell_us"
     item_attributes = {"brand": "Sara Campbell", "brand_wikidata": "Q117747597"}
     start_urls = ["https://saracampbell.com/pages/store-locator"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for location in response.css('div.map-section[data-section-type="section-map"]'):
