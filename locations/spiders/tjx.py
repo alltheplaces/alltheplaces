@@ -14,6 +14,12 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class TjxSpider(Spider):
     name = "tjx"
+    # A unit marker followed by an identifier ("Suite 300", "Ste. F-130", "Local 120", "#74"), not "Unity Plaza".
+    unit = re.compile(
+        r"(?:(?:unit|suite|ste|space|spc|bldg|building|apt|local|bureau|bay|shop|store|rm|fl|floor|level)\b\.?|#)"
+        r"[\s#-]*(?:[a-z]?\d|[a-z]\b)",
+        re.IGNORECASE,
+    )
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     requires_proxy = True
     chains = {
@@ -70,7 +76,12 @@ class TjxSpider(Spider):
                 if branch_name := item.pop("name", None):
                     item["branch"] = branch_name
 
-                item["street_address"] = clean_address([location.get("Address"), location.get("Address2")])
+                address2 = (location.get("Address2") or "").strip()
+                if location["Country"] in ["CA", "US"] and not self.unit.match(address2):
+                    # In the US and Canada, Address2 is otherwise a shopping centre or
+                    # cross streets ("The Grove", "6th Ave. at 18th St."), not street.
+                    address2 = ""
+                item["street_address"] = clean_address([location.get("Address"), address2])
                 item.pop("addr_full", None)
                 if location["Country"] not in ["CA", "US"]:
                     # Outside of CA and US, the "State" field is incorrectly the
