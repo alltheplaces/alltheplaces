@@ -10,6 +10,7 @@ class RochesterZASpider(JSONBlobSpider):
     name = "rochester_za"
     item_attributes = {"brand": "Rochester", "brand_wikidata": "Q130377132"}
     start_urls = ["https://www.boardmans.co.za/storelocator/"]
+    requires_proxy = True
 
     def extract_json(self, response):
         data_raw = response.xpath(
