@@ -1,3 +1,4 @@
+import re
 from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
@@ -58,6 +59,8 @@ class DairyQueenSpider(Spider):
                     self.logger.error("Unexpected type: {}".format(concept_type))
 
             item["street_address"] = location.get("address3")
+            if item["country"] == "MX":
+                item["postcode"] = self.clean_mx_postcode(location.get("postalCode"))
 
             if website := self.WEBSITE_BY_COUNTRY.get(item["country"]):
                 item["website"] = urljoin(website, location.get("urlTitle").lstrip("/"))
@@ -66,6 +69,17 @@ class DairyQueenSpider(Spider):
 
             item["opening_hours"] = self.parse_opening_hours(location.get("storeHours"))
             yield item
+
+    @staticmethod
+    def clean_mx_postcode(value: str | None) -> str | None:
+        """Return a five-digit código postal.
+
+        Mexico City codes arrive without their leading zero ("9910" for 09910),
+        one carries a prefix ("C.P 35090"), and one is just ".".
+        """
+        if match := re.search(r"\b\d{4,5}\b", str(value or "")):
+            return match.group().zfill(5)
+        return None
 
     def parse_opening_hours(self, rules: str) -> OpeningHours | None:
         if not rules:
