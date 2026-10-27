@@ -77,10 +77,13 @@ class TjxSpider(Spider):
                     item["branch"] = branch_name
 
                 address2 = (location.get("Address2") or "").strip()
-                if location["Country"] in ["CA", "US"] and not self.unit.match(address2):
-                    # In the US and Canada, Address2 is otherwise a shopping centre or
-                    # cross streets ("The Grove", "6th Ave. at 18th St."), not street.
-                    address2 = ""
+                if location["Country"] in ["CA", "US"]:
+                    if not self.unit.match(address2):
+                        # In the US and Canada, Address2 is otherwise a shopping centre or
+                        # cross streets ("The Grove", "6th Ave. at 18th St."), not street.
+                        address2 = ""
+                    elif numbered := re.match(r"(#\s*[\w-]+)\s+\D", address2):
+                        address2 = numbered.group(1)  # "#74 Colony Square Mall": keep the unit
                 item["street_address"] = clean_address([location.get("Address"), address2])
                 item.pop("addr_full", None)
                 if location["Country"] not in ["CA", "US"]:
