@@ -31,6 +31,7 @@ class RulerFoodsUSSpider(Spider):
         for location in response.json()["data"]["item"]["modules"]["itemListModules"][0]["items"]["locationItems"]:
             location.update(location.pop("locationAddress"))
             item = DictParser.parse(location)
-            item["phone"] = location["locationPhone"]
+            item["branch"] = (item.pop("name", None) or "").removeprefix("Ruler Foods ").strip(" -")
+            item["phone"] = location.get("locationPhone")
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
