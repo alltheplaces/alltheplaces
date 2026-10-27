@@ -71,12 +71,12 @@ class DunhamsSportsUSSpider(Spider):
             unit, centre = numbered.groups()  # "#74 Colony Square Mall"
         street = next((line for line in lines if STREET.match(line)), None)
         if street is None:
-            # An unnumbered street ("Highway 50 W"): the second line, as before, then the
-            # first, skipping units and shopping-centre names.
-            street = next(
-                (line for line in (lines[1], lines[0]) if line and line != unit_line and not CENTRE.search(line)),
-                None,
-            )
+            # An unnumbered street: the second line, as before, unless it is a unit; else a
+            # first line that doesn't name a centre ("Highway 50 W", not "Cross Creek Mall").
+            if lines[1] and lines[1] != unit_line:
+                street = lines[1]
+            elif lines[0] and lines[0] != unit_line and not CENTRE.search(lines[0]):
+                street = lines[0]
         branch = next((line for line in lines if line and line not in (street, unit_line)), centre)
         return branch, ", ".join(filter(None, [street, unit])) or None
 
