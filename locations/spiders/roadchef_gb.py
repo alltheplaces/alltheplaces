@@ -1,19 +1,17 @@
 import json
 
+from scrapy.spiders import SitemapSpider
+
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class RoadchefGBSpider(StructuredDataSpider):
+class RoadchefGBSpider(SitemapSpider, StructuredDataSpider):
     name = "roadchef_gb"
     item_attributes = {"operator": "Roadchef", "operator_wikidata": "Q7339582"}
-    start_urls = ["https://www.roadchef.com/motorway-services"]
+    sitemap_urls = ["https://roadchef.com/sitemap.xml"]
+    sitemap_rules = [(r"https://roadchef.com/motorway-services/[-\w]+", "parse")]
     wanted_types = ["LocalBusiness"]
-
-    def parse(self, response, **kwargs):
-        template = response.xpath('//wrapper/@*[name()=":template"]').get()
-        for location in json.loads(template)["value"]["items"]:
-            yield response.follow(location["url"], callback=self.parse_sd)
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.rstrip("/").split("/")[-1]
