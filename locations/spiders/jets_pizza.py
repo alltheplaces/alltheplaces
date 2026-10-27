@@ -23,5 +23,8 @@ class JetsPizzaSpider(SitemapSpider, StructuredDataSpider):
         ]  # generic "Jet's Pizza <address> (<store code>)" on every page, backfilled from item_attributes
         if ld_data.get("identifier"):
             item["ref"] = ld_data["identifier"]
+        item["extras"]["website:orders"] = response.xpath('//a[contains(@href, "order.jetspizza.com")]/@href').get()
+
         apply_category(Categories.RESTAURANT, item)
+
         yield item
