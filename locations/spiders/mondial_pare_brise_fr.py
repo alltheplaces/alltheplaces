@@ -14,7 +14,7 @@ OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976":
 
 class MondialPareBriseFRSpider(SitemapSpider, StructuredDataSpider):
     name = "mondial_pare_brise_fr"
-    item_attributes = {"brand": "Mondial Pare-Brise", "brand_wikidata": "Q118129474"}
+    item_attributes = {"brand": "Mondial Pare-Brise", "brand_wikidata": "Q118129474", "name": "Mondial Pare-Brise"}
     sitemap_urls = ["https://www.mondialparebrise.fr/robots.txt"]
     # Only the brand's own technical centres. The "point-relais-mondial-pare-brise-*"
     # pages are partner garages that host appointments without Mondial Pare-Brise staff.
