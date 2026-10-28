@@ -184,10 +184,13 @@ class OpentransportdataSwissSpider(Spider):
 
     def handle_traffic_points(self, response: Response) -> Iterable[Feature]:
         for row in self.read_csv("actual-date-world-traffic-point", response):
-            # This table does not seem to have a status column,
-            # so we do not check for status="VALIDATED" here.
+            if row.get("status", "VALIDATED") != "VALIDATED":
+                continue
             sloid = row["sloid"]
-            station_sloid = row["parentSloid"]
+            # For a platform within a larger boarding area, such as
+            # track 3 at Zürich HB, parentSloid is the boarding area;
+            # parentSloidServicePoint is always the station.
+            station_sloid = row["parentSloidServicePoint"]
             if not station_sloid and sloid.startswith("ch:1:sloid:"):
                 station_sloid = ":".join(sloid.split(":")[:4])
             station = self.stations.get(station_sloid)
