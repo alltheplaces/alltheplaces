@@ -44,6 +44,9 @@ class CamilleAlbaneSpider(SitemapSpider):
                 item["opening_hours"].set_closed(day)
                 continue
             item["opening_hours"].add_range(day, opens.zfill(4), closes.zfill(4), "%H%M")
+        if item["opening_hours"].as_opening_hours() == "Mo-Su closed":
+            # Every day is "0" when the salon has no hours set
+            item["opening_hours"] = None
 
         apply_category(Categories.SHOP_HAIRDRESSER, item)
         yield item
