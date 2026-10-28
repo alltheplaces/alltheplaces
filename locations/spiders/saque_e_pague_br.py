@@ -6,13 +6,16 @@ from scrapy.http import Request, Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class SaqueEPagueBRSpider(JSONBlobSpider):
+class SaqueEPagueBRSpider(JSONBlobSpider, PlaywrightSpider):
     name = "saque_e_pague_br"
     item_attributes = {"brand": "Saque e Pague"}
     # The store locator fetches its ATM list from a gist, whose URL changes from time to time.
     start_urls = ["https://www.saqueepague.com.br/encontre-um-ponto"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(self.start_urls[0], callback=self.parse_locator)
