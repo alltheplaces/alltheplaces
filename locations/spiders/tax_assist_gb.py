@@ -1,22 +1,22 @@
 from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import SitemapSpider
 
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class TaxAssistGBSpider(CrawlSpider, StructuredDataSpider):
+class TaxAssistGBSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     name = "tax_assist_gb"
     item_attributes = {"brand": "TaxAssist Accountants", "brand_wikidata": "Q122459380"}
-    start_urls = ["https://www.taxassist.co.uk/locations"]
-    rules = [Rule(LinkExtractor("/accountants/", restrict_xpaths='//div[contains(., "Local Offices")]'), "parse_sd")]
-    wanted_types = ["AccountingService"]
-
-    def pre_process_data(self, ld_data, **kwargs):
-        for rule in ld_data.get("openingHoursSpecification", []):
-            if rule["opens"] == "00:00" and rule["closes"] == "00:00":
-                rule.pop("opens")
+    sitemap_urls = ["https://www.taxassist.co.uk/sitemap.xml"]
+    sitemap_rules = [("/locations/", "parse_sd")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    wanted_types = [
+        ["AccountingService", "FinancialService", "LocalBusiness"],
+    ]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name")
