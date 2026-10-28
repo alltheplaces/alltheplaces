@@ -69,6 +69,41 @@ def _rebuild_geojson(geojson_path: Path, features: list[dict]) -> None:
         out.write("\n]}\n")
 
 
+def _salvage_geojson_in_place(geojson_path: Path) -> int:
+    """Close off a truncated GeoJSON file using only its own content.
+
+    GeoJsonExporter writes the header on one line and then one feature per
+    line, so a killed process leaves complete feature lines followed by at
+    most one partial line. Keep the header and every feature line that parses,
+    then append the trailer. Returns the number of features kept (0 means the
+    file was left untouched).
+    """
+    with geojson_path.open("r", encoding="utf-8", errors="replace") as f:
+        header = f.readline()
+        if not header.rstrip("\n").endswith('"features":['):
+            return 0
+        kept = []
+        for raw_line in f:
+            line = raw_line.strip().rstrip(",")
+            if not line:
+                continue
+            try:
+                json.loads(line)
+            except json.JSONDecodeError:
+                break
+            kept.append(line)
+    if not kept:
+        return 0
+
+    tmp_path = geojson_path.with_suffix(geojson_path.suffix + ".tmp")
+    with tmp_path.open("w", encoding="utf-8") as out:
+        out.write(header)
+        out.write(",\n".join(kept))
+        out.write("\n]}\n")
+    tmp_path.replace(geojson_path)
+    return len(kept)
+
+
 def repair_spider_output(geojson_path: Path, ndgeojson_path: Path) -> None:
     geojson_complete = geojson_path.exists() and _looks_complete(geojson_path)
 
@@ -88,11 +123,22 @@ def repair_spider_output(geojson_path: Path, ndgeojson_path: Path) -> None:
         return
 
     if not valid_features:
-        logger.warning(
-            "%s is incomplete and %s has no usable features to rebuild from",
-            geojson_path.name,
-            ndgeojson_path.name,
-        )
+        # The ndgeojson can be empty or lose its tail when the process is
+        # SIGKILLed with buffered writes, so fall back to the geojson itself.
+        salvaged = _salvage_geojson_in_place(geojson_path) if geojson_path.exists() else 0
+        if salvaged:
+            logger.info(
+                "Closed truncated %s in place (%d feature(s)); %s had nothing usable",
+                geojson_path.name,
+                salvaged,
+                ndgeojson_path.name,
+            )
+        else:
+            logger.warning(
+                "%s is incomplete and neither it nor %s has usable features to rebuild from",
+                geojson_path.name,
+                ndgeojson_path.name,
+            )
         return
 
     _rebuild_geojson(geojson_path, valid_features)

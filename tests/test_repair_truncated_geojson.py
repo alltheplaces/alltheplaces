@@ -152,3 +152,53 @@ def test_repair_directory_processes_every_spider(tmp_path: Path):
 
     rebuilt = json.loads((tmp_path / "broken.geojson").read_text())
     assert [f["id"] for f in rebuilt["features"]] == ["a", "b"]
+
+
+def test_truncated_geojson_is_salvaged_when_ndgeojson_is_empty(tmp_path: Path):
+    geojson_path = tmp_path / "example.geojson"
+    ndgeojson_path = tmp_path / "example.ndgeojson"
+
+    feature_a = json.dumps(
+        {k: v for k, v in FEATURE_A.items() if k != "dataset_attributes"},
+        separators=(",", ":"),
+    )
+    feature_b = json.dumps(
+        {k: v for k, v in FEATURE_B.items() if k != "dataset_attributes"},
+        separators=(",", ":"),
+    )
+    geojson_path.write_text(
+        '{"type":"FeatureCollection","dataset_attributes":{"@spider":"example"},"features":[\n'
+        + feature_a
+        + ",\n"
+        + feature_b
+        + ',\n{"type":"Feature","id":"c","prop',
+        encoding="utf-8",
+    )
+    ndgeojson_path.write_text("", encoding="utf-8")
+
+    repair_spider_output(geojson_path, ndgeojson_path)
+
+    data = json.loads(geojson_path.read_text())
+    assert [f["id"] for f in data["features"]] == ["a", "b"]
+    assert data["dataset_attributes"] == {"@spider": "example"}
+
+
+def test_truncated_geojson_ending_in_comma_is_salvaged_when_ndgeojson_is_missing_lines(
+    tmp_path: Path,
+):
+    geojson_path = tmp_path / "example.geojson"
+    ndgeojson_path = tmp_path / "example.ndgeojson"
+
+    feature_a = json.dumps(
+        {k: v for k, v in FEATURE_A.items() if k != "dataset_attributes"},
+        separators=(",", ":"),
+    )
+    geojson_path.write_text(
+        '{"type":"FeatureCollection","dataset_attributes":{"@spider":"example"},"features":[\n' + feature_a + ",\n",
+        encoding="utf-8",
+    )
+    ndgeojson_path.write_text('{"type":"Feature","id":"a"', encoding="utf-8")
+
+    repair_spider_output(geojson_path, ndgeojson_path)
+
+    assert [f["id"] for f in json.loads(geojson_path.read_text())["features"]] == ["a"]
