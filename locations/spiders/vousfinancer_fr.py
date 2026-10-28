@@ -17,10 +17,10 @@ class VousfinancerFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["ref"] = response.url.split("-")[-1]
-        item["branch"] = item.pop("name").removeprefix("Courtier en crédit à ").split(" (")[0]
+        item["branch"] = (item.pop("name") or "").removeprefix("Courtier en crédit à ").split(" (")[0] or None
         # NSI only covers mainland France, so set these for the overseas agencies too
         item["name"] = "Vousfinancer"
         apply_category(Categories.OFFICE_FINANCIAL, item)
-        if item.get("facebook") == "https://www.facebook.com/Vousfinancer/":
+        if (item.get("facebook") or "").rstrip("/").lower().endswith("facebook.com/vousfinancer"):
             item["facebook"] = None
         yield item
