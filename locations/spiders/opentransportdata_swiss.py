@@ -310,10 +310,10 @@ class OpentransportdataSwissSpider(Spider):
             "subway": "yes" if "METRO" in means else None,
         }
 
-        # Indicate primary means of transportation.
+        # Indicate primary means of transportation. OpenStreetMap puts
+        # highway=bus_stop on the platform, not on the stop area.
         primary_tags = {
             "BOAT": {"amenity": "ferry_terminal"},
-            "BUS": {"highway": "bus_stop"},
             "CABLE_CAR": {"aerialway": "station"},
             "CABLE_RAILWAY": {"railway": "station"},
             "CHAIRLIFT": {"aerialway": "station"},
@@ -323,7 +323,14 @@ class OpentransportdataSwissSpider(Spider):
             "TRAM": {"railway": "station"},
             "TRAIN": {"railway": "station"},
         }
-        tags.update(primary_tags.get(main, {}))
+        if platform:
+            # Tag platforms like OpenStreetMap does, not like stations.
+            if main in ("CABLE_RAILWAY", "METRO", "RACK_RAILWAY", "TRAIN", "TRAM"):
+                tags["railway"] = "platform"
+            elif main == "BUS":
+                tags["highway"] = "bus_stop"
+        else:
+            tags.update(primary_tags.get(main, {}))
 
         # Set tags "public_transport" and (if appropriate) "station".
         # Values for https://wiki.openstreetmap.org/wiki/Key:station
