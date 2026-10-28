@@ -146,7 +146,7 @@ class OpentransportdataSwissSpider(Spider):
                 "name": name,
                 "operator": operator,
                 "operator:wikidata": operator_wikidata,
-                "ref:IFOPT": sloid,
+                "ref:IFOPT": self.parse_ifopt(row),
                 "uic_ref": self.parse_uic_ref(row),
                 "wheelchair": wheelchair,
                 "wheelchair:conditional": wheelchair_cond,
@@ -244,9 +244,22 @@ class OpentransportdataSwissSpider(Spider):
         return lat, lon, ele
 
     @staticmethod
+    def parse_ifopt(row: dict) -> str:
+        # For stops abroad, globalId holds the ID that the authority of
+        # that country has assigned, such as "de:08336:3674". Both IDs
+        # are equally valid, so we emit both.
+        ids = [row["sloid"]]
+        if row.get("globalId") and row["globalId"] != row["sloid"]:
+            ids.append(row["globalId"])
+        return ";".join(ids)
+
+    @staticmethod
     def parse_uic_ref(row: dict) -> str | None:
+        # Only Swiss service points (country code 85) have real UIC codes.
+        # For stops abroad, the feed uses its own number ranges such as
+        # 11 for Germany or 12 for Austria, which are not UIC codes.
         num = row["number"]
-        if len(num) == 7 and num.startswith(row["uicCountryCode"]):
+        if len(num) == 7 and row["uicCountryCode"] == "85" and num.startswith("85"):
             return num
         else:
             return None
