@@ -10,7 +10,7 @@ from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class SaqueEPagueBRSpider(JSONBlobSpider,PlaywrightSpider):
+class SaqueEPagueBRSpider(JSONBlobSpider, PlaywrightSpider):
     name = "saque_e_pague_br"
     item_attributes = {"brand": "Saque e Pague"}
     # The store locator fetches its ATM list from a gist, whose URL changes from time to time.
