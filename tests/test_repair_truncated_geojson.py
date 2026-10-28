@@ -183,6 +183,10 @@ def test_truncated_geojson_is_salvaged_when_ndgeojson_is_empty(tmp_path: Path):
     data = json.loads(geojson_path.read_text())
     assert [f["id"] for f in data["features"]] == ["a", "b"]
     assert data["dataset_attributes"] == {"@spider": "example"}
+    assert data["features"] == [
+        {k: v for k, v in FEATURE_A.items() if k != "dataset_attributes"},
+        {k: v for k, v in FEATURE_B.items() if k != "dataset_attributes"},
+    ]
     ndfeatures = [json.loads(line) for line in ndgeojson_path.read_text().splitlines()]
     assert ndfeatures == [dict(feature, dataset_attributes=data["dataset_attributes"]) for feature in data["features"]]
 
@@ -232,6 +236,29 @@ def test_salvage_is_skipped_when_ndgeojson_cannot_be_synchronized(tmp_path: Path
         return original_operation(path, *args, **kwargs)
 
     monkeypatch.setattr(Path, operation, fail_ndgeojson_sync)
+    repair_spider_output(geojson_path, ndgeojson_path)
+
+    assert geojson_path.read_bytes() == original
+    assert ndgeojson_path.read_bytes() == b""
+    assert "Skipping salvage" in caplog.text
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_ndgeojson_is_restored_when_geojson_replacement_fails(tmp_path: Path, monkeypatch, caplog):
+    geojson_path = tmp_path / "example.geojson"
+    ndgeojson_path = tmp_path / "example.ndgeojson"
+    _write_complete_geojson(geojson_path, [FEATURE_A])
+    original = geojson_path.read_bytes().removesuffix(b"\n]}\n") + b",\n"
+    geojson_path.write_bytes(original)
+    ndgeojson_path.write_text("", encoding="utf-8")
+    original_replace = Path.replace
+
+    def fail_geojson_replace(path, target):
+        if path == geojson_path.with_suffix(".geojson.tmp"):
+            raise OSError("Cannot replace geojson")
+        return original_replace(path, target)
+
+    monkeypatch.setattr(Path, "replace", fail_geojson_replace)
     repair_spider_output(geojson_path, ndgeojson_path)
 
     assert geojson_path.read_bytes() == original

@@ -118,7 +118,13 @@ def _salvage_geojson_in_place(geojson_path: Path, ndgeojson_path: Path) -> int:
             out.write(",\n".join(kept))
             out.write("\n]}\n")
         nd_tmp_path.replace(ndgeojson_path)
-        tmp_path.replace(geojson_path)
+        try:
+            tmp_path.replace(geojson_path)
+        except OSError:
+            # The ndgeojson had no usable features before salvage, so emptying
+            # it restores a state consistent with the still-truncated geojson.
+            ndgeojson_path.write_text("", encoding="utf-8")
+            raise
     finally:
         nd_tmp_path.unlink(missing_ok=True)
         tmp_path.unlink(missing_ok=True)
