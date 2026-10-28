@@ -79,44 +79,46 @@ def _salvage_geojson_in_place(geojson_path: Path, ndgeojson_path: Path) -> int:
     attributes to ndgeojson before replacing the GeoJSON. Returns the number
     of features kept (0 means the files were left untouched).
     """
-    with geojson_path.open("r", encoding="utf-8", errors="replace") as f:
-        header = f.readline()
-        if not header.rstrip("\n").endswith('"features":['):
-            return 0
-        try:
-            dataset_attributes = json.loads(header + "]}").get("dataset_attributes", {})
-        except json.JSONDecodeError:
-            return 0
-        if not isinstance(dataset_attributes, dict):
-            return 0
-        kept = []
-        for raw_line in f:
-            line = raw_line.strip().rstrip(",")
-            if not line:
-                continue
-            try:
-                feature = json.loads(line)
-            except json.JSONDecodeError:
-                break
-            if not isinstance(feature, dict):
-                break
-            kept.append(line)
-    if not kept:
-        return 0
-
     tmp_path = geojson_path.with_suffix(geojson_path.suffix + ".tmp")
     nd_tmp_path = ndgeojson_path.with_suffix(ndgeojson_path.suffix + ".tmp")
+    kept = 0
     try:
-        with nd_tmp_path.open("w", encoding="utf-8") as out:
-            for line in kept:
-                feature = json.loads(line)
-                feature["dataset_attributes"] = dataset_attributes
-                json.dump(feature, out, ensure_ascii=False, separators=(",", ":"))
-                out.write("\n")
-        with tmp_path.open("w", encoding="utf-8") as out:
+        with (
+            geojson_path.open("r", encoding="utf-8", errors="replace") as f,
+            tmp_path.open("w", encoding="utf-8") as out,
+            nd_tmp_path.open("w", encoding="utf-8") as nd_out,
+        ):
+            header = f.readline()
+            if not header.rstrip("\n").endswith('"features":['):
+                return 0
+            try:
+                dataset_attributes = json.loads(header + "]}").get("dataset_attributes", {})
+            except json.JSONDecodeError:
+                return 0
+            if not isinstance(dataset_attributes, dict):
+                return 0
             out.write(header)
-            out.write(",\n".join(kept))
+            # Stream line by line: a truncated file can hold millions of features.
+            for raw_line in f:
+                line = raw_line.strip().rstrip(",")
+                if not line:
+                    continue
+                try:
+                    feature = json.loads(line)
+                except json.JSONDecodeError:
+                    break
+                if not isinstance(feature, dict):
+                    break
+                if kept:
+                    out.write(",\n")
+                out.write(line)
+                feature["dataset_attributes"] = dataset_attributes
+                json.dump(feature, nd_out, ensure_ascii=False, separators=(",", ":"))
+                nd_out.write("\n")
+                kept += 1
             out.write("\n]}\n")
+        if not kept:
+            return 0
         nd_tmp_path.replace(ndgeojson_path)
         try:
             tmp_path.replace(geojson_path)
@@ -128,7 +130,7 @@ def _salvage_geojson_in_place(geojson_path: Path, ndgeojson_path: Path) -> int:
     finally:
         nd_tmp_path.unlink(missing_ok=True)
         tmp_path.unlink(missing_ok=True)
-    return len(kept)
+    return kept
 
 
 def repair_spider_output(geojson_path: Path, ndgeojson_path: Path) -> None:
