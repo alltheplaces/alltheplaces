@@ -1,3 +1,4 @@
+import json
 import shutil
 from pathlib import Path
 
@@ -5,6 +6,7 @@ import psutil
 from pandas import read_parquet
 
 from ci.ndgeojsons_to_parquet import cgroup_memory_limit_bytes, duckdb_memory_limit, to_parquet
+from ci.repair_truncated_geojson import repair_directory
 
 
 def _patch_cgroup_v2_path(monkeypatch, cgroup_v2_file: Path):
@@ -78,3 +80,24 @@ def test_to_parquet(tmp_path: Path):
     expected_top_level_columns = ["id", "type", "dataset_attributes", "properties", "geom", "bbox"]
     assert all(col in columns for col in expected_top_level_columns)
     # TODO: better GeoParquet file validation
+
+
+def test_salvaged_geojson_features_reach_parquet(tmp_path: Path):
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    features = [json.loads(line) for line in Path("tests/data/dixy_ru.ndgeojson").read_text().splitlines()]
+    dataset_attributes = features[0]["dataset_attributes"]
+    header = {"type": "FeatureCollection", "dataset_attributes": dataset_attributes}
+    body = ",\n".join(json.dumps({k: v for k, v in f.items() if k != "dataset_attributes"}) for f in features)
+    (input_dir / "example.geojson").write_text(
+        json.dumps(header)[:-1] + ',"features":[\n' + body + ',\n{"type":"Feature",', encoding="utf-8"
+    )
+    (input_dir / "example.ndgeojson").write_text("", encoding="utf-8")
+
+    repair_directory(input_dir)
+    output_parquet = tmp_path / "output.parquet"
+    to_parquet(input_dir, output_parquet)
+
+    result_df = read_parquet(output_parquet)
+    assert sorted(result_df["id"]) == sorted(f["id"] for f in features)
+    assert all(dict(attrs) == dataset_attributes for attrs in result_df["dataset_attributes"])
