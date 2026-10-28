@@ -13,7 +13,7 @@ class TaxAssistGBSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     item_attributes = {"brand": "TaxAssist Accountants", "brand_wikidata": "Q122459380"}
     sitemap_urls = ["https://www.taxassist.co.uk/sitemap.xml"]
     sitemap_rules = [("/locations/", "parse_sd")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "CONCURRENT_REQUEST": 1, "DOWNLOAD_DELAY": 3} | DEFAULT_PLAYWRIGHT_SETTINGS
     wanted_types = [
         ["AccountingService", "FinancialService", "LocalBusiness"],
     ]
