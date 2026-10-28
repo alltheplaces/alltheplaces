@@ -17,6 +17,15 @@ from locations.user_agents import BOT_USER_AGENT_SCRAPY
 # per-station properties in memory.
 Station = namedtuple("Station", "name operator operator_wikidata city country means")
 
+# Which means of transportation determines the tagging of a stop
+# that is served by several; earlier entries win.
+MEANS_PRIORITY = {
+    m: i
+    for i, m in enumerate(
+        ("TRAIN", "RACK_RAILWAY", "METRO", "TRAM", "CABLE_RAILWAY", "CABLE_CAR", "CHAIRLIFT", "BOAT", "BUS", "ELEVATOR")
+    )
+}
+
 
 class OpentransportdataSwissSpider(Spider):
     name = "opentransportdata_swiss"
@@ -256,19 +265,21 @@ class OpentransportdataSwissSpider(Spider):
         if not means:
             return {}
 
-        main = means[0]
-        funicular_means = ("CABLE_CAR", "CABLE_RAILWAY")
-        railway_means = ("RACK_RAILWAY", "TRAIN")
-        has_funicular = any(m in means for m in funicular_means)
-        has_railway = any(m in means for m in railway_means)
+        # The feed lists the means of transportation in alphabetical
+        # order, so BUS would come first even at a tram stop or railway
+        # station. Instead, take the means that OpenStreetMap would
+        # use for tagging the stop.
+        main = min(means, key=lambda m: MEANS_PRIORITY.get(m, len(MEANS_PRIORITY)))
 
+        # In the feed, CABLE_CAR is an aerial cable car ("Luftseilbahn")
+        # and CABLE_RAILWAY is a funicular ("Standseilbahn").
         tags = {
-            "aerialway": "yes" if "CHAIRLIFT" in means else None,
+            "aerialway": "yes" if any(m in means for m in ("CABLE_CAR", "CHAIRLIFT")) else None,
             "bus": "yes" if "BUS" in means else None,
             "elevator": "yes" if "ELEVATOR" in means else None,
             "ferry": "yes" if "BOAT" in means else None,
-            "funicular": "yes" if has_funicular else None,
-            "railway": "yes" if has_railway else None,
+            "funicular": "yes" if "CABLE_RAILWAY" in means else None,
+            "train": "yes" if any(m in means for m in ("RACK_RAILWAY", "TRAIN")) else None,
             "tram": "yes" if "TRAM" in means else None,
             "subway": "yes" if "METRO" in means else None,
         }
@@ -277,7 +288,7 @@ class OpentransportdataSwissSpider(Spider):
         primary_tags = {
             "BOAT": {"amenity": "ferry_terminal"},
             "BUS": {"highway": "bus_stop"},
-            "CABLE_CAR": {"railway": "station"},
+            "CABLE_CAR": {"aerialway": "station"},
             "CABLE_RAILWAY": {"railway": "station"},
             "CHAIRLIFT": {"aerialway": "station"},
             "ELEVATOR": {"highway": "elevator"},
@@ -287,12 +298,14 @@ class OpentransportdataSwissSpider(Spider):
             "TRAIN": {"railway": "station"},
         }
         tags.update(primary_tags.get(main, {}))
+        if platform and "BUS" in means:
+            # Buses also stop at this platform.
+            tags["highway"] = "bus_stop"
 
         # Set tags "public_transport" and (if appropriate) "station".
         # Values for https://wiki.openstreetmap.org/wiki/Key:station
         # based on primary means of transportation supplied by feed.
         station_tags = {
-            "CABLE_CAR": "funicular",
             "CABLE_RAILWAY": "funicular",
             "METRO": "subway",
             "RACK_RAILWAY": "railway",
