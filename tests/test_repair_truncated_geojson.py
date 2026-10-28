@@ -265,3 +265,23 @@ def test_ndgeojson_is_restored_when_geojson_replacement_fails(tmp_path: Path, mo
     assert ndgeojson_path.read_bytes() == b""
     assert "Skipping salvage" in caplog.text
     assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_salvage_stops_at_undecodable_bytes(tmp_path: Path):
+    geojson_path = tmp_path / "example.geojson"
+    ndgeojson_path = tmp_path / "example.ndgeojson"
+
+    feature_a = json.dumps({k: v for k, v in FEATURE_A.items() if k != "dataset_attributes"}, separators=(",", ":"))
+    feature_b = json.dumps({k: v for k, v in FEATURE_B.items() if k != "dataset_attributes"}, separators=(",", ":"))
+    geojson_path.write_bytes(
+        b'{"type":"FeatureCollection","dataset_attributes":{"@spider":"example"},"features":[\n'
+        + feature_a.encode()
+        + b",\n"
+        + feature_b.replace("2", "\udcff").encode("utf-8", errors="surrogateescape")
+        + b",\n"
+    )
+    ndgeojson_path.write_text("", encoding="utf-8")
+
+    repair_spider_output(geojson_path, ndgeojson_path)
+
+    assert [f["id"] for f in json.loads(geojson_path.read_text())["features"]] == ["a"]

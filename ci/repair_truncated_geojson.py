@@ -84,11 +84,14 @@ def _salvage_geojson_in_place(geojson_path: Path, ndgeojson_path: Path) -> int:
     kept = 0
     try:
         with (
-            geojson_path.open("r", encoding="utf-8", errors="replace") as f,
+            geojson_path.open("rb") as f,
             tmp_path.open("w", encoding="utf-8") as out,
             nd_tmp_path.open("w", encoding="utf-8") as nd_out,
         ):
-            header = f.readline()
+            try:
+                header = f.readline().decode("utf-8")
+            except UnicodeDecodeError:
+                return 0
             if not header.rstrip("\n").endswith('"features":['):
                 return 0
             try:
@@ -100,7 +103,11 @@ def _salvage_geojson_in_place(geojson_path: Path, ndgeojson_path: Path) -> int:
             out.write(header)
             # Stream line by line: a truncated file can hold millions of features.
             for raw_line in f:
-                line = raw_line.strip().rstrip(",")
+                try:
+                    line = raw_line.decode("utf-8").strip().rstrip(",")
+                except UnicodeDecodeError:
+                    # Never publish a feature whose bytes were altered by decoding.
+                    break
                 if not line:
                     continue
                 try:
