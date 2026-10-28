@@ -2,6 +2,7 @@ import json
 import logging
 import sys
 from argparse import ArgumentParser
+from collections.abc import Iterable, Iterator
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,38 @@ def _rebuild_geojson(geojson_path: Path, features: list[dict]) -> None:
         out.write("\n]}\n")
 
 
+def _parse_geojson_header(raw_header: bytes) -> tuple[str, dict] | None:
+    """Return the header line and its dataset attributes, or None if the first
+    line isn't a GeoJsonExporter header."""
+    try:
+        header = raw_header.decode("utf-8")
+        if not header.rstrip("\n").endswith('"features":['):
+            return None
+        dataset_attributes = json.loads(header + "]}").get("dataset_attributes", {})
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(dataset_attributes, dict):
+        return None
+    return header, dataset_attributes
+
+
+def _iter_complete_features(lines: Iterable[bytes]) -> Iterator[tuple[str, dict]]:
+    """Yield (line, feature) for each feature line up to the first one that is
+    undecodable or unparseable, which is where a killed process stopped."""
+    for raw_line in lines:
+        try:
+            line = raw_line.decode("utf-8").strip().rstrip(",")
+            if not line:
+                continue
+            feature = json.loads(line)
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            # Never publish a feature whose bytes were altered by decoding.
+            return
+        if not isinstance(feature, dict):
+            return
+        yield line, feature
+
+
 def _salvage_geojson_in_place(geojson_path: Path, ndgeojson_path: Path) -> int:
     """Close off a truncated GeoJSON file and synchronize its parquet input.
 
@@ -88,34 +121,13 @@ def _salvage_geojson_in_place(geojson_path: Path, ndgeojson_path: Path) -> int:
             tmp_path.open("w", encoding="utf-8") as out,
             nd_tmp_path.open("w", encoding="utf-8") as nd_out,
         ):
-            try:
-                header = f.readline().decode("utf-8")
-            except UnicodeDecodeError:
+            parsed_header = _parse_geojson_header(f.readline())
+            if parsed_header is None:
                 return 0
-            if not header.rstrip("\n").endswith('"features":['):
-                return 0
-            try:
-                dataset_attributes = json.loads(header + "]}").get("dataset_attributes", {})
-            except json.JSONDecodeError:
-                return 0
-            if not isinstance(dataset_attributes, dict):
-                return 0
+            header, dataset_attributes = parsed_header
             out.write(header)
             # Stream line by line: a truncated file can hold millions of features.
-            for raw_line in f:
-                try:
-                    line = raw_line.decode("utf-8").strip().rstrip(",")
-                except UnicodeDecodeError:
-                    # Never publish a feature whose bytes were altered by decoding.
-                    break
-                if not line:
-                    continue
-                try:
-                    feature = json.loads(line)
-                except json.JSONDecodeError:
-                    break
-                if not isinstance(feature, dict):
-                    break
+            for line, feature in _iter_complete_features(f):
                 if kept:
                     out.write(",\n")
                 out.write(line)
