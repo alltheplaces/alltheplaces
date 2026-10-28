@@ -69,18 +69,25 @@ def _rebuild_geojson(geojson_path: Path, features: list[dict]) -> None:
         out.write("\n]}\n")
 
 
-def _salvage_geojson_in_place(geojson_path: Path) -> int:
-    """Close off a truncated GeoJSON file using only its own content.
+def _salvage_geojson_in_place(geojson_path: Path, ndgeojson_path: Path) -> int:
+    """Close off a truncated GeoJSON file and synchronize its parquet input.
 
     GeoJsonExporter writes the header on one line and then one feature per
     line, so a killed process leaves complete feature lines followed by at
     most one partial line. Keep the header and every feature line that parses,
-    then append the trailer. Returns the number of features kept (0 means the
-    file was left untouched).
+    then append the trailer. Copy each feature with the header's dataset
+    attributes to ndgeojson before replacing the GeoJSON. Returns the number
+    of features kept (0 means the files were left untouched).
     """
     with geojson_path.open("r", encoding="utf-8", errors="replace") as f:
         header = f.readline()
         if not header.rstrip("\n").endswith('"features":['):
+            return 0
+        try:
+            dataset_attributes = json.loads(header + "]}").get("dataset_attributes", {})
+        except json.JSONDecodeError:
+            return 0
+        if not isinstance(dataset_attributes, dict):
             return 0
         kept = []
         for raw_line in f:
@@ -88,19 +95,33 @@ def _salvage_geojson_in_place(geojson_path: Path) -> int:
             if not line:
                 continue
             try:
-                json.loads(line)
+                feature = json.loads(line)
             except json.JSONDecodeError:
+                break
+            if not isinstance(feature, dict):
                 break
             kept.append(line)
     if not kept:
         return 0
 
     tmp_path = geojson_path.with_suffix(geojson_path.suffix + ".tmp")
-    with tmp_path.open("w", encoding="utf-8") as out:
-        out.write(header)
-        out.write(",\n".join(kept))
-        out.write("\n]}\n")
-    tmp_path.replace(geojson_path)
+    nd_tmp_path = ndgeojson_path.with_suffix(ndgeojson_path.suffix + ".tmp")
+    try:
+        with nd_tmp_path.open("w", encoding="utf-8") as out:
+            for line in kept:
+                feature = json.loads(line)
+                feature["dataset_attributes"] = dataset_attributes
+                json.dump(feature, out, ensure_ascii=False, separators=(",", ":"))
+                out.write("\n")
+        with tmp_path.open("w", encoding="utf-8") as out:
+            out.write(header)
+            out.write(",\n".join(kept))
+            out.write("\n]}\n")
+        nd_tmp_path.replace(ndgeojson_path)
+        tmp_path.replace(geojson_path)
+    finally:
+        nd_tmp_path.unlink(missing_ok=True)
+        tmp_path.unlink(missing_ok=True)
     return len(kept)
 
 
@@ -125,10 +146,19 @@ def repair_spider_output(geojson_path: Path, ndgeojson_path: Path) -> None:
     if not valid_features:
         # The ndgeojson can be empty or lose its tail when the process is
         # SIGKILLed with buffered writes, so fall back to the geojson itself.
-        salvaged = _salvage_geojson_in_place(geojson_path) if geojson_path.exists() else 0
+        try:
+            salvaged = _salvage_geojson_in_place(geojson_path, ndgeojson_path) if geojson_path.exists() else 0
+        except OSError as exc:
+            logger.warning(
+                "Skipping salvage of %s: could not synchronize repaired outputs with %s: %s",
+                geojson_path.name,
+                ndgeojson_path.name,
+                exc,
+            )
+            return
         if salvaged:
             logger.info(
-                "Closed truncated %s in place (%d feature(s)); %s had nothing usable",
+                "Closed truncated %s in place (%d feature(s)) and synchronized %s",
                 geojson_path.name,
                 salvaged,
                 ndgeojson_path.name,

@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from ci.repair_truncated_geojson import repair_directory, repair_spider_output
 
 FEATURE_A = {
@@ -181,6 +183,15 @@ def test_truncated_geojson_is_salvaged_when_ndgeojson_is_empty(tmp_path: Path):
     data = json.loads(geojson_path.read_text())
     assert [f["id"] for f in data["features"]] == ["a", "b"]
     assert data["dataset_attributes"] == {"@spider": "example"}
+    ndfeatures = [json.loads(line) for line in ndgeojson_path.read_text().splitlines()]
+    assert ndfeatures == [dict(feature, dataset_attributes=data["dataset_attributes"]) for feature in data["features"]]
+
+    # Running repair again must leave both synchronized files untouched.
+    geojson_before = geojson_path.read_bytes()
+    ndgeojson_before = ndgeojson_path.read_bytes()
+    repair_spider_output(geojson_path, ndgeojson_path)
+    assert geojson_path.read_bytes() == geojson_before
+    assert ndgeojson_path.read_bytes() == ndgeojson_before
 
 
 def test_truncated_geojson_ending_in_comma_is_salvaged_when_ndgeojson_is_missing_lines(
@@ -202,3 +213,28 @@ def test_truncated_geojson_ending_in_comma_is_salvaged_when_ndgeojson_is_missing
     repair_spider_output(geojson_path, ndgeojson_path)
 
     assert [f["id"] for f in json.loads(geojson_path.read_text())["features"]] == ["a"]
+    assert json.loads(ndgeojson_path.read_text()) == dict(FEATURE_A, dataset_attributes={"@spider": "example"})
+
+
+@pytest.mark.parametrize("operation", ["open", "replace"])
+def test_salvage_is_skipped_when_ndgeojson_cannot_be_synchronized(tmp_path: Path, monkeypatch, caplog, operation):
+    geojson_path = tmp_path / "example.geojson"
+    ndgeojson_path = tmp_path / "example.ndgeojson"
+    _write_complete_geojson(geojson_path, [FEATURE_A])
+    original = geojson_path.read_bytes().removesuffix(b"\n]}\n") + b",\n"
+    geojson_path.write_bytes(original)
+    ndgeojson_path.write_text("", encoding="utf-8")
+    original_operation = getattr(Path, operation)
+
+    def fail_ndgeojson_sync(path, *args, **kwargs):
+        if path == ndgeojson_path.with_suffix(".ndgeojson.tmp"):
+            raise OSError("Cannot synchronize ndgeojson")
+        return original_operation(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, operation, fail_ndgeojson_sync)
+    repair_spider_output(geojson_path, ndgeojson_path)
+
+    assert geojson_path.read_bytes() == original
+    assert ndgeojson_path.read_bytes() == b""
+    assert "Skipping salvage" in caplog.text
+    assert not list(tmp_path.glob("*.tmp"))
