@@ -20,6 +20,9 @@ class IonitySpider(Spider):
     def parse_locations(self, response):
         for location in response.json()["LocationDetails"]:
             item = DictParser.parse(location)
+            if item.pop("state") == "planned":
+                item["opening_hours"] = "closed"
+            item["extras"]["capacity"] = str(location["connectorsTotal"]) if location.get("connectorsTotal") else None
             item["ref"] = item["name"]
             apply_category(Categories.CHARGING_STATION, item)
             yield item
