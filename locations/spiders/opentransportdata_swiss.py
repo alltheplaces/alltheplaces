@@ -15,7 +15,7 @@ from locations.user_agents import BOT_USER_AGENT_SCRAPY
 
 # To emit proper OpenStreetMap tags for platforms, we need to keep some
 # per-station properties in memory.
-Station = namedtuple("Station", "name operator operator_wikidata city country means")
+Station = namedtuple("Station", "name operator operator_wikidata city country means request_stop")
 
 
 class OpentransportdataSwissSpider(Spider):
@@ -129,6 +129,10 @@ class OpentransportdataSwissSpider(Spider):
         for row in self.read_csv("actual-date-swiss-service-point", response):
             if row["status"] != "VALIDATED":
                 continue
+            # Skip operating points that are no stops, such as tunnels
+            # or junctions, and stops that are currently out of service.
+            if row["stopPoint"] != "true" or row["stopPointType"] == "OUT_OF_ORDER":
+                continue
             sloid = row["sloid"]
             name = row["designationLong"] or row["designationOfficial"]
             operator = row["businessOrganisationDescriptionEn"]
@@ -159,6 +163,9 @@ class OpentransportdataSwissSpider(Spider):
                 continue
             if ele > 0:
                 tags["ele:regional"] = "%.1f" % ele
+            request_stop = row["stopPointType"] in ("ON_REQUEST", "ZONE_ON_REQUEST")
+            if request_stop:
+                tags["request_stop"] = "yes"
 
             tags = {k: v for k, v in tags.items() if v}
             yield Feature(
@@ -176,6 +183,7 @@ class OpentransportdataSwissSpider(Spider):
                 city=city,
                 country=country,
                 means=means,
+                request_stop=request_stop,
             )
 
         # Next, fetch data for "traffic points" (platforms).
@@ -219,6 +227,8 @@ class OpentransportdataSwissSpider(Spider):
                 continue
             if ele > 0:
                 tags["ele:regional"] = "%.1f" % ele
+            if station.request_stop:
+                tags["request_stop"] = "yes"
             tags = {k: v for k, v in tags.items() if v}
             yield Feature(
                 lat=lat,
