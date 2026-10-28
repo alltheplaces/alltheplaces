@@ -13,6 +13,7 @@ class SaqueEPagueBRSpider(JSONBlobSpider):
     item_attributes = {"brand": "Saque e Pague"}
     # The store locator fetches its ATM list from a gist, whose URL changes from time to time.
     start_urls = ["https://www.saqueepague.com.br/encontre-um-ponto"]
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(self.start_urls[0], callback=self.parse_locator)
