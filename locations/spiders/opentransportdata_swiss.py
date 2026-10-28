@@ -298,9 +298,6 @@ class OpentransportdataSwissSpider(Spider):
             "TRAIN": {"railway": "station"},
         }
         tags.update(primary_tags.get(main, {}))
-        if platform and "BUS" in means:
-            # Buses also stop at this platform.
-            tags["highway"] = "bus_stop"
 
         # Set tags "public_transport" and (if appropriate) "station".
         # Values for https://wiki.openstreetmap.org/wiki/Key:station
