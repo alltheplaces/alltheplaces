@@ -8,7 +8,7 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 BRANDS = {
-    "BNP Paribas Bank Polska": ("BNP Paribas Bank Polska", "Q20744004"),
+    "BNP Paribas Bank Polska": ("BNP Paribas", "Q499707"),
     "Euronet": ("Euronet", "Q5412010"),
     "Planet Cash": ("Planet Cash", "Q117744569"),
 }
