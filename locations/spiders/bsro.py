@@ -1,9 +1,10 @@
 from typing import Any
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 from scrapy.http import JsonRequest, Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -38,7 +39,7 @@ class BsroSpider(CrawlSpider):
         # Retrieve store IDs from city page and then make store-wise API call to fetch store details
         for store_id in response.xpath("//@data-store").getall():
             yield JsonRequest(
-                url=f"https://{urlparse(response.url).hostname}/bsro/services/store/details/{store_id}",
+                url=f"https://{urlparse_cached(response).hostname}/bsro/services/store/details/{store_id}",
                 callback=self.parse_store,
             )
 
@@ -48,7 +49,7 @@ class BsroSpider(CrawlSpider):
                 return
             store["street-address"] = store.pop("address", "")
             item = DictParser.parse(store)
-            item["website"] = urljoin(f"https://{urlparse(response.url).hostname}", store.get("localPageURL", ""))
+            item["website"] = urljoin(f"https://{urlparse_cached(response).hostname}", store.get("localPageURL", ""))
             item["extras"]["fax"] = store.get("fax")
             item["opening_hours"] = OpeningHours()
             for rule in store.get("hours", []):

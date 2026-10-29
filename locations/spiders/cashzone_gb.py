@@ -1,8 +1,8 @@
 import hashlib
 from typing import AsyncIterator
 
-from scrapy import Selector, Spider
-from scrapy.http import FormRequest
+from scrapy import Spider
+from scrapy.http import FormRequest, XmlResponse
 
 from locations.geo import point_locations
 from locations.items import Feature
@@ -24,8 +24,9 @@ class CashzoneGBSpider(Spider):
             )
 
     def parse(self, response, **kwargs):
-        response = Selector(text=response.text, type="xml")
-        for marker in response.xpath("//markers/marker"):
+        xml_response = response.replace(cls=XmlResponse)
+
+        for marker in xml_response.xpath("//markers/marker"):
             item = Feature()
             item["lat"] = marker.xpath("./@lat").get()
             item["lon"] = marker.xpath("./@lng").get()
