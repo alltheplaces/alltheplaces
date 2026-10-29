@@ -18,12 +18,12 @@ class OyoSpider(StructuredDataSpider):
             yield scrapy.Request("https://www.oyorooms.com/{}/allcities/".format(country), self.parse_all_cities)
 
     def parse_all_cities(self, response: Response, **kwargs: Any) -> Any:
-        for link in response.xpath("//a/@href").extract():
+        for link in response.xpath("//a/@href").getall():
             if "/hotels-in-" in link:
                 yield scrapy.Request(response.urljoin(link), self.parse_hotels_in_first_page)
 
     def parse_hotels_in_first_page(self, response: Response, **kwargs: Any) -> Any:
-        for link in response.xpath("//a/@href").extract():
+        for link in response.xpath("//a/@href").getall():
             if "?page=" in link:
                 yield scrapy.Request(response.urljoin(link), self.parse_hotel_cards)
         yield from self.parse_hotel_cards(response)

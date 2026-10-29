@@ -1,4 +1,3 @@
-import logging
 import re
 
 import chompjs
@@ -44,7 +43,7 @@ class PiazzaItaliaITSpider(JSONBlobSpider):
                         open_time, close_time = period.split("-")
                         hours.add_range(day, open_time.strip(), close_time.strip(), "%H:%M")
                     except ValueError:
-                        logging.warning("Invalid opening hours period '%s'", period)
+                        self.logger.warning("Invalid opening hours period '%s'", period)
         item["opening_hours"] = hours
 
         apply_category(Categories.SHOP_CLOTHES, item)
