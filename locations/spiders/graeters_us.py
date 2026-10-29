@@ -41,7 +41,7 @@ class GraetersUSSpider(SitemapSpider):
             ).getall(),
         )
         apply_category(Categories.ICE_CREAM, item)
-        amenities = response.xpath('//*[@class="store-info__amenity-item"]/span[2]/text()').extract()
+        amenities = response.xpath('//*[@class="store-info__amenity-item"]/span[2]/text()').getall()
         apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive Thru Hours" in amenities)
         apply_yes_no(Extras.KIDS_AREA, item, "Play Area" in amenities)
         yield item
