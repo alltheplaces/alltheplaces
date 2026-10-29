@@ -1,7 +1,7 @@
 from typing import Iterable
-from urllib.parse import urlparse
 
 from scrapy.http import Response
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
@@ -31,7 +31,7 @@ class KennardsHireAUSpider(JSONBlobSpider):
         item["postcode"] = feature["address"].get("postcode")
         item["country"] = feature["address"].get("country")
         if website_path := feature.get("url"):
-            item["website"] = "https://" + urlparse(response.url).netloc + website_path
+            item["website"] = "https://" + urlparse_cached(response).netloc + website_path
 
         item["opening_hours"] = OpeningHours()
         for day_hours in feature.get("workingHours", []):
