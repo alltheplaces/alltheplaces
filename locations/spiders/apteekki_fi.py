@@ -67,7 +67,7 @@ class ApteekkiFISpider(Spider):
         self._count("pages")
         if not divs:
             self._count("empty_page")
-            logger.warning("apteekki_fi: no records on %s", response.url)
+            self.logger.warning("apteekki_fi: no records on %s", response.url)
             # No valid listing page is ever empty (the last one holds 4
             # records and no next link), so any empty page is an outage.
             raise CloseSpider(f"apteekki_fi: zero records on {response.url}")
@@ -78,7 +78,7 @@ class ApteekkiFISpider(Spider):
                 partial = self._partial(div)
             except Exception:
                 self._count("dropped/crashed")
-                logger.warning("apteekki_fi: dropping malformed record", exc_info=True)
+                self.logger.warning("apteekki_fi: dropping malformed record", exc_info=True)
                 continue
             if partial is None:
                 continue
@@ -87,7 +87,7 @@ class ApteekkiFISpider(Spider):
             yield response.follow(next_url, callback=self.parse_listing, errback=self.errback)
         if not partials:
             self._count("dropped/page_all_dropped")
-            logger.warning("apteekki_fi: all records dropped on %s", response.url)
+            self.logger.warning("apteekki_fi: all records dropped on %s", response.url)
             return
         query = urlencode([("id[]", partial["ref"]) for partial in partials])
         yield JsonRequest(
@@ -105,21 +105,21 @@ class ApteekkiFISpider(Spider):
         ref = raw_id.removeprefix("apteekki-").strip()
         if not ref:
             self._count("dropped/no_ref")
-            logger.warning("apteekki_fi: item div without apteekki id")
+            self.logger.warning("apteekki_fi: item div without apteekki id")
             return None
         name = div.css("span.limit.name::text").get()
         if not name or not name.strip():
             name = div.css("div.map-holder::attr(data-name)").get()
         if not name or not name.strip():
             self._count("dropped/no_name")
-            logger.warning("apteekki_fi: ref %s without a name", ref)
+            self.logger.warning("apteekki_fi: ref %s without a name", ref)
             return None
         partial: dict[str, Any] = {"ref": ref}
         addr_line = div.css("span.limit.address::text").get()
         address = self._split_address(addr_line)
         if address is None:
             self._count("dropped/no_address")
-            logger.warning("apteekki_fi: ref %s with unparseable address %r", ref, addr_line)
+            self.logger.warning("apteekki_fi: ref %s with unparseable address %r", ref, addr_line)
             return None
         partial.update(address)
         name_text = " ".join(name.split())
@@ -146,12 +146,12 @@ class ApteekkiFISpider(Spider):
                 lat, lon = (float(part.strip()) for part in coord.split(",")[:2])
             except ValueError:
                 self._count("coords/invalid")  # A bad pin must not lose the pharmacy.
-                logger.warning("apteekki_fi: ref %s with bad coords %r", ref, coord)
+                self.logger.warning("apteekki_fi: ref %s with bad coords %r", ref, coord)
             else:
                 partial["lat"], partial["lon"] = lat, lon
         else:
             self._count("coords/empty")
-            logger.warning("apteekki_fi: ref %s without coords", ref)
+            self.logger.warning("apteekki_fi: ref %s without coords", ref)
         return partial
 
     def _split_address(self, addr_line: str | None) -> dict[str, Any] | None:
@@ -224,26 +224,26 @@ class ApteekkiFISpider(Spider):
             self._count("website/truncated")
         if not url.lower().startswith(("http://", "https://")) or "." not in url or " " in url:
             self._count("website/invalid")
-            logger.warning("apteekki_fi: ref %s with invalid website %r", ref, href)
+            self.logger.warning("apteekki_fi: ref %s with invalid website %r", ref, href)
             return None
         if re.match(r"https?://https?://", url, re.IGNORECASE):
             self._count("website/invalid")  # Doubled scheme (17x, cf. 2597); no valid URL nests a scheme.
-            logger.warning("apteekki_fi: ref %s with doubled scheme %r", ref, href)
+            self.logger.warning("apteekki_fi: ref %s with doubled scheme %r", ref, href)
             return None
         try:
             host = (urlparse(url).hostname or "").casefold()
             username = urlparse(url).username
         except ValueError:
             self._count("website/invalid")  # Unparseable host (cf. bracketed literals); keep the pharmacy.
-            logger.warning("apteekki_fi: ref %s with unparseable website %r", ref, href)
+            self.logger.warning("apteekki_fi: ref %s with unparseable website %r", ref, href)
             return None
         if host in self.SOCIAL_HOSTS or any(host.endswith(f".{social}") for social in self.SOCIAL_HOSTS):
             self._count("website/social")  # Pharmacies without a site link their Facebook page instead.
-            logger.warning("apteekki_fi: ref %s links social page %r, not a website", ref, href)
+            self.logger.warning("apteekki_fi: ref %s links social page %r, not a website", ref, href)
             return None
         if username:
             self._count("website/email")  # Email address entered into the website field (cf. 4495).
-            logger.warning("apteekki_fi: ref %s links email %r, not a website", ref, href)
+            self.logger.warning("apteekki_fi: ref %s links email %r, not a website", ref, href)
             return None
         return url
 
@@ -252,22 +252,22 @@ class ApteekkiFISpider(Spider):
             data = response.json()  # ty: ignore[unresolved-attribute]
         except ValueError:
             self._count("hours/bad_payload")
-            logger.warning("apteekki_fi: non-JSON hours payload, flushing %d partials", len(partials))
+            self.logger.warning("apteekki_fi: non-JSON hours payload, flushing %d partials", len(partials))
             data = []
         if not isinstance(data, list):
             self._count("hours/bad_payload")
-            logger.warning("apteekki_fi: unexpected hours shape, flushing %d partials", len(partials))
+            self.logger.warning("apteekki_fi: unexpected hours shape, flushing %d partials", len(partials))
             data = []
         records = {}
         for obj in data:
             if not isinstance(obj, dict):
                 self._count("hours/bad_entry")
-                logger.warning("apteekki_fi: skipping non-dict hours entry")
+                self.logger.warning("apteekki_fi: skipping non-dict hours entry")
                 continue
             pharmacy = obj.get("pharmacy")
             if not isinstance(pharmacy, dict):
                 self._count("hours/bad_entry")
-                logger.warning("apteekki_fi: skipping hours entry without pharmacy")
+                self.logger.warning("apteekki_fi: skipping hours entry without pharmacy")
                 continue
             records[str(pharmacy.get("id")).strip()] = pharmacy
         for partial in partials:
@@ -275,7 +275,9 @@ class ApteekkiFISpider(Spider):
                 yield self._build_item(partial, records.get(partial["ref"]))
             except Exception:
                 self._count("dropped/crashed")
-                logger.warning("apteekki_fi: dropping crashed hours item for ref %s", partial.get("ref"), exc_info=True)
+                self.logger.warning(
+                    "apteekki_fi: dropping crashed hours item for ref %s", partial.get("ref"), exc_info=True
+                )
 
     def _build_item(self, partial: dict[str, Any], pharmacy: dict[str, Any] | None) -> Feature:
         item = Feature()
@@ -342,14 +344,14 @@ class ApteekkiFISpider(Spider):
                 oh.add_range(day, opens.strip(), closes.strip(), time_format="%H:%M")
                 continue
             self._count("hours/bad_range")
-            logger.warning("apteekki_fi: bad hours range %r-%r", opens, closes)
+            self.logger.warning("apteekki_fi: bad hours range %r-%r", opens, closes)
         return oh if oh.day_hours else None  # All-closed weeks emit nothing.
 
     def errback(self, failure) -> Iterable[Request]:
         request = getattr(failure, "request", None)
         url = getattr(request, "url", "") or ""
         self._count("failed")
-        logger.warning("apteekki_fi: listing request failed: %s", url)
+        self.logger.warning("apteekki_fi: listing request failed: %s", url)
         # The next page is only discoverable from its predecessor, so a dead
         # page must not truncate the tail behind it. Persistent failures stop
         # the crawl instead of advancing page numbers forever.
@@ -367,9 +369,9 @@ class ApteekkiFISpider(Spider):
         partials = cb_kwargs.get("partials") or []
         if not partials:
             self._count("hours/unrecoverable")
-            logger.warning("apteekki_fi: hours failed with no recoverable partials")
+            self.logger.warning("apteekki_fi: hours failed with no recoverable partials")
             return
         for partial in partials:
             self._count("hours/failed_flush")
-            logger.warning("apteekki_fi: hours failed for ref %s, flushing without hours", partial.get("ref"))
+            self.logger.warning("apteekki_fi: hours failed for ref %s, flushing without hours", partial.get("ref"))
             yield self._build_item(partial, None)

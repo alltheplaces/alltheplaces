@@ -141,18 +141,18 @@ class AbcFISpider(SitemapSpider):
         match = self.NEXT_DATA_RE.search(response.text)
         if not match:
             self.crawler.stats.inc_value("atp/abc_fi/dropped/no_nextdata")
-            logger.warning("abc_fi: no __NEXT_DATA__ on %s", response.url)
+            self.logger.warning("abc_fi: no __NEXT_DATA__ on %s", response.url)
             return None
         try:
             data = json.loads(match.group(1))
             location = data["props"]["pageProps"]["location"]
         except (ValueError, KeyError, TypeError):
             self.crawler.stats.inc_value("atp/abc_fi/dropped/bad_nextdata")
-            logger.warning("abc_fi: unparseable __NEXT_DATA__ on %s", response.url)
+            self.logger.warning("abc_fi: unparseable __NEXT_DATA__ on %s", response.url)
             return None
         if not isinstance(location, dict):
             self.crawler.stats.inc_value("atp/abc_fi/dropped/bad_nextdata")
-            logger.warning("abc_fi: unexpected __NEXT_DATA__ shape on %s", response.url)
+            self.logger.warning("abc_fi: unexpected __NEXT_DATA__ shape on %s", response.url)
             return None
         return location
 
