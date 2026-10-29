@@ -20,9 +20,7 @@ class PumaTWSpider(SitemapSpider):
     ]
 
     def parse(self, response):
-        store = chompjs.parse_js_object(
-            response.xpath('//script[contains(text(),"nineyi.ServerData")]/text()').extract_first()
-        )
+        store = chompjs.parse_js_object(response.xpath('//script[contains(text(),"nineyi.ServerData")]/text()').get())
         item = DictParser.parse(store)
         item["opening_hours"] = OpeningHours()
         self.opening_hours_add(DAYS_WEEKDAY, store.get("NormalTime"), item)

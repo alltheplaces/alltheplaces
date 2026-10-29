@@ -30,10 +30,10 @@ class RoyalLepageSpider(CrawlSpider):
 
         properties = {
             "ref": re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1),
-            "name": response.xpath('normalize-space(//*[@itemprop="name"]//text())').extract_first().strip(" *"),
-            "addr_full": response.xpath('normalize-space(//*[@itemprop="address"]/p/text())').extract_first(),
+            "name": response.xpath('normalize-space(//*[@itemprop="name"]//text())').get().strip(" *"),
+            "addr_full": response.xpath('normalize-space(//*[@itemprop="address"]/p/text())').get(),
             "country": "CA",
-            "phone": response.xpath('normalize-space(//a[@itemprop="telephone"]//text())').extract_first(),
+            "phone": response.xpath('normalize-space(//a[@itemprop="telephone"]//text())').get(),
             "website": response.url,
             "lat": float(lat) if lat else None,
             "lon": float(lon) if lon else None,
