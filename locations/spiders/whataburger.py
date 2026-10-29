@@ -45,7 +45,7 @@ class WhataburgerSpider(SitemapSpider, StructuredDataSpider):
         if "#" in item["name"]:
             item["ref"] = item.pop("name").split("#", 1)[1].strip()
         item["image"] = item["name"] = None
-        name = response.xpath('//span[@class="Banner-titleGeo"]/text()').extract_first()
+        name = response.xpath('//span[@class="Banner-titleGeo"]/text()').get()
         if name == "NA":
             name = None
         item["branch"] = name

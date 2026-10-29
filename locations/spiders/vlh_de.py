@@ -34,7 +34,7 @@ class VlhDESpider(SitemapSpider, StructuredDataSpider):
 
             for row in table.xpath("./tr"):
                 day = row.xpath("./td/text()").extract()[0]
-                times = row.xpath("./td/text()").extract()[1:]
+                times = row.xpath("./td/text()").getall()[1:]
 
                 for time in times:
                     time.strip()
