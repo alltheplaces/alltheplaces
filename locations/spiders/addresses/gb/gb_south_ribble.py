@@ -21,6 +21,7 @@ class GbSouthRibbleSpider(UprnEnhancerSpider):
         + " Contains Royal Mail data © Royal Mail copyright and Database right."  # ONSUD, postcodes
         + " Office for National Statistics licensed under the Open Government Licence v.3.0."
     }
+    requires_proxy = True
     no_refs = True
     onsud_region = "NW"
     start_urls = [
