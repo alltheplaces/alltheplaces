@@ -31,6 +31,8 @@ class JerseyMikesUSSpider(Spider):
             item["street_address"] = merge_address_lines(
                 [location["address"].get("street1"), location["address"].get("street2")]
             )
+            # DictParser has no key for "subdivisionCode" ("US-WI").
+            item["state"] = (location["address"].get("subdivisionCode") or "").removeprefix("US-") or None
             item["ref"] = location["number"]
             item["website"] = "https://www.jerseymikes.com/{}".format(item["ref"])
 
