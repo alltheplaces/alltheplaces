@@ -38,7 +38,7 @@ class CAndASpider(scrapy.Spider):
     def parse(self, response):
         pages = response.xpath(
             '//div[@class="overviewCities"]/div/div/a[contains(concat(" ", normalize-space(@class), " "), " allcities ")]/@href'
-        ).extract()
+        ).getall()
         for page in pages:
             yield scrapy.Request(response.urljoin(page), callback=self.parse_city)
 

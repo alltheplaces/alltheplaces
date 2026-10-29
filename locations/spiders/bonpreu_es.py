@@ -15,7 +15,7 @@ class BonpreuESSpider(scrapy.Spider):
     def parse(self, response):
         data = response.xpath(
             '//*[@id="portlet_cercadorestabliments_WAR_cercadorestablimentsportlet_INSTANCE_rIdyDd6D3TeG"]/div/div[2]/div/script[1]/text()'
-        ).extract_first()
+        ).get()
         data = re.sub("(?si)var establimentsJson =|function.*", "", data)
         for location in json.loads(data):
             if location["ensenya"] == "BONPREU" or location["ensenya"] == "BONPREU_RAPID":

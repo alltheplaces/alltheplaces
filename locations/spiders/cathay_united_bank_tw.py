@@ -1,7 +1,4 @@
-from typing import AsyncIterator
-
 from scrapy import Spider
-from scrapy.http import Request
 
 from locations.brand_utils import extract_located_in
 from locations.categories import Categories, apply_category
@@ -16,6 +13,7 @@ from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 class CathayUnitedBankTWSpider(Spider):
     name = "cathay_united_bank_tw"
     item_attributes = {"brand": "國泰世華商業銀行", "brand_wikidata": "Q702656"}
+    start_urls = ["www.cathaybk.com.tw/CathayBK/service/Locations/LocationsGetEnData.ashx"]
 
     LOCATED_IN_MAPPINGS = [
         (["FAMILYMART", "FAMILY"], FamilymartTWSpider.item_attributes),
@@ -28,11 +26,6 @@ class CathayUnitedBankTWSpider(Spider):
         (["WELLCOME"], {"brand": "Wellcome", "brand_wikidata": "Q706247"}),
         (["COSTCO"], COSTCO_SHARED_ATTRIBUTES),
     ]
-
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(
-            url="https://www.cathaybk.com.tw/CathayBK/service/Locations/LocationsGetEnData.ashx", callback=self.parse
-        )
 
     def parse(self, response, **kwargs):
         for branch_type in ["Branch", "Atm"]:
@@ -57,6 +50,8 @@ class CathayUnitedBankTWSpider(Spider):
                         apply_category(Categories.ATM, item)
                         # Extract retail brand from SetAddressKind field for ATMs
                         item["located_in"], item["located_in_wikidata"] = extract_located_in(
-                            details.get("SetAddressKind", ""), self.LOCATED_IN_MAPPINGS, self
+                            details.get("SetAddressKind", ""),
+                            self.LOCATED_IN_MAPPINGS,
+                            self,
                         )
                     yield item
