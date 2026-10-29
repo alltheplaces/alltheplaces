@@ -13,7 +13,7 @@ from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 class CathayUnitedBankTWSpider(Spider):
     name = "cathay_united_bank_tw"
     item_attributes = {"brand": "國泰世華商業銀行", "brand_wikidata": "Q702656"}
-    start_urls = ["www.cathaybk.com.tw/CathayBK/service/Locations/LocationsGetEnData.ashx"]
+    start_urls = ["https://www.cathaybk.com.tw/CathayBK/service/Locations/LocationsGetEnData.ashx"]
 
     LOCATED_IN_MAPPINGS = [
         (["FAMILYMART", "FAMILY"], FamilymartTWSpider.item_attributes),
