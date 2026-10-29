@@ -5,6 +5,7 @@ from urllib.parse import parse_qsl, urlencode, urlparse
 
 from scrapy import Request, Spider
 from scrapy.http import Response
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -108,29 +109,29 @@ class SMarketFISpider(Spider):
         return "https://s-etukortti.fi/data/pob-search?" + urlencode(params)
 
     def brand_of(self, response: Response) -> str | None:
-        query = dict(parse_qsl(urlparse(response.url).query)).get("q")
+        query = dict(parse_qsl(urlparse_cached(response).query)).get("q")
         return query if query in self.BRANDS else None
 
     def parse(self, response: Response, brand: str | None = None, **kwargs) -> Iterable[Request | Feature | None]:
         brand = brand or self.brand_of(response)
         if brand is None:
             self.crawler.stats.inc_value("atp/s_market_fi/unknown_brand")
-            logger.warning("s_market_fi: cannot determine brand for %s", response.url)
+            self.logger.warning("s_market_fi: cannot determine brand for %s", response.url)
             return
         try:
             data = response.json()
         except ValueError:
             self.crawler.stats.inc_value(f"atp/s_market_fi/bad_payload/{brand}")
-            logger.warning("s_market_fi: non-JSON payload for %s", brand)
+            self.logger.warning("s_market_fi: non-JSON payload for %s", brand)
             return
         if not isinstance(data, dict):
             self.crawler.stats.inc_value(f"atp/s_market_fi/bad_payload/{brand}")
-            logger.warning("s_market_fi: unexpected payload shape for %s", brand)
+            self.logger.warning("s_market_fi: unexpected payload shape for %s", brand)
             return
         results = data.get("results") or []
         if not isinstance(results, list):
             self.crawler.stats.inc_value(f"atp/s_market_fi/bad_payload/{brand}")
-            logger.warning("s_market_fi: non-list results for %s", brand)
+            self.logger.warning("s_market_fi: non-list results for %s", brand)
             return
         self.crawler.stats.inc_value(f"atp/s_market_fi/pages/{brand}")
         self.crawler.stats.inc_value(f"atp/s_market_fi/results/{brand}", len(results))
@@ -142,7 +143,7 @@ class SMarketFISpider(Spider):
             except Exception:
                 # One malformed record must not take down the page.
                 self.crawler.stats.inc_value(f"atp/s_market_fi/dropped/crashed/{brand}")
-                logger.warning("s_market_fi: dropping malformed record for %s", brand, exc_info=True)
+                self.logger.warning("s_market_fi: dropping malformed record for %s", brand, exc_info=True)
                 continue
             if item is None:
                 continue
@@ -161,7 +162,7 @@ class SMarketFISpider(Spider):
             cursor = data["nextCursor"]
             if cursor in self.seen_cursors[brand]:
                 self.crawler.stats.inc_value(f"atp/s_market_fi/repeated_cursor/{brand}")
-                logger.warning("s_market_fi: repeated cursor for %s, stopping chain", brand)
+                self.logger.warning("s_market_fi: repeated cursor for %s, stopping chain", brand)
                 return
             self.seen_cursors[brand].add(cursor)
             yield Request(
@@ -173,7 +174,7 @@ class SMarketFISpider(Spider):
         elif data.get("hasMore"):
             # Truncated chain: cursor missing but more pages claimed.
             self.crawler.stats.inc_value(f"atp/s_market_fi/truncated/{brand}")
-            logger.warning("s_market_fi: hasMore without nextCursor for %s", brand)
+            self.logger.warning("s_market_fi: hasMore without nextCursor for %s", brand)
 
     def errback(self, failure) -> None:
         # Scrapy calls errbacks as errback(failure): cb_kwargs are NOT passed
@@ -185,7 +186,7 @@ class SMarketFISpider(Spider):
         cb_kwargs = getattr(request, "cb_kwargs", None) or {}
         brand = cb_kwargs.get("brand") or (self.brand_of(request) if request is not None else None)
         self.crawler.stats.inc_value(f"atp/s_market_fi/failed/{brand or 'unknown'}")
-        logger.warning("s_market_fi: request failed for %s: %s", brand, failure.value)
+        self.logger.warning("s_market_fi: request failed for %s: %s", brand, failure.value)
 
     def dedupe_key(self, result: dict) -> tuple[str, str]:
         # Same-address records from different verticals share one key and
