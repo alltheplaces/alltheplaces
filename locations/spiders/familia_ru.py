@@ -1,6 +1,6 @@
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy.http import Request, TextResponse
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_RU, DELIMITERS_RU, NAMED_DAY_RANGES_RU, NAMED_TIMES_RU, OpeningHours
@@ -15,10 +15,6 @@ class FamiliaRUSpider(JSONBlobSpider):
     start_urls = ["https://www.famil.ru/cms/api/stores?where%5BisOn%5D%5Bequals%5D=true&limit=0&locale=ru"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     locations_key = "docs"
-
-    async def start(self) -> AsyncIterator[Request]:
-        for url in self.start_urls:
-            yield Request(url, dont_filter=True)
 
     def pre_process_data(self, feature: dict) -> None:
         feature["ref"] = feature.pop("storeId")

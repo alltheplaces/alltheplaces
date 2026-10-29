@@ -1,5 +1,5 @@
 import re
-from typing import Any, AsyncIterator
+from typing import Any
 
 from scrapy import Request, Spider
 from scrapy.http import Response
@@ -31,12 +31,10 @@ class DaiwaCycleJPSpider(Spider):
         "brand_wikidata": "Q109598687",
         "extras": Categories.SHOP_BICYCLE.value,
     }
-    allowed_domains = ["www.daiwa-cycle.co.jp"]
-
-    async def start(self) -> AsyncIterator[Request]:
-        # The map script on this page is broken, but the full store list is
-        # rendered server side, with coordinates on each list item.
-        yield Request("https://www.daiwa-cycle.co.jp/shop/default.aspx")
+    allowed_domains = ["daiwa-cycle.co.jp"]
+    # The map script on this page is broken, but the full store list is
+    # rendered server side, with coordinates on each list item.
+    start_urls = ["https://www.daiwa-cycle.co.jp/shop/default.aspx"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//section[@class="shop_list"]/ul/li'):

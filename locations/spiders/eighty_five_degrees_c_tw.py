@@ -1,8 +1,9 @@
 import re
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs
 
 from scrapy import Spider
 from scrapy.http import FormRequest
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.google_url import extract_google_position
 from locations.hours import DAYS_CN, OpeningHours
@@ -35,7 +36,7 @@ class EightyFiveDegreesCTWSpider(Spider):
     def parse_location(self, response):
         item = Feature()
         item["website"] = response.url
-        item["ref"] = parse_qs(urlparse(response.url).query)["data"][0]
+        item["ref"] = parse_qs(urlparse_cached(response).query)["data"][0]
         item["branch"] = response.xpath("//div[@class='Store_INtitle']/text()").get()
         extract_google_position(item, response)
         item["phone"] = response.xpath("//td[text()='電話']/following-sibling::td[1]/text()").get()
