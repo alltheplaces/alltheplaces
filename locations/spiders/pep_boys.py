@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.user_agents import BROWSER_DEFAULT
 
 DIRECTORY = "https://www.pepboys.com/stores"
 # The site is a Next.js application which streams the data its pages are built
@@ -41,8 +42,11 @@ class PepBoysSpider(Spider):
     allowed_domains = ["www.pepboys.com"]
     start_urls = [DIRECTORY]
     # The site refuses a caller it does not take for a person, whatever it asks
-    # for, so the requests are made from the proxy pool.
+    # for, so the requests are made from the proxy pool. Announcing ourselves a
+    # crawler on top of that would undo it, the proxy saying as much itself, so
+    # the ordinary browser agent is sent instead.
     requires_proxy = "US"
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
