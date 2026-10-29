@@ -1,7 +1,7 @@
 import re
-from urllib.parse import urlparse
 
 from scrapy.spiders import SitemapSpider
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
@@ -26,7 +26,7 @@ class JohnnysNewYorkStylePizzaUSSpider(SitemapSpider, StructuredDataSpider):
         # Two pages publish an empty name, where the title still leads with the branch.
         item["branch"] = item.pop("name", None) or response.xpath("//title/text()").re_first(r"\s*([^|]+?)\s*\|")
 
-        host = urlparse(response.url).netloc.removeprefix("www.")
+        host = urlparse_cached(response).netloc.removeprefix("www.")
         if not (brand := BRANDS.get(host)):
             self.logger.warning(f"Unrecognised brand host {host!r} on {response.url}")
             return

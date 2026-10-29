@@ -1,7 +1,8 @@
 import json
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 import scrapy
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
@@ -34,7 +35,7 @@ class JyskSpider(scrapy.Spider):
         self.logger.debug("Found %d locations on %s", len(locations), response.url)
         for location in locations:
             yield scrapy.Request(
-                "https://{}/services/store/get/{}".format(urlparse(response.url).netloc, str(location["id"])),
+                "https://{}/services/store/get/{}".format(urlparse_cached(response).netloc, str(location["id"])),
                 callback=self.parse_data,
                 cb_kwargs=dict(locator_url=response.url),
             )
