@@ -11,6 +11,7 @@ from locations.hours import OpeningHours
 class PepcoSpider(Spider):
     name = "pepco"
     item_attributes = {"brand": "Pepco", "brand_wikidata": "Q11815580"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Any]:
         for country in [
