@@ -1,19 +1,24 @@
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy.http import Request
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.geo import point_locations
-from locations.spiders.swarovski_us import SwarovskiUSSpider
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class SwarovskiEUSpider(SwarovskiUSSpider):
+class SwarovskiEUSpider(SitemapSpider, StructuredDataSpider):
     name = "swarovski_eu"
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
-    allowed_domains = ["swarovski.com"]
+    sitemap_urls = ["https://www.swarovski.com/sitemapindex.xml"]
+    sitemap_rules = [(r"https://www.swarovski.com/en-\w+/store/[^/]+/[^/]+$", "parse_sd")]
+    sitemap_follow = ["sitemap-cms"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
-    async def start(self) -> AsyncIterator[Request]:
-        point_files = "eu_centroids_120km_radius_country.csv"
-        for lat, lon in point_locations(point_files):
-            yield Request(
-                url=f"https://www.swarovski.com/en-LU/store-finder/stores/?geoPoint.latitude={lat}&geoPoint.longitude={lon}&provider=GOOGLE&allBaseStores=true&radius=120&clientTimeZoneOffset=-60",
-            )
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["addr_full"] = item.pop("street_address")
+        item["branch"] = item.pop("name").removeprefix("SWAROVSKI ")
+        item["lat"] = response.xpath("//@data-lat").get()
+        item["lon"] = response.xpath("//@data-lng").get()
+        yield item
