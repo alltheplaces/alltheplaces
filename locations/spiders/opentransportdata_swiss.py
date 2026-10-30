@@ -17,6 +17,22 @@ from locations.user_agents import BOT_USER_AGENT_SCRAPY
 # per-station properties in memory.
 Station = namedtuple("Station", "name operator operator_wikidata city country means request_stop")
 
+# The columns of the traffic point table that we use.
+TRAFFIC_POINT_COLUMNS = (
+    "designation",
+    "height",
+    "parentSloid",
+    "parentSloidServicePoint",
+    "sloid",
+    "status",
+    "trafficPointElementType",
+    "wgs84East",
+    "wgs84North",
+)
+
+# Means of transportation that run on rails, as named in the feed.
+RAIL_MEANS = ("CABLE_RAILWAY", "METRO", "RACK_RAILWAY", "TRAIN", "TRAM")
+
 # Which means of transportation determines the tagging of a stop
 # that is served by several; earlier entries win.
 MEANS_PRIORITY = {
@@ -200,7 +216,20 @@ class OpentransportdataSwissSpider(Spider):
         yield Request(url, callback=self.handle_traffic_points)
 
     def handle_traffic_points(self, response: Response) -> Iterable[Feature]:
-        for row in self.read_csv("actual-date-world-traffic-point", response):
+        # The table has two kinds of rows. A BOARDING_AREA is a larger
+        # area, such as "Perron 2" at Zürich HB with tracks 3 and 4, or
+        # a group of bus bays. A BOARDING_PLATFORM is one place where
+        # vehicles stop, such as track 3; its parentSloid is the
+        # BOARDING_AREA, if it belongs to one.
+        # We need two passes, so we keep the rows, but only the columns
+        # we use. This cuts memory from about 150 MB to 40 MB.
+        rows = [
+            {k: r[k] for k in TRAFFIC_POINT_COLUMNS if k in r}
+            for r in self.read_csv("actual-date-world-traffic-point", response)
+        ]
+        designations, positions = self.boarding_areas(rows)
+
+        for row in rows:
             if row.get("status", "VALIDATED") != "VALIDATED":
                 continue
             sloid = row["sloid"]
@@ -213,6 +242,29 @@ class OpentransportdataSwissSpider(Spider):
             station = self.stations.get(station_sloid)
             if not station:
                 continue
+
+            # In Switzerland, a railway platform (German: "Perron") usually
+            # serves two tracks, one on each side. OpenStreetMap maps such
+            # a platform as one feature, with the numbers of its tracks in
+            # local_ref, such as "3;4", and puts the local_ref of each track
+            # on the stop position where trains halt.
+            # Other boarding areas, such as "Bus 1,2" or "Tram", only group
+            # platforms and are not mapped in OpenStreetMap. The feed does
+            # not tell the means of transportation per boarding area, so
+            # only stations served by nothing but trains get railway platforms.
+            train = set(station.means) <= {"RACK_RAILWAY", "TRAIN"}
+            parent = row["parentSloid"]
+            if row["trafficPointElementType"] == "BOARDING_AREA":
+                if not train:
+                    continue
+                stop_position = False
+                local_ref = ";".join(
+                    sorted(set(designations.get(sloid, [])), key=lambda d: (self.natural_sort_key(d), d))
+                )
+            else:
+                # A boarding area's SLOID starts with that of its station.
+                stop_position = train and parent in positions and parent.startswith(station_sloid + ":")
+                local_ref = row["designation"]
 
             # Surprisingly, we don’t see in the data feed what means of
             # transportation are serving the platform, so we look at the
@@ -229,12 +281,19 @@ class OpentransportdataSwissSpider(Spider):
                 "operator": station.operator,
                 "operator:wikidata": station.operator_wikidata,
                 "ref:IFOPT": sloid,
+                "local_ref": local_ref,
                 "wheelchair": wheelchair,
                 "wheelchair:conditional": wheelchair_cond,
                 "toilets:wheelchair": self.toilets_wheelchair.get(sloid),
             }
             tags.update(self.means_tags(station.means, platform=True))
+            if stop_position:
+                tags.pop("highway", None)
+                tags["public_transport"] = "stop_position"
+                tags["railway"] = "stop"
             lat, lon, ele = self.parse_lat_lon_ele(row)
+            if sloid in positions:
+                lat, lon = positions[sloid]
             if lat == 0.0 or lon == 0.0:
                 continue
             if ele > 0:
@@ -250,6 +309,56 @@ class OpentransportdataSwissSpider(Spider):
                 ref=sloid,
                 extras=tags,
             )
+
+    def boarding_areas(self, rows: list[dict]) -> tuple[dict[str, list[str]], dict[str, tuple[float, float]]]:
+        # Returns the track designations and the position of each valid
+        # BOARDING_AREA, keyed by its sloid.
+        designations = {}  # BOARDING_AREA sloid -> designations of its BOARDING_PLATFORMs
+        track_positions = {}  # BOARDING_AREA sloid -> (lat, lon) of its BOARDING_PLATFORMs
+        areas = {}  # BOARDING_AREA sloid -> (station sloid, row)
+        tracks = []  # (station sloid, row) of BOARDING_PLATFORMs within a BOARDING_AREA
+        for row in rows:
+            parent = row["parentSloid"]
+            if row.get("status", "VALIDATED") != "VALIDATED":
+                continue
+            # Like handle_traffic_points, skip rows of unknown stations.
+            station_sloid = row["parentSloidServicePoint"] or ":".join(row["sloid"].split(":")[:4])
+            if station_sloid not in self.stations:
+                continue
+            if row["trafficPointElementType"] == "BOARDING_AREA":
+                areas[row["sloid"]] = (station_sloid, row)
+            elif parent:
+                tracks.append((station_sloid, row))
+
+        for station_sloid, row in tracks:
+            # Only count tracks of the same station as their boarding area.
+            parent = row["parentSloid"]
+            if parent not in areas or areas[parent][0] != station_sloid:
+                continue
+            if row["designation"]:
+                designations.setdefault(parent, []).append(row["designation"])
+            area_lat, area_lon, _ = self.parse_lat_lon_ele(areas[parent][1])
+            if area_lat != 0.0 and area_lon != 0.0:
+                continue  # the boarding area has its own position
+            lat, lon, _ = self.parse_lat_lon_ele(row)
+            if lat != 0.0 and lon != 0.0:
+                track_positions.setdefault(parent, []).append((lat, lon))
+
+        # Many boarding areas at train stations come without
+        # coordinates. For those, we take the center of their tracks.
+        # A boarding area without coordinates and without located tracks
+        # cannot be emitted; its tracks then become platforms themselves,
+        # so that the station does not end up without any platform.
+        positions = {}  # BOARDING_AREA sloid -> (lat, lon)
+        for sloid, (_, row) in areas.items():
+            lat, lon, _ = self.parse_lat_lon_ele(row)
+            if (lat == 0.0 or lon == 0.0) and track_positions.get(sloid):
+                points = track_positions[sloid]
+                lat = round(sum(p[0] for p in points) / len(points), 7)
+                lon = round(sum(p[1] for p in points) / len(points), 7)
+            if lat != 0.0 and lon != 0.0:
+                positions[sloid] = (lat, lon)
+        return designations, positions
 
     @staticmethod
     def parse_date(d: str | None) -> datetime.date | None:
@@ -287,15 +396,26 @@ class OpentransportdataSwissSpider(Spider):
             return None
 
     @staticmethod
-    def means_tags(means: tuple[str, ...], platform: bool) -> dict[str, str]:
-        if not means:
-            return {}
-
+    def main_means(means: tuple[str, ...]) -> str | None:
         # The feed lists the means of transportation in alphabetical
         # order, so BUS would come first even at a tram stop or railway
         # station. Instead, take the means that OpenStreetMap would
         # use for tagging the stop.
-        main = min(means, key=lambda m: MEANS_PRIORITY.get(m, len(MEANS_PRIORITY)))
+        if not means:
+            return None
+        return min(means, key=lambda m: MEANS_PRIORITY.get(m, len(MEANS_PRIORITY)))
+
+    @staticmethod
+    def natural_sort_key(s: str) -> tuple:
+        # Sorts track "9" before "10".
+        return tuple((0, int(p), "") if p.isdecimal() else (1, 0, p) for p in re.split(r"(\d+)", s) if p)
+
+    @staticmethod
+    def means_tags(means: tuple[str, ...], platform: bool) -> dict[str, str]:
+        if not means:
+            return {}
+
+        main = OpentransportdataSwissSpider.main_means(means)
 
         # In the feed, CABLE_CAR is an aerial cable car ("Luftseilbahn")
         # and CABLE_RAILWAY is a funicular ("Standseilbahn").
@@ -325,7 +445,7 @@ class OpentransportdataSwissSpider(Spider):
         }
         if platform:
             # Tag platforms like OpenStreetMap does, not like stations.
-            if main in ("CABLE_RAILWAY", "METRO", "RACK_RAILWAY", "TRAIN", "TRAM"):
+            if main in RAIL_MEANS:
                 tags["railway"] = "platform"
             elif main == "BUS":
                 tags["highway"] = "bus_stop"
@@ -359,7 +479,7 @@ class OpentransportdataSwissSpider(Spider):
         acc = self.wheelchair_accessible.get(sloid)
         if not acc or not means:
             return None, None
-        rail_means = {"CABLE_CAR", "CABLE_RAILWAY", "METRO", "TRAIN", "TRAM"}
+        rail_means = {"CABLE_CAR", "CABLE_RAILWAY", "METRO", "RACK_RAILWAY", "TRAIN", "TRAM"}
         has_rail = any(m in rail_means for m in means)
         has_nonrail = any(m not in rail_means for m in means)
         values = []
