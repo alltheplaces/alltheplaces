@@ -9,14 +9,6 @@ from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# The locations page lists every restaurant as a result card carrying its id,
-# coordinates and page URL in data attributes. Address, phone and hours are only
-# on each restaurant's page, as an address paragraph, a tel: link and a table of
-# day and time rows.
-#
-# The list includes restaurants in Canada, France and the Philippines; their
-# addresses carry no US state and postcode, and they are skipped.
-
 
 class EarlOfSandwichUSSpider(Spider):
     name = "earl_of_sandwich_us"

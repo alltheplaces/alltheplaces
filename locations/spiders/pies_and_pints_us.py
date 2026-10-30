@@ -8,13 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Every restaurant is a block on the one store locations page. The address and
-# phone share a single pipe separated line, and opening hours are written as
-# "<days>: <times>" pairs.
-#
-# No coordinates are published anywhere on the site, and there are no per
-# location pages, so features carry an address but no geometry.
-
 
 class PiesAndPintsUSSpider(Spider):
     name = "pies_and_pints_us"

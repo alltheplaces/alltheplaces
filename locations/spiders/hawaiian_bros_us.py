@@ -8,14 +8,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# The locations page is a Webflow collection. Every restaurant is a card with
-# its coordinates and city in data attributes, the address split across inline
-# divs, and the hours as free text.
-#
-# Restaurants that have not opened yet, and temporarily closed ones, are marked
-# by a tag that Webflow leaves in the markup and hides with the
-# w-condition-invisible class, so the visible tag is what identifies them.
-
 
 class HawaiianBrosUSSpider(Spider):
     name = "hawaiian_bros_us"

@@ -8,13 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 
-# The bakery finder is served by Blipstar. Its searchdbnew endpoint returns
-# every US bakery in one response when asked for a large enough page, with the
-# first element of the array being a header rather than a bakery.
-#
-# Addresses arrive as one string and hours as a field per day, written as
-# "7AM-6PM" or "CLOSED".
-
 
 class GreatHarvestBreadUSSpider(Spider):
     name = "great_harvest_bread_us"

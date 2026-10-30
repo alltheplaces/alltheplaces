@@ -12,23 +12,6 @@ from locations.items import Feature
 
 logger = logging.getLogger(__name__)
 
-# Museot.fi is the joint web service of the Finnish Museum Card network
-# (Museokortti), run by FMA Creations Oy, wholly owned by the Finnish
-# Museums Association (Suomen museoliitto). Each museum maintains its own
-# record, so items are independent POIs with no shared brand or operator.
-# Verified 2026-10-14. Sitemap carries 365 museums x3 languages (1095 locs).
-# Government open-data spiders (ptv_fi, helsinki_servicemap_fi) cover some of
-# the same venues with a narrower field set and coexist per repo convention.
-# A dozen source-labelled Museo records are primarily a working church,
-# gardens, galleries, visitor centres or event venues (descriptions
-# checked); they map via NON_MUSEUM_CATEGORIES, and two event/tour records
-# drop with documented homes. Castle, ship and science-centre museums keep
-# documented homes. Castle, ship and science-centre museums keep MUSEUM as
-# their primary function; new slugs default to MUSEUM.
-# Step-free access, accessible wc and dogs-allowed tag from formal topic-link criteria.
-# No open license is declared on the directory data, so no
-# dataset_attributes license is declared here.
-
 
 class MuseotFISpider(SitemapSpider):
     name = "museot_fi"

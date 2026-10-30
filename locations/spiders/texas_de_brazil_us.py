@@ -7,14 +7,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The locations page carries a window.locationsData array of map pins, each
-# with the restaurant's page. Those pages hold a schema.org Restaurant record
-# with a clean address, coordinates, phone and hours.
-#
-# The chain also operates outside the US, so records are filtered on the
-# record's own addressCountry. Restaurants that have not opened yet have no
-# Restaurant record at all and are skipped by the wanted type.
-
 
 class TexasDeBrazilUSSpider(StructuredDataSpider):
     name = "texas_de_brazil_us"

@@ -9,13 +9,6 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# The locations page links to a page per restaurant, each carrying a Location
-# block with the address and phone and an Hours block written as free text such
-# as "SUN - THURS, 4 - 9 PM".
-#
-# No coordinates are published: the address links are goo.gl short links that
-# would need resolving one by one.
-
 
 class OceanPrimeUSSpider(Spider):
     name = "ocean_prime_us"

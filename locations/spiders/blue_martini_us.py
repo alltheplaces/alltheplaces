@@ -8,13 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
-# Every lounge has its own subdomain, linked from the brand site's navigation,
-# and publishes its address, phone and hours on a /contact/ page as an icon
-# prefixed list.
-#
-# The map links are goo.gl short links, so no coordinates are available without
-# resolving each one.
-
 
 class BlueMartiniUSSpider(Spider):
     name = "blue_martini_us"

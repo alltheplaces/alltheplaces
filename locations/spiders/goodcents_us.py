@@ -7,12 +7,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# Location pages are listed in the sitemap alongside the site map directory
-# pages, and carry a schema.org Restaurant record with address, coordinates,
-# phone and hours.
-#
-# The record's name is "Goodcents - 1021", which holds the store number.
-
 
 class GoodcentsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "goodcents_us"

@@ -6,12 +6,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
-# Chief Markets runs the Agile Store Locator WordPress plugin, which returns
-# every store in one admin-ajax.php response.
-#
-# Its website field holds a malformed URL ("http:///Bryan") on every record, and
-# the description is the same marketing line throughout.
-
 
 class ChiefMarketsUSSpider(AgileStoreLocatorSpider):
     name = "chief_markets_us"

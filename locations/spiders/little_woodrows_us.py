@@ -7,15 +7,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.structured_data_spider import StructuredDataSpider
 
-# Each bar has a page carrying a schema.org LocalBusiness record with
-# coordinates, phone and an amenity list.
-#
-# Its streetAddress holds the whole address as one string, and its postalCode
-# is empty, so both the street and the postcode are taken from that string.
-#
-# No opening hours are published: the pages only carry a marketing line such as
-# "Open until 2am".
-
 
 class LittleWoodrowsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "little_woodrows_us"

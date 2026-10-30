@@ -10,13 +10,6 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# The locations page is a Next.js app whose page data holds every restaurant,
-# with the address split into lines, coordinates, phone and a per day hours
-# list.
-#
-# Those hours are free text and vary between restaurants: "11:00am - 12:00am",
-# "11am - 11pm", "11:00am - Midnight" and so on.
-
 
 class EurekaUSSpider(Spider):
     name = "eureka_us"

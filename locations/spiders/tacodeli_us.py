@@ -6,15 +6,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# Location pages come from the locator subdomain's sitemap, which also lists
-# the directory pages, so only the two level paths are followed.
-#
-# Each page carries a schema.org Restaurant record with address, coordinates,
-# phone, hours and an amenityFeature list.
-#
-# The record's name is the brand, so the branch comes from the page heading,
-# whose first line is also the brand.
-
 
 class TacodeliUSSpider(SitemapSpider, StructuredDataSpider):
     name = "tacodeli_us"

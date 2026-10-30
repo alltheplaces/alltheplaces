@@ -6,12 +6,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
-# MassageLuXe runs the Agile Store Locator WordPress plugin, which returns
-# every spa in one admin-ajax.php response.
-#
-# Some records spell the state out rather than using its code, which the
-# project's state clean up pipeline normalises.
-
 
 class MassageluxeUSSpider(AgileStoreLocatorSpider):
     name = "massageluxe_us"

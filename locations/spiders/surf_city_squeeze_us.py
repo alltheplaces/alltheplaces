@@ -9,13 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
-# Surf City Squeeze is a Kahala Brands franchise, and its locator page writes
-# every store onto the page as a series of Locator.stores[n] = {...} JavaScript
-# assignments. Stores that have not opened yet are marked "Coming Soon".
-#
-# Most stores sit in a mall food court, named either in LocationHelp or in the
-# free text Name field, which otherwise just repeats the city and state.
-
 
 class SurfCitySqueezeUSSpider(Spider):
     name = "surf_city_squeeze_us"

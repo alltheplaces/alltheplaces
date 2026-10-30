@@ -6,14 +6,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The SOCi location directory lists a page per restaurant in its sitemap,
-# alongside the state and city index pages. Each restaurant page carries a
-# schema.org FastFoodRestaurant record with address, coordinates, phone and
-# hours.
-#
-# The record's name is the branch, and the same brand logo appears on every
-# page.
-
 
 class BarberitosUSSpider(SitemapSpider, StructuredDataSpider):
     name = "barberitos_us"

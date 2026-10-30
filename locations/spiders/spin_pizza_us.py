@@ -9,13 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# The locations page lists each restaurant as a card holding the address a line
-# at a time, the phone and the hours, and passes the coordinates separately in
-# a "locations" JavaScript array keyed by the same id.
-#
-# Closed restaurants are commented out of that array, and holiday notices are
-# commented out inside the hours block.
-
 
 class SpinPizzaUSSpider(Spider):
     name = "spin_pizza_us"

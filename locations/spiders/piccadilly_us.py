@@ -8,13 +8,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# The locations page is a Next.js app whose restaurant data arrives in the
-# React Server Components stream as self.__next_f.push() chunks. Joined and
-# decoded, they contain an "initialValue" array with the address as one string,
-# coordinates and phone.
-#
-# Records carry isClosed and isInActive flags, which are honoured.
-
 
 class PiccadillyUSSpider(Spider):
     name = "piccadilly_us"

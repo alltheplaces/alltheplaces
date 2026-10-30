@@ -16,18 +16,6 @@ logger = logging.getLogger(__name__)
 # No open license is declared on S Group store data, so no
 # dataset_attributes license is declared here.
 
-# ABC is the S Group fuel-station chain (brand ABC / Q10397504, NSI
-# abc-1c8a41): service stations, unmanned automaattiasema points and the
-# marina fuel point. Crawls the first-party stations sitemap and reads the
-# Next.js __NEXT_DATA__ payload per page (abcasemat.fi serves Scrapy
-# normally, unlike s-kaupat.fi which 429s). Verified 2026-10-08.
-#
-# Companion to s_market_fi, which drops every abcasemat.fi record: ABC
-# station views of grocery stores (cf. ABC S-market Isojoki) are fuel POIs
-# here, not grocery items there. Lataus/carwash/parking/non-ABC pages drop
-# by brand below; ABC-lataus gets its own spider. Seasonally closed Inkoo
-# is dropped by the name rule until its signed name returns.
-
 
 class AbcFISpider(SitemapSpider):
     name = "abc_fi"

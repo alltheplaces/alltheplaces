@@ -7,7 +7,6 @@ from locations.pipelines.address_clean_up import clean_address
 SAE_INSTITUTE_SHARED_ATTRIBUTES = {"brand": "SAE Institute", "brand_wikidata": "Q201438"}
 
 
-# Also used by UK, US
 class SaeInstituteAUSpider(Spider):
     name = "sae_institute_au"
     start_urls = ["https://sae.edu.au/contact-us/"]

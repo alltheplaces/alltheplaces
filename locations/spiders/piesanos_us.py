@@ -5,9 +5,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The locations page links to a page per restaurant, each carrying a schema.org
-# Restaurant record with address, coordinates, phone and hours.
-
 
 class PiesanosUSSpider(StructuredDataSpider):
     name = "piesanos_us"

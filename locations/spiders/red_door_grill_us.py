@@ -6,12 +6,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# The locations page links each restaurant to Red Door's Appfront ordering
-# app, whose public branch endpoint has cleaner addresses and coordinates.
-#
-# The API also includes one "Retail & Merchandise" branch, which is not a
-# restaurant and is skipped.
-
 
 class RedDoorGrillUSSpider(Spider):
     name = "red_door_grill_us"

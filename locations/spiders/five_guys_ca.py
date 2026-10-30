@@ -4,8 +4,6 @@ from locations.items import Feature
 from locations.spiders.five_guys_us import FIVE_GUYS_SHARED_ATTRIBUTES
 from locations.storefinders.yext_search import YextSearchSpider
 
-# Five Guys YextSearch
-
 
 class FiveGuysCASpider(YextSearchSpider):
     name = "five_guys_ca"

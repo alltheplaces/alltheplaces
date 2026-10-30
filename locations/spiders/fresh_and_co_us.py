@@ -8,13 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# The locations page carries every restaurant as a subOrganization of the
-# brand's schema.org Organization record, with the address, phone and an
-# openingHours list already in OSM syntax.
-#
-# No coordinates are published: the map links are Google address searches, and
-# the newer restaurants publish neither hours nor a phone.
-
 
 class FreshAndCOUSSpider(Spider):
     name = "fresh_and_co_us"

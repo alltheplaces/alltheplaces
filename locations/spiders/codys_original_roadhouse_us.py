@@ -8,17 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Cody's runs on Wix and publishes no structured data, so each restaurant page
-# is read as text. The address, phone and hours sit together in one rich text
-# block, e.g.
-#
-#     895 Cortez Rd W, Bradenton, FL 34207
-#     Order Pickup: 941 -727-6700
-#     Monday - Friday: 3pm - 10pm
-#
-# Restaurants are the navigation entries labelled "<city>, FL". No coordinates
-# are published anywhere on the site, so features have no geometry.
-
 
 class CodysOriginalRoadhouseUSSpider(Spider):
     name = "codys_original_roadhouse_us"
