@@ -6,6 +6,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class WhidbeyCoffeeUSSpider(SitemapSpider):
@@ -36,9 +37,8 @@ class WhidbeyCoffeeUSSpider(SitemapSpider):
         elif m := re.search(r"/@(-?[\d.]+),(-?[\d.]+)", response.text):
             item["lat"], item["lon"] = m.groups()
 
-        address_lines = [t.strip() for t in location_block.xpath(".//a//text()").getall() if t.strip()]
-        if address_lines:
-            item["addr_full"] = ", ".join(address_lines)
+        if address := merge_address_lines(location_block.xpath(".//a//text()").getall()):
+            item["addr_full"] = address
 
         phone_block = response.xpath('//p[strong[contains(text(), "Phone")]]')
         if phone_block:

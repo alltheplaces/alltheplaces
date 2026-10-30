@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -50,6 +51,6 @@ class UnimoniINSpider(scrapy.Spider):
         item["branch"] = kwargs["branch"]
         item["ref"] = kwargs["branch_code"]
         item["state"] = kwargs["state"]
-        item["addr_full"] = ", ".join(filter(None, [data.get("address1"), data.get("address2"), data.get("address3")]))
+        item["addr_full"] = merge_address_lines([data.get("address1"), data.get("address2"), data.get("address3")])
         apply_category(Categories.BUREAU_DE_CHANGE, item)
         yield item
