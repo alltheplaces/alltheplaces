@@ -1,5 +1,6 @@
 from locations.items import Feature
 from locations.licenses import Licenses
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.addresses.gb.owen_base_spider import OwenBaseSpider
 
 
@@ -22,6 +23,6 @@ class GbCamdenSpider(OwenBaseSpider):
             if component not in ["", "LONDON", "GREATER LONDON", "CAMDEN"]:
                 street_address.append(component)
 
-        item["street_address"] = ", ".join(street_address)
+        item["street_address"] = merge_address_lines(street_address)
         item["extras"]["addr:suburb"] = "Camden"
         item["city"] = "London"

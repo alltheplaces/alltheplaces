@@ -6,6 +6,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.structured_data_spider import StructuredDataSpider
 
 # Location pages come from the site's sitemap, which also lists a private
@@ -60,7 +61,7 @@ class BoqueriaUSSpider(SitemapSpider, StructuredDataSpider):
             (match for line in lines if (match := re.fullmatch(r"(.+?),?\s+([A-Z]{2})\s+(\d{5})", line))), None
         ):
             item["city"], item["state"], item["postcode"] = locality.groups()
-            item["street_address"] = ", ".join(lines[: lines.index(locality.group(0))])
+            item["street_address"] = merge_address_lines(lines[: lines.index(locality.group(0))])
         else:
             # Boston and West Hartford publish only their street.
             item["street_address"] = lines[0]
