@@ -10,6 +10,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 def _varint(buf: memoryview, i: int) -> tuple[int, int]:
@@ -198,7 +199,7 @@ class PostnordLetterBoxesSESpider(Spider):
         item["ref"] = str(box["id"])
         item["lat"] = round(lat, 6)
         item["lon"] = round(lon, 6)
-        item["street_address"] = ", ".join(filter(None, [box.get("address"), box.get("address2")]))
+        item["street_address"] = merge_address_lines([box.get("address"), box.get("address2")])
         item["postcode"] = box.get("postalcode")
         item["city"] = box.get("postalcity")
         apply_category(Categories.POST_BOX, item)

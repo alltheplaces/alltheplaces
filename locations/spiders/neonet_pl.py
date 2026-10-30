@@ -8,6 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class NeonetPLSpider(JSONBlobSpider):
@@ -22,7 +23,7 @@ class NeonetPLSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        item["street_address"] = ", ".join(feature["address"].get("lines") or [])
+        item["street_address"] = merge_address_lines(feature["address"].get("lines") or [])
         item["website"] = urljoin("https://www.neonet.pl/kontakt/", feature["safetyName"])
 
         item["opening_hours"] = OpeningHours()

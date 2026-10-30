@@ -2,6 +2,7 @@ import scrapy
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class NewyorkerSpider(scrapy.Spider):
@@ -20,7 +21,7 @@ class NewyorkerSpider(scrapy.Spider):
             address_data = store["address"]
             item = DictParser.parse(store)
             item["name"] = address_data["headline"]
-            item["addr_full"] = ", ".join(
+            item["addr_full"] = merge_address_lines(
                 filter(
                     None,
                     [address_data["address_line_1"], address_data["address_line_2"], address_data["address_line_3"]],
