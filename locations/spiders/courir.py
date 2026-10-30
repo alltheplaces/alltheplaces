@@ -4,6 +4,7 @@ from typing import Any, Iterable
 from scrapy.http import Request, Response, TextResponse
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -11,8 +12,8 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class CourirSpider(SitemapSpider):
     name = "courir"
-    item_attributes = {"brand": "Courir", "brand_wikidata": "Q3001258"}
-    # The FR sitemap also covers BE, LU and MC; Spanish stores are only in the ES one.
+    item_attributes = {"brand": "Courir", "brand_wikidata": "Q3001258", "name": "Courir"}
+    # The FR sitemap covers FR, BE, LU and MC; most Spanish stores are only in the ES one.
     sitemap_urls = [
         "https://www.courir.com/fr/sitemap-custom-storeloc-fr.xml",
         "https://www.courir.es/es/sitemap-custom-storeloc-es.xml",
@@ -42,6 +43,9 @@ class CourirSpider(SitemapSpider):
         item["branch"] = re.sub(r"^COURIR\s+", "", item.pop("name", None) or "", flags=re.IGNORECASE)
         item["street_address"] = merge_address_lines([store.get("address1"), store.get("address2")])
         item["phone"] = store.get("phoneNumber")
+        # The source tags the Monaco store as FR.
+        if item.get("country") == "FR" and (item.get("postcode") or "").startswith("980"):
+            item["country"] = "MC"
         if item.get("country") == "ES":
             item["website"] = f"https://www.courir.es/es/tienda?StoreID={item['ref']}"
         else:
@@ -55,4 +59,6 @@ class CourirSpider(SitemapSpider):
                 for open_time, close_time in ranges:
                     item["opening_hours"].add_range(day, open_time, close_time)
 
+        # NSI's Courir entry doesn't cover Monaco.
+        apply_category(Categories.SHOP_SHOES, item)
         yield item
