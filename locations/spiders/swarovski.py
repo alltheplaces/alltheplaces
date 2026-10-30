@@ -8,8 +8,8 @@ from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class SwarovskiEUSpider(SitemapSpider, StructuredDataSpider):
-    name = "swarovski_eu"
+class SwarovskiSpider(SitemapSpider, StructuredDataSpider):
+    name = "swarovski"
     item_attributes = {"brand": "Swarovski", "brand_wikidata": "Q611115"}
     sitemap_urls = ["https://www.swarovski.com/sitemapindex.xml"]
     sitemap_rules = [(r"https://www.swarovski.com/en-\w+/store/[^/]+/[^/]+$", "parse_sd")]
