@@ -1,29 +1,40 @@
-from scrapy.http import Response
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import json
+import re
+from typing import Iterable
 
-from locations.categories import Categories, apply_category
+from scrapy.http import Response
+
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.decathlon_fr import DecathlonFRSpider
-from locations.structured_data_spider import StructuredDataSpider
-from locations.user_agents import BROWSER_DEFAULT
 
 
-class DecathlonSKSpider(CrawlSpider, StructuredDataSpider, PlaywrightSpider):
+class DecathlonSKSpider(PlaywrightSpider):
     name = "decathlon_sk"
     item_attributes = DecathlonFRSpider.item_attributes
     allowed_domains = ["www.decathlon.sk"]
-    start_urls = ["https://www.decathlon.sk/content/24-filialen-decathlon"]
-    rules = [Rule(LinkExtractor(allow=r"/content/(\d+)-store-"), "parse_sd")]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
-        "ROBOTSTXT_OBEY": False,
-        "USER_AGENT": BROWSER_DEFAULT,
-    }
+    start_urls = ["https://www.decathlon.sk/store-locator"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["branch"] = item.pop("name").removeprefix("Decathlon ")
-        apply_category(Categories.SHOP_SPORTS, item)
-        yield item
+    def parse(self, response: Response) -> Iterable[Feature]:
+        stores = json.loads(
+            re.search(
+                r"stores\":(\[.+\]),\"administrativeAreaLevels",
+                response.xpath('//*[contains(text(),"postalCode")]/text()').get().replace("\\", ""),
+            ).group(1)
+        )
+        for store in stores:
+            item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
+            item["street_address"] = item.pop("street_address")
+            oh = OpeningHours()
+            for day_time in store.get("workingHours"):
+                day = day_time.get("day")
+                open_time = day_time.get("openHour")
+                close_time = day_time.get("closeHour")
+                oh.add_range(day, open_time, close_time)
+            item["opening_hours"] = oh
+            yield item
