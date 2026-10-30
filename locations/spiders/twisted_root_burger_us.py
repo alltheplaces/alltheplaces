@@ -8,12 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# The locations page is a Webflow collection, each card giving the address on
-# two lines, the phone, and the hours as alternating day and time lines such as
-# "Sunday - Thursday" then "11:00 am - 10:00 pm".
-#
-# No coordinates are published: the address links are Google short links.
-
 ADDRESS = re.compile(r"(.+?),\s*([A-Z]{2})\s+(\d{5})")
 
 
@@ -34,7 +28,6 @@ class TwistedRootBurgerUSSpider(Spider):
                 continue
 
             item = Feature()
-            # "ABILENE"
             item["branch"] = (card.xpath(".//h1/text()").get("") or "").title().strip()
             item["street_address"] = lines[0]
             item["city"], item["state"], item["postcode"] = locality.groups()

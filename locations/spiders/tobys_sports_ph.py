@@ -49,20 +49,3 @@ class TobysSportsPHSpider(Spider):
 
             apply_category(Categories.SHOP_SPORTS, item)
             yield item
-
-
-#             item["phone"] = store.xpath(
-# 'normalize-space(.//strong[contains(.,"Landline")]/following-sibling::text()[1])'
-# ).get()
-#             item["addr_full"] = store.xpath(
-# 'normalize-space(.//strong[contains(.,"Address")]/following-sibling::text()[1])'
-# ).get(),
-#             apply_category(Categories.SHOP_SPORTS, item)
-#             try:
-#                 oh = OpeningHours()
-#                 oh.add_ranges_from_string(''.join(store.xpath('.//strong[contains(.,"Store Hours")]/following-sibling::text()').getall()).strip().strip())
-#                 item["opening_hours"] = oh
-#             except:
-#                 pass
-#             yield item
-#
