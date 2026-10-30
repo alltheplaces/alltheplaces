@@ -19,7 +19,7 @@ class UpdateFitnessCHSpider(StructuredDataSpider):
             yield response.follow(studio, callback=self.parse_sd)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
-        item["branch"] = item.pop("name").removeprefix("update Fitness ")
+        item["branch"] = (item.pop("name", None) or "").removeprefix("update Fitness ")
         item["website"] = item["ref"] = response.url
         apply_category(Categories.GYM, item)
         yield item
