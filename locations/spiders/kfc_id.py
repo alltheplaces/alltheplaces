@@ -14,6 +14,7 @@ from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 class KfcIDSpider(Spider):
     name = "kfc_id"
     item_attributes = KFC_SHARED_ATTRIBUTES
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for city in city_locations("ID", 15000):
