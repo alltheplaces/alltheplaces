@@ -44,7 +44,6 @@ class CashServicesFRSpider(CrawlSpider):
         item = Feature()
         item["ref"] = response.url
 
-        # Extract name from breadcrumb
         item["name"] = response.xpath('//li[@aria-current="page"]//span[@itemprop="name"]/text()').get()
 
         # Extract coordinates from JavaScript (_Data$Value2 = lat, _Data$Value3 = lon)

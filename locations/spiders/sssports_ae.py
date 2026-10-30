@@ -22,7 +22,6 @@ class SssportsAESpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location.get("ID")
 
-            # Build street address
             address_parts = []
             if location.get("address1"):
                 address_parts.append(location["address1"])
@@ -30,7 +29,6 @@ class SssportsAESpider(Spider):
                 address_parts.append(location["address2"])
             item["street_address"] = ", ".join(address_parts) if address_parts else None
 
-            # Parse hours
             if store_hours := location.get("storeHours"):
                 oh = OpeningHours()
                 for day_data in store_hours:

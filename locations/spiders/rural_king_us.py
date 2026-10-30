@@ -73,7 +73,6 @@ class RuralKingUSSpider(Spider):
         """Parse individual store page to extract services"""
         store = response.meta.get("store_data")
 
-        # Extract services from the page
         services = []
         service_elements = response.css(".storelocatorServiceOffer-offer__label::text").getall()
         for service in service_elements:
@@ -107,24 +106,20 @@ class RuralKingUSSpider(Spider):
             "lon": float(store.get("longitude")),
         }
 
-        # Extract email if available
         for attribute in store.get("Attribute", []):
             if attribute.get("name") == "Email":
                 properties["email"] = attribute.get("value")
                 break
 
-        # Get store image if available
         for description in store.get("Description", []):
             if "thumbnail" in description:
                 properties["image"] = description.get("thumbnail")
                 break
 
-        # Add hours
         hours = self.parse_hours(store)
         if hours:
             properties["opening_hours"] = hours
 
-        # Create the feature
         item = Feature(**properties)
 
         # Apply shop category - Rural King is an agrarian/farm supply store

@@ -33,12 +33,10 @@ class UnderArmourAESASpider(Spider):
             item = DictParser.parse(store)
             item["ref"] = store.get("ID")
 
-            # Clean up phone number
             if phone := store.get("phone"):
                 if phone.startswith("Phone"):
                     item["phone"] = phone[5:].strip()
 
-            # Build street address
             address_parts = []
             if store.get("address1"):
                 address_parts.append(store["address1"])
@@ -46,7 +44,6 @@ class UnderArmourAESASpider(Spider):
                 address_parts.append(store["address2"])
             item["street_address"] = ", ".join(address_parts) if address_parts else None
 
-            # Parse hours
             if store_hours := store.get("storeHours"):
                 oh = OpeningHours()
                 for day_data in store_hours:
