@@ -13,11 +13,12 @@ class LawsonBankJPSpider(EMapSpider):
         "brand": "ローソン銀行",
         "brand_wikidata": "Q11350963",
     }
+
     async def start(self):
         self.transformer = Transformer.from_pipeline("EPSG:15484")
         async for req in super().start():
             yield req
-    
+
     def parse_row(self, row):
         item = Feature()
         item["ref"] = row[0]
