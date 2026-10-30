@@ -8,23 +8,6 @@ from parsel import Selector
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# “Ich tanke Strom“, charging stations for electric vehicles.
-# Published as Open Data by the Swiss Federal Office of Energy.
-#
-# https://ich-tanke-strom.ch/
-# https://opendata.swiss/en/dataset/ladestationen-fuer-elektroautos
-#
-# Most charging stations are located in Switzerland, but the data feed
-# also includes a small number of stations in various other countries,
-# such as Israel or Laos, if they happen to be owned or operated by
-# Swiss companies. In particular, there is one Swiss start-up that
-# manufactures do-it-yourself kits for charging stations and sells
-# them around the world; their customers become part of a global,
-# public charging network. The Swiss company then submits its (global)
-# charging station locations to the Swiss Federal Office of Energy,
-# which aggregates them it with all other data from Swiss companies,
-# and publishes the result as a single data feed.
-
 
 class IchTankeStromSpider(scrapy.Spider):
     name = "ich_tanke_strom"

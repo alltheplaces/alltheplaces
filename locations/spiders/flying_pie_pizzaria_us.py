@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # The page heading is a marketing line rather than the branch, so the branch
 # comes from the page title.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 

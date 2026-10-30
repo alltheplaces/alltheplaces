@@ -8,11 +8,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# The chain's ordering platform, Novadine, returns every store in one response
-# with address, coordinates, phone and per day hours.
-#
-# Two rows are not stores: a "Gift Card" entry and a "Test Lab".
-
 
 class CleanJuiceUSSpider(Spider):
     name = "clean_juice_us"

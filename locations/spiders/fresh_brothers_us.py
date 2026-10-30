@@ -7,17 +7,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
-# The locations page links to a page per restaurant, each carrying a schema.org
-# Restaurant record with the address and phone.
-#
-# The record's hours are in a description field ("10:30am-9pm") rather than
-# opens and closes, so they are parsed here.
-#
-# Coordinates come from the Google Maps place link, which some restaurants
-# replace with an address search.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class FreshBrothersUSSpider(StructuredDataSpider):
     name = "fresh_brothers_us"

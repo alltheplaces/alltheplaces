@@ -20,10 +20,5 @@ class WilkoGBSpider(Spider):
             item = DictParser.parse(location)
             if "Collection" not in item["name"]:
                 item["street_address"] = merge_address_lines([location["addressExtra"], location["streetAndNumber"]])
-                #                address=location["streetAndNumber"].replace(" ","-")
-                #                city=location["city"]
-                #                id=location["identifier"]
-                #                slug=city +"/"+ address +"/" +id
-                #                item["website"] = urljoin("https://www.wilko.com/en-uk/stores/l/", slug)
 
                 yield item

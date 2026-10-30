@@ -12,9 +12,6 @@ class BakersBaristasGBIESpider(JSONBlobSpider):
         "brand_wikidata": "Q85199581",
         "brand": "Bakers + Baristas",
     }
-    # allowed_domains = [
-    #     "www.bakersbaristas.com",
-    # ]
     start_urls = ["https://matthews42.sg-host.com/test-location-app/store-locations.php"]
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

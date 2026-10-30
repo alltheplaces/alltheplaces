@@ -17,8 +17,6 @@ from locations.items import Feature
 # commas, sometimes split across lines by a <br>, sometimes with no comma
 # between street and city, and the stadium concession adds a venue name and a
 # note.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BurgatoryUSSpider(Spider):

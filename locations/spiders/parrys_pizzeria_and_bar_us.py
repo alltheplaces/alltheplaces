@@ -9,18 +9,6 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# Parry's publishes one page per location, but two page templates are in use and
-# they expose different things:
-#
-#   * the older template marks the address up with schema.org microdata and
-#     links the phone number with a tel: URL, but has no coordinates, and
-#   * the newer template has an embedded Google map carrying coordinates, with
-#     the address, phone and hours written as plain paragraphs that are only
-#     identifiable by the icon image each one starts with.
-#
-# Both are parsed below. No brand:wikidata is set because the chain has no
-# Wikidata item.
-
 
 class ParrysPizzeriaAndBarUSSpider(SitemapSpider):
     name = "parrys_pizzeria_and_bar_us"

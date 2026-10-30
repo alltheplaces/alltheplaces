@@ -7,15 +7,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# Location pages come from the site's location sitemap and carry a schema.org
-# Restaurant record with address, coordinates, phone and hours.
-#
-# Each page also has a second, hand written LocalBusiness block that is broken
-# with <br /> tags and cannot be parsed; only the Restaurant record is used.
-# A handful of records have no geo block, so those features have no geometry.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class PicklemansUSSpider(SitemapSpider, StructuredDataSpider):
     name = "picklemans_us"

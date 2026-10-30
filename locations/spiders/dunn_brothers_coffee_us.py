@@ -8,13 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
-# Store pages come from the locator subdomain's gzipped sitemap and carry a
-# schema.org CafeOrCoffeeShop record with coordinates and the phone number
-# nested inside the address.
-#
-# Its openingHours is one run-on string, "Su 07:00 - 15:00 Mo 06:00 - 16:00
-# ...", which the linked data parser cannot read.
-
 
 class DunnBrothersCoffeeUSSpider(SitemapSpider, StructuredDataSpider):
     name = "dunn_brothers_coffee_us"

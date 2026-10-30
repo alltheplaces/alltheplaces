@@ -8,14 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# The locations page builds its map from a series of pointMapJSON.push({...})
-# calls in an inline script, one per restaurant, each with a title, coordinates
-# and an info window description built by concatenating string literals. The
-# description holds the address, phone and the restaurant's own page.
-#
-# One restaurant is marked "(Temporarily Closed)" in its title and is skipped.
-# No opening hours are published on this page.
-
 
 class RodizioGrillUSSpider(Spider):
     name = "rodizio_grill_us"

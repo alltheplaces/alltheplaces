@@ -9,16 +9,6 @@ from scrapy.selector import Selector
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# Palokuntahaku (24365.fi) lists Finnish volunteer/professional fire
-# brigades (~765 rows). The index carries name + municipality only, so
-# each row's detail POST returns address, contacts, rescue department
-# and site-published map coordinates. No license is declared on the
-# source, so no dataset_attributes is set (first-party facts track).
-# Independent brigades share no brand, so brand/operator fields stay
-# per-location (operator = rescue department). Brigade staffing model
-# maps to fire_station:type (voluntary/retained/industrial/military).
-# Verified 2026-10-15.
-
 
 class PalokuntahakuFISpider(Spider):
     name = "palokuntahaku_fi"

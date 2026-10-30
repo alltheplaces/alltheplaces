@@ -7,16 +7,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# The locations page lists each restaurant as an info list item holding the
-# branch as a heading and the street, "city, state" and phone as lines below.
-#
-# Restaurants that have not opened are marked "Coming Soon" and carry no phone
-# or full address.
-#
-# The page publishes no postcodes, coordinates or hours.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class PizzaWorldUSSpider(Spider):
     name = "pizza_world_us"

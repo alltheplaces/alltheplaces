@@ -5,14 +5,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The locations page links to a page per restaurant, each carrying a schema.org
-# Restaurant record with address, coordinates, phone and hours.
-#
-# The record's name is a marketing title, so the branch comes from the page
-# path.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BeauJosUSSpider(StructuredDataSpider):
     name = "beau_jos_us"

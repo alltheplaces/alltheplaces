@@ -15,10 +15,6 @@ from locations.items import Feature
 # "Commercial & Consumer", "Truck Tire Center") are tagged as shops, and the
 # distribution centres as warehouses. Retread plants are industrial sites
 # rather than shops, and are skipped.
-#
-# No opening hours are published on this page.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 WAREHOUSES = {"Distribution Services", "Central Distribution"}
 SKIPPED = {"Retread"}

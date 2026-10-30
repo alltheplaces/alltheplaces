@@ -10,11 +10,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# The locations page is a Next.js app built with Builder.io. Its restaurant
-# data arrives in the React Server Components stream as self.__next_f.push()
-# chunks; joined and decoded, they contain a "locations" array with address,
-# coordinates, per day hours and service flags for every restaurant.
-
 
 class ZippysUSSpider(Spider):
     name = "zippys_us"

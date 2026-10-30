@@ -9,18 +9,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# The store locator is initialised from an ajax/locations.json endpoint which
-# returns the whole chain in one response.
-#
-# The endpoint reuses two of its ids for different restaurants, so the postcode
-# is appended to the ref.
-#
-# Hours are split across up to three free text fields, e.g. "Sun - Thurs:
-# 6:30am - 10pm" and "Fri & Sat: 6:30am - 11pm"; one restaurant uses the first
-# field for an opening announcement instead.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class RosasCafeUSSpider(Spider):
     name = "rosas_cafe_us"

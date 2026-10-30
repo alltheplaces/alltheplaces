@@ -8,11 +8,6 @@ from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# The site is a single page app whose own /api/locations endpoint returns every
-# restaurant with address, coordinates, phone and per day hours.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class CaliforniaTacoShopUSSpider(Spider):
     name = "california_taco_shop_us"

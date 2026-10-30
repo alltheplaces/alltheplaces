@@ -6,15 +6,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# Location pages come from the site's locations sitemap, which also lists a
-# services page per location, so only the two level paths are followed.
-#
-# Each page carries a schema.org PetStore record for the location itself, and
-# the site's own brand wide PetStore record, which is skipped by matching on
-# the location's name.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class TheDogStopUSSpider(SitemapSpider, StructuredDataSpider):
     name = "the_dog_stop_us"

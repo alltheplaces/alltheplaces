@@ -16,8 +16,6 @@ from locations.items import Feature
 #
 # Two restaurants publish separate winter and summer hours, so only the first
 # block is read.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Z]{2})\s+(\d{5})")
 PHONE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")

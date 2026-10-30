@@ -6,15 +6,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The location directory lists a page per bakery in its sitemap, alongside the
-# state and city index pages. Each bakery page carries a schema.org Restaurant
-# record with address, coordinates, phone and hours.
-#
-# Every record shares the same marketing description and brand photo, so those
-# are dropped.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class KolacheFactoryUSSpider(SitemapSpider, StructuredDataSpider):
     name = "kolache_factory_us"
