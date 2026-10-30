@@ -17,7 +17,6 @@ class TireBarnUSSpider(SitemapSpider, StructuredDataSpider):
     time_format = "%H:%M:%S"
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_email = False
     search_for_image = False
 

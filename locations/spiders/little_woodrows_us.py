@@ -17,7 +17,6 @@ class LittleWoodrowsUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["LocalBusiness"]
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_email = False
     search_for_image = False
 

@@ -16,7 +16,6 @@ class TheDogStopUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["PetStore"]
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_image = False
 
     def post_process_item(self, item, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Any]:
