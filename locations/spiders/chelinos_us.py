@@ -6,6 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # The locations page lists each restaurant as a block holding the branch as a
 # heading and the street, "city, state postcode" and phone as lines below.
@@ -33,7 +34,7 @@ class ChelinosUSSpider(Spider):
             item = Feature()
             item["branch"] = re.sub(r"\s+", " ", block.xpath(".//h1/text()").get("") or "").strip()
             item["city"], item["state"], item["postcode"] = locality.groups()
-            item["street_address"] = ", ".join(lines[: lines.index(locality.group(0))])
+            item["street_address"] = merge_address_lines(lines[: lines.index(locality.group(0))])
             item["ref"] = re.sub(r"[^a-z0-9]+", "-", f"{item['branch']} {item['postcode']}".lower()).strip("-")
 
             if phone := next(
