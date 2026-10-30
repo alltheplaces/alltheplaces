@@ -15,6 +15,7 @@ class SwarovskiSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"https://www.swarovski.com/en-\w+/store/[^/]+/[^/]+$", "parse_sd")]
     sitemap_follow = ["sitemap-cms"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["addr_full"] = item.pop("street_address")
