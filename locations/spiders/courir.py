@@ -42,11 +42,10 @@ class CourirSpider(SitemapSpider):
     def parse(self, response: TextResponse, **kwargs: Any) -> Any:
         store = response.json()
         item = DictParser.parse(store)
-        if name := item.pop("name", None):
-            if m := re.match(r"COURIR\s+OUTLET\s+", name, flags=re.IGNORECASE):
+        if m := re.match(r"(?:COURIR\s+)?(OUTLET\s+)?(.+)", item.pop("name", None) or "", flags=re.IGNORECASE):
+            item["branch"] = m.group(2)
+            if m.group(1):
                 item["name"] = "Courir Outlet"
-                name = name[m.end() :]
-            item["branch"] = re.sub(r"^COURIR\s+", "", name, flags=re.IGNORECASE)
         item["street_address"] = merge_address_lines([store.get("address1"), store.get("address2")])
         # The source tags the Monaco store as FR.
         if item.get("country") == "FR" and (item.get("postcode") or "").startswith("980"):
@@ -58,12 +57,15 @@ class CourirSpider(SitemapSpider):
 
         # Closures are only stated in this free-text note.
         note = store.get("informations") or ""
-        if re.search(r"définitivement|definitivamente", note, flags=re.IGNORECASE):
+        if re.search(r"d[ée]finitivement|definitivamente", note, flags=re.IGNORECASE):
             set_closed(item)
-        elif m := re.search(r"Fermeture définitive le (\d{2}\.\d{2}\.\d{4})", note):
-            set_closed(item, datetime.strptime(m.group(1), "%d.%m.%Y"))
+        elif m := re.search(r"Fermeture d[ée]finitive le (\d{2}\.\d{2}\.\d{4})", note, flags=re.IGNORECASE):
+            try:
+                set_closed(item, datetime.strptime(m.group(1), "%d.%m.%Y"))
+            except ValueError:
+                set_closed(item)
 
-        # Closed stores, temporarily or not, list no hours on any day.
+        # Closed stores leave every day empty: that means unknown hours, not closed all week.
         if len(hours := store.get("openingHours") or []) == 7 and any(hours):
             item["opening_hours"] = OpeningHours()
             for day, ranges in zip(DAYS, hours):
