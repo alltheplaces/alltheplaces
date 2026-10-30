@@ -12,8 +12,6 @@ from locations.structured_data_spider import StructuredDataSpider
 # Each page carries a schema.org PetStore record for the location itself, and
 # the site's own brand wide PetStore record, which is skipped by matching on
 # the location's name.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class TheDogStopUSSpider(SitemapSpider, StructuredDataSpider):

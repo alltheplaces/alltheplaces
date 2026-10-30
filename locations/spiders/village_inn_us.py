@@ -8,7 +8,6 @@ from locations.structured_data_spider import StructuredDataSpider
 class VillageInnUSSpider(CrawlSpider, StructuredDataSpider):
     name = "village_inn_us"
     item_attributes = {"brand": "Village Inn", "brand_wikidata": "Q7930659"}
-    # allowed_domains = ["www.villageinn.com"]
     start_urls = ("https://www.villageinn.com/Locations",)
     rules = [
         Rule(LinkExtractor(restrict_xpaths='//*[@id="state-list"]')),

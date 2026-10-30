@@ -17,8 +17,6 @@ from locations.items import Feature
 #
 # No coordinates are published: the store pages embed a map built from the
 # address text.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class VistaPaintUSSpider(Spider):

@@ -18,8 +18,6 @@ from locations.items import Feature
 # Hours are split across up to three free text fields, e.g. "Sun - Thurs:
 # 6:30am - 10pm" and "Fri & Sat: 6:30am - 11pm"; one restaurant uses the first
 # field for an opening announcement instead.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class RosasCafeUSSpider(Spider):

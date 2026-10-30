@@ -13,10 +13,6 @@ from locations.items import Feature
 #
 # The hours block also carries a "Kitchen until ..." line per rule, which is
 # not the restaurant's own closing time.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BeerBarrelUSSpider(Spider):

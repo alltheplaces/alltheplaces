@@ -13,8 +13,6 @@ from locations.items import Feature
 # "Sunday - Thursday" then "11:00 am - 10:00 pm".
 #
 # No coordinates are published: the address links are Google short links.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Z]{2})\s+(\d{5})")
 

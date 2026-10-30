@@ -11,8 +11,6 @@ from locations.items import Feature
 #
 # The API also includes one "Retail & Merchandise" branch, which is not a
 # restaurant and is skipped.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class RedDoorGrillUSSpider(Spider):

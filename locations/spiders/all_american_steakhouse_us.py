@@ -11,10 +11,6 @@ from locations.items import Feature
 # The locations page lists each restaurant as a card holding the branch, the
 # address across two lines, the phone and a link to the restaurant's page,
 # where the hours are listed a day at a time.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Za-z .]+)\s+(\d{5})")
 

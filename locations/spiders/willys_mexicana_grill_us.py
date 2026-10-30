@@ -14,8 +14,6 @@ from locations.items import Feature
 # "Mon-Sun 11:00am - 10:00pm".
 #
 # The amenity list marks the options a restaurant offers with a "check" class.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class WillysMexicanaGrillUSSpider(SitemapSpider):

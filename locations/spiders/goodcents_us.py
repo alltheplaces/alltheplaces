@@ -12,8 +12,6 @@ from locations.structured_data_spider import StructuredDataSpider
 # phone and hours.
 #
 # The record's name is "Goodcents - 1021", which holds the store number.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class GoodcentsUSSpider(SitemapSpider, StructuredDataSpider):

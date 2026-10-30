@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # No coordinates are published: the directions button links to a Google Maps
 # place page for the address, without an "@lat,lng" part.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Z]{2})\s+(\d{5})")
 # A line of hours starts with a day or a range of days, however abbreviated.

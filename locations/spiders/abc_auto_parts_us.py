@@ -15,8 +15,6 @@ from locations.items import Feature
 # The card's address text runs the street into the city with no separator
 # ("3667 Estes Pkwy Longview, TX, 75603"), so the address is taken from the
 # directions link instead, where the parts are comma separated.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class AbcAutoPartsUSSpider(Spider):

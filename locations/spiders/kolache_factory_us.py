@@ -12,8 +12,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # Every record shares the same marketing description and brand photo, so those
 # are dropped.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class KolacheFactoryUSSpider(SitemapSpider, StructuredDataSpider):

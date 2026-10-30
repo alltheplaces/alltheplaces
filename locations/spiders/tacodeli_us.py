@@ -14,8 +14,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # The record's name is the brand, so the branch comes from the page heading,
 # whose first line is also the brand.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class TacodeliUSSpider(SitemapSpider, StructuredDataSpider):

@@ -12,8 +12,6 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 # Some records spell the state out rather than using its code, which the
 # project's state clean up pipeline normalises. Titles name the street or
 # neighbourhood rather than the city, and one record has none at all.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class JohnnysPizzaHouseUSSpider(AgileStoreLocatorSpider):

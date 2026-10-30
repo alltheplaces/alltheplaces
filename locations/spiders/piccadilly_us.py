@@ -14,8 +14,6 @@ from locations.items import Feature
 # coordinates and phone.
 #
 # Records carry isClosed and isInActive flags, which are honoured.
-#
-# No opening hours are published on this page.
 
 
 class PiccadillyUSSpider(Spider):

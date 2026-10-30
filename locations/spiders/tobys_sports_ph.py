@@ -49,9 +49,6 @@ class TobysSportsPHSpider(Spider):
 
             apply_category(Categories.SHOP_SPORTS, item)
             yield item
-            # apply_category(Categories.SHOP_SPORTS, item)
-            #
-            # yield item
 
 
 #             item["phone"] = store.xpath(

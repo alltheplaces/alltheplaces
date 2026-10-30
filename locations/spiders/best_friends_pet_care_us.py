@@ -15,8 +15,6 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 # the partner businesses keep their own name.
 #
 # One record has its city and state the wrong way round, which is corrected.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BestFriendsPetCareUSSpider(WPStoreLocatorSpider):

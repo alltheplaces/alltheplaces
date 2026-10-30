@@ -15,8 +15,6 @@ from locations.items import Feature
 # Half the blocks link to maps.google.com, which carries the coordinates, and
 # half to a goo.gl short link, which does not, so only some features have
 # geometry.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BakersfieldUSSpider(Spider):

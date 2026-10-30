@@ -11,8 +11,6 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 #
 # Some records spell the state out rather than using its code, which the
 # project's state clean up pipeline normalises.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class MassageluxeUSSpider(AgileStoreLocatorSpider):

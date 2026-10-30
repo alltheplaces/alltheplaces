@@ -17,8 +17,6 @@ from locations.structured_data_spider import StructuredDataSpider
 # Three restaurants carry no structured data, so their address block is read
 # instead. Its lines are unpunctuated, e.g. "ATLANTA GA 30361", and two of them
 # publish only a street.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 # The two street only pages, by their path.
 CITIES = {"bos-seaport": ("Boston", "MA"), "weha-blue-back-square": ("West Hartford", "CT")}

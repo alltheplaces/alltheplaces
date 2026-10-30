@@ -19,8 +19,6 @@ from locations.items import Feature
 #
 # Both are read, keyed on the store code, so the widget data is used where it
 # exists and the structured data fills in the rest.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class HelloBistroUSSpider(Spider):

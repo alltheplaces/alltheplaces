@@ -49,8 +49,6 @@ class BubbakoosBurritosUSSpider(JSONBlobSpider):
             for rule in calendar.get("ranges") or []:
                 item["opening_hours"].add_range(rule["weekday"], rule["start"].split(" ")[1], rule["end"].split(" ")[1])
 
-        # item["website"]  = "https://locations.bubbakoos.com/location-directory/{}/{}/{}".format("", feature["slug"], feature["location_slug"])
-
         apply_yes_no(Extras.DELIVERY, item, feature.get("supportsDelivery"))
         apply_category(Categories.FAST_FOOD, item)
 

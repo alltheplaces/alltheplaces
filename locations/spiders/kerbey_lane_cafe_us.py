@@ -7,10 +7,6 @@ from locations.structured_data_spider import StructuredDataSpider
 
 # The locations page links to a page per restaurant, each carrying a schema.org
 # Restaurant record with address, phone and hours.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class KerbeyLaneCafeUSSpider(StructuredDataSpider):

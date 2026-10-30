@@ -15,10 +15,6 @@ from locations.items import Feature
 #
 # Most stores sit in a mall food court, named either in LocationHelp or in the
 # free text Name field, which otherwise just repeats the city and state.
-#
-# No opening hours are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class SurfCitySqueezeUSSpider(Spider):

@@ -16,8 +16,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # The hours carry seconds ("07:30:00"), so the spider sets time_format
 # accordingly.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class TireBarnUSSpider(SitemapSpider, StructuredDataSpider):

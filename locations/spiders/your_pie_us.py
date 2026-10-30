@@ -15,8 +15,6 @@ from locations.items import Feature
 #
 # The Thanx ordering link carries the chain's own location id, which is used as
 # the ref where present.
-#
-# No opening hours are published on this page.
 
 
 class YourPieUSSpider(Spider):

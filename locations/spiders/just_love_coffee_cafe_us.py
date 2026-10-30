@@ -16,8 +16,6 @@ from locations.structured_data_spider import StructuredDataSpider
 # rather than schema.org ranges.
 #
 # Cafes that have not opened yet are labelled "Coming Soon" on their card.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class JustLoveCoffeeCafeUSSpider(StructuredDataSpider):

@@ -15,8 +15,6 @@ from locations.items import Feature
 # Restaurants that have not opened yet, and temporarily closed ones, are marked
 # by a tag that Webflow leaves in the markup and hides with the
 # w-condition-invisible class, so the visible tag is what identifies them.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class HawaiianBrosUSSpider(Spider):

@@ -16,8 +16,6 @@ from locations.pipelines.address_clean_up import merge_address_lines
 #
 # Those hours are free text and vary between restaurants: "11:00am - 12:00am",
 # "11am - 11pm", "11:00am - Midnight" and so on.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class EurekaUSSpider(Spider):

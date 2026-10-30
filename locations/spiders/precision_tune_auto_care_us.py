@@ -6,8 +6,6 @@ from locations.storefinders.storerocket import StoreRocketSpider
 
 # The locations page embeds a StoreRocket widget, whose API returns every
 # centre in one response. The account publishes no opening hours through it.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class PrecisionTuneAutoCareUSSpider(StoreRocketSpider):

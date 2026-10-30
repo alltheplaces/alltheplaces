@@ -15,8 +15,6 @@ from locations.items import Feature
 #
 # Closed restaurants are commented out of that array, and holiday notices are
 # commented out inside the hours block.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class SpinPizzaUSSpider(Spider):

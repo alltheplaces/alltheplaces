@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # The map links are goo.gl short links, so no coordinates are available without
 # resolving each one.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BlueMartiniUSSpider(Spider):

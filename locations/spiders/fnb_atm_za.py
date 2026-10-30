@@ -71,8 +71,6 @@ class FnbAtmZASpider(Spider):
             yield Request(url="https://www.fnb.co.za" + link, callback=self.parse_item)
 
     def parse_item(self, response):
-        # from scrapy.shell import inspect_response
-        # inspect_response(response, self)
         try:
             details = response.xpath('.//p[@class="      "]').getall()
             deposits = Selector(text=details[2]).xpath(".//strong/text()").get().strip()

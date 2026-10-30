@@ -19,8 +19,6 @@ from locations.items import Feature
 #
 # Closed restaurants stay in the sitemap but serve a page with no address, so
 # those are skipped.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class SamuraiSamsUSSpider(SitemapSpider):

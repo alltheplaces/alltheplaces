@@ -15,8 +15,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # Coordinates come from the Google Maps place link, which some restaurants
 # replace with an address search.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class FreshBrothersUSSpider(StructuredDataSpider):

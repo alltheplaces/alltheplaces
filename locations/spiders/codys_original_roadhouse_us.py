@@ -18,8 +18,6 @@ from locations.items import Feature
 #
 # Restaurants are the navigation entries labelled "<city>, FL". No coordinates
 # are published anywhere on the site, so features have no geometry.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class CodysOriginalRoadhouseUSSpider(Spider):

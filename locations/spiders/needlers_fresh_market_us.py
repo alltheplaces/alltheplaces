@@ -11,8 +11,6 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 #
 # The plugin's open_hours field holds "0" for every day rather than times,
 # which the store finder reads as closed, so hours are dropped.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class NeedlersFreshMarketUSSpider(AgileStoreLocatorSpider):

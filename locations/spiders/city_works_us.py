@@ -14,8 +14,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # The record's hours are written with seconds, and the restaurants that close
 # at midnight give "00:00:00" rather than a 24 hour closing time.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class CityWorksUSSpider(StructuredDataSpider):

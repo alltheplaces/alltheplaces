@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # No coordinates are published: the map links are Google address searches, and
 # the newer restaurants publish neither hours nor a phone.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class FreshAndCOUSSpider(Spider):

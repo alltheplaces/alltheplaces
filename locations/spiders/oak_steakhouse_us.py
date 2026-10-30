@@ -11,8 +11,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # The record's description is a page of marketing copy, and no coordinates are
 # published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class OakSteakhouseUSSpider(StructuredDataSpider):

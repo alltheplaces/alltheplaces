@@ -16,10 +16,6 @@ from locations.items import Feature
 #
 # Restaurants that have not opened are marked in the branch name, sometimes
 # with an address already listed, and are skipped on that marker.
-#
-# No coordinates or hours are published on this page.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BiscuitBellyUSSpider(Spider):

@@ -15,8 +15,6 @@ from locations.pipelines.address_clean_up import merge_address_lines
 #
 # No coordinates are published: the address links are goo.gl short links that
 # would need resolving one by one.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class OceanPrimeUSSpider(Spider):

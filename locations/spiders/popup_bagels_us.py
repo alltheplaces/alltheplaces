@@ -16,8 +16,6 @@ from locations.items import Feature
 #
 # The /locations page carries only CMS entries with an address slug, which is
 # why the directory page is used instead.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class PopupBagelsUSSpider(Spider):

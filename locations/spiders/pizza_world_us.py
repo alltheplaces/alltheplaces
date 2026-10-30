@@ -14,8 +14,6 @@ from locations.items import Feature
 # or full address.
 #
 # The page publishes no postcodes, coordinates or hours.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class PizzaWorldUSSpider(Spider):

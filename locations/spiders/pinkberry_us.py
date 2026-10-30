@@ -16,8 +16,6 @@ from locations.items import Feature
 # The Name field is a free text label — sometimes the city and state, sometimes
 # the mall or airport terminal — so it is only kept as the branch when it adds
 # something the address does not.
-#
-# No opening hours are published.
 
 
 class PinkberryUSSpider(Spider):

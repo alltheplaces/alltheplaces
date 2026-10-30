@@ -11,8 +11,6 @@ from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 #
 # Its website field holds a malformed URL ("http:///Bryan") on every record, and
 # the description is the same marketing line throughout.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class ChiefMarketsUSSpider(AgileStoreLocatorSpider):

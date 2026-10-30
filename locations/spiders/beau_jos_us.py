@@ -10,8 +10,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # The record's name is a marketing title, so the branch comes from the page
 # path.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BeauJosUSSpider(StructuredDataSpider):

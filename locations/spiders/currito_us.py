@@ -15,8 +15,6 @@ from locations.items import Feature
 #
 # Franchises that have not opened yet are flagged in the block title, e.g.
 # "Lexington (Coming Soon)".
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class CurritoUSSpider(Spider):

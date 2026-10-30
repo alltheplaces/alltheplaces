@@ -11,10 +11,6 @@ from locations.items import Feature
 # heading followed by an icon list holding the address, phone and email.
 #
 # One kennel gives only a street, with no city line.
-#
-# No coordinates or hours are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 # One kennel runs its street into the city with no comma between them.

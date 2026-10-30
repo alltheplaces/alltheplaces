@@ -13,8 +13,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # Every record carries the same brand logo, and a containedIn field holding the
 # template's placeholder text rather than a mall name.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class GarbanzoUSSpider(SitemapSpider, StructuredDataSpider):

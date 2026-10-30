@@ -20,7 +20,6 @@ class LadbrokesGBSpider(Spider):
         for store in response.json():
             if store.get("ad"):
                 item = Feature()
-                # item["name"] = store["n"]
                 item["lat"] = store["lat"]
                 item["lon"] = store["lng"]
                 item["ref"] = store["bpid"]

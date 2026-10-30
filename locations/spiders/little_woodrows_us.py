@@ -15,8 +15,6 @@ from locations.structured_data_spider import StructuredDataSpider
 #
 # No opening hours are published: the pages only carry a marketing line such as
 # "Open until 2am".
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class LittleWoodrowsUSSpider(SitemapSpider, StructuredDataSpider):

@@ -15,8 +15,6 @@ from locations.items import Feature
 #
 # Coordinates are not usable: the map links carry an ll or sll parameter, but
 # it is the map's default centre and repeats across restaurants.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class RobertosTacoShopUSSpider(Spider):

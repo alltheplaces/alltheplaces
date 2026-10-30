@@ -201,7 +201,6 @@ class LukoilSpider(Spider):
                 apply_yes_no(tag, item, True)
             else:
                 pass
-                # self.crawler.stats.inc_value(f"atp/lukoil/{attribute_name}/failed/{attribute_entity.get('Name')}")
 
     def parse_hours(self, item: Feature, poi: dict) -> None:
         if poi.get("TwentyFourHour"):

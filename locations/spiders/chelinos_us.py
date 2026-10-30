@@ -11,8 +11,6 @@ from locations.items import Feature
 # heading and the street, "city, state postcode" and phone as lines below.
 #
 # The page publishes no coordinates or hours.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Z]{2})\s+(\d{5})")
 

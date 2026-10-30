@@ -16,8 +16,6 @@ from locations.items import Feature
 # Unlike the other BentoBox sites, this one leaves structured_hours empty and
 # writes the hours as HTML instead, with "*Take-Out" and "*Delivery" notes
 # alongside the restaurant's own hours.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class MamounsFalafelUSSpider(Spider):

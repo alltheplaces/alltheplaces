@@ -211,9 +211,6 @@ class ExxonMobilSpider(SitemapSpider, PlaywrightSpider):
             apply_yes_no(Fuel.ELECTRIC, item, "Electric Charger" in features, True)
             apply_yes_no(Fuel.ELECTRIC, item, "Electric Vehicle Charging" in features, True)
 
-            # if "Convenience Store" in features:
-            #    apply_category(Categories.SHOP_CONVENIENCE, item)
-
             yield item
 
     @staticmethod

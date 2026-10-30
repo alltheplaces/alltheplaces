@@ -14,8 +14,6 @@ from locations.items import Feature
 # whose URL carries the coordinates.
 #
 # The hours are a sentence, "7 days a week 11am-10pm".
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BecksPrimeUSSpider(Spider):

@@ -14,10 +14,6 @@ from locations.items import Feature
 # Taverns that have not opened yet are flagged coming_soon. The records also
 # carry an "active" field, which is false on every one of them and reflects the
 # map widget's selection rather than whether the tavern is open.
-#
-# No opening hours are published on this page.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class WorldOfBeerUSSpider(Spider):

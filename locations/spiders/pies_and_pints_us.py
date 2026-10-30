@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # No coordinates are published anywhere on the site, and there are no per
 # location pages, so features carry an address but no geometry.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class PiesAndPintsUSSpider(Spider):

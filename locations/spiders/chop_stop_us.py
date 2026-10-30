@@ -17,8 +17,6 @@ from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 #
 # Addresses arrive as one string with the street separated from the city by two
 # or more spaces.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class ChopStopUSSpider(SuperStoreFinderSpider):
