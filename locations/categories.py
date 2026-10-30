@@ -461,6 +461,7 @@ class Categories(Enum):
     TRADE_BATHROOM = {"trade": "bathroom"}
     TRADE_BUILDING_SUPPLIES = {"trade": "building_supplies"}
     TRADE_ELECTRICAL = {"trade": "electrical"}
+    TRADE_FENCING = {"trade": "fencing"}
     TRADE_FIRE_PROTECTION = {"trade": "fire_protection"}
     TRADE_HVAC = {"trade": "hvac"}
     TRADE_IRRIGATION = {"trade": "irrigation"}
