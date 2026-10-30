@@ -1,6 +1,8 @@
 import re
+
 from scrapy.http import HtmlResponse
 from scrapy.spiders import SitemapSpider
+
 from locations.categories import Categories
 from locations.items import Feature
 
@@ -31,8 +33,9 @@ class CargoFrSpider(SitemapSpider):
         street_address = response.css("span.address::text").get(default="").strip()
         # Phone – text containing "Tél" or "T??l??phone"
         phone = (
-            response.xpath("//div[contains(text(),'Tél') or contains(text(),'Téléphone')]/text()")
-            .re_first(r"(\d[\d\s]+)")
+            response.xpath("//div[contains(text(),'Tél') or contains(text(),'Téléphone')]/text()").re_first(
+                r"(\d[\d\s]+)"
+            )
             or ""
         ).strip()
         # Coordinates – hidden inputs use comma as decimal separator
@@ -63,11 +66,13 @@ class CargoFrSpider(SitemapSpider):
             for part in parts:
                 match = re.match(r"(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})", part)
                 if match:
-                    opening_hours.append({
-                        "day": day_map.get(day_fr, day_fr),
-                        "open": match.group(1),
-                        "close": match.group(2),
-                    })
+                    opening_hours.append(
+                        {
+                            "day": day_map.get(day_fr, day_fr),
+                            "open": match.group(1),
+                            "close": match.group(2),
+                        }
+                    )
         # Build Feature item
         item = Feature(
             ref=ref,
