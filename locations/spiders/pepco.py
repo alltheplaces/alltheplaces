@@ -42,7 +42,7 @@ class PepcoSpider(Spider):
         for location in response.json().get("globalStoreDataSet").get("stores").get("features"):
             location.update(location.pop("properties"))
             item = DictParser.parse(location)
-            item["branch"] = item.pop("name").removeprefix("Pepco ")
+            item["name"] = None
             try:
                 oh = OpeningHours()
                 for hours_text in location.get("opening_hours"):
