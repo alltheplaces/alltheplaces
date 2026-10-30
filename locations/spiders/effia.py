@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 EFFIA = {"brand": "Effia", "brand_wikidata": "Q3045894"}
 
@@ -36,7 +37,7 @@ class EffiaSpider(SitemapSpider):
             if len(parts) >= 3:
                 item["city"] = parts[-1].title()
                 item["postcode"] = parts[-2]
-                item["street_address"] = ", ".join(parts[:-2])
+                item["street_address"] = merge_address_lines(parts[:-2])
 
             # To prevent border-snapping anomaly for Hendaye
             if "Hendaye" in item.get("city", ""):

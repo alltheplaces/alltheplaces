@@ -8,6 +8,7 @@ from scrapy import Request
 
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # Present in the finder page's own store list but not real single-address stores: whole-region
 # marketing markers for Guadeloupe/La Réunion (no street address, no Timetables, no Url).
@@ -49,7 +50,7 @@ class FnacFRSpider(scrapy.Spider):
             item = Feature()
             item["ref"] = store["EAGId"]
             item["branch"] = store.get("Name")
-            item["street_address"] = ", ".join(
+            item["street_address"] = merge_address_lines(
                 line.strip(" ,") for line in store["AddressLine"].splitlines() if line.strip(" ,")
             )
             item["city"] = store["CityName"]

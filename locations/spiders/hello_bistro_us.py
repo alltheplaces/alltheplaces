@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, DAYS_EN, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class HelloBistroUSSpider(Spider):
@@ -48,7 +49,7 @@ class HelloBistroUSSpider(Spider):
         item = Feature()
         item["ref"] = str(location["storeCode"])
         item["branch"] = location.get("city")
-        item["street_address"] = ", ".join(location.get("addressLines") or [])
+        item["street_address"] = merge_address_lines(location.get("addressLines") or [])
         item["city"] = location.get("city")
         item["state"] = location.get("state")
         item["postcode"] = location.get("postalCode")
