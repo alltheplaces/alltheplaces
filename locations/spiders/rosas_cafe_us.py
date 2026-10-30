@@ -8,6 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RosasCafeUSSpider(Spider):
@@ -29,7 +30,7 @@ class RosasCafeUSSpider(Spider):
             item["branch"] = location.get("name")
             item["name"] = None
             item.pop("addr_full", None)
-            item["street_address"] = ", ".join(
+            item["street_address"] = merge_address_lines(
                 part.strip() for part in [location.get("address"), location.get("address2")] if part and part.strip()
             )
 

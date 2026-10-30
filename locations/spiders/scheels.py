@@ -8,6 +8,7 @@ from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature, SocialMedia, set_social_media
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 
@@ -65,7 +66,7 @@ class ScheelsSpider(CamoufoxSpider):
         item = Feature()
         item["ref"] = general.get("storeID")
         item["branch"] = name
-        item["street_address"] = ", ".join(filter(None, [address.get("address1"), address.get("address2")]))
+        item["street_address"] = merge_address_lines([address.get("address1"), address.get("address2")])
         item["city"] = (address.get("city") or "").strip()
         item["state"] = address.get("state")
         item["postcode"] = address.get("postalCode")

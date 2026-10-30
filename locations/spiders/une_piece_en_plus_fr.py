@@ -2,6 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class UnePieceEnPlusFRSpider(SitemapSpider):
@@ -17,7 +18,7 @@ class UnePieceEnPlusFRSpider(SitemapSpider):
             item["ref"] = link.xpath("./@data-tracking-id").get()
             item["branch"] = link.xpath("normalize-space(.)").get()
             item["website"] = response.urljoin(link.xpath("./@href").get())
-            item["addr_full"] = ", ".join(card.xpath('.//*[@itemprop="address"]//text()').getall())
+            item["addr_full"] = merge_address_lines(card.xpath('.//*[@itemprop="address"]//text()').getall())
             item["phone"] = card.xpath('.//meta[@itemprop="telephone"]/@content').get()
             item["lat"] = card.xpath('.//meta[@itemprop="latitude"]/@content').get()
             item["lon"] = card.xpath('.//meta[@itemprop="longitude"]/@content').get()
