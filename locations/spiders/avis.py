@@ -1,30 +1,67 @@
-from scrapy.spiders import SitemapSpider
+import json
+import re
 
-from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from scrapy.http import TextResponse
+
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class AvisSpider(SitemapSpider, StructuredDataSpider):
+class AvisSpider(StructuredDataSpider):
     name = "avis"
-    item_attributes = {"brand": "Avis", "brand_wikidata": "Q791136"}
-    sitemap_urls = ["https://www.avis.com/sitemap.xml"]
-    sitemap_rules = [(r"https://www.avis.com/en/locations/[^/]+/[^/]+/[^/]+/[^/]+(?:/[^/]+)?$", "parse_sd")]
-    wanted_types = ["AutoRental"]
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        if item.get("name"):
-            item["branch"] = item.pop("name").removeprefix("Avis ")
-        item.pop("facebook", None)
-        item.pop("twitter", None)
-        item.pop("image", None)
-        oh = OpeningHours()
-        for day_time in ld_data["openingHours"]:
-            if "24 hrs" in day_time:
-                item["opening_hours"] = "24/7"
-            else:
-                oh.add_ranges_from_string(day_time)
-                item["opening_hours"] = oh
-        apply_category(Categories.CAR_RENTAL, item)
+    item_attributes = {
+        "brand": "Avis",
+        "brand_wikidata": "Q791136",
+    }
 
-        yield item
+    start_urls = [
+        "https://www.avis.com/en/locations/avisworldwide",
+    ]
+
+    LOCATION_DATA_RE = re.compile(r'"locationData":({.+?}),"i18n":{"locationIndex')
+
+    def extract_location_data(self, response: TextResponse) -> dict:
+        """Extract locationData JSON from page."""
+
+        if not (script := response.xpath('//*[contains(text(), "locationData")]/text()').get()):
+            return {}
+
+        if not (match := self.LOCATION_DATA_RE.search(script.replace("\\", ""))):
+            return {}
+
+        return json.loads(match.group(1))
+
+    def follow_location_links(
+        self,
+        response: TextResponse,
+        callback,
+    ):
+        """Follow all child location links."""
+
+        location_data = self.extract_location_data(response)
+
+        for node in location_data.values():
+            for child in node.get("children", {}).values():
+                if link := child.get("link"):
+                    yield response.follow(
+                        link,
+                        callback=callback,
+                    )
+
+    def parse(self, response: TextResponse, **kwargs):
+        yield from self.follow_location_links(
+            response,
+            self.parse_location,
+        )
+
+    def parse_location(self, response: TextResponse, **kwargs):
+        yield from self.follow_location_links(
+            response,
+            self.parse_details,
+        )
+
+    def parse_details(self, response: TextResponse, **kwargs):
+        yield from response.follow_all(
+            response.xpath('//*[@data-testid="location-map-view-station-description"]/@href').getall(),
+            callback=self.parse_sd,
+        )
