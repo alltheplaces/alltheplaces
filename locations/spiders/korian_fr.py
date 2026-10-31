@@ -4,12 +4,14 @@ from scrapy.http import TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class KorianFRSpider(CrawlSpider, StructuredDataSpider):
+class KorianFRSpider(CrawlSpider, StructuredDataSpider, CamoufoxSpider):
     name = "korian_fr"
     item_attributes = {"operator": "Korian", "operator_wikidata": "Q3198944"}
     start_urls = ["https://www.korian.fr/maisons-retraite"]
@@ -20,6 +22,7 @@ class KorianFRSpider(CrawlSpider, StructuredDataSpider):
         )
     ]
     requires_proxy = True
+    custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE | {"CONCURRENT_REQUESTS": 1}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["name"] = item["name"].removeprefix("Korian ")
