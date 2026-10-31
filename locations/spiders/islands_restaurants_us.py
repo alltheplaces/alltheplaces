@@ -9,12 +9,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# Islands uses a BentoBox store locator, which passes every restaurant to a
-# storeLocatorConfig() call on the locator page as a JavaScript object literal.
-#
-# Unlike the other BentoBox sites in this project, this one fills in
-# structured_hours, so the hours need no text parsing.
-
 
 class IslandsRestaurantsUSSpider(Spider):
     name = "islands_restaurants_us"

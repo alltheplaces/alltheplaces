@@ -59,9 +59,7 @@ class TheKegCAUSSpider(PlaywrightSpider):
                     )
                 ),
             ).strip(),
-            "phone": response.xpath('//section[@id="LocationDetail"]//p[contains(@class, "phone")]/a/@href')
-            .get("")
-            .replace("tel:", ""),
+            "phone": response.xpath('//section[@id="LocationDetail"]//p[contains(@class, "phone")]/a/@href').get(""),
         }
         hours_text = re.sub(
             r"\s+",

@@ -6,14 +6,6 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The SOCi location directory lists a page per restaurant in its sitemap,
-# alongside the state and city index pages. Each restaurant page carries a
-# schema.org FastFoodRestaurant record with address, coordinates, phone and
-# hours.
-#
-# The record's name is the site or mall the restaurant sits in rather than the
-# brand, so it is kept as the branch.
-
 
 class SaladworksUSSpider(SitemapSpider, StructuredDataSpider):
     name = "saladworks_us"
@@ -24,7 +16,6 @@ class SaladworksUSSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["FastFoodRestaurant"]
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_email = False
     search_for_image = False
 

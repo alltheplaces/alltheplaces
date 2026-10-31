@@ -15,8 +15,6 @@ from locations.items import Feature
 #
 # The hours are free text and differ per restaurant: "Sun - Thur | 11am - 10pm"
 # and "Fri - Sat 11 a.m. - 11 p.m." both appear.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 PHONE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
 

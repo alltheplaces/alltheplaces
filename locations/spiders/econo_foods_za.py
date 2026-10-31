@@ -6,6 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class EconoFoodsZASpider(JSONBlobSpider):
@@ -27,7 +28,7 @@ class EconoFoodsZASpider(JSONBlobSpider):
         item["website"] = None
 
         address = feature.get("address") or {}
-        item["street_address"] = ", ".join(address.get("addressLines") or []) or None
+        item["street_address"] = merge_address_lines(address.get("addressLines") or []) or None
         item["country"] = address.get("regionCode")
 
         item["opening_hours"] = OpeningHours()

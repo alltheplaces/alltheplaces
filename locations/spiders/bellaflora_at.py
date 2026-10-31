@@ -44,7 +44,7 @@ class BellafloraATSpider(Spider):
             }
 
             if phone_uri := location.xpath('.//div[@class="phone-info"]//a[contains(@href, "tel:")]/@href').get():
-                properties["phone"] = phone_uri.removeprefix("tel:")
+                properties["phone"] = phone_uri
 
             if website_link := location.xpath('.//div[@class="button-area"]/a/@href').get():
                 properties["website"] = f"https://www.bellaflora.at{website_link}"

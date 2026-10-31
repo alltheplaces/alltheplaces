@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.geo import bbox_contains
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 API_URL = "https://cons.libyapost.ly:54800/api/office?page={}"
 # Public key baked into the libyapost.ly locator's JS bundle and sent by the site on every request
@@ -78,9 +79,7 @@ class LibyaPostLySpider(Spider):
             item["extras"]["branch:en"] = name_en
         item["postcode"] = office.get("postal_code")
         item["phone"] = office.get("phone_number")
-        item["street_address"] = (
-            ", ".join(filter(None, [office.get("address_line1"), office.get("address_line2")])) or None
-        )
+        item["street_address"] = merge_address_lines([office.get("address_line1"), office.get("address_line2")]) or None
         if city := office.get("city"):
             item["city"] = city.get("name")
             if city.get("name_en"):

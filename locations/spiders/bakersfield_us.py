@@ -9,15 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Every restaurant is a block on the one locations page, with the address
-# inside a map link and the hours as a short list of "<days> <times>" lines.
-#
-# Half the blocks link to maps.google.com, which carries the coordinates, and
-# half to a goo.gl short link, which does not, so only some features have
-# geometry.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BakersfieldUSSpider(Spider):
     name = "bakersfield_us"

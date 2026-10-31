@@ -135,7 +135,6 @@ class IrvingOilSpider(Spider):
                 item["lat"] = float(props["lat"])
                 item["lon"] = float(props["long"])
 
-            # Parse structured address
             address = self.parse_address(props.get("address", ""))
             item["street_address"] = address["street_address"]
             item["city"] = address["city"]

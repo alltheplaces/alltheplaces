@@ -27,9 +27,7 @@ class InspirationsPaintAUSpider(SitemapSpider):
             "addr_full": merge_address_lines(
                 response.xpath('//div[contains(@class, "store-address")]/span[@class="address"]/text()').getall()
             ),
-            "phone": response.xpath('//div[contains(@class, "store-contact")]/a[contains(@href, "tel:")]/@href')
-            .get()
-            .removeprefix("tel:"),
+            "phone": response.xpath('//div[contains(@class, "store-contact")]/a[contains(@href, "tel:")]/@href').get(),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }

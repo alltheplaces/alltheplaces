@@ -8,6 +8,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class SocoocFRSpider(Spider):
@@ -59,8 +60,8 @@ class SocoocFRSpider(Spider):
             item["ref"] = item["website"] = "https://www.socooc.com" + location["url"][0]
             item["lat"] = location["lat"][0]
             item["lon"] = location["lon"][0]
-            item["street_address"] = ", ".join(
-                filter(None, [location["field_adresse_1"][0], *location.get("field_adresse_2", [])])
+            item["street_address"] = merge_address_lines(
+                [location["field_adresse_1"][0], *location.get("field_adresse_2", [])]
             )
             item["postcode"] = location["field_code_postal"][0]
             item["phone"] = location["field_tel"][0]

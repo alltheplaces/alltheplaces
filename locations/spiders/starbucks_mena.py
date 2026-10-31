@@ -10,7 +10,6 @@ class StarbucksMenaSpider(SitemapSpider, StructuredDataSpider):
     name = "starbucks_mena"
     item_attributes = {"brand": "ستاربكس", "brand_wikidata": "Q37158"}
     sitemap_urls = [
-        "https://locations.starbucks.ae/robots.txt",
         "https://locations.starbucks.qa/robots.txt",
         "https://locations.starbucks.sa/robots.txt",
         "https://locations.starbucks.eg/robots.txt",

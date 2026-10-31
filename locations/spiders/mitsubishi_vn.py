@@ -2,18 +2,8 @@ from copy import deepcopy
 from datetime import datetime
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import OpeningHours
+from locations.hours import DAYS_VN, OpeningHours
 from locations.json_blob_spider import JSONBlobSpider
-
-DAYS_VN = {
-    "Thứ 2": "Mo",
-    "Thứ 3": "Tu",
-    "Thứ 4": "We",
-    "Thứ 5": "Th",
-    "Thứ 6": "Fr",
-    "Thứ 7": "Sa",
-    "Chủ nhật": "Su",
-}
 
 
 class MitsubishiVNSpider(JSONBlobSpider):

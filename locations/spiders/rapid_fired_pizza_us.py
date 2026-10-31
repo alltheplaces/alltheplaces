@@ -8,14 +8,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# The locations page passes every restaurant to the map's updateMarkers()
-# call, with the address, coordinates and the restaurant's page path.
-#
-# The per restaurant pages those paths point at return branded 404s, so no
-# phone or hours are available.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class RapidFiredPizzaUSSpider(Spider):
     name = "rapid_fired_pizza_us"

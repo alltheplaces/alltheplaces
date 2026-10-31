@@ -22,7 +22,7 @@ class CrelanBESpider(SitemapSpider):
         item["postcode"] = response.xpath('//*[@class= "address-display-element postal-code-element"]/text()').get()
         item["city"] = response.xpath('//*[@class="address-display-element locality-element"]/text()').get()
         if phone := response.xpath('//*[contains(@href,"tel:")]'):
-            item["phone"] = phone.xpath(".//@href").get().replace("tel:", "")
+            item["phone"] = phone.xpath(".//@href").get()
         item["lat"] = response.xpath("//@data-lat").get()
         item["lon"] = response.xpath("//@data-lng").get()
         item["ref"] = item["website"] = response.url

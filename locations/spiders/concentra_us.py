@@ -6,11 +6,6 @@ from scrapy.http import Request
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
-# Concentra is using a Sitecode SXA Search Service as documented at
-# https://doc.sitecore.com/xp/en/developers/sxa/103/sitecore-experience-accelerator/the-sxa-search-service.html
-#
-# A maximum of 250 locations are returned per page of results.
-
 
 class ConcentraUSSpider(Spider):
     name = "concentra_us"

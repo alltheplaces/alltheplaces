@@ -8,6 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import DAYS_PL, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CastoramaPLSpider(CrawlSpider):
@@ -20,7 +21,7 @@ class CastoramaPLSpider(CrawlSpider):
         item = Feature()
         item["name"] = response.xpath("//h1/text()").get()
         item["street_address"] = response.xpath("//address//text()").get()
-        item["addr_full"] = ",".join(response.xpath("//address//text()").getall())
+        item["addr_full"] = merge_address_lines(response.xpath("//address//text()").getall())
         item["phone"] = response.xpath('//*[contains(@href,"tel:")]//text()').get()
         item["ref"] = item["website"] = response.url
         extract_google_position(item, response)

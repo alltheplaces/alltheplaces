@@ -9,19 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# The locations page carries the restaurants twice, and neither list is
-# complete on its own:
-#
-#   * the Next.js page data has coordinates and a per day hours array, but only
-#     covers the restaurants in the store locator widget, and
-#   * the schema.org Organization block lists every restaurant, including ones
-#     the widget omits, but has no coordinates.
-#
-# Both are read, keyed on the store code, so the widget data is used where it
-# exists and the structured data fills in the rest.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class HelloBistroUSSpider(Spider):
     name = "hello_bistro_us"

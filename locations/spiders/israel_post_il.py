@@ -15,8 +15,6 @@ AGENCY_TYPES = {
 }
 FRONT_COUNTER = 10  # אשנב קדמי: small Israel Post counter inside an institution (e.g. a city hall)
 VILLAGE_SECRETARIAT = 15  # מזכירות יישוב: postal counter run by a village/kibbutz/base secretariat
-# Not emitted: 7 דואר נע (mobile post vans), 13 מסירת דואר בלבד (parcel pick-up points in shops),
-# 14 אוטומטים (cash machines).
 
 
 class IsraelPostILSpider(Spider):

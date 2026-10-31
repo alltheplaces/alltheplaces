@@ -5,20 +5,9 @@ from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FR, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-
-DAYS_FR = {
-    "lundi": "Mo",
-    "mardi": "Tu",
-    "mercredi": "We",
-    "jeudi": "Th",
-    "vendredi": "Fr",
-    "samedi": "Sa",
-    "dimanche": "Su",
-}
-DAY_ORDER = list(DAYS_FR.keys())
 
 TIME_RANGE_RE = re.compile(r"(\d{1,2}[:h]\d{2})\s*-\s*(\d{1,2}[:h]\d{2})")
 DAY_LINE_RE = re.compile(
@@ -62,15 +51,8 @@ class AgnAvocatsSpider(SitemapSpider, StructuredDataSpider):
                 continue
 
             start_day, end_day, rest = match.groups()
-            start_day = start_day.lower()
-
-            if end_day:
-                end_day = end_day.lower()
-                start_idx = DAY_ORDER.index(start_day)
-                end_idx = DAY_ORDER.index(end_day)
-                days = DAY_ORDER[start_idx : end_idx + 1]
-            else:
-                days = [start_day]
+            start_day = sanitise_day(start_day, DAYS_FR)
+            days = day_range(start_day, sanitise_day(end_day, DAYS_FR)) if end_day else [start_day]
 
             if "rendez-vous" in rest.lower() or "fermé" in rest.lower():
                 continue
@@ -79,7 +61,6 @@ class AgnAvocatsSpider(SitemapSpider, StructuredDataSpider):
                 open_time = open_time.replace("h", ":")
                 close_time = close_time.replace("h", ":")
                 for day in days:
-                    if osm_day := DAYS_FR.get(day):
-                        oh.add_range(osm_day, open_time, close_time, time_format="%H:%M")
+                    oh.add_range(day, open_time, close_time, time_format="%H:%M")
 
         return oh

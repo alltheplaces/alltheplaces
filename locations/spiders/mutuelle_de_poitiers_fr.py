@@ -8,6 +8,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MutuelleDePoitiersFRSpider(SitemapSpider):
@@ -22,8 +23,8 @@ class MutuelleDePoitiersFRSpider(SitemapSpider):
         item["ref"] = response.xpath('//input[@name="agency"]/@value').get()
         item["website"] = response.url.removesuffix("/nous-trouver")
         item["branch"] = response.xpath('//span[@class="push-agency-city"]/text()').get("").strip()
-        item["phone"] = response.xpath('//p[@class="push-agency-phone"]/a/@href').get("").removeprefix("tel:")
-        item["email"] = response.xpath('//p[@class="push-agency-email"]/a/@href').get("").removeprefix("mailto:")
+        item["phone"] = response.xpath('//p[@class="push-agency-phone"]/a/@href').get("")
+        item["email"] = response.xpath('//p[@class="push-agency-email"]/a/@href').get("")
 
         # The address and coordinates are only in the map popup script
         script = response.xpath('//script[contains(text(), "gmap-infobulle")]/text()').get("")
@@ -34,7 +35,7 @@ class MutuelleDePoitiersFRSpider(SitemapSpider):
             lines = [line.strip() for line in lines if line.strip()]
             if lines and (postcode_city := re.match(r"(\d{5})\s+(.+)", lines[-1])):
                 item["postcode"], item["city"] = postcode_city.groups()
-                item["street_address"] = ", ".join(lines[:-1])
+                item["street_address"] = merge_address_lines(lines[:-1])
 
         apply_category(Categories.OFFICE_INSURANCE, item)
         yield response.follow(item["website"] + "/nos-horaires", self.parse_hours, cb_kwargs={"item": item})

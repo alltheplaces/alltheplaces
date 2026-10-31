@@ -38,7 +38,7 @@ class DollarSelfStorageUSSpider(Spider):
         if len(state) == 2:
             item["state"] = state
         item["phone"] = response.css('.d-learch a[href^="tel:"] *::text').get()
-        item["email"] = response.css('.d-learch a[href^="mailto:"]::attr(href)').get("").removeprefix("mailto:")
+        item["email"] = response.css('.d-learch a[href^="mailto:"]::attr(href)').get("")
         item["branch"] = item["city"]
         if store_number := re.search(r"#(\d+)", card):
             item["extras"]["ref:dss"] = store_number.group(1)

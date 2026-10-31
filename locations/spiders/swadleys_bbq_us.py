@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # The first section on the page is an overview listing every address, so a
 # section is only read when it names a single restaurant.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 PHONE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")

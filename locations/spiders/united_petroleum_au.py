@@ -8,6 +8,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 TIME_RANGE_REGEX = re.compile(r"(\d{1,2}:\d{2}[AP]M) - (\d{1,2}:\d{2}[AP]M)")
 SUB_TENANTS = {
@@ -68,9 +69,7 @@ class UnitedPetroleumAUSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["addr_full"] = ", ".join(
-                filter(None, [location["address1"], location["address2"], location["address3"]])
-            )
+            item["addr_full"] = merge_address_lines([location["address1"], location["address2"], location["address3"]])
 
             if food_and_drinks := location.get("foodAndDrinks"):
                 for tenant_key, (brand, cat) in SUB_TENANTS.items():

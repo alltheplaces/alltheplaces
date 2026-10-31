@@ -20,7 +20,7 @@ class TedsMontanaGrillSpider(scrapy.Spider):
     def parse_location(self, location, state):
         ref = location.xpath(".//a/@href").extract_first()
         city = location.xpath(".//h5/text()").extract_first()
-        phone = location.xpath(".//p")[-1].xpath(".//span/a/@href").extract_first().replace("tel:", "")
+        phone = location.xpath(".//p")[-1].xpath(".//span/a/@href").extract_first()
         address = location.xpath(".//p")[-1].xpath("text()").extract()
         street_address = clean_address([line.strip() for line in address[:-1]])
         postcode = address[-1].strip()
