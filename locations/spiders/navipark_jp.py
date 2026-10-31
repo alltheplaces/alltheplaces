@@ -44,7 +44,7 @@ class NaviparkJPSpider(Spider):
         self, response: Response, bbox: tuple[tuple[float, float], tuple[float, float]]
     ) -> Iterable[Feature | Request]:
         try:
-            data = json.loads(response.text)
+            data = response.json()
         except json.JSONDecodeError:
             return
         if not data:

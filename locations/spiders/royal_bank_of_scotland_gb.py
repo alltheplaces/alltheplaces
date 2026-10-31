@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from scrapy import Spider
@@ -16,7 +15,7 @@ class RoyalBankOfScotlandGBSpider(Spider):
     requires_proxy = False
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = json.loads(response.text)
+        data = response.json()
         for brand_data in data["data"]:
             for brand in brand_data["Brand"]:
                 for branch in brand["Branch"]:
