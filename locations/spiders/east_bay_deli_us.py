@@ -127,14 +127,9 @@ class EastBayDeliUSSpider(SitemapSpider):
             ):
                 oh.add_days_range(
                     days,
-                    EastBayDeliUSSpider.normalise_time(times.group(1)),
-                    EastBayDeliUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)
