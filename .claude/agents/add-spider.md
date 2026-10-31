@@ -127,6 +127,8 @@ Comments: default to none. Only add one where the *why* is genuinely non-obvious
 
 **Join address parts with `merge_address_lines`** (`locations/pipelines/address_clean_up.py`), not `", ".join(filter(None, ...))` or a strip-and-filter comprehension. It strips each part and drops empty and non-string ones, and accepts any iterable (`merge_address_lines([a.get("line1"), a.get("line2")])`). Use a plain space join only when the parts are components of one line (street type + name + number).
 
+**Don't define a local weekday map** (`{"mon": "Mo", ...}`, `{"月": "Mo", ...}`). `locations/hours.py` has `DAYS`, `DAYS_3_LETTERS`, `DAYS_FROM_SUNDAY` and per-language `DAYS_XX` dicts; look up a source string with `sanitise_day(value, DAYS_XX)` (default `DAYS_EN`, case-insensitive), or zip `DAYS_3_LETTERS` with `DAYS` when the source uses day names as field-name prefixes.
+
 **Reuse existing shared mapping tables before writing a new per-spider one.** Check `categories.py` for `map_payment`/`payment_method_aliases`, and `hours.py` for `DAYS_EN`, before inventing an equivalent local dict — this gets flagged every time it's duplicated (davidhicks, PR #17947, #17931: "Is there a reason why a new mapping needs to be defined here?").
 
 **Check whether `DictParser.parse` fits before manually pulling fields one at a time.** If a spider extracts many similarly-shaped fields from a JSON dict individually, `DictParser.parse` can usually replace that boilerplate (davidhicks, PR #17947, flagged twice in one PR).
