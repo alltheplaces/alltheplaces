@@ -39,8 +39,8 @@ class RoofRacksGaloreAUSpider(Spider):
             "lon": response.meta["lon"],
             "branch": feature.xpath('.//label[contains(@class, "store-item-lable")]/text()').get().strip(),
             "addr_full": feature.xpath('.//span[contains(@class, "address-location")]/text()').get().strip(),
-            "phone": feature.xpath('.//a[contains(@href, "tel:")]/@href').get("").replace("tel:", ""),
-            "email": feature.xpath('.//a[contains(@href, "mailto:")]/@href').get("").replace("mailto:", ""),
+            "phone": feature.xpath('.//a[contains(@href, "tel:")]/@href').get(""),
+            "email": feature.xpath('.//a[contains(@href, "mailto:")]/@href').get(""),
             "opening_hours": OpeningHours(),
         }
 

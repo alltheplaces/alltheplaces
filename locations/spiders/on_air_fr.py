@@ -37,7 +37,7 @@ class OnAirFRSpider(SitemapSpider):
         item["phone"] = (
             re.sub(r"\s+", "", response.css(".single_span_icn.tel").xpath("normalize-space()").get("")) or None
         )
-        item["email"] = response.css(".single_span_icn.mail a::attr(href)").get("").removeprefix("mailto:") or None
+        item["email"] = response.css(".single_span_icn.mail a::attr(href)").get("") or None
 
         map_link = response.css(".single_span_icn.map a")
         self.parse_address(item, map_link.css("::text").getall())
