@@ -43,7 +43,7 @@ class GiordanosUSSpider(scrapy.Spider):
                 item["lat"], item["lon"] = m.groups()
 
         if tel := response.css(".phone a::attr(href)").get():
-            item["phone"] = tel.removeprefix("tel:")
+            item["phone"] = tel
 
         oh = OpeningHours()
         oh.add_ranges_from_string("; ".join(response.css(".hours::text").getall()))

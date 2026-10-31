@@ -6,17 +6,6 @@ from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.storefinders.storerocket import StoreRocketSpider
 
-# The locations page embeds a StoreRocket widget whose API returns every
-# restaurant in one response.
-#
-# Two of its fields hold markup rather than data: "phone" is a block of order
-# buttons, with the real number in a tel: link inside the Order Online field,
-# and "address_line_1" is only the street name, so the address comes from
-# display_address.
-#
-# Hours are free text and inconsistent: "Open 24 Hours", "7AM-10PM",
-# "7AM - 11PM" and "7AM,11PM" all appear.
-
 
 class NormsUSSpider(StoreRocketSpider):
     name = "norms_us"

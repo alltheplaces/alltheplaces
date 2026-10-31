@@ -25,8 +25,8 @@ class BenitaBGSpider(Spider):
             item["branch"] = re.sub(r"(?i)^benita\s*", "", name).strip(" –-")
 
             item["addr_full"] = location.css("span.short_description::text").get("").strip()
-            item["phone"] = location.css('a.link[href^="tel:"]::attr(href)').get("").removeprefix("tel:")
-            item["email"] = location.css('a.link[href^="mailto:"]::attr(href)').get("").removeprefix("mailto:")
+            item["phone"] = location.css('a.link[href^="tel:"]::attr(href)').get("")
+            item["email"] = location.css('a.link[href^="mailto:"]::attr(href)').get("")
 
             filters = [f.upper() for f in location.css("div.object_filter::text").getall()]
 

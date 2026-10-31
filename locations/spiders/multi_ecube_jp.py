@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS, DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 
 
@@ -60,17 +60,8 @@ class MultiEcubeJPSpider(Spider):
 
     def _parse_hours(self, bh: dict) -> OpeningHours:
         oh = OpeningHours()
-        day_map = {
-            "mon": "Mo",
-            "tue": "Tu",
-            "wed": "We",
-            "thu": "Th",
-            "fri": "Fr",
-            "sat": "Sa",
-            "sun": "Su",
-        }
-        for key, day in day_map.items():
-            day_data = bh.get(key, {})
+        for key, day in zip(DAYS_3_LETTERS, DAYS):
+            day_data = bh.get(key.lower(), {})
             open_time = day_data.get("open_time")
             close_time = day_data.get("close_time")
             if not open_time or not close_time:

@@ -153,8 +153,6 @@ CARDS_MAPPING = {
 }
 
 
-# MOL data is also available at https://www.molgroupcards.com/station-finder
-# along with other brands, but not all POIs on this page have fuel types and services.
 class MolSpider(Spider):
     name = "mol"
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 90}

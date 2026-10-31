@@ -44,9 +44,7 @@ class FoodCitySoutheastUSSpider(Spider):
             item["state"] = store_listing.xpath(f"..//input[@id='State{ref}']/@value").get()
             item["postcode"] = store_listing.xpath(f"..//input[@id='Zip{ref}']/@value").get()
 
-            item["phone"] = (
-                store_listing.xpath(".//div[@class='location']//a[@class='tel']/@href").get().removeprefix("tel:")
-            )
+            item["phone"] = store_listing.xpath(".//div[@class='location']//a[@class='tel']/@href").get()
             for location_hours in store_listing.xpath(".//*[@class='hours']"):
                 h2 = location_hours.xpath("./h2/text()").get()
                 if h2 == "Store Hours":

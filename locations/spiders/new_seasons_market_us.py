@@ -18,7 +18,7 @@ class NewSeasonsMarketUSSpider(JSONBlobSpider):
             item["lon"] = location.xpath(".//@data-longitude").get()
             item["state"] = location.xpath(".//@data-state-name").get()
             item["ref"] = location.xpath(".//@id").get()
-            item["phone"] = location.xpath('.//*[contains(@href,"tel:")]/@href').get().replace("tel:", "")
+            item["phone"] = location.xpath('.//*[contains(@href,"tel:")]/@href').get()
             item["street_address"] = location.xpath('.//*[@class="store-addressdetails"]/text()').get()
             item["city"] = location.xpath('.//*[@class="store-city"]/text()').get()
             item["postcode"] = location.xpath('.//*[@class="store-zipcode"]/text()').get()

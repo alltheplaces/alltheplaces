@@ -32,13 +32,9 @@ class FreshchoiceNZSpider(CrawlSpider):
                     ).getall()
                 ),
             ).strip(),
-            "phone": response.xpath('//div[@class="Footer__Column"]//a[contains(@href, "tel:")]/@href')
-            .get("")
-            .replace("tel:", "")
-            .strip(),
+            "phone": response.xpath('//div[@class="Footer__Column"]//a[contains(@href, "tel:")]/@href').get("").strip(),
             "email": response.xpath('//div[@class="Footer__Column"]//a[contains(@href, "mailto:")]/@href')
             .get("")
-            .replace("mailto:", "")
             .strip(),
             "website": url,
         }

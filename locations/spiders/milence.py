@@ -5,8 +5,6 @@ from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
-# Malformed Microdata
-
 
 class MilenceSpider(SitemapSpider):
     name = "milence"

@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # The site also lists food trucks and a location with no address; those cards
 # carry no address line and are skipped.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 

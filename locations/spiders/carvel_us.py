@@ -8,11 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.storefinders.yext import YextSpider
 
-# Carvel uses Yext Pages for its store locator. Each location page embeds the
-# full Yext entity document as a URL encoded JSON blob passed to
-# decodeURIComponent, which carries more than the page's JSON-LD does (entity
-# id, display coordinates and structured opening hours).
-
 
 class CarvelUSSpider(SitemapSpider):
     name = "carvel_us"

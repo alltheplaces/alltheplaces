@@ -7,6 +7,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AbbeRegionalLibrarySystemUSSpider(Spider):
@@ -39,10 +40,10 @@ class AbbeRegionalLibrarySystemUSSpider(Spider):
                 item["branch"] = m.group(1)
 
         if m := re.fullmatch(r"(.+), ([A-Z]{2}) (\d{5})", address[-1]):
-            item["street_address"] = ", ".join(address[:-1])
+            item["street_address"] = merge_address_lines(address[:-1])
             item["city"], item["state"], item["postcode"] = m.groups()
         else:
-            item["addr_full"] = ", ".join(address)
+            item["addr_full"] = merge_address_lines(address)
         item["phone"] = response.css('.post__contact-item--phone a[href^="tel:"]::text').get()
         if latlong := response.css("[data-latlong]::attr(data-latlong)").get():
             item["lat"], item["lon"] = latlong.split(",")

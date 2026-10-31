@@ -27,9 +27,7 @@ class CookGBGGSpider(SitemapSpider):
             "addr_full": merge_address_lines(
                 response.xpath('//div[@class="shop-address-info"]/p[position()<=2]/text()').getall()
             ),
-            "phone": response.xpath('//div[@class="shop-address-info"]/p/a[contains(@href, "tel:")]/@href')
-            .get()
-            .removeprefix("tel:"),
+            "phone": response.xpath('//div[@class="shop-address-info"]/p/a[contains(@href, "tel:")]/@href').get(),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }

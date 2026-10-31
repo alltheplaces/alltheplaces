@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_BR, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 STATES = [
     "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA",
@@ -63,8 +64,8 @@ class CorreiosBRSpider(Spider):
             item = Feature()
             item["ref"] = code
             # The address may continue on a second line (e.g. a complement or reference point).
-            item["street_address"] = ", ".join(
-                filter(None, map(self.text, re.findall(r'class="endereco-agencia"[^>]*>(.*?)</span>', base, re.S)))
+            item["street_address"] = merge_address_lines(
+                map(self.text, re.findall(r'class="endereco-agencia"[^>]*>(.*?)</span>', base, re.S))
             )
             item["city"] = city
             item["state"] = state

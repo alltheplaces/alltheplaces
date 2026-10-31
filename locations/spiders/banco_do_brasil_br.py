@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_WEEKDAY, OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 API_BASE = "https://encontre-bb-api.bb.com.br/ws-localizacao-agencias"
@@ -34,7 +35,7 @@ class BancoDoBrasilBRSpider(Spider):
             item["lat"], item["lon"] = item["lat"].strip(), item["lon"].strip()  # source pads them with spaces
             item["ref"] = location["uor"]
             item["name"] = self.clean_name(location.get("nm_ponto"))
-            item["street_address"] = ", ".join(filter(None, [location.get("logradouro"), location.get("complemento")]))
+            item["street_address"] = merge_address_lines([location.get("logradouro"), location.get("complemento")])
             item["city"] = location.get("municipio")
             item["state"] = location.get("uf")
             item["postcode"] = str(location["cep"]) if location.get("cep") else None

@@ -33,9 +33,7 @@ class FireAndRescueNswAUSpider(CrawlSpider):
             "state": "NSW",
             "phone": response.xpath(
                 '//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Phone:")]/a/@href'
-            )
-            .get()
-            .replace("tel:", ""),
+            ).get(),
             "website": response.url,
             "facebook": response.xpath(
                 '//main/div[2]//div[@class="card-panel white"][1]/p[contains(text(), "Social media:")]/a/@href'

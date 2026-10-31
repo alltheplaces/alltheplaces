@@ -21,7 +21,7 @@ class FoodworksAUSpider(Spider):
                 [item["street_address"], store.xpath('.//*[@class="StoreCard__Details"]//text()[4]').get()]
             )
             if phone := store.xpath('.//*[contains(@href,"tel:")]/@href').get():
-                item["phone"] = phone.replace("tel:", "")
+                item["phone"] = phone
             item["ref"] = store.xpath('.//*[contains(@href,"i_choose_you")]/@href').get().replace("catalogues", "")
             if website := store.xpath('.//*[contains(@href,"catalogues")]/@href').get():
                 item["website"] = website.replace("catalogues", "")

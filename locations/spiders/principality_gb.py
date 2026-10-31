@@ -8,6 +8,7 @@ from scrapy.http import Request, Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # UK postcode pattern
 POSTCODE_RE = re.compile(r"([A-Z]{1,2}[0-9R][0-9A-Z]? ?[0-9][ABD-HJLNP-UW-Z]{2})$")
@@ -66,7 +67,7 @@ class PrincipalityGBSpider(Spider):
             addr_parts = [p for p in parts if not POSTCODE_RE.fullmatch(p.strip())]
             if len(addr_parts) >= 2:
                 item["city"] = addr_parts[-1]
-                item["street_address"] = ", ".join(addr_parts[:-1])
+                item["street_address"] = merge_address_lines(addr_parts[:-1])
             elif addr_parts:
                 item["street_address"] = addr_parts[0]
 

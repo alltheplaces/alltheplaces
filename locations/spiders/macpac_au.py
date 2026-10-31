@@ -31,7 +31,7 @@ class MacpacAUSpider(Spider):
         item["branch"] = name.removeprefix("Macpac ")
         item["lat"] = response.xpath('//div[@class="additional-info"]/@data-lat').get()
         item["lon"] = response.xpath('//div[@class="additional-info"]/@data-lng').get()
-        item["phone"] = response.xpath('//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:")
+        item["phone"] = response.xpath('//a[starts-with(@href, "tel:")]/@href').get("")
         item["website"] = "https://www.macpac.com.au/our-stores"
 
         address_lines = [

@@ -4,8 +4,6 @@ from chompjs import chompjs
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# Official website: https://chizhik.club/
-
 
 class ChizhikRUSpider(scrapy.Spider):
     name = "chizhik_ru"

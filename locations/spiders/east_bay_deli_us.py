@@ -7,6 +7,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # Location pages come from the WordPress page sitemap. Each is built with
 # Elementor and gives the branch as a heading, then a text block holding the
@@ -14,8 +15,6 @@ from locations.items import Feature
 #
 # No coordinates are published: the directions button links to a Google Maps
 # place page for the address, without an "@lat,lng" part.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Z]{2})\s+(\d{5})")
 # A line of hours starts with a day or a range of days, however abbreviated.
@@ -79,7 +78,7 @@ class EastBayDeliUSSpider(SitemapSpider):
                 if HOURS_LINE.match(line):
                     continue
                 street.append(line)
-            item["street_address"] = ", ".join(street[-2:]) if street else None
+            item["street_address"] = merge_address_lines(street[-2:]) if street else None
 
             item["phone"] = next(
                 (

@@ -25,7 +25,7 @@ class InteriorHealthCASpider(SitemapSpider):
             "website": response.url,
         }
         if properties["phone"]:
-            properties["phone"] = properties["phone"].replace("tel:", "").strip()
+            properties["phone"] = properties["phone"].strip()
         else:
             properties.pop("phone", None)
 

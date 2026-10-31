@@ -107,7 +107,6 @@ class SeventeenIceJPSpider(Spider):
             item["phone"] = loc.get("phone") or None
             item["extras"]["addr:province"] = loc.get("pref")
             item["city"] = loc.get("city")
-            # item["street_address"] = loc.get("street_address") # this has bad data, do not use
 
             apply_category(Categories.VENDING_MACHINE, item)
             item["extras"]["vending"] = "ice_cream"

@@ -26,7 +26,7 @@ class LaTaverneTableDeCaractereFRSpider(Spider):
                 li.xpath('.//div[@class="code_postal-restaurant"]/following-sibling::div/text()').get("").strip()
             )
             item["phone"] = li.xpath('.//div[@class="tel-restaurant"]/text()').get()
-            item["email"] = li.xpath('.//div[@class="mail-restaurant"]//a/@href').get("").replace("mailto:", "")
+            item["email"] = li.xpath('.//div[@class="mail-restaurant"]//a/@href').get("")
             item["lat"] = marker.xpath("@data-markerlat").get()
             item["lon"] = marker.xpath("@data-markerlon").get()
 

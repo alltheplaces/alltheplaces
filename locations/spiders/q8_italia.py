@@ -41,9 +41,6 @@ FUEL_TYPES_MAPPING = {
     # "F41767000": 91,
 }
 
-# Confusingly, not just IT but most of Europe
-# Also not just Q8Italia
-
 
 class Q8ItaliaSpider(Spider):
     name = "q8_italia"

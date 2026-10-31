@@ -27,7 +27,7 @@ class TheBigBiscuitUSSpider(Spider):
 
             # Phone from tel: link
             if phone := block.css("a[href^='tel:']::attr(href)").get():
-                item["phone"] = phone.replace("tel:", "")
+                item["phone"] = phone
 
             # Website from detail link if present
             if detail := block.css("a[href*='bigbiscuit.com']::attr(href)").get():

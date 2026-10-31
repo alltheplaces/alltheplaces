@@ -6,7 +6,6 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.virgin_active_bw_na_za import VIRGIN_ACTIVE_SHARED_ATTRIBUTES
 
 
-# Also used by virgin_active_au
 class VirginActiveSGSpider(JSONBlobSpider):
     name = "virgin_active_sg"
     item_attributes = VIRGIN_ACTIVE_SHARED_ATTRIBUTES

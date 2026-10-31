@@ -47,7 +47,6 @@ class OldNationalBankUSSpider(SitemapSpider, StructuredDataSpider):
         if response.xpath('//div[@class="Teaser-service" and contains(text(), "ATM")]'):
             apply_yes_no(Extras.ATM, item, True)
 
-            # Get ATM hours JSON data
             hours_json = response.xpath(
                 '//h2[@class="Core-heading" and contains(text(), "ATM")]/..//span[@class="c-hours-today js-hours-today"]/@data-days'
             ).get()

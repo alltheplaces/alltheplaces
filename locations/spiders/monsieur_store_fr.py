@@ -6,6 +6,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MonsieurStoreFRSpider(SitemapSpider):
@@ -24,9 +25,9 @@ class MonsieurStoreFRSpider(SitemapSpider):
             .removeprefix("Monsieur Store ")
             .strip("– ")
         )
-        item["addr_full"] = ",".join(response.xpath('//*[@class="store-header__address"]//text()').getall())
+        item["addr_full"] = merge_address_lines(response.xpath('//*[@class="store-header__address"]//text()').getall())
         item["ref"] = item["website"] = response.url
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]//@href').get().replace("tel:", "")
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]//@href').get()
 
         oh = OpeningHours()
         for day_time in response.xpath('//*[@class="store-header__schedule"]//li'):

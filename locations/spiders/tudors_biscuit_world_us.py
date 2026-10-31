@@ -29,7 +29,7 @@ class TudorsBiscuitWorldUSSpider(scrapy.Spider):
                 item["city"] = city.strip()
                 item["state"] = state.strip()
                 item["postcode"] = postcode.strip()
-            item["phone"] = inner.xpath(".//a[starts-with(@href, 'tel:')]/@href").get().removeprefix("tel:")
+            item["phone"] = inner.xpath(".//a[starts-with(@href, 'tel:')]/@href").get()
 
             oh = OpeningHours()
             for line in inner.xpath(".//div[@class='container']/div[@class='row']"):

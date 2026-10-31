@@ -6,6 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # The all-locations page is built with the Divi page builder: each location is a
 # column holding the city and service type, the address and phone, and a
@@ -15,10 +16,6 @@ from locations.items import Feature
 # "Commercial & Consumer", "Truck Tire Center") are tagged as shops, and the
 # distribution centres as warehouses. Retread plants are industrial sites
 # rather than shops, and are skipped.
-#
-# No opening hours are published on this page.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 WAREHOUSES = {"Distribution Services", "Central Distribution"}
 SKIPPED = {"Retread"}
@@ -49,8 +46,8 @@ class PurcellTireUSSpider(Spider):
             # locations put the whole address on one line.
             if lines and (locality := re.fullmatch(r"(.+?),\s*([A-Z]{2})\s+(\d{5})", lines[-1])):
                 item["city"], item["state"], item["postcode"] = locality.groups()
-                item["street_address"] = ", ".join(lines[:-1])
-            elif address := re.fullmatch(r"(.*?),\s*([^,]+?),?\s+([A-Z]{2}),?\s+(\d{5})", ", ".join(lines)):
+                item["street_address"] = merge_address_lines(lines[:-1])
+            elif address := re.fullmatch(r"(.*?),\s*([^,]+?),?\s+([A-Z]{2}),?\s+(\d{5})", merge_address_lines(lines)):
                 item["street_address"], item["city"], item["state"], item["postcode"] = address.groups()
             else:
                 item["addr_full"] = ", ".join(lines)

@@ -54,8 +54,8 @@ class DetroitPublicLibraryUSSpider(Spider):
         # The page header carries the system's main number, so only read the
         # contact links in the location overview.
         overview = response.css('section[data-block-type="location-overview"]')
-        item["phone"] = overview.css('nav a[href^="tel:"]::attr(href)').get("").removeprefix("tel:")
-        item["email"] = overview.css('nav a[href^="mailto:"]::attr(href)').get("").removeprefix("mailto:")
+        item["phone"] = overview.css('nav a[href^="tel:"]::attr(href)').get("")
+        item["email"] = overview.css('nav a[href^="mailto:"]::attr(href)').get("")
 
         item["opening_hours"] = OpeningHours()
         if status == "temporarily-closed":

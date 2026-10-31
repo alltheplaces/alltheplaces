@@ -117,7 +117,6 @@ class EuronetPLSpider(Spider):
 
             item["opening_hours"] = parse_hours(location)
 
-            # Apply ATM category
             apply_category(Categories.ATM, item)
             apply_yes_no(Extras.CASH_IN, item, location.get("Typ") == "Recycler")
 
