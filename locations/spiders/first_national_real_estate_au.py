@@ -31,8 +31,8 @@ class FirstNationalRealEstateAUSpider(Spider):
                 or None,
                 addr_full=clean_address(location.xpath('.//div[contains(@class, "office-address")]//text()').getall()),
                 website=f"https://www.firstnational.com.au{href.strip()}" if href else None,
-                phone=phone.replace("tel:", "") if phone else None,
-                email=email.replace("mailto:", "") if email else None,
+                phone=phone,
+                email=email,
             )
             extract_google_position(item, location)
             yield item
