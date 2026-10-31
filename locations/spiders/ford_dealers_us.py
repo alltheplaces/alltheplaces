@@ -3,8 +3,7 @@ from copy import deepcopy
 from typing import Any
 
 import scrapy
-from requests import Response
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
