@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TexacoNLSpider(SitemapSpider):
@@ -18,7 +19,7 @@ class TexacoNLSpider(SitemapSpider):
         item["name"] = response.xpath("//title/text()").get()
         addr = response.xpath('//section[@class="locationDetail noHero"]//p/text()').getall()
         item["street_address"] = addr[0]
-        item["addr_full"] = " ".join(addr)
+        item["addr_full"] = merge_address_lines(addr)
         item["phone"] = response.xpath('//section[@class="locationDetail noHero"]//a/text()').get()
         oh = OpeningHours()
         days = {"mon": "Mo", "tue": "Tu", "wed": "We", "thu": "Th", "fri": "Fr", "sat": "Sa", "sun": "Su"}
