@@ -15,7 +15,7 @@ class TijuanaFlatsSpider(scrapy.Spider):
     start_urls = ("https://www.tijuanaflats.com/locations",)
 
     def parse(self, response):
-        data = json.loads(response.xpath('//tjs-view-locations/attribute::*[name()=":locations"]').extract_first())
+        data = json.loads(response.xpath('//tjs-view-locations/attribute::*[name()=":locations"]').get())
         for row in data:
             for ent in row["yoast_json_ld"][0]["@graph"]:
                 if ent["@type"] == "WebPage" and row["slug"] in ent["url"]:
