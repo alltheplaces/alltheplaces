@@ -78,14 +78,9 @@ class CodysOriginalRoadhouseUSSpider(Spider):
             if day_names:
                 oh.add_days_range(
                     day_names,
-                    CodysOriginalRoadhouseUSSpider.normalise_time(times.group(1)),
-                    CodysOriginalRoadhouseUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").lower()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

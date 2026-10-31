@@ -69,13 +69,8 @@ class BecksPrimeUSSpider(Spider):
         oh = OpeningHours()
         oh.add_days_range(
             ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
-            BecksPrimeUSSpider.normalise_time(times.group(1)),
-            BecksPrimeUSSpider.normalise_time(times.group(2)),
-            time_format="%I:%M%p",
+            times.group(1),
+            times.group(2),
+            time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
         )
         return oh
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)
