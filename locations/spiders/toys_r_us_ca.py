@@ -26,9 +26,7 @@ class ToysRUSCASpider(SitemapSpider):
         address_section = response.xpath('//h3[text()="Address"]/following-sibling::p/text()').getall()
         item["addr_full"] = merge_address_lines(address_section)
 
-        item["phone"] = (
-            response.xpath('//h3[text()="Phone"]/following-sibling::p//a/@href').get("").removeprefix("tel:")
-        )
+        item["phone"] = response.xpath('//h3[text()="Phone"]/following-sibling::p//a/@href').get("")
 
         oh = OpeningHours()
         for day in DAYS_FULL:
