@@ -47,3 +47,15 @@ spider walks their JSON structure and is able to pull
 out the opening hours rather simply using the ATP library support.
 The cost-benefit analysis in this case is very much in favour of
 us making the effort!
+
+### Time formats
+
+`add_range` and `add_days_range` read times as `%H:%M` by default. For anything else pass `time_format`,
+either a single `strptime` format or a list of formats that are tried in order, the first match wins.
+
+List only the spellings the source really uses. If every time reads "9:30AM" use `time_format="%I:%M%p"`;
+if on-the-hour times drop the minutes ("9AM", "9:30AM") use `time_format=["%I%p", "%I:%M%p"]`.
+Don't write a local helper to reshape the strings, and don't copy a list covering every possible
+12 hour spelling: each unused format is a failed parse on every call, and a time that doesn't match
+any listed format should raise instead of being quietly accepted.
+Keep the regex that captures the time as tight as the formats you pass.
