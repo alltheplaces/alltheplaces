@@ -38,8 +38,8 @@ class CrustAUSpider(Spider):
         item = response.meta["item"]
         item["website"] = "https://www.crust.com.au" + response.xpath('//div[@class="store_container"]/a/@href').get()
         item["addr_full"] = merge_address_lines(response.xpath('//div[@class="store_container"]/p[1]/text()').getall())
-        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
-        item["email"] = response.xpath('//a[contains(@href, "mailto:")]/@href').get("").replace("mailto:", "")
+        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("")
+        item["email"] = response.xpath('//a[contains(@href, "mailto:")]/@href').get("")
         item["opening_hours"] = OpeningHours()
         try:
             self._parse_hours(response, item)

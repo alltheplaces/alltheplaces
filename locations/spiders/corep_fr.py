@@ -40,7 +40,7 @@ class CorepFRSpider(SitemapSpider):
                 item["phone"] = "; ".join(lines[index + 1 :])
                 break
 
-        item["email"] = response.css(".agence a[href^='mailto:']::attr(href)").get("").removeprefix("mailto:")
+        item["email"] = response.css(".agence a[href^='mailto:']::attr(href)").get("")
 
         hours = []
         # A separate "Horaires exceptionnels" block holds temporary hours.
