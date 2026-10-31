@@ -53,7 +53,7 @@ class ChemistKingAUSpider(Spider):
             item["postcode"] = postcode
 
         if phone := response.css('a[href^="tel:"]::attr(href)').get():
-            item["phone"] = phone.replace("tel:", "").strip()
+            item["phone"] = phone.strip()
 
         if m := re.search(r"Opening Hours:\s*(.*?)\s*P\s*ublic\s*Holidays:", text):
             oh = OpeningHours()

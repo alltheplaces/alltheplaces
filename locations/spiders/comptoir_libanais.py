@@ -24,7 +24,7 @@ class ComptoirLibanaisSpider(Spider):
             item["website"] = item["ref"] = location.xpath(".//a/@href").get()
             item["branch"] = location.xpath("normalize-space(.//h5)").get()
             item["addr_full"] = merge_address_lines(location.xpath("./p//text()").getall())
-            item["phone"] = location.xpath('.//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:")
+            item["phone"] = location.xpath('.//a[starts-with(@href, "tel:")]/@href').get("")
             yield response.follow(item["website"], callback=self.parse_location, cb_kwargs={"item": item})
 
     def parse_location(self, response: Response, item: Feature) -> Any:
