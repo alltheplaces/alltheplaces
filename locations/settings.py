@@ -103,6 +103,7 @@ EXTENSIONS = {
 ITEM_PIPELINES = {
     "locations.pipelines.duplicates.DuplicatesPipeline": 200,
     "locations.pipelines.drop_attributes.DropAttributesPipeline": 250,
+    "locations.pipelines.name_is_branch.NameIsBranchPipeline": 280,
     "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
     "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
     "locations.pipelines.clean_strings.CleanStringsPipeline": 354,
