@@ -16,7 +16,7 @@ class BottegaVenetaSpider(PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response):
-        countries = response.xpath('//select[@id="country"]/option/@value').extract()
+        countries = response.xpath('//select[@id="country"]/option/@value').getall()
         for country in countries:
             url = f"https://www.bottegaveneta.com/on/demandware.store/Sites-BV-R-WEUR-Site/de_DE/Stores-FindStoresData?countryCode={country}"
             yield scrapy.Request(url=url, callback=self.store_parse)

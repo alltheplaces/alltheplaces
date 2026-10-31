@@ -19,9 +19,9 @@ class BestBuyCASpider(StructuredDataSpider):
     drop_attributes = {"image"}
 
     def parse(self, response: TextResponse, **kwargs):
-        locations = response.xpath('//a[@class="Directory-listLink"]/@href').extract()
+        locations = response.xpath('//a[@class="Directory-listLink"]/@href').getall()
         if not locations:
-            stores = response.xpath('//a[@class="Teaser-titleLink"]/@href').extract()
+            stores = response.xpath('//a[@class="Teaser-titleLink"]/@href').getall()
             if not stores:
                 yield from self.parse_sd(response)
             for store in stores:
