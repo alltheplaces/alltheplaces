@@ -212,6 +212,13 @@ def test_add_range_time_with_non_numeric_hour_raises():
         o.add_range("Mo", "ab:00", "10:00")
 
 
+def test_add_range_12h_times_fall_back_across_spellings():
+    o = OpeningHours()
+    o.add_range("Mo", "9am", "5:30 PM", time_format="%I:%M%p")
+    o.add_range("Tu", "9 AM", "5pm")
+    assert o.as_opening_hours() == "Mo 09:00-17:30; Tu 09:00-17:00"
+
+
 def test_till_midnight():
     o = OpeningHours()
     o.add_range("Mo", "11:00", "23:00")

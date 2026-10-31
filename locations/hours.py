@@ -1162,6 +1162,22 @@ def _normalise_hour_over_24(value: str) -> tuple[str, bool]:
     return f"{hour_int - 24:02d}{sep}{rest}", True
 
 
+_FALLBACK_12H_FORMATS = ("%I:%M%p", "%I:%M %p", "%I%p", "%I %p")
+
+
+def _strptime(value: str, time_format: str) -> time.struct_time:
+    """Parse with `time_format`, falling back to common 12 hour spellings such as "9am" or "9:30 PM"."""
+    try:
+        return time.strptime(value, time_format)
+    except ValueError as error:
+        for fallback in _FALLBACK_12H_FORMATS:
+            try:
+                return time.strptime(value.strip(), fallback)
+            except ValueError:
+                pass
+        raise error
+
+
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
@@ -1264,9 +1280,9 @@ class OpeningHours:
         if open_after_midnight:
             day = DAYS[(DAYS.index(day) + 1) % len(DAYS)]
         if not isinstance(open_time, time.struct_time):
-            open_time = time.strptime(open_time, time_format)
+            open_time = _strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
-            close_time = time.strptime(close_time, time_format)
+            close_time = _strptime(close_time, time_format)
             if close_time.tm_hour == 0 and close_time.tm_min == 0:
                 # weird format not caught by checks above
                 # may be 0:00 or even more divergent if time_format
