@@ -2,6 +2,7 @@ import logging
 import re
 import time
 from collections import defaultdict
+from collections.abc import Sequence
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 DAYS_FROM_SUNDAY = DAYS[-1:] + DAYS[:-1]
@@ -1173,6 +1174,18 @@ def _normalise_hour_over_24(value: str) -> tuple[str, bool]:
     return f"{hour_int - 24:02d}{sep}{rest}", True
 
 
+def _strptime(value: str, time_format: str | Sequence[str]) -> time.struct_time:
+    """Parse `value` with `time_format`, or with the first of several formats that matches."""
+    if isinstance(time_format, str):
+        return time.strptime(value, time_format)
+    for fmt in time_format:
+        try:
+            return time.strptime(value, fmt)
+        except ValueError:
+            pass
+    raise ValueError(f"time data {value!r} does not match any of the formats {list(time_format)!r}")
+
+
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
@@ -1186,7 +1199,7 @@ class OpeningHours:
         days: list[str],
         open_time: str | time.struct_time,
         close_time: str | time.struct_time,
-        time_format: str = "%H:%M",
+        time_format: str | Sequence[str] = "%H:%M",
     ):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
@@ -1227,7 +1240,7 @@ class OpeningHours:
         day,
         open_time: str | time.struct_time,
         close_time: str | time.struct_time,
-        time_format: str = "%H:%M",
+        time_format: str | Sequence[str] = "%H:%M",
         closed: list[str] = CLOSED_EN,
     ):
         day = sanitise_day(day)
@@ -1275,9 +1288,9 @@ class OpeningHours:
         if open_after_midnight:
             day = DAYS[(DAYS.index(day) + 1) % len(DAYS)]
         if not isinstance(open_time, time.struct_time):
-            open_time = time.strptime(open_time, time_format)
+            open_time = _strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
-            close_time = time.strptime(close_time, time_format)
+            close_time = _strptime(close_time, time_format)
             if close_time.tm_hour == 0 and close_time.tm_min == 0:
                 # weird format not caught by checks above
                 # may be 0:00 or even more divergent if time_format
