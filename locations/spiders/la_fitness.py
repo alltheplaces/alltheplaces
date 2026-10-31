@@ -29,7 +29,8 @@ class LaFitnessSpider(Spider):
         if not hours:
             return None
 
-        hours.pop(hours.index("CLUB HOURS"))
+        if "CLUB HOURS" in hours:
+            hours.remove("CLUB HOURS")
 
         hours = list(zip(hours[0::2], hours[1::2]))
         for hour in hours:
@@ -63,14 +64,28 @@ class LaFitnessSpider(Spider):
 
     def parse_club(self, response):
         properties = response.meta["properties"]
+        # "13999 WEST SUNRISE BLVD<br/>SUNRISE, FL 33323"; a unit may sit on its own line.
+        lines = [
+            line.strip() for line in response.xpath('//span[@id="clubInfoAddress"]/text()').getall() if line.strip()
+        ]
+        has_club_page = bool(lines)
+        if not has_club_page:
+            # Pre-sale and retired clubs have no club page; split the API's
+            # "13999 WEST SUNRISE BLVD, SUITE 200, SUNRISE, FL 33323" instead.
+            parts = [part.strip() for part in (properties.get("addr_full") or "").split(",") if part.strip()]
+            # Anything shorter can't be split reliably; addr_full stays as it is.
+            lines = [", ".join(parts[:-2]), ", ".join(parts[-2:])] if len(parts) >= 3 else []
+        street = (", ".join(lines[:-1]) or (lines[0] if lines else "")) or None
+        locality = lines[-1] if len(lines) > 1 else ""
+        postcode = re.search(r"([A-Z]\d[A-Z] ?\d[A-Z]\d|\d{5}(?:-\d{4})?)$", locality)
 
         properties.update(
             {
-                "phone": response.xpath('//span[contains(@id, "lblClubPhone")]/text()').extract_first(),
-                "street_address": response.xpath('//span[contains(@id, "lblClubAddress")]/text()').extract_first(),
-                "postcode": response.xpath('//span[contains(@id, "lblZipCode")]/text()').extract_first(),
-                "website": response.url,
-                "opening_hours": self.parse_hours(response.xpath('//div[@id="divClubHourPanel"]//tr')),
+                "phone": response.xpath('//span[@id="clubInfoPhone"]/text()').get(),
+                "street_address": street,
+                "postcode": postcode.group(1) if postcode else None,
+                "website": response.url if has_club_page else None,
+                "opening_hours": self.parse_hours(response.xpath('//div[@id="clubInfoHours"]//tr')),
             }
         )
 
