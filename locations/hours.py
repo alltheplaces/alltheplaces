@@ -2,6 +2,7 @@ import logging
 import re
 import time
 from collections import defaultdict
+from collections.abc import Sequence
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 DAYS_FROM_SUNDAY = DAYS[-1:] + DAYS[:-1]
@@ -1162,20 +1163,16 @@ def _normalise_hour_over_24(value: str) -> tuple[str, bool]:
     return f"{hour_int - 24:02d}{sep}{rest}", True
 
 
-_FALLBACK_12H_FORMATS = ("%I:%M%p", "%I:%M %p", "%I%p", "%I %p")
-
-
-def _strptime(value: str, time_format: str) -> time.struct_time:
-    """Parse with `time_format`, falling back to common 12 hour spellings such as "9am" or "9:30 PM"."""
-    try:
+def _strptime(value: str, time_format: str | Sequence[str]) -> time.struct_time:
+    """Parse `value` with `time_format`, or with the first of several formats that matches."""
+    if isinstance(time_format, str):
         return time.strptime(value, time_format)
-    except ValueError as error:
-        for fallback in _FALLBACK_12H_FORMATS:
-            try:
-                return time.strptime(value.strip(), fallback)
-            except ValueError:
-                pass
-        raise error
+    for fmt in time_format:
+        try:
+            return time.strptime(value, fmt)
+        except ValueError:
+            pass
+    raise ValueError(f"time data {value!r} does not match any of the formats {list(time_format)!r}")
 
 
 class OpeningHours:
@@ -1191,7 +1188,7 @@ class OpeningHours:
         days: list[str],
         open_time: str | time.struct_time,
         close_time: str | time.struct_time,
-        time_format: str = "%H:%M",
+        time_format: str | Sequence[str] = "%H:%M",
     ):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
@@ -1232,7 +1229,7 @@ class OpeningHours:
         day,
         open_time: str | time.struct_time,
         close_time: str | time.struct_time,
-        time_format: str = "%H:%M",
+        time_format: str | Sequence[str] = "%H:%M",
         closed: list[str] = CLOSED_EN,
     ):
         day = sanitise_day(day)

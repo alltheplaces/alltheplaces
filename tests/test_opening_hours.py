@@ -212,11 +212,24 @@ def test_add_range_time_with_non_numeric_hour_raises():
         o.add_range("Mo", "ab:00", "10:00")
 
 
-def test_add_range_12h_times_fall_back_across_spellings():
+def test_add_range_accepts_several_time_formats():
     o = OpeningHours()
-    o.add_range("Mo", "9am", "5:30 PM", time_format="%I:%M%p")
-    o.add_range("Tu", "9 AM", "5pm")
+    formats = ["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"]
+    o.add_range("Mo", "9am", "5:30 PM", time_format=formats)
+    o.add_range("Tu", "9 AM", "5pm", time_format=formats)
     assert o.as_opening_hours() == "Mo 09:00-17:30; Tu 09:00-17:00"
+
+
+def test_add_range_single_time_format_does_not_fall_back():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "9am", "5pm", time_format="%I:%M%p")
+
+
+def test_add_range_no_matching_time_format_raises():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "9am", "5pm", time_format=["%H:%M", "%I:%M%p"])
 
 
 def test_till_midnight():
