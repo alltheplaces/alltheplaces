@@ -7,6 +7,7 @@ from scrapy.spiders import CrawlSpider, Request, Rule
 from locations.categories import apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
@@ -71,6 +72,6 @@ class NswPoliceForceAUSpider(CrawlSpider, PlaywrightSpider):
             elif "PHONE:" in contact_line.upper():
                 properties["phone"] = contact_line.upper().split("PHONE:", 1)[1].strip()
             else:
-                properties["addr_full"] = ", ".join(filter(None, [properties.get("addr_full"), contact_line.strip()]))
+                properties["addr_full"] = merge_address_lines([properties.get("addr_full"), contact_line.strip()])
         apply_category({"amenity": "police"}, properties)
         yield Feature(**properties)

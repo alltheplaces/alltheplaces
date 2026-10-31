@@ -7,6 +7,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, DAYS_EN, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -52,7 +53,7 @@ class FarewayUSSpider(Spider):
             item["ref"] = store_url.rsplit("/", 1)[-1]
             item["lat"] = card.attrib.get("data-latitude")
             item["lon"] = card.attrib.get("data-longitude")
-            item["street_address"] = ", ".join(address_parts[:-2])
+            item["street_address"] = merge_address_lines(address_parts[:-2])
             item["city"] = city
             item["state"] = state
             item["postcode"] = postcode
