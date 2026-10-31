@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -16,7 +16,7 @@ class CleanJuiceUSSpider(Spider):
     allowed_domains = ["order.cleanjuice.com"]
     start_urls = ["https://order.cleanjuice.com/api/stores?all_stores=true"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
