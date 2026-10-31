@@ -32,8 +32,8 @@ class ZambreroAUSpider(Spider):
             "addr_full": clean_address(
                 " ".join(response.xpath('//div[@data-location-id]//span[contains(@class, "address")]/text()').getall())
             ),
-            "phone": response.xpath('//a[contains(@class, "phone")]/@href').get().replace("tel:", ""),
-            "email": response.xpath('//a[contains(@href, "mailto:")]/@href').get().replace("mailto:", ""),
+            "phone": response.xpath('//a[contains(@class, "phone")]/@href').get(),
+            "email": response.xpath('//a[contains(@href, "mailto:")]/@href').get(),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }
