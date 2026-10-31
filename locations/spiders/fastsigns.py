@@ -43,7 +43,7 @@ class FastsignsSpider(Spider):
                 location.css("a.fnt_t-itm strong::text").get(""),
                 flags=re.IGNORECASE,
             )
-            item["addr_full"] = ", ".join(t.strip() for t in location.xpath(".//address//text()").getall() if t.strip())
+            item["addr_full"] = merge_address_lines(location.xpath(".//address//text()").getall())
             item["phone"] = location.css("a.fnt_phn::text").get()
             apply_category(Categories.CRAFT_SIGNMAKER, item)
             yield item
