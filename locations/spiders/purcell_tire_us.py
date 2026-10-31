@@ -6,6 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # The all-locations page is built with the Divi page builder: each location is a
 # column holding the city and service type, the address and phone, and a
@@ -45,8 +46,8 @@ class PurcellTireUSSpider(Spider):
             # locations put the whole address on one line.
             if lines and (locality := re.fullmatch(r"(.+?),\s*([A-Z]{2})\s+(\d{5})", lines[-1])):
                 item["city"], item["state"], item["postcode"] = locality.groups()
-                item["street_address"] = ", ".join(lines[:-1])
-            elif address := re.fullmatch(r"(.*?),\s*([^,]+?),?\s+([A-Z]{2}),?\s+(\d{5})", ", ".join(lines)):
+                item["street_address"] = merge_address_lines(lines[:-1])
+            elif address := re.fullmatch(r"(.*?),\s*([^,]+?),?\s+([A-Z]{2}),?\s+(\d{5})", merge_address_lines(lines)):
                 item["street_address"], item["city"], item["state"], item["postcode"] = address.groups()
             else:
                 item["addr_full"] = ", ".join(lines)
