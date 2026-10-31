@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class UnderArmourAESASpider(Spider):
@@ -42,7 +43,7 @@ class UnderArmourAESASpider(Spider):
                 address_parts.append(store["address1"])
             if store.get("address2"):
                 address_parts.append(store["address2"])
-            item["street_address"] = ", ".join(address_parts) if address_parts else None
+            item["street_address"] = merge_address_lines(address_parts) if address_parts else None
 
             if store_hours := store.get("storeHours"):
                 oh = OpeningHours()
