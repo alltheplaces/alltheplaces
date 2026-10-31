@@ -61,23 +61,18 @@ class CashBESpider(Spider):
                 if city := location.get(f"adr_city_{lang}"):
                     item["extras"][f"addr:city:{lang}"] = city
 
-            # Parse opening hours
             if regular_hours := location.get("regular_hours"):
                 if isinstance(regular_hours, dict) and regular_hours:
                     item["opening_hours"] = self.parse_opening_hours(regular_hours)
 
-            # Parse special hours
             if special_hours := location.get("special_hours_nl"):
                 if special_hours.strip():
                     item["extras"]["opening_hours:note"] = special_hours
 
-            # Apply category
             apply_category(Categories.ATM, item)
 
-            # Add ATM features
             apply_yes_no(Extras.CASH_IN, item, location.get("deposit_cash") == "1")
 
-            # Add accessibility info
             if accessibility := location.get("accessibility"):
                 accessibility_map = {
                     "Green": "yes",
@@ -87,7 +82,6 @@ class CashBESpider(Spider):
                 if wheelchair := accessibility_map.get(accessibility):
                     item["extras"]["wheelchair"] = wheelchair
 
-            # Add denomination availability
             denomination_fields = ["5_eur", "10_eur", "20_eur", "50_eur", "100_eur"]
             denominations = [
                 field.replace("_eur", " EUR") for field in denomination_fields if location.get(field) == "1"
@@ -112,7 +106,6 @@ class CashBESpider(Spider):
             # Handle 24/7 format
             if times == "00:00-00:00":
                 oh.add_range(day_short, "00:00", "24:00")
-            # Handle single time range
             elif "-" in times and ":" in times:
                 try:
                     # Extract HH:MM-HH:MM format

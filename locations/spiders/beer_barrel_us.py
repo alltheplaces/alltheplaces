@@ -8,16 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# The locations page links to a page per restaurant, each marking its address
-# up with hCard classes and listing the hours a day at a time.
-#
-# The hours block also carries a "Kitchen until ..." line per rule, which is
-# not the restaurant's own closing time.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BeerBarrelUSSpider(Spider):
     name = "beer_barrel_us"

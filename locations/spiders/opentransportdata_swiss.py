@@ -15,7 +15,16 @@ from locations.user_agents import BOT_USER_AGENT_SCRAPY
 
 # To emit proper OpenStreetMap tags for platforms, we need to keep some
 # per-station properties in memory.
-Station = namedtuple("Station", "name operator operator_wikidata city country means")
+Station = namedtuple("Station", "name operator operator_wikidata city country means request_stop")
+
+# Which means of transportation determines the tagging of a stop
+# that is served by several; earlier entries win.
+MEANS_PRIORITY = {
+    m: i
+    for i, m in enumerate(
+        ("TRAIN", "RACK_RAILWAY", "METRO", "TRAM", "CABLE_RAILWAY", "CABLE_CAR", "CHAIRLIFT", "BOAT", "BUS", "ELEVATOR")
+    )
+}
 
 
 class OpentransportdataSwissSpider(Spider):
@@ -129,6 +138,10 @@ class OpentransportdataSwissSpider(Spider):
         for row in self.read_csv("actual-date-swiss-service-point", response):
             if row["status"] != "VALIDATED":
                 continue
+            # Skip operating points that are no stops, such as tunnels
+            # or junctions, and stops that are currently out of service.
+            if row["stopPoint"] != "true" or row["stopPointType"] == "OUT_OF_ORDER":
+                continue
             sloid = row["sloid"]
             name = row["designationLong"] or row["designationOfficial"]
             operator = row["businessOrganisationDescriptionEn"]
@@ -146,7 +159,7 @@ class OpentransportdataSwissSpider(Spider):
                 "name": name,
                 "operator": operator,
                 "operator:wikidata": operator_wikidata,
-                "ref:IFOPT": sloid,
+                "ref:IFOPT": self.parse_ifopt(row),
                 "uic_ref": self.parse_uic_ref(row),
                 "wheelchair": wheelchair,
                 "wheelchair:conditional": wheelchair_cond,
@@ -159,6 +172,9 @@ class OpentransportdataSwissSpider(Spider):
                 continue
             if ele > 0:
                 tags["ele:regional"] = "%.1f" % ele
+            request_stop = row["stopPointType"] in ("ON_REQUEST", "ZONE_ON_REQUEST")
+            if request_stop:
+                tags["request_stop"] = "yes"
 
             tags = {k: v for k, v in tags.items() if v}
             yield Feature(
@@ -176,6 +192,7 @@ class OpentransportdataSwissSpider(Spider):
                 city=city,
                 country=country,
                 means=means,
+                request_stop=request_stop,
             )
 
         # Next, fetch data for "traffic points" (platforms).
@@ -184,10 +201,13 @@ class OpentransportdataSwissSpider(Spider):
 
     def handle_traffic_points(self, response: Response) -> Iterable[Feature]:
         for row in self.read_csv("actual-date-world-traffic-point", response):
-            # This table does not seem to have a status column,
-            # so we do not check for status="VALIDATED" here.
+            if row.get("status", "VALIDATED") != "VALIDATED":
+                continue
             sloid = row["sloid"]
-            station_sloid = row["parentSloid"]
+            # For a platform within a larger boarding area, such as
+            # track 3 at Zürich HB, parentSloid is the boarding area;
+            # parentSloidServicePoint is always the station.
+            station_sloid = row["parentSloidServicePoint"]
             if not station_sloid and sloid.startswith("ch:1:sloid:"):
                 station_sloid = ":".join(sloid.split(":")[:4])
             station = self.stations.get(station_sloid)
@@ -219,6 +239,8 @@ class OpentransportdataSwissSpider(Spider):
                 continue
             if ele > 0:
                 tags["ele:regional"] = "%.1f" % ele
+            if station.request_stop:
+                tags["request_stop"] = "yes"
             tags = {k: v for k, v in tags.items() if v}
             yield Feature(
                 lat=lat,
@@ -244,9 +266,22 @@ class OpentransportdataSwissSpider(Spider):
         return lat, lon, ele
 
     @staticmethod
+    def parse_ifopt(row: dict) -> str:
+        # For stops abroad, globalId holds the ID that the authority of
+        # that country has assigned, such as "de:08336:3674". Both IDs
+        # are equally valid, so we emit both.
+        ids = [row["sloid"]]
+        if row.get("globalId") and row["globalId"] != row["sloid"]:
+            ids.append(row["globalId"])
+        return ";".join(ids)
+
+    @staticmethod
     def parse_uic_ref(row: dict) -> str | None:
+        # Only Swiss service points (country code 85) have real UIC codes.
+        # For stops abroad, the feed uses its own number ranges such as
+        # 11 for Germany or 12 for Austria, which are not UIC codes.
         num = row["number"]
-        if len(num) == 7 and num.startswith(row["uicCountryCode"]):
+        if len(num) == 7 and row["uicCountryCode"] == "85" and num.startswith("85"):
             return num
         else:
             return None
@@ -256,28 +291,30 @@ class OpentransportdataSwissSpider(Spider):
         if not means:
             return {}
 
-        main = means[0]
-        funicular_means = ("CABLE_CAR", "CABLE_RAILWAY")
-        railway_means = ("RACK_RAILWAY", "TRAIN")
-        has_funicular = any(m in means for m in funicular_means)
-        has_railway = any(m in means for m in railway_means)
+        # The feed lists the means of transportation in alphabetical
+        # order, so BUS would come first even at a tram stop or railway
+        # station. Instead, take the means that OpenStreetMap would
+        # use for tagging the stop.
+        main = min(means, key=lambda m: MEANS_PRIORITY.get(m, len(MEANS_PRIORITY)))
 
+        # In the feed, CABLE_CAR is an aerial cable car ("Luftseilbahn")
+        # and CABLE_RAILWAY is a funicular ("Standseilbahn").
         tags = {
-            "aerialway": "yes" if "CHAIRLIFT" in means else None,
+            "aerialway": "yes" if any(m in means for m in ("CABLE_CAR", "CHAIRLIFT")) else None,
             "bus": "yes" if "BUS" in means else None,
             "elevator": "yes" if "ELEVATOR" in means else None,
             "ferry": "yes" if "BOAT" in means else None,
-            "funicular": "yes" if has_funicular else None,
-            "railway": "yes" if has_railway else None,
+            "funicular": "yes" if "CABLE_RAILWAY" in means else None,
+            "train": "yes" if any(m in means for m in ("RACK_RAILWAY", "TRAIN")) else None,
             "tram": "yes" if "TRAM" in means else None,
             "subway": "yes" if "METRO" in means else None,
         }
 
-        # Indicate primary means of transportation.
+        # Indicate primary means of transportation. OpenStreetMap puts
+        # highway=bus_stop on the platform, not on the stop area.
         primary_tags = {
             "BOAT": {"amenity": "ferry_terminal"},
-            "BUS": {"highway": "bus_stop"},
-            "CABLE_CAR": {"railway": "station"},
+            "CABLE_CAR": {"aerialway": "station"},
             "CABLE_RAILWAY": {"railway": "station"},
             "CHAIRLIFT": {"aerialway": "station"},
             "ELEVATOR": {"highway": "elevator"},
@@ -286,13 +323,19 @@ class OpentransportdataSwissSpider(Spider):
             "TRAM": {"railway": "station"},
             "TRAIN": {"railway": "station"},
         }
-        tags.update(primary_tags.get(main, {}))
+        if platform:
+            # Tag platforms like OpenStreetMap does, not like stations.
+            if main in ("CABLE_RAILWAY", "METRO", "RACK_RAILWAY", "TRAIN", "TRAM"):
+                tags["railway"] = "platform"
+            elif main == "BUS":
+                tags["highway"] = "bus_stop"
+        else:
+            tags.update(primary_tags.get(main, {}))
 
         # Set tags "public_transport" and (if appropriate) "station".
         # Values for https://wiki.openstreetmap.org/wiki/Key:station
         # based on primary means of transportation supplied by feed.
         station_tags = {
-            "CABLE_CAR": "funicular",
             "CABLE_RAILWAY": "funicular",
             "METRO": "subway",
             "RACK_RAILWAY": "railway",

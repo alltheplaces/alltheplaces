@@ -1,5 +1,6 @@
 import re
 from copy import deepcopy
+from typing import Any
 
 import scrapy
 from requests import Response
@@ -25,7 +26,7 @@ class FordDealersUSSpider(PlaywrightSpider):
     }
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
-    def parse(self, response: Response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         client_id = re.search(r"clientId\":\"([0-9-a-z-]+)\"", response.text).group(1)
         js_path = response.xpath('//*[contains(@src,"clientlibs/skin/")]/@src').get()
         yield scrapy.Request(
@@ -34,25 +35,34 @@ class FordDealersUSSpider(PlaywrightSpider):
             cb_kwargs={"token": client_id},
         )
 
-    def parse_state(self, response: Response, **kwargs):
-        state_list = (re.search(r"var\s*\w+\s*=\s*\"(.+)\"\.split\(\";\"\),", response.text).group(1)).split(";")
+    def parse_state(self, response: Response, **kwargs: Any) -> Any:
+        state_list = (
+            re.search(r"getDealerConfig.+?var\s+\w[=\s]+\"([\w\s;]+)\"\.split\(\";\"\)", response.text, re.DOTALL)
+            .group(1)
+            .split(";")
+        )
         for make in self.BRAND_MAPPING:
             for state in state_list:
                 yield JsonRequest(
-                    url="https://www.ford.com/cxservices/dealer/Dealers.json?make={}&state={}".format(make, state),
+                    url="https://www.ford.com/cxservices/dealer/Dealers.json?make={}&state={}".format(
+                        make, state.strip()
+                    ),
                     headers={"Application-id": kwargs["token"]},
                     callback=self.parse_details,
                     cb_kwargs={"brand": make},
                 )
 
-    def parse_details(self, response: Response, **kwargs):
+    def parse_details(self, response: Response, **kwargs: Any) -> Any:
         if data := response.json().get("Response").get("Dealer"):
             for dealer in data:
                 item = DictParser.parse(dealer)
                 item["ref"] = f"{dealer.get('PACode')}-{kwargs['brand']}"
                 item["street_address"] = dealer.get("Address").get("Street1")
-                if item["website"] == "http://DealerOn-null":
-                    item.pop("website")
+                if item["website"]:
+                    item["website"] = item["website"].replace("www. ", "www.")
+                    if item["website"] == "http://DealerOn-null":
+                        item.pop("website")
+
                 if brand := self.BRAND_MAPPING[kwargs["brand"]]:
                     item.update(brand)
 

@@ -11,10 +11,6 @@ from locations.items import Feature
 # The locations page lists each restaurant as a row holding the branch, the
 # address, the phone and the hours, with the hours written as "Sun - Thur
 # 11:00am - 9:00pm" and "Fri & Sat ...".
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 DAYS = {
     "M": "Mo",

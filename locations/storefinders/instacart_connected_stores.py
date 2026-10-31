@@ -51,7 +51,7 @@ class InstacartConnectedStoresSpider(Spider):
     # Connected Stores storefronts have been observed to ship a robots.txt that blanket-disallows
     # all crawlers other than a named allowlist of search engine bots, seemingly targeting generic
     # scraping/crawling rather than this specific, lightweight store-locator lookup.
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     storefront_root: str
     retailer_slug: str
     search_points: list[tuple[str, float, float]] = []

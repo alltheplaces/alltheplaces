@@ -4,12 +4,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.storerocket import StoreRocketSpider
 
-# Bricktown Brewery's locations page embeds a StoreRocket widget, whose API
-# returns every restaurant in one response. The account publishes no opening
-# hours through it.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BricktownBreweryUSSpider(StoreRocketSpider):
     name = "bricktown_brewery_us"

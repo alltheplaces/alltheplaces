@@ -7,6 +7,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 TILE_URL = "https://api.rivianservices.com/map-chargers/tiles/chrg2/{}/{}/{}"
 SEARCH_ZOOM = 7
@@ -177,7 +178,7 @@ class RivianUSSpider(Spider):
             item["addr_full"] = address
             return
         state, _, postcode = parts[-2].partition(" ")
-        item["street_address"] = ", ".join(parts[:-3])
+        item["street_address"] = merge_address_lines(parts[:-3])
         item["city"] = parts[-3]
         item["state"] = state
         item["postcode"] = postcode

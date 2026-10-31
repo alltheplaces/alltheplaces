@@ -42,11 +42,11 @@ class LloydsBankGBSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         location_type = response.xpath('//*[@class="LocationName-brand"]/text()').get("").strip()
         if any(
-            bank in location_type for bank in ["Halifax", "Bank of Scotland"]
+            bank in location_type.lower() for bank in ["halifax", "bank of scotland"]
         ):  # Skip locations already covered by their individual brand spiders
             return
 
-        if location_type == "Cash In & Out Machine" or location_type == "Cash in and out machine":
+        if location_type.lower() in ("cash in & out machine", "cash in and out machine"):
             apply_category(Categories.ATM, item)
             apply_yes_no(Extras.CASH_IN, item, True)
             apply_yes_no(Extras.CASH_OUT, item, True)

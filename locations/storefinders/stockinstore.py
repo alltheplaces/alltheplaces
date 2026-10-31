@@ -38,7 +38,7 @@ class StockInStoreSpider(Spider):
     api_widget_id: str
     api_widget_type: str
     api_origin: str
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[FormRequest]:
         data = {

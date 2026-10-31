@@ -9,8 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# Microdata is malformed
-
 
 class RushHairGBSpider(CrawlSpider):
     name = "rush_hair_gb"

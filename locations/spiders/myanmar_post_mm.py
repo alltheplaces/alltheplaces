@@ -7,6 +7,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -43,8 +44,8 @@ class MyanmarPostMmSpider(Spider):
             item["extras"]["branch:my"] = re.sub(r"\s*စာတိုက်$", "", (office["name_mm"] or "").strip()) or None
             item["lat"], item["lon"] = office["latitude"], office["longitude"]
             # "no_en" holds house numbers but also placeholders ("-", "Test Number") and village names.
-            item["street_address"] = ", ".join(
-                filter(None, (clean(office[key]) for key in ("no_en", "street_en", "quarter_en")))
+            item["street_address"] = merge_address_lines(
+                (clean(office[key]) for key in ("no_en", "street_en", "quarter_en"))
             )
             item["city"] = (office.get("town") or {}).get("name_en")
             item["state"] = (office.get("region") or {}).get("name_en")

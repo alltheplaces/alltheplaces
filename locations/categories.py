@@ -100,7 +100,6 @@ class Categories(Enum):
     LEISURE_NATURE_RESERVE = {"leisure": "nature_reserve"}
     LEISURE_PARK = {"leisure": "park"}
     LEISURE_PADDLING_POOL = {"leisure": "paddling_pool"}
-    LEISURE_PARKOUR = {"leisure": "parkour_park"}
     LEISURE_PICNIC_SHELTER = {"amenity": "shelter", "shelter_type": "picnic_shelter"}
     LEISURE_PICNIC_TABLE = {"leisure": "picnic_table"}
     TOURISM_PICNIC_SITE = {"tourism": "picnic_site"}
@@ -130,6 +129,7 @@ class Categories(Enum):
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BATHROOM_FURNISHING = {"shop": "bathroom_furnishing"}
     SHOP_BEAUTY = {"shop": "beauty"}
+    SHOP_BEAUTY_TATTOO_REMOVAL = {"shop": "beauty", "beauty": "tattoo_removal"}
     SHOP_BEAUTY_LASER_HAIR_REMOVAL = {"shop": "beauty", "beauty": "laser_hair_removal"}
     SHOP_BEAUTY_SPA = {"shop": "beauty", "beauty": "spa"}
     SHOP_BED = {"shop": "bed"}
@@ -282,6 +282,7 @@ class Categories(Enum):
     SHOP_WINE = {"shop": "wine"}
 
     OFFICE_ARCHITECT = {"office": "architect"}
+    OFFICE_ASSOCIATION = {"office": "association"}
     OFFICE_COMPANY = {"office": "company"}
     OFFICE_CONSULTING = {"office": "consulting"}
     OFFICE_COURIER = {"office": "courier"}
@@ -298,6 +299,7 @@ class Categories(Enum):
     OFFICE_IT = {"office": "it"}
     OFFICE_LAWYER = {"office": "lawyer"}
     OFFICE_MORTGAGE = {"office": "mortgage"}
+    OFFICE_PROPERTY_MANAGEMENT = {"office": "property_management"}
     OFFICE_RESEARCH = {"office": "research"}
     OFFICE_ADMINISTRATIVE = {"office": "administrative"}
     OFFICE_SECURITY = {"office": "security"}
@@ -325,6 +327,7 @@ class Categories(Enum):
     ALTERNATIVE_MEDICINE = {"healthcare": "alternative"}
     AMBULANCE_STATION = {"emergency": "ambulance_station"}
     AIRCRAFT_FUELLING_STATION = {"aeroway": "fuel"}
+    AERODROME = {"aeroway": "aerodrome"}
     ANIMAL_BOARDING = {"amenity": "animal_boarding"}
     ARCHIVE = {"amenity": "archive"}
     ARTS_CENTRE = {"amenity": "arts_centre"}
@@ -367,6 +370,7 @@ class Categories(Enum):
     DOCTOR_GP = {"amenity": "doctors", "healthcare:speciality": "community"}
     DRINKING_WATER = {"amenity": "drinking_water"}
     DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
+    DOG_TOILET = {"amenity": "dog_toilet"}
     EMERGENCY_WARD = {"emergency": "emergency_ward_entrance"}
     EVENTS_VENUE = {"amenity": "events_venue"}
     FAST_FOOD = {"amenity": "fast_food"}
@@ -383,11 +387,13 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
+    KARAOKE_BOX = {"amenity": "karaoke_box"}
     LIBRARY = {"amenity": "library"}
     LOADING_DOCK = {"amenity": "loading_dock"}
     MAILROOM = {"amenity": "mailroom"}
     MANHOLE = {"man_made": "manhole"}
     MARINA = {"leisure": "marina"}
+    MOORING = {"mooring": "yes"}
     MARKETPLACE = {"amenity": "marketplace"}
     MEDICAL_IMAGING = {
         "healthcare": "medical_imaging"
@@ -434,12 +440,14 @@ class Categories(Enum):
     SHELTER = {"amenity": "shelter"}
     SOCIAL_CENTRE = {"amenity": "social_centre"}
     SOCIAL_FACILITY = {"amenity": "social_facility"}
+    SOCIAL_FACILITY_OUTREACH = {"amenity": "social_facility", "social_facility": "outreach"}
     SPEECH_THERAPIST = {"healthcare": "speech_therapist"}
     TAXI = {"amenity": "taxi"}
     TELEPHONE = {"amenity": "telephone"}
     TOILETS = {"amenity": "toilets"}
     THEATRE = {"amenity": "theatre"}
     AMENITY_BOAT_RENTAL = {"amenity": "boat_rental"}
+    AMENITY_STUDIO = {"amenity": "studio"}
     TOOL_LIBRARY = {"amenity": "tool_library"}
     VACCINATION_CENTRE = {"healthcare": "vaccination_centre"}
     VENDING_MACHINE = {"amenity": "vending_machine"}
@@ -483,6 +491,7 @@ class Categories(Enum):
     MAN_MADE_PIER = {"man_made": "pier"}
     POWER_POLE = {"power": "pole"}
     POWER_TOWER = {"power": "tower"}
+    POWER_PLANT = {"power": "plant"}
     PUMPING_STATION_SEWAGE = {
         "man_made": "pumping_station",
         "pumping_station": "sewage",
@@ -590,6 +599,7 @@ top_level_tags = [
     "landuse",
     "leisure",
     "man_made",
+    "mooring",
     "natural",
     "office",
     "power",
@@ -736,6 +746,7 @@ class Extras(Enum):
     DRINKING_WATER = "drinking_water"
     DRIVE_THROUGH = "drive_through"
     DUTY_FREE = "duty_free"
+    ELEVATOR = "elevator"
     FAST_FOOD = "fast_food"
     FAX = "fax"
     FAXING = "service:fax"
@@ -768,7 +779,7 @@ class Extras(Enum):
     RESERVATION = "reservation"
     RESERVATION_REQUIRED = "reservation=required"
     SANITARY_DUMP_STATION = "sanitary_dump_station"
-    SCANING = "service:scan"
+    SCANNING = "service:scan"
     SELF_CHECKOUT = "self_checkout"
     SHOWERS = "shower"
     SMOKING = "smoking"
@@ -1141,6 +1152,17 @@ class Sport(Enum):
     BEACH_VOLLEYBALL = "beachvolleyball"
     CLIMBING = "climbing"
     KARTING = "karting"
+    WAKEBOARDING = "wakeboarding"
+    AXE_THROWING = "axe_throwing"
+    BIATHLON = "biathlon"
+    CHESS = "chess"
+    CROSS_COUNTRY_SKIING = "cross_country_skiing"
+    GOLF = "golf"
+    ORIENTEERING = "orienteering"
+    PILATES = "pilates"
+    SHOOTING = "shooting"
+    SKIING = "skiing"
+    YOGA = "yoga"
     ARCHERY = "archery"
 
 

@@ -1,64 +1,34 @@
-import json
 import re
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Request, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
+from locations.storefinders.mapion import MapionSpider
 
-PAGE_SIZE = 500  # the API errors on anything larger
 
-
-class MizuhoBankJPSpider(Spider):
+class MizuhoBankJPSpider(MapionSpider):
     name = "mizuho_bank_jp"
     item_attributes = {"brand": "みずほ銀行", "brand_wikidata": "Q2882956"}
     allowed_domains = ["lbs.mapion.co.jp"]
+    # Mapion's PoiWithin API backs the store finder at shop.www.mizuhobank.co.jp.
+    api_group = "one_mizuho"
+    website_template = "https://shop.www.mizuhobank.co.jp/b/mhbk/info/{}/"
 
-    def make_request(self, page: int) -> Request:
-        # Mapion's PoiWithin API backs the store finder at shop.www.mizuhobank.co.jp.
-        # "start" is a page number, the bounding box covers all of Japan.
-        return Request(
-            "https://lbs.mapion.co.jp/map/uc/PoiWithin?grp=one_mizuho&scl=1&crd=0&json=1&entref=1&dtm=wgs"
-            f"&start={page}&pm={PAGE_SIZE}&nl=35&el=138&minnl=0&minel=0&maxnl=89&maxel=179&poi_status=1",
-            cb_kwargs={"page": page},
-        )
+    def post_process_item(self, item: Feature, poi: dict, response: Response) -> Iterable[Feature]:
+        # The same API also lists Mizuho Securities and Mizuho Trust & Banking
+        # offices, and the AEON Bank ATMs that Mizuho customers can use
+        # (already covered by aeon_bank_jp). Keep only Mizuho Bank's own sites.
+        if poi.get("schema_id") != "mizuho_all" or not poi["id"].startswith("BA"):
+            return
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield self.make_request(1)
-
-    def parse(self, response: Response, page: int) -> Iterable[Feature | Request]:
-        # The JSON body is wrapped as "({...});"
-        text = response.text.strip()
-        data = json.loads(text[text.index("(") + 1 : text.rindex(")")])["mbml"]
-
-        if page * PAGE_SIZE < int(data["Property"]["hit"]):
-            yield self.make_request(page + 1)
-
-        for poi in data["PoiList"].get("Poi", []):
-            # The same API also lists Mizuho Securities and Mizuho Trust & Banking
-            # offices, and the AEON Bank ATMs that Mizuho customers can use
-            # (already covered by aeon_bank_jp). Keep only Mizuho Bank's own sites.
-            if poi.get("schema_id") != "mizuho_all" or not poi["id"].startswith("BA"):
-                continue
-            yield self.parse_poi(poi)
-
-    def parse_poi(self, poi: dict) -> Feature:
-        item = Feature()
-        item["ref"] = poi["id"]
-        item["lat"] = poi["latitude"]
-        item["lon"] = poi["longitude"]
-        item["addr_full"] = poi["full_address"]
-        item["postcode"] = poi.get("zip_code")
-        item["state"] = poi.get("kenname")
-        item["city"] = poi.get("cityname")
+        item["name"] = None
         item["street_address"] = poi.get("street_address")
-        item["phone"] = poi.get("tel")
-        item["website"] = f"https://shop.www.mizuhobank.co.jp/b/mhbk/info/{poi['id']}/"
         item["extras"]["branch:en"] = poi.get("bk_poi_name_en")
-        item["extras"]["branch:ja-Kana"] = poi.get("poi_name_yomi")
+        # The readings are in katakana
+        item["extras"]["branch:ja-Kana"] = item["extras"].pop("branch:ja-Hira", None)
 
         name = poi["name"].strip()
         if poi.get("bk_kind") == "店舗外(ATM)":
@@ -80,7 +50,7 @@ class MizuhoBankJPSpider(Spider):
                     oh.add_days_range(DAYS_WEEKDAY, open_time, close_time)
                 item["opening_hours"] = oh
 
-        return item
+        yield item
 
     def parse_atm_hours(self, poi: dict) -> OpeningHours:
         oh = OpeningHours()

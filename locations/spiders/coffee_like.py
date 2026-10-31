@@ -5,7 +5,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
 
-# POIs are available for RU and KZ
 class CoffeeLikeSpider(scrapy.Spider):
     name = "coffee_like"
     allowed_domains = ["coffee-like.com"]

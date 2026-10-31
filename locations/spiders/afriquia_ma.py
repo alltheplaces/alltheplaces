@@ -6,6 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AfriquiaMASpider(Spider):
@@ -39,7 +40,7 @@ class AfriquiaMASpider(Spider):
                 ]
                 if len(address_parts) >= 2:
                     properties["city"] = address_parts[-1]
-                    properties["street_address"] = ", ".join(address_parts[:-1])
+                    properties["street_address"] = merge_address_lines(address_parts[:-1])
                 elif len(address_parts) == 1:
                     properties["addr_full"] = address_parts[0]
 

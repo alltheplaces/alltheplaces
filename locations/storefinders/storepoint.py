@@ -17,7 +17,7 @@ class StorepointSpider(Spider):
     """
 
     dataset_attributes: dict = {"source": "api", "api": "storepoint.co"}
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     key: str
 

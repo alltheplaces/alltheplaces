@@ -6,6 +6,7 @@ from scrapy import FormRequest, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS, DAYS_CN, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.spiders.seven_eleven_au import SEVEN_ELEVEN_SHARED_ATTRIBUTES
 
@@ -55,4 +56,21 @@ class SevenElevenTWSpider(Spider):
                 apply_yes_no(Extras.TOILETS, item, "廁所" in services)
                 apply_yes_no(Extras.ATM, item, "ATM" in services)
                 apply_yes_no(Extras.WIFI, item, "WiFi" in services)
+            item["opening_hours"] = self.parse_hours(location.get("OP_TIME"), location.get("OP_DAY"))
             yield item
+
+    @staticmethod
+    def parse_hours(op_time: str | None, op_day: str | None) -> OpeningHours | None:
+        if not op_time:
+            return None
+        closed_days = []
+        if match := re.search(r"週([一二三四五六日/]+)不營業", op_day or ""):
+            closed_days = [sanitise_day(f"週{day}", DAYS_CN) for day in match.group(1).split("/")]
+        oh = OpeningHours()
+        oh.set_closed(closed_days)
+        open_days = [day for day in DAYS if day not in closed_days]
+        if op_time.strip() == "24H":
+            oh.add_days_range(open_days, "00:00", "24:00")
+        elif match := re.fullmatch(r"(\d\d:\d\d) ~ (\d\d:\d\d)", op_time.strip()):
+            oh.add_days_range(open_days, *match.groups())
+        return oh

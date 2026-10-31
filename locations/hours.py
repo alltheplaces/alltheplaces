@@ -751,12 +751,23 @@ DAYS_ES = {
 
 DAYS_RO = {
     "Luni": "Mo",
+    "L": "Mo",
     "Marți": "Tu",
+    "Marti": "Tu",
+    "Ma": "Tu",
     "Miercuri": "We",
+    "Mi": "We",
     "Joi": "Th",
+    "J": "Th",
     "Vineri": "Fr",
+    "Vi": "Fr",
+    "V": "Fr",
     "Sâmbătă": "Sa",
+    "Sambata": "Sa",
+    "S": "Sa",
     "Duminică": "Su",
+    "Duminica": "Su",
+    "D": "Su",
 }
 
 DAYS_SR = {
@@ -769,6 +780,7 @@ DAYS_SR = {
     "Uto": "Tu",
     "Utorak": "Tu",
     "Уторак": "Tu",
+    "Sre": "We",
     "Sri": "We",
     "Sreda": "We",
     "Среда": "We",
@@ -807,6 +819,16 @@ DAYS_ID = {
     "Sabtu": "Sa",
     "Minggu": "Su",
     "Ahad": "Su",
+}
+
+DAYS_VN = {
+    "Thứ 2": "Mo",
+    "Thứ 3": "Tu",
+    "Thứ 4": "We",
+    "Thứ 5": "Th",
+    "Thứ 6": "Fr",
+    "Thứ 7": "Sa",
+    "Chủ nhật": "Su",
 }
 
 DAYS_TH = {

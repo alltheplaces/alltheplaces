@@ -138,6 +138,10 @@ class McdonaldsSpider(PlaywrightSpider):
             apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in filter_type)
             apply_yes_no(Extras.WIFI, item, "WIFI" in filter_type)
             apply_yes_no(Extras.DELIVERY, item, "MCDELIVERYSERVICE" in filter_type)
+            # The separate indoorPlayGround/outDoorPlayGround fields can be "0"
+            # even when filterType advertises a PlayPlace.
+            apply_yes_no(Extras.KIDS_AREA, item, bool({"PLAYPLACEPRESENCE", "INDOORPLAYGROUND"} & set(filter_type)))
+            apply_yes_no("kids_area:indoor", item, "INDOORPLAYGROUND" in filter_type)
 
             if "MCCAFE" in filter_type:
                 mccafe = item.deepcopy()

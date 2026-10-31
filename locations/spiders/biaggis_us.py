@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours, day_range
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # Matches a "City, ST 12345" (optionally ZIP+4) trailing address line.
 CITY_STATE_ZIP_RE = re.compile(r"^(?P<city>.+),\s*(?P<state>[A-Z]{2})\s+(?P<postcode>\d{5}(?:-\d{4})?)$")
@@ -75,7 +76,7 @@ class BiaggisUSSpider(scrapy.Spider):
             street_lines = lines
 
         if street_lines:
-            item["street_address"] = ", ".join(street_lines)
+            item["street_address"] = merge_address_lines(street_lines)
 
     def parse_detail(self, response: Response) -> Any:
         item = response.meta["item"]

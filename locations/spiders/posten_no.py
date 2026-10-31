@@ -28,7 +28,6 @@ class PostenNOSpider(Spider):
             item["ref"] = item["extras"]["ref:posten"] = attributes["enhetsnr"]
             item["lat"], item["lon"] = transformer.transform(location["geometry"]["x"], location["geometry"]["y"])
 
-            # item["extras"]["fixme:description"] = attributes["beliggenhet"]
             item["name"] = attributes["navn"]
             item["street_address"] = attributes["besoksadresse"]
             item["postcode"] = attributes["besoksadresse_postnr"]

@@ -22,8 +22,8 @@ class GoReviewSpider(CrawlSpider):
     """
 
     start_urls: list[str] = []
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}  # robots.txt disallows everything
-    rules: list[Rule] = [
+    custom_settings = {"ROBOTSTXT_OBEY": False}  # robots.txt disallows everything
+    rules = [
         Rule(
             LinkExtractor(allow=r"^https:\/\/.+\.goreview\.co\.za\/store-information.+$"),
             callback="parse",

@@ -8,12 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Location pages come from the site's sitemap. They are built with Duda, whose
-# map widget carries the coordinates and the address in data attributes.
-#
-# The hours sit between the address and the phone as free text lines such as
-# "Sunday-Thursday: 11:00am-10:00pm".
-
 
 class RosatisPizzaUSSpider(SitemapSpider):
     name = "rosatis_pizza_us"
@@ -27,16 +21,14 @@ class RosatisPizzaUSSpider(SitemapSpider):
         if not location:
             return
 
-        # "1165 W Spring St, South Elgin, IL 60177"
-        address = (location[0].xpath("@data-address").get() or "").strip()
-        if not (parts := re.fullmatch(r"(.+),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})", address)):
+        if not (address := self.parse_address(location[0].xpath("@data-address").get(), response)):
             return
 
         item = Feature()
         item["ref"] = response.url.rstrip("/").rsplit("/", 1)[-1]
         item["branch"] = (response.xpath("//title/text()").get() or "").strip() or None
         item["website"] = response.url
-        item["street_address"], item["city"], item["state"], item["postcode"] = parts.groups()
+        item["street_address"], item["city"], item["state"], item["postcode"] = address
         item["lat"] = location[0].xpath("@data-lat").get()
         item["lon"] = location[0].xpath("@data-lng").get()
         item["phone"] = response.xpath('//*[contains(text(), "PHONE")]/following::text()[normalize-space()][1]').get()
@@ -47,6 +39,29 @@ class RosatisPizzaUSSpider(SitemapSpider):
         item["extras"]["cuisine"] = "pizza"
 
         yield item
+
+    @staticmethod
+    def parse_address(address: str | None, response: Response) -> tuple[str, str, str, str] | None:
+        """Parses "1165 W Spring St, South Elgin, IL 60177" and the two other shapes used.
+
+        Some addresses end with a country, and some omit the comma between the street
+        and the city, in which case the page title is what names the city.
+        """
+        address = re.sub(r"\s+", " ", address or "").strip()
+        address = re.sub(r",\s*(?:United States|USA)\.?$", "", address, flags=re.IGNORECASE)
+        if not (parts := re.fullmatch(r"(.+?),?\s*([A-Z]{2})\s+(\d{5})(?:-\d{4})?", address)):
+            return None
+
+        head, state, postcode = parts.groups()
+        if "," in head:
+            street, _, city = head.rpartition(",")
+        else:
+            # "Las Vegas (Cheyenne)" titles the branch, not the city.
+            city = re.sub(r"\(.*?\)", "", response.xpath("//title/text()").get("")).strip()
+            if not city or not head.endswith(city):
+                return None
+            street = head[: -len(city)]
+        return street.strip(" ,"), city.strip(), state, postcode
 
     @staticmethod
     def parse_opening_hours(response: Response) -> OpeningHours | None:

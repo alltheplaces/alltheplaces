@@ -60,6 +60,4 @@ class MarksAndSpencerGBSpider(CrawlSpider):
         apply_yes_no(Extras.ATM, item, "Cash machine" in services)
         apply_yes_no(Extras.WIFI, item, "Free Wi-Fi" in services)
 
-        # departments = [f["name"] for f in json_data["departments"]]
-
         yield item

@@ -1,7 +1,6 @@
 import re
 from typing import Iterable
 
-from pyproj import Transformer
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
@@ -38,9 +37,9 @@ def _counter_weekdays(shop_info: str) -> list:
 class HokkokuBankJPSpider(MapionSpider):
     name = "hokkoku_bank_jp"
     item_attributes = {"brand": "北國銀行", "brand_wikidata": "Q5878184"}
-    allowed_domains = ["sasp.mapion.co.jp"]
-    feature_url_template = "https://sasp.mapion.co.jp/b/hokkokubank/attr/?start={}"
-    transformer = Transformer.from_pipeline("EPSG:15484")
+    allowed_domains = ["lbs.mapion.co.jp"]
+    api_group = "hokkokubank"
+    website_template = "https://sasp.mapion.co.jp/b/hokkokubank/info/{}/"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         # Branches that have been consolidated into another branch's building are
@@ -53,7 +52,6 @@ class HokkokuBankJPSpider(MapionSpider):
 
         item["name"] = self.item_attributes["brand"]
         item["branch"] = data.get("name")
-        item["lat"], item["lon"] = self.transformer.transform(data.get("latitude"), data.get("longitude"))
 
         counter_hours = _build_hours(data, "handle_time", _counter_weekdays(data.get("shop_info1")))
         atm_hours = _build_hours(data, "atm_time", DAYS_WEEKDAY)

@@ -11,6 +11,7 @@ from locations.items import Feature
 
 class UlybkaRadugiRUSpider(scrapy.Spider):
     name = "ulybka_radugi_ru"
+    requires_proxy = True
     item_attributes = {"brand": "Улыбка радуги", "brand_wikidata": "Q109734104"}
     start_urls = [
         "http://delivery.shop.api.svs.tdera.ru/stores?active=1&retailPoint=1&sortBy=geoCoordinates asc&page=1&limit=10000"

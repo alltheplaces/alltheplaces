@@ -3,6 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -35,6 +36,7 @@ class MagasinVertFRSpider(JSONBlobSpider):
             item.update(brand_info)
             item["branch"] = item.pop("name").removeprefix(item["brand"]).strip()
             item["name"] = item["brand"]
+        apply_category(Categories.SHOP_GARDEN_CENTRE, item)
         item["website"] = feature.get("cms_page_url")
         item["opening_hours"] = OpeningHours()
         for rule in json.loads(feature.get("schedules")).get("schedules", []):

@@ -8,17 +8,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# The locations page carries every tavern in the site_info JavaScript object,
-# as a JSON string holding the address, coordinates, phone and page link.
-#
-# Taverns that have not opened yet are flagged coming_soon. The records also
-# carry an "active" field, which is false on every one of them and reflects the
-# map widget's selection rather than whether the tavern is open.
-#
-# No opening hours are published on this page.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class WorldOfBeerUSSpider(Spider):
     name = "world_of_beer_us"
