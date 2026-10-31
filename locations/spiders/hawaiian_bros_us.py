@@ -93,14 +93,9 @@ class HawaiianBrosUSSpider(Spider):
             if day_names:
                 oh.add_days_range(
                     day_names,
-                    HawaiianBrosUSSpider.normalise_time(open_time),
-                    HawaiianBrosUSSpider.normalise_time(close_time),
-                    time_format="%I:%M%p",
+                    open_time,
+                    close_time,
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)
