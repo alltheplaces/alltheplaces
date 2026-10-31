@@ -22,13 +22,11 @@ class MarinerFinanceSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_store)
 
     def parse_store(self, response):
-        branch = response.xpath('//h2[contains(text(), "Address")]/following::a/following::text()').extract_first()
+        branch = response.xpath('//h2[contains(text(), "Address")]/following::a/following::text()').get()
         branch_number = re.search(r"Branch Number:\s([0-9]+)\s*.*", branch).group(1)
 
         data = json.loads(
-            response.xpath(
-                '//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()'
-            ).extract_first()
+            response.xpath('//script[@type="application/ld+json" and contains(text(), "streetAddress")]/text()').get()
         )
 
         meta = {

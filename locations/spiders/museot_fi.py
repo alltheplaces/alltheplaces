@@ -111,7 +111,7 @@ class MuseotFISpider(SitemapSpider):
         except AttributeError:
             return
         if reason == "finished" and not count:
-            logger.error("museot_fi: finished with zero items scraped")
+            self.logger.error("museot_fi: finished with zero items scraped")
 
     def parse_museum(self, response: Response) -> Iterable[Feature]:
         slug = response.url.rstrip("/").rsplit("/", 1)[-1].split("?")[0]
