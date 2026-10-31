@@ -15,6 +15,9 @@ class AnytimeFitnessSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for gym in response.json():
+            if gym["content"]["country"] == "JP":
+                # Japanese clubs link to dead pages here, see anytime_fitness_jp
+                continue
             yield Feature(
                 lat=gym["latitude"],
                 lon=gym["longitude"],
