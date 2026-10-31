@@ -780,6 +780,7 @@ DAYS_SR = {
     "Uto": "Tu",
     "Utorak": "Tu",
     "Уторак": "Tu",
+    "Sre": "We",
     "Sri": "We",
     "Sreda": "We",
     "Среда": "We",
@@ -818,6 +819,16 @@ DAYS_ID = {
     "Sabtu": "Sa",
     "Minggu": "Su",
     "Ahad": "Su",
+}
+
+DAYS_VN = {
+    "Thứ 2": "Mo",
+    "Thứ 3": "Tu",
+    "Thứ 4": "We",
+    "Thứ 5": "Th",
+    "Thứ 6": "Fr",
+    "Thứ 7": "Sa",
+    "Chủ nhật": "Su",
 }
 
 DAYS_TH = {
