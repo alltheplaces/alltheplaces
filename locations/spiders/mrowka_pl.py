@@ -21,6 +21,6 @@ class MrowkaPLSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["name"] = None
         item["branch"] = response.xpath("//h1/text()").get().removeprefix("PSB Mrówka ")
-        item["phone"] = response.xpath("//a[starts-with(@href, 'tel:')]/@href").get("").removeprefix("tel:")
+        item["phone"] = response.xpath("//a[starts-with(@href, 'tel:')]/@href").get("")
         apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item

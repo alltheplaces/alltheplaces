@@ -23,8 +23,8 @@ class MutuelleDePoitiersFRSpider(SitemapSpider):
         item["ref"] = response.xpath('//input[@name="agency"]/@value').get()
         item["website"] = response.url.removesuffix("/nous-trouver")
         item["branch"] = response.xpath('//span[@class="push-agency-city"]/text()').get("").strip()
-        item["phone"] = response.xpath('//p[@class="push-agency-phone"]/a/@href').get("").removeprefix("tel:")
-        item["email"] = response.xpath('//p[@class="push-agency-email"]/a/@href').get("").removeprefix("mailto:")
+        item["phone"] = response.xpath('//p[@class="push-agency-phone"]/a/@href').get("")
+        item["email"] = response.xpath('//p[@class="push-agency-email"]/a/@href').get("")
 
         # The address and coordinates are only in the map popup script
         script = response.xpath('//script[contains(text(), "gmap-infobulle")]/text()').get("")
