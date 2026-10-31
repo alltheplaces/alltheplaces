@@ -29,7 +29,7 @@ class AdriaticFurnitureAUSpider(CrawlSpider):
             return
 
         if phone_match_link := store_details.xpath('.//a[contains(@href, "tel:")]/@href').get():
-            phone = phone_match_link.replace("tel:", "").strip()
+            phone = phone_match_link.strip()
         else:
             contact_text = " ".join(store_details.xpath(".//text()").getall())
             phone = re.search(r"\(?03\)?[\s\-]*\d{4}[\s\-]*\d{4}", contact_text).group(0).strip()
@@ -42,7 +42,7 @@ class AdriaticFurnitureAUSpider(CrawlSpider):
             .replace("Furniture Store", "")
             .strip(),
             "phone": phone,
-            "email": store_details.xpath('.//a[contains(@href, "mailto:")]/@href').get().replace("mailto:", "").strip(),
+            "email": store_details.xpath('.//a[contains(@href, "mailto:")]/@href').get().strip(),
             "website": response.url,
             "addr_full": merge_address_lines(store_details.xpath("./p[1]//text()").getall()),
         }

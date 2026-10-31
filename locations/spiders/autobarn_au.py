@@ -26,12 +26,8 @@ class AutobarnAUSpider(SitemapSpider):
             "addr_full": merge_address_lines(
                 response.xpath("//main/div[1]/div[1]/div[2]/div[1]/div[3]/p/text()").getall()
             ),
-            "phone": response.xpath('//main/div[1]/div[1]/div[2]/div[1]//a[contains(@href, "tel:")]/@href')
-            .get()
-            .removeprefix("tel:"),
-            "email": response.xpath('//main/div[1]/div[1]/div[2]/div[1]//a[contains(@href, "mailto:")]/@href')
-            .get()
-            .removeprefix("mailto:"),
+            "phone": response.xpath('//main/div[1]/div[1]/div[2]/div[1]//a[contains(@href, "tel:")]/@href').get(),
+            "email": response.xpath('//main/div[1]/div[1]/div[2]/div[1]//a[contains(@href, "mailto:")]/@href').get(),
             "website": response.url,
             "image": response.xpath("//main/div[1]/div[1]/div[2]/div[1]/div[2]/img/@src").get(),
             "opening_hours": OpeningHours(),

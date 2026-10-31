@@ -92,7 +92,7 @@ class BiaggisUSSpider(scrapy.Spider):
     def finish_item(self, item: Feature, response: Response) -> Any:
         phone = response.css("div.phone-number a::attr(href)").get()
         if phone:
-            item["phone"] = phone.removeprefix("tel:").strip()
+            item["phone"] = phone.strip()
 
         oh = OpeningHours()
         for row in response.css(".opening-hours-row"):
