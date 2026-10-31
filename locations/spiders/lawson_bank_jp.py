@@ -1,3 +1,5 @@
+from pyproj import Transformer
+
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.emap import EMapSpider
@@ -12,12 +14,16 @@ class LawsonBankJPSpider(EMapSpider):
         "brand_wikidata": "Q11350963",
     }
 
+    async def start(self):
+        self.transformer = Transformer.from_pipeline("EPSG:15484")
+        async for req in super().start():
+            yield req
+
     def parse_row(self, row):
         item = Feature()
         item["ref"] = row[0]
         item["website"] = f"https://map.lawsonbank.jp/p/{self.map_id}/dtl/{row[0]}/"
-        item["lat"] = row[1]
-        item["lon"] = row[2]
+        item["lat"], item["lon"] = self.transformer.transform(row[1], row[2])
         item["branch"] = row[7].removeprefix("ローソン銀行ＡＴＭ　").removesuffix("共同出張所")
         item["addr_full"] = row[8]
 
