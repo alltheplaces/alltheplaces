@@ -10,7 +10,7 @@ class QdobaSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Qdoba", "brand_wikidata": "Q1363885"}
     allowed_domains = ["qdoba.com"]
     sitemap_urls = ["https://locations.qdoba.com/sitemap.xml"]
-    sitemap_rules = [(r"com/[^/]+/[^/]+/[^/]+/.*", "parse")]
+    sitemap_rules = [(r"com/[^/]+/[^/]+/[^/]+/(?!.*/(?:burritos|catering|delivery|salads|tacos|takeout)$).+", "parse")]
     wanted_types = ["Organization"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
