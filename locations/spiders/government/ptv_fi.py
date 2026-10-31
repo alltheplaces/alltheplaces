@@ -7,7 +7,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.licenses import Licenses
 
@@ -43,16 +43,7 @@ class PtvFISpider(Spider):
 
     _transformer = Transformer.from_crs(3067, 4326, always_xy=True)
 
-    DAY_MAP = {
-        "MONDAY": "Mo",
-        "TUESDAY": "Tu",
-        "WEDNESDAY": "We",
-        "THURSDAY": "Th",
-        "FRIDAY": "Fr",
-        "SATURDAY": "Sa",
-        "SUNDAY": "Su",
-    }
-    WEEK_ORDER: tuple[str, ...] = tuple(DAY_MAP.values())
+    WEEK_ORDER: tuple[str, ...] = tuple(DAYS)
 
     # Road furniture, institutional kitchens, bookmobiles and mobile/outreach
     # services are not visitable fixed POIs (cf. service-map excluded subtrees).
@@ -4002,12 +3993,12 @@ class PtvFISpider(Spider):
         for span in entry.get("openingHour") or []:
             if not isinstance(span, dict):
                 continue
-            day = self.DAY_MAP.get((span.get("dayFrom") or "").upper())
+            day = sanitise_day(span.get("dayFrom"))
             if not day:
                 self._count("hours/unknown_day")
                 continue
             days = [day]
-            last = self.DAY_MAP.get((span.get("dayTo") or "").upper())
+            last = sanitise_day(span.get("dayTo"))
             if last and last != day:
                 # Multi-day span (Monday - Friday): expand the range,
                 # wrapping past Sunday when the range wraps the weekend.

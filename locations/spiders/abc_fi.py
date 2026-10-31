@@ -8,7 +8,7 @@ from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 logger = logging.getLogger(__name__)
@@ -144,16 +144,6 @@ class AbcFISpider(SitemapSpider):
             return None
         return location
 
-    DAY_MAP = {
-        "MON": "Mo",
-        "TUE": "Tu",
-        "WED": "We",
-        "THU": "Th",
-        "FRI": "Fr",
-        "SAT": "Sa",
-        "SUN": "Su",
-    }
-
     def parse_hours(self, opening_times: dict, today: str | None = None) -> OpeningHours | str | None:
         # defaults[] holds consecutive validity ranges: use the last entry
         # already in force. Date-set exceptions are single-day deviations
@@ -175,7 +165,7 @@ class AbcFISpider(SitemapSpider):
         for day_entry in days:
             if not isinstance(day_entry, dict):
                 continue
-            day = self.DAY_MAP.get(str(day_entry.get("day") or "").upper())
+            day = sanitise_day(str(day_entry.get("day") or ""))
             if not day:
                 self.crawler.stats.inc_value("atp/abc_fi/hours/unknown_day")
                 continue
