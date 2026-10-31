@@ -10,8 +10,6 @@ class KreatosBESpider(Spider):
 
     def parse(self, response):
         for location in response.xpath('//div[@typeof="Place"]'):
-            if phone := location.xpath('.//a[contains(@href, "tel:")]/@href').get():
-                phone = phone.replace("tel:", "")
             properties = {
                 "ref": location.xpath("./@id").get(),
                 "name": " ".join(filter(None, location.xpath('.//div[@class="title"]/a/text()').getall())).strip(),
@@ -23,7 +21,7 @@ class KreatosBESpider(Spider):
                         location.xpath('.//div[contains(@class, "field-address")]/div[@class="line"]/text()').getall(),
                     )
                 ).strip(),
-                "phone": phone,
+                "phone": location.xpath('.//a[contains(@href, "tel:")]/@href').get(),
                 "website": "https://www.kreatos.be" + location.xpath('.//div[@class="title"]/a/@href').get(),
             }
             yield Feature(**properties)
