@@ -77,14 +77,9 @@ class SpinPizzaUSSpider(Spider):
 
             oh.add_days_range(
                 day_range(start, end),
-                SpinPizzaUSSpider.normalise_time(rule.group(3)),
-                SpinPizzaUSSpider.normalise_time(rule.group(4)),
-                time_format="%I:%M%p",
+                rule.group(3),
+                rule.group(4),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)
