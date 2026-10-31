@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CleanJuiceUSSpider(Spider):
@@ -30,7 +31,7 @@ class CleanJuiceUSSpider(Spider):
             item["name"] = None
             # "Agoura Hills, CA"
             item["branch"] = name.rsplit(",", 1)[0].strip()
-            item["street_address"] = ", ".join(
+            item["street_address"] = merge_address_lines(
                 part.strip() for part in [location.get("address1"), location.get("address2")] if part and part.strip()
             )
 

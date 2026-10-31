@@ -9,6 +9,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_FR, DAYS_FR, DELIMITERS_FR, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CorepFRSpider(SitemapSpider):
@@ -35,7 +36,7 @@ class CorepFRSpider(SitemapSpider):
         for index, line in enumerate(lines):
             if match := re.match(r"(\d{5})\s+(.+)", line):
                 item["postcode"], item["city"] = match.groups()
-                item["street_address"] = ", ".join(lines[:index])
+                item["street_address"] = merge_address_lines(lines[:index])
                 item["phone"] = "; ".join(lines[index + 1 :])
                 break
 
