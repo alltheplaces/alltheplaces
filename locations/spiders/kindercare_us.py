@@ -22,7 +22,7 @@ class KindercareUSSpider(CrawlSpider, StructuredDataSpider):
     ]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
-        item["phone"] = response.xpath('//*[contains(., "Call")]/@href').get().replace("tel:", "")
+        item["phone"] = response.xpath('//*[contains(., "Call")]/@href').get()
         if image := item.get("image"):
             item["image"] = urllib.parse.quote(image, safe=":/?=&")
         yield item

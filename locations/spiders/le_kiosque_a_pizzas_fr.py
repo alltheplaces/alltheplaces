@@ -34,7 +34,7 @@ class LeKiosqueAPizzasFRSpider(SitemapSpider):
         if postcode_city := re.match(r"(\d{2})\s?(\d{3})\s+(.+)", lines[-1]):
             item["postcode"] = postcode_city.group(1) + postcode_city.group(2)
             item["city"] = postcode_city.group(3)
-        item["phone"] = response.xpath('//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:") or None
+        item["phone"] = response.xpath('//a[starts-with(@href, "tel:")]/@href').get("") or None
         item["opening_hours"] = self.parse_hours(response)
         yield item
 

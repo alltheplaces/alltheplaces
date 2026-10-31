@@ -27,7 +27,7 @@ class MonsieurStoreFRSpider(SitemapSpider):
         )
         item["addr_full"] = merge_address_lines(response.xpath('//*[@class="store-header__address"]//text()').getall())
         item["ref"] = item["website"] = response.url
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]//@href').get().replace("tel:", "")
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]//@href').get()
 
         oh = OpeningHours()
         for day_time in response.xpath('//*[@class="store-header__schedule"]//li'):
