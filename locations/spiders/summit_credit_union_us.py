@@ -9,9 +9,6 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
-# Both phone numbers found in the API response are shared national hotlines
-# (33 and 25 of the 58 branches respectively), not branch-specific numbers.
-
 
 class SummitCreditUnionUSSpider(CamoufoxSpider):
     name = "summit_credit_union_us"

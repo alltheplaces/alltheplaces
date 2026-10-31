@@ -2,6 +2,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ItsuGBSpider(SitemapSpider):
@@ -13,9 +14,7 @@ class ItsuGBSpider(SitemapSpider):
     def parse(self, response, **kwargs):
         item = Feature()
         item["branch"] = response.xpath('//h1[@class="title"]/text()').get()
-        item["addr_full"] = ", ".join(
-            filter(None, map(str.strip, response.xpath("//address[not(@class)]/text()").getall()))
-        )
+        item["addr_full"] = merge_address_lines(response.xpath("//address[not(@class)]/text()").getall())
         extract_google_position(item, response)
         item["ref"] = item["website"] = response.url
         return item

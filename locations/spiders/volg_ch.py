@@ -59,9 +59,7 @@ class VolgCHSpider(Spider):
             ),
             "phone": response.xpath(
                 '//div[contains(@class, "c-content__main")]/section[2]/div[contains(@class, "container")]/div[1]/div[2]/div[1]/div[1]/p[2]/a/@href'
-            )
-            .get()
-            .removeprefix("tel:"),
+            ).get(),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }

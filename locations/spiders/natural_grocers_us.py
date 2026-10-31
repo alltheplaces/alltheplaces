@@ -8,7 +8,6 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
-# Paging links are added by js, so this can't currently be a CrawlSpider
 class NaturalGrocersUSSpider(Spider):
     name = "natural_grocers_us"
     item_attributes = {"brand": "Natural Grocers", "brand_wikidata": "Q17146520"}

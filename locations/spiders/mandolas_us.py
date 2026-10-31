@@ -16,10 +16,6 @@ from locations.items import Feature
 #
 # The hours are a sentence, e.g. "Open Every Day 11am - 9pm" or "Sun - Thu 11am
 # - 9pm".
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 # One restaurant writes its state as "Fl." rather than "FL".
 ADDRESS = re.compile(r"(.+?),\s*([A-Za-z]{2})\.?\s+(\d{5})")

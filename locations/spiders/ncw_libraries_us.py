@@ -64,9 +64,9 @@ class NcwLibrariesUSSpider(LibCalSpider):
         else:
             self.logger.warning("No address found for %s: %r", item["name"], address)
         if phone := contact.xpath('.//a[starts-with(@href, "tel:")]/@href').get():
-            item["phone"] = phone.removeprefix("tel:").strip()
+            item["phone"] = phone.strip()
         if email := contact.xpath('.//a[starts-with(@href, "mailto:")]/@href').get():
-            item["email"] = email.removeprefix("mailto:").strip()
+            item["email"] = email.strip()
         # A branch page's only location is a Google Maps embed, and its centre
         # sits about 190 m west of the building (up to 3 km where the map is
         # zoomed out), so it is not used as a coordinate source.

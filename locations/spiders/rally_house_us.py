@@ -8,9 +8,6 @@ from locations.hours import DAYS, DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
-# Rally House is not present in NSI (checked against brand_wikidata Q121086620),
-# so "brand" is omitted here rather than guessing a string.
-
 
 class RallyHouseUSSpider(CamoufoxSpider):
     name = "rally_house_us"

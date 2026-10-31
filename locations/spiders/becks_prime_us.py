@@ -9,14 +9,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# The locations page links to a page per restaurant, and each page's Next.js
-# data holds the address, phone, hours, feature list and a Google Maps embed
-# whose URL carries the coordinates.
-#
-# The hours are a sentence, "7 days a week 11am-10pm".
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BecksPrimeUSSpider(Spider):
     name = "becks_prime_us"

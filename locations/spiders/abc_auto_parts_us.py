@@ -9,15 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# Every store is a card on the one locator page, carrying its coordinates and
-# id in data attributes and its hours as a day and time list.
-#
-# The card's address text runs the street into the city with no separator
-# ("3667 Estes Pkwy Longview, TX, 75603"), so the address is taken from the
-# directions link instead, where the parts are comma separated.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class AbcAutoPartsUSSpider(Spider):
     name = "abc_auto_parts_us"
@@ -31,7 +22,7 @@ class AbcAutoPartsUSSpider(Spider):
             item["ref"] = location.xpath("@data-id").get()
             item["lat"] = location.xpath("@data-lat").get()
             item["lon"] = location.xpath("@data-lng").get()
-            item["phone"] = location.xpath('.//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:")
+            item["phone"] = location.xpath('.//a[starts-with(@href, "tel:")]/@href').get("")
 
             # "ABC Auto Parts, 3667 Estes Pkwy, Longview, TX, 75603"
             query = unquote(

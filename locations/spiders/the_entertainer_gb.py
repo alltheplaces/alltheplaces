@@ -34,8 +34,6 @@ class TheEntertainerGBSpider(PlaywrightSpider):
             item["opening_hours"] = self.parse_opening_hours(feature.get("openingHours", {}))
             if "tesco" in item["website"]:
                 continue
-                # item["located_in"] = "Tesco"
-                # item["located_in_wikidata"] = "Q487494"
 
             apply_category(Categories.SHOP_TOYS, item)
             yield item

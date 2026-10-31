@@ -99,12 +99,12 @@ class IhWorldSpider(SitemapSpider):
         # Phone: prefer tel: links
         phones = response.xpath('//a[starts-with(@href,"tel:")]/@href').getall()
         if phones:
-            item["phone"] = phones[0].replace("tel:", "").strip()
+            item["phone"] = phones[0].strip()
 
         # Email: prefer mailto: links
         emails = response.xpath('//a[starts-with(@href,"mailto:")]/@href').getall()
         if emails:
-            item["email"] = emails[0].replace("mailto:", "").strip()
+            item["email"] = emails[0].strip()
 
         apply_category(Categories.LANGUAGE_SCHOOL, item)
         yield item

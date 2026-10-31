@@ -5,18 +5,8 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_3_LETTERS, OpeningHours, sanitise_day
 from locations.items import Feature
-
-DAY_ABBR = {
-    "mon": "Mo",
-    "tue": "Tu",
-    "wed": "We",
-    "thu": "Th",
-    "fri": "Fr",
-    "sat": "Sa",
-    "sun": "Su",
-}
 
 # Matches day ranges such as "Mon-Thu", "Mon–Thu", "Saturday-Sunday" or
 # "Sun～Thur" (a full/half width wave dash is sometimes used in place of a
@@ -56,7 +46,7 @@ def _extract_days(context: str) -> list[str] | None:
     context = context.lower()
 
     if m := DAY_RANGE_RE.search(context):
-        start, end = DAY_ABBR[m.group(1)], DAY_ABBR[m.group(2)]
+        start, end = sanitise_day(m.group(1)), sanitise_day(m.group(2))
         start_index, end_index = DAYS.index(start), DAYS.index(end)
         if start_index <= end_index:
             return DAYS[start_index : end_index + 1]
@@ -67,7 +57,7 @@ def _extract_days(context: str) -> list[str] | None:
     if "weekend" in context:
         return ["Sa", "Su"]
 
-    found = [code for abbr, code in DAY_ABBR.items() if re.search(r"\b" + abbr + r"[a-z]*\b", context)]
+    found = [code for abbr, code in zip(DAYS_3_LETTERS, DAYS) if re.search(r"\b" + abbr.lower() + r"[a-z]*\b", context)]
     if found:
         return [day for day in DAYS if day in found]
 

@@ -8,18 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# The store locator is a table of company owned stores, each row linking to the
-# store's page, where the hours are listed a day at a time.
-#
-# The table also carries the company's two offices in China and a row labelled
-# "(DEALER)", which is an independent stockist rather than a Vista Paint store;
-# both are skipped.
-#
-# No coordinates are published: the store pages embed a map built from the
-# address text.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class VistaPaintUSSpider(Spider):
     name = "vista_paint_us"

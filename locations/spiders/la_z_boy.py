@@ -9,18 +9,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# La-Z-Boy's store finder (https://www.la-z-boy.com/storeLocator/storeLocator.jsp)
-# lists three kinds of location: La-Z-Boy branded "Furniture Galleries"
-# (businessType 004, a mix of company-owned and independently licensed
-# dealers all trading as "La-Z-Boy"), "Comfort Studio" shop-in-shops hosted
-# inside another retailer's store (003), and "Other Retailer" listings for
-# unrelated furniture stores that merely stock some La-Z-Boy product (001).
-# Only 004 stores get their own page on la-z-boy.com, and only those pages
-# are listed in this sitemap, so it already gives just the La-Z-Boy branded
-# storefronts without any extra filtering.
-# Each store page itself renders its details client side from a Yext
-# Knowledge API location document, fetched here directly.
-
 
 class LaZBoySpider(Spider):
     name = "la_z_boy"

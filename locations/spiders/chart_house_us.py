@@ -10,16 +10,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# Chart House uses a BentoBox store locator, which passes every location to a
-# storeLocatorConfig() call on the locator page as a JavaScript object literal.
-#
-# Opening hours come from an HTML blob that also carries happy hour promotions
-# and dated holiday hours, so those lines are skipped before parsing to stop
-# them being read as extra opening periods.
-#
-# No brand:wikidata is set: Wikidata has no item for the chain, only one for a
-# single restaurant of that name.
-
 
 class ChartHouseUSSpider(Spider):
     name = "chart_house_us"

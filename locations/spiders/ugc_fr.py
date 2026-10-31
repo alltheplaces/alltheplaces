@@ -7,6 +7,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class UgcFRSpider(Spider):
@@ -32,7 +33,7 @@ class UgcFRSpider(Spider):
                     if m := re.match(r"^(\d{5})\s+(.+)$", address_lines[-1]):
                         item["postcode"], item["city"] = m.groups()
                     else:
-                        item["street_address"] = ", ".join(address_lines)
+                        item["street_address"] = merge_address_lines(address_lines)
 
             apply_category(Categories.CINEMA, item)
 

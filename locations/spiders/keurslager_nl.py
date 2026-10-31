@@ -1,7 +1,8 @@
 from chompjs import chompjs
 from scrapy import FormRequest, Spider
 
-from locations.hours import OpeningHours
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -46,9 +47,10 @@ class KeurslagerNLSpider(Spider):
         item["opening_hours"] = OpeningHours()
         for day_time in response.xpath("//table//tr"):
             day, times = day_time.xpath(".//td/text()").getall()
-            day = day.replace(":", "")
+            day = sanitise_day(day.replace(":", ""), DAYS_NL)
             if times == "gesloten":
                 item["opening_hours"].set_closed(day)
             else:
                 item["opening_hours"].add_range(day, *times.split(" - "))
+        apply_category(Categories.SHOP_BUTCHER, item)
         yield item

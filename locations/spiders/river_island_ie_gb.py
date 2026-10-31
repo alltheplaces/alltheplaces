@@ -4,7 +4,6 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.structured_data_spider import StructuredDataSpider
 
 
-# There is a sitemap, but it's old
 class RiverIslandIEGBSpider(CrawlSpider, StructuredDataSpider):
     name = "river_island_ie_gb"
     item_attributes = {"brand": "River Island", "brand_wikidata": "Q2670328"}

@@ -23,7 +23,7 @@ class TommyHilfigerAESpider(Spider):
                 "lat": store.xpath(".//@data-lat").get(),
                 "lon": store.xpath(".//@data-long").get(),
                 "addr_full": store.xpath("./div/div[3]/text()").get(),
-                "phone": store.xpath('.//a[contains(@href, "tel:")]/@href').get().removeprefix("tel:"),
+                "phone": store.xpath('.//a[contains(@href, "tel:")]/@href').get(),
                 "opening_hours": OpeningHours(),
             }
 

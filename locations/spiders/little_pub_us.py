@@ -17,8 +17,6 @@ from locations.items import Feature
 # pub's own paragraphs first.
 #
 # No coordinates or hours are published: the map links are Google short links.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 CITY = re.compile(r"([^,]+),\s*([A-Z]{2})\s+(\d{5})")

@@ -8,7 +8,6 @@ from locations.geo import city_locations, point_locations
 from locations.user_agents import BROWSER_DEFAULT
 
 
-# The CrawlSpider approach was avoided because crawling hundreds of store pages yields only a few unique location entries, with many pages containing duplicate data.
 class DominosPizzaAUSpider(Spider):
     name = "dominos_pizza_au"
     item_attributes = {"brand": "Domino's", "brand_wikidata": "Q839466"}

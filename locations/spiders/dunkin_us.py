@@ -36,7 +36,6 @@ class DunkinUSSpider(SitemapSpider):
             close_time = day_time.get("endTime")
             oh.add_range(day=day, open_time=open_time, close_time=close_time)
         item["opening_hours"] = oh
-        # extra_features = filter(None, [feature.get("name") for feature in location_data.get("amenities")])
         apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-Thru" in location_data.get("amenities"), False)
         apply_yes_no(Extras.WIFI, item, "WiFi" in location_data.get("amenities"), False)
         yield item

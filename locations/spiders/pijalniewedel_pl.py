@@ -45,10 +45,8 @@ class PijalniewedelPLSpider(Spider):
                 "city": address["city"],
                 "lat": place["lat"],
                 "lon": place["lng"],
-                "phone": location_div.xpath("div/div/a[starts-with(@href,'tel:')]").attrib["href"].removeprefix("tel:"),
-                "email": location_div.xpath("div/div/a[starts-with(@href,'mailto:')]")
-                .attrib["href"]
-                .removeprefix("mailto:"),
+                "phone": location_div.xpath("div/div/a[starts-with(@href,'tel:')]").attrib["href"],
+                "email": location_div.xpath("div/div/a[starts-with(@href,'mailto:')]").attrib["href"],
                 "opening_hours": opening_hours,
                 "image": image_url,
             }

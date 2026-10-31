@@ -6,18 +6,10 @@ from scrapy.http import Request
 
 from locations.categories import Categories, apply_category
 from locations.geo import MILES_TO_KILOMETERS, vincenty_distance
+from locations.hours import sanitise_day
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 
-DAYS_NAME = {
-    "MO": "Mo",
-    "TU": "Tu",
-    "WE": "We",
-    "TH": "Th",
-    "FR": "Fr",
-    "SA": "Sa",
-    "SU": "Su",
-}
 USPS_URL = "https://tools.usps.com/UspsToolsRestServices/rest/POLocator/findLocations"
 USPS_HEADERS = {
     "origin": "https://tools.usps.com",
@@ -73,7 +65,7 @@ class UspsCollectionBoxesSpider(Spider):
                 pass
             else:
                 d = hour["dayOfTheWeek"]
-                day = DAYS_NAME[d]
+                day = sanitise_day(d)
                 close_time = hour["times"][0]["close"][:-3]
 
                 if not this_day_group:
