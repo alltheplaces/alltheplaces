@@ -1,7 +1,7 @@
 from typing import Any
 
 import scrapy
-from requests import Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature

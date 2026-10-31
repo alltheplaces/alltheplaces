@@ -1,7 +1,7 @@
 from typing import Iterable
 
-from requests import Response
 from scrapy import Selector
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
