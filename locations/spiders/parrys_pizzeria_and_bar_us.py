@@ -104,15 +104,9 @@ class ParrysPizzeriaAndBarUSSpider(SitemapSpider):
             if days:
                 oh.add_days_range(
                     days,
-                    ParrysPizzeriaAndBarUSSpider.normalise_time(times.group(1)),
-                    ParrysPizzeriaAndBarUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        """Turns "11am", "9:45 am" into a consistent "%I:%M%p" string."""
-        value = value.replace(" ", "").lower()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)
