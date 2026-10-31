@@ -12,21 +12,21 @@ class JjillSpider(scrapy.Spider):
     start_urls = ["https://locations.jjill.com/"]
 
     def parse(self, response):
-        urls = response.xpath('//*[@class="indexpage_node"]/a/@href').extract()
+        urls = response.xpath('//*[@class="indexpage_node"]/a/@href').getall()
         if urls:
             for url in urls:
                 yield scrapy.Request(response.urljoin(url), callback=self.parse)
         else:
-            name = response.xpath('//*[@class="store-name"]/text()').extract_first()
-            street = response.xpath('//*[@itemprop="streetAddress"]//text()').extract_first()
-            city = response.xpath('//*[@itemprop="addressLocality"]/text()').extract_first()
-            state = response.xpath('//*[@itemprop="addressRegion"]/text()').extract_first()
-            postalcode = response.xpath('//*[@itemprop="postalCode"]/text()').extract_first()
-            country = response.xpath('//*[@itemprop="addressCountry"]/text()').extract_first()
-            if phone := response.xpath('//*[@itemprop="telephone"]/text()').extract_first():
+            name = response.xpath('//*[@class="store-name"]/text()').get()
+            street = response.xpath('//*[@itemprop="streetAddress"]//text()').get()
+            city = response.xpath('//*[@itemprop="addressLocality"]/text()').get()
+            state = response.xpath('//*[@itemprop="addressRegion"]/text()').get()
+            postalcode = response.xpath('//*[@itemprop="postalCode"]/text()').get()
+            country = response.xpath('//*[@itemprop="addressCountry"]/text()').get()
+            if phone := response.xpath('//*[@itemprop="telephone"]/text()').get():
                 phone = phone.strip()
-            latitude = response.xpath('//*[@property="place:location:latitude"]/@content').extract_first()
-            longitude = response.xpath('//*[@property="place:location:longitude"]/@content').extract_first()
+            latitude = response.xpath('//*[@property="place:location:latitude"]/@content').get()
+            longitude = response.xpath('//*[@property="place:location:longitude"]/@content').get()
             ref = response.url.strip("/").split("/")[-1]
             hours = response.xpath(
                 '//h2[text()="Store Hours"]/following-sibling::div[@class="desktop"]/div[contains(@class, "day-hours")]'
