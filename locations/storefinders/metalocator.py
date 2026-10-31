@@ -29,7 +29,7 @@ class MetaLocatorSpider(Spider):
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json():
             item = DictParser.parse(location)
-            item.pop("addr_full")
+            item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location["address"], location["address2"]]))
             if location.get("hours"):
                 item["opening_hours"] = OpeningHours()
