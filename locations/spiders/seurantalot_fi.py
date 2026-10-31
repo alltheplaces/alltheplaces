@@ -66,7 +66,7 @@ class SeurantalotFISpider(Spider):
         except AttributeError:
             return
         if reason == "finished" and not count:
-            logger.error("seurantalot_fi: finished with zero items scraped")
+            self.logger.error("seurantalot_fi: finished with zero items scraped")
 
     @staticmethod
     def _num(text: str) -> int:
@@ -82,7 +82,7 @@ class SeurantalotFISpider(Spider):
         counts = response.xpath("normalize-space(//strong[@class='counter'])").get()
         if not response.xpath("//div[@class='product']").getall():
             self._stat("atp/seurantalot_fi/dropped/zero_product_page")
-            logger.warning("seurantalot_fi: list page with zero products: %s", response.url)
+            self.logger.warning("seurantalot_fi: list page with zero products: %s", response.url)
         # Prev/next share btn-next: select by label, since the first class match is Edellinen past page 1.
         if next_href := response.xpath(
             "//a[contains(@class, 'btn-next')][contains(normalize-space(.), 'Seuraava sivu')]/@href"
@@ -93,16 +93,16 @@ class SeurantalotFISpider(Spider):
         match = self.COUNTER_RE.search(counts or "")
         if not counts:
             self._stat("atp/seurantalot_fi/empty/result_counter")
-            logger.warning("seurantalot_fi: no result counter on %s", response.url)
+            self.logger.warning("seurantalot_fi: no result counter on %s", response.url)
         elif not match or self._num(match.group(3)) < self._num(match.group(1)):
             self._stat("atp/seurantalot_fi/dropped/no_next_page")
-            logger.warning("seurantalot_fi: products but no next page: %s", response.url)
+            self.logger.warning("seurantalot_fi: products but no next page: %s", response.url)
 
     def errback(self, failure) -> None:
         # Failed requests never reach callbacks; count them so losses stay explainable.
         self._stat("atp/seurantalot_fi/dropped/request_error")
         url = getattr(getattr(failure, "request", None), "url", "?")
-        logger.warning("seurantalot_fi: request failed: %s", url)
+        self.logger.warning("seurantalot_fi: request failed: %s", url)
 
     def parse_hall(self, response: Response) -> Iterable[Feature]:
         if not response.xpath("//aside[@id='sidebar']").get():

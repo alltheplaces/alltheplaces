@@ -119,12 +119,12 @@ class SignetJewelersSpider(Spider):
                     yield Request(url, callback=self.parse_cities)
 
     def parse_cities(self, response):
-        cities = response.xpath('//*[@class="viewstoreslist"]/a/@href').extract()
+        cities = response.xpath('//*[@class="viewstoreslist"]/a/@href').getall()
         for i in cities:
             yield Request(response.urljoin(i), callback=self.parse)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        script = " ".join(response.xpath('//*[@id="js-store-details"]/div/script/text()').extract())
+        script = " ".join(response.xpath('//*[@id="js-store-details"]/div/script/text()').getall())
 
         if re.search(r"(?s)storeInformation\s=\s(.*);", script) is not None:
             data = re.search(r"(?s)storeInformation\s=\s(.*);", script).group(1)
