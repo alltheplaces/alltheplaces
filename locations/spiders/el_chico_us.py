@@ -109,14 +109,9 @@ class ElChicoUSSpider(Spider):
             if times := re.fullmatch(r"(\d{1,2}(?::\d{2})?\s*[ap]m)\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]m)", hours, re.I):
                 oh.add_days_range(
                     days,
-                    ElChicoUSSpider.normalise_time(times.group(1)),
-                    ElChicoUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)
