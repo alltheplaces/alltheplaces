@@ -15,7 +15,7 @@ class AubertFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"magasins\.aubert\.com/.*/.*/.*/results$", "discover_store_details")]
 
     def discover_store_details(self, response):
-        urls = response.xpath('//a[contains(@href, "details")]/@href').extract()
+        urls = response.xpath('//a[contains(@href, "details")]/@href').getall()
         for url in urls:
             url = url.replace("\r\n", "")
             yield scrapy.Request(response.urljoin(url), callback=self.parse_sd)

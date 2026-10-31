@@ -40,15 +40,15 @@ class AuBonPainSpider(scrapy.Spider):
     def parse_store(self, response):
         ref = re.findall(r"[^(\/)]+$", response.url)[0]
 
-        scripts = "".join(response.xpath("//script/text()").extract())
+        scripts = "".join(response.xpath("//script/text()").getall())
         lat, lon = re.search(r".*Microsoft.Maps.Location\(([0-9.-]*),\s+([0-9-.]*)\).*", scripts).groups()
 
-        address1, address2 = response.xpath('//dt[contains(text(), "Address")]/following-sibling::dd/text()').extract()
+        address1, address2 = response.xpath('//dt[contains(text(), "Address")]/following-sibling::dd/text()').getall()
         city, state, zipcode = re.search(r"^(.*),\s+([a-z]{2})\s+([0-9]+)$", address2.strip(), re.IGNORECASE).groups()
 
         properties = {
             "street_address": address1.strip(", "),
-            "phone": response.xpath('//dt[contains(text(), "Phone")]/following-sibling::dd/a/text()').extract_first(),
+            "phone": response.xpath('//dt[contains(text(), "Phone")]/following-sibling::dd/a/text()').get(),
             "city": city,
             "state": state,
             "postcode": zipcode,
@@ -65,7 +65,7 @@ class AuBonPainSpider(scrapy.Spider):
         yield Feature(**properties)
 
     def parse(self, response):
-        urls = response.xpath('//section/div/div//a[contains(@href, "stores")]/@href').extract()
+        urls = response.xpath('//section/div/div//a[contains(@href, "stores")]/@href').getall()
 
         for url in urls:
             url = url.replace("\r\n", "")
