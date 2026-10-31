@@ -1,7 +1,6 @@
-from urllib.parse import urlparse
-
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories
 from locations.structured_data_spider import StructuredDataSpider
@@ -32,5 +31,5 @@ class PlsUSSpider(CrawlSpider, StructuredDataSpider):
             ld_data["openingHours"][i] = hr.replace("—", "-")
 
     def post_process_item(self, item, response, ld_data):
-        item["state"] = urlparse(response.url).path.split("/")[1].upper()
+        item["state"] = urlparse_cached(response).path.split("/")[1].upper()
         yield item
