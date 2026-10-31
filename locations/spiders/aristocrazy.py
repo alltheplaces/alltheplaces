@@ -3,6 +3,7 @@ import re
 from scrapy import Spider
 
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class AristocrazySpider(Spider):
@@ -64,6 +65,6 @@ class AristocrazySpider(Spider):
                         address_lines.append(location_line)
 
                 if address_lines:
-                    item["street_address"] = ", ".join(address_lines)
+                    item["street_address"] = merge_address_lines(address_lines)
 
                 yield item
