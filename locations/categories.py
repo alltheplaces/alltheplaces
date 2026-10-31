@@ -1163,6 +1163,7 @@ class Sport(Enum):
     SHOOTING = "shooting"
     SKIING = "skiing"
     YOGA = "yoga"
+    ARCHERY = "archery"
 
 
 def add_sport(sport: Sport | Iterable[Sport], item: Feature | dict) -> None:
