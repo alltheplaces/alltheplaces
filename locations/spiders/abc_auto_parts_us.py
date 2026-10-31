@@ -22,7 +22,7 @@ class AbcAutoPartsUSSpider(Spider):
             item["ref"] = location.xpath("@data-id").get()
             item["lat"] = location.xpath("@data-lat").get()
             item["lon"] = location.xpath("@data-lng").get()
-            item["phone"] = location.xpath('.//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:")
+            item["phone"] = location.xpath('.//a[starts-with(@href, "tel:")]/@href').get("")
 
             # "ABC Auto Parts, 3667 Estes Pkwy, Longview, TX, 75603"
             query = unquote(

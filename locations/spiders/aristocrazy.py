@@ -31,7 +31,7 @@ class AristocrazySpider(Spider):
 
                 phone_el = store_ul.css("a[href^='tel:']")
                 if phone_el:
-                    item["phone"] = phone_el.attrib["href"].removeprefix("tel:")
+                    item["phone"] = phone_el.attrib["href"]
 
                 # Collect non-phone, non-name <li> text lines
                 address_lines = []
