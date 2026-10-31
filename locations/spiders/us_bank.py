@@ -35,7 +35,7 @@ class UsBankSpider(SitemapSpider):
         return opening_hours
 
     def parse_store_info(self, response):
-        data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())
+        data = json.loads(response.xpath('//script[@type="application/json"]/text()').get())
 
         branch_data = data["props"]["pageProps"]["branchData"]
         item = DictParser.parse(branch_data)
