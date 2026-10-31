@@ -4,14 +4,14 @@ from scrapy.http import Response
 
 from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, DAYS_3_LETTERS, OpeningHours
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 
 class RallyHouseUSSpider(CamoufoxSpider):
     name = "rally_house_us"
-    item_attributes = {"brand_wikidata": "Q121086620"}
+    item_attributes = {"brand": "Rally House", "brand_wikidata": "Q121086620"}
     start_urls = ["https://www.rallyhouse.com/feeds/store-locator/store-locator.json"]
     captcha_type = "cloudflare_turnstile"
     captcha_selector_indicating_success = '//pre[contains(text(), "FeatureCollection")]'
@@ -26,10 +26,12 @@ class RallyHouseUSSpider(CamoufoxSpider):
             # with a placeholder photo and no confirmed opening yet.
             if properties.get("forcedClosed"):
                 continue
+            if not properties["name"].startswith("Rally House "):
+                continue
 
             item = Feature()
             item["ref"] = properties["id"]
-            item["name"] = properties["name"]
+            item["branch"] = properties["name"].removeprefix("Rally House ")
             item["lon"], item["lat"] = feature["geometry"]["coordinates"]
             item["street_address"] = properties["address"]
             item["city"] = properties["city"]
@@ -40,12 +42,12 @@ class RallyHouseUSSpider(CamoufoxSpider):
             item["image"] = properties.get("photo")
 
             oh = OpeningHours()
-            for day_key, day in zip(DAYS_3_LETTERS, DAYS):
-                if hours_range := (properties.get("hours") or {}).get(day_key.lower()):
+            for day in DAYS_3_LETTERS:
+                if hours_range := (properties.get("hours") or {}).get(day.lower()):
                     open_time, close_time = hours_range.split(" - ")
                     oh.add_range(day, open_time, close_time, time_format="%I:%M %p")
             item["opening_hours"] = oh
 
-            apply_category(Categories.SHOP_SPORTS, item)
+            apply_category(Categories.SHOP_CLOTHES, item)
 
             yield item
