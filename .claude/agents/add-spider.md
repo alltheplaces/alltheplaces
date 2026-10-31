@@ -125,6 +125,8 @@ Comments: default to none. Only add one where the *why* is genuinely non-obvious
 
 **Closures/lifecycle tagging — hard no on `disused:<key>=*`.** Never prefix a tag with `disused:` (e.g. `disused:amenity=...`) to mark a closed or former location, even for a brand mid-liquidation. This repo has a hard rule against it — use `end_date` or the spider's `set_closed()` helper instead (Cj-Malone, PR #17947: "Hard no on `disused:amenity` in ATP, we have `end_date`/`set_closed` for this").
 
+**Join address parts with `merge_address_lines`** (`locations/pipelines/address_clean_up.py`), not `", ".join(filter(None, ...))` or a strip-and-filter comprehension. It strips each part and drops empty and non-string ones, and accepts any iterable (`merge_address_lines([a.get("line1"), a.get("line2")])`). Use a plain space join only when the parts are components of one line (street type + name + number).
+
 **Reuse existing shared mapping tables before writing a new per-spider one.** Check `categories.py` for `map_payment`/`payment_method_aliases`, and `hours.py` for `DAYS_EN`, before inventing an equivalent local dict — this gets flagged every time it's duplicated (davidhicks, PR #17947, #17931: "Is there a reason why a new mapping needs to be defined here?").
 
 **Check whether `DictParser.parse` fits before manually pulling fields one at a time.** If a spider extracts many similarly-shaped fields from a JSON dict individually, `DictParser.parse` can usually replace that boilerplate (davidhicks, PR #17947, flagged twice in one PR).

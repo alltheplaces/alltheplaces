@@ -1,15 +1,15 @@
 import re
 from html import unescape
-from typing import Any
+from typing import Any, Iterable
 
 from locations.items import Feature
 
 
-def merge_address_lines(address_lines: list[Any]) -> str:
+def merge_address_lines(address_lines: Iterable[Any]) -> str:
     """
     For the strings provided in a list of objects, combine the strings
     together in the order they are listed into a single address string.
-    :param address_lines: ordered list of objects from which string objects
+    :param address_lines: ordered iterable of objects from which string objects
                           are extracted, and remaining objects ignored.
     :return: single address string where each address component is separated
              by a comma. An address component could be a house number, street

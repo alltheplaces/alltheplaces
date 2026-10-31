@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
@@ -27,7 +28,7 @@ class JumboCHSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["street_address"] = response.xpath('//*[@itemprop="streetAddress"]/text()').get()
-        item["addr_full"] = ",".join(response.xpath('//*[@itemprop="address"]//text()').getall())
+        item["addr_full"] = merge_address_lines(response.xpath('//*[@itemprop="address"]//text()').getall())
         item["lat"] = response.xpath('//*[@itemprop="latitude"]/@content').get()
         item["lon"] = response.xpath('//*[@itemprop="longitude"]/@content').get()
         oh = OpeningHours()
