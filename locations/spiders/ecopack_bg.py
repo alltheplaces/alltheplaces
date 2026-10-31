@@ -1,4 +1,3 @@
-import json
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -23,7 +22,7 @@ class EcopackBGSpider(Spider):
             yield Request(url, headers=headers)
 
     def parse(self, response):
-        data = json.loads(response.text)
+        data = response.json()
         for municipality in data.get("municipalities"):
             for city in municipality.get("locations"):
                 for container in city.get("items", []):

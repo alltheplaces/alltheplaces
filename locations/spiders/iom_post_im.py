@@ -1,4 +1,3 @@
-import json
 import re
 from html import unescape
 from itertools import groupby
@@ -48,7 +47,7 @@ class IomPostIMSpider(Spider):
         )
 
     def parse_offices(self, response: Response) -> Any:
-        for office in json.loads(response.text):
+        for office in response.json():
             name = unescape(office["name"]).strip()
             item = self.base_item(name, office["lat"], office["lng"])
             item["branch"] = re.sub(r"\s*Post Office$", "", name)

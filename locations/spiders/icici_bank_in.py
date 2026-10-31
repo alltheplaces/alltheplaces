@@ -1,4 +1,3 @@
-import json
 import re
 from typing import Any
 
@@ -24,7 +23,7 @@ class IciciBankINSpider(Spider):
         return None
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for branch in json.loads(response.text)["branch"]:
+        for branch in response.json()["branch"]:
             item = DictParser.parse(branch)
             item["street_address"] = item.pop("addr_full", None)
             item.pop("phone", None)
@@ -50,7 +49,7 @@ class IciciBankINSpider(Spider):
 
             yield item
 
-        for atm in json.loads(response.text)["atm"]:
+        for atm in response.json()["atm"]:
             item = DictParser.parse(atm)
             item["street_address"] = item.pop("addr_full", None)
             if name := item.pop("name", None):

@@ -1,4 +1,3 @@
-import json
 import re
 from datetime import date, timedelta
 from typing import Any, AsyncIterator, Iterable
@@ -68,7 +67,7 @@ class EuropcarSpider(Spider):
         )
 
     def parse_station_list(self, response: Response, token: str, slugs: dict) -> Any:
-        result = json.loads(response.text)
+        result = response.json()
         for entry in result["items"]:
             # With every locale requested, each field is a dict keyed by locale.
             code = entry["fields"]["stationCode"]["en-US"].strip()
@@ -84,7 +83,7 @@ class EuropcarSpider(Spider):
             )
 
     def parse_station(self, response: Response, slugs: dict) -> Iterable[Feature]:
-        station = json.loads(response.text)
+        station = response.json()
         # Internal stations are closed or back-office entries.
         if station.get("visibility") != "PUBLIC":
             return

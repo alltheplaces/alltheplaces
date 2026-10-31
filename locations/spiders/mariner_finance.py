@@ -72,7 +72,7 @@ class MarinerFinanceSpider(scrapy.Spider):
     def parse_branch_locator(self, response):
         properties = response.meta
         [properties.pop(k) for k in ["download_timeout", "download_slot", "download_latency", "depth"]]  # pop meta keys
-        branch_results = json.loads(response.text)
+        branch_results = response.json()
         branch_data = branch_results["branchData"]
         branch_number = properties.get("ref")
 
