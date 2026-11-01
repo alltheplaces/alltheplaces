@@ -21,7 +21,7 @@ class CervenyKrizCZSpider(CrawlSpider):
         item["name"] = response.xpath("//section//h1/text()").get()
         table = response.xpath('//div[@class="pge"]/table/tbody')
         item["phone"] = table.xpath('./tr[./th[contains(text(), "Telefon")]]/td/text()').get()
-        item["street_address"] = table.xpath('./tr[./th[contains(text(), "Sídlo")]]/td/text()').getall()[0]
+        item["street_address"] = table.xpath('./tr[./th[contains(text(), "Sídlo")]]/td/text()').get()
         line2 = table.xpath('./tr[./th[contains(text(), "Sídlo")]]/td/text()').getall()[1]
         item["postcode"], item["city"] = re.search(r"([\d\s]{5,})\s(.+)", line2).groups()
         item["website"] = table.xpath('./tr[./th[contains(text(), "Web")]]/td/a/@href').get() or response.url

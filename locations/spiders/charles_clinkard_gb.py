@@ -17,18 +17,18 @@ class CharlesClinkardGBSpider(CrawlSpider):
     rules = [Rule(LinkExtractor(allow=r"/map/[^/]+$"), "parse")]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        map_data = response.xpath('//script[contains(text(), "google.maps.LatLng")]/text()').extract_first()
+        map_data = response.xpath('//script[contains(text(), "google.maps.LatLng")]/text()').get()
         coordinates = re.search(r"var myLatlng = new google\.maps\.LatLng\((.*)\)", map_data).group(1)
         lat, lon = coordinates.split(",")
 
         properties = {
-            "branch": response.xpath("//h1/text()").extract_first(),
+            "branch": response.xpath("//h1/text()").get(),
             "addr_full": ", ".join(
-                response.xpath('//div[@class="col l-col-16 store-locator__store__col"]/div/p/span/text()').extract()
+                response.xpath('//div[@class="col l-col-16 store-locator__store__col"]/div/p/span/text()').getall()
             ),
             "phone": response.xpath(
                 '//div[@class="col l-col-16 store-locator__store__col"]/div/span/a[contains(@href, "tel:")]/text()'
-            ).extract_first(),
+            ).get(),
             "ref": response.url.replace("https://www.charlesclinkard.co.uk/map/", ""),
             "website": response.url,
             "lat": lat,

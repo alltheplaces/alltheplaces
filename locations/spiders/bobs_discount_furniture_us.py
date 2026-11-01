@@ -11,8 +11,11 @@ from locations.items import Feature
 
 class BobsDiscountFurnitureUSSpider(XMLFeedSpider):
     name = "bobs_discount_furniture_us"
-    item_attributes = {"brand": "Bob's Discount Furniture", "brand_wikidata": "Q4931582"}
-    allowed_domains = ["www.mybobs.com"]
+    item_attributes = {
+        "brand": "Bob's Discount Furniture",
+        "brand_wikidata": "Q4931582",
+    }
+    allowed_domains = ["mybobs.com"]
     start_urls = ["https://api.mybobs.com/occ/v2/bobsspa/stores?pageSize=1000&fields=FULL"]
     iterator = "iternodes"
     itertag = "stores"
