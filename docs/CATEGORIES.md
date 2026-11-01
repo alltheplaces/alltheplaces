@@ -13,5 +13,5 @@ should be the "top level" tag, additional attributes can be added with `apply_ye
 We follow [OSM categories](https://wiki.openstreetmap.org/wiki/Map_features), as best we can, however there are times
 when we don't know the correct category.
 For these we may use [`amenity=yes`](https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dyes), you may be able to get some
-value from them by clustering them with other data eg collecting `post_office=post_partner` from `czech_post_cz`,
+value from them by clustering them with other data eg collecting [`post_office=post_partner`](https://wiki.openstreetmap.org/wiki/Tag:post_office%3Dpost_partner) from `czech_post_cz`,
 however you probably don't want to put them in a product on their own.

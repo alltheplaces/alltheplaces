@@ -66,4 +66,4 @@ All the above is best illustrated with some further examples:
 
 * [spar_gb.py](../locations/spiders/spar_gb.py) (drive query API by postcode)
 * [pets_at_home_gb.py](../locations/spiders/pets_at_home_gb.py) (query GB at 20km point resolution)
-* [the_body_shop.py](../locations/spiders/the_body_shop.py) (use sitemap to generate API parameters)
+* [the_body_shop_gb.py](../locations/spiders/the_body_shop_gb.py) (use sitemap to generate API parameters)
