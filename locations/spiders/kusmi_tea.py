@@ -31,5 +31,6 @@ class KusmiTeaSpider(StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = response.meta["ref"]
-        item["branch"] = re.sub(r"^Kusmi Tea\s*\|\s*", "", item.pop("name"))
+        branch = re.sub(r"^Kusmi Tea\s*\|\s*", "", item.pop("name"))
+        item["branch"] = re.sub(r"\s*\|\s*", " ", branch)
         yield item
