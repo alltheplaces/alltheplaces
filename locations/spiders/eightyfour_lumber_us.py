@@ -24,7 +24,7 @@ class EightyfourLumberUSSpider(scrapy.Spider):
     start_urls = ["https://www.84lumber.com/umbraco/surface/StoreSupport/StoreSearch?radius=10000"]
 
     def parse(self, response):
-        data = json.loads(json.loads(response.text))
+        data = json.loads(response.json())
         for row in data:
             opening_hours = OpeningHours()
             for day in DAYS:

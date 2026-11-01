@@ -1,4 +1,3 @@
-import json
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -23,7 +22,7 @@ class EmpikPLSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs):
-        data = json.loads(response.text)
+        data = response.json()
         for shop in data:
             properties = DictParser.parse(shop)
             properties["email"] = properties["email"].strip()

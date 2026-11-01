@@ -46,7 +46,7 @@ class PostaSrbijeRSSpider(Spider):
         # The endpoint returns (as a JSON string) an HTML fragment of "<b>Label:</b> value<br/>"
         # pairs with Serbian labels; DictParser keys off English field names and maps none of them,
         # so the fields are read out by their label via XPath.
-        fragment = Selector(text=json.loads(response.text))
+        fragment = Selector(text=response.json())
         fields = {}
         for label in fragment.xpath("//b"):
             fields[label.xpath("normalize-space()").get().rstrip(":")] = label.xpath(

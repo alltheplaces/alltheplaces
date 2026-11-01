@@ -68,7 +68,7 @@ class GeicoSpider(scrapy.Spider):
             )
 
     def parse_location_map(self, response):
-        data = json.loads(response.text)
+        data = response.json()
         map_data = data[1]  # skip header element
         lat = map_data["latitude"]
         lon = map_data["longitude"]
