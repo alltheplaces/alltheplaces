@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, AsyncIterator
 
 import scrapy
 from scrapy.http import Response
@@ -27,7 +27,7 @@ class PetroServeUsaSpider(scrapy.Spider):
     # response even though a normal, fully-rendered page follows the Referer-less request.
     handle_httpstatus_list = [500]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[scrapy.Request]:
         yield scrapy.Request(url=self.start_urls[0], headers={"Referer": self.start_urls[0]}, callback=self.parse)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
