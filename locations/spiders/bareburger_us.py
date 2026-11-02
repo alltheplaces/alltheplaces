@@ -71,9 +71,9 @@ class BareburgerUSSpider(Spider):
     allowed_domains = ["bareburger.com"]
     start_urls = [DIRECTORY]
     # About one request in twelve is held back whichever pace it is made at,
-    # so the pages are asked for at a walking pace and a page held back is
-    # asked for again until it comes.
-    custom_settings = {"DOWNLOAD_DELAY": 0.5, "RETRY_TIMES": 6}
+    # so a page held back is asked for again until it comes. The project's own
+    # delay between requests is left as it is, being the more patient.
+    custom_settings = {"RETRY_TIMES": 6}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
