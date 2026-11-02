@@ -17,6 +17,7 @@ class McdonaldsMASpider(PlaywrightSpider):
     start_urls = ["https://www.mcdonalds.ma/nos-restaurants"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
     no_refs = True
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//*[@class="gridRestaurants"]//*[@data-services]'):
