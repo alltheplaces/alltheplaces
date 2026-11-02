@@ -1,43 +1,35 @@
+import json
 from typing import Any, Iterable
 
-from scrapy import Request, Spider
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
 class ColonialParkingUSSpider(Spider):
     name = "colonial_parking_us"
     item_attributes = {"brand": "Colonial Parking", "brand_wikidata": "Q121494114"}
-    start_urls = [
-        "https://www.ecolonial.com/wp-admin/admin-ajax.php?action=mapmarkers&ne_lat=90&ne_lng=180&sw_lat=-90&sw_lng=-180"
-    ]
+    start_urls = ["https://www.ecolonial.com/park-with-us/parking-locator/"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        data = json.loads(response.xpath('//script[@id="pl-map-js-before"]/text()').re_first(r"PL_MAP_DATA = (\{.*\})"))
+        for location in data["locations"]:
             item = DictParser.parse(location)
+            item["branch"] = location["building"]
+            item["addr_full"] = location["address"]
+
+            oh = OpeningHours()
+            for day, hours in zip(DAYS[-1:] + DAYS[:-1], location["week"]):
+                if hours:
+                    oh.add_range(day, *(f"{minutes // 60:02d}:{minutes % 60:02d}" for minutes in hours))
+                else:
+                    oh.set_closed(day)
+            if oh.day_hours:
+                item["opening_hours"] = oh
+
             apply_category(Categories.PARKING, item)
-            yield Request(
-                url=f'https://www.ecolonial.com/wp-admin/admin-ajax.php?action=facility&id={item["ref"]}',
-                callback=self.parse_location_details,
-                cb_kwargs={"item": item},
-            )
-
-    def parse_location_details(self, response: Response, item: Feature) -> Iterable[Feature]:
-        item["addr_full"] = response.xpath('//*[@class="adresse"]/span/text()').get()
-        item["phone"] = response.xpath('//*[contains(text(), "Phone")]/following-sibling::span/text()').get()
-        item["opening_hours"] = self.parse_opening_hours(response)
-        yield item
-
-    def parse_opening_hours(self, response: Response) -> OpeningHours:
-        opening_hours = OpeningHours()
-        for rule in (
-            response.xpath('//*[contains(@class, "openhours")]//p[@class="intend"]')
-            .xpath("normalize-space(.)")
-            .getall()
-        ):
-            opening_hours.add_ranges_from_string(rule.replace("from 12:00 AM to 12:00 AM", "from 12:00 AM to 11:59 PM"))
-        return opening_hours
+            yield item
