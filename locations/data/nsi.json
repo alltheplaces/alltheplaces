@@ -1,13 +1,29 @@
 {
 	"_meta": {
-		"generated": "2026-09-18T19:50:18.997Z",
-		"hash": "3d3f4ba18fae91f329a6faaf73702e96",
-		"url": "https://cdn.jsdelivr.net/npm/name-suggestion-index@8.0.20260918/dist/json/nsi.json",
-		"version": "8.0.20260918"
+		"generated": "2026-11-01T22:01:24.808Z",
+		"hash": "2933936f3dd40b5b33544bbaef53fc01",
+		"url": "https://cdn.jsdelivr.net/npm/name-suggestion-index@8.0.20261101.\\dist\\json\\nsi.json",
+		"version": "8.0.20261101"
 	},
 	"nsi": {
 		"brands/advertising/totem": {
 			"items": [
+				{
+					"displayName": "Cercan\u00edas",
+					"id": "cercanias-80ab21",
+					"locationSet": {
+						"include": [
+							"es"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Cercan\u00edas",
+						"brand:wikidata": "Q1054782",
+						"operator": "Renfe",
+						"operator:wikidata": "Q2476154"
+					}
+				},
 				{
 					"displayName": "1-2-3",
 					"fromTemplate": true,
@@ -139,6 +155,21 @@
 						"brand:wikidata": "Q127686527",
 						"operator": "Aegis Huile Company Limited",
 						"operator:wikidata": "Q127686527"
+					}
+				},
+				{
+					"displayName": "AF Petroli",
+					"fromTemplate": true,
+					"id": "afpetroli-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "AF Petroli",
+						"brand:wikidata": "Q141713787"
 					}
 				},
 				{
@@ -297,6 +328,24 @@
 						"advertising": "totem",
 						"brand": "AL Prime Energy",
 						"brand:wikidata": "Q135268157"
+					}
+				},
+				{
+					"displayName": "Ala Carburanti",
+					"fromTemplate": true,
+					"id": "alacarburanti-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"ala"
+					],
+					"tags": {
+						"advertising": "totem",
+						"brand": "Ala Carburanti",
+						"brand:wikidata": "Q132725815"
 					}
 				},
 				{
@@ -1197,6 +1246,21 @@
 					}
 				},
 				{
+					"displayName": "Benza",
+					"fromTemplate": true,
+					"id": "benza-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Benza",
+						"brand:wikidata": "Q131781765"
+					}
+				},
+				{
 					"displayName": "Benzina",
 					"fromTemplate": true,
 					"id": "benzina-3a612c",
@@ -2077,6 +2141,21 @@
 					}
 				},
 				{
+					"displayName": "Cleanfuel",
+					"fromTemplate": true,
+					"id": "cleanfuel-10e4f0",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Cleanfuel",
+						"brand:wikidata": "Q120717922"
+					}
+				},
+				{
 					"displayName": "Co-op (Canada)",
 					"fromTemplate": true,
 					"id": "federatedcooperatives-e93e09",
@@ -2089,6 +2168,21 @@
 						"advertising": "totem",
 						"brand": "Federated Co-operatives",
 						"brand:wikidata": "Q5440676"
+					}
+				},
+				{
+					"displayName": "COIL",
+					"fromTemplate": true,
+					"id": "coil-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "COIL",
+						"brand:wikidata": "Q141713792"
 					}
 				},
 				{
@@ -2447,6 +2541,21 @@
 					}
 				},
 				{
+					"displayName": "DB Carburanti",
+					"fromTemplate": true,
+					"id": "dbcarburanti-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "DB Carburanti",
+						"brand:wikidata": "Q141713809"
+					}
+				},
+				{
 					"displayName": "Delek",
 					"fromTemplate": true,
 					"id": "delek-30ed24",
@@ -2557,12 +2666,29 @@
 					}
 				},
 				{
-					"displayName": "Disa",
+					"displayName": "Dis-Car",
 					"fromTemplate": true,
-					"id": "disa-a0a030",
+					"id": "discar-996b0f",
 					"locationSet": {
 						"include": [
-							"ic"
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Dis-Car",
+						"brand:wikidata": "Q141713810"
+					}
+				},
+				{
+					"displayName": "Disa",
+					"fromTemplate": true,
+					"id": "disa-4b4b52",
+					"locationSet": {
+						"include": [
+							"es",
+							"ic",
+							"uy"
 						]
 					},
 					"tags": {
@@ -2739,7 +2865,8 @@
 					},
 					"tags": {
 						"advertising": "totem",
-						"brand": "Ego"
+						"brand": "Ego",
+						"brand:wikidata": "Q141713817"
 					}
 				},
 				{
@@ -2984,6 +3111,25 @@
 						"advertising": "totem",
 						"brand": "Energas",
 						"brand:wikidata": "Q124623439"
+					}
+				},
+				{
+					"displayName": "Energia BC",
+					"fromTemplate": true,
+					"id": "energiabc-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"bc",
+						"berica carburanti"
+					],
+					"tags": {
+						"advertising": "totem",
+						"brand": "Energia BC",
+						"brand:wikidata": "Q141713788"
 					}
 				},
 				{
@@ -3438,6 +3584,21 @@
 						"advertising": "totem",
 						"brand": "Fieten Olie",
 						"brand:wikidata": "Q98837500"
+					}
+				},
+				{
+					"displayName": "Filoil",
+					"fromTemplate": true,
+					"id": "filoil-10e4f0",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Filoil",
+						"brand:wikidata": "Q141689508"
 					}
 				},
 				{
@@ -4551,6 +4712,24 @@
 					}
 				},
 				{
+					"displayName": "ICM Petroli",
+					"fromTemplate": true,
+					"id": "icmpetroli-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"icm"
+					],
+					"tags": {
+						"advertising": "totem",
+						"brand": "ICM Petroli",
+						"brand:wikidata": "Q125305330"
+					}
+				},
+				{
 					"displayName": "IES",
 					"fromTemplate": true,
 					"id": "ies-996b0f",
@@ -4826,6 +5005,39 @@
 						"advertising": "totem",
 						"brand": "Irving",
 						"brand:wikidata": "Q1673286"
+					}
+				},
+				{
+					"displayName": "IS Simonetti",
+					"fromTemplate": true,
+					"id": "issimonetti-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"simonetti petroli"
+					],
+					"tags": {
+						"advertising": "totem",
+						"brand": "IS Simonetti",
+						"brand:wikidata": "Q141713799"
+					}
+				},
+				{
+					"displayName": "Itala Petroli",
+					"fromTemplate": true,
+					"id": "italapetroli-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Itala Petroli",
+						"brand:wikidata": "Q141713812"
 					}
 				},
 				{
@@ -6079,6 +6291,24 @@
 					}
 				},
 				{
+					"displayName": "Nobile Oil Group",
+					"fromTemplate": true,
+					"id": "nobileoilgroup-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"nobile oil"
+					],
+					"tags": {
+						"advertising": "totem",
+						"brand": "Nobile Oil Group",
+						"brand:wikidata": "Q141713796"
+					}
+				},
+				{
 					"displayName": "Nordoel",
 					"fromTemplate": true,
 					"id": "nordoel-3c3d38",
@@ -6154,6 +6384,21 @@
 					"tags": {
 						"advertising": "totem",
 						"brand": "Octa+"
+					}
+				},
+				{
+					"displayName": "Oil Italia",
+					"fromTemplate": true,
+					"id": "oilitalia-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Oil Italia",
+						"brand:wikidata": "Q141713806"
 					}
 				},
 				{
@@ -6273,7 +6518,8 @@
 					},
 					"tags": {
 						"advertising": "totem",
-						"brand": "OLA Energy"
+						"brand": "OLA Energy",
+						"brand:wikidata": "Q126916526"
 					}
 				},
 				{
@@ -6773,6 +7019,21 @@
 					}
 				},
 				{
+					"displayName": "Petrol Company",
+					"fromTemplate": true,
+					"id": "petrolcompany-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Petrol Company",
+						"brand:wikidata": "Q141713801"
+					}
+				},
+				{
 					"displayName": "Petrol Ofisi",
 					"fromTemplate": true,
 					"id": "petrolofisi-ff109b",
@@ -6785,6 +7046,21 @@
 						"advertising": "totem",
 						"brand": "Petrol Ofisi",
 						"brand:wikidata": "Q1278087"
+					}
+				},
+				{
+					"displayName": "Petrolgamma",
+					"fromTemplate": true,
+					"id": "petrolgamma-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Petrolgamma",
+						"brand:wikidata": "Q141713791"
 					}
 				},
 				{
@@ -6816,6 +7092,24 @@
 						"advertising": "totem",
 						"brand": "Petrolina",
 						"brand:wikidata": "Q17013948"
+					}
+				},
+				{
+					"displayName": "Petrolmenga",
+					"fromTemplate": true,
+					"id": "petrolmenga-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"menga petroli"
+					],
+					"tags": {
+						"advertising": "totem",
+						"brand": "Petrolmenga",
+						"brand:wikidata": "Q141713797"
 					}
 				},
 				{
@@ -7934,6 +8228,21 @@
 					}
 				},
 				{
+					"displayName": "Sarni Oil",
+					"fromTemplate": true,
+					"id": "sarnioil-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Sarni Oil",
+						"brand:wikidata": "Q141713802"
+					}
+				},
+				{
 					"displayName": "Sasol",
 					"fromTemplate": true,
 					"id": "sasol-30e129",
@@ -8095,6 +8404,21 @@
 					}
 				},
 				{
+					"displayName": "Sia Fuel",
+					"fromTemplate": true,
+					"id": "siafuel-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Sia Fuel",
+						"brand:wikidata": "Q141713786"
+					}
+				},
+				{
 					"displayName": "SILKOIL",
 					"fromTemplate": true,
 					"id": "silkoil-d67647",
@@ -8211,6 +8535,21 @@
 						"advertising": "totem",
 						"brand": "Slovnaft",
 						"brand:wikidata": "Q1587563"
+					}
+				},
+				{
+					"displayName": "Smaf",
+					"fromTemplate": true,
+					"id": "smaf-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Smaf",
+						"brand:wikidata": "Q141713807"
 					}
 				},
 				{
@@ -8343,6 +8682,21 @@
 						"advertising": "totem",
 						"brand": "Solo Oil",
 						"brand:wikidata": "Q115517074"
+					}
+				},
+				{
+					"displayName": "Sommese Petroli",
+					"fromTemplate": true,
+					"id": "sommesepetroli-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Sommese Petroli",
+						"brand:wikidata": "Q141713795"
 					}
 				},
 				{
@@ -9149,6 +9503,21 @@
 						"advertising": "totem",
 						"brand": "Tirex Petrol",
 						"brand:wikidata": "Q20432218"
+					}
+				},
+				{
+					"displayName": "Toil",
+					"fromTemplate": true,
+					"id": "toil-996b0f",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"advertising": "totem",
+						"brand": "Toil",
+						"brand:wikidata": "Q141713789"
 					}
 				},
 				{
@@ -18096,6 +18465,23 @@
 					}
 				},
 				{
+					"displayName": "Banque Michel Inchausp\u00e9",
+					"fromTemplate": true,
+					"id": "banquemichelinchauspe-134295",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
+					"tags": {
+						"amenity": "atm",
+						"brand": "Banque Michel Inchausp\u00e9",
+						"brand:wikidata": "Q99647022",
+						"operator": "Banque Michel Inchausp\u00e9",
+						"operator:wikidata": "Q99647022"
+					}
+				},
+				{
 					"displayName": "Banque Misr",
 					"fromTemplate": true,
 					"id": "banquemisr-443494",
@@ -19979,6 +20365,23 @@
 					}
 				},
 				{
+					"displayName": "Caja Piura",
+					"fromTemplate": true,
+					"id": "cajapiura-98e68c",
+					"locationSet": {
+						"include": [
+							"pe"
+						]
+					},
+					"tags": {
+						"amenity": "atm",
+						"brand": "Caja Piura",
+						"brand:wikidata": "Q129027339",
+						"operator": "Caja Piura",
+						"operator:wikidata": "Q129027339"
+					}
+				},
+				{
 					"displayName": "Caja Rural Central",
 					"fromTemplate": true,
 					"id": "cajaruralcentral-360f91",
@@ -20645,6 +21048,9 @@
 					"tags": {
 						"amenity": "atm",
 						"brand": "Central Bank of India",
+						"brand:en": "Central Bank of India",
+						"brand:hi": "\u0938\u0947\u0928\u094d\u091f\u094d\u0930\u0932 \u092c\u0948\u0902\u0915 \u0911\u095e \u0907\u0902\u0921\u093f\u092f\u093e",
+						"brand:mr": "\u0938\u0947\u0902\u091f\u094d\u0930\u0932 \u092c\u0901\u0915 \u0911\u095e \u0907\u0902\u0921\u093f\u092f\u093e",
 						"brand:wikidata": "Q2007090",
 						"operator": "Central Bank of India",
 						"operator:wikidata": "Q2007090"
@@ -24460,9 +24866,9 @@
 					}
 				},
 				{
-					"displayName": "GT Bank",
+					"displayName": "GTBank",
 					"fromTemplate": true,
-					"id": "gtbank-55d972",
+					"id": "gtbank-4bc537",
 					"locationSet": {
 						"include": [
 							"ci",
@@ -24473,15 +24879,16 @@
 							"lr",
 							"ng",
 							"rw",
+							"sl",
 							"tz",
 							"ug"
 						]
 					},
 					"tags": {
 						"amenity": "atm",
-						"brand": "GT Bank",
+						"brand": "GTBank",
 						"brand:wikidata": "Q579747",
-						"operator": "GT Bank",
+						"operator": "GTBank",
 						"operator:wikidata": "Q579747"
 					}
 				},
@@ -29013,6 +29420,23 @@
 					}
 				},
 				{
+					"displayName": "Postbank",
+					"fromTemplate": true,
+					"id": "postbank-e5108a",
+					"locationSet": {
+						"include": [
+							"bg"
+						]
+					},
+					"tags": {
+						"amenity": "atm",
+						"brand": "Postbank",
+						"brand:wikidata": "Q7234083",
+						"operator": "Postbank",
+						"operator:wikidata": "Q7234083"
+					}
+				},
+				{
 					"displayName": "Postbank (Deutschland)",
 					"fromTemplate": true,
 					"id": "postbank-fb8bf5",
@@ -29176,6 +29600,27 @@
 						"brand:wikidata": "Q567304",
 						"operator": "ProCredit Bank",
 						"operator:wikidata": "Q567304"
+					}
+				},
+				{
+					"displayName": "ProCredit Bank (\u0411\u044a\u043b\u0433\u0430\u0440\u0438\u044f)",
+					"fromTemplate": true,
+					"id": "procreditbank-e5108a",
+					"locationSet": {
+						"include": [
+							"bg"
+						]
+					},
+					"matchNames": [
+						"procredit",
+						"\u043f\u0440\u043e\u043a\u0440\u0435\u0434\u0438\u0442"
+					],
+					"tags": {
+						"amenity": "atm",
+						"brand": "ProCredit Bank",
+						"brand:wikidata": "Q122763238",
+						"operator": "ProCredit Bank",
+						"operator:wikidata": "Q122763238"
 					}
 				},
 				{
@@ -31139,6 +31584,23 @@
 					}
 				},
 				{
+					"displayName": "SJF Bank",
+					"fromTemplate": true,
+					"id": "sjfbank-198cfd",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"amenity": "atm",
+						"brand": "SJF Bank",
+						"brand:wikidata": "Q42143219",
+						"operator": "SJF Bank",
+						"operator:wikidata": "Q42143219"
+					}
+				},
+				{
 					"displayName": "SKB Banka",
 					"fromTemplate": true,
 					"id": "skbbanka-c633d2",
@@ -31465,6 +31927,23 @@
 						"brand:wikidata": "Q18217384",
 						"operator": "Space Coast Credit Union",
 						"operator:wikidata": "Q18217384"
+					}
+				},
+				{
+					"displayName": "Spar Nord Bank",
+					"fromTemplate": true,
+					"id": "sparnordbank-198cfd",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"amenity": "atm",
+						"brand": "Spar Nord Bank",
+						"brand:wikidata": "Q7573540",
+						"operator": "Spar Nord Bank",
+						"operator:wikidata": "Q7573540"
 					}
 				},
 				{
@@ -31940,6 +32419,7 @@
 						"brand": "State Bank of India",
 						"brand:en": "State Bank of India",
 						"brand:hi": "\u092d\u093e\u0930\u0924\u0940\u092f \u0938\u094d\u091f\u0947\u091f \u092c\u0948\u0902\u0915",
+						"brand:kn": "\u0cad\u0cbe\u0cb0\u0ca4\u0cc0\u0caf \u0cb8\u0ccd\u0c9f\u0cc7\u0c9f\u0ccd \u0cac\u0ccd\u0caf\u0cbe\u0c82\u0c95\u0ccd",
 						"brand:mr": "\u092d\u093e\u0930\u0924\u0940\u092f \u0938\u094d\u091f\u0947\u091f \u092c\u0901\u0915",
 						"brand:wikidata": "Q1340361",
 						"operator": "State Bank of India",
@@ -32115,6 +32595,23 @@
 						"brand:wikidata": "Q1145493",
 						"operator": "Swedbank",
 						"operator:wikidata": "Q1145493"
+					}
+				},
+				{
+					"displayName": "Sydjysk Sparekasse",
+					"fromTemplate": true,
+					"id": "sydjysksparekasse-198cfd",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"amenity": "atm",
+						"brand": "Sydjysk Sparekasse",
+						"brand:wikidata": "Q12313116",
+						"operator": "Sydjysk Sparekasse",
+						"operator:wikidata": "Q12313116"
 					}
 				},
 				{
@@ -32672,6 +33169,23 @@
 					}
 				},
 				{
+					"displayName": "Trustmark Bank",
+					"fromTemplate": true,
+					"id": "trustmarkbank-93d3a2",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "atm",
+						"brand": "Trustmark Bank",
+						"brand:wikidata": "Q110130777",
+						"operator": "Trustmark Bank",
+						"operator:wikidata": "Q110130777"
+					}
+				},
+				{
 					"displayName": "TSB (New Zealand)",
 					"fromTemplate": true,
 					"id": "tsb-6bd214",
@@ -33109,19 +33623,11 @@
 				{
 					"displayName": "UniCredit",
 					"fromTemplate": true,
-					"id": "unicredit-4a82ee",
+					"id": "unicredit-46b329",
 					"locationSet": {
 						"include": [
-							"ba",
-							"cz",
-							"hu",
 							"it",
-							"pl",
-							"ro",
-							"rs",
-							"ru",
-							"si",
-							"sk"
+							"pl"
 						]
 					},
 					"matchNames": [
@@ -33135,6 +33641,33 @@
 						"brand": "UniCredit",
 						"brand:wikidata": "Q45568",
 						"operator": "UniCredit",
+						"operator:wikidata": "Q45568"
+					}
+				},
+				{
+					"displayName": "UniCredit Bank",
+					"fromTemplate": true,
+					"id": "unicreditbank-4ebdde",
+					"locationSet": {
+						"include": [
+							"ba",
+							"cz",
+							"hu",
+							"ro",
+							"rs",
+							"ru",
+							"si",
+							"sk"
+						]
+					},
+					"matchNames": [
+						"unicredit"
+					],
+					"tags": {
+						"amenity": "atm",
+						"brand": "UniCredit Bank",
+						"brand:wikidata": "Q45568",
+						"operator": "UniCredit Bank",
 						"operator:wikidata": "Q45568"
 					}
 				},
@@ -35526,23 +36059,6 @@
 					}
 				},
 				{
-					"displayName": "\u041f\u043e\u0449\u0435\u043d\u0441\u043a\u0430 \u0431\u0430\u043d\u043a\u0430",
-					"fromTemplate": true,
-					"id": "59f0b6-e5108a",
-					"locationSet": {
-						"include": [
-							"bg"
-						]
-					},
-					"tags": {
-						"amenity": "atm",
-						"brand": "\u041f\u043e\u0449\u0435\u043d\u0441\u043a\u0430 \u0431\u0430\u043d\u043a\u0430",
-						"brand:wikidata": "Q7234083",
-						"operator": "\u041f\u043e\u0449\u0435\u043d\u0441\u043a\u0430 \u0431\u0430\u043d\u043a\u0430",
-						"operator:wikidata": "Q7234083"
-					}
-				},
-				{
 					"displayName": "\u041f\u0440\u0430\u0432\u0435\u043a\u0441-\u0411\u0430\u043d\u043a",
 					"fromTemplate": true,
 					"id": "pravexbank-968b58",
@@ -35640,29 +36156,6 @@
 						"brand:wikidata": "Q3919658",
 						"operator": "\u041f\u0440\u0438\u043e\u0440\u0431\u0430\u043d\u043a",
 						"operator:wikidata": "Q3919658"
-					}
-				},
-				{
-					"displayName": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a (\u0411\u044a\u043b\u0433\u0430\u0440\u0438\u044f)",
-					"fromTemplate": true,
-					"id": "procreditbank-e5108a",
-					"locationSet": {
-						"include": [
-							"bg"
-						]
-					},
-					"matchNames": [
-						"procredit",
-						"\u043f\u0440\u043e\u043a\u0440\u0435\u0434\u0438\u0442"
-					],
-					"tags": {
-						"amenity": "atm",
-						"brand": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a",
-						"brand:bg": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a",
-						"brand:en": "ProCredit Bank",
-						"brand:wikidata": "Q122763238",
-						"operator": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a",
-						"operator:wikidata": "Q122763238"
 					}
 				},
 				{
@@ -45908,6 +46401,22 @@
 					}
 				},
 				{
+					"displayName": "Banque Michel Inchausp\u00e9",
+					"id": "banquemichelinchauspe-ad79d4",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
+					"tags": {
+						"amenity": "bank",
+						"brand": "Banque Michel Inchausp\u00e9",
+						"brand:wikidata": "Q99647022",
+						"name": "Banque Michel Inchausp\u00e9",
+						"short_name": "BAMI"
+					}
+				},
+				{
 					"displayName": "Banque Misr",
 					"id": "banquemisr-bbd826",
 					"locationSet": {
@@ -47681,6 +48190,21 @@
 					}
 				},
 				{
+					"displayName": "Caja Piura",
+					"id": "cajapiura-e2ab80",
+					"locationSet": {
+						"include": [
+							"pe"
+						]
+					},
+					"tags": {
+						"amenity": "bank",
+						"brand": "Caja Piura",
+						"brand:wikidata": "Q129027339",
+						"name": "Caja Piura"
+					}
+				},
+				{
 					"displayName": "Caja Rural Central",
 					"id": "cajaruralcentral-6e3a9a",
 					"locationSet": {
@@ -48296,8 +48820,14 @@
 					"tags": {
 						"amenity": "bank",
 						"brand": "Central Bank of India",
+						"brand:en": "Central Bank of India",
+						"brand:hi": "\u0938\u0947\u0928\u094d\u091f\u094d\u0930\u0932 \u092c\u0948\u0902\u0915 \u0911\u095e \u0907\u0902\u0921\u093f\u092f\u093e",
+						"brand:mr": "\u0938\u0947\u0902\u091f\u094d\u0930\u0932 \u092c\u0901\u0915 \u0911\u095e \u0907\u0902\u0921\u093f\u092f\u093e",
 						"brand:wikidata": "Q2007090",
-						"name": "Central Bank of India"
+						"name": "Central Bank of India",
+						"name:en": "Central Bank of India",
+						"name:hi": "\u0938\u0947\u0928\u094d\u091f\u094d\u0930\u0932 \u092c\u0948\u0902\u0915 \u0911\u095e \u0907\u0902\u0921\u093f\u092f\u093e",
+						"name:mr": "\u0938\u0947\u0902\u091f\u094d\u0930\u0932 \u092c\u0901\u0915 \u0911\u095e \u0907\u0902\u0921\u093f\u092f\u093e"
 					}
 				},
 				{
@@ -51819,8 +52349,8 @@
 					}
 				},
 				{
-					"displayName": "GT Bank",
-					"id": "gtbank-b3c39a",
+					"displayName": "GTBank",
+					"id": "gtbank-edf34c",
 					"locationSet": {
 						"include": [
 							"ci",
@@ -51831,16 +52361,17 @@
 							"lr",
 							"ng",
 							"rw",
+							"sl",
 							"tz",
 							"ug"
 						]
 					},
 					"tags": {
 						"amenity": "bank",
-						"brand": "GT Bank",
+						"brand": "GTBank",
 						"brand:wikidata": "Q579747",
-						"name": "GT Bank",
-						"official_name": "Guaranty Trust Bank"
+						"name": "GTBank",
+						"official_name": "Guaranty Trust Bank Limited"
 					}
 				},
 				{
@@ -56055,6 +56586,23 @@
 					}
 				},
 				{
+					"displayName": "Postbank",
+					"id": "postbank-126296",
+					"locationSet": {
+						"include": [
+							"bg"
+						]
+					},
+					"tags": {
+						"amenity": "bank",
+						"brand": "Postbank",
+						"brand:wikidata": "Q7234083",
+						"name": "Postbank",
+						"name:bg": "\u041f\u043e\u0449\u0435\u043d\u0441\u043a\u0430 \u0431\u0430\u043d\u043a\u0430",
+						"name:en": "Postbank"
+					}
+				},
+				{
 					"displayName": "Postbank (Deutschland)",
 					"id": "postbank-1180cf",
 					"locationSet": {
@@ -56217,6 +56765,25 @@
 						"amenity": "bank",
 						"brand": "ProCredit Bank",
 						"brand:wikidata": "Q567304",
+						"name": "ProCredit Bank"
+					}
+				},
+				{
+					"displayName": "ProCredit Bank (\u0411\u044a\u043b\u0433\u0430\u0440\u0438\u044f)",
+					"id": "procreditbank-126296",
+					"locationSet": {
+						"include": [
+							"bg"
+						]
+					},
+					"matchNames": [
+						"procredit",
+						"\u043f\u0440\u043e\u043a\u0440\u0435\u0434\u0438\u0442"
+					],
+					"tags": {
+						"amenity": "bank",
+						"brand": "ProCredit Bank",
+						"brand:wikidata": "Q122763238",
 						"name": "ProCredit Bank"
 					}
 				},
@@ -58034,6 +58601,21 @@
 					}
 				},
 				{
+					"displayName": "SJF Bank",
+					"id": "sjfbank-cc27e5",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"amenity": "bank",
+						"brand": "SJF Bank",
+						"brand:wikidata": "Q42143219",
+						"name": "SJF Bank"
+					}
+				},
+				{
 					"displayName": "SKB Banka",
 					"id": "skbbanka-30392e",
 					"locationSet": {
@@ -58330,6 +58912,21 @@
 						"brand": "Space Coast Credit Union",
 						"brand:wikidata": "Q18217384",
 						"name": "Space Coast Credit Union"
+					}
+				},
+				{
+					"displayName": "Spar Nord Bank",
+					"id": "sparnordbank-cc27e5",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"amenity": "bank",
+						"brand": "Spar Nord Bank",
+						"brand:wikidata": "Q7573540",
+						"name": "Spar Nord Bank"
 					}
 				},
 				{
@@ -58770,11 +59367,13 @@
 						"brand": "State Bank of India",
 						"brand:en": "State Bank of India",
 						"brand:hi": "\u092d\u093e\u0930\u0924\u0940\u092f \u0938\u094d\u091f\u0947\u091f \u092c\u0948\u0902\u0915",
+						"brand:kn": "\u0cad\u0cbe\u0cb0\u0ca4\u0cc0\u0caf \u0cb8\u0ccd\u0c9f\u0cc7\u0c9f\u0ccd \u0cac\u0ccd\u0caf\u0cbe\u0c82\u0c95\u0ccd",
 						"brand:mr": "\u092d\u093e\u0930\u0924\u0940\u092f \u0938\u094d\u091f\u0947\u091f \u092c\u0901\u0915",
 						"brand:wikidata": "Q1340361",
 						"name": "State Bank of India",
 						"name:en": "State Bank of India",
 						"name:hi": "\u092d\u093e\u0930\u0924\u0940\u092f \u0938\u094d\u091f\u0947\u091f \u092c\u0948\u0902\u0915",
+						"name:kn": "\u0cad\u0cbe\u0cb0\u0ca4\u0cc0\u0caf \u0cb8\u0ccd\u0c9f\u0cc7\u0c9f\u0ccd \u0cac\u0ccd\u0caf\u0cbe\u0c82\u0c95\u0ccd",
 						"name:mr": "\u092d\u093e\u0930\u0924\u0940\u092f \u0938\u094d\u091f\u0947\u091f \u092c\u0901\u0915",
 						"short_name": "SBI",
 						"short_name:en": "SBI"
@@ -58934,6 +59533,21 @@
 						"brand": "Swedbank",
 						"brand:wikidata": "Q1145493",
 						"name": "Swedbank"
+					}
+				},
+				{
+					"displayName": "Sydjysk Sparekasse",
+					"id": "sydjysksparekasse-cc27e5",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"amenity": "bank",
+						"brand": "Sydjysk Sparekasse",
+						"brand:wikidata": "Q12313116",
+						"name": "Sydjysk Sparekasse"
 					}
 				},
 				{
@@ -59447,6 +60061,21 @@
 					}
 				},
 				{
+					"displayName": "Trustmark Bank",
+					"id": "trustmarkbank-ea2e2d",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "bank",
+						"brand": "Trustmark Bank",
+						"brand:wikidata": "Q110130777",
+						"name": "Trustmark Bank"
+					}
+				},
+				{
 					"displayName": "TSB (New Zealand)",
 					"id": "tsb-279fc5",
 					"locationSet": {
@@ -59857,19 +60486,11 @@
 				},
 				{
 					"displayName": "UniCredit",
-					"id": "unicredit-d887c4",
+					"id": "unicredit-fe4210",
 					"locationSet": {
 						"include": [
-							"ba",
-							"cz",
-							"hu",
 							"it",
-							"pl",
-							"ro",
-							"rs",
-							"ru",
-							"si",
-							"sk"
+							"pl"
 						]
 					},
 					"matchNames": [
@@ -59883,6 +60504,31 @@
 						"brand": "UniCredit",
 						"brand:wikidata": "Q45568",
 						"name": "UniCredit"
+					}
+				},
+				{
+					"displayName": "UniCredit Bank",
+					"id": "unicreditbank-900faa",
+					"locationSet": {
+						"include": [
+							"ba",
+							"cz",
+							"hu",
+							"ro",
+							"rs",
+							"ru",
+							"si",
+							"sk"
+						]
+					},
+					"matchNames": [
+						"unicredit"
+					],
+					"tags": {
+						"amenity": "bank",
+						"brand": "UniCredit Bank",
+						"brand:wikidata": "Q45568",
+						"name": "UniCredit Bank"
 					}
 				},
 				{
@@ -62198,23 +62844,6 @@
 					}
 				},
 				{
-					"displayName": "\u041f\u043e\u0449\u0435\u043d\u0441\u043a\u0430 \u0431\u0430\u043d\u043a\u0430",
-					"id": "postbank-126296",
-					"locationSet": {
-						"include": [
-							"bg"
-						]
-					},
-					"tags": {
-						"amenity": "bank",
-						"brand": "\u041f\u043e\u0449\u0435\u043d\u0441\u043a\u0430 \u0431\u0430\u043d\u043a\u0430",
-						"brand:wikidata": "Q7234083",
-						"name": "\u041f\u043e\u0449\u0435\u043d\u0441\u043a\u0430 \u0431\u0430\u043d\u043a\u0430",
-						"name:bg": "\u041f\u043e\u0449\u0435\u043d\u0441\u043a\u0430 \u0431\u0430\u043d\u043a\u0430",
-						"name:en": "Postbank"
-					}
-				},
-				{
 					"displayName": "\u041f\u0440\u0430\u0432\u0435\u043a\u0441-\u0411\u0430\u043d\u043a",
 					"id": "pravexbank-c8dc19",
 					"locationSet": {
@@ -62314,29 +62943,6 @@
 						"name:be-tarask": "\u041f\u0440\u044b\u0451\u0440\u0431\u0430\u043d\u043a",
 						"name:en": "PriorBank",
 						"name:ru": "\u041f\u0440\u0438\u043e\u0440\u0431\u0430\u043d\u043a"
-					}
-				},
-				{
-					"displayName": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a (\u0411\u044a\u043b\u0433\u0430\u0440\u0438\u044f)",
-					"id": "procreditbank-126296",
-					"locationSet": {
-						"include": [
-							"bg"
-						]
-					},
-					"matchNames": [
-						"procredit",
-						"\u043f\u0440\u043e\u043a\u0440\u0435\u0434\u0438\u0442"
-					],
-					"tags": {
-						"amenity": "bank",
-						"brand": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a",
-						"brand:bg": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a",
-						"brand:en": "ProCredit Bank",
-						"brand:wikidata": "Q122763238",
-						"name": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a",
-						"name:bg": "\u041f\u0440\u043e\u041a\u0440\u0435\u0434\u0438\u0442 \u0411\u0430\u043d\u043a",
-						"name:en": "ProCredit Bank"
 					}
 				},
 				{
@@ -68458,6 +69064,26 @@
 					}
 				},
 				{
+					"displayName": "Padi's Point",
+					"id": "padispoint-6e8ee7",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"preserveTags": [
+						"^name"
+					],
+					"tags": {
+						"amenity": "bar",
+						"brand": "Padi's Point",
+						"brand:wikidata": "Q141597377",
+						"cocktails": "yes",
+						"name": "Padi's Point",
+						"official_name": "Padi's Point Restaurant & Bar"
+					}
+				},
+				{
 					"displayName": "Piana Vyshnia",
 					"id": "pianavyshnia-1dc747",
 					"locationSet": {
@@ -69232,22 +69858,6 @@
 					}
 				},
 				{
-					"displayName": "Bici Cuenca",
-					"id": "bicicuenca-3e9425",
-					"locationSet": {
-						"include": [
-							"ec"
-						]
-					},
-					"tags": {
-						"amenity": "bicycle_rental",
-						"brand": "Bici Cuenca",
-						"network": "Bici Cuenca",
-						"operator": "Bici Cuenca",
-						"operator:type": "private"
-					}
-				},
-				{
 					"displayName": "Bici Las Condes",
 					"id": "bicilascondes-70bf31",
 					"locationSet": {
@@ -69261,6 +69871,25 @@
 						"network": "Bici Las Condes",
 						"operator": "Clear Channel",
 						"operator:type": "private"
+					}
+				},
+				{
+					"displayName": "Bici P\u00fablica Cuenca",
+					"id": "bicipublicacuenca-3e9425",
+					"locationSet": {
+						"include": [
+							"ec"
+						]
+					},
+					"matchNames": [
+						"bici cuenca"
+					],
+					"tags": {
+						"amenity": "bicycle_rental",
+						"brand": "Bici P\u00fablica Cuenca",
+						"brand:wikidata": "Q141547147",
+						"network": "Bici P\u00fablica Cuenca",
+						"network:wikidata": "Q141547147"
 					}
 				},
 				{
@@ -72332,9 +72961,9 @@
 					"tags": {
 						"amenity": "bicycle_rental",
 						"brand": "MuyBici",
+						"brand:wikidata": "Q141548207",
 						"network": "MuyBici",
-						"operator": "UTE MuyBici servicio p\u00fablico de transporte con bicicleta de Murcia",
-						"operator:type": "private"
+						"network:wikidata": "Q141548207"
 					}
 				},
 				{
@@ -76502,6 +77131,34 @@
 					}
 				},
 				{
+					"displayName": "Auntea Jenny",
+					"id": "aunteajenny-9d6a38",
+					"locationSet": {
+						"include": [
+							"gb",
+							"id",
+							"my",
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "cafe",
+						"brand": "Auntea Jenny",
+						"brand:en": "Auntea Jenny",
+						"brand:wikidata": "Q108165945",
+						"brand:zh": "\u6caa\u4e0a\u963f\u59e8",
+						"brand:zh-Hans": "\u6caa\u4e0a\u963f\u59e8",
+						"brand:zh-Hant": "\u6eec\u4e0a\u963f\u59e8",
+						"cuisine": "bubble_tea",
+						"name": "Auntea Jenny",
+						"name:en": "Auntea Jenny",
+						"name:zh": "\u6caa\u4e0a\u963f\u59e8",
+						"name:zh-Hans": "\u6caa\u4e0a\u963f\u59e8",
+						"name:zh-Hant": "\u6eec\u4e0a\u963f\u59e8",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Bagels & Beans",
 					"id": "bagelsandbeans-4a052f",
 					"locationSet": {
@@ -78024,6 +78681,23 @@
 					}
 				},
 				{
+					"displayName": "Coffee House",
+					"id": "coffeehouse-a89223",
+					"locationSet": {
+						"include": [
+							"gb"
+						]
+					},
+					"tags": {
+						"amenity": "cafe",
+						"brand": "Coffee House",
+						"brand:wikidata": "Q141791435",
+						"cuisine": "coffee_shop",
+						"name": "Coffee House",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Coffee House (Suomi)",
 					"id": "coffeehouse-7a8d18",
 					"locationSet": {
@@ -78858,6 +79532,23 @@
 						"name": "Flying Horse Coffee",
 						"name:en": "Flying Horse Coffee",
 						"name:ja": "\u30d5\u30e9\u30a4\u30f3\u30b0\u30db\u30fc\u30b9\u30b3\u30fc\u30d2\u30fc",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "Foam Coffee",
+					"id": "foamcoffee-054740",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "cafe",
+						"brand": "Foam Coffee",
+						"brand:wikidata": "Q141592639",
+						"cuisine": "coffee_shop",
+						"name": "Foam Coffee",
 						"takeaway": "yes"
 					}
 				},
@@ -79708,6 +80399,26 @@
 						"brand:wikidata": "Q28008050",
 						"cuisine": "coffee_shop",
 						"name": "Kahve D\u00fcnyas\u0131",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "Kenangan Coffee",
+					"id": "kenangancoffee-054740",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"preserveTags": [
+						"^takeaway"
+					],
+					"tags": {
+						"amenity": "cafe",
+						"brand": "Kenangan Coffee",
+						"brand:wikidata": "Q97221992",
+						"cuisine": "coffee_shop",
+						"name": "Kenangan Coffee",
 						"takeaway": "yes"
 					}
 				},
@@ -81265,6 +81976,23 @@
 					}
 				},
 				{
+					"displayName": "Serenitea",
+					"id": "serenitea-054740",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "cafe",
+						"brand": "Serenitea",
+						"brand:wikidata": "Q24884997",
+						"cuisine": "bubble_tea",
+						"name": "Serenitea",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Shakespeare Coffee & Bistro",
 					"id": "shakespeare-fadeed",
 					"locationSet": {
@@ -82661,6 +83389,27 @@
 						"brand:wikidata": "Q105051786",
 						"cuisine": "waffle",
 						"name": "WonderWaffel",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "Wushiland Boba",
+					"id": "wushilandboba-eadda1",
+					"locationSet": {
+						"include": [
+							"au",
+							"ca",
+							"my",
+							"sg",
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "cafe",
+						"brand": "Wushiland Boba",
+						"brand:wikidata": "Q106926258",
+						"cuisine": "bubble_tea",
+						"name": "Wushiland Boba",
 						"takeaway": "yes"
 					}
 				},
@@ -85837,6 +86586,35 @@
 					}
 				},
 				{
+					"displayName": "\u76ae\u7237\u5496\u5561",
+					"id": "peetscoffee-823e31",
+					"locationSet": {
+						"exclude": [
+							"hk",
+							"mo"
+						],
+						"include": [
+							"cn"
+						]
+					},
+					"matchNames": [
+						"peets",
+						"peets coffee & tea"
+					],
+					"tags": {
+						"amenity": "cafe",
+						"brand": "\u76ae\u7237\u5496\u5561",
+						"brand:en": "Peet's Coffee",
+						"brand:wikidata": "Q1094101",
+						"brand:zh": "\u76ae\u7237\u5496\u5561",
+						"cuisine": "coffee_shop",
+						"name": "\u76ae\u7237\u5496\u5561",
+						"name:en": "Peet's Coffee",
+						"name:zh": "\u76ae\u7237\u5496\u5561",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "\u76ca\u79be\u5802",
 					"id": "yhtang-3300f4",
 					"locationSet": {
@@ -88728,6 +89506,21 @@
 					}
 				},
 				{
+					"displayName": "Tsunami Express",
+					"id": "tsunamiexpress-244496",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "car_wash",
+						"brand": "Tsunami Express",
+						"brand:wikidata": "Q139980358",
+						"name": "Tsunami Express"
+					}
+				},
+				{
 					"displayName": "Uno-X",
 					"id": "unox-56bd0e",
 					"locationSet": {
@@ -88767,19 +89560,20 @@
 				},
 				{
 					"displayName": "Wash World",
-					"id": "washworld-83b5fb",
+					"id": "washworld-436258",
 					"locationSet": {
 						"include": [
-							"dk"
+							"de",
+							"dk",
+							"no",
+							"se"
 						]
 					},
 					"tags": {
 						"amenity": "car_wash",
 						"brand": "Wash World",
 						"brand:wikidata": "Q130249954",
-						"name": "Wash World",
-						"operator": "Wash World",
-						"operator:wikidata": "Q130249954"
+						"name": "Wash World"
 					}
 				},
 				{
@@ -89359,10 +90153,7 @@
 					"tags": {
 						"amenity": "charging_station",
 						"brand": "bike-energy",
-						"brand:wikidata": "Q67770877",
-						"name": "bike-energy",
-						"operator": "bike-energy",
-						"operator:wikidata": "Q67770877"
+						"brand:wikidata": "Q67770877"
 					}
 				},
 				{
@@ -91463,6 +92254,24 @@
 					}
 				},
 				{
+					"displayName": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0445\u0430\u0431",
+					"id": "electrohab-012f44",
+					"locationSet": {
+						"include": [
+							"ru"
+						]
+					},
+					"tags": {
+						"amenity": "charging_station",
+						"brand": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0445\u0430\u0431",
+						"brand:en": "Electrohab",
+						"brand:ru": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0445\u0430\u0431",
+						"brand:wikidata": "Q140627893",
+						"operator": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0445\u0430\u0431",
+						"operator:wikidata": "Q140627893"
+					}
+				},
+				{
 					"displayName": "\u042d\u043d\u0435\u0440\u0433\u0438\u044f \u041c\u043e\u0441\u043a\u0432\u044b",
 					"id": "energyofmoscow-012f44",
 					"locationSet": {
@@ -91809,6 +92618,28 @@
 						"amenity": "childcare",
 						"brand": "Arbeiterwohlfahrt",
 						"brand:wikidata": "Q627256"
+					}
+				},
+				{
+					"displayName": "BrightPath",
+					"id": "brightpath-7329bc",
+					"locationSet": {
+						"include": [
+							"ca",
+							"us"
+						]
+					},
+					"matchNames": [
+						"brightpath kids"
+					],
+					"preserveTags": [
+						"^name"
+					],
+					"tags": {
+						"amenity": "childcare",
+						"brand": "BrightPath",
+						"brand:wikidata": "Q132156405",
+						"name": "BrightPath"
 					}
 				},
 				{
@@ -94065,6 +94896,24 @@
 					}
 				},
 				{
+					"displayName": "Joaquim Chaves Sa\u00fade",
+					"id": "joaquimchavessaude-16b07a",
+					"locationSet": {
+						"include": [
+							"pt"
+						]
+					},
+					"tags": {
+						"amenity": "clinic",
+						"brand": "Joaquim Chaves Sa\u00fade",
+						"brand:wikidata": "Q134271555",
+						"healthcare": "clinic",
+						"operator": "Dr. Joaquim Chaves, Laborat\u00f3rio de An\u00e1lises Cl\u00ednicas, S.A.",
+						"operator:type": "private",
+						"operator:wikidata": "Q134271555"
+					}
+				},
+				{
 					"displayName": "LASIK MD",
 					"id": "lasikmd-a4b770",
 					"locationSet": {
@@ -94261,6 +95110,24 @@
 						"healthcare": "clinic",
 						"healthcare:speciality": "surgery",
 						"name": "Sutter Surgery Center"
+					}
+				},
+				{
+					"displayName": "Terveystalo",
+					"id": "terveystalo-054044",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "clinic",
+						"brand": "Terveystalo",
+						"brand:wikidata": "Q11897034",
+						"healthcare": "clinic",
+						"operator": "Terveystalo",
+						"operator:type": "private",
+						"operator:wikidata": "Q11897034"
 					}
 				},
 				{
@@ -94523,6 +95390,34 @@
 						"amenity": "community_centre",
 						"brand": "Pilares",
 						"brand:wikidata": "Q111737852"
+					}
+				},
+				{
+					"displayName": "Punto Vuela",
+					"id": "puntovuela-5e2a04",
+					"locationSet": {
+						"include": [
+							"es"
+						]
+					},
+					"matchNames": [
+						"guadalinfo",
+						"puntos vuela",
+						"vuela"
+					],
+					"matchTags": [
+						"amenity/internet_cafe",
+						"amenity/social_centre",
+						"amenity/social_facility",
+						"office/it"
+					],
+					"tags": {
+						"amenity": "community_centre",
+						"brand": "Punto Vuela",
+						"brand:wikidata": "Q5886880",
+						"name": "Punto Vuela",
+						"operator": "Consorcio Puntos Vuela",
+						"operator:wikidata": "Q141726645"
 					}
 				},
 				{
@@ -97569,6 +98464,23 @@
 					}
 				},
 				{
+					"displayName": "Cartofisserie",
+					"id": "cartofisserie-9dd297",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Cartofisserie",
+						"brand:wikidata": "Q141806783",
+						"cuisine": "fries",
+						"name": "Cartofisserie",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Chamas Tacos",
 					"id": "chamastacos-11ef38",
 					"locationSet": {
@@ -98073,7 +98985,24 @@
 					}
 				},
 				{
-					"displayName": "Chopstix",
+					"displayName": "Chopstix (Romania)",
+					"id": "chopstix-9dd297",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Chopstix",
+						"brand:wikidata": "Q141806802",
+						"cuisine": "chinese",
+						"name": "Chopstix",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "Chopstix (United Kingdom & Ireland)",
 					"id": "chopstix-2dcf5d",
 					"locationSet": {
 						"include": [
@@ -98641,9 +99570,10 @@
 				},
 				{
 					"displayName": "Dairy Queen",
-					"id": "dairyqueen-9b2018",
+					"id": "dairyqueen-34562d",
 					"locationSet": {
 						"exclude": [
+							"ph",
 							"pl"
 						],
 						"include": [
@@ -100556,6 +101486,24 @@
 					}
 				},
 				{
+					"displayName": "Fryday",
+					"id": "fryday-769832",
+					"locationSet": {
+						"include": [
+							"md",
+							"ro"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Fryday",
+						"brand:wikidata": "Q141807354",
+						"cuisine": "burger",
+						"name": "Fryday",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Fuzzy's Taco Shop",
 					"id": "fuzzystacoshop-4d2ff4",
 					"locationSet": {
@@ -101451,6 +102399,24 @@
 					}
 				},
 				{
+					"displayName": "Holy Cow!",
+					"id": "holycow-2fcd78",
+					"locationSet": {
+						"include": [
+							"ch"
+						]
+					},
+					"tags": {
+						"alt_name": "Holy Cow! Gourmet Burger Co.",
+						"amenity": "fast_food",
+						"brand": "Holy Cow!",
+						"brand:wikidata": "Q130614312",
+						"cuisine": "burger",
+						"name": "Holy Cow!",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Home Burgers",
 					"id": "homeburgers-9bc101",
 					"locationSet": {
@@ -101656,6 +102622,24 @@
 						"cuisine": "burger;fries;ice_cream",
 						"name": "Hwy55",
 						"official_name": "Hwy55 Burgers, Shakes & Fries",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "I Love Poke",
+					"id": "ilovepoke-b4e8f3",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "I Love Poke",
+						"brand:wikidata": "Q132147397",
+						"cuisine": "poke",
+						"delivery": "yes",
+						"name": "I Love Poke",
 						"takeaway": "yes"
 					}
 				},
@@ -101887,6 +102871,25 @@
 					}
 				},
 				{
+					"displayName": "IT",
+					"id": "it-4752a5",
+					"locationSet": {
+						"include": [
+							"fr",
+							"us"
+						]
+					},
+					"tags": {
+						"alt_name": "Italian Trattoria",
+						"amenity": "fast_food",
+						"brand": "IT",
+						"brand:wikidata": "Q141564586",
+						"cuisine": "italian",
+						"name": "IT",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "itsu",
 					"id": "itsu-56a2ff",
 					"locationSet": {
@@ -101998,9 +103001,10 @@
 				},
 				{
 					"displayName": "Jamba",
-					"id": "jamba-4d2ff4",
+					"id": "jamba-f6ec99",
 					"locationSet": {
 						"include": [
+							"ph",
 							"us"
 						]
 					},
@@ -103595,6 +104599,22 @@
 					}
 				},
 				{
+					"displayName": "MACS Macaroni and Cheese Shop",
+					"id": "macsmacaroniandcheeseshop-6035d9",
+					"locationSet": {
+						"include": [
+							"us-wi.geojson"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "MACS Macaroni and Cheese Shop",
+						"brand:wikidata": "Q141130578",
+						"name": "MACS Macaroni and Cheese Shop",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Mak.by",
 					"id": "makby-381458",
 					"locationSet": {
@@ -104447,6 +105467,23 @@
 					}
 				},
 				{
+					"displayName": "MOS Burger",
+					"id": "mosburger-33d36e",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "MOS Burger",
+						"brand:wikidata": "Q1204169",
+						"cuisine": "burger",
+						"name": "MOS Burger",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Mostaza",
 					"id": "mostaza-c1cb89",
 					"locationSet": {
@@ -104640,6 +105677,24 @@
 						"name": "Myungrang Hotdog",
 						"name:en": "Myungrang Hotdog",
 						"name:ko": "\uba85\ub791\ud56b\ub3c4\uadf8",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "Nachos",
+					"id": "nachos-11ef38",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Nachos",
+						"brand:wikidata": "Q141119389",
+						"cuisine": "mexican",
+						"name": "Nachos",
 						"takeaway": "yes"
 					}
 				},
@@ -104913,6 +105968,23 @@
 						"brand:wikidata": "Q112571654",
 						"cuisine": "noodle",
 						"name": "Noodle King",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "Noodle Pack",
+					"id": "noodlepack-9dd297",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Noodle Pack",
+						"brand:wikidata": "Q141806816",
+						"cuisine": "noodle",
+						"name": "Noodle Pack",
 						"takeaway": "yes"
 					}
 				},
@@ -105284,6 +106356,22 @@
 						"cuisine": "sushi",
 						"name": "Osama Sushi",
 						"takeaway": "only"
+					}
+				},
+				{
+					"displayName": "Oscar's Frozen Custard",
+					"id": "oscarsfrozencustard-4d2ff4",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Oscar's Frozen Custard",
+						"brand:wikidata": "Q141112617",
+						"name": "Oscar's Frozen Custard",
+						"takeaway": "yes"
 					}
 				},
 				{
@@ -108150,6 +109238,24 @@
 					}
 				},
 				{
+					"displayName": "Spartan",
+					"id": "spartan-acb892",
+					"locationSet": {
+						"include": [
+							"es",
+							"ro"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Spartan",
+						"brand:wikidata": "Q25467338",
+						"cuisine": "greek",
+						"name": "Spartan",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Speedy Caf\u00e9",
 					"id": "speedycafe-4d2ff4",
 					"locationSet": {
@@ -108320,6 +109426,26 @@
 					}
 				},
 				{
+					"displayName": "Sunset Boulevard",
+					"id": "sunsetboulevard-070235",
+					"locationSet": {
+						"include": [
+							"de",
+							"dk",
+							"fo",
+							"gl"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Sunset Boulevard",
+						"brand:wikidata": "Q12337737",
+						"cuisine": "burger;sandwich",
+						"name": "Sunset Boulevard",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Super Chix",
 					"id": "superchix-4d2ff4",
 					"locationSet": {
@@ -108352,6 +109478,34 @@
 						"cuisine": "burger",
 						"name": "Supermac's",
 						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "Sushi Daily",
+					"id": "sushidaily-94e04a",
+					"locationSet": {
+						"include": [
+							"be",
+							"de",
+							"es",
+							"fi",
+							"fo",
+							"fr",
+							"gb",
+							"it",
+							"mx",
+							"nl",
+							"pt",
+							"se"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Sushi Daily",
+						"brand:wikidata": "Q124301611",
+						"cuisine": "sushi",
+						"name": "Sushi Daily",
+						"takeaway": "only"
 					}
 				},
 				{
@@ -108895,6 +110049,26 @@
 					}
 				},
 				{
+					"displayName": "Tapa King",
+					"id": "tapaking-33d36e",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"preserveTags": [
+						"^takeaway"
+					],
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "Tapa King",
+						"brand:wikidata": "Q141592887",
+						"cuisine": "filipino",
+						"name": "Tapa King",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Tashir Pizza",
 					"id": "tashirpizza-90e404",
 					"locationSet": {
@@ -108934,7 +110108,7 @@
 				},
 				{
 					"displayName": "Tasty Crousty",
-					"id": "tastycrousty-301a36",
+					"id": "tastycrousty-875366",
 					"locationSet": {
 						"include": [
 							"be",
@@ -108942,6 +110116,7 @@
 							"dz",
 							"fr",
 							"gb",
+							"lu",
 							"ma"
 						]
 					},
@@ -110782,10 +111957,11 @@
 				},
 				{
 					"displayName": "Zambrero",
-					"id": "zambrero-ee9f0e",
+					"id": "zambrero-7abe22",
 					"locationSet": {
 						"include": [
 							"au",
+							"gb",
 							"ie",
 							"nz",
 							"us"
@@ -112248,6 +113424,28 @@
 						"name": "\u0645\u0627\u0643\u062f\u0648\u0646\u0627\u0644\u062f\u0632",
 						"name:ar": "\u0645\u0627\u0643\u062f\u0648\u0646\u0627\u0644\u062f\u0632",
 						"name:en": "McDonald's",
+						"takeaway": "yes"
+					}
+				},
+				{
+					"displayName": "\u0645\u0627\u064a\u0633\u062a\u0631\u0648 \u0628\u064a\u062a\u0632",
+					"id": "maestropizza-a1e4d4",
+					"locationSet": {
+						"include": [
+							"ae",
+							"sa"
+						]
+					},
+					"tags": {
+						"amenity": "fast_food",
+						"brand": "\u0645\u0627\u064a\u0633\u062a\u0631\u0648 \u0628\u064a\u062a\u0632\u0627",
+						"brand:ar": "\u0645\u0627\u064a\u0633\u062a\u0631\u0648 \u0628\u064a\u062a\u0632\u0627",
+						"brand:en": "Maestro Pizza",
+						"brand:wikidata": "Q121133743",
+						"cuisine": "pizza",
+						"name": "\u0645\u0627\u064a\u0633\u062a\u0631\u0648 \u0628\u064a\u062a\u0632\u0627",
+						"name:ar": "\u0645\u0627\u064a\u0633\u062a\u0631\u0648 \u0628\u064a\u062a\u0632\u0627",
+						"name:en": "Maestro Pizza",
 						"takeaway": "yes"
 					}
 				},
@@ -115841,6 +117039,21 @@
 					}
 				},
 				{
+					"displayName": "AF Petroli",
+					"id": "afpetroli-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "AF Petroli",
+						"brand:wikidata": "Q141713787",
+						"name": "AF Petroli"
+					}
+				},
+				{
 					"displayName": "Afriquia",
 					"id": "afriquia-d0fa88",
 					"locationSet": {
@@ -115998,6 +117211,24 @@
 						"brand": "AL Prime Energy",
 						"brand:wikidata": "Q135268157",
 						"name": "AL Prime Energy"
+					}
+				},
+				{
+					"displayName": "Ala Carburanti",
+					"id": "alacarburanti-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"ala"
+					],
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Ala Carburanti",
+						"brand:wikidata": "Q132725815",
+						"name": "Ala Carburanti"
 					}
 				},
 				{
@@ -116907,6 +118138,21 @@
 					}
 				},
 				{
+					"displayName": "Benza",
+					"id": "benza-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Benza",
+						"brand:wikidata": "Q131781765",
+						"name": "Benza"
+					}
+				},
+				{
 					"displayName": "Benzina",
 					"id": "benzina-5f489f",
 					"locationSet": {
@@ -117792,6 +119038,21 @@
 					}
 				},
 				{
+					"displayName": "Cleanfuel",
+					"id": "cleanfuel-289efc",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Cleanfuel",
+						"brand:wikidata": "Q120717922",
+						"name": "Cleanfuel"
+					}
+				},
+				{
 					"displayName": "Co-op (Canada)",
 					"id": "coop-04874d",
 					"locationSet": {
@@ -117804,6 +119065,21 @@
 						"brand": "Federated Co-operatives",
 						"brand:wikidata": "Q5440676",
 						"name": "Co-op"
+					}
+				},
+				{
+					"displayName": "COIL",
+					"id": "coil-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "COIL",
+						"brand:wikidata": "Q141713792",
+						"name": "COIL"
 					}
 				},
 				{
@@ -118163,6 +119439,21 @@
 					}
 				},
 				{
+					"displayName": "DB Carburanti",
+					"id": "dbcarburanti-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "DB Carburanti",
+						"brand:wikidata": "Q141713809",
+						"name": "DB Carburanti"
+					}
+				},
+				{
 					"displayName": "Delek",
 					"id": "delek-bb4acb",
 					"locationSet": {
@@ -118276,11 +119567,28 @@
 					}
 				},
 				{
-					"displayName": "Disa",
-					"id": "disa-2e774c",
+					"displayName": "Dis-Car",
+					"id": "discar-e8f712",
 					"locationSet": {
 						"include": [
-							"ic"
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Dis-Car",
+						"brand:wikidata": "Q141713810",
+						"name": "Dis-Car"
+					}
+				},
+				{
+					"displayName": "Disa",
+					"id": "disa-f32b62",
+					"locationSet": {
+						"include": [
+							"es",
+							"ic",
+							"uy"
 						]
 					},
 					"tags": {
@@ -118484,6 +119792,7 @@
 					"tags": {
 						"amenity": "fuel",
 						"brand": "Ego",
+						"brand:wikidata": "Q141713817",
 						"name": "Ego"
 					}
 				},
@@ -118737,6 +120046,25 @@
 						"brand": "Energas",
 						"brand:wikidata": "Q124623439",
 						"name": "Energas"
+					}
+				},
+				{
+					"displayName": "Energia BC",
+					"id": "energiabc-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"bc",
+						"berica carburanti"
+					],
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Energia BC",
+						"brand:wikidata": "Q141713788",
+						"name": "Energia BC"
 					}
 				},
 				{
@@ -119212,6 +120540,21 @@
 						"brand": "Fieten Olie",
 						"brand:wikidata": "Q98837500",
 						"name": "Fieten Olie"
+					}
+				},
+				{
+					"displayName": "Filoil",
+					"id": "filoil-289efc",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Filoil",
+						"brand:wikidata": "Q141689508",
+						"name": "Filoil"
 					}
 				},
 				{
@@ -120330,6 +121673,24 @@
 					}
 				},
 				{
+					"displayName": "ICM Petroli",
+					"id": "icmpetroli-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"icm"
+					],
+					"tags": {
+						"amenity": "fuel",
+						"brand": "ICM Petroli",
+						"brand:wikidata": "Q125305330",
+						"name": "ICM Petroli"
+					}
+				},
+				{
 					"displayName": "IES",
 					"id": "ies-e8f712",
 					"locationSet": {
@@ -120607,6 +121968,39 @@
 						"brand": "Irving",
 						"brand:wikidata": "Q1673286",
 						"name": "Irving"
+					}
+				},
+				{
+					"displayName": "IS Simonetti",
+					"id": "issimonetti-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"simonetti petroli"
+					],
+					"tags": {
+						"amenity": "fuel",
+						"brand": "IS Simonetti",
+						"brand:wikidata": "Q141713799",
+						"name": "IS Simonetti"
+					}
+				},
+				{
+					"displayName": "Itala Petroli",
+					"id": "italapetroli-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Itala Petroli",
+						"brand:wikidata": "Q141713812",
+						"name": "Itala Petroli"
 					}
 				},
 				{
@@ -121867,6 +123261,24 @@
 					}
 				},
 				{
+					"displayName": "Nobile Oil Group",
+					"id": "nobileoilgroup-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"nobile oil"
+					],
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Nobile Oil Group",
+						"brand:wikidata": "Q141713796",
+						"name": "Nobile Oil Group"
+					}
+				},
+				{
 					"displayName": "Nordoel",
 					"id": "nordoel-495186",
 					"locationSet": {
@@ -121942,6 +123354,21 @@
 						"amenity": "fuel",
 						"brand": "Octa+",
 						"name": "Octa+"
+					}
+				},
+				{
+					"displayName": "Oil Italia",
+					"id": "oilitalia-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Oil Italia",
+						"brand:wikidata": "Q141713806",
+						"name": "Oil Italia"
 					}
 				},
 				{
@@ -122063,6 +123490,7 @@
 					"tags": {
 						"amenity": "fuel",
 						"brand": "OLA Energy",
+						"brand:wikidata": "Q126916526",
 						"name": "OLA Energy"
 					}
 				},
@@ -122564,6 +123992,21 @@
 					}
 				},
 				{
+					"displayName": "Petrol Company",
+					"id": "petrolcompany-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Petrol Company",
+						"brand:wikidata": "Q141713801",
+						"name": "Petrol Company"
+					}
+				},
+				{
 					"displayName": "Petrol Ofisi",
 					"id": "petrolofisi-b3d110",
 					"locationSet": {
@@ -122576,6 +124019,21 @@
 						"brand": "Petrol Ofisi",
 						"brand:wikidata": "Q1278087",
 						"name": "Petrol Ofisi"
+					}
+				},
+				{
+					"displayName": "Petrolgamma",
+					"id": "petrolgamma-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Petrolgamma",
+						"brand:wikidata": "Q141713791",
+						"name": "Petrolgamma"
 					}
 				},
 				{
@@ -122607,6 +124065,24 @@
 						"brand": "Petrolina",
 						"brand:wikidata": "Q17013948",
 						"name": "Petrolina"
+					}
+				},
+				{
+					"displayName": "Petrolmenga",
+					"id": "petrolmenga-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchNames": [
+						"menga petroli"
+					],
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Petrolmenga",
+						"brand:wikidata": "Q141713797",
+						"name": "Petrolmenga"
 					}
 				},
 				{
@@ -123725,6 +125201,21 @@
 					}
 				},
 				{
+					"displayName": "Sarni Oil",
+					"id": "sarnioil-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Sarni Oil",
+						"brand:wikidata": "Q141713802",
+						"name": "Sarni Oil"
+					}
+				},
+				{
 					"displayName": "Sasol",
 					"id": "sasol-0ba9a1",
 					"locationSet": {
@@ -123886,6 +125377,21 @@
 					}
 				},
 				{
+					"displayName": "Sia Fuel",
+					"id": "siafuel-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Sia Fuel",
+						"brand:wikidata": "Q141713786",
+						"name": "Sia Fuel"
+					}
+				},
+				{
 					"displayName": "SILKOIL",
 					"id": "silkoil-c67f2c",
 					"locationSet": {
@@ -124004,6 +125510,21 @@
 						"brand": "Slovnaft",
 						"brand:wikidata": "Q1587563",
 						"name": "Slovnaft"
+					}
+				},
+				{
+					"displayName": "Smaf",
+					"id": "smaf-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Smaf",
+						"brand:wikidata": "Q141713807",
+						"name": "Smaf"
 					}
 				},
 				{
@@ -124138,6 +125659,21 @@
 						"brand": "Solo Oil",
 						"brand:wikidata": "Q115517074",
 						"name": "Solo Oil"
+					}
+				},
+				{
+					"displayName": "Sommese Petroli",
+					"id": "sommesepetroli-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Sommese Petroli",
+						"brand:wikidata": "Q141713795",
+						"name": "Sommese Petroli"
 					}
 				},
 				{
@@ -124965,6 +126501,21 @@
 						"brand": "Tirex Petrol",
 						"brand:wikidata": "Q20432218",
 						"name": "Tirex Petrol"
+					}
+				},
+				{
+					"displayName": "Toil",
+					"id": "toil-e8f712",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"amenity": "fuel",
+						"brand": "Toil",
+						"brand:wikidata": "Q141713789",
+						"name": "Toil"
 					}
 				},
 				{
@@ -128159,6 +129710,23 @@
 		"brands/amenity/gambling": {
 			"items": [
 				{
+					"displayName": "BingoPlus",
+					"id": "bingoplus-e7e9a2",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"alt_name": "Bingo Plus",
+						"amenity": "gambling",
+						"brand": "BingoPlus",
+						"brand:wikidata": "Q138713220",
+						"gambling": "bingo",
+						"name": "BingoPlus"
+					}
+				},
+				{
 					"displayName": "Buzz Bingo",
 					"id": "buzzbingo-738ef2",
 					"locationSet": {
@@ -128701,6 +130269,23 @@
 					}
 				},
 				{
+					"displayName": "Dairy Queen (Philippines)",
+					"id": "dairyqueen-8d6331",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "ice_cream",
+						"brand": "Dairy Queen",
+						"brand:wikidata": "Q1141226",
+						"name": "Dairy Queen",
+						"short_name": "DQ",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "De IJswinckel",
 					"id": "deijswinckel-e6af0f",
 					"locationSet": {
@@ -128823,6 +130408,25 @@
 						"brand": "Gelato Borelli",
 						"brand:wikidata": "Q132745627",
 						"name": "Gelato Borelli"
+					}
+				},
+				{
+					"displayName": "Giovanni L.",
+					"id": "giovannil-ceaed0",
+					"locationSet": {
+						"include": [
+							"at",
+							"de",
+							"dk",
+							"es",
+							"sa"
+						]
+					},
+					"tags": {
+						"amenity": "ice_cream",
+						"brand": "Giovanni L.",
+						"brand:wikidata": "Q141609716",
+						"name": "Giovanni L."
 					}
 				},
 				{
@@ -129550,7 +131154,7 @@
 				},
 				{
 					"displayName": "sm\u00f6oy",
-					"id": "smooy-ae897d",
+					"id": "smooy-855c18",
 					"locationSet": {
 						"include": [
 							"ao",
@@ -129566,6 +131170,7 @@
 							"ma",
 							"pa",
 							"pe",
+							"ph",
 							"pt",
 							"sa"
 						]
@@ -131090,6 +132695,22 @@
 						"amenity": "kindergarten",
 						"brand": "Lebenshilfe",
 						"brand:wikidata": "Q20533"
+					}
+				},
+				{
+					"displayName": "Les bambins d'abord",
+					"id": "lesbambinsdabord-9b7dc9",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"amenity": "kindergarten",
+						"brand": "Les bambins d'abord",
+						"brand:wikidata": "Q130214605",
+						"name": "Les bambins d'abord"
 					}
 				},
 				{
@@ -132795,23 +134416,6 @@
 					}
 				},
 				{
-					"displayName": "Deutsche Post",
-					"id": "deutschepost-83cc4d",
-					"locationSet": {
-						"include": [
-							"de"
-						]
-					},
-					"matchNames": [
-						"deutsche post ag"
-					],
-					"tags": {
-						"amenity": "parcel_locker",
-						"brand": "Deutsche Post",
-						"brand:wikidata": "Q157645"
-					}
-				},
-				{
 					"displayName": "DExpress",
 					"id": "dexpress-a2bd5c",
 					"locationSet": {
@@ -132885,12 +134489,15 @@
 						]
 					},
 					"matchNames": [
+						"deutsche post packstation",
 						"packstation"
 					],
 					"tags": {
 						"amenity": "parcel_locker",
 						"brand": "DHL Packstation",
-						"brand:wikidata": "Q1766703"
+						"brand:wikidata": "Q1766703",
+						"operator": "DHL",
+						"operator:wikidata": "Q489815"
 					}
 				},
 				{
@@ -132901,11 +134508,16 @@
 							"de"
 						]
 					},
+					"matchNames": [
+						"deutsche post paketbox",
+						"paketbox"
+					],
 					"tags": {
 						"amenity": "parcel_locker",
-						"brand": "Paketbox",
+						"brand": "DHL Paketbox",
 						"brand:wikidata": "Q2046604",
-						"name": "DHL Paketbox"
+						"operator": "DHL",
+						"operator:wikidata": "Q489815"
 					}
 				},
 				{
@@ -132917,12 +134529,15 @@
 						]
 					},
 					"matchNames": [
+						"deutsche post poststation",
 						"poststation"
 					],
 					"tags": {
 						"amenity": "parcel_locker",
 						"brand": "DHL Poststation",
-						"brand:wikidata": "Q123120984"
+						"brand:wikidata": "Q123120984",
+						"operator": "DHL",
+						"operator:wikidata": "Q489815"
 					}
 				},
 				{
@@ -133354,6 +134969,20 @@
 					}
 				},
 				{
+					"displayName": "Kargopark",
+					"id": "kargopark-391183",
+					"locationSet": {
+						"include": [
+							"tr"
+						]
+					},
+					"tags": {
+						"amenity": "parcel_locker",
+						"brand": "Kargopark",
+						"brand:wikidata": "Q141618371"
+					}
+				},
+				{
 					"displayName": "Latvijas Pasts",
 					"id": "latvijaspasts-e45cee",
 					"locationSet": {
@@ -133644,6 +135273,22 @@
 						"brand:wikidata": "Q137765791",
 						"operator": "Overseas Express",
 						"operator:wikidata": "Q115972775"
+					}
+				},
+				{
+					"displayName": "OX Point",
+					"id": "oxpoint-48c9bb",
+					"locationSet": {
+						"include": [
+							"cz"
+						]
+					},
+					"tags": {
+						"amenity": "parcel_locker",
+						"brand": "OX Point",
+						"brand:wikidata": "Q116894862",
+						"operator": "OX Point",
+						"operator:wikidata": "Q116894862"
 					}
 				},
 				{
@@ -133973,6 +135618,34 @@
 					}
 				},
 				{
+					"displayName": "Ptt Kargomat",
+					"id": "pttkargomat-391183",
+					"locationSet": {
+						"include": [
+							"tr"
+						]
+					},
+					"tags": {
+						"amenity": "parcel_locker",
+						"brand": "Ptt Kargomat",
+						"brand:wikidata": "Q141618126"
+					}
+				},
+				{
+					"displayName": "PUDO T\u00fcrkiye",
+					"id": "pudo-391183",
+					"locationSet": {
+						"include": [
+							"tr"
+						]
+					},
+					"tags": {
+						"amenity": "parcel_locker",
+						"brand": "PUDO",
+						"brand:wikidata": "Q131450632"
+					}
+				},
+				{
 					"displayName": "PUDO\u30b9\u30c6\u30fc\u30b7\u30e7\u30f3",
 					"id": "pudostation-5c1de3",
 					"locationSet": {
@@ -134146,6 +135819,23 @@
 					}
 				},
 				{
+					"displayName": "Trendyol Kargo Otomat\u0131",
+					"id": "trendyolkargootomati-391183",
+					"locationSet": {
+						"include": [
+							"tr"
+						]
+					},
+					"matchNames": [
+						"trendyol gel al"
+					],
+					"tags": {
+						"amenity": "parcel_locker",
+						"brand": "Trendyol Kargo Otomat\u0131",
+						"brand:wikidata": "Q141618322"
+					}
+				},
+				{
 					"displayName": "Venipak",
 					"id": "venipak-b4a3f3",
 					"locationSet": {
@@ -134192,6 +135882,23 @@
 						"brand": "Yeep",
 						"brand:wikidata": "Q123421114",
 						"name": "Yeep"
+					}
+				},
+				{
+					"displayName": "YK Plus",
+					"id": "ykplus-391183",
+					"locationSet": {
+						"include": [
+							"tr"
+						]
+					},
+					"matchNames": [
+						"yurti\u00e7i kargo plus"
+					],
+					"tags": {
+						"amenity": "parcel_locker",
+						"brand": "YK Plus",
+						"brand:wikidata": "Q141619256"
 					}
 				},
 				{
@@ -134987,6 +136694,21 @@
 						"brand": "Rapipago",
 						"brand:wikidata": "Q6100413",
 						"name": "Rapipago"
+					}
+				},
+				{
+					"displayName": "Redpagos",
+					"id": "redpagos-80cf76",
+					"locationSet": {
+						"include": [
+							"uy"
+						]
+					},
+					"tags": {
+						"amenity": "payment_centre",
+						"brand": "Redpagos",
+						"brand:wikidata": "Q16624623",
+						"name": "Redpagos"
 					}
 				},
 				{
@@ -138423,6 +140145,27 @@
 						"brand:wikidata": "Q5856092",
 						"healthcare": "pharmacy",
 						"name": "Farmatodo"
+					}
+				},
+				{
+					"displayName": "Fascino",
+					"id": "fascino-f98a60",
+					"locationSet": {
+						"include": [
+							"th"
+						]
+					},
+					"tags": {
+						"amenity": "pharmacy",
+						"brand": "Fascino",
+						"brand:en": "Fascino",
+						"brand:th": "\u0e1f\u0e32\u0e2a\u0e0b\u0e34\u0e42\u0e19",
+						"brand:wikidata": "Q140999529",
+						"dispensing": "yes",
+						"healthcare": "pharmacy",
+						"name": "Fascino",
+						"name:en": "Fascino",
+						"name:th": "\u0e1f\u0e32\u0e2a\u0e0b\u0e34\u0e42\u0e19"
 					}
 				},
 				{
@@ -144822,6 +146565,24 @@
 					}
 				},
 				{
+					"displayName": "Australia Post",
+					"id": "australiapost-f90efe",
+					"locationSet": {
+						"include": [
+							"au"
+						]
+					},
+					"matchNames": [
+						"aus post",
+						"aust post"
+					],
+					"tags": {
+						"amenity": "post_office",
+						"brand": "Australia Post",
+						"brand:wikidata": "Q1142936"
+					}
+				},
+				{
 					"displayName": "Best Express",
 					"id": "bestexpress-4c54ab",
 					"locationSet": {
@@ -147442,10 +149203,10 @@
 				},
 				{
 					"displayName": "Young's",
-					"id": "youngs-72d0dd",
+					"id": "youngs-eaed91",
 					"locationSet": {
 						"include": [
-							"gb-eng"
+							"gb"
 						]
 					},
 					"tags": {
@@ -149293,6 +151054,22 @@
 					}
 				},
 				{
+					"displayName": "Bacolod Chicken Inasal",
+					"id": "bacolodchickeninasal-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Bacolod Chicken Inasal",
+						"brand:wikidata": "Q4839906",
+						"cuisine": "filipino;chicken",
+						"name": "Bacolod Chicken Inasal"
+					}
+				},
+				{
 					"displayName": "Bag O' Crab",
 					"id": "bagocrab-85c92c",
 					"locationSet": {
@@ -150139,6 +151916,23 @@
 					}
 				},
 				{
+					"displayName": "Bone's",
+					"id": "bones-f3703e",
+					"locationSet": {
+						"include": [
+							"dk",
+							"gl"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Bone's",
+						"brand:wikidata": "Q9661352",
+						"cuisine": "steak_house",
+						"name": "Bone's"
+					}
+				},
+				{
 					"displayName": "Bonefish Grill",
 					"id": "bonefishgrill-96af40",
 					"locationSet": {
@@ -150185,6 +151979,24 @@
 						"brand:wikidata": "Q894578",
 						"cuisine": "pizza",
 						"name": "Boston Pizza"
+					}
+				},
+				{
+					"displayName": "Botejyu",
+					"id": "botejyu-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Botejyu",
+						"brand:ja": "\u307c\u3066\u3062\u3085\u3046",
+						"brand:wikidata": "Q11278035",
+						"cuisine": "japanese",
+						"name": "Botejyu",
+						"name:ja": "\u307c\u3066\u3062\u3085\u3046"
 					}
 				},
 				{
@@ -150503,6 +152315,22 @@
 					}
 				},
 				{
+					"displayName": "Cabalen",
+					"id": "cabalen-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Cabalen",
+						"brand:wikidata": "Q48771218",
+						"cuisine": "filipino;buffet",
+						"name": "Cabalen"
+					}
+				},
+				{
 					"displayName": "Cactus Club Cafe",
 					"id": "cactusclubcafe-e68b16",
 					"locationSet": {
@@ -150550,6 +152378,26 @@
 						"brand:wikidata": "Q17310688",
 						"cuisine": "international",
 						"name": "Cafe Del Sol"
+					}
+				},
+				{
+					"displayName": "Cafe Mary Grace",
+					"id": "cafemarygrace-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"matchNames": [
+						"mary grace cafe"
+					],
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Mary Grace",
+						"brand:wikidata": "Q123196663",
+						"cuisine": "pastry;sandwich",
+						"name": "Cafe Mary Grace",
+						"takeaway": "yes"
 					}
 				},
 				{
@@ -151257,6 +153105,26 @@
 						"brand:wikidata": "Q25613087",
 						"cuisine": "pizza",
 						"name": "Col'Cacchio Pizzeria"
+					}
+				},
+				{
+					"displayName": "Comptoir Libanais",
+					"id": "comptoirlibanais-7e6646",
+					"locationSet": {
+						"include": [
+							"ae",
+							"gb",
+							"it",
+							"nl",
+							"qa"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Comptoir Libanais",
+						"brand:wikidata": "Q91025096",
+						"cuisine": "lebanese",
+						"name": "Comptoir Libanais"
 					}
 				},
 				{
@@ -152128,6 +153996,23 @@
 					}
 				},
 				{
+					"displayName": "El Pollo Loco",
+					"id": "elpolloloco-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "El Pollo Loco",
+						"brand:wikidata": "Q2353849",
+						"cuisine": "mexican",
+						"name": "El Pollo Loco",
+						"takeaway": "yes"
+					}
+				},
+				{
 					"displayName": "Elephant Bar",
 					"id": "elephantbar-96af40",
 					"locationSet": {
@@ -152627,9 +154512,10 @@
 				},
 				{
 					"displayName": "Genki Sushi",
-					"id": "genkisushi-96af40",
+					"id": "genkisushi-e9ec2e",
 					"locationSet": {
 						"include": [
+							"ph",
 							"us"
 						]
 					},
@@ -152639,6 +154525,40 @@
 						"brand:wikidata": "Q5533323",
 						"cuisine": "sushi",
 						"name": "Genki Sushi"
+					}
+				},
+				{
+					"displayName": "George Webb Restaurant",
+					"id": "georgewebbrestaurant-96af40",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "George Webb Restaurant",
+						"brand:wikidata": "Q5546110",
+						"cuisine": "american",
+						"name": "George Webb Restaurant"
+					}
+				},
+				{
+					"displayName": "Gerry's Restaurant & Bar",
+					"id": "gerrys-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"alt_name": "Gerry's Grill",
+						"amenity": "restaurant",
+						"brand": "Gerry's",
+						"brand:wikidata": "Q5552625",
+						"cuisine": "filipino",
+						"name": "Gerry's",
+						"official_name": "Gerry's Restaurant & Bar"
 					}
 				},
 				{
@@ -152794,6 +154714,25 @@
 						"brand:wikidata": "Q564256",
 						"cuisine": "pizza",
 						"name": "Grimaldi's Pizzeria"
+					}
+				},
+				{
+					"displayName": "Gringo",
+					"id": "gringo-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"preserveTags": [
+						"^name"
+					],
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Gringo",
+						"brand:wikidata": "Q133825859",
+						"cuisine": "latin_american;tex-mex",
+						"name": "Gringo"
 					}
 				},
 				{
@@ -153001,6 +154940,23 @@
 						"brand:wikidata": "Q22569868",
 						"cuisine": "burger",
 						"name": "Hans im Gl\u00fcck"
+					}
+				},
+				{
+					"displayName": "Hap Chan",
+					"id": "hapchan-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Hap Chan",
+						"brand:wikidata": "Q141596772",
+						"cuisine": "chinese",
+						"name": "Hap Chan",
+						"name:yue": "\u5408\u6808\u9152\u5bb6"
 					}
 				},
 				{
@@ -153628,10 +155584,11 @@
 				},
 				{
 					"displayName": "Italianni's",
-					"id": "italiannis-f5830e",
+					"id": "italiannis-694635",
 					"locationSet": {
 						"include": [
-							"mx"
+							"mx",
+							"ph"
 						]
 					},
 					"tags": {
@@ -154037,6 +155994,25 @@
 						"brand:wikidata": "Q6428706",
 						"cuisine": "sushi;cocktails",
 						"name": "Kona Grill"
+					}
+				},
+				{
+					"displayName": "Kuya J Restaurant",
+					"id": "kuyajrestaurant-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"matchNames": [
+						"kuya j"
+					],
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Kuya J Restaurant",
+						"brand:wikidata": "Q141598286",
+						"cuisine": "filipino",
+						"name": "Kuya J Restaurant"
 					}
 				},
 				{
@@ -154633,9 +156609,10 @@
 				},
 				{
 					"displayName": "LongHorn Steakhouse",
-					"id": "longhornsteakhouse-96af40",
+					"id": "longhornsteakhouse-e9ec2e",
 					"locationSet": {
 						"include": [
+							"ph",
 							"us"
 						]
 					},
@@ -155074,22 +157051,6 @@
 					}
 				},
 				{
-					"displayName": "Mary Grace",
-					"id": "marygrace-5259a4",
-					"locationSet": {
-						"include": [
-							"ph"
-						]
-					},
-					"tags": {
-						"amenity": "restaurant",
-						"brand": "Mary Grace",
-						"brand:wikidata": "Q123196663",
-						"cuisine": "pastry;sandwich",
-						"name": "Mary Grace"
-					}
-				},
-				{
 					"displayName": "Maryland Fried Chicken",
 					"id": "marylandfriedchicken-96af40",
 					"locationSet": {
@@ -155318,6 +157279,22 @@
 						"brand": "Mendocino Farms",
 						"brand:wikidata": "Q110671982",
 						"name": "Mendocino Farms"
+					}
+				},
+				{
+					"displayName": "Mesa",
+					"id": "mesa-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Mesa",
+						"brand:wikidata": "Q141554959",
+						"cuisine": "filipino",
+						"name": "Mesa"
 					}
 				},
 				{
@@ -155748,6 +157725,22 @@
 					}
 				},
 				{
+					"displayName": "MOTO Pizza",
+					"id": "motopizza-96af40",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "MOTO Pizza",
+						"brand:wikidata": "Q130335986",
+						"cuisine": "pizza",
+						"name": "MOTO Pizza"
+					}
+				},
+				{
 					"displayName": "Mountain Mike's",
 					"id": "mountainmikes-96af40",
 					"locationSet": {
@@ -155899,6 +157892,22 @@
 						"brand:wikidata": "Q3472954",
 						"cuisine": "chicken;portuguese",
 						"name": "Nando's"
+					}
+				},
+				{
+					"displayName": "Nanyang",
+					"id": "nanyang-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Nanyang",
+						"brand:wikidata": "Q141591931",
+						"cuisine": "singaporean",
+						"name": "Nanyang"
 					}
 				},
 				{
@@ -157450,6 +159459,22 @@
 						"brand:wikidata": "Q7339591",
 						"cuisine": "steak_house",
 						"name": "Roadhouse"
+					}
+				},
+				{
+					"displayName": "Rock N Roll Sushi",
+					"id": "rocknrollsushi-96af40",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "restaurant",
+						"brand": "Rock N Roll Sushi",
+						"brand:wikidata": "Q129166075",
+						"cuisine": "sushi",
+						"name": "Rock N Roll Sushi"
 					}
 				},
 				{
@@ -159921,6 +161946,27 @@
 					}
 				},
 				{
+					"displayName": "Yayoi",
+					"id": "yayoi-5259a4",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"alt_name": "Yayoi-ken",
+						"amenity": "restaurant",
+						"brand": "Yayoi",
+						"brand:en": "Yayoi",
+						"brand:ja": "\u3084\u3088\u3044\u8ed2",
+						"brand:wikidata": "Q11280577",
+						"cuisine": "japanese",
+						"name": "Yayoi",
+						"name:en": "Yayoi",
+						"name:ja": "\u3084\u3088\u3044\u8ed2"
+					}
+				},
+				{
 					"displayName": "YO! Sushi",
 					"id": "yosushi-9b5453",
 					"locationSet": {
@@ -160994,13 +163040,12 @@
 				},
 				{
 					"displayName": "\u3084\u3088\u3044\u8ed2",
-					"id": "yayoiken-73219d",
+					"id": "yayoiken-6d24fe",
 					"locationSet": {
 						"include": [
 							"au",
 							"jp",
 							"lb",
-							"ph",
 							"sg",
 							"th",
 							"tw",
@@ -164273,6 +166318,21 @@
 					}
 				},
 				{
+					"displayName": "Braeburn Schools",
+					"id": "braeburnschools-aee75b",
+					"locationSet": {
+						"include": [
+							"ke"
+						]
+					},
+					"tags": {
+						"amenity": "school",
+						"brand": "Braeburn Schools",
+						"brand:wikidata": "Q4955304",
+						"name": "Braeburn Schools"
+					}
+				},
+				{
 					"displayName": "Do\u011fa Koleji",
 					"id": "dogakoleji-8696da",
 					"locationSet": {
@@ -165358,6 +167418,23 @@
 					}
 				},
 				{
+					"displayName": "Fisher House",
+					"id": "fisherhouse-233ba4",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"amenity": "social_facility",
+						"brand": "Fisher House",
+						"brand:wikidata": "Q5454812",
+						"name": "Fisher House",
+						"social_facility": "shelter",
+						"social_facility:for": "family"
+					}
+				},
+				{
 					"displayName": "Hilfswerk",
 					"id": "hilfswerkosterreich-257965",
 					"locationSet": {
@@ -165565,6 +167642,26 @@
 						"brand:wikidata": "Q140315772",
 						"name": "Refood",
 						"social_facility": "food_bank"
+					}
+				},
+				{
+					"displayName": "Ronald McDonald House",
+					"id": "ronaldmcdonaldhouse-233ba4",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"preserveTags": [
+						"^name"
+					],
+					"tags": {
+						"amenity": "social_facility",
+						"brand": "Ronald McDonald House",
+						"brand:wikidata": "Q1915120",
+						"name": "Ronald McDonald House",
+						"social_facility": "shelter",
+						"social_facility:for": "family"
 					}
 				},
 				{
@@ -167565,6 +169662,21 @@
 						"brand:wikidata": "Q109371103",
 						"name": "Glacier Water",
 						"vending": "water"
+					}
+				},
+				{
+					"displayName": "go.Rheinland",
+					"id": "gorheinland-a242c5",
+					"locationSet": {
+						"include": [
+							"de"
+						]
+					},
+					"tags": {
+						"amenity": "vending_machine",
+						"brand": "go.Rheinland",
+						"brand:wikidata": "Q231849",
+						"vending": "public_transport_tickets"
 					}
 				},
 				{
@@ -169788,6 +171900,21 @@
 					}
 				},
 				{
+					"displayName": "Village Vet",
+					"id": "villagevet-c1da42",
+					"locationSet": {
+						"include": [
+							"gb-eng"
+						]
+					},
+					"tags": {
+						"amenity": "veterinary",
+						"brand": "Village Vet",
+						"brand:wikidata": "Q24434148",
+						"name": "Village Vet"
+					}
+				},
+				{
 					"displayName": "WellHaven Pet Health",
 					"id": "wellhavenpethealth-146b24",
 					"locationSet": {
@@ -170821,6 +172948,23 @@
 						"craft": "electronics_repair",
 						"electronics_repair": "computer;phone",
 						"name": "iSmash"
+					}
+				},
+				{
+					"displayName": "Mobile Care",
+					"id": "mobilecare-517ffb",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Mobile Care",
+						"brand:wikidata": "Q141603705",
+						"craft": "electronics_repair",
+						"electronics_repair": "computer;phone",
+						"name": "Mobile Care",
+						"official_name": "Mobile Care by Power Mac Center"
 					}
 				},
 				{
@@ -174862,6 +177006,22 @@
 		"brands/leisure/amusement_arcade": {
 			"items": [
 				{
+					"displayName": "EVA",
+					"id": "eva-dd2442",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"brand": "EVA",
+						"brand:wikidata": "Q138313401",
+						"leisure": "amusement_arcade",
+						"name": "EVA",
+						"virtual_reality": "yes"
+					}
+				},
+				{
 					"displayName": "Four Quarters",
 					"id": "fourquarters-0f0c9e",
 					"locationSet": {
@@ -175015,6 +177175,25 @@
 						"brand": "Warpoint",
 						"leisure": "amusement_arcade",
 						"name": "Warpoint"
+					}
+				},
+				{
+					"displayName": "Zero Latency VR",
+					"id": "zerolatencyvr-dd2442",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"matchNames": [
+						"zero latency"
+					],
+					"tags": {
+						"brand": "Zero Latency VR",
+						"brand:wikidata": "Q25339779",
+						"leisure": "amusement_arcade",
+						"name": "Zero Latency VR",
+						"virtual_reality": "yes"
 					}
 				},
 				{
@@ -175691,10 +177870,11 @@
 				},
 				{
 					"displayName": "Basic-Fit",
-					"id": "basicfit-4741dc",
+					"id": "basicfit-b660ad",
 					"locationSet": {
 						"include": [
 							"be",
+							"de",
 							"es",
 							"fr",
 							"lu",
@@ -176143,6 +178323,21 @@
 					}
 				},
 				{
+					"displayName": "EasyFit",
+					"id": "easyfit-a9beea",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"brand": "EasyFit",
+						"brand:wikidata": "Q141740469",
+						"leisure": "fitness_centre",
+						"name": "EasyFit"
+					}
+				},
+				{
 					"displayName": "EasyFitness",
 					"id": "easyfitness-d6de51",
 					"locationSet": {
@@ -176173,6 +178368,21 @@
 						"brand:wikidata": "Q123073582",
 						"leisure": "fitness_centre",
 						"name": "\u00c9conofitness"
+					}
+				},
+				{
+					"displayName": "Elixia",
+					"id": "elixia-a9beea",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"brand": "Elixia",
+						"brand:wikidata": "Q5362025",
+						"leisure": "fitness_centre",
+						"name": "Elixia"
 					}
 				},
 				{
@@ -176549,6 +178759,21 @@
 					}
 				},
 				{
+					"displayName": "Forever",
+					"id": "forever-a9beea",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"brand": "Forever",
+						"brand:wikidata": "Q141740471",
+						"leisure": "fitness_centre",
+						"name": "Forever"
+					}
+				},
+				{
 					"displayName": "Form Factory",
 					"id": "formfactory-557990",
 					"locationSet": {
@@ -176583,6 +178808,21 @@
 						"brand:wikidata": "Q110300356",
 						"leisure": "fitness_centre",
 						"name": "Frame"
+					}
+				},
+				{
+					"displayName": "Fressi",
+					"id": "fressi-a9beea",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"brand": "Fressi",
+						"brand:wikidata": "Q141606237",
+						"leisure": "fitness_centre",
+						"name": "Fressi"
 					}
 				},
 				{
@@ -176633,6 +178873,21 @@
 						"brand:wikidata": "Q122949631",
 						"leisure": "fitness_centre",
 						"name": "Genesis Health and Fitness"
+					}
+				},
+				{
+					"displayName": "GOGO Liikuntakeskus",
+					"id": "gogoliikuntakeskus-a9beea",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"brand": "GOGO Liikuntakeskus",
+						"brand:wikidata": "Q141740472",
+						"leisure": "fitness_centre",
+						"name": "GOGO Liikuntakeskus"
 					}
 				},
 				{
@@ -176985,6 +179240,21 @@
 						"brand": "Lady Stretch",
 						"leisure": "fitness_centre",
 						"name": "Lady Stretch"
+					}
+				},
+				{
+					"displayName": "LadyLine",
+					"id": "ladyline-a9beea",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"brand": "LadyLine",
+						"brand:wikidata": "Q141740470",
+						"leisure": "fitness_centre",
+						"name": "LadyLine"
 					}
 				},
 				{
@@ -178870,6 +181140,24 @@
 					}
 				},
 				{
+					"displayName": "Arkose",
+					"id": "arkose-937511",
+					"locationSet": {
+						"include": [
+							"be",
+							"es",
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Arkose",
+						"brand:wikidata": "Q124329187",
+						"leisure": "sports_centre",
+						"name": "Arkose",
+						"sport": "climbing"
+					}
+				},
+				{
 					"displayName": "Associa\u00e7\u00e3o Atl\u00e9tica Banco do Brasil",
 					"id": "associacaoatleticabancodobrasil-d2fb77",
 					"locationSet": {
@@ -179369,6 +181657,26 @@
 						"leisure": "sports_centre",
 						"name": "United Taekwondo Center",
 						"sport": "taekwondo"
+					}
+				},
+				{
+					"displayName": "UrbanSoccer",
+					"id": "urbansoccer-a90c81",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"matchTags": [
+						"leisure/pitch"
+					],
+					"tags": {
+						"brand": "UrbanSoccer",
+						"brand:wikidata": "Q56318206",
+						"leisure": "sports_centre",
+						"name": "UrbanSoccer",
+						"sport": "five-a-side"
 					}
 				},
 				{
@@ -179877,9 +182185,7 @@
 					"tags": {
 						"brand": "bike-energy",
 						"brand:wikidata": "Q67770877",
-						"man_made": "charge_point",
-						"operator": "bike-energy",
-						"operator:wikidata": "Q67770877"
+						"man_made": "charge_point"
 					}
 				},
 				{
@@ -181992,6 +184298,25 @@
 					}
 				},
 				{
+					"displayName": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0445\u0430\u0431",
+					"fromTemplate": true,
+					"id": "electrohab-97aa16",
+					"locationSet": {
+						"include": [
+							"ru"
+						]
+					},
+					"tags": {
+						"brand": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0445\u0430\u0431",
+						"brand:en": "Electrohab",
+						"brand:ru": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0445\u0430\u0431",
+						"brand:wikidata": "Q140627893",
+						"man_made": "charge_point",
+						"operator": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0445\u0430\u0431",
+						"operator:wikidata": "Q140627893"
+					}
+				},
+				{
 					"displayName": "\u042d\u043d\u0435\u0440\u0433\u0438\u044f \u041c\u043e\u0441\u043a\u0432\u044b",
 					"fromTemplate": true,
 					"id": "energyofmoscow-97aa16",
@@ -182646,6 +184971,9 @@
 							"ru"
 						]
 					},
+					"matchNames": [
+						"2gis"
+					],
 					"tags": {
 						"brand": "2\u0413\u0418\u0421",
 						"brand:wikidata": "Q4030613",
@@ -184038,6 +186366,25 @@
 						"brand": "Randstad",
 						"brand:wikidata": "Q267840",
 						"name": "Randstad",
+						"office": "employment_agency"
+					}
+				},
+				{
+					"displayName": "Servicio P\u00fablico de Empleo Estatal",
+					"id": "serviciopublicodeempleoestatal-83244c",
+					"locationSet": {
+						"include": [
+							"es"
+						]
+					},
+					"matchNames": [
+						"servicio p\u00fablico de empleo estatal (sepe)"
+					],
+					"tags": {
+						"brand": "Servicio P\u00fablico de Empleo Estatal",
+						"brand:short": "SEPE",
+						"brand:wikidata": "Q2939495",
+						"name": "Servicio P\u00fablico de Empleo Estatal",
 						"office": "employment_agency"
 					}
 				},
@@ -187094,6 +189441,21 @@
 					}
 				},
 				{
+					"displayName": "Caprock",
+					"id": "caprock-f55434",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "Caprock",
+						"brand:wikidata": "Q141189141",
+						"name": "Caprock",
+						"office": "financial_advisor"
+					}
+				},
+				{
 					"displayName": "Charles Schwab",
 					"id": "charlesschwab-f55434",
 					"locationSet": {
@@ -188509,6 +190871,21 @@
 						"brand": "Aflac",
 						"brand:wikidata": "Q26311",
 						"name": "Aflac",
+						"office": "insurance"
+					}
+				},
+				{
+					"displayName": "Alfa Insurance",
+					"id": "alfainsurance-6b1e37",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "Alfa Insurance",
+						"brand:wikidata": "Q4033696",
+						"name": "Alfa Insurance",
 						"office": "insurance"
 					}
 				},
@@ -198120,6 +200497,21 @@
 					}
 				},
 				{
+					"displayName": "Skousen",
+					"id": "skousen-808a7e",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"brand": "Skousen",
+						"brand:wikidata": "Q12335777",
+						"name": "Skousen",
+						"shop": "appliance"
+					}
+				},
+				{
 					"displayName": "Tien21",
 					"id": "tien21-5228b9",
 					"locationSet": {
@@ -198901,6 +201293,21 @@
 					}
 				},
 				{
+					"displayName": "Doughnut",
+					"id": "doughnut-1f38be",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Doughnut",
+						"brand:wikidata": "Q141602290",
+						"name": "Doughnut",
+						"shop": "bag"
+					}
+				},
+				{
 					"displayName": "Frasers",
 					"id": "frasers-3fbcc0",
 					"locationSet": {
@@ -199623,6 +202030,22 @@
 					}
 				},
 				{
+					"displayName": "Bakery Bakery",
+					"id": "bakerybakery-903073",
+					"locationSet": {
+						"include": [
+							"ch"
+						]
+					},
+					"tags": {
+						"brand": "Bakery Bakery",
+						"brand:wikidata": "Q141447459",
+						"diet:vegan": "only",
+						"name": "Bakery Bakery",
+						"shop": "bakery"
+					}
+				},
+				{
 					"displayName": "Bakker Bart",
 					"id": "bakkerbart-8ba7df",
 					"locationSet": {
@@ -199890,9 +202313,10 @@
 				},
 				{
 					"displayName": "BreadTalk",
-					"id": "breadtalk-96a6b3",
+					"id": "breadtalk-517267",
 					"locationSet": {
 						"include": [
+							"ph",
 							"sg"
 						]
 					},
@@ -204077,6 +206501,21 @@
 					}
 				},
 				{
+					"displayName": "Facq",
+					"id": "facq-caedbb",
+					"locationSet": {
+						"include": [
+							"be"
+						]
+					},
+					"tags": {
+						"brand": "Facq",
+						"brand:wikidata": "Q141496238",
+						"name": "Facq",
+						"shop": "bathroom_furnishing"
+					}
+				},
+				{
 					"displayName": "Frank Webb Home",
 					"id": "frankwebbhome-f64940",
 					"locationSet": {
@@ -204737,6 +207176,21 @@
 						"brand": "Indigo Sun",
 						"brand:wikidata": "Q63436906",
 						"name": "Indigo Sun",
+						"shop": "beauty"
+					}
+				},
+				{
+					"displayName": "L'Atelier du Sourcil",
+					"id": "latelierdusourcil-e85977",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "L'Atelier du Sourcil",
+						"brand:wikidata": "Q128618614",
+						"name": "L'Atelier du Sourcil",
 						"shop": "beauty"
 					}
 				},
@@ -205794,6 +208248,22 @@
 						"brand": "Le Roi du Matelas",
 						"brand:wikidata": "Q122931917",
 						"name": "Le Roi du Matelas",
+						"shop": "bed"
+					}
+				},
+				{
+					"displayName": "Litrimarch\u00e9",
+					"id": "litrimarche-1bbb34",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Litrimarch\u00e9",
+						"brand:wikidata": "Q127446387",
+						"name": "Litrimarch\u00e9",
 						"shop": "bed"
 					}
 				},
@@ -207324,6 +209794,22 @@
 					}
 				},
 				{
+					"displayName": "Veloland",
+					"id": "veloland-64ac44",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Veloland",
+						"brand:wikidata": "Q141566882",
+						"name": "Veloland",
+						"shop": "bicycle"
+					}
+				},
+				{
 					"displayName": "Wim",
 					"id": "wim-ae2479",
 					"locationSet": {
@@ -208445,6 +210931,22 @@
 					}
 				},
 				{
+					"displayName": "Booksale",
+					"id": "booksale-08d1a3",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Booksale",
+						"brand:wikidata": "Q138702232",
+						"name": "Booksale",
+						"second_hand": "yes",
+						"shop": "books"
+					}
+				},
+				{
 					"displayName": "Booktrading",
 					"id": "booktrading-eec251",
 					"locationSet": {
@@ -208836,6 +211338,21 @@
 						"brand": "France Loisirs",
 						"brand:wikidata": "Q3080726",
 						"name": "France Loisirs",
+						"shop": "books"
+					}
+				},
+				{
+					"displayName": "Fully Booked",
+					"id": "fullybooked-08d1a3",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Fully Booked",
+						"brand:wikidata": "Q131348459",
+						"name": "Fully Booked",
 						"shop": "books"
 					}
 				},
@@ -209536,14 +212053,18 @@
 				},
 				{
 					"displayName": "ReadShop",
-					"id": "readshop-ef41f6",
+					"id": "readshop-1267b5",
 					"locationSet": {
 						"include": [
-							"001"
+							"nl"
 						]
 					},
+					"matchNames": [
+						"the readshop"
+					],
 					"tags": {
 						"brand": "ReadShop",
+						"brand:wikidata": "Q114905224",
 						"name": "ReadShop",
 						"shop": "books"
 					}
@@ -209688,21 +212209,6 @@
 						"brand": "Thalia",
 						"brand:wikidata": "Q2408854",
 						"name": "Thalia",
-						"shop": "books"
-					}
-				},
-				{
-					"displayName": "The Readshop",
-					"id": "thereadshop-1267b5",
-					"locationSet": {
-						"include": [
-							"nl"
-						]
-					},
-					"tags": {
-						"brand": "The Readshop",
-						"brand:wikidata": "Q114905224",
-						"name": "The Readshop",
 						"shop": "books"
 					}
 				},
@@ -215055,6 +217561,21 @@
 					}
 				},
 				{
+					"displayName": "Fixus",
+					"id": "fixus-1abfb0",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"brand": "Fixus",
+						"brand:wikidata": "Q127515000",
+						"name": "Fixus",
+						"shop": "car_parts"
+					}
+				},
+				{
 					"displayName": "FleetPride",
 					"id": "fleetpride-bb9baa",
 					"locationSet": {
@@ -216393,6 +218914,21 @@
 					}
 				},
 				{
+					"displayName": "Doctor Glass",
+					"id": "doctorglass-af6229",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"tags": {
+						"brand": "Doctor Glass",
+						"brand:wikidata": "Q126961196",
+						"name": "Doctor Glass",
+						"shop": "car_repair"
+					}
+				},
+				{
 					"displayName": "DS Automobiles",
 					"id": "dsautomobiles-dc8719",
 					"locationSet": {
@@ -216542,6 +219078,21 @@
 						"brand": "Fit Service",
 						"brand:wikidata": "Q129632037",
 						"name": "Fit Service",
+						"shop": "car_repair"
+					}
+				},
+				{
+					"displayName": "Fixus",
+					"id": "fixus-c03199",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"brand": "Fixus",
+						"brand:wikidata": "Q127515000",
+						"name": "Fixus",
 						"shop": "car_repair"
 					}
 				},
@@ -217991,6 +220542,21 @@
 						"brand:wikidata": "Q23816518",
 						"name": "Wintec Autoglas",
 						"service:vehicle:glass": "yes",
+						"shop": "car_repair"
+					}
+				},
+				{
+					"displayName": "Ziebart",
+					"id": "ziebart-878d90",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "Ziebart",
+						"brand:wikidata": "Q8071501",
+						"name": "Ziebart",
 						"shop": "car_repair"
 					}
 				},
@@ -222263,10 +224829,12 @@
 				},
 				{
 					"displayName": "Matas",
-					"id": "matas-9eec7a",
+					"id": "matas-6aa848",
 					"locationSet": {
 						"include": [
-							"dk"
+							"dk",
+							"fo",
+							"gl"
 						]
 					},
 					"tags": {
@@ -225181,6 +227749,37 @@
 					}
 				},
 				{
+					"displayName": "Bayard",
+					"id": "bayard-fed098",
+					"locationSet": {
+						"include": [
+							"ch"
+						]
+					},
+					"tags": {
+						"brand": "Bayard Co Ltd",
+						"brand:wikidata": "Q18018661",
+						"name": "Bayard",
+						"shop": "clothes"
+					}
+				},
+				{
+					"displayName": "Bayo",
+					"id": "bayo-08e127",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Bayo",
+						"brand:wikidata": "Q141598269",
+						"clothes": "women",
+						"name": "Bayo",
+						"shop": "clothes"
+					}
+				},
+				{
 					"displayName": "Beams",
 					"id": "beams-3dc647",
 					"locationSet": {
@@ -225706,6 +228305,22 @@
 						"brand": "Boboli",
 						"brand:wikidata": "Q39073733",
 						"name": "Boboli",
+						"shop": "clothes"
+					}
+				},
+				{
+					"displayName": "BOCU",
+					"id": "bocu-08e127",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "BOCU",
+						"brand:wikidata": "Q141673670",
+						"name": "BOCU",
+						"official_name": "BOCU Lifestyle",
 						"shop": "clothes"
 					}
 				},
@@ -226394,12 +229009,11 @@
 				},
 				{
 					"displayName": "Cache Cache",
-					"id": "cachecache-ecfb3e",
+					"id": "cachecache-9976d6",
 					"locationSet": {
 						"include": [
-							"fr",
-							"it",
-							"lu"
+							"es",
+							"fr"
 						]
 					},
 					"tags": {
@@ -228214,6 +230828,24 @@
 					}
 				},
 				{
+					"displayName": "Ding Fring",
+					"id": "dingfring-4a3e29",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Ding Fring",
+						"brand:wikidata": "Q141502105",
+						"name": "Ding Fring",
+						"operator": "Le Relais",
+						"operator:wikidata": "Q16654240",
+						"second_hand": "only",
+						"shop": "clothes"
+					}
+				},
+				{
 					"displayName": "Dior",
 					"id": "dior-3937bd",
 					"locationSet": {
@@ -229140,10 +231772,11 @@
 				},
 				{
 					"displayName": "Ever New",
-					"id": "evernew-9e1367",
+					"id": "evernew-66fda4",
 					"locationSet": {
 						"include": [
-							"ca"
+							"ca",
+							"ph"
 						]
 					},
 					"tags": {
@@ -230099,6 +232732,22 @@
 						"brand": "Gina Tricot",
 						"brand:wikidata": "Q1524904",
 						"name": "Gina Tricot",
+						"shop": "clothes"
+					}
+				},
+				{
+					"displayName": "Gingersnaps",
+					"id": "gingersnaps-08e127",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Gingersnaps",
+						"brand:wikidata": "Q12686970",
+						"clothes": "children",
+						"name": "Gingersnaps",
 						"shop": "clothes"
 					}
 				},
@@ -233373,6 +236022,21 @@
 					}
 				},
 				{
+					"displayName": "Maldita",
+					"id": "maldita-08e127",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Maldita",
+						"brand:wikidata": "Q141554486",
+						"name": "Maldita",
+						"shop": "clothes"
+					}
+				},
+				{
 					"displayName": "Malwee",
 					"id": "malwee-c7d1e1",
 					"locationSet": {
@@ -235236,6 +237900,22 @@
 					}
 				},
 				{
+					"displayName": "On\u00e9simus",
+					"id": "onesimus-08e127",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "On\u00e9simus",
+						"brand:wikidata": "Q141592852",
+						"clothes": "men;suits",
+						"name": "On\u00e9simus",
+						"shop": "clothes"
+					}
+				},
+				{
 					"displayName": "ONLY",
 					"id": "only-3937bd",
 					"locationSet": {
@@ -236624,6 +239304,38 @@
 					}
 				},
 				{
+					"displayName": "Rains",
+					"id": "rains-4e6380",
+					"locationSet": {
+						"include": [
+							"dk",
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Rains",
+						"brand:wikidata": "Q119440481",
+						"clothes": "men;women",
+						"name": "Rains",
+						"shop": "clothes"
+					}
+				},
+				{
+					"displayName": "Rally House",
+					"id": "rallyhouse-0a21d9",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "Rally House",
+						"brand:wikidata": "Q121086620",
+						"name": "Rally House",
+						"shop": "clothes"
+					}
+				},
+				{
 					"displayName": "Ramraj Cotton",
 					"id": "ramrajcotton-f8e8b1",
 					"locationSet": {
@@ -237814,6 +240526,23 @@
 					}
 				},
 				{
+					"displayName": "SKIMS",
+					"id": "skims-2751df",
+					"locationSet": {
+						"include": [
+							"gb",
+							"mx",
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "SKIMS",
+						"brand:wikidata": "Q110778161",
+						"name": "SKIMS",
+						"shop": "clothes"
+					}
+				},
+				{
 					"displayName": "Skipper Bar",
 					"id": "skipperbar-bd328b",
 					"locationSet": {
@@ -238627,6 +241356,24 @@
 					}
 				},
 				{
+					"displayName": "Tara Jarmon",
+					"id": "tarajarmon-d2a81f",
+					"locationSet": {
+						"include": [
+							"ch",
+							"fr",
+							"lu"
+						]
+					},
+					"tags": {
+						"brand": "Tara Jarmon",
+						"brand:wikidata": "Q141580805",
+						"clothes": "women",
+						"name": "Tara Jarmon",
+						"shop": "clothes"
+					}
+				},
+				{
 					"displayName": "Tarocash",
 					"id": "tarocash-392c8b",
 					"locationSet": {
@@ -238691,6 +241438,23 @@
 						"brand": "Tatuum",
 						"brand:wikidata": "Q28673883",
 						"name": "Tatuum",
+						"shop": "clothes"
+					}
+				},
+				{
+					"displayName": "Tayo",
+					"id": "tayo-08e127",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Tayo",
+						"brand:wikidata": "Q141688245",
+						"clothes": "women;men",
+						"name": "Tayo",
+						"official_name": "Tayo Studio",
 						"shop": "clothes"
 					}
 				},
@@ -239062,7 +241826,7 @@
 				},
 				{
 					"displayName": "T\u00f8jeksperten",
-					"id": "tojeskperten-7949a4",
+					"id": "tojeksperten-7949a4",
 					"locationSet": {
 						"include": [
 							"dk"
@@ -239072,7 +241836,7 @@
 						"brand": "T\u00f8jeksperten",
 						"brand:wikidata": "Q12339995",
 						"clothes": "men",
-						"name": "T\u00f8jeskperten",
+						"name": "T\u00f8jeksperten",
 						"shop": "clothes"
 					}
 				},
@@ -239652,8 +242416,13 @@
 				},
 				{
 					"displayName": "Uniqlo",
-					"id": "uniqlo-3937bd",
+					"id": "uniqlo-23e20e",
 					"locationSet": {
+						"exclude": [
+							"cn",
+							"jp",
+							"kr"
+						],
 						"include": [
 							"001"
 						]
@@ -240982,7 +243751,7 @@
 					],
 					"tags": {
 						"brand": "Zegna",
-						"brand:wikidata": "Q1355904",
+						"brand:wikidata": "Q138529259",
 						"clothes": "men",
 						"name": "Zegna",
 						"shop": "clothes"
@@ -242358,6 +245127,21 @@
 						"brand": "notebooksbilliger.de",
 						"brand:wikidata": "Q2001998",
 						"name": "notebooksbilliger.de",
+						"shop": "computer"
+					}
+				},
+				{
+					"displayName": "Octagon",
+					"id": "octagon-6648aa",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Octagon",
+						"brand:wikidata": "Q28405520",
+						"name": "Octagon",
 						"shop": "computer"
 					}
 				},
@@ -244130,6 +246914,22 @@
 						"brand": "Annabella",
 						"brand:wikidata": "Q127785313",
 						"name": "Annabella",
+						"shop": "convenience"
+					}
+				},
+				{
+					"displayName": "Api",
+					"id": "api-bf3eb4",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Api",
+						"brand:wikidata": "Q116193091",
+						"name": "Api",
+						"self_service": "only",
 						"shop": "convenience"
 					}
 				},
@@ -246514,6 +249314,26 @@
 					}
 				},
 				{
+					"displayName": "FiveStar",
+					"id": "fivestar-42bf18",
+					"locationSet": {
+						"include": [
+							"us-in.geojson",
+							"us-ky.geojson",
+							"us-tn.geojson"
+						]
+					},
+					"matchNames": [
+						"five star food mart"
+					],
+					"tags": {
+						"brand": "FiveStar",
+						"brand:wikidata": "Q127690151",
+						"name": "FiveStar",
+						"shop": "convenience"
+					}
+				},
+				{
 					"displayName": "Flop",
 					"id": "flop-a7773e",
 					"locationSet": {
@@ -246930,6 +249750,21 @@
 						"brand": "Go Local",
 						"brand:wikidata": "Q120634011",
 						"name": "Go Local",
+						"shop": "convenience"
+					}
+				},
+				{
+					"displayName": "Go Local Extra",
+					"id": "golocalextra-232829",
+					"locationSet": {
+						"include": [
+							"gb"
+						]
+					},
+					"tags": {
+						"brand": "Go Local Extra",
+						"brand:wikidata": "Q141622324",
+						"name": "Go Local Extra",
 						"shop": "convenience"
 					}
 				},
@@ -248023,6 +250858,24 @@
 					}
 				},
 				{
+					"displayName": "Let-K\u00f8b",
+					"id": "letkob-f9ced2",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"matchNames": [
+						"let-koeb"
+					],
+					"tags": {
+						"brand": "Let-K\u00f8b",
+						"brand:wikidata": "Q67086705",
+						"name": "Let-K\u00f8b",
+						"shop": "convenience"
+					}
+				},
+				{
 					"displayName": "Lewiatan",
 					"id": "lewiatan-95f41b",
 					"locationSet": {
@@ -248631,6 +251484,24 @@
 					}
 				},
 				{
+					"displayName": "Maxi Go",
+					"id": "maxigo-3015fb",
+					"locationSet": {
+						"include": [
+							"rs"
+						]
+					},
+					"matchNames": [
+						"shop&go"
+					],
+					"tags": {
+						"brand": "Maxi Go",
+						"brand:wikidata": "Q141665376",
+						"name": "Maxi Go",
+						"shop": "convenience"
+					}
+				},
+				{
 					"displayName": "Maxikiosco",
 					"id": "maxikiosco-478c1f",
 					"locationSet": {
@@ -248825,13 +251696,12 @@
 				},
 				{
 					"displayName": "Mini Mix",
-					"id": "minimix-ba18ab",
+					"id": "minimix-771921",
 					"locationSet": {
 						"include": [
 							"at",
 							"be",
 							"cy",
-							"cz",
 							"de",
 							"es",
 							"fx",
@@ -248971,6 +251841,25 @@
 						"name": "mini\u30d4\u30a2\u30b4",
 						"name:en": "mini Piago",
 						"name:ja": "mini\u30d4\u30a2\u30b4",
+						"shop": "convenience"
+					}
+				},
+				{
+					"displayName": "Mix Markt",
+					"id": "mixmarkt-65ae8a",
+					"locationSet": {
+						"include": [
+							"cz",
+							"sk"
+						]
+					},
+					"matchTags": [
+						"shop/supermarket"
+					],
+					"tags": {
+						"brand": "Mix Markt",
+						"brand:wikidata": "Q327854",
+						"name": "Mix Markt",
 						"shop": "convenience"
 					}
 				},
@@ -251557,9 +254446,12 @@
 						"tempo market potraviny",
 						"tempo tuty"
 					],
+					"preserveTags": [
+						"^name"
+					],
 					"tags": {
 						"brand": "Tempo",
-						"brand:wikidata": "Q52851660",
+						"brand:wikidata": "Q58527483",
 						"name": "Tempo",
 						"shop": "convenience"
 					}
@@ -256523,6 +259415,22 @@
 					}
 				},
 				{
+					"displayName": "Corep",
+					"id": "corep-dbbed6",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Corep",
+						"brand:wikidata": "Q73111125",
+						"name": "Corep",
+						"shop": "copyshop"
+					}
+				},
+				{
 					"displayName": "FaxCopy",
 					"id": "faxcopy-8c1a3b",
 					"locationSet": {
@@ -257944,10 +260852,11 @@
 				},
 				{
 					"displayName": "The Face Shop",
-					"id": "thefaceshop-b395fe",
+					"id": "thefaceshop-d2b122",
 					"locationSet": {
 						"include": [
-							"kr"
+							"kr",
+							"ph"
 						]
 					},
 					"tags": {
@@ -258598,6 +261507,21 @@
 					}
 				},
 				{
+					"displayName": "Land & Fritid",
+					"id": "landandfritid-20c6ff",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"brand": "Land & Fritid",
+						"brand:wikidata": "Q133225928",
+						"name": "Land & Fritid",
+						"shop": "country_store"
+					}
+				},
+				{
 					"displayName": "Landi",
 					"id": "landi-a9a167",
 					"locationSet": {
@@ -258771,6 +261695,21 @@
 						"brand": "A.C. Moore",
 						"brand:wikidata": "Q4647066",
 						"name": "A.C. Moore",
+						"shop": "craft"
+					}
+				},
+				{
+					"displayName": "Art Bar",
+					"id": "artbar-3fe037",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Art Bar",
+						"brand:wikidata": "Q141585986",
+						"name": "Art Bar",
 						"shop": "craft"
 					}
 				},
@@ -262527,6 +265466,22 @@
 					}
 				},
 				{
+					"displayName": "Bygma",
+					"id": "bygma-8242be",
+					"locationSet": {
+						"include": [
+							"dk",
+							"fo"
+						]
+					},
+					"tags": {
+						"brand": "Bygma",
+						"brand:wikidata": "Q12304724",
+						"name": "Bygma",
+						"shop": "doityourself"
+					}
+				},
+				{
 					"displayName": "Cashbuild",
 					"id": "cashbuild-c5a717",
 					"locationSet": {
@@ -262986,19 +265941,14 @@
 				},
 				{
 					"displayName": "Homebase",
-					"id": "homebase-0c42e1",
+					"id": "homebase-092aaf",
 					"locationSet": {
 						"include": [
-							"gb",
-							"ie"
+							"001"
 						]
 					},
-					"matchTags": [
-						"shop/furniture"
-					],
 					"tags": {
 						"brand": "Homebase",
-						"brand:wikidata": "Q9293447",
 						"name": "Homebase",
 						"shop": "doityourself"
 					}
@@ -263839,6 +266789,22 @@
 						"brand": "Sonderpreis Baumarkt",
 						"brand:wikidata": "Q102247917",
 						"name": "Sonderpreis Baumarkt",
+						"shop": "doityourself"
+					}
+				},
+				{
+					"displayName": "Stark",
+					"id": "stark-9848d0",
+					"locationSet": {
+						"include": [
+							"dk",
+							"gl"
+						]
+					},
+					"tags": {
+						"brand": "Stark",
+						"brand:wikidata": "Q16324560",
+						"name": "Stark",
 						"shop": "doityourself"
 					}
 				},
@@ -266566,10 +269532,11 @@
 				},
 				{
 					"displayName": "Elgiganten",
-					"id": "elgiganten-540210",
+					"id": "elgiganten-b7ba06",
 					"locationSet": {
 						"include": [
 							"dk",
+							"gl",
 							"se"
 						]
 					},
@@ -267018,6 +269985,21 @@
 						"brand": "Interdiscount",
 						"brand:wikidata": "Q1665980",
 						"name": "Interdiscount",
+						"shop": "electronics"
+					}
+				},
+				{
+					"displayName": "iStore",
+					"id": "istore-9584c3",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "iStore",
+						"brand:wikidata": "Q141585296",
+						"name": "iStore",
 						"shop": "electronics"
 					}
 				},
@@ -267581,10 +270563,11 @@
 				},
 				{
 					"displayName": "OSIM",
-					"id": "osim-3e8e54",
+					"id": "osim-2927b4",
 					"locationSet": {
 						"include": [
 							"my",
+							"ph",
 							"sg"
 						]
 					},
@@ -267707,6 +270690,21 @@
 						"brand": "Power Buy",
 						"brand:wikidata": "Q128759484",
 						"name": "Power Buy",
+						"shop": "electronics"
+					}
+				},
+				{
+					"displayName": "Power Mac Center",
+					"id": "powermaccenter-9584c3",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Power Mac Center",
+						"brand:wikidata": "Q141585532",
+						"name": "Power Mac Center",
 						"shop": "electronics"
 					}
 				},
@@ -269769,6 +272767,26 @@
 					}
 				},
 				{
+					"displayName": "CLN",
+					"id": "cln-5c3448",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"matchTags": [
+						"shop/cosmetics"
+					],
+					"tags": {
+						"brand": "CLN",
+						"brand:wikidata": "Q141591253",
+						"clothes": "no",
+						"name": "CLN",
+						"shoes": "women",
+						"shop": "fashion_accessories"
+					}
+				},
+				{
 					"displayName": "Dooney & Bourke",
 					"id": "dooneyandbourke-5ec70d",
 					"locationSet": {
@@ -271351,10 +274369,11 @@
 				},
 				{
 					"displayName": "Ashley HomeStore",
-					"id": "ashleyhomestore-a694b9",
+					"id": "ashleyhomestore-614cd0",
 					"locationSet": {
 						"include": [
 							"ca",
+							"ph",
 							"us"
 						]
 					},
@@ -271939,11 +274958,10 @@
 				},
 				{
 					"displayName": "Designer Sofas",
-					"id": "designersofas-94fffd",
+					"id": "designersofas-5a41a5",
 					"locationSet": {
 						"include": [
-							"gb",
-							"ie"
+							"gb"
 						]
 					},
 					"matchNames": [
@@ -273359,12 +276377,13 @@
 				},
 				{
 					"displayName": "Nitori",
-					"id": "nitori-a040a8",
+					"id": "nitori-03e0aa",
 					"locationSet": {
 						"include": [
 							"hk",
 							"mo",
 							"my",
+							"ph",
 							"sg",
 							"us"
 						]
@@ -275049,6 +278068,26 @@
 					}
 				},
 				{
+					"displayName": "Homebase",
+					"id": "gardencentrebyhomebase-6bdd6f",
+					"locationSet": {
+						"include": [
+							"gb",
+							"ie"
+						]
+					},
+					"matchTags": [
+						"shop/doityourself",
+						"shop/furniture"
+					],
+					"tags": {
+						"brand": "Garden Centre by Homebase",
+						"brand:wikidata": "Q9293447",
+						"name": "Garden Centre by Homebase",
+						"shop": "garden_centre"
+					}
+				},
+				{
 					"displayName": "Intratuin",
 					"id": "intratuin-c9b478",
 					"locationSet": {
@@ -275707,7 +278746,7 @@
 					"tags": {
 						"brand": "ALE-HOP",
 						"brand:wikidata": "Q98456840",
-						"name": "ALE-HOP",
+						"name": "Ale-Hop",
 						"shop": "gift"
 					}
 				},
@@ -275920,11 +278959,12 @@
 				},
 				{
 					"displayName": "Disney Store",
-					"id": "disneystore-81bf88",
+					"id": "disneystore-cfb1fd",
 					"locationSet": {
 						"include": [
 							"ca",
 							"fr",
+							"ph",
 							"us"
 						]
 					},
@@ -276069,6 +279109,21 @@
 					}
 				},
 				{
+					"displayName": "Kultura",
+					"id": "kultura-5322bd",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Kultura",
+						"brand:wikidata": "Q141555153",
+						"name": "Kultura",
+						"shop": "gift"
+					}
+				},
+				{
 					"displayName": "Menkind",
 					"id": "menkind-da52c2",
 					"locationSet": {
@@ -276150,6 +279205,26 @@
 						"brand": "Paper Kisses",
 						"brand:wikidata": "Q128803615",
 						"name": "Paper Kisses",
+						"shop": "gift"
+					}
+				},
+				{
+					"displayName": "Pylones",
+					"id": "pylones-5be7fe",
+					"locationSet": {
+						"include": [
+							"au",
+							"cz",
+							"de",
+							"fr",
+							"hu"
+						]
+					},
+					"tags": {
+						"brand": "Pylones",
+						"brand:wikidata": "Q24287146",
+						"name": "Pylones",
+						"second_hand": "yes",
 						"shop": "gift"
 					}
 				},
@@ -276369,6 +279444,22 @@
 		"brands/shop/gold_buyer": {
 			"items": [
 				{
+					"displayName": "Comptoir National de l'Or",
+					"id": "comptoirnationaldelor-357486",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Comptoir National de l'Or",
+						"brand:wikidata": "Q101444707",
+						"name": "Comptoir National de l'Or",
+						"shop": "gold_buyer"
+					}
+				},
+				{
 					"displayName": "Godot & Fils",
 					"id": "godotandfils-9fda9d",
 					"locationSet": {
@@ -276378,7 +279469,24 @@
 					},
 					"tags": {
 						"brand": "Godot & Fils",
+						"brand:wikidata": "Q134652093",
 						"name": "Godot & Fils",
+						"shop": "gold_buyer"
+					}
+				},
+				{
+					"displayName": "GoldUnion",
+					"id": "goldunion-9fda9d",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
+					"tags": {
+						"alt_name": "Gold Union",
+						"brand": "GoldUnion",
+						"brand:wikidata": "Q131622916",
+						"name": "GoldUnion",
 						"shop": "gold_buyer"
 					}
 				},
@@ -276519,6 +279627,21 @@
 						"brand": "MarketPlace Fresh",
 						"brand:wikidata": "Q117847717",
 						"name": "MarketPlace Fresh",
+						"shop": "greengrocer"
+					}
+				},
+				{
+					"displayName": "Potager City",
+					"id": "potagercity-b3c71a",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Potager City",
+						"brand:wikidata": "Q60964464",
+						"name": "Potager City",
 						"shop": "greengrocer"
 					}
 				},
@@ -277012,6 +280135,21 @@
 						"brand": "Cutters",
 						"brand:wikidata": "Q106940660",
 						"name": "Cutters",
+						"shop": "hairdresser"
+					}
+				},
+				{
+					"displayName": "David's Salon",
+					"id": "davidssalon-2b2fb2",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "David's Salon",
+						"brand:wikidata": "Q141554128",
+						"name": "David's Salon",
 						"shop": "hairdresser"
 					}
 				},
@@ -281012,7 +284150,7 @@
 					],
 					"tags": {
 						"brand": "Blokker",
-						"brand:wikidata": "Q33903645",
+						"brand:wikidata": "Q4495642",
 						"name": "Blokker",
 						"shop": "houseware"
 					}
@@ -284234,9 +287372,10 @@
 				},
 				{
 					"displayName": "Marc Orian",
-					"id": "marcorian-381def",
+					"id": "marcorian-1d7974",
 					"locationSet": {
 						"include": [
+							"be",
 							"fx",
 							"fr"
 						]
@@ -284311,6 +287450,21 @@
 						"brand": "Michael Hill",
 						"brand:wikidata": "Q3308250",
 						"name": "Michael Hill",
+						"shop": "jewelry"
+					}
+				},
+				{
+					"displayName": "Mikimoto",
+					"id": "mikimoto-a038d2",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"brand": "Mikimoto",
+						"brand:wikidata": "Q11341902",
+						"name": "Mikimoto",
 						"shop": "jewelry"
 					}
 				},
@@ -292309,6 +295463,7 @@
 					},
 					"tags": {
 						"brand": "Rusi",
+						"brand:wikidata": "Q141666661",
 						"name": "Rusi",
 						"shop": "motorcycle"
 					}
@@ -292813,6 +295968,21 @@
 						"brand": "Long & McQuade",
 						"brand:wikidata": "Q6672180",
 						"name": "Long & McQuade",
+						"shop": "musical_instrument"
+					}
+				},
+				{
+					"displayName": "Lyric",
+					"id": "lyric-e132d2",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Lyric",
+						"brand:wikidata": "Q141585207",
+						"name": "Lyric",
 						"shop": "musical_instrument"
 					}
 				},
@@ -294320,6 +297490,23 @@
 					}
 				},
 				{
+					"displayName": "EO Executive Optical",
+					"id": "eoexecutiveoptical-cafbe0",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"alt_name": "Executive Optical",
+						"brand": "EO Executive Optical",
+						"brand:wikidata": "Q141542633",
+						"name": "EO Executive Optical",
+						"shop": "optician",
+						"short_name": "EO"
+					}
+				},
+				{
 					"displayName": "Europtica",
 					"id": "europtica-61fd57",
 					"locationSet": {
@@ -294620,6 +297807,22 @@
 						"brand:wikidata": "Q1884976",
 						"name": "Hans Anders",
 						"shop": "optician"
+					}
+				},
+				{
+					"displayName": "Ideal Vision Center",
+					"id": "idealvisioncenter-cafbe0",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"tags": {
+						"brand": "Ideal Vision Center",
+						"brand:wikidata": "Q141666500",
+						"name": "Ideal Vision Center",
+						"shop": "optician",
+						"short_name": "Ideal Vision"
 					}
 				},
 				{
@@ -295458,9 +298661,10 @@
 				},
 				{
 					"displayName": "OWNDAYS",
-					"id": "owndays-b2cb2d",
+					"id": "owndays-41293c",
 					"locationSet": {
 						"include": [
+							"ph",
 							"tw"
 						]
 					},
@@ -295776,6 +298980,24 @@
 					}
 				},
 				{
+					"displayName": "Spaccio Occhiali Vision",
+					"id": "spaccioocchialivision-740ad9",
+					"locationSet": {
+						"include": [
+							"it"
+						]
+					},
+					"matchTags": [
+						"healthcare/optometrist"
+					],
+					"tags": {
+						"brand": "Spaccio Occhiali Vision",
+						"brand:wikidata": "Q141756627",
+						"name": "Spaccio Occhiali Vision",
+						"shop": "optician"
+					}
+				},
+				{
 					"displayName": "Specsavers",
 					"id": "specsavers-4fd8bc",
 					"locationSet": {
@@ -295846,10 +299068,11 @@
 				},
 				{
 					"displayName": "Synoptik",
-					"id": "synoptik-32f5e0",
+					"id": "synoptik-766545",
 					"locationSet": {
 						"include": [
 							"dk",
+							"gl",
 							"se"
 						]
 					},
@@ -298802,6 +302025,30 @@
 					}
 				},
 				{
+					"displayName": "Mary Grace (kiosk)",
+					"id": "marygrace-8e8b12",
+					"locationSet": {
+						"include": [
+							"ph"
+						]
+					},
+					"matchNames": [
+						"cafe mary grace",
+						"mary grace cafe"
+					],
+					"preserveTags": [
+						"^takeaway"
+					],
+					"tags": {
+						"brand": "Mary Grace",
+						"brand:wikidata": "Q123196663",
+						"cuisine": "cake;pastry",
+						"name": "Mary Grace",
+						"shop": "pastry",
+						"takeaway": "only"
+					}
+				},
+				{
 					"displayName": "Mio Amore",
 					"id": "mioamore-77ae94",
 					"locationSet": {
@@ -299699,6 +302946,21 @@
 					}
 				},
 				{
+					"displayName": "MoneyGold",
+					"id": "moneygold-60563e",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "MoneyGold",
+						"brand:wikidata": "Q141807860",
+						"name": "MoneyGold",
+						"shop": "pawnbroker"
+					}
+				},
+				{
 					"displayName": "Nacional Monte de Piedad",
 					"id": "nacionalmontedepiedad-25220b",
 					"locationSet": {
@@ -299828,6 +303090,21 @@
 						"brand": "Tambunting",
 						"brand:wikidata": "Q7681088",
 						"name": "Tambunting",
+						"shop": "pawnbroker"
+					}
+				},
+				{
+					"displayName": "Tezaur",
+					"id": "tezaur-60563e",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Tezaur",
+						"brand:wikidata": "Q141807891",
+						"name": "Tezaur",
 						"shop": "pawnbroker"
 					}
 				},
@@ -300551,7 +303828,7 @@
 					},
 					"tags": {
 						"brand": "Une Heure Pour Soi",
-						"brand:wikidata": "Q1273376",
+						"brand:wikidata": "Q132130879",
 						"name": "Une Heure Pour Soi",
 						"shop": "perfumery"
 					}
@@ -305447,6 +308724,23 @@
 					}
 				},
 				{
+					"displayName": "Musette",
+					"id": "musette-836de9",
+					"locationSet": {
+						"include": [
+							"at",
+							"bg",
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Musette",
+						"brand:wikidata": "Q12736058",
+						"name": "Musette",
+						"shop": "shoes"
+					}
+				},
+				{
 					"displayName": "MyShoes",
 					"id": "myshoes-0833e2",
 					"locationSet": {
@@ -306616,7 +309910,7 @@
 				},
 				{
 					"displayName": "Snipes",
-					"id": "snipes-9e6e1a",
+					"id": "snipes-33c850",
 					"locationSet": {
 						"include": [
 							"at",
@@ -306625,9 +309919,11 @@
 							"de",
 							"es",
 							"fr",
+							"hr",
 							"it",
 							"nl",
 							"pl",
+							"pt",
 							"us"
 						]
 					},
@@ -308665,6 +311961,21 @@
 					}
 				},
 				{
+					"displayName": "Scheels",
+					"id": "scheels-89ce6f",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "Scheels",
+						"brand:wikidata": "Q7431070",
+						"name": "Scheels",
+						"shop": "sports"
+					}
+				},
+				{
 					"displayName": "Skiset",
 					"id": "skiset-8e4106",
 					"locationSet": {
@@ -308831,6 +312142,21 @@
 						"brand": "Sport Zone",
 						"brand:wikidata": "Q18485899",
 						"name": "Sport Zone",
+						"shop": "sports"
+					}
+				},
+				{
+					"displayName": "Sportigan",
+					"id": "sportigan-2dd6d1",
+					"locationSet": {
+						"include": [
+							"dk"
+						]
+					},
+					"tags": {
+						"brand": "Sportigan",
+						"brand:wikidata": "Q12336715",
+						"name": "Sportigan",
 						"shop": "sports"
 					}
 				},
@@ -310223,6 +313549,22 @@
 					}
 				},
 				{
+					"displayName": "Locakase",
+					"id": "locakase-1d8b68",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Locakase",
+						"brand:wikidata": "Q141525976",
+						"name": "Locakase",
+						"shop": "storage_rental"
+					}
+				},
+				{
 					"displayName": "Lok'nStore",
 					"id": "loknstore-93b48c",
 					"locationSet": {
@@ -310291,6 +313633,21 @@
 						"brand": "Mini Storage Depot",
 						"brand:wikidata": "Q112833014",
 						"name": "Mini Storage Depot",
+						"shop": "storage_rental"
+					}
+				},
+				{
+					"displayName": "Mini U Storage",
+					"id": "miniustorage-7879a0",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "Mini U Storage",
+						"brand:wikidata": "Q141910638",
+						"name": "Mini U Storage",
 						"shop": "storage_rental"
 					}
 				},
@@ -310590,6 +313947,21 @@
 						"brand": "Storage Rentals of America",
 						"brand:wikidata": "Q120733770",
 						"name": "Storage Rentals of America",
+						"shop": "storage_rental"
+					}
+				},
+				{
+					"displayName": "Storage Sense",
+					"id": "storagesense-7879a0",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "Storage Sense",
+						"brand:wikidata": "Q126620207",
+						"name": "Storage Sense",
 						"shop": "storage_rental"
 					}
 				},
@@ -311030,6 +314402,21 @@
 						"brand": "ABC Lavpris",
 						"brand:wikidata": "Q12300077",
 						"name": "ABC Lavpris",
+						"shop": "supermarket"
+					}
+				},
+				{
+					"displayName": "Accord Bio",
+					"id": "accordbio-c16b1c",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Accord Bio",
+						"brand:wikidata": "Q140930088",
+						"organic": "only",
 						"shop": "supermarket"
 					}
 				},
@@ -316563,10 +319950,15 @@
 				},
 				{
 					"displayName": "Intermarch\u00e9",
-					"id": "intermarche-986a24",
+					"id": "intermarche-5ea40c",
 					"locationSet": {
 						"include": [
-							"001"
+							"be",
+							"ca",
+							"fx",
+							"pl",
+							"pt",
+							"fr"
 						]
 					},
 					"tags": {
@@ -319053,13 +322445,12 @@
 				},
 				{
 					"displayName": "Mix Markt",
-					"id": "mixmarkt-4aeb54",
+					"id": "mixmarkt-34dfbb",
 					"locationSet": {
 						"include": [
 							"at",
 							"be",
 							"cy",
-							"cz",
 							"de",
 							"es",
 							"fr",
@@ -319072,8 +322463,7 @@
 							"pl",
 							"pt",
 							"rs",
-							"si",
-							"sk"
+							"si"
 						]
 					},
 					"matchTags": [
@@ -319957,6 +323347,21 @@
 						"brand": "Pam",
 						"brand:wikidata": "Q105615038",
 						"name": "Pam",
+						"shop": "supermarket"
+					}
+				},
+				{
+					"displayName": "Pan-Asia",
+					"id": "panasia-dde59d",
+					"locationSet": {
+						"include": [
+							"us"
+						]
+					},
+					"tags": {
+						"brand": "Pan-Asia",
+						"brand:wikidata": "Q141112503",
+						"name": "Pan-Asia",
 						"shop": "supermarket"
 					}
 				},
@@ -322599,6 +326004,23 @@
 						"brand": "Sutterl\u00fcty",
 						"brand:wikidata": "Q1421502",
 						"name": "Sutterl\u00fcty",
+						"shop": "supermarket"
+					}
+				},
+				{
+					"displayName": "Tang Fr\u00e8res",
+					"id": "tangfreres-94a8a9",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"tags": {
+						"brand": "Tang Fr\u00e8res",
+						"brand:wikidata": "Q1005336",
+						"name": "Tang Fr\u00e8res",
+						"origin": "asian",
 						"shop": "supermarket"
 					}
 				},
@@ -330459,6 +333881,21 @@
 					}
 				},
 				{
+					"displayName": "m:tel",
+					"id": "mtel-b92dfd",
+					"locationSet": {
+						"include": [
+							"ba"
+						]
+					},
+					"tags": {
+						"brand": "m:tel",
+						"brand:wikidata": "Q12754716",
+						"name": "m:tel",
+						"shop": "telecommunication"
+					}
+				},
+				{
 					"displayName": "Magenta",
 					"id": "magenta-a73137",
 					"locationSet": {
@@ -331732,6 +335169,23 @@
 					}
 				},
 				{
+					"displayName": "go.Center",
+					"id": "gocenter-6b8984",
+					"locationSet": {
+						"include": [
+							"de"
+						]
+					},
+					"tags": {
+						"brand": "go.Rheinland",
+						"brand:wikidata": "Q231849",
+						"name": "go.Center",
+						"public_transport": "service_center",
+						"shop": "ticket",
+						"tickets:public_transport": "yes"
+					}
+				},
+				{
 					"displayName": "Guichet Transilien",
 					"id": "guichettransilien-b7c783",
 					"locationSet": {
@@ -331925,11 +335379,10 @@
 					],
 					"tags": {
 						"brand": "\u0426\u0435\u043d\u0442\u044a\u0440 \u0437\u0430 \u0433\u0440\u0430\u0434\u0441\u043a\u0430 \u043c\u043e\u0431\u0438\u043b\u043d\u043e\u0441\u0442",
+						"brand:short": "\u0426\u0413\u041c",
 						"brand:wikidata": "Q7553668",
-						"shop": "ticket",
-						"short_name": "\u0426\u0413\u041c",
-						"short_name:bg": "\u0426\u0413\u041c",
-						"short_name:en": "SUMC"
+						"name:signed": "no",
+						"shop": "ticket"
 					}
 				},
 				{
@@ -333008,7 +336461,7 @@
 					}
 				},
 				{
-					"displayName": "Dreamland",
+					"displayName": "DreamLand",
 					"id": "dreamland-5f5d6c",
 					"locationSet": {
 						"include": [
@@ -333017,9 +336470,9 @@
 						]
 					},
 					"tags": {
-						"brand": "Dreamland",
+						"brand": "DreamLand",
 						"brand:wikidata": "Q13574205",
-						"name": "Dreamland",
+						"name": "DreamLand",
 						"shop": "toys"
 					}
 				},
@@ -333242,11 +336695,13 @@
 				},
 				{
 					"displayName": "King Jouet",
-					"id": "kingjouet-12ffc2",
+					"id": "kingjouet-7b130a",
 					"locationSet": {
 						"include": [
 							"be",
-							"fr"
+							"ch",
+							"fr",
+							"lu"
 						]
 					},
 					"matchNames": [
@@ -333279,6 +336734,22 @@
 						"brand": "La Grande R\u00e9cr\u00e9",
 						"brand:wikidata": "Q3209556",
 						"name": "La Grande R\u00e9cr\u00e9",
+						"shop": "toys"
+					}
+				},
+				{
+					"displayName": "Legek\u00e6den",
+					"id": "legekaeden-2819fd",
+					"locationSet": {
+						"include": [
+							"dk",
+							"gl"
+						]
+					},
+					"tags": {
+						"brand": "Legek\u00e6den",
+						"brand:wikidata": "Q12324135",
+						"name": "Legek\u00e6den",
 						"shop": "toys"
 					}
 				},
@@ -335231,6 +338702,25 @@
 					}
 				},
 				{
+					"displayName": "Nisbets",
+					"id": "nisbets-96cf10",
+					"locationSet": {
+						"include": [
+							"au",
+							"gb",
+							"ie",
+							"nz"
+						]
+					},
+					"tags": {
+						"brand": "Nisbets",
+						"brand:wikidata": "Q7040194",
+						"name": "Nisbets",
+						"shop": "trade",
+						"trade": "catering_supplies"
+					}
+				},
+				{
 					"displayName": "NMC CAT",
 					"id": "nmccat-346f4e",
 					"locationSet": {
@@ -336357,6 +339847,21 @@
 					}
 				},
 				{
+					"displayName": "Christian Tour",
+					"id": "christiantour-7b088e",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Christian Tour",
+						"brand:wikidata": "Q141807458",
+						"name": "Christian Tour",
+						"shop": "travel_agency"
+					}
+				},
+				{
 					"displayName": "Club Med",
 					"id": "clubmed-9ff76a",
 					"locationSet": {
@@ -336872,6 +340377,21 @@
 					"tags": {
 						"brand": "Pac Group",
 						"name": "Pac Group",
+						"shop": "travel_agency"
+					}
+				},
+				{
+					"displayName": "Paralela 45",
+					"id": "paralela45-7b088e",
+					"locationSet": {
+						"include": [
+							"ro"
+						]
+					},
+					"tags": {
+						"brand": "Paralela 45",
+						"brand:wikidata": "Q18545185",
+						"name": "Paralela 45",
 						"shop": "travel_agency"
 					}
 				},
@@ -339211,20 +342731,24 @@
 				},
 				{
 					"displayName": "Action",
-					"id": "action-ba0d1d",
+					"id": "action-affbc2",
 					"locationSet": {
 						"include": [
 							"at",
 							"be",
+							"ch",
 							"cz",
 							"de",
 							"es",
 							"fr",
+							"hr",
 							"it",
 							"lu",
 							"nl",
 							"pl",
 							"pt",
+							"ro",
+							"si",
 							"sk"
 						]
 					},
@@ -339249,6 +342773,21 @@
 					"matchNames": [
 						"b&m stores"
 					],
+					"tags": {
+						"brand": "B&M",
+						"brand:wikidata": "Q4836931",
+						"name": "B&M",
+						"shop": "variety_store"
+					}
+				},
+				{
+					"displayName": "B&M (France)",
+					"id": "bandm-4bad18",
+					"locationSet": {
+						"include": [
+							"fr"
+						]
+					},
 					"tags": {
 						"brand": "B&M",
 						"brand:wikidata": "Q4836931",
@@ -339695,7 +343234,7 @@
 				},
 				{
 					"displayName": "Flying Tiger Copenhagen",
-					"id": "flyingtigercopenhagen-55ef00",
+					"id": "flyingtigercopenhagen-261a35",
 					"locationSet": {
 						"include": [
 							"at",
@@ -339723,6 +343262,7 @@
 							"mt",
 							"nl",
 							"no",
+							"ph",
 							"pl",
 							"pt",
 							"se",
@@ -341642,6 +345182,42 @@
 					}
 				},
 				{
+					"displayName": "Blancpain",
+					"id": "blancpain-101248",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"preserveTags": [
+						"^name"
+					],
+					"tags": {
+						"brand": "Blancpain",
+						"brand:wikidata": "Q804327",
+						"name": "Blancpain",
+						"shop": "watches"
+					}
+				},
+				{
+					"displayName": "Breguet",
+					"id": "breguet-101248",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"preserveTags": [
+						"^name"
+					],
+					"tags": {
+						"brand": "Breguet",
+						"brand:wikidata": "Q661205",
+						"name": "Breguet",
+						"shop": "watches"
+					}
+				},
+				{
 					"displayName": "Breitling",
 					"id": "breitling-101248",
 					"locationSet": {
@@ -341656,6 +345232,21 @@
 						"brand": "Breitling",
 						"brand:wikidata": "Q665740",
 						"name": "Breitling",
+						"shop": "watches"
+					}
+				},
+				{
+					"displayName": "Chopard",
+					"id": "chopard-101248",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"brand": "Chopard",
+						"brand:wikidata": "Q670112",
+						"name": "Chopard",
 						"shop": "watches"
 					}
 				},
@@ -341699,6 +345290,21 @@
 						"brand": "Fossil",
 						"brand:wikidata": "Q356212",
 						"name": "Fossil",
+						"shop": "watches"
+					}
+				},
+				{
+					"displayName": "Hublot",
+					"id": "hublot-101248",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"brand": "Hublot",
+						"brand:wikidata": "Q691958",
+						"name": "Hublot",
 						"shop": "watches"
 					}
 				},
@@ -341869,6 +345475,42 @@
 						"brand": "Patek Philippe",
 						"brand:wikidata": "Q659096",
 						"name": "Patek Philippe",
+						"shop": "watches"
+					}
+				},
+				{
+					"displayName": "Rado",
+					"id": "rado-101248",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"preserveTags": [
+						"^name"
+					],
+					"tags": {
+						"brand": "Rado",
+						"brand:wikidata": "Q180014",
+						"name": "Rado",
+						"shop": "watches"
+					}
+				},
+				{
+					"displayName": "Richard Mille",
+					"id": "richardmille-101248",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"preserveTags": [
+						"^name"
+					],
+					"tags": {
+						"brand": "Richard Mille",
+						"brand:wikidata": "Q3431044",
+						"name": "Richard Mille",
 						"shop": "watches"
 					}
 				},
@@ -342049,6 +345691,21 @@
 						"brand": "Vacheron Constantin",
 						"brand:wikidata": "Q62341",
 						"name": "Vacheron Constantin",
+						"shop": "watches"
+					}
+				},
+				{
+					"displayName": "Zenith",
+					"id": "zenith-101248",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"brand": "Zenith",
+						"brand:wikidata": "Q189601",
+						"name": "Zenith",
 						"shop": "watches"
 					}
 				},
@@ -348527,6 +352184,21 @@
 					}
 				},
 				{
+					"displayName": "Studio 6",
+					"id": "studio6-779ccb",
+					"locationSet": {
+						"include": [
+							"001"
+						]
+					},
+					"tags": {
+						"brand": "Studio 6",
+						"brand:wikidata": "Q115793950",
+						"name": "Studio 6",
+						"tourism": "hotel"
+					}
+				},
+				{
 					"displayName": "Suburban Studios",
 					"id": "suburbanstudios-6ac210",
 					"locationSet": {
@@ -349023,6 +352695,34 @@
 						"brand": "The Sebel",
 						"brand:wikidata": "Q110888248",
 						"name": "The Sebel",
+						"tourism": "hotel"
+					}
+				},
+				{
+					"displayName": "The Social Hub",
+					"id": "thesocialhub-92d813",
+					"locationSet": {
+						"include": [
+							"at",
+							"de",
+							"es",
+							"fx",
+							"gb",
+							"hu",
+							"it",
+							"nl",
+							"pt",
+							"fr"
+						]
+					},
+					"matchNames": [
+						"the student hotel",
+						"tsh"
+					],
+					"tags": {
+						"brand": "The Social Hub",
+						"brand:wikidata": "Q60742778",
+						"name": "The Social Hub",
 						"tourism": "hotel"
 					}
 				},
@@ -362500,6 +366200,20 @@
 					}
 				},
 				{
+					"displayName": "Dreammedia",
+					"id": "dreammedia-c250a7",
+					"locationSet": {
+						"include": [
+							"pt"
+						]
+					},
+					"tags": {
+						"advertising": "poster_box",
+						"operator": "Dreammedia",
+						"operator:wikidata": "Q140956057"
+					}
+				},
+				{
 					"displayName": "DSMDecaux",
 					"id": "dsmdecaux-9683c3",
 					"locationSet": {
@@ -368173,6 +371887,7 @@
 							"ch"
 						]
 					},
+					"note": "Charging offer folded into JOYA (JOYA Mobility AG) on 2026-10-01. Keep this entry while the on-site name is still Energie 360\u00b0. Energie 360\u00b0 remains the parent company.",
 					"tags": {
 						"amenity": "charging_station",
 						"operator": "Energie 360\u00b0",
@@ -369504,6 +373219,7 @@
 							"ch"
 						]
 					},
+					"note": "Charging brand folded into JOYA (JOYA Mobility AG) on 2026-10-01. Keep this entry while the on-site name is still GOFAST.",
 					"tags": {
 						"amenity": "charging_station",
 						"operator": "GOFAST",
@@ -370230,6 +373946,19 @@
 						"amenity": "charging_station",
 						"operator": "Joulz",
 						"operator:wikidata": "Q129002048"
+					}
+				},
+				{
+					"displayName": "JOYA",
+					"id": "joya-086737",
+					"locationSet": {
+						"include": [
+							"ch"
+						]
+					},
+					"tags": {
+						"amenity": "charging_station",
+						"operator": "JOYA"
 					}
 				},
 				{
@@ -371051,10 +374780,11 @@
 				},
 				{
 					"displayName": "Monta",
-					"id": "monta-47be25",
+					"id": "monta-72a858",
 					"locationSet": {
 						"include": [
 							"de",
+							"dk",
 							"gb",
 							"ie",
 							"se"
@@ -371155,6 +374885,7 @@
 							"ch"
 						]
 					},
+					"note": "Charging brand folded into JOYA (JOYA Mobility AG) on 2026-10-01. Keep this entry while the on-site name is still MOVE.",
 					"tags": {
 						"amenity": "charging_station",
 						"operator": "MOVE",
@@ -374566,6 +378297,7 @@
 							"ch"
 						]
 					},
+					"note": "Charging brand folded into JOYA (JOYA Mobility AG) on 2026-10-01. Keep this entry while the on-site name is still Swisscharge.",
 					"tags": {
 						"amenity": "charging_station",
 						"operator": "Swisscharge",
@@ -376686,6 +380418,24 @@
 						"healthcare": "clinic",
 						"operator": "Central Australia Health Service",
 						"operator:type": "private"
+					}
+				},
+				{
+					"displayName": "Christian Health Association of Ghana",
+					"id": "christianhealthassociationofghana-7981f3",
+					"locationSet": {
+						"include": [
+							"gh"
+						]
+					},
+					"tags": {
+						"amenity": "clinic",
+						"healthcare": "clinic",
+						"operator": "Christian Health Association of Ghana",
+						"operator:short": "CHAG",
+						"operator:type": "religious",
+						"operator:wikidata": "Q5109683",
+						"religion": "christian"
 					}
 				},
 				{
@@ -380138,6 +383888,21 @@
 					}
 				},
 				{
+					"displayName": "Diakonia-ammattikorkeakoulu Oy",
+					"id": "diakoniaammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "college",
+						"operator": "Diakonia-ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q8095258"
+					}
+				},
+				{
 					"displayName": "Dunamare onderwijs",
 					"id": "dunamareonderwijs-e7dc64",
 					"locationSet": {
@@ -380169,6 +383934,23 @@
 						"operator": "\u00c9cole de la Deuxi\u00e8me Chance",
 						"operator:type": "private",
 						"operator:wikidata": "Q3577882"
+					}
+				},
+				{
+					"displayName": "Generalitat Valenciana",
+					"id": "generalitatvalenciana-800cad",
+					"locationSet": {
+						"include": [
+							"es-a.geojson",
+							"es-cs.geojson",
+							"es-v.geojson"
+						]
+					},
+					"tags": {
+						"amenity": "college",
+						"operator": "Generalitat Valenciana",
+						"operator:type": "public",
+						"operator:wikidata": "Q2477285"
 					}
 				},
 				{
@@ -380217,6 +383999,21 @@
 					}
 				},
 				{
+					"displayName": "Haaga-Helia ammattikorkeakoulu Oy",
+					"id": "haagaheliaammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "college",
+						"operator": "Haaga-Helia ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q5636472"
+					}
+				},
+				{
 					"displayName": "IFET",
 					"id": "institutofederaldeeducacaocienciaetecnologia-628adc",
 					"locationSet": {
@@ -380248,6 +384045,77 @@
 						"operator:short": "INA",
 						"operator:type": "public",
 						"operator:wikidata": "Q21573160"
+					}
+				},
+				{
+					"displayName": "Jyv\u00e4skyl\u00e4n ammattikorkeakoulu Oy",
+					"id": "jyvaskylanammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"jyv\u00e4skyl\u00e4n ammattikorkeakoulu"
+					],
+					"tags": {
+						"amenity": "college",
+						"operator": "Jyv\u00e4skyl\u00e4n ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q3050990"
+					}
+				},
+				{
+					"displayName": "LAB-ammattikorkeakoulu",
+					"id": "labammattikorkeakoulu-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "college",
+						"operator": "LAB-ammattikorkeakoulu",
+						"operator:type": "private",
+						"operator:wikidata": "Q87105663"
+					}
+				},
+				{
+					"displayName": "Laurea-ammattikorkeakoulu Oy",
+					"id": "laureaammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"laurea-ammattikorkeakoulu"
+					],
+					"tags": {
+						"amenity": "college",
+						"operator": "Laurea-ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q5482866"
+					}
+				},
+				{
+					"displayName": "Metropolia Ammattikorkeakoulu Oy",
+					"id": "metropoliaammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"metropolia",
+						"metropolia ammattikorkeakoulu",
+						"metropolia oy"
+					],
+					"tags": {
+						"amenity": "college",
+						"operator": "Metropolia Ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q5710515"
 					}
 				},
 				{
@@ -380299,6 +384167,21 @@
 					}
 				},
 				{
+					"displayName": "Oulun ammattikorkeakoulu Oy",
+					"id": "oulunammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "college",
+						"operator": "Oulun ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q7110482"
+					}
+				},
+				{
 					"displayName": "Portland Community College",
 					"id": "portlandcommunitycollege-58b6d9",
 					"locationSet": {
@@ -380326,6 +384209,39 @@
 						"amenity": "college",
 						"operator": "Qaraqalpaqstan Respublikas\u0131 mektepke shekemgi h\u00e1m mektep bilimlendiriw ministrligi",
 						"operator:type": "government"
+					}
+				},
+				{
+					"displayName": "Satakunnan ammattikorkeakoulu Oy",
+					"id": "satakunnanammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "college",
+						"operator": "Satakunnan ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q7425869"
+					}
+				},
+				{
+					"displayName": "Savonia-ammattikorkeakoulu Oy",
+					"id": "savoniaammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"savonia-ammattikorkeakoulu"
+					],
+					"tags": {
+						"amenity": "college",
+						"operator": "Savonia-ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q522187"
 					}
 				},
 				{
@@ -380370,6 +384286,21 @@
 						"amenity": "college",
 						"operator": "Skk School Sp\u00f3\u0142ka Z Ograniczon\u0105 Odpowiedzialno\u015bci\u0105",
 						"operator:type": "private"
+					}
+				},
+				{
+					"displayName": "Suomen Humanistinen Ammattikorkeakoulu Oy",
+					"id": "suomenhumanistinenammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "college",
+						"operator": "Suomen Humanistinen Ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q5636183"
 					}
 				},
 				{
@@ -380433,6 +384364,21 @@
 					}
 				},
 				{
+					"displayName": "Tampereen ammattikorkeakoulu Oy",
+					"id": "tampereenammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "college",
+						"operator": "Tampereen ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q7681771"
+					}
+				},
+				{
 					"displayName": "TasTAFE",
 					"id": "tastafe-e237af",
 					"locationSet": {
@@ -380445,6 +384391,24 @@
 						"operator": "TasTAFE",
 						"operator:type": "government",
 						"operator:wikidata": "Q7669252"
+					}
+				},
+				{
+					"displayName": "Turun ammattikorkeakoulu Oy",
+					"id": "turunammattikorkeakouluoy-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"turun ammattikorkeakoulu"
+					],
+					"tags": {
+						"amenity": "college",
+						"operator": "Turun ammattikorkeakoulu Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q7855557"
 					}
 				},
 				{
@@ -380550,6 +384514,25 @@
 						"operator": "University of the Highlands and Islands",
 						"operator:type": "private",
 						"operator:wikidata": "Q1470817"
+					}
+				},
+				{
+					"displayName": "Yrkesh\u00f6gskolan Arcada Ab",
+					"id": "yrkeshogskolanarcadaab-54aebe",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"arcada",
+						"yrkesh\u00f6gskolan arcada"
+					],
+					"tags": {
+						"amenity": "college",
+						"operator": "Yrkesh\u00f6gskolan Arcada Ab",
+						"operator:type": "private",
+						"operator:wikidata": "Q4411479"
 					}
 				},
 				{
@@ -393030,6 +397013,24 @@
 					}
 				},
 				{
+					"displayName": "Christian Health Association of Ghana",
+					"id": "christianhealthassociationofghana-e476e7",
+					"locationSet": {
+						"include": [
+							"gh"
+						]
+					},
+					"tags": {
+						"amenity": "hospital",
+						"healthcare": "hospital",
+						"operator": "Christian Health Association of Ghana",
+						"operator:short": "CHAG",
+						"operator:type": "religious",
+						"operator:wikidata": "Q5109683",
+						"religion": "christian"
+					}
+				},
+				{
 					"displayName": "ChristianaCare",
 					"id": "christianacare-9c32f9",
 					"locationSet": {
@@ -393663,6 +397664,22 @@
 						"operator:short": "GRN",
 						"operator:type": "private",
 						"operator:wikidata": "Q48754458"
+					}
+				},
+				{
+					"displayName": "Ghana Health Service",
+					"id": "ghanahealthservice-e476e7",
+					"locationSet": {
+						"include": [
+							"gh"
+						]
+					},
+					"tags": {
+						"amenity": "hospital",
+						"healthcare": "hospital",
+						"operator": "Ghana Health Service",
+						"operator:type": "government",
+						"operator:wikidata": "Q5555350"
 					}
 				},
 				{
@@ -397373,7 +401390,7 @@
 					"tags": {
 						"amenity": "kindergarten",
 						"operator": "Elbkinder Vereinigung Hamburger Kitas gGmbH",
-						"operator:type": "private",
+						"operator:type": "public",
 						"operator:wikidata": "Q126896525"
 					}
 				},
@@ -397414,6 +401431,9 @@
 							"fi"
 						]
 					},
+					"matchNames": [
+						"espoo"
+					],
 					"tags": {
 						"amenity": "kindergarten",
 						"operator": "Espoon kaupunki",
@@ -397675,11 +401695,14 @@
 							"fi"
 						]
 					},
+					"matchNames": [
+						"helsinki"
+					],
 					"tags": {
 						"amenity": "kindergarten",
 						"operator": "Helsingin kaupunki",
 						"operator:type": "government",
-						"operator:wikidata": "Q20251620"
+						"operator:wikidata": "Q1757"
 					}
 				},
 				{
@@ -397871,6 +401894,24 @@
 						"amenity": "kindergarten",
 						"operator": "Junji",
 						"operator:type": "private"
+					}
+				},
+				{
+					"displayName": "Jyv\u00e4skyl\u00e4n kaupunki",
+					"id": "jyvaskylankaupunki-f5d7fd",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"jyv\u00e4skyl\u00e4"
+					],
+					"tags": {
+						"amenity": "kindergarten",
+						"operator": "Jyv\u00e4skyl\u00e4n kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q134620"
 					}
 				},
 				{
@@ -398324,6 +402365,24 @@
 					}
 				},
 				{
+					"displayName": "Kuopion kaupunki",
+					"id": "kuopionkaupunki-f5d7fd",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"kuopio"
+					],
+					"tags": {
+						"amenity": "kindergarten",
+						"operator": "Kuopion kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q162279"
+					}
+				},
+				{
 					"displayName": "La Maison Bleue",
 					"id": "lamaisonbleue-94d05d",
 					"locationSet": {
@@ -398350,6 +402409,24 @@
 						"amenity": "kindergarten",
 						"operator": "L\u00e6ringsverkstedet AS",
 						"operator:type": "private"
+					}
+				},
+				{
+					"displayName": "Lahden kaupunki",
+					"id": "lahdenkaupunki-f5d7fd",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"lahti"
+					],
+					"tags": {
+						"amenity": "kindergarten",
+						"operator": "Lahden kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q28911"
 					}
 				},
 				{
@@ -398599,6 +402676,25 @@
 					}
 				},
 				{
+					"displayName": "Norlandia P\u00e4iv\u00e4kodit Oy",
+					"id": "norlandiapaivakoditoy-f5d7fd",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"norlandia",
+						"norlandia p\u00e4iv\u00e4kodit"
+					],
+					"tags": {
+						"amenity": "kindergarten",
+						"operator": "Norlandia P\u00e4iv\u00e4kodit Oy",
+						"operator:type": "private",
+						"operator:wikidata": "Q137463892"
+					}
+				},
+				{
 					"displayName": "Norrk\u00f6pings kommun",
 					"id": "norrkopingskommun-b6a588",
 					"locationSet": {
@@ -398707,6 +402803,24 @@
 					}
 				},
 				{
+					"displayName": "Oulun kaupunki",
+					"id": "oulunkaupunki-f5d7fd",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"oulu"
+					],
+					"tags": {
+						"amenity": "kindergarten",
+						"operator": "Oulun kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q47048"
+					}
+				},
+				{
 					"displayName": "Outlaw",
 					"id": "outlaw-747d0f",
 					"locationSet": {
@@ -398811,6 +402925,24 @@
 						"amenity": "kindergarten",
 						"operator": "pme Familienservice GmbH",
 						"operator:type": "private"
+					}
+				},
+				{
+					"displayName": "Porin kaupunki",
+					"id": "porinkaupunki-f5d7fd",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"pori"
+					],
+					"tags": {
+						"amenity": "kindergarten",
+						"operator": "Porin kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q180233"
 					}
 				},
 				{
@@ -399711,6 +403843,9 @@
 							"fi"
 						]
 					},
+					"matchNames": [
+						"tampere"
+					],
 					"tags": {
 						"amenity": "kindergarten",
 						"operator": "Tampereen kaupunki",
@@ -399794,6 +403929,25 @@
 					}
 				},
 				{
+					"displayName": "Turun kaupunki",
+					"id": "turunkaupunki-f5d7fd",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"city of turku",
+						"turku"
+					],
+					"tags": {
+						"amenity": "kindergarten",
+						"operator": "Turun kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q38511"
+					}
+				},
+				{
 					"displayName": "Ullensvang kommune",
 					"id": "ullensvangkommune-04f073",
 					"locationSet": {
@@ -399860,6 +404014,9 @@
 							"fi"
 						]
 					},
+					"matchNames": [
+						"vantaa"
+					],
 					"tags": {
 						"amenity": "kindergarten",
 						"operator": "Vantaan kaupunki",
@@ -405241,6 +409398,26 @@
 						"operator": "Ace Parking",
 						"operator:type": "private",
 						"operator:wikidata": "Q108274179"
+					}
+				},
+				{
+					"displayName": "AMGEVICESA",
+					"id": "aparcamientosmunicipalesygestionvialdeceutasa-e6e9da",
+					"locationSet": {
+						"include": [
+							"es-ce"
+						]
+					},
+					"matchNames": [
+						"aparcamientos ceuta",
+						"aparcamientos municipales y gesti\u00f3n vial de ceuta"
+					],
+					"tags": {
+						"amenity": "parking",
+						"operator": "Aparcamientos Municipales y Gesti\u00f3n Vial de Ceuta S.A.",
+						"operator:short": "AMGEVICESA",
+						"operator:type": "public",
+						"operator:wikidata": "Q141623439"
 					}
 				},
 				{
@@ -412525,6 +416702,21 @@
 					}
 				},
 				{
+					"displayName": "Nordkurier Logistik",
+					"id": "nordkurierlogistik-225eac",
+					"locationSet": {
+						"include": [
+							"de"
+						]
+					},
+					"tags": {
+						"amenity": "post_box",
+						"operator": "Nordkurier Logistik",
+						"operator:type": "private",
+						"operator:wikidata": "Q123506090"
+					}
+				},
+				{
 					"displayName": "PIN Mail",
 					"id": "pinmail-225eac",
 					"locationSet": {
@@ -412575,6 +416767,27 @@
 						"operator": "UPS",
 						"operator:type": "private",
 						"operator:wikidata": "Q155026"
+					}
+				},
+				{
+					"displayName": "Australia Post",
+					"fromTemplate": true,
+					"id": "australiapost-7f3a8a",
+					"locationSet": {
+						"include": [
+							"au"
+						]
+					},
+					"matchNames": [
+						"aus post",
+						"aust post"
+					],
+					"tags": {
+						"amenity": "post_box",
+						"brand": "Australia Post",
+						"brand:wikidata": "Q1142936",
+						"operator": "Australia Post",
+						"operator:wikidata": "Q1142936"
 					}
 				},
 				{
@@ -413691,25 +417904,6 @@
 						"amenity": "post_box",
 						"operator": "Aras Kargo",
 						"operator:wikidata": "Q6094691"
-					}
-				},
-				{
-					"displayName": "Australia Post",
-					"fromTemplate": true,
-					"id": "australiapost-7f3a8a",
-					"locationSet": {
-						"include": [
-							"au"
-						]
-					},
-					"matchNames": [
-						"aus post",
-						"aust post"
-					],
-					"tags": {
-						"amenity": "post_box",
-						"operator": "Australia Post",
-						"operator:wikidata": "Q1142936"
 					}
 				},
 				{
@@ -416485,24 +420679,6 @@
 						"amenity": "post_office",
 						"operator": "Aras Kargo",
 						"operator:wikidata": "Q6094691"
-					}
-				},
-				{
-					"displayName": "Australia Post",
-					"id": "australiapost-536bec",
-					"locationSet": {
-						"include": [
-							"au"
-						]
-					},
-					"matchNames": [
-						"aus post",
-						"aust post"
-					],
-					"tags": {
-						"amenity": "post_office",
-						"operator": "Australia Post",
-						"operator:wikidata": "Q1142936"
 					}
 				},
 				{
@@ -423341,20 +427517,6 @@
 					}
 				},
 				{
-					"displayName": "FCC",
-					"id": "fcc-49dabd",
-					"locationSet": {
-						"include": [
-							"es"
-						]
-					},
-					"tags": {
-						"amenity": "recycling",
-						"operator": "FCC",
-						"operator:wikidata": "Q549127"
-					}
-				},
-				{
 					"displayName": "FCC BEC",
 					"id": "fccbec-778b5b",
 					"locationSet": {
@@ -423447,6 +427609,21 @@
 						"amenity": "recycling",
 						"operator": "FKF",
 						"operator:wikidata": "Q119149757"
+					}
+				},
+				{
+					"displayName": "Fomento de Construcciones y Contratas",
+					"id": "fomentodeconstruccionesycontratas-49dabd",
+					"locationSet": {
+						"include": [
+							"es"
+						]
+					},
+					"tags": {
+						"amenity": "recycling",
+						"operator": "Fomento de Construcciones y Contratas",
+						"operator:short": "FCC",
+						"operator:wikidata": "Q549127"
 					}
 				},
 				{
@@ -431889,7 +436066,8 @@
 					"tags": {
 						"amenity": "recycling",
 						"operator": "\u0411\u0443\u043b\u0435\u043a\u043e\u043f\u0430\u043a",
-						"operator:wikidata": "Q116687113"
+						"operator:wikidata": "Q116687113",
+						"recycling_type": "container"
 					}
 				},
 				{
@@ -431959,7 +436137,8 @@
 					"tags": {
 						"amenity": "recycling",
 						"operator": "\u0415\u043a\u043e\u0431\u0443\u043b\u043f\u0430\u043a",
-						"operator:wikidata": "Q116687156"
+						"operator:wikidata": "Q116687156",
+						"recycling_type": "container"
 					}
 				},
 				{
@@ -431978,7 +436157,8 @@
 					"tags": {
 						"amenity": "recycling",
 						"operator": "\u0415\u043a\u043e\u043f\u0430\u043a",
-						"operator:wikidata": "Q116687081"
+						"operator:wikidata": "Q116687081",
+						"recycling_type": "container"
 					}
 				},
 				{
@@ -449789,7 +453969,7 @@
 					}
 				},
 				{
-					"displayName": "Diocese Of Southwell and Nottingham Multi-Academy Trust",
+					"displayName": "Diocese of Southwell and Nottingham Multi-Academy Trust",
 					"id": "dioceseofsouthwellandnottinghammultiacademytrust-26e9df",
 					"locationSet": {
 						"include": [
@@ -449798,7 +453978,7 @@
 					},
 					"tags": {
 						"amenity": "school",
-						"operator": "Diocese Of Southwell and Nottingham Multi-Academy Trust",
+						"operator": "Diocese of Southwell and Nottingham Multi-Academy Trust",
 						"operator:type": "private",
 						"operator:wikidata": "Q121704468"
 					}
@@ -453278,6 +457458,24 @@
 					}
 				},
 				{
+					"displayName": "Elements Diocesan Learning Trust",
+					"id": "elementsdiocesanlearningtrust-7a837c",
+					"locationSet": {
+						"include": [
+							"gb-eng"
+						]
+					},
+					"matchNames": [
+						"the diocese of worcester multi academy trust"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Elements Diocesan Learning Trust",
+						"operator:type": "private",
+						"operator:wikidata": "Q122616484"
+					}
+				},
+				{
 					"displayName": "Elevate Multi Academy Trust",
 					"id": "elevatemultiacademytrust-7a837c",
 					"locationSet": {
@@ -453735,6 +457933,39 @@
 						"operator": "Esperanza III District",
 						"operator:type": "government",
 						"operator:wikidata": "Q130491101"
+					}
+				},
+				{
+					"displayName": "Espoon kaupunki",
+					"id": "espoonkaupunki-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"espoo"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Espoon kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q47034"
+					}
+				},
+				{
+					"displayName": "Espoon seudun koulutuskuntayhtym\u00e4 Omnia",
+					"id": "espoonseudunkoulutuskuntayhtymaomnia-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"tags": {
+						"amenity": "school",
+						"operator": "Espoon seudun koulutuskuntayhtym\u00e4 Omnia",
+						"operator:type": "government",
+						"operator:wikidata": "Q11885531"
 					}
 				},
 				{
@@ -457498,6 +461729,24 @@
 					}
 				},
 				{
+					"displayName": "Helsingin kaupunki",
+					"id": "helsinginkaupunki-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"helsinki"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Helsingin kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q1757"
+					}
+				},
+				{
 					"displayName": "Henrico County Public Schools",
 					"id": "henricocountypublicschools-3cf7e1",
 					"locationSet": {
@@ -458711,6 +462960,21 @@
 						"operator": "Infanta District",
 						"operator:type": "government",
 						"operator:wikidata": "Q130490541"
+					}
+				},
+				{
+					"displayName": "Infinity Academies Trust",
+					"id": "infinityacademiestrust-7a837c",
+					"locationSet": {
+						"include": [
+							"gb-eng"
+						]
+					},
+					"tags": {
+						"amenity": "school",
+						"operator": "Infinity Academies Trust",
+						"operator:type": "private",
+						"operator:wikidata": "Q122683868"
 					}
 				},
 				{
@@ -460115,6 +464379,24 @@
 						"operator": "Junta de Extremadura",
 						"operator:type": "government",
 						"operator:wikidata": "Q51517"
+					}
+				},
+				{
+					"displayName": "Jyv\u00e4skyl\u00e4n kaupunki",
+					"id": "jyvaskylankaupunki-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"jyv\u00e4skyl\u00e4"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Jyv\u00e4skyl\u00e4n kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q134620"
 					}
 				},
 				{
@@ -461644,6 +465926,9 @@
 							"fi"
 						]
 					},
+					"matchNames": [
+						"kuopio"
+					],
 					"tags": {
 						"amenity": "school",
 						"operator": "Kuopion kaupunki",
@@ -462230,6 +466515,24 @@
 						"operator": "Laguindingan District",
 						"operator:type": "government",
 						"operator:wikidata": "Q130490370"
+					}
+				},
+				{
+					"displayName": "Lahden kaupunki",
+					"id": "lahdenkaupunki-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"lahti"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Lahden kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q28911"
 					}
 				},
 				{
@@ -474175,6 +478478,24 @@
 					}
 				},
 				{
+					"displayName": "Oulun kaupunki",
+					"id": "oulunkaupunki-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"oulu"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Oulun kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q47048"
+					}
+				},
+				{
 					"displayName": "Our Community Multi Academy Trust",
 					"id": "ourcommunitymultiacademytrust-7a837c",
 					"locationSet": {
@@ -475523,6 +479844,21 @@
 						"operator": "Pathfinder Schools",
 						"operator:type": "private",
 						"operator:wikidata": "Q122616294"
+					}
+				},
+				{
+					"displayName": "Pathway Trust",
+					"id": "pathwaytrust-7a837c",
+					"locationSet": {
+						"include": [
+							"gb-eng"
+						]
+					},
+					"tags": {
+						"amenity": "school",
+						"operator": "Pathway Trust",
+						"operator:type": "private",
+						"operator:wikidata": "Q122683278"
 					}
 				},
 				{
@@ -477146,6 +481482,24 @@
 						"operator": "Porac West District",
 						"operator:type": "government",
 						"operator:wikidata": "Q130490400"
+					}
+				},
+				{
+					"displayName": "Porin kaupunki",
+					"id": "porinkaupunki-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"pori"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Porin kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q180233"
 					}
 				},
 				{
@@ -490459,6 +494813,24 @@
 					}
 				},
 				{
+					"displayName": "Tampereen kaupunki",
+					"id": "tampereenkaupunki-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"tampere"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Tampereen kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q40840"
+					}
+				},
+				{
 					"displayName": "Tampereen seudun ammattiopisto",
 					"id": "tampereenseudunammattiopisto-4ccccf",
 					"locationSet": {
@@ -490469,7 +494841,8 @@
 					"tags": {
 						"amenity": "school",
 						"operator": "Tampereen seudun ammattiopisto",
-						"operator:type": "private"
+						"operator:type": "government",
+						"operator:wikidata": "Q11896313"
 					}
 				},
 				{
@@ -491535,22 +495908,6 @@
 						"operator:short": "DOWAT",
 						"operator:type": "private",
 						"operator:wikidata": "Q122616262"
-					}
-				},
-				{
-					"displayName": "The Diocese of Worcester Multi Academy Trust",
-					"id": "thedioceseofworcestermultiacademytrust-7a837c",
-					"locationSet": {
-						"include": [
-							"gb-eng"
-						]
-					},
-					"tags": {
-						"amenity": "school",
-						"operator": "The Diocese of Worcester Multi Academy Trust",
-						"operator:short": "DoWMAT",
-						"operator:type": "private",
-						"operator:wikidata": "Q122616484"
 					}
 				},
 				{
@@ -493536,6 +497893,25 @@
 					}
 				},
 				{
+					"displayName": "Turun kaupunki",
+					"id": "turunkaupunki-4ccccf",
+					"locationSet": {
+						"include": [
+							"fi"
+						]
+					},
+					"matchNames": [
+						"city of turku",
+						"turku"
+					],
+					"tags": {
+						"amenity": "school",
+						"operator": "Turun kaupunki",
+						"operator:type": "government",
+						"operator:wikidata": "Q38511"
+					}
+				},
+				{
 					"displayName": "Tuscaloosa County School System",
 					"id": "tuscaloosacountyschoolsystem-cc53cf",
 					"locationSet": {
@@ -494506,6 +498882,9 @@
 							"fi"
 						]
 					},
+					"matchNames": [
+						"vantaa"
+					],
 					"tags": {
 						"amenity": "school",
 						"operator": "Vantaan kaupunki",
@@ -497595,9 +501974,9 @@
 					},
 					"tags": {
 						"amenity": "school",
-						"operataor:type": "government",
 						"operator": "\u4eac\u90fd\u5e02",
 						"operator:en": "city of Kyoto",
+						"operator:type": "government",
 						"operator:wikidata": "Q34600"
 					}
 				},
@@ -500298,6 +504677,26 @@
 					}
 				},
 				{
+					"displayName": "Emeis",
+					"id": "emeis-704240",
+					"locationSet": {
+						"include": [
+							"fx",
+							"fr"
+						]
+					},
+					"matchNames": [
+						"orp\u00e9a",
+						"sa orpea"
+					],
+					"tags": {
+						"amenity": "social_facility",
+						"operator": "Emeis",
+						"operator:type": "private",
+						"operator:wikidata": "Q3347694"
+					}
+				},
+				{
 					"displayName": "Esperi Care",
 					"id": "espericare-d65e34",
 					"locationSet": {
@@ -501399,25 +505798,6 @@
 						"operator": "OCMW",
 						"operator:type": "public",
 						"operator:wikidata": "Q2679662"
-					}
-				},
-				{
-					"displayName": "Orp\u00e9a",
-					"id": "orpea-704240",
-					"locationSet": {
-						"include": [
-							"fx",
-							"fr"
-						]
-					},
-					"matchNames": [
-						"sa orpea"
-					],
-					"tags": {
-						"amenity": "social_facility",
-						"operator": "Orp\u00e9a",
-						"operator:type": "private",
-						"operator:wikidata": "Q3347694"
 					}
 				},
 				{
@@ -503654,6 +508034,20 @@
 					}
 				},
 				{
+					"displayName": "Renfe",
+					"id": "renfe-5ffe93",
+					"locationSet": {
+						"include": [
+							"es"
+						]
+					},
+					"tags": {
+						"amenity": "ticket_validator",
+						"operator": "Renfe",
+						"operator:wikidata": "Q2476154"
+					}
+				},
+				{
 					"displayName": "S-Bahn Berlin GmbH",
 					"id": "sbahnberlingmbh-666711",
 					"locationSet": {
@@ -503679,6 +508073,7 @@
 						]
 					},
 					"matchNames": [
+						"sbb cff ffs",
 						"schweizerische bundesbahnen ag",
 						"swiss federal railways"
 					],
@@ -503686,19 +508081,6 @@
 						"amenity": "ticket_validator",
 						"operator": "SBB",
 						"operator:wikidata": "Q83835"
-					}
-				},
-				{
-					"displayName": "SBB CFF FFS",
-					"id": "sbbcffffs-9fdb02",
-					"locationSet": {
-						"include": [
-							"001"
-						]
-					},
-					"tags": {
-						"amenity": "ticket_validator",
-						"operator": "SBB CFF FFS"
 					}
 				},
 				{
@@ -521499,6 +525881,9 @@
 							"in"
 						]
 					},
+					"matchNames": [
+						"archeological survey of india"
+					],
 					"tags": {
 						"historic": "archaeological_site",
 						"operator": "Archaeological Survey of India",
@@ -532426,7 +536811,7 @@
 					"tags": {
 						"leisure": "park",
 						"operator": "The Parks Trust",
-						"operator:type": "public",
+						"operator:type": "charitable",
 						"operator:wikidata": "Q6861252"
 					}
 				},
@@ -539478,6 +543863,7 @@
 							"ch"
 						]
 					},
+					"note": "Charging offer folded into JOYA (JOYA Mobility AG) on 2026-10-01. Keep this entry while the on-site name is still Energie 360\u00b0. Energie 360\u00b0 remains the parent company.",
 					"tags": {
 						"man_made": "charge_point",
 						"operator": "Energie 360\u00b0",
@@ -540901,6 +545287,7 @@
 							"ch"
 						]
 					},
+					"note": "Charging brand folded into JOYA (JOYA Mobility AG) on 2026-10-01. Keep this entry while the on-site name is still GOFAST.",
 					"tags": {
 						"man_made": "charge_point",
 						"operator": "GOFAST",
@@ -541673,6 +546060,20 @@
 						"man_made": "charge_point",
 						"operator": "Joulz",
 						"operator:wikidata": "Q129002048"
+					}
+				},
+				{
+					"displayName": "JOYA",
+					"fromTemplate": true,
+					"id": "joya-d761b8",
+					"locationSet": {
+						"include": [
+							"ch"
+						]
+					},
+					"tags": {
+						"man_made": "charge_point",
+						"operator": "JOYA"
 					}
 				},
 				{
@@ -542551,10 +546952,11 @@
 				{
 					"displayName": "Monta",
 					"fromTemplate": true,
-					"id": "monta-065623",
+					"id": "monta-971f78",
 					"locationSet": {
 						"include": [
 							"de",
+							"dk",
 							"gb",
 							"ie",
 							"se"
@@ -542662,6 +547064,7 @@
 							"ch"
 						]
 					},
+					"note": "Charging brand folded into JOYA (JOYA Mobility AG) on 2026-10-01. Keep this entry while the on-site name is still MOVE.",
 					"tags": {
 						"man_made": "charge_point",
 						"operator": "MOVE",
@@ -546308,6 +550711,7 @@
 							"ch"
 						]
 					},
+					"note": "Charging brand folded into JOYA (JOYA Mobility AG) on 2026-10-01. Keep this entry while the on-site name is still Swisscharge.",
 					"tags": {
 						"man_made": "charge_point",
 						"operator": "Swisscharge",
@@ -597486,6 +601890,25 @@
 					}
 				},
 				{
+					"displayName": "Agencia Tributaria",
+					"id": "agenciatributaria-f19bf1",
+					"locationSet": {
+						"include": [
+							"es"
+						]
+					},
+					"matchNames": [
+						"aeat",
+						"agencia estatal de administraci\u00f3n tributaria"
+					],
+					"tags": {
+						"government": "tax",
+						"office": "government",
+						"operator": "Agencia Tributaria",
+						"operator:wikidata": "Q4891205"
+					}
+				},
+				{
 					"displayName": "Ajuntament de Barcelona",
 					"id": "ajuntamentdebarcelona-c7b087",
 					"locationSet": {
@@ -616409,19 +620832,14 @@
 				{
 					"displayName": "\u010cesk\u00e9 dr\u00e1hy",
 					"fromTemplate": true,
-					"id": "ceskedrahy-e7d44b",
+					"id": "ceskedrahy-74af95",
 					"locationSet": {
 						"include": [
-							"cz"
+							"001"
 						]
 					},
-					"matchNames": [
-						"cz:\u010dd"
-					],
 					"tags": {
 						"operator": "\u010cesk\u00e9 dr\u00e1hy",
-						"operator:short": "\u010cD",
-						"operator:wikidata": "Q304944",
 						"power": "catenary_mast"
 					}
 				},
@@ -617154,16 +621572,14 @@
 				{
 					"displayName": "\u017delezni\u010dn\u00e1 spolo\u010dnos\u0165 Slovensko",
 					"fromTemplate": true,
-					"id": "zeleznicnaspolocnostslovensko-5fda63",
+					"id": "zeleznicnaspolocnostslovensko-74af95",
 					"locationSet": {
 						"include": [
-							"sk"
+							"001"
 						]
 					},
 					"tags": {
 						"operator": "\u017delezni\u010dn\u00e1 spolo\u010dnos\u0165 Slovensko",
-						"operator:short": "ZSSK",
-						"operator:wikidata": "Q393557",
 						"power": "catenary_mast"
 					}
 				},
@@ -617637,15 +622053,19 @@
 					}
 				},
 				{
-					"displayName": "Acampo Arias, S.L.",
-					"id": "acampoariassl-4d4c0b",
+					"displayName": "Acampo Arias",
+					"id": "acampoarias-4d4c0b",
 					"locationSet": {
 						"include": [
 							"es-z.geojson"
 						]
 					},
+					"matchNames": [
+						"acampo arias, s.l."
+					],
 					"tags": {
-						"operator": "Acampo Arias, S.L.",
+						"operator": "Acampo Arias",
+						"operator:wikidata": "Q141543599",
 						"power": "generator"
 					}
 				},
@@ -620258,20 +624678,6 @@
 					}
 				},
 				{
-					"displayName": "DeWind",
-					"id": "dewind-19ecba",
-					"locationSet": {
-						"include": [
-							"us"
-						]
-					},
-					"tags": {
-						"operator": "DeWind",
-						"operator:wikidata": "Q5244167",
-						"power": "generator"
-					}
-				},
-				{
 					"displayName": "Dezentrale Energie Anlagen Beteiligungs- und Verwaltungsgesellschaft mbH",
 					"id": "dezentraleenergieanlagenbeteiligungsundverwaltungsgesellschaftmbh-b8ae25",
 					"locationSet": {
@@ -622740,8 +627146,12 @@
 							"es-z.geojson"
 						]
 					},
+					"matchNames": [
+						"forestalia renovables sl"
+					],
 					"tags": {
 						"operator": "Forestalia",
+						"operator:wikidata": "Q133854360",
 						"power": "generator"
 					}
 				},
@@ -623028,23 +627438,6 @@
 					}
 				},
 				{
-					"displayName": "GE Wind",
-					"id": "gewind-19ecba",
-					"locationSet": {
-						"include": [
-							"us"
-						]
-					},
-					"matchNames": [
-						"ge wind energy"
-					],
-					"tags": {
-						"operator": "GE Wind",
-						"operator:wikidata": "Q634056",
-						"power": "generator"
-					}
-				},
-				{
 					"displayName": "Gecalsa",
 					"id": "gecalsa-660d36",
 					"locationSet": {
@@ -623323,23 +627716,6 @@
 					"tags": {
 						"operator": "Golden Spread Electric Cooperative",
 						"operator:wikidata": "Q115691491",
-						"power": "generator"
-					}
-				},
-				{
-					"displayName": "Goldwind",
-					"id": "goldwind-19ecba",
-					"locationSet": {
-						"include": [
-							"us"
-						]
-					},
-					"matchNames": [
-						"goldwind usa nwe"
-					],
-					"tags": {
-						"operator": "Goldwind",
-						"operator:wikidata": "Q1090900",
 						"power": "generator"
 					}
 				},
@@ -632626,6 +637002,7 @@
 						"^enercon$",
 						"^entergy corporation and shell wind corporation$",
 						"^gamesa$",
+						"^ge wind$",
 						"^nordex$",
 						"^private?$",
 						"^siemens gamesa$",
@@ -739253,19 +743630,14 @@
 				},
 				{
 					"displayName": "\u010cesk\u00e9 dr\u00e1hy",
-					"id": "ceskedrahy-fb3809",
+					"id": "ceskedrahy-954af4",
 					"locationSet": {
 						"include": [
-							"cz"
+							"001"
 						]
 					},
-					"matchNames": [
-						"cz:\u010dd"
-					],
 					"tags": {
 						"operator": "\u010cesk\u00e9 dr\u00e1hy",
-						"operator:short": "\u010cD",
-						"operator:wikidata": "Q304944",
 						"route": "railway"
 					}
 				},
@@ -740062,16 +744434,14 @@
 				},
 				{
 					"displayName": "\u017delezni\u010dn\u00e1 spolo\u010dnos\u0165 Slovensko",
-					"id": "zeleznicnaspolocnostslovensko-ae10a0",
+					"id": "zeleznicnaspolocnostslovensko-954af4",
 					"locationSet": {
 						"include": [
-							"sk"
+							"001"
 						]
 					},
 					"tags": {
 						"operator": "\u017delezni\u010dn\u00e1 spolo\u010dnos\u0165 Slovensko",
-						"operator:short": "ZSSK",
-						"operator:wikidata": "Q393557",
 						"route": "railway"
 					}
 				},
@@ -740957,6 +745327,9 @@
 							"in"
 						]
 					},
+					"matchNames": [
+						"archeological survey of india"
+					],
 					"tags": {
 						"operator": "Archaeological Survey of India",
 						"operator:en": "Archaeological Survey of India",
@@ -742978,6 +747351,9 @@
 							"in"
 						]
 					},
+					"matchNames": [
+						"archeological survey of india"
+					],
 					"tags": {
 						"operator": "Archaeological Survey of India",
 						"operator:en": "Archaeological Survey of India",
@@ -745832,11 +750208,10 @@
 						"amt (barcelona)",
 						"atm (autoritat del transport metropolit\u00e0 de l'\u00e0rea de barcelona)"
 					],
-					"note": "Barcelona, Spain",
 					"tags": {
 						"highway": "bus_stop",
 						"network": "Autoritat del Transport Metropolit\u00e0 de l'\u00c0rea de Barcelona",
-						"network:short": "ATM",
+						"network:short": "ATM Barcelona",
 						"network:wikidata": "Q1845633"
 					}
 				},
@@ -750246,7 +754621,6 @@
 					"tags": {
 						"highway": "bus_stop",
 						"network": "Consorcio de Transportes del \u00c1rea de Zaragoza",
-						"network:guid": "ES-AR-Z-CTAZ",
 						"network:short": "CTAZ",
 						"network:wikidata": "Q5784328"
 					}
@@ -753443,7 +757817,7 @@
 						"network": "Gooi- en Vechtstreek",
 						"network:wikidata": "Q108723753",
 						"operator": "Transdev",
-						"operator:wikidata": "Q442637"
+						"operator:wikidata": "Q131179812"
 					}
 				},
 				{
@@ -757896,6 +762270,28 @@
 					}
 				},
 				{
+					"displayName": "MAD Pie\u0161\u0165any",
+					"fromTemplate": true,
+					"id": "mestskaautobusovadopravapiestany-de2bb4",
+					"locationSet": {
+						"include": [
+							"sk"
+						]
+					},
+					"matchNames": [
+						"mhd piestany"
+					],
+					"note": "ISO 3166-2 SK-TA",
+					"tags": {
+						"highway": "bus_stop",
+						"network": "Mestsk\u00e1 autobusov\u00e1 doprava Pie\u0161\u0165any",
+						"network:short": "MAD Pie\u0161\u0165any",
+						"network:wikidata": "Q110521796",
+						"operator": "Arriva Trnava",
+						"operator:wikidata": "Q131698585"
+					}
+				},
+				{
 					"displayName": "MAD T\u0159eb\u00ed\u010d",
 					"fromTemplate": true,
 					"id": "madtrebic-147fb6",
@@ -759267,18 +763663,19 @@
 				{
 					"displayName": "MHD Bratislava",
 					"fromTemplate": true,
-					"id": "mhdbratislava-a92fd9",
+					"id": "mhdbratislava-331781",
 					"locationSet": {
 						"include": [
-							"at-3.geojson",
-							"hu",
 							"sk-bl.geojson"
 						]
 					},
 					"tags": {
 						"highway": "bus_stop",
 						"network": "MHD Bratislava",
-						"network:wikidata": "Q7258005"
+						"network:wikidata": "Q7258005",
+						"operator": "Dopravn\u00fd podnik Bratislava",
+						"operator:short": "DPB",
+						"operator:wikidata": "Q685601"
 					}
 				},
 				{
@@ -759596,24 +763993,6 @@
 						"operator": "Dopravn\u00ed podnik m\u011bsta Pardubic",
 						"operator:short": "DPMP",
 						"operator:wikidata": "Q11822119"
-					}
-				},
-				{
-					"displayName": "MHD Pie\u0161\u0165any",
-					"fromTemplate": true,
-					"id": "mhdpiestany-de2bb4",
-					"locationSet": {
-						"include": [
-							"sk"
-						]
-					},
-					"note": "ISO 3166-2 SK-TA",
-					"tags": {
-						"highway": "bus_stop",
-						"network": "MHD Pie\u0161\u0165any",
-						"network:wikidata": "Q110521796",
-						"operator": "Arriva Trnava",
-						"operator:wikidata": "Q131698585"
 					}
 				},
 				{
@@ -760999,9 +765378,9 @@
 					}
 				},
 				{
-					"displayName": "MUV",
+					"displayName": "MUV - Mobilidade Urbana de Viseu",
 					"fromTemplate": true,
-					"id": "muv-9b939b",
+					"id": "mobilidadeurbanadeviseu-9b939b",
 					"locationSet": {
 						"include": [
 							"pt-18.geojson"
@@ -761009,7 +765388,8 @@
 					},
 					"tags": {
 						"highway": "bus_stop",
-						"network": "MUV",
+						"network": "Mobilidade Urbana de Viseu",
+						"network:short": "MUV",
 						"network:wikidata": "Q63247817"
 					}
 				},
@@ -767631,7 +772011,21 @@
 					}
 				},
 				{
-					"displayName": "SN'go",
+					"displayName": "SNG",
+					"fromTemplate": true,
+					"id": "sng-2e0a96",
+					"locationSet": {
+						"include": [
+							"de-th.geojson"
+						]
+					},
+					"tags": {
+						"highway": "bus_stop",
+						"network": "SNG"
+					}
+				},
+				{
+					"displayName": "SNgo!",
 					"fromTemplate": true,
 					"id": "sngo-3e832a",
 					"locationSet": {
@@ -767644,22 +772038,8 @@
 					],
 					"tags": {
 						"highway": "bus_stop",
-						"network": "SN'go",
+						"network": "SNgo!",
 						"network:wikidata": "Q86669125"
-					}
-				},
-				{
-					"displayName": "SNG",
-					"fromTemplate": true,
-					"id": "sng-2e0a96",
-					"locationSet": {
-						"include": [
-							"de-th.geojson"
-						]
-					},
-					"tags": {
-						"highway": "bus_stop",
-						"network": "SNG"
 					}
 				},
 				{
@@ -768781,6 +773161,22 @@
 						"highway": "bus_stop",
 						"network": "STTR",
 						"network:wikidata": "Q3488031"
+					}
+				},
+				{
+					"displayName": "STUV - Servi\u00e7o de Trasportes Urbanos de Viseu",
+					"fromTemplate": true,
+					"id": "servicodetrasportesurbanosdeviseu-9b939b",
+					"locationSet": {
+						"include": [
+							"pt-18.geojson"
+						]
+					},
+					"tags": {
+						"highway": "bus_stop",
+						"network": "Servi\u00e7o de Trasportes Urbanos de Viseu",
+						"network:short": "STUV",
+						"network:wikidata": "Q10370644"
 					}
 				},
 				{
@@ -781414,7 +785810,7 @@
 						"highway": "bus_stop",
 						"network": "\u9f8d\u904b\u6a5f\u5834\u5df4\u58eb Long Win Bus",
 						"network:en": "Long Win Bus",
-						"network:short": "LBW",
+						"network:short": "LWB",
 						"network:wikidata": "Q6673423",
 						"network:yue": "\u9f8d\u904b\u6a5f\u5834\u5df4\u58eb"
 					}
@@ -783114,13 +787510,15 @@
 							"dz"
 						]
 					},
-					"matchNames": [
-						"ratp"
-					],
 					"tags": {
 						"network": "M\u00e9tro d'Alger",
+						"network:ar": "\u0645\u062a\u0631\u0648 \u0627\u0644\u062c\u0632\u0627\u0626\u0631",
+						"network:fr": "M\u00e9tro d'Alger",
 						"network:wikidata": "Q728045",
-						"operator": "RATP El Djaza\u00efr",
+						"operator": "M\u00e9tro El Djaza\u00efr",
+						"operator:ar": "\u0645\u062a\u0631\u0648 \u0627\u0644\u062c\u0632\u0627\u0626\u0631",
+						"operator:fr": "M\u00e9tro El Djaza\u00efr",
+						"operator:wikidata": "Q109315002",
 						"public_transport": "station",
 						"railway": "station",
 						"station": "subway",
@@ -785682,6 +790080,39 @@
 					}
 				},
 				{
+					"displayName": "IDESKA",
+					"fromTemplate": true,
+					"id": "ideska-7b933d",
+					"locationSet": {
+						"include": [
+							"cz-31.geojson"
+						]
+					},
+					"tags": {
+						"network": "IDESKA",
+						"network:wikidata": "Q138862649",
+						"railway": "halt",
+						"train": "yes"
+					}
+				},
+				{
+					"displayName": "IDOK",
+					"fromTemplate": true,
+					"id": "integrovanadopravakarlovarskehokraje-6b2253",
+					"locationSet": {
+						"include": [
+							"cz-41.geojson"
+						]
+					},
+					"tags": {
+						"network": "Integrovan\u00e1 doprava Karlovarsk\u00e9ho kraje",
+						"network:short": "IDOK",
+						"network:wikidata": "Q12021681",
+						"railway": "halt",
+						"train": "yes"
+					}
+				},
+				{
 					"displayName": "IDOL",
 					"fromTemplate": true,
 					"id": "integrovanadopravalibereckehokraje-074fbe",
@@ -785806,6 +790237,25 @@
 					}
 				},
 				{
+					"displayName": "ODIS",
+					"fromTemplate": true,
+					"id": "integrovanydopravnisystemmoravskoslezskehokraje-2741b9",
+					"locationSet": {
+						"include": [
+							"cz-71.geojson",
+							"cz-72.geojson",
+							"cz-80.geojson"
+						]
+					},
+					"tags": {
+						"network": "Integrovan\u00fd dopravn\u00ed syst\u00e9m Moravskoslezsk\u00e9ho kraje",
+						"network:short": "ODIS",
+						"network:wikidata": "Q12043044",
+						"railway": "halt",
+						"train": "yes"
+					}
+				},
+				{
 					"displayName": "Pra\u017esk\u00e1 integrovan\u00e1 doprava",
 					"fromTemplate": true,
 					"id": "prazskaintegrovanadoprava-4617fb",
@@ -785821,6 +790271,23 @@
 						"network": "Pra\u017esk\u00e1 integrovan\u00e1 doprava",
 						"network:short": "PID",
 						"network:wikidata": "Q2108171",
+						"railway": "halt",
+						"train": "yes"
+					}
+				},
+				{
+					"displayName": "VDV",
+					"fromTemplate": true,
+					"id": "verejnadopravavysociny-e2ce8a",
+					"locationSet": {
+						"include": [
+							"cz-63.geojson"
+						]
+					},
+					"tags": {
+						"network": "Ve\u0159ejn\u00e1 doprava Vyso\u010diny",
+						"network:short": "VDV",
+						"network:wikidata": "Q85938572",
 						"railway": "halt",
 						"train": "yes"
 					}
@@ -785873,15 +790340,19 @@
 					"note": "railway=halt is a relatively rare tag, so only create it for route/train whitelisted here",
 					"templateInclude": [
 						"dopravausteckehokraje",
+						"ideska",
+						"integrovanadopravakarlovarskehokraje",
 						"integrovanadopravalibereckehokraje",
 						"integrovanadopravaplzenskehokraje",
 						"integrovanadopravazlinskehokraje",
 						"integrovanaregionalnidopravakralovehradeckehoapardubickehokraje",
 						"integrovanydopravnisystemjihomoravskehokraje",
+						"integrovanydopravnisystemmoravskoslezskehokraje",
 						"integrovanydopravnisystemolomouckehokraje",
 						"integrovanydopravnysystemplus",
 						"prazskaintegrovanadoprava",
-						"ukrainianrailways"
+						"ukrainianrailways",
+						"verejnadopravavysociny"
 					],
 					"templateSource": "transit/route/train",
 					"templateTags": {
@@ -788942,27 +793413,6 @@
 					}
 				},
 				{
-					"displayName": "RegioJet",
-					"fromTemplate": true,
-					"id": "regiojet-bb8ba7",
-					"locationSet": {
-						"include": [
-							"be",
-							"cz",
-							"lu",
-							"pl"
-						]
-					},
-					"tags": {
-						"network": "RegioJet",
-						"network:short": "RJ",
-						"network:wikidata": "Q221186",
-						"public_transport": "station",
-						"railway": "station",
-						"train": "yes"
-					}
-				},
-				{
 					"displayName": "Regionaal spoorvervoer Frysl\u00e2n en Groningen",
 					"fromTemplate": true,
 					"id": "regionaalspoorvervoerfryslanengroningen-c1189c",
@@ -791736,7 +796186,10 @@
 				{
 					"note": "Auto create railway/station for all route/train - #7576, #4765",
 					"templateExclude": [
-						"european sleeper"
+						"european sleeper",
+						"leo expres",
+						"regiojet",
+						"zeleznicna spolocnost slovensko"
 					],
 					"templateSource": "transit/route/train",
 					"templateTags": {
@@ -795463,10 +799916,9 @@
 						"amt (barcelona)",
 						"atm (autoritat del transport metropolit\u00e0 de l'\u00e0rea de barcelona)"
 					],
-					"note": "Barcelona, Spain",
 					"tags": {
 						"network": "Autoritat del Transport Metropolit\u00e0 de l'\u00c0rea de Barcelona",
-						"network:short": "ATM",
+						"network:short": "ATM Barcelona",
 						"network:wikidata": "Q1845633",
 						"route": "bus"
 					}
@@ -799616,7 +804068,6 @@
 					},
 					"tags": {
 						"network": "Consorcio de Transportes del \u00c1rea de Zaragoza",
-						"network:guid": "ES-AR-Z-CTAZ",
 						"network:short": "CTAZ",
 						"network:wikidata": "Q5784328",
 						"route": "bus"
@@ -802612,7 +807063,7 @@
 						"network": "Gooi- en Vechtstreek",
 						"network:wikidata": "Q108723753",
 						"operator": "Transdev",
-						"operator:wikidata": "Q442637",
+						"operator:wikidata": "Q131179812",
 						"route": "bus"
 					}
 				},
@@ -806787,6 +811238,27 @@
 					}
 				},
 				{
+					"displayName": "MAD Pie\u0161\u0165any",
+					"id": "mestskaautobusovadopravapiestany-51c51c",
+					"locationSet": {
+						"include": [
+							"sk"
+						]
+					},
+					"matchNames": [
+						"mhd piestany"
+					],
+					"note": "ISO 3166-2 SK-TA",
+					"tags": {
+						"network": "Mestsk\u00e1 autobusov\u00e1 doprava Pie\u0161\u0165any",
+						"network:short": "MAD Pie\u0161\u0165any",
+						"network:wikidata": "Q110521796",
+						"operator": "Arriva Trnava",
+						"operator:wikidata": "Q131698585",
+						"route": "bus"
+					}
+				},
+				{
 					"displayName": "MAD T\u0159eb\u00ed\u010d",
 					"id": "madtrebic-a45453",
 					"locationSet": {
@@ -808079,17 +812551,18 @@
 				},
 				{
 					"displayName": "MHD Bratislava",
-					"id": "mhdbratislava-ce8ad1",
+					"id": "mhdbratislava-55fe1b",
 					"locationSet": {
 						"include": [
-							"at-3.geojson",
-							"hu",
 							"sk-bl.geojson"
 						]
 					},
 					"tags": {
 						"network": "MHD Bratislava",
 						"network:wikidata": "Q7258005",
+						"operator": "Dopravn\u00fd podnik Bratislava",
+						"operator:short": "DPB",
+						"operator:wikidata": "Q685601",
 						"route": "bus"
 					}
 				},
@@ -808388,23 +812861,6 @@
 						"operator": "Dopravn\u00ed podnik m\u011bsta Pardubic",
 						"operator:short": "DPMP",
 						"operator:wikidata": "Q11822119",
-						"route": "bus"
-					}
-				},
-				{
-					"displayName": "MHD Pie\u0161\u0165any",
-					"id": "mhdpiestany-51c51c",
-					"locationSet": {
-						"include": [
-							"sk"
-						]
-					},
-					"note": "ISO 3166-2 SK-TA",
-					"tags": {
-						"network": "MHD Pie\u0161\u0165any",
-						"network:wikidata": "Q110521796",
-						"operator": "Arriva Trnava",
-						"operator:wikidata": "Q131698585",
 						"route": "bus"
 					}
 				},
@@ -809706,15 +814162,16 @@
 					}
 				},
 				{
-					"displayName": "MUV",
-					"id": "muv-fdc094",
+					"displayName": "MUV - Mobilidade Urbana de Viseu",
+					"id": "mobilidadeurbanadeviseu-fdc094",
 					"locationSet": {
 						"include": [
 							"pt-18.geojson"
 						]
 					},
 					"tags": {
-						"network": "MUV",
+						"network": "Mobilidade Urbana de Viseu",
+						"network:short": "MUV",
 						"network:wikidata": "Q63247817",
 						"route": "bus"
 					}
@@ -815936,7 +820393,20 @@
 					}
 				},
 				{
-					"displayName": "SN'go",
+					"displayName": "SNG",
+					"id": "sng-d9bf75",
+					"locationSet": {
+						"include": [
+							"de-th.geojson"
+						]
+					},
+					"tags": {
+						"network": "SNG",
+						"route": "bus"
+					}
+				},
+				{
+					"displayName": "SNgo!",
 					"id": "sngo-6efcc0",
 					"locationSet": {
 						"include": [
@@ -815947,21 +820417,8 @@
 						"transcape"
 					],
 					"tags": {
-						"network": "SN'go",
+						"network": "SNgo!",
 						"network:wikidata": "Q86669125",
-						"route": "bus"
-					}
-				},
-				{
-					"displayName": "SNG",
-					"id": "sng-d9bf75",
-					"locationSet": {
-						"include": [
-							"de-th.geojson"
-						]
-					},
-					"tags": {
-						"network": "SNG",
 						"route": "bus"
 					}
 				},
@@ -817012,6 +821469,21 @@
 					"tags": {
 						"network": "STTR",
 						"network:wikidata": "Q3488031",
+						"route": "bus"
+					}
+				},
+				{
+					"displayName": "STUV - Servi\u00e7o de Trasportes Urbanos de Viseu",
+					"id": "servicodetrasportesurbanosdeviseu-fdc094",
+					"locationSet": {
+						"include": [
+							"pt-18.geojson"
+						]
+					},
+					"tags": {
+						"network": "Servi\u00e7o de Trasportes Urbanos de Viseu",
+						"network:short": "STUV",
+						"network:wikidata": "Q10370644",
 						"route": "bus"
 					}
 				},
@@ -828904,7 +833376,7 @@
 					"tags": {
 						"network": "\u9f8d\u904b\u6a5f\u5834\u5df4\u58eb Long Win Bus",
 						"network:en": "Long Win Bus",
-						"network:short": "LBW",
+						"network:short": "LWB",
 						"network:wikidata": "Q6673423",
 						"network:yue": "\u9f8d\u904b\u6a5f\u5834\u5df4\u58eb",
 						"route": "bus"
@@ -831342,13 +835814,15 @@
 							"dz"
 						]
 					},
-					"matchNames": [
-						"ratp"
-					],
 					"tags": {
 						"network": "M\u00e9tro d'Alger",
+						"network:ar": "\u0645\u062a\u0631\u0648 \u0627\u0644\u062c\u0632\u0627\u0626\u0631",
+						"network:fr": "M\u00e9tro d'Alger",
 						"network:wikidata": "Q728045",
-						"operator": "RATP El Djaza\u00efr",
+						"operator": "M\u00e9tro El Djaza\u00efr",
+						"operator:ar": "\u0645\u062a\u0631\u0648 \u0627\u0644\u062c\u0632\u0627\u0626\u0631",
+						"operator:fr": "M\u00e9tro El Djaza\u00efr",
+						"operator:wikidata": "Q109315002",
 						"route": "subway"
 					}
 				},
