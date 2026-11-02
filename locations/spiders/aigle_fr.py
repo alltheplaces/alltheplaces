@@ -9,12 +9,11 @@ from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
 
-class AigleSpider(Spider):
-    name = "aigle"
-    item_attributes = {"brand_wikidata": "Q404391"}
+class AigleFRSpider(Spider):
+    name = "aigle_fr"
+    item_attributes = {"brand": "Aigle", "brand_wikidata": "Q404391"}
 
     async def start(self) -> AsyncIterator[Request]:
-        # The other Aigle sites (BE, UK, EU) list no stores or the same French ones.
         yield Request(
             "https://www.aigle.com/on/demandware.store/Sites-aigle-fr-Site/fr_FR/Stores-InitMarkersMap",
             method="POST",
