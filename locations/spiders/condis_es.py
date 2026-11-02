@@ -1,44 +1,48 @@
 import re
+from collections import Counter
+from typing import Any
 
-from scrapy.http import JsonRequest
+from scrapy.http import Response
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_ES, OpeningHours, sanitise_day
+from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
 
 
 class CondisESSpider(Spider):
     name = "condis_es"
-    custom_settings = {"ROBOTSTXT_OBEY": False}
     item_attributes = {"brand": "Condis", "brand_wikidata": "Q57417581"}
-    start_urls = ["https://www.condis.es/data/get-tiendas.php"]
+    start_urls = ["https://www.condis.es/wp-content/uploads/condis/stores-finder-es.json"]
 
-    def parse(self, response):
-        for location in response.json():
-            yield JsonRequest(
-                url="https://www.condis.es/ficha/" + str(location["id"]),
-                cb_kwargs=dict(location=location),
-                callback=self.store_data,
-            )
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        data = response.json()
+        phones = Counter(store[8] for store in data["stores"])
+        for ref, store in enumerate(data["stores"]):
+            if data["brands"][store[2]] == "condisline":
+                continue
+            item = Feature()
+            item["ref"] = str(ref)
+            item["city"] = data["places"][store[1]]
+            item["postcode"] = store[4]
+            item["street_address"] = store[5]
+            item["lat"] = store[11]
+            item["lon"] = store[12]
+            if data["zones"][store[0]] == "and":
+                item["country"] = "AD"
+            if phones[store[8]] == 1:
+                item["phone"] = store[8]
 
-    def store_data(self, response, location):
-        item = DictParser.parse(location)
-        item["street_address"] = location["calle"]
-        item["city"] = location["ciudad"]
-        item["postcode"] = location["cp"]
-        item["website"] = response.url
+            days_hours = store[6] if isinstance(store[6], list) else [store[6]] * 7
+            oh = OpeningHours()
+            for day, hours in zip(DAYS, days_hours):
+                if "cerrado" in hours.lower() and not re.search(r"\d", hours):
+                    oh.set_closed(day)
+                    continue
+                for start, end in re.findall(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", hours):
+                    oh.add_range(day, start, end)
+            if oh.day_hours:
+                item["opening_hours"] = oh
 
-        item["opening_hours"] = OpeningHours()
-        for timing in response.xpath('//table//table//td[@class="force-col"]'):
-            opening_hours = timing.xpath(".//table//tr//td/text()").getall()
-            if len(opening_hours) > 1:
-                if day := sanitise_day(opening_hours[0].strip(), DAYS_ES):
-                    for hours in opening_hours[1:]:
-                        # e.g. 09:00-14:00-21:00 replaced by 09:00-21:00
-                        hours = re.sub(r"(\d+:\d+)[-\s]+\d+:\d+[-\s]+(\d+:\d+)", r"\1-\2", hours.strip())
-
-                        if match := re.search(r"(\d+:\d+)[-\s]+(\d+:\d+)", hours):
-                            item["opening_hours"].add_range(day, match.group(1), match.group(2))
-        apply_category(Categories.SHOP_SUPERMARKET, item)
-        yield item
+            apply_category(Categories.SHOP_SUPERMARKET, item)
+            yield item
