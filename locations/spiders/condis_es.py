@@ -41,8 +41,7 @@ class CondisESSpider(Spider):
                     continue
                 for start, end in re.findall(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", hours):
                     oh.add_range(day, start, end)
-            if oh.day_hours:
-                item["opening_hours"] = oh
+            item["opening_hours"] = oh
 
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item
