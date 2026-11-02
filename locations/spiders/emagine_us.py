@@ -39,9 +39,7 @@ class EmagineUSSpider(Spider):
         # The page also lists a separate automated "Showtimes" hotline; only the
         # "Phone Number" entry is the theatre's own contact number.
         item["phone"] = (
-            response.xpath('//h4[normalize-space()="Phone Number"]/following-sibling::p[1]/a/@href')
-            .get(default="")
-            .removeprefix("tel:")
+            response.xpath('//h4[normalize-space()="Phone Number"]/following-sibling::p[1]/a/@href').get(default="")
             or None
         )
 

@@ -8,16 +8,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# The locations page is a Webflow collection. Every restaurant is a card with
-# its coordinates and city in data attributes, the address split across inline
-# divs, and the hours as free text.
-#
-# Restaurants that have not opened yet, and temporarily closed ones, are marked
-# by a tag that Webflow leaves in the markup and hides with the
-# w-condition-invisible class, so the visible tag is what identifies them.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class HawaiianBrosUSSpider(Spider):
     name = "hawaiian_bros_us"
@@ -103,14 +93,9 @@ class HawaiianBrosUSSpider(Spider):
             if day_names:
                 oh.add_days_range(
                     day_names,
-                    HawaiianBrosUSSpider.normalise_time(open_time),
-                    HawaiianBrosUSSpider.normalise_time(close_time),
-                    time_format="%I:%M%p",
+                    open_time,
+                    close_time,
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

@@ -7,16 +7,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
-# The locations page carries each restaurant's coordinates on its map bubble,
-# which also links to the restaurant's page. Those pages hold a schema.org
-# FoodEstablishment record with the address, phone and hours, but no geo, so
-# the coordinates are carried over from the listing.
-#
-# The record's hours are written with seconds, and the restaurants that close
-# at midnight give "00:00:00" rather than a 24 hour closing time.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class CityWorksUSSpider(StructuredDataSpider):
     name = "city_works_us"
@@ -27,7 +17,6 @@ class CityWorksUSSpider(StructuredDataSpider):
     time_format = "%H:%M:%S"
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_email = False
     search_for_image = False
 

@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # The first section on the page is an overview listing every address, so a
 # section is only read when it names a single restaurant.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 PHONE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
@@ -94,14 +92,9 @@ class SwadleysBbqUSSpider(Spider):
                     continue
                 oh.add_days_range(
                     day_range(start, end),
-                    SwadleysBbqUSSpider.normalise_time(rule.group(3)),
-                    SwadleysBbqUSSpider.normalise_time(rule.group(4)),
-                    time_format="%I:%M%p",
+                    rule.group(3),
+                    rule.group(4),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

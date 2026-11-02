@@ -30,6 +30,6 @@ class ZebrosZASpider(Spider):
                 if branch_name := tooltip.xpath("//h3/text()").get().removeprefix("Zebro's").strip():
                     properties["branch"] = branch_name
                 properties["addr_full"] = tooltip.xpath("//p/text()").get()
-                properties["phone"] = tooltip.xpath('//a[contains(@href, "tel:")]/@href').get().removeprefix("tel:")
+                properties["phone"] = tooltip.xpath('//a[contains(@href, "tel:")]/@href').get()
             apply_category(Categories.FAST_FOOD, properties)
             yield Feature(**properties)

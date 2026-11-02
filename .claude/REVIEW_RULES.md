@@ -229,6 +229,8 @@ These apply to both new spiders and fixes. Sample the CI output GeoJSON before a
 - **`addr:street_address`** should not contain the city, postcode, or country - those belong
   in their own fields. Flag if DictParser or structured data is collapsing the full address
   into a single field.
+- Build `addr_full`/`street_address` from several source parts with `merge_address_lines` rather than a hand-written
+  `", ".join(filter(None, ...))` or strip-and-filter comprehension.
 - Do not put `None`, empty strings, or `"null"` into address fields - omit the field entirely.
 
 ### Phone / email / website

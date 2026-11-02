@@ -7,7 +7,7 @@ from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 logger = logging.getLogger(__name__)
@@ -317,16 +317,6 @@ class SMarketFISpider(Spider):
         remainder = tail or head
         return (remainder or None), (name if remainder else None)
 
-    DAY_MAP = {
-        "MON": "Mo",
-        "TUE": "Tu",
-        "WED": "We",
-        "THU": "Th",
-        "FRI": "Fr",
-        "SAT": "Sa",
-        "SUN": "Su",
-    }
-
     def parse_hours(self, weeks: list[dict]) -> OpeningHours | str | None:
         # weeks[0] is the current week: holiday, renovation and pre-opening
         # deviations baked into it must not become the timetable (cf. Alepa
@@ -341,7 +331,7 @@ class SMarketFISpider(Spider):
             for entry in week.get("openingTimes") or []:
                 if not isinstance(entry, dict):
                     continue
-                day = self.DAY_MAP.get((entry.get("day") or "").upper())
+                day = sanitise_day(entry.get("day"))
                 if not day:
                     self.crawler.stats.inc_value("atp/s_market_fi/hours/unknown_day")
                     continue

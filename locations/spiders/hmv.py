@@ -21,7 +21,6 @@ class HmvSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["street_address"] = merge_address_lines([feature["addressOne"], feature["addressTwo"]])
-        #        item["instagram"] = feature["Instagram"]
         item["branch"] = item.pop("name").replace("hmv ", "")
         item["twitter"] = feature["twitter"]
 

@@ -56,7 +56,7 @@ class DjhDESpider(SitemapSpider):
 
         email = response.css("div.contact-box__reachability a[href^='mailto:']::attr(href)").get()
         if email:
-            email = email.replace("mailto:", "").strip()
+            email = email.strip()
 
         # Canonical hostel URL: strip /portraet suffix
         website = re.sub(r"/portraet$", "/", response.url)

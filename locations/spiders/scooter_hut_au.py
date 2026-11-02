@@ -19,7 +19,7 @@ class ScooterHutAUSpider(Spider):
             item["addr_full"] = (
                 store.xpath('.//p[contains(text(), "Address")]/text()').get("").replace("Address:", "").strip()
             )
-            item["email"] = store.xpath('.//a[starts-with(@href, "mailto:")]/@href').get("").replace("mailto:", "")
+            item["email"] = store.xpath('.//a[starts-with(@href, "mailto:")]/@href').get("")
             item["phone"] = store.xpath('.//p[contains(text(), "Phone")]//a/text()').get()
 
             if destination := store.xpath('.//a[contains(@href, "destination=")]/@href').re_first(

@@ -17,8 +17,6 @@ from locations.items import Feature
 # commas, sometimes split across lines by a <br>, sometimes with no comma
 # between street and city, and the stadium concession adds a venue name and a
 # note.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 
 class BurgatoryUSSpider(Spider):
@@ -124,14 +122,9 @@ class BurgatoryUSSpider(Spider):
             if day_names:
                 oh.add_days_range(
                     day_names,
-                    BurgatoryUSSpider.normalise_time(times.group(1)),
-                    BurgatoryUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").lower()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

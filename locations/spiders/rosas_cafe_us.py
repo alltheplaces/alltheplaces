@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -8,18 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
-
-# The store locator is initialised from an ajax/locations.json endpoint which
-# returns the whole chain in one response.
-#
-# The endpoint reuses two of its ids for different restaurants, so the postcode
-# is appended to the ref.
-#
-# Hours are split across up to three free text fields, e.g. "Sun - Thurs:
-# 6:30am - 10pm" and "Fri & Sat: 6:30am - 11pm"; one restaurant uses the first
-# field for an opening announcement instead.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class RosasCafeUSSpider(Spider):
@@ -28,7 +17,7 @@ class RosasCafeUSSpider(Spider):
     allowed_domains = ["www.rosascafe.com"]
     start_urls = ["https://www.rosascafe.com/ajax/locations.json"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -41,7 +30,7 @@ class RosasCafeUSSpider(Spider):
             item["branch"] = location.get("name")
             item["name"] = None
             item.pop("addr_full", None)
-            item["street_address"] = ", ".join(
+            item["street_address"] = merge_address_lines(
                 part.strip() for part in [location.get("address"), location.get("address2")] if part and part.strip()
             )
 
@@ -77,14 +66,9 @@ class RosasCafeUSSpider(Spider):
             if days:
                 oh.add_days_range(
                     days,
-                    RosasCafeUSSpider.normalise_time(times.group(1)),
-                    RosasCafeUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

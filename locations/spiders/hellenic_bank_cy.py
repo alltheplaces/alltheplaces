@@ -14,7 +14,6 @@ class HellenicBankCYSpider(PlaywrightSpider):
     item_attributes = {"brand_wikidata": "Q5707160"}
     start_urls = ["https://www.hellenicbank.com/el/personal/locations"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in chompjs.parse_js_object(

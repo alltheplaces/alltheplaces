@@ -5,6 +5,8 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_JP, OpeningHours, sanitise_day
+from locations.items import Feature
 
 
 class SugiPharmacyJPSpider(Spider):
@@ -48,7 +50,25 @@ class SugiPharmacyJPSpider(Spider):
             else:
                 apply_category(Categories.PHARMACY, item)
 
-            yield item
+            yield JsonRequest(
+                url=f"https://bff.sugi-net.jp/stores/{loc['id']}",
+                callback=self.parse_details,
+                cb_kwargs={"item": item},
+            )
 
         if len(response.json()["stores"]) >= 10:
             yield self.make_request(response.meta["page"] + 1)
+
+    def parse_details(self, response: Response, item: Feature, **kwargs: Any) -> Any:
+        if store_info := response.json().get("storeInfo"):
+            item["phone"] = store_info[0].get("tel")
+            oh = OpeningHours()
+            for hours in store_info[0]["businessHours"]:
+                if day := sanitise_day(hours["dow"], DAYS_JP):
+                    if hours["businessStartTime"] and hours["businessEndTime"]:
+                        oh.add_range(day, hours["businessStartTime"], hours["businessEndTime"])
+                    else:
+                        oh.set_closed(day)
+            if oh.day_hours:
+                item["opening_hours"] = oh
+        yield item

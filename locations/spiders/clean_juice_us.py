@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -7,11 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
-
-# The chain's ordering platform, Novadine, returns every store in one response
-# with address, coordinates, phone and per day hours.
-#
-# Two rows are not stores: a "Gift Card" entry and a "Test Lab".
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CleanJuiceUSSpider(Spider):
@@ -20,7 +16,7 @@ class CleanJuiceUSSpider(Spider):
     allowed_domains = ["order.cleanjuice.com"]
     start_urls = ["https://order.cleanjuice.com/api/stores?all_stores=true"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -35,7 +31,7 @@ class CleanJuiceUSSpider(Spider):
             item["name"] = None
             # "Agoura Hills, CA"
             item["branch"] = name.rsplit(",", 1)[0].strip()
-            item["street_address"] = ", ".join(
+            item["street_address"] = merge_address_lines(
                 part.strip() for part in [location.get("address1"), location.get("address2")] if part and part.strip()
             )
 

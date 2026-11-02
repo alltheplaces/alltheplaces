@@ -5,7 +5,7 @@ from scrapy.http import JsonRequest, Request
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
+from locations.pipelines.address_clean_up import clean_address, merge_address_lines
 
 
 class CrustAUSpider(Spider):
@@ -37,11 +37,9 @@ class CrustAUSpider(Spider):
     def add_store_details(self, response):
         item = response.meta["item"]
         item["website"] = "https://www.crust.com.au" + response.xpath('//div[@class="store_container"]/a/@href').get()
-        item["addr_full"] = " ".join(
-            filter(None, map(str.strip, response.xpath('//div[@class="store_container"]/p[1]/text()').getall()))
-        )
-        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
-        item["email"] = response.xpath('//a[contains(@href, "mailto:")]/@href').get("").replace("mailto:", "")
+        item["addr_full"] = merge_address_lines(response.xpath('//div[@class="store_container"]/p[1]/text()').getall())
+        item["phone"] = response.xpath('//a[contains(@href, "tel:")]/@href').get("")
+        item["email"] = response.xpath('//a[contains(@href, "mailto:")]/@href').get("")
         item["opening_hours"] = OpeningHours()
         try:
             self._parse_hours(response, item)

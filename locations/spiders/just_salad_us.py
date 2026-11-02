@@ -8,11 +8,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
-# Just Salad publishes every location in a single JSON file on its CDN. The
-# feed carries a states lookup table which the address blocks reference by
-# numeric id, and rows for stores that have not opened yet, flagged by
-# "coming_soon".
-
 
 class JustSaladUSSpider(Spider):
     name = "just_salad_us"

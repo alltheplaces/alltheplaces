@@ -6,6 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class LandisSupermarketUSSpider(scrapy.Spider):
@@ -25,7 +26,7 @@ class LandisSupermarketUSSpider(scrapy.Spider):
             address_lines = [line for line in address_lines if line]
             if len(address_lines) >= 2:
                 *street_lines, city_state_zip = address_lines
-                item["street_address"] = ", ".join(street_lines)
+                item["street_address"] = merge_address_lines(street_lines)
                 if m := re.match(r"^(.*?),\s*([A-Z]{2})\s+(\d{5})$", city_state_zip):
                     item["city"], item["state"], item["postcode"] = m.groups()
 

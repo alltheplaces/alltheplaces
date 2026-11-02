@@ -11,9 +11,6 @@ from locations.categories import Categories, Vending, add_vending, apply_categor
 from locations.items import Feature
 
 
-# Open Data of the Land Surveying Office of the City of Bern, Switzerland
-# https://opendata.swiss/en/organization/geoinformation-der-stadt-bern
-# https://opendata.swiss/en/dataset/velo-themen
 class BernCHSpider(Spider):
     name = "bern_ch"
     allowed_domains = ["map.bern.ch"]

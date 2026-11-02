@@ -1,9 +1,12 @@
+import re
+import unicodedata
 from typing import Any, AsyncIterator
 
 import scrapy
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 
 
@@ -51,4 +54,26 @@ class JaBankJPSpider(scrapy.Spider):
             apply_category(Categories.BANK, item)
             item["extras"]["atm"] = atm
 
-            yield item
+            yield scrapy.FormRequest(
+                url="https://map.jabank.org/api/detail",
+                formdata={"code": shop["code"], "type": "1"},
+                callback=self.parse_details,
+                cb_kwargs={"item": item},
+            )
+
+    def parse_details(self, response: Response, item: Feature, **kwargs: Any) -> Any:
+        shop = response.json()["data"]
+        oh = OpeningHours()
+        for days, key in [
+            (DAYS_WEEKDAY, "teller_window_business_hours"),
+            (["Sa"], "teller_window_business_hours2"),
+            (["Su"], "teller_window_business_hours3"),
+        ]:
+            text = unicodedata.normalize("NFKC", shop[key]).strip()
+            if text == "定休日":
+                oh.set_closed(days)
+            elif match := re.fullmatch(r"(\d{1,2}:\d{2})\s*[~〜]\s*(\d{1,2}:\d{2})", text):
+                oh.add_days_range(days, *match.groups())
+        if oh.day_hours:
+            item["opening_hours"] = oh
+        yield item
