@@ -4,11 +4,9 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category, apply_yes_no
-from locations.hours import DAYS_WEEKDAY, OpeningHours
+from locations.hours import DAYS_JP, DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 from locations.storefinders.mapion import MapionSpider
-
-DAYS_JA = {"月": "Mo", "火": "Tu", "水": "We", "木": "Th", "金": "Fr"}
 
 
 class ChugokuBankJPSpider(MapionSpider):
@@ -45,7 +43,7 @@ class ChugokuBankJPSpider(MapionSpider):
             item["branch"] = name
             apply_category(Categories.BANK, item)
             hours, _, note = poi.get("handle_time1", "").partition("※")
-            days = [DAYS_JA[d] for d in re.findall(r"([月火水木金])曜日", note.split("のみ")[0])] or DAYS_WEEKDAY
+            days = [DAYS_JP[d] for d in re.findall(r"([月火水木金])曜日", note.split("のみ")[0])] or DAYS_WEEKDAY
             oh = OpeningHours()
             for times in self.find_ranges(hours):
                 oh.add_days_range(days, *times)
