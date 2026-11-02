@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -26,6 +27,10 @@ class ChocozapJPSpider(Spider):
     def parse(self, response):
         data = response.json()
         for location in data["list"]:
+            if (opening := location.get("grand_opening_at")) and datetime.fromisoformat(opening) > datetime.now(
+                timezone.utc
+            ):
+                continue
             item = Feature()
             item["ref"] = location["hacomono_studio_id"]
             item["branch"] = location["name"]
@@ -33,6 +38,8 @@ class ChocozapJPSpider(Spider):
             item["lat"] = location["coords"]["gmap_y"]
             item["lon"] = location["coords"]["gmap_x"]
             item["website"] = f"https://chocozap.jp/studios/{location['hacomono_studio_id']}"
+            if any(service["label"] == "24時間営業" for service in location["services"]):
+                item["opening_hours"] = "24/7"
             apply_category(Categories.GYM, item)
             yield item
 
