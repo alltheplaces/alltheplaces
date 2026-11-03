@@ -18,6 +18,7 @@ class PetlandUSSpider(WPStoreLocatorSpider):
     days = DAYS_EN
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["email"] = None
         if feature["country"] not in ("USA", "United States"):
             return
         # Default WPSL hours left unedited by most stores
