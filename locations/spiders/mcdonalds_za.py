@@ -22,7 +22,7 @@ class McdonaldsZASpider(Spider):
             if item["website"] == "https://www.mcdonalds.co.za/location/mcdonalds-head-office":
                 continue
 
-            item["name"] = location.xpath(".//h5/text()").get()
+            item["branch"] = location.xpath(".//h5/text()").get("").removeprefix("McDonald's ")
             item["addr_full"] = location.xpath(".//p/text()").get()
             item["phone"] = (
                 location.xpath('.//span[contains(., "Contact Number:")]/text()')
