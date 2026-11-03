@@ -48,6 +48,6 @@ class BramLadageNLSpider(Spider):
                 elif times := re.fullmatch(r"(\d{1,2}:\d{2})\s*–\s*(\d{1,2}:\d{2})", hours.strip()):
                     item["opening_hours"].add_range(day, times.group(1), times.group(2))
 
-            apply_yes_no(Extras.DELIVERY, item, location.attrib.get("data-delivery") == "1", False)
+            apply_yes_no(Extras.DELIVERY, item, location.attrib.get("data-delivery") == "1")
             apply_category(Categories.FAST_FOOD, item)
             yield item
