@@ -317,6 +317,13 @@ do
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
             fi
 
+            # Warn if items with a brand or operator Wikidata ID were not matched to an NSI entry
+            missing_nsi_id=$(jq '.features | map(.properties | select((.brand_wikidata or .operator_wikidata) and .nsi_id == null)) | length' "${OUTFILE}")
+            if [ "${missing_nsi_id}" -gt 0 ]; then
+                nsi_reasons=$(jq --raw-output 'to_entries | map(select(.key | startswith("atp/nsi/") and (startswith("atp/nsi/match_") | not))) | map("\(.key | ltrimstr("atp/nsi/")): \(.value)") | join(", ")' "${STATSFILE}")
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ NSI ID is missing on ${missing_nsi_id} items with a brand or operator Wikidata ID (${nsi_reasons})</li>"
+            fi
+
             # Warn if image/phone/email values are not very unique among the items that have them
             STATS_WARNINGS="${STATS_WARNINGS}$(uniqueness_warning "${OUTFILE}" image 50 "image URLs")"
             STATS_WARNINGS="${STATS_WARNINGS}$(uniqueness_warning "${OUTFILE}" phone 90 "phone numbers")"
