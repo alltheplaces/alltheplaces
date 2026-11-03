@@ -17,8 +17,6 @@ from locations.items import Feature
 #
 # The hours block is followed by a happy hour block, which is not the
 # restaurant's own opening hours.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Z]{2})\s+(\d{5})")
 PHONE = re.compile(r"\d{3}[-.]\d{3}[-.]\d{4}")

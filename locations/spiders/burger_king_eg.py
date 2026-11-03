@@ -42,7 +42,6 @@ class BurgerKingEGSpider(JSONBlobSpider):
         item["phone"] = location["attributes"]["telephone"]
         item["email"] = location["attributes"]["email"]
         item["addr_full"] = location["attributes"]["line1"]
-        # item["country"] = location["attributes"]["country"] # Incorrect country (SA) reported for some locations
 
         apply_category(Categories.FAST_FOOD, item)
         apply_yes_no(Extras.DELIVERY, item, location["attributes"]["delivery-enabled"] == 1, False)

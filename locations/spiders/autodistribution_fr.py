@@ -1,59 +1,39 @@
-from urllib.parse import urlsplit
+import re
+from typing import Any, Iterable
 
-import chompjs
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.hours import CLOSED_FR, DAYS_FR, DELIMITERS_FR, OpeningHours
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class AutodistributionFRSpider(SitemapSpider):
+class AutodistributionFRSpider(SitemapSpider, StructuredDataSpider):
     name = "autodistribution_fr"
     item_attributes = {
         "brand": "Autodistribution",
         "brand_wikidata": "Q139825482",
     }
     sitemap_urls = ["https://www.autodistribution.fr/sitemap.xml"]
-    sitemap_rules = [(r"autodistribution.fr/magasins-pieces-auto/[^/]+", "process_item")]
+    sitemap_rules = [(r"autodistribution\.fr/magasins-pieces-auto/[^/]+$", "parse_sd")]
+    wanted_types = ["AutomotiveBusiness"]
+    search_for_email = False
+    search_for_phone = False
 
-    def process_item(self, response):
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        text = response.text.replace('\\"', '"')
+        if match := re.search(r'"id":(\d+),"latitude":(-?[\d.]+),"longitude":(-?[\d.]+)', text):
+            item["ref"], item["lat"], item["lon"] = match.groups()
 
-        script = response.xpath('//script[contains(text(), "schedule")]/text()').get()
-        if not script:
-            return
-        slug = urlsplit(response.url).path.rstrip("/").rsplit("/", 1)[-1]
+        item.pop("name", None)
 
-        payload = chompjs.parse_js_object(script.replace("&q;", '"'))
-        key = f"G.json.https://backend.production.gcp.autodistribution.fr/api/shop/{slug}?"
-        if key not in payload:
-            return
-        data = payload[key]["body"]
+        if schedule := response.xpath('//svg[contains(@class, "remixicon")]/following-sibling::p/text()').get():
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(
+                schedule.replace("et", " ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR
+            )
 
-        item = DictParser.parse(data)
         apply_category(Categories.SHOP_CAR_REPAIR, item)
-
-        item["branch"] = (item.pop("name", "") or "").removeprefix("autodistribution ")
-
-        if item.get("street_address") is None:
-            if addr_full := item.pop("addr_full", None):
-                item["street_address"] = addr_full
-
-        if item.get("email") is None:
-            item["email"] = data.pop("mail", "")
-
-        item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(
-            data["schedule"].replace("et", " ").split("Atelier")[0], DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR
-        )
-
-        if item.get("lat") is not None:
-            item["lat"] = item.pop("lat", "").replace(",", ".")
-
-        if item.get("lon") is not None:
-            lon = item.pop("lon", "").replace(",", ".")
-            if lon.startswith("."):
-                lon = "0" + lon
-            item["lon"] = lon
-
         yield item

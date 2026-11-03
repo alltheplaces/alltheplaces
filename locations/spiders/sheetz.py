@@ -79,7 +79,6 @@ class SheetzSpider(scrapy.Spider):
                 elif isinstance(v, int):
                     apply_yes_no(f"{tag.value if isinstance(tag, Enum) else tag}={v}", item, True)
             else:
-                # self.crawler.stats.inc_value(f"atp/sheetz/feature/failed/{k}")
                 continue
 
     def parse_24_7(self, item: Feature, features: dict):

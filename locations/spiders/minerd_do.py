@@ -54,9 +54,3 @@ class MinerdDOSpider(Spider):
             apply_category(Categories.SCHOOL, item)
 
             yield item
-
-            # More info?
-            # yield JsonRequest(
-            #                 url="https://apps.minerd.gob.do/Maps/MapsWebServices/PlantaFisicaWS.asmx/getPlantaFisicaDetallesByFilter",
-            #                 data={"parametros": json.dumps([{"ParameterName": "PF.Codigo", "ParameterValue": school["Codigo"]}])},
-            #             )

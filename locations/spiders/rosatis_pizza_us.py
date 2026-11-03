@@ -8,12 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Location pages come from the site's sitemap. They are built with Duda, whose
-# map widget carries the coordinates and the address in data attributes.
-#
-# The hours sit between the address and the phone as free text lines such as
-# "Sunday-Thursday: 11:00am-10:00pm".
-
 
 class RosatisPizzaUSSpider(SitemapSpider):
     name = "rosatis_pizza_us"
@@ -92,14 +86,9 @@ class RosatisPizzaUSSpider(SitemapSpider):
             if days:
                 oh.add_days_range(
                     days,
-                    RosatisPizzaUSSpider.normalise_time(times.group(1)),
-                    RosatisPizzaUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

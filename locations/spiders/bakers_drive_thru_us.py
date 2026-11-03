@@ -11,6 +11,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 LOCATIONS = re.compile(r"var locations\s*=\s*(\[.*?\]);", re.DOTALL)
 DAY = "|".join(DAYS_FULL)
@@ -92,7 +93,7 @@ class BakersDriveThruUSSpider(Spider):
         lines = [line.strip() for line in re.split(r"[\r\n]+", match["head"]) if line.strip()]
         if len(lines) > 1:
             item["city"] = lines[-1]
-            item["street_address"] = ", ".join(lines[:-1])
+            item["street_address"] = merge_address_lines(lines[:-1])
         elif (title := (entry.get("title") or "").strip()) and lines[0].endswith(title):
             # The one run-together address ends with the city the record is titled by.
             item["city"] = title

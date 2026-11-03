@@ -1,6 +1,6 @@
 from typing import Any
 
-from requests import Response
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 

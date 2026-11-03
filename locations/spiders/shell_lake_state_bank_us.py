@@ -50,7 +50,7 @@ class ShellLakeStateBankUSSpider(Spider):
             item["city"] = city
             item["state"] = state
             item["postcode"] = postcode
-            item["phone"] = caption.css("a[href^='tel:']::attr(href)").get("").removeprefix("tel:")
+            item["phone"] = caption.css("a[href^='tel:']::attr(href)").get("")
 
             if store := stores_by_address.get(key):
                 item["lat"] = store["lat"]

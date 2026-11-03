@@ -10,15 +10,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Mamoun's uses a BentoBox store locator, which passes every restaurant to a
-# storeLocatorConfig() call on the locator page as a JavaScript object literal.
-#
-# Unlike the other BentoBox sites, this one leaves structured_hours empty and
-# writes the hours as HTML instead, with "*Take-Out" and "*Delivery" notes
-# alongside the restaurant's own hours.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class MamounsFalafelUSSpider(Spider):
     name = "mamouns_falafel_us"
@@ -74,14 +65,9 @@ class MamounsFalafelUSSpider(Spider):
 
             oh.add_days_range(
                 day_range(start, end),
-                MamounsFalafelUSSpider.normalise_time(rule.group(3)),
-                MamounsFalafelUSSpider.normalise_time(rule.group(4)),
-                time_format="%I:%M%p",
+                rule.group(3),
+                rule.group(4),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

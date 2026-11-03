@@ -11,7 +11,6 @@ class AussieDisposalsAUSpider(Spider):
     name = "aussie_disposals_au"
     item_attributes = {"brand": "Aussie Disposals", "brand_wikidata": "Q117847729"}
     start_urls = ["https://www.aussiedisposals.com.au/"]
-    requires_proxy = "AU"
     no_refs = True
 
     def parse(self, response: Response) -> Iterable[Feature]:

@@ -9,6 +9,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 COUNTRY_CODES = {
     "Botswana": "BW",
@@ -37,11 +38,9 @@ class StyleFashionZASpider(Spider):
 
             item["branch"] = re.sub(r"^(?:BW|NA|SW)\s+|\s*\([A-Z]\d+\)$", "", item.pop("name", "")).strip() or None
 
-            address_parts = [
-                re.sub(r"^Style\b\s*", "", part or "").strip()
-                for part in (location.get("address"), location.get("address2"))
-            ]
-            item["street_address"] = ", ".join(part for part in address_parts if part)
+            item["street_address"] = merge_address_lines(
+                [re.sub(r"^Style\b\s*", "", part or "") for part in (location.get("address"), location.get("address2"))]
+            )
             item.pop("addr_full", None)
 
             if (postcode := item.get("postcode")) and not postcode.strip("0"):

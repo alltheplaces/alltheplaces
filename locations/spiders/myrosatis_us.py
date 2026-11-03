@@ -31,8 +31,6 @@ CLOSED = re.compile(rf"^(?P<days>(?:{DAY})(?:\s*(?:{JOIN})\s*(?:{DAY}))*)\s*[:\-
 OTHER_HOURS = re.compile(r"(holiday|bar|delivery|kitchen|brunch|happy)\s*hours?|^holiday", re.IGNORECASE)
 # The five restaurants on the other site state their hours as JSON instead.
 STORE_HOURS = re.compile(r'"store_hours"\s*:\s*(\{.*?\}\s*\})')
-WEEKDAYS = {"mon": "Mo", "tue": "Tu", "wed": "We", "thu": "Th", "fri": "Fr", "sat": "Sa", "sun": "Su"}
-
 US_STATES = {}
 for subdivision in pycountry.subdivisions.get(country_code="US"):
     US_STATES[subdivision.name.casefold()] = (code := subdivision.code.split("-")[1])
@@ -140,7 +138,7 @@ class MyrosatisUSSpider(Spider):
             self.logger.warning(f"Unparsed hours: {blob!r}")
             return oh
         for name, times in store_hours.items():
-            if not (day := WEEKDAYS.get(name.casefold())) or not isinstance(times, dict):
+            if not (day := sanitise_day(name)) or not isinstance(times, dict):
                 continue
             if (opens := times.get("open")) and (closes := times.get("close")):
                 oh.add_range(day, opens, "24:00" if closes == "00:00" else closes)

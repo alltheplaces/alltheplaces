@@ -7,15 +7,13 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 
 # Every branch/ATM record carries the same national contact-centre phone number and mailbox
 # instead of a location-specific one; compared digits-only / lower-case since raw formatting
 # varies (e.g. "+381 11 3 777 888" vs "+381 11 3777888").
 NATIONAL_HOTLINE_DIGITS = "381113777888"
 NATIONAL_EMAIL = "kontakt@unicreditbank.rs"
-
-DAY_CODES = {"MO": "Mo", "TU": "Tu", "WE": "We", "TH": "Th", "FR": "Fr", "SA": "Sa", "SU": "Su"}
 
 
 class UnicreditBankRSSpider(Spider):
@@ -130,7 +128,7 @@ class UnicreditBankRSSpider(Spider):
         opening_hours = OpeningHours()
         # Flat list in groups of five per day: [day_code, open, close, open2, close2].
         for i in range(0, len(workinghours) - 4, 5):
-            if not (day := DAY_CODES.get(workinghours[i])):
+            if not (day := sanitise_day(workinghours[i])):
                 continue
             if workinghours[i + 1] and workinghours[i + 2]:
                 opening_hours.add_range(day, workinghours[i + 1], workinghours[i + 2])

@@ -6,6 +6,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # "City, TX 78701" or "City, Texas 78701" - the site is inconsistent about
 # abbreviating the state, so match both and just hardcode "TX" ourselves
@@ -63,7 +64,7 @@ class AustinCommunityCollegeUSSpider(Spider):
             # e.g. the Lockhart Center's address doesn't split cleanly into a
             # single street line and a "City, TX ZIP" line, so fall back to
             # an unsplit address rather than forcing an incorrect split.
-            item["addr_full"] = ", ".join(addr_lines)
+            item["addr_full"] = merge_address_lines(addr_lines)
             if postcode := re.search(r"(\d{5})$", addr_lines[-1]):
                 item["postcode"] = postcode.group(1)
 

@@ -6,16 +6,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-
-# The locations page lists each restaurant as an info list item holding the
-# branch as a heading and the street, "city, state" and phone as lines below.
-#
-# Restaurants that have not opened are marked "Coming Soon" and carry no phone
-# or full address.
-#
-# The page publishes no postcodes, coordinates or hours.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class PizzaWorldUSSpider(Spider):
@@ -58,7 +49,7 @@ class PizzaWorldUSSpider(Spider):
                 location.xpath('.//h2[contains(@class, "uabb-info-list-title")]/text()').get("").strip(),
             )
             item["city"], item["state"] = locality.group(1).strip(), locality.group(2).upper()
-            item["street_address"] = ", ".join(lines[: lines.index(locality.group(0))])
+            item["street_address"] = merge_address_lines(lines[: lines.index(locality.group(0))])
             item["ref"] = re.sub(r"[^a-z0-9]+", "-", item["branch"].lower()).strip("-")
 
             if phone := next((line for line in lines if re.search(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}", line)), None):

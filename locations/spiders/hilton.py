@@ -1,8 +1,8 @@
 import json
 from typing import Any
 
-import requests
 from chompjs import parse_js_object
+from scrapy import Request
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -104,37 +104,38 @@ class HiltonSpider(PlaywrightSpider):
             for country in countries:
                 regions = country.get("states") or country.get("cities")
                 for region in regions:
-                    response = self.get_hotels(region["locationPageUri"])
+                    yield self.get_hotels(region["locationPageUri"])
 
-                    try:
-                        hotels_summary = response.json()["data"]["geocodePage"].get("hotelSummaryOptions") or {}
-                        for poi in hotels_summary.get("hotels", []):
-                            poi.update(poi.pop("address"))
-                            poi.update(poi.pop("contactInfo"))
-                            item = DictParser.parse(poi)
-                            item["ref"] = poi["ctyhocn"]
-                            item["website"] = poi.get("facilityOverview", {}).get("homeUrlTemplate")
-                            item["lat"] = poi.get("localization", {}).get("coordinate", {}).get("latitude")
-                            item["lon"] = poi.get("localization", {}).get("coordinate", {}).get("longitude")
+    def parse_hotels(self, response: Response, location_url: str, **kwargs: Any) -> Any:
+        try:
+            hotels_summary = response.json()["data"]["geocodePage"].get("hotelSummaryOptions") or {}
+            for poi in hotels_summary.get("hotels", []):
+                poi.update(poi.pop("address"))
+                poi.update(poi.pop("contactInfo"))
+                item = DictParser.parse(poi)
+                item["ref"] = poi["ctyhocn"]
+                item["website"] = poi.get("facilityOverview", {}).get("homeUrlTemplate")
+                item["lat"] = poi.get("localization", {}).get("coordinate", {}).get("latitude")
+                item["lon"] = poi.get("localization", {}).get("coordinate", {}).get("longitude")
 
-                            if brand_code := poi.get("brandCode"):
-                                if match := self.BRANDS_MAPPING.get(brand_code):
-                                    item["brand"], item["brand_wikidata"] = match
-                                else:
-                                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{brand_code}")
+                if brand_code := poi.get("brandCode"):
+                    if match := self.BRANDS_MAPPING.get(brand_code):
+                        item["brand"], item["brand_wikidata"] = match
+                    else:
+                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_brand/{brand_code}")
 
-                            for service in poi.get("amenityIds", []):
-                                if match := self.SERVICES_MAPPING.get(service):
-                                    apply_yes_no(match, item, True)
-                                else:
-                                    self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
+                for service in poi.get("amenityIds", []):
+                    if match := self.SERVICES_MAPPING.get(service):
+                        apply_yes_no(match, item, True)
+                    else:
+                        self.crawler.stats.inc_value(f"atp/{self.name}/unknown_service/{service}")
 
-                            apply_category(Categories.HOTEL, item)
-                            yield item
-                    except Exception:
-                        self.logger.error(f'Error parsing locations for path: {region["locationPageUri"]}')
+                apply_category(Categories.HOTEL, item)
+                yield item
+        except Exception:
+            self.logger.error(f"Error parsing locations for path: {location_url}")
 
-    def get_hotels(self, location_url: str):
+    def get_hotels(self, location_url: str) -> Request:
         # TODO: we should use JsonRequest here, but it doesn't work with this endpoint for some reason!
         url = "https://www.hilton.com/graphql/customer?appName=dx_shop_search_app&operationName=hotelSummaryOptions_geocodePage&originalOpName=hotelSummaryOptions_geocodePage&bl=en"
 
@@ -356,4 +357,11 @@ class HiltonSpider(PlaywrightSpider):
             "content-type": "application/json",
         }
 
-        return requests.post(url, headers=headers, data=payload)
+        return Request(
+            url,
+            method="POST",
+            headers=headers,
+            body=payload,
+            callback=self.parse_hotels,
+            cb_kwargs={"location_url": location_url},
+        )

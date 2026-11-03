@@ -8,16 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# The locations page links to a page per restaurant, each marking its address
-# up with hCard classes and listing the hours a day at a time.
-#
-# The hours block also carries a "Kitchen until ..." line per rule, which is
-# not the restaurant's own closing time.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BeerBarrelUSSpider(Spider):
     name = "beer_barrel_us"
@@ -78,14 +68,9 @@ class BeerBarrelUSSpider(Spider):
             if times := re.fullmatch(r"(\d{1,2}(?::\d{2})?\s*[ap]m)\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]m)", hours, re.I):
                 oh.add_days_range(
                     day_range(start, end),
-                    BeerBarrelUSSpider.normalise_time(times.group(1)),
-                    BeerBarrelUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

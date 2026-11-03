@@ -3,6 +3,7 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class VivaChickenSpider(scrapy.Spider):
@@ -17,7 +18,7 @@ class VivaChickenSpider(scrapy.Spider):
             item["name"] = self.item_attributes["brand"]
             item["branch"] = restaurant.xpath(".//h2//text()").get()
             item["street_address"] = restaurant.xpath('.//*[@class="locations_grid__address"]//text()').get()
-            item["addr_full"] = ",".join(
+            item["addr_full"] = merge_address_lines(
                 [item["street_address"], restaurant.xpath('.//*[@class="locations_grid__address"]//text()[2]').get()]
             )
             item["phone"] = restaurant.xpath('.//*[contains(@href,"tel:")]/text()').get().replace("Phone: ", "")

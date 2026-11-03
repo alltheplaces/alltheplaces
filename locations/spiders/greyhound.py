@@ -25,7 +25,6 @@ class GreyhoundSpider(SitemapSpider):
         # The richest data is JSON in an inline script call to handleStopsLocation()
         for script in response.css("script"):
             script = script.get()
-            # Extract first function argument
             m = re.search(r"handleStopsLocation\((.*\]),.*?\);\n", script)
             if m:
                 stations = m.group(1)

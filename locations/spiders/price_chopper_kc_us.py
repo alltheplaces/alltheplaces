@@ -8,12 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
-# This is the Kansas City / Des Moines "Price Chopper" operated under
-# license from Associated Wholesale Grocers by several independent
-# ownership groups (Ball's Food Stores, Cosentino's, Queen's Price
-# Chopper, McKeever's, etc). It is unrelated to the New England "Price
-# Chopper" (Golub Corporation) already covered by golub_corporation_us.py.
-
 
 class PriceChopperKcUSSpider(Spider):
     name = "price_chopper_kc_us"

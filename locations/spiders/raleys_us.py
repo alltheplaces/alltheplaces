@@ -11,8 +11,6 @@ BRAND_MAP = {
     "Food City": {"brand": "Food City", "brand_wikidata": "Q130253202"},
 }
 
-# FoodCityArizonaUSSpider inherits this spider
-
 
 class RaleysUSSpider(JSONBlobSpider):
     name = "raleys_us"

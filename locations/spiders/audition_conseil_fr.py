@@ -38,8 +38,8 @@ class AuditionConseilFRSpider(Spider):
                 item["postcode"], item["city"] = m.group(1), m.group(2).strip()
                 item["country"] = OVERSEAS_COUNTRIES.get(item["postcode"][:3], "FR")
 
-            item["phone"] = popup.xpath('//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:")
-            item["email"] = popup.xpath('//a[starts-with(@href, "mailto:")]/@href').get("").removeprefix("mailto:")
+            item["phone"] = popup.xpath('//a[starts-with(@href, "tel:")]/@href').get("")
+            item["email"] = popup.xpath('//a[starts-with(@href, "mailto:")]/@href').get("")
 
             yield response.follow(item["website"], self.parse_hours, cb_kwargs={"item": item})
 

@@ -9,6 +9,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ClaptonCraftGBSpider(Spider):
@@ -41,7 +42,7 @@ class ClaptonCraftGBSpider(Spider):
             # addressLine2 contains city/postcode combined — leave as addr_full fallback
             addr2 = loc.get("addressLine2", "").strip()
             if addr2 and addr2.lower() not in ("united kingdom", ""):
-                item["addr_full"] = ", ".join(filter(None, [loc.get("addressLine1"), addr2]))
+                item["addr_full"] = merge_address_lines([loc.get("addressLine1"), addr2])
             item["lat"] = loc["markerLat"]
             item["lon"] = loc["markerLng"]
 

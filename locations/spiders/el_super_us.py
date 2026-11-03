@@ -24,31 +24,23 @@ class ElSuperUSSpider(SitemapSpider):
     def parse_store(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()
 
-        # Extract basic store info
         self._extract_store_name_and_ref(response, item)
 
-        # Extract address
         self._extract_address(response, item)
 
-        # Extract phone
         self._extract_phone(response, item)
 
-        # Extract coordinates
         self._extract_coordinates(response, item)
 
-        # Extract opening hours
         self._extract_opening_hours(response, item)
 
-        # Set website
         item["website"] = response.url
 
-        # Apply category
         apply_category(Categories.SHOP_SUPERMARKET, item)
 
         yield item
 
     def _extract_store_name_and_ref(self, response: Response, item: Feature) -> None:
-        # Extract store name
         store_name = response.xpath('//h1[@class="pad-und-sm"]/text()').get()
         if not store_name:
             store_name = response.xpath('//h1[contains(@class, "invisibile-h1")]/text()').get()
@@ -56,7 +48,6 @@ class ElSuperUSSpider(SitemapSpider):
         if not store_name:
             store_name = response.url.split("/")[-2].replace("-", " ").title()
 
-        # Extract reference from URL
         ref = response.url.split("/")[-2]
 
         item["branch"] = store_name

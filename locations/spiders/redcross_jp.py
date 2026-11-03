@@ -64,7 +64,7 @@ class RedcrossJPSpider(Spider):
         item = Feature()
         pref, slug = self._pref_slug(row["url"])
         item["ref"] = f"{pref}/{slug}"
-        item["website"] = self._website(row["url"])
+        item["website"] = response.url
         item["name"] = row["name"].replace("\u3000", " ")
         item["state"] = row["pref"]
 
@@ -110,18 +110,6 @@ class RedcrossJPSpider(Spider):
             idx = parts.index("place")
             return parts[idx - 1], parts[-1].rsplit(".", 1)[0]
         return "", parts[-1].rsplit(".", 1)[0]
-
-    @staticmethod
-    def _website(url: str) -> str:
-        """Stable website url: pref segment + slug, without the .html suffix.
-
-        Drop the branch and extension so the url survives branch-domain
-        reorganisations.
-        """
-        pref, slug = RedcrossJPSpider._pref_slug(url)
-        if pref:
-            return f"https://www.bs.jrc.or.jp/{pref}/{slug}"
-        return url
 
     @staticmethod
     def _extract_blood_types(item: Feature, hours_text: str) -> None:

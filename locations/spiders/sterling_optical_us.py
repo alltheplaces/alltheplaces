@@ -44,7 +44,7 @@ class SterlingOpticalUSSpider(Spider):
                 state=None if state == "VI" else state,
                 postcode=postcode,
                 country="VI" if state == "VI" else "US",
-                phone=location.css("a.locationPhone::attr(href)").get("").removeprefix("tel:"),
+                phone=location.css("a.locationPhone::attr(href)").get(""),
                 website=location.css("h3 a::attr(href)").get(),
             )
 

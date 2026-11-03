@@ -7,6 +7,7 @@ from scrapy import Selector, Spider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class JustGroupSpider(Spider):
@@ -47,7 +48,7 @@ class JustGroupSpider(Spider):
                 item.pop("state")
             if location["suburb"].strip() == item.get("city"):
                 location["suburb"] = None
-            item["addr_full"] = ", ".join(
+            item["addr_full"] = merge_address_lines(
                 filter(
                     None,
                     [

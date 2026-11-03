@@ -8,19 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, DAYS_EN, OpeningHours
 from locations.items import Feature
-
-# The locations page carries the restaurants twice, and neither list is
-# complete on its own:
-#
-#   * the Next.js page data has coordinates and a per day hours array, but only
-#     covers the restaurants in the store locator widget, and
-#   * the schema.org Organization block lists every restaurant, including ones
-#     the widget omits, but has no coordinates.
-#
-# Both are read, keyed on the store code, so the widget data is used where it
-# exists and the structured data fills in the rest.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class HelloBistroUSSpider(Spider):
@@ -61,7 +49,7 @@ class HelloBistroUSSpider(Spider):
         item = Feature()
         item["ref"] = str(location["storeCode"])
         item["branch"] = location.get("city")
-        item["street_address"] = ", ".join(location.get("addressLines") or [])
+        item["street_address"] = merge_address_lines(location.get("addressLines") or [])
         item["city"] = location.get("city")
         item["state"] = location.get("state")
         item["postcode"] = location.get("postalCode")
