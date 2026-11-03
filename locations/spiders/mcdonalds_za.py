@@ -1,19 +1,20 @@
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsZASpider(Spider):
+class McdonaldsZASpider(PlaywrightSpider):
     name = "mcdonalds_za"
     item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.co.za/templates/_layout/ajax_calls/get_all_locations.php?lat=0&long=0"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//div[@class="store_listing_con"]'):
