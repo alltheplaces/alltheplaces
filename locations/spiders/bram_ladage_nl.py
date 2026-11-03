@@ -2,12 +2,13 @@ import re
 from typing import Iterable
 from urllib.parse import unquote
 
-from scrapy import Spider
+from scrapy import Request, Spider
 from scrapy.http import TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -16,7 +17,7 @@ class BramLadageNLSpider(Spider):
     item_attributes = {"brand": "Bram Ladage", "brand_wikidata": "Q2216467"}
     start_urls = ["https://bramladage.nl/bestellen/"]
 
-    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
+    def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature | Request]:
         for location in response.css(".exp-store-locator__item.card[data-lat]"):
             item = Feature()
             item["branch"] = location.css(".exp-store-locator__item-title::text").get().strip()
@@ -50,4 +51,23 @@ class BramLadageNLSpider(Spider):
 
             apply_yes_no(Extras.DELIVERY, item, location.attrib.get("data-delivery") == "1")
             apply_category(Categories.FAST_FOOD, item)
-            yield item
+
+            if item.get("website"):
+                # The branch's ordering site has city and phone; its hours are online ordering hours, so not used
+                yield Request(
+                    item["website"],
+                    callback=self.parse_ordering_site,
+                    errback=self.ordering_site_failed,
+                    cb_kwargs={"item": item},
+                )
+            else:
+                yield item
+
+    def parse_ordering_site(self, response: TextResponse, item: Feature) -> Iterable[Feature]:
+        if ld := LinkedDataParser.find_linked_data(response, "Restaurant"):
+            item["city"] = ld.get("address", {}).get("addressLocality")
+            item["phone"] = ld.get("telephone")
+        yield item
+
+    def ordering_site_failed(self, failure) -> Iterable[Feature]:
+        yield failure.request.cb_kwargs["item"]
