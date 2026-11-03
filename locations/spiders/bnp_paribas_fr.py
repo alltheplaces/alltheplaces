@@ -5,6 +5,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import CLOSED_FR, DAYS_FR, OpeningHours
 
 
 class BnpParibasFRSpider(scrapy.Spider):
@@ -28,8 +29,16 @@ class BnpParibasFRSpider(scrapy.Spider):
         item["postcode"] = result["cp"]
         bank = deepcopy(item)
         apply_category(Categories.BANK, bank)
+        bank["opening_hours"] = self.parse_hours(result["text1"])
         yield bank
         if result["services"]["gab"] == "1":
             item["ref"] += "-ATM"
+            item["opening_hours"] = self.parse_hours(result["text2"])
             apply_category(Categories.ATM, item)
             yield item
+
+    @staticmethod
+    def parse_hours(hours: str) -> OpeningHours | None:
+        oh = OpeningHours()
+        oh.add_ranges_from_string(hours.replace("<br/>", ";"), days=DAYS_FR, closed=CLOSED_FR)
+        return oh if oh.day_hours else None
