@@ -10,7 +10,7 @@ from locations.spiders.penny_de import PennyDESpider
 DAYS_BY_COUNTRY = {
     "AT": DAYS_AT,
     "CZ": DAYS_CZ,
-    "HU": {**DAYS_HU, "Csüt": "Th"},
+    "HU": DAYS_HU,
     "IT": DAYS_IT,
     "RO": DAYS_RO,
 }
