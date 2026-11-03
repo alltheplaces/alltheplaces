@@ -1,22 +1,22 @@
 from typing import Any
 
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.items import Feature
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsMASpider(PlaywrightSpider):
+class McdonaldsMASpider(Spider):
     name = "mcdonalds_ma"
     item_attributes = McdonaldsSpider.item_attributes
     allowed_domains = ["www.mcdonalds.ma"]
     start_urls = ["https://www.mcdonalds.ma/nos-restaurants"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     no_refs = True
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//*[@class="gridRestaurants"]//*[@data-services]'):
