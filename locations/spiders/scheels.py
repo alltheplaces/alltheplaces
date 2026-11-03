@@ -14,7 +14,7 @@ from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTIL
 
 class ScheelsSpider(CamoufoxSpider):
     name = "scheels"
-    item_attributes = {"name": "SCHEELS", "brand_wikidata": "Q7431070"}
+    item_attributes = {"brand": "Scheels", "brand_wikidata": "Q7431070"}
     allowed_domains = ["www.scheels.com"]
     start_urls = ["https://www.scheels.com/stores/"]
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
