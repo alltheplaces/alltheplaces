@@ -3,6 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -31,5 +32,7 @@ class McdonaldsZASpider(Spider):
                 .strip()
             )
             item["email"] = location.xpath('.//span[contains(., "Email:")]/text()').get().replace("Email:", "").strip()
+
+            apply_category(Categories.FAST_FOOD, item)
 
             yield item
