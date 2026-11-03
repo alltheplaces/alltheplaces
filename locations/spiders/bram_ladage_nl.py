@@ -6,7 +6,7 @@ from scrapy import Request, Spider
 from scrapy.http import TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS_NL, OpeningHours, sanitise_day
+from locations.hours import CLOSED_NL, DAYS_NL, OpeningHours
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -40,14 +40,11 @@ class BramLadageNLSpider(Spider):
                     item["facebook"] = link.split("?")[0]
 
             item["opening_hours"] = OpeningHours()
-            for day_hours in location.css(".exp-store-locator__item-hours-list li"):
-                day, hours = (day_hours.css("span::text").getall() + [""])[:2]
-                if not (day := sanitise_day(day.strip(), DAYS_NL)):
-                    continue
-                if hours.strip().lower() == "gesloten":
-                    item["opening_hours"].set_closed(day)
-                elif times := re.fullmatch(r"(\d{1,2}:\d{2})\s*–\s*(\d{1,2}:\d{2})", hours.strip()):
-                    item["opening_hours"].add_range(day, times.group(1), times.group(2))
+            item["opening_hours"].add_ranges_from_string(
+                " ".join(location.css(".exp-store-locator__item-hours-list li ::text").getall()),
+                days=DAYS_NL,
+                closed=CLOSED_NL,
+            )
 
             apply_yes_no(Extras.DELIVERY, item, location.attrib.get("data-delivery") == "1")
             apply_category(Categories.FAST_FOOD, item)
