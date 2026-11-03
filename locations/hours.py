@@ -320,6 +320,7 @@ DAYS_HU = {
     # "Sz": "We",
     "Csütörtök": "Th",
     "Csutortok": "Th",
+    "Csüt": "Th",
     "Csü": "Th",
     "Cs": "Th",
     "Péntek": "Fr",
@@ -1243,6 +1244,15 @@ class OpeningHours:
         time_format: str | Sequence[str] = "%H:%M",
         closed: list[str] = CLOSED_EN,
     ):
+        """
+
+        :param day:
+        :param open_time:
+        :param close_time:
+        :param time_format: common formats include "%I:%M%p" and "%H:%M:%S"
+        :param closed:
+        :return:
+        """
         day = sanitise_day(day)
 
         if day not in DAYS:
