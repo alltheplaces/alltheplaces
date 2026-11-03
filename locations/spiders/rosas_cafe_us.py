@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -17,7 +17,7 @@ class RosasCafeUSSpider(Spider):
     allowed_domains = ["www.rosascafe.com"]
     start_urls = ["https://www.rosascafe.com/ajax/locations.json"]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

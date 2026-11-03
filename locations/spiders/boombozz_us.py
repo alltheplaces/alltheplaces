@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # The locations page carries the addresses, coordinates and Google place ids in
 # a "locations" JavaScript array, and the phone and hours in the matching
@@ -38,9 +39,7 @@ class BoombozzUSSpider(Spider):
             item = Feature()
             item["ref"] = address.get("addressable_id") or address.get("id")
             item["branch"] = location.get("title")
-            item["street_address"] = ", ".join(
-                part for part in [address.get("street"), address.get("street_two")] if part
-            )
+            item["street_address"] = merge_address_lines([address.get("street"), address.get("street_two")])
             item["city"] = address.get("city")
             item["state"] = address.get("state")
             item["postcode"] = address.get("zip")

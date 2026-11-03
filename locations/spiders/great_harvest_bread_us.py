@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -19,7 +19,7 @@ class GreatHarvestBreadUSSpider(Spider):
         "&cnt=us&mb=false&state=&start=0&show=500"
     ]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
