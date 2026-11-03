@@ -13,6 +13,7 @@ class BurgerKingJPSpider(Spider):
     name = "burger_king_jp"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     page_size = 100
+    requires_proxy = True
 
     def make_request(self, page: int) -> FormRequest:
         return FormRequest(
