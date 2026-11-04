@@ -8,6 +8,17 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
+PICK_N_PAY_BRANDS = {
+    "PNP": {
+        "brand": "Pick n Pay",
+        "brand_wikidata": "Q7190735",
+    },
+    "BOXER": {
+        "brand": "Boxer",
+        "brand_wikidata": "Q116586275",
+    },
+}
+
 
 class TymebankZASpider(Spider):
     name = "tymebank_za"
