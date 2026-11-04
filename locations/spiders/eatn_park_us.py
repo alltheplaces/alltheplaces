@@ -3,6 +3,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -29,4 +30,5 @@ class EatnParkUSSpider(JSONBlobSpider):
             item["opening_hours"] = oh
         except:
             pass
+        apply_category(Categories.RESTAURANT, item)
         yield item
