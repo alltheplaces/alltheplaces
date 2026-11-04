@@ -16,8 +16,10 @@ class LeonidasSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("addr_full")
-        item["website"] = feature.get("official_page_urls").get("fr" if item["country"] == "FR" else "en")
         item["branch"] = item.pop("name").upper().removeprefix("LEONIDAS ")
+        for lang, url in feature["official_page_urls"].items():
+            item["extras"]["website:{}".format(lang)] = url
+        item["website"] = item["extras"]["website:fr"] if item["country"] == "FR" else item["extras"]["website:en"]
         try:
             oh = OpeningHours()
             for day, times in (feature.get("opening_hours") or {}).items():
