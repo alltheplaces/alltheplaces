@@ -17,6 +17,9 @@ from locations.user_agents import BOT_USER_AGENT_SCRAPY
 # per-station properties in memory.
 Station = namedtuple("Station", "name operator operator_wikidata city country means request_stop")
 
+# Means of transportation that run on rails, as named in the feed.
+RAIL_MEANS = ("CABLE_RAILWAY", "METRO", "RACK_RAILWAY", "TRAIN", "TRAM")
+
 # Which means of transportation determines the tagging of a stop
 # that is served by several; earlier entries win.
 MEANS_PRIORITY = {
@@ -325,7 +328,7 @@ class OpentransportdataSwissSpider(Spider):
         }
         if platform:
             # Tag platforms like OpenStreetMap does, not like stations.
-            if main in ("CABLE_RAILWAY", "METRO", "RACK_RAILWAY", "TRAIN", "TRAM"):
+            if main in RAIL_MEANS:
                 tags["railway"] = "platform"
             elif main == "BUS":
                 tags["highway"] = "bus_stop"
@@ -359,9 +362,10 @@ class OpentransportdataSwissSpider(Spider):
         acc = self.wheelchair_accessible.get(sloid)
         if not acc or not means:
             return None, None
-        rail_means = {"CABLE_CAR", "CABLE_RAILWAY", "METRO", "TRAIN", "TRAM"}
-        has_rail = any(m in rail_means for m in means)
-        has_nonrail = any(m not in rail_means for m in means)
+        # The BfR data has separate values for rail-bound vehicles (sg_*)
+        # and others (ug_*). Aerial cable cars are not rail-bound.
+        has_rail = any(m in RAIL_MEANS for m in means)
+        has_nonrail = any(m not in RAIL_MEANS for m in means)
         values = []
         for start_date, end_date, rail_value, nonrail_value in acc:
             if not start_date:
