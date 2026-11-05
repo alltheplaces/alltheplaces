@@ -15,7 +15,7 @@ class MaseratiSpider(scrapy.Spider):
         "brand": "Maserati",
         "brand_wikidata": "Q35962",
     }
-    allowed_domains = ["maserati.com"]
+    allowed_domains = ["onthemap.io", "maserati.com"]
     start_urls = [
         "https://api.onthemap.io/server/v1/api/location?language=en&sort=dealername&key=6e0b94fb-7f95-11ec-9c36-eb25f50f4870&channel=www.maserati.com",
     ]
@@ -44,7 +44,11 @@ class MaseratiSpider(scrapy.Spider):
                 service_item = item.deepcopy()
                 service_item["ref"] = f"{item['ref']}-service"
                 apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-                apply_yes_no(Extras.VEHICLE_BODY_REPAIR_SERVICES, service_item, row.get("autoBodyShop") == "true")
+                apply_yes_no(
+                    Extras.VEHICLE_BODY_REPAIR_SERVICES,
+                    service_item,
+                    row.get("autoBodyShop") == "true",
+                )
                 self.parse_hours(service_item, row.get("service_opening_hours", []))
                 yield service_item
 
