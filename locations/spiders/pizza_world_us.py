@@ -1,61 +1,56 @@
-import re
-from typing import Any, Iterable
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
+import chompjs
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.json_blob_spider import JSONBlobSpider
+from locations.react_server_components import parse_rsc
 
 
-class PizzaWorldUSSpider(Spider):
+class PizzaWorldUSSpider(JSONBlobSpider):
     name = "pizza_world_us"
-    item_attributes = {"brand": "Pizza World"}
-    allowed_domains = ["www.pizzaworldonline.com"]
-    start_urls = ["https://www.pizzaworldonline.com/locations"]
+    item_attributes = {"brand": "Pizza World", "name": "Pizza World"}
+    start_urls = ["https://pizzaworldonline.com/locations"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        for location in response.xpath('//li[contains(@class, "uabb-info-list-item")]'):
-            lines = [
-                re.sub(r"\s+", " ", line).strip()
-                for line in location.xpath('.//div[contains(@class, "uabb-info-list-description")]//text()').getall()
-                if line.strip()
-            ]
-            # The ordering button below the item reads "Coming Soon" for
-            # restaurants that have not opened.
-            button = location.xpath(
-                'string(./ancestor::div[contains(@class, "fl-col")][1]//span[@class="fl-button-text"])'
-            ).get("")
-            if "coming soon" in button.lower():
+    def extract_json(self, response: TextResponse) -> list[dict]:
+        scripts = response.xpath(
+            "//script[starts-with(text(), 'self.__next_f.push')][contains(text(), 'SearchAction')]/text()"
+        ).getall()
+        objs = [chompjs.parse_js_object(s) for s in scripts]
+        return DictParser.get_nested_key(dict(parse_rsc("".join([s for n, s in objs]).encode())), "locations")
+
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("address", {}))
+
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if feature.get("status") in ["temporarily-closed", "coming-soon"]:
+            return
+        item["ref"] = feature["storeNumber"]
+        item.pop("name", None)
+        item["branch"] = feature["publicDisplayName"].removeprefix("Pizza World — ")
+        if phone := feature.get("publicPhone"):
+            item["phone"] = phone
+        item["website"] = f'https://pizzaworldonline.com/locations/{feature["slug"].strip("/")}'
+
+        weekly_hours = feature.get("weeklyHours") or {}
+        item["opening_hours"] = self.parse_opening_hours(weekly_hours)
+
+        apply_category(Categories.FAST_FOOD, item)
+        item["extras"]["cuisine"] = "pizza"
+
+        yield item
+
+    def parse_opening_hours(self, rules: dict) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for day, hours in rules.items():
+            if hours.get("closed") is True:
+                opening_hours.set_closed(day)
                 continue
-
-            # "Odessa, FL", or "Ruskin Fl" without the comma.
-            locality = next(
-                (
-                    match
-                    for line in lines
-                    if (match := re.fullmatch(r"(.+?),?\s+([A-Za-z]{2})", line)) and match.group(2).isalpha()
-                ),
-                None,
-            )
-            if not locality:
-                continue
-
-            item = Feature()
-            item["branch"] = re.sub(
-                r",\s*[A-Za-z]{2}$",
-                "",
-                location.xpath('.//h2[contains(@class, "uabb-info-list-title")]/text()').get("").strip(),
-            )
-            item["city"], item["state"] = locality.group(1).strip(), locality.group(2).upper()
-            item["street_address"] = merge_address_lines(lines[: lines.index(locality.group(0))])
-            item["ref"] = re.sub(r"[^a-z0-9]+", "-", item["branch"].lower()).strip("-")
-
-            if phone := next((line for line in lines if re.search(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}", line)), None):
-                item["phone"] = re.search(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}", phone).group(0)
-
-            apply_category(Categories.FAST_FOOD, item)
-            item["extras"]["cuisine"] = "pizza"
-
-            yield item
+            for start, end in [("openTime", "closeTime"), ("secondOpenTime", "secondCloseTime")]:
+                if hours.get(start):
+                    opening_hours.add_ranges_from_string(f"{day}: {hours[start]} - {hours[end]}")
+        return opening_hours
