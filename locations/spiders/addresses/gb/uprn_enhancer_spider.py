@@ -1,4 +1,5 @@
 import csv
+import re
 import shutil
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -107,9 +108,13 @@ class UprnEnhancerSpider(AddressSpider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         rows = self.iter_rows(response)
         header = next(rows)
+        address_re = self.get_regex()
 
         for row in rows:
-            addr = dict(zip(header, row))
+            addr = {}
+            for k, v in zip(header, row):
+                addr[k] = v.strip() if isinstance(v, str) else v
+
             self.pre_process_data(addr)
             address = merge_address_lines([addr.get(line) for line in self.address_columns])
 
@@ -119,14 +124,23 @@ class UprnEnhancerSpider(AddressSpider):
             if uprn := addr.get(self.uprn_column):
                 self.apply_uprn(item, int(uprn))
 
+            if address_re and (match := address_re.match(address)):
+                match_groups = match.groupdict()
+                item["street_address"] = match_groups.get("street_address")
+                item["extras"]["addr:suburb"] = match_groups.get("suburb")
+                item["city"] = match_groups.get("city")
+            else:
+                item["addr_full"] = address or merge_address_lines(
+                    [*GB_POSTCODE_PATTERN.sub("", address).split(","), item.get("postcode"), "United Kingdom"]
+                )
+
             if not item.get("city") and item.get("postcode"):
                 item["city"] = self.postal_towns.get(item["postcode"].split(" ", 1)[0])
 
-            item["addr_full"] = merge_address_lines(
-                [*GB_POSTCODE_PATTERN.sub("", address).split(","), item.get("postcode"), "United Kingdom"]
-            )
-
             yield from self.post_process_item(item, response, addr)
+
+    def get_regex(self) -> re.Pattern | None:
+        return None
 
     def pre_process_data(self, addr: dict, **kwargs) -> None:
         """Override with any pre-processing on the item."""
@@ -137,6 +151,9 @@ class UprnEnhancerSpider(AddressSpider):
 
     def apply_uprn(self, item: Feature, uprn: int | str) -> None:
         item["extras"]["ref:GB:uprn"] = str(uprn)
+
+        if not self.connection:
+            return
 
         cursor = self.connection.execute("SELECT LATITUDE, LONGITUDE FROM uprn WHERE UPRN = ? LIMIT 1;", [uprn])
         if coords := cursor.fetchone():

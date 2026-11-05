@@ -1,3 +1,5 @@
+import re
+
 from locations.spiders.addresses.gb.uprn_enhancer_spider import UprnEnhancerSpider
 
 # https://www.whatdotheyknow.com/request/re_council_tax_band_data_19
@@ -13,4 +15,40 @@ class GbBasingstokeAndDeaneSpider(UprnEnhancerSpider):
 
     ref_column = "PRN:"
     uprn_column = "UPRN:"
-    address_columns = ["Address:"]
+    address_columns = ["Address:"]  # Capped at 70 chars :(
+
+    def get_regex(self) -> re.Pattern | None:
+        return re.compile(
+            r"^(?P<street_address>.+?)(?:, (?P<suburb>{}))?, (?P<city>{})".format(
+                "|".join(
+                    [
+                        "Baughurst",
+                        "Beggarwood",
+                        "Bramley",
+                        "Chineham",
+                        "Hatch Warren",
+                        "Kingsclere",
+                        "Oakley",
+                        "Old Basing",
+                        "Overton",
+                        "Sherfield On Loddon",
+                    ]
+                ),
+                "|".join(
+                    [
+                        "Alresford",
+                        "Alton",
+                        "Andover",
+                        "Basingstoke",
+                        "Hook",
+                        "Newbury",
+                        "Odiham",
+                        "Reading",
+                        "Tadley",
+                        "Thatcham",
+                        "Whitchurch",
+                        "Winchester",
+                    ]
+                ),
+            )
+        )

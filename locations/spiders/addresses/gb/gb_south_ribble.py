@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -20,7 +21,29 @@ class GbSouthRibbleSpider(UprnEnhancerSpider):
     uprn_column = "uprn"
     address_columns = ["addr1", "addr2", "addr3"]
 
+    def get_regex(self) -> re.Pattern | None:
+        return re.compile(
+            r"^(?P<street_address>.+?)(?:, (?P<suburb>{}))?, (?P<city>{})$".format(
+                "|".join(
+                    [
+                        "BAMBER BRIDGE",
+                        "BUCKSHAW VILLAGE",
+                        "FARINGTON",
+                        "LONGTON",
+                        "LOSTOCK HALL",
+                        "MOSS SIDE",
+                        "NEW LONGTON",
+                        "PENWORTHAM",
+                        "WALTON-LE-DALE",
+                    ]
+                ),
+                "|".join(["BLACKBURN", "CHORLEY", "LEYLAND", "PRESTON"]),
+            )
+        )
+
     def post_process_item(self, item: Feature, response: Response, addr: dict, **kwargs) -> Iterable[Feature]:
         if "DUFF" in addr["addr1"] or "NOT TO BE USED" in addr["addr1"]:
             return None
+        if city := item.get("city"):
+            item["city"] = city.title()
         yield item
