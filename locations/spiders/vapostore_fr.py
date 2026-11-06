@@ -10,12 +10,10 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
-
 
 class VapostoreFRSpider(Spider):
     name = "vapostore_fr"
-    item_attributes = {"brand": "Vapostore", "brand_wikidata": "Q91257968", "name": "Vapostore"}
+    item_attributes = {"brand": "Vapostore", "brand_wikidata": "Q91257968"}
     allowed_domains = ["www.vapostore.com"]
     start_urls = ["https://www.vapostore.com/magasins-cigarette-electronique"]
 
@@ -43,13 +41,11 @@ class VapostoreFRSpider(Spider):
             item["street_address"] = store["address"]
             item["postcode"] = store["zip"].strip()
             item["city"] = store["city"].strip()
-            item["country"] = OVERSEAS_COUNTRIES.get(item["postcode"][:3], "FR")
             item["phone"] = store["phone"]
             item["lat"] = store["g_lat"]
             item["lon"] = store["g_long"]
             item["website"] = websites.get(item["ref"])
             item["opening_hours"] = self.parse_hours(store)
-            # NSI only covers mainland France, not the Guadeloupe stores
             apply_category(Categories.SHOP_E_CIGARETTE, item)
             yield item
 

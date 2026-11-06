@@ -3,10 +3,9 @@ import re
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT", "980": "MC", "988": "NC"}
 
 
 class AdaFRSpider(SitemapSpider, StructuredDataSpider):
@@ -34,5 +33,5 @@ class AdaFRSpider(SitemapSpider, StructuredDataSpider):
         item.pop("image", None)
         # addressRegion is always "fr"
         item.pop("state", None)
-        item["country"] = OVERSEAS_COUNTRIES.get((item.get("postcode") or "")[:3], "FR")
+        apply_category(Categories.CAR_RENTAL, item)
         yield item
