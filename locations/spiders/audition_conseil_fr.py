@@ -8,8 +8,6 @@ from scrapy.http import Response
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
-
 
 class AuditionConseilFRSpider(Spider):
     name = "audition_conseil_fr"
@@ -36,7 +34,6 @@ class AuditionConseilFRSpider(Spider):
             item["addr_full"] = address
             if m := re.search(r"(\d{5}),?\s*([^,\d][^,]*)$", address):
                 item["postcode"], item["city"] = m.group(1), m.group(2).strip()
-                item["country"] = OVERSEAS_COUNTRIES.get(item["postcode"][:3], "FR")
 
             item["phone"] = popup.xpath('//a[starts-with(@href, "tel:")]/@href').get("")
             item["email"] = popup.xpath('//a[starts-with(@href, "mailto:")]/@href').get("")

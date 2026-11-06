@@ -6,8 +6,6 @@ from scrapy.spiders import SitemapSpider
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
-
 
 class TapeALOeilSpider(SitemapSpider, StructuredDataSpider):
     name = "tape_a_l_oeil"
@@ -25,7 +23,4 @@ class TapeALOeilSpider(SitemapSpider, StructuredDataSpider):
         item["ref"] = response.url.split("/magasins/", 1)[1]
         item["branch"] = re.sub(r"\s+(ALGERIE|MAROC|NOUVELLE CALEDONIE)$", "", item.pop("name"))
         item.pop("image", None)
-        # Stores in the overseas departments are given as FR
-        if item.get("country") == "FR":
-            item["country"] = OVERSEAS_COUNTRIES.get(str(item.get("postcode") or "")[:3], "FR")
         yield item

@@ -3,10 +3,9 @@ from typing import Iterable
 from scrapy import Request, Selector
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
 
 
 class HumanImmobilierFRSpider(StructuredDataSpider):
@@ -28,6 +27,7 @@ class HumanImmobilierFRSpider(StructuredDataSpider):
             item["website"] = response.urljoin(path)
             item["lat"] = point.xpath('./input[@class="latitude"]/@value').get().replace(",", ".")
             item["lon"] = point.xpath('./input[@class="longitude"]/@value').get().replace(",", ".")
+            apply_category(Categories.OFFICE_ESTATE_AGENT, item)
             if path.startswith("/louer/"):
                 # Rental management offices have no agency structured data on their pages
                 item["branch"] = popup.xpath('//*[@class="infobox__agence-name"]/text()').get()
@@ -40,5 +40,4 @@ class HumanImmobilierFRSpider(StructuredDataSpider):
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item.update(response.meta["point"])
         item["branch"] = item.pop("name")
-        item["country"] = OVERSEAS_COUNTRIES.get(item["postcode"][:3], "FR")
         yield item
