@@ -49,6 +49,7 @@ BORDERS = {
         ),
         feature(iso1A2="FR", iso1A3="FRA", iso1N3="250", nameEn="France"),
         feature(
+            (2.3, 46.6),
             iso1A2="FX",
             iso1N3="249",
             nameEn="Metropolitan France",
@@ -56,7 +57,7 @@ BORDERS = {
             groups=["155", "150"],
             isoStatus="excRes",
         ),
-        feature(iso1A2="GP", iso1N3="312", nameEn="Guadeloupe", country="FR", groups=["029", "003"]),
+        feature((-61.5, 16.2), iso1A2="GP", iso1N3="312", nameEn="Guadeloupe", country="FR", groups=["029", "003"]),
         feature(iso1A2="ES", iso1A3="ESP", iso1N3="724", nameEn="Spain"),
         feature(nameEn="Peninsular Spain", country="ES", groups=["039", "150"]),
         feature((-5.3, 35.9), nameEn="Ceuta", level="subterritory", country="ES", groups=["EA", "015", "002"]),
@@ -80,6 +81,8 @@ BORDERS = {
             country="GB",
             groups=["Q644636", "Q37362", "145"],
         ),
+        feature(iso1A2="CN", iso1A3="CHN", iso1N3="156", nameEn="China"),
+        feature((114.2, 22.3), iso1A2="HK", iso1N3="344", nameEn="Hong Kong", country="CN"),
         feature(iso1A2="RU", iso1A3="RUS", iso1N3="643", nameEn="Russia"),
         feature(
             (34.0, 45.0), wikidata="Q7835", nameEn="Crimea", level="subterritory", country="RU", groups=["151", "150"]
@@ -114,11 +117,14 @@ def test_canonical_id(identifier, expected):
 @pytest.mark.parametrize(
     "identifier, expected",
     [
-        ("gb", {"gb"}),  # a country resolves to itself, not to its territories
+        ("gb", {"gb"}),
+        ("fr", {"fr", "gp"}),  # a country covers its ISO-coded territories, as in country-coder
+        ("gp", {"gp"}),
+        ("cn", {"cn"}),  # NSI keeps separate HK entries, so CN does not cover HK
         ("uk", {"gb"}),  # alias
         ("GBR", {"gb"}),  # ISO3
         ("826", {"gb"}),  # single-country M49
-        ("fx", {"fr"}),  # exceptional reservation -> assigned code
+        ("fx", {"fr"}),  # exceptional reservation -> assigned code; Metropolitan France excludes Guadeloupe
         ("cq", {"gg"}),
         ("ea", {"es"}),
         ("xk", {"xk"}),  # user-assigned codes are kept
@@ -164,7 +170,7 @@ def test_resolve_location_set_keeps_unknown_and_logs(coder, caplog):
 
 def test_resolve_location_set_preserves_empty_sides(coder):
     assert resolve_location_set({"include": ["001"], "exclude": []}, coder) == {"include": ["001"], "exclude": []}
-    assert resolve_location_set({"include": ["fr"]}, coder) == {"include": ["fr"]}
+    assert resolve_location_set({"include": ["ca"]}, coder) == {"include": ["ca"]}
 
 
 def test_vendored_nsi_location_sets_are_resolved():

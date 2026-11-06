@@ -36,6 +36,10 @@ EXCEPTIONAL_RESERVATIONS = {
     "TA": "SH",
 }
 
+# Territories that country-coder files under a country but that NSI and our pipelines treat as separate
+# markets: NSI lists separate HK/MO entries for brands that also have a CN one.
+NOT_PART_OF_COUNTRY = {"HK", "MO"}
+
 # Ported from country-coder's canonicalID(): drop and/the/of/el/la/de and punctuation, then uppercase.
 M49_REGION_LEVELS = ("region", "subregion", "intermediateRegion")
 
@@ -83,6 +87,10 @@ class CountryCoder:
         for props in features:
             for group in props.get("groups", []):
                 self._members[canonical_id(group)].append(props)
+            # As in country-coder, a country is the union of every feature that names it as its country, so
+            # "fr" covers Guadeloupe and "us" covers Puerto Rico.
+            if props.get("geometry") and props.get("country") and props.get("iso1A2") not in NOT_PART_OF_COUNTRY:
+                self._members[canonical_id(props["country"])].append(props)
 
     @classmethod
     def from_url(cls, url: str = BORDERS_URL) -> "CountryCoder":
@@ -95,7 +103,8 @@ class CountryCoder:
         """
         ISO2 codes (lowercase) covered by an identifier, or None if country-coder doesn't know it.
 
-        A country or territory resolves to itself only. A named sub-country place (England, Crimea,
+        A country resolves to itself plus its ISO-coded territories (fr -> fr, gp, mq, ...); a territory
+        resolves to itself only, so "fx" stays Metropolitan France. A named sub-country place (England, Crimea,
         Northern Cyprus) resolves to whatever our reverse geocoder calls it, so the code agrees with the
         country our pipelines put on POIs there rather than with country-coder's political model. M49
         regions resolve by membership; other groups (US States, the Cyprus landform) by membership with
@@ -106,7 +115,10 @@ class CountryCoder:
             return None
         if props.get("iso1A2"):
             code = self._country_code(props)
-            return {code} if code else set()
+            codes = {code} if code else set()
+            return codes | {
+                c for member in self._members[canonical_id(props["iso1A2"])] if (c := self._country_code(member))
+            }
         if props.get("geometry"):
             return countries_in_geometry(props["geometry"])
         members = self._members[canonical_id(props["id"])]
