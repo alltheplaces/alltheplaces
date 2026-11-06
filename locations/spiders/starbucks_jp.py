@@ -1,9 +1,13 @@
+from typing import Any
+
 from chompjs import parse_js_object
-from scrapy.http import JsonRequest, Request
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Extras, apply_yes_no
 from locations.hours import DAYS_3_LETTERS, OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.linked_data_parser import LinkedDataParser
 
 
 class StarbucksJPSpider(JSONBlobSpider):
@@ -91,4 +95,10 @@ class StarbucksJPSpider(JSONBlobSpider):
 
         apply_yes_no(Extras.WIFI, item, location["fields"].get("public_wireless_service_flg") == "1")
 
+        yield Request(item["website"], callback=self.parse_details, cb_kwargs={"item": item})
+
+    def parse_details(self, response: Response, item: Feature, **kwargs: Any) -> Any:
+        if ld := LinkedDataParser.find_linked_data(response, "Restaurant"):
+            item["phone"] = ld.get("telephone")
+            item["postcode"] = ld.get("address", {}).get("postalCode")
         yield item

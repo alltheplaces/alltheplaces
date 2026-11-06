@@ -103,7 +103,7 @@ For example, the [wikckes_gb.py](../locations/spiders/wickes_gb.py) spider is a 
 
 ### Coordinate Reference Systems
 
-All our spiders emit geographic coordinates as latitude/longitude pairs according to the World Geodetic System WGS84, which is used by GPS and nearly all online mapping services. To convert coordinates from other reference systems to WGS84, we use [proj](https://proj.org/) via its Python wrapper [pyproj](https://pyproj4.github.io/pyproj/stable/examples.html).  For example, the [winterthur_ch.py](../locations/spiders/winterthur_ch.py) spider converts [Swiss CH1903+/LV95 coordinates](https://epsg.io/2056) to WGS84.
+All our spiders emit geographic coordinates as latitude/longitude pairs according to the World Geodetic System WGS84, which is used by GPS and nearly all online mapping services. To convert coordinates from other reference systems to WGS84, we use [proj](https://proj.org/) via its Python wrapper [pyproj](https://pyproj4.github.io/pyproj/stable/examples.html).  For example, the [winterthur_ch.py](../spiders/infrastructure/winterthur_ch.py) spider converts [Swiss CH1903+/LV95 coordinates](https://epsg.io/2056) to WGS84.
 
 ### Doing is learning
 

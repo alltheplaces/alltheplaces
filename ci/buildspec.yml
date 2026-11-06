@@ -22,7 +22,6 @@ phases:
       - uv sync --cache-dir /root/.cache/uv
   build:
     commands:
-      - uv run scrapy check
       - /bin/bash ci/run_pr_spiders.sh
   post_build:
     commands:

@@ -1,12 +1,14 @@
 import re
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 from geonamescache import GeonamesCache
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
+from locations.items import Feature
 
 
 def slugify(s):
@@ -16,12 +18,13 @@ def slugify(s):
 class PaneraBreadUSSpider(Spider):
     name = "panera_bread_us"
     item_attributes = {"brand": "Panera Bread", "brand_wikidata": "Q7130852"}
+    headers = {"Referer": "https://www.panerabread.com/"}
 
     async def start(self) -> AsyncIterator[Request]:
         for state in GeonamesCache().get_us_states():
             yield Request(
                 f"https://www-api.panerabread.com/www-api/public/cafe/location/{state.lower()}",
-                headers={"Referer": "https://www.panerabread.com/"},
+                headers=self.headers,
             )
 
     def parse(self, response):
@@ -41,4 +44,19 @@ class PaneraBreadUSSpider(Spider):
                 apply_yes_no(Extras.TAKEAWAY, item, features["hasPickup"])
                 apply_yes_no(Extras.DRIVE_THROUGH, item, features["hasDriveThru"])
 
-                yield item
+                apply_category(Categories.FAST_FOOD, item)
+
+                yield Request(
+                    f"https://www-api.panerabread.com/www-api/public/cafe/details/{cafe['cafeId']}",
+                    headers=self.headers,
+                    callback=self.parse_details,
+                    cb_kwargs={"item": item},
+                )
+
+    def parse_details(self, response: Response, item: Feature, **kwargs: Any) -> Any:
+        if cafes := response.json().get("cafeList"):
+            item["opening_hours"] = OpeningHours()
+            for day, ranges in cafes[0]["cafeHours"]["dinein"]["hours"].items():
+                for hours in ranges:
+                    item["opening_hours"].add_range(day, hours["open"], hours["close"])
+        yield item
