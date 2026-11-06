@@ -12,7 +12,6 @@ class LoxamFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://agence.loxam.fr/robots.txt"]
     sitemap_follow = ["locationsitemap"]
     sitemap_rules = [("", "parse_sd")]
-    requires_proxy = True
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item.pop("image", None)
