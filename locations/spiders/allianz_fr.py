@@ -48,7 +48,7 @@ class AllianzFRSpider(SitemapSpider):
             item["street_address"] = poi["address"]["AddressLine1"].title()
             item["city"] = poi["address"]["City"].title()
             postcode = item["postcode"] = poi["address"]["PostalCode"]
-            if country := NON_FR_POSTCODE_COUNTRIES.get(postcode) or NON_FR_POSTCODE_COUNTRIES.get(postcode[:3]):
+            if country := (NON_FR_POSTCODE_COUNTRIES.get(postcode) or NON_FR_POSTCODE_COUNTRIES.get(postcode[:3])):
                 item["country"] = country
             apply_category(Categories.OFFICE_INSURANCE, item)
             item["phone"] = contacts["Phone"]
