@@ -28,21 +28,17 @@ class ElysiumHealthcareSpider(CamoufoxSpider):
     handle_httpstatus_list = [403]
 
     def parse(self, response):
-        urls = response.xpath('//li[@class="elementor-icon-list-item"]/a/@href').extract()
+        urls = response.xpath('//li[@class="elementor-icon-list-item"]/a/@href').getall()
 
         for url in urls:
             yield Request(url=url, callback=self.parse_location)
 
     def parse_location(self, response):
-        coming_soon = response.xpath(
-            '//h1[@class="elementor-heading-title elementor-size-default"]/span/text()'
-        ).extract_first()
+        coming_soon = response.xpath('//h1[@class="elementor-heading-title elementor-size-default"]/span/text()').get()
 
         if not coming_soon:  # Skip empty pages
             ref = re.search(r".+/(.+?)/?(?:\.html|$)", response.url).group(1)
-            name = response.xpath(
-                '(//h1[@class="elementor-heading-title elementor-size-default"]/text())[2]'
-            ).extract_first()
+            name = response.xpath('(//h1[@class="elementor-heading-title elementor-size-default"]/text())[2]').get()
 
             # The address block markup is inconsistent between location
             # pages (varying levels of wrapping <div>s), so rather than
@@ -54,7 +50,7 @@ class ElysiumHealthcareSpider(CamoufoxSpider):
             for p in contact_block.xpath(".//p"):
                 if p.xpath("./a"):  # Skip phone/email link lines
                     continue
-                text = "".join(p.xpath(".//text()").extract()).replace("\xa0", " ").strip()
+                text = "".join(p.xpath(".//text()").getall()).replace("\xa0", " ").strip()
                 if not text:
                     continue
                 if text.startswith(
@@ -66,7 +62,7 @@ class ElysiumHealthcareSpider(CamoufoxSpider):
                 addr_lines.append(text.rstrip(","))
             address_full = ", ".join(addr_lines) if addr_lines else None
 
-            map_settings = response.xpath('//div[contains(@id, "wpgmza_map")]/@data-settings').extract_first()
+            map_settings = response.xpath('//div[contains(@id, "wpgmza_map")]/@data-settings').get()
             if map_settings:
                 map_data = json.loads(map_settings)
                 lat = map_data["map_start_lat"]
@@ -77,11 +73,11 @@ class ElysiumHealthcareSpider(CamoufoxSpider):
 
             # Usually the phone number is a "tel:" link, but a handful of
             # pages just have plain text e.g. "T: 01582 344950" instead.
-            telephone = contact_block.xpath('.//a[starts-with(@href, "tel:")]/text()').extract_first()
+            telephone = contact_block.xpath('.//a[starts-with(@href, "tel:")]/text()').get()
             if telephone:
                 telephone = telephone.strip()
             else:
-                for p_text in contact_block.xpath(".//p//text()").extract():
+                for p_text in contact_block.xpath(".//p//text()").getall():
                     p_text = p_text.strip()
                     if p_text.startswith("T:"):
                         telephone = p_text.removeprefix("T:").strip()
