@@ -24,9 +24,7 @@ class GelsonsSpider(scrapy.spiders.SitemapSpider):
             yield entry
 
     def parse_store(self, response):
-        content = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())["props"][
-            "pageProps"
-        ]
+        content = json.loads(response.xpath('//script[@type="application/json"]/text()').get())["props"]["pageProps"]
         store_json = content["store"]
 
         item = DictParser.parse(store_json)
