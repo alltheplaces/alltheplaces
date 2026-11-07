@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from typing import Iterable
 
@@ -27,7 +26,7 @@ class GovSaluteParafarmacieITSpider(Spider):
             yield response.follow(url, callback=self.parse_data)
 
     def parse_data(self, response: Response) -> Iterable[Feature]:
-        for record in json.loads(response.text):
+        for record in response.json():
             if record.get("data_fine_validita", "-") != "-":
                 continue
 

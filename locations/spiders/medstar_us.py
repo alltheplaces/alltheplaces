@@ -1,5 +1,3 @@
-import json
-
 import scrapy
 
 from locations.categories import Categories, apply_category
@@ -15,7 +13,7 @@ class MedstarUSSpider(scrapy.Spider):
     )
 
     def parse(self, response):
-        data = json.loads(response.text)
+        data = response.json()
         for i in data["Results"]:
             url = i["Url"]
             yield scrapy.Request(response.urljoin(url), callback=self.parse_loc)
