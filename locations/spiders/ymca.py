@@ -26,15 +26,15 @@ class YmcaSpider(SitemapSpider):
 
         yield Feature(
             ref=response.url.split("/")[-1],
-            name=response.xpath("//h1/text()").extract_first().strip(),
+            name=response.xpath("//h1/text()").get().strip(),
             lat=float(geo.attrib["data-lat"]),
             lon=float(geo.attrib["data-lng"]),
-            street_address=response.xpath('//span[@class="address-line1"]/text()').extract_first(),
-            city=response.xpath('//span[@class="locality"]/text()').extract_first(),
-            state=response.xpath('//span[@class="administrative-area"]/text()').extract_first(),
-            postcode=response.xpath('//span[@class="postal-code"]/text()').extract_first(),
-            country=response.xpath('//span[@class="country"]/text()').extract_first(),
-            phone=response.xpath('//div[contains(@class, "field--type-telephone")]//a/text()').extract_first(),
+            street_address=response.xpath('//span[@class="address-line1"]/text()').get(),
+            city=response.xpath('//span[@class="locality"]/text()').get(),
+            state=response.xpath('//span[@class="administrative-area"]/text()').get(),
+            postcode=response.xpath('//span[@class="postal-code"]/text()').get(),
+            country=response.xpath('//span[@class="country"]/text()').get(),
+            phone=response.xpath('//div[contains(@class, "field--type-telephone")]//a/text()').get(),
             website=response.url,
             opening_hours=self.parse_hours(
                 response.xpath('//div[contains(@class, "field--name-field-branch-hours")]//td/text()').getall()

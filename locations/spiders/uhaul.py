@@ -20,13 +20,13 @@ class UhaulSpider(scrapy.Spider):
         for store_nav in response.xpath('//ul/li/ul[@class="sub-nav"]'):
             # Each store nav can have multiple services, each with a link under the sub-nav ul.
             # We want to pick the first one to get to a store details page.
-            store_url = store_nav.xpath(".//a/@href").extract_first()
+            store_url = store_nav.xpath(".//a/@href").get()
 
             yield scrapy.Request(url=response.urljoin(store_url), callback=self.parse_store)
 
     def parse_store(self, response):
         store_obj = None
-        for script in response.xpath('//script[@type="application/ld+json"]/text()').extract():
+        for script in response.xpath('//script[@type="application/ld+json"]/text()').getall():
             tmp_obj = json.loads(script)
             ldjson_type = tmp_obj.get("@type")
             if ldjson_type in ("SelfStorage", "LocalBusiness"):
