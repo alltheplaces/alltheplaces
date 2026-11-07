@@ -64,8 +64,11 @@ class GoodwillSpider(PlaywrightSpider):
 
     def parse(self, body: str, **kwargs: Any) -> Iterable[Feature]:
         response_json = json.loads(body)
-        if not response_json.get("success") or not (data := response_json.get("data", {})).get("success"):
+
+        if not isinstance(response_json, dict):  # Ignore empty page response like "0" etc
             return
+
+        data = response_json.get("data") or {}
 
         for store in data.get("data", []):
             item = DictParser.parse(store)
