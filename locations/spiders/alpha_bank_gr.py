@@ -1,6 +1,4 @@
-from typing import AsyncIterator
-
-from scrapy import Request, Spider
+from scrapy import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -10,9 +8,7 @@ from locations.hours import DAYS_GR, OpeningHours, day_range
 class AlphaBankGRSpider(Spider):
     name = "alpha_bank_gr"
     item_attributes = {"brand": "Alpha Bank", "brand_wikidata": "Q747394"}
-
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(url="https://www.alpha.gr/api/maps/MapLocations?bringPrivates=False&httproute=True&lang=el")
+    start_urls = ["https://www.alpha.gr/api/maps/MapLocations?bringPrivates=False&httproute=True&lang=el"]
 
     def parse(self, response):
         data = response.json()

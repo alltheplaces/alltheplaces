@@ -1,8 +1,8 @@
 from typing import Any, AsyncIterator, Iterable
-from urllib.parse import urlparse
 
 from scrapy.http import Request, Response
 from scrapy.spiders import SitemapSpider
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
@@ -25,7 +25,7 @@ class AllianzDESpider(SitemapSpider):
 
     def _parse_sitemap(self, response: Response) -> Iterable[Request]:
         for request in super()._parse_sitemap(response):
-            path = urlparse(request.url).path.strip("/")
+            path = urlparse_cached(request).path.strip("/")
             yield request.replace(
                 url=f"https://ags-service.allianz.de/rest/agencySearch/v4/context/path/{path}?token=fae3e901-651c-42d2-a079-b794c03ea5a7"
             )
