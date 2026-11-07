@@ -19,7 +19,7 @@ class LululemonCAUSSpider(SitemapSpider, PlaywrightSpider):
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse_store(self, response):
-        data = json.loads(response.xpath('//script[@type="application/json"]/text()').extract_first())
+        data = json.loads(response.xpath('//script[@type="application/json"]/text()').get())
         if store_data := data["props"]["pageProps"].get("storeData"):
             if store_data.get("storeStatus") == "active":
                 item = DictParser.parse(store_data)

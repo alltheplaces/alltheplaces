@@ -14,28 +14,24 @@ class LowesFoodsSpider(SitemapSpider):
     sitemap_rules = [(r".*store-locator/store-\d+$", "parse_store")]
 
     def parse_store(self, response):
-        city_state_zip = (
-            response.xpath("//div[@class='store-details__store-info']/ul/li[4]/text()").extract_first().strip()
-        )
+        city_state_zip = response.xpath("//div[@class='store-details__store-info']/ul/li[4]/text()").get().strip()
 
-        map_data = response.xpath('//script[contains(text(), "initMap")]').extract_first()
+        map_data = response.xpath('//script[contains(text(), "initMap")]').get()
 
         yield Feature(
             ref=response.url.split("/")[-1],
-            name=response.xpath("//div[@class='store-details__heading']/h1/text()").extract_first().strip(),
+            name=response.xpath("//div[@class='store-details__heading']/h1/text()").get().strip(),
             lat=re.search(r".*lat: (-?\d+\.\d+),.*", map_data).group(1),
             lon=re.search(r".*lng: (-?\d+\.\d+).*", map_data).group(1),
-            street_address=response.xpath("//div[@class='store-details__store-info']/ul/li[2]/text()")
-            .extract_first()
-            .strip(),
+            street_address=response.xpath("//div[@class='store-details__store-info']/ul/li[2]/text()").get().strip(),
             city=city_state_zip.split(",")[0],
             state=city_state_zip.split(" ")[1],
             postcode=city_state_zip.split(" ")[2],
             country="United States",
-            phone=response.xpath("//div[@class='store-details__store-info__phone']/a/text()").extract_first().strip(),
+            phone=response.xpath("//div[@class='store-details__store-info__phone']/a/text()").get().strip(),
             website=response.url,
             opening_hours=self.parse_hours(
-                response.xpath("//div[@class='store-details__heading']/h2/text()").extract_first().strip()
+                response.xpath("//div[@class='store-details__heading']/h2/text()").get().strip()
             ),
         )
 
