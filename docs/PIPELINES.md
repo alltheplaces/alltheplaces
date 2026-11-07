@@ -8,6 +8,13 @@ See [`fedex.py`](../locations/spiders/fedex.py) for an example.
 
 When a spider has `drop_attributes`, we remove those attributes from `Feature`s, this happens early, so it may be re added by other pipelines later on.
 
+### `NameIsBranchPipeline`
+
+When a spider has `name_is_branch = True`, the `name` of each `Feature` is moved to `branch`, unless `branch` is already set.
+Use it when the source's name field is really the branch label, instead of writing `item["branch"] = item.pop("name")` in `post_process_item`.
+This runs before `ApplySpiderLevelAttributesPipeline`, so a `name` in `item_attributes` still fills in the now empty `name`.
+It runs after `post_process_item`, so code there sees the original `name`.
+
 ### `ApplySpiderLevelAttributesPipeline`
 
 When a spider has `item_attributes`, they are applied to all the `Item`s produced by the `Spider`.
