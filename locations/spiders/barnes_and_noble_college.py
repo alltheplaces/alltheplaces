@@ -16,9 +16,9 @@ class BarnesAndNobleCollegeSpider(scrapy.Spider):
         address_data = response.xpath('//div[@class="address"]/p')
 
         for location, addresses, citypostal in zip(locations, address_data, address_data):
-            name = location.xpath(".//text()").extract_first()
-            address = addresses.xpath(".//text()").extract_first()
-            city_postal = citypostal.xpath(".//text()").extract().pop(-1).strip()
+            name = location.xpath(".//text()").get()
+            address = addresses.xpath(".//text()").get()
+            city_postal = citypostal.xpath(".//text()").getall().pop(-1).strip()
             try:
                 city_state, postal = re.search(r"\s+(.*)(\d{5})", city_postal).groups()
                 city, state = city_state.split(",")

@@ -18,13 +18,13 @@ class CooplandsDoncasterGBSpider(scrapy.Spider):
         stores = response.xpath("//div[@class='box box-store']")
 
         for index, store in enumerate(stores):
-            data = store.xpath("ul/li/text()").extract()
+            data = store.xpath("ul/li/text()").getall()
             addr_full = merge_address_lines(data[:-2])
 
             item = Feature(
                 ref=index,
                 name="Cooplands",
-                branch=store.xpath("h4/text()").extract_first(),
+                branch=store.xpath("h4/text()").get(),
                 addr_full=addr_full,
                 postcode=data[-2].strip(),
                 phone=data[-1].strip(),
