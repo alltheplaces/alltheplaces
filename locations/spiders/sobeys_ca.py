@@ -13,7 +13,7 @@ from locations.items import Feature
 class SobeysCASpider(Spider):
     name = "sobeys_ca"
     item_attributes = {"brand": "Sobeys", "brand_wikidata": "Q1143340"}
-    allowed_domains = ["www.sobeys.com"]
+    allowed_domains = ["sobeys.com", "sobeyspharmacy.com"]
     start_urls = [
         "https://www.sobeys.com/store-locator/",
         "https://liquor.sobeys.com/store-locator/",

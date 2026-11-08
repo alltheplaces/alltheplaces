@@ -41,8 +41,8 @@ class SystemeUSpider(SitemapSpider):
                     )
                 continue
 
-            day = hour.xpath('.//td[@class="day"]/text()').extract_first()
-            schedule = hour.xpath('.//td[@class="schedule"]/text()').extract_first()
+            day = hour.xpath('.//td[@class="day"]/text()').get()
+            schedule = hour.xpath('.//td[@class="schedule"]/text()').get()
 
             if schedule and schedule.lower() != "fermé":
                 open_time, close_time = schedule.split(" - ")
@@ -58,20 +58,18 @@ class SystemeUSpider(SitemapSpider):
     def parse_stores(self, response):
         properties = {
             "ref": response.url,
-            "name": response.xpath('//div[@class="info-magasin-station"]/h1[@class="h1"]/text()').extract_first(),
+            "name": response.xpath('//div[@class="info-magasin-station"]/h1[@class="h1"]/text()').get(),
             "street_address": response.xpath(
                 'normalize-space(//div[@class="address b-md b-md--sm"]/p[1]/text())'
-            ).extract_first(),
-            "city": response.xpath(
-                'normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[2]/text())'
-            ).extract_first(),
+            ).get(),
+            "city": response.xpath('normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[2]/text())').get(),
             "postcode": response.xpath(
                 'normalize-space(//div[@class="address b-md b-md--sm"]/p[2]/span[1]/text())'
-            ).extract_first(),
+            ).get(),
             "country": "FR",
-            "lat": response.xpath("//@data-store-latitude").extract_first(),
-            "lon": response.xpath("//@data-store-longitude").extract_first(),
-            "phone": response.xpath('//div[@class="phone-number b-md"]/text()').extract_first(),
+            "lat": response.xpath("//@data-store-latitude").get(),
+            "lon": response.xpath("//@data-store-longitude").get(),
+            "phone": response.xpath('//div[@class="phone-number b-md"]/text()').get(),
             "website": response.url,
         }
 

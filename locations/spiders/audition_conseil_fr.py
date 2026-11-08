@@ -5,6 +5,7 @@ from typing import Any, Iterable
 from scrapy import Request, Selector, Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -56,4 +57,5 @@ class AuditionConseilFRSpider(Spider):
             for open_h, open_m, close_h, close_m in self.TIME_RANGE.findall(times):
                 oh.add_range(day, f"{open_h}:{open_m or '00'}", f"{close_h}:{close_m or '00'}")
         item["opening_hours"] = oh
+        apply_category(Categories.SHOP_HEARING_AIDS, item)
         yield item
