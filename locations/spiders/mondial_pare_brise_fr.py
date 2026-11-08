@@ -9,8 +9,6 @@ from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
-
 
 class MondialPareBriseFRSpider(SitemapSpider, StructuredDataSpider):
     name = "mondial_pare_brise_fr"
@@ -27,11 +25,6 @@ class MondialPareBriseFRSpider(SitemapSpider, StructuredDataSpider):
         item["branch"] = item.pop("name").removeprefix("Mondial Pare-Brise").strip()
         item["street_address"] = item.pop("street_address", "").strip(" ,") or None
         item.pop("addr_full", None)
-        postcode = item.get("postcode") or ""
-        if postcode == "97150":
-            item["country"] = "MF"
-        else:
-            item["country"] = OVERSEAS_COUNTRIES.get(postcode[:3], "FR")
         if item.get("state") == "DROM 97":
             item.pop("state")
         # Many centres link the national page rather than their own.

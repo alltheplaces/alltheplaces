@@ -10,8 +10,6 @@ from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
 from locations.linked_data_parser import LinkedDataParser
 
-OVERSEAS = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
-
 
 class FranceLiterieFRSpider(SitemapSpider):
     name = "france_literie_fr"
@@ -36,9 +34,6 @@ class FranceLiterieFRSpider(SitemapSpider):
         item["branch"] = item.pop("name").removeprefix("France Literie ").split(" – ")[0]
         item["name"] = "France Literie"
         item["opening_hours"] = self.parse_hours(hours or [])
-        # Overseas stores are listed with addressCountry FR
-        if country := OVERSEAS.get((item.get("postcode") or "")[:3]):
-            item["country"] = country
 
         apply_category(Categories.SHOP_BED, item)
 

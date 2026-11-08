@@ -8,22 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# Exact postcodes take precedence: Saint-Martin and Saint-Barthélemy share the 971 prefix.
-NON_FR_POSTCODE_COUNTRIES = {
-    "97150": "MF",
-    "97133": "BL",
-    "971": "GP",
-    "972": "MQ",
-    "973": "GF",
-    "974": "RE",
-    "975": "PM",
-    "976": "YT",
-    "980": "MC",
-    "986": "WF",
-    "987": "PF",
-    "988": "NC",
-}
-
 
 class AllianzFRSpider(SitemapSpider):
     name = "allianz_fr"
@@ -47,9 +31,7 @@ class AllianzFRSpider(SitemapSpider):
             item["lon"] = poi["position"]["Longitude"]
             item["street_address"] = poi["address"]["AddressLine1"].title()
             item["city"] = poi["address"]["City"].title()
-            postcode = item["postcode"] = poi["address"]["PostalCode"]
-            if country := (NON_FR_POSTCODE_COUNTRIES.get(postcode) or NON_FR_POSTCODE_COUNTRIES.get(postcode[:3])):
-                item["country"] = country
+            item["postcode"] = poi["address"]["PostalCode"]
             apply_category(Categories.OFFICE_INSURANCE, item)
             item["phone"] = contacts["Phone"]
             item["email"] = contacts["Mail"]
