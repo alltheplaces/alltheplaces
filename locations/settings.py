@@ -107,6 +107,7 @@ ITEM_PIPELINES = {
     "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
     "locations.pipelines.clean_strings.CleanStringsPipeline": 354,
     "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": 355,
+    "locations.pipelines.country_code_fr_pipeline.CountryCodeFRPipeline": 356,
     "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": 356,
     "locations.pipelines.address_clean_up.AddressCleanUpPipeline": 357,
     "locations.pipelines.phone_clean_up.PhoneCleanUpPipeline": 360,

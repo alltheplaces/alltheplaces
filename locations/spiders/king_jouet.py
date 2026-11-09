@@ -17,7 +17,6 @@ COUNTRIES = {
     "www.king-jouet.ch": "CH",
     "www.king-jouet.lu": "LU",
 }
-OVERSEAS_POSTCODE_PREFIXES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT", "987": "PF", "988": "NC"}
 
 
 class KingJouetSpider(JSONBlobSpider):
@@ -94,9 +93,7 @@ class KingJouetSpider(JSONBlobSpider):
         else:
             # Drop the brand and store-format prefixes for regular King Jouet stores; "CITY 2" is a Brussels shopping centre, not the format.
             item["branch"] = re.sub(r"^(?:KING JOUET |CITY (?!\d)|BOUTIQUE )+", "", label, flags=re.I)
-        item["country"] = OVERSEAS_POSTCODE_PREFIXES.get(
-            (store.get("postalCode") or "")[:3], COUNTRIES[urlparse(response.url).netloc]
-        )
+        item["country"] = COUNTRIES[urlparse(response.url).netloc]
 
         oh = OpeningHours()
         for day in store.get("openingHours") or []:

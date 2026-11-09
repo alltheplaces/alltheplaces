@@ -1,12 +1,9 @@
-from io import BytesIO
-from typing import Any
+import re
+from typing import Iterable
 
-import openpyxl
 from scrapy.http import Response
 
 from locations.items import Feature
-from locations.licenses import Licenses
-from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.addresses.gb.uprn_enhancer_spider import UprnEnhancerSpider
 
 # https://www.whatdotheyknow.com/request/re_council_tax_band_data_28
@@ -15,45 +12,38 @@ from locations.spiders.addresses.gb.uprn_enhancer_spider import UprnEnhancerSpid
 
 class GbSouthRibbleSpider(UprnEnhancerSpider):
     name = "gb_south_ribble"
-    dataset_attributes = Licenses.GB_OGLv3.value | {
-        "attribution:name": "Contains public sector information licensed under the Open Government Licence v3.0."  # FOI, addr+UPRN
-        + " Contains OS data © Crown copyright and database right."  # OS Open UPRN, coords
-        + " Contains Royal Mail data © Royal Mail copyright and Database right."  # ONSUD, postcodes
-        + " Office for National Statistics licensed under the Open Government Licence v.3.0."
-    }
-    requires_proxy = True
-    no_refs = True
     onsud_region = "NW"
     start_urls = [
         "https://www.whatdotheyknow.com/request/re_council_tax_band_data_28/response/3515941/attach/6/SRBC269801.xlsx?cookie_passthrough=1"
     ]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        rows = openpyxl.load_workbook(BytesIO(response.body), read_only=True).active.iter_rows(values_only=True)
-        header = next(rows)
+    ref_column = "property_ref1"
+    uprn_column = "uprn"
+    address_columns = ["addr1", "addr2", "addr3"]
 
-        for row in rows:
-            addr = dict(zip(header, row))
+    def get_regex(self) -> re.Pattern | None:
+        return re.compile(
+            r"^(?P<street_address>.+?)(?:, (?P<suburb>{}))?, (?P<city>{})$".format(
+                "|".join(
+                    [
+                        "BAMBER BRIDGE",
+                        "BUCKSHAW VILLAGE",
+                        "FARINGTON",
+                        "LONGTON",
+                        "LOSTOCK HALL",
+                        "MOSS SIDE",
+                        "NEW LONGTON",
+                        "PENWORTHAM",
+                        "WALTON-LE-DALE",
+                    ]
+                ),
+                "|".join(["BLACKBURN", "CHORLEY", "LEYLAND", "PRESTON"]),
+            )
+        )
 
-            if "DUFF" in addr["addr1"] or "NOT TO BE USED" in addr["addr1"]:
-                continue
-
-            item = Feature()
-            item["ref"] = str(addr["property_ref1"])
-
-            if addr["uprn"]:
-                self.apply_uprn(item, addr["uprn"])
-
-            if not item.get("city") and item.get("postcode"):
-                item["city"] = self.postal_towns.get(item["postcode"].split(" ", 1)[0])
-
-            item["addr_full"] = merge_address_lines(
-                [
-                    addr["addr1"],
-                    addr["addr2"],
-                    addr["addr3"],
-                    item.get("postcode"),
-                ]
-            ).removesuffix(", LANCASHIRE")
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, addr: dict, **kwargs) -> Iterable[Feature]:
+        if "DUFF" in addr["addr1"] or "NOT TO BE USED" in addr["addr1"]:
+            return None
+        if city := item.get("city"):
+            item["city"] = city.title()
+        yield item

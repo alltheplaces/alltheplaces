@@ -12,7 +12,6 @@ class MenardsSpider(JSONBlobSpider):
     name = "menards"
     item_attributes = {"brand": "Menards", "brand_wikidata": "Q1639897"}
     start_urls = ["https://www.menards.com/store-details/locator.html"]
-    requires_proxy = True
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         return json.loads(response.xpath("//@data-initial-stores").get())
