@@ -85,7 +85,7 @@ def test_parse_store():
     assert item["addr_full"] == "兵庫県西宮市鳴尾町2-24-17"
     assert item["phone"] == "0798-31-2688"
     assert item["extras"]["fax"] == "0798-31-2689"
-    assert item["opening_hours"].as_opening_hours() == "Mo-Fr 10:00-20:00; Sa 10:00-21:00; Su 10:00-20:00"
+    assert item["opening_hours"].as_opening_hours() == "Mo-Fr,Su 10:00-20:00; Sa 10:00-21:00"
 
 
 def test_parse_name():
@@ -109,7 +109,7 @@ def test_parse_hours():
         "Mo-Fr 10:00-20:00; Sa-Su 10:00-21:00"
     )
     assert parse_hours(["平日：10:00-20:00", "土曜：10:00-21:00", "日曜：10:00-20:00"]) == (
-        "Mo-Fr 10:00-20:00; Sa 10:00-21:00; Su 10:00-20:00"
+        "Mo-Fr,Su 10:00-20:00; Sa 10:00-21:00"
     )
     assert (
         DaiwaCycleJPSpider.parse_hours(

@@ -21,12 +21,12 @@ def test_closing_day_range():
 
 
 def test_full_width_japanese_times():
-    assert hours("１０時〜１８時３０分", "毎週水曜日") == "Mo-Tu 10:00-18:30; Th-Su 10:00-18:30"
+    assert hours("１０時〜１８時３０分", "毎週水曜日") == "Mo-Tu,Th-Su 10:00-18:30"
     assert hours("午前10:00〜午後6:00", "年中無休") == "Mo-Su 10:00-18:00"
 
 
 def test_workshop_intake_note_is_ignored():
-    assert hours("9:30〜18:00(サービス受付17:30まで)", "毎週火曜日") == "Mo 09:30-18:00; We-Su 09:30-18:00"
+    assert hours("9:30〜18:00(サービス受付17:30まで)", "毎週火曜日") == "Mo,We-Su 09:30-18:00"
 
 
 def test_yearly_holidays_are_ignored():
