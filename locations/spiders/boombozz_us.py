@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # The locations page carries the addresses, coordinates and Google place ids in
 # a "locations" JavaScript array, and the phone and hours in the matching
@@ -15,8 +16,6 @@ from locations.items import Feature
 #
 # The hours are free text and differ per restaurant: "Sun - Thur | 11am - 10pm"
 # and "Fri - Sat 11 a.m. - 11 p.m." both appear.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 PHONE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
 
@@ -40,9 +39,7 @@ class BoombozzUSSpider(Spider):
             item = Feature()
             item["ref"] = address.get("addressable_id") or address.get("id")
             item["branch"] = location.get("title")
-            item["street_address"] = ", ".join(
-                part for part in [address.get("street"), address.get("street_two")] if part
-            )
+            item["street_address"] = merge_address_lines([address.get("street"), address.get("street_two")])
             item["city"] = address.get("city")
             item["state"] = address.get("state")
             item["postcode"] = address.get("zip")
@@ -91,14 +88,9 @@ class BoombozzUSSpider(Spider):
 
             oh.add_days_range(
                 days,
-                BoombozzUSSpider.normalise_time(times.group(1)),
-                BoombozzUSSpider.normalise_time(times.group(2)),
-                time_format="%I:%M%p",
+                times.group(1),
+                times.group(2),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

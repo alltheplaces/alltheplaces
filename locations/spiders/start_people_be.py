@@ -62,8 +62,8 @@ class StartPeopleBESpider(Spider):
                 contacts.add((block.css("h3::text").get(), phone, email))
             if not phone or item.get("phone"):
                 continue
-            item["phone"] = phone.removeprefix("tel:")
-            item["email"] = (email or "").removeprefix("mailto:")
+            item["phone"] = phone
+            item["email"] = email or ""
             oh = OpeningHours()
             by_appointment = []
             for row in block.css(".dxp-page-office--opening-hours tr"):

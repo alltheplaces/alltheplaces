@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Extras, PaymentMethods, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 
 
 class SkylarkJPSpider(Spider):
@@ -138,12 +139,17 @@ class SkylarkJPSpider(Spider):
 
             if store["extra_fields"]["全日２４時間フラグ"] == "1":
                 item["opening_hours"] = "24/7"
+            else:
+                item["opening_hours"] = oh = OpeningHours()
+                for days, key in [(DAYS_WEEKDAY, "平日"), (["Sa"], "土曜日"), (["Su"], "日曜・祝日")]:
+                    oh.add_days_range(days, *store["extra_fields"][key].split("～"))
 
             apply_yes_no(PaymentMethods.CREDIT_CARDS, item, store["extra_fields"]["クレジット（有無）フラグ"] == "1")
             apply_yes_no(Extras.WIFI, item, store["extra_fields"]["ｗｉ－ｆｉ（有無）フラグ"] == "1")
             item["ref"] = store["key"]
             item["website"] = f"https://store-info.skylark.co.jp/skylark/map/{store['key']}/"
-            item["phone"] = f"+81 {store['extra_fields']['電話番号']}"
+            if phone := store["extra_fields"]["電話番号"]:
+                item["phone"] = f"+81 {phone}"
             apply_yes_no("parking", item, store["extra_fields"]["駐車場（有無）フラグ"] == "有")
             item["extras"]["start_date"] = re.search(
                 r"\d{4}-\d{2}-\d{2}", str(store["extra_fields"]["オープン日"])

@@ -31,7 +31,7 @@ class BissuMXSpider(CrawlSpider):
 
         phone = response.xpath('//a/@href[contains(., "tel:")]').get()
         if phone:
-            item["phone"] = phone.replace("tel:", "")
+            item["phone"] = phone
 
         location_script = response.xpath('//script[contains(., "locationData")]/text()')
         latlon_re = r"locationData:\s*{[^}]*lat:\s*([^,]*),\s*lng:\s*([^,]*)[^}]*}"

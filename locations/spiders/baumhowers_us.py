@@ -12,10 +12,6 @@ from locations.items import Feature
 #
 # The address is one line, and three restaurants omit the comma before the
 # city.
-#
-# No coordinates or hours are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Za-z .']+),\s*([A-Z]{2})\s+(\d{5})")
 # Three restaurants omit the comma before the city, so the city is matched

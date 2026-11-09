@@ -24,7 +24,7 @@ class PitaPitCASpider(SitemapSpider):
         item["addr_full"] = merge_address_lines(
             response.xpath('//div[contains(concat(" ", @class, " "), " fusion-text-1 ")]//text()').getall()
         )
-        item["phone"] = response.xpath('//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:") or None
+        item["phone"] = response.xpath('//a[starts-with(@href, "tel:")]/@href').get("") or None
 
         item["extras"]["website:en"] = response.url
         item["extras"]["website:fr"] = response.xpath('//a[@title="Switch to FR"]/@href').get()

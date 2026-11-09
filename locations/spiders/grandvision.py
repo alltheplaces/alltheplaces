@@ -32,7 +32,6 @@ class GrandvisionSpider(CrawlSpider, StructuredDataSpider):
         "https://www.optica2000.com/grupo-tiendas",
         "https://www.synoptik.se/butiksoversikt",
         "https://www.synoptik.dk/butiksoversigt",
-        "https://www.visionexpress.com/store-overview",
         "https://www.visionexpress.ie/store-overview",
     ]
     rules = [
@@ -74,11 +73,9 @@ class GrandvisionSpider(CrawlSpider, StructuredDataSpider):
         ),
         Rule(LinkExtractor(allow=r"https://www\.synoptik\.dk/butikker/[-\w]+/[-\w]+$"), callback="parse_sd"),
         Rule(
-            LinkExtractor(allow=r"https://www\.visionexpress\.(com|ie)/opticians/[-\w]+$"),
+            LinkExtractor(allow=r"https://www\.visionexpress\.ie/opticians/[-\w]+$"),
         ),
-        Rule(
-            LinkExtractor(allow=r"https://www\.visionexpress\.(com|ie)/opticians/[-\w]+/[-\w]+$"), callback="parse_sd"
-        ),
+        Rule(LinkExtractor(allow=r"https://www\.visionexpress\.ie/opticians/[-\w]+/[-\w]+$"), callback="parse_sd"),
     ]
 
     def post_process_item(self, item, response, ld_data, **kwargs):

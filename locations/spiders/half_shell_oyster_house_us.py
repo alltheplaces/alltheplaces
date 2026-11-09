@@ -14,10 +14,6 @@ from locations.items import Feature
 #
 # The hours are two parallel runs of paragraphs, the day names first and then
 # the times in the same order.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 PHONE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
@@ -82,14 +78,9 @@ class HalfShellOysterHouseUSSpider(Spider):
         for day, rule in zip(days, times):
             oh.add_range(
                 day,
-                HalfShellOysterHouseUSSpider.normalise_time(rule.group(1)),
-                HalfShellOysterHouseUSSpider.normalise_time(rule.group(2)),
-                time_format="%I:%M%p",
+                rule.group(1),
+                rule.group(2),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

@@ -2,6 +2,7 @@ from scrapy import Spider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TradePointGBSpider(Spider):
@@ -35,12 +36,7 @@ class TradePointGBSpider(Spider):
                 "store_type": store["attributes"]["store"]["storeType"],
             }
 
-            item["addr_full"] = ", ".join(
-                filter(
-                    None,
-                    store["attributes"]["store"]["geoCoordinates"]["address"]["lines"],
-                )
-            )
+            item["addr_full"] = merge_address_lines(store["attributes"]["store"]["geoCoordinates"]["address"]["lines"])
             item["postcode"] = store["attributes"]["store"]["geoCoordinates"]["postalCode"]
             item["country"] = store["attributes"]["store"]["geoCoordinates"]["countryCode"]
 

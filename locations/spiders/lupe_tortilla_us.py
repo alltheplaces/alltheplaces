@@ -6,10 +6,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
-# Lupe Tortilla runs the Agile Store Locator WordPress plugin, which returns
-# every restaurant in one admin-ajax.php response. Its records spell the state
-# out, which the project's state clean up pipeline normalises.
-
 
 class LupeTortillaUSSpider(AgileStoreLocatorSpider):
     name = "lupe_tortilla_us"

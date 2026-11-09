@@ -8,20 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 
-# Samurai Sam's is a Kahala Brands franchise. Its locator page reads from the
-# shared Kahala locator service, which disallows crawling in robots.txt, but
-# the brand's own site publishes a page per restaurant and lists them all in
-# its sitemap, so those are used instead.
-#
-# The pages give an address, phone and hours but no coordinates: the map is an
-# embed built from the address text and the directions link is a Google place
-# id, so features have no geometry.
-#
-# Closed restaurants stay in the sitemap but serve a page with no address, so
-# those are skipped.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class SamuraiSamsUSSpider(SitemapSpider):
     name = "samurai_sams_us"

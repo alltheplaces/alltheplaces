@@ -21,7 +21,7 @@ class HygieiaPLSpider(Spider):
                 item = Feature()
                 item["street_address"] = title
                 item["addr_full"] = merge_address_lines([item["street_address"], store.xpath(".//p/text()").get()])
-                item["phone"] = store.xpath('.//*[contains(@href,"tel:")]/@href').get().replace("tel:", "")
-                item["email"] = store.xpath('.//*[contains(@href,"mailto:")]/@href').get().replace("mailto:", "")
+                item["phone"] = store.xpath('.//*[contains(@href,"tel:")]/@href').get()
+                item["email"] = store.xpath('.//*[contains(@href,"mailto:")]/@href').get()
                 apply_category(Categories.PHARMACY, item)
                 yield item

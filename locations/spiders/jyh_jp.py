@@ -30,7 +30,6 @@ class JyhJPSpider(SitemapSpider):
             return
         lat, lon = float(coords.group(1)), float(coords.group(2))
 
-        # Extract postcode and address
         addr_block = re.search(r"住所<br><span class=\"item_price2\">(.*?)</span>", response.text, re.DOTALL)
         postcode = None
         street_address = None
@@ -45,7 +44,6 @@ class JyhJPSpider(SitemapSpider):
                 else:
                     street_address = line
 
-        # Extract phone number
         phone_match = re.search(r"電話番号.*?<span class=\"item_price2\">([\d\-]+)</span>", response.text, re.DOTALL)
         phone = phone_match.group(1).strip() if phone_match else None
 

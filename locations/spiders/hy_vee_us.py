@@ -24,7 +24,7 @@ class HyVeeUSSpider(SitemapSpider):
             addr_full=merge_address_lines(
                 response.xpath('//div[contains(strong/text(), "Address")]/text()[not(parent::a)]').getall()
             ),
-            phone=response.xpath('//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "").strip(),
+            phone=response.xpath('//a[contains(@href, "tel:")]/@href').get("").strip(),
             website=response.url,
         )
 

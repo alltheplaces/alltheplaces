@@ -15,7 +15,6 @@ POST_OFFICE_TYPES = {"GPO", "PO", "Kiosk", "PPL", "SC"}
 # Counters run by third parties: Pos Mini (franchised "mini post offices" operated by entrepreneurs) and authorised
 # agents (MyPospay ParcelHub, Collectco and other shops taking parcels and bill payments).
 PARTNER_TYPES = {"Mini", "Agent", None}
-# Not included: "EDT" (Pos Laju Ezidrive-Thru parcel drop-offs) and "ArRahnu" (Islamic pawnbroking counters).
 
 
 class PosMalaysiaMYSpider(Spider):

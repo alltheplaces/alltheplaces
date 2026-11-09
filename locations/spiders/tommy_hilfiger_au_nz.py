@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TommyHilfigerAUNZSpider(Spider):
@@ -29,7 +30,7 @@ class TommyHilfigerAUNZSpider(Spider):
                 "name": location["n"],
                 "lat": location["l"],
                 "lon": location["g"],
-                "addr_full": ", ".join(filter(None, location["a"])),
+                "addr_full": merge_address_lines(location["a"]),
                 "postcode": location["seo_postcode"],
                 "phone": location.get("p"),
                 "website": f"https://{country}.tommy.com" + location["u"],

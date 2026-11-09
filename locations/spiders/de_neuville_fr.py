@@ -5,6 +5,7 @@ from scrapy import Selector, Spider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class DeNeuvilleFRSpider(Spider):
@@ -54,7 +55,7 @@ class DeNeuvilleFRSpider(Spider):
             street_lines.append(city_postcode)
 
         if street_lines:
-            item["street_address"] = ", ".join(street_lines)
+            item["street_address"] = merge_address_lines(street_lines)
 
     def parse_hours(self, other: str) -> OpeningHours:
         oh = OpeningHours()

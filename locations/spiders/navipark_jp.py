@@ -8,12 +8,10 @@ from scrapy.http import Response
 
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
 from locations.geo import bbox_split
-from locations.hours import DAYS, DAYS_WEEKDAY, OpeningHours, day_range
+from locations.hours import DAYS, DAYS_JP, DAYS_WEEKDAY, OpeningHours, day_range
 from locations.items import Feature
 
 # 曜日 kanji used in 【月～土】-style open-time day prefixes.
-JP_DAYS = {"月": "Mo", "火": "Tu", "水": "We", "木": "Th", "金": "Fr", "土": "Sa", "日": "Su"}
-
 # Bounding box comfortably covering all of Japan, including Okinawa.
 JAPAN_BBOX = ((46.0, 122.0), (20.0, 150.0))
 
@@ -148,7 +146,7 @@ class NaviparkJPSpider(Spider):
             text = text[len("平日") :]
         if m := re.match(r"【(.+?)】", text):
             start_jp, sep, end_jp = m.group(1).partition("-")
-            days = day_range(JP_DAYS[start_jp], JP_DAYS[end_jp]) if sep else [JP_DAYS[start_jp]]
+            days = day_range(DAYS_JP[start_jp], DAYS_JP[end_jp]) if sep else [DAYS_JP[start_jp]]
             text = text[m.end() :]
 
         if not (m := re.match(r"(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})", text.strip())):

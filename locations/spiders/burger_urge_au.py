@@ -22,9 +22,7 @@ class BurgerUrgeAUSpider(SitemapSpider):
                         None, map(str.strip, response.xpath('//div[contains(@class, "address-loc")]//text()').getall())
                     )
                 ),
-                "phone": response.xpath('//li[@class="our-details"]/a[contains(@href, "tel:")]/@href')
-                .get()
-                .replace("tel:", ""),
+                "phone": response.xpath('//li[@class="our-details"]/a[contains(@href, "tel:")]/@href').get(),
                 "website": response.url,
             }
             extract_google_position(properties, response)

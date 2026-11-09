@@ -41,6 +41,7 @@ class DiaESSpider(Spider):
             "street": response.json()["nombreVia"].strip() + " " + response.json()["tipoVia"].strip(),
             "city": response.json()["localidad"].strip(),
             "postcode": response.json()["codigoPostal"].strip(),
+            "phone": response.json()["telefono"],
         }
         if response.json()["tipoTienda"] == "dia":
             properties.update(DIA)

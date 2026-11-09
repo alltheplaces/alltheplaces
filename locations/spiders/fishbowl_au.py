@@ -10,7 +10,8 @@ from locations.json_blob_spider import JSONBlobSpider
 class FishbowlAUSpider(JSONBlobSpider):
     name = "fishbowl_au"
     item_attributes = {"brand": "Fishbowl", "brand_wikidata": "Q110785465"}
-    start_urls = ["https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/38415-rW5LvC1Cy7c6N3Jf/stores.js"]
+    start_urls = ["https://storemapper-herokuapp-com.global.ssl.fastly.net/api/users/39537-YiknJWu5B5SpmnJR/stores.js"]
+
     custom_settings = {"ROBOTSTXT_OBEY": False}
     locations_key = "stores"
 

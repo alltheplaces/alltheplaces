@@ -5,7 +5,7 @@ import scrapy
 from scrapy.http import FormRequest, Response
 
 from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_JP, OpeningHours
 from locations.items import Feature
 
 # The 47 prefectures the store finder's free-text "address" search
@@ -23,7 +23,6 @@ PREFECTURES = [
     "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
 ]  # fmt: skip
 
-DAY_CHARS = {"月": "Mo", "火": "Tu", "水": "We", "木": "Th", "金": "Fr", "土": "Sa", "日": "Su"}
 HOURS_RE = re.compile(r"([月火水木金土日祝平、\-]*)\s*(\d{1,2}:\d{2})-(\d{1,2}:\d{2})")
 
 
@@ -35,15 +34,15 @@ def expand_days(raw_day_part: str) -> list[str] | None:
         return ["Mo", "Tu", "We", "Th", "Fr"]
     if "-" in stripped:
         start_part, _, end_part = stripped.partition("-")
-        start = DAY_CHARS.get(start_part[-1]) if start_part else None
-        end = DAY_CHARS.get(end_part[-1]) if end_part else None
+        start = DAYS_JP.get(start_part[-1]) if start_part else None
+        end = DAYS_JP.get(end_part[-1]) if end_part else None
         if not start or not end:
             return None
         start_index, end_index = DAYS.index(start), DAYS.index(end)
         if start_index <= end_index:
             return DAYS[start_index : end_index + 1]
         return DAYS[start_index:] + DAYS[: end_index + 1]
-    days = [DAY_CHARS[c] for c in stripped if c in DAY_CHARS]
+    days = [DAYS_JP[c] for c in stripped if c in DAYS_JP]
     return days or None
 
 

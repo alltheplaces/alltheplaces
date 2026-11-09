@@ -8,6 +8,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.react_server_components import parse_rsc
 
 LOCATOR_NL = "https://www.qteam.be/nl/onze-service-centers"
@@ -55,7 +56,7 @@ class QTeamBESpider(Spider):
             item["lat"] = garage["location"]["lat"]
             item["lon"] = garage["location"]["lng"]
             item["branch"] = garage["title"].removeprefix("QTeam").strip(" -")
-            item["addr_full"] = ", ".join([garage["addressLine1"], garage["addressLine2"]])
+            item["addr_full"] = merge_address_lines([garage["addressLine1"], garage["addressLine2"]])
             item["country"] = "BE"
             item["phone"] = garage["phone"]
             item["website"] = item["extras"]["website:nl"] = response.urljoin(garage["url"])

@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CrownDecoratingCentresGBSpider(Spider):
@@ -23,8 +24,8 @@ class CrownDecoratingCentresGBSpider(Spider):
             item = DictParser.parse(location)
             item["ref"] = location["StoreCode"]
             item.pop("name", None)
-            item["street_address"] = ", ".join(
-                filter(None, map(str.strip, [location.get("Address1"), location.get("Address2")]))
+            item["street_address"] = merge_address_lines(
+                map(str.strip, [location.get("Address1"), location.get("Address2")])
             )
             item["website"] = "https://www.crowndecoratingcentres.co.uk" + location["Url"]
             hours_string = ""

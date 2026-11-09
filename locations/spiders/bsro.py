@@ -10,8 +10,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 
 
-# Bridgestone Retail Operations(BSRO): https://www.bsro.com/
-# Part of Bridgestone Americas: https://www.bridgestoneamericas.com/en/company/businesses/services
 class BsroSpider(CrawlSpider):
     name = "bsro"
     BRANDS = {

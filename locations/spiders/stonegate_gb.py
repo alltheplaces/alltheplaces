@@ -1,8 +1,8 @@
 import html
-from urllib.parse import urlparse
 
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.spiders.morrisons_gb import set_operator
@@ -52,7 +52,7 @@ class StonegateGBSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         set_operator(self.STONEGATE, item)
 
-        brand = self.brands.get(urlparse(response.url).netloc, {})
+        brand = self.brands.get(urlparse_cached(response).netloc, {})
 
         item["brand"] = brand.get("brand")
         item["brand_wikidata"] = brand.get("brand_wikidata")

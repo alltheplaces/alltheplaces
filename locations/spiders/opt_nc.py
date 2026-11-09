@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, DELIMITERS_FR, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class OptNCSpider(Spider):
@@ -51,7 +52,7 @@ class OptNCSpider(Spider):
                 if m.group(2):
                     item["city"] = m.group(2).title()
                 lines = lines[:-1]
-            item["street_address"] = ", ".join(lines)
+            item["street_address"] = merge_address_lines(lines)
         for contact in details.css(".agency-contacts div"):
             text = " ".join(t.strip() for t in contact.css("::text").getall() if t.strip())
             if "@" in text:

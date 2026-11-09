@@ -9,18 +9,6 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# Parry's publishes one page per location, but two page templates are in use and
-# they expose different things:
-#
-#   * the older template marks the address up with schema.org microdata and
-#     links the phone number with a tel: URL, but has no coordinates, and
-#   * the newer template has an embedded Google map carrying coordinates, with
-#     the address, phone and hours written as plain paragraphs that are only
-#     identifiable by the icon image each one starts with.
-#
-# Both are parsed below. No brand:wikidata is set because the chain has no
-# Wikidata item.
-
 
 class ParrysPizzeriaAndBarUSSpider(SitemapSpider):
     name = "parrys_pizzeria_and_bar_us"
@@ -116,15 +104,9 @@ class ParrysPizzeriaAndBarUSSpider(SitemapSpider):
             if days:
                 oh.add_days_range(
                     days,
-                    ParrysPizzeriaAndBarUSSpider.normalise_time(times.group(1)),
-                    ParrysPizzeriaAndBarUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        """Turns "11am", "9:45 am" into a consistent "%I:%M%p" string."""
-        value = value.replace(" ", "").lower()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)
