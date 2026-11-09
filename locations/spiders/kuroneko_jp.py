@@ -8,6 +8,7 @@ from locations.storefinders.emap import EMapSpider
 class KuronekoJPSpider(EMapSpider):
     name = "kuroneko_jp"
     map_id = "yamato01"
+    requires_proxy = True
 
     def make_request(self, lat, lon, radius, offset=1, count=900):
         return super().make_request(
