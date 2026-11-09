@@ -8,6 +8,9 @@ This page discusses the common case of contributing a new spider to the project:
 * a PR title like *"Add great_name_za spider (500 locations)"* is informative as to scale
 * if you have something you want people to know going forward add it as a comment to the
   spider and not the PR
+* keep the spider as small as possible: don't redo what the [pipelines](./PIPELINES.md) already
+  do (de-duplication, phone/email cleanup) and use the shared helpers; see [AGENTS.md](../AGENTS.md)
+  if you're using an AI coding tool
 
 Our automation is going to check (and reject) your code for unused imports and "poor"
 formatting. To avoid being bitten too often by these you can add some pre-commit hooks

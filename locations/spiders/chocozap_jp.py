@@ -20,7 +20,7 @@ class ChocozapJPSpider(Spider):
 
     def make_request(self, page: int) -> Request:
         return Request(
-            f"https://chocozap.g.kuroco.app/rcms-api/34/studios?pageID={page}",
+            f"https://chocozap.g.kuroco.app/rcms-api/34/studios?cnt=1000&order=topics_id:asc&pageID={page}",
             meta={"page": page},
         )
 

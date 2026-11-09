@@ -16,12 +16,12 @@ class MondialtissusFRSpider(SitemapSpider, StructuredDataSpider):
     }
     sitemap_urls = ["https://magasins.mondialtissus.fr/robots.txt"]
     sitemap_rules = [
-        (r"/tissu-mercerie/[\w-]+/[\w\d]+", "parse"),
+        (r"^https://magasins\.mondialtissus\.fr/[\w-]+/[\w-]+/[\w-]+$", "parse"),
     ]
     custom_settings = {"DOWNLOAD_TIMEOUT": 120}
     drop_attributes = {"facebook", "phone"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
-        item["branch"] = item.pop("name", None)
+        item["branch"] = item.pop("name", "").removeprefix("Mondial Tissus ")
         apply_category(Categories.SHOP_FABRIC, item)
         yield item

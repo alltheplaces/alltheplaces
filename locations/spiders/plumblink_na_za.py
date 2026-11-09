@@ -1,55 +1,38 @@
-from typing import AsyncIterator, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy.http import FormRequest, Request, Response
-from scrapy_playwright.page import PageMethod
+from scrapy.http import JsonRequest, Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
 
 class PlumblinkNAZASpider(JSONBlobSpider):
     name = "plumblink_na_za"
     item_attributes = {"brand": "Plumblink", "brand_wikidata": "Q127596751"}
-    start_urls = ["https://api.esolve.co.za/get-locations.php?is_active=true&ws_id=PLNK01"]
     locations_key = "records"
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS_WITH_EXT_JS
 
     async def start(self) -> AsyncIterator[Request]:
-        yield Request(
-            url="https://www.plumblink.co.za/store-locator",
-            meta={
-                "playwright": True,
-                "playwright_include_page": True,
-                "playwright_page_methods": [
-                    PageMethod("wait_for_load_state", "networkidle"),
-                ],
-            },
-            callback=self.parse_cookie,
+        yield JsonRequest(
+            url="https://api.esolve.co.za/get-access-token.php?anonymous=true&ws_id=PLNK01",
+            callback=self.parse_token,
         )
 
-    async def parse_cookie(self, response) -> AsyncIterator[FormRequest]:
-        page = response.meta["playwright_page"]
-
-        try:
-            cookies = await page.context.cookies()
-        finally:
-            await page.close()
-
-        auth_cookie = next((c for c in cookies if c["name"] == "_ng_eslv_token"), None)
-        if not auth_cookie:
-            return
-
-        yield FormRequest(url=self.start_urls[0], headers={"authorization": auth_cookie["value"]})
+    def parse_token(self, response: Response, **kwargs: Any) -> Any:
+        yield JsonRequest(
+            url="https://api.esolve.co.za/get-locations.php?is_active=true&ws_id=PLNK01",
+            headers={"authorization": response.json()["additional_data"]["key"]},
+            callback=self.parse,
+        )
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature["head_office"] == 1:
             return
 
         item["branch"] = feature.pop("description", "").removeprefix("Plumblink ")
-        item["website"] = "https://www.plumblink.co.za/store/" + feature.pop("identifier", "")
+        identifier = feature.pop("identifier", "")
+        item["website"] = "https://www.plumblink.co.za/store/" + identifier if identifier else None
 
         item["street_address"] = item.pop("street", "")
 

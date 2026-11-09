@@ -10,25 +10,10 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 
-# Exact postcodes take precedence: Saint-Martin and Saint-Barthélemy share the 971 prefix.
-OVERSEAS_POSTCODE_COUNTRIES = {
-    "97150": "MF",
-    "97133": "BL",
-    "971": "GP",
-    "972": "MQ",
-    "973": "GF",
-    "974": "RE",
-    "975": "PM",
-    "976": "YT",
-    "986": "WF",
-    "987": "PF",
-    "988": "NC",
-}
-
 
 class PimkieFRSpider(JSONBlobSpider, CamoufoxSpider):
     name = "pimkie_fr"
-    item_attributes = {"brand": "Pimkie", "brand_wikidata": "Q1758066", "name": "Pimkie"}
+    item_attributes = {"brand": "Pimkie", "brand_wikidata": "Q1758066"}
     start_urls = ["https://www.pimkie.fr/pages/magasins"]
     # Plain requests were observed to get a Shopify 500, then a Cloudflare managed challenge.
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS
@@ -49,12 +34,7 @@ class PimkieFRSpider(JSONBlobSpider, CamoufoxSpider):
             item["city"] = city.split(" (")[0].title()
         item["website"] = response.urljoin(feature["url"])
 
-        postcode = item["postcode"] or ""
-        if country := OVERSEAS_POSTCODE_COUNTRIES.get(postcode) or OVERSEAS_POSTCODE_COUNTRIES.get(postcode[:3]):
-            item["country"] = country
-            # The NSI entry doesn't cover the overseas territories.
-            apply_category(Categories.SHOP_CLOTHES, item)
-            apply_category({"clothes": "women"}, item)
+        apply_category(Categories.SHOP_CLOTHES, item)
 
         # "am" holds each day's full range ("pm" is always blank); "FERME - FERME" is a closed day.
         # No hours at all when a day is half "FERME" (ambiguous, e.g. "FERME - 19:00") or when

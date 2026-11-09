@@ -36,8 +36,6 @@ class EvyveGBSpider(Spider):
             item["postcode"] = location["location"]["address"]["zip"]
             item["lat"] = location["location"]["coordinates"]["latitude"]
             item["lon"] = location["location"]["coordinates"]["longitude"]
-            item["extras"]["start_date"] = location["metadata"]["openingDate"]
-
             apply_category(Categories.CHARGING_STATION, item)
 
             yield item

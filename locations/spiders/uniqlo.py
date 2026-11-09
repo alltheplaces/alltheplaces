@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator, Iterable
 
 from scrapy.http import JsonRequest, Response
@@ -13,6 +14,17 @@ class UniqloSpider(JSONBlobSpider):
     item_attributes = {"brand": "Uniqlo", "brand_wikidata": "Q26070"}
     locations_key = ["result", "stores"]
     offset = 0
+    # Local language of each store map site. Belgium is set per store.
+    languages = {
+        "jp": "ja",
+        "fr": "fr",
+        "de": "de",
+        "es": "es",
+        "it": "it",
+        "dk": "da",
+        "se": "sv",
+        "nl": "nl",
+    }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for country in [
@@ -58,9 +70,24 @@ class UniqloSpider(JSONBlobSpider):
             else:
                 oh.add_range(day, feature["wdOpenAt"], feature["wdCloseAt"])
         item["opening_hours"] = oh
-        item["website"] = f'https://map.uniqlo.com/{response.meta["country"]}/en/detail/{feature["id"]}'
+        country = response.meta["country"]
+        language = self.languages.get(country, "en")
+        if country == "be":
+            language = self.belgian_language(feature.get("address") or "")
+        item["website"] = f"https://map.uniqlo.com/{country}/{language}/detail/{feature['id']}"
         item["branch"] = item.pop("name")
 
         apply_category(Categories.SHOP_CLOTHES, item)
 
         yield item
+
+    @staticmethod
+    def belgian_language(address: str) -> str:
+        # Brussels and Wallonia postcodes get French, Flanders Dutch.
+        # Some addresses have no postcode, so keep the English page.
+        if match := re.search(r"\b(\d{4})\b", address):
+            postcode = int(match.group(1))
+            if 1000 <= postcode <= 1499 or 4000 <= postcode <= 7999:
+                return "fr"
+            return "nl"
+        return "en"

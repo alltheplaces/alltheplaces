@@ -1,5 +1,7 @@
 # PR Review Rules
 
+Author-side code rules (how a spider should be written) live in the root `AGENTS.md`; this file covers deciding what to merge, close or hold. Check diffs against `AGENTS.md`, and put newly learned code-style feedback there rather than here.
+
 ## Quick Merge (all CI checks passing, no deeper review needed)
 - **Dependabot dependency bumps** - merge if all CI checks pass
   - If the version is a release candidate (e.g. `rc1`, `rc2`), check the changelog to confirm
@@ -60,22 +62,9 @@
 - Include a brief summary of the CI output (count, warnings, any issues noted)
 
 ## Code Verbosity (comments, tests)
-This is about the code itself, not the PR description (see "PR Descriptions" above, which
-should stay detailed) — the spider source should be lean.
-- **Flag excessive code comments.** LLM-assisted spiders in particular tend to over-comment —
-  a comment restating what the next line obviously does (e.g. `# extract the store name` above
-  `name = response.css(...)`) adds noise, not clarity. One line max per comment, and only where
-  the *why* isn't obvious from the code (a workaround, a non-obvious API quirk, a subtle
-  ordering requirement). Don't block a merge over this alone, but call it out as review feedback
-  so the author can trim it, either before merge or as a quick follow-up.
-- **Don't add a test file per spider.** This repo's convention is not to write an individual
-  test file for each spider — the shared test suite (`test_item_attributes`, structural checks,
-  etc.) already covers spiders generically. A per-spider test file is unnecessary and should be
-  flagged for removal.
-- Confirmed 2026-08-07 re: #17626 (`maaf_fr` spider) — Cj-Malone called the PR "excessively
-  verbose"; iandees's own follow-up feedback was "Claude added too many comments and we don't
-  need tests for every spider." The contributor opened a fast-follow PR (#17694) to trim
-  comments to one line each and delete the per-spider test file.
+Spider source should be lean. The author-side rules (comments, helpers, defensive code, no per-spider tests) are in
+the root `AGENTS.md`, which is the source of truth: review the diff against it. Flag violations as review feedback
+rather than blocking on them alone, and push a trimming fixup if the author is unresponsive.
 
 ## Spider Fix PRs
 - Verify CI checks pass (pytest + pre-commit; AWS CodeBuild run is informational)
@@ -186,7 +175,6 @@ should stay detailed) — the spider source should be lean.
   - **20+ locations**: no special scrutiny needed for size alone.
   - This is a judgment call, not an automatic rejection — note the count and reasoning either
     way in the review.
-- **Category must use `apply_category`** — never set `item["extras"]["amenity"]` (or any other top level tag) directly. Always use `apply_category(Categories.X, item)` from `locations.categories`. If the right `Categories` enum value doesn't exist yet, add it to `categories.py` in the same PR.
 - **`add_list` for multi-value extras tags** — `apply_category` no longer accumulates values;
   calling it twice for the same key overwrites the first. For tags that genuinely need
   semicolon-separated values (e.g. `cuisine`), use `add_list(key, value, item)` from
@@ -197,10 +185,6 @@ should stay detailed) — the spider source should be lean.
   dealer with both sales and service), yield two separate items using `deepcopy(item)` with
   distinct ref suffixes (`f"{item['ref']}-sales"`, `f"{item['ref']}-service"`), each with its
   own `apply_category` call. Do not stack two top-level category tags on one item.
-- **`"extras": Categories.X.value` in `item_attributes` is an antipattern** — `.value` returns a
-  raw dict that bypasses `apply_category`'s field routing. Always call
-  `apply_category(Categories.X, item)` in the parse method (or `post_process_item`) instead of
-  embedding `{"extras": Categories.X.value}` in `item_attributes`. Push a fixup commit if seen.
 - **`name` vs `branch`** - when `brand` is set in `item_attributes` and the source provides a per-location store name that differs from the brand (e.g. an operator's store name like `Cellular Sales Bellingham Meridian St`), that value belongs in `branch`, not `name`. The brand name from `item_attributes` will serve as the feature name.
 - **Prefer primary sources over aggregators** — favor spiders that crawl each individual brand's own site/API over a third-party aggregator that combines multiple brands. Exception: government open-data aggregators are fine when they live in the repo's dedicated government-data spider folder — those are expected to coexist with per-brand primary-source spiders rather than replace them, since they typically carry a narrower field set (e.g. price/location only, no opening hours/phone/services) that per-brand spiders can still improve on. Before treating a per-brand spider as "superseded" by a new aggregator PR (or vice versa), verify the two actually pull the same data — check the per-brand spider's source domain and fields against the aggregator's; don't take a contributor's offer to close their own PR at face value without checking.
 
