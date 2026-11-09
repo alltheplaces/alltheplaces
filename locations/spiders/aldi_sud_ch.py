@@ -9,7 +9,7 @@ from locations.storefinders.uberall import UberallSpider
 
 class AldiSudCHSpider(UberallSpider):
     name = "aldi_sud_ch"
-    item_attributes = {"brand_wikidata": "Q41171672"}
+    item_attributes = {"brand": "Aldi Suisse", "brand_wikidata": "Q111030009"}
     key = "lFDqKBoedhfjMheH3C3e0AcRGDuLG4"
 
     def post_process_item(self, item: Feature, response: Response, location: dict) -> Iterable[Feature]:
