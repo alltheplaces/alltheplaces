@@ -8,7 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
-# https://www.benchmarkpyramid.com/press_media/releases/benchmark-pyramid-merger/
 class BenchmarkPyramidHospitalitySpider(scrapy.Spider):
     name = "benchmark_pyramid_hospitality"
     # item_attributes = {'brand': ''}   # doesn't really apply - Benchmark Hospitality is the operator or various

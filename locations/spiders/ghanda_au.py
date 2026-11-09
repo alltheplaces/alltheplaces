@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # The source data usually gives state abbreviations (e.g. "VIC") but at
 # least one store uses the full name instead, so normalise it.
@@ -52,8 +53,8 @@ class GhandaAUSpider(Spider):
             if name := data.get("name"):
                 item["name"] = name[0]["text"].title()
 
-            item["street_address"] = ", ".join(
-                filter(None, (line.strip() for line in data.get("street_address", "").split("\n")))
+            item["street_address"] = merge_address_lines(
+                (line.strip() for line in data.get("street_address", "").split("\n"))
             )
             item["city"] = data.get("suburb")
             item["postcode"] = data.get("postcode")

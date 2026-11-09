@@ -169,6 +169,7 @@ Owen and published. Others are helping.
 | Sheffield City Council                        | https://www.owenboswarva.com/blog/post-addr16.htm                                                                                     |
 | Somerset Council                              | https://www.owenboswarva.com/blog/post-addr42.htm                                                                                     |
 | South Norfolk District Council                | https://www.owenboswarva.com/blog/post-addr81.htm                                                                                     |
+| South Ribble Borough Council                  | https://www.owenboswarva.com/blog/post-addr117.htm                                                                                    |
 | Southampton City Council                      | https://www.owenboswarva.com/blog/post-addr64.htm                                                                                     |
 | Southwark Council                             | https://www.owenboswarva.com/blog/post-addr33.htm                                                                                     |
 | Staffordshire Moorlands District Council      | https://www.owenboswarva.com/blog/post-addr74.htm                                                                                     |

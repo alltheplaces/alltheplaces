@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
 
 # Matches e.g. "Beaumont TX 77705" -> city="Beaumont", state="TX", postcode="77705"
@@ -70,13 +71,13 @@ class VeoliaUSSpider(CamoufoxSpider):
                 match = CITY_STATE_ZIP.match(last_line)
 
             if match:
-                item["street_address"] = ", ".join(addr_lines[:-1])
+                item["street_address"] = merge_address_lines(addr_lines[:-1])
                 item["city"] = match.group("city")
                 if not is_puerto_rico:
                     item["state"] = match.group("state")
                 item["postcode"] = match.group("postcode")
             else:
-                item["street_address"] = ", ".join(addr_lines)
+                item["street_address"] = merge_address_lines(addr_lines)
         elif addr_lines:
             item["addr_full"] = addr_lines[0]
 

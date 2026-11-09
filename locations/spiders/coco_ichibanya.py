@@ -1,38 +1,32 @@
-from typing import Any, AsyncIterator
-
-from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from typing import Iterable
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.items import Feature
+from locations.storefinders.goga_store_locator import GogaStoreLocatorSpider
 
 
-class CocoIchibanyaSpider(Spider):
+class CocoIchibanyaSpider(GogaStoreLocatorSpider):
     name = "coco_ichibanya"
     skip_auto_cc_domain = True
     item_attributes = {"brand": "CoCo Ichibanya", "brand_wikidata": "Q5986105"}
+    start_urls = ["https://worldwide.ichibanya.co.jp/api/point"]
+    geohashes = ["g", "t", "q", "w", "x", "8", "9"]
+    geohash_suffix = "/"
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for points in ["g", "t", "q", "w", "x", "8", "9"]:
-            yield JsonRequest(url=f"https://worldwide.ichibanya.co.jp/api/point/{points}/")
+    def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = source_feature["name"].replace("店", "")
+        item["name"] = None
+        try:
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_days_range(
+                DAYS,
+                source_feature["営業時間(From)"].replace("：", ":"),
+                source_feature["営業時間(To)"].replace("：", ":"),
+            )
+        except Exception:
+            item["opening_hours"] = None
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["items"]:
+        apply_category(Categories.RESTAURANT, item)
 
-            item = DictParser.parse(store)
-            item["branch"] = item.pop("name").replace("店", "")
-            item["ref"] = store["key"]
-            try:
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_days_range(
-                    DAYS,
-                    store["extra_fields"]["営業時間(From)"].replace("：", ":"),
-                    store["extra_fields"]["営業時間(To)"].replace("：", ":"),
-                )
-            except:
-                pass
-
-            apply_category(Categories.RESTAURANT, item)
-
-            yield item
+        yield item

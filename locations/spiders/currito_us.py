@@ -9,15 +9,6 @@ from locations.google_url import extract_google_position
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# Every location is a block on the one locations page, marked up with
-# schema.org microdata. Coordinates come from the Google Maps link behind each
-# block's "Directions" button.
-#
-# Franchises that have not opened yet are flagged in the block title, e.g.
-# "Lexington (Coming Soon)".
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class CurritoUSSpider(Spider):
     name = "currito_us"

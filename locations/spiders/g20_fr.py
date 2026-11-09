@@ -6,6 +6,7 @@ from scrapy.http import Response
 
 from locations.hours import DAYS_FR, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class G20FRSpider(Spider):
@@ -40,7 +41,7 @@ class G20FRSpider(Spider):
                 item["city"] = re.sub(r"\s+\d{1,2}(ER|EME)$", "", m.group(2), flags=re.IGNORECASE)
             elif line:
                 street_lines.append(line)
-        item["street_address"] = ", ".join(street_lines)
+        item["street_address"] = merge_address_lines(street_lines)
 
         if coords := response.xpath("//script/text()").re(
             r"position:\s*new google\.maps\.LatLng\(\s*(-?[\d.]+),\s*(-?[\d.]+)"

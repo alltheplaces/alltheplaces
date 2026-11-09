@@ -10,12 +10,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# The locations page is a Livewire component whose wire:snapshot attribute holds
-# every site, nested by state, with address and coordinates. Opening hours are
-# only on the per site pages, in a JSON-LD block that is not valid JSON — the
-# days are written as {"dayOfWeek": ["Monday": "08:00-19:00", ...]} — so they
-# are read with a regular expression rather than a JSON parse.
-
 
 class ZipsCarWashUSSpider(Spider):
     name = "zips_car_wash_us"

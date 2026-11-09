@@ -3,7 +3,6 @@ from scrapy.spiders import SitemapSpider
 from locations.items import Feature
 
 
-# Only half the Microdata :(
 class MonicalsPizzaUSSpider(SitemapSpider):
     name = "monicals_pizza_us"
     item_attributes = {"brand": "Monical's Pizza", "brand_wikidata": "Q6900121"}

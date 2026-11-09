@@ -14,8 +14,6 @@ from locations.items import Feature
 #
 # The page heading is a marketing line rather than the branch, so the branch
 # comes from the page title.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 
@@ -78,14 +76,9 @@ class FlyingPiePizzariaUSSpider(Spider):
             if times := re.fullmatch(r"(\d{1,2}(?::\d{2})?\s*[AP]M)\s*-\s*(\d{1,2}(?::\d{2})?\s*[AP]M)", hours, re.I):
                 oh.add_days_range(
                     day_range(start, end),
-                    FlyingPiePizzariaUSSpider.normalise_time(times.group(1)),
-                    FlyingPiePizzariaUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

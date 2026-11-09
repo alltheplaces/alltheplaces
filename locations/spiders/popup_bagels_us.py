@@ -9,16 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 
-# The location directory is a Next.js page whose shop data arrives in the React
-# Server Components stream as self.__next_f.push() chunks. Joined and decoded,
-# the stream holds one record per shop with address, coordinates, phone and
-# per day hours. Records can appear more than once, so they are keyed on id.
-#
-# The /locations page carries only CMS entries with an address slug, which is
-# why the directory page is used instead.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class PopupBagelsUSSpider(Spider):
     name = "popup_bagels_us"

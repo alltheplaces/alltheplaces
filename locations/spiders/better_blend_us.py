@@ -15,8 +15,6 @@ from locations.items import Feature
 # "COMING SOON!" with no address and are skipped.
 #
 # No coordinates are published: the address links are Google short links.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 

@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy.http import JsonRequest
@@ -5,6 +6,7 @@ from scrapy.spiders import Spider
 
 from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -112,6 +114,12 @@ class AscensionUSSpider(Spider):
             item["lat"] = location["Address"]["Latitude"]
             item["lon"] = location["Address"]["Longitude"]
             item["website"] = response.urljoin(location["Url"])
+
+            if re.search(r"\b24 hours.*7 days? a week", location.get("Hours") or ""):
+                item["opening_hours"] = "24/7"
+            else:
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_ranges_from_string(location.get("TimePeriods") or "")
 
             if thumb := location.get("LocationThumbnail"):
                 item["image"] = response.urljoin(thumb)

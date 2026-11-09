@@ -1,14 +1,17 @@
+import re
 from typing import Any, Iterable
 
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS, DAYS_JP, OpeningHours
 from locations.items import Feature
 
 # UQ mobile is a separate KDDI-owned brand that shares this store locator
 # (storeClassification "9"); exclude it so only "au" branded shops remain.
 UQ_MOBILE_CLASSIFICATION = "9"
+WEEKLY_CLOSED_REGEX = re.compile(r"(?:毎週)?[月火水木金土日](?:曜日?)?(?:[・、]?[月火水木金土日](?:曜日?)?)*(?:定休)?")
 
 
 class AuJPSpider(Spider):
@@ -38,6 +41,17 @@ class AuJPSpider(Spider):
             item["phone"] = shop.get("phoneNo") or shop.get("freeCall") or None
             item["website"] = f"https://www.au.com/storelocator/detail/?shopId={shop['shopNo']}"
             item["country"] = "JP"
+
+            for hours in shop.get("businessHours") or []:
+                if hours["weekDay"] in ("", "営業", "全日") and hours["openHour"] and hours["closeHour"]:
+                    oh = OpeningHours()
+                    oh.add_days_range(DAYS, hours["openHour"], hours["closeHour"])
+                    if WEEKLY_CLOSED_REGEX.fullmatch(shop.get("closedHoliday") or ""):
+                        closed_days = re.sub("曜日?|毎週|定休", "", shop["closedHoliday"])
+                        oh.set_closed([DAYS_JP[day] for day in re.findall("[月火水木金土日]", closed_days)])
+                    if oh.day_hours:
+                        item["opening_hours"] = oh
+                    break
 
             apply_category(Categories.SHOP_MOBILE_PHONE, item)
 

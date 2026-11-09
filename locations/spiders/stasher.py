@@ -1,3 +1,5 @@
+from typing import AsyncIterator
+
 import pycountry
 from scrapy import Spider
 from scrapy.http import JsonRequest
@@ -12,7 +14,7 @@ class StasherSpider(Spider):
     item_attributes = {"brand": "Stasher"}
     start_urls = ["https://api.stasher.com/v3/stashpoints?page=1&per_page=1000"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=self.start_urls[0], callback=self.parse)
 
     def parse(self, response, **kwargs):

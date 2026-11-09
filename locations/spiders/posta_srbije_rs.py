@@ -6,19 +6,10 @@ from scrapy import Selector, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_SR, OpeningHours, sanitise_day
 from locations.items import Feature
 
 # Serbian (Latin) weekday tokens used in the detail fragment's opening hours -> ATP day codes.
-DAY_TOKENS = {
-    "pon": "Mo",  # ponedeljak
-    "uto": "Tu",  # utorak
-    "sre": "We",  # sreda
-    "cet": "Th",  # četvrtak (č normalised to c)
-    "pet": "Fr",  # petak
-    "sub": "Sa",  # subota
-    "ned": "Su",  # nedelja
-}
 # A weekday label immediately preceding a "HH.MM-HH.MM" range (per-day schedules).
 DAY_RANGE_RE = re.compile(
     r"(pon|uto|sre|[čc]et|pet|sub(?:ota)?|ned(?:elja)?)\s*\.?\s*:?\s*(\d{1,2})\.(\d{2})\s*-\s*(\d{1,2})\.(\d{2})",
@@ -95,7 +86,7 @@ class PostaSrbijeRSSpider(Spider):
             try:
                 if labelled := DAY_RANGE_RE.findall(line):
                     for token, h1, m1, h2, m2 in labelled:
-                        day = DAY_TOKENS[token[:3].lower().replace("č", "c")]
+                        day = sanitise_day(token[:3], DAYS_SR)
                         opening_hours.add_range(day, "{}:{}".format(h1, m1), "{}:{}".format(h2, m2))
                 elif hours := RANGE_RE.search(line):
                     for day in DAYS[:5]:

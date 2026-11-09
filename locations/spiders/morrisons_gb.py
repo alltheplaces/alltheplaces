@@ -111,7 +111,6 @@ class MorrisonsGBSpider(Spider):
         data = response.json()
         context = data["result"]["pageContext"]
 
-        # Extract services from JSON
         services = context.get("services", [])
         service_names = [s["serviceName"] for s in services]
 
@@ -163,7 +162,6 @@ class MorrisonsGBSpider(Spider):
         if not has_valid_hours:
             return None
 
-        # Parse hours into OpeningHours object
         hours = OpeningHours()
         for day_hours in opening_times_data:
             hours.add_range(
@@ -189,7 +187,6 @@ class MorrisonsGBSpider(Spider):
 
         poi = store_item.copy()
 
-        # Create unique ref
         poi["ref"] = f"{store_item['ref']}_{poi_type}"
 
         # Clear store-specific fields

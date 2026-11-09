@@ -6,14 +6,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.agile_store_locator import AgileStoreLocatorSpider
 
-# Needler's runs the Agile Store Locator WordPress plugin, which returns every
-# store in one admin-ajax.php response.
-#
-# The plugin's open_hours field holds "0" for every day rather than times,
-# which the store finder reads as closed, so hours are dropped.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class NeedlersFreshMarketUSSpider(AgileStoreLocatorSpider):
     name = "needlers_fresh_market_us"

@@ -5,10 +5,9 @@ from typing import Any, Iterable
 from scrapy import Request, Selector, Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
-
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
 
 
 class AuditionConseilFRSpider(Spider):
@@ -36,10 +35,9 @@ class AuditionConseilFRSpider(Spider):
             item["addr_full"] = address
             if m := re.search(r"(\d{5}),?\s*([^,\d][^,]*)$", address):
                 item["postcode"], item["city"] = m.group(1), m.group(2).strip()
-                item["country"] = OVERSEAS_COUNTRIES.get(item["postcode"][:3], "FR")
 
-            item["phone"] = popup.xpath('//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:")
-            item["email"] = popup.xpath('//a[starts-with(@href, "mailto:")]/@href').get("").removeprefix("mailto:")
+            item["phone"] = popup.xpath('//a[starts-with(@href, "tel:")]/@href').get("")
+            item["email"] = popup.xpath('//a[starts-with(@href, "mailto:")]/@href').get("")
 
             yield response.follow(item["website"], self.parse_hours, cb_kwargs={"item": item})
 
@@ -59,4 +57,5 @@ class AuditionConseilFRSpider(Spider):
             for open_h, open_m, close_h, close_m in self.TIME_RANGE.findall(times):
                 oh.add_range(day, f"{open_h}:{open_m or '00'}", f"{close_h}:{close_m or '00'}")
         item["opening_hours"] = oh
+        apply_category(Categories.SHOP_HEARING_AIDS, item)
         yield item

@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
+from locations.pipelines.address_clean_up import merge_address_lines
 
 PAGE_SIZE = 500
 
@@ -59,7 +60,7 @@ class KrysSpider(Spider):
             )
             item["website"] = location["URL"]["canonical"]
             item["image"] = ";".join([i["original"] for i in location["visuals"]])
-            item["street_address"] = ", ".join(filter(None, [location["street"], location["street_extend"]]))
+            item["street_address"] = merge_address_lines([location["street"], location["street_extend"]])
             item["addr_full"] = ", ".join(location["lines"])
 
             item["opening_hours"] = OpeningHours()

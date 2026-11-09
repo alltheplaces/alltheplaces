@@ -1,8 +1,7 @@
 import re
 from typing import Any
 
-from requests import Response
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.spiders.ford_dealers_us import FordDealersUSSpider
 
