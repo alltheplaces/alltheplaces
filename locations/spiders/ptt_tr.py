@@ -16,6 +16,7 @@ class PttTRSpider(Spider):
     item_attributes = {"operator": "PTT", "operator_wikidata": "Q3079259"}
     allowed_domains = ["enyakinptt.ptt.gov.tr"]
     API = "https://enyakinptt.ptt.gov.tr/api/"
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(f"{self.API}il", callback=self.parse_provinces)
