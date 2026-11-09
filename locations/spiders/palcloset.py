@@ -49,7 +49,7 @@ class PalclosetSpider(GogaStoreLocatorSpider):
         item["postcode"] = source_feature["郵便番号"]
         if item["phone"] == "-":
             item["phone"] = None
-        item["extras"]["addr:province"] = source_feature["都道府県"]
+        item["extras"]["addr:province"] = item.pop("state")
         item["branch"] = item.pop("name")
 
         # Almost every shop has irregular closing days (不定休); fixed closing days are not handled.
