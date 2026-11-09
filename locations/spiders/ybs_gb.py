@@ -5,6 +5,7 @@ from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -28,7 +29,9 @@ class YbsGBSpider(Spider):
                 [store[f] if store[f] != "0" else None for f in ["Address1", "Address2", "Address3", "Postcode"]]
             )
 
-            # TODO Opening hours
+            item["opening_hours"] = oh = OpeningHours()
+            for day in DAYS_FULL:
+                oh.add_ranges_from_string(f"{day} {store[f'Times{day}']}")
 
             apply_category(Categories.BANK, item)
 

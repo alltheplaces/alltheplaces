@@ -7,6 +7,7 @@ import requests
 import requests_cache
 from scrapy.commands import ScrapyCommand
 
+from locations.country_coder import BORDERS_URL, CountryCoder, resolve_location_set
 from locations.name_suggestion_index import NSI_FILE_PATH, WIKIDATA_FILE_PATH
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,14 @@ class VendorDataCommand(ScrapyCommand):
             type=str,
             help="nsi.json to be vendored [default: %(default)s]",
         )
+        parser.add_argument(
+            "-c",
+            "--country-coder",
+            dest="country_coder_url",
+            default=BORDERS_URL,
+            type=str,
+            help="country-coder borders.json used to resolve locationSets [default: %(default)s]",
+        )
 
     def run(self, args: list[str], opts: argparse.Namespace) -> None:
         with requests_cache.disabled():
@@ -58,6 +67,7 @@ class VendorDataCommand(ScrapyCommand):
 
     def _vendor_nsi(self, opts: argparse.Namespace):
         nsi = requests.get(opts.nsi_url).json()
+        self.country_coder = CountryCoder.from_url(opts.country_coder_url)
 
         for override in self._nsi_overrides:
             override(self, nsi)
@@ -69,11 +79,12 @@ class VendorDataCommand(ScrapyCommand):
         data = json.load(open(file, encoding="utf-8"))
         print(f"{file.stem.upper()} version: {data['_meta']['version']}")
 
-    def _fr_replacement_overrides(self, nsi: dict):
+    def _resolve_location_sets(self, nsi: dict):
+        # Runs last so the overrides above are normalised too. Consumers only match country codes,
+        # so M49 regions, aliases, circles etc. are expanded here.
         for tree in nsi["nsi"].values():
             for entry in tree["items"]:
-                if "include" in entry["locationSet"] and "fx" in entry["locationSet"]["include"]:
-                    entry["locationSet"]["include"].append("fr")
+                entry["locationSet"] = resolve_location_set(entry["locationSet"], self.country_coder, entry["id"])
 
     _wikidata_overrides = []
-    _nsi_overrides = [_fr_replacement_overrides]
+    _nsi_overrides = [_resolve_location_sets]

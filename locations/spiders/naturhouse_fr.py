@@ -8,8 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
-
 
 class NaturhouseFRSpider(SitemapSpider):
     name = "naturhouse_fr"
@@ -25,7 +23,6 @@ class NaturhouseFRSpider(SitemapSpider):
         item["addr_full"] = response.xpath('normalize-space(//div[@id="cardAddress"]//p)').get()
         if m := re.search(r"\b(\d{5}) (.+)$", item["addr_full"] or ""):
             item["postcode"], item["city"] = m.group(1), m.group(2).title()
-            item["country"] = OVERSEAS_COUNTRIES.get(item["postcode"][:3], "FR")
         item["phone"] = response.xpath('//a[starts-with(@href, "tel:")]/@href').get()
         if m := re.search(r"const shop = \{ lat: (-?[\d.]+), lng: (-?[\d.]+) \}", response.text):
             item["lat"], item["lon"] = m.group(1), m.group(2)

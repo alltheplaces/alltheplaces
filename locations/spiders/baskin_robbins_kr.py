@@ -1,3 +1,5 @@
+import re
+from html import unescape
 from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
@@ -5,11 +7,13 @@ from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Extras, apply_yes_no
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 ADDRESS_URL = "https://www.baskinrobbins.co.kr/api/store-address.php"
 STORES_URL = "https://www.baskinrobbins.co.kr/api/store-list.php"
 RESULT_LIMIT = 100
+OPERATION_TIME = re.compile(r"AM\s*(\d{1,2})(?::(\d{2}))?(?:시)?\s*~\s*PM\s*(\d{1,2})(?::(\d{2}))?(?:시)?")
 
 
 class BaskinRobbinsKRSpider(Spider):
@@ -55,6 +59,16 @@ class BaskinRobbinsKRSpider(Spider):
                 for key in ["addr_si", "addr_gugun", "addr_road", "addr_detail"]
                 if (part := store.get(key))
             )
+
+            if m := OPERATION_TIME.fullmatch(unescape(store["operation_time"]).strip()):
+                open_hour, open_min, close_hour, close_min = m.groups(default="00")
+                close_hour = int(close_hour)
+                if close_hour < 12:
+                    close_hour += 12
+                elif close_hour == 12:
+                    close_hour = 24
+                item["opening_hours"] = OpeningHours()
+                item["opening_hours"].add_days_range(DAYS, f"{open_hour}:{open_min}", f"{close_hour}:{close_min}")
 
             services = store.get("service_info") or ""
             apply_yes_no(Extras.TAKEAWAY, item, "픽업" in services)
