@@ -11,8 +11,8 @@ class CocoIchibanyaJPSpider(GogaStoreLocatorSpider):
         "brand_wikidata": "Q5986105",
     }
     start_urls = ["https://tenpo.ichibanya.co.jp/api/point"]
-    # The API requires a trailing slash after the geohash
-    geohashes = ["w/", "xj/", "xn/", "xp/", "z/"]
+    geohashes = ["w", "xj", "xn", "xp", "z"]
+    geohash_suffix = "/"
     website_formatter = "https://tenpo.ichibanya.co.jp/map/{}/"
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:

@@ -11,8 +11,8 @@ class CocoIchibanyaSpider(GogaStoreLocatorSpider):
     skip_auto_cc_domain = True
     item_attributes = {"brand": "CoCo Ichibanya", "brand_wikidata": "Q5986105"}
     start_urls = ["https://worldwide.ichibanya.co.jp/api/point"]
-    # The API requires a trailing slash after the geohash
-    geohashes = ["g/", "t/", "q/", "w/", "x/", "8/", "9/"]
+    geohashes = ["g", "t", "q", "w", "x", "8", "9"]
+    geohash_suffix = "/"
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = source_feature["name"].replace("店", "")
