@@ -24,10 +24,8 @@ class DennysJPSpider(GogaStoreLocatorSpider):
     }
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
-        item["ref"] = source_feature["id"]
         item["branch"] = item.pop("name").replace("デニーズ", "").split()[0]
         item["phone"] = f"+81 {source_feature['電話番号']}"
-        item["postcode"] = source_feature["郵便番号"]
         apply_category(Categories.RESTAURANT, item)
 
         item["opening_hours"] = OpeningHours()
@@ -43,7 +41,7 @@ class DennysJPSpider(GogaStoreLocatorSpider):
         for key, attribute in self.FLAGS.items():
             apply_yes_no(attribute, item, source_feature[key] == "1")
         if source_feature["コンセント"] == "1":
-            item["extras"]["socket:nema_5_15"] = "yes"
+            item["extras"]["socket:nema_1_15"] = "yes"
         if source_feature["全席禁煙"] == "1":
             item["extras"]["smoking"] = "no"
 
