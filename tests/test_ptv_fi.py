@@ -3578,8 +3578,7 @@ def test_hours_edge_branches_and_ranges():
         }
     ]
     rendered = spider._hours(ch, None).as_opening_hours()
-    assert "Fr-Su 12:00-14:00" in rendered
-    assert "Mo 12:00-14:00" in rendered
+    assert rendered == "Mo,Fr-Su 12:00-14:00"
     assert spider._to_minutes("25:00") is None
     assert spider._to_minutes("10:00:99") is None
     assert spider._to_minutes("08:00-12:00") is None

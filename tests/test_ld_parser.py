@@ -389,7 +389,7 @@ def test_ld_parse_opening_hours_day_range():
                 "@context": "https://schema.org",
                 "openingHours": ["Th-Tu 09:00-17:00"]
             }
-            """)).as_opening_hours() == "Mo-Tu 09:00-17:00; Th-Su 09:00-17:00"
+            """)).as_opening_hours() == "Mo-Tu,Th-Su 09:00-17:00"
 
 
 def test_ld_parse_opening_hours_array_with_commas():
