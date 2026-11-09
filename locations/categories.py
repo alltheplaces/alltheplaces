@@ -387,6 +387,7 @@ class Categories(Enum):
     HOTEL = {"tourism": "hotel"}
     INTERNET_CAFE = {"amenity": "internet_cafe"}
     ICE_CREAM = {"amenity": "ice_cream"}
+    KARAOKE_BOX = {"amenity": "karaoke_box"}
     LIBRARY = {"amenity": "library"}
     LOADING_DOCK = {"amenity": "loading_dock"}
     MAILROOM = {"amenity": "mailroom"}
@@ -460,6 +461,7 @@ class Categories(Enum):
     TRADE_BATHROOM = {"trade": "bathroom"}
     TRADE_BUILDING_SUPPLIES = {"trade": "building_supplies"}
     TRADE_ELECTRICAL = {"trade": "electrical"}
+    TRADE_FENCING = {"trade": "fencing"}
     TRADE_FIRE_PROTECTION = {"trade": "fire_protection"}
     TRADE_HVAC = {"trade": "hvac"}
     TRADE_IRRIGATION = {"trade": "irrigation"}
@@ -745,6 +747,7 @@ class Extras(Enum):
     DRINKING_WATER = "drinking_water"
     DRIVE_THROUGH = "drive_through"
     DUTY_FREE = "duty_free"
+    ELEVATOR = "elevator"
     FAST_FOOD = "fast_food"
     FAX = "fax"
     FAXING = "service:fax"
@@ -777,7 +780,7 @@ class Extras(Enum):
     RESERVATION = "reservation"
     RESERVATION_REQUIRED = "reservation=required"
     SANITARY_DUMP_STATION = "sanitary_dump_station"
-    SCANING = "service:scan"
+    SCANNING = "service:scan"
     SELF_CHECKOUT = "self_checkout"
     SHOWERS = "shower"
     SMOKING = "smoking"
@@ -1161,6 +1164,7 @@ class Sport(Enum):
     SHOOTING = "shooting"
     SKIING = "skiing"
     YOGA = "yoga"
+    ARCHERY = "archery"
 
 
 def add_sport(sport: Sport | Iterable[Sport], item: Feature | dict) -> None:

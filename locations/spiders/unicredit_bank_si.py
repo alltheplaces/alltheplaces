@@ -7,7 +7,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 
 # Titles that are just the generic word for "ATM" rather than anything location-specific, so
 # keeping them as name would add no information beyond the category tag already applied.
@@ -16,8 +16,6 @@ GENERIC_TITLES = {"atm"}
 # An internal reference/branch code sometimes prepended as its own address line (e.g. "KR01",
 # "BA00057N"), duplicating the record's own branchCode field where that is set.
 CODE_LINE = re.compile(r"^[A-Za-z]{2}\d+[A-Za-z]?$")
-
-DAY_CODES = {"MO": "Mo", "TU": "Tu", "WE": "We", "TH": "Th", "FR": "Fr", "SA": "Sa", "SU": "Su"}
 
 
 class UnicreditBankSISpider(Spider):
@@ -138,7 +136,7 @@ class UnicreditBankSISpider(Spider):
         opening_hours = OpeningHours()
         # Flat list in groups of five per day: [day_code, open, close, open2, close2].
         for i in range(0, len(workinghours) - 4, 5):
-            if not (day := DAY_CODES.get(workinghours[i])):
+            if not (day := sanitise_day(workinghours[i])):
                 continue
             if workinghours[i + 1] and workinghours[i + 2]:
                 opening_hours.add_range(day, workinghours[i + 1], workinghours[i + 2])

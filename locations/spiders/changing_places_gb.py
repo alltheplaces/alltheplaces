@@ -6,6 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ChangingPlacesGBSpider(JSONBlobSpider):
@@ -19,7 +20,7 @@ class ChangingPlacesGBSpider(JSONBlobSpider):
         item["lon"] = feature.get("lo")
         item["name"] = "Changing Places"
         item["branch"] = feature.get("n")
-        item["street_address"] = ", ".join(filter(None, (feature.get("a1"), feature.get("a2"))))
+        item["street_address"] = merge_address_lines((feature.get("a1"), feature.get("a2")))
         item["city"] = feature.get("c")
         item["postcode"] = feature.get("p")
         item["website"] = "https://www.changing-places.org/find?toilet=" + str(item["ref"])

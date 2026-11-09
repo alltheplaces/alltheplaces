@@ -17,7 +17,7 @@ class EgOnTheMoveGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             brands = location["Brands"].split(", ")
-            if not ("EGOTM" in brands and "PFS" in brands):
+            if not (("EGOTM" in brands or "EGOTM2" in brands) and "PFS" in brands):
                 continue
 
             item = Feature()

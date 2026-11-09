@@ -8,7 +8,6 @@ from locations.licenses import Licenses
 from locations.materials import MATERIALS_DE
 
 
-# Open Data of the City of Zürich, https://data.stadt-zuerich.ch/
 class StadtZuerichCHSpider(scrapy.Spider):
     name = "stadt_zuerich_ch"
     allowed_domains = ["ogd.stadt-zuerich.ch"]

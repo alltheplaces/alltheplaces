@@ -28,16 +28,6 @@ class FinsburySpider(PlaywrightSpider):
         "Guadeloupe": "GP",
         "Côte d'Ivoire": "CI",
     }
-    # Overseas French departments are all labelled "France" here (unlike Guadeloupe
-    # above) - postcode prefix reliably tells them apart.
-    OVERSEAS_FRANCE_POSTCODES = {
-        "971": "GP",
-        "972": "MQ",
-        "973": "GF",
-        "974": "RE",
-        "975": "PM",
-        "976": "YT",
-    }
 
     def parse(self, response: Response) -> Any:
         for template in response.css('template[name^="store_"]'):
@@ -62,8 +52,6 @@ class FinsburySpider(PlaywrightSpider):
 
             country = block.css(".map-place-list__list-address-country::text").get("").strip()
             item["country"] = self.COUNTRY_OVERRIDES.get(store_id) or self.COUNTRY_MAPPING.get(country, country)
-            if item["country"] == "FR" and postcode:
-                item["country"] = self.OVERSEAS_FRANCE_POSTCODES.get(postcode[:3], item["country"])
 
             # A handful of stores cram a second phone number, or even an email,
             # into this same field separated by " - " instead of a proper list.

@@ -1,86 +1,39 @@
-from typing import Any, Counter
+from typing import Any, Iterable
 
-from scrapy import Spider
+import chompjs
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-from locations.items import set_closed
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class PizzaExpressGBSpider(Spider):
+class PizzaExpressGBSpider(SitemapSpider, StructuredDataSpider):
     name = "pizza_express_gb"
     item_attributes = {"brand": "PizzaExpress", "brand_wikidata": "Q662845"}
-    start_urls = ["https://www.pizzaexpress.com/api/restaurants/FindRestaurantsByLatLong?limit=2000"]
+    sitemap_urls = ["https://locations.pizzaexpress.com/sitemap.xml"]
+    sitemap_rules = [(r"com/(?!restaurants)[^/]+$", "parse_sd")]
+    wanted_types = ["FoodEstablishment"]
+    drop_attributes = {"image", "name", "facebook"}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        restaurants = response.json()
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["ref"] = response.url
+        item["branch"] = response.xpath("//h1/text()").get()
+        if item.get("postcode", "").startswith("JE"):
+            item["country"] = "JE"
 
-        # Count how many times each image URL appears; drop any that are shared
-        image_counts = Counter()
-        for i in restaurants:
-            if img := i.get("image"):
-                if img.get("MediaExists") and img.get("Src"):
-                    image_counts[img["Src"]] += 1
+        for block in response.xpath('//script[@type="application/ld+json"]/text()').getall():
+            if geo := chompjs.parse_js_object(block).get("credentialSubject", {}).get("geo"):
+                item["lat"] = geo.get("latitude")
+                item["lon"] = geo.get("longitude")
 
-        for i in restaurants:
-            item = DictParser.parse(i)
-            item["branch"] = item.pop("name")
+        facilities = response.xpath("//span/text()").getall()
+        apply_yes_no(Extras.WIFI, item, "WiFi" in facilities)
+        apply_yes_no(Extras.OUTDOOR_SEATING, item, "Outdoor Dining" in facilities)
+        apply_yes_no(Extras.DELIVERY, item, "Delivery" in facilities)
+        apply_yes_no(Extras.TAKEAWAY, item, "Collection" in facilities)
 
-            item["ref"] = i["restaurantId"]
-            item["addr_full"] = i["fullAddress"]
-            item["postcode"] = i["Postcode"]
-            item["website"] = response.urljoin(i["link"])
-            item["street_address"] = merge_address_lines(
-                [
-                    i["Address1"],
-                    i["Address2"],
-                    i["Address3"],
-                ],
-            )
+        apply_category(Categories.RESTAURANT, item)
 
-            if i["Location"] == "":
-                item["city"] = i["fullAddress"].split(", ")[-2]
-            else:
-                item["city"] = i["Location"]
-
-            if item["city"] == "Jersey":
-                item["country"] = "JE"
-                item["city"] = None
-            else:
-                item["country"] = "GB"
-
-            if img := i.get("image"):
-                if img.get("MediaExists") and img.get("Src") and image_counts[img["Src"]] == 1:
-                    item["image"] = response.urljoin(img["Src"])
-
-            facilities = [f["label"] for f in i["facilities"]]
-            apply_yes_no(Extras.WHEELCHAIR, item, i["DisabledAccess"])
-            apply_yes_no(Extras.TAKEAWAY, item, i["isOpenForCollection"], False)
-            apply_yes_no(Extras.DELIVERY, item, i["isOpenForDelivery"], False)
-            apply_yes_no(Extras.INDOOR_SEATING, item, i["isOpenForDineIn"], False)
-            apply_yes_no(Extras.TOILETS_WHEELCHAIR, item, "Disabled Toilet" in facilities)
-            apply_yes_no(Extras.OUTDOOR_SEATING, item, "Outdoor dining" in facilities)
-            apply_yes_no(Extras.WIFI, item, "WiFi" in facilities)
-
-            if i["openingHours"]:
-                try:
-                    item["opening_hours"] = self.parse_opening_hours(i["openingHours"])
-                except Exception:
-                    pass
-            else:
-                set_closed(item)
-            if i["IsClosed"] or i["temporarilyClosed"]:
-                set_closed(item)
-
-            apply_category(Categories.RESTAURANT, item)
-
-            yield item
-
-    def parse_opening_hours(self, opening_hours: list[dict]) -> OpeningHours:
-        oh = OpeningHours()
-        for rule in opening_hours:
-            oh.add_range(rule["label"], *rule["value"].split("-"))
-        return oh
+        yield item

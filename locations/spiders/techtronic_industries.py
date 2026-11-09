@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -12,7 +12,7 @@ class TechtronicIndustriesSpider(Spider):
     item_attributes = {"brand": "Techtronic Industries", "brand_wikidata": "Q2399612"}
     start_urls = ["https://www.ttigroup.com/ttigroup/api/v1/node/office?lang=en&page_nid=1161"]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

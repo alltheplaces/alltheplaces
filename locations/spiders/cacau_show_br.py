@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.geo import city_locations
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 BASE_URL = "https://www.cacaushow.com.br/on/demandware.store/Sites-CacauShow-Site/pt_BR/Stores-FindStores"
 
@@ -74,7 +75,7 @@ class CacauShowBRSpider(Spider):
             item["branch"] = item.pop("name", None)
 
             address_parts = [p for p in (store.get("address1"), store.get("address2")) if p]
-            item["street_address"] = ", ".join(address_parts) if address_parts else None
+            item["street_address"] = merge_address_lines(address_parts) if address_parts else None
 
             apply_category(Categories.SHOP_CHOCOLATE, item)
 

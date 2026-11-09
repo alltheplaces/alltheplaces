@@ -15,6 +15,7 @@ from locations.categories import (
     apply_yes_no,
 )
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
 from locations.spiders.avia_de import AVIA_SHARED_ATTRIBUTES
 from locations.user_agents import BROWSER_DEFAULT
@@ -47,6 +48,8 @@ class AviaFRSpider(Spider):
                     item.update(self.AVIA_XPRESS)
             apply_category(Categories.FUEL_STATION, item)
 
+            item["opening_hours"] = self.parse_hours(store)
+
             self.apply_attribute(Fuel.ADBLUE, item, store.get("AdBlue pump"))
             self.apply_attribute(Fuel.E10, item, store.get("SP95/10"))
             self.apply_attribute(Fuel.E5, item, [store.get("SP95/E5"), store.get("SP98/E5")])
@@ -75,6 +78,20 @@ class AviaFRSpider(Spider):
             self.apply_attribute(Extras.WIFI, item, store.get("wifi"))
 
             yield item
+
+    def parse_hours(self, store: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day, name in zip(DAYS, DAYS_3_LETTERS):
+            hours = store.get(f"{name.lower()}_from_till", "")
+            if hours == "00:00-00:00":
+                oh.set_closed(day)
+                continue
+            open_time, _, close_time = hours.partition("-")
+            lunch_start, _, lunch_end = store.get(f"{name.lower()}_lunchtime_from_to", "").partition("-")
+            if open_time < lunch_start < lunch_end < close_time:
+                hours = f"{open_time}-{lunch_start}, {lunch_end}-{close_time}"
+            oh.add_ranges_from_string(f"{day} {hours}")
+        return oh
 
     def apply_attribute(self, attribute: str | Enum, item: Feature, value: str | list[str]) -> None:
         if not isinstance(value, list):

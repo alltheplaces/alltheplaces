@@ -1,56 +1,48 @@
-from typing import Any, AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, Response
-
-from locations.categories import Categories, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
-from locations.hours import DAYS, OpeningHours
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS, DAYS_JP, OpeningHours
+from locations.items import Feature
+from locations.storefinders.goga_store_locator import GogaStoreLocatorSpider
 
 
-class DennysJPSpider(Spider):
+class DennysJPSpider(GogaStoreLocatorSpider):
     name = "dennys_jp"
     item_attributes = {"brand": "デニーズ", "brand_wikidata": "Q11320661"}
-    days = dict(zip(DAYS, ["月", "火", "水", "木", "金", "土", "日"]))
+    start_urls = ["https://shop.dennys.co.jp/api/point"]
+    geohashes = ["w", "x", "z"]
+    geohash_suffix = "/"
+    website_formatter = "https://shop.dennys.co.jp/map/{}/"
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for points in [
-            "w",
-            "x",
-            "z",
-        ]:
-            yield JsonRequest(url=f"https://shop.dennys.co.jp/api/point/{points}/")
+    FLAGS = {
+        "駐車場あり": Extras.PARKING,
+        "だれでもトイレ": Extras.TOILETS_WHEELCHAIR,
+        "ベビーシート": Extras.BABY_CHANGING_TABLE,
+        "出前サービス": Extras.DELIVERY,
+        "エレベーター": Extras.ELEVATOR,
+        "車椅子対応の入り口": Extras.WHEELCHAIR,
+    }
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["items"]:
+    def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").replace("デニーズ", "").split()[0]
+        item["phone"] = f"+81 {source_feature['電話番号']}"
+        apply_category(Categories.RESTAURANT, item)
 
-            item = DictParser.parse(store)
+        item["opening_hours"] = OpeningHours()
+        for day_name, day in DAYS_JP.items():
+            if not day_name.endswith("曜日"):
+                continue
+            ranges = [hours.strip().split("-") for hours in source_feature[f"{day_name}の営業時間"].split(",")]
+            for open_time, close_time in ranges:
+                # After-midnight hours are listed on the day the night started, so move them to the next day
+                overflow = len(ranges) > 1 and open_time in ("0:00", "00:00")
+                item["opening_hours"].add_range(DAYS[(DAYS.index(day) + overflow) % 7], open_time, close_time)
 
-            item["branch"] = item.pop("name").replace("デニーズ", "").split()[0]
-            apply_category(Categories.RESTAURANT, item)
+        for key, attribute in self.FLAGS.items():
+            apply_yes_no(attribute, item, source_feature[key] == "1")
+        if source_feature["コンセント"] == "1":
+            item["extras"]["socket:nema_1_15"] = "yes"
+        if source_feature["全席禁煙"] == "1":
+            item["extras"]["smoking"] = "no"
 
-            item["opening_hours"] = OpeningHours()
-            for index, day in enumerate(DAYS):
-                ranges = [
-                    hours.strip().split("-")
-                    for hours in store["extra_fields"][f"{self.days[day]}曜日の営業時間"].split(",")
-                ]
-                for open_time, close_time in ranges:
-                    # After-midnight hours are listed on the day the night started, so move them to the next day
-                    overflow = len(ranges) > 1 and open_time in ("0:00", "00:00")
-                    item["opening_hours"].add_range(DAYS[(index + overflow) % 7], open_time, close_time)
-            item["website"] = f"https://shop.dennys.co.jp/map/{store['key']}/"
-            item["phone"] = f"+81 {store['extra_fields']['電話番号']}"
-            apply_yes_no("parking", item, store["extra_fields"]["駐車場あり"] == "1")
-            apply_yes_no("toilets:wheelchair", item, store["extra_fields"]["だれでもトイレ"] == "1")
-            apply_yes_no("changing_table", item, store["extra_fields"]["ベビーシート"] == "1")
-            apply_yes_no("delivery", item, store["extra_fields"]["出前サービス"] == "1")
-            apply_yes_no("elevator", item, store["extra_fields"]["エレベーター"] == "1")
-            apply_yes_no("wheelchair", item, store["extra_fields"]["車椅子対応の入り口"] == "1")
-            if store["extra_fields"]["コンセント"] == "1":
-                item["extras"]["socket:nema_5_15"] = "yes"
-            if store["extra_fields"]["全席禁煙"] == "1":
-                item["extras"]["smoking"] = "no"
-            item["postcode"] = store["extra_fields"]["郵便番号"]
-
-            yield item
+        yield item

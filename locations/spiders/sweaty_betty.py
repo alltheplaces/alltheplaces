@@ -24,10 +24,5 @@ class SweatyBettySpider(Spider):
                 s = location["name"]
                 slug = "-".join(s.split()).lower() + "-" + location["storeId"]
                 item["website"] = urljoin("https://www.sweatybetty.com/shop-details/", slug)
-                # if location.get("storeHours"):
-                #   item["opening_hours"] = OpeningHours()
-                #     xpath("./@data-day").get()+ " "
-                #    xpath("./@data-open").get()+ "-"
-                #    xpath("./@data-close").get()
                 item["branch"] = item.pop("name")
                 yield item

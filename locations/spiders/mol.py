@@ -1,3 +1,4 @@
+import re
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
@@ -94,6 +95,7 @@ SERVICES_MAPPING = {
     "Hoover": Extras.VACUUM_CLEANER,
     "Hot dog": "fast_food",
     "Internet (wifi)": Extras.WIFI,
+    "Internet Wifi": Extras.WIFI,
     "Lubricant": Fuel.ENGINE_OIL,
     "Shower room": Extras.SHOWERS,
     "Truck friendly": Access.HGV,
@@ -153,11 +155,9 @@ CARDS_MAPPING = {
 }
 
 
-# MOL data is also available at https://www.molgroupcards.com/station-finder
-# along with other brands, but not all POIs on this page have fuel types and services.
 class MolSpider(Spider):
     name = "mol"
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_TIMEOUT": 90}
+    custom_settings = {"DOWNLOAD_TIMEOUT": 90}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for country in COUNTRIES.values():
@@ -186,16 +186,17 @@ class MolSpider(Spider):
             self.parse_attribute(item, poi, "cards", CARDS_MAPPING)
             self.parse_attribute(item, poi, "services", SERVICES_MAPPING)
             self.parse_brand(item, poi)
+            if item.get("brand") and (label := item.pop("name", None)) and not re.search(r"\d", label):
+                item["branch"] = re.sub(r"^(?:TOTAL EXPRESS|TOTAL|MOL)\s+", "", label, flags=re.IGNORECASE)
             self.parse_hours(item, poi)
             apply_category(Categories.FUEL_STATION, item)
             yield item
 
     def parse_attribute(self, item, data: dict, attribute_name: str, mapping: dict) -> Any:
+        mapping = {key.lower(): tag for key, tag in mapping.items()}
         for attribute in data.get(attribute_name, {}).get("values", []):
-            name = attribute.get("name")
-            if attribute_name == "fuelsAndAdditives":
-                name = name.upper() if name else ""
-            if tag := mapping.get(name):
+            name = attribute.get("name") or ""
+            if tag := mapping.get(name.lower()):
                 apply_yes_no(tag, item, True)
             else:
                 self.crawler.stats.inc_value(f"atp/mol/{attribute_name}/failed/{name}")

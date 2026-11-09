@@ -9,15 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Every restaurant is a block on the one locations page, with the address
-# inside a map link and the hours as a short list of "<days> <times>" lines.
-#
-# Half the blocks link to maps.google.com, which carries the coordinates, and
-# half to a goo.gl short link, which does not, so only some features have
-# geometry.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BakersfieldUSSpider(Spider):
     name = "bakersfield_us"
@@ -80,14 +71,9 @@ class BakersfieldUSSpider(Spider):
             if day_names:
                 oh.add_days_range(
                     day_names,
-                    BakersfieldUSSpider.normalise_time(times.group(1)),
-                    BakersfieldUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").lower()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

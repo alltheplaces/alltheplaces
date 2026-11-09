@@ -60,6 +60,14 @@ class JSONBlobSpider(Spider):
     locations_key: str | list[str] | None = None
     needs_json_request = False
 
+    """
+    name_is_branch:
+    If True, the value `DictParser` finds for the name is moved to `branch`
+    (leaving `name` unset for the brand to fill in) before `post_process_item`
+    is called.
+    """
+    name_is_branch = False
+
     async def start(self) -> AsyncIterator[JsonRequest | Request]:
         if self.needs_json_request:
             for url in self.start_urls:
@@ -108,6 +116,8 @@ class JSONBlobSpider(Spider):
                 continue
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
+            if self.name_is_branch:
+                item["branch"] = item.pop("name", None)
             yield from self.post_process_item(item, response, feature) or []
 
     def parse_feature_dict(self, response: TextResponse, feature_dict: dict) -> Iterable[Feature]:
@@ -120,6 +130,8 @@ class JSONBlobSpider(Spider):
                 feature["feature_id"] = feature_id
             self.pre_process_data(feature)
             item = DictParser.parse(feature)
+            if self.name_is_branch:
+                item["branch"] = item.pop("name", None)
             yield from self.post_process_item(item, response, feature) or []
 
     def pre_process_data(self, feature: dict) -> None:

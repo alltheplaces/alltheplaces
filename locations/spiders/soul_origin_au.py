@@ -1,14 +1,16 @@
 import chompjs
-from scrapy import Spider
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class SoulOriginAUSpider(Spider):
+class SoulOriginAUSpider(PlaywrightSpider):
     name = "soul_origin_au"
     item_attributes = {"brand": "Soul Origin", "brand_wikidata": "Q110473093"}
     start_urls = ["https://www.soulorigin.com.au/pages/stores"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response):
         all_locations_text = response.xpath('//script[contains(text(), "const features = [];")]/text()').get()

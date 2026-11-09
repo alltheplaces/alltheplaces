@@ -79,10 +79,10 @@ class PttTHSpider(Spider):
 
                 # TODO: "GSH 95 Premium", "Hi-speed Diesel B7","Premium Hi-speed Diesel B7"
                 apply_yes_no(Fuel.ELECTRIC, item, "EV" in products)
-                apply_yes_no(Fuel.OCTANE_91, item, "GASOHOL 91" in products)
-                apply_yes_no(Fuel.E20, item, "GASOHOL 95-E20" in products)
+                apply_yes_no(Fuel.OCTANE_91, item, "Gasohol 91" in products)
+                apply_yes_no(Fuel.E20, item, "Gasohol E20" in products)
                 apply_yes_no(Fuel.E85, item, "GASOHOL 95-E85" in products)
-                apply_yes_no(Fuel.DIESEL, item, "Hi-speed Diesel" in products)
+                apply_yes_no(Fuel.DIESEL, item, "Diesel" in products)
                 apply_yes_no(Fuel.OCTANE_95, item, "Unlead Gas 95" in products)
 
             yield item

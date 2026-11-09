@@ -16,10 +16,6 @@ from locations.items import Feature
 #
 # The hours are a sentence, e.g. "Open Every Day 11am - 9pm" or "Sun - Thu 11am
 # - 9pm".
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 # One restaurant writes its state as "Fl." rather than "FL".
 ADDRESS = re.compile(r"(.+?),\s*([A-Za-z]{2})\.?\s+(\d{5})")
@@ -93,14 +89,9 @@ class MandolasUSSpider(Spider):
 
             oh.add_days_range(
                 days,
-                MandolasUSSpider.normalise_time(times.group(1)),
-                MandolasUSSpider.normalise_time(times.group(2)),
-                time_format="%I:%M%p",
+                times.group(1),
+                times.group(2),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

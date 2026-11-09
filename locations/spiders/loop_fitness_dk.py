@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class LoopFitnessDKSpider(SitemapSpider):
@@ -22,7 +23,7 @@ class LoopFitnessDKSpider(SitemapSpider):
         item["ref"] = response.url
         item["website"] = response.url
         item["branch"] = response.xpath('//h1[starts-with(@id, "h-")]/text()').get("").strip()
-        item["addr_full"] = " ".join(info.xpath('.//*[@itemprop="address"]//text()').getall()).strip()
+        item["addr_full"] = merge_address_lines(info.xpath('.//*[@itemprop="address"]//text()').getall())
         item["phone"] = info.xpath('.//*[@itemprop="telephone"]//text()').get()
         item["email"] = info.xpath('.//*[@itemprop="email"]//text()').get()
 

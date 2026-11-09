@@ -5,6 +5,7 @@ from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class GermanAmericanUSSpider(SitemapSpider):
@@ -17,7 +18,7 @@ class GermanAmericanUSSpider(SitemapSpider):
         item = Feature()
         item["branch"] = response.xpath('//*[@class= "location-info"]//h1/text()').get()
         item["street_address"] = response.xpath('//*[@class= "location-info"]//p//text()').get()
-        item["addr_full"] = ",".join(
+        item["addr_full"] = merge_address_lines(
             [item["street_address"], response.xpath('//*[@class="location-address"]').xpath("normalize-space()").get()]
         )
         item["ref"] = item["website"] = response.url

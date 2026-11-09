@@ -9,18 +9,17 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 
-STORE_LOCATOR_URL = "https://www.loungelovers.com.au/showrooms"
-
 
 class LoungeLoversAUSpider(Spider):
     name = "lounge_lovers_au"
     item_attributes = {"brand": "Lounge Lovers", "brand_wikidata": "Q140684820"}
     allowed_domains = ["www.loungelovers.com.au"]
+    STORE_LOCATOR_URL = "https://www.loungelovers.com.au/showrooms"
     start_urls = [STORE_LOCATOR_URL]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         yield response.follow(
-            re.search(r'([^"\\]+\.js[^"\\]*)\\"\],\\"ShowroomStoreLocator', response.text).group(1),
+            response.xpath("//script/@src").re_first(r"/_next/static/chunks/\d{2}\.\w+\.js"),
             callback=self.parse_server_action,
         )
 
@@ -29,7 +28,7 @@ class LoungeLoversAUSpider(Spider):
         # identifier changes with every deployment and so has to be read at run time.
         action_id = re.search(r'"([0-9a-f]{32,})"[^()]+"getStoreLocations"', response.text).group(1)
         yield Request(
-            url=STORE_LOCATOR_URL,
+            url=self.STORE_LOCATOR_URL,
             method="POST",
             headers={"Content-Type": "text/plain;charset=UTF-8", "Next-Action": action_id},
             body=json.dumps(

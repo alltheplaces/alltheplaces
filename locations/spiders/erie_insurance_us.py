@@ -43,6 +43,10 @@ class ErieInsuranceUSSpider(scrapy.Spider):
             agency.update(agency["Address"].pop("GeoCode"))
             item = DictParser.parse(agency)
             item["ref"] = agency.get("AgencyAccountNumber")
+            item["branch"] = agency.get("AgencyName")
+            contacts = {contact["Type"]: contact["Value"] for contact in agency["AgentContact"]["ContactInfo"]}
+            item["phone"] = contacts.get("Phone")
+            item["extras"]["fax"] = contacts.get("Fax")
             item["opening_hours"] = OpeningHours()
             try:
                 for day_time in json.loads(agency["AgencyInfo"]["BusinessHoursOperationDescription"]).get(

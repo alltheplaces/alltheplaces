@@ -4,6 +4,7 @@ from scrapy import Spider
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 
 
 class LewiatanPLSpider(Spider):
@@ -21,7 +22,23 @@ class LewiatanPLSpider(Spider):
                 item["city"] = item["city"].split(" (")[0]
             apply_category(Categories.SHOP_SUPERMARKET, item)
 
+            oh = self.parse_hours(location)
+            if oh.day_hours:
+                item["opening_hours"] = oh
+
             if item.get("phone") == "BRAK":  # 300 x "missing"
                 item["phone"] = None
 
             yield item
+
+    @staticmethod
+    def parse_hours(location: dict) -> OpeningHours:
+        # Sunday fields (3, 4) are for trading / non-trading Sundays only, so are not regular weekly hours
+        oh = OpeningHours()
+        for key, days in (
+            ("field_open_hours_1_value", DAYS_WEEKDAY),
+            ("field_open_hours_2_value", ["Sa"]),
+        ):
+            if hours := location.get(key):
+                oh.add_days_range(days, *hours.split())
+        return oh

@@ -37,10 +37,5 @@ class SushiSushiAUSpider(Spider):
             if item["phone"] and "CALL ME" in item["phone"]:
                 item.pop("phone", None)
 
-            # 2024-07-18 Spider produces low quality coordinates, so we reject all for now.
-            # https://github.com/alltheplaces/alltheplaces/issues/8683
-            item["lat"] = None
-            item["lon"] = None
-
             apply_category(Categories.RESTAURANT, item)
             yield item

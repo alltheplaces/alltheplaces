@@ -7,12 +7,6 @@ from locations.hours import DAYS_EN
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
-# Color Me Mine runs the WP Store Locator plugin. The endpoint caps an
-# autoload=1 request at 50 locations, so a single wide radius search centred on
-# the contiguous US is used instead, which returns every location in one
-# request. The response carries a few Canadian and Costa Rican studios, plus
-# rows for studios that have not opened yet, all of which are dropped.
-
 
 class ColorMeMineUSSpider(WPStoreLocatorSpider):
     name = "color_me_mine_us"
