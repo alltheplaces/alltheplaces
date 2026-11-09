@@ -1,11 +1,13 @@
 import datetime
+import json
 from itertools import groupby
-from typing import Any, AsyncIterator, Iterable
+from typing import Any, Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.geo import bbox_contains, make_subdivisions
 from locations.hours import DAYS, DAYS_FULL, OpeningHours
 from locations.items import Feature
@@ -13,8 +15,8 @@ from locations.items import Feature
 SWISS_POST = {"operator": "Die Post", "operator_wikidata": "Q614803"}
 API = "https://places.post.ch/StandortSuche/StaoCacheServiceV2/api/v1"
 
-LETTER_BOX = "T12"  # Briefeinwurf (003BE)
-BRANCH = "T9"  # Filiale (001PST)
+LETTER_BOX = {"desc": "Briefeinwurf", "id": "003BE", "tag": ""}
+BRANCH = {"desc": "Filiale", "id": "001PST", "tag": ""}
 # Branch distribution types: 001F1-001F4 are branches run by Swiss Post, 001QA are "Filialen mit Partner",
 # postal counters inside a partner's shop. Self-service corners and the business customer counter have none.
 OWN_BRANCH_TYPES = {"001F1", "001F2", "001F3", "001F4"}
@@ -27,6 +29,7 @@ class SwissPostCHSpider(Spider):
     name = "swiss_post_ch"
     item_attributes = SWISS_POST
     allowed_domains = ["places.post.ch"]
+    start_urls = ["https://places.post.ch/standortsuche"]
 
     # lon_min, lat_min, lon_max, lat_max
     CH_BOUNDS = (5.9, 45.8, 10.5, 47.9)
@@ -34,21 +37,34 @@ class SwissPostCHSpider(Spider):
     MAX_POIS = 20000
     MIN_CELL_SIZE = 0.005
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
+    def make_find_request(self, bounds: tuple[float, float, float, float]) -> JsonRequest:
+        extent = ",".join(str(round(c, 6)) for c in bounds)
+        return JsonRequest(
+            f'{API}/Find?extent={extent}&query={LETTER_BOX["tag"]},{BRANCH["tag"]}&clusterdist=0&agglevel=0&lod=2&lang=de'
+            f"&maxpois={self.MAX_POIS}&encoding=UTF-8&autoexpand=false",
+            cb_kwargs={"bounds": bounds},
+            dont_filter=True,
+            callback=self.parse_pois_list,
+        )
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        poi_types = DictParser.get_nested_key(
+            json.loads(response.xpath('//script[@id="topos-state"]/text()').get("")), "types"
+        )
+        # Collect the valid tag values for the desired poi types
+        for poi_type in poi_types:
+            if poi_type["desc"] == LETTER_BOX["desc"]:
+                LETTER_BOX["tag"] = poi_type["tag"]
+            elif poi_type["desc"] == BRANCH["desc"]:
+                BRANCH["tag"] = poi_type["tag"]
+            elif LETTER_BOX["tag"] and BRANCH["tag"]:
+                break
+
         # "-a bounds=lon_min,lat_min,lon_max,lat_max" restricts a test run to a smaller area.
         bounds = getattr(self, "bounds", None)
         yield self.make_find_request(tuple(map(float, bounds.split(","))) if bounds else self.CH_BOUNDS)
 
-    def make_find_request(self, bounds: tuple[float, float, float, float]) -> JsonRequest:
-        extent = ",".join(str(round(c, 6)) for c in bounds)
-        return JsonRequest(
-            f"{API}/Find?extent={extent}&query={LETTER_BOX},{BRANCH}&clusterdist=0&agglevel=0&lod=2&lang=de"
-            f"&maxpois={self.MAX_POIS}&encoding=UTF-8&autoexpand=false",
-            cb_kwargs={"bounds": bounds},
-            dont_filter=True,
-        )
-
-    def parse(self, response: Response, bounds: tuple[float, float, float, float]) -> Iterable[Any]:
+    def parse_pois_list(self, response: Response, bounds: tuple[float, float, float, float]) -> Iterable[Any]:
         pois = response.json()["pois"]
         if len(pois) >= self.MAX_POIS:
             if bounds[2] - bounds[0] > self.MIN_CELL_SIZE:
@@ -62,7 +78,7 @@ class SwissPostCHSpider(Spider):
             # POIs on a cell edge are collected by the neighbouring cell's query too.
             if not bbox_contains(bounds, (poi["x"], poi["y"])):
                 continue
-            if poi["type"] == BRANCH:
+            if poi["type"] == BRANCH["tag"]:
                 distribution_type = poi["info"].get("DistributionType")
                 if distribution_type not in OWN_BRANCH_TYPES and distribution_type != PARTNER_BRANCH_TYPE:
                     self.crawler.stats.inc_value(f"atp/swiss_post_ch/skipped_branch_type/{distribution_type}")
@@ -87,7 +103,7 @@ class SwissPostCHSpider(Spider):
             return
         item["website"] = f"https://places.post.ch/de/{poi['id']}"
 
-        if poi["type"] == LETTER_BOX:
+        if poi["type"] == LETTER_BOX["tag"]:
             apply_category(Categories.POST_BOX, item)
             if collection_times := self.parse_collection_times(root.xpath('Product[@ProductTypeId="003BE_LZ"]')):
                 item["extras"]["collection_times"] = collection_times
