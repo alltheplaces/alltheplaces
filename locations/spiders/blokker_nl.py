@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class BlokkerNLSpider(Spider):
     name = "blokker_nl"
-    item_attributes = {"brand": "Blokker", "brand_wikidata": "Q33903645"}
+    item_attributes = {"brand": "Blokker", "brand_wikidata": "Q4495642"}
     start_urls = ["https://www.blokker.nl/nl/vind-een-winkel/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
