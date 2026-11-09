@@ -19,9 +19,8 @@ class CocoIchibanyaJPSpider(GogaStoreLocatorSpider):
         item["extras"]["addr:province"] = source_feature.get("住所(都道府県)")
         item["city"] = source_feature.get("住所(市町村区郡)")
         item["street_address"] = source_feature.get("住所(その他)")
-        item["postcode"] = source_feature.get("郵便番号")
         item["branch"] = source_feature["name"]
-        item["extras"]["branch:jp"] = source_feature["name"]
+        item["extras"]["branch:ja"] = source_feature["name"]
         item["extras"]["branch:en"] = source_feature.get("店舗名（英語）")
         item["phone"] = None
         if (phone := source_feature.get("TEL", "-")) != "-":
@@ -35,7 +34,7 @@ class CocoIchibanyaJPSpider(GogaStoreLocatorSpider):
         if source_feature.get("カウンターのみ（座席）") == "1":
             item["extras"]["indoor_seating"] = "bar_table"
         if source_feature.get("駐車場") == "1":
-            item["extras"]["parking"] = "yes"
+            apply_yes_no(Extras.PARKING, item, True)
         if source_feature.get("お子様メニュー") == "1":
             item["extras"]["child"] = "yes"
         if source_feature.get("ベビーフード") == "1":
