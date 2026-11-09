@@ -24,6 +24,8 @@ See [`docs/PIPELINES.md`](docs/PIPELINES.md). Spiders emit raw values and the pi
   or a class in `locations/storefinders/` if the site runs a known locator platform.
 - `DictParser.parse(obj)` instead of copying fields one at a time. Set `name_is_branch = True` on
   `JSONBlobSpider`/`StructuredDataSpider` instead of `item["branch"] = item.pop("name")`.
+- Subclassing a `locations/storefinders/` class: read its `parse()` first and don't re-set what it or `DictParser` already
+  fills in (`ref`, `phone`, `postcode`, `website`). In `post_process_feature` only add what is brand-specific.
 - Categories: `apply_category(Categories.X, item)`. Never write `item["extras"]["shop"]` or
   `item_attributes["extras"] = Categories.X.value`. Grep `locations/categories.py` for an existing entry before adding one.
 - Sources with a sitemap or JSON-LD: prefer `SitemapSpider` + `StructuredDataSpider` (`wanted_types = [...]` to filter) over bespoke crawling.
@@ -71,6 +73,8 @@ See [`docs/PIPELINES.md`](docs/PIPELINES.md). Spiders emit raw values and the pi
 - Sanity-check counts and meaning against OSM: a suspiciously large or round count, or a category that doesn't match what
   the business does (e.g. truck dealers tagged `shop=truck`).
 - Never use a `disused:` prefix; use `end_date` or `set_closed()`.
+- Language suffixes on tags are ISO 639-1 codes (`branch:ja`, `name:en`), never country codes (`jp`). For amenities use
+  `Extras.*` with `apply_yes_no` rather than raw tag strings; sockets in Japan are `socket:nema_1_15`.
 - Read a few output records, not just the item count:
   `uv run scrapy runspider locations/spiders/<name>.py -o /tmp/out.geojson -L INFO`
 
