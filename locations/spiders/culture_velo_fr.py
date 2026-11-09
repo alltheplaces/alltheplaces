@@ -8,8 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
-
 
 class CultureVeloFRSpider(SitemapSpider, StructuredDataSpider):
     name = "culture_velo_fr"
@@ -40,7 +38,5 @@ class CultureVeloFRSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Culture Vélo").strip()
         item["email"] = response.xpath("//script/text()").re_first(r'"mail":"([^"]+)"')
-        if country := OVERSEAS_COUNTRIES.get(item["postcode"][:3]):
-            item["country"] = country
         apply_category(Categories.SHOP_BICYCLE, item)
         yield item

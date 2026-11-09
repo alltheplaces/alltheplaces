@@ -1,20 +1,27 @@
+import json
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 
 
-class PopeyesTRSpider(Spider):
+class PopeyesTRSpider(SitemapSpider):
     name = "popeyes_tr"
     item_attributes = {"brand": "Popeyes", "brand_wikidata": "Q1330910"}
-    start_urls = ["https://www.popeyes.com.tr/Restaurants/GetRestaurants/GetRestaurants/"]
-    no_refs = True
+    sitemap_urls = ["https://www.popeyes.com.tr/robots.txt"]
+    sitemap_rules = [(r"/subeler/[^/]+/[^/]+/[^/]+$", "parse")]
+    sitemap_follow = ["restaurants"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.json():
-            location.update(location.pop("data"))
-            item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_full")
-            yield item
+        item = Feature()
+        item["ref"] = item["website"] = response.url
+        item["branch"] = response.xpath("//title/text()").get("").removeprefix("Popeyes® ").split("|", 1)[0].strip()
+        item["state"] = response.xpath("//@data-city").get()
+        item["city"] = response.xpath("//@data-county").get()
+        item["street_address"] = response.xpath('//*[@class="restaurant-content"]/p/text()').get("")
+        item["lat"], item["lon"] = json.loads(response.xpath("//@data-location").get(""))
+        apply_category(Categories.FAST_FOOD, item)
+        yield item

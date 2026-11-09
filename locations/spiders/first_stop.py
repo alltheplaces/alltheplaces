@@ -3,10 +3,9 @@ import re
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
-
-OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ", "973": "GF", "974": "RE", "976": "YT"}
 
 
 class FirstStopSpider(SitemapSpider, StructuredDataSpider):
@@ -44,6 +43,5 @@ class FirstStopSpider(SitemapSpider, StructuredDataSpider):
 
         item["ref"] = re.search(r"/(ps\d+)/", response.url).group(1).upper()
         item["website"] = response.url
-        if item["country"] == "FR":
-            item["country"] = OVERSEAS_COUNTRIES.get(item["postcode"][:3], "FR")
+        apply_category(Categories.SHOP_CAR_REPAIR, item)
         yield item
