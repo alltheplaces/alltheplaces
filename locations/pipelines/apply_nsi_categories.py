@@ -198,7 +198,7 @@ class ApplyNSICategoriesPipeline:
         """
         if not nsi_entry.get("tags"):
             return False
-        if nsi_entry["tags"].get("operator:wikidata") and not nsi_entry["tags"].get("brand_wikidata"):
+        if nsi_entry["tags"].get("operator:wikidata") and not nsi_entry["tags"].get("brand:wikidata"):
             return True
         return False
 
