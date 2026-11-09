@@ -5,15 +5,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The home page links to a page per restaurant, each carrying a schema.org
-# FoodEstablishment record with the address, phone and hours already in OSM
-# syntax.
-#
-# The record's description is a page of marketing copy, and no coordinates are
-# published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class OakSteakhouseUSSpider(StructuredDataSpider):
     name = "oak_steakhouse_us"
@@ -23,7 +14,6 @@ class OakSteakhouseUSSpider(StructuredDataSpider):
     wanted_types = ["FoodEstablishment"]
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_email = False
     search_for_image = False
 

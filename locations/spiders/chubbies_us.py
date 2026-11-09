@@ -13,10 +13,6 @@ from locations.items import Feature
 #
 # One store wraps its address across two lines, and the hours are written with
 # or without spaces around the dash.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5})")
 PHONE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
@@ -86,14 +82,9 @@ class ChubbiesUSSpider(Spider):
 
             oh.add_days_range(
                 day_range(start, end),
-                ChubbiesUSSpider.normalise_time(rule.group(3)),
-                ChubbiesUSSpider.normalise_time(rule.group(4)),
-                time_format="%I:%M%p",
+                rule.group(3),
+                rule.group(4),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

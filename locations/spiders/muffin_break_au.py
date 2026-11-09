@@ -8,6 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MuffinBreakAUSpider(Spider):
@@ -25,7 +26,7 @@ class MuffinBreakAUSpider(Spider):
                 item["located_in"] = "Croc's Playcentre"
                 branch = re.sub(r"Croc[’']?s Playcentre", "", branch)
             item["branch"] = re.sub(r"^Muffin Break\s*", "", branch).strip()
-            item["addr_full"] = ", ".join(filter(None, [location["address"].strip(), location["address2"].strip()]))
+            item["addr_full"] = merge_address_lines([location["address"], location["address2"]])
             item["website"] = location["web"]
             apply_category(Categories.CAFE, item)
 

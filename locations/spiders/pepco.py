@@ -1,55 +1,58 @@
-from json import loads
-from typing import AsyncIterator, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy import Selector, Spider
-from scrapy.http import FormRequest, Request, Response
+from scrapy import Spider
+from scrapy.http import JsonRequest, Response
 
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class PepcoSpider(Spider):
     name = "pepco"
     item_attributes = {"brand": "Pepco", "brand_wikidata": "Q11815580"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    # Shop data is split into two places. The map data on https://pepco.eu/find-store/ contains only the shop ID and
-    # geocoordinates. The shop name and address come from a shop listing which is requested from
-    # https://pepco.eu/wp-admin/admin-ajax.php.
-    #
-    # To connect the data sets, first request all pages from https://pepco.eu/wp-admin/admin-ajax.php, passing along the
-    # collected shop details. When no more pages are found, request https://pepco.eu/find-store/ and combine the data in
-    # the parse() method.
+    async def start(self) -> AsyncIterator[Any]:
+        for country in [
+            "AT",
+            "BA",
+            "BG",
+            "CZ",
+            "DE",
+            "EE",
+            "ES",
+            "GR",
+            "HR",
+            "HU",
+            "IT",
+            "LT",
+            "LV",
+            "MK",
+            "PL",
+            "PT",
+            "RO",
+            "RS",
+            "SI",
+            "SK",
+        ]:
+            yield JsonRequest(url=f"https://pepco.pl/api/stores?market={country}", callback=self.parse)
 
-    def get_shop_detail_request(self, page: int, shop_details: list[str]) -> FormRequest:
-        return FormRequest(
-            "https://pepco.eu/wp-admin/admin-ajax.php",
-            formdata={"action": "get_more_shops", "search": "", "page": str(page)},
-            callback=self.parse_shop_details,
-            cb_kwargs={"shop_details": shop_details},
-        )
+    def parse(self, response: Response) -> Iterable[Any]:
+        for location in response.json().get("globalStoreDataSet").get("stores").get("features"):
+            location.update(location.pop("properties"))
+            item = DictParser.parse(location)
+            item["name"] = None
+            try:
+                oh = OpeningHours()
+                for hours_text in location.get("opening_hours"):
+                    for day in hours_text.get("days"):
+                        open_time = hours_text.get("from")
+                        close_time = hours_text.get("to")
+                        oh.add_range(day, open_time, close_time)
+                item["opening_hours"] = oh
+            except:
+                pass
+            apply_category(Categories.SHOP_CLOTHES, item)
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        yield self.get_shop_detail_request(0, [])
-
-    def parse_shop_details(self, response, shop_details: list[str] = None) -> Iterable[FormRequest | Request]:
-        result = response.json()
-        shop_details += result["shops"]
-        next_page = result["page"]
-        if result["last_page"]:
-            shop_selector = Selector(text="".join(shop_details))
-            yield Request("https://pepco.eu/find-store/", callback=self.parse, cb_kwargs={"shops": shop_selector})
-        else:
-            yield self.get_shop_detail_request(next_page, shop_details)
-
-    def parse(self, response: Response, shops: Selector = None) -> Iterable[Feature]:
-        for location in loads(response.xpath("//@shops-map-markers").get()):
-            yield Feature(
-                ref=location["shop_id"],
-                lat=location["coordinates"]["lat"],
-                lon=location["coordinates"]["lng"],
-                name=shops.xpath(
-                    '//div[@shops-map-marker-anchor="{}"]//@data-shop-name'.format(location["shop_id"])
-                ).get(),
-                addr_full=shops.xpath(
-                    '//div[@shops-map-marker-anchor="{}"]//@data-shop-address'.format(location["shop_id"])
-                ).get(),
-            )
+            yield item

@@ -20,8 +20,6 @@ VOLKSWAGEN_COMMERCIAL_VEHICLES_SHARED_ATTRIBUTES = {
 }
 
 
-# The API groups multiple countries under the same countryCode (e.g., FRX, LAC, LAM),
-# which causes the spider to produce duplicate results when querying the API by individual country.
 class VolkswagenSpider(JSONBlobSpider):
     name = "volkswagen"
     locations_key = "dealers"

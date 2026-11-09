@@ -13,12 +13,10 @@ class AdoptParfumsSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Adopt'", "brand_wikidata": "Q104649177"}
     sitemap_urls = ["https://www.adopt.com/en/sitemap/sitemap.xml"]
     sitemap_rules = [("/store-locator/", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
+    wanted_types = ["Store"]
     drop_attributes = ["facebook"]
-    time_format = "%I:%M %p"
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name", "").removeprefix("Adopt Parfums ")
-
         apply_category(Categories.SHOP_PERFUMERY, item)
         yield item

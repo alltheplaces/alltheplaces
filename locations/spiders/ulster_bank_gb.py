@@ -27,7 +27,6 @@ class UlsterBankGBSpider(Spider):
                     item["name"] = branch["Name"]
                     item["branch"] = branch["Name"].removeprefix("Ulster Bank ")
 
-                    # Parse address components properly
                     if address_lines := postal_address.get("AddressLine"):
                         # First line is typically the street address
                         item["street_address"] = address_lines[0] if len(address_lines) > 0 else None
@@ -41,7 +40,6 @@ class UlsterBankGBSpider(Spider):
                         if lon := geo_location.get("Longitude"):
                             item["lon"] = float(lon)
 
-                    # Parse contact information
                     if contact_info := branch.get("ContactInfo"):
                         for contact in contact_info:
                             if contact.get("ContactType") == "Phone":
@@ -50,20 +48,16 @@ class UlsterBankGBSpider(Spider):
                                 phone = phone.replace("<br>", " ").split(":")[0] if ":" in phone else phone
                                 item["phone"] = phone.strip()
 
-                    # Parse services and facilities
                     services = branch.get("ServiceAndFacility", [])
                     apply_yes_no(Extras.ATM, item, "ExternalATM" in services or "InternalATM" in services)
                     apply_yes_no(Extras.CASH_IN, item, "QuickDeposit" in services or "CounterServices" in services)
 
-                    # Parse accessibility features
                     accessibility = branch.get("Accessibility", [])
                     apply_yes_no(Extras.WHEELCHAIR, item, "WheelchairAccess" in accessibility)
 
-                    # Parse opening hours
                     if availability := branch.get("Availability", {}).get("StandardAvailability", {}).get("Day"):
                         item["opening_hours"] = self.parse_opening_hours(availability)
 
-                    # Set category
                     apply_category(Categories.BANK, item)
 
                     yield item

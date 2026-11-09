@@ -8,6 +8,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # Canadian province/territory codes used by the dealer locator, to
 # distinguish Canadian dealers from US dealers (both use two letter
@@ -66,8 +67,8 @@ class CulliganSpider(Spider):
         item = Feature()
         item["ref"] = dealer["DealerNumber"]
         item["name"] = dealer["Title"].strip()
-        item["street_address"] = ", ".join(
-            filter(None, (dealer.get("Address1", "").strip(), dealer.get("Address2", "").strip()))
+        item["street_address"] = merge_address_lines(
+            (dealer.get("Address1", "").strip(), dealer.get("Address2", "").strip())
         )
         item["city"] = dealer.get("City")
         item["state"] = dealer.get("State")

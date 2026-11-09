@@ -7,14 +7,11 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # The locations page lists each restaurant as a card holding the branch, the
 # address across two lines, the phone and a link to the restaurant's page,
 # where the hours are listed a day at a time.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Za-z .]+)\s+(\d{5})")
 
@@ -41,7 +38,7 @@ class AllAmericanSteakhouseUSSpider(Spider):
             item["branch"] = re.sub(
                 r",\s*[A-Z]{2}$", "", re.sub(r"\s+", " ", card.xpath('.//h4[@class="title"]/text()').get("")).strip()
             )
-            item["street_address"] = ", ".join(lines[:-1])
+            item["street_address"] = merge_address_lines(lines[:-1])
             item["city"], item["state"], item["postcode"] = locality.groups()
             item["phone"] = card.xpath('.//a[@class="phone"]/text()').get("").strip() or None
             item["website"] = card.xpath('.//a[@class="permalink"]/@href').get()
@@ -69,16 +66,11 @@ class AllAmericanSteakhouseUSSpider(Spider):
             if times := re.fullmatch(r"(\d{1,2}(?::\d{2})?\s*[ap]m)\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]m)", hours, re.I):
                 oh.add_range(
                     day,
-                    self.normalise_time(times.group(1)),
-                    self.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
         if oh:
             item["opening_hours"] = oh
 
         yield item
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

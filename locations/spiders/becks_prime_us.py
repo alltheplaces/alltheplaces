@@ -9,14 +9,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# The locations page links to a page per restaurant, and each page's Next.js
-# data holds the address, phone, hours, feature list and a Google Maps embed
-# whose URL carries the coordinates.
-#
-# The hours are a sentence, "7 days a week 11am-10pm".
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BecksPrimeUSSpider(Spider):
     name = "becks_prime_us"
@@ -77,13 +69,8 @@ class BecksPrimeUSSpider(Spider):
         oh = OpeningHours()
         oh.add_days_range(
             ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
-            BecksPrimeUSSpider.normalise_time(times.group(1)),
-            BecksPrimeUSSpider.normalise_time(times.group(2)),
-            time_format="%I:%M%p",
+            times.group(1),
+            times.group(2),
+            time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
         )
         return oh
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

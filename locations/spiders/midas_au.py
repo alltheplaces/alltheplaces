@@ -24,7 +24,7 @@ class MidasAUSpider(Spider):
         results = Selector(text=response.json()["result_listing"])
         for location in results.xpath('//div[@class = "result-list"]'):
             if phone := location.xpath('.//div/p[2]/a[contains(@href, "tel:")]/@href').get():
-                phone = phone.strip().replace("tel:", "")
+                phone = phone.strip()
             properties = {
                 "ref": location.xpath(".//h4/@data-index").get().strip(),
                 "name": location.xpath(".//h4/text()").get().strip(),

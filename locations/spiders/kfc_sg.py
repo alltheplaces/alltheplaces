@@ -1,7 +1,7 @@
 import scrapy
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FROM_SUNDAY, OpeningHours
 from locations.spiders.kfc_us import KFC_SHARED_ATTRIBUTES
 
 
@@ -20,9 +20,8 @@ class KfcSGSpider(scrapy.Spider):
             item.pop("state")
             item.pop("city")
 
-            days = {0: "Su", 1: "Mo", 2: "Tu", 3: "We", 4: "Th", 5: "Fr", 6: "Sa"}
             opening_hours = " ".join(
-                f"{days[entry['dayofweek']]} {entry['openCloseHour']}"
+                f"{DAYS_FROM_SUNDAY[entry['dayofweek']]} {entry['openCloseHour']}"
                 for entry in location["displayOperatingHours"]["dinein"]
             )
             oh = OpeningHours()

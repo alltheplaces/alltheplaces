@@ -7,17 +7,6 @@ from locations.hours import DAYS_EN
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
-# The locator runs the WP Store Locator plugin and covers the whole Best
-# Friends Pet Care network: the brand's own hotels plus the independently named
-# pet care businesses it partners with, each with its own site.
-#
-# The brand is therefore set per record rather than for the whole spider, and
-# the partner businesses keep their own name.
-#
-# One record has its city and state the wrong way round, which is corrected.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BestFriendsPetCareUSSpider(WPStoreLocatorSpider):
     name = "best_friends_pet_care_us"

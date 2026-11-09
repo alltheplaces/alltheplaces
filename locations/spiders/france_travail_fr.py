@@ -9,6 +9,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.licenses import Licenses
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # https://www.data.gouv.fr/datasets/service-public-gouv-fr-annuaire-de-ladministration-base-de-donnees-locales
 # The export endpoint returns every matching record in one response, so there
@@ -54,8 +55,8 @@ class FranceTravailFRSpider(Spider):
             item = Feature()
             item["ref"] = location["id"]
             item["branch"] = re.sub(r"^(Agence|Relai)\b.*?France Travail\s*", "", location["nom"])
-            item["street_address"] = ", ".join(
-                filter(None, [address["complement1"], address["complement2"], address["numero_voie"]])
+            item["street_address"] = merge_address_lines(
+                [address["complement1"], address["complement2"], address["numero_voie"]]
             )
             item["postcode"] = address["code_postal"]
             item["city"] = address["nom_commune"]

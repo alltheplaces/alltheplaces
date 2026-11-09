@@ -11,7 +11,6 @@ from locations.pipelines.address_clean_up import clean_address
 class BoloDaMadreBRSpider(Spider):
     name = "bolo_da_madre_br"
     item_attributes = {"brand": "Bolo da Madre", "brand_wikidata": "Q121322483"}
-    # allowed_domains = ["www.a1.net"]
     start_urls = ["https://bolodamadre.com.br/onde-encontrar/"]
 
     async def start(self) -> AsyncIterator[Request]:

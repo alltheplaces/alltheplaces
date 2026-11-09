@@ -23,7 +23,7 @@ class NicolasSpider(SitemapSpider):
         item["branch"] = location["displayName"]
 
         item["website"] = response.url
-        item["email"] = response.xpath('//a[contains(@href, "mailto:")]/@href').get(default="").removeprefix("mailto:")
+        item["email"] = response.xpath('//a[contains(@href, "mailto:")]/@href').get(default="")
         extract_phone(item, response)
 
         yield item

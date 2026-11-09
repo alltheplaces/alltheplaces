@@ -7,10 +7,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# The locations page's JS bundle fetches this JSON API directly; it is grouped
-# by state and includes locations not yet open, marked with status "Coming
-# Soon", which are skipped here.
-
 
 class HotHeadBurritosUSSpider(Spider):
     name = "hot_head_burritos_us"

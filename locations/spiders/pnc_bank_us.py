@@ -14,7 +14,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class PncBankUSSpider(PlaywrightSpider):
     name = "pnc_bank_us"
     item_attributes = {"brand": "PNC Bank", "brand_wikidata": "Q38928"}
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[Any]:
         yield JsonRequest(url="https://locator.pnc.com/dmx-ma-locator-search-ui/configmaps/env.json")
@@ -36,15 +36,22 @@ class PncBankUSSpider(PlaywrightSpider):
             item["branch"] = item.pop("name")
             item["ref"] = location.get("mbdBranchIdentifier")
             apply_category(Categories.BANK, item)
-            oh = OpeningHours()
+            item["phone"] = location.get("branchInformation", {}).get("branchMainLinePhoneNumber")
+            hours = {"Lobby Hours": OpeningHours(), "Drive Up Hours": OpeningHours()}
             for hours_dict in location.get("branchHourlyServices"):
-                if hours_dict.get("branchServiceName") == "Drive Up Hours":
+                if (oh := hours.get(hours_dict.get("branchServiceName"))) is not None:
                     for day_time in hours_dict.get("branchServiceHours"):
-                        oh.add_range(
-                            day_time.get("dayOrHolidayName"),
-                            day_time.get("openTime"),
-                            day_time.get("closeTime"),
-                            "%H:%M:%S",
-                        )
-            item["opening_hours"] = oh
+                        if day_time.get("closedIndicator") == "Y":
+                            oh.set_closed(day_time.get("dayOrHolidayName"))
+                        else:
+                            oh.add_range(
+                                day_time.get("dayOrHolidayName"),
+                                day_time.get("openTime"),
+                                day_time.get("closeTime"),
+                                "%H:%M:%S",
+                            )
+            if hours["Lobby Hours"].day_hours:
+                item["opening_hours"] = hours["Lobby Hours"]
+            if hours["Drive Up Hours"].day_hours:
+                item["extras"]["opening_hours:drive_through"] = hours["Drive Up Hours"].as_opening_hours()
             yield item

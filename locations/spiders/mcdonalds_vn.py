@@ -1,4 +1,7 @@
+from typing import Any
+
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
@@ -11,8 +14,8 @@ class McdonaldsVNSpider(Spider):
     item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://mcdonalds.vn/restaurants.html"]
 
-    def parse(self, response):
-        for location in response.xpath('//div[@class="tbox-address-store"]'):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for location in response.xpath('//*[contains(@class,"tbox-address-store")]'):
             item = Feature()
             item["ref"] = location.xpath("@id").get()
             item["name"] = location.xpath('./p[@class="tname-store"]/text()').get()

@@ -1,8 +1,10 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.storefinders.mapion import MapionSpider
 
@@ -23,5 +25,13 @@ class NipponRentacarJPSpider(MapionSpider):
             item.set_tag("branch:en", eng_name)
         item["addr_full"] = "".join(part for part in (data.get("address1"), data.get("address2")) if part)
         apply_category(Categories.CAR_RENTAL, item)
+
+        item["opening_hours"] = oh = OpeningHours()
+        for day, key in zip(DAYS, ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]):
+            value = data.get(f"eigyo_{key}") or ""
+            if "休業" in value:
+                oh.set_closed(day)
+            elif m := re.fullmatch(r"\s*(\d{1,2}:\d{2})\s*[~〜～]\s*(\d{1,2}:\d{2})\s*", value):
+                oh.add_range(day, m.group(1), m.group(2))
 
         yield item

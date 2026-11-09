@@ -8,15 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# The site lists its restaurants on a page per state, each holding a block per
-# restaurant with the city, address, phone and the franchisee's own website.
-#
-# The state pages come from the sitemap. Addresses spell the state out on some
-# blocks and abbreviate it on others.
-#
-# No coordinates are published: the map links are goo.gl short links. No
-# opening hours are published either.
-
 
 class OriginalPancakeHouseUSSpider(SitemapSpider):
     name = "original_pancake_house_us"

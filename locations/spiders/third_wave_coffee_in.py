@@ -17,7 +17,7 @@ class ThirdWaveCoffeeINSpider(SitemapSpider):
         item["city"] = response.xpath('//li[contains(@class, "br-info-card-str-loc")]/span/text()').get()
         item["addr_full"] = response.xpath('//*[@id="cadrs"]/@value').get()
         item["phone"] = response.xpath('//*[@id="ctele"]/@value').get()
-        item["email"] = response.xpath('//a[contains(@href, "mailto")]/@href').get().replace("mailto:", "")
+        item["email"] = response.xpath('//a[contains(@href, "mailto")]/@href').get()
         item["name"] = response.xpath('//*[@id="cname"]/@value').get()
         item["ref"] = item["website"] = response.url
         apply_category(Categories.COFFEE_SHOP, item)

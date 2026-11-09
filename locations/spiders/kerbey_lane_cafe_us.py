@@ -5,13 +5,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The locations page links to a page per restaurant, each carrying a schema.org
-# Restaurant record with address, phone and hours.
-#
-# No coordinates are published.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class KerbeyLaneCafeUSSpider(StructuredDataSpider):
     name = "kerbey_lane_cafe_us"
@@ -21,7 +14,6 @@ class KerbeyLaneCafeUSSpider(StructuredDataSpider):
     wanted_types = ["Restaurant"]
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_email = False
     search_for_image = False
 

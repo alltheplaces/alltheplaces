@@ -23,7 +23,7 @@ class MommaGoldbergsUSSpider(Spider):
             branch=response.css("h1").xpath("normalize-space(.)").get(),
             addr_full=" ".join(address.xpath(".//text()").getall()),
             country="US",
-            phone=response.css('a[href^="tel:"]::attr(href)').get(default="").removeprefix("tel:"),
+            phone=response.css('a[href^="tel:"]::attr(href)').get(default=""),
             website=response.url,
         )
         hours = OpeningHours()

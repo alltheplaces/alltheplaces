@@ -7,6 +7,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 # The locations page lists each restaurant as a card holding the branch, the
 # street, "city, state postcode", the phone and the hours.
@@ -16,8 +17,6 @@ from locations.items import Feature
 #
 # Two restaurants publish separate winter and summer hours, so only the first
 # block is read.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
 
 ADDRESS = re.compile(r"(.+?),\s*([A-Z]{2})\s+(\d{5})")
 PHONE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
@@ -44,7 +43,7 @@ class CafeSaborUSSpider(Spider):
             # "Logan, UT", "REXBURG, id"
             heading = re.sub(r"\s+", " ", card.xpath('.//h3[contains(@class, "el-title")]/text()').get("")).strip()
             item["branch"] = re.sub(r",\s*[A-Za-z]{2}$", "", heading).title()
-            item["street_address"] = ", ".join(lines[:locality])
+            item["street_address"] = merge_address_lines(lines[:locality])
             item["city"], item["state"], item["postcode"] = ADDRESS.fullmatch(lines[locality]).groups()
             item["ref"] = re.sub(r"[^a-z0-9]+", "-", f"{item['branch']} {item['postcode']}".lower()).strip("-")
 
@@ -89,14 +88,9 @@ class CafeSaborUSSpider(Spider):
             if times := re.fullmatch(r"(\d{1,2}(?::\d{2})?\s*[ap]m)\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]m)", hours, re.I):
                 oh.add_days_range(
                     day_range(start, end),
-                    CafeSaborUSSpider.normalise_time(times.group(1)),
-                    CafeSaborUSSpider.normalise_time(times.group(2)),
-                    time_format="%I:%M%p",
+                    times.group(1),
+                    times.group(2),
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

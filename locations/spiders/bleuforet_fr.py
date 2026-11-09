@@ -6,18 +6,8 @@ from scrapy.http import TextResponse
 from scrapy.spiders import Spider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
-
-DAY_FR = {
-    "lundi": "Mo",
-    "mardi": "Tu",
-    "mercredi": "We",
-    "jeudi": "Th",
-    "vendredi": "Fr",
-    "samedi": "Sa",
-    "dimanche": "Su",
-}
 
 LAT_RE = re.compile(r'defaultLat\s*=\s*parseFloat\("(-?\d+\.\d+)"\)')
 LON_RE = re.compile(r'defaultLong\s*=\s*parseFloat\("(-?\d+\.\d+)"\)')
@@ -95,8 +85,7 @@ class BleuforetFRSpider(Spider):
             if len(cells) < 2:
                 continue
 
-            day_fr = cells[0].rstrip(":").lower()
-            if day_fr not in DAY_FR:
+            if not (day := sanitise_day(cells[0].rstrip(":"), DAYS_FR)):
                 continue
 
             hours_str = " ".join(cells[1:])
@@ -107,7 +96,7 @@ class BleuforetFRSpider(Spider):
 
             for i in range(0, len(times), 2):
                 if i + 1 < len(times):
-                    oh.add_range(DAY_FR[day_fr], times[i], times[i + 1], time_format="%H:%M")
+                    oh.add_range(day, times[i], times[i + 1], time_format="%H:%M")
 
         return oh
 
