@@ -25,6 +25,7 @@ class GogaStoreLocatorSpider(Spider):
 
     start_urls: list[str] = []
     geohashes: list[str] = []
+    geohash_suffix: str = ""  # set to "/" if the API requires a trailing slash after the geohash
     website_formatter: str = ""
 
     async def start(self) -> AsyncIterator[Request]:
@@ -33,7 +34,7 @@ class GogaStoreLocatorSpider(Spider):
         elif len(self.start_urls) == 1 and len(self.geohashes) != 0:
             for geohash in self.geohashes:
                 yield Request(
-                    url=f"{self.start_urls[0]}/{geohash}"
+                    url=f"{self.start_urls[0]}/{geohash}{self.geohash_suffix}"
                 )  # make sure to leave out trailing slash on start_urls
         else:
             raise ValueError("Specify one URL in the start_urls list attribute.")
