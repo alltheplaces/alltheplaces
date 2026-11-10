@@ -11,11 +11,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class TuiGBSpider(SitemapSpider):
     name = "tui_gb"
-    item_attributes = {
-        "brand": "TUI",
-        "brand_wikidata": "Q7795876",
-        "country": "GB",
-    }
+    item_attributes = {"brand": "TUI", "brand_wikidata": "Q573103"}
     sitemap_urls = ["https://www.tui.co.uk/sitemap/sitemap.xml"]
     sitemap_rules = [(r"^https:\/\/www\.tui\.co\.uk\/shop-finder\/([-\w]+)$", "parse")]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
