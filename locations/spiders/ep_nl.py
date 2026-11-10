@@ -1,46 +1,38 @@
 import json
+from typing import Any
 
-import scrapy
+from scrapy import Spider
+from scrapy.http import Response
 
-from locations.hours import DAYS_NL, OpeningHours
-from locations.items import Feature
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 
 
-class EpNLSpider(scrapy.Spider):
+class EpNLSpider(Spider):
     name = "ep_nl"
-    start_urls = ["https://www.ep.nl/winkels/"]
-
     item_attributes = {"brand": "EP:", "brand_wikidata": "Q110271192"}
+    start_urls = ["https://www.ep.nl/winkels"]
 
-    def parse(self, response, **kwargs):
-        raw = response.xpath("//div[@id='content']/script/text()").get()
-        raw = raw.replace("pageData.push({ stores: ", "").replace("});", "")
-        stores_json = json.loads(raw)
-        for store in stores_json.get("stores"):
-            oh = OpeningHours()
-            for day in store.get("openingHours"):
-                hours = day.get("openingHours").replace(" - ", "-")
-                if hours == "":
-                    continue
-                for hour in hours.split(" "):
-                    open_time, close_time = hour.split("-")
-                    oh.add_range(
-                        day=DAYS_NL[day.get("weekDay")], open_time=open_time, close_time=close_time, time_format="%H:%M"
-                    )
-            yield Feature(
-                {
-                    "ref": store.get("id"),
-                    "name": store.get("name"),
-                    "street_address": store.get("street"),
-                    "addr_full": ", ".join(
-                        filter(None, [store.get("street"), store.get("zipcode"), store.get("city")])
-                    ),
-                    "phone": store.get("phoneNumber"),
-                    "email": store.get("email"),
-                    "postcode": store.get("zipcode"),
-                    "city": store.get("city"),
-                    "website": store.get("link"),
-                    "lat": store.get("latitude"),
-                    "lon": store.get("longitude"),
-                }
-            )
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        # The store list is embedded in the Next.js payload with escaped quotes
+        text = response.text.replace(r"\"", '"')
+
+        marker = '"stores":'
+        idx = text.find(marker)
+        if idx == -1:
+            return
+
+        try:
+            stores, _ = json.JSONDecoder().raw_decode(text, idx + len(marker))
+        except json.JSONDecodeError:
+            return
+
+        for store in stores:
+            item = DictParser.parse(store)
+            item["branch"] = item.pop("name").removeprefix("EP:").strip()
+            item["name"] = self.item_attributes["brand"]
+            item["street_address"] = item.pop("addr_full")
+            item["website"] = store.get("domain")
+            apply_category(Categories.SHOP_ELECTRONICS, item)
+
+            yield item
