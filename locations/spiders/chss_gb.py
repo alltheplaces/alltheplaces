@@ -3,7 +3,7 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_EN
+from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
@@ -24,3 +24,10 @@ class ChssGBSpider(WPStoreLocatorSpider):
         item["branch"] = item.pop("name", None)
         apply_category(Categories.SHOP_CHARITY, item)
         yield item
+
+    def parse_opening_hours(self, feature: dict, days: dict) -> OpeningHours:
+        oh = OpeningHours()
+        for day in DAYS_FULL:
+            if hours := feature.get(day.lower()):
+                oh.add_ranges_from_string(f"{day} {hours}", days=days)
+        return oh
