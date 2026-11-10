@@ -14,6 +14,7 @@ class HongkongPostHKSpider(Spider):
     allowed_domains = ["www.hongkongpost.hk"]
     # DATA.GOV.HK "Post Office" dataset, updated monthly.
     start_urls = ["https://www.hongkongpost.hk/opendata/post-office.json"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for office in response.json()["data"]:
