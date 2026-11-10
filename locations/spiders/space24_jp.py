@@ -23,6 +23,7 @@ class Space24JPSpider(Spider):
     name = "space24_jp"
     item_attributes = {"brand": "スペース24", "operator": "株式会社スペース24"}
     allowed_domains = ["space24.co.jp"]
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         # The map asks for the car parks in its bounding box, given as
