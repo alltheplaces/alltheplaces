@@ -29,13 +29,13 @@ class UpsFreightServiceCentersSpider(scrapy.Spider):
         yield Feature(**properties)
 
     def parse_state(self, response):
-        location_urls = response.xpath('//*[@id="app_ctl00_scTable_hlDetail"]/@href').getall()
+        location_urls = response.xpath('//*[@id="app_ctl00_scTable_hlDetail"]/@href').extract()
 
         for url in location_urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_location)
 
     def parse(self, response):
-        urls = response.xpath("//table//table//table//table//table//a/@href").getall()
+        urls = response.xpath("//table//table//table//table//table//a/@href").extract()
 
         for url in urls:
             yield scrapy.Request(response.urljoin(url), callback=self.parse_state)
