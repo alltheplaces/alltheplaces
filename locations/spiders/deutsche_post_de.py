@@ -10,6 +10,7 @@ from locations.dict_parser import DictParser
 from locations.geo import bbox_contains, make_subdivisions
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.spiders.central_england_cooperative import set_operator
 from locations.user_agents import BROWSER_DEFAULT
 
 WGS84 = Geod(ellps="WGS84")
@@ -111,7 +112,10 @@ class DeutschePostDESpider(Spider):
         item["opening_hours"] = self.parse_hours(location["pfTimeinfos"])
 
         if cat := self.cats.get(location["locationType"]):
-            item.update(DHL_POSTSTATION if location["locationType"] == "POSTSTATION" else DEUTSCHE_POST)
+            if location["locationType"] == "POSTSTATION":
+                item.update(DHL_POSTSTATION)
+            else:
+                set_operator(DEUTSCHE_POST, item)
             apply_category(cat, item)
             if location["locationType"] in ("LETTER_BOX", "POSTSTATION"):
                 if collection_times := self.parse_collection_times(location["pfTimeinfos"]):
