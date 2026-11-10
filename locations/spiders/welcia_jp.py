@@ -523,6 +523,7 @@ FLAG_PHARMACY_HOURS = "00112"  # 調剤薬局営業時間 -> opening_hours:pharm
 
 class WelciaJPSpider(LocationCloudSpider):
     name = "welcia_jp"
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     api_endpoint = "https://store.welcia.co.jp/welcia/api/proxy2/shop/list"
     website_formatter = "https://store.welcia.co.jp/welcia/spot/detail?code={}"
 
