@@ -22,6 +22,7 @@ class ChssGBSpider(WPStoreLocatorSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", None)
+        item["name"] = self.item_attributes["brand"]
         apply_category(Categories.SHOP_CHARITY, item)
         yield item
 
