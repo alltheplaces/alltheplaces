@@ -16,7 +16,7 @@ class AutourDeBebeFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = {"image"}
 
     def discover_store_details(self, response):
-        urls = response.xpath('//a[contains(@href, "details")]/@href').extract()
+        urls = response.xpath('//a[contains(@href, "details")]/@href').getall()
         for url in urls:
             url = url.replace("\r\n", "")
             yield scrapy.Request(response.urljoin(url), callback=self.parse_sd)

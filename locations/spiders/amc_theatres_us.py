@@ -19,14 +19,14 @@ class AmcTheatresUSSpider(Spider):
 
         for theater_elem in response.xpath("//url"):
             properties = {
-                "website": theater_elem.xpath(".//loc/text()").extract_first(),
-                "ref": theater_elem.xpath('.//Attribute[@name="theatreId"]/text()').extract_first(),
-                "street_address": theater_elem.xpath('.//Attribute[@name="addressLine1"]/text()').extract_first(),
-                "city": theater_elem.xpath('.//Attribute[@name="city"]/text()').extract_first(),
-                "state": theater_elem.xpath('.//Attribute[@name="state"]/text()').extract_first(),
-                "postcode": theater_elem.xpath('.//Attribute[@name="postalCode"]/text()').extract_first(),
-                "lat": theater_elem.xpath('.//Attribute[@name="latitude"]/text()').extract_first(),
-                "lon": theater_elem.xpath('.//Attribute[@name="longitude"]/text()').extract_first(),
+                "website": theater_elem.xpath(".//loc/text()").get(),
+                "ref": theater_elem.xpath('.//Attribute[@name="theatreId"]/text()').get(),
+                "street_address": theater_elem.xpath('.//Attribute[@name="addressLine1"]/text()').get(),
+                "city": theater_elem.xpath('.//Attribute[@name="city"]/text()').get(),
+                "state": theater_elem.xpath('.//Attribute[@name="state"]/text()').get(),
+                "postcode": theater_elem.xpath('.//Attribute[@name="postalCode"]/text()').get(),
+                "lat": theater_elem.xpath('.//Attribute[@name="latitude"]/text()').get(),
+                "lon": theater_elem.xpath('.//Attribute[@name="longitude"]/text()').get(),
             }
 
             label = theater_elem.xpath('.//Attribute[@name="title"]/text()').get()
