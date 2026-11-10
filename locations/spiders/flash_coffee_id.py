@@ -1,7 +1,8 @@
 from scrapy import Spider
 
-from locations.categories import Categories, Extras, apply_yes_no
-from locations.dict_parser import DictParser
+from locations.categories import Categories
+from locations.google_url import extract_google_position
+from locations.items import Feature
 
 
 class FlashCoffeeIDSpider(Spider):
@@ -11,26 +12,14 @@ class FlashCoffeeIDSpider(Spider):
         "brand_wikidata": "Q118627777",
         "extras": Categories.CAFE.value,
     }
-    start_urls = ["https://content-gateway.flash-coffee.com/api/stores?contentType=storesId"]
+    start_urls = ["https://flash-coffee.com/locations/"]
 
     def parse(self, response):
-        for location in response.json():
-            item = DictParser.parse(location)
-
-            apply_yes_no(Extras.OUTDOOR_SEATING, item, location["outdoorSeating"])
-            # "indoorSeating": true,
-            # "outdoorSeating": false,
-            # "music": true,
-            # "glassdoor": true,
-            # "tv": true,
-            # "ambientDisplay": true,
-            # "chillerDisplay": true,
-            # "iceBin": false,
-            # "iceMachine": false,
-            # "manualPlumbing": false,
-            # "staffToilet": false,
-            # "customerToilet": false,
-            apply_yes_no(Extras.TOILETS, item, location["customerToilet"])
-            # "centralKitchen": false,
-            # "topview": false
+        for location in response.xpath(
+            '//*[@class = "wp-block-group alignfull is-layout-flow wp-block-group-is-layout-flow"]'
+        ):
+            item = Feature()
+            item["branch"] = item["ref"] = location.xpath(".//p/strong/text()").get()
+            item["addr_full"] = location.xpath(".//p/text()").get()
+            extract_google_position(item, location)
             yield item
