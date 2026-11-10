@@ -4,6 +4,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -12,7 +13,7 @@ OVERSEAS_COUNTRIES = {"971": "GP", "972": "MQ"}
 
 class VillaverdeSpider(Spider):
     name = "villaverde"
-    item_attributes = {"brand_wikidata": "Q89346546"}
+    item_attributes = {"brand": "Villaverde", "brand_wikidata": "Q89346546", "name": "Villaverde"}
     start_urls = ["https://www.villaverde.fr/nos-magasins"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
@@ -48,4 +49,5 @@ class VillaverdeSpider(Spider):
                     oh.add_range(day, start, end)
             item["opening_hours"] = oh
 
+        apply_category(Categories.SHOP_GARDEN_CENTRE, item)
         yield item
