@@ -22,13 +22,13 @@ class DollarGeneralSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
-            "street_address": response.xpath("//@data-address").extract_first(),
-            "city": response.xpath("//div[@data-city]/@data-city").extract_first(),
-            "state": response.xpath("//div[@data-state]/@data-state").extract_first(),
-            "postcode": response.xpath("//div[@data-zip]/@data-zip").extract_first(),
-            "lat": response.xpath("//div[@data-latitude]/@data-latitude").extract_first(),
-            "lon": response.xpath("//div[@data-longitude]/@data-longitude").extract_first(),
-            "phone": response.xpath("//div[@data-phone]/@data-phone").extract_first(),
+            "street_address": response.xpath("//@data-address").get(),
+            "city": response.xpath("//div[@data-city]/@data-city").get(),
+            "state": response.xpath("//div[@data-state]/@data-state").get(),
+            "postcode": response.xpath("//div[@data-zip]/@data-zip").get(),
+            "lat": response.xpath("//div[@data-latitude]/@data-latitude").get(),
+            "lon": response.xpath("//div[@data-longitude]/@data-longitude").get(),
+            "phone": response.xpath("//div[@data-phone]/@data-phone").get(),
             "website": response.url,
             "ref": response.url.rsplit("/", 1)[-1].rsplit(".")[0],
             "name": self.item_attributes["brand"],

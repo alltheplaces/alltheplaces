@@ -16,7 +16,7 @@ class DockxBESpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         raw = (
             response.xpath('//*[@id="main"]/section/div/div/div/script[3]/text()')
-            .extract_first()
+            .get()
             .replace(
                 'window.addEventListener("load",function(){if(typeof window.initializeComponent!=="undefined")initializeComponent("DealerLocatorWidget",',
                 "",

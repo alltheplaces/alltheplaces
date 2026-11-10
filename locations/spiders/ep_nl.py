@@ -13,7 +13,7 @@ class EpNLSpider(scrapy.Spider):
     item_attributes = {"brand": "EP:", "brand_wikidata": "Q110271192"}
 
     def parse(self, response, **kwargs):
-        raw = response.xpath("//div[@id='content']/script/text()").extract_first()
+        raw = response.xpath("//div[@id='content']/script/text()").get()
         raw = raw.replace("pageData.push({ stores: ", "").replace("});", "")
         stores_json = json.loads(raw)
         for store in stores_json.get("stores"):
