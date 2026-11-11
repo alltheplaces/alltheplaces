@@ -2,6 +2,7 @@ from typing import Iterable
 
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.uberall import UberallSpider
 
@@ -14,4 +15,5 @@ class HaysTravelGBSpider(UberallSpider):
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name").removeprefix("Hays Travel ")
         item["website"] = f'https://www.haystravel.co.uk/branches/{item["branch"].lower().replace(" ","-")}/'
+        apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
         yield item
