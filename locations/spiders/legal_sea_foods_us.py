@@ -10,7 +10,7 @@ from locations.items import Feature
 
 class LegalSeaFoodsUSSpider(SitemapSpider):
     name = "legal_sea_foods_us"
-    item_attributes = {"brand": "Legal Sea Foods", "name": "Legal Sea Foods"}
+    item_attributes = {"brand": "Legal Sea Foods", "brand_wikidata": "Q6517417"}
     sitemap_urls = ["https://www.legalseafoods.com/page-sitemap.xml"]
     sitemap_rules = [(r"/locations/[^/]+/$", "parse_location")]
     custom_settings = {"USER_AGENT": "Googlebot"}

@@ -10,7 +10,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class MiniUStorageUSSpider(SitemapSpider, StructuredDataSpider):
     name = "mini_u_storage_us"
-    item_attributes = {"brand": "Mini U Storage", "name": "Mini U Storage"}
+    item_attributes = {"brand": "Mini U Storage", "brand_wikidata": "Q141910638"}
     sitemap_urls = ["https://www.miniustorage.com/candee_location-sitemap.xml"]
     sitemap_rules = [(r"/location/USA/", "parse_sd")]
     wanted_types = ["SelfStorage", "LocalBusiness"]

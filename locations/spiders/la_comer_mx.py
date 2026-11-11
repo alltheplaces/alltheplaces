@@ -10,7 +10,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class LaComerMXSpider(JSONBlobSpider):
     name = "la_comer_mx"
-    item_attributes = {"brand": "La Comer", "brand_wikidata": "Q134237561"}
+    item_attributes = {"brand": "La Comer", "brand_wikidata": "Q26765126"}
     allowed_domains = ["www.lacomer.com.mx"]
     start_urls = [
         "https://www.lacomer.com.mx/lacomer-api/api/v1/public/sucursal/sucursales?succFmt=200&succId=380&tipoNombre="

@@ -8,7 +8,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class UkStorageCompanyGBSpider(SitemapSpider, StructuredDataSpider):
     name = "uk_storage_company_gb"
-    item_attributes = {"brand": "UK Storage Company"}
+    item_attributes = {"brand": "UK Storage Company", "brand_wikidata": "Q87411468"}
     sitemap_urls = ["https://www.ukstoragecompany.co.uk/sitemap.xml"]
     sitemap_rules = [(r"/all-locations/[^/]+/[^/]+/$", "parse_sd")]
     wanted_types = ["SelfStorage"]

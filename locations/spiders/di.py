@@ -9,9 +9,7 @@ from locations.items import Feature
 
 class DiSpider(Spider):
     name = "di"
-    item_attributes = {
-        "brand": "Di",
-    }
+    item_attributes = {"brand": "Di", "brand_wikidata": "Q122955082"}
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {

@@ -8,10 +8,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class SynlabFRSpider(JSONBlobSpider):
     name = "synlab_fr"
-    item_attributes = {
-        "brand": "Synlab",
-        "brand_wikidata": "Q106847432",
-    }
+    item_attributes = {"brand": "Synlab", "brand_wikidata": "Q2376015"}
     start_urls = ["https://www.synlab.fr/trouver-un-laboratoire/"]
 
     def extract_json(self, response):
