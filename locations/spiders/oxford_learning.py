@@ -11,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class OxfordLearningSpider(Spider):
     name = "oxford_learning"
-    item_attributes = {"name": "Oxford Learning", "brand": "Oxford Learning", "brand_wikidata": "Q124034787"}
+    item_attributes = {"brand": "Oxford Learning", "brand_wikidata": "Q126617389"}
     start_urls = ["https://www.oxfordlearning.com/locations/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

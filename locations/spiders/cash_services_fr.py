@@ -16,7 +16,7 @@ from locations.spiders.systeme_u import SystemeUSpider
 
 class CashServicesFRSpider(CrawlSpider):
     name = "cash_services_fr"
-    item_attributes = {"brand": "Cash Services"}
+    item_attributes = {"brand": "Cash Services", "brand_wikidata": "Q140008260"}
     allowed_domains = ["www.cash-services.fr"]
     start_urls = ["https://www.cash-services.fr/fr/Regions.aspx"]
 

@@ -13,7 +13,7 @@ from locations.items import Feature
 
 class PowerNOSpider(Spider):
     name = "power_no"
-    item_attributes = {"brand": "Power", "brand_wikidata": "Q137773608"}
+    item_attributes = {"brand": "Power", "brand_wikidata": "Q99525174"}
     start_urls = ["https://www.power.no/api/v2/stores/header-stores?postalCode=1482&amount=500"]
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:

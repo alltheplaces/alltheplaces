@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class LagerboxDESpider(SitemapSpider, StructuredDataSpider):
     name = "lagerbox_de"
-    item_attributes = {"brand": "Lagerbox", "name": "Lagerbox"}
+    item_attributes = {"brand": "Lagerbox", "brand_wikidata": "Q130268714"}
     sitemap_urls = ["https://www.lagerbox.com/sitemap.xml"]
     sitemap_rules = [(r"/lagerraum-mieten-[^/]+/[^/]+$", "parse_sd")]
     drop_attributes = {"facebook", "twitter", "image"}
