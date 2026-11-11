@@ -1,41 +1,20 @@
-from json import loads
-from typing import Any, AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class BigBrandTireAndServiceUSSpider(Spider):
+class BigBrandTireAndServiceUSSpider(SitemapSpider, StructuredDataSpider):
     name = "big_brand_tire_and_service_us"
     item_attributes = {"brand": "Big Brand Tire & Service", "brand_wikidata": "Q120784816"}
     allowed_domains = ["www.bigbrandtire.com"]
+    sitemap_urls = ["https://www.bigbrandtire.com/sitemap.xml"]
+    sitemap_rules = [("/locations/", "parse_sd")]
+    wanted_types = ["TireShop"]
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url="https://www.bigbrandtire.com/api/publicWeb/getLocations", data={"StoreBrandId": 1})
-
-    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        for feature in response.json():
-            if feature.get("storeClosed"):
-                continue
-
-            item = DictParser.parse(feature)
-            item["branch"] = item.pop("name")
-            item["website"] = "https://www.bigbrandtire.com/locations/" + feature["publicWebEndPoint"]
-
-            if feature.get("storeSchedule"):
-                item["opening_hours"] = OpeningHours()
-                hours_dict = loads(feature["storeSchedule"])
-                for day_hours in hours_dict:
-                    if day_hours.get("storeClosed"):
-                        continue
-                    item["opening_hours"].add_range(
-                        day_hours["dayName"], *day_hours["displayHours"].split(" - ", 1), "%I:%M%p"
-                    )
-
-            apply_category(Categories.SHOP_TYRES, item)
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Big Brand Tire & Service - ")
+        yield item
