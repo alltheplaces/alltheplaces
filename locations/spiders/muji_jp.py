@@ -43,7 +43,7 @@ class MujiJPSpider(Spider):
         self, response: Response, bbox: tuple[tuple[float, float], tuple[float, float]]
     ) -> Iterable[Feature | Request]:
         try:
-            stores = json.loads(response.text)
+            stores = response.json()
         except json.JSONDecodeError:
             self.logger.warning("Failed to decode JSON for bbox %s", bbox)
             return
