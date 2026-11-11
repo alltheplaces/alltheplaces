@@ -1,13 +1,12 @@
-import json
 import re
-from typing import AsyncIterator, Iterable
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy.http import Request, TextResponse
+from scrapy import FormRequest
+from scrapy.http import JsonRequest, Request, TextResponse
 
-from locations.camoufox_spider import CamoufoxSpider
 from locations.categories import Categories, apply_category
-from locations.settings import DEFAULT_CAMOUFOX_SETTINGS
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 # Coop's "Verkaufsstellen" (points of sale) search covers every banner in
 # the Coop Group (supermarkets, Pronto convenience/fuel stations,
@@ -18,21 +17,26 @@ from locations.structured_data_spider import StructuredDataSpider
 DETAIL_URL = "https://www.coop.ch/de/unternehmen/standorte-und-oeffnungszeiten/detail.html/{}/{}.html"
 
 
-class CoopCHSpider(StructuredDataSpider, CamoufoxSpider):
+class CoopCHSpider(StructuredDataSpider):
     name = "coop_ch"
     item_attributes = {"brand": "Coop", "brand_wikidata": "Q432564", "name": "Coop"}
-    # DataDome intermittently blocks even a real Camoufox browser request with
-    # a 403 (observed on the very first request of a crawl). A retry with a
-    # fresh page/context usually succeeds, so treat 403 as retryable here.
-    custom_settings = DEFAULT_CAMOUFOX_SETTINGS | {"RETRY_HTTP_CODES": [403], "RETRY_TIMES": 5}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     # Every detail page carries the same corporate "Share on Twitter/Facebook"
     # links in its page chrome, not a branch-specific social profile; the
     # Twitter one isn't even a handle, just the "intent/tweet" share URL path.
     drop_attributes = {"twitter", "facebook"}
 
-    async def start(self) -> AsyncIterator[Request]:
-        # The whole site sits behind DataDome, so even the JSON API used by
-        # the store locator widget must be requested via a real browser.
+    async def start(self) -> AsyncIterator[FormRequest]:
+        # Fetch cookies to avoid DataDome blockage
+        yield FormRequest(
+            url="https://api-js.datadome.co/js/",
+            headers={
+                "referer": "https://www.coop.ch/de/store-finder",
+            },
+            formdata={"ddk": "4E2D21855D176C1885A97CE16C8EC3"},
+        )
+
+    def parse(self, response: TextResponse, **kwargs) -> Any:
         # A single query centred on Switzerland with a generous "end" value
         # returns every "retail" (Coop Supermarkt) location in one response
         # (foundVstsSize == len(vstList), i.e. nothing is truncated).
@@ -40,12 +44,10 @@ class CoopCHSpider(StructuredDataSpider, CamoufoxSpider):
             "https://www.coop.ch/de/unternehmen/standorte-und-oeffnungszeiten.getvstlist.json"
             "?lat=46.8&lng=8.2&start=1&end=5000&filterFormat=retail&filterAttribute=&filterOpen=false&gasIndex=0"
         )
-        yield Request(url, callback=self.parse_list)
+        yield JsonRequest(url=url, cookies={"cookie": response.json()["cookie"]}, callback=self.parse_list)
 
     def parse_list(self, response: TextResponse) -> Iterable[Request]:
-        # Camoufox renders the raw JSON response body inside a <pre> element.
-        data = json.loads(re.search(r"<pre>(.*)</pre>", response.text, re.S).group(1))
-        for store in data["vstList"]:
+        for store in response.json()["vstList"]:
             detail_url = DETAIL_URL.format(store["betriebsNummerId"]["id"], store["prettyUrlName"])
             yield Request(detail_url, callback=self.parse_sd)
 
