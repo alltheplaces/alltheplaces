@@ -9,16 +9,18 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class KmartAUSpider(SitemapSpider):
+class KmartAUSpider(SitemapSpider, PlaywrightSpider):
     name = "kmart_au"
     item_attributes = {"brand": "Kmart", "brand_wikidata": "Q6421682", "country": "AU"}
     allowed_domains = ["kmart.com.au"]
     sitemap_urls = ["https://www.kmart.com.au/sitemap/au/storelocation-sitemap.xml"]
     sitemap_rules = [("/store-detail/", "parse")]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
         # Store pages only include JSON-LD for some stores (it is missing for e.g. 24 hour stores), but the
