@@ -1,39 +1,11 @@
-import json
-import re
-from typing import Any
+from scrapy.spiders import SitemapSpider
 
-from scrapy import Spider
-from scrapy.http import Response
-
-from locations.categories import Categories, apply_category
-from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class FoussierFRSpider(Spider):
+class FoussierFRSpider(SitemapSpider, StructuredDataSpider):
     name = "foussier_fr"
     item_attributes = {"brand": "Foussier", "brand_wikidata": "Q135189843"}
-    start_urls = ["https://www.foussier.fr/magasins-foussier-en-france"]
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(
-            re.search(
-                r"data\":(\[.*\]),\"dataUpdateCount",
-                response.xpath('//*[contains(text(),"codePostal")]').get().replace("\\", ""),
-            ).group(1)
-        ):
-            item = Feature()
-            item["ref"] = location["id"]
-            item["branch"] = location["libelle"].removeprefix("Foussier ")
-            item["street_address"] = merge_address_lines(
-                [location["adresse"]["adresse1"], location["adresse"]["adresse2"]]
-            )
-            item["postcode"] = location["adresse"]["codePostal"]
-            item["city"] = location["adresse"]["ville"]
-            item["phone"] = location["adresse"].get("telephoneFixe") or location["adresse"].get("telephoneMobile")
-            item["lat"] = location["adresse"]["latitude"]
-            item["lon"] = location["adresse"]["longitude"]
-
-            apply_category(Categories.SHOP_HARDWARE, item)
-
-            yield item
+    sitemap_urls = ["https://www.foussier.fr/sitemap-magasins.xml"]
+    sitemap_rules = [("/nos-magasins-et-points-de-retrait/", "parse_sd")]
+    wanted_items = ["LocalBusiness"]
