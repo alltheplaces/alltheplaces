@@ -10,10 +10,11 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
+PTT = {"operator": "PTT", "operator_wikidata": "Q3079259"}
+
 
 class PttTRSpider(Spider):
     name = "ptt_tr"
-    item_attributes = {"operator": "PTT", "operator_wikidata": "Q3079259"}
     allowed_domains = ["enyakinptt.ptt.gov.tr"]
     API = "https://enyakinptt.ptt.gov.tr/api/"
     requires_proxy = True
@@ -53,10 +54,12 @@ class PttTRSpider(Spider):
             elif re.search(r"DAĞITIM|İŞLEME|AKTARMA", name):
                 # Delivery, sorting and transfer centres ("POSTA DAĞITIM MÜDÜRLÜĞÜ" etc.)
                 item["branch"] = name
+                item.update(PTT)
                 apply_category(Categories.POST_DEPOT, item)
             else:
                 # "MERKEZ" (main offices) and "ŞUBE" (branches).
                 item["branch"] = name
+                item.update(PTT)
                 apply_category(Categories.POST_OFFICE, item)
             item["opening_hours"] = self.parse_hours(office)
             yield item
