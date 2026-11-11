@@ -24,15 +24,16 @@ class PunjabNationalBankINSpider(Spider):
     def parse(self, response):
         data = response.json()["d"]
         if "MarkerData" in data:
-            for index, store in enumerate(loads(data)["MarkerData"]):
+            for store in loads(data)["MarkerData"]:
                 store["lon"] = store.pop("longt")
                 store["address"] = store.pop("location")
                 item = DictParser.parse(store)
                 if store["loctType"] == "Branch":
                     apply_category(Categories.BANK, item)
-                    item["ref"] = f'{store["IFSC"]}-{index}'
+                    item["ref"] = store["IFSC"]
                     item["phone"] = store["Tel1"]
                 else:
                     apply_category(Categories.ATM, item)
-                    item["ref"] = f'{store["ATMID"]}-{index}'
+                    item["ref"] = store["ATMID"]
+                    item.pop("city", None)
                 yield item
