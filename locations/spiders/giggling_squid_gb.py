@@ -8,8 +8,7 @@ from locations.items import Feature
 class GigglingSquidGBSpider(Spider):
     name = "giggling_squid_gb"
     item_attributes = {"brand": "Giggling Squid", "brand_wikidata": "Q113127471"}
-    start_urls = ["https://wp.gigglingsquid.com/wp-json/gs/v1/locations"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    start_urls = ["https://wp2.gigglingsquid.com/wp-json/gs/v1/locations"]
 
     def parse(self, response, **kwargs):
         for location in response.json()["locations"]:
