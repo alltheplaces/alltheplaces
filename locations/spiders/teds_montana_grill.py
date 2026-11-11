@@ -1,5 +1,8 @@
+from urllib.parse import urljoin
+
 import scrapy
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
 
@@ -24,7 +27,6 @@ class TedsMontanaGrillSpider(scrapy.Spider):
         address = location.xpath(".//p")[-1].xpath("text()").getall()
         street_address = clean_address([line.strip() for line in address[:-1]])
         postcode = address[-1].strip()
-        addr_full = f"{street_address}, {postcode}"
         properties = {
             "ref": ref,
             "state": state,
@@ -32,6 +34,9 @@ class TedsMontanaGrillSpider(scrapy.Spider):
             "phone": phone,
             "street_address": street_address,
             "postcode": postcode,
-            "addr_full": addr_full,
+            "country": "US",
+            "website": urljoin("https://www.tedsmontanagrill.com/", ref),
         }
-        yield Feature(**properties)
+        item = Feature(**properties)
+        apply_category(Categories.RESTAURANT, item)
+        yield item

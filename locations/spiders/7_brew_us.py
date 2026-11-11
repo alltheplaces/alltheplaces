@@ -9,14 +9,9 @@ class SevenBrewUSSpider(SitemapSpider):
     name = "7_brew_us"
     allowed_domains = ["7brew.com"]
     start_urls = ["https://7brew.com"]
-    item_attributes = {
-        "brand": "7 Brew",
-        "brand_wikidata": "Q127688691",
-    }
+    item_attributes = {"brand": "7 Brew", "brand_wikidata": "Q131838275"}
     sitemap_urls = ["https://7brew.com/sitemap.xml"]
-    sitemap_rules = [
-        ("/location/", "parse"),
-    ]
+    sitemap_rules = [("/location/", "parse")]
 
     def parse(self, response):
         item = Feature()

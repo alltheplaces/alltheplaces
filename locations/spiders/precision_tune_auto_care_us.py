@@ -7,7 +7,7 @@ from locations.storefinders.storerocket import StoreRocketSpider
 
 class PrecisionTuneAutoCareUSSpider(StoreRocketSpider):
     name = "precision_tune_auto_care_us"
-    item_attributes = {"brand": "Precision Tune Auto Care"}
+    item_attributes = {"brand": "Precision Tune Auto Care", "brand_wikidata": "Q120717427"}
     storerocket_id = "xw8VVEg8aE"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:

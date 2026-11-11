@@ -63,7 +63,7 @@ def parse_opening_hours(raw: str) -> OpeningHours:
 
 class GodotEtFilsFRSpider(Spider):
     name = "godot_et_fils_fr"
-    item_attributes = {"brand": "Godot & Fils"}
+    item_attributes = {"brand": "Godot & Fils", "brand_wikidata": "Q134652093"}
     allowed_domains = ["godotetfils.com"]
     start_urls = ["https://godotetfils.com/agences-test/"]
     custom_settings = {"ROBOTSTXT_OBEY": False}

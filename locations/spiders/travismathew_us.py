@@ -9,7 +9,7 @@ from locations.items import Feature
 
 class TravismathewUSSpider(SitemapSpider):
     name = "travismathew_us"
-    item_attributes = {"brand": "TravisMathew", "name": "TravisMathew"}
+    item_attributes = {"brand": "TravisMathew", "brand_wikidata": "Q128212818"}
     sitemap_urls = ["https://travismathew.com/sitemap.xml"]
     sitemap_rules = [(r"/pages/store/[\w-]+$", "parse_item")]
 
