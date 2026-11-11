@@ -12,6 +12,7 @@ from locations.items import Feature
 
 PTT = {"operator": "PTT", "operator_wikidata": "Q3079259"}
 
+
 class PttTRSpider(Spider):
     name = "ptt_tr"
     allowed_domains = ["enyakinptt.ptt.gov.tr"]
