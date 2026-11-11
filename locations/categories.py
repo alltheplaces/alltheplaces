@@ -415,6 +415,7 @@ class Categories(Enum):
     OPTOMETRIST = {"healthcare": "optometrist"}
     PARCEL_LOCKER = {"amenity": "parcel_locker"}
     PAYMENT_CENTRE = {"amenity": "payment_centre"}
+    PAYMENT_TERMINAL = {"amenity": "payment_terminal"}
     PHARMACY = {"amenity": "pharmacy"}
     PHOTO_BOOTH = {"amenity": "photo_booth"}
     PHYSIOTHERAPIST = {"healthcare": "physiotherapist"}
