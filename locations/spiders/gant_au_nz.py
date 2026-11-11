@@ -14,14 +14,13 @@ class GantAUNZSpider(PlaywrightSpider):
     allowed_domains = ["gant.com.au"]
     start_urls = ["https://gant.com.au/pages/stores"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
-    no_refs = True
 
     def parse(self, response: Response) -> Iterable[Feature]:
         for location in response.xpath('//section[contains(@class,"ai-store-locator-")]'):
             country = location.xpath(".//@data-state-group").get()
             for store in location.xpath(".//article[contains(@class,'ai-store-locator-')]"):
                 item = Feature()
-                item["branch"] = store.xpath(".//h4/text()").get()
+                item["branch"] = item["ref"] = store.xpath(".//h4/text()").get()
                 item["addr_full"] = store.xpath(".//p//text()").get().split("\n\n", 1)[0]
                 if country == "New Zealand":
                     item["country"] = "NZ"
