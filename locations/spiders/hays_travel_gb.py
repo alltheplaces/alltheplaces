@@ -1,15 +1,19 @@
-from scrapy import Spider
+from typing import Iterable
 
-from locations.dict_parser import DictParser
+from scrapy.http import TextResponse
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.uberall import UberallSpider
 
 
-class HaysTravelGBSpider(Spider):
+class HaysTravelGBSpider(UberallSpider):
     name = "hays_travel_gb"
     item_attributes = {"brand": "Hays Travel", "brand_wikidata": "Q70250954"}
-    start_urls = ["https://branches.haystravel.co.uk/api/branches"]
+    key = "xKkPXW8KuKiZLOaOUiIWZ2ckdz7nsz"
 
-    def parse(self, response):
-        for store in response.json()["data"]:
-            item = DictParser.parse(store)
-            item.pop("name", None)
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name").removeprefix("Hays Travel ")
+        item["website"] = f'https://www.haystravel.co.uk/branches/{item["branch"].lower().replace(" ","-")}/'
+        apply_category(Categories.SHOP_TRAVEL_AGENCY, item)
+        yield item
