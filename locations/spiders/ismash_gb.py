@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours, day_range
 from locations.items import Feature
 
 
@@ -33,10 +33,11 @@ class IsmashGBSpider(Spider):
             apply_category(Categories.CRAFT_ELECTRONICS_REPAIR, item)
 
             item["opening_hours"] = OpeningHours()
-            if "-" in location.get("mon_fri"):
-                item["opening_hours"].add_days_range(DAYS[:5], *location["mon_fri"].split("-"))
-            if "-" in location.get("sat"):
-                item["opening_hours"].add_range("Sa", *location["sat"].split("-"))
-            if "-" in location.get("sun"):
-                item["opening_hours"].add_range("Su", *location["sun"].split("-"))
+            for day_info in ["mon_fri", "sat", "sun"]:
+                days = day_range(*day_info.split("_")) if "_" in day_info else [day_info]
+                hours_info = location.get(day_info) or ""
+                if "-" in hours_info:
+                    item["opening_hours"].add_days_range(days, *location[day_info].split("-"))
+                elif "Closed" in hours_info.title():
+                    item["opening_hours"].set_closed(days)
             yield item
