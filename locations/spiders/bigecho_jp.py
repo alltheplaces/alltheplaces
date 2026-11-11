@@ -1,27 +1,39 @@
-from typing import Any
+from typing import Any, Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.items import Feature
+from locations.linked_data_parser import LinkedDataParser
+from locations.storefinders.goga_store_locator import GogaStoreLocatorSpider
 
 
-class BigechoJPSpider(Spider):
+class BigechoJPSpider(GogaStoreLocatorSpider):
     name = "bigecho_jp"
+    item_attributes = {"brand_wikidata": "Q15831707"}
+    start_urls = ['https://shop.big-echo.jp/api/point?f=["短縮ＵＲＬ","電話番号"]']
 
-    start_urls = ["https://shop.big-echo.jp/api/point"]
-    allowed_domains = ["shop.big-echo.jp"]
-    item_attributes = {
-        "brand_wikidata": "Q15831707",
+    # Bit positions in __condition_flags, in the order of the "conditions" list on shop.big-echo.jp
+    CONDITIONS = {
+        7: Extras.PARKING,
+        9: Extras.SMOKING_AREA,
+        11: Extras.WHEELCHAIR,
+        12: Extras.TOILETS_WHEELCHAIR,
+        13: Extras.KIDS_AREA,
+        18: Extras.WIFI,
     }
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["items"]:
+    def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Request]:
+        item["website"] = source_feature["短縮ＵＲＬ"]
+        apply_category(Categories.KARAOKE_BOX, item)
+        for bit, attribute in self.CONDITIONS.items():
+            apply_yes_no(attribute, item, source_feature["__condition_flags"] & 1 << bit)
+        if source_feature["__condition_flags"] & 1 << 22:
+            item["extras"]["sport"] = "darts"
+        yield Request(item["website"], callback=self.parse_hours, cb_kwargs={"item": item})
 
-            item = DictParser.parse(store)
-
-            item["extras"]["amenity"] = "karaoke_box"
-            item["website"] = f"https://reserve.big-echo.jp/r/{store['key']}"
-            item["ref"] = store["key"]
-
-            yield item
+    def parse_hours(self, response: Response, item: Feature, **kwargs: Any) -> Iterable[Feature]:
+        item["opening_hours"] = LinkedDataParser.parse_opening_hours(
+            LinkedDataParser.find_linked_data(response, "LocalBusiness")
+        )
+        yield item

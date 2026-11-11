@@ -42,7 +42,7 @@ class GogaStoreLocatorSpider(Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for location in response.json()["items"]:  # ty: ignore[unresolved-attribute]
-            location.update(location.pop("extra_fields"))
+            location.update(location.pop("extra_fields", {}))
             item = DictParser.parse(location)
             if self.website_formatter:
                 item["website"] = self.website_formatter.format(location.get("key"))
