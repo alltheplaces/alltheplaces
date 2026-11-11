@@ -1,6 +1,8 @@
+from typing import Any
 from urllib.parse import urljoin
 
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
@@ -10,9 +12,9 @@ from locations.items import Feature
 class IsmashGBSpider(Spider):
     name = "ismash_gb"
     item_attributes = {"brand": "iSmash", "brand_wikidata": "Q42306824"}
-    start_urls = ["https://api.ismash.com/app/stores"]
+    start_urls = ["https://ismash-api.eu.assurant.com/api/stores"]
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             if location["isStore"] != 1:
                 continue
