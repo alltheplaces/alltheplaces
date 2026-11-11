@@ -1,10 +1,8 @@
-import re
 from typing import Iterable
 
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
@@ -16,30 +14,19 @@ class GantAUNZSpider(PlaywrightSpider):
     allowed_domains = ["gant.com.au"]
     start_urls = ["https://gant.com.au/pages/stores"]
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    no_refs = True
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        for location in response.xpath("//store-locator-marker"):
-            raw_name = location.xpath("@data-name").get()
-            item = Feature()
-            item["ref"] = raw_name.replace('"', "").replace(" ", "_").lower().strip()
-            item["branch"] = raw_name
-            item["addr_full"] = location.xpath("@data-address").get()
-            item["phone"] = location.xpath("@data-phone").get()
-            item["lat"] = location.xpath("@data-latitude").get()
-            item["lon"] = location.xpath("@data-longitude").get()
+        for location in response.xpath('//section[contains(@class,"ai-store-locator-")]'):
+            country = location.xpath(".//@data-state-group").get()
+            for store in location.xpath(".//article[contains(@class,'ai-store-locator-')]"):
+                item = Feature()
+                item["branch"] = store.xpath(".//h4/text()").get()
+                item["addr_full"] = store.xpath(".//p//text()").get().split("\n\n", 1)[0]
+                if country == "New Zealand":
+                    item["country"] = "NZ"
+                else:
+                    item["country"] = "AU"
+                apply_category(Categories.SHOP_CLOTHES, item)
 
-            state_raw = location.xpath("@data-state").get()
-            if state_raw == "New Zealand":
-                item["country"] = "NZ"
-            else:
-                item["country"] = "AU"
-                item["state"] = state_raw
-
-            if hours_raw := location.xpath("@data-hours").get():
-                item["opening_hours"] = OpeningHours()
-                hours_spaced = re.sub(r"(?<!^)(Mon|Tue|Wed|Thu|Fri|Sat|Sun)", r" \1", hours_raw)
-                item["opening_hours"].add_ranges_from_string(hours_spaced)
-
-            apply_category(Categories.SHOP_CLOTHES, item)
-
-            yield item
+                yield item
