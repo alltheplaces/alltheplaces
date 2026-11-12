@@ -62,12 +62,12 @@ class KrysSpider(Spider):
             )
             item["website"] = location["URL"]["canonical"]
             if "/audioprothesiste/" in item["website"] or "Audition" in name:
-                item["brand"] = "Krys Audition"
+                item["name"] = "Krys Audition"
                 apply_category(Categories.SHOP_HEARING_AIDS, item)
             else:
                 apply_category(Categories.SHOP_OPTICIAN, item)
             item["image"] = ";".join([i["original"] for i in location["visuals"]])
-            item["street_address"] = merge_address_lines([location["street"], location["street_extend"]])
+            item["street_address"] = merge_address_lines([item.pop("street", ""), location["street_extend"]])
             item["addr_full"] = ", ".join(location["lines"])
 
             item["opening_hours"] = OpeningHours()
