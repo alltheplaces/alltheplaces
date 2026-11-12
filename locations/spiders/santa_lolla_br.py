@@ -13,23 +13,24 @@ class SantaLollaBRSpider(Spider):
     def parse(self, response):
         for store in response.json():
             store["street_address"] = store.pop("street")
-            if store.get("latitude"):
-                item = DictParser.parse(store)
-                item["branch"] = item["ref"] = item.pop("name")
-                oh = OpeningHours()
-                for day in DAYS_FULL:
-                    try:
-                        times = store["hour_" + day]
-                        if times == "Fechado":
-                            continue
-                        start_time, _, end_time = times.split(" ")
-                        if start_time.endswith("h"):
-                            start_time += "00"
-                        if end_time.endswith("h"):
-                            end_time += "00"
-                        oh.add_range(day, start_time, end_time, time_format="%Hh%M")
-                    except:
+            if not store.get("latitude"):
+                continue
+            item = DictParser.parse(store)
+            item["branch"] = item["ref"] = item.pop("name")
+            oh = OpeningHours()
+            for day in DAYS_FULL:
+                try:
+                    times = store["hour_" + day]
+                    if times == "Fechado":
                         continue
-                item["opening_hours"] = oh
-                apply_category(Categories.SHOP_SHOES, item)
-                yield item
+                    start_time, _, end_time = times.split(" ")
+                    if start_time.endswith("h"):
+                        start_time += "00"
+                    if end_time.endswith("h"):
+                        end_time += "00"
+                    oh.add_range(day, start_time, end_time, time_format="%Hh%M")
+                except:
+                    continue
+            item["opening_hours"] = oh
+            apply_category(Categories.SHOP_SHOES, item)
+            yield item
