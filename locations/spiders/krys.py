@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -55,10 +56,16 @@ class KrysSpider(Spider):
             location.update(location.pop("fields"))
             location.update(location.pop("card"))
             item = DictParser.parse(location)
+            name = item.pop("name", "") or ""
             item["branch"] = (
-                item.pop("name").replace("Krys", "").replace("Audition", "").lstrip("- ").rstrip(" -").lstrip().rstrip()
+                name.replace("Krys", "").replace("Audition", "").lstrip("- ").rstrip(" -").lstrip().rstrip()
             )
             item["website"] = location["URL"]["canonical"]
+            if "/audioprothesiste/" in item["website"] or "Audition" in name:
+                item["brand"] = "Krys Audition"
+                apply_category(Categories.SHOP_HEARING_AIDS, item)
+            else:
+                apply_category(Categories.SHOP_OPTICIAN, item)
             item["image"] = ";".join([i["original"] for i in location["visuals"]])
             item["street_address"] = merge_address_lines([location["street"], location["street_extend"]])
             item["addr_full"] = ", ".join(location["lines"])
