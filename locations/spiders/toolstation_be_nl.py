@@ -17,9 +17,6 @@ class ToolstationBENLSpider(StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         item["street_address"] = merge_address_lines([item.pop("city"), item["street_address"].replace("Toolstation", "")])
-        if "nl" in response.url:
-            item["website"] = f'https://www.toolstation.nl/branches/{item["branch"]}'
-        else:
-            item["website"] = f'https://www.toolstation.be/branches/{item["branch"]}'
+        item["website"] = response.urljoin("/branches/{}".format(item["branch"].lower().replace(" ", "-")))
         apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item
