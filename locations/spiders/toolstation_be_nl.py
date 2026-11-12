@@ -17,7 +17,9 @@ class ToolstationBENLSpider(StructuredDataSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["image"] = item["phone"] = item["email"] = None
         item["branch"] = item.pop("name")
-        item["street_address"] = merge_address_lines([item.pop("city"), item["street_address"].replace("Toolstation", "")])
+        item["street_address"] = merge_address_lines(
+            [item.pop("city"), item["street_address"].replace("Toolstation", "")]
+        )
         item["website"] = response.urljoin("/branches/{}".format(item["branch"].lower().replace(" ", "-")))
         apply_category(Categories.SHOP_DOITYOURSELF, item)
         yield item
