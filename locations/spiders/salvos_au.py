@@ -8,15 +8,13 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class SalvosAUSpider(JSONBlobSpider, PlaywrightSpider):
+class SalvosAUSpider(JSONBlobSpider):
     name = "salvos_au"
     item_attributes = {"brand": "Salvos", "brand_wikidata": "Q120646407"}
     start_urls = ["https://www.salvosstores.com.au/stores"]
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS  # Playwright helps to avoid http 429
+    requires_proxy = True
 
     def extract_json(self, response: TextResponse) -> dict | list[dict]:
         return DictParser.get_nested_key(
