@@ -5,6 +5,7 @@ from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.playwright_spider import PlaywrightSpider
@@ -35,5 +36,22 @@ class SalvosAUSpider(JSONBlobSpider, PlaywrightSpider):
         item["state"] = feature.get("address_state")
         if slug := feature.get("url_key"):
             item["website"] = f'https://www.salvosstores.com.au/stores/{slug.strip("/")}'
+
+        trading_hours = feature.get("trading_hours") or []
+        try:
+            item["opening_hours"] = self.parse_opening_hours(trading_hours)
+        except Exception as e:
+            self.logger.warning(f"Failed to parse hours: {trading_hours}, {e}")
+
         apply_category(Categories.SHOP_CHARITY, item)
         yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for rule in rules:
+            for day, hours in rule.items():
+                if hours.get("isOpen") is False:
+                    opening_hours.set_closed(day)
+                    continue
+                opening_hours.add_range(day, hours["openingTime"], hours["closingTime"], "%H:%M:%S")
+        return opening_hours
