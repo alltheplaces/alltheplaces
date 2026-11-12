@@ -38,6 +38,27 @@ UNAVAILABLE_STATUS = 3
 # of AS 24 and partner brands which the feed does not distinguish.
 FRANCE = "FRA"
 
+# Station finder languages, other countries get the English page
+WEBSITE_LANGUAGES = {
+    "AUT": "de",
+    "BGR": "bg",
+    "CZE": "cs",
+    "DEU": "de",
+    "ESP": "es",
+    "FRA": "fr",
+    "HRV": "hr",
+    "HUN": "hu",
+    "ITA": "it",
+    "LTU": "lt",
+    "LUX": "fr",
+    "NLD": "nl",
+    "POL": "pl",
+    "PRT": "pt",
+    "ROU": "ro",
+    "SVN": "sl",
+    "UKR": "uk",
+}
+
 PARKING_BOOKING_MAPPING = {
     0: None,
     1: Extras.RESERVATION,
@@ -58,7 +79,8 @@ class As24Spider(JSONBlobSpider):
             return
         item["ref"] = feature["stationId"]
         item["street_address"] = item.pop("addr_full")
-        item["website"] = f"https://network.as24.com/stationfinder/en/stations/{item['ref']}"
+        language = WEBSITE_LANGUAGES.get(feature["countryCode"], "en")
+        item["website"] = f"https://network.as24.com/stationfinder/{language}/stations/{item['ref']}"
         apply_yes_no(Access.HGV, item, True)
 
         if feature["stationType"] == WASH_AND_PARKING_STATION_TYPE:
