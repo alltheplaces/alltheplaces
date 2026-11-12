@@ -11,5 +11,6 @@ class SportscraftSpider(StockistSpider):
     key = "map_93wpxmnq"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name")
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item
