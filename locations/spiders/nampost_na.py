@@ -15,22 +15,26 @@ OPERATOR = {"operator": "NamPost", "operator_wikidata": "Q1509637"}
 class NampostNASpider(Spider):
     name = "nampost_na"
     allowed_domains = ["www.nampost.com.na"]
-    # The page embeds every office and agent as a JS object: "var items = {...};"
+    # The page embeds every office and agent as a JS array: "var data = [...];"
     start_urls = ["https://www.nampost.com.na/contact-us/post-offices"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        start = response.text.find("var items = {")
-        items = json.JSONDecoder().raw_decode(response.text, start + len("var items = "))[0]
-        for office in items.values():
+        for office in json.JSONDecoder().raw_decode(
+            response.text, re.search(r"\bvar\s+data\s*=\s*(?=\[)", response.text).end()
+        )[0]:
             if office.get("deleted_at"):
                 continue
             # Newer entries without a real position default to (-30, 24), which is in South Africa.
-            if float(office["latitude"]) == -30 and float(office["longitude"]) == 24:
+            try:
+                lat, lon = float(office["latitude"]), float(office["longitude"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            if lat == -30 and lon == 24:
                 self.crawler.stats.inc_value("atp/nampost_na/placeholder_coordinates")
                 continue
             item = Feature()
             item["ref"] = str(office["id"])
-            item["lat"], item["lon"] = office["latitude"], office["longitude"]
+            item["lat"], item["lon"] = lat, lon
             item["street_address"] = (office.get("address") or "").strip(" .") or None
             item["postcode"] = office.get("post_code")
             item["city"] = (office.get("city") or {}).get("title")
