@@ -5,17 +5,22 @@ from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class KmartAUSpider(SitemapSpider):
+class KmartAUSpider(SitemapSpider, PlaywrightSpider):
     name = "kmart_au"
     item_attributes = {"brand": "Kmart", "brand_wikidata": "Q6421682", "country": "AU"}
     allowed_domains = ["kmart.com.au"]
     sitemap_urls = ["https://www.kmart.com.au/sitemap/au/storelocation-sitemap.xml"]
     sitemap_rules = [("/store-detail/", "parse")]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: TextResponse, **kwargs) -> Iterable[Feature]:
         # Store pages only include JSON-LD for some stores (it is missing for e.g. 24 hour stores), but the
@@ -30,19 +35,12 @@ class KmartAUSpider(SitemapSpider):
             return
 
         public_name = (location.get("publicName") or "").strip()
-        item = Feature()
-        item["ref"] = location["locationId"]
+        item = DictParser.parse(location)
         item["branch"] = public_name.replace("K Hub", "").strip()
         item["name"] = "K Hub" if "K Hub" in public_name else "Kmart"
-        item["lat"] = location.get("latitude")
-        item["lon"] = location.get("longitude")
         item["street_address"] = merge_address_lines(
             [location.get("address1"), location.get("address2"), location.get("address3")]
         )
-        item["city"] = location.get("city")
-        item["state"] = location.get("state")
-        item["postcode"] = location.get("postcode")
-        item["phone"] = location.get("phoneNumber")
         item["website"] = response.url
         item["opening_hours"] = self.parse_hours(location.get("tradingHours") or [])
 
@@ -53,12 +51,13 @@ class KmartAUSpider(SitemapSpider):
     def parse_hours(trading_hours: list[dict]) -> OpeningHours:
         oh = OpeningHours()
         for rule in trading_hours:
-            day, hours = rule.get("weekDay"), (rule.get("hours") or "").strip()
-            if hours.lower() == "24hr":
-                oh.add_range(day, "00:00", "24:00")
-            elif hours.lower() == "closed":
-                oh.set_closed(day)
-            elif "-" in hours:
-                open_time, close_time = hours.split("-", 1)
-                oh.add_range(day, open_time.strip(), close_time.strip(), "%I:%M%p")
+            if day := sanitise_day(rule.get("weekDay", "")):
+                hours = (rule.get("hours") or "").strip()
+                if hours.lower() == "24hr":
+                    oh.add_range(day, "00:00", "24:00")
+                elif hours.lower() == "closed":
+                    oh.set_closed(day)
+                elif "-" in hours:
+                    open_time, close_time = hours.split("-", 1)
+                    oh.add_range(day, open_time.strip(), close_time.strip(), "%I:%M%p")
         return oh

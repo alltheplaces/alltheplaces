@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.geo import postal_regions
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -12,46 +13,41 @@ from locations.user_agents import BROWSER_DEFAULT
 
 
 class WinnDixieUSSpider(Spider):
-    """
-    This brand is owned by Southeastern Grocers (https://www.segrocers.com)
-    who reuse the same store finder method for their other brand
-    Harveys Supermarkets (spider: harveys_supermarkets_us).
-    """
-
     name = "winn_dixie_us"
-    item_attributes = {
-        "brand": "Winn-Dixie",
-        "brand_wikidata": "Q1264366",
-    }
+    item_attributes = {"brand": "Winn-Dixie", "brand_wikidata": "Q1264366"}
     allowed_domains = ["www.winndixie.com"]
-    start_urls = [
-        "https://www.winndixie.com/V2/storelocator/getStores?search=jacksonville,%20fl&strDefaultMiles=1000&filter="
-    ]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    states = {"FL", "AL", "LA", "MS"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield JsonRequest(url=self.start_urls[0], method="POST")
+        for region in postal_regions("US", min_population=50000, consolidate_cities=True):
+            if region["state"] not in self.states:
+                continue
+            yield JsonRequest(
+                url=f"https://www.winndixie.com/api/seg/locator/stores?search={region['postal_region']}&miles=100"
+            )
 
     def parse(self, response: Response) -> Iterable[Feature]:
-        for feature in response.json():
+        data = response.json()
+        if not isinstance(data, list):
+            self.logger.warning(f"Unexpected response for {response.url}: {response.text[:300]}")
+            return
+
+        for feature in data:
             item = DictParser.parse(feature)
-            item["ref"] = str(feature.get("StoreCode", ""))
-            item["branch"] = feature.get("StoreName")
-            item.pop("name", None)
+            item["branch"] = item.pop("name", None)
             item["street_address"] = clean_address(
-                [feature["Address"].get("AddressLine1"), feature["Address"].get("AddressLine2")]
+                [feature["address"].get("addressLine1"), feature["address"].get("addressLine2")]
             )
             item["opening_hours"] = OpeningHours()
-            item["opening_hours"].add_ranges_from_string(feature.get("WorkingHours", ""))
-            item["website"] = (
-                "https://"
-                + self.allowed_domains[0]
-                + "/storedetails/"
-                + item["city"].lower().replace(" ", "-")
-                + "/"
-                + item["state"].lower()
-                + "?search="
-                + item["ref"].lower()
-            )
+            if hours := feature.get("workingHours"):
+                item["opening_hours"].add_ranges_from_string(hours)
+
+            if item.get("city") and item.get("state"):
+                item["website"] = (
+                    f"https://{self.allowed_domains[0]}/storedetails/"
+                    f"{item['city'].lower().replace(' ', '-')}/{item['state'].lower()}?search={item['ref']}"
+                )
+
             apply_category(Categories.SHOP_SUPERMARKET, item)
             yield item

@@ -14,7 +14,8 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Wendy's", "brand_wikidata": "Q550258"}
     wanted_types = ["FastFoodRestaurant"]
     sitemap_urls = ["https://locations.wendys.com/sitemap.xml"]
-    sitemap_rules = [(r"https://locations.wendys.com/.+/\w\w/.+/.+", "parse_sd")]
+    # Menu pages (kids-meals.html, breakfast-menu.html) and fr_ca copies repeat the store page's data
+    sitemap_rules = [(r"https://locations\.wendys\.com/(?!fr_ca/)(?!.*\.html).+/\w\w/.+/.+", "parse_sd")]
     drop_attributes = {"name", "image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):

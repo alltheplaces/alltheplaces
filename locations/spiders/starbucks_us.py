@@ -117,7 +117,7 @@ class StarbucksUSSpider(Spider):
         "Ingles ": {"brand": "Ingles", "brand_wikidata": "Q6032595"},
         "King Soopers ": {"brand": "King Soopers", "brand_wikidata": "Q6412065"},
         "Kroger ": {"brand": "Kroger", "brand_wikidata": "Q153417"},
-        "Safeway ": {"brand": "Safeway", "brand_wikidata": "Q17111901"},
+        "Safeway ": {"brand": "Safeway", "brand_wikidata": "Q1508234"},
         "Target ": {"brand": "Target", "brand_wikidata": "Q1046951"},
         "Albertsons ": {"brand": "Albertsons", "brand_wikidata": "Q2831861"},
         "Food City ": {"brand": "Food City"},
