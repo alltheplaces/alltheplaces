@@ -60,9 +60,8 @@ class KuronekoJPSpider(Spider):
                 item.set_tag("post_office:service_provider", "ヤマト運輸")
                 item.set_tag("post_office:brand", "ヤマト運輸")
                 item.set_tag("post_office:brand:wikidata", "Q6584353")
-                item.set_tag("post_office:parcel_from", "no")
+                item.set_tag("post_office:parcel_from", "yes")
                 item.set_tag("post_office:parcel_to", "yes")
-                item.set_tag("post_office:parcel_pickup", "yes")
 
             oh = OpeningHours()
             for day in DAYS_3_LETTERS:
