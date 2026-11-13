@@ -1,68 +1,55 @@
-import csv
-from io import StringIO
+import re
+from typing import Iterable
 
-from chompjs import parse_js_object
-from scrapy import Request, Spider
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.geo import country_iseadgg_centroids
 from locations.items import Feature
-
-MAX_ITEMS = 1640  # determined experimentally
-RADIUS_KM = 24
-MAP_ID = "smbcbank"  # for storefinder
+from locations.storefinders.area_marker import AreaMarkerSpider
 
 
-class SmbcJPSpider(Spider):
+class SmbcJPSpider(AreaMarkerSpider):
     name = "smbc_jp"
     item_attributes = {
         "brand": "三井住友銀行",
         "brand_wikidata": "Q2660418",
+        "name": "三井住友銀行",
+    }
+    corp_id = "smbc-demo"
+    referer = "https://www.areamarker.com/smbc-demo/top"
+    fields = {
+        "ref": "kyo_id",
+        "name": "name",
+        "lat": "lat_en",
+        "lon": "lon_en",
+        "addr": "addr_1",
+        "phone": "tel_1",
+        "col_1": "col_1",
+        "col_2": "col_2",
+        "col_3": "col_3",
+        "col_4": "col_4",
+        "col_7": "col_7",
+        "col_10": "col_10",
+        "col_16": "col_16",
     }
 
-    def make_request(self, lat, lon, offset=1, count=900):
-        radius_m = RADIUS_KM * 1000
-        return Request(
-            f"https://www.e-map.ne.jp/p/{MAP_ID}/zdcemaphttp.cgi?target=http%3A%2F%2F127.0.0.1%2Fcgi%2Fnkyoten.cgi%3F%26cid%3D{MAP_ID}%26pos%3D{offset}%26lat%3D{lat}%26lon%3D{lon}%26knsu%3D{MAX_ITEMS}%26cnt%3D{count}%26hour%3D1%26rad%3D{radius_m}&zdccnt=1",
-            cb_kwargs={"lat": lat, "lon": lon, "offset": offset},
-        )
+    def post_process_item(
+        self, item: Feature, response: TextResponse, store: dict, raw_record: dict, **kwargs
+    ) -> Iterable[Feature]:
+        item["name"] = None
+        branch = store["name"]
+        branch = re.sub(r"\s*【[^】]*】\s*$", "", branch)
+        branch = re.sub(r"\s*[（(][^）)]*[）)]\s*$", "", branch)
+        item["branch"] = branch.strip()
+        item["website"] = f"https://www.areamarker.com/smbc-demo/info/{store['ref']}"
 
-    async def start(self):
-        for lat, lon in country_iseadgg_centroids("JP", RADIUS_KM):
-            yield self.make_request(lat, lon)
+        if store["col_1"] == "1" or store["col_7"] == "1" or store["col_10"] == "1" or store["col_4"] == "1":
+            apply_category(Categories.BANK, item)
+        elif store["col_2"] == "1" or store["col_3"] == "1":
+            apply_category(Categories.ATM, item)
+        elif store["col_16"] == "1":
+            apply_category(Categories.ATM, item)
+        else:
+            apply_category(Categories.BANK, item)
 
-    def parse(self, response, lat, lon, offset):
-        # response is an EUC-encoded JS file that looks like
-        #   ZdcEmapHttpResult[1] = '...';
-        # where the string body is a TSV
-        js_body = response.body.decode("euc-jp")
-        # chompjs sees the array index as an array itself, so get just the string itself:
-        js_str = js_body[js_body.find("'") : js_body.rfind("'") + 1]
-        # For some reason, neither Python json nor chompjs like just the string on its own, so wrap it in an array
-        js_ls = f"[{js_str}]"
-        (tsv_str,) = parse_js_object(js_ls)
-        reader = csv.reader(StringIO(tsv_str), delimiter="\t")
-        ret_code, rec_count, hit_count = map(int, next(reader))
-        assert rec_count <= hit_count, (rec_count, hit_count)
-        if hit_count >= MAX_ITEMS:
-            self.logger.warning("Maximum number of items returned in one query, consider lowering the radius")
-        if rec_count >= hit_count:
-            yield self.make_request(lat, lon, offset + rec_count)
-        for row in reader:
-            item = Feature()
-            item["ref"] = row[0]
-            item["website"] = f"https://www.e-map.ne.jp/p/{MAP_ID}/dtl/{row[0]}/"
-            item["lat"] = row[1]
-            item["lon"] = row[2]
-            if row[3] == "5585":
-                apply_category(Categories.ATM, item)
-                item["name"] = row[6].removesuffix("出張所")
-            else:
-                apply_category(Categories.BANK, item)
-                item["branch"] = row[6]
-                item["extras"]["branch:ja-Hira"] = row[7]
-                item["extras"]["branch:en"] = row[17]
-
-            item["addr_full"] = row[10]
-
-            yield item
+        yield item
