@@ -1,7 +1,9 @@
 from scrapy import Spider
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_PL, OpeningHours
+from locations.items import set_closed, set_temporarily_closed
 
 
 class TmobilePLSpider(Spider):
@@ -17,8 +19,6 @@ class TmobilePLSpider(Spider):
             "Ul.": None,  # ulica (street) is omitted - OSM convention in Poland
         }
         for feature in response.json():
-            if feature["status"] != "Commercial - Production":
-                continue
             item = DictParser.parse(feature)
             item["lat"] = feature["coordinates"]["y"]
             item["lon"] = feature["coordinates"]["x"]
@@ -28,4 +28,11 @@ class TmobilePLSpider(Spider):
             item["opening_hours"].add_ranges_from_string(ranges_string=feature["hours"]["txt"], days=DAYS_PL)
             street_prefix = street_prefix_mapping.get(feature["address"]["street_prefix"], None)
             item["street"] = " ".join(filter(None, [street_prefix, feature["address"]["street"]]))
+
+            if feature["status"] == "Decommercialized":
+                set_closed(item)
+            elif "Planned":
+                set_temporarily_closed(item)
+
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
             yield item
