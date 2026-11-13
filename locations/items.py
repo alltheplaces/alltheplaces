@@ -216,6 +216,10 @@ def set_closed(item: Feature, end_date: datetime | None = None) -> None:
     item["extras"]["end_date"] = end_date.strftime("%Y-%m-%d") if end_date else "yes"
 
 
+def set_temporarily_closed(item: Feature) -> None:
+    item["opening_hours"] = "closed"
+
+
 def merge_items(language_dict: dict, main_language: str, matching_key: str = "ref") -> Iterable[Feature]:
     """
     Merge multiple items in different languages together. See starbucks_cn for example usage.
