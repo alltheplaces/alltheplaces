@@ -32,25 +32,23 @@ class JuicelandSpider(scrapy.Spider):
 
         properties = {
             "ref": response.url,
-            "name": response.xpath('normalize-space(//*[@itemprop="name"]//text())').extract_first(),
-            "street_address": response.xpath(
-                'normalize-space(//span[@itemprop="StreetAddress"]//text())'
-            ).extract_first(),
-            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())').extract_first(),
-            "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]//text())').extract_first(),
-            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').extract_first(),
+            "name": response.xpath('normalize-space(//*[@itemprop="name"]//text())').get(),
+            "street_address": response.xpath('normalize-space(//span[@itemprop="StreetAddress"]//text())').get(),
+            "city": response.xpath('normalize-space(//span[@itemprop="addressLocality"]//text())').get(),
+            "state": response.xpath('normalize-space(//span[@itemprop="addressRegion"]//text())').get(),
+            "postcode": response.xpath('normalize-space(//span[@itemprop="postalCode"]//text())').get(),
             "country": "US",
-            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]//text())').extract_first(),
+            "phone": response.xpath('normalize-space(//span[@itemprop="telephone"]//text())').get(),
             "website": response.url,
             "lat": lat,
             "lon": long,
         }
 
         properties["opening_hours"] = self.parse_hours(
-            response.xpath('//*[@itemprop="openingHours"]/@content').extract()
+            response.xpath('//*[@itemprop="openingHours"]/@content').getall()
         )
         yield Feature(**properties)
 
     def parse(self, response):
-        for url in response.xpath('//span[@class="store-info"]/a/@href').extract():
+        for url in response.xpath('//span[@class="store-info"]/a/@href').getall():
             yield scrapy.Request(response.urljoin(url), callback=self.parse_store)
