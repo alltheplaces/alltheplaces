@@ -18,7 +18,6 @@ class McdonaldsPHSpider(Spider):
     custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
     }
-    requires_proxy = True
 
     def parse(self, response: XmlResponse, **kwargs):
         for location in json.loads(response.xpath("//store-locator").attrib[":stores"]):
