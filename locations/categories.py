@@ -367,6 +367,7 @@ class Categories(Enum):
     DENTIST = {"amenity": "dentist"}
     DIALYSIS = {"healthcare": "dialysis"}
     DISASTER_HELP_POINT = {"emergency": "disaster_help_point"}
+    DOCTOR = {"amenity": "doctors"}
     DOCTOR_GP = {"amenity": "doctors", "healthcare:speciality": "community"}
     DRINKING_WATER = {"amenity": "drinking_water"}
     DOG_BOWL_FOUNTAIN = {"amenity": "drinking_water", "fountain": "dog_bowl"}
