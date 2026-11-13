@@ -14,7 +14,12 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Wendy's", "brand_wikidata": "Q550258"}
     wanted_types = ["FastFoodRestaurant"]
     sitemap_urls = ["https://locations.wendys.com/sitemap.xml"]
-    sitemap_rules = [(r"https://locations.wendys.com/.+/\w\w/.+/.+", "parse_sd")]
+    sitemap_rules = [
+        (
+            r"https://locations\.wendys\.com/(?:united-states|canada)/\w\w/[^/]+/(?!.*/(?:kids-meals|breakfast-menu)\.html).+",
+            "parse_sd",
+        )
+    ]
     drop_attributes = {"name", "image"}
 
     def post_process_item(self, item, response, ld_data, **kwargs):
@@ -23,7 +28,8 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
 
         # Opening hours for the drive-through seem to get included with regular hours, so clean that up
         opening_hours_divs = response.xpath('//div[@class="c-location-hours-details-wrapper js-location-hours"]')
-        item["opening_hours"] = self.clean_hours(opening_hours_divs[0])
+        if opening_hours_divs:
+            item["opening_hours"] = self.clean_hours(opening_hours_divs[0])
 
         if len(opening_hours_divs) > 1:
             item["extras"]["opening_hours:drive_through"] = self.clean_hours(opening_hours_divs[1]).as_opening_hours()
