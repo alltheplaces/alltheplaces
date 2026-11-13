@@ -1,4 +1,5 @@
 import re
+import unicodedata
 from typing import Any, Iterable
 from urllib.parse import quote
 
@@ -9,8 +10,8 @@ from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply
 from locations.hours import DAYS, DAYS_JP, OpeningHours
 from locations.items import Feature
 
-HOLIDAY_TOKENS_RE = re.compile("祝日|祭日|祝|、")
-HOURS_RE = re.compile(r"([月火水木金土日祝、\-]*)\s*(\d{1,2}:\d{2})-(\d{1,2}:\d{2})")
+IGNORED_DAY_TOKENS_RE = re.compile("祝日|祭日|祝|曜日|曜|、")
+HOURS_RE = re.compile(r"([月火水木金土日祝曜平、\-]*)\s*(\d{1,2}:\d{2})-(\d{1,2}:\d{2})")
 
 # 48 search areas exposed by the store finder: Hokkaido is split into two
 # halves ("01a"/"01b"), all other prefectures use their standard 2 digit code.
@@ -91,7 +92,7 @@ def expand_days(raw_day_part: str) -> list[str] | None:
     if raw_day_part == "":
         return list(DAYS)
 
-    stripped = HOLIDAY_TOKENS_RE.sub("", raw_day_part).strip()
+    stripped = IGNORED_DAY_TOKENS_RE.sub("", raw_day_part).strip()
 
     if "平日" in stripped:
         return ["Mo", "Tu", "We", "Th", "Fr"]
@@ -115,7 +116,7 @@ def expand_days(raw_day_part: str) -> list[str] | None:
 
 
 def parse_hours(hours_text: str) -> OpeningHours | None:
-    hours_text = hours_text.strip()
+    hours_text = unicodedata.normalize("NFKC", hours_text).strip()
     if not hours_text:
         return None
     if "24時間" in hours_text:
@@ -124,7 +125,7 @@ def parse_hours(hours_text: str) -> OpeningHours | None:
             oh.add_range(day, "00:00", "23:59")
         return oh
 
-    text = hours_text.replace("〜", "-").replace("～", "-").replace("~", "-")
+    text = re.sub(r"[〜~ー‐]", "-", hours_text)
     text = re.sub(r"(\d{1,2})時(\d{1,2})分", r"\1:\2", text)
     text = re.sub(r"(\d{1,2})時", r"\1:00", text)
 
@@ -167,7 +168,11 @@ class EneosJPSpider(scrapy.Spider):
         # redirects the request to error.php.
         municipalities = set(response.css(".searchWordNom li a::text").getall())
         for municipality in municipalities:
-            url = "https://eneos-ss.com/search/ss/pc/listken.php" f"?f_code={f_code}&f_addr2={quote(municipality)}&MAP="
+            # The list page only knows "01" for both Hokkaido halves.
+            url = (
+                "https://eneos-ss.com/search/ss/pc/listken.php"
+                f"?f_code={f_code[:2]}&f_addr2={quote(municipality)}&MAP="
+            )
             yield scrapy.Request(url, callback=self.parse_listken)
 
     def parse_listken(self, response: Response, **kwargs: Any) -> Iterable[scrapy.Request]:
