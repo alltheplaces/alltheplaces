@@ -17,6 +17,8 @@ class TmobilePLSpider(Spider):
             "Ul.": None,  # ulica (street) is omitted - OSM convention in Poland
         }
         for feature in response.json():
+            if feature["status"] != "Commercial - Production":
+                continue
             item = DictParser.parse(feature)
             item["lat"] = feature["coordinates"]["y"]
             item["lon"] = feature["coordinates"]["x"]
