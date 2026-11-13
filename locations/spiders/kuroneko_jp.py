@@ -16,12 +16,10 @@ class KuronekoJPSpider(Spider):
     skip_names = [
         "ツルハ",
         "福太郎",
-        "ドラッグイレブン",
+        "イレブン",
         "ウォンツ",
         "B＆D",
         "Ｂ＆D",
-        "セブンイレブン",
-        "セブン-イレブン",
     ]
 
     async def start(self):
