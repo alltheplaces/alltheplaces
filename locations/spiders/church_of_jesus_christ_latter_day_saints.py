@@ -21,28 +21,29 @@ Starting zoom=2 (continental tiles), recursing to zoom=12 for dense areas.
 Cluster threshold: when the API reports more than CLUSTER_THRESHOLD items
 in a tile, the tile is subdivided before individual markers are resolved.
 """
+
 from __future__ import annotations
 
-import json
-from typing import Generator, Any
+from typing import Any, Generator
 
 import scrapy
-from locations.items import Feature
+
 from locations.dict_parser import DictParser
+from locations.items import Feature
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
 API_BASE = "https://maps.churchofjesuschrist.org/api/maps-proxy/v2"
-CLUSTERS_URL  = f"{API_BASE}/locations/clusters"
-IDENTIFY_URL  = f"{API_BASE}/locations/identify"
+CLUSTERS_URL = f"{API_BASE}/locations/clusters"
+IDENTIFY_URL = f"{API_BASE}/locations/identify"
 LOCATIONS_URL = f"{API_BASE}/locations"
 
-WORLD_EXTENT    = "-180,-90,180,90"
-MIN_ZOOM        = 2
-MAX_ZOOM        = 12
-CLUSTER_THRESHOLD = 50   # subdivide if cluster count exceeds this
+WORLD_EXTENT = "-180,-90,180,90"
+MIN_ZOOM = 2
+MAX_ZOOM = 12
+CLUSTER_THRESHOLD = 50  # subdivide if cluster count exceeds this
 
 # 2026-11-12: API now requires Referer header; bare requests return HTTP 401.
 HEADERS = {
@@ -59,6 +60,7 @@ MANITBA_SAMPLE_ID = "5126835-01-01"
 # ---------------------------------------------------------------------------
 # Spider
 # ---------------------------------------------------------------------------
+
 
 class ChurchOfJesusChristLatterDaySaintsSpider(scrapy.Spider):
     name = "church_of_jesus_christ_latter_day_saints"
@@ -101,9 +103,7 @@ class ChurchOfJesusChristLatterDaySaintsSpider(scrapy.Spider):
             item_type = str(item.get("type", "")).upper()
             is_cluster = count > 1 or (not sub_items and item_type not in ("MARKER", "LOCATION"))
 
-            coords = item.get("coordinates") or (
-                item.get("geometry", {}).get("coordinates")
-            )
+            coords = item.get("coordinates") or (item.get("geometry", {}).get("coordinates"))
             if isinstance(coords, list) and len(coords) >= 2:
                 item_lng, item_lat = float(coords[0]), float(coords[1])
             else:
@@ -132,11 +132,7 @@ class ChurchOfJesusChristLatterDaySaintsSpider(scrapy.Spider):
 
             elif item_lng is not None and item_lat is not None:
                 # Individual marker — resolve via /identify
-                facility_id = (
-                    item.get("facilityId")
-                    or item.get("id")
-                    or item.get("facility_id_identifier")
-                )
+                facility_id = item.get("facilityId") or item.get("id") or item.get("facility_id_identifier")
                 yield scrapy.Request(
                     url=IDENTIFY_URL,
                     method="GET",
@@ -154,9 +150,7 @@ class ChurchOfJesusChristLatterDaySaintsSpider(scrapy.Spider):
     # Location detail
     # ------------------------------------------------------------------
 
-    def parse_identify(
-        self, response: scrapy.http.Response, facility_id: str | None
-    ) -> Generator[Feature, None, None]:
+    def parse_identify(self, response: scrapy.http.Response, facility_id: str | None) -> Generator[Feature, None, None]:
         data = response.json()
         # /identify returns list of nearest matches
         records = data if isinstance(data, list) else [data]
@@ -179,12 +173,8 @@ class ChurchOfJesusChristLatterDaySaintsSpider(scrapy.Spider):
         DictParser.parse(item, record)
 
         # Explicit overrides for LDS-specific field names
-        facility_id = (
-            record.get("facilityId")
-            or record.get("facility_id_identifier")
-            or record.get("id")
-        )
-        item["ref"]  = facility_id or item.get("ref", "")
+        facility_id = record.get("facilityId") or record.get("facility_id_identifier") or record.get("id")
+        item["ref"] = facility_id or item.get("ref", "")
         item["name"] = (
             record.get("name")
             or record.get("displayName")
@@ -203,19 +193,19 @@ class ChurchOfJesusChristLatterDaySaintsSpider(scrapy.Spider):
             item["lat"] = float(lat)
             item["lon"] = float(lng)
         else:
-            return None   # coordinates required
+            return None  # coordinates required
 
         # Address
-        item["addr_full"]   = record.get("formattedAddress") or record.get("formatted_address") or ""
-        item["street"]      = record.get("streetAddress") or record.get("street_1") or ""
-        item["city"]        = record.get("city", "")
-        item["state"]       = record.get("state") or record.get("stateCode") or record.get("state_code") or ""
-        item["postcode"]    = record.get("postalCode") or record.get("zip") or record.get("postal_code") or ""
-        item["country"]     = record.get("country") or record.get("countryCode") or record.get("country_code_2") or ""
-        item["county"]      = record.get("county", "")
+        item["addr_full"] = record.get("formattedAddress") or record.get("formatted_address") or ""
+        item["street"] = record.get("streetAddress") or record.get("street_1") or ""
+        item["city"] = record.get("city", "")
+        item["state"] = record.get("state") or record.get("stateCode") or record.get("state_code") or ""
+        item["postcode"] = record.get("postalCode") or record.get("zip") or record.get("postal_code") or ""
+        item["country"] = record.get("country") or record.get("countryCode") or record.get("country_code_2") or ""
+        item["county"] = record.get("county", "")
 
         # Phone / website
-        item["phone"]   = record.get("phone", "")
+        item["phone"] = record.get("phone", "")
         item["website"] = record.get("website") or "https://www.churchofjesuschrist.org/"
 
         # Google Place ID — preserved for Moroni category monitoring
@@ -228,13 +218,13 @@ class ChurchOfJesusChristLatterDaySaintsSpider(scrapy.Spider):
         if record.get("structureId") or record.get("structure_id"):
             extras["ref:lds:structure_id"] = record.get("structureId") or record.get("structure_id")
         if record.get("propertyId") or record.get("property_id"):
-            extras["ref:lds:property_id"]  = record.get("propertyId") or record.get("property_id")
+            extras["ref:lds:property_id"] = record.get("propertyId") or record.get("property_id")
         item["extras"] = extras
 
         # Brand / category
-        item["brand"]          = "The Church of Jesus Christ of Latter-day Saints"
+        item["brand"] = "The Church of Jesus Christ of Latter-day Saints"
         item["brand_wikidata"] = "Q42504"
-        item["nsi_id"]         = "thechurchofjesuschristoflatterdaysaints-155571"
+        item["nsi_id"] = "thechurchofjesuschristoflatterdaysaints-155571"
 
         return item
 
