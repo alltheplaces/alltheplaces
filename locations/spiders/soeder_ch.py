@@ -1,6 +1,6 @@
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from locations.categories import Categories, Extras, apply_category
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.storefinders.storemapper import StoremapperSpider
 
