@@ -17,6 +17,8 @@ class CrackerBarrelUSSpider(SitemapSpider, JSONBlobSpider):
     allowed_domains = ["crackerbarrel.com"]
     sitemap_urls = ["https://www.crackerbarrel.com/sitemap-locations.xml"]
     sitemap_rules = [(r"/locations/states/\w{2}/[-\w]+/\d+$", "parse")]
+    custom_settings = {"CONCURRENT_REQUESTS": 1}
+    requires_proxy = True  # Avoid Vercel security checkpoint
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         return [
