@@ -1,54 +1,30 @@
-from typing import Any, AsyncIterator
-
-from scrapy import Spider
-from scrapy.http import Request, Response
+from typing import Iterable
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.storefinders.location_cloud import LocationCloudSpider
 
 
-class AeonBankJPSpider(Spider):
+class AeonBankJPSpider(LocationCloudSpider):
     name = "aeon_bank_jp"
+    item_attributes = {
+        "brand": "イオン銀行",
+        "brand_wikidata": "Q11286327",
+        "name": "イオン銀行",
+    }
+    api_endpoint = "https://map.aeonbank.co.jp/aeonbank/api/proxy2/shop/list"
+    website_formatter = "https://map.aeonbank.co.jp/aeonbank/spot/detail?code={}"
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield self.get_page(0)
+    def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
+        if source_feature.get("categories") and source_feature["categories"][0]["code"] == "10":
+            item["brand"] = "みずほ銀行"
+            item["brand_wikidata"] = "Q2882956"
+            item["name"] = "みずほ銀行"
 
-    def get_page(self, n):
-        return Request(
-            f"https://map.aeonbank.co.jp/aeonbank/api/proxy2/shop/list?datum=wgs84&limit=500&offset={n}",
-            meta={"offset": n},
-        )
+        item["branch"] = source_feature["name"].removesuffix("出張所")
+        if ruby := source_feature.get("ruby"):
+            item["extras"]["branch:ja-Hira"] = ruby
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = response.json()
-        stores = data["items"]
+        apply_category(Categories.ATM, item)
 
-        for store in stores:
-            item = DictParser.parse(store)
-            try:
-                match store["categories"][0]["code"]:
-                    case "10":
-                        item["name"] = "みずほ銀行"
-                        item.update({"brand_wikidata": "Q2882956"})
-                    case _:
-                        item["name"] = "イオン銀行"
-                        item.update({"brand_wikidata": "Q11286327"})
-            except:
-                item["name"] = "イオン銀行"
-                item.update({"brand_wikidata": "Q11286327"})
-
-            item["branch"] = store["name"].removesuffix("出張所")
-            item["ref"] = store["code"]
-            item["lat"] = store["coord"]["lat"]
-            item["lon"] = store["coord"]["lon"]
-            item["extras"]["branch:ja-Hira"] = store.get("ruby")
-            item["addr_full"] = store["address_name"]
-            item["postcode"] = store.get("postal_code")
-            item["website"] = f"https://map.aeonbank.co.jp/aeonbank/spot/detail?code={store['code']}"
-
-            apply_category(Categories.ATM, item)
-
-            yield item
-
-        if data["count"]["limit"] == len(data["items"]):
-            yield self.get_page(data["count"]["limit"] + response.meta["offset"])
+        yield item
