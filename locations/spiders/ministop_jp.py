@@ -78,8 +78,6 @@ class MinistopJPSpider(CanlySpider):
                         has_wifi = True
                     elif text in ("コピー", "マルチコピー（シャープ）"):
                         apply_yes_no(Extras.COPYING, item, True)
-                    elif text == "EV充電器":
-                        apply_yes_no("amenity:charging_station", item, True)
                     elif text == "Tax-free Shop":
                         apply_yes_no(Extras.DUTY_FREE, item, True)
                 if has_wifi:
