@@ -23,7 +23,7 @@ class CuttersSpider(JSONBlobSpider):
             return
 
         item["branch"] = item.pop("name")
-        item["extras"]["start_date"] = salon["openingDate"]
+        item["extras"]["start_date"] = salon["openingDate"][:10]
 
         if relativeLocation := salon.get("relativeLocation"):
             item["extras"]["description"] = relativeLocation
