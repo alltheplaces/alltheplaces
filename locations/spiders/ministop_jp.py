@@ -5,13 +5,12 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
+from locations.storefinders.canly import CanlySpider
 
 
-class MinistopJPSpider(JSONBlobSpider):
+class MinistopJPSpider(CanlySpider):
     name = "ministop_jp"
-    start_urls = ["https://api.site.can-ly.com/v2/directories/94/shops/search"]
-    locations_key = "shops"
+    api_endpoint = "https://api.site.can-ly.com/v2/directories/94/shops/search"
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         if feature["openStatus"] != "IS_ALREADY_OPEN":
