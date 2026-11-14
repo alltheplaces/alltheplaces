@@ -1,8 +1,8 @@
 import re
-from urllib.parse import urlparse
 
 import scrapy
 from scrapy.spiders import SitemapSpider
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
@@ -53,7 +53,7 @@ class LegolandDiscoveryCentreSpider(SitemapSpider, StructuredDataSpider):
                     obj[key] = obj[key].strip().rstrip("°")
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        host = urlparse(response.url).netloc.removeprefix("www.")
+        host = urlparse_cached(response).netloc.removeprefix("www.")
         if host == "legolanddiscoverycentre.com" and "/hong-kong/" in response.url:
             item["brand"] = "樂高探索中心 LEGOLAND Discovery Centre"
         else:
