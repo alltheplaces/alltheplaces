@@ -27,6 +27,6 @@ class SaversCAUSSpider(RioSeoSpider):
 
         if location["openingDate"].count("/") == 2:
             m, d, y = map(int, location["openingDate"].split("/"))
-            feature["extras"]["start_date"] = f"{y}.{m:02}.{d:02}"
+            feature["extras"]["start_date"] = f"{y}-{m:02}-{d:02}"
 
         yield feature

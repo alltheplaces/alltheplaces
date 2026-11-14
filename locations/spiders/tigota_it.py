@@ -28,7 +28,7 @@ class TigotaITSpider(Spider):
             item["street_address"] = item.pop("addr_full", None)
             item["addr_full"] = location.get("marketing_address")
             item["website"] = "https://www.tigota.it/negozi/{}".format(item["ref"])
-            item["extras"]["start_date"] = location["opening_date"]
+            item["extras"]["start_date"] = location["opening_date"][:10]
 
             item["opening_hours"] = OpeningHours()
             for rule in location.get("weekly_opening_hours", []):
