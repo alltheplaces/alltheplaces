@@ -3,7 +3,6 @@ from typing import Iterable
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Sells, apply_category, apply_yes_no
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.canly import CanlySpider
 
