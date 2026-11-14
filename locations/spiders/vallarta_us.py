@@ -14,19 +14,19 @@ class VallartaUSSpider(SitemapSpider):
     def parse_store(self, response):
         # No lat/lon in source code; Google map link contains address
         item = Feature()
-        address = response.xpath("//div[@class='blade store-location']/div/div/div[2]/p[1]/text()").extract()
+        address = response.xpath("//div[@class='blade store-location']/div/div/div[2]/p[1]/text()").getall()
 
         item["ref"] = item["website"] = response.url
-        item["name"] = response.xpath("//div[@class='page-breadcrumb']/span/text()").extract_first()
+        item["name"] = response.xpath("//div[@class='page-breadcrumb']/span/text()").get()
         item["street_address"] = address[1].strip()
         item["city"] = address[2].split(",")[0].strip()
         item["state"] = address[2].split(" ")[-2].strip()
         item["postcode"] = address[2].split(" ")[-1].strip()
-        if phone := response.xpath("//a[@class='tel']/text()").extract_first():
+        if phone := response.xpath("//a[@class='tel']/text()").get():
             item["phone"] = phone.strip()
         try:
-            if days := response.xpath("//div[contains(@class, 'days')]/text()").extract_first():
-                if hours := response.xpath("//div[contains(@class, 'hours')]//p/text()").extract_first():
+            if days := response.xpath("//div[contains(@class, 'days')]/text()").get():
+                if hours := response.xpath("//div[contains(@class, 'hours')]//p/text()").get():
                     item["opening_hours"] = self.parse_hours(days.strip(), hours.strip())
         except Exception as e:
             self.logger.error(f"Failed to parse hours for {item['name']}, {e}")
