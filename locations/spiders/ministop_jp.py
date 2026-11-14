@@ -36,6 +36,7 @@ class MinistopJPSpider(CanlySpider):
 
         item["ref"] = str(feature["storeCode"])
         item["extras"]["alt_ref"] = str(feature["storeId"])
+        item["website"] = f"https://map.ministop.co.jp/detail/{feature['storeCode']}/"
         item.pop("name", None)
 
         item["opening_hours"] = OpeningHours()
