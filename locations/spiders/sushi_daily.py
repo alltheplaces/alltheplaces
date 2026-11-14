@@ -7,6 +7,22 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import set_closed
 
+DELIVERY_AND_TEST_GROUPS = {
+    "Deliveroo",
+    "Just Eat",
+    "Rappi",
+    "Test",
+    "Uber Eats",
+    "Uber Eats France",
+    "Uber Eats United Kingdom",
+}
+LOCATED_IN = {
+    "Albert Heijn BIS": "Albert Heijn",
+    "Finiper": "Iper",
+    "HIT Handelsgruppe": "HIT",
+    "Rewe Group": "REWE",
+}
+
 
 class SushiDailySpider(scrapy.Spider):
     name = "sushi_daily"
@@ -24,11 +40,7 @@ class SushiDailySpider(scrapy.Spider):
             "gpsLatitude": "lat",
         }
         for shop in locations:
-            if (
-                shop["name"].startswith("DELIVEROO - ")
-                or shop["name"].startswith("UBER EATS - ")
-                or shop["name"].startswith("JUST EAT - ")
-            ):
+            if shop["distributorGroup"] in DELIVERY_AND_TEST_GROUPS:
                 continue
 
             for old, new in RENAME.items():
@@ -42,7 +54,7 @@ class SushiDailySpider(scrapy.Spider):
             if shop["closed"] is True:
                 set_closed(item)
 
-            item["located_in"] = shop["distributorGroup"]
+            item["located_in"] = LOCATED_IN.get(shop["distributorGroup"], shop["distributorGroup"])
             item["extras"]["kioskType"] = str(shop["kioskType"])
 
             apply_category(Categories.FAST_FOOD, item)
