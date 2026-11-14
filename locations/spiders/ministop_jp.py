@@ -2,7 +2,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.categories import Categories, Extras, Sells, apply_category, apply_yes_no
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.storefinders.canly import CanlySpider
@@ -34,16 +34,8 @@ class MinistopJPSpider(CanlySpider):
         else:
             self.logger.warning("Unknown brand name as prefix to location name: {}".format(feature["nameKanji"]))
 
-        item["ref"] = str(feature["storeCode"])
-        item["extras"]["alt_ref"] = str(feature["storeId"])
         item["website"] = f"https://map.ministop.co.jp/detail/{feature['storeCode']}/"
         item.pop("name", None)
-
-        item["opening_hours"] = OpeningHours()
-        for day_hours in feature["businessHours"]:
-            item["opening_hours"].add_range(
-                day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S"
-            )
 
         yield item
 
@@ -61,13 +53,12 @@ class MinistopJPSpider(CanlySpider):
                     if product.get("checked"):
                         text = product.get("text")
                         if text == "お酒":  # Alcohol
-                            apply_yes_no("sells:alcohol", item, True)
+                            apply_yes_no(Sells.ALCOHOL, item, True)
                         elif text == "たばこ":  # Tobacco
-                            apply_yes_no("sells:tobacco", item, True)
+                            apply_yes_no(Sells.TOBACCO, item, True)
 
-            # Services: ATM, WiFi, copying, car charging, tax-free
+            # Services: ATM, WiFi, copying, tax-free
             elif keyword == "service":
-                has_wifi = False
                 for service in content.get("checkBoxComposite", {}).get("items", []):
                     if not service.get("checked"):
                         continue
@@ -75,13 +66,11 @@ class MinistopJPSpider(CanlySpider):
                     if text == "ATM":
                         apply_yes_no(Extras.ATM, item, True)
                     elif text in ("ciscaWiFi", "ソフトバンクWiFi"):
-                        has_wifi = True
+                        apply_yes_no(Extras.WIFI, item, True)
                     elif text in ("コピー", "マルチコピー（シャープ）"):
                         apply_yes_no(Extras.COPYING, item, True)
                     elif text == "Tax-free Shop":
                         apply_yes_no(Extras.DUTY_FREE, item, True)
-                if has_wifi:
-                    apply_yes_no(Extras.WIFI, item, True)
 
             # Delivery: Uber Eats, 出前館
             elif keyword == "delivery":
