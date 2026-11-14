@@ -23,7 +23,7 @@ See [`docs/PIPELINES.md`](docs/PIPELINES.md). Spiders emit raw values and the pi
 - Pick the simplest base class: `JSONBlobSpider`, `StructuredDataSpider` (+ `SitemapSpider`/`CrawlSpider`),
   or a class in `locations/storefinders/` if the site runs a known locator platform.
 - `DictParser.parse(obj)` instead of copying fields one at a time. Set `name_is_branch = True` on
-  `JSONBlobSpider`/`StructuredDataSpider` instead of `item["branch"] = item.pop("name")`.
+  any spider instead of `item["branch"] = item.pop("name")`.
 - Subclassing a `locations/storefinders/` class: read its `parse()` first and don't re-set what it or `DictParser` already
   fills in (`ref`, `phone`, `postcode`, `website`). In `post_process_feature` only add what is brand-specific.
 - Categories: `apply_category(Categories.X, item)`. Never write `item["extras"]["shop"]` or
