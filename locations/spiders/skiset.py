@@ -5,31 +5,23 @@ from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class SkisetSpider(SitemapSpider, StructuredDataSpider):
+class SkisetSpider(SitemapSpider):
     name = "skiset"
     item_attributes = {"brand": "Skiset", "brand_wikidata": "Q48747223"}
     sitemap_urls = ["https://www.skiset.com/sitemap.xml"]
-    sitemap_rules = [(r"https://www\.skiset\.com/.*/magasins/.*", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
-    drop_attributes = {"image", "facebook", "phone"}
+    sitemap_rules = [(r"https://www\.skiset\.com/.*/magasins/.*", "parse")]
 
-    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+    def parse(self, response: TextResponse) -> Iterable[Feature]:
+        start = response.text.index("window.appConfig=") + len("window.appConfig=")
+        shop = json.JSONDecoder().raw_decode(response.text[start:])[0]["shop"]["map"]
+        if shop is None:  # a few shop pages have no address or map
+            return
+        item = DictParser.parse(shop)
         item["branch"] = item.pop("name").removeprefix("Skiset ")
-
-        if (idx := response.text.find("window.appConfig=")) != -1:
-            start = idx + len("window.appConfig=")
-            try:
-                config, _ = json.JSONDecoder().raw_decode(response.text[start:])
-                geo = config.get("shop", {}).get("map", {})
-                if geo.get("lat") is not None and geo.get("lng") is not None:
-                    item["lat"] = geo["lat"]
-                    item["lon"] = geo["lng"]
-            except (json.JSONDecodeError, AttributeError):
-                pass
-
+        item["website"] = response.url
         apply_category(Categories.SHOP_SPORTS, item)
         yield item
