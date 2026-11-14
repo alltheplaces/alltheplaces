@@ -17,9 +17,7 @@ class AeonBankJPSpider(LocationCloudSpider):
 
     def post_process_feature(self, item: Feature, source_feature: dict, **kwargs) -> Iterable[Feature]:
         if source_feature.get("categories") and source_feature["categories"][0]["code"] == "10":
-            item["brand"] = "みずほ銀行"
-            item["brand_wikidata"] = "Q2882956"
-            item["name"] = "みずほ銀行"
+            return
 
         item["branch"] = source_feature["name"].removesuffix("出張所")
         if ruby := source_feature.get("ruby"):
