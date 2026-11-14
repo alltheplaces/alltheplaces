@@ -1,11 +1,12 @@
 import html
 import json
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 from locations.user_agents import BROWSER_DEFAULT
@@ -158,7 +159,20 @@ class SherwinWilliamsSpider(Spider):
                     "phone": store["phone"].strip(),
                     "lat": float(store["latitude"]),
                     "lon": float(store["longitude"]),
-                    "website": "https://www.sherwin-williams.com" + store["url"],
+                    "website": "https://www.sherwin-williams.com"
+                    + store["url"].removeprefix("/webapp/wcs/stores/servlet"),
                 }
 
-                yield Feature(**properties)
+                yield Request(
+                    url=properties["website"],
+                    cb_kwargs={"item": Feature(**properties)},
+                    callback=self.parse_store,
+                )
+
+    def parse_store(self, response: Response, item: Feature, **kwargs: Any) -> Any:
+        if ld := response.xpath('//script[@class="cmp-storedetailhero-storeschema"]/text()').get():
+            ld_data = json.loads(ld)
+            item["email"] = ld_data.get("email")
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(" ".join(ld_data.get("openingHours", [])))
+        yield item
