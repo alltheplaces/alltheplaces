@@ -13,6 +13,7 @@ class NozFRSpider(SitemapSpider, StructuredDataSpider):
     drop_attributes = ["facebook"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
+        item["ref"] = response.url
         item["branch"] = item.pop("name", "").removeprefix("NOZ ")
         apply_category(Categories.SHOP_VARIETY_STORE, item)
 
