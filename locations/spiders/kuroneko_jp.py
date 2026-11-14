@@ -42,6 +42,8 @@ class KuronekoJPSpider(Spider):
             item["lon"] = store["wgs_lon"]
             item["addr_full"] = store["shop_addr"]
             item["website"] = f"https://locations2.kuronekoyamato.co.jp/yamato01/Detail?id={store['kyoten_id']}"
+            item.set_tag("post_office:parcel_from", "yes")
+            item.set_tag("post_office:parcel_to", "yes")
 
             if store["shop_type_cd"] == "1":
                 branch = re.sub(r"\s*[（(][^）)]*[）)]\s*$", "", store["shop_nm"])
@@ -49,8 +51,6 @@ class KuronekoJPSpider(Spider):
                 item["branch"] = branch
                 item["name"] = item["brand"] = "ヤマト運輸"
                 item["brand_wikidata"] = "Q6584353"
-                item.set_tag("post_office:parcel_from", "yes")
-                item.set_tag("post_office:parcel_to", "yes")
                 item.set_tag("post_office:parcel_pickup", "yes")
 
             else:
@@ -60,8 +60,6 @@ class KuronekoJPSpider(Spider):
                 item.set_tag("post_office:service_provider", "ヤマト運輸")
                 item.set_tag("post_office:brand", "ヤマト運輸")
                 item.set_tag("post_office:brand:wikidata", "Q6584353")
-                item.set_tag("post_office:parcel_from", "yes")
-                item.set_tag("post_office:parcel_to", "yes")
 
             oh = OpeningHours()
             for day in DAYS_3_LETTERS:
