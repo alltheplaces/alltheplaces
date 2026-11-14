@@ -1,62 +1,100 @@
-from pyproj import Transformer
+import re
+
+from scrapy import Request, Spider
 
 from locations.categories import Categories, apply_category
+from locations.geo import country_iseadgg_centroids
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
-from locations.storefinders.emap import EMapSpider
+from locations.lang_utils import katakana_to_hiragana
 
 
-class KuronekoJPSpider(EMapSpider):
+class KuronekoJPSpider(Spider):
     name = "kuroneko_jp"
-    map_id = "yamato01"
+    allowed_domains = ["locations2.kuronekoyamato.co.jp"]
 
-    def make_request(self, lat, lon, radius, offset=1, count=900):
-        return super().make_request(
-            lat,
-            lon,
-            radius,
-            offset,
-            count,
-            extra_params={
-                "jkn": "(COL_01:1 OR COL_01:2 AND ((COL_39!:002 AND COL_39!:001 AND COL_39!:003 AND COL_39!:418 AND "
-                "COL_39!:436 AND COL_39!:101 AND COL_39!:171 AND COL_39!:207 AND COL_39!:Z98 AND COL_39!:Z99 "
-                "AND COL_39!:563) OR (COL_39 IS NULL))) AND (((COL_01:1 AND (COL_10:A OR COL_10:B)) OR "
-                "COL_01:2) AND ((COL_39!:Z96 AND COL_39!:Z97 AND COL_39!:003 AND COL_39!:207 AND COL_39!:Z98 "
-                "AND COL_39!:Z99) OR COL_39:@@NULL@@))"
-            },
-        )
+    skip_names = [
+        "ツルハ",
+        "福太郎",
+        "イレブン",
+        "ウォンツ",
+        "B＆D",
+        "Ｂ＆D",
+    ]
 
     async def start(self):
-        self.transformer = Transformer.from_pipeline("EPSG:15484")
-        async for req in super().start():
-            yield req
+        for lat, lon in country_iseadgg_centroids("JP", 24):
+            yield Request(
+                "https://locations2.kuronekoyamato.co.jp/api/v1/stores/nearsearch"
+                f"?site=yamato01&lat={lat}&lon={lon}&search_range=24&disp_cnt=5000&store_yamato=1&store_other=1",
+                callback=self.parse,
+            )
 
-    def parse_row(self, row):
-        if any(
-            i in row[6] for i in ["ツルハ", "福太郎", "イレブン", "ウォンツ", "B＆D", "Ｂ＆D"]
-        ):  # skip Tsuruha Drug locations
-            return
-        item = Feature()
-        item["ref"] = row[0]
-        item["website"] = f"https://www.e-map.ne.jp/p/{self.map_id}/dtl/{row[0]}/"
-        lat = float(row[1])
-        lon = float(row[2])
-        item["lat"], item["lon"] = self.transformer.transform(lat, lon)
-        if row[3] == "YTC":
-            apply_category(Categories.POST_OFFICE, item)
-            item["branch"] = row[6]
-            item["name"] = item["brand"] = "ヤマト運輸"
-            item["brand_wikidata"] = "Q6584353"
-        else:
-            item["name"] = row[6]
-            apply_category(Categories.GENERIC_POI, item)
-            item.set_tag("post_office", "post_partner")
-            item.set_tag("post_office:service_provider", "ヤマト運輸")
+    def parse(self, response):
+        data = response.json()
+        for store in data["store_datasets"]:
+            if any(token in store["shop_nm"] for token in self.skip_names):
+                continue
 
-        item["addr_full"] = row[7]
-        item["phone"] = row[16]
+            item = Feature()
+            item["ref"] = store["kyoten_id"]
+            item["lat"] = store["wgs_lat"]
+            item["lon"] = store["wgs_lon"]
+            item["addr_full"] = store["shop_addr"]
+            item["website"] = f"https://locations2.kuronekoyamato.co.jp/yamato01/Detail?id={store['kyoten_id']}"
+            item.set_tag("post_office:parcel_from", "yes")
+            item.set_tag("post_office:parcel_to", "yes")
 
-        # row 35-42 =1 is days the place is closed. 35-41 is Mon-Sun, 42 is holidays. row 43 =1 means open every day.
-        if row[44] == "1":
-            item["opening_hours"] = "24/7"
+            if store["shop_type_cd"] == "1":
+                branch = re.sub(r"\s*[（(][^）)]*[）)]\s*$", "", store["shop_nm"])
+                apply_category(Categories.POST_OFFICE, item)
+                item["branch"] = branch
+                item["name"] = item["brand"] = "ヤマト運輸"
+                item["brand_wikidata"] = "Q6584353"
+                item.set_tag("post_office:parcel_pickup", "yes")
 
+            else:
+                item["name"] = store["shop_nm"]
+                apply_category(Categories.GENERIC_POI, item)
+                item.set_tag("post_office", "post_partner")
+                item.set_tag("post_office:service_provider", "ヤマト運輸")
+                item.set_tag("post_office:brand", "ヤマト運輸")
+                item.set_tag("post_office:brand:wikidata", "Q6584353")
+
+            oh = OpeningHours()
+            for day in DAYS_3_LETTERS:
+                prefix = day.lower()
+                if store[f"{prefix}_cl_flg"] == "1":
+                    oh.set_closed(day)
+                    continue
+                op = store[f"{prefix}_op_tm"]
+                cl = store[f"{prefix}_cl_tm"]
+                if op and cl:
+                    oh.add_range(
+                        day,
+                        f"{op[:2]}:{op[2:]}",
+                        f"{cl[:2]}:{cl[2:]}",
+                    )
+            item["opening_hours"] = oh
+
+            detail_url = "https://locations2.kuronekoyamato.co.jp/api/v1/stores/" f"{store['kyoten_id']}?site=yamato01"
+            yield Request(detail_url, callback=self.parse_detail, cb_kwargs={"item": item})
+
+    def parse_detail(self, response, item):
+        detail = response.json()
+        item["postcode"] = detail.get("zip_num")
+        if detail.get("tel_num"):
+            item["phone"] = detail["tel_num"]
+        if detail.get("parking_flg") == "1":
+            item.set_tag("parking", "yes")
+            if detail.get("parking_cap") is not None:
+                item.set_tag("parking:capacity:standard", detail["parking_cap"])
+        kn = detail.get("shop_kn_nm")
+        if kn:
+            cleaned = re.sub(r"\s*[（(][^）)]*[）)]\s*$", "", kn)
+            hira = katakana_to_hiragana(cleaned)
+            if "branch" in item:
+                item.set_tag("branch:ja-Hira", hira)
+            else:
+                item.set_tag("name:ja-Hira", hira)
         yield item
