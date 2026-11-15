@@ -47,9 +47,6 @@ class CourirSpider(SitemapSpider):
             if m.group(1):
                 item["name"] = "Courir Outlet"
         item["street_address"] = merge_address_lines([store.get("address1"), store.get("address2")])
-        # The source tags the Monaco store as FR.
-        if item.get("country") == "FR" and (item.get("postcode") or "").startswith("980"):
-            item["country"] = "MC"
         if item.get("country") == "ES":
             item["website"] = f"https://www.courir.es/es/tienda?StoreID={item['ref']}"
         else:
