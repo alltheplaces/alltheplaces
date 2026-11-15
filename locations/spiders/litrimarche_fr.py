@@ -18,4 +18,6 @@ class LitrimarcheFRSpider(SitemapSpider, StructuredDataSpider):
         # Stores without a photo fall back to the brand logo.
         if "logo-litrimarche" in item["image"]:
             item["image"] = None
+        if item.get("facebook") == "https://www.facebook.com/":
+            item["facebook"] = None
         yield item
