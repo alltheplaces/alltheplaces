@@ -1,3 +1,4 @@
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
@@ -17,6 +18,10 @@ class GreystarSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["LodgingBusiness"]
     search_for_facebook = False
     search_for_twitter = False
+
+    def _get_sitemap_body(self, response: Response) -> bytes:
+        # The sitemap has no <urlset> root element
+        return b"<urlset>" + response.body + b"</urlset>"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["lat"] = ld_data["latitude"]
