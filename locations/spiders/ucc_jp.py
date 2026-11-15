@@ -62,11 +62,13 @@ class UccJPSpider(LocationCloudSpider):
             for flag in col.get("columns", {}).get("flag", []):
                 flags[flag["label"]] = flag["value"] == "true"
 
-        # Brewing methods (ペーパードリップ/ネルドリップ → filter coffee; エスプレッソ → espresso)
+        # Brewing methods (ペーパードリップ/ネルドリップ → filter coffee; エスプレッソ → espresso; コールドブリュー → cold brew)
         if flags.get("ペーパードリップ") or flags.get("ネルドリップ"):
             apply_yes_no("drink:filter_coffee", item, True)
         if flags.get("エスプレッソ"):
             apply_yes_no("drink:espresso", item, True)
+        if flags.get("コールドブリュー"):
+            apply_yes_no("drink:cold_brew", item, True)
 
         # Facilities
         if flags.get("全席禁煙"):
