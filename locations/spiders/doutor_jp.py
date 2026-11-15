@@ -2,6 +2,7 @@ import json
 from typing import Iterable
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.hours import DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
 from locations.storefinders.location_cloud import LocationCloudSpider
 
@@ -54,6 +55,24 @@ class DoutorJPSpider(LocationCloudSpider):
     def parse_detail_page(self, response, item: Feature, source_feature: dict) -> Iterable[Feature]:
         start = response.text.index("spotDetail = ") + len("spotDetail = ")
         detail = json.JSONDecoder().raw_decode(response.text, start)[0]
+
+        hours_col = next((c for c in detail["detailColumns"] if c.get("code") == "00001"), None)
+        if hours_col:
+            hours = {
+                t["label"]: t["value"] for t in hours_col.get("columns", {}).get("text", []) if "備考" not in t["label"]
+            }
+            oh = OpeningHours()
+            if weekday := hours.get("平日営業時間"):
+                open_time, close_time = weekday.split("-")
+                oh.add_days_range(DAYS_WEEKDAY, open_time, close_time)
+            if saturday := hours.get("土曜営業時間"):
+                open_time, close_time = saturday.split("-")
+                oh.add_range("Sa", open_time, close_time)
+            if sunday := hours.get("日祝営業時間"):
+                open_time, close_time = sunday.split("-")
+                oh.add_range("Su", open_time, close_time)
+            item["opening_hours"] = oh
+
         flags = {flag["label"]: flag["value"] == "true" for flag in detail["flags"].values()}
 
         apply_yes_no(Extras.WIFI, item, flags["FREE Wi-Fi"])
