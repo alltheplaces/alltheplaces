@@ -11,6 +11,17 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
+LOCALES = {
+    "Belgium": "fr-be",
+    "Germany": "de-de",
+    "Italy": "it-it",
+    "Netherlands": "en-nl",
+    "Spain": "es-es",
+    "Switzerland": "fr-ch",
+    "United Kingdom": "en-gb",
+    "United States": "en-us",
+}
+
 
 class JimmyFairlySpider(JSONBlobSpider, PlaywrightSpider):
     name = "jimmy_fairly"
@@ -44,7 +55,12 @@ class JimmyFairlySpider(JSONBlobSpider, PlaywrightSpider):
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", "").removeprefix("Jimmy Fairly - ")
         if location.get("url") is not None:
-            item["website"] = "https://www.jimmyfairly.com" + location["url"]
+            slug = location["url"].rsplit("/", 1)[1]
+            locale = LOCALES.get(location["country"].strip())
+            item["website"] = f"https://www.jimmyfairly.com{'/' + locale if locale else ''}/pages/stores/{slug}"
+            if locale == "fr-be":
+                item["extras"]["website:fr"] = item["website"]
+                item["extras"]["website:nl"] = f"https://www.jimmyfairly.com/nl-be/pages/stores/{slug}"
 
         if location.get("opening_hours") is not None:
             try:
