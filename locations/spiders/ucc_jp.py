@@ -5,6 +5,7 @@ from typing import Iterable
 from locations.categories import Categories, Extras, PaymentMethods, Sells, apply_category, apply_yes_no
 from locations.hours import DAYS_JP, DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours, day_range
 from locations.items import Feature
+from locations.lang_utils import katakana_to_hiragana
 from locations.storefinders.location_cloud import LocationCloudSpider
 
 # delivery partners: (display name, Wikidata QID or None)
@@ -34,19 +35,19 @@ class UccJPSpider(LocationCloudSpider):
                 item["brand_wikidata"] = "Q96152143"
                 item["branch"] = source_feature["name"].removeprefix("上島珈琲店　")
                 if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby.removeprefix("UESHIMA COFFEE ")
+                    item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(ruby.removeprefix("UESHIMA COFFEE "))
                 apply_category(Categories.COFFEE_SHOP, item)
             case "04" | "05" | "08" | "09" | "16":
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["branch"] = source_feature.get("name")
                 if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby
+                    item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(ruby)
                 apply_category(Categories.COFFEE_SHOP, item)
             case "11" | "12":
                 item["brand"] = source_feature["categories"][0]["name"]
                 item["branch"] = source_feature.get("name")
                 if ruby := source_feature.get("ruby"):
-                    item["extras"]["branch:ja-Hira"] = ruby
+                    item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(ruby)
                 apply_category(Categories.SHOP_COFFEE, item)
             case _:
                 return
