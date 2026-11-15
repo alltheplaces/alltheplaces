@@ -3,6 +3,16 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
+LOCALES = {
+    "AT": "de-at/shops",
+    "BE": "nl-be/winkels",
+    "DE": "de-de/shops",
+    "ES": "es-es/tiendas",
+    "FR": "fr-fr/magasins",
+    "LU": "fr-lu/magasins",
+    "NL": "nl-nl/winkels",
+}
+
 
 class ZeemanSpider(SitemapSpider, StructuredDataSpider):
     name = "zeeman"
@@ -13,12 +23,10 @@ class ZeemanSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["branch"] = item.pop("name")
-        item["extras"]["website:nl"] = response.url
-        item["extras"]["website:be"] = response.url.replace(".com/nl-nl/winkels", ".com/nl-be/winkels")
-        item["extras"]["website:fr"] = response.url.replace(".com/nl-nl/winkels", ".com/fr-fr/magasins")
-        item["extras"]["website:de"] = response.url.replace(".com/nl-nl/winkels", ".com/de-de/shops")
-        item["extras"]["website:es"] = response.url.replace(".com/nl-nl/winkels", ".com/es-es/tiendas")
-        item["extras"]["website:pt"] = response.url.replace(".com/nl-nl/winkels", ".com/pt-pt/lojas")
+        item["website"] = response.url.replace("nl-nl/winkels", LOCALES[item["country"]])
+        if item["country"] == "BE":
+            item["extras"]["website:nl"] = item["website"]
+            item["extras"]["website:fr"] = response.url.replace("nl-nl/winkels", "fr-be/magasins")
 
         if item.get("twitter") == "zeeman.com":
             item.pop("twitter")
