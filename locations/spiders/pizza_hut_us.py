@@ -24,6 +24,7 @@ class PizzaHutUSSpider(SitemapSpider, StructuredDataSpider):
         )
     ]
     wanted_types = ["FastFoodRestaurant"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 180, "CONCURRENT_REQUESTS": 4}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["image"] = None
