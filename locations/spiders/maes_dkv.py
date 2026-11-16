@@ -436,7 +436,7 @@ class MaesDkvSpider(scrapy.Spider):
         item["ref"] = str(station["id"])
         item["lat"] = station.get("latitude")
         item["lon"] = station.get("longitude")
-        item["street"] = station.get("street")
+        item["street_address"] = station.get("street")
         item["city"] = station.get("city")
 
         # Don't add postal code if value is "#NV" (not available)
