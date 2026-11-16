@@ -1,9 +1,10 @@
-import urllib
-
+import chompjs
+from scrapy import Selector
 from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -20,9 +21,16 @@ class KindercareUSSpider(CrawlSpider, StructuredDataSpider):
             follow=True,
         )
     ]
+    search_for_email = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removesuffix(" KinderCare")
+        item["ref"] = response.url.rsplit("/", 1)[1]
+        markers = chompjs.parse_js_object(response.xpath('//script[@id="js-nearby-centers"]/text()').get())
+        center = next(c for c in markers["centers"] if c["id"] == item["ref"])
+        item["lat"] = center["latitude"]
+        item["lon"] = center["longitude"]
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(Selector(text=center["openHours"]).xpath("//time/@datetime").get())
         item["phone"] = response.xpath('//*[contains(., "Call")]/@href').get()
-        if image := item.get("image"):
-            item["image"] = urllib.parse.quote(image, safe=":/?=&")
         yield item
