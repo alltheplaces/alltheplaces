@@ -2162,17 +2162,16 @@ wheels = [
 
 [[package]]
 name = "scrapy-zyte-api"
-version = "0.36.0"
+version = "0.37.0"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "scrapy" },
-    { name = "typing-extensions" },
     { name = "zyte-api" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/83/af/122b9be57406a3b3760dee55a3ab80c3f8c3bd89fd1e477fe3869e366ac4/scrapy_zyte_api-0.36.0.tar.gz", hash = "sha256:b042df45988a17607511df534bfe8a7cf9f5b2c4d2d2a1e0ebe80cc7c0097b56", size = 165775, upload-time = "2026-08-20T13:03:33.923Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/80/b5/b3b7f0104fba344c208e6ee5d5ee070de387d19a7a136668a1fc49fb48cb/scrapy_zyte_api-0.37.0.tar.gz", hash = "sha256:d55b87225a087164deb338df692b8d26f48f1f19a325ec3cdc1e92ddfcbe3d28", size = 167395, upload-time = "2026-11-06T20:58:22.297Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5e/33/75afd77e91ecb4b9d434cbd73bccb9579a257f1ba319a580199a9e79330c/scrapy_zyte_api-0.36.0-py3-none-any.whl", hash = "sha256:86cc643e7ddd656f35960a9925fdfa1c2d685e6fadee1514b29c5c18e08c0755", size = 53999, upload-time = "2026-08-20T13:03:32.417Z" },
+    { url = "https://files.pythonhosted.org/packages/e5/ae/44dcc721c6d3f370c1674c25415ca69a520121106065173f252125696552/scrapy_zyte_api-0.37.0-py3-none-any.whl", hash = "sha256:0c3f19dbfbd903b406dd8025466ef875d1ca3705a0dcd1860fbffff837e99d8c", size = 52311, upload-time = "2026-11-06T20:58:20.849Z" },
 ]
 
 [[package]]
