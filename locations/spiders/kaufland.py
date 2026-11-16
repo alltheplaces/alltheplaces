@@ -32,7 +32,7 @@ class KauflandSpider(Spider):
             item["postcode"] = location["pc"]
             item["street_address"] = location["sn"]
             item["city"] = location["t"]
-            item["extras"]["start_date"] = location["opd"]
+            item["extras"]["start_date"] = location["opd"][:10]
 
             oh = OpeningHours()
             for rule in location["wod"]:

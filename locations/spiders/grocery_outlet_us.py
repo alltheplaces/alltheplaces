@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -22,7 +23,10 @@ class GroceryOutletUSSpider(Spider):
             item["branch"] = item.pop("name", None)
             item["street_address"] = item.pop("addr_full", None)
             item["ref"] = location["store_number"]
-            item["extras"]["start_date"] = location["open_date"]
+            if location["open_date_set"]:
+                item["extras"]["start_date"] = (
+                    datetime.strptime(location["open_date_set"], "%m/%d/%Y").date().isoformat()
+                )
             item["facebook"] = location["fb_url"]
 
             oh = OpeningHours()
