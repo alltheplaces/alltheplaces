@@ -4,6 +4,7 @@ from datetime import date
 from typing import Any, Iterable
 from urllib.parse import parse_qs
 
+from pyproj import Transformer
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 from scrapy.utils.httpobj import urlparse_cached
@@ -15,6 +16,8 @@ from locations.items import Feature
 POSTCODE_RE = re.compile(r"〒(\d{3}-\d{4})\s*")
 TIME_RANGE_RE = re.compile(r"(\d{1,2}:\d{2})\s*[~〜～]\s*(\d{1,2}:\d{2})")
 DATE_RANGE_RE = re.compile(r"\((\d{1,2})/(\d{1,2})(?:[~〜～](\d{1,2})/(\d{1,2}))?\)")
+# The shop JSON gives milliseconds of arc in the Tokyo datum (EPSG:4301).
+TOKYO_TO_WGS84 = Transformer.from_pipeline("EPSG:15484")
 
 
 def _date_span(segment: str) -> int:
@@ -110,10 +113,9 @@ class ToyotaRentACarJPSpider(SitemapSpider):
             if entry:
                 if english_name := entry.get("shopNameInbound"):
                     item["branch"] = english_name
-                if lat := entry.get("latitude"):
-                    item["lat"] = float(lat) / 3600000
-                if lon := entry.get("longitude"):
-                    item["lon"] = float(lon) / 3600000
+                lat, lon = entry.get("latitude"), entry.get("longitude")
+                if lat and lon:
+                    item["lat"], item["lon"] = TOKYO_TO_WGS84.transform(float(lat) / 3600000, float(lon) / 3600000)
                 if oh := parse_hours(entry.get("displayEigyoList")):
                     item["opening_hours"] = oh
 
