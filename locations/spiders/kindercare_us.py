@@ -21,8 +21,10 @@ class KindercareUSSpider(CrawlSpider, StructuredDataSpider):
             follow=True,
         )
     ]
+    search_for_email = False
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
+        item["branch"] = item.pop("name").removesuffix(" KinderCare")
         item["ref"] = response.url.rsplit("/", 1)[1]
         markers = chompjs.parse_js_object(response.xpath('//script[@id="js-nearby-centers"]/text()').get())
         center = next(c for c in markers["centers"] if c["id"] == item["ref"])
