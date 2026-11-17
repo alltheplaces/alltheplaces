@@ -1,7 +1,4 @@
 import re
-from typing import Iterable
-
-from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -27,19 +24,6 @@ class UnitedEnergyAUSpider(RosettaAPRSpider):
         ),
     ]
     requires_proxy = "AU"
-
-    def parse_decryption_params(self, response: Response) -> Iterable[Request]:
-        js_blob = response.xpath('//script[contains(text(), "async function importAESKey(keyHex)")]/text()').get()
-        if m := re.search(r"^\s*const [0-9a-f]+\s*=\s*'([0-9a-f]{64})';$", js_blob, flags=re.MULTILINE):
-            self.key = m.group(1)
-        if m := re.search(r"^\s*const [0-9a-f]+\s*=\s*'([0-9a-f]{32})';$", js_blob, flags=re.MULTILINE):
-            self.iv = m.group(1)
-        if not self.key or not self.iv:
-            raise RuntimeError(
-                "Could not automatically locate required AES256-CBC key and IV values for decrypting data files."
-            )
-            return
-        yield from self.request_data_files()
 
     def parse_zone_substations(self, features: list[dict]) -> (list[dict], RosettaAPRDataFile):
         items = []
