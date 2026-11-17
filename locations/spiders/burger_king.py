@@ -1,8 +1,8 @@
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 import geonamescache
 from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -21,104 +21,104 @@ class BurgerKingSpider(Spider):
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
     custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2, "DOWNLOAD_TIMEOUT": 30}
 
-    def make_request(self, lat, lon, country_code, search_radius, result_limit, url) -> JsonRequest:
-        body = [
-            {
-                "operationName": "GetRestaurants",
-                "variables": {
-                    "input": {
-                        "filter": "NEARBY",
-                        "coordinates": {
-                            "userLat": float(lat),
-                            "userLng": float(lon),
-                            "searchRadius": search_radius,
-                        },
-                        "first": result_limit,
+    def make_request(
+        self, lat: float | str, lon: float | str, country_code: str, search_radius: int, result_limit: int, url: str
+    ) -> JsonRequest:
+        body = {
+            "operationName": "GetRestaurants",
+            "variables": {
+                "input": {
+                    "filter": "NEARBY",
+                    "coordinates": {
+                        "userLat": float(lat),
+                        "userLng": float(lon),
+                        "searchRadius": search_radius,
+                    },
+                    "first": result_limit,
+                }
+            },
+            "query": """
+                    query GetRestaurants($input: RestaurantsInput) {
+                      restaurants(input: $input) {
+                        pageInfo {
+                          hasNextPage
+                          endCursor
+                          __typename
+                        }
+                        totalCount
+                        nodes {
+                          ...RestaurantNodeFragment
+                          __typename
+                        }
+                        __typename
+                      }
                     }
-                },
-                "query": (
-                    "query GetRestaurants($input: RestaurantsInput) {\n"
-                    "  restaurants(input: $input) {\n"
-                    "    pageInfo {\n"
-                    "      hasNextPage\n"
-                    "      endCursor\n"
-                    "      __typename\n"
-                    "    }\n"
-                    "    totalCount\n"
-                    "    nodes {\n"
-                    "      ...RestaurantNodeFragment\n"
-                    "      __typename\n"
-                    "    }\n"
-                    "    __typename\n"
-                    "  }\n"
-                    "}\n"
-                    "\n"
-                    "fragment RestaurantNodeFragment on RestaurantNode {\n"
-                    "  _id\n"
-                    "  storeId\n"
-                    "  curbsideHours {\n"
-                    "    ...OperatingHoursFragment\n"
-                    "    __typename\n"
-                    "  }\n"
-                    "  deliveryHours {\n"
-                    "    ...OperatingHoursFragment\n"
-                    "    __typename\n"
-                    "  }\n"
-                    "  diningRoomHours {\n"
-                    "    ...OperatingHoursFragment\n"
-                    "    __typename\n"
-                    "  }\n"
-                    "  driveThruHours {\n"
-                    "    ...OperatingHoursFragment\n"
-                    "    __typename\n"
-                    "  }\n"
-                    "  email\n"
-                    "  franchiseGroupName\n"
-                    "  hasBreakfast\n"
-                    "  hasDelivery\n"
-                    "  hasDriveThru\n"
-                    "  hasPlayground\n"
-                    "  hasTakeOut\n"
-                    "  hasWifi\n"
-                    "  isDarkKitchen\n"
-                    "  isHalal\n"
-                    "  latitude\n"
-                    "  longitude\n"
-                    "  name\n"
-                    "  phoneNumber\n"
-                    "  physicalAddress {\n"
-                    "    address1\n"
-                    "    address2\n"
-                    "    city\n"
-                    "    country\n"
-                    "    postalCode\n"
-                    "    stateProvince\n"
-                    "    stateProvinceShort\n"
-                    "    __typename\n"
-                    "  }\n"
-                    "  __typename\n"
-                    "}\n"
-                    "\n"
-                    "fragment OperatingHoursFragment on OperatingHours {\n"
-                    "  friClose\n"
-                    "  friOpen\n"
-                    "  monClose\n"
-                    "  monOpen\n"
-                    "  satClose\n"
-                    "  satOpen\n"
-                    "  sunClose\n"
-                    "  sunOpen\n"
-                    "  thrClose\n"
-                    "  thrOpen\n"
-                    "  tueClose\n"
-                    "  tueOpen\n"
-                    "  wedClose\n"
-                    "  wedOpen\n"
-                    "  __typename\n"
-                    "}\n"
-                ),
-            }
-        ]
+
+                    fragment RestaurantNodeFragment on RestaurantNode {
+                      _id
+                      storeId
+                      curbsideHours {
+                        ...OperatingHoursFragment
+                        __typename
+                      }
+                      deliveryHours {
+                        ...OperatingHoursFragment
+                        __typename
+                      }
+                      diningRoomHours {
+                        ...OperatingHoursFragment
+                        __typename
+                      }
+                      driveThruHours {
+                        ...OperatingHoursFragment
+                        __typename
+                      }
+                      email
+                      franchiseGroupName
+                      hasBreakfast
+                      hasDelivery
+                      hasDriveThru
+                      hasPlayground
+                      hasTakeOut
+                      hasWifi
+                      isDarkKitchen
+                      isHalal
+                      latitude
+                      longitude
+                      name
+                      phoneNumber
+                      physicalAddress {
+                        address1
+                        address2
+                        city
+                        country
+                        postalCode
+                        stateProvince
+                        stateProvinceShort
+                        __typename
+                      }
+                      __typename
+                    }
+
+                    fragment OperatingHoursFragment on OperatingHours {
+                      friClose
+                      friOpen
+                      monClose
+                      monOpen
+                      satClose
+                      satOpen
+                      sunClose
+                      sunOpen
+                      thrClose
+                      thrOpen
+                      tueClose
+                      tueOpen
+                      wedClose
+                      wedOpen
+                      __typename
+                    }
+                """,
+        }
         return JsonRequest(
             url=url,
             data=body,
@@ -126,7 +126,7 @@ class BurgerKingSpider(Spider):
             cb_kwargs=dict(country_code=country_code),
         )
 
-    def make_city_request(self, city_name, country_code, search_radius, result_limit, url):
+    def make_city_request(self, city_name: str, country_code: str, search_radius: int, result_limit: int, url: str):
         for city in city_locations(country_code):
             if city.get("name", "").lower() == city_name.lower() and city.get("latitude") and city.get("longitude"):
                 self.logger.info("Making city request for %s, %s", country_code, city_name)
@@ -150,7 +150,7 @@ class BurgerKingSpider(Spider):
         gb_endpoint = "https://euc1-prod-bk.rbictg.com/graphql"
         nz_endpoint = "https://www.burgerking.co.nz/api/whitelabel"
         sa_endpoint = "https://www.burgerking.com.sa/api/whitelabel"
-        us_endpoint = "https://use1-prod-bk.rbictg.com/graphql"
+        us_endpoint = "https://use1-prod-bk-gateway.rbictg.com/graphql"
         za_endpoint = "https://www.burgerking.co.za/api/whitelabel"
         ie_endpoint = "https://burgerking.ie/api/whitelabel"
         ar_cl_endpoint = "https://use2-prod-bk.rbictg.com/graphql"
@@ -222,8 +222,9 @@ class BurgerKingSpider(Spider):
         "ZA": "https://www.burgerking.co.za/store-locator/store/{}",
     }
 
-    def parse(self, response, country_code):
-        for location in response.json()[0]["data"]["restaurants"]["nodes"]:
+    def parse(self, response: Response, country_code: str) -> Any:
+        restaurants = response.json().get("data", {}).get("restaurants") or {}
+        for location in restaurants.get("nodes") or []:
             location.update(location.pop("physicalAddress"))
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
@@ -266,7 +267,7 @@ class BurgerKingSpider(Spider):
 
             yield item
 
-    def parse_opening_hours(self, hours: dict) -> OpeningHours:
+    def parse_opening_hours(self, hours: dict) -> OpeningHours | None:
         """
         hours format:
         "diningRoomHours": {
