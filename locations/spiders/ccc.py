@@ -32,7 +32,7 @@ class CccSpider(Spider):
         for country, frontend_id in self.markets.items():
             yield JsonRequest(
                 url=f"https://ccc.eu/{country.lower()}/api/Configuration/GetShops",
-                headers={"x-frontend-id": str(frontend_id)},
+                headers={"x-frontend-id": str(frontend_id), "x-source-name": "WWW"},
                 cb_kwargs={"country": country},
             )
 
