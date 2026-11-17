@@ -19,9 +19,9 @@ class HaciendaMexicanRestaurantsUSSpider(WPStoreLocatorSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         # The head office is listed with the restaurants.
-        if "Support Center" in feature.get("store", ""):
+        if "Support Center" in item["name"]:
             return
-        item["branch"] = item.pop("name", None)
+        item["branch"] = item.pop("name")
         # Every entry carries the same office hours, not the restaurant's.
         item["opening_hours"] = None
         apply_category(Categories.RESTAURANT, item)
