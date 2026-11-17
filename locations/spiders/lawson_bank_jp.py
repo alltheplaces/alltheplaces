@@ -6,6 +6,8 @@ from scrapy.http import TextResponse
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, DAYS_JP, DAYS_WEEKDAY, OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.storefinders.area_marker import AreaMarkerSpider
 
 # Open days as free text, used when the hours text has no day prefix of its own.
@@ -38,7 +40,7 @@ def parse_days(spec: str) -> list[str]:
     return days
 
 
-class LawsonBankJPSpider(AreaMarkerSpider):
+class LawsonBankJPSpider(AreaMarkerSpider, PlaywrightSpider):
     name = "lawson_bank_jp"
     item_attributes = {"brand": "ローソン銀行", "brand_wikidata": "Q11350963"}
     corp_id = "lbankatm"
@@ -53,6 +55,7 @@ class LawsonBankJPSpider(AreaMarkerSpider):
         "days": "col_5",  # open days, as free text
         "open_hours": "col_6",  # day-scoped opening times, followed by a note
     }
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(
         self, item: Feature, response: TextResponse, store: dict, raw_record: dict, **kwargs
