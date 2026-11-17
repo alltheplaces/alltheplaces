@@ -203,20 +203,21 @@ class BurgerKingSpider(Spider):
             yield self.make_request(lat, lon, "US", 128000, 20000, us_endpoint)
 
     store_locator_templates = {
-        "AR": "https://burgerking.com.ar/store-locator/store/{}",
-        "AT": "https://www.burgerking.at/store-locator/store/{}",
+        "AE": "https://www.burgerking.ae/ar/store-locator/store/{}",
+        "AR": "https://burgerking.com.ar/es/store-locator/store/{}",
+        "AT": "https://www.burgerking.at/de/store-locator/store/{}",
         "CA": "https://www.burgerking.ca/store-locator/store/{}",
-        "CH": "https://www.burger-king.ch/store-locator/store/{}",
-        "CL": "https://www.burgerking.cl/en/store-locator/store/{}",
-        "CZ": "https://burgerking.cz/store-locator/store/{}",
+        "CH": "https://www.burger-king.ch/de/store-locator/store/{}",
+        "CL": "https://www.burgerking.cl/es/store-locator/store/{}",
+        "CZ": "https://burgerking.cz/cs/store-locator/store/{}",
         "DE": "https://www.burgerking.de/store-locator/store/{}",
         "GB": "https://www.burgerking.co.uk/store-locator/store/{}",
         "IE": "https://burgerking.ie/store-locator/store/{}",
         "NL": "https://www.burgerking.nl/store-locator/store/{}",
         "NZ": "https://www.burgerking.co.nz/store-locator/store/{}",
-        "PL": "https://burgerking.pl/store-locator/store/{}",
-        "PT": "https://www.burgerking.pt/store-locator/store/{}",
-        "RO": "https://burgerking.ro/store-locator/store/{}",
+        "PL": "https://burgerking.pl/pl/store-locator/store/{}",
+        "PT": "https://www.burgerking.pt/pt/store-locator/store/{}",
+        "RO": "https://burgerking.ro/ro/store-locator/store/{}",
         "SA": "https://www.burgerking.com.sa/ar/store-locator/store/{}",
         "US": "https://www.bk.com/store-locator/store/{}",
         "ZA": "https://www.burgerking.co.za/store-locator/store/{}",
@@ -240,6 +241,8 @@ class BurgerKingSpider(Spider):
             )
 
             item["website"] = self.store_locator_templates.get(country_code, "").format(location["_id"]) or None
+            if country_code in ["CA", "US"]:
+                item["website"] = item["website"].replace("restaurant_", "")
             if country_code == "SA" and item["website"] is not None:
                 item["extras"]["website:ar"] = item["website"]
                 item["extras"]["website:en"] = item["website"].replace(".com.sa/ar/store", ".com.sa/en/store")
