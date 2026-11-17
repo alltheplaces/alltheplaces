@@ -19,7 +19,7 @@ BURGER_KING_SHARED_ATTRIBUTES = {
 class BurgerKingSpider(Spider):
     name = "burger_king"
     item_attributes = BURGER_KING_SHARED_ATTRIBUTES
-    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2, "DOWNLOAD_TIMEOUT": 30}
+    custom_settings = {"ROBOTSTXT_OBEY": False, "DOWNLOAD_DELAY": 2, "DOWNLOAD_TIMEOUT": 120}
 
     def make_request(
         self, lat: float | str, lon: float | str, country_code: str, search_radius: int, result_limit: int, url: str
