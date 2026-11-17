@@ -1,32 +1,22 @@
-from typing import Any, AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import FormRequest, Response
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McdonaldsMYSpider(Spider):
+class McdonaldsMYSpider(JSONBlobSpider):
     name = "mcdonalds_my"
     item_attributes = McdonaldsSpider.item_attributes
+    start_urls = [
+        "https://www.mcdonalds.com.my/locate-us/stores?distance=100000&lat=&lng=&state=&category=&address=&is_suggestion=0&is_locate=0"
+    ]
+    locations_key = "stores"
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        yield FormRequest(
-            url="https://www.mcdonalds.com.my/storefinder/index.php",
-            formdata={
-                "action": "get_nearby_stores",
-                "distance": "100000",
-                "lat": "4",
-                "lng": "101",
-                "ajax": "1",
-            },
-        )
-
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for index, store in enumerate(response.json()["stores"]):
-            item = DictParser.parse(store)
-            item["ref"] = index
-            apply_category(Categories.FAST_FOOD, item)
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item["ref"] = item.pop("name").removeprefix("McDonlad's ")
+        apply_category(Categories.FAST_FOOD, item)
+        yield item
