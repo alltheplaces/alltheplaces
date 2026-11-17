@@ -23,8 +23,7 @@ class KirklandsUSSpider(Spider):
     item_attributes = {"brand": "Kirkland's", "brand_wikidata": "Q6415714"}
     start_urls = ["https://www.bedbathandbeyond.com/store-locations"]
     # The site stalls requests that do not look like a browser's.
-    user_agent = BROWSER_DEFAULT
-    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "DOWNLOAD_TIMEOUT": 60}
     brand_ids = {"2"}
 
     def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Feature]:
