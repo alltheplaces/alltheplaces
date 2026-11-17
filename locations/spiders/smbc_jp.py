@@ -37,6 +37,8 @@ class SmbcJPSpider(AreaMarkerSpider):
         self, item: Feature, response: TextResponse, store: dict, raw_record: dict, **kwargs
     ) -> Iterable[Feature]:
         item["name"] = None
+        if store["phone"] == "03-6847-2713":  # ATM support line shared by 672 ATMs
+            item["phone"] = None
         branch = store["name"]
         branch = re.sub(r"\s*【[^】]*】\s*$", "", branch)
         branch = re.sub(r"\s*[（(][^）)]*[）)]\s*$", "", branch)
