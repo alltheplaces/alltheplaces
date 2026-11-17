@@ -1,50 +1,31 @@
-import scrapy
+import json
+import re
+
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_EN, OpeningHours
 
 
-class NewYorkPublicLibraryUSSpider(scrapy.Spider):
+class NewYorkPublicLibraryUSSpider(CrawlSpider):
     name = "new_york_public_library_us"
     item_attributes = {"operator": "New York Public Library", "operator_wikidata": "Q219555"}
 
     start_urls = [
-        "https://refinery.nypl.org/api/nypl/locations/v1.0/locations",
+        "https://www.nypl.org/locations",
     ]
-
-    def parse_hours(self, location_hours):
-        opening_hours = OpeningHours()
-        regular_hours = location_hours["regular"]
-
-        for week_day in regular_hours:
-            day = DAYS_EN[week_day["day"].strip(".")]
-            open_time = week_day["open"]
-            close_time = week_day["close"]
-
-            if open_time and close_time:
-                opening_hours.add_range(
-                    day=day,
-                    open_time=open_time,
-                    close_time=close_time,
-                    time_format="%H:%M",
-                )
-            else:
-                continue
-
-        return opening_hours
+    rules = [Rule(LinkExtractor(r"/locations/[^/]+$"), "parse")]
 
     def parse(self, response):
-        for location in response.json()["locations"]:
-            item = DictParser.parse(location)
-            if images := location.get("images"):
-                item["image"] = images.get("exterior")
-            if coordinates := location.get("geolocation"):
-                item["lon"], item["lat"] = coordinates.get("coordinates")
-            item["website"] = "https://www.nypl.org/locations/" + location["slug"]
-
-            if hours := location.get("hours"):
-                item["opening_hours"] = self.parse_hours(hours)
-
-            apply_category(Categories.LIBRARY, item)
-            yield item
+        address_data = DictParser.get_nested_key(
+            json.loads(response.xpath('//*[@id="__NEXT_DATA__"]//text()').get()), "secondaryContent"
+        )
+        item = DictParser.parse(address_data)
+        item["branch"] = response.xpath("//h1//text()").get()
+        item["ref"] = item["website"] = response.url
+        apply_category(Categories.LIBRARY, item)
+        if lat_lon := re.search(r"\"lat\":\s*(\d+\.\d+),\s*\"lng\":\s*(-?\d+\.\d+)", response.text):
+            item["lat"] = lat_lon.groups()[0]
+            item["lon"] = lat_lon.groups()[1]
+        yield item
