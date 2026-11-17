@@ -16,7 +16,7 @@ class FnbcCASpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
-            url="https://api.forge.central1.cc/find-branch-atm-service/v1/places?latitude=58.55148693137242&longitude=-94.06979&radius=4000&type=all&dedupeAtms=true",
+            url="https://api.forge.central1.cc/find-branch-atm-service/v1/places?latitude=58.55148693137242&longitude=-94.06979&radius=400000&type=branch",
             headers={"c1-tid": "sk_fnbc"},
         )
 
