@@ -15,6 +15,7 @@ class AxaFRSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://agence.axa.fr/sitemap.xml"]
     sitemap_rules = [(r"/distributeur/(\d+)$", "parse_sd")]
     wanted_types = ["InsuranceAgency"]
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
         item["ref"] = response.url.rsplit("/", 1)[-1]
