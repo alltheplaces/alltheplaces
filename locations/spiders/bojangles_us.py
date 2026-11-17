@@ -5,8 +5,8 @@ from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 
 
-class BojanglesSpider(JSONBlobSpider):
-    name = "bojangles"
+class BojanglesUSSpider(JSONBlobSpider):
+    name = "bojangles_us"
     item_attributes = {"brand": "Bojangles'", "brand_wikidata": "Q891163"}
     start_urls = ["https://bojangles.com/unified-gateway/online-ordering/v1/all-stores/23446?limit=50"]
     locations_key = "stores_v1"
