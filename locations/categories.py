@@ -1415,7 +1415,6 @@ class Sells(Enum):
     ELECTRONICS = "sells:electronics"
     EYEGLASSES = "sells:eyeglasses"
     JEWELRY = "sells:jewelry"
-    MEDICINE = "sells:medicine"
     NEWSPAPERS = "sells:newspapers"
     PET_SUPPLIES = "sells:pet_supplies"
     TOBACCO = "sells:tobacco"
