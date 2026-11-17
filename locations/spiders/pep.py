@@ -13,7 +13,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class PepSpider(Spider):
     name = "pep"
-    start_urls = ["https://www.pepstores.com/cdn/shop/t/6/assets/env.js"]
+    start_urls = ["https://www.pepstores.com/pages/find-a-store"]
     brands = {
         "PEP Cell": ("PEP Cell", "Q128802743", Categories.SHOP_MOBILE_PHONE),
         "PEP Home": ("PEP Home", "Q128802022", Categories.SHOP_HOUSEWARE),
@@ -21,12 +21,12 @@ class PepSpider(Spider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        if api_key := re.search(r"middleware_api_key=\"(.+?)\"", response.text):
+        if api_key := re.search(r"PEP_PROXY_KEY\s*=\s*\"(.+?)\";", response.text):
             token = api_key.group(1)
             yield JsonRequest(
-                url="https://ecom.pep.commercebridge.tech/rest/v1/store/locator?limit=10000",
+                url="https://ecom.pep.commercebridge.tech/rest/proxy/v1/store-locator",
                 headers={
-                    "Authorization": f"Bearer {token}",
+                    "X-Proxy-Key": f"{token}",
                 },
                 callback=self.parse_locations,
             )
