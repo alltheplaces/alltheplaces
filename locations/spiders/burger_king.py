@@ -7,7 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.geo import city_locations, country_iseadgg_centroids
-from locations.hours import DAYS_EN, OpeningHours
+from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.pipelines.address_clean_up import clean_address
 
 BURGER_KING_SHARED_ATTRIBUTES = {
@@ -272,36 +272,15 @@ class BurgerKingSpider(Spider):
             yield item
 
     def parse_opening_hours(self, hours: dict) -> OpeningHours | None:
-        """
-        hours format:
-        "diningRoomHours": {
-            "friClose": "04:00:00",
-            "friOpen": "11:00:00",
-            "monClose": "23:00:00",
-            "monOpen": "11:00:00",
-            "satClose": "04:00:00",
-            "satOpen": "11:00:00",
-            "sunClose": "23:00:00",
-            "sunOpen": "11:00:00",
-            "thrClose": "23:00:00",
-            "thrOpen": "11:00:00",
-            "tueClose": "23:00:00",
-            "tueOpen": "11:00:00",
-            "wedClose": "04:00:00",
-            "wedOpen": "11:00:00",
-            "__typename": "OperatingHours"
-            }
-        """
         if hours is None:
             return None
         try:
             oh = OpeningHours()
-            for day in ["mon", "tue", "wed", "thr", "fri", "sat", "sun"]:
+            for day in DAYS_3_LETTERS:
+                day = day.lower()
                 if hours.get(f"{day}Open"):
-                    oh.add_range(
-                        DAYS_EN.get(day.title()), hours.get(f"{day}Open"), hours.get(f"{day}Close"), "%H:%M:%S"
-                    )
+                    oh.add_range(day, hours.get(f"{day}Open"), hours.get(f"{day}Close"), "%H:%M:%S")
             return oh
         except Exception as e:
-            self.logger.warning("Failed to parse hours: %s", e)
+            self.logger.warning(f"Failed to parse hours: {hours} {e}")
             return None
