@@ -21,7 +21,9 @@ class TheMeltingPotSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["ref"] = response.url.rstrip("/").rsplit("/", 1)[-1]
-        item["branch"] = item.pop("name", None).removeprefix("Melting Pot ").removeprefix("The Melting Pot ")
+        item["branch"] = (
+            item.pop("name", None).removeprefix("Melting Pot ").removeprefix("The Melting Pot ").removeprefix("of ")
+        )
         item.pop("image", None)
         # The page's map script carries the coordinates; the structured data does not.
         if match := re.search(r"'lat':\s*(-?\d+\.\d+),\s*'lng':\s*(-?\d+\.\d+)", response.text):
