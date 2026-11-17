@@ -49,8 +49,6 @@ class CainzJPSpider(CanlySpider):
                 for offering in content["checkBoxIconTextWithUrl"]["items"]:
                     if not offering["checked"]:
                         continue
-                    if offering["label"].startswith("ドラッグコーナー"):
-                        apply_yes_no(Sells.MEDICINE, item, True)
                     elif attribute := self.ATTRIBUTES.get(offering["label"]):
                         apply_yes_no(attribute, item, True)
 
