@@ -42,10 +42,7 @@ class CourirSpider(SitemapSpider):
     def parse(self, response: TextResponse, **kwargs: Any) -> Any:
         store = response.json()
         item = DictParser.parse(store)
-        if m := re.match(r"(?:COURIR\s+)?(OUTLET\s+)?(.+)", item.pop("name", None) or "", flags=re.IGNORECASE):
-            item["branch"] = m.group(2)
-            if m.group(1):
-                item["name"] = "Courir Outlet"
+        item["branch"] = item.pop("name")
         item["street_address"] = merge_address_lines([store.get("address1"), store.get("address2")])
         if item.get("country") == "ES":
             item["website"] = f"https://www.courir.es/es/tienda?StoreID={item['ref']}"
