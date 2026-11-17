@@ -211,6 +211,7 @@ class BurgerKingSpider(Spider):
         "CL": "https://www.burgerking.cl/es/store-locator/store/{}",
         "CZ": "https://burgerking.cz/cs/store-locator/store/{}",
         "DE": "https://www.burgerking.de/store-locator/store/{}",
+        "ES": "https://www.burgerking.es/es/store-locator/store/{}",
         "GB": "https://www.burgerking.co.uk/store-locator/store/{}",
         "IE": "https://burgerking.ie/store-locator/store/{}",
         "NL": "https://www.burgerking.nl/store-locator/store/{}",
