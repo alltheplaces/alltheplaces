@@ -18,6 +18,7 @@ class IraqiPostIqSpider(Spider):
     # "المواقع البريدية" (postal locations): one static page with a table of offices per governorate
     # (federal Iraq only; the Kurdistan Region's offices are not listed).
     start_urls = ["https://post.iq/?page=17"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for table in response.xpath("//table"):
