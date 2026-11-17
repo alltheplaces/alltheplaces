@@ -145,14 +145,14 @@ class BurgerKingSpider(Spider):
         return [(c["iso"], c["capital"]) for c in gc.get_countries().values() if c["continentcode"] == "EU"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        ae_endpoint = "https://www.burgerking.ae/api/whitelabel"
+        ae_endpoint = "https://euc1-prod-bk-gateway.rbictg.com/graphql"
         eu_endpoint = "https://euc1-prod-bk.rbictg.com/graphql"
         gb_endpoint = "https://euc1-prod-bk.rbictg.com/graphql"
-        nz_endpoint = "https://www.burgerking.co.nz/api/whitelabel"
-        sa_endpoint = "https://www.burgerking.com.sa/api/whitelabel"
+        nz_endpoint = "https://apse1-prod-bk-gateway.rbictg.com/graphql"
+        sa_endpoint = "https://euc1-prod-bk-gateway.rbictg.com/graphql"
         us_endpoint = "https://use1-prod-bk-gateway.rbictg.com/graphql"
-        za_endpoint = "https://www.burgerking.co.za/api/whitelabel"
-        ie_endpoint = "https://burgerking.ie/api/whitelabel"
+        za_endpoint = "https://euc1-prod-bk-gateway.rbictg.com/graphql"
+        ie_endpoint = "https://euc1-prod-bk-gateway.rbictg.com/graphql"
         ar_cl_endpoint = "https://use2-prod-bk.rbictg.com/graphql"
 
         # UAE
