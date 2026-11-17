@@ -18,6 +18,6 @@ class TxbUSSpider(WPStoreLocatorSpider):
     days = DAYS_EN
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
-        item["branch"] = item.pop("name", None).removeprefix("TXB ")
+        item["branch"] = item.pop("name").removeprefix("TXB ")
         apply_category(Categories.SHOP_CONVENIENCE, item)
         yield item
