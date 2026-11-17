@@ -27,6 +27,7 @@ class PictureFRSpider(JSONBlobSpider):
         # The locator also lists stockists; only own stores are flagged
         if not feature["picture_store"]:
             return
+        item["ref"] = feature["handle"]
         item["branch"] = item["branch"].removeprefix("PICTURE STORE ")
         set_social_media(item, SocialMedia.INSTAGRAM, item.pop("website"))
         apply_category(Categories.SHOP_CLOTHES, item)
