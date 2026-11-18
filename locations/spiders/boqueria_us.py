@@ -4,7 +4,7 @@ import re
 from scrapy.http import Response
 from scrapy.spiders import Spider
 
-from locations.categories import apply_category, Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import merge_address_lines
 
