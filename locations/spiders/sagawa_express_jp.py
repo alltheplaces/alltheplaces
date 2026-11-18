@@ -20,7 +20,6 @@ SERVICE_CENTRE = 2
 
 class SagawaExpressJPSpider(Spider):
     name = "sagawa_express_jp"
-    custom_settings = {"DOWNLOAD_DELAY": 0.5}
 
     # The API returns the nearest 50 locations within about 50 km of the search point.
     MAX_RESULTS = 50
