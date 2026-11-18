@@ -1,10 +1,10 @@
+import re
 from typing import Iterable
 
 import chompjs
 from scrapy.http import TextResponse
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
@@ -20,37 +20,40 @@ class F24Spider(JSONBlobSpider):
     }
 
     def extract_json(self, response: TextResponse) -> list[dict]:
-        return DictParser.get_nested_key(
-            chompjs.parse_js_object(
-                response.xpath('//script[contains(text(), "window.__APP_INIT_DATA__")]/text()').get()
-            ),
-            "stations",
-        )
+        chunks = []
+        for script in response.xpath('//script[contains(text(), "self.__next_f.push")]/text()').getall():
+            if m := re.search(r"self\.__next_f\.push\((.*)\)\s*$", script, re.DOTALL):
+                payload = chompjs.parse_js_object(m.group(1))
+                if len(payload) == 2 and isinstance(payload[1], str):
+                    chunks.append(payload[1])
+        data = "".join(chunks)
+
+        marker = '"stations":'
+        start = data.find(marker + "[")
+        if start == -1:
+            return []
+        return chompjs.parse_js_object(data[start + len(marker) :])
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         if "test." in feature["stationPageUrl"]:
             return
-        item["street_address"] = item.pop("street")
+
+        item["street_address"] = item.pop("street", None)
         item["branch"] = item.pop("name").split(",")[0]
-        item["website"] = feature["stationPageUrl"]
+        item["website"] = response.urljoin(feature["stationPageUrl"])
 
         item["opening_hours"] = OpeningHours()
         for rule in ["Weekday", "Saturday", "Sunday"]:
-            self.add_rule(item["opening_hours"], rule, feature.get(f"openHours{rule}"))
+            self.add_rule(item["opening_hours"], rule, feature.get(f"openHours{rule}") or {})
 
         if brand := self.BRANDS.get(feature["network"]):
             item.update(brand)
 
         apply_category(Categories.FUEL_STATION, item)
 
-        services = [service["specificTag"] for service in feature.get("allServices", [])]
-        apply_yes_no(Extras.CAR_WASH, item, any("CAR_WASH" in service for service in services))
-        apply_yes_no(Fuel.OCTANE_95, item, "FUEL_GO_EASY_95" in services)
-        apply_yes_no(Fuel.OCTANE_98, item, "FUEL_GO_EASY_98_EXTRA" in services)
-        apply_yes_no(Fuel.BIODIESEL, item, "FUEL_DIESEL_BIO_HVO_100" in services)
-        apply_yes_no(Fuel.ADBLUE, item, any("FUEL_AD_BLUE" in service for service in services))
-        apply_yes_no(Fuel.DIESEL, item, any("FUEL_GO_EASY_DIESEL" in service for service in services))
-        apply_yes_no(Fuel.ELECTRIC, item, any("CHARGE_QUICK_CHARGE" in service for service in services))
+        tags = feature.get("genericTags", [])
+        apply_yes_no(Extras.CAR_WASH, item, "WASH" in tags)
+        apply_yes_no(Fuel.ELECTRIC, item, "CHARGE" in tags)
 
         yield item
 
