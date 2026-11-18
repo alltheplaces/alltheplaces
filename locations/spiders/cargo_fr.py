@@ -7,7 +7,7 @@ from locations.categories import Categories
 from locations.items import Feature
 
 
-class CargoFrSpider(SitemapSpider):
+class CargoFRSpider(SitemapSpider):
     """Spider for CarGo vehicle‑rental agencies in France.
     Data source: https://www.cargo.fr/sitemap.xml – agency pages under
     /les‑agences‑cargo/cargo-location-de‑vehicules-…
