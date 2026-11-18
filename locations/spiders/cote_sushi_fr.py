@@ -6,8 +6,8 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class CoteSushiSpider(SitemapSpider, StructuredDataSpider):
-    name = "cote_sushi"
+class CoteSushiFRSpider(SitemapSpider, StructuredDataSpider):
+    name = "cote_sushi_fr"
     item_attributes = {
         "brand": "Côté Sushi",
         "brand_wikidata": "Q130731390",
