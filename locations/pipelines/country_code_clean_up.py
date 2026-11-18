@@ -28,7 +28,7 @@ class CountryCodeCleanUpPipeline:
         if not getattr(self.crawler.spider, "skip_auto_cc_spider_name", False):
             # No country set, see if it can be cleanly deduced from the spider name
             if country := self.country_utils.country_code_from_spider_name(
-                self.crawler.spider.name  # ty: ignore[unresolved-attribute]
+                self.crawler.spider.name  # ty: ignore[missing-union-attribute]
             ):
                 self.crawler.stats.inc_value("atp/field/country/from_spider_name")
                 item["country"] = country
