@@ -40,7 +40,9 @@ class WpGoMapsSpider(Spider):
     async def start(self) -> AsyncIterator[Request]:
         api_endpoint = None
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            api_endpoint = f"https://{self.allowed_domains[0]}/wp-json/wpgmza/v1/features/"
+            api_endpoint = (
+                f"https://{self.allowed_domains[0]}/wp-json/wpgmza/v1/features/"  # ty: ignore[not-subscriptable]
+            )
         elif len(self.start_urls) == 1:
             api_endpoint = self.start_urls[0]
         else:

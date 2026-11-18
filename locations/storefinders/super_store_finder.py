@@ -38,7 +38,7 @@ class SuperStoreFinderSpider(Spider):
     async def start(self) -> AsyncIterator[Request]:
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
             yield Request(
-                url=f"https://{self.allowed_domains[0]}/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php"
+                url=f"https://{self.allowed_domains[0]}/wp-content/plugins/superstorefinder-wp/ssf-wp-xml.php"  # ty: ignore[not-subscriptable]
             )
         elif len(self.start_urls) == 1:
             yield Request(url=self.start_urls[0])
