@@ -66,6 +66,7 @@ class CostaCoffeeSpider(Spider):
         "Smart Café": (SMART_CAFE, Categories.VENDING_MACHINE),
         "Store": (COSTA, Categories.COFFEE_SHOP),
     }
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def __init__(self):
         self.country_utils = CountryUtils()
