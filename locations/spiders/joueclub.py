@@ -28,7 +28,6 @@ class JoueclubSpider(SitemapSpider, StructuredDataSpider):
     # but unrouted — see PR discussion), while genuine Zyte routing succeeds
     # every time. requires_proxy forces real Zyte routing instead of the
     # ZyteApiByCountryMiddleware default (skip Zyte unless this is set).
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
         # .get(), not [], and a name check: LinkedDataParser only sets "country"
