@@ -12,6 +12,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 HALFORDS_AUTOCENTRE = {"brand": "Halfords Autocentre", "brand_wikidata": "Q5641894"}
 NATIONAL_TYRES = {"brand": "National Tyres and Autocare", "brand_wikidata": "Q6979055"}
 HALFORDS = {"brand": "Halfords", "brand_wikidata": "Q3398786"}
+HALFORDS_GARAGE_SERVICES = {"brand": "Halfords Garage Services", "brand_wikidata": "Q130270919"}
 
 
 class HalfordsGBSpider(Spider):
@@ -56,8 +57,7 @@ class HalfordsGBSpider(Spider):
                     item.update(HALFORDS_AUTOCENTRE)
                     apply_category(Categories.SHOP_CAR_REPAIR, item)
                 elif data["storePrefix"] == "Halfords Garage Services":
-                    item.update(HALFORDS)
-                    apply_category(Categories.SHOP_CAR_PARTS, item)
+                    item.update(HALFORDS_GARAGE_SERVICES)
                     item["name"] = "Halfords Garage Services"
                     apply_category(Categories.SHOP_CAR_REPAIR, item)
                 elif data["storePrefix"] == "National Tyres and Autocare":
