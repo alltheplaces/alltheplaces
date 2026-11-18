@@ -15,6 +15,7 @@ class LeCollectifDesLunetiersFRSpider(Spider):
         "brand": "Le Collectif des Lunetiers",
         "brand_wikidata": "Q23752663",
         "name": "Le Collectif des Lunetiers",
+        "nsi_id": "N/A",
     }
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
