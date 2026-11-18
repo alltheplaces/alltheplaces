@@ -1,10 +1,12 @@
+import re
 from typing import Any
 
 from pyproj import Transformer
 from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
@@ -29,4 +31,14 @@ class KireiJPSpider(Spider):
             item["ref"] = store.get("seq")
             apply_category(Categories.PHOTO_BOOTH, item)
 
-            yield item
+            yield Request(item["website"], self.parse_details, cb_kwargs={"item": item})
+
+    def parse_details(self, response: Response, item: Feature) -> Any:
+        hours = response.xpath('//th[text()="営業時間"]/following-sibling::td/text()').get("")
+        oh = OpeningHours()
+        if "24時間" in hours:
+            oh.add_days_range(DAYS, "00:00", "23:59")
+        elif m := re.search(r"(\d+)[:：](\d+)\s*[～~]\s*(\d+)[:：](\d+)", hours):
+            oh.add_days_range(DAYS, f"{m[1]}:{m[2]}", f"{m[3]}:{m[4]}")
+        item["opening_hours"] = oh
+        yield item
