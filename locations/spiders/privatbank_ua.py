@@ -19,6 +19,7 @@ CATEGORIES = {
 class PrivatbankUASpider(Spider):
     name = "privatbank_ua"
     item_attributes = {"brand": "ПриватБанк", "brand_wikidata": "Q1515015"}
+    requires_proxy = True
 
     async def start(self) -> AsyncIterator[Any]:
         # The map search endpoint reads form-encoded POST params (a JSON body is ignored and returns a
