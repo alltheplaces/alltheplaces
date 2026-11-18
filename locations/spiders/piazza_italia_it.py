@@ -34,17 +34,18 @@ class PiazzaItaliaITSpider(JSONBlobSpider):
             item["branch"] = item.pop("name").removesuffix(", Piazza Italia")
             item["name"] = "Piazza Italia"
 
-        hours = OpeningHours()
-        for index, day in enumerate(DAYS):
-            day_definition = location["openings"][str(index + 1)]
-            for period in self.re_period.split(day_definition):
-                if "-" in period:
-                    try:
-                        open_time, close_time = period.split("-")
-                        hours.add_range(day, open_time.strip(), close_time.strip(), "%H:%M")
-                    except ValueError:
-                        self.logger.warning("Invalid opening hours period '%s'", period)
-        item["opening_hours"] = hours
+        if location["openings"]:
+            hours = OpeningHours()
+            for index, day_definition in location["openings"].items():
+                day = DAYS[int(index) - 1]
+                for period in self.re_period.split(day_definition):
+                    if "-" in period:
+                        try:
+                            open_time, close_time = period.split("-")
+                            hours.add_range(day, open_time.strip(), close_time.strip(), "%H:%M")
+                        except ValueError:
+                            self.logger.warning("Invalid opening hours period '%s'", period)
+            item["opening_hours"] = hours
 
         apply_category(Categories.SHOP_CLOTHES, item)
 
