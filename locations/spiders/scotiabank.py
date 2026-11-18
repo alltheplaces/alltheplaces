@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.geo import country_iseadgg_centroids
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
@@ -14,11 +15,11 @@ class ScotiabankSpider(Spider):
     name = "scotiabank"
     item_attributes = {"brand": "Scotiabank", "brand_wikidata": "Q451476"}
     allowed_domains = ["api.scotiabank.com"]
-    base_url = "https://api.scotiabank.com/assets-locator/v1/search/asset/near?asset_types=branch&lat=56.13&lon=-106.34&radius=8000&page={page}&count=50&country=CA&locale=en-CA&rolling_days=true&show_holidays=true&include_abm_info=true"
+    base_url = "https://api.scotiabank.com/assets-locator/v1/search/asset/near?asset_types=branch&lat={lat}&lon={lon}&radius=458&page={page}&count=50&country=CA&locale=en-CA&rolling_days=true&show_holidays=true&include_abm_info=true"
 
-    def request_page(self, page: int) -> JsonRequest:
+    def request_page(self, lat: float, lon: float, page: int) -> JsonRequest:
         return JsonRequest(
-            url=self.base_url.format(page=page),
+            url=self.base_url.format(lat=lat, lon=lon, page=page),
             headers={
                 "x-b3-traceid": str(uuid4()),
                 "x-b3-spanid": str(uuid4()),
@@ -26,14 +27,15 @@ class ScotiabankSpider(Spider):
                 "x-originating-appl-code": "BGMN",
                 "x-country-code": "CA",
             },
-            meta={"page": page},
+            meta={"lat": lat, "lon": lon, "page": page},
         )
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield self.request_page(1)
+        for lat, lon in country_iseadgg_centroids("CA", 458):
+            yield self.request_page(lat, lon, 1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        branches = response.json()["data"] or []
+        branches = response.json().get("data") or []
         for branch in branches:
             if branch["status"]["code"] != "OPE":
                 continue
@@ -61,4 +63,4 @@ class ScotiabankSpider(Spider):
             yield item
 
         if branches:
-            yield self.request_page(response.meta["page"] + 1)
+            yield self.request_page(response.meta["lat"], response.meta["lon"], response.meta["page"] + 1)

@@ -89,7 +89,6 @@ class DhlPLSpider(Spider):
         item["postcode"] = data.get("zip")
         item["city"] = data.get("city")
 
-        # Parse structured opening hours
         oh_data = data.get("opening_hours") or {}
         if oh_data:
             oh = OpeningHours()

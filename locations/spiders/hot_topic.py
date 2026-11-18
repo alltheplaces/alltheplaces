@@ -9,13 +9,6 @@ from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# Store pages come from the site's own store sitemap. The chain is also served
-# by a Salesforce Commerce Cloud endpoint in one response, but robots.txt
-# disallows */demandware.store*, so the per store pages are used instead.
-#
-# Each page holds the address as a run of text, the coordinates inside the
-# map's data-locations attribute, and the hours as day and time spans.
-
 
 class HotTopicSpider(SitemapSpider):
     name = "hot_topic"

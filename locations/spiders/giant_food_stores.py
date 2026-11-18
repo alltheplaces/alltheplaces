@@ -1,3 +1,5 @@
+import json
+
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
@@ -16,17 +18,16 @@ class GiantFoodStoresSpider(SitemapSpider):
         main = response.xpath("//main")
 
         hours = OpeningHours()
-        for row in main.xpath('.//*[@itemprop="openingHours"]/@content').extract():
-            day, interval = row.split(" ")
-            if interval == "Closed":
-                continue
-            open_time, close_time = interval.split("-")
-            hours.add_range(day, open_time, close_time)
+        for day in json.loads(main.xpath('.//*[@id="store-hours"]//*[@data-days]/@data-days').get("[]")):
+            if not day["intervals"]:
+                hours.set_closed(day["day"])
+            for interval in day["intervals"]:
+                hours.add_range(day["day"], f"{interval['start']:04d}", f"{interval['end']:04d}", "%H%M")
 
         properties = {
             "ref": response.xpath('//div[@class="StoreDetails-storeNum"]/text()').get(),
             "website": response.url,
-            "name": main.css("[itemprop=name]").attrib["content"],
+            "branch": main.css("[itemprop=name]").attrib["content"].removeprefix("GIANT "),
             "lat": main.css("[itemprop=latitude]").attrib["content"],
             "lon": main.css("[itemprop=longitude]").attrib["content"],
             "phone": main.css("[itemprop=telephone]::text").get(),

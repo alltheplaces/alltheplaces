@@ -9,6 +9,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -31,7 +32,7 @@ class WholeFoodsSpider(SitemapSpider):
         item = DictParser.parse(location)
         item["ref"] = location.get("storeCode")
         item["branch"] = item.pop("name", None)
-        item["street_address"] = ", ".join((location.get("address") or {}).get("addressLines") or [])
+        item["street_address"] = merge_address_lines((location.get("address") or {}).get("addressLines") or [])
         item["website"] = response.url
         item["opening_hours"] = self.parse_hours(location)
 

@@ -1,19 +1,21 @@
 import re
 from typing import Any, Iterable
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 PHONE_PATTERN = re.compile(r"\d{3}[-.\s]\d{3}[-.\s]\d{4}")
 
 
-class SaraCampbellUSSpider(Spider):
+class SaraCampbellUSSpider(PlaywrightSpider):
     name = "sara_campbell_us"
     item_attributes = {"brand": "Sara Campbell", "brand_wikidata": "Q117747597"}
     start_urls = ["https://saracampbell.com/pages/store-locator"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for location in response.css('div.map-section[data-section-type="section-map"]'):

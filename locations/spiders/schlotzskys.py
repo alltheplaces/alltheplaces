@@ -1,51 +1,27 @@
-import scrapy
+from typing import Any, Iterable
 
-from locations.hours import OpeningHours
+import chompjs
+from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class SchlotzskysSpider(scrapy.Spider):
+class SchlotzskysSpider(SitemapSpider, StructuredDataSpider):
     name = "schlotzskys"
     item_attributes = {"brand": "Schlotzsky's", "brand_wikidata": "Q2244796"}
-    allowed_domains = ["schlotzskys.com"]
-    start_urls = ["https://locations.schlotzskys.com/"]
+    sitemap_urls = ["https://locations.schlotzskys.com/robots.txt"]
+    sitemap_rules = [(r"/\d[^/]*$", "parse")]
+    wanted_types = ["FastFoodRestaurant"]
+    drop_attributes = {"twitter", "facebook"}
 
-    def parse_hours(self, hours):
-        oh = OpeningHours()
-        for h in hours:
-            dow, times = h.split(" ")
-
-            if times == "Closed":
-                continue
-
-            open_time, close_time = times.split("-")
-
-            oh.add_range(dow, open_time, close_time)
-        return oh
-
-    def parse(self, response):
-        links = response.xpath('//a[@class="Directory-listLink"]')
-        for link in links:
-            count = link.xpath("./@data-count").extract_first()
-            url = response.urljoin(link.xpath("./@href").extract_first().strip())
-
-            if count == "(1)":
-                yield scrapy.Request(url, callback=self.parse_store)
-            else:
-                yield scrapy.Request(url)
-
-    def parse_store(self, response):
-        properties = {
-            "ref": response.xpath('//main[@id="main"]/@itemid').extract_first(),
-            "lat": response.xpath('//meta[@itemprop="latitude"]/@content').extract_first(),
-            "lon": response.xpath('//meta[@itemprop="longitude"]/@content').extract_first(),
-            "phone": response.xpath('//div[@itemprop="telephone"]/text()').extract_first(),
-            "website": response.xpath('//link[@rel="canonical"]/@href').extract_first(),
-            "addr_full": response.xpath('//meta[@itemprop="streetAddress"]/text()').extract_first(),
-            "city": response.xpath('//meta[@itemprop="addressLocality"]/text()').extract_first(),
-            "postcode": response.xpath('//span[@itemprop="postalCode"]/text()').extract_first(),
-            "state": response.xpath('//abbr[@itemprop="addressRegion"]/text()').extract_first(),
-            "opening_hours": self.parse_hours(response.xpath('//tr[@itemprop="openingHours"]/@content').extract()),
-        }
-
-        yield Feature(**properties)
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        item["name"] = None
+        for block in response.xpath('//script[@type="application/ld+json"]/text()').getall():
+            if geo := chompjs.parse_js_object(block).get("credentialSubject", {}).get("geo"):
+                item["lat"] = geo.get("latitude")
+                item["lon"] = geo.get("longitude")
+        apply_category(Categories.FAST_FOOD, item)
+        yield item

@@ -6,7 +6,6 @@ from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS_BR, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
 
@@ -21,9 +20,9 @@ class CasaDoPaoDeQueijoBRSpider(Spider):
         )
 
     def parse_location(self, response: Response, **kwargs: Any) -> Any:
-        match = re.search(r"dP\s*=\s*(\[.+\]),\s*fP=\(\)", response.text)
+        match = re.search(r"=(\[\{nome:\"CPQ .+?\}\]),", response.text)
         if not match:
-            self.logger.error("Could not find dP=[...] data in bundle at %s", response.url)
+            self.logger.error("Could not find store data in bundle at %s", response.url)
             return
         for location in chompjs.parse_js_object(match.group(1)):
             item = Feature()
@@ -31,18 +30,7 @@ class CasaDoPaoDeQueijoBRSpider(Spider):
             item["addr_full"] = item["ref"] = location["endereco"]
             item["city"] = location["cidade"]
             item["state"] = location["estado"]
-            oh = OpeningHours()
-            for day_time in location["horario_funcionamento"].split(";"):
-                day, time = day_time.split(": ")
-                if " a " in day:
-                    start_day, end_day = day.split(" a ")
-                    start_day = sanitise_day(start_day, DAYS_BR)
-                    end_day = sanitise_day(end_day, DAYS_BR)
-                    open_time, close_time = time.split(" - ")
-                    oh.add_days_range(day_range(start_day, end_day), open_time, close_time)
-
-            item["opening_hours"] = oh
-
+            # "horario_funcionamento" is the same placeholder on every location, so it is not used
             apply_category(Categories.CAFE, item)
 
             yield item

@@ -26,12 +26,8 @@ class PhoneHouseNLSpider(CrawlSpider):
             "addr_full": clean_address(
                 " ".join(response.xpath('//ul[@class="contact-block__list"]//address/text()').getall())
             ),
-            "phone": response.xpath('//ul[@class="contact-block__list"]//a[contains(@href, "tel:")]/@href')
-            .get("")
-            .replace("tel:", ""),
-            "email": response.xpath('//ul[@class="contact-block__list"]//a[contains(@href, "mailto:")]/@href')
-            .get("")
-            .replace("mailto:", ""),
+            "phone": response.xpath('//ul[@class="contact-block__list"]//a[contains(@href, "tel:")]/@href').get(""),
+            "email": response.xpath('//ul[@class="contact-block__list"]//a[contains(@href, "mailto:")]/@href').get(""),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }

@@ -1,21 +1,24 @@
 from typing import Any, AsyncIterator
 
-from scrapy import Selector, Spider
+from scrapy import Selector
 from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class DuluxDecoratorCentreGBSpider(Spider):
+class DuluxDecoratorCentreGBSpider(PlaywrightSpider):
     name = "dulux_decorator_centre_gb"
-    item_attributes = {
-        "brand": "Dulux Decorator Centre",
-        "brand_wikidata": "Q115593557",
-    }
+    item_attributes = {"brand": "Dulux Decorator Centre", "brand_wikidata": "Q115593557"}
     allowed_domains = ["www.duluxdecoratorcentre.co.uk"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    custom_settings = custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
+        "USER_AGENT": BROWSER_DEFAULT,
+        "ROBOTSTXT_OBEY": False,
+    }
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url="https://www.duluxdecoratorcentre.co.uk/store/getstores", cookies={"BVBRANDID": ""})

@@ -2,6 +2,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 LOCATION_TYPE_MAP = {
     "Clinic": Categories.CLINIC,
@@ -26,7 +27,7 @@ class CoxHealthSpider(scrapy.Spider):
             item["ref"] = location["uid"]
             item["street"] = None
             address = location.get("address") or {}
-            item["street_address"] = ", ".join(filter(None, [address.get("street"), address.get("street2")]))
+            item["street_address"] = merge_address_lines([address.get("street"), address.get("street2")])
             item["lat"] = address.get("latitude")
             item["lon"] = address.get("longitude")
             item["phone"] = location.get("kyruus_phone")

@@ -12,7 +12,7 @@ from locations.items import Feature
 
 class MidasAUSpider(Spider):
     name = "midas_au"
-    item_attributes = {"brand": "Midas", "brand_wikidata": "Q118383658"}
+    item_attributes = {"brand": "Midas", "brand_wikidata": "Q3312613"}
     allowed_domains = ["www.midas.com.au"]
     start_urls = ["https://www.midas.com.au/wp-admin/admin-ajax.php?action=get_all_stores"]
 
@@ -24,7 +24,7 @@ class MidasAUSpider(Spider):
         results = Selector(text=response.json()["result_listing"])
         for location in results.xpath('//div[@class = "result-list"]'):
             if phone := location.xpath('.//div/p[2]/a[contains(@href, "tel:")]/@href').get():
-                phone = phone.strip().replace("tel:", "")
+                phone = phone.strip()
             properties = {
                 "ref": location.xpath(".//h4/@data-index").get().strip(),
                 "name": location.xpath(".//h4/text()").get().strip(),

@@ -28,7 +28,6 @@ class StewartsShopsUSSpider(SitemapSpider, StructuredDataSpider):
         item["ref"] = response.url.split("/")[-1]
         item["branch"] = (item.pop("name") or "").split("- #", 1)[0]
 
-        # Parse features from HTML checkmarks
         features = response.xpath('//span[preceding-sibling::img[contains(@alt, "Check mark")]]/text()').getall()
         features = [f.strip().lower() for f in features]
 

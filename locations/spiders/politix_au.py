@@ -1,41 +1,32 @@
-import re
-from typing import AsyncIterator
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
-
-from locations.categories import Categories, Clothes, apply_category, apply_clothes
-from locations.dict_parser import DictParser
+from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class PolitixAUSpider(Spider):
+class PolitixAUSpider(CrawlSpider):
     name = "politix_au"
     item_attributes = {"brand": "Politix", "brand_wikidata": "Q126166036"}
-    start_urls = [
-        "https://www.politix.com.au/on/demandware.store/Sites-politix_au-Site/en_AU/PolitixStores-GetAllStores?countryCode=AU"
-    ]
+    start_urls = ["https://www.politix.com.au/pages/stores"]
+    rules = [Rule(LinkExtractor(r"/pages/stores/[^/]+$"), "parse")]
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url)
-
     def parse(self, response):
-        for location in response.json()["stores"]:
-            # MYER/DAVID_JONES also appear
-            if (
-                location["storeType"]["value"] == "POLITIX_STORES"
-                or location["storeType"]["value"] == "FACTORY_OUTLETS"
-            ):
-                item = DictParser.parse(location)
-                hours_string = re.sub(
-                    r"\s+", " ", location["storeHours"].replace("</p>", "").replace("<p>", "")
-                ).strip()
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_ranges_from_string(hours_string)
-                if " (" in item["name"]:
-                    item["name"] = item["name"].split(" (")[0]
-                apply_category(Categories.SHOP_CLOTHES, item)
-                apply_clothes(Clothes.MEN, item)
-                yield item
+        item = Feature()
+        item["name"] = self.item_attributes["brand"]
+        item["branch"] = response.xpath("//h1/text()").get()
+        item["addr_full"] = merge_address_lines(response.xpath('//*[@class="store-detail__address"]//text()').getall())
+        item["phone"] = response.xpath('//*[@class="store-details__phone-text"]/text()').get()
+        item["ref"] = item["website"] = response.url
+        extract_google_position(item, response)
+        oh = OpeningHours()
+        for hours_text in response.xpath("//tbody//tr"):
+            day = hours_text.xpath("normalize-space()").get()
+            oh.add_ranges_from_string(day)
+        item["opening_hours"] = oh
+        apply_category(Categories.SHOP_CLOTHES, item)
+        yield item

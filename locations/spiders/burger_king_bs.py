@@ -11,7 +11,6 @@ from locations.items import Feature
 from locations.spiders.burger_king import BURGER_KING_SHARED_ATTRIBUTES
 
 
-# Also used by DO, HU, PY
 class BurgerKingBSSpider(Spider):
     name = "burger_king_bs"
     allowed_domains = ["www.burgerking.bs"]

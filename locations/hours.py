@@ -2,6 +2,7 @@ import logging
 import re
 import time
 from collections import defaultdict
+from collections.abc import Sequence
 
 DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 DAYS_FROM_SUNDAY = DAYS[-1:] + DAYS[:-1]
@@ -137,6 +138,7 @@ DAYS_BR = {
     "Sex": "Fr",
     "Sábado": "Sa",
     "Sáb": "Sa",
+    "Domingo": "Su",
     "Domingos": "Su",
     "Dom": "Su",
 }
@@ -240,18 +242,25 @@ DAYS_CZ = {
 DAYS_EE = {
     "Esmaspäev": "Mo",
     "Es": "Mo",
+    "E": "Mo",
     "Teisipäev": "Tu",
     "Te": "Tu",
+    "T": "Tu",
     "Kolmapäev": "We",
     "Ko": "We",
+    "K": "We",
     "Neljapäev": "Th",
     "Ne": "Th",
+    "N": "Th",
     "Reede": "Fr",
     "Re": "Fr",
+    "R": "Fr",
     "Laupäev": "Sa",
     "La": "Sa",
+    "L": "Sa",
     "Pühapäev": "Su",
     "Pü": "Su",
+    "P": "Su",
 }
 
 DAYS_GR = {
@@ -271,11 +280,23 @@ DAYS_GR = {
     "Κυριακή": "Su",
 }
 
+DAYS_AL = {
+    "E Hënë": "Mo",
+    "E Martë": "Tu",
+    "E Mërkurë": "We",
+    "E Enjte": "Th",
+    "E Premte": "Fr",
+    "E Shtunë": "Sa",
+    "E Diel": "Su",
+}
+
 DAYS_HR = {
     "Ponedjeljak": "Mo",
     "Pon": "Mo",
     "Utorak": "Tu",
+    "Uto": "Tu",
     "Srijeda": "We",
+    "Sri": "We",
     "Četvrtak": "Th",
     "Čet": "Th",
     "Petak": "Fr",
@@ -299,6 +320,7 @@ DAYS_HU = {
     # "Sz": "We",
     "Csütörtök": "Th",
     "Csutortok": "Th",
+    "Csüt": "Th",
     "Csü": "Th",
     "Cs": "Th",
     "Péntek": "Fr",
@@ -363,25 +385,39 @@ DAYS_LT = {
 }
 
 DAYS_SE = {
+    "Måndagar": "Mo",
     "Måndag": "Mo",
+    "Månd": "Mo",
     "Mån": "Mo",
     "Må": "Mo",
+    "Tisdagar": "Tu",
     "Tisdag": "Tu",
+    "Tisd": "Tu",
     "Tis": "Tu",
     "Ti": "Tu",
+    "Onsdagar": "We",
     "Onsdag": "We",
+    "Onsd": "We",
     "Ons": "We",
     "On": "We",
+    "Torsdagar": "Th",
     "Torsdag": "Th",
+    "Torsd": "Th",
     "Tors": "Th",
     "To": "Th",
+    "Fredagar": "Fr",
     "Fredag": "Fr",
+    "Fred": "Fr",
     "Fre": "Fr",
     "Fr": "Fr",
+    "Lördagar": "Sa",
     "Lördag": "Sa",
+    "Lörd": "Sa",
     "Lör": "Sa",
     "Lö": "Sa",
+    "Söndagar": "Su",
     "Söndag": "Su",
+    "Sönd": "Su",
     "Sön": "Su",
     "Sö": "Su",
 }
@@ -534,14 +570,24 @@ DAYS_PT = {
     # "Feriado": "PH",
     # "Se": "Mo",
     "Segunda": "Mo",
+    "Segunda-Feira": "Mo",
+    "2ª": "Mo",
     "Te": "Tu",
     "Terça": "Tu",
+    "Terça-Feira": "Tu",
+    "3ª": "Tu",
     # "Qu": "We",
     "Quarta": "We",
+    "Quarta-Feira": "We",
+    "4ª": "We",
     # "Qu": "Th",
     "Quinta": "Th",
+    "Quinta-Feira": "Th",
+    "5ª": "Th",
     # "Se": "Fr",
     "Sexta": "Fr",
+    "Sexta-Feira": "Fr",
+    "6ª": "Fr",
     "Sábado": "Sa",
     "Sa": "Sa",
     "Sá": "Sa",
@@ -589,6 +635,15 @@ DAYS_RU = {
     "Субботу": "Sa",
     "Вс": "Su",
     "Воскресенье": "Su",
+}
+DAYS_GE = {
+    "ორშაბათი": "Mo",
+    "სამშაბათი": "Tu",
+    "ოთხშაბათი": "We",
+    "ხუთშაბათი": "Th",
+    "პარასკევი": "Fr",
+    "შაბათი": "Sa",
+    "კვირა": "Su",
 }
 DAYS_RS = {
     "Ponedeljak": "Mo",
@@ -665,6 +720,7 @@ DAYS_ES = {
     "Lunes": "Mo",
     "Lun": "Mo",
     "Lu": "Mo",
+    "L": "Mo",
     "Martes": "Tu",
     "Mar": "Tu",
     "Ma": "Tu",
@@ -679,26 +735,41 @@ DAYS_ES = {
     "Viernes": "Fr",
     "Vie": "Fr",
     "Vi": "Fr",
+    "V": "Fr",
     "Sabado": "Sa",
     "Sábado": "Sa",
+    "Sabados": "Sa",
     "Sábados": "Sa",
     "Sab": "Sa",
     "Sáb": "Sa",
     "Sa": "Sa",
+    "S": "Sa",
     "Domingo": "Su",
     "Domingos": "Su",
     "Dom": "Su",
     "Do": "Su",
+    "D": "Su",
 }
 
 DAYS_RO = {
     "Luni": "Mo",
+    "L": "Mo",
     "Marți": "Tu",
+    "Marti": "Tu",
+    "Ma": "Tu",
     "Miercuri": "We",
+    "Mi": "We",
     "Joi": "Th",
+    "J": "Th",
     "Vineri": "Fr",
+    "Vi": "Fr",
+    "V": "Fr",
     "Sâmbătă": "Sa",
+    "Sambata": "Sa",
+    "S": "Sa",
     "Duminică": "Su",
+    "Duminica": "Su",
+    "D": "Su",
 }
 
 DAYS_SR = {
@@ -711,6 +782,7 @@ DAYS_SR = {
     "Uto": "Tu",
     "Utorak": "Tu",
     "Уторак": "Tu",
+    "Sre": "We",
     "Sri": "We",
     "Sreda": "We",
     "Среда": "We",
@@ -749,6 +821,16 @@ DAYS_ID = {
     "Sabtu": "Sa",
     "Minggu": "Su",
     "Ahad": "Su",
+}
+
+DAYS_VN = {
+    "Thứ 2": "Mo",
+    "Thứ 3": "Tu",
+    "Thứ 4": "We",
+    "Thứ 5": "Th",
+    "Thứ 6": "Fr",
+    "Thứ 7": "Sa",
+    "Chủ nhật": "Su",
 }
 
 DAYS_TH = {
@@ -790,6 +872,7 @@ DAYS_IS = {
     "Fim": "Th",
     "Fimmtudagur": "Th",
     "Fös": "Fr",
+    "Föst": "Fr",
     "Föstudagur": "Fr",
     "Lau": "Sa",
     "Laugardagur": "Sa",
@@ -880,6 +963,11 @@ DAYS_BY_FREQUENCY = [
 
 NAMED_DAY_RANGES_DK = {
     "Hverdage": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],  # Weekdays
+}
+
+NAMED_DAY_RANGES_SE = {
+    "Vardagar": ["Mo", "Tu", "We", "Th", "Fr"],  # Weekdays
+    "Vardag": ["Mo", "Tu", "We", "Th", "Fr"],
 }
 
 NAMED_DAY_RANGES_EN = {
@@ -1087,6 +1175,18 @@ def _normalise_hour_over_24(value: str) -> tuple[str, bool]:
     return f"{hour_int - 24:02d}{sep}{rest}", True
 
 
+def _strptime(value: str, time_format: str | Sequence[str]) -> time.struct_time:
+    """Parse `value` with `time_format`, or with the first of several formats that matches."""
+    if isinstance(time_format, str):
+        return time.strptime(value, time_format)
+    for fmt in time_format:
+        try:
+            return time.strptime(value, fmt)
+        except ValueError:
+            pass
+    raise ValueError(f"time data {value!r} does not match any of the formats {list(time_format)!r}")
+
+
 class OpeningHours:
     def __init__(self):
         self.day_hours = defaultdict(set)
@@ -1100,7 +1200,7 @@ class OpeningHours:
         days: list[str],
         open_time: str | time.struct_time,
         close_time: str | time.struct_time,
-        time_format: str = "%H:%M",
+        time_format: str | Sequence[str] = "%H:%M",
     ):
         for day in days:
             self.add_range(day, open_time, close_time, time_format=time_format)
@@ -1141,9 +1241,18 @@ class OpeningHours:
         day,
         open_time: str | time.struct_time,
         close_time: str | time.struct_time,
-        time_format: str = "%H:%M",
+        time_format: str | Sequence[str] = "%H:%M",
         closed: list[str] = CLOSED_EN,
     ):
+        """
+
+        :param day:
+        :param open_time:
+        :param close_time:
+        :param time_format: common formats include "%I:%M%p" and "%H:%M:%S"
+        :param closed:
+        :return:
+        """
         day = sanitise_day(day)
 
         if day not in DAYS:
@@ -1189,9 +1298,9 @@ class OpeningHours:
         if open_after_midnight:
             day = DAYS[(DAYS.index(day) + 1) % len(DAYS)]
         if not isinstance(open_time, time.struct_time):
-            open_time = time.strptime(open_time, time_format)
+            open_time = _strptime(open_time, time_format)
         if not isinstance(close_time, time.struct_time):
-            close_time = time.strptime(close_time, time_format)
+            close_time = _strptime(close_time, time_format)
             if close_time.tm_hour == 0 and close_time.tm_min == 0:
                 # weird format not caught by checks above
                 # may be 0:00 or even more divergent if time_format
@@ -1207,9 +1316,6 @@ class OpeningHours:
         self.day_hours[day].add((open_time, close_time))
 
     def as_opening_hours(self) -> str:
-        day_groups = []
-        this_day_group = None
-
         # usually ; works fine as a separator between different days
         # but it has an annoying quirk, in OpenStreetMap opening_hours syntax
         # it overrides previous definitions
@@ -1238,6 +1344,9 @@ class OpeningHours:
                         self.days_closed.remove(next_day)
                 else:
                     day_hours_midnight_split[day].add(h)
+        # Days with identical hours are grouped together even when they are not
+        # adjacent, e.g. "Mo,We,Fr 08:00-12:00; Tu,Th,Sa-Su closed".
+        days_by_hours = defaultdict(list)
         for day in DAYS:
             if day in self.days_closed:
                 hours = "closed"
@@ -1250,32 +1359,21 @@ class OpeningHours:
                     )
                     for h in sorted(day_hours_midnight_split[day])
                 )
+            if hours:
+                days_by_hours[hours].append(day)
 
-            if not this_day_group:
-                this_day_group = {"from_day": day, "to_day": day, "hours": hours}
-            elif this_day_group["hours"] != hours:
-                day_groups.append(this_day_group)
-                this_day_group = {"from_day": day, "to_day": day, "hours": hours}
-            elif this_day_group["hours"] == hours:
-                this_day_group["to_day"] = day
+        return "; ".join(f"{self._format_days(days)} {hours}" for hours, days in days_by_hours.items())
 
-        if this_day_group is not None:
-            day_groups.append(this_day_group)
-
-        opening_hours = ""
-
-        for day_group in day_groups:
-            if not day_group["hours"]:
-                continue
-            elif day_group["from_day"] == day_group["to_day"]:
-                opening_hours += "{from_day} {hours}; ".format(**day_group)
-            elif day_group["from_day"] == "Su" and day_group["to_day"] == "Sa":
-                opening_hours += "{hours}; ".format(**day_group)
+    @staticmethod
+    def _format_days(days: list[str]) -> str:
+        """Format days in week order as OSM day runs, e.g. ["Mo", "Tu", "Th"] as "Mo-Tu,Th"."""
+        runs = []
+        for day in days:
+            if runs and DAYS.index(day) == DAYS.index(runs[-1][1]) + 1:
+                runs[-1][1] = day
             else:
-                opening_hours += "{from_day}-{to_day} {hours}; ".format(**day_group)
-        opening_hours = opening_hours[:-2]
-
-        return opening_hours
+                runs.append([day, day])
+        return ",".join(first if first == last else f"{first}-{last}" for first, last in runs)
 
     @staticmethod
     def delimiters_regex(delimiters: list[str] = DELIMITERS_EN) -> str:

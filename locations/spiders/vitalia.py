@@ -25,5 +25,5 @@ class VitaliaSpider(CrawlSpider):
             '//span[contains(., "Anschrift:")]/following-sibling::span/text()'
         ).get()
         item["postcode"] = response.xpath('//span[contains(., "PLZ:")]/following-sibling::span/text()').get()
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/@href').get().replace("tel:", "")
+        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/@href').get()
         yield item

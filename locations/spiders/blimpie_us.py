@@ -9,10 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
-# Blimpie uses the Kahala Brands store locator, which writes every store onto
-# the locator page as a series of Locator.stores[n] = {...} JavaScript
-# assignments. No opening hours are published.
-
 
 class BlimpieUSSpider(Spider):
     name = "blimpie_us"

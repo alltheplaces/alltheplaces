@@ -1,33 +1,25 @@
-import re
+from typing import Any
 
-from scrapy import Selector, Spider
+from scrapy.http import Response
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class UpdateFitnessCHSpider(Spider):
+class UpdateFitnessCHSpider(StructuredDataSpider):
     name = "update_fitness_ch"
     item_attributes = {"brand": "update Fitness", "brand_wikidata": "Q117406567"}
     start_urls = ["https://www.update-fitness.ch/standorte/"]
 
-    def parse(self, response, **kwargs):
-        script = response.xpath('//script[contains(text(), "markers")]/text()').get()
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for studio in response.xpath(
+            '//a[@data-locations-studio][@data-is-soon="false"][@data-is-presale="false"]/@href'
+        ).getall():
+            yield response.follow(studio, callback=self.parse_sd)
 
-        for lat, lon, html in re.findall(
-            r"new L\.LatLng\((-?\d+\.\d+), (-?\d+\.\d+)\), .+\.bindPopup\(\"(.+)\"\);", script
-        ):
-            item = Feature()
-            item["lat"] = lat
-            item["lon"] = lon
-
-            html_selector = Selector(text=html.replace("\\'", '"'))
-
-            item["image"] = html_selector.xpath("//img/@src").get()
-            item["website"] = item["ref"] = html_selector.xpath("//a/@href").get()
-            item["name"] = html_selector.xpath("//a/text()").get().strip()
-            item["addr_full"] = merge_address_lines(
-                html_selector.xpath('//div[@class="location-content"]//p[not(span)]/text()').getall()
-            )
-
-            yield item
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
+        item["branch"] = (item.pop("name", None) or "").removeprefix("update Fitness ")
+        item["website"] = item["ref"] = response.url
+        apply_category(Categories.GYM, item)
+        yield item

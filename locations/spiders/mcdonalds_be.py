@@ -3,7 +3,7 @@ from typing import Any
 
 from scrapy.http import Response
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.playwright_spider import PlaywrightSpider
@@ -50,4 +50,5 @@ class McdonaldsBESpider(PlaywrightSpider):
             apply_yes_no(Extras.DELIVERY, item, 15 in service_ids, False)
             apply_yes_no(Extras.WIFI, item, 1 in service_ids, False)
 
+            apply_category(Categories.FAST_FOOD, item)
             yield item

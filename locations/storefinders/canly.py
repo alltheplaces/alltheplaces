@@ -5,7 +5,7 @@ from scrapy import Spider
 from scrapy.http import JsonRequest, Request, Response, TextResponse
 
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 
@@ -39,7 +39,9 @@ class CanlySpider(Spider):
             oh = OpeningHours()
             if item_hours := feature.get("businessHours"):
                 for day_hours in item_hours:
-                    oh.add_range(day_hours["name"], day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
+                    # Public holiday entries (HOLIDAY, BEFORE_HOLIDAY) are skipped.
+                    if day := sanitise_day(day_hours["name"]):
+                        oh.add_range(day, day_hours["openTime"], day_hours["closeTime"], "%H:%M:%S")
             item["opening_hours"] = oh
 
             if self._fetches_detail_pages():

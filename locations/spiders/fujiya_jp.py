@@ -11,8 +11,9 @@ from locations.storefinders.mapion import MapionSpider
 class FujiyaJPSpider(MapionSpider):
     name = "fujiya_jp"
     item_attributes = {"brand": "不二家", "brand_wikidata": "Q858452"}
-    allowed_domains = ["shop.fujiya-peko.co.jp"]
-    feature_url_template = "https://shop.fujiya-peko.co.jp/b/fujiya/attr/?t=attr_con&start={}"
+    allowed_domains = ["lbs.mapion.co.jp"]
+    api_group = "fujiya"
+    website_template = "https://shop.fujiya-peko.co.jp/b/fujiya/info/{}/"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["name"] = None

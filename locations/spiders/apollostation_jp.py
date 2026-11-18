@@ -10,8 +10,10 @@ from locations.storefinders.mapion import MapionSpider
 class ApollostationJPSpider(MapionSpider):
     name = "apollostation_jp"
     item_attributes = {"brand": "apollostation", "brand_wikidata": "Q114731101"}
-    allowed_domains = ["map.idemitsu.com"]
-    feature_url_template = "https://map.idemitsu.com/b/a/attr/?t=attr_con&kind=0&start={}"
+    allowed_domains = ["lbs.mapion.co.jp"]
+    api_group = "apollostation"
+    website_template = "https://map.idemitsu.com/b/a/info/{}/"
+    additional_args = "&kind=0"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["name"] = None

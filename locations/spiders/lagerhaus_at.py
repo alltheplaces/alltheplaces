@@ -1,36 +1,61 @@
-from typing import Any
+import re
+from typing import Any, Iterable
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
-from locations.google_url import extract_google_position
-from locations.hours import DAYS_DE, OpeningHours, sanitise_day
+from locations.categories import Categories, apply_category
 from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
+
+CATEGORIES = [
+    # Shell branded stations are collected by the shell spider
+    (r"Shell", None),
+    (r"Tankstelle|Tankautomat", Categories.FUEL_STATION),
+    (r"Werkst", Categories.SHOP_CAR_REPAIR),
+    (r"Autohaus", Categories.SHOP_CAR),
+    (r"Bau|Garten", Categories.SHOP_DOITYOURSELF),
+    (r"Agrar|Technik|TECHNIK|Steyr Center", Categories.SHOP_AGRARIAN),
+    (r"Reifen", Categories.SHOP_TYRES),
+    (r"Elektrotechnik", Categories.SHOP_ELECTRONICS),
+    (
+        r"Verwaltung|Zentrale|Silo|Online|Mühle|Mischfutter|Energie|Edelstahl"
+        r"|\bArena\b|\bLager |GmbH|eGen|\bWein|\bSPAR|\bSpar",
+        None,
+    ),
+]
 
 
-class LagerhausATSpider(SitemapSpider):
+class LagerhausATSpider(SitemapSpider, StructuredDataSpider):
     name = "lagerhaus_at"
     item_attributes = {"brand": "Lagerhaus", "brand_wikidata": "Q1232873"}
     sitemap_urls = ["https://lagerhaus.at/sitemap/index.xml"]
-    sitemap_rules = [("/standort/", "parse")]
+    sitemap_rules = [("/standort/", "parse_sd")]
     sitemap_follow = ["locations"]
+    wanted_types = ["LocalBusiness"]
+    time_format = "%H:%M:%S"
+    search_for_twitter = False
+    search_for_facebook = False
+    search_for_image = False
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        item = Feature()
-        item["name"] = response.xpath("//h1").xpath("normalize-space()").get()
-        item["addr_full"] = response.xpath('//*[@class="A5SKTxfddRWFz7lYLFXx"]').xpath("normalize-space()").get()
-        item["ref"] = item["website"] = response.url
-        extract_google_position(item, response)
-        item["opening_hours"] = OpeningHours()
-        for day_time in response.xpath('//*[@class="crIzOQn7PNuYkyfoUq9P"]//*[@class="m4VniD5GavaCh3bqMUKm"]'):
-            day = sanitise_day(
-                day_time.xpath('.//*[@class="HUI8SAWj6xc116qIMHGC GtBm40epTsrl8DTPJIA_"]/text()').get(), DAYS_DE
-            )
-            for time_string in day_time.xpath(".//li"):
-                time = time_string.xpath(".//text()").get()
-                if "geschlossen" in time:
-                    item["opening_hours"].set_closed(day)
-                else:
-                    open_time, close_time = time.replace("Uhr", "").split("-")
-                    item["opening_hours"].add_range(day=day, open_time=open_time.strip(), close_time=close_time.strip())
+    def pre_process_data(self, ld_data: dict, **kwargs: Any) -> None:
+        ld_data["openingHoursSpecification"] = [
+            rule for rule in ld_data.get("openingHoursSpecification", []) if "validFrom" not in rule
+        ]
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        name = item.pop("name")
+        if "geschlossen" in name:
+            return
+        for pattern, category in CATEGORIES:
+            if re.search(pattern, name):
+                if not category:
+                    return
+                apply_category(category, item)
+                break
+        else:
+            apply_category(Categories.SHOP_DOITYOURSELF, item)
+        item["branch"] = re.sub(r"^RGO\||\bLagerhaus\b-?", "", name).strip(" -")
+        item.pop("facebook", None)
+        item.pop("image", None)
         yield item

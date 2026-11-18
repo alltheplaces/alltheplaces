@@ -56,6 +56,8 @@ class CaliberCollisionUSSpider(JSONBlobSpider):
 
         if location.get("status") == "closed" or location.get("closeDate"):
             set_closed(item, self.parse_date(location.get("closeDate")))
+        elif location.get("status") == "inactive" and not (start_date and start_date > datetime.now()):
+            set_closed(item)  # An inactive location with a future openDate is an upcoming opening, not a closure
 
         if services := {key for service in location.get("serviceType") or [] for key in service}:
             body_repair = bool(services & {"collision", "fleetCare"})

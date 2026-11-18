@@ -6,8 +6,6 @@ from scrapy.spiders import Spider
 from locations.items import Feature
 
 
-# Sitemap is incomplete - 534 shops but only 218 on sitemap
-# No location available
 class CancerResearchUkGBSpider(Spider):
     name = "cancer_research_uk_gb"
     item_attributes = {"brand": "Cancer Research UK", "brand_wikidata": "Q326079", "country": "GB"}

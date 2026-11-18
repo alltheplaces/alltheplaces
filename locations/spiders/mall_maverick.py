@@ -21,9 +21,6 @@ SOCIAL_MEDIA_MAP = {
     "youtube": SocialMedia.YOUTUBE,
 }
 
-# stores could be obtained from https://api.mallmaverick.com/properties/{ref}/stores
-# However coords is relative to a none north facing svg
-
 
 class MallMaverickSpider(Spider):
     name = "mall_maverick"

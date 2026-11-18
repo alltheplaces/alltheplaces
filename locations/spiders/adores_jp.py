@@ -64,7 +64,6 @@ class AdoresJPSpider(Spider):
         item = Feature()
         item["ref"] = ref
         item["branch"] = name.removeprefix("アドアーズプラス").removeprefix("アドアーズ").strip()
-        item["country"] = "JP"
         item["phone"] = phone or None
         item["website"] = response.url
 

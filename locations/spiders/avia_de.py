@@ -12,6 +12,7 @@ from locations.categories import (
     map_payment,
 )
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 AVIA_SHARED_ATTRIBUTES = {
     "brand": "Avia",
@@ -99,7 +100,14 @@ class AviaDESpider(scrapy.Spider):
 
             apply_category(Categories.FUEL_STATION, item)
 
-            # TODO: Opening hours
+            item["opening_hours"] = oh = OpeningHours()
+            for day, rules in optional["openingHours"]["tanken"]["oeffnungszeit"]["detail"].items():
+                times = rules["detail"]
+                if times == "geschlossen":
+                    oh.set_closed(day)
+                    continue
+                for time in [times] if isinstance(times, dict) else times:
+                    oh.add_range(day, time["from"], time["to"])
             yield item
 
     def parse_attribute(self, item, values: list, attribute_name, mapping: dict):

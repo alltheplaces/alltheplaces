@@ -6,19 +6,9 @@ from scrapy import Selector
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import DAYS_AL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
-
-DAYS_SQ = {
-    "E Hënë": "Mo",
-    "E Martë": "Tu",
-    "E Mërkurë": "We",
-    "E Enjte": "Th",
-    "E Premte": "Fr",
-    "E Shtunë": "Sa",
-    "E Diel": "Su",
-}
 
 
 class BpbXKSpider(JSONBlobSpider):
@@ -48,7 +38,7 @@ class BpbXKSpider(JSONBlobSpider):
         opening_hours.add_ranges_from_string(
             # Stray closing tag would otherwise run Saturday's hours into Friday's.
             " ".join(Selector(text=location["text"].replace("</br>", "<br/>")).xpath("//text()").getall()),
-            days=DAYS_SQ,
+            days=DAYS_AL,
         )
         if opening_hours:
             item["opening_hours"] = opening_hours

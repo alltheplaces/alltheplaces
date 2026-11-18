@@ -4,6 +4,12 @@ After an `Item` is emitted from a spider, it goes through several pipelines befo
 If a spider needs to disable these pipelines, they can by overriding `ITEM_PIPELINES` in `custom_settings`.
 See [`fedex.py`](../locations/spiders/fedex.py) for an example.
 
+### `DuplicatesPipeline`
+
+Items with a `ref` the spider has already produced are dropped.
+Spiders should not do their own de-duplication (no `seen_refs` sets), just emit every item with a stable `ref`.
+A spider with no meaningful `ref` can set `no_refs = True` to skip this.
+
 ### `DropAttributesPipeline`
 
 When a spider has `drop_attributes`, we remove those attributes from `Feature`s, this happens early, so it may be re added by other pipelines later on.

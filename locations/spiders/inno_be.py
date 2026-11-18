@@ -23,10 +23,9 @@ class InnoBESpider(CrawlSpider):
             "addr_full": response.xpath('//h2[@class="store-detail__address"]/text()').get(),
             "phone": response.xpath('//a[contains(@class, "store-detail__phone")]/@href')
             .get()
-            .removeprefix("tel:")
             .replace("/", "")
             .replace(".", ""),
-            "email": response.xpath('//a[contains(@class, "store-detail__email")]/@href').get().removeprefix("mailto:"),
+            "email": response.xpath('//a[contains(@class, "store-detail__email")]/@href').get(),
             "opening_hours": OpeningHours(),
         }
         apply_category(Categories.SHOP_DEPARTMENT_STORE, properties)

@@ -3,7 +3,7 @@ from typing import Any
 from scrapy import Spider
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
@@ -11,7 +11,7 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class VuoriSpider(Spider):
     name = "vuori"
-    item_attributes = {"brand": "Vuori", "brand_wikidata": "Q121878733", "extras": Categories.SHOP_CLOTHES.value}
+    item_attributes = {"brand": "Vuori", "brand_wikidata": "Q121878733"}
     start_urls = ["https://vuoriclothing.com/api/store-locations"]
     no_refs = True
 
@@ -33,5 +33,7 @@ class VuoriSpider(Spider):
             for line in location["workingHours"]:
                 hours.add_ranges_from_string(line)
             item["opening_hours"] = hours
+
+            apply_category(Categories.SHOP_CLOTHES, item)
 
             yield item

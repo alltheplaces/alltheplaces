@@ -23,7 +23,6 @@ class MatoppetSESpider(JSONBlobSpider):
 
     def post_process_item(self, item, response, location):
         item["branch"] = item.pop("name", None)
-        item["country"] = "SE"
         if store_link := location.get("StoreLinkString"):
             item["website"] = "https://www.matoppet.se" + store_link
         apply_category(Categories.SHOP_SUPERMARKET, item)

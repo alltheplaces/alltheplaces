@@ -1,26 +1,79 @@
+import json
 import re
+from typing import Any, AsyncIterator
 
-from scrapy.spiders import SitemapSpider
+from scrapy import Request, Spider
+from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
-from locations.google_url import url_to_coords
-from locations.structured_data_spider import StructuredDataSpider
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class SocoocFRSpider(SitemapSpider, StructuredDataSpider):
+class SocoocFRSpider(Spider):
     name = "socooc_fr"
     item_attributes = {"brand": "SoCoo'c", "brand_wikidata": "Q62783840"}
-    sitemap_urls = ["https://www.socooc.com/sitemap.xml"]
-    sitemap_rules = [(r"/magasin/socooc-[^/]+$", "parse_sd")]
-    wanted_types = ["Store"]
-    drop_attributes = {"image"}
+    api_requested = False
 
-    def post_process_item(self, item, response, ld_data, **kwargs):
-        # Coordinates are only available embedded in a Google Maps embed URL
-        # inside an Angular state JSON blob, not as an iframe/anchor tag, so
-        # extract_google_position()'s xpath-based discovery can't find it.
-        if m := re.search(r'"virtualTour":\{"url":"(https://www\.google\.com/maps/embed\?pb=[^"]*)"', response.text):
-            item["lat"], item["lon"] = url_to_coords(m.group(1))
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request("https://www.socooc.com/", callback=self.parse_home)
 
-        apply_category(Categories.SHOP_KITCHEN, item)
-        yield item
+    def parse_home(self, response: Response, **kwargs: Any) -> Any:
+        for chunk in response.xpath('//link[@rel="modulepreload"]/@href').getall():
+            yield response.follow(chunk, callback=self.parse_chunk)
+
+    def parse_chunk(self, response: Response, **kwargs: Any) -> Any:
+        if self.api_requested:
+            return
+        if m := re.search(r'fournierWebservice:\{apiKey:"<Bearer>([^"]+)"', response.text):
+            self.api_requested = True
+            yield JsonRequest(
+                "https://api.socooc.com/elasticsearch?networkId=195&q=AllStores",
+                data={
+                    "query": "_search",
+                    "index": "indice-socooc-store",
+                    "body": {
+                        "query": {
+                            "bool": {
+                                "filter": [
+                                    {"term": {"search_api_datasource": "entity:node"}},
+                                    {"term": {"search_api_language": "fr"}},
+                                ]
+                            }
+                        },
+                        "from": 0,
+                        "size": 10000,
+                    },
+                },
+                headers={"Authorization": f"Bearer {m.group(1)}"},
+                callback=self.parse_stores,
+            )
+
+    def parse_stores(self, response: Response, **kwargs: Any) -> Any:
+        for hit in response.json()["hits"]["hits"]:
+            location = hit["_source"]
+            if location.get("operational_status") or location.get("field_temporary_close") == [True]:
+                continue
+
+            item = Feature()
+            item["ref"] = item["website"] = "https://www.socooc.com" + location["url"][0]
+            item["lat"] = location["lat"][0]
+            item["lon"] = location["lon"][0]
+            item["street_address"] = merge_address_lines(
+                [location["field_adresse_1"][0], *location.get("field_adresse_2", [])]
+            )
+            item["postcode"] = location["field_code_postal"][0]
+            item["phone"] = location["field_tel"][0]
+            item["branch"] = re.sub(r"^so\s?coo['’]?c\s*", "", location["title"][0], flags=re.IGNORECASE)
+
+            item["opening_hours"] = oh = OpeningHours()
+            for day, hours in json.loads(location["weekly_opening_hours"][0]).items():
+                if hours["isOpen"]:
+                    for slot in hours["timeSlots"]:
+                        oh.add_range(day, slot["start"], slot["end"])
+                else:
+                    oh.set_closed(day)
+
+            apply_category(Categories.SHOP_KITCHEN, item)
+            yield item

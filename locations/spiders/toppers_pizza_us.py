@@ -39,7 +39,7 @@ class ToppersPizzaUSSpider(Spider):
             item["state"] = spans[0].strip()
             item["postcode"] = spans[1].strip()
 
-        item["phone"] = response.css(".location-phone a::attr(href)").get("").removeprefix("tel:").strip() or None
+        item["phone"] = response.css(".location-phone a::attr(href)").get("").strip() or None
 
         if m := re.search(r"latitude:\s*([\-\d.]+),\s*longitude:\s*([\-\d.]+)", response.text):
             item["lat"], item["lon"] = m.group(1), m.group(2)

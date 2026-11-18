@@ -34,15 +34,16 @@ class GlobusDESpider(JSONBlobSpider):
             feature[en] = feature.pop(de, None)
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        if feature["betriebsstaette"] == "FMZ":
+            # Retail park entries duplicate the stores within them
+            return
         categories = {
             "ARC": Categories.SHOP_WHOLESALE,
             "GC": Categories.SHOP_BEVERAGES,
-            "RES": Categories.RESTAURANT,
+            "RS": Categories.RESTAURANT,
             "SBW": Categories.SHOP_SUPERMARKET,
             "TS": Categories.FUEL_STATION,
             "WS": Categories.CAR_WASH,
-            "FMZ": None,
-            "RS": None,
         }
         if cat := categories.get(feature["betriebsstaette"]):
             apply_category(cat, item)

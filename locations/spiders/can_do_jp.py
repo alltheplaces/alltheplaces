@@ -1,31 +1,30 @@
-from typing import Any
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.lang_utils import katakana_to_hiragana
+from locations.storefinders.canly import CanlySpider
 
 
-class CanDOJPSpider(Spider):
+class CanDOJPSpider(CanlySpider):
     name = "can_do_jp"
     item_attributes = {
         "brand": "キャンドゥ",
         "brand_wikidata": "Q11297367",
     }
-    start_urls = ["https://g9ey9rioe.api.hp.can-ly.com/v2/companies/1209/shops/search"]
+    brand_key = "1209"
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["shops"]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if feature.get("businessStatus") == "CLOSED_PERMANENTLY":
+            return
 
-            item = DictParser.parse(store)
-            item["name"] = "キャンドゥ"
-            item["ref"] = store["storeCode"]
-            item["website"] = f"https://shopinfo.cando-web.co.jp/detail/{store['storeCode']}/"
-            if store["phoneNumber"] is not None:
-                item["phone"] = f"+81 {store['phoneNumber']}"
-            item["branch"] = store["nameKanji"].removeprefix("Can★Doセレクト").removeprefix("Can★Do")
-            item["extras"]["branch:ja-Hira"] = store["nameKana"]
-            item["postcode"] = store["postalCode"]
-            item["addr_full"] = store["address"]
+        item["name"] = "キャンドゥ"
+        item["branch"] = feature["nameKanji"].removeprefix("Can★Doセレクト").removeprefix("Can★Do").strip()
+        if kana := feature.get("nameKana"):
+            item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(kana)
+        item["website"] = f"https://shopinfo.cando-web.co.jp/detail/{feature['storeCode']}/"
+        if phone := feature.get("phoneNumber"):
+            item["phone"] = f"+81 {phone}"
 
-            yield item
+        yield item

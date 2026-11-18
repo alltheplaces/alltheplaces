@@ -9,16 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
-# Pinkberry is a Kahala Brands franchise, and its locator page writes every
-# shop onto the page as a series of Locator.stores[n] = {...} JavaScript
-# assignments. Shops that have not opened yet are marked "Coming Soon".
-#
-# The Name field is a free text label — sometimes the city and state, sometimes
-# the mall or airport terminal — so it is only kept as the branch when it adds
-# something the address does not.
-#
-# No opening hours are published.
-
 
 class PinkberryUSSpider(Spider):
     name = "pinkberry_us"

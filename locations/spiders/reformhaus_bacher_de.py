@@ -14,3 +14,6 @@ class ReformhausBacherDESpider(WPStoreLocatorSpider):
         "www.reformhaus-bacher.de",
     ]
     days = DAYS_EN
+    start_urls = [
+        "https://www.reformhaus-bacher.de/wp-admin/admin-ajax.php?action=store_search&lat=51.165691&lng=10.451526&max_results=200&search_radius=10000&distance_unit=km"
+    ]

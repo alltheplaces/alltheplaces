@@ -1,3 +1,9 @@
+import re
+
+from scrapy import Selector
+
+from locations.categories import Categories, apply_category
+from locations.hours import DAYS_RO, OpeningHours
 from locations.storefinders.elfsight import ElfsightSpider
 
 
@@ -11,8 +17,14 @@ class AnimaxROSpider(ElfsightSpider):
 
     def post_process_item(self, item, response, location):
         item["street_address"] = location.pop("position")
-        # TODO: Parse hours from:
-        #  'infoDescription': 'Drumul Ciorogârla 295-291&nbsp;Jud. Ilfov\nPetshop &amp; punct farmaceutic<div><br></div><div>☎&nbsp;0725.888.814</div><div>✉ chiajna@animax.ro </div><div><br></div><div>Luni 09:00 AM - 09:00 PM</div><div>Marti 09:00 AM -
-        #  09:00 PM</div><div>Miercuri 09:00 AM - 09:00 PM</div><div>Joi 09:00 AM - 09:00 PM</div>
-        #  <div>Vineri 09:00 AM - 09:00 PM</div><div>Sambata 09:00 AM - 09:00 PM</div><div>Duminica 09:00 AM - 07:00 PM</div>',
+        item["branch"] = item.pop("name")
+        text = "\n".join(Selector(text=location["infoDescription"]).xpath("//text()").getall()).replace("\xa0", " ")
+        text = re.sub(r"(\d+:\d\d) AM\s*-\s*((?:1[3-9]|2[0-3]):\d\d) PM", r"\1 - \2", text)
+        if match := re.search(r"☎\s*([\d.\s]+\d)", text):
+            item["phone"] = match.group(1)
+        if match := re.search(r"✉\s*(\S+@\S+)", text):
+            item["email"] = match.group(1)
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(text, days=DAYS_RO)
+        apply_category(Categories.SHOP_PET, item)
         yield item

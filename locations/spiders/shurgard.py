@@ -1,6 +1,11 @@
+from typing import Iterable
+
+from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
+from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -18,12 +23,23 @@ class ShurgardSpider(CrawlSpider, StructuredDataSpider):
         "https://www.shurgard.com/en-gb/self-storage-uk",
     ]
 
+    # Store pages sit below city pages, which only carry a summary of their stores
     rules = [
-        Rule(LinkExtractor("/opslagruimte-huren/"), callback="parse_sd"),
-        Rule(LinkExtractor("/opbevaringsrum/"), callback="parse_sd"),
-        Rule(LinkExtractor("/garde-meuble/"), callback="parse_sd"),
-        Rule(LinkExtractor("/lagerraum-mieten/"), callback="parse_sd"),
-        Rule(LinkExtractor("/opslagruimte-in-nederland/"), callback="parse_sd"),
-        Rule(LinkExtractor("-forrad/"), callback="parse_sd"),
-        Rule(LinkExtractor("/self-storage-uk/"), callback="parse_sd"),
+        Rule(LinkExtractor(r"/opslagruimte-huren/[^/]+/[^/]+"), callback="parse_sd"),
+        Rule(LinkExtractor(r"/opbevaringsrum/[^/]+/[^/]+"), callback="parse_sd"),
+        Rule(LinkExtractor(r"/garde-meuble/[^/]+/[^/]+"), callback="parse_sd"),
+        Rule(LinkExtractor(r"/lagerraum-mieten/[^/]+/[^/]+"), callback="parse_sd"),
+        Rule(LinkExtractor(r"/opslagruimte-in-nederland/[^/]+/[^/]+"), callback="parse_sd"),
+        Rule(LinkExtractor(r"-forrad/[^/]+/[^/]+"), callback="parse_sd"),
+        Rule(LinkExtractor(r"/self-storage-uk/[^/]+/[^/]+"), callback="parse_sd"),
     ]
+    time_format = "%I:%M %p"
+
+    def pre_process_data(self, ld_data: dict, **kwargs) -> None:
+        ld_data["openingHoursSpecification"] = [
+            rule for rule in ld_data.get("openingHoursSpecification") or [] if rule.get("name") == "Office hours"
+        ]
+
+    def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        apply_category(Categories.SHOP_STORAGE_RENTAL, item)
+        yield item

@@ -15,8 +15,8 @@ class DominosPizzaInternationalSpider(JSONBlobSpider):
     dataset_attributes: dict = {"source": "api", "api": "dominos_pizza"}
 
     item_attributes: dict = {"brand": "Domino's", "brand_wikidata": "Q839466"}
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
-    locations_key: str | list[str] = "Stores"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+    locations_key = "Stores"
 
     domain: str = "order.golo03.dominos.com"
     region_code: str

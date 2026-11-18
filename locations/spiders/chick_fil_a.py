@@ -35,6 +35,11 @@ class ChickFilASpider(YextSearchSpider):
         apply_yes_no(Extras.INDOOR_SEATING, item, location["profile"].get("c_fullDineIn") is True)
         apply_yes_no(Extras.TAKEAWAY, item, location["profile"].get("c_carryout") is True)
 
+        playground = location["profile"].get("c_playground")
+        if playground in ("interior", "none"):
+            apply_yes_no(Extras.KIDS_AREA, item, playground == "interior", False)
+            apply_yes_no("kids_area:indoor", item, playground == "interior")
+
         item["branch"] = location["profile"].get("c_locationName")
 
         yield item

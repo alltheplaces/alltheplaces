@@ -15,7 +15,7 @@ class BurgerKingINSpider(SitemapSpider, StructuredDataSpider):
     time_format = "%I:%M %p"
     search_for_twitter = False
     search_for_facebook = False
-    wanted_types = ["Restaurant"]  # Duplicate items in SD on each page
+    wanted_types = ["Store"]  # Several SD objects per store; only Store has hours
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         apply_category(Categories.FAST_FOOD, item)

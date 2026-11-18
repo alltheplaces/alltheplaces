@@ -69,7 +69,6 @@ class CampingWorldUSSpider(scrapy.Spider):
             item["postcode"] = store["billingpostalcode"]
             item["city"] = store["billingcity"]
             item["state"] = store["billingstatecode"]
-            item["country"] = "US"
             item["phone"] = store["phone"]
             item["website"] = f"https://rv.campingworld.com/dealer/{store['dealer_url']}"
             item["opening_hours"] = self.parse_hours(store.get("hours") or [])

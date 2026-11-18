@@ -6,7 +6,7 @@ from scrapy.http import Response
 from scrapy.spiders import XMLFeedSpider
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.hours import CLOSED_FR, DAYS_FR, DELIMITERS_FR, OpeningHours
 from locations.items import Feature
 from locations.spiders.printemps import PrintempsSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -15,8 +15,8 @@ from locations.user_agents import BROWSER_DEFAULT
 class TaraJarmonSpider(XMLFeedSpider):
     name = "tara_jarmon"
     item_attributes = {"brand": "Tara Jarmon", "brand_wikidata": "Q141580805", "name": "Tara Jarmon"}
-    allowed_domains = ["en.tarajarmon.com"]
-    start_urls = ["https://en.tarajarmon.com/ajax_generate_xml_map.php"]
+    allowed_domains = ["www.tarajarmon.com"]
+    start_urls = ["https://www.tarajarmon.com/ajax_generate_xml_map.php"]
     itertag = "marqueur"
     # The bot user agent is redirected to google.com.
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
@@ -36,7 +36,7 @@ class TaraJarmonSpider(XMLFeedSpider):
         # Monaco is listed under France.
         if item["postcode"] and item["postcode"].startswith("980"):
             country = "MC"
-        item["country"] = {"Swiss": "CH"}.get(country, country)
+        item["country"] = {"Suisse": "CH"}.get(country, country)
         item["lat"] = selector.xpath("@lat").get()
         item["lon"] = selector.xpath("@lng").get()
         item["phone"] = selector.xpath("@telephone").get()
@@ -45,19 +45,20 @@ class TaraJarmonSpider(XMLFeedSpider):
             item["website"] = response.urljoin(url)
 
         branch = " ".join(selector.xpath("@nom").get("").split())
+        branch = re.sub(r"^(magasin d'usine )?tara jarmon\s+", "", branch, flags=re.IGNORECASE)
         for key, attributes in self.located_in_brands.items():
             if branch.upper().startswith(f"{key} "):
                 item["located_in"] = attributes["brand"]
                 item["located_in_wikidata"] = attributes["brand_wikidata"]
                 branch = branch[len(key) :]
                 break
-        item["branch"] = re.sub(r"^tara jarmon\s+", "", branch.strip(), flags=re.IGNORECASE).title()
+        item["branch"] = branch.strip()
 
         # Only the displayed text is reliable; horaire_plus disagrees with it on most stores.
         hours = re.sub(r"<[^>]+>", " ", selector.xpath("@horaire").get(""))
-        hours = re.sub(r"(\d)h(\d)", r"\1:\2", hours).replace(" and ", ", ")
+        hours = re.sub(r"(\d)h(\d)", r"\1:\2", hours).replace(" et ", ", ")
         item["opening_hours"] = OpeningHours()
-        item["opening_hours"].add_ranges_from_string(hours)
+        item["opening_hours"].add_ranges_from_string(hours, days=DAYS_FR, delimiters=DELIMITERS_FR, closed=CLOSED_FR)
 
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item

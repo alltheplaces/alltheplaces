@@ -1,28 +1,24 @@
 import json
 
-import scrapy
+from scrapy import Spider
 from scrapy.http import XmlResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsPHSpider(scrapy.Spider):
+class McdonaldsPHSpider(Spider):
     name = "mcdonalds_ph"
     item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://www.mcdonalds.com.ph/store-locator"]
-    is_playwright_spider = True
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
-        "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
-        "DOWNLOAD_DELAY": 10,
-        "RETRY_TIMES": 10,
+    custom_settings = {
         "USER_AGENT": BROWSER_DEFAULT,
     }
+    requires_proxy = True
 
     def parse(self, response: XmlResponse, **kwargs):
         for location in json.loads(response.xpath("//store-locator").attrib[":stores"]):

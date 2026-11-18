@@ -29,9 +29,7 @@ class AdvantageNZSpider(JSONBlobSpider):
         feature["address"] = merge_address_lines(
             extra_attributes_selector.xpath('//p[@class="mb-2"]/a//text()').getall()
         )
-        feature["phone"] = (
-            extra_attributes_selector.xpath('//a[contains(@href, "tel:")]/@href').get().replace("tel:", "").strip()
-        )
+        feature["phone"] = extra_attributes_selector.xpath('//a[contains(@href, "tel:")]/@href').get().strip()
         feature["website"] = (
             extra_attributes_selector.xpath('//p/a[contains(@href, "https://advantagetyres.co.nz/store/")]/@href')
             .get()

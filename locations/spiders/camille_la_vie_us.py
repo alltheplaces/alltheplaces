@@ -8,13 +8,16 @@ from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class CamilleLaVieUSSpider(CrawlSpider):
+class CamilleLaVieUSSpider(CrawlSpider, PlaywrightSpider):
     name = "camille_la_vie_us"
     item_attributes = {"brand": "Camille La Vie"}
     start_urls = ("https://camillelavie.com/pages/store-locations",)
     rules = [Rule(LinkExtractor(allow="/pages/", restrict_xpaths='//*[@class="store_location"]'), callback="parse")]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         item = Feature()

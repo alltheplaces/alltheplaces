@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -5,6 +6,7 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 
 class CaltexSpider(Spider):
@@ -24,6 +26,36 @@ class CaltexSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
+
+    @staticmethod
+    def parse_au_opening_hours(text: str | None) -> OpeningHours | str | None:
+        """Parse the free text `operatingHours` of an Australian station; None unless it is read in full."""
+        text = " ".join((text or "").split())
+        lower = text.lower()
+        if re.fullmatch(r"(daily )?24 hours?", lower):
+            return "24/7"
+        # Times without am/pm, or any word other than days, "daily" and "closed", are not read.
+        leftover = re.sub(r"\d{1,2}(?:[:.]\d{2})?\s*[ap]m", " ", lower)
+        leftover = re.sub(
+            r"\b(?:mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:r(?:s(?:day)?)?)?|fri(?:day)?|sat(?:urday)?"
+            r"|sun(?:day)?|daily|closed|to|and)\b|[-–&,.;:]",
+            " ",
+            leftover,
+        )
+        if re.search(r"[a-z0-9]", leftover):
+            return None
+        text = re.sub(r"\bsat\s*&\s*sun\b", "Sat-Sun", text, flags=re.IGNORECASE)
+        results = OpeningHours.extract_hours_from_string(text)
+        if not results or len(results) != len(re.findall(r"[ap]m\s*(?:-|–|to)\s*\d|closed", text, flags=re.IGNORECASE)):
+            return None
+        oh = OpeningHours()
+        for days, open_time, close_time in results:
+            for day in days:
+                if open_time == "closed":
+                    oh.set_closed(day)
+                else:
+                    oh.add_range(day, open_time, close_time)
+        return oh or None
 
     def parse(self, response):
         for location in response.json():
@@ -97,6 +129,10 @@ class CaltexSpider(Spider):
                 )
                 apply_yes_no(Fuel.ADBLUE, item, "Bulk AdBlue" in location["fuelsName"], False)
                 apply_yes_no(Fuel.KEROSENE, item, "Kerosene" in location["fuelsName"], False)
+
+            if "/au/" in response.url:
+                # Other countries use different wording that is not handled here.
+                item["opening_hours"] = self.parse_au_opening_hours(location.get("operatingHours"))
 
             apply_category(Categories.FUEL_STATION, item)
 

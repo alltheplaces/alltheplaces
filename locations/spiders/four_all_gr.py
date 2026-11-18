@@ -1,6 +1,6 @@
 import html
 import re
-from typing import Any
+from typing import Any, AsyncIterator
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -18,7 +18,7 @@ class FourAllGRSpider(Spider):
     item_attributes = {"brand": "4all", "brand_wikidata": "Q130279387", "country": "GR"}
     start_urls = ["https://4allstores.gr/wp-admin/admin-ajax.php?action=filter_stores&storesArea="]
 
-    def start_requests(self):
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 

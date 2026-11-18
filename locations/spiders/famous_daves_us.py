@@ -10,14 +10,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# The locations page links to a listing per state, and each listing hides its
-# restaurants in a "storeList" input as JSON, with coordinates, phone and
-# hours. The listing covers other countries too, so only the US restaurants
-# are kept.
-#
-# Hours are HTML with non breaking spaces, e.g.
-# "Monday - Sunday:&nbsp;11&nbsp;am&nbsp;-&nbsp;9&nbsp;pm".
-
 
 class FamousDavesUSSpider(Spider):
     name = "famous_daves_us"

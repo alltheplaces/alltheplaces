@@ -8,15 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Every restaurant is a block on the one store locations page. The address and
-# phone share a single pipe separated line, and opening hours are written as
-# "<days>: <times>" pairs.
-#
-# No coordinates are published anywhere on the site, and there are no per
-# location pages, so features carry an address but no geometry.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class PiesAndPintsUSSpider(Spider):
     name = "pies_and_pints_us"
@@ -88,14 +79,9 @@ class PiesAndPintsUSSpider(Spider):
             if day_names:
                 oh.add_days_range(
                     day_names,
-                    PiesAndPintsUSSpider.normalise_time(open_time),
-                    PiesAndPintsUSSpider.normalise_time(close_time),
-                    time_format="%I:%M%p",
+                    open_time,
+                    close_time,
+                    time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
                 )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").lower()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

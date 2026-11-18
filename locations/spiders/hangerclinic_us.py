@@ -22,7 +22,7 @@ class HangerclinicUSSpider(SitemapSpider):
         item["name"] = response.xpath('//*[@class = "c-page-header__title"]/span/text()').get()
         item["street_address"] = response.xpath('//*[@class="c-map__info--address"]/text()').get().strip()
         item["addr_full"] = response.xpath('//*[@class="c-map__info--address"]').xpath("normalize-space()").get()
-        item["phone"] = response.xpath('//*[contains(@href,"tel:")]/text()').get()
+        item["phone"] = response.xpath('//*[@class="c-map__info--phone"]/a[starts-with(@href, "tel:")]/text()').get()
         item["ref"] = item["website"] = response.url
         apply_category(Categories.CLINIC, item)
         extract_google_position(item, response)

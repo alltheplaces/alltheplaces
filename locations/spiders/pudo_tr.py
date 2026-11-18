@@ -7,7 +7,7 @@ from locations.dict_parser import DictParser
 class PudoTRSpider(scrapy.Spider):
     name = "pudo_tr"
     start_urls = ["https://webapp.pudo.com.tr/svc/api/v1.2/pudobox/pudoboxs/FilterPudobox?cityId=null&countyId=null"]
-    item_attributes = {"brand": "pudo", "brand_wikidata": "Q131450632"}
+    item_attributes = {"brand": "PUDO", "brand_wikidata": "Q131450632"}
 
     def parse(self, response):
         for item in response.json():

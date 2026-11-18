@@ -28,7 +28,6 @@ class ReznictviRabbitCZSpider(Spider):
     def parse_store(self, response: Response) -> Iterable[Feature]:
         item = Feature()
         item["ref"] = item["website"] = response.url
-        item["country"] = "CZ"
 
         item["branch"] = response.xpath('//li[@class="last"]/text()').get("").strip()
 
@@ -52,13 +51,9 @@ class ReznictviRabbitCZSpider(Spider):
             else:
                 item["city"] = city_postcode
 
-        item["phone"] = (
-            response.xpath(
-                '//strong[contains(text(), "Telefon")]/ancestor::div[@class="text"][1]//a[starts-with(@href, "tel:")]/@href'
-            )
-            .get("")
-            .removeprefix("tel:")
-        )
+        item["phone"] = response.xpath(
+            '//strong[contains(text(), "Telefon")]/ancestor::div[@class="text"][1]//a[starts-with(@href, "tel:")]/@href'
+        ).get("")
 
         if m := LAT_LON_PATTERN.search(response.text):
             item["lat"], item["lon"] = m.groups()

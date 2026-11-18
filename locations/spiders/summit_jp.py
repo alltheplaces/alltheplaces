@@ -66,7 +66,6 @@ class SummitJPSpider(Spider):
         item["name"] = self.item_attributes["brand"]
         item["branch"] = store.get("title")
         item["website"] = f"https://www.summitstore.co.jp/store/{prefecture}/post/?id={slug}"
-        item["country"] = "JP"
         item["state"] = state
 
         if address := store.get("address"):

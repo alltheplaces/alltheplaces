@@ -2,19 +2,19 @@ import json
 import re
 from datetime import date
 from typing import Any, Iterable
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_JP, OpeningHours
 from locations.items import Feature
 
 POSTCODE_RE = re.compile(r"〒(\d{3}-\d{4})\s*")
 TIME_RANGE_RE = re.compile(r"(\d{1,2}:\d{2})\s*[~〜～]\s*(\d{1,2}:\d{2})")
 DATE_RANGE_RE = re.compile(r"\((\d{1,2})/(\d{1,2})(?:[~〜～](\d{1,2})/(\d{1,2}))?\)")
-DAY_CHARS = {"月": "Mo", "火": "Tu", "水": "We", "木": "Th", "金": "Fr", "土": "Sa", "日": "Su"}
 
 
 def _date_span(segment: str) -> int:
@@ -45,7 +45,7 @@ def parse_hours(eigyo_list: list[str]) -> OpeningHours | None:
             if not time_match:
                 continue
             open_time, close_time = time_match.groups()
-            days_found = [DAY_CHARS[c] for c in segment if c in DAY_CHARS]
+            days_found = [DAYS_JP[c] for c in segment if c in DAYS_JP]
             if days_found:
                 for day in days_found:
                     day_specific[day] = (open_time, close_time)
@@ -72,7 +72,7 @@ class ToyotaRentACarJPSpider(SitemapSpider):
     sitemap_urls = ["https://rent.toyota.co.jp/sitemap_shop_detail.xml"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        qs = parse_qs(urlparse(response.url).query)
+        qs = parse_qs(urlparse_cached(response).query)
         rcode = qs.get("rCode", [None])[0]
         ecode = qs.get("eCode", [None])[0]
         if not rcode or not ecode:
@@ -88,7 +88,6 @@ class ToyotaRentACarJPSpider(SitemapSpider):
         item = Feature()
         item["ref"] = f"{rcode}-{ecode}"
         item["website"] = response.url
-        item["country"] = "JP"
         item["phone"] = response.css("#lblTel::text").get("").strip() or None
         item["branch"] = shop_name
 

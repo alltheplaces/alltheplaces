@@ -1,9 +1,9 @@
 import re
 from typing import Iterable
-from urllib.parse import urlparse
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider, Spider
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS, DAYS_JP, OpeningHours, day_range
@@ -42,7 +42,7 @@ class KrispyKremeJPSpider(SitemapSpider, Spider):
         # no store id found, so use URL parts as ID: pref + '-' + store-name-slug
         #   /store/tokyo/meiji-jingumae.html -> "tokyo-meiji-jingumae"
         #   /store/kanagawa/atre_kawasaki_northgate.html -> "kanagawa-atre-kawasaki-northgate"
-        parts = urlparse(response.url).path.rstrip("/").split("/")
+        parts = urlparse_cached(response).path.rstrip("/").split("/")
         item["ref"] = f"{parts[-2]}-{parts[-1].removesuffix('.html')}".replace("_", "-")
         item["website"] = response.url
         item["lat"] = store_detail.xpath('.//div[contains(@class, "marker")]/@data-lat').get()

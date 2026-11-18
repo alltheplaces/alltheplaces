@@ -3,6 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 from scrapy import Spider
 from scrapy.http import Request, Response
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EE, DAYS_LT, OpeningHours, day_range
@@ -24,7 +25,7 @@ class SebEELTLVSpider(Spider):
                 yield Request(url=f"https://www.seb.{cc}/atm-find?type_id={type_id}&page=0")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        parsed = urlparse(response.url)
+        parsed = urlparse_cached(response)
         country = (parsed.hostname or "").rsplit(".", 1)[-1].upper()
         type_id = parse_qs(parsed.query).get("type_id", [None])[0]
 

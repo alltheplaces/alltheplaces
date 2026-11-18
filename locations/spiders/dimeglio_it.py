@@ -35,7 +35,6 @@ class DimeglioITSpider(Spider):
             branch = re.sub(r"<[^>]+>", "", name_match.group(1)).strip()
             branch = re.sub(r"^Supermercato Di Meglio\s+", "", branch).strip()
 
-            # Extract street address.
             addr_match = re.search(r"Indirizzo:\s*(.*?)(?:<br|Telefono|\[)", html_content, re.DOTALL)
             addr_raw = re.sub(r"<[^>]+>", "", addr_match.group(1)).strip().rstrip(",").strip() if addr_match else ""
 
@@ -48,14 +47,12 @@ class DimeglioITSpider(Spider):
                 state = city_match.group(2).strip()
                 street = addr_raw[: city_match.start()].strip().rstrip(",| ").strip()
 
-            # Extract phone.
             phone_match = re.search(r"Telefono:\s*([^<\[\\]+)", html_content)
             phone = phone_match.group(1).strip() if phone_match else ""
             # Normalise Italian phone format "0185/232064" → "+390185232064".
             if phone:
                 phone = re.sub(r"\s+", "", phone)
 
-            # Extract opening hours text.
             hours_match = re.search(r"Orari:\s*(.*?)(?:\",|$)", html_content, re.DOTALL)
             oh = OpeningHours()
             if hours_match:

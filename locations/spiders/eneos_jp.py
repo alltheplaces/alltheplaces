@@ -1,4 +1,5 @@
 import re
+import unicodedata
 from typing import Any, Iterable
 from urllib.parse import quote
 
@@ -6,12 +7,11 @@ import scrapy
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_JP, OpeningHours
 from locations.items import Feature
 
-DAY_CHARS = {"月": "Mo", "火": "Tu", "水": "We", "木": "Th", "金": "Fr", "土": "Sa", "日": "Su"}
-HOLIDAY_TOKENS_RE = re.compile("祝日|祭日|祝|、")
-HOURS_RE = re.compile(r"([月火水木金土日祝、\-]*)\s*(\d{1,2}:\d{2})-(\d{1,2}:\d{2})")
+IGNORED_DAY_TOKENS_RE = re.compile("祝日|祭日|祝|曜日|曜|、")
+HOURS_RE = re.compile(r"([月火水木金土日祝曜平、\-]*)\s*(\d{1,2}:\d{2})-(\d{1,2}:\d{2})")
 
 # 48 search areas exposed by the store finder: Hokkaido is split into two
 # halves ("01a"/"01b"), all other prefectures use their standard 2 digit code.
@@ -92,7 +92,7 @@ def expand_days(raw_day_part: str) -> list[str] | None:
     if raw_day_part == "":
         return list(DAYS)
 
-    stripped = HOLIDAY_TOKENS_RE.sub("", raw_day_part).strip()
+    stripped = IGNORED_DAY_TOKENS_RE.sub("", raw_day_part).strip()
 
     if "平日" in stripped:
         return ["Mo", "Tu", "We", "Th", "Fr"]
@@ -102,8 +102,8 @@ def expand_days(raw_day_part: str) -> list[str] | None:
 
     if "-" in stripped:
         start_part, _, end_part = stripped.partition("-")
-        start = DAY_CHARS.get(start_part[-1]) if start_part else None
-        end = DAY_CHARS.get(end_part[-1]) if end_part else None
+        start = DAYS_JP.get(start_part[-1]) if start_part else None
+        end = DAYS_JP.get(end_part[-1]) if end_part else None
         if not start or not end:
             return None
         start_index, end_index = DAYS.index(start), DAYS.index(end)
@@ -111,12 +111,12 @@ def expand_days(raw_day_part: str) -> list[str] | None:
             return DAYS[start_index : end_index + 1]
         return DAYS[start_index:] + DAYS[: end_index + 1]
 
-    days = [DAY_CHARS[c] for c in stripped if c in DAY_CHARS]
+    days = [DAYS_JP[c] for c in stripped if c in DAYS_JP]
     return days or None
 
 
 def parse_hours(hours_text: str) -> OpeningHours | None:
-    hours_text = hours_text.strip()
+    hours_text = unicodedata.normalize("NFKC", hours_text).strip()
     if not hours_text:
         return None
     if "24時間" in hours_text:
@@ -125,7 +125,7 @@ def parse_hours(hours_text: str) -> OpeningHours | None:
             oh.add_range(day, "00:00", "23:59")
         return oh
 
-    text = hours_text.replace("〜", "-").replace("～", "-").replace("~", "-")
+    text = re.sub(r"[〜~ー‐]", "-", hours_text)
     text = re.sub(r"(\d{1,2})時(\d{1,2})分", r"\1:\2", text)
     text = re.sub(r"(\d{1,2})時", r"\1:00", text)
 
@@ -168,7 +168,11 @@ class EneosJPSpider(scrapy.Spider):
         # redirects the request to error.php.
         municipalities = set(response.css(".searchWordNom li a::text").getall())
         for municipality in municipalities:
-            url = "https://eneos-ss.com/search/ss/pc/listken.php" f"?f_code={f_code}&f_addr2={quote(municipality)}&MAP="
+            # The list page only knows "01" for both Hokkaido halves.
+            url = (
+                "https://eneos-ss.com/search/ss/pc/listken.php"
+                f"?f_code={f_code[:2]}&f_addr2={quote(municipality)}&MAP="
+            )
             yield scrapy.Request(url, callback=self.parse_listken)
 
     def parse_listken(self, response: Response, **kwargs: Any) -> Iterable[scrapy.Request]:
@@ -212,7 +216,6 @@ class EneosJPSpider(scrapy.Spider):
         item["name"] = "ENEOS"
         item["branch"] = name
         item["street_address"] = address.strip()
-        item["country"] = "JP"
         item["phone"] = tel.strip() or None
         item["website"] = response.url
 

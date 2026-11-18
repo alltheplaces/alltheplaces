@@ -3,6 +3,7 @@ import re
 import scrapy
 from scrapy.http import TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.structured_data_spider import StructuredDataSpider
@@ -27,4 +28,5 @@ class McdonaldsLUSpider(StructuredDataSpider):
         )
         item["lat"], item["lon"] = re.search(r"setView\(\[(\d+\.\d+),\s*(\d+\.\d+)\],", response.text).groups()
         item["ref"] = item["website"] = response.url
+        apply_category(Categories.FAST_FOOD, item)
         yield item

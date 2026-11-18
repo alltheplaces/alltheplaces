@@ -16,7 +16,7 @@ class GiordanosUSSpider(scrapy.Spider):
     custom_settings = {"CONCURRENT_REQUESTS_PER_DOMAIN": 1}
 
     def parse(self, response):
-        for url in response.css("#locations-list a::attr(href)").getall():
+        for url in response.xpath('//*[@class="locations-directory__name"]/a/@href').getall():
             if "/locations/search" in url:
                 continue
             yield response.follow(url, callback=self.parse_item)
@@ -43,7 +43,7 @@ class GiordanosUSSpider(scrapy.Spider):
                 item["lat"], item["lon"] = m.groups()
 
         if tel := response.css(".phone a::attr(href)").get():
-            item["phone"] = tel.removeprefix("tel:")
+            item["phone"] = tel
 
         oh = OpeningHours()
         oh.add_ranges_from_string("; ".join(response.css(".hours::text").getall()))

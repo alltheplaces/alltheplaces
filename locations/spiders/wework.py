@@ -12,6 +12,7 @@ class WeworkSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     sitemap_urls = ["https://www.wework.com/sitemap.xml"]
     sitemap_rules = [("/buildings/", "parse_sd")]
     search_for_email = False
+    time_format = "%I:%M %p"
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
     def post_process_item(self, item, response, ld_data, **kwargs):

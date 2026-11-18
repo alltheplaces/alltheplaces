@@ -63,7 +63,7 @@ class HoustonPublicLibraryUSSpider(LibCalSpider):
         else:
             item["addr_full"] = address
         if phone := card.xpath('.//a[starts-with(@href, "tel:")]/@href').get():
-            item["phone"] = phone.removeprefix("tel:")
+            item["phone"] = phone
         item["image"] = card.xpath(".//img/@src").get()
 
         if Selector(text=location.get("desc") or "<html/>").css(".icon-accessible"):

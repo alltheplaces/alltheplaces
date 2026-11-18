@@ -6,14 +6,9 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class CashConvertersFRSpider(SitemapSpider, StructuredDataSpider):
     name = "cash_converters_fr"
-    item_attributes = {
-        "brand": "Cash Converters",
-        "brand_wikidata": "Q124606631",
-    }
+    item_attributes = {"brand": "Cash Converters", "brand_wikidata": "Q5048645"}
     sitemap_urls = ["https://magasins.cashconverters.fr/sitemap.xml"]
-    sitemap_rules = [
-        (r"-[0-9]+", "parse_sd"),
-    ]
+    sitemap_rules = [(r"-[0-9]+", "parse_sd")]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
 

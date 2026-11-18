@@ -13,9 +13,7 @@ class SpiritHalloweenSpider(scrapy.Spider):
     start_urls = ("http://stores.spirithalloween.com/",)
 
     def parse_stores(self, response):
-        app_json = json.loads(
-            response.xpath('normalize-space(//script[@type="application/ld+json"]/text())').extract_first()
-        )
+        app_json = json.loads(response.xpath('normalize-space(//script[@type="application/ld+json"]/text())').get())
         hours = app_json[0]["openingHours"].replace(" - ", "-").split()
         hours = [re.sub(r"[:]$", "", day_hour) for day_hour in hours]
 
@@ -36,16 +34,16 @@ class SpiritHalloweenSpider(scrapy.Spider):
         return Feature(**props)
 
     def parse_city_stores(self, response):
-        stores = response.xpath('//div[@class="map-list-item-info"]/a/@href').extract()
+        stores = response.xpath('//div[@class="map-list-item-info"]/a/@href').getall()
         for store in stores:
             yield scrapy.Request(response.urljoin(store), callback=self.parse_stores)
 
     def parse_state(self, response):
-        city_urls = response.xpath('//div[@class="map-list-item is-single"]/a/@href').extract()
+        city_urls = response.xpath('//div[@class="map-list-item is-single"]/a/@href').getall()
         for path in city_urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_city_stores)
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="map-list-item is-single"]/a/@href').extract()
+        urls = response.xpath('//div[@class="map-list-item is-single"]/a/@href').getall()
         for path in urls:
             yield scrapy.Request(response.urljoin(path), callback=self.parse_state)

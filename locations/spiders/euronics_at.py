@@ -6,7 +6,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class EuronicsATSpider(SitemapSpider, StructuredDataSpider):
     name = "euronics_at"
-    RED_ZAC = {"brand": "RED ZAC", "brand_wikidata": "Q1375116"}
+    RED_ZAC = {"brand": "Red Zac", "brand_wikidata": "Q128305342"}
     item_attributes = RED_ZAC
     sitemap_urls = ["https://www.redzac.at/iconparc_static/seo/Frontend/sitemap_rzat.xml"]
     sitemap_rules = [(r"/info/Home", "parse_sd")]

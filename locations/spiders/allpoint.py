@@ -1,3 +1,4 @@
+from math import ceil
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
@@ -5,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.geo import country_iseadgg_centroids
 from locations.spiders.albertsons import AlbertsonsSpider
 from locations.spiders.ampm_us import AmpmUSSpider
 from locations.spiders.caseys_general_store_us import CaseysGeneralStoreUSSpider
@@ -33,8 +35,6 @@ from locations.spiders.winn_dixie_us import WinnDixieUSSpider
 class AllpointSpider(Spider):
     name = "allpoint"
     item_attributes = {"network": "Allpoint", "network_wikidata": "Q4733264"}
-    total_count = 0
-    page_size = 0
     custom_settings = {"DOWNLOAD_TIMEOUT": 180}
 
     LOCATED_IN_MAPPINGS = {
@@ -74,32 +74,32 @@ class AllpointSpider(Spider):
         "Duane Reade": WalgreensSpider.DUANE_READE,
     }
 
-    def make_request(self, page: int) -> JsonRequest:
+    def make_request(self, latitude: float, longitude: float, page: int) -> JsonRequest:
         return JsonRequest(
             url="https://clsws.locatorsearch.net/Rest/LocatorSearchAPI.svc/GetLocations",
             data={
                 "NetworkId": 10029,
-                "Latitude": 33.15004936,
-                "Longitude": -96.83464,
-                "Miles": 50000,
+                "Latitude": latitude,
+                "Longitude": longitude,
+                "Miles": 200,
                 "SearchByOptions": "ATMSF, ATMDP",
                 "PageIndex": page,
             },
-            cb_kwargs={"current_page": page},
+            cb_kwargs={"latitude": latitude, "longitude": longitude, "current_page": page},
         )
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        yield self.make_request(1)
+        for latitude, longitude in country_iseadgg_centroids(["US", "CA", "GB", "AU", "MX"], 315):
+            yield self.make_request(latitude, longitude, 1)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         results = response.json()["data"]
-        if not self.total_count:
-            # Initialize total_count and page_size only once, when data is available
-            self.total_count = results["TotalRecCount"]
-            self.page_size = results["PageSize"]
 
-        locations = results.get("ATMInfo") or []
-        for atm in locations:
+        if kwargs["current_page"] == 1:
+            for page in range(2, ceil(results["TotalRecCount"] / (results["PageSize"] or 1)) + 1):
+                yield self.make_request(kwargs["latitude"], kwargs["longitude"], page)
+
+        for atm in results.get("ATMInfo") or []:
             item = DictParser.parse(atm)
             item["street_address"] = item.pop("street", None)
 
@@ -116,6 +116,3 @@ class AllpointSpider(Spider):
                 item["located_in_wikidata"] = brand_data.get("brand_wikidata")
 
             yield item
-
-        if (kwargs["current_page"] * self.page_size) < self.total_count:
-            yield self.make_request(kwargs["current_page"] + 1)

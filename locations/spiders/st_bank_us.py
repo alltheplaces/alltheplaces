@@ -28,7 +28,6 @@ class StBankUSSpider(Spider):
         item = DictParser.parse(location)
         item["ref"] = location["title"]
         item["addr_full"] = item.pop("street_address")
-        item["country"] = "US"
 
         location_type = location.get("typeSelect", "")
         if location_type == "ATM":

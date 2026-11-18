@@ -41,7 +41,7 @@ class CitroenSpider(scrapy.Spider):
 
             item = Feature(
                 {
-                    "ref": store.get("rrdi"),
+                    "ref": store.get("siteGeo"),
                     "name": store.get("dealerName"),
                     "street_address": address_details.get("addressLine1"),
                     "postcode": address_details.get("postalCode"),

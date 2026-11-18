@@ -21,7 +21,7 @@ class MetaLocatorSpider(Spider):
     dataset_attributes: dict = {"source": "api", "api": "metalocator.com"}
     allowed_domains: list[str] = ["code.metalocator.com"]
     brand_id: str
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(url=f"https://code.metalocator.com/webapi/api/search/?Itemid={self.brand_id}&limit=100000")
@@ -29,7 +29,7 @@ class MetaLocatorSpider(Spider):
     def parse(self, response: TextResponse) -> Iterable[Feature]:
         for location in response.json():
             item = DictParser.parse(location)
-            item.pop("addr_full")
+            item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location["address"], location["address2"]]))
             if location.get("hours"):
                 item["opening_hours"] = OpeningHours()

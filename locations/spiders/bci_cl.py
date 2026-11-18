@@ -34,7 +34,6 @@ class BciCLSpider(Spider):
             item["phone"] = location.get("Teléfono")
             item["email"] = location.get("Correo")
             item["opening_hours"] = OpeningHours()
-            item["country"] = "CL"
             for day in DAYS_ES:
                 hours = location.get(f"Horario Funcionamiento {day}")
                 if hours in [None, ["Cerrado"]]:

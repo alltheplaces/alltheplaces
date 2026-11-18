@@ -15,6 +15,7 @@ class HaymesPaintShopAUSpider(Spider):
     allowed_domains = ["www.haymespaint.com.au"]
     start_urls = ["https://www.haymespaint.com.au/pages/find-a-store"]
     _api_endpoint: str = "https://www.haymespaint.com.au/api/2025-01/graphql.json"
+    requires_proxy = True
 
     @staticmethod
     def _request_graphql_page(

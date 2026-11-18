@@ -12,8 +12,9 @@ from locations.storefinders.mapion import MapionSpider
 class MisterDonutJPSpider(MapionSpider):
     name = "mister_donut_jp"
     item_attributes = {"brand": "ミスタードーナツ", "brand_wikidata": "Q1065819"}
-    allowed_domains = ["md.mapion.co.jp"]
-    feature_url_template = "https://md.mapion.co.jp/b/misterdonut/attr/?t=attr_con&start={}"
+    allowed_domains = ["lbs.mapion.co.jp"]
+    api_group = "misterdonut_all"
+    website_template = "https://md.mapion.co.jp/b/misterdonut/info/{}/"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["name"] = None

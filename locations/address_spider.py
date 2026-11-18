@@ -13,10 +13,6 @@ class AddressSpider(Spider):
             "ITEM_PIPELINES",
             {
                 "locations.pipelines.duplicates.DuplicatesPipeline": None,
-                "locations.pipelines.drop_attributes.DropAttributesPipeline": 250,
-                "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
-                "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
-                "locations.pipelines.clean_strings.CleanStringsPipeline": 354,
                 "locations.pipelines.country_code_clean_up.CountryCodeCleanUpPipeline": None,
                 "locations.pipelines.state_clean_up.StateCodeCleanUpPipeline": None,
                 "locations.pipelines.address_clean_up.AddressCleanUpPipeline": None,
@@ -28,11 +24,15 @@ class AddressSpider(Spider):
                 "locations.pipelines.drop_logo.DropLogoPipeline": None,
                 "locations.pipelines.closed.ClosePipeline": None,
                 "locations.pipelines.apply_nsi_categories.ApplyNSICategoriesPipeline": None,
-                "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 750,
                 "locations.pipelines.geojson_multipoint_simplification.GeoJSONMultiPointSimplificationPipeline": None,
                 "locations.pipelines.count_categories.CountCategoriesPipeline": None,
                 "locations.pipelines.count_brands.CountBrandsPipeline": None,
                 "locations.pipelines.count_operators.CountOperatorsPipeline": None,
+                "locations.pipelines.drop_attributes.DropAttributesPipeline": 250,
+                "locations.pipelines.apply_spider_level_attributes.ApplySpiderLevelAttributesPipeline": 300,
+                "locations.pipelines.apply_spider_name.ApplySpiderNamePipeline": 350,
+                "locations.pipelines.clean_strings.CleanStringsPipeline": 354,
+                "locations.pipelines.check_item_properties.CheckItemPropertiesPipeline": 750,
             },
         )
         return spider

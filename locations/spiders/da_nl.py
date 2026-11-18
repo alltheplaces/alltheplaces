@@ -3,7 +3,7 @@ from typing import AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 
@@ -12,7 +12,7 @@ class DaNLSpider(Spider):
     name = "da_nl"
     start_urls = ["https://www.da.nl/api/graphql"]
     allowed_domains = ["www.da.nl"]
-    item_attributes = {"brand": "DA", "brand_wikidata": "Q4899756", "extras": Categories.SHOP_CHEMIST.value}
+    item_attributes = {"brand": "DA", "brand_wikidata": "Q4899756"}
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         graphql_query = """query GetRetailStores($storeId: Int = 3) {
@@ -71,5 +71,7 @@ class DaNLSpider(Spider):
                     item["opening_hours"].add_range(
                         DAYS[day_hours["day_of_week"] - 1], day_hours["open"], day_hours["close"]
                     )
+
+            apply_category(Categories.SHOP_CHEMIST, item)
 
             yield item

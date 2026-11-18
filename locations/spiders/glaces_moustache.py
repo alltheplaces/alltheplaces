@@ -18,6 +18,9 @@ class GlacesMoustacheSpider(WPStoreLocatorSpider):
     }
     # Ice cream parlour chain, mostly in France with a few shops in Belgium and Spain.
     allowed_domains = ["www.glaces-moustache.fr"]
+    start_urls = [
+        "https://www.glaces-moustache.fr/wp-admin/admin-ajax.php?action=store_search&lat=46.227638&lng=2.213749&max_results=25&search_radius=50&autoload=1&distance_unit=km"
+    ]
     days = DAYS_FR
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:

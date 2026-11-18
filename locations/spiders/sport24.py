@@ -16,9 +16,9 @@ class Sport24Spider(JSONBlobSpider):
     skip_auto_cc_domain = True
 
     def extract_json(self, response: Response) -> list[dict]:
-        return chompjs.parse_js_object(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())["props"][
-            "pageProps"
-        ]["stores"]
+        scripts = response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall()
+        rsc = "".join(obj[1] for obj in map(chompjs.parse_js_object, scripts) if len(obj) > 1)
+        return chompjs.parse_js_object(rsc[rsc.index('"stores":[') + len('"stores":') :])
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["ref"] = feature["navLocationCode"]

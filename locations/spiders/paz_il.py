@@ -15,7 +15,6 @@ class PazILSpider(Spider):
     item_attributes = {"brand": "פז", "brand_wikidata": "Q2211731"}
     allowed_domains = ["www.paz.co.il"]
     start_urls = ["https://www.paz.co.il/service-locator"]
-    requires_proxy = True  # Radware Bot Manager blocks direct requests.
 
     # metaData service label (Hebrew) -> tag.
     SERVICES = {

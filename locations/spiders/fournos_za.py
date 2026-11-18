@@ -31,7 +31,7 @@ class FournosZASpider(scrapy.Spider):
             else:
                 item["email"] = None
 
-            item["phone"] = loc.xpath('.//a[contains(@href, "tel:")]/@href').get("").replace("tel:", "")
+            item["phone"] = loc.xpath('.//a[contains(@href, "tel:")]/@href').get("")
             item["addr_full"] = clean_address(
                 loc.xpath(".//p[strong[contains(., 'Email')]]/following-sibling::p[.//br][1]//text()").getall()
             ).rstrip(".")

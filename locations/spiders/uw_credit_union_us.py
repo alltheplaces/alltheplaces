@@ -31,7 +31,6 @@ class UwCreditUnionUSSpider(SitemapSpider):
         if len(lines) > 1 and (m := re.match(r"(.+),\s*([A-Z]{2})\s*(\d{5}(?:-\d{4})?)$", lines[-1])):
             item["street_address"] = merge_address_lines(lines[:-1])
             item["city"], item["state"], item["postcode"] = m.group(1), m.group(2), m.group(3)
-            item["country"] = "US"
         else:
             item["street_address"] = merge_address_lines(lines)
 

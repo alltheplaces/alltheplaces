@@ -7,9 +7,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
-
-DAY_CODES = {"MO": "Mo", "TU": "Tu", "WE": "We", "TH": "Th", "FR": "Fr", "SA": "Sa", "SU": "Su"}
+from locations.hours import OpeningHours, sanitise_day
 
 
 class UnicreditBankBaSpider(Spider):
@@ -128,7 +126,7 @@ class UnicreditBankBaSpider(Spider):
         opening_hours = OpeningHours()
         # Flat list in groups of five per day: [day_code, open, close, open2, close2].
         for i in range(0, len(workinghours) - 4, 5):
-            if not (day := DAY_CODES.get(workinghours[i])):
+            if not (day := sanitise_day(workinghours[i])):
                 continue
             if workinghours[i + 1] and workinghours[i + 2]:
                 opening_hours.add_range(day, workinghours[i + 1], workinghours[i + 2])

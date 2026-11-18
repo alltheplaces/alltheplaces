@@ -58,7 +58,6 @@ class DingFringFRSpider(Spider):
             item["street_address"] = lines[0] if len(lines) > 1 else None
             item["postcode"] = postcode
             item["city"] = commune.title() or None
-            item["country"] = "FR"
 
             # Names look like "CITY - Ding Fring Suffix". The source drops accents, so when the name's
             # city is the commune, use the commune (accented) instead.

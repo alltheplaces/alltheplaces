@@ -4,6 +4,7 @@ from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, Extras, Fuel, PaymentMethods, apply_category, apply_yes_no
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
 
@@ -22,6 +23,13 @@ class GscaltexKRSpider(Spider):
             item["street_address"] = location["detAddr"]
             item["lat"] = location["lat"]
             item["lon"] = location["longi"]
+
+            open_time, close_time = location["businsFrTm"], location["businsToTm"]
+            if open_time and close_time and (close_time == "0000" or open_time < close_time):
+                oh = OpeningHours()
+                oh.add_days_range(DAYS, f"{open_time[:2]}:{open_time[2:]}", f"{close_time[:2]}:{close_time[2:]}")
+                if oh.day_hours:
+                    item["opening_hours"] = oh
 
             apply_yes_no(Extras.CAR_WASH, item, location["carWashYn"] == "Y")
             apply_yes_no("self_service", item, location["selfYn"] == "Y")

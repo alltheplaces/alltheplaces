@@ -1,11 +1,14 @@
 import json
+import re
 
 from scrapy import Request
+from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 from scrapy.utils.sitemap import sitemap_urls_from_robots
 
 from locations.categories import Categories, HealthcareSpecialities, apply_category, apply_healthcare_specialities
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider, extract_email, extract_phone
 
@@ -141,6 +144,19 @@ DEPARTMENT_TYPE_MAP = {
 }
 
 
+TIME_REGEX = r"(?:\d{1,2}\s+)?noon|midnight|\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?"
+
+
+def to_24h(value: str) -> str:
+    value = value.lower()
+    if value.endswith("noon"):
+        return "12:00"
+    if value == "midnight":
+        return "00:00"
+    hour, minute, meridiem = re.fullmatch(r"(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?", value).groups()
+    return f"{int(hour) % 12 + (12 if meridiem == 'p' else 0):02d}:{minute or '00'}"
+
+
 class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
     name = "kaiser_permanente_us"
     allowed_domains = ["healthy.kaiserpermanente.org"]
@@ -197,6 +213,8 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
         if response.xpath("//@data-affiliated").get() != "true":
             item.update({"brand": "Kaiser Permanente", "brand_wikidata": "Q1721601"})
 
+        item["opening_hours"] = self.parse_opening_hours(response)
+
         cat = response.xpath("//@data-type").get()
         if cat in CATEGORY_MAP:
             apply_category(CATEGORY_MAP[cat], item)
@@ -219,3 +237,27 @@ class KaiserPermanenteUSSpider(SitemapSpider, StructuredDataSpider):
                     self.crawler.stats.inc_value(f"atp/kaiser_permanente_us/unmapped_specialty/{specialty}")
 
         yield item
+
+    @staticmethod
+    def parse_opening_hours(response: Response) -> OpeningHours:
+        oh = OpeningHours()
+        for line in response.xpath("//p[contains(@class, 'info-banner-card-hours')]").xpath("string(.)").getall():
+            split = re.search(r"open 24 hours|closed|noon|midnight|\d", line, flags=re.I)
+            if not split:
+                continue
+            days = []
+            for start, end in re.findall(r"(\w+day)(?:\s+through\s+(\w+day))?", line[: split.start()]):
+                days += day_range(start, end) if end else [sanitise_day(start)]
+            hours = line[split.start() :].lower()
+            if not days and hours.startswith("open 24 hours"):
+                days = DAYS
+            if not days:
+                continue
+            if hours.startswith("open 24 hours"):
+                oh.add_days_range(days, "00:00", "24:00")
+            elif hours.startswith("closed"):
+                oh.set_closed(days)
+            else:
+                for start_time, end_time in re.findall(rf"({TIME_REGEX})\s*(?:to|-)\s*({TIME_REGEX})", hours):
+                    oh.add_days_range(days, to_24h(start_time), to_24h(end_time))
+        return oh

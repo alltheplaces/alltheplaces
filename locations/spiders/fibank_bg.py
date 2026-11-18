@@ -50,5 +50,4 @@ class FibankBGSpider(Spider):
                     apply_category(Categories.ATM, item)
                     apply_yes_no("authentication:contactless", item, "atm_filter_contactless" in location["features"])
                     apply_yes_no(Extras.CASH_IN, item, "atm_filter_deposit" in location["features"])
-                    # apply_yes_no("???", item, "atm_filter_blind" in location["features"])
                 yield item

@@ -5,6 +5,7 @@ import scrapy
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, day_range, sanitise_day
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class HoneyDewDonutsUSSpider(scrapy.Spider):
@@ -20,9 +21,7 @@ class HoneyDewDonutsUSSpider(scrapy.Spider):
                 store.pop("region", "")
                 item = DictParser.parse(store)
                 item["branch"] = store["internal_store_code"]
-                item["street_address"] = ", ".join(
-                    filter(None, [store.get("address_line_1"), store.get("address_line_2")])
-                )
+                item["street_address"] = merge_address_lines([store.get("address_line_1"), store.get("address_line_2")])
                 item["phone"] = store.get("primary_phone")
                 if hours := store.get("hours"):
                     item["opening_hours"] = OpeningHours()

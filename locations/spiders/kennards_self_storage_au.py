@@ -16,6 +16,7 @@ class KennardsSelfStorageAUSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["SelfStorage"]
     search_for_twitter = False
     search_for_facebook = False
+    requires_proxy = True
 
     def pre_process_data(self, ld_data: dict, **kwargs: Any) -> None:
         # A described specification covers 24 hour customer access, not office hours

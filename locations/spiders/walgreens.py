@@ -27,6 +27,9 @@ class WalgreensSpider(SitemapSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         if "/locator/walgreens-" in response.url:
             item.update(self.WALGREENS)
+        elif "/locator/walgreens+specialty+pharmacy" in response.url:
+            item.update(self.WALGREENS)
+            item["name"] = "Walgreens Specialty Pharmacy"
         elif item["name"] == "Duane Reade":
             item.update(self.DUANE_READE)
         # TODO: a few more brands here

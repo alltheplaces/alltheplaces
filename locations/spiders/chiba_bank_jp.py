@@ -12,8 +12,9 @@ from locations.storefinders.mapion import MapionSpider
 class ChibaBankJPSpider(MapionSpider):
     name = "chiba_bank_jp"
     item_attributes = {"brand": "千葉銀行", "brand_wikidata": "Q1071712"}
-    allowed_domains = ["sasp.mapion.co.jp"]
-    feature_url_template = "https://sasp.mapion.co.jp/b/chibabank/attr/?t=attr_con&start={}"
+    allowed_domains = ["lbs.mapion.co.jp"]
+    api_group = "chibabank"
+    website_template = "https://sasp.mapion.co.jp/b/chibabank/info/{}/"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
 
@@ -26,7 +27,9 @@ class ChibaBankJPSpider(MapionSpider):
             self.add_hours(oh, ["Sa"], data.get("sat_atm"))
             self.add_hours(oh, ["Su"], data.get("sun_atm"))
             apply_category(Categories.ATM, item)
-        elif data.get("store_kind") == "0":  # foreign exchange counter, no opening hours in data.
+        elif (
+            data.get("store_kind") == "0" and data.get("foreign_flg") == "1"
+        ):  # foreign exchange counter, no opening hours in data.
             item.set_tag("branch:ja-Hira", data.get("poi_name_yomi").removeprefix("（").removesuffix("）"))
             apply_category(Categories.BUREAU_DE_CHANGE, item)
         else:

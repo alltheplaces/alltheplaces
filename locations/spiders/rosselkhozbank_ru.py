@@ -1,3 +1,4 @@
+import re
 from typing import AsyncIterator
 
 from scrapy import Spider
@@ -5,7 +6,19 @@ from scrapy.http import JsonRequest
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
-from locations.hours import DAYS_WEEKDAY, OpeningHours
+from locations.hours import OpeningHours
+
+TIME_RANGE = re.compile(r"(\d{1,2}[.:]\d{2})\s*[–-]\s*(\d{1,2}[.:]\d{2})")
+LUNCH_BREAK = re.compile(r"перерыв:\s*(\d{1,2}[.:]\d{2})\s*[–-]\s*(\d{1,2}[.:]\d{2})")
+DAY_FLAGS = {
+    "Mo": "workingMonday",
+    "Tu": "workingTuesday",
+    "We": "workingWednesday",
+    "Th": "workingThursday",
+    "Fr": "workingFriday",
+    "Sa": "workingSaturday",
+    "Su": "workingSunday",
+}
 
 
 class RosselkhozbankRUSpider(Spider):
@@ -31,51 +44,20 @@ class RosselkhozbankRUSpider(Spider):
             yield item
 
     def parse_hours(self, item, poi):
-        time_format = "%H.%M"
-        no_break = "Без перерыва"
-
-        def _handle_weekday_hours(oh, work_schedule):
-            work_time = work_schedule.get("workTime")
-            lunch_hour = work_schedule.get("lunchHour")
-            if not work_time:
-                return
-
-            if not lunch_hour or lunch_hour.strip() == no_break:
-                open_time, close_time = work_time.split("–")
-                oh.add_days_range(DAYS_WEEKDAY, open_time, close_time, time_format)
+        work_schedule = poi.get("workSchedule") or {}
+        oh = OpeningHours()
+        for day, flag in DAY_FLAGS.items():
+            if not work_schedule.get(flag):
+                continue
+            saturday = day == "Sa"
+            time_ranges = TIME_RANGE.findall(work_schedule.get("workTimeSaturday" if saturday else "workTime") or "")
+            if len(time_ranges) != 1:
+                continue
+            open_time, close_time = (t.replace(".", ":") for t in time_ranges[0])
+            lunch = LUNCH_BREAK.search(work_schedule.get("lunchHourSaturday" if saturday else "lunchHour") or "")
+            if lunch:
+                oh.add_range(day, open_time, lunch.group(1).replace(".", ":"))
+                oh.add_range(day, lunch.group(2).replace(".", ":"), close_time)
             else:
-                open_time, close_time = work_time.split("–")
-                open_lunch, close_lunch = lunch_hour.split("–")
-                oh.add_days_range(DAYS_WEEKDAY, open_time, open_lunch, time_format)
-                oh.add_days_range(DAYS_WEEKDAY, close_lunch, close_time, time_format)
-
-        def _handle_saturday_hours(oh, work_schedule):
-            work_time_saturday = work_schedule.get("workTimeSaturday")
-            lunch_hour_saturday = work_schedule.get("lunchHourSaturday")
-            if not work_time_saturday:
-                return
-
-            if not lunch_hour_saturday or lunch_hour_saturday.strip() == no_break:
-                open_time, close_time = work_time_saturday.split("–")
-                oh.add_range("Sa", open_time, close_time, time_format)
-            else:
-                open_time, close_time = work_time_saturday.split("–")
-                open_lunch, close_lunch = lunch_hour_saturday.split("–")
-                oh.add_range("Sa", open_time, open_lunch, time_format)
-                oh.add_range("Sa", close_lunch, close_time, time_format)
-
-        work_schedule = poi.get("workSchedule")
-        if not work_schedule:
-            return
-
-        if not work_schedule.get("isMatchesPattern"):
-            return
-
-        try:
-            oh = OpeningHours()
-            _handle_weekday_hours(oh, work_schedule)
-            _handle_saturday_hours(oh, work_schedule)
-            item["opening_hours"] = oh
-        except Exception as e:
-            self.logger.warning(f"Failed to parse hours: {e}, {work_schedule}")
-            self.crawler.stats.inc_value("atp/hours/failed")
+                oh.add_range(day, open_time, close_time)
+        item["opening_hours"] = oh

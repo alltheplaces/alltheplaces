@@ -1,12 +1,19 @@
 import json
+from typing import Iterable
+
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class LindtSpider(JSONBlobSpider):
+class LindtSpider(JSONBlobSpider, PlaywrightSpider):
     name = "lindt"
     item_attributes = {
         "brand": "Lindt",
@@ -31,20 +38,20 @@ class LindtSpider(JSONBlobSpider):
         "https://www.lindt.fi/fi/stores/",
         "https://www.lindtusa.com/stores/",
     ]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def extract_json(self, response):
+    def extract_json(self, response: TextResponse) -> dict | list[dict]:
         return DictParser.get_nested_key(
             json.loads(response.xpath('//script[contains(text(), "locationItems")]/text()').get()), "locationItems"
         )
 
-    def post_process_item(self, item, response, location):
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["street_address"] = item.pop("street")
 
-        oh = OpeningHours()
+        item["opening_hours"] = OpeningHours()
         for day in DAYS_FULL:
-            day_hours = location[f"opening_hours_{day.lower()}"]
-            oh.add_ranges_from_string(f"{day} {day_hours}")
-        item["opening_hours"] = oh
+            day_hours = feature[f"opening_hours_{day.lower()}"]
+            item["opening_hours"].add_ranges_from_string(f"{day} {day_hours}")
 
         if "ghirardelli" in item["name"].casefold():
             item["brand"] = "Ghirardelli"

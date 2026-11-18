@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterable
+from collections.abc import AsyncIterator, Iterable
 
 from scrapy.http import Request, TextResponse
 
@@ -18,7 +18,7 @@ class FamiliaRUSpider(JSONBlobSpider):
 
     async def start(self) -> AsyncIterator[Request]:
         for url in self.start_urls:
-            yield Request(url, dont_filter=True)
+            yield Request(url, dont_filter=True)  # dont_filter is not default in parent
 
     def pre_process_data(self, feature: dict) -> None:
         feature["ref"] = feature.pop("storeId")

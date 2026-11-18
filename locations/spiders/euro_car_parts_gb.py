@@ -8,6 +8,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.react_server_components import parse_rsc
 
 
@@ -43,7 +44,7 @@ class EuroCarPartsGBSpider(Spider):
             item["website"] = f"https://www.eurocarparts.com/store-locator/{store['url']}"
 
             lines = [line for line in store["address"]["lines"] if line and line != "Euro Car Parts"]
-            item["street_address"] = ", ".join(lines)
+            item["street_address"] = merge_address_lines(lines)
 
             item["opening_hours"] = OpeningHours()
             for entry in store.get("openingHours", []):

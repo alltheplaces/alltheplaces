@@ -6,7 +6,6 @@ from locations.pipelines.address_clean_up import clean_address
 from locations.spiders.sae_institute_au import SAE_INSTITUTE_SHARED_ATTRIBUTES
 
 
-# Also used by UK, US
 class SaeInstituteZASpider(Spider):
     name = "sae_institute_za"
     start_urls = ["https://www.sae.edu.za/contact-us/"]

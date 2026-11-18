@@ -16,9 +16,7 @@ class CosmoDESpider(KlierHairGroupSpider):
     def post_process_item(self, item: Feature, response: TextResponse, location: dict, **kwargs) -> Iterable[Feature]:
         if item["name"].startswith("Cosmo Friseurzubehör und Friseurdienstleistungen "):
             item["branch"] = item.pop("name").removeprefix("Cosmo Friseurzubehör und Friseurdienstleistungen ")
-            # apply_category(Categories.SHOP_HAIRDRESSER, item)
         elif item["name"].startswith("Cosmo Friseurzubehör "):
             item["branch"] = item.pop("name").removeprefix("Cosmo Friseurzubehör ")
-            # apply_category(Categories.SHOP_HAIRDRESSER_SUPPLY, item)
         apply_category(Categories.SHOP_HAIRDRESSER_SUPPLY, item)
         yield item

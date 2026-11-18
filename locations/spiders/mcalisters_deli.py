@@ -15,7 +15,7 @@ class McalistersDeliSpider(SitemapSpider, StructuredDataSpider):
         "https://locations.mcalistersdeli.com/sitemap.xml",
     ]
     sitemap_follow = ["locations"]
-    sitemap_rules = [(r"https://locations.mcalistersdeli.com/[a-z-]+/[a-z-]+/.*", "parse_sd")]
+    sitemap_rules = [(r"https://locations\.mcalistersdeli\.com/[a-z-]+/[a-z-]+/[^/]+$", "parse_sd")]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         data = urllib.parse.unquote_plus(response.xpath('//*[@type="module"]/text()').get())

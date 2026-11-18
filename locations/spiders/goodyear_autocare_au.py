@@ -24,10 +24,8 @@ class GoodyearAutocareAUSpider(SitemapSpider):
             "addr_full": merge_address_lines(
                 response.xpath('//p[contains(@class, "address-container")]//text()').getall()
             ),
-            "phone": response.xpath('//div[contains(@class, "store-phone-custom")]/a/@href').get().removeprefix("tel:"),
-            "email": response.xpath('//div[contains(@class, "store-email-custom")]/a/@href')
-            .get()
-            .removeprefix("mailto:"),
+            "phone": response.xpath('//div[contains(@class, "store-phone-custom")]/a/@href').get(),
+            "email": response.xpath('//div[contains(@class, "store-email-custom")]/a/@href').get(),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }

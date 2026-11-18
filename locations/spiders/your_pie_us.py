@@ -9,15 +9,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 
-# The locations page holds every restaurant in a window.blockLocations
-# JavaScript array with the address as one string, coordinates, phone and the
-# restaurant's page.
-#
-# The Thanx ordering link carries the chain's own location id, which is used as
-# the ref where present.
-#
-# No opening hours are published on this page.
-
 
 class YourPieUSSpider(Spider):
     name = "your_pie_us"

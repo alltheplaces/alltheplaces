@@ -44,7 +44,6 @@ class TobuParkJPSpider(SitemapSpider):
             item["lat"] = lat
             item["lon"] = lon
             item["addr_full"] = address
-            item["country"] = "JP"
             item["website"] = response.url
 
             apply_category(category, item)

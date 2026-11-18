@@ -12,6 +12,7 @@ class TvoeRUSpider(JSONBlobSpider):
     name = "tvoe_ru"
     item_attributes = {"brand": "ТВОЕ", "brand_wikidata": "Q110034939"}
     start_urls = ["https://tvoe.ru/api/shops/"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item.pop("name", None)

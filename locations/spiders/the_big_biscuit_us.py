@@ -27,7 +27,7 @@ class TheBigBiscuitUSSpider(Spider):
 
             # Phone from tel: link
             if phone := block.css("a[href^='tel:']::attr(href)").get():
-                item["phone"] = phone.replace("tel:", "")
+                item["phone"] = phone
 
             # Website from detail link if present
             if detail := block.css("a[href*='bigbiscuit.com']::attr(href)").get():
@@ -52,7 +52,6 @@ class TheBigBiscuitUSSpider(Spider):
                     item["city"] = city_state[0].strip()
                     if len(city_state) > 1:
                         item["state"] = city_state[1].strip()
-                item["country"] = "US"
 
             item["ref"] = item.get("website") or item["branch"]
 

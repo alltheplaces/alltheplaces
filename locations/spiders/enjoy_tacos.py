@@ -12,10 +12,11 @@ class EnjoyTacosSpider(SitemapSpider, StructuredDataSpider):
     name = "enjoy_tacos"
     item_attributes = {"brand": "Enjoy Tacos", "brand_wikidata": "Q141242529"}
     sitemap_urls = ["https://enjoytacos.belorder.com/sitemap.xml"]
-    sitemap_rules = [(r"https\:\/\/enjoytacos\.belorder\.com\/\/restaurants\/.+$", "parse_sd")]
+    sitemap_rules = [(r"https://enjoytacos.belorder.com/restaurants/([^/]+)$", "parse_sd")]
     wanted_types = ["Restaurant"]
     drop_attributes = {"image"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = (item.pop("name", None) or "").removeprefix("Enjoy Tacos - ")
         apply_category(Categories.FAST_FOOD, item)
         yield item

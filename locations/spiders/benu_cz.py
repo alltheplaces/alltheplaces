@@ -14,7 +14,7 @@ NATIONAL_HOTLINE_DIGITS = "420212812811"
 
 class BenuCZSpider(SitemapSpider, StructuredDataSpider):
     name = "benu_cz"
-    item_attributes = {"brand": "BENU", "brand_wikidata": "Q58170509"}
+    item_attributes = {"brand": "Benu", "brand_wikidata": "Q62562792"}
     requires_proxy = True
     # Pharmacy pages do not follow a consistent URL pattern, so crawl the
     # entire page sitemap and rely on StructuredDataSpider filtering by
@@ -32,7 +32,6 @@ class BenuCZSpider(SitemapSpider, StructuredDataSpider):
         if "vydejni-box" in response.url or "e-shop" in response.url:
             return
 
-        item["country"] = "CZ"
         if re.sub(r"\D", "", item.get("phone") or "").endswith(NATIONAL_HOTLINE_DIGITS):
             item["phone"] = None
         apply_category(Categories.PHARMACY, item)

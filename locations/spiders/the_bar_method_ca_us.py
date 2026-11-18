@@ -14,7 +14,7 @@ class TheBarMethodCAUSSpider(Spider):
 
     def parse(self, response):
         response.selector.remove_namespaces()
-        city_urls = response.xpath('//a[@class="studioname"]/@href').extract()
+        city_urls = response.xpath('//a[@class="studioname"]/@href').getall()
         for path in city_urls:
             if path == "https://barmethod.com/locations/bar-online/":
                 continue

@@ -32,7 +32,7 @@ class MillersAleHouseSpider(scrapy.Spider):
         item["branch"] = item.pop("name")
         item["website"] = store["url"]
 
-        schema = json.loads(response.xpath('//script[@class="saswp-schema-markup-output"]/text()').get())[0]
+        schema = json.loads(response.xpath('//script[@class="saswp-schema-markup-output"]/text()').get())["@graph"][0]
 
         # openingHours mixes "Dine-In" and "Takeout & Delivery" hours in one
         # HTML-tagged string; only the dine-in section reflects when the

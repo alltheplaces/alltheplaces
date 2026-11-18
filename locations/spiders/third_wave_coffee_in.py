@@ -7,7 +7,7 @@ from locations.items import Feature
 
 class ThirdWaveCoffeeINSpider(SitemapSpider):
     name = "third_wave_coffee_in"
-    item_attributes = {"brand": "Third Wave Coffee Roasters", "brand_wikidata": "Q7785004"}
+    item_attributes = {"brand": "Third Wave Coffee Roasters", "brand_wikidata": "Q137711794"}
     sitemap_urls = ["https://cafe.thirdwavecoffee.in/sitemaps/v1/google/index-10001.xml"]
     sitemap_follow = ["dealer"]
     sitemap_rules = [(r"https://cafe\.thirdwavecoffee\.in/coffee-cafe-[-\w]+/home$", "parse")]
@@ -17,8 +17,7 @@ class ThirdWaveCoffeeINSpider(SitemapSpider):
         item["city"] = response.xpath('//li[contains(@class, "br-info-card-str-loc")]/span/text()').get()
         item["addr_full"] = response.xpath('//*[@id="cadrs"]/@value').get()
         item["phone"] = response.xpath('//*[@id="ctele"]/@value').get()
-        item["email"] = response.xpath('//a[contains(@href, "mailto")]/@href').get().replace("mailto:", "")
-        item["name"] = response.xpath('//*[@id="cname"]/@value').get()
+        item["email"] = response.xpath('//a[contains(@href, "mailto")]/@href').get()
         item["ref"] = item["website"] = response.url
         apply_category(Categories.COFFEE_SHOP, item)
         extract_google_position(item, response)

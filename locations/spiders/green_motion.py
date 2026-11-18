@@ -6,6 +6,7 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_EN, DAYS_FULL, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class GreenMotionSpider(JSONBlobSpider):
@@ -17,7 +18,7 @@ class GreenMotionSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        item["street_address"] = ", ".join(
+        item["street_address"] = merge_address_lines(
             [feature.get(f"address_{x}") for x in range(1, 4) if feature.get(f"address_{x}")]
         )
         item["email"] = feature.get("emails")[0]

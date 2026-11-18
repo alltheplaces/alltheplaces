@@ -5,7 +5,9 @@ from scrapy.http import Response
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
@@ -44,4 +46,12 @@ class ChilisSpider(CrawlSpider):
                     [location.get("streetaddress"), location.get("streetaddress2")]
                 )
                 item["website"] = f'{response.url.strip("/")}/{location["slug"]}'
+
+                item["opening_hours"] = OpeningHours()
+                for calendar in location.get("calendars") or []:
+                    if calendar["TypeCode"] == "B":
+                        item["opening_hours"].add_range(calendar["DayName"], calendar["OpenTime"], calendar["EndTime"])
+
+                apply_category(Categories.RESTAURANT, item)
+
                 yield item

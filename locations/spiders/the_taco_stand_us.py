@@ -1,9 +1,9 @@
 import re
 from typing import Any
-from urllib.parse import urlparse
 
 from scrapy import Request, Spider
 from scrapy.http import Response
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours
@@ -32,7 +32,7 @@ class TheTacoStandUSSpider(Spider):
         )
 
         item = Feature(
-            ref=urlparse(response.url).path.rstrip("/").rsplit("/", 1)[-1],
+            ref=urlparse_cached(response).path.rstrip("/").rsplit("/", 1)[-1],
             branch=contact.css("h2::text").get(),
             website=response.url,
             country="US",

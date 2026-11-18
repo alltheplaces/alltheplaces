@@ -48,6 +48,5 @@ class FonehouseGBSpider(CrawlSpider, StructuredDataSpider):
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = item["website"] = response.url
         item["branch"] = item.pop("name").removeprefix("Fonehouse").strip()
-        item["country"] = "GB"
         apply_category(Categories.SHOP_MOBILE_PHONE, item)
         yield item

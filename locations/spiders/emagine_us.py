@@ -25,7 +25,6 @@ class EmagineUSSpider(Spider):
             item["city"] = theatre["city"]
             item["state"] = theatre["state"]
             item["postcode"] = theatre["postal_code"]
-            item["country"] = "US"
             item["lat"] = theatre["latlng"]["latitude"]
             item["lon"] = theatre["latlng"]["longitude"]
             item["website"] = theatre["permalink"]
@@ -40,9 +39,7 @@ class EmagineUSSpider(Spider):
         # The page also lists a separate automated "Showtimes" hotline; only the
         # "Phone Number" entry is the theatre's own contact number.
         item["phone"] = (
-            response.xpath('//h4[normalize-space()="Phone Number"]/following-sibling::p[1]/a/@href')
-            .get(default="")
-            .removeprefix("tel:")
+            response.xpath('//h4[normalize-space()="Phone Number"]/following-sibling::p[1]/a/@href').get(default="")
             or None
         )
 

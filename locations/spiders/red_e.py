@@ -113,10 +113,7 @@ def parse_sockets(connectors: list[dict]) -> dict[str, str]:
 
 class RedESpider(Spider):
     name = "red_e"
-    item_attributes = {
-        "brand": "Red E",
-        "operator": "Red E",
-    }
+    item_attributes = {"brand": "Red E", "brand_wikidata": "Q131416886"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Request]:

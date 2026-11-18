@@ -180,12 +180,16 @@ class WPStoreLocatorSpider(Spider):
                     )
 
     def parse(self, response: TextResponse) -> Iterable[Feature]:
-        if response.text.strip():
+        if response.text.strip() not in ("", "0"):
             features = response.json()
         else:
-            # Empty pages are sometimes returned when there are no features
-            # nearby a specified WGS84 coordinate.
+            # Empty pages or "0" are sometimes returned when there are
+            # no features nearby a specified WGS84 coordinate.
             features = []
+
+        if not isinstance(features, list):
+            self.logger.error(f"Unexpected response from {response.url}")
+            return
 
         if self.max_results > 0:
             if self.crawler.stats:

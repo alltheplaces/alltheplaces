@@ -31,7 +31,6 @@ class BeobankBESpider(CrawlSpider, StructuredDataSpider):
             item.pop("name").removeprefix("BEOBANK AG ").removeprefix("BEOBANK BR ").removeprefix("BEOBANK PRO CENTER ")
         )
         item["ref"] = response.url
-        item["country"] = "BE"
 
         services_text = " ".join(response.xpath("//table[@role='presentation']//p/text()").getall())
 

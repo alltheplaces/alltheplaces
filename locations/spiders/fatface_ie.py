@@ -29,7 +29,6 @@ class FatfaceIESpider(Spider):
                 item["phone"] = address[-1].strip()
                 address = address[:-1]
             item["ref"] = item["addr_full"] = clean_address(address)
-            item["country"] = "IE"
             item["website"] = response.url
             if hours_start_index < len(store_details):
                 item["opening_hours"] = OpeningHours()

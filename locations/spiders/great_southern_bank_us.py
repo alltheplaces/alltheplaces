@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from scrapy.http import Response
@@ -12,11 +13,14 @@ class GreatSouthernBankUSSpider(SitemapSpider, StructuredDataSpider):
     name = "great_southern_bank_us"
     item_attributes = {"brand": "Great Southern Bank"}
     sitemap_urls = ["https://locations.greatsouthernbank.com/sitemap.xml"]
-    sitemap_rules = [(r"^https://locations\.greatsouthernbank\.com/great-southern-bank-[0-9a-f]+$", "parse_sd")]
+    sitemap_rules = [(r"https://locations.greatsouthernbank.com/us/[^/]+/[^/]+/[^/]+$", "parse_sd")]
     wanted_types = ["FinancialService", "AutomatedTeller"]
     drop_attributes = {"image"}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["lat"] = re.search(r"\"latitude\":\s*(\d+\.\d+),\"", response.text).group(1)
+        item["lon"] = re.search(r"\"longitude\":\s*(-?\d+\.\d+)", response.text).group(1)
+
         if "CLOSED" in item["name"].upper():
             return
 

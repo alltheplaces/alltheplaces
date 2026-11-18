@@ -6,6 +6,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
 
 
@@ -77,18 +78,41 @@ class RenaultSpider(Spider):
                     is_parts = "10" in activities
                     if is_dealer:
                         sales_item = self.create_shop_item(item, key, brand)
+                        sales_item["opening_hours"] = self.parse_hours(location[key], "01")
                         apply_yes_no(Extras.VEHICLE_USED_CAR_SALES, sales_item, "03" in activities)
                         yield sales_item
                     if is_service:
                         service_item = self.create_service_item(item, key, brand)
+                        service_item["opening_hours"] = self.parse_hours(location[key], "04")
                         apply_yes_no(Extras.VEHICLE_INSPECTION_SERVICES, service_item, "17" in activities)
                         yield service_item
                     if is_parts:
                         parts_item = self.create_parts_item(item, key, brand)
+                        parts_item["opening_hours"] = self.parse_hours(location[key], "10")
                         yield parts_item
 
         if response.json()["currentPage"] < response.json()["totalPages"]:
             yield self.make_request(response.url, response.json()["currentPage"] + 1)
+
+    @staticmethod
+    def parse_hours(brand_data: dict, activity: str) -> OpeningHours | None:
+        for sheet in brand_data.get("activityTimeSheet") or []:
+            if sheet["activityBirId"] != activity:
+                continue
+            oh = OpeningHours()
+            for day, slots in sheet["dayOfWeekTimeSlot"].items():
+                periods = [slots[part] for part in ("morning", "afternoon") if slots and slots.get(part)]
+                if not periods:
+                    oh.set_closed(day)
+                for period in periods:
+                    opening, closing = period["openingTime"], period["closingTime"]
+                    oh.add_range(
+                        day,
+                        "{:02d}:{:02d}".format(opening["hour"], opening["minutes"]),
+                        "{:02d}:{:02d}".format(closing["hour"], closing["minutes"]),
+                    )
+            return oh
+        return None
 
     def create_shop_item(self, item: Feature, key: str, brand: dict) -> Feature:
         shop = item.deepcopy()

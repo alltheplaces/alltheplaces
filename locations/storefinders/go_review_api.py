@@ -17,8 +17,8 @@ class GoReviewApiSpider(JSONBlobSpider):
     """
 
     start_urls: list[str] = ["https://admin.goreview.co.za/website/api/locations/search"]
-    locations_key: str | list[str] = "stores"
-    custom_settings: dict = {"ROBOTSTXT_OBEY": False}
+    locations_key = "stores"
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     domain: str | None = None
     domain_list: list[str] | None = None
 

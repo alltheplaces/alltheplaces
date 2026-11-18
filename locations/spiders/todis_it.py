@@ -1,50 +1,66 @@
-from typing import AsyncIterator
+import json
+import re
+from typing import AsyncIterator, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
+from unidecode import unidecode
 
-from locations.categories import Categories, apply_category
-from locations.dict_parser import DictParser
-from locations.hours import DAYS_IT, OpeningHours
+from locations.categories import Categories, PaymentMethods, apply_category, apply_yes_no
+from locations.items import Feature
+from locations.storefinders.uberall import UberallSpider
+
+# Slug rules of the Todis store finder's hash routes (#!/l/{city}/{street}/{id}),
+# replicated so that website values match the widget's own URLs.
+SLUG_PUNCTUATION = re.compile(r"[\\.,/#!$%^&*|;:{}=\-_`'~()\[\]]")
+SLUG_WHITESPACE = re.compile(r"\s+")
 
 
-class TodisITSpider(Spider):
+class TodisITSpider(UberallSpider):
     name = "todis_it"
-    item_attributes = {"brand": "Todis", "brand_wikidata": "Q3992174"}
-    allowed_domains = ["www.todis.it"]
-    start_urls = ["https://www.todis.it/wp-json/todis-stores/v1/stores"]
+    item_attributes = {"brand": "Todis", "brand_wikidata": "Q3992174", "name": "Todis"}
+    allowed_domains = ["uberall.com"]
+    key = "BWr7teQp5Na9Ikhj3y3pvORJS9OG5M"
+    locations_api_url = f"https://uberall.com/api/storefinders/{key}/locations"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        for url in self.start_urls:
-            yield JsonRequest(url=url, method="POST", callback=self.parse_store_list)
+        yield JsonRequest(url=f"{self.locations_api_url}/all", callback=self.parse_store_list)
 
-    def parse_store_list(self, response):
-        for location in response.json():
-            store_id = location["id"]
+    def parse_store_list(self, response: TextResponse) -> Iterable[JsonRequest]:
+        # /locations/all lacks per-store email, so the detail endpoint (which
+        # has it) is fetched per store.
+        for location in response.json()["response"]["locations"]:
             yield JsonRequest(
-                url=f"https://www.todis.it/wp-json/todis-stores/v1/store?id={store_id}", callback=self.parse_store
+                url=f"{self.locations_api_url}/{location['id']}?language=it",
+                callback=self.parse_store,
             )
 
-    def parse_store(self, response):
-        location = response.json()
-        if location["store"]["active"] != "1":
-            return
+    def parse_store(self, response: TextResponse) -> Iterable[Feature]:
+        location = response.json()["response"]
+        # Reuse the parent list parser on a single-location envelope.
+        body = json.dumps({"status": "SUCCESS", "response": {"locations": [location]}}, ensure_ascii=False)
+        yield from self.parse(response.replace(body=body.encode("utf-8")))
 
-        item = DictParser.parse(location["store"])
-        item["name"] = location["store"]["store"]
-        item["street_address"] = item.pop("addr_full", None)
-        item["city"] = location["comune"]["comune"]
-        item["state"] = location["comune"]["regione"]
-        item.pop("website", None)
+    def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
+        # The API name ("Todis - Supermercato (City - Street)") only repeats the address.
+        item.pop("name")
 
-        item["opening_hours"] = OpeningHours()
-        for day_hours in location["orari"]:
-            if day_hours["chiuso"] != "0":
-                item["opening_hours"].add_range(DAYS_IT[day_hours["g"]], "closed", "closed")
-                continue
-            item["opening_hours"].add_range(DAYS_IT[day_hours["g"]], day_hours["a"], day_hours["c"])
-            if day_hours["a_2"] and day_hours["c_2"]:
-                item["opening_hours"].add_range(DAYS_IT[day_hours["g"]], day_hours["a_2"], day_hours["c_2"])
+        item["website"] = "https://www.todis.it/negozi-e-volantini/#!/l/{}/{}/{}".format(
+            self.url_slug(location["city"]),
+            self.url_slug(location["streetAndNumber"]),
+            location["id"],
+        )
+        item["image"] = next(
+            (photo["publicUrl"] for photo in location.get("photos") or [] if photo.get("type") == "MAIN"),
+            None,
+        )
 
+        apply_yes_no(PaymentMethods.CASH, item, True)
+        apply_yes_no(PaymentMethods.CARDS, item, True)
         apply_category(Categories.SHOP_SUPERMARKET, item)
         yield item
+
+    @staticmethod
+    def url_slug(value: str) -> str:
+        slug = SLUG_PUNCTUATION.sub(" ", value.lower().strip())
+        slug = unidecode(SLUG_WHITESPACE.sub("-", slug))
+        return slug or "-"

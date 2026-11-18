@@ -1,3 +1,4 @@
+import re
 from typing import Any, AsyncIterator
 from urllib.parse import urljoin
 
@@ -43,21 +44,24 @@ class DairyQueenSpider(Spider):
 
             concept_type = location.get("conceptType")
 
-            if not concept_type:
-                self.logger.error("Store concept type not available")
+            if concept_type in ["Food and Treat", "Treat & Food"]:
+                item.update(DQ_GRILL_CHILL)
+                apply_category(Categories.FAST_FOOD, item)
+                item["extras"]["cuisine"] = "ice_cream;burger"
+            elif concept_type == "Treat Only":
+                item.update(DQ)
+                apply_category(Categories.FAST_FOOD, item)
+                item["extras"]["cuisine"] = "ice_cream"
             else:
-                if concept_type in ["Food and Treat", "Treat & Food"]:
-                    item.update(DQ_GRILL_CHILL)
-                    apply_category(Categories.FAST_FOOD, item)
-                    item["extras"]["cuisine"] = "ice_cream;burger"
-                elif concept_type == "Treat Only":
-                    item.update(DQ)
-                    apply_category(Categories.FAST_FOOD, item)
-                    item["extras"]["cuisine"] = "ice_cream"
-                else:
+                # Stores outside North America (all of Qatar) have no concept type.
+                if concept_type:
                     self.logger.error("Unexpected type: {}".format(concept_type))
+                item.update(DQ)
+                apply_category(Categories.FAST_FOOD, item)
 
             item["street_address"] = location.get("address3")
+            if item["country"] == "MX":
+                item["postcode"] = self.clean_mx_postcode(location.get("postalCode"))
 
             if website := self.WEBSITE_BY_COUNTRY.get(item["country"]):
                 item["website"] = urljoin(website, location.get("urlTitle").lstrip("/"))
@@ -66,6 +70,17 @@ class DairyQueenSpider(Spider):
 
             item["opening_hours"] = self.parse_opening_hours(location.get("storeHours"))
             yield item
+
+    @staticmethod
+    def clean_mx_postcode(value: str | None) -> str | None:
+        """Return a five-digit código postal.
+
+        Mexico City codes arrive without their leading zero ("9910" for 09910),
+        one carries a prefix ("C.P 35090"), and one is just ".".
+        """
+        if match := re.fullmatch(r"(?:C\.?\s*P\.?\s*)?(\d{4,5})", str(value or "").strip(), re.IGNORECASE):
+            return match.group(1).zfill(5)
+        return None
 
     def parse_opening_hours(self, rules: str) -> OpeningHours | None:
         if not rules:

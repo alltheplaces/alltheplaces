@@ -27,7 +27,7 @@ class IgaAUSpider(CrawlSpider):
     ]
     rules = [
         Rule(
-            LinkExtractor(allow=r"\/stores\/", restrict_xpaths='//ul[contains(@class, "states-list")]'),
+            LinkExtractor(allow=r"\/stores\/", restrict_xpaths='//h4[contains(@class, "store-card-title")]'),
             callback="parse_store",
         )
     ]
@@ -46,7 +46,7 @@ class IgaAUSpider(CrawlSpider):
             "opening_hours": OpeningHours(),
         }
         if phone := response.xpath('//a[@id="phone-no"]/@href').get():
-            properties["phone"] = phone.removeprefix("tel:")
+            properties["phone"] = phone
         apply_category(Categories.SHOP_SUPERMARKET, properties)
 
         hours_string = " ".join(response.xpath('//table[@id="store-hours-table"]//text()').getall())

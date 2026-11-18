@@ -1,15 +1,23 @@
+import csv
+import gzip
 import json
+import re
 from typing import Any, AsyncIterator
 
+from pyproj import Geod
 from scrapy import Spider
 from scrapy.http import FormRequest, Response
 
-from locations.categories import Categories, apply_category
+from locations.categories import Categories
 from locations.dict_parser import DictParser
-from locations.geo import postal_regions
-from locations.hours import OpeningHours
+from locations.geo import country_iseadgg_centroids
+from locations.hours import DAYS, OpeningHours, sanitise_day
+from locations.items import Feature, set_closed
 from locations.pipelines.address_clean_up import clean_address
+from locations.searchable_points import get_searchable_points_path
 from locations.user_agents import BROWSER_DEFAULT
+
+WGS84 = Geod(ellps="WGS84")
 
 GAMESTOP_SHARED_ATTRIBUTES = {
     "brand": "GameStop",
@@ -17,87 +25,96 @@ GAMESTOP_SHARED_ATTRIBUTES = {
     "extras": Categories.SHOP_VIDEO_GAMES.value,
 }
 
+NAME_CLEANUP_RE = re.compile(r"(?i)\s*-\s*gamestop\b")
+
+UNIT_CLEANUP_RULES = (
+    (re.compile(r"(?i)\b(?:STE\.?|SUITE)(?=\s|$)"), "Suite"),
+    (re.compile(r"(?i)\b(?:SPC[E]?\.?|SPACE)(?=\s|$)"), "Space"),
+    (re.compile(r"(?i)\b(?:BLD[G]?\.?|BUILDING)(?=\s|$)"), "Building"),
+    (re.compile(r"(?i)\b(?:RM\.?|ROOM)(?=\s|$)"), "Room"),
+    (re.compile(r"(?i)\bUNIT(?=\s|$)"), "Unit"),
+)
+
 
 class GamestopUSSpider(Spider):
     name = "gamestop_us"
     item_attributes = GAMESTOP_SHARED_ATTRIBUTES
     allowed_domains = ["www.gamestop.com"]
-    start_urls = [
-        "https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores?hasCondition=false&hasVariantsAvailableForLookup=false&hasVariantsAvailableForPickup=false&source=plp&showMap=false&products=undefined:1"
-    ]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
+    start_urls = ["https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Stores-FindStores"]
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "CONCURRENT_REQUESTS": 1,
+    }
+
+    # Demandware API maximum query radius (in miles)
+    api_search_radius_miles: str = "200"
+
+    # Centroid search grid radius in kilometers.
+    # Default is 158 km (~98 miles), which maps to 214 search postal codes.
+    # When combined with GameStop's 200-mile query radius, this provides 100% US coverage
+    # with a ~100-mile overlap safety margin.
+    radius_km: int = 158
+
+    def __init__(self, *args: Any, radius_km: int | str = 158, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.radius_km = int(radius_km)
+
+    @staticmethod
+    def get_centroid_postal_regions(radius_km: int = 158) -> list[str]:
+        """
+        Derive the minimal set of search postal codes required for 100% US coverage.
+        Because GameStop requires searching by postal code rather than raw coordinates,
+        this maps WGS84 ISEADGG geodesic centroids to their nearest US zip code.
+        """
+        with gzip.open(get_searchable_points_path("postcodes/uszips.csv.gz"), mode="rt", encoding="utf-8") as f:
+            zips = [(row["zip"], float(row["lat"]), float(row["lng"])) for row in csv.DictReader(f)]
+
+        mapped = []
+        for lat, lon in country_iseadgg_centroids("US", radius_km):
+            nearest = min(zips, key=lambda z: abs(WGS84.inv(lon, lat, z[2], z[1])[2]))
+            mapped.append(nearest[0])
+
+        return list(dict.fromkeys(mapped))
 
     async def start(self) -> AsyncIterator[FormRequest]:
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Referer": "https://www.gamestop.com/stores/",
-            "X-Requested-With": "XMLHttpRequest",
-        }
+        postal_codes = self.get_centroid_postal_regions(self.radius_km)
+        self.logger.info(
+            "Starting crawl with %d centroid-derived postal codes (grid radius: %d km)",
+            len(postal_codes),
+            self.radius_km,
+        )
         for url in self.start_urls:
-            # There appears to be no way via the website or API to
-            # list all stores or perform a coordinate/radius or
-            # bounding box search. A postcode search appears to be
-            # the only option and there are almost 38000 postcodes
-            # in the US (38000 API requests to Gamestop). It is
-            # possible to reduce the list of postcodes to search
-            # by ignoring postcodes with low populations. There are
-            # fancier and more accurate ways to reduce the list of
-            # postcodes to those which are useful, but this is not
-            # yet implemented in ATP and is a complex problem
-            # requiring significant experimentation and
-            # documentation to explain the methodology which others
-            # can reproduce.
-            #
-            # The 2022 Annual Report (https://news.gamestop.com/static-files/fe325562-c087-4fad-809c-efd183364196)
-            # states that there were 2949 open stores at 28 Jan 2023
-            # operating in the US.
-            #
-            # One year later, the following search results were
-            # observed for different population filter values:
-            # 1. Population > 30000: 2843 locations returned
-            #    from 2013 requests to the API.
-            # 2. Population > 50000: 2824 locations returned
-            #    from 629 requests to the API.
-            #
-            # This spider picks option (2) as a balance between
-            # minimising API requests and obtaining as many
-            # locations as possible.
-            #
-            # A website tracking Gamestop store closures indicates
-            # that 55 stores were known to have closed in 2023 and
-            # to the end of January 2024. Reference:
-            # https://gsclosing.blogspot.com/
-            #
-            # The error margin therefore appears to be ~70 stores
-            # (<2.5%) which this spider may miss due to reduction
-            # in postcodes which are searched for stores.
-            #
-            # Note the search radius can be increased above 200
-            # however this will result in API failures because
-            # there is a limit of a 3MB response and 1 million
-            # characters returned.
-            for postal_region in postal_regions("US", min_population=50000, consolidate_cities=True):
-                postcode = postal_region["postal_region"]
+            for postcode in postal_codes:
                 yield FormRequest(
                     url=url,
                     method="POST",
-                    headers=headers,
-                    formdata={"postalCode": str(postcode), "radius": "200", "csrf_token": "0"},
+                    headers={"Referer": "https://www.gamestop.com/stores/"},
+                    formdata={"radius": self.api_search_radius_miles, "postalCode": postcode},
                 )
+
+    @staticmethod
+    def parse_hours(item: Feature, raw_hours: str | None) -> None:
+        if not raw_hours or not (hours := json.loads(raw_hours)):
+            return
+        if all(day["open"] == "CLOSED" and day["close"] == "CLOSED" for day in hours) and {
+            sanitise_day(day["day"]) for day in hours
+        } == set(DAYS):
+            set_closed(item)
+            return
+        item["opening_hours"] = OpeningHours()
+        for day in hours:
+            item["opening_hours"].add_range(day["day"], day["open"], day["close"], "%H%M")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json()["stores"]:
             item = DictParser.parse(location)
-            item["name"] = item["name"].replace(" - GameStop", "")
-            if location.get("address2"):
-                suite = location.get("address2").upper().replace("STE", "Suite")
-                item["street_address"] = clean_address([suite, location.get("address1")])
-            item["website"] = "https://www.gamestop.com/search/?store=" + item["ref"]
-            item["opening_hours"] = OpeningHours()
-            for day_hours in json.loads(location.get("storeOperationHours")):
-                item["opening_hours"].add_range(day_hours["day"], day_hours["open"], day_hours["close"], "%H%M")
-
-            apply_category(Categories.SHOP_VIDEO_GAMES, item)
+            item["name"] = NAME_CLEANUP_RE.sub("", item["name"]).strip()
+            item["website"] = f"https://www.gamestop.com/search/?store={item['ref']}"
+            if addr2 := location.get("address2"):
+                for pattern, repl in UNIT_CLEANUP_RULES:
+                    addr2 = pattern.sub(repl, addr2)
+                item["street_address"] = clean_address([location.get("address1"), addr2])
+            self.parse_hours(item, location.get("storeOperationHours"))
 
             yield item

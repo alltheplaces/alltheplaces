@@ -32,8 +32,6 @@ class FnbBanksZASpider(Spider):
             yield Request(url="https://www.fnb.co.za" + link, callback=self.parse_item)
 
     def parse_item(self, response: Response, **kwargs: Any) -> Any:
-        # from scrapy.shell import inspect_response
-        # inspect_response(response, self)
         properties = {
             "branch": response.xpath(".//h2/text()").get().strip(),
             "lon": response.xpath('.//p[@class="  fontGrey   linePadding "]/text()').getall()[1].strip(),

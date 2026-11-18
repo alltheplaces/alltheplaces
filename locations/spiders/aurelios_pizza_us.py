@@ -38,7 +38,7 @@ class AureliosPizzaUSSpider(SitemapSpider):
         # The address link's text is split into fragments by a preceding
         # <i> icon element, so all of its text nodes need joining.
         item["addr_full"] = " ".join(t.strip() for t in response.css("a.gray")[0].css("::text").getall() if t.strip())
-        item["phone"] = response.css('a[href^="tel:"]::attr(href)').get("").removeprefix("tel:").strip()
+        item["phone"] = response.css('a[href^="tel:"]::attr(href)').get("").strip()
 
         # Hours are split across a variable number of <p> tags (carry-out vs
         # dine-in), so all are combined; anything from "Buffet Hours" onward

@@ -5,7 +5,6 @@ from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
 
-# Sitemap is not available for all brands, hence CrawlSpider is used.
 class ChicosSpider(CrawlSpider, StructuredDataSpider):
     name = "chicos"
     BRANDS = {

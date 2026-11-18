@@ -10,8 +10,9 @@ from locations.storefinders.mapion import MapionSpider
 class NttLePercJPSpider(MapionSpider):
     name = "ntt_le_perc_jp"
     item_attributes = {"brand": "NTTル・パルク", "brand_wikidata": "Q11236111"}
-    allowed_domains = ["sasp.mapion.co.jp"]
-    feature_url_template = "https://sasp.mapion.co.jp/b/leperc/attr/?t=attr_con&start={}"
+    allowed_domains = ["lbs.mapion.co.jp"]
+    api_group = "leperc"
+    website_template = "https://sasp.mapion.co.jp/b/leperc/info/{}/"
 
     def post_process_item(self, item: Feature, data: dict, response: Response) -> Iterable[Feature]:
         item["phone"] = None

@@ -23,7 +23,7 @@ class YoungsGBSpider(scrapy.Spider):
             item["website"] = (
                 data.get("pubExternalUrl").replace("https://https://", "https://").replace("http://", "https://")
             )
-            item["branch"] = data.get("venueName")
+            item["name"] = data.get("venueName")
             lon = item.get("lon", "")
             if isinstance(lon, str):
                 lon_clean = lon.replace(",", "").replace(" ", "")

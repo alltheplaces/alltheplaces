@@ -58,6 +58,21 @@ def test_clean_address_removes_very_short_addresses():
     assert clean_address("NY", 1) == "NY"
 
 
+def test_clean_address_keeps_short_place_names():
+    # Ii is a real Finnish municipality; must survive the city threshold.
+    assert clean_address("Ii", 1) == "Ii"
+    # Single-letter settlements are real (Y in France, Å in the Nordics),
+    # kept where the caller accepts short values (city/state threshold 1).
+    assert clean_address("Å", 1) == "Å"
+    assert clean_address("Y", 1) == "Y"
+    # Longer-minimum fields (street/postcode/addr_full threshold 2) still drop them.
+    assert clean_address("Å", 2) == ""
+    # Punctuation-only strings are dud at any threshold.
+    assert clean_address("-", 1) == ""
+    assert clean_address(" -", 1) == ""
+    assert clean_address("--", 1) == ""
+
+
 def test_clean_address_dont_remove_short_valid_cjk():
     assert not clean_address("NY", 2)
     assert clean_address("昆明", 2) == "昆明"
@@ -83,3 +98,20 @@ def test_handle():
     assert item.get("street") == ""
     assert item.get("state") == ""
     assert item.get("city") == "Exampletown"
+
+
+def test_handle_keeps_short_city_names():
+    # Ii is a real Finnish municipality (2 chars); the pipeline must keep it.
+    item, pipeline = get_objects(Feature(city="Ii"))
+    pipeline.process_item(item)
+    assert item.get("city") == "Ii"
+    # Single-letter settlements are real; lone punctuation is not.
+    item, pipeline = get_objects(Feature(city="Å"))
+    pipeline.process_item(item)
+    assert item.get("city") == "Å"
+    item, pipeline = get_objects(Feature(city="-"))
+    pipeline.process_item(item)
+    assert item.get("city") == ""
+    item, pipeline = get_objects(Feature(city="--"))
+    pipeline.process_item(item)
+    assert item.get("city") == ""

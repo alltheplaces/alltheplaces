@@ -22,7 +22,7 @@ class McdonaldsSpider(PlaywrightSpider):
     allowed_domains = ["www.mcdonalds.com"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
-    ISEADGG_COUNTRIES = {"AU", "CA", "NZ", "US"}
+    ISEADGG_COUNTRIES = {"AU", "CA", "NZ"}
 
     async def start(self) -> AsyncIterator[Request]:
         template = "https://www.mcdonalds.com/googleappsv2/geolocation?latitude={}&longitude={}&radius=50&maxResults=250&country={}&language={}&showClosed="
@@ -33,7 +33,6 @@ class McdonaldsSpider(PlaywrightSpider):
             "en-nz",
             "fi-fi",
             "en-ie",
-            "en-us",
             "de-de",
             "nb-no",
             "en-ae",
@@ -138,6 +137,10 @@ class McdonaldsSpider(PlaywrightSpider):
             apply_yes_no(Extras.DRIVE_THROUGH, item, "DRIVETHRU" in filter_type)
             apply_yes_no(Extras.WIFI, item, "WIFI" in filter_type)
             apply_yes_no(Extras.DELIVERY, item, "MCDELIVERYSERVICE" in filter_type)
+            # The separate indoorPlayGround/outDoorPlayGround fields can be "0"
+            # even when filterType advertises a PlayPlace.
+            apply_yes_no(Extras.KIDS_AREA, item, bool({"PLAYPLACEPRESENCE", "INDOORPLAYGROUND"} & set(filter_type)))
+            apply_yes_no("kids_area:indoor", item, "INDOORPLAYGROUND" in filter_type)
 
             if "MCCAFE" in filter_type:
                 mccafe = item.deepcopy()

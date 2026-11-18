@@ -19,7 +19,6 @@ class ZoupUSSpider(SitemapSpider, StructuredDataSpider):
     search_for_email = False
     search_for_facebook = False
     search_for_image = False
-    search_for_instagram = False
     search_for_twitter = False
 
     def post_process_item(self, item, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Any]:

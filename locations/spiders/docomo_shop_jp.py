@@ -49,7 +49,6 @@ class DocomoShopJPSpider(Spider):
         item["name"] = shop_name
         item["branch"] = shop_name.removeprefix("ドコモショップ").strip()
 
-        item["country"] = "JP"
         item["state"] = shop.get("prefecture")
         item["city"] = shop.get("municipality")
         item["street_address"] = " ".join(

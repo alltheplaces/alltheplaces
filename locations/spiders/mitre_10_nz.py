@@ -15,7 +15,6 @@ class Mitre10NZSpider(Spider):
     start_urls = [
         "https://ccapi.mitre10.co.nz/occ/v2/mitre10/geolocation/store-locator?fields=FULL&page=0&pageSize=1000&storeCode=28&lang=en&curr=NZD"
     ]
-    requires_proxy = "NZ"
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:

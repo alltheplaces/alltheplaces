@@ -9,15 +9,6 @@ from locations.dict_parser import DictParser
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
-# Saltgrass Steak House uses a BentoBox store locator. The locator page passes
-# every location to a storeLocatorConfig() call as a JavaScript object literal.
-#
-# Opening hours are published two ways: a structured_hours object that only a
-# handful of locations fill in, and an HTML blob that the rest use. The HTML
-# also carries happy hour times and ordering links, so lines mentioning happy
-# hour are dropped before parsing to stop them being read as a second opening
-# period.
-
 
 class SaltgrassSteakHouseUSSpider(Spider):
     name = "saltgrass_steak_house_us"

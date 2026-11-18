@@ -21,6 +21,7 @@ class HRBlockSpider(SitemapSpider, PlaywrightSpider):
         "METAREFRESH_ENABLED": False,
         "USER_AGENT": BROWSER_DEFAULT,
         "ROBOTSTXT_OBEY": False,
+        "CONCURRENT_REQUESTS": 1,
     }
     sitemap_follow = ["opp"]
 

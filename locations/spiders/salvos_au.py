@@ -1,68 +1,55 @@
-from typing import AsyncIterator, Iterable
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest, Response
+from chompjs import chompjs
+from scrapy.http import TextResponse
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import merge_address_lines
+from locations.json_blob_spider import JSONBlobSpider
 
 
-class SalvosAUSpider(Spider):
+class SalvosAUSpider(JSONBlobSpider):
     name = "salvos_au"
     item_attributes = {"brand": "Salvos", "brand_wikidata": "Q120646407"}
+    start_urls = ["https://www.salvosstores.com.au/stores"]
+    requires_proxy = True
 
-    async def start(self) -> AsyncIterator[JsonRequest]:
-        yield self.query_warehouses()
-
-    def query_warehouses(self, after: str | None = None) -> JsonRequest:
-        return JsonRequest(
-            url="https://checkout.ssapi.link/graphql/",
-            data={
-                "query": """
-                    query getWarehouses($after: String) {
-                      warehouses(first: 100, after: $after) {
-                        pageInfo {
-                          hasNextPage
-                          endCursor
-                        }
-                        edges {
-                          node {
-                            id
-                            name
-                            address {
-                              streetAddress1
-                              streetAddress2
-                              city
-                              postalCode
-                              countryArea
-                              phone
-                            }
-                          }
-                        }
-                      }
-                    }
-                """,
-                "variables": {"after": after},
-            },
+    def extract_json(self, response: TextResponse) -> dict | list[dict]:
+        return DictParser.get_nested_key(
+            chompjs.parse_js_object(
+                response.xpath('//script[contains(text(), "_geoloc")]/text()').get("").split("=", 1)[-1]
+            ),
+            "hits",
         )
 
-    def parse(self, response: Response) -> Iterable[Feature | JsonRequest]:
-        warehouses = response.json()["data"]["warehouses"]
-        if warehouses["pageInfo"]["hasNextPage"]:
-            yield self.query_warehouses(warehouses["pageInfo"]["endCursor"])
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("_geoloc", {}))
 
-        for edge in warehouses["edges"]:
-            store = edge["node"]
-            address = store.pop("address")
-            if store["name"].startswith("Test ") or address["streetAddress1"] == "ONLINE STORE ONLY":
-                continue
-            store.update(address)
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if "ONLINE STORE ONLY" in feature["address"].upper():
+            return
+        item["branch"] = item.pop("name", None)
+        item["state"] = feature.get("address_state")
+        if slug := feature.get("url_key"):
+            item["website"] = f'https://www.salvosstores.com.au/stores/{slug.strip("/")}'
 
-            item = DictParser.parse(store)
-            item["branch"] = item.pop("name").split(", ")[0].strip()
-            item["street_address"] = merge_address_lines([address["streetAddress1"], address["streetAddress2"]])
-            item["state"] = address["countryArea"]
-            apply_category(Categories.SHOP_CHARITY, item)
-            yield item
+        trading_hours = feature.get("trading_hours") or []
+        try:
+            item["opening_hours"] = self.parse_opening_hours(trading_hours)
+        except Exception as e:
+            self.logger.warning(f"Failed to parse hours: {trading_hours}, {e}")
+
+        apply_category(Categories.SHOP_CHARITY, item)
+        yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for rule in rules:
+            for day, hours in rule.items():
+                if hours.get("isOpen") is False:
+                    opening_hours.set_closed(day)
+                    continue
+                opening_hours.add_range(day, hours["openingTime"], hours["closingTime"], "%H:%M:%S")
+        return opening_hours

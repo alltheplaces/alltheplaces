@@ -7,18 +7,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.structured_data_spider import StructuredDataSpider
 
-# The locations page lists every cafe as a card; each links to that cafe's own
-# page, which carries a schema.org LocalBusiness record.
-#
-# Two things about that record need handling: the coordinates are nested under
-# "location" rather than on the business itself, so the linked data parser does
-# not pick them up, and openingHours is a list of "Monday 6 AM - 3 PM" strings
-# rather than schema.org ranges.
-#
-# Cafes that have not opened yet are labelled "Coming Soon" on their card.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class JustLoveCoffeeCafeUSSpider(StructuredDataSpider):
     name = "just_love_coffee_cafe_us"
@@ -28,7 +16,6 @@ class JustLoveCoffeeCafeUSSpider(StructuredDataSpider):
     wanted_types = ["LocalBusiness"]
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_email = False
     search_for_image = False
 
@@ -88,14 +75,9 @@ class JustLoveCoffeeCafeUSSpider(StructuredDataSpider):
 
             oh.add_range(
                 day,
-                JustLoveCoffeeCafeUSSpider.normalise_time(match.group(2)),
-                JustLoveCoffeeCafeUSSpider.normalise_time(match.group(3)),
-                time_format="%I:%M%p",
+                match.group(2),
+                match.group(3),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

@@ -15,7 +15,7 @@ class SupaQuickSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [("/tyre-fitment-centres/", "parse_sd")]
     wanted_types = ["TireShop"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 30}  # The default timeout led to a lot of requests timing out
-    requires_proxy = True
+    requires_proxy = "ZA"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         if item["facebook"] == "https://www.facebook.com/supaquick":

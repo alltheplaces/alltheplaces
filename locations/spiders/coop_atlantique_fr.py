@@ -3,6 +3,7 @@ import scrapy
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CoopAtlantiqueFRSpider(scrapy.Spider):
@@ -18,8 +19,8 @@ class CoopAtlantiqueFRSpider(scrapy.Spider):
                 continue
             item = DictParser.parse(store)
             item["branch"] = store.get("nomMag").replace("Utile ", "").replace("Coop ", "")
-            item["street_address"] = ", ".join(
-                filter(None, [store.get("adresse"), store.get("adresse2"), store.get("adresse3")])
+            item["street_address"] = merge_address_lines(
+                [store.get("adresse"), store.get("adresse2"), store.get("adresse3")]
             )
             item["city"] = store.get("ville")
             item["postcode"] = store.get("cp")

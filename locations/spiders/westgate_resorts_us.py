@@ -5,12 +5,6 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.structured_data_spider import StructuredDataSpider
 
-# The hotels page links to a page per resort, each carrying a schema.org Hotel
-# record with address, coordinates and phone.
-#
-# The collection includes resorts in the Bahamas, Canada and Mexico, which are
-# dropped on the record's own addressCountry.
-
 
 class WestgateResortsUSSpider(StructuredDataSpider):
     name = "westgate_resorts_us"
@@ -20,7 +14,6 @@ class WestgateResortsUSSpider(StructuredDataSpider):
     wanted_types = ["Hotel"]
     search_for_twitter = False
     search_for_facebook = False
-    search_for_instagram = False
     search_for_email = False
     search_for_image = False
 

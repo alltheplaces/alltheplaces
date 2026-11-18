@@ -1,25 +1,22 @@
+import json
 import re
-from typing import AsyncIterator
-
-from scrapy import Spider
-from scrapy.http import Request
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_BG, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+from locations.user_agents import BROWSER_DEFAULT
 
 
-class UbbBGSpider(Spider):
+class UbbBGSpider(PlaywrightSpider):
     name = "ubb_bg"
     item_attributes = {"brand": "ОББ", "brand_wikidata": "Q7887555"}
     start_urls = ["https://www.ubb.bg/offices/pins"]
-
-    async def start(self) -> AsyncIterator[Request]:
-        for url in self.start_urls:
-            yield Request(url, cookies={"d41d8cd98f00b204e": "800998ecf8427f"}, callback=self.parse)
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response, **kwargs):
-        markers = response.json()["markers"]
+        markers = json.loads(response.xpath("//body/text()").get())["markers"]
         for location in markers["offices"]:
             item = Feature()
             item["ref"] = location["data"]["id"]

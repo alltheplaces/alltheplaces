@@ -1,6 +1,7 @@
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 from locations.user_agents import BROWSER_DEFAULT
@@ -18,15 +19,16 @@ class BoostMobileUSSpider(SitemapSpider, StructuredDataSpider):
         "USER_AGENT": BROWSER_DEFAULT,
         "CONCURRENT_REQUESTS": 1,
         "DOWNLOAD_DELAY": 5,
-        "ROBOTSTXT_OBEY": False,
     }
 
     def pre_process_data(self, ld_data: dict, **kwargs):
-        ld_data["openingHours"] = ld_data.pop("openingHoursSpecification", [])
+        if opening_hours_specification := ld_data.pop("openingHoursSpecification", None):
+            ld_data["openingHours"] = opening_hours_specification
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item.pop("name")
         item["image"] = None
         if "Temporarily Closed" in response.xpath('//*[contains(@class, "location-details")]').get(""):
-            item["opening_hours"] = "off"
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].set_closed(DAYS)
         yield item

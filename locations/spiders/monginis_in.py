@@ -13,10 +13,11 @@ class MonginisINSpider(CrawlSpider, StructuredDataSpider):
         Rule(LinkExtractor(allow=(r"/?page=\d+$"))),
         Rule(LinkExtractor(allow=(r"-\d+/Home$")), callback="parse_sd"),
     ]
-    wanted_types = ["Bakery"]
+    wanted_types = ["LocalBusiness"]
     time_format = "%I:%M %p"
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["name"] = None
+        item.pop("facebook", None)
         apply_category(Categories.SHOP_PASTRY, item)
         yield item

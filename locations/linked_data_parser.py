@@ -201,6 +201,8 @@ class LinkedDataParser:
             days = [days]
 
         for day in days:
+            if not sanitise_day(day.strip()):
+                continue
             oh.add_range(
                 day=day.strip(),
                 open_time=LinkedDataParser.get_case_insensitive(rule, "opens").strip(),

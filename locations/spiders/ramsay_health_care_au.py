@@ -28,6 +28,14 @@ class RamsayHealthCareAUSpider(scrapy.Spider):
             item["website"] = location["href"]
             if location["locationTypeName"] == "Pharmacy":
                 apply_category(Categories.PHARMACY, item)
-            elif location["locationTypeName"] in ["Mental Health Clinic", "Psychology Clinic", "Ramsay Health Plus"]:
+            elif location["locationTypeName"] == "Hospital":
+                apply_category(Categories.HOSPITAL, item)
+            elif location["locationTypeName"] in [
+                "Mental Health Clinic",
+                "Psychology Clinic",
+                "Ramsay Health Plus",
+                "Surgical Centre",
+                "Specialist Centre",
+            ]:
                 apply_category(Categories.CLINIC, item)
             yield item

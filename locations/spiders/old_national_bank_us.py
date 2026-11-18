@@ -12,7 +12,7 @@ from locations.structured_data_spider import StructuredDataSpider
 
 class OldNationalBankUSSpider(SitemapSpider, StructuredDataSpider):
     name = "old_national_bank_us"
-    item_attributes = {"brand": "Old National Bank", "brand_wikidata": "Q17520701"}
+    item_attributes = {"brand": "Old National Bank", "brand_wikidata": "Q7084595"}
     sitemap_urls = ["https://locations.oldnational.com/sitemap.xml"]
     sitemap_rules = [(r"https://locations\.oldnational\.com/[a-z]{2}/[^/]+/[^/]+$", "parse_sd")]
 
@@ -47,7 +47,6 @@ class OldNationalBankUSSpider(SitemapSpider, StructuredDataSpider):
         if response.xpath('//div[@class="Teaser-service" and contains(text(), "ATM")]'):
             apply_yes_no(Extras.ATM, item, True)
 
-            # Get ATM hours JSON data
             hours_json = response.xpath(
                 '//h2[@class="Core-heading" and contains(text(), "ATM")]/..//span[@class="c-hours-today js-hours-today"]/@data-days'
             ).get()

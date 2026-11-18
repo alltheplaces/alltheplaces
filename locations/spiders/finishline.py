@@ -4,7 +4,6 @@ from scrapy.spiders import CrawlSpider, Rule
 from locations.structured_data_spider import StructuredDataSpider
 
 
-# 2024-02-09 - Sitemap excludes Puerto Rico
 class FinishlineSpider(CrawlSpider, StructuredDataSpider):
     name = "finishline"
     item_attributes = {"brand": "Finish Line", "brand_wikidata": "Q5450341"}

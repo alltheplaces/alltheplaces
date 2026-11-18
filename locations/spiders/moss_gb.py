@@ -26,7 +26,6 @@ class MossGBSpider(CrawlSpider, StructuredDataSpider):
                 item["lat"], item["lon"] = coords.split(",")
             else:
                 return
-        #       item["image"] = response.xpath('//*[@itemprop="image"]/@content').get()
         item["name"] = response.xpath('//ul[@itemprop="address"]//li[@itemprop="name"]/text()').get()
         if item["name"]:
             if item["name"].startswith("Moss "):

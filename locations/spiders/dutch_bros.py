@@ -19,7 +19,7 @@ class DutchBrosSpider(scrapy.Spider):
     name = "dutch_bros"
     item_attributes = {"brand": "Dutch Bros. Coffee", "brand_wikidata": "Q5317253"}
 
-    allowed_domains = ["www.dutchbros.com"]
+    allowed_domains = ["dutchbros.com"]
     start_urls = ("https://files.dutchbros.com/api-cache/stands.json",)
 
     def parse(self, response):
@@ -37,7 +37,7 @@ class DutchBrosSpider(scrapy.Spider):
                 city=store["city"],
                 state=store["state"],
                 postcode=store["zip_code"],
-                website=f'https://locations.dutchbros.com/dutch-bros-coffee-{store["yext_url"]}',
+                website=f"https://locations.dutchbros.com/dutch-bros-coffee-{store['yext_url']}",
                 opening_hours=self.parse_hours(store["hours"]),
             )
 

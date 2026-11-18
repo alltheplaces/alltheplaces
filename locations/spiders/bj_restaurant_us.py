@@ -4,6 +4,7 @@ from typing import Any
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.linked_data_parser import LinkedDataParser
 
 
@@ -18,11 +19,11 @@ class BjRestaurantUSSpider(SitemapSpider):
         if "restaurantdetails" not in f.get("props", {}).get("pageProps", {}).get("model", {}):
             return
         restaurant_data = f["props"]["pageProps"]["model"]["restaurantdetails"]["restaurant"]
-        nested_json = json.loads(restaurant_data["seoScript"])
-        item = LinkedDataParser.parse_ld(nested_json, time_format="%H:%M:%S")
+        item = LinkedDataParser.parse(response, "Restaurant")
         item["ref"] = restaurant_data["restaurantId"]
         item["branch"] = item.pop("name", None)
         item["website"] = response.urljoin(item["website"])
         if "/generic-" in (item.get("image") or ""):
             item.pop("image", None)
+        apply_category(Categories.RESTAURANT, item)
         yield item

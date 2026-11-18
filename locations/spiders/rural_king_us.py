@@ -6,7 +6,7 @@ from scrapy.http import Request, Response
 from twisted.python.failure import Failure
 
 from locations.categories import Categories, Fuel, apply_category, apply_yes_no
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
 
@@ -73,7 +73,6 @@ class RuralKingUSSpider(Spider):
         """Parse individual store page to extract services"""
         store = response.meta.get("store_data")
 
-        # Extract services from the page
         services = []
         service_elements = response.css(".storelocatorServiceOffer-offer__label::text").getall()
         for service in service_elements:
@@ -107,24 +106,20 @@ class RuralKingUSSpider(Spider):
             "lon": float(store.get("longitude")),
         }
 
-        # Extract email if available
         for attribute in store.get("Attribute", []):
             if attribute.get("name") == "Email":
                 properties["email"] = attribute.get("value")
                 break
 
-        # Get store image if available
         for description in store.get("Description", []):
             if "thumbnail" in description:
                 properties["image"] = description.get("thumbnail")
                 break
 
-        # Add hours
         hours = self.parse_hours(store)
         if hours:
             properties["opening_hours"] = hours
 
-        # Create the feature
         item = Feature(**properties)
 
         # Apply shop category - Rural King is an agrarian/farm supply store
@@ -156,18 +151,14 @@ class RuralKingUSSpider(Spider):
     def parse_hours(self, store: dict) -> OpeningHours:
         oh = OpeningHours()
 
-        days = {"Mon": "Mo", "Tue": "Tu", "Wed": "We", "Thu": "Th", "Fri": "Fr", "Sat": "Sa", "Sun": "Su"}
-
         for attribute in store.get("Attribute", []):
             day_name = attribute.get("displayName")
-            if day_name in days and attribute.get("name", "").startswith("Hours_"):
+            if (day := sanitise_day(day_name)) and attribute.get("name", "").startswith("Hours_"):
                 hours_value = attribute.get("value")
                 if hours_value and hours_value.strip():
                     try:
                         open_time, close_time = hours_value.split(" - ")
-                        oh.add_range(
-                            day=days[day_name], open_time=open_time, close_time=close_time, time_format="%I:%M%p"
-                        )
+                        oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M%p")
                     except Exception as e:
                         self.logger.warning(f"Error parsing hours {hours_value} for {day_name}: {e}")
 

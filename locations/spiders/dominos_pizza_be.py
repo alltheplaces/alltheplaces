@@ -18,9 +18,9 @@ class DominosPizzaBESpider(SitemapSpider):
     def parse_store(self, response: Response, **kwargs: Any) -> Any:
         properties = {
             "ref": response.url,
-            "name": response.xpath('//h1[@class="storetitle"]/text()').extract_first(),
+            "name": response.xpath('//h1[@class="storetitle"]/text()').get(),
             "street_address": response.xpath('//a[@id="open-map-address"]/text()').get(),
-            "addr_full": response.xpath('//a[@id="open-map-address"]').xpath("normalize-space()").extract(),
+            "addr_full": response.xpath('//a[@id="open-map-address"]').xpath("normalize-space()").getall(),
             "lat": response.xpath('//input[@id="store-lat"]/@value').get().replace(",", "."),
             "lon": response.xpath('//input[@id="store-lon"]/@value').get().replace(",", "."),
             "website": response.url,

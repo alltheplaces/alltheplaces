@@ -47,7 +47,6 @@ class PlusfrescESSpider(Spider):
                 item["lat"], item["lon"] = coordinates
 
             self.parse_address(item, shop.get("address") or "")
-            item["country"] = "ES"
 
             apply_category(Categories.SHOP_SUPERMARKET, item)
             apply_yes_no(Extras.WIFI, item, shop.get("has_wifi"))

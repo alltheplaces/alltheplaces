@@ -2,6 +2,7 @@ import chompjs
 import scrapy
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS_WEEKDAY, DAYS_WEEKEND, OpeningHours
 from locations.items import Feature
 
 
@@ -30,5 +31,11 @@ class BradescoBRSpider(scrapy.Spider):
             item["state"] = poi[10]
             item["postcode"] = poi[11]
             item["phone"] = poi[12]
+            item["opening_hours"] = OpeningHours()
+            if cat == Categories.ATM:
+                item["opening_hours"].add_days_range(DAYS_WEEKDAY, poi[22], poi[23])
+                item["opening_hours"].add_days_range(DAYS_WEEKEND, poi[24], poi[25])
+            elif poi[5] and poi[6]:
+                item["opening_hours"].add_days_range(DAYS_WEEKDAY, f"{poi[5]}:00", f"{poi[6]}:00")
             apply_category(cat, item)
             yield item

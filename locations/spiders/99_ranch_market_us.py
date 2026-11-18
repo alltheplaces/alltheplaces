@@ -11,22 +11,10 @@ from locations.hours import OpeningHours
 class NinetynineRanchMarketUSSpider(Spider):
     name = "99_ranch_market_us"
     item_attributes = {"brand": "99 Ranch Market", "brand_wikidata": "Q4646307"}
-    allowed_domains = ["api.awsprod.99ranch.com"]
-    start_urls = ["https://api.awsprod.99ranch.com/store/web/nearby/stores"]
 
     async def start(self) -> AsyncIterator[JsonRequest]:
-        data = {
-            "address": "Foster City, CA, USA",
-            "zipCode": "",
-            "longitude": -122.2710788,
-            "latitude": 37.5585465,
-            "pageSize": 1000,
-            "pageNum": 1,
-            "type": 1,
-            "source": "WEB",
-            "within": 10000,
-        }
-        yield JsonRequest(url=self.start_urls[0], data=data, method="POST")
+        data = {"zipCode": "99950", "pageSize": 100, "pageNum": 1, "type": 1, "source": "WEB"}
+        yield JsonRequest(url="https://www.99ranch.com/be-api/store/web/nearby/stores", data=data, method="POST")
 
     def parse(self, response):
         for location in response.json()["data"]["records"]:

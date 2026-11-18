@@ -16,7 +16,7 @@ class CentraIESpider(Spider):
             item["ref"] = location.xpath('./div[@class="shop-info"]/a/@href').re_first(r"_(\d+)$")
             item["name"] = location.xpath('.//h4[@class="shop-title"]/text()').get()
             item["addr_full"] = location.xpath('.//p[@class="shop-address"]/text()').get()
-            item["phone"] = location.xpath('.//li[@class="call"]/a/@href').get().replace("tel:", "")
+            item["phone"] = location.xpath('.//li[@class="call"]/a/@href').get()
             if location_data := location.xpath('.//li[@class="directions"]/a/@onclick').re_first(
                 r"\((-?\d+\.\d+,\s-?\d+\.\d+)\);"
             ):

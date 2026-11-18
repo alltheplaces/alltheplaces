@@ -9,15 +9,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# The locations page groups its restaurants under a heading per city, each
-# block giving the street on the first line and usually a phone below it, plus
-# a map link whose query sometimes carries the postcode.
-#
-# Coordinates are not usable: the map links carry an ll or sll parameter, but
-# it is the map's default centre and repeats across restaurants.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class RobertosTacoShopUSSpider(Spider):
     name = "robertos_taco_shop_us"

@@ -20,8 +20,7 @@ from locations.user_agents import BROWSER_DEFAULT
 class KasikornBankTHSpider(PlaywrightSpider):
     name = "kasikorn_bank_th"
     item_attributes = {"brand_wikidata": "Q276557"}
-    requires_proxy = "TH"
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"DOWNLOAD_TIMEOUT": 40}
 
     LOCATED_IN_MAPPINGS = [
         (["7-11", "7-ELEVEN"], SEVEN_ELEVEN_SHARED_ATTRIBUTES),

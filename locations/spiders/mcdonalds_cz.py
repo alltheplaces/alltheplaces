@@ -57,4 +57,6 @@ class McdonaldsCZSpider(scrapy.Spider):
                 self.parse_hours(mccafe, poi.get("mccafe_worktime"))
                 yield mccafe
 
+            apply_category(Categories.FAST_FOOD, item)
+
             yield item

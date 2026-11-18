@@ -1,74 +1,130 @@
 import json
+import re
+from typing import Any, AsyncIterator, Iterable
 
-from scrapy.spiders import SitemapSpider
+from scrapy import Request, Spider
+from scrapy.http import Response
+from twisted.python.failure import Failure
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.user_agents import FIREFOX_LATEST
 
+STORE_SITEMAP = "https://www.lowes.com/sitemap/store0.xml"
+DIRECTORY_SITEMAP = "https://www.lowes.com/sitemap/storedirectory0.xml"
+PRELOADED = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{)", re.IGNORECASE)
+LOCATIONS = re.compile(r"<loc>(?:<!\[CDATA\[)?([^<\]]+)")
 
-class LowesUSSpider(SitemapSpider):
+
+class LowesUSSpider(Spider):
+    """A store's own page is refused with a 403, so the stores are read from the state
+    directories instead, where the page states them all in its preloaded state.
+
+    Those directories state no coordinates and no opening hours: the only page that
+    did was the store's own. The store sitemap is still read, because it names each
+    store's page by the same id the directory gives, which is where `website` comes
+    from.
+    """
+
     name = "lowes_us"
-    item_attributes = {"brand": "Lowe's", "brand_wikidata": "Q1373493"}
+    # The brand is set per store rather than for the spider, because 16 of them trade
+    # as Lowe's Outlet, which has no Wikidata item of its own to carry.
     allowed_domains = ["lowes.com"]
-    sitemap_urls = ["https://www.lowes.com/sitemap/store0.xml"]
-    sitemap_rules = [(r"^https://www.lowes.com/store", "parse_store")]
     custom_settings = {"USER_AGENT": FIREFOX_LATEST}
     requires_proxy = True
 
-    def parse_hours(self, store_hours):
-        opening_hours = OpeningHours()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.websites: dict[str, str] = {}
 
-        for weekday in store_hours:
-            day = weekday.get("day").get("day")
-            open_time = weekday.get("day").get("open")
-            hour, minute, sec = open_time.split(".")
-            open_time_formatted = hour + ":" + minute
+    async def start(self) -> AsyncIterator[Request]:
+        # Asked for with an errback, so that a run still reaches the directories when
+        # the store sitemap cannot be had; it only supplies each store's own address.
+        yield Request(STORE_SITEMAP, callback=self.parse, errback=self.no_store_sitemap)
 
-            close = weekday.get("day").get("close")
-            hour, minute, sec = close.split(".")
-            close_time_formatted = hour + ":" + minute
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Request]:
+        # "https://www.lowes.com/store/OH-Columbus/0181" is store 0181.
+        for url in LOCATIONS.findall(response.text):
+            if store := re.search(r"/(\d{4})/?$", url):
+                self.websites[store.group(1)] = url
+        yield from self.directories()
 
-            if close_time_formatted in {"00:00", "24:00"}:
-                close_time_formatted = "23:59"
+    def no_store_sitemap(self, failure: Failure) -> Iterable[Request]:
+        """Carry on without the store pages' addresses, which only name them."""
+        self.logger.warning(f"No store sitemap, so no website for any store: {failure.value}")
+        yield from self.directories()
 
-            opening_hours.add_range(
-                day=day[:2],
-                open_time=open_time_formatted,
-                close_time=close_time_formatted,
-            )
+    def directories(self) -> Iterable[Request]:
+        yield Request(DIRECTORY_SITEMAP, callback=self.parse_directory)
 
-        return opening_hours
+    def parse_directory(self, response: Response, **kwargs: Any) -> Iterable[Request]:
+        for url in LOCATIONS.findall(response.text):
+            # A state's directory is "/Lowes-Stores/Ohio/OH"; the two pages that index
+            # the states themselves are not.
+            if re.search(r"/Lowes-Stores/[^/]+/[A-Z]{2}$", url):
+                yield response.follow(url, callback=self.parse_state)
 
-    def parse_store(self, response):
-        script_content = response.xpath('//script[contains(text(),"storeHours")]/text()').extract_first()
-        if not script_content:
+    def parse_state(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
+        if not (stores := self.preloaded(response).get("storeDirectory")):
+            self.logger.warning(f"No stores in the directory at {response.url}")
             return
 
-        # effectively strip off leading "window.__FRAGMENT__FOOTER__PRELOAD__ = " where
-        # the rest is a json blob
-        script_data = script_content.split(" = ", 1)[-1]
-        json_data = json.loads(script_data)
-        store_hours = json_data.get("storeHours")
+        # The directory is keyed by town, each holding the stores in it.
+        for town in stores.values():
+            for store in town or []:
+                item = Feature()
+                item["ref"] = store.get("id")
+                self.name_and_brand(item, store.get("storeName"))
+                item["street_address"] = self.titlecase(store.get("address"))
+                item["city"] = store.get("city")
+                item["state"] = store.get("state")
+                item["postcode"] = store.get("zip")
+                item["phone"] = store.get("phone")
+                item["country"] = store.get("country")
+                item["website"] = self.websites.get(store.get("id"))
+                # Every store in a state is given the same list of features, so they
+                # describe the chain rather than any one store and are not read.
+                apply_category(Categories.SHOP_DOITYOURSELF, item)
+                yield item
 
-        properties = {
-            "lat": json_data["storeDetails"]["lat"],
-            "lon": json_data["storeDetails"]["long"],
-            "ref": json_data["storeDetails"]["id"],
-            "street_address": json_data["storeDetails"]["address"],
-            "city": json_data["storeDetails"]["city"],
-            "state": json_data["storeDetails"]["state"],
-            "postcode": json_data["storeDetails"]["zip"],
-            "phone": json_data["storeDetails"]["phone"],
-            "website": response.request.url,
-            "opening_hours": self.parse_hours(store_hours),
-            "extras": {},
-        }
+    def preloaded(self, response: Response) -> dict:
+        """Return the state the page is built from, which trails the rest of the page."""
+        if not (start := PRELOADED.search(response.text)):
+            return {}
+        try:
+            return json.JSONDecoder().raw_decode(response.text[start.start(1) :])[0]
+        except json.JSONDecodeError:
+            self.logger.warning(f"Unparsed preloaded state on {response.url}")
+            return {}
 
-        if start_date := json_data["storeDetails"].get("openDate"):
-            properties["extras"]["start_date"] = start_date
+    @staticmethod
+    def name_and_brand(item: Feature, name: str | None) -> None:
+        """Set which Lowe's a store is, and what it is called without that in front.
 
-        apply_category(Categories.SHOP_DOITYOURSELF, properties)
+        The stores are named "Cheyenne Lowe's", and the clearance stores "Lowe's
+        Outlet Houston" or "Lowe's Outlet of Baltimore", one of them in capitals.
+        """
+        name = re.sub(r"\s+", " ", (name or "").replace("’", "'")).strip()
+        if outlet := re.match(r"Lowe'?s\s+Outlet\s+(?:of\s+)?(?P<branch>.+)", name, flags=re.IGNORECASE):
+            item["brand"] = "Lowe's Outlet"
+            branch = outlet["branch"]
+        else:
+            item["brand"] = "Lowe's"
+            item["brand_wikidata"] = "Q1373493"
+            branch = re.sub(r"^Lowe'?s\s+of\s+|\s*Lowe'?s$", "", name, flags=re.IGNORECASE)
+        # One store's name ends with its state, which the item already states.
+        branch = re.sub(r",\s*[A-Z]{2}$", "", branch.strip())
+        item["branch"] = LowesUSSpider.titlecase(branch) or None
 
-        yield Feature(**properties)
+    @staticmethod
+    def titlecase(value: str | None) -> str | None:
+        """Take the shouting out of an address, which is published in capitals."""
+        if not value:
+            return None
+        words = []
+        for word in value.split():
+            if any(char.isdigit() for char in word):
+                words.append(word)
+            else:
+                words.append(re.sub(r"[^\W\d_]+", lambda run: run.group().capitalize(), word))
+        return " ".join(words) or None

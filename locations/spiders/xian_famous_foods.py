@@ -38,30 +38,24 @@ class XianFamousFoodsSpider(scrapy.Spider):
         if not location_name:
             return None
 
-        # Extract address and hours
         address = self._get_text_from_detail(location_item, 0)
         if not address:
             return None
 
         hours = self._get_text_from_detail(location_item, 1)
 
-        # Parse address components
         address_components = self._parse_address(address)
         if not address_components:
             return None
 
         street_address, city, state, postcode = address_components
 
-        # Extract coordinates
         lat, lon = self._extract_coordinates(response, location_name)
 
-        # Parse hours
         opening_hours = self._parse_hours(hours)
 
-        # Create a unique reference ID
         ref = f"{borough.lower()}-{location_name.lower().replace(' ', '-')}"
 
-        # Create the store item
         item = Feature(
             ref=ref,
             name=f"Xi'an Famous Foods - {location_name.strip()}",
@@ -76,10 +70,8 @@ class XianFamousFoodsSpider(scrapy.Spider):
             opening_hours=opening_hours,
         )
 
-        # Apply restaurant category
         apply_category(Categories.RESTAURANT, item)
 
-        # Add cuisine information
         item["extras"]["cuisine"] = "chinese"
 
         # Add takeaway information (all locations offer takeaway)
@@ -149,7 +141,6 @@ class XianFamousFoodsSpider(scrapy.Spider):
         """Normalize time string to HH:MM format."""
         time_str = time_str.strip()
 
-        # Add colon if missing
         if ":" not in time_str:
             time_str = f"{time_str}:00"
 
@@ -235,7 +226,6 @@ class XianFamousFoodsSpider(scrapy.Spider):
         if not hours:
             return None
 
-        # Create an OpeningHours object
         opening_hours = OpeningHours()
 
         # Normalize hours format

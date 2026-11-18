@@ -1,31 +1,21 @@
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy.http import Request
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
 
-from locations.storefinders.kibo import KiboSpider
-from locations.user_agents import BROWSER_DEFAULT
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class BoscovsUSSpider(KiboSpider):
+class BoscovsUSSpider(SitemapSpider, StructuredDataSpider):
     name = "boscovs_us"
     item_attributes = {"brand": "Boscov's", "brand_wikidata": "Q4947190"}
-    start_urls = ["https://www.boscovs.com/api/commerce/storefront/locationUsageTypes/SP/locations"]
-    custom_settings = {"COOKIES_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
+    sitemap_urls = ["https://locations.boscovs.com/robots.txt"]
+    sitemap_rules = [(r"/[a-z]{2}/[^/]+/[^/]+\.html$", "parse_sd")]
+    drop_attributes = {"facebook", "twitter"}
 
-    # A session cookie needs to be obtained prior to the Kibo Storefront API being used
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request("https://www.boscovs.com/", self.parse_cookie_page)
-
-    def parse_cookie_page(self, response):
-        for url in self.start_urls:
-            yield Request(url, self.parse)
-
-    def parse_item(self, item, location: {}, **kwargs):
-        # Returned data often contains unwanted tab characters
-        for field in "street_address", "city", "state", "email":
-            if field in item:
-                item[field] = item[field].replace("\t", "")
-        for attribute in location["attributes"]:
-            if attribute["fullyQualifiedName"] == "tenant~location-url":
-                item["website"] = attribute["values"][0]
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", "").replace("Boscov's Department Store", "").strip()
+        apply_category(Categories.SHOP_DEPARTMENT_STORE, item)
         yield item

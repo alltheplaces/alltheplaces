@@ -16,7 +16,7 @@ from locations.spiders.systeme_u import SystemeUSpider
 
 class CashServicesFRSpider(CrawlSpider):
     name = "cash_services_fr"
-    item_attributes = {"brand": "Cash Services"}
+    item_attributes = {"brand": "Cash Services", "brand_wikidata": "Q140008260"}
     allowed_domains = ["www.cash-services.fr"]
     start_urls = ["https://www.cash-services.fr/fr/Regions.aspx"]
 
@@ -44,7 +44,6 @@ class CashServicesFRSpider(CrawlSpider):
         item = Feature()
         item["ref"] = response.url
 
-        # Extract name from breadcrumb
         item["name"] = response.xpath('//li[@aria-current="page"]//span[@itemprop="name"]/text()').get()
 
         # Extract coordinates from JavaScript (_Data$Value2 = lat, _Data$Value3 = lon)
@@ -67,7 +66,6 @@ class CashServicesFRSpider(CrawlSpider):
                     item["street_address"] = address_paragraphs[i - 1].strip()
                 break
 
-        item["country"] = "FR"
         item["website"] = response.url
 
         services = response.xpath('//@class[contains(., "ei_rogi_picto_")]').getall()

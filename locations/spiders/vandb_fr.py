@@ -25,6 +25,8 @@ class VandbFRSpider(SitemapSpider, StructuredDataSpider):
     # "centrale" (head office) has no "v-and-b-" slug, so it's excluded here already.
     sitemap_rules = [(r"/nos-magasins/(v-and-b-[a-z0-9-]+)$", "parse_sd")]
     wanted_types = ["LocalBusiness"]
+    # sitemap.xml is generated on every request and takes 11-15 s to start responding.
+    custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name", "").removeprefix("V and B ")

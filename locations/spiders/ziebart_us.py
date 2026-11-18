@@ -9,18 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Location pages come from the site's sitemap. Each page holds the address
-# inside its Google Maps embed URL, the phone in a tel: link, and the hours as
-# two columns, one of day labels and one of times.
-#
-# Every page also carries a "preferred store" widget for whichever store the
-# visitor last used, which repeats another store's address and code, so the
-# store's own details are read from the location map block and the URL.
-#
-# Coordinates are only present when the page links to a Google Maps place with
-# an "@lat,lng" URL; some pages link to an address search instead, and those
-# features have no geometry.
-
 
 class ZiebartUSSpider(SitemapSpider):
     name = "ziebart_us"

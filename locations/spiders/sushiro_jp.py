@@ -114,7 +114,6 @@ class SushiroJPSpider(JSONBlobSpider):
         item["postcode"] = f"{feature['zip1']}{feature['zip2']}"
         item["city"] = feature["city_name"]
         item["extras"]["addr:province"] = feature["pref_name"]
-        item["country"] = "JP"
         item["website"] = f"https://www.akindo-sushiro.co.jp/shop/detail.php?id={feature['id']}"
         item["extras"][
             "website:menu"

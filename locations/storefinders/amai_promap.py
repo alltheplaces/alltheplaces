@@ -63,4 +63,5 @@ class AmaiPromapSpider(JSONBlobSpider):
             item["image"] = feature.get("store_image")
             item.pop("addr_full")
             item["street_address"] = merge_address_lines([feature.get("address"), feature.get("address2")])
+            item["website"] = feature.get("web")
             yield from self.post_process_item(item, response, feature) or []

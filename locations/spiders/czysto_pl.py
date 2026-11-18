@@ -33,7 +33,6 @@ class CzystoPLSpider(scrapy.Spider):
         item = Feature()
         item["ref"] = ref
         item["website"] = response.url
-        item["country"] = "PL"
 
         item["branch"] = " ".join(response.css(".cw_info h1::text").get("").split())
 

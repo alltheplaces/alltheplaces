@@ -14,14 +14,14 @@ class CenexSpider(JSONBlobSpider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         yield JsonRequest(
-            "https://www.cenex.com/chs-sitecore/api/locationsearch/search",
+            "https://sitecoremanagedcloudapi.chsinc.com/cenexlocations/search",
             method="POST",
             data={
                 "Bounds": {
-                    "NorthEast": {"Latitude": 90, "Longitude": 180},
-                    "SouthWest": {"Latitude": -90, "Longitude": -180},
+                    "NorthEast": {"Latitude": 65.92012014074632, "Longitude": -63.80067604104317},
+                    "SouthWest": {"Latitude": 26.05794978774229, "Longitude": -132.09169166604318},
                 },
-                "LocationTypes": [1, 2, 4, 8],
+                "LocationTypes": 1,
                 "Amenities": [],
             },
         )

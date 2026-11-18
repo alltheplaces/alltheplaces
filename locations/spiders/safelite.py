@@ -11,6 +11,6 @@ class SafeliteSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["AutoGlass", "AutoRepair", "Service"]
 
     def post_process_item(self, item, response, ld_data, **kwargs):
-        item["lat"] = response.xpath('.//div[@class="store-map"]/@data-start-lat').extract_first()
-        item["lon"] = response.xpath('.//div[@class="store-map"]/@data-start-lon').extract_first()
+        item["lat"] = response.xpath('.//div[@class="store-map"]/@data-start-lat').get()
+        item["lon"] = response.xpath('.//div[@class="store-map"]/@data-start-lon').get()
         yield item

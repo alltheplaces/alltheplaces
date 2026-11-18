@@ -26,8 +26,6 @@ class IkeaTRSpider(Spider):
             item["website"] = response.urljoin(store.xpath(".//h4/a/@href").get())
 
             # Inaccurate coordinates, more accurate ones are extracted from the store page, but still not ideal data.
-            # lat = store.xpath(".//@data-latitude").get()
-            # lon = store.xpath(".//@data-longitude").get()
 
             addr_parts = store.xpath(".//p//text()").getall()
             item["addr_full"] = merge_address_lines(addr_parts)

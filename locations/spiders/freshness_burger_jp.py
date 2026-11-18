@@ -1,30 +1,31 @@
-from typing import Any
+import re
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import Response
+from scrapy.http import TextResponse
 
-from locations.dict_parser import DictParser
+from locations.items import Feature
+from locations.lang_utils import katakana_to_hiragana
+from locations.storefinders.canly import CanlySpider
 
 
-class FreshnessBurgerJPSpider(Spider):
+class FreshnessBurgerJPSpider(CanlySpider):
     name = "freshness_burger_jp"
-
-    start_urls = ["https://g9ey9rioe.api.hp.can-ly.com/v2/companies/630/shops/search"]
     item_attributes = {
         "brand_wikidata": "Q5503087",
     }
+    brand_key = "630"
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in response.json()["shops"]:
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        if feature.get("businessStatus") == "CLOSED_PERMANENTLY":
+            return
 
-            item = DictParser.parse(store)
+        # Some names carry an opening notice in brackets or a note after "※".
+        branch = re.sub(r"^【[^】]*】", "", feature["nameKanji"]).split("※")[0]
+        branch = re.sub(r"^(フレッシュネスバーガー|フレュシュネスバーガー|チーズネスバーガー)", "", branch)
+        item["branch"] = branch.strip()
+        if kana := feature.get("nameKana"):
+            item["extras"]["branch:ja-Hira"] = katakana_to_hiragana(kana)
+        item["website"] = f"https://search.freshnessburger.co.jp/detail/{feature['storeCode']}/"
+        item["extras"]["start_date"] = feature.get("openingDate")
 
-            item["branch"] = (
-                store.get("nameKanji").removeprefix("フレッシュネスバーガー").removeprefix("チーズネスバーガー")
-            )
-            item["extras"]["branch:ja-Hira"] = store.get("nameKana")
-            item["website"] = f"https://search.freshnessburger.co.jp/detail/{store.get('storeCode')}/"
-            item["extras"]["start_date"] = store.get("openingDate")
-            item["ref"] = store.get("storeCode")
-
-            yield item
+        yield item

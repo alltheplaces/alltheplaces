@@ -9,8 +9,6 @@ from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
-# 2024-02-18 Sitemap is out of date, and before we access /getStoreList we need a legit ci_session cookie
-
 
 class SalvatoreCASpider(CrawlSpider, StructuredDataSpider):
     name = "salvatore_ca"

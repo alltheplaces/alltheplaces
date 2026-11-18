@@ -1,16 +1,12 @@
-from typing import Any, Iterable
+from typing import Any
 
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
-from locations.linked_data_parser import LinkedDataParser
 from locations.structured_data_spider import StructuredDataSpider
 
-# Store pages use a non-standard schema.org "@type" ("Oční optika", i.e.
-# "Eye optics" in Czech), so the default StructuredDataSpider wanted_types
-# filtering is bypassed via the iter_linked_data() override below.
 COUNTRY_NAME_TO_CODE = {
     "Czech Republic": "CZ",
     "Slovakia": "SK",
@@ -23,12 +19,8 @@ class DoctorOpticCZSKSpider(SitemapSpider, StructuredDataSpider):
     sitemap_urls = ["https://doctoroptic.cz/stores-sitemap.xml"]
     sitemap_rules = [(r"/ocni-optika/[^/]+/$", "parse_sd")]
 
-    def iter_linked_data(self, response: Response) -> Iterable[dict]:
-        for ld_obj in LinkedDataParser.iter_linked_data(response):
-            if ld_obj.get("@type") == "Oční optika":
-                yield ld_obj
-
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Any:
+        item["branch"] = item.pop("name")
         if country := item.get("country"):
             item["country"] = COUNTRY_NAME_TO_CODE.get(country, country)
 

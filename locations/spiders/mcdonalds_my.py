@@ -1,33 +1,39 @@
-from typing import AsyncIterator
+from typing import Iterable
 
-from scrapy import Spider
-from scrapy.http import FormRequest
+from scrapy.http import TextResponse
 
-from locations.dict_parser import DictParser
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.spiders.mcdonalds import McdonaldsSpider
 
 
-class McdonaldsMYSpider(Spider):
+class McdonaldsMYSpider(JSONBlobSpider):
     name = "mcdonalds_my"
     item_attributes = McdonaldsSpider.item_attributes
+    start_urls = [
+        "https://www.mcdonalds.com.my/locate-us/stores?distance=100000&lat=&lng=&state=&category=&address=&is_suggestion=0&is_locate=0"
+    ]
+    locations_key = "stores"
 
-    async def start(self) -> AsyncIterator[FormRequest]:
-        form_data = {
-            "action": "get_nearby_stores",
-            "distance": "100000",
-            "lat": "4",
-            "lng": "101",
-            "ajax": "1",
-        }
-        yield FormRequest(
-            url="https://www.mcdonalds.com.my/storefinder/index.php",
-            method="POST",
-            formdata=form_data,
-            callback=self.parse,
-        )
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item["ref"] = item.pop("name").removeprefix("McDonlad's ")
 
-    def parse(self, response):
-        for index, store in enumerate(response.json()["stores"]):
-            item = DictParser.parse(store)
-            item["ref"] = index
-            yield item
+        services = [c["cat_name"] for c in feature["cat"]]
+
+        if "McCafe" in services:
+            mccafe = item.deepcopy()
+            mccafe["ref"] = "{}_mccafe".format(item["ref"])
+            mccafe["brand"] = "McCafé"
+            mccafe["brand_wikidata"] = "Q3114287"
+            apply_category(Categories.CAFE, mccafe)
+            yield mccafe
+
+        item["opening_hours"] = "24/7" if "24 Hours" in services else None
+        apply_yes_no(Extras.BREAKFAST, item, "Breakfast" in services)
+        apply_yes_no(Extras.SELF_CHECKOUT, item, "Digital Order Kiosk" in services)
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "Drive-Thru" in services)
+        apply_yes_no(Extras.DRIVE_THROUGH, item, "McDelivery" in services)
+        apply_yes_no(Extras.WIFI, item, "WiFi" in services)
+        apply_category(Categories.FAST_FOOD, item)
+        yield item

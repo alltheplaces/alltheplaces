@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, Fuel, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS_FULL, OpeningHours
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
@@ -40,8 +41,14 @@ class CircleKSpider(Spider):
         for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = item.pop("street")
-            item["branch"] = location["businessUnit"]
             item["addr_full"] = merge_address_lines(location["address"].values())
+            if location["openingHours"].get("alwaysOpen"):
+                item["opening_hours"] = "24/7"
+            else:
+                item["opening_hours"] = OpeningHours()
+                for day in DAYS_FULL:
+                    if rule := location["openingHours"].get(day.lower()):
+                        item["opening_hours"].add_range(day, rule["open"], rule["close"])
             services = [service["displayName"] for service in location["services"]]
             fuels = [fuels["displayName"] for fuels in location["fuels"]]
             apply_yes_no(Extras.ATM, item, "ATM" in services)

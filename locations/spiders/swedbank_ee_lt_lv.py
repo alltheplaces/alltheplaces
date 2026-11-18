@@ -1,10 +1,10 @@
 import re
 from typing import Any, AsyncIterator
-from urllib.parse import urlparse
 
 import xmltodict
 from scrapy import Spider
 from scrapy.http import Request, Response
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
@@ -20,7 +20,7 @@ class SwedbankEELTLVSpider(Spider):
             yield Request(url=f"https://www.swedbank.{cc}/finder.xml")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        country = (urlparse(response.url).hostname or "").rsplit(".", 1)[-1].upper()
+        country = (urlparse_cached(response).hostname or "").rsplit(".", 1)[-1].upper()
         for location in xmltodict.parse(response.text)["items"]["item"]:
             if not self.has_coordinates(location):
                 continue

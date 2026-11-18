@@ -3,7 +3,7 @@ from typing import Iterable
 
 from scrapy.http import Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_DE
 from locations.items import Feature
 from locations.spiders.galeria_de import GaleriaDESpider
@@ -15,11 +15,7 @@ from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 class WienerFeinbackerHebererDESpider(WPStoreLocatorSpider):
     name = "wiener_feinbacker_heberer_de"
-    item_attributes = {
-        "brand": "Wiener Feinbäcker Heberer",
-        "brand_wikidata": "Q15854357",
-        "extras": Categories.SHOP_BAKERY.value,
-    }
+    item_attributes = {"brand": "Wiener Feinbäcker Heberer", "brand_wikidata": "Q15854357"}
     allowed_domains = ["heberer.de"]
     days = DAYS_DE
 
@@ -43,5 +39,6 @@ class WienerFeinbackerHebererDESpider(WPStoreLocatorSpider):
                 item["located_in_wikidata"] = KauflandSpider.item_attributes["brand_wikidata"]
             else:
                 item["name"] = old_name
+        apply_category(Categories.SHOP_BAKERY, item)
 
         yield item

@@ -31,8 +31,8 @@ class TheLearningExperienceUSSpider(SitemapSpider):
             "addr_full": merge_address_lines(
                 response.xpath('//div[@class="banner__left_contacts_item location"]/p[1]//text()').getall()
             ),
-            "phone": response.xpath('.//*[contains(@href,"tel:")]/text()').get().removeprefix("tel:"),
-            "email": response.xpath('.//*[contains(@href,"mailto:")]/text()').get().removeprefix("mailto:"),
+            "phone": response.xpath('.//*[contains(@href,"tel:")]/text()').get(),
+            "email": response.xpath('.//*[contains(@href,"mailto:")]/text()').get(),
             "website": response.url,
             "opening_hours": OpeningHours(),
         }

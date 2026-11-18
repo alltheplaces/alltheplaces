@@ -33,7 +33,6 @@ class DunnTireUSSpider(Spider):
             item["ref"] = urlparse(website).path.strip("/").lower()
             item["branch"] = location.get("locationName")
             item["addr_full"] = (location.get("locationAddress") or "").strip(" ,")
-            item["country"] = "US"
             item["lat"] = location.get("locationLat")
             item["lon"] = location.get("locationLng")
             item["phone"] = location.get("locationPhone")

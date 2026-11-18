@@ -8,15 +8,6 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 
-# Every lounge has its own subdomain, linked from the brand site's navigation,
-# and publishes its address, phone and hours on a /contact/ page as an icon
-# prefixed list.
-#
-# The map links are goo.gl short links, so no coordinates are available without
-# resolving each one.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class BlueMartiniUSSpider(Spider):
     name = "blue_martini_us"
@@ -76,14 +67,9 @@ class BlueMartiniUSSpider(Spider):
 
             oh.add_range(
                 day,
-                BlueMartiniUSSpider.normalise_time(rule.group(2)),
-                BlueMartiniUSSpider.normalise_time(rule.group(3)),
-                time_format="%I:%M%p",
+                rule.group(2),
+                rule.group(3),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").lower()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

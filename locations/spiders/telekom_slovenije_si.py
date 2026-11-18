@@ -107,7 +107,6 @@ class TelekomSlovenijeSISpider(Spider):
             item["street_address"] = " ".join(location["address"].split()).title()
             item["postcode"] = location["postNumber"]
             item["city"] = location["postName"].title()
-            item["country"] = "SI"
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             item["phone"] = location.get("phoneNumber") or location.get("gsmNumber")

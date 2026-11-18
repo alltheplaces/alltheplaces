@@ -26,8 +26,10 @@ class DennerCHSpider(Spider):
 
         for location in results.get("hits", []):
             location.update(location.pop("_geo"))
-            location["street-number"] = location.pop("number")
-            location["street"] = location.pop("address")
+            if number := location.pop("number"):
+                location["street"], location["street-number"] = location.pop("address"), number
+            else:
+                location["street_address"] = location.pop("address")
             item = DictParser.parse(location)
             item.pop("name")
             item["website"] = response.urljoin(location["link"])

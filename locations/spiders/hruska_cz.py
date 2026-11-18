@@ -1,4 +1,5 @@
-from typing import Iterable
+import re
+from typing import Any, Iterable
 
 from scrapy import Spider
 from scrapy.http import Response
@@ -13,23 +14,25 @@ class HruskaCZSpider(Spider):
     item_attributes = {"brand": "Hruška", "brand_wikidata": "Q58196374"}
     allowed_domains = ["mojehruska.cz"]
     start_urls = ["https://mojehruska.cz/prodejny/"]
-    no_refs = True
 
-    def parse(self, response: Response) -> Iterable[Feature]:
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
         for store in response.xpath('//div[@class="prodejny"]/div[position()>1]'):
-            properties = {
-                "street_address": store.xpath("./div[3]/text()").get(),
-                "city": store.xpath("./div[4]/text()").get(),
-                "postcode": store.xpath("./div[5]/text()").get(),
-                "phone": store.xpath("./div[6]/text()").get(),
-                "opening_hours": OpeningHours(),
-            }
-            if store_name := store.xpath("./div[2]/text()").get():
-                if store_name.startswith("Hruška č. "):
-                    properties["ref"] = store_name.split("Hruška č. ", 1)[1]
-                else:
-                    properties["name"] = store_name
-            hours_text = " ".join(store.xpath("./div[position()>6]").getall())
-            properties["opening_hours"].add_ranges_from_string(hours_text, days=DAYS_CZ)
-            apply_category(Categories.SHOP_CONVENIENCE, properties)
-            yield Feature(**properties)
+            item = Feature()
+            item["name"], item["ref"] = store.xpath("normalize-space(./div[1])").get().split(" č.", 1)
+            item["addr_full"] = store.xpath("normalize-space(./div[2])").get()
+            item["phone"] = store.xpath("normalize-space(./div[4])").get()
+            item["opening_hours"] = oh = OpeningHours()
+            for cell, default_days in ((5, ["Mo", "Tu", "We", "Th", "Fr"]), (6, ["Sa"]), (7, ["Su"])):
+                for line in store.xpath(f"./div[{cell}]/text()").getall():
+                    days = default_days
+                    if match := re.match(r"([^\d:]+):\s*(.+)", line):
+                        days = [DAYS_CZ[day.strip()] for day in match.group(1).split(",")]
+                        line = match.group(2)
+                    if line.strip().lower() == "zavřeno":
+                        oh.set_closed(days)
+                        continue
+                    for start_time, end_time in re.findall(r"(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})", line):
+                        if start_time.zfill(5) < end_time.zfill(5):
+                            oh.add_days_range(days, start_time, end_time)
+            apply_category(Categories.SHOP_CONVENIENCE, item)
+            yield item

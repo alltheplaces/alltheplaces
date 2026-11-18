@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours, sanitise_day
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.spar_aspiag import SPAR_SHARED_ATTRIBUTES
 
 
@@ -32,7 +33,7 @@ class SparDESpider(Spider):
 
     def parse(self, response, **kwargs):
         for shop in response.json():
-            shop["street_address"] = ", ".join(filter(None, [shop.pop("address"), shop.pop("address2")]))
+            shop["street_address"] = merge_address_lines([shop.pop("address"), shop.pop("address2")])
             item = DictParser.parse(shop)
             item["opening_hours"] = OpeningHours()
             timing = shop.get("hours")

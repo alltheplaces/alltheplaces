@@ -7,6 +7,7 @@ from locations.categories import Categories, apply_category
 from locations.geo import point_locations
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
 from locations.items import Feature
+from locations.spiders.central_england_cooperative import set_operator
 
 POSTNL = {"brand": "PostNL", "brand_wikidata": "Q5921598"}
 
@@ -83,7 +84,7 @@ class PostnlNLBESpider(Spider):
         item["country"] = address.get("countryCode") or "NL"
 
         if type_id == LETTERBOX_TYPE_ID:
-            item.update(POSTNL)
+            set_operator(POSTNL, item)
             apply_category(Categories.POST_BOX, item)
             if collection_times := self.format_collection_times(entity):
                 item["extras"]["collection_times"] = collection_times

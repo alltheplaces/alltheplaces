@@ -97,7 +97,7 @@ def test_closed_tuesday():
     o.add_range("Sa", "07:00", "17:00")
     o.add_range("Su", "07:00", "17:00")
 
-    assert o.as_opening_hours() == "Mo 07:00-17:00; We-Su 07:00-17:00"
+    assert o.as_opening_hours() == "Mo,We-Su 07:00-17:00"
 
 
 def test_twentyfour_seven():
@@ -212,6 +212,26 @@ def test_add_range_time_with_non_numeric_hour_raises():
         o.add_range("Mo", "ab:00", "10:00")
 
 
+def test_add_range_accepts_several_time_formats():
+    o = OpeningHours()
+    formats = ["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"]
+    o.add_range("Mo", "9am", "5:30 PM", time_format=formats)
+    o.add_range("Tu", "9 AM", "5pm", time_format=formats)
+    assert o.as_opening_hours() == "Mo 09:00-17:30; Tu 09:00-17:00"
+
+
+def test_add_range_single_time_format_does_not_fall_back():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "9am", "5pm", time_format="%I:%M%p")
+
+
+def test_add_range_no_matching_time_format_raises():
+    o = OpeningHours()
+    with pytest.raises(ValueError):
+        o.add_range("Mo", "9am", "5pm", time_format=["%H:%M", "%I:%M%p"])
+
+
 def test_till_midnight():
     o = OpeningHours()
     o.add_range("Mo", "11:00", "23:00")
@@ -222,7 +242,7 @@ def test_till_midnight():
     o.add_range("Sa", "11:00", "24:00")
     o.add_range("Su", "11:00", "23:00")
 
-    assert o.as_opening_hours() == "Mo-Th 11:00-23:00; Fr-Sa 11:00-24:00; Su 11:00-23:00"
+    assert o.as_opening_hours() == "Mo-Th,Su 11:00-23:00; Fr-Sa 11:00-24:00"
 
 
 def test_till_midnight_formatted_as_zero_hour():
@@ -307,7 +327,7 @@ def test_add_ranges_from_string():
 
     o = OpeningHours()
     o.add_ranges_from_string("Sunday to Thursday 0800-1400, Wed-Sat 1300-1800")
-    assert o.as_opening_hours() == "Mo-Tu 08:00-14:00; We-Th 08:00-14:00,13:00-18:00; Fr-Sa 13:00-18:00; Su 08:00-14:00"
+    assert o.as_opening_hours() == "Mo-Tu,Su 08:00-14:00; We-Th 08:00-14:00,13:00-18:00; Fr-Sa 13:00-18:00"
 
     o = OpeningHours()
     o.add_ranges_from_string("Monday - Sunday: 00:00 - 23:59")
@@ -372,7 +392,7 @@ def test_add_ranges_from_string():
         NAMED_TIMES_RU,
         DELIMITERS_RU,
     )
-    assert o.as_opening_hours() == "Mo-Fr 10:00-21:00; Sa 10:00-20:00; Su 10:00-21:00"
+    assert o.as_opening_hours() == "Mo-Fr,Su 10:00-21:00; Sa 10:00-20:00"
 
     o = OpeningHours()
     o.add_ranges_from_string(
@@ -447,3 +467,12 @@ def test_oh_as_bool():
     o = OpeningHours()
     o.set_closed("Mo")
     assert o
+
+
+def test_alternating_days_are_grouped():
+    o = OpeningHours()
+    for day in ["Mo", "We", "Fr"]:
+        o.add_range(day, "08:00", "12:00")
+        o.add_range(day, "12:30", "15:30")
+    o.set_closed(["Tu", "Th", "Sa", "Su"])
+    assert o.as_opening_hours() == "Mo,We,Fr 08:00-12:00,12:30-15:30; Tu,Th,Sa-Su closed"

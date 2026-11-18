@@ -22,14 +22,14 @@ class AnacondaAUSpider(SitemapSpider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         properties = {
-            "ref": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storeid').extract_first(),
+            "ref": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storeid').get(),
             "branch": response.xpath('//div[contains(@id, "maps_canvas")]/@data-storename')
-            .extract_first()
+            .get()
             .removeprefix("Anaconda "),
-            "lat": response.xpath('//div[contains(@id, "maps_canvas")]/@data-latitude').extract_first(),
-            "lon": response.xpath('//div[contains(@id, "maps_canvas")]/@data-longitude').extract_first(),
+            "lat": response.xpath('//div[contains(@id, "maps_canvas")]/@data-latitude').get(),
+            "lon": response.xpath('//div[contains(@id, "maps_canvas")]/@data-longitude').get(),
             "addr_full": clean_address(
-                response.xpath('//div[contains(@class, "store-detail-desc")]//li/text()').extract()
+                response.xpath('//div[contains(@class, "store-detail-desc")]//li/text()').getall()
             ),
             "website": response.url,
             "opening_hours": OpeningHours(),
@@ -37,8 +37,8 @@ class AnacondaAUSpider(SitemapSpider):
         extract_phone(properties, response)
 
         for rule in response.xpath('//*[contains(text(),"Opening Hours")]/parent::div//table/tbody/tr'):
-            if day := sanitise_day(rule.xpath("./td[1]/text()").extract_first()):
-                hours = rule.xpath("./td[2]/text()").extract_first()
+            if day := sanitise_day(rule.xpath("./td[1]/text()").get()):
+                hours = rule.xpath("./td[2]/text()").get()
                 if "Closed" in hours.title():
                     properties["opening_hours"].set_closed(day)
                 else:

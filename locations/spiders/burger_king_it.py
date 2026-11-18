@@ -28,7 +28,6 @@ class BurgerKingITSpider(Spider):
             item["branch"] = item.pop("name")
             item["addr_full"] = store["address"]
             item["city"] = store["name"]
-            item["country"] = "IT"
 
             apply_category(Categories.FAST_FOOD, item)
             apply_yes_no(Extras.DELIVERY, item, "HomeDelivery" in store["servizi"])

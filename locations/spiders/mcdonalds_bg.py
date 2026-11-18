@@ -54,6 +54,8 @@ class McdonaldsBGSpider(Spider):
             apply_yes_no(Extras.DRIVE_THROUGH, item, "McDrive™" in services)
             apply_yes_no(Extras.DELIVERY, item, location.get("is_delivery_available"))
 
+            apply_category(Categories.FAST_FOOD, item)
+
             item["opening_hours"] = self.parse_opening_hours(location.get("business_hours", []))
 
             if work_hours := location.get("work_hours", []):

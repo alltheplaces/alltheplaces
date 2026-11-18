@@ -6,7 +6,10 @@ from scrapy.http import Response
 
 from locations.categories import Categories, PaymentMethods, Sells, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, OpeningHours
 from locations.user_agents import FIREFOX_LATEST
+
+DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
 
 class MatsukiyoJPSpider(Spider):
@@ -72,6 +75,18 @@ class MatsukiyoJPSpider(Spider):
 
             if store["businesshours"][2] == "1":
                 item["opening_hours"] = "24/7"
+            else:
+                prefix = "store" if any(store[f"store_open_time_{key}"] for key in DAY_KEYS) else "dispensing"
+                oh = OpeningHours()
+                for day, key in zip(DAYS, DAY_KEYS):
+                    for suffix in ("", "_2"):
+                        oh.add_range(
+                            day,
+                            store.get(f"{prefix}_open_time_{key}{suffix}"),
+                            store.get(f"{prefix}_close_time_{key}{suffix}"),
+                            time_format="%H:%M:%S",
+                        )
+                item["opening_hours"] = oh
 
             if store["services"][4] == "1":
                 apply_category(Categories.PHARMACY, item)
@@ -110,7 +125,8 @@ class MatsukiyoJPSpider(Spider):
 
             item["website"] = f"https://www.matsukiyococokara-online.com/map?kid={store['id']}"
 
-            item["phone"] = f"+81 {store['phone_store']}"
+            if phone := store["phone_store"] or store["phone_dispensing"]:
+                item["phone"] = f"+81 {phone}"
             if store["phone_dispensing"] is not None:
                 item["extras"]["phone:pharmacy"] = f"+81 {store['phone_dispensing']}"
             if store["fax_dispensing"] is not None:

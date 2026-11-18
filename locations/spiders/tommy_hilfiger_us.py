@@ -14,6 +14,5 @@ class TommyHilfigerUSSpider(YextAnswersSpider):
     locale = "en-US"
 
     def parse_item(self, location: dict, item: Feature) -> Iterable[Feature]:
-        item["country"] = "US"
         apply_category(Categories.SHOP_CLOTHES, item)
         yield item

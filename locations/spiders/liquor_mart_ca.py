@@ -39,7 +39,6 @@ class LiquorMartCASpider(Spider):
             item["postcode"] = (
                 location.css("div.views-field-field-location-postal-code .field-content::text").get("").strip() or None
             )
-            item["country"] = "CA"
             item["state"] = "MB"
 
             apply_category(Categories.SHOP_ALCOHOL, item)

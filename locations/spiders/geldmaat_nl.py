@@ -22,7 +22,7 @@ class GeldmaatNLSpider(Spider):
         "dekamarkt": {"brand": "Dekamarkt", "brand_wikidata": "Q2489350"},
         "primera": {"brand": "Primera", "brand_wikidata": "Q2176149"},
         "geldmaat": {"brand": "Geldmaat", "brand_wikidata": "Q74051230"},
-        "readshop": {"brand": "The Readshop", "brand_wikidata": "Q114905224"},
+        "readshop": {"brand": "ReadShop", "brand_wikidata": "Q114905224"},
         "spar": {"brand": "Spar", "brand_wikidata": "Q610492"},
     }
 

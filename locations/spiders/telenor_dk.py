@@ -9,6 +9,7 @@ from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_DK, NAMED_DAY_RANGES_DK, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class TelenorDKSpider(Spider):
@@ -43,11 +44,8 @@ class TelenorDKSpider(Spider):
 
             html = Selector(text=store.get("html"))
 
-            address_lines = [
-                line.strip() for line in html.xpath("//div/div/div[1]/div/p/text()").getall() if line and line.strip()
-            ]
-            if address_lines:
-                item["addr_full"] = re.sub(r"\s+", " ", ", ".join(address_lines))
+            if address := merge_address_lines(html.xpath("//div/div/div[1]/div/p/text()").getall()):
+                item["addr_full"] = re.sub(r"\s+", " ", address)
 
             if phone := html.xpath("//div/div/div[2]/p[1]/text()").get():
                 item["phone"] = phone.replace("Telefon:", "").strip()

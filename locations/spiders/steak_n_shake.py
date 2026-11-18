@@ -28,6 +28,7 @@ class SteakNShakeSpider(scrapy.Spider):
                 "lat": store_data["address"]["loc"][1],
                 "lon": store_data["address"]["loc"][0],
                 "website": f"https://www.steaknshake.com/locations/{store_data['slug']}/",
+                "opening_hours": self.parse_opening_hours(store_data["hours"]),
             }
 
             apply_category(Categories.FAST_FOOD, properties)
@@ -42,6 +43,11 @@ class SteakNShakeSpider(scrapy.Spider):
                 continue
             for day, times in rules["days"].items():
                 for time in times:
-                    oh.add_range(day, str(time["start"]).zfill(4), str(time["end"]).zfill(4), "%H%M")
+                    start = time["start"]
+                    # Times are minutes after midnight; "12am - 12am" is taken to mean noon to midnight
+                    if start == time["end"] == 0:
+                        start = 720
+                    close = "24:00" if time["end"] == 0 else f"{time['end'] // 60:02}:{time['end'] % 60:02}"
+                    oh.add_range(day, f"{start // 60:02}:{start % 60:02}", close)
 
         return oh

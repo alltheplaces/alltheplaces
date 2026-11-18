@@ -1,7 +1,7 @@
 import json
 
-from requests import Response
 from scrapy import Spider
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser

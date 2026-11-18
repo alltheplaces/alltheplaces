@@ -8,8 +8,6 @@ from locations.hours import DAYS_DE, OpeningHours
 from locations.items import Feature
 
 
-# Technically, the site uses linked data, but in reality that contains only
-# boilerplate. Anything interesting needs to be extracted from HTML.
 class RotpunktApothekenCHSpider(CrawlSpider):
     name = "rotpunkt_apotheken_ch"
     allowed_domains = ["www.rotpunkt-apotheken.ch"]
@@ -76,7 +74,7 @@ class RotpunktApothekenCHSpider(CrawlSpider):
         hours_list = response.css(".location-info__opening-hours-list")
         oh = OpeningHours()
         day = None
-        for t in hours_list.xpath("*/text()").extract():
+        for t in hours_list.xpath("*/text()").getall():
             day = DAYS_DE.get(t.strip(), day)
             for open_h, close_h in re.findall(r"(\d\d:\d\d) – (\d\d:\d\d)", t):
                 oh.add_range(day, open_h, close_h)

@@ -5,6 +5,7 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
+from locations.hours import DAYS, DAYS_FULL, OpeningHours
 
 
 class AedJPSpider(Spider):
@@ -35,6 +36,32 @@ class AedJPSpider(Spider):
             item["street_address"] = aed["install_address"]
             item["extras"]["addr:province"] = aed["install_prefecture_name"]
             item["name"] = aed["install_location_name"]
+
+            if aed["utility_time_type"] == 1:
+                times = ("00:00", "23:59")
+            elif (
+                aed["utility_time_from"]
+                and aed["utility_time_to"]
+                and aed["utility_time_from"] != aed["utility_time_to"]
+            ):
+                times = (aed["utility_time_from"][11:16], aed["utility_time_to"][11:16])
+            else:
+                times = None
+            closed = [day for day, day_name in zip(DAYS, DAYS_FULL) if aed[f"closed_on_{day_name.lower()}s"]]
+            # Devices closed every day are only usable during events or term times described in free text.
+            if times and len(closed) < 7:
+                oh = OpeningHours()
+                for day in DAYS:
+                    if day in closed:
+                        oh.set_closed(day)
+                    else:
+                        oh.add_range(day, *times)
+                item["opening_hours"] = oh
+
+            if aed["everyone_allow"] == "認める":
+                item["extras"]["access"] = "yes"
+            elif aed["everyone_allow"] == "認めない":
+                item["extras"]["access"] = "private"
 
             yield item
 

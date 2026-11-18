@@ -8,18 +8,6 @@ from locations.hours import DAYS_EN, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 
-# Chop Stop runs the Super Store Finder WordPress plugin.
-#
-# The plugin's own operatingHours field is unused by this brand: hours are put
-# in custom_field1 instead, written as free text such as
-# "Monday - Friday 10:00am - 9:00pm <br/> Weekends 11:00am - 8:00pm" or
-# "10:00am - 8:00pm Daily".
-#
-# Addresses arrive as one string with the street separated from the city by two
-# or more spaces.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class ChopStopUSSpider(SuperStoreFinderSpider):
     name = "chop_stop_us"

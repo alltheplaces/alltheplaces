@@ -4,7 +4,7 @@ from scrapy import Spider
 
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.pipelines.address_clean_up import clean_address
+from locations.pipelines.address_clean_up import clean_address, merge_address_lines
 
 
 class DavidsBridalUSSpider(Spider):
@@ -23,7 +23,7 @@ class DavidsBridalUSSpider(Spider):
             item = DictParser.parse(data)
             item["ref"] = data.get("storeId", {}).get("value")
             item["branch"] = item.pop("name", None)
-            item["addr_full"] = ", ".join(data.get("formatted", []))
+            item["addr_full"] = merge_address_lines(data.get("formatted", []))
             item["street_address"] = clean_address([data.get("address1"), data.get("address2")])
             item["website"] = (
                 f"https://www.davidsbridal.com/stores/"

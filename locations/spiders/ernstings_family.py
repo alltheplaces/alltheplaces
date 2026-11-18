@@ -6,6 +6,7 @@ from scrapy.http import Request
 from locations.dict_parser import DictParser
 from locations.geo import point_locations
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class ErnstingsFamilySpider(Spider):
@@ -21,7 +22,7 @@ class ErnstingsFamilySpider(Spider):
             if location["open_for_business"]:
                 location["id"] = location.pop("storeCode")
                 location["name"] = location.pop("locationName")
-                location["street_address"] = ", ".join(location["addressLines"])
+                location["street_address"] = merge_address_lines(location["addressLines"])
                 location["country"] = location.pop("regionCode")
                 location["phone"] = location.pop("primaryPhone")
                 item = DictParser.parse(location)

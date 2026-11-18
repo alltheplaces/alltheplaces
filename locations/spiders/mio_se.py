@@ -7,6 +7,7 @@ from scrapy.http import Request, Response
 from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class MioSESpider(Spider):
@@ -52,8 +53,9 @@ class MioSESpider(Spider):
         if city_m:
             item["city"] = _decode(city_m.group(1))
         if item.get("street_address") or item.get("city"):
-            parts = [item.get("street_address"), item.get("postcode"), item.get("city")]
-            item["addr_full"] = ", ".join(p for p in parts if p)
+            item["addr_full"] = merge_address_lines(
+                [item.get("street_address"), item.get("postcode"), item.get("city")]
+            )
 
         loc_m = re.search(
             r'"location":\{"longitude":([-\d.]+),"latitude":([-\d.]+)\}',

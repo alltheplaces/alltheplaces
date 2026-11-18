@@ -36,7 +36,6 @@ class LibraryInstituteHUSpider(scrapy.Spider):
         labels = response.xpath('//span[@class="nykj_label"]/text()').getall()
         values = response.xpath('//span[@class="nykj_content"]')
 
-        # Get Phone and Fax
         phone = self.get_node("Telefonszám:", labels, values)
         if phone:
             for phone in phone.xpath(".//li/text()").getall():
@@ -45,7 +44,6 @@ class LibraryInstituteHUSpider(scrapy.Spider):
                 else:
                     props["phone"] = phone[: phone.find("(")].strip()
 
-        # Get Website
         website = self.get_node("Honlapcím:", labels, values)
         if website:
             props["website"] = website.xpath(".//a/@href").get()

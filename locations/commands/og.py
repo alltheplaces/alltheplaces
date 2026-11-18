@@ -15,7 +15,7 @@ from locations.user_agents import BROWSER_DEFAULT
 
 class MySpider(OpenGraphSpider):
     name = "my_spider"
-    start_urls = None
+    start_urls = None  # ty: ignore[invalid-assignment]
     item_attributes = {}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 

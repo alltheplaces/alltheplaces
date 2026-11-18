@@ -50,7 +50,6 @@ class SparPLSpider(Spider):
             self.seen_ids.add(shop["id"])
 
             item = DictParser.parse(shop)
-            item["country"] = "PL"
             item["website"] = f'https://spar.pl/sklep/{shop["post_name"]}/'
 
             item["opening_hours"] = OpeningHours()

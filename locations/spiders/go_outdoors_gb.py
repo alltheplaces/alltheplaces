@@ -14,6 +14,7 @@ class GoOutdoorsGBSpider(Spider):
     name = "go_outdoors_gb"
     item_attributes = {"brand": "Go Outdoors", "brand_wikidata": "Q75293941"}
     start_urls = ["https://www.gooutdoors.co.uk/pages/stores"]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in json.loads(

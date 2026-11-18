@@ -1,5 +1,7 @@
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
+from locations.hours import OpeningHours
 from locations.structured_data_spider import StructuredDataSpider
 
 
@@ -14,8 +16,22 @@ class CashConvertersGBSpider(SitemapSpider, StructuredDataSpider):
         item["lon"] = response.xpath("//@data-lng").get()
         item["name"] = None
         item["branch"] = response.xpath("//@data-title").get()
+        item["facebook"] = None
+        item["twitter"] = None
 
         if "placeholder" in item.get("image", ""):
             item["image"] = None
+
+        item["opening_hours"] = OpeningHours()
+        item["opening_hours"].add_ranges_from_string(
+            " ".join(
+                response.xpath(
+                    '//div[contains(@class, "store-detail__hours--group")][h2[contains(., "Retail")]]'
+                    '//div[contains(@class, "store-detail__hours--body")]/text()'
+                ).getall()
+            )
+        )
+
+        apply_category(Categories.SHOP_PAWNBROKER, item)
 
         yield item

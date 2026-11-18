@@ -7,6 +7,7 @@ from scrapy.spiders import SitemapSpider
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -26,8 +27,8 @@ class TractorSupplySpider(SitemapSpider):
                 store = entry["value"]
                 if store.get("storenum") != ref:
                     continue
-                store["street_address"] = ", ".join(
-                    filter(None, [store.get("address1"), store.get("address2"), store.get("address3")])
+                store["street_address"] = merge_address_lines(
+                    [store.get("address1"), store.get("address2"), store.get("address3")]
                 )
                 store["postcode"] = store.get("zipcode")
                 store["phone"] = store.get("phone1")

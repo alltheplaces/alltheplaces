@@ -7,13 +7,11 @@ from scrapy.http import JsonRequest, Response
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
-from locations.hours import OpeningHours
+from locations.hours import OpeningHours, sanitise_day
 
 # The generic branch call-centre line, present on a large share of branch records instead of a
 # branch-specific number. Compared digits-only since raw formatting varies.
 NATIONAL_HOTLINE_DIGITS = "420221210035"
-
-DAY_CODES = {"MO": "Mo", "TU": "Tu", "WE": "We", "TH": "Th", "FR": "Fr", "SA": "Sa", "SU": "Su"}
 
 
 class UnicreditBankCZSpider(Spider):
@@ -123,7 +121,7 @@ class UnicreditBankCZSpider(Spider):
         opening_hours = OpeningHours()
         # Flat list in groups of five per day: [day_code, open, close, open2, close2].
         for i in range(0, len(workinghours) - 4, 5):
-            if not (day := DAY_CODES.get(workinghours[i])):
+            if not (day := sanitise_day(workinghours[i])):
                 continue
             if workinghours[i + 1] and workinghours[i + 2]:
                 opening_hours.add_range(day, workinghours[i + 1], workinghours[i + 2])

@@ -3,7 +3,7 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
 
-from locations.categories import Categories
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import set_closed
@@ -11,11 +11,7 @@ from locations.items import set_closed
 
 class DeutscheTelekomDESpider(Spider):
     name = "deutsche_telekom_de"
-    item_attributes = {
-        "brand": "Deutsche Telekom",
-        "brand_wikidata": "Q9396",
-        "extras": Categories.SHOP_MOBILE_PHONE.value,
-    }
+    item_attributes = {"brand": "Deutsche Telekom", "brand_wikidata": "Q9396"}
     drop_attributes = {"image"}
 
     def make_request(self, page: int) -> JsonRequest:
@@ -46,6 +42,8 @@ class DeutscheTelekomDESpider(Spider):
             item["extras"]["start_date"] = location["properties"]["initial_opening_date"]
             if location["closed"]:
                 set_closed(item)
+
+            apply_category(Categories.SHOP_MOBILE_PHONE, item)
 
             yield item
 

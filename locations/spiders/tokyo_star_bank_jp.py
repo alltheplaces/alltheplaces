@@ -61,13 +61,12 @@ class TokyoStarBankJPSpider(Spider):
 
         # Phone: first tel: link href
         phone_raw = response.css('a[href^="tel:"]::attr(href)').get("")
-        phone = phone_raw.replace("tel:", "").strip() if phone_raw else None
+        phone = phone_raw.strip() if phone_raw else None
 
         item = Feature()
         item["ref"] = ref
         item["branch"] = branch_name
         item["addr_full"] = addr_full
-        item["country"] = "JP"
         item["phone"] = phone
         item["website"] = response.url
 

@@ -70,7 +70,6 @@ class MujobchodCZSpider(Spider):
             item["street_address"] = street_address
             item["city"] = city
             item["postcode"] = postcode
-            item["country"] = "CZ"
             item["website"] = website
             item["opening_hours"] = oh
 

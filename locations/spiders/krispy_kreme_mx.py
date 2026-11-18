@@ -15,7 +15,6 @@ class KrispyKremeMXSpider(Spider):
         locations = response.xpath('//tbody[@id="myTable"]/tr')
         for index in range(0, len(locations)):
             item = {}
-            # item["name"] = locations[index].xpath('./td[1]/text()').get() # Seems to be name of owner or something. Thus use NSI Name tag
             item["addr_full"] = clean_address(locations[index].xpath("./td[2]/text()").get())
             if phone := locations[index].xpath("./a/text()").get():
                 item["phone"] = phone

@@ -6,6 +6,7 @@ from scrapy.http import FormRequest
 
 from locations.geo import point_locations
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class CashzoneGBSpider(Spider):
@@ -31,12 +32,7 @@ class CashzoneGBSpider(Spider):
             item["lon"] = marker.xpath("./@lng").get()
             item["name"] = marker.xpath("./label/text()").get().replace("<br>", ", ")
             item["street_address"] = marker.xpath("./tab/add1/text()").get()
-            item["addr_full"] = ", ".join(
-                [
-                    item["street_address"],
-                    marker.xpath("./tab/add2/text()").get(),
-                ]
-            )
+            item["addr_full"] = merge_address_lines([item["street_address"], marker.xpath("./tab/add2/text()").get()])
             item["ref"] = hashlib.sha256(
                 (item["name"] + item["addr_full"] + item["lat"] + item["lon"]).encode("utf_8")
             ).hexdigest()

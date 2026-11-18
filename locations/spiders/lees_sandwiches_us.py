@@ -7,6 +7,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 branch_separator = re.compile(r"^\s*-\s*Lee's Sandwiches\s+")
 
@@ -35,7 +36,7 @@ class LeesSandwichesUSSpider(Spider):
         item = DictParser.parse({key.removeprefix("sl_"): value for key, value in location.items()})
         item["ref"] = location["sl_id"]
         item.pop("addr_full", None)
-        item["street_address"] = ", ".join(filter(None, [location.get("sl_address"), location.get("sl_address2")]))
+        item["street_address"] = merge_address_lines([location.get("sl_address"), location.get("sl_address2")])
         item["website"] = None
         item["image"] = location["sl_image"]
         item["extras"]["fax"] = location["sl_fax"]

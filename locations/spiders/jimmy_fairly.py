@@ -8,14 +8,28 @@ from locations.categories import Categories, apply_category
 from locations.hours import OpeningHours, sanitise_day
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
+
+LOCALES = {
+    "Belgium": "fr-be",
+    "Germany": "de-de",
+    "Italy": "it-it",
+    "Netherlands": "en-nl",
+    "Spain": "es-es",
+    "Switzerland": "fr-ch",
+    "United Kingdom": "en-gb",
+    "United States": "en-us",
+}
 
 
-class JimmyFairlySpider(JSONBlobSpider):
+class JimmyFairlySpider(JSONBlobSpider, PlaywrightSpider):
     name = "jimmy_fairly"
     item_attributes = {"brand": "Jimmy Fairly", "brand_wikidata": "Q104825419"}
     start_urls = ["https://www.jimmyfairly.com/pages/stores"]
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def extract_json(self, response):
+    def extract_json(self, response: TextResponse) -> dict | list[dict]:
         data = response.xpath('//script[contains(@x-ref,"json")]/text()').get()
 
         if not data:
@@ -41,13 +55,18 @@ class JimmyFairlySpider(JSONBlobSpider):
     def post_process_item(self, item: Feature, response: TextResponse, location: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name", "").removeprefix("Jimmy Fairly - ")
         if location.get("url") is not None:
-            item["website"] = "https://www.jimmyfairly.com" + location["url"]
+            slug = location["url"].rsplit("/", 1)[1]
+            locale = LOCALES.get(location["country"].strip())
+            item["website"] = f"https://www.jimmyfairly.com{'/' + locale if locale else ''}/pages/stores/{slug}"
+            if locale == "fr-be":
+                item["extras"]["website:fr"] = item["website"]
+                item["extras"]["website:nl"] = f"https://www.jimmyfairly.com/nl-be/pages/stores/{slug}"
 
         if location.get("opening_hours") is not None:
             try:
                 item["opening_hours"] = self.parse_opening_hours(location["opening_hours"])
-            except Exception:
-                pass
+            except Exception as e:
+                self.logger.error(f'Failed to parse hours: {location["opening_hours"]}, {e}')
 
         apply_category(Categories.SHOP_OPTICIAN, item)
 

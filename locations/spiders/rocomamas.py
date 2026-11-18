@@ -1,6 +1,6 @@
 from scrapy.http import JsonRequest
 
-from locations.categories import Extras, apply_yes_no
+from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.items import SocialMedia, set_social_media
 from locations.json_blob_spider import JSONBlobSpider
@@ -22,6 +22,11 @@ ROCOMAMAS_COUNTRIES = {
 ROCOMAMAS_BRANDS = {
     "ROCO": {"brand": "RocoMamas", "brand_wikidata": "Q123034964"},
     "ROCOGO": {"brand": "RocoGo", "brand_wikidata": "Q123034964"},
+}
+
+ROCOMAMAS_CATEGORIES = {
+    "ROCO": Categories.RESTAURANT,
+    "ROCOGO": Categories.FAST_FOOD,
 }
 
 SOCIAL_MEDIA_MAP = {
@@ -67,6 +72,9 @@ class RocomamasSpider(JSONBlobSpider):
             item.update(brand_details)
         else:
             self.crawler.stats.inc_value(f'atp/{self.name}/unknown_brand/{location["brand"].get("key")}')
+
+        if category := ROCOMAMAS_CATEGORIES.get(location["brand"].get("key")):
+            apply_category(category, item)
 
         if item.get("state") == "International":
             item.pop("state")

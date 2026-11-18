@@ -1,7 +1,12 @@
-from scrapy import Spider
+from typing import Any
 
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 state_country_map = {
     "botswana": {"country": "BW"},
@@ -15,13 +20,14 @@ state_country_map = {
 }
 
 
-class ExclusiveBooksBWNAZASpider(Spider):
+class ExclusiveBooksBWNAZASpider(PlaywrightSpider):
     name = "exclusive_books_bw_na_za"
     item_attributes = {"brand": "Exclusive Books", "brand_wikidata": "Q5419679"}
     start_urls = ["https://exclusivebooks.co.za/pages/find-a-store"]
     no_refs = True
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('.//div[contains(@class, "region--block")]'):
             item = Feature()
             item["branch"] = location.xpath(".//h4/text()").get()
@@ -40,4 +46,5 @@ class ExclusiveBooksBWNAZASpider(Spider):
                 self.crawler.stats.inc_value(
                     f"atp/{self.name}/failed_state_match/{location.xpath('@class').get().split('--block')[0]}"
                 )
+            apply_category(Categories.SHOP_BOOKS, item)
             yield item

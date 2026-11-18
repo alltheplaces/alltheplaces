@@ -24,7 +24,7 @@ class MenchiesSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         item["branch"] = branch.strip()
         item["addr_full"] = location.xpath('.//div[contains(@class, "address-col")]//p/text()').get()
-        item["phone"] = location.xpath('.//a[starts-with(@href, "tel:")]/@href').get("").removeprefix("tel:")
+        item["phone"] = location.xpath('.//a[starts-with(@href, "tel:")]/@href').get("")
         item["facebook"] = location.xpath('.//a[contains(@href, "facebook.com")]/@href').get()
         item["twitter"] = location.xpath(
             './/a[contains(@href, "twitter.com") or contains(@href, "//x.com")]/@href'

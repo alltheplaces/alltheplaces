@@ -27,6 +27,7 @@ class CycaParkingJPSpider(SitemapSpider):
     allowed_domains = ["charinavi72.jp"]
     sitemap_urls = ["https://www.charinavi72.jp/sitemap.xml"]
     sitemap_rules = [(r"/system/Parkings/detail/\d+$", "parse")]
+    requires_proxy = True
 
     def parse(self, response: Response):
         call = MAPSINITIALIZE_CALL.search(response.text)
@@ -70,7 +71,6 @@ class CycaParkingJPSpider(SitemapSpider):
         item["street_address"] = "".join(
             filter(None, [area.get("prefecture"), area.get("city"), parking.get("address")])
         )
-        item["country"] = "JP"
         item["phone"] = phone
         item["website"] = response.url
         if oh:

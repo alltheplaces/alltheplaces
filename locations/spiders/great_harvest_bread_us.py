@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterable
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Spider
 from scrapy.http import JsonRequest, Response
@@ -7,13 +7,6 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS_3_LETTERS, OpeningHours
 from locations.items import Feature
-
-# The bakery finder is served by Blipstar. Its searchdbnew endpoint returns
-# every US bakery in one response when asked for a large enough page, with the
-# first element of the array being a header rather than a bakery.
-#
-# Addresses arrive as one string and hours as a field per day, written as
-# "7AM-6PM" or "CLOSED".
 
 
 class GreatHarvestBreadUSSpider(Spider):
@@ -26,7 +19,7 @@ class GreatHarvestBreadUSSpider(Spider):
         "&cnt=us&mb=false&state=&start=0&show=500"
     ]
 
-    def start_requests(self) -> Iterable[JsonRequest]:
+    async def start(self) -> AsyncIterator[JsonRequest]:
         for url in self.start_urls:
             yield JsonRequest(url=url)
 
@@ -81,14 +74,9 @@ class GreatHarvestBreadUSSpider(Spider):
 
             oh.add_range(
                 day,
-                GreatHarvestBreadUSSpider.normalise_time(match.group(1)),
-                GreatHarvestBreadUSSpider.normalise_time(match.group(2)),
-                time_format="%I:%M%p",
+                match.group(1),
+                match.group(2),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh.as_opening_hours() else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

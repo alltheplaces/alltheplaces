@@ -25,7 +25,6 @@ class ToymasterSpider(JSONBlobSpider):
 
         item["facebook"] = feature["SocialFacebook"]
         item["twitter"] = feature["SocialTwitter"]
-        # item["instagram"] = feature["SocialInstagram"]
         item["email"] = feature["Email"]
         item["phone"] = feature["Phone"]
         item["ref"] = feature["ANA"]

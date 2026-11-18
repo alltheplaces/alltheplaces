@@ -223,7 +223,7 @@ class CheckItemPropertiesPipeline:
             elif not isinstance(opening_hours, str):
                 if spider.crawler.stats:
                     spider.crawler.stats.inc_value("atp/field/opening_hours/wrong_type")
-            elif not self.opening_hours_regex.match(opening_hours) and opening_hours != "24/7":
+            elif opening_hours not in ("24/7", "closed") and not self.opening_hours_regex.match(opening_hours):
                 if spider.crawler.stats:
                     spider.crawler.stats.inc_value("atp/field/opening_hours/invalid")
         else:

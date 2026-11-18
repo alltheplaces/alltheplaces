@@ -31,15 +31,15 @@ class MuggAndBeanSpider(SitemapSpider, StructuredDataSpider):
         item["image"] = None
         item["addr_full"] = response.xpath('//*[@id="location"]//p/text()').get()
         oh = OpeningHours()
-        for day_time in response.xpath('//*[@class="operating-hours flex py-3"]//*[@class="p-3"]'):
-            day = day_time.xpath(".//h3/text()").get().strip()
-            time = day_time.xpath(".//span/text()").get()
+        for day_time in response.xpath('//*[@class="operating-hours hidden md:flex"]//*[@class="p-3"]'):
+            day = day_time.xpath("./h3/text()").get().strip()
+            time = day_time.xpath("./span/text()").get()
             if time == "Open 24 hours":
-                item["opening_hours"] = "24/7"
+                oh.add_range(day=day, open_time="00:00", close_time="24:00")
             elif time == "Closed":
                 oh.set_closed(day)
             else:
-                open_time, close_time = day_time.xpath(".//span/text()").get().split(" | ")
+                open_time, close_time = time.split(" | ")
                 oh.add_range(day=day, open_time=open_time, close_time=close_time, time_format="%I:%M %p")
         item["opening_hours"] = oh
         attributes = response.xpath('//*[@class = "p-2"]//text()').getall()

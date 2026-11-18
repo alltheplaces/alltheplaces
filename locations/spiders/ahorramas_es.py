@@ -66,7 +66,6 @@ class AhorramasESSpider(Spider):
                 item["addr_full"] = store["direccion"]
             item["city"] = municipio
             item["state"] = STATE_CODES.get(store["comunidad"], store["comunidad"])
-            item["country"] = "ES"
 
             item["website"] = response.urljoin(
                 "/encuentra-tu-tienda/{}/{}/{}.html".format(

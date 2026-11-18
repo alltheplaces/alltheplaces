@@ -1,3 +1,5 @@
+import re
+
 import scrapy
 from scrapy.http import JsonRequest
 
@@ -16,6 +18,7 @@ class IngSpider(scrapy.Spider):
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
     CASHPOINT_BRAND = {"brand": "Cash", "brand_wikidata": "Q112875867"}
+    CENTRAL_PHONES = ["+3224646001", "+3224646002", "+3280071302"]
 
     def parse(self, response, **kwargs):
         for store in response.json().get("locations"):
@@ -52,9 +55,15 @@ class IngSpider(scrapy.Spider):
                 "phone": store.get("phone"),
                 "lat": response.meta.get("lat"),
                 "lon": response.meta.get("lon"),
-                "branch": response.meta["name"].removeprefix("ING "),
+                "branch": re.sub(
+                    r"^(?:Cash Punt|Cash Punkt|Point Cash) - |^ING (?:Geldautomaat |Distributeur De Billets )?",
+                    "",
+                    response.meta["name"],
+                ),
             }
         )
+        if item["phone"] in self.CENTRAL_PHONES:
+            item["phone"] = None
         item["opening_hours"] = OpeningHours()
         if timetable := store["timetable"].get("office"):
             apply_category(Categories.BANK, item)
@@ -65,8 +74,11 @@ class IngSpider(scrapy.Spider):
             item.update(self.CASHPOINT_BRAND)
 
         for hours in timetable:
-            for day_hours in hours.get("hours", []):
-                if day := sanitise_day(hours["day"]):
-                    item["opening_hours"].add_range(day, day_hours["open"], day_hours["closed"])
+            if day := sanitise_day(hours["day"]):
+                if day_hours_list := hours.get("hours"):
+                    for day_hours in day_hours_list:
+                        item["opening_hours"].add_range(day, day_hours["open"], day_hours["closed"])
+                else:
+                    item["opening_hours"].set_closed(day)
 
         yield item

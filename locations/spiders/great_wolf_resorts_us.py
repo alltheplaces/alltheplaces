@@ -24,7 +24,7 @@ class GreatWolfResortsUSSpider(SitemapSpider):
         item["ref"] = item["website"] = response.url
         phone = response.xpath('//*[contains(@href,"tel:")]/@href').get()
         if phone:
-            item["phone"] = phone.replace("tel:", "")
+            item["phone"] = phone
         extract_google_position(item, response)
         apply_category(Categories.LEISURE_WATER_PARK, item)
         yield item

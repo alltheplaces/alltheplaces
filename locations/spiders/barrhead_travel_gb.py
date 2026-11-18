@@ -10,7 +10,6 @@ from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-# Sitemap has store links but not complete.
 class BarrheadTravelGBSpider(CrawlSpider):
     name = "barrhead_travel_gb"
     item_attributes = {"brand": "Barrhead Travel", "brand_wikidata": "Q114292485"}

@@ -85,6 +85,21 @@ upload_file() {
     upload_to_r2 "${file_path}" "${R2_BUCKET}/${path}"
 }
 
+uniqueness_warning() {
+    # Print a warning <li> if too few of the features that have a property share distinct values
+    local geojson="$1"
+    local property="$2"
+    local threshold="$3"
+    local label="$4"
+    local counts present unique
+    counts=$(jq --raw-output --arg p "${property}" '.features | map(.properties[$p]) | map(select(. != null)) | "\(length) \(unique | length)"' "${geojson}")
+    read -r present unique <<< "${counts}"
+    if [ "${present}" -gt 0 ] && awk -v u="${unique}" -v p="${present}" -v t="${threshold}" 'BEGIN { exit !((u / p) * 100 < t) }'; then
+        local rate=$(awk -v u="${unique}" -v p="${present}" 'BEGIN { printf "%.2f", (u / p) * 100 }')
+        echo "<li>⚠️ Only ${unique} of ${present} (${rate}%) ${label} are unique</li>"
+    fi
+}
+
 PR_COMMENT_BODY="I ran the spiders in this pull request for a __2 minute__ test and got these results:\\n\\n|Spider|Results|Log|\\n|---|---|---|\\n"
 HAD_TIMEOUT=false
 
@@ -302,26 +317,17 @@ do
                 STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ ${dupe_dropped} items (${dupe_percent}%) were dropped by the dupe filter</li>"
             fi
 
-            # Warn if the image URL is not very unique across all the outputs
-            unique_image_urls=$(jq '.features | map(.properties.image) | map(select(. != null)) | unique | length' ${OUTFILE})
-            unique_image_url_rate=$(awk -v uiu="${unique_image_urls}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && uiu > 0) { printf "%.2f", (uiu / fc) * 100 } else { printf "0.00" } }')
-            if awk -v uiu="${unique_image_urls}" -v uir="${unique_image_url_rate}" 'BEGIN { exit !(uir < 50 && uiu > 0) }'; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_image_urls} (${unique_image_url_rate}%) unique image URLs</li>"
+            # Warn if items with a brand or operator Wikidata ID were not matched to an NSI entry
+            missing_nsi_id=$(jq '.features | map(.properties | select((."brand:wikidata" or ."operator:wikidata") and .nsi_id == null)) | length' "${OUTFILE}")
+            if [ "${missing_nsi_id}" -gt 0 ]; then
+                nsi_reasons=$(jq --raw-output 'to_entries | map(select(.key | startswith("atp/nsi/") and (startswith("atp/nsi/match_") | not))) | map("\(.key | ltrimstr("atp/nsi/")): \(.value)") | join(", ")' "${STATSFILE}")
+                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ NSI ID is missing on ${missing_nsi_id} items with a brand or operator Wikidata ID (${nsi_reasons})</li>"
             fi
 
-            # Warn if the phone number is not very unique across all the outputs
-            unique_phones=$(jq '.features | map(.properties.phone) | map(select(. != null)) | unique | length' ${OUTFILE})
-            unique_phone_rate=$(awk -v up="${unique_phones}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && up > 0) { printf "%.2f", (up / fc) * 100 } else { printf "0.00" } }')
-            if awk -v up="${unique_phones}" -v upr="${unique_phone_rate}" 'BEGIN { exit !(upr < 90 && up > 0) }'; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_phones} (${unique_phone_rate}%) unique phone numbers</li>"
-            fi
-
-            # Warn if the email is not very unique across all the outputs
-            unique_emails=$(jq '.features | map(.properties.email) | map(select(. != null)) | unique | length' ${OUTFILE})
-            unique_email_rate=$(awk -v ue="${unique_emails}" -v fc="${FEATURE_COUNT}" 'BEGIN { if (fc > 0 && ue > 0) { printf "%.2f", (ue / fc) * 100 } else { printf "0.00" } }')
-            if awk -v ue="${unique_emails}" -v uer="${unique_email_rate}" 'BEGIN { exit !(uer < 90 && ue > 0) }'; then
-                STATS_WARNINGS="${STATS_WARNINGS}<li>⚠️ Only ${unique_emails} (${unique_email_rate}%) unique email addresses</li>"
-            fi
+            # Warn if image/phone/email values are not very unique among the items that have them
+            STATS_WARNINGS="${STATS_WARNINGS}$(uniqueness_warning "${OUTFILE}" image 50 "image URLs")"
+            STATS_WARNINGS="${STATS_WARNINGS}$(uniqueness_warning "${OUTFILE}" phone 90 "phone numbers")"
+            STATS_WARNINGS="${STATS_WARNINGS}$(uniqueness_warning "${OUTFILE}" email 90 "email addresses")"
 
             num_warnings=$(echo "${STATS_WARNINGS}" | grep -o "</li>" | wc -l)
             num_errors=$(echo "${STATS_ERRORS}" | grep -o "</li>" | wc -l)

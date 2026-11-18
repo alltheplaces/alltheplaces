@@ -25,6 +25,7 @@ class KikoMilanoSpider(JSONBlobSpider):
         )
 
     def post_process_item(self, item, response, location):
+        item["branch"] = item.get("name").removeprefix("Kiko Milano - ").strip()
         item["opening_hours"] = OpeningHours()
         for i in range(len(location["openingHours"])):
             split_hours = location["openingHours"][i].split(",")

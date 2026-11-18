@@ -34,7 +34,6 @@ class VomarNLSpider(SitemapSpider):
         item["street_address"] = data.get("street_and_number")
         item["postcode"] = data.get("zipcode")
         item["city"] = data.get("city")
-        item["country"] = "NL"
         item["phone"] = data.get("telephone") or None
         item["lat"] = lat
         item["lon"] = lon

@@ -7,11 +7,10 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
-from locations.hours import DAYS, OpeningHours
+from locations.hours import DAYS, DAYS_JP, OpeningHours
 from locations.items import Feature
 
 # Japanese single-character day names mapped to OSM day abbreviations.
-DAY_CHARS = {"月": "Mo", "火": "Tu", "水": "We", "木": "Th", "金": "Fr", "土": "Sa", "日": "Su"}
 DAY_RANGE = re.compile(r"([月火水木金土日])-([月火水木金土日])")
 
 
@@ -47,7 +46,6 @@ class ApinaJPSpider(CrawlSpider):
         item["ref"] = ref_match.group(1)
         item["name"] = name.strip()
         item["website"] = response.url
-        item["country"] = "JP"
 
         if phone_html := details.get("電話番号"):
             item["phone"] = self._parse_phone(phone_html)
@@ -158,14 +156,14 @@ class ApinaJPSpider(CrawlSpider):
 
         days: list[str] = []
         while m := DAY_RANGE.search(stripped):
-            start = DAYS.index(DAY_CHARS[m.group(1)])
-            end = DAYS.index(DAY_CHARS[m.group(2)])
+            start = DAYS.index(DAYS_JP[m.group(1)])
+            end = DAYS.index(DAYS_JP[m.group(2)])
             days.extend(DAYS[start : end + 1])
             stripped = stripped[: m.start()] + stripped[m.end() :]
 
         for char in stripped:
-            if char in DAY_CHARS:
-                days.append(DAY_CHARS[char])
+            if char in DAYS_JP:
+                days.append(DAYS_JP[char])
 
         # De-duplicate while preserving order
         seen = set()

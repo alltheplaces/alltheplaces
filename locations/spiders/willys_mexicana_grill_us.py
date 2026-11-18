@@ -8,15 +8,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.hours import OpeningHours, day_range, sanitise_day
 from locations.items import Feature
 
-# Location pages come from the site's locations sitemap. Each page marks the
-# address up as a run of spans with segment-* classes, carries its coordinates
-# on the map marker, and gives hours as a free text line such as
-# "Mon-Sun 11:00am - 10:00pm".
-#
-# The amenity list marks the options a restaurant offers with a "check" class.
-#
-# No brand:wikidata is set because the chain has no Wikidata item.
-
 
 class WillysMexicanaGrillUSSpider(SitemapSpider):
     name = "willys_mexicana_grill_us"
@@ -87,14 +78,9 @@ class WillysMexicanaGrillUSSpider(SitemapSpider):
 
             oh.add_days_range(
                 day_range(start, end),
-                WillysMexicanaGrillUSSpider.normalise_time(times.group(1)),
-                WillysMexicanaGrillUSSpider.normalise_time(times.group(2)),
-                time_format="%I:%M%p",
+                times.group(1),
+                times.group(2),
+                time_format=["%I:%M%p", "%I:%M %p", "%I%p", "%I %p"],
             )
 
         return oh if oh else None
-
-    @staticmethod
-    def normalise_time(value: str) -> str:
-        value = value.replace(" ", "").upper()
-        return value if ":" in value else re.sub(r"(\d+)", r"\1:00", value, count=1)

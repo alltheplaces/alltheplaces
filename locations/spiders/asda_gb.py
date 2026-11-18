@@ -76,7 +76,6 @@ class AsdaGBSpider(VirtualEarthSpider):
         """Create separate POI for a department (pharmacy, café, etc.)"""
         poi = store_item.copy()
 
-        # Create unique ref
         poi["ref"] = f"{store_item['ref']}_{poi_type}"
 
         # Clear store-specific fields

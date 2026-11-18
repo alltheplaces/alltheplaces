@@ -9,6 +9,7 @@ class CumberlandFarmsUSSpider(Spider):
     name = "cumberland_farms_us"
     item_attributes = {"brand": "Cumberland Farms", "brand_wikidata": "Q1143685"}
     allowed_domains = ["cumberlandfarms.com"]
+    requires_proxy = "US"
     start_urls = ["https://www.cumberlandfarms.com/api/stores-locator/store-locator-search/results?bannerId=1"]
 
     def parse(self, response, **kwargs):

@@ -1,13 +1,13 @@
 import json
 from typing import Any
 
+import chompjs
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
-from locations.items import set_closed
 
 
 class LeonGBSpider(Spider):
@@ -16,41 +16,46 @@ class LeonGBSpider(Spider):
     start_urls = ["https://leon.co/find-leon/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for store in DictParser.get_nested_key(
-            json.loads(response.xpath('//script[@type="application/json"][@id="__NEXT_DATA__"]/text()').get()),
-            "restaurants",
-        ):
+        stream = ""
+        for script in response.xpath("//script[starts-with(text(), 'self.__next_f.push')]/text()").getall():
+            chunk = chompjs.parse_js_object(script)
+            if len(chunk) > 1 and isinstance(chunk[1], str):
+                stream += chunk[1]
+        for line in stream.splitlines():
+            data = line.partition(":")[2]
+            if data[:1] in ("[", "{"):
+                for payload in DictParser.iter_matching_keys(json.loads(data), "payload"):
+                    for store in payload:
+                        if isinstance(store, dict) and "locationDetails" in store:
+                            yield from self.parse_store(store)
 
-            store["address"] = store.pop("locationDetails")
-            store["address"]["city"] = store["address"].pop("townOrCity", "")
-            if not store["address"].get("country"):
-                store["address"]["country"] = "GB"
+    def parse_store(self, store: dict) -> Any:
+        if store.get("permanentlyClosed") or store.get("comingSoon") or store.get("closed"):
+            return
 
-            item = DictParser.parse(store)
-            item["branch"] = item.pop("name")
+        store["address"] = store.pop("locationDetails")
+        store["address"]["city"] = store["address"].pop("townOrCity", "")
+        if not store["address"].get("country"):
+            store["address"]["country"] = "GB"
 
-            if item["ref"] == "a-title-for-this-restaurant-and-another-one":
-                continue
+        item = DictParser.parse(store)
+        item["branch"] = item.pop("name")
 
-            item["addr_full"] = store["address"].get("fullAddress")
+        if item["ref"] == "a-title-for-this-restaurant-and-another-one":
+            return
 
+        item["addr_full"] = store["address"].get("fullAddress")
+        item["phone"] = (store.get("contactDetails") or {}).get("phoneNumber")
+
+        try:
             oh = OpeningHours()
-            for rule in store.get("restaurantOpeningTimes", {}).get("openingTimes", []):
-                try:
-                    oh.add_range(rule["day"], rule["opensAt"], rule["closesAt"])
-                except:
-                    pass
+            for rule in (store.get("restaurantOpeningTimes") or {}).get("openingTimes") or []:
+                oh.add_range(rule["day"], rule["opensAt"][:5], rule["closesAt"])
             item["opening_hours"] = oh
+        except Exception:
+            pass
+        item["website"] = f'https://leon.co/restaurants/{store["slug"]}/'
 
-            item["website"] = (
-                f'https://leon.co/restaurants/{store["slug"]}/'
-                if item["country"] == "GB"
-                else f'https://leon-nl.co/restaurants/{store["slug"]}/'
-            )
+        apply_category(Categories.FAST_FOOD, item)
 
-            apply_category(Categories.FAST_FOOD, item)
-
-            if store.get("permanentlyClosed"):
-                set_closed(item)
-
-            yield item
+        yield item

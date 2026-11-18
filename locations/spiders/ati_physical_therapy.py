@@ -7,7 +7,6 @@ from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
 
-# Can't currently use StructuredDataSpider as there is no type in the source data
 class AtiPhysicalTherapySpider(SitemapSpider, StructuredDataSpider):
     name = "ati_physical_therapy"
     item_attributes = {

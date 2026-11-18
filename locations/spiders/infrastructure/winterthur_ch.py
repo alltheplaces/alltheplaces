@@ -7,12 +7,18 @@ from scrapy.http import Request
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.licenses import Licenses
+from locations.user_agents import BOT_USER_AGENT_SCRAPY
 
 
 # Open Data of the City of Winterthur, Switzerland
 class WinterthurCHSpider(Spider):
     name = "winterthur_ch"
     allowed_domains = ["stadtplan.winterthur.ch"]
+    custom_settings = {
+        "DEFAULT_REQUEST_HEADERS": {
+            "User-Agent": BOT_USER_AGENT_SCRAPY,
+        },
+    }
     dataset_attributes = Licenses.CC0.value | {
         "attribution:name:de": "Stadt Winterthur",
         "attribution:name:en": "City of Winterthur",
@@ -20,6 +26,7 @@ class WinterthurCHSpider(Spider):
         "attribution:website": "https://stadtplan.winterthur.ch/stadtgruen/spielplatzkontrolle-service/swagger/index.html",
     }
     no_refs = True
+    requires_proxy = "CH"  # site blocks datacenter IP ranges
 
     # Swiss LV95 (https://epsg.io/2056) -> lat/lon (https://epsg.io/4326)
     coord_transformer = pyproj.Transformer.from_crs(2056, 4326)

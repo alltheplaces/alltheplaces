@@ -17,6 +17,7 @@ class CaixabankESSpider(Spider):
     # regardless of the box's actual size), so Spain's extent is searched recursively: any box that hits
     # the cap is split into quadrants (DuplicatesPipeline drops overlaps by ref).
     max_results = 200
+    custom_settings = {"DOWNLOAD_TIMEOUT": 30}
 
     def bbox_request(self, lat1: float, lat2: float, lon1: float, lon2: float) -> Request:
         return Request(

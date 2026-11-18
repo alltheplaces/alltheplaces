@@ -15,7 +15,6 @@ brands = {
 
 class TsuruhadrugSpider(YextAnswersSpider):
     name = "tsuruhadrug"
-    # item_attributes = {"brand": "ツルハドラッグ", "brand_wikidata": "Q11318826"}
 
     endpoint = "https://prod-cdn.us.yextapis.com/v2/accounts/me/search/vertical/query"
     api_key = "6f3d5119d849cfdb44094409f825f542"

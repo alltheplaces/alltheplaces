@@ -27,6 +27,6 @@ class BevcoINSpider(Spider):
         if m := re.search(r"query=\s*(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)", row.xpath("./td[5]//a/@href").get("")):
             item["lat"], item["lon"] = m.group(1), m.group(2)
 
-        item["phone"] = row.xpath("./td[7]//a/@href").get("").removeprefix("tel:").strip()
+        item["phone"] = row.xpath("./td[7]//a/@href").get("").strip()
         apply_category(Categories.SHOP_ALCOHOL, item)
         yield item

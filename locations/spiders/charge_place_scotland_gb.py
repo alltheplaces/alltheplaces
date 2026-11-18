@@ -7,12 +7,13 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
+SOCKETS = {"type_2_plug": "type2", "ccs": "type2_combo", "chademo": "chademo"}
+
 
 class ChargePlaceScotlandGBSpider(Spider):
     name = "charge_place_scotland_gb"
     item_attributes = {"operator": "ChargePlace Scotland", "operator_wikidata": "Q105359316"}
     start_urls = ["https://chargeplacescotland.org/"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         token = re.search(r"apiAuthKey: '(\w+)',", response.text).group(1)
@@ -34,7 +35,15 @@ class ChargePlaceScotlandGBSpider(Spider):
                 item["extras"]["charge"] = "{} {}/kWh".format(
                     location["properties"]["tariff"]["amount"], location["properties"]["tariff"]["currency"]
                 )
-            # TODO: connectors available location["properties"]["connectorGroups"]
+            sockets = {}
+            for group in location["properties"]["connectorGroups"] or []:
+                for connector in group["connectors"]:
+                    if socket := SOCKETS.get(connector["connectorPlugType"]):
+                        count, output = sockets.get(socket, (0, 0))
+                        sockets[socket] = (count + 1, max(output, float(connector["connectorMaxChargeRate"])))
+            for socket, (count, output) in sockets.items():
+                item["extras"][f"socket:{socket}"] = str(count)
+                item["extras"][f"socket:{socket}:output"] = f"{output:g} kW"
 
             apply_category(Categories.CHARGE_POINT, item)
 

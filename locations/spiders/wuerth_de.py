@@ -8,6 +8,8 @@ class WuerthDESpider(scrapy.Spider):
     name = "wuerth_de"
     item_attributes = {"brand": "Würth", "brand_wikidata": "Q679750"}
     start_urls = ["https://www.wuerth.de/web/de/awkg/niederlassungen/branches_json_v2.json"]
+    requires_proxy = True
+    custom_settings = {"ZYTE_API_SKIP_HEADERS": ["Cookie", "User-Agent"]}
 
     def parse(self, response, **kwargs):
         for location in response.json():

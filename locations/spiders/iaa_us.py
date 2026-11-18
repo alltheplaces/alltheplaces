@@ -9,6 +9,7 @@ from scrapy.http import Response
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours, day_range, sanitise_day
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 DAY = r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)"
 DAY_TIME_RANGE = re.compile(
@@ -78,7 +79,7 @@ class IaaUSSpider(Spider):
             street_parts = [branch.get("street")]
             if suite and "box" not in suite.lower():
                 street_parts.append(suite)
-            item["street_address"] = ", ".join(filter(None, street_parts))
+            item["street_address"] = merge_address_lines(street_parts)
             item["city"] = branch.get("city")
             item["state"] = branch.get("state")
             item["postcode"] = branch.get("zip")

@@ -26,7 +26,7 @@ class LocationCloudSpider(Spider):
         )
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        data = response.json()  # ty: ignore[unresolved-attribute]
+        data = response.json()  # ty: ignore[missing-attribute]
 
         for location in data["items"]:
             item = Feature()

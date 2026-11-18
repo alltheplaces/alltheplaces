@@ -1,11 +1,10 @@
-from locations.categories import Categories
 from locations.hours import DAYS_DE
 from locations.spiders.eathappy import EathappySpider
 
 
 class YuzuDESpider(EathappySpider):
     name = "yuzu_de"
-    item_attributes = {"brand": "Yuzu", "brand_wikidata": "Q130392622", "extras": Categories.FAST_FOOD.value}
+    item_attributes = {"brand": "Yuzu", "brand_wikidata": "Q130392622"}
     base_domain = "https://www.yuzu-food.com"
     countries = {
         "DE": {

@@ -8,6 +8,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class FranckProvostSpider(SitemapSpider):
@@ -32,7 +33,7 @@ class FranckProvostSpider(SitemapSpider):
         item["ref"] = salon.get("code") or str(salon.get("id"))
         item["name"] = "Franck Provost"
         item["branch"] = common.get("brand") or ""
-        item["addr_full"] = ", ".join(filter(None, [common.get("addressLine2"), common.get("addressLine1")]))
+        item["addr_full"] = merge_address_lines([common.get("addressLine2"), common.get("addressLine1")])
         item["city"] = salon.get("city")
         item["phone"] = common.get("tel")
         item["email"] = (salon.get("infos") or {}).get("email")

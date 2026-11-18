@@ -75,6 +75,6 @@ class HucksUSSpider(Spider):
 
         if not item.get("phone"):
             if phone := response.css("a[href^='tel']::attr(href)").get():
-                item["phone"] = phone.replace("tel:", "").strip()
+                item["phone"] = phone.strip()
 
         yield item

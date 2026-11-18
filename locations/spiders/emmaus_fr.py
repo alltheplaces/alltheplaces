@@ -64,7 +64,6 @@ class EmmausFRSpider(Spider):
             if len(gps_parts) >= 2:
                 item["lat"], item["lon"] = gps_parts[0], gps_parts[1]
             item["street_address"], item["postcode"], item["city"] = self.parse_address(store)
-            item["country"] = "FR"
             item["phone"] = store.get("telephone")
             item["email"] = store.get("email")
             item["website"] = store.get("permalink")

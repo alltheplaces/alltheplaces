@@ -48,7 +48,6 @@ class PanishopESSpider(Spider):
             item["street_address"] = street
             item["city"] = city
             item["postcode"] = postcode
-            item["country"] = "ES"
             item["phone"] = phone
             apply_category(Categories.SHOP_BAKERY, item)
             yield item

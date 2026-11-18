@@ -6,12 +6,7 @@ from scrapy.http import JsonRequest, Response
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
 from locations.dict_parser import DictParser
 
-CZECH_POST = {
-    "brand": "Česká Pošta",
-    "brand_wikidata": "Q341090",
-    "operator": "Česká pošta, s.p.",
-    "operator_wikidata": "Q341090",
-}
+CZECH_POST = {"operator": "Česká pošta, s.p.", "operator_wikidata": "Q341090"}
 
 
 class CzechPostCZSpider(Spider):

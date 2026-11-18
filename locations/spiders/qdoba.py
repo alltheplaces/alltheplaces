@@ -1,6 +1,7 @@
 from scrapy.http import Response
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -10,10 +11,13 @@ class QdobaSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Qdoba", "brand_wikidata": "Q1363885"}
     allowed_domains = ["qdoba.com"]
     sitemap_urls = ["https://locations.qdoba.com/sitemap.xml"]
-    sitemap_rules = [(r"com/[^/]+/[^/]+/[^/]+/.*", "parse")]
+    sitemap_rules = [(r"com/[^/]+/[^/]+/[^/]+/(?!.*/(?:burritos|catering|delivery|salads|tacos|takeout)$).+", "parse")]
     wanted_types = ["Organization"]
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         if ld_data.get("geo"):
+            if "Coming Soon" in item["name"]:
+                item["opening_hours"] = "closed"
             item["name"] = None
+            apply_category(Categories.FAST_FOOD, item)
             yield item

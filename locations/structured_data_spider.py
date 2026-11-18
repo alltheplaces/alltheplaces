@@ -144,6 +144,7 @@ class StructuredDataSpider(Spider):
     - search_for_image
     - search_for_amenity_features
     - search_for_payment_accepted
+    - name_is_branch (move the name found in the structured data to `branch`)
 
     By default the spider only looks for certain `wanted_types`.
     You can change this behaviour by specifying this as a list of your desired types.
@@ -230,6 +231,7 @@ class StructuredDataSpider(Spider):
         "VeterinaryCare",
     ]
     convert_microdata = True
+    name_is_branch = False
     search_for_email = True
     search_for_phone = True
     search_for_twitter = True
@@ -251,7 +253,7 @@ class StructuredDataSpider(Spider):
     def parse(self, response: TextResponse, **kwargs):
         yield from self.parse_sd(response)
 
-    def parse_sd(self, response: TextResponse):  # noqa: C901
+    def parse_sd(self, response: TextResponse, **kwargs):  # noqa: C901
         selector = response.selector
         if self.convert_microdata:
             MicrodataParser.convert_to_json_ld(response)
@@ -260,6 +262,9 @@ class StructuredDataSpider(Spider):
 
             item = LinkedDataParser.parse_ld(ld_item, time_format=self.time_format)
             url = get_url(response)
+
+            if self.name_is_branch:
+                item["branch"] = item.pop("name", None)
 
             if item["ref"] is None:
                 item["ref"] = self.get_ref(url, response)

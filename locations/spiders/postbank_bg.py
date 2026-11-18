@@ -30,7 +30,7 @@ LOCATIONS_FETCH_JS = """async () => {
 
 class PostbankBGSpider(JSONBlobSpider, PlaywrightSpider):
     name = "postbank_bg"
-    item_attributes = {"brand": "Пощенска банка", "brand_wikidata": "Q7234083", "country": "BG"}
+    item_attributes = {"brand": "Postbank", "brand_wikidata": "Q7234083", "country": "BG"}
     allowed_domains = ["content.postbank.bg"]
     no_refs = True
     custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}

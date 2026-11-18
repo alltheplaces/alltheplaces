@@ -43,7 +43,6 @@ class T2SISpider(CrawlSpider):
         item["city"] = response.xpath('//span[@itemprop="addressLocality"]/text()').get("").strip() or None
         item["phone"] = response.xpath('//span[@itemprop="telephone"]/text()').get("").strip() or None
         item["email"] = response.xpath('//span[@itemprop="email"]/a/text()').get("").strip() or None
-        item["country"] = "SI"
 
         hours_html = response.xpath(
             '//div[contains(@class,"label-inline") and contains(text(),"Delovni")]/following-sibling::p'
