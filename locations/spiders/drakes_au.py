@@ -1,10 +1,5 @@
-from typing import Iterable
-
-from scrapy.http import Response
-
 from locations.categories import Categories
 from locations.hours import DAYS_EN
-from locations.items import Feature
 from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
 
 
@@ -14,10 +9,7 @@ class DrakesAUSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "drakes.com.au",
     ]
+    start_urls = [
+        "https://drakes.com.au/wp-admin/admin-ajax.php?action=store_search&lat=-34.928499&lng=138.600746&max_results=100&search_radius=500"
+    ]
     days = DAYS_EN
-
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item.pop("addr_full", None)
-        item.pop("email", None)
-        item.pop("website", None)
-        yield item

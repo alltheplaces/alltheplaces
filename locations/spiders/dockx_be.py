@@ -6,6 +6,8 @@ from locations.categories import Categories
 from locations.hours import DAYS_EN, OpeningHours
 from locations.items import Feature
 
+ALL_DAY = {("00:01", "23:59"), ("23:59", "00:01")}
+
 
 class DockxBESpider(scrapy.Spider):
     name = "dockx_be"
@@ -29,6 +31,9 @@ class DockxBESpider(scrapy.Spider):
             oh = OpeningHours()
             for hours in store.get("openingHours").values():
                 day = DAYS_EN.get(hours.get("weekday").capitalize())
+                if (hours.get("startAm"), hours.get("endAm")) in ALL_DAY:
+                    oh.add_range(day, "00:00", "24:00")
+                    continue
                 oh.add_range(
                     day=day,
                     open_time=hours.get("startAm"),
