@@ -3,6 +3,7 @@ import re
 from typing import Any, AsyncIterator, Iterable
 from urllib.parse import urlencode
 
+from playwright.async_api import Error as PlaywrightError
 from scrapy.http import Request, Response
 
 from locations.categories import Categories, apply_category
@@ -57,7 +58,12 @@ class GoodwillSpider(PlaywrightSpider):
                 }
                 url = "https://www.goodwill.org/wp-admin/admin-ajax.php?" + urlencode(params)
                 # Fetch from inside the browser so the request carries the page's cookies and origin.
-                for item in self.parse(await page.evaluate("(url) => fetch(url).then((r) => r.text())", url)):
+                try:
+                    body = await page.evaluate("(url) => fetch(url).then((r) => r.text())", url)
+                except PlaywrightError as e:
+                    self.logger.warning(f"Fetch failed for {latitude},{longitude}: {e}")
+                    continue
+                for item in self.parse(body):
                     yield item
         finally:
             await page.close()
