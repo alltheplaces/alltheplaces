@@ -6,6 +6,7 @@ from scrapy.utils.httpobj import urlparse_cached
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
+from locations.pipelines.address_clean_up import merge_address_lines
 
 
 class JyskSpider(scrapy.Spider):
@@ -30,6 +31,9 @@ class JyskSpider(scrapy.Spider):
             yield scrapy.Request(urljoin(url, "stores-locator"), callback=self.parse_country_site)
 
     def parse_country_site(self, response):
+        if not response.xpath('//*[@id="stores-locator-ssr"]'):
+            yield scrapy.Request(response.urljoin("/api/stores"), callback=self.parse_next_site)
+            return
         data = response.xpath('//*[@id="stores-locator-ssr"]/div').attrib["data-jysk-react-properties"]
         locations = json.loads(data)["storesCoordinates"]
         self.logger.debug("Found %d locations on %s", len(locations), response.url)
@@ -66,3 +70,18 @@ class JyskSpider(scrapy.Spider):
                 oh.add_range(DAYS_FULL[day_index - 1], convert(start), convert(end))
         item["opening_hours"] = oh
         yield item
+
+    def parse_next_site(self, response):
+        for store in response.json()["data"]:
+            item = DictParser.parse(store)
+            item["branch"] = item.pop("name")
+            item["street_address"] = merge_address_lines([store["street"], store["number"]])
+            item["website"] = response.urljoin(store["url"])
+            item["image"] = store["imageUrl"]
+            item["opening_hours"] = oh = OpeningHours()
+            for rule in store["openingHours"]:
+                if rule["startHours"] or rule["endHours"]:
+                    oh.add_range(DAYS_FULL[rule["day"]], f"{rule['startHours']:04d}", f"{rule['endHours']:04d}", "%H%M")
+                else:
+                    oh.set_closed(DAYS_FULL[rule["day"]])
+            yield item
