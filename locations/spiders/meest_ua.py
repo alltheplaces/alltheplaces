@@ -45,10 +45,10 @@ class MeestUASpider(Spider):
                 apply_category(Categories.POST_OFFICE, item)
             else:
                 # Mini branches are counters inside partner shops, petrol stations and so on
-                item["extras"]["post_office"] = "post_partner"
-                item["extras"]["post_office:brand"] = MEEST["brand"]
-                item["extras"]["post_office:brand:wikidata"] = MEEST["brand_wikidata"]
                 apply_category(Categories.GENERIC_POI, item)
+                apply_category({"post_office": "post_partner"}, item)
+                item.set_tag("post_office:brand", MEEST["brand"])
+                item.set_tag("post_office:brand:wikidata", MEEST["brand_wikidata"])
 
             item["opening_hours"] = OpeningHours()
             for day in branch["branch_work_time"]:
