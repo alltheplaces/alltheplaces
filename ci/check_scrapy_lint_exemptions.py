@@ -7,6 +7,11 @@ import sys
 import tomllib
 from typing import Final
 
+for k, v in sorted(os.environ.items()):
+    masked = "***" if any(s in k.upper() for s in ("KEY", "SECRET", "TOKEN", "PASS")) else v  # noqa: T201
+
+    print(f"{k}={masked}")  # noqa: T201
+
 try:
     # Parse the TOML file:
     with open("pyproject.toml", "rb") as config_file:
