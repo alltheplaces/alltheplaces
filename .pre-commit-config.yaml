@@ -7,7 +7,14 @@ repos:
         name: Check spider naming consistency
         entry: python ci/check_spider_naming_consistency.py
         language: python
+        pass_filenames: false
         types: [python]
+      - id: check-scrapy-lint-exemptions
+        name: Check scrapy-lint rules
+        entry: uv run --active ci/check_scrapy_lint_exemptions.py
+        files: ^locations/.*\.py$
+        language: python
+        verbose: true
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -42,3 +49,8 @@ repos:
       - id: autoflake
         language_version: python3.11
         args: [--remove-all-unused-imports, --in-place]
+  - repo: https://github.com/scrapy/scrapy-lint
+    rev: v0.1.1
+    hooks:
+    - id: scrapy-lint
+      files: locations/
