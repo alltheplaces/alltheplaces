@@ -11,7 +11,7 @@ repos:
         types: [python]
       - id: check-scrapy-lint-exemptions
         name: Check scrapy-lint rules
-        entry: uv run --active ci/check_scrapy_lint_exemptions.py
+        entry: python ci/check_scrapy_lint_exemptions.py
         files: ^locations/.*\.py$
         language: python
         verbose: true
