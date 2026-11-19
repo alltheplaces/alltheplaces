@@ -24,7 +24,7 @@ except Exception:
 matches: Final[set[str]] = (set(sys.argv) & set(exemptions)) - allowed
 for match in sorted(matches):
     print(  # noqa: T201
-        f"{match} has exemption(s) {exemptions[match]} in pyproject.toml that need to be fixed and removed"
+        f"WARNING: {match} has exemption(s) {exemptions[match]} in pyproject.toml that should be fixed and exemption removed"
     )
 # CI calls with --all-files so the warnings on the screen will need to be enough :/
 # sys.exit(bool(matches))
