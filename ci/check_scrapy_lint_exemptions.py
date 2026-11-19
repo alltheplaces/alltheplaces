@@ -2,6 +2,7 @@
 
 # Since this script is a shim that won't last forever, it is not following best practices; e.g. cannot be imported elsewhere
 
+import os
 import sys
 import tomllib
 from typing import Final
@@ -27,4 +28,5 @@ for match in sorted(matches):
         f"WARNING: {match} has exemption(s) {exemptions[match]} in pyproject.toml that should be fixed and exemption removed"
     )
 # CI calls with --all-files so the warnings on the screen will need to be enough :/
-# sys.exit(bool(matches))
+if os.getenv("CI", "").lower() != "true":
+    sys.exit(bool(matches))
