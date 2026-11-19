@@ -131,3 +131,9 @@ known-settings = [
 "locations/spiders/volkswagen.py" = ["SCP45"]
 "locations/spiders/walmart_us.py" = ["SCP46"]
 "locations/structured_data_spider.py" = ["SCP03"]
+
+# These are the exemptions to the exemptions; the spider BREAKS if "fixed" - must be listed above as well
+# (The assigned value doesn't matter.)
+[tool.scrapy-lint-exemptions]
+"locations/spiders/infrastructure/canton_basel_stadt_trees_ch.py" = {}
+"locations/spiders/bobs_discount_furniture_us.py" = true
