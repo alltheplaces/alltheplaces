@@ -31,7 +31,7 @@ class GbChichesterSpider(UprnEnhancerSpider):
                         "Southbourne",
                         "Tangmere",
                         "West Wittering",
-                        "Westbourne"
+                        "Westbourne",
                     ]
                 ),
                 "|".join(
