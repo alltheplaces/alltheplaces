@@ -15,7 +15,7 @@ class LoewsHotelsSpider(StructuredDataSpider):
     wanted_types = ["Hotel"]
 
     def parse(self, response):
-        urls = response.xpath('//div[@class="buttons"]/a/@href').extract()
+        urls = response.xpath('//div[@class="buttons"]/a/@href').getall()
         for url in urls:
             if url.startswith("reservations.loewshotels.com"):
                 pass
