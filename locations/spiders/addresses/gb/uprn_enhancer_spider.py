@@ -125,6 +125,8 @@ class UprnEnhancerSpider(AddressSpider):
         rows = self.iter_rows(response)
         header = next(rows)
         address_re = self.get_regex()
+        if address_re:
+            self.logger.info(address_re.pattern)
 
         for row in rows:
             addr = {}
