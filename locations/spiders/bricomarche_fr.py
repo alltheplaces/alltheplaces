@@ -22,7 +22,7 @@ class BricomarcheFRSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider)
         ld_data["address"]["postalCode"] = str(ld_data["address"]["postalCode"]).zfill(5)
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["ref"] = response.url.rstrip("/").split("/")[-1]
+        item["ref"] = item["website"].rstrip("/").split("/")[-1]
         item["branch"] = item.pop("name").removeprefix("Bricomarché ")
         item.pop("image", None)
         apply_category(Categories.SHOP_DOITYOURSELF, item)
