@@ -1,11 +1,12 @@
 import json
+import re
 from typing import Any, Iterable
 
 from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
-from locations.hours import OpeningHours
+from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
@@ -16,39 +17,14 @@ class FreshAndCOUSSpider(Spider):
     start_urls = ["https://www.freshandco.com/locations/"]
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[Feature]:
-        for block in response.xpath('//script[@type="application/ld+json"]/text()').getall():
-            data = json.loads(block)
-            if data.get("@type") != "Organization":
-                continue
-
-            for location in data.get("subOrganization") or []:
-                address = location.get("address") or {}
-
-                item = Feature()
-                item["ref"] = (location.get("url") or "").rstrip("/").rsplit("/", 1)[-1]
-                # "fresh&co Morristown", "200 W 57th St"
-                item["branch"] = (location.get("name") or "").removeprefix("fresh&co").strip()
-                item["street_address"] = address.get("streetAddress")
-                item["city"] = address.get("addressLocality")
-                item["state"] = address.get("addressRegion")
-                item["postcode"] = address.get("postalCode")
-                item["phone"] = location.get("telephone")
-                item["country"] = "US"
-                item["website"] = location.get("url")
-
-                item["opening_hours"] = self.parse_opening_hours(location.get("openingHours") or [])
-
-                apply_category(Categories.FAST_FOOD, item)
-                item["extras"]["cuisine"] = "salad;sandwich"
-
-                yield item
-
-    @staticmethod
-    def parse_opening_hours(opening_hours: list[str]) -> OpeningHours | None:
-        """The rules are already in OSM syntax, e.g. "Mo 07:00-20:00"."""
-        oh = OpeningHours()
-
-        for rule in opening_hours:
-            oh.add_ranges_from_string(rule)
-
-        return oh if oh else None
+        json_data = json.loads(
+            re.search(
+                r"locations:\s*(\[.+\]),\s*apiKey", response.xpath('//script[contains(text(),"locations")]').get()
+            ).group(1)
+        )
+        for location in json_data:
+            item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
+            item["website"] = response.urljoin(item["website"])
+            apply_category(Categories.FAST_FOOD, item)
+            yield item
