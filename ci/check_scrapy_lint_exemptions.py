@@ -7,6 +7,11 @@ import sys
 import tomllib
 from typing import Final
 
+GITHUB_CI: Final[bool] = os.getenv("CI", "").lower() == "true"
+PRECOMMIT_CI: Final[bool] = (
+    (os.getenv("HOME") == "/code") and (os.getenv("container") == "podman") and (os.getenv("PRE_COMMIT_HOME") == "/pc")
+)
+
 try:
     # Parse the TOML file:
     with open("pyproject.toml", "rb") as config_file:
@@ -28,5 +33,9 @@ for match in sorted(matches):
         f"WARNING: {match} has exemption(s) {exemptions[match]} in pyproject.toml that should be fixed and exemption removed"
     )
 # CI calls with --all-files so the warnings on the screen will need to be enough :/
-if os.getenv("CI", "").lower() != "true":
+if GITHUB_CI or PRECOMMIT_CI:
+    print(  # noqa: T201
+        f"PASSING (pid={os.getpid()}) even with warnings; detected CI environment which calls with --all-files"
+    )
+else:
     sys.exit(bool(matches))
