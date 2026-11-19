@@ -1,31 +1,36 @@
+import json
+import re
 from typing import Any, Iterable
 
+from scrapy import Request, Spider
 from scrapy.http import TextResponse
-from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.hours import DAYS_PT, OpeningHours, sanitise_day
 from locations.items import Feature
-from locations.structured_data_spider import StructuredDataSpider
 
 
-class BancoMercantilBRSpider(SitemapSpider, StructuredDataSpider):
+class BancoMercantilBRSpider(Spider):
     name = "banco_mercantil_br"
     item_attributes = {"brand": "Banco Mercantil do Brasil", "brand_wikidata": "Q9645252"}
-    sitemap_urls = ["https://encontre.bancomercantil.com.br/sitemap.xml"]
-    sitemap_rules = [(r"/banco-mercantil(?:-\d+)?$", "parse_sd")]
-    search_for_facebook = False
+    # Any page with the map widget lists all stores in window.maps["map"]
+    start_urls = ["https://encontre.bancomercantil.com.br/sao-paulo/jacarei/jacarei"]
 
-    def post_process_item(
-        self, item: Feature, response: TextResponse, ld_data: dict, **kwargs: Any
-    ) -> Iterable[Feature]:
-        item["ref"] = response.xpath("//@data-trackingclient-store_id").get()
-        item["branch"] = item.pop("name").removeprefix("Banco Mercantil - ")
-        item["phone"] = None
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[Request]:
+        map_data = re.search(r'window\.maps\["map"\]\s*=\s*(\{.*?\});', response.text, re.DOTALL).group(1)
+        for marker in json.loads(map_data)["markers"]:
+            url = marker.pop("url")
+            item = DictParser.parse(marker)
+            item["branch"] = item.pop("name").removeprefix("Banco Mercantil - ")
+            apply_category(Categories.BANK, item)
+            yield Request(url, callback=self.parse_card, cb_kwargs={"item": item})
+
+    def parse_card(self, response: TextResponse, item: Feature, **kwargs: Any) -> Iterable[Feature]:
+        item["website"] = response.url  # card redirects to the real store page
+        if address := response.xpath('(//*[contains(@class, "address")])[1]//text()').getall():
+            item["addr_full"] = " ".join(t.strip() for t in address if t.strip())
         item["opening_hours"] = self.parse_hours(response)
-        if review_link := response.xpath('//a[contains(@href, "placeid=")]/@href').get():
-            item["extras"]["ref:google:place_id"] = review_link.split("placeid=")[1].split("&")[0]
-        apply_category(Categories.BANK, item)
         yield item
 
     @staticmethod
