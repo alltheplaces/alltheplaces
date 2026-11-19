@@ -9,8 +9,8 @@ from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-class KidStrongUSSpider(SitemapSpider):
-    name = "kid_strong_us"
+class KidStrongUSCASpider(SitemapSpider):
+    name = "kid_strong_us_ca"
     item_attributes = {"brand": "KidStrong", "brand_wikidata": "Q125705878"}
     sitemap_urls = ["https://www.kidstrong.com/sitemap.xml"]
     sitemap_rules = [(r"/locations/[^/]+/?$", "parse")]
