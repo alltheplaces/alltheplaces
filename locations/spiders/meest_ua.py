@@ -45,7 +45,7 @@ class MeestUASpider(Spider):
                 apply_category(Categories.POST_OFFICE, item)
             else:
                 # Mini branches are counters inside partner shops, petrol stations and so on
-                apply_category(Categories.GENERIC_POI, item)
+                apply_category(Categories.POST_OFFICE, item)
                 apply_category({"post_office": "post_partner"}, item)
                 item.set_tag("post_office:brand", MEEST["brand"])
                 item.set_tag("post_office:brand:wikidata", MEEST["brand_wikidata"])
