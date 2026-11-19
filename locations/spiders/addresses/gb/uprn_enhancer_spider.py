@@ -1,9 +1,12 @@
 import csv
+import os
 import re
 import shutil
+import time
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any, AsyncIterator, Iterable, Iterator, Self
+from zipfile import ZipFile
 
 import duckdb
 import openpyxl
@@ -36,7 +39,6 @@ class UprnEnhancerSpider(AddressSpider):
     no_refs = True
     custom_settings = {"DOWNLOAD_TIMEOUT": 60 * 5}
 
-    onsud_region: str = "*"  # ONSUD region file suffix, e.g. "NW"
     postal_towns = {}
     connection = None
 
@@ -60,7 +62,7 @@ class UprnEnhancerSpider(AddressSpider):
 
     def fetch_uprn_lookup(self, response: Response, **kwargs: Any) -> Any:
         assert response.json()["features"][0]["properties"]["title"].startswith("ONS UPRN Directory (")
-        root = Path(self.settings["FILES_STORE"] or "/tmp/atp") / self.name
+        root = Path(self.settings["FILES_STORE"] or "/tmp/atp") / "gb_addresses"
         root.mkdir(exist_ok=True, parents=True)
 
         with requests_cache.disabled():
@@ -80,21 +82,35 @@ class UprnEnhancerSpider(AddressSpider):
                 if local_filepath.exists():
                     continue
 
+                dl_filepath = local_filepath.with_suffix(".{}.download".format(str(int(time.time()))))
                 with requests.get(url, stream=True) as r:
                     self.logger.info("Downloading: {}".format(file_name))
-                    with open(local_filepath, "wb") as f:
+                    with open(dl_filepath, "wb") as f:
                         shutil.copyfileobj(r.raw, f)
+                shutil.move(dl_filepath, local_filepath)
 
-        self.connection = duckdb.connect(root / "temp")
-        self.connection.execute("INSTALL zipfs FROM community; LOAD zipfs;")
-        self.connection.execute(
-            "CREATE TABLE IF NOT EXISTS uprn AS SELECT * FROM 'zip://{}/OpenUPRN.zip/osopenuprn_*.csv';".format(root)
-        )
-        self.connection.execute(
-            "CREATE TABLE IF NOT EXISTS uprn2postcode AS SELECT UPRN AS uprn, PCDS AS postcode FROM 'zip://{}/ONS-NSUL.zip/Data/ONSUD_*_{}.csv';".format(
-                root, self.onsud_region
+        self.connection = duckdb.connect(root / "db")
+        if not self.connection.execute("SELECT * FROM duckdb_tables WHERE table_name='uprn';").fetchone():
+            self.connection.execute("INSTALL zipfs FROM community; LOAD zipfs;")
+            self.connection.execute(
+                "CREATE TABLE IF NOT EXISTS uprn AS SELECT * FROM 'zip://{}/OpenUPRN.zip/osopenuprn_*.csv';".format(
+                    root
+                )
             )
-        )
+
+        if not self.connection.execute("SELECT * FROM duckdb_tables WHERE table_name='uprn2postcode';").fetchone():
+            nsul_root = root / "nsul"
+            if not nsul_root.exists():
+                self.logger.info("Extracting NSUL")
+                nsul_root.mkdir(exist_ok=True, parents=True)
+                ZipFile(root / "ONS-NSUL.zip").extractall(nsul_root)
+            self.connection.execute("CREATE TABLE uprn2postcode (uprn BIGINT PRIMARY KEY, postcode VARCHAR);")
+            for f in os.listdir(nsul_root / "Data"):
+                self.connection.execute(
+                    "INSERT INTO uprn2postcode SELECT UPRN AS uprn, PCDS AS postcode FROM read_csv('{}');".format(
+                        nsul_root / "Data" / f
+                    )
+                )
 
         for url in self.start_urls:
             yield Request(url)
@@ -122,7 +138,8 @@ class UprnEnhancerSpider(AddressSpider):
             item["ref"] = str(addr.get(self.ref_column))
 
             if uprn := addr.get(self.uprn_column):
-                self.apply_uprn(item, int(uprn))
+                if str(uprn).isdigit():
+                    self.apply_uprn(item, int(uprn))
 
             if address_re and (match := address_re.match(address)):
                 match_groups = match.groupdict()
@@ -130,7 +147,7 @@ class UprnEnhancerSpider(AddressSpider):
                 item["extras"]["addr:suburb"] = match_groups.get("suburb")
                 item["city"] = match_groups.get("city")
             else:
-                item["addr_full"] = address or merge_address_lines(
+                item["addr_full"] = merge_address_lines(
                     [*GB_POSTCODE_PATTERN.sub("", address).split(","), item.get("postcode"), "United Kingdom"]
                 )
 
