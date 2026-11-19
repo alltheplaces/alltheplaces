@@ -1,67 +1,39 @@
-import json
-import re
+from typing import Iterable
 
-from scrapy.http import TextResponse
+from scrapy import Request
+from scrapy.http import Response, TextResponse
+from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
+from locations.items import Feature, set_closed
 from locations.structured_data_spider import StructuredDataSpider
 
 
-class AvisSpider(StructuredDataSpider):
+class AvisSpider(SitemapSpider, StructuredDataSpider):
     name = "avis"
+    item_attributes = {"brand": "Avis", "brand_wikidata": "Q791136"}
+    sitemap_urls = ["https://www.avis.com/sitemap.xml"]
+    sitemap_rules = [(r"https://www.avis.com/en/locations/[^/]+/[^/]+/[^/]+/[^/]+(?:/[^/]+)?$", "parse_sd")]
+    wanted_types = ["AutoRental"]
+    drop_attributes = {"image", "twitter"}
 
-    item_attributes = {
-        "brand": "Avis",
-        "brand_wikidata": "Q791136",
-    }
+    def _parse_sitemap(self, response: Response) -> Iterable[Request]:
+        for request in super()._parse_sitemap(response):
+            # Pages that return 5xx to Scrapy but work in a browser (likely bot detection)
+            request.meta["handle_httpstatus_list"] = [500, 502, 503]
+            # response already has data, so don't retry
+            request.meta["dont_retry"] = True
+            yield request
 
-    start_urls = [
-        "https://www.avis.com/en/locations/avisworldwide",
-    ]
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        # Collect locationId as ref
+        item["ref"] = response.url.strip("/").split("#")[0].rsplit("/", 1)[-1]
+        item.pop("name", None)
+        item["branch"] = response.xpath('//*[@data-testid="location-list-view-item-heading"]/text()').get("").title()
+        if "Closed " in item["branch"].title():
+            item["branch"] = None
+            set_closed(item)
 
-    LOCATION_DATA_RE = re.compile(r'"locationData":({.+?}),"i18n":{"locationIndex')
+        apply_category(Categories.CAR_RENTAL, item)
 
-    def extract_location_data(self, response: TextResponse) -> dict:
-        """Extract locationData JSON from page."""
-
-        if not (script := response.xpath('//*[contains(text(), "locationData")]/text()').get()):
-            return {}
-
-        if not (match := self.LOCATION_DATA_RE.search(script.replace("\\", ""))):
-            return {}
-
-        return json.loads(match.group(1))
-
-    def follow_location_links(
-        self,
-        response: TextResponse,
-        callback,
-    ):
-        """Follow all child location links."""
-
-        location_data = self.extract_location_data(response)
-
-        for node in location_data.values():
-            for child in node.get("children", {}).values():
-                if link := child.get("link"):
-                    yield response.follow(
-                        link,
-                        callback=callback,
-                    )
-
-    def parse(self, response: TextResponse, **kwargs):
-        yield from self.follow_location_links(
-            response,
-            self.parse_location,
-        )
-
-    def parse_location(self, response: TextResponse, **kwargs):
-        yield from self.follow_location_links(
-            response,
-            self.parse_details,
-        )
-
-    def parse_details(self, response: TextResponse, **kwargs):
-        yield from response.follow_all(
-            response.xpath('//*[@data-testid="location-map-view-station-description"]/@href').getall(),
-            callback=self.parse_sd,
-        )
+        yield item
