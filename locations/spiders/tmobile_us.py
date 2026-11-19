@@ -4,6 +4,7 @@ from scrapy.spiders import SitemapSpider
 from locations.categories import Categories, apply_category
 from locations.items import Feature
 from locations.structured_data_spider import StructuredDataSpider
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class TmobileUSSpider(SitemapSpider, StructuredDataSpider):
@@ -13,7 +14,12 @@ class TmobileUSSpider(SitemapSpider, StructuredDataSpider):
     sitemap_rules = [(r"/stores/[a-z]{2}/t-mobile-[-\w]+/?$", "parse_sd")]
     allowed_domains = ["www.t-mobile.com"]
     drop_attributes = {"facebook", "twitter"}
-    custom_settings = {"ROBOTSTXT_OBEY": False, "CONCURRENT_REQUESTS": 1}
+    custom_settings = {
+        "ROBOTSTXT_OBEY": False,
+        "CONCURRENT_REQUESTS": 1,
+        "USER_AGENT": BROWSER_DEFAULT,
+        "DOWNLOAD_TIMEOUT": 120,
+    }
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs):
         item["branch"] = item.pop("name").removeprefix("T-Mobile ").removeprefix("at ")
