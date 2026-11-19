@@ -1,40 +1,30 @@
+import json
 from typing import Iterable
 
 from scrapy.http import Response
+from scrapy.spiders import SitemapSpider
 
 from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
 from locations.items import Feature
-from locations.json_blob_spider import JSONBlobSpider
-
-COLUMNS = {
-    "1": "name",
-    "4": "location",
-    "5": "email",
-    "6": "phone",
-    "8": "address",
-    "19": "state",
-    "27": "website",
-    "56": "ref",
-}
 
 
-class KidStrongUSSpider(JSONBlobSpider):
+class KidStrongUSSpider(SitemapSpider):
     name = "kid_strong_us"
     item_attributes = {"brand": "KidStrong", "brand_wikidata": "Q125705878"}
-    start_urls = ["https://api.hubapi.com/hubdb/api/v2/tables/5311378/rows?portalId=20820444"]
-    custom_settings = {"ROBOTSTXT_OBEY": False}
+    sitemap_urls = ["https://www.kidstrong.com/sitemap.xml"]
+    sitemap_rules = [(r"/locations/[^/]+/?$", "parse")]
 
-    def extract_json(self, response: Response) -> list[dict]:
-        features = []
-        for row in response.json()["objects"]:
-            values = row.get("values") or {}
-            if values.get("57") != "yes":  # location_active
-                continue
-            features.append({name: values.get(column) for column, name in COLUMNS.items()})
-        return features
-
-    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+    def parse(self, response: Response, **kwargs) -> Iterable[Feature]:
+        item = DictParser.parse(
+            next(
+                node
+                for node in json.loads(response.xpath('//script[@data-hid="ld-graph"]/text()').get())["@graph"]
+                if "LocalBusiness" in node["@type"]
+            )
+        )
+        item["ref"] = response.url.rstrip("/").rpartition("/")[2]
         item["branch"] = item.pop("name").removeprefix("KidStrong ")
-        item["website"] = f'https://{feature["website"]}' if feature.get("website") else None
+        item["website"] = response.url
         apply_category(Categories.GYM, item)
         yield item
