@@ -1,0 +1,32 @@
+from typing import Iterable
+
+from scrapy.http import Response
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.storefinders.arcgis_feature_server import ArcGISFeatureServerSpider
+
+
+class SeattleParksAndRecreationSwimmingBeachesUSSpider(ArcGISFeatureServerSpider):
+    name = "seattle_parks_and_recreation_swimming_beaches_us"
+    item_attributes = {
+        "operator": "Seattle Parks and Recreation",
+        "operator_wikidata": "Q7442147",
+        "state": "WA",
+    }
+    host = "services.arcgis.com"
+    context_path = "ZOyb2t4B0UYuYNYH/ArcGIS"
+    service_id = "Swimming_Beaches"
+    layer_id = "0"
+
+    def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
+        item["ref"] = str(feature.get("OBJECTID") or feature.get("ID"))
+        item["name"] = feature.get("NAME")
+        item["street_address"] = feature.get("ADDRESS")
+        if phone := feature.get("PHONE"):
+            item["phone"] = f"+1-206-{phone}"
+        if feature.get("LATITUDE") and feature.get("LONGITUDE"):
+            item["lat"] = feature["LATITUDE"]
+            item["lon"] = feature["LONGITUDE"]
+        apply_category(Categories.NATURAL_BEACH, item)
+        yield item
