@@ -18,7 +18,6 @@ class SeoulBikeKRSpider(Spider):
         "brand_wikidata": "Q28127084",
         "state": "서울특별시",
     }
-    requires_proxy = "KR"  # Direct requests from foreign data-centre IPs are blocked.
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
         "USER_AGENT": BROWSER_DEFAULT,
