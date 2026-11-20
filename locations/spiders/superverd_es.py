@@ -10,4 +10,7 @@ class SuperverdESSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "www.superverd.es",
     ]
+    start_urls = [
+        "https://www.superverd.es/wp-admin/admin-ajax.php?action=store_search&lat=41.385064&lng=2.173404&autoload=1&distance_unit=km"
+    ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
