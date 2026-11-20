@@ -19,9 +19,10 @@ class SpaWorldAUNZSpider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["HotTubStore"]
     search_for_twitter = False
     search_for_facebook = False
+    search_for_email = False
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
-        item["email"] = None
+        item["phone"] = None
         item["branch"] = item.pop("name").removeprefix("Spa World ").strip("- ")
         item["name"] = self.item_attributes["brand"]
         apply_category(Categories.SHOP_SWIMMING_POOL, item)
