@@ -1,18 +1,18 @@
 from datetime import datetime
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterable
 
-from scrapy import Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, TextResponse
 
 from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.dict_parser import DictParser
 from locations.geo import city_locations
-from locations.hours import DAYS, OpeningHours
+from locations.hours import OpeningHours
+from locations.items import Feature
+from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.spiders.starbucks_us import STARBUCKS_SHARED_ATTRIBUTES
 
 
-class StarbucksARCLSpider(Spider):
+class StarbucksARCLSpider(JSONBlobSpider):
     name = "starbucks_ar_cl"
     item_attributes = STARBUCKS_SHARED_ATTRIBUTES
 
@@ -27,29 +27,43 @@ class StarbucksARCLSpider(Spider):
                     data=[city["latitude"], city["longitude"], "100000"],
                 )
 
-    def parse(self, response, **kwargs):
-        for location in response.json():
-            store = location.get("store")
-            item = DictParser.parse(store)
-            item["street_address"] = merge_address_lines(
-                [store["address"].get("streetAddressLine1"), store["address"].get("streetAddressLine2")]
-            )
-            item["state"] = store["address"].get("countrySubdivisionCode")
-            if item["phone"] == "null":
-                item["phone"] = None
-            oh = OpeningHours()
-            for rule in store.get("hoursNext7Days", {}).get("dailySchedule", []):
-                day = datetime.strptime(rule.get("date").split(".")[0], "%Y-%m-%dT%H:%M:%S").weekday()
-                if rule.get("openTime") and rule.get("closeTime"):
-                    oh.add_range(DAYS[day], rule["openTime"], rule["closeTime"], "%H:%M:%S")
-            item["opening_hours"] = oh
-            item["website"] = response.url.replace("/api/getStores", "/stores")
+    def pre_process_data(self, feature: dict) -> None:
+        feature.update(feature.pop("store", {}))
 
-            if services := store.get("features", {}).get("feature"):
-                service_codes = [service.get("code") for service in services]
-                apply_yes_no(Extras.WIFI, item, "WF" in service_codes)
-                apply_yes_no(Extras.DELIVERY, item, "DE" in service_codes)
-                apply_yes_no(Extras.DRIVE_THROUGH, item, "DT" in service_codes)
-                apply_yes_no(Extras.TOILETS, item, "WC" in service_codes)
-            apply_category(Categories.COFFEE_SHOP, item)
-            yield item
+    def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
+        item["branch"] = item.pop("name", None)
+        item["street_address"] = merge_address_lines(
+            [feature["address"].get("streetAddressLine1"), feature["address"].get("streetAddressLine2")]
+        )
+        item["state"] = feature["address"].get("countrySubdivisionCode")
+        if item["phone"] == "null":
+            item["phone"] = None
+
+        schedule = feature.get("hoursNext7Days", {}).get("dailySchedule") or []
+        try:
+            item["opening_hours"] = self.parse_opening_hours(schedule)
+        except Exception as e:
+            self.logger.warning(f"Failed to parse opening hours: {schedule} {e}")
+
+        item["website"] = response.url.replace("/api/getStores", "/stores")
+
+        if services := feature.get("features", {}).get("feature", []):
+            service_codes = [service.get("code") for service in services]
+            apply_yes_no(Extras.WIFI, item, "WF" in service_codes)
+            apply_yes_no(Extras.DELIVERY, item, "DE" in service_codes)
+            apply_yes_no(Extras.DRIVE_THROUGH, item, "DT" in service_codes)
+            apply_yes_no(Extras.TOILETS, item, "WC" in service_codes)
+        apply_category(Categories.COFFEE_SHOP, item)
+        yield item
+
+    def parse_opening_hours(self, rules: list[dict]) -> OpeningHours:
+        opening_hours = OpeningHours()
+        for rule in rules:
+            day = datetime.strptime(rule.get("date").split(".")[0], "%Y-%m-%dT%H:%M:%S").strftime("%A")
+            if rule.get("openTime") and rule.get("closeTime"):
+                if "Cerrado" in rule["openTime"].title():
+                    opening_hours.set_closed(day)
+                    continue
+                time_format = "%I:%M:%S %p" if "M" in rule["openTime"] else "%H:%M:%S"
+                opening_hours.add_range(day, rule["openTime"], rule["closeTime"], time_format)
+        return opening_hours
