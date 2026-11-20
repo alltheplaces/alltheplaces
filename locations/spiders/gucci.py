@@ -3,6 +3,7 @@ from typing import Iterable
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 from locations.playwright_spider import PlaywrightSpider
@@ -26,4 +27,5 @@ class GucciSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
         extract_google_position(item, response)
+        apply_category(Categories.SHOP_CLOTHES, item)
         yield item
