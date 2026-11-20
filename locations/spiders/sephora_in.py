@@ -17,6 +17,7 @@ class SephoraINSpider(SitemapSpider):
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     sitemap_urls = ["https://sephora.in/sitemap/pages.sitemap.xml"]
     sitemap_rules = [("/page/sephora-", "parse")]
+    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         name = response.xpath('//div[contains(@class, "store-details-item-bold")]/text()').get()
