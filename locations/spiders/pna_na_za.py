@@ -1,15 +1,16 @@
-from scrapy import Selector, Spider
-from scrapy.http import Request
+from typing import Any
+
+from scrapy import Spider
+from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
-from locations.pipelines.address_clean_up import clean_address
 
 
 class PnaNAZASpider(Spider):
     name = "pna_na_za"
     allowed_domains = ["pnastores.co.za"]
-    start_urls = ["https://pnastores.co.za/store-locator.php"]
+    start_urls = ["https://www.pna.co.za/pna-locations/"]
     item_attributes = {
         "brand": "PNA",
         "brand_wikidata": "Q126911439",
@@ -17,50 +18,31 @@ class PnaNAZASpider(Spider):
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
     }
-    skip_auto_cc_domain = True
 
-    def parse(self, response):
-        for province in response.xpath('.//div[contains(@class, "store-list")]'):
-            province_name = province.xpath("string(.//h4)").get().strip()
-            for link in province.xpath('.//a[contains(@href, "/store/")]/@href').getall():
-                yield Request(
-                    url="https://pnastores.co.za" + link, callback=self.parse_item, meta={"province": province_name}
-                )
-
-    def parse_item(self, response):
-        item = Feature()
-        item["ref"] = response.url
-        item["website"] = response.url
-        item["state"] = response.meta["province"]
-        if item["state"] == "Namibia":
-            item.pop("state")
-        item["branch"] = response.xpath(".//title/text()").get().split("|")[0].replace("PNA", "").strip()
-        addr = Selector(
-            text=response.text.split("<!-- ngIf: shop.physical_address.place -->")[1].split(
-                "<!-- end ngIf: shop.physical_address.place -->"
-            )[0]
-        )
-        addr_text = addr.xpath("string(.//div)").get()
-        item["addr_full"] = clean_address(addr_text)
-        addr_lines = [line.strip() for line in addr_text.split("\n") if line.strip() != ""]
-        item["street_address"] = addr_lines[0]
-        try:
-            int(addr_lines[-1])
-            item["postcode"] = addr_lines[-1]
-            if item["postcode"] == "0000":
-                item.pop("postcode")
-        except ValueError:
-            pass
-
-        item["email"] = response.xpath('.//a[contains(@href, "mailto:")]/@href').get()
-        item["phone"] = response.xpath('.//a[contains(@href, "tel:")]/@href').get()
-
-        item["opening_hours"] = OpeningHours()
-        hours = Selector(
-            text=response.text.split("<!-- ngIf: shop.trading_hours.monday -->")[1].split(
-                "<!-- end ngIf: shop.trading_hours.monday -->"
-            )[0]
-        )
-        item["opening_hours"].add_ranges_from_string(hours.xpath("string(.//div)").get())
-
-        yield item
+    def parse(self, response: Response, **kwargs: Any) -> Any:
+        for store in response.xpath('//*[@class="goreview-store-grid"]//*[@class="goreview-store-card"]'):
+            item = Feature()
+            item["branch"] = item["ref"] = (
+                store.xpath('.//*[@class="goreview-store-name"]/text()').get().removeprefix("PNA ")
+            )
+            item["addr_full"] = store.xpath('.//*[@class="goreview-store-address"]/text()').get()
+            item["city"] = store.xpath('.//*[@class="goreview-store-city"]/text()').get()
+            item["phone"] = store.xpath('.//*[contains(@href,"tel:")]/text()').get()
+            item["email"] = store.xpath('.//*[contains(@href,"mailto:")]/text()').get()
+            item["state"] = store.xpath(".//@data-province").get()
+            item["lat"] = store.xpath(".//@data-lat").get()
+            item["lon"] = store.xpath(".//@data-lng").get()
+            try:
+                oh = OpeningHours()
+                for day_time in store.xpath('.//*[@class="goreview-store-times"]//tbody//tr'):
+                    day = day_time.xpath("./td[1]/text()").get()
+                    open_close_time = day_time.xpath("./td[2]/text()").get()
+                    if open_close_time == "Closed":
+                        oh.set_closed(day)
+                    else:
+                        open_time, close_time = open_close_time.split("-")
+                        oh.add_range(day, open_time.strip(), close_time.strip())
+                item["opening_hours"] = oh
+            except:
+                pass
+            yield item
