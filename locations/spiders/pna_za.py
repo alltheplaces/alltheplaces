@@ -1,6 +1,5 @@
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.hours import OpeningHours
@@ -9,8 +8,8 @@ from locations.playwright_spider import PlaywrightSpider
 from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class PnaNAZASpider(PlaywrightSpider):
-    name = "pna_na_za"
+class PnaZASpider(PlaywrightSpider):
+    name = "pna_za"
     allowed_domains = ["pnastores.co.za"]
     start_urls = ["https://www.pna.co.za/pna-locations/"]
     item_attributes = {
