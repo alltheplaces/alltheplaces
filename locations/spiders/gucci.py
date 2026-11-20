@@ -23,6 +23,7 @@ class GucciSpider(SitemapSpider, StructuredDataSpider, PlaywrightSpider):
         "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": 180 * 1000,
         "CONCURRENT_REQUESTS": 1,
     }
+    drop_attributes = {"image", "twitter"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
