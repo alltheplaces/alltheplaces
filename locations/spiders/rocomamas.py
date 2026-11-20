@@ -1,123 +1,48 @@
-from scrapy.http import JsonRequest
+import json
+import re
 
-from locations.categories import Categories, Extras, apply_category, apply_yes_no
-from locations.hours import DAYS_FULL, OpeningHours
-from locations.items import SocialMedia, set_social_media
-from locations.json_blob_spider import JSONBlobSpider
+from scrapy.spiders import SitemapSpider
 
-ROCOMAMAS_COUNTRIES = {
-    "BW",
-    "CD",
-    "GH",
-    "KE",
-    "IN",
-    "NA",
-    "SA",
-    "SZ",
-    "ZM",
-    "ZA",
-    "ZW",
-}
-
-ROCOMAMAS_BRANDS = {
-    "ROCO": {"brand": "RocoMamas", "brand_wikidata": "Q123034964"},
-    "ROCOGO": {"brand": "RocoGo", "brand_wikidata": "Q123034964"},
-}
+from locations.categories import Categories, apply_category
+from locations.dict_parser import DictParser
+from locations.hours import OpeningHours
 
 ROCOMAMAS_CATEGORIES = {
     "ROCO": Categories.RESTAURANT,
     "ROCOGO": Categories.FAST_FOOD,
 }
 
-SOCIAL_MEDIA_MAP = {
-    "Facebook": SocialMedia.FACEBOOK,
-    "TripAdvisor": SocialMedia.TRIPADVISOR,
-}
 
-
-class RocomamasSpider(JSONBlobSpider):
+class RocomamasSpider(SitemapSpider):
     name = "rocomamas"
-    start_urls = ["https://rocomamas.com/api/proxy"]
-    base_url = "https://rocomamas.com/"
-    countries = ROCOMAMAS_COUNTRIES
-    brands = ROCOMAMAS_BRANDS
+    sitemap_urls = ["https://rocomamas.com/sitemap_index.xml"]
+    sitemap_rules = [(r"/restaurants/[^/]+/[^/]+$", "parse_restaurant")]
+    brands = {
+        "ROCO": {"brand": "RocoMamas", "brand_wikidata": "Q123034964"},
+        "ROCOGO": {"brand": "RocoGo", "brand_wikidata": "Q123034964"},
+    }
 
-    async def start(self):
-        for url in self.start_urls:
-            for country in self.countries:
-                yield JsonRequest(
-                    url=url,
-                    data={
-                        "url": "restaurants?brandKey={}&countryCode={}&tradingStatus=Open&filterHidden=true&expand=channels".format(
-                            ",".join(self.brands.keys()), country
-                        ),
-                        "method": "GET",
-                    },
-                )
+    def parse_restaurant(self, response):
+        slug = response.url.rstrip("/").split("/")[-1]
+        data = json.loads(response.xpath('//script[@id="__NUXT_DATA__"]/text()').get())
+        shop = next(
+            {k: data[v] for k, v in obj.items()}
+            for obj in data
+            if isinstance(obj, dict) and "slug" in obj and data[obj["slug"]] == slug
+        )
 
-    def extract_json(self, response):
-        return response.json()["res"]["data"]
-
-    def pre_process_data(self, feature):
-        feature["ref"] = feature.pop("key")
-        if (alt_phone := feature.get("alternateTelephoneNumber")) is not None:
-            feature["telephoneNumber"] = feature.get("telephoneNumber") + "; " + alt_phone
-        if (alt_email := feature.get("alternateEmailAddress")) is not None:
-            feature["emailAddress"] = feature.get("emailAddress") + "; " + alt_email
-
-    def post_process_item(self, item, response, location):
-        item.pop("name")
-
-        if brand_details := self.brands.get(location["brand"].get("key")):
+        item = DictParser.parse(shop)
+        item["ref"] = shop["key"]
+        item["website"] = response.url
+        brand_key = "ROCOGO" if slug.startswith("rocogo") else "ROCO"
+        if brand_details := self.brands.get(brand_key):
             item.update(brand_details)
-        else:
-            self.crawler.stats.inc_value(f'atp/{self.name}/unknown_brand/{location["brand"].get("key")}')
+        item["branch"] = item.pop("name").replace(item["brand"], "").strip()
+        if m := re.search(
+            r"Opening hours(.*?)(?:Loved by|$)", " ".join(response.xpath("//body//text()").getall()), re.S
+        ):
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(re.sub(r"\s+", " ", m.group(1)))
+        apply_category(ROCOMAMAS_CATEGORIES[brand_key], item)
 
-        if category := ROCOMAMAS_CATEGORIES.get(location["brand"].get("key")):
-            apply_category(category, item)
-
-        if item.get("state") == "International":
-            item.pop("state")
-        if item.get("postcode") in ["9000", "9999", "0000", "00000"]:
-            item.pop("postcode")
-
-        item["branch"] = location.get("displayName").replace(item.get("brand"), "").strip()
-        website = (
-            f"{self.base_url}{location['countryCode']}/restaurants/{location['province']}/{location['displayName']}"
-        )
-        item["website"] = website.lower().replace(" ", "-")
-
-        apply_yes_no(Extras.KIDS_AREA, item, location.get("playArea"))
-        apply_yes_no(Extras.WIFI, item, location.get("wireless"))
-        apply_yes_no(Extras.HALAL, item, location.get("halaal") is True, "halaal" not in location)
-        apply_yes_no(Extras.SMOKING_AREA, item, location.get("smokingSection"))
-
-        fulfilment = [i["name"] for i in location["fulfilmentChannels"]]
-        apply_yes_no(Extras.TAKEAWAY, item, "Take-away" in fulfilment)
-        apply_yes_no(Extras.DELIVERY, item, "Delivery" in fulfilment)
-
-        yield JsonRequest(
-            url=self.start_urls[0],
-            data={"url": "/restaurants/{}?expand=all".format(item["ref"]), "method": "GET"},
-            meta={"item": item},
-            callback=self.parse_store,
-        )
-
-    def parse_store(self, response):
-        item = response.meta["item"]
-        store_data = response.json()["res"]["data"]
-        for url in store_data["urls"]:
-            if service := SOCIAL_MEDIA_MAP.get(url["urlType"]):
-                set_social_media(item, service, url["url"])
-        item["opening_hours"] = OpeningHours()
-        for day in store_data["tradingTimes"]:
-            # They also provide public holidays and Christmas hours
-            if day["tradingDay"] not in DAYS_FULL:
-                continue
-            if day["closed"]:
-                item["opening_hours"].set_closed(day["tradingDay"])
-            else:
-                item["opening_hours"].add_range(
-                    day["tradingDay"], day["openingTime"], day["closingTime"], time_format="%H:%M:%S"
-                )
         yield item
