@@ -5,9 +5,11 @@ from scrapy.http import Response
 
 from locations.hours import OpeningHours
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class PnaNAZASpider(Spider):
+class PnaNAZASpider(PlaywrightSpider):
     name = "pna_na_za"
     allowed_domains = ["pnastores.co.za"]
     start_urls = ["https://www.pna.co.za/pna-locations/"]
@@ -15,7 +17,7 @@ class PnaNAZASpider(Spider):
         "brand": "PNA",
         "brand_wikidata": "Q126911439",
     }
-    custom_settings = {
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {
         "ROBOTSTXT_OBEY": False,
     }
 
