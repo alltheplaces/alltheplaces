@@ -42,7 +42,12 @@ class TasmanianGovernmentFreeWifiAUSpider(Spider):
             item["city"] = feature["suburb"]
 
             if feature.get("wifiHours"):
-                hours_text_reformatted = feature["wifiHours"].replace("Available on request", "").replace("Seven days a week, 24 hours per day", "Mon-Sun: 12:00am - 11:59pm").replace("Seven days a week,", "Mon-Sun: ")
+                hours_text_reformatted = (
+                    feature["wifiHours"]
+                    .replace("Available on request", "")
+                    .replace("Seven days a week, 24 hours per day", "Mon-Sun: 12:00am - 11:59pm")
+                    .replace("Seven days a week,", "Mon-Sun: ")
+                )
                 item["opening_hours"] = OpeningHours()
                 item["opening_hours"].add_ranges_from_string(hours_text_reformatted)
 
