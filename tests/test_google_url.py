@@ -80,11 +80,28 @@ def test_directions():
 def test_place():
     assert url_to_coords(
         "https://www.google.co.uk/maps/place/24%20Howard%20St,%20Glasgow%20G1%204BA/@55.8568582,-4.257138,18z/_data=!3m1!4b1!4m5!3m4!1s0x4888469ecb49dc1f_0x243ec55597095f68!8m2!3d55.8568582!4d-4.2560748"
-    ) == (55.8568582, -4.257138)
+    ) == (55.8568582, -4.2560748)
 
     assert url_to_coords(
         "https://www.google.com/maps/place/Portsmouth%20PO1%203EE/@50.799315,-1.1083991,17z/_data=!3m1!4b1!4m5!3m4!1s0x48745d7f5c40b405_0xa073c4da0d1c686a!8m2!3d50.7993679!4d-1.1059256"
-    ) == (50.799315, -1.1083991)
+    ) == (50.7993679, -1.1059256)
+
+    assert url_to_coords(
+        "https://www.google.com/maps/place/Mazda+L%C3%AA+V%C4%83n+L%C6%B0%C6%A1ng/@21.0015759,105.7967372,17z/data=!4m12!1m6!3m5!1s0x3135ad93530042cd:0xd3482ed8375570d0!2zTWF6ZGEgTMOqIFbEg24gTMawxqFuZw!8m2!3d21.0015759!4d105.7989259!3m4!1s0x3135ad93530042cd:0xd3482ed8375570d0!8m2!3d21.0015759!4d105.7989259"
+    ) == (21.0015759, 105.7989259)
+
+    assert url_to_coords(
+        "https://www.google.com/maps/place/Inchcape+Motors/@54.7286772,25.23598,16.22z/data=!4m6!3m5!1s0x46dd94055529fabf:0xdb27b16368a6d1b9!8m2!3d54.728902!4d25.238054!16s%2Fg%2F1tdc_c5n?entry=ttu&g_ep=EgoyMDI2MTAyMC4wIKXMDSoASAFQAw%3D%3D"
+    ) == (54.728902, 25.238054)
+
+    assert url_to_coords(
+        "https://www.google.com.sg/maps/place/17%C2%B046'10.0%22S+63%C2%B011'25.1%22W/@-17.7694344,-63.1914073,18z/data=!3m1!4b1!4m5!3m4!1s0x0:0x0!8m2!3d-17.769437!4d-63.190313"
+    ) == (-17.769437, -63.190313)
+
+    assert url_to_coords("https://www.google.com/maps/place/Portsmouth/@50.799315,-1.1083991,17z") == (
+        50.799315,
+        -1.1083991,
+    )
 
     assert url_to_coords("https://www.google.com/maps/place/57.137275,-2.098053") == (
         57.137275,
