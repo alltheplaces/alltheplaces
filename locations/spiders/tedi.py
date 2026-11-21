@@ -11,7 +11,7 @@ from locations.hours import DAYS, OpeningHours
 class TediSpider(Spider):
     name = "tedi"
     item_attributes = {"brand": "TEDi", "brand_wikidata": "Q1364603"}
-    countries = ["AT", "BG", "CZ", "DE", "ES", "HR", "HU", "IT", "PL", "PT", "RO", "SI", "SK"]
+    countries = ["AT", "BG", "CZ", "DE", "ES", "FR", "HR", "HU", "IT", "PL", "PT", "RO", "SI", "SK"]
 
     async def start(self) -> AsyncIterator[Request]:
         for country in self.countries:
