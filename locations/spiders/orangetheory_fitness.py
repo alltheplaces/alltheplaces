@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 import scrapy
@@ -38,7 +37,7 @@ class OrangetheoryFitnessSpider(scrapy.Spider):
     ]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        location_data = json.loads(response.text)
+        location_data = response.json()
         locations = location_data["data"]
 
         for location in locations:

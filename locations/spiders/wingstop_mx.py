@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from scrapy import Spider
@@ -13,7 +12,7 @@ class WingstopMXSpider(Spider):
     start_urls = ["https://wingstopmexico.com/wp-admin/admin-ajax.php?action=asl_load_stores"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in json.loads(response.text):
+        for location in response.json():
             item = DictParser.parse(location)
             item["street_address"] = item.pop("street")
             yield item
