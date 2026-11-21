@@ -12,7 +12,6 @@ from locations.spiders.addresses.gb.uprn_enhancer_spider import UprnEnhancerSpid
 
 class GbSouthRibbleSpider(UprnEnhancerSpider):
     name = "gb_south_ribble"
-    onsud_region = "NW"
     start_urls = [
         "https://www.whatdotheyknow.com/request/re_council_tax_band_data_28/response/3515941/attach/6/SRBC269801.xlsx?cookie_passthrough=1"
     ]
