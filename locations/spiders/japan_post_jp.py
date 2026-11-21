@@ -17,6 +17,7 @@ class JapanPostJPSpider(EMapSpider):
     name = "japan_post_jp"
     map_id = "search"
     host = "map.japanpost.jp"
+    requires_proxy = True
 
     def make_request(
         self,
