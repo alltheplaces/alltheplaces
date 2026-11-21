@@ -102,7 +102,7 @@ class WPStoreLocatorSpider(Spider):
         """
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
             yield JsonRequest(
-                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&autoload=1"
+                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&autoload=1"  # ty: ignore[not-subscriptable]
             )
         elif len(self.start_urls) == 1:
             yield JsonRequest(url=self.start_urls[0])
@@ -142,7 +142,7 @@ class WPStoreLocatorSpider(Spider):
         for lat, lon in country_iseadgg_centroids(self.iseadgg_countries_list, iseadgg_radius):
             if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
                 yield JsonRequest(
-                    url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                    url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"  # ty: ignore[not-subscriptable]
                 )
             elif len(self.start_urls) == 1:
                 yield JsonRequest(
@@ -168,7 +168,7 @@ class WPStoreLocatorSpider(Spider):
             for lat, lon in point_locations(searchable_points_file, self.area_field_filter):
                 if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
                     yield JsonRequest(
-                        url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
+                        url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=store_search&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"  # ty: ignore[not-subscriptable]
                     )
                 elif len(self.start_urls) == 1:
                     yield JsonRequest(

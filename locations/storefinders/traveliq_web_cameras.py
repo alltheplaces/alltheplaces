@@ -41,7 +41,7 @@ class TravelIQWebCamerasSpider(Spider):
             return
         yield JsonRequest(
             url="https://"
-            + self.allowed_domains[0]
+            + self.allowed_domains[0]  # ty: ignore[not-subscriptable]
             + '/List/GetData/Cameras?query={"columns":[{"data":null,"name":""},{"name":"sortId","s":true},{"name":"state","s":true},{"name":"roadway","s":true},{"name":"description1"},{"data":5,"name":""}],"order":[{"column":2,"dir":"asc"},{"column":1,"dir":"asc"}],"start":0,"length":100,"search":{"value":""}}&lang=en-US'
         )
 
@@ -64,7 +64,7 @@ class TravelIQWebCamerasSpider(Spider):
                 item["lat"] = m.group(2)
             apply_category(Categories.SURVEILLANCE_CAMERA, item)
             item["extras"]["contact:webcam"] = "https://{}/tooltip/Cameras/{}".format(
-                self.allowed_domains[0], item["ref"]
+                self.allowed_domains[0], item["ref"]  # ty: ignore[not-subscriptable]
             )
             item["extras"]["camera:type"] = "fixed"
             yield from self.post_process_item(item, response, camera) or []

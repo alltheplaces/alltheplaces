@@ -71,7 +71,7 @@ class StoreLocatorPlusSelfSpider(Spider):
 
     async def start(self) -> AsyncIterator[FormRequest]:
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            url = f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php"
+            url = f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php"  # ty: ignore[not-subscriptable]
         elif len(self.start_urls) == 1:
             url = self.start_urls[0]
         else:
@@ -148,7 +148,7 @@ class StoreLocatorPlusSelfSpider(Spider):
             item.pop("addr_full", None)
             item["street_address"] = ", ".join(filter(None, [location.get("address"), location.get("address2")]))
             if item["website"] and item["website"].startswith("/") and hasattr(self, "allowed_domains"):
-                item["website"] = f"https://{self.allowed_domains[0]}{item['website']}"
+                item["website"] = f"https://{self.allowed_domains[0]}{item['website']}"  # ty: ignore[not-subscriptable]
             yield from self.parse_item(item, location) or []
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:

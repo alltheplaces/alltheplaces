@@ -31,7 +31,7 @@ class LimesharpStoreLocatorSpider(Spider):
 
     async def start(self) -> AsyncIterator[JsonRequest]:
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
-            yield JsonRequest(url=f"https://{self.allowed_domains[0]}/stockists/ajax/stores/")
+            yield JsonRequest(url=f"https://{next(iter(self.allowed_domains))}/stockists/ajax/stores/")
         elif len(self.start_urls) == 1:
             yield JsonRequest(url=self.start_urls[0])
         else:
