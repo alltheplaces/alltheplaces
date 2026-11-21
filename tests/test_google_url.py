@@ -80,11 +80,11 @@ def test_directions():
 def test_place():
     assert url_to_coords(
         "https://www.google.co.uk/maps/place/24%20Howard%20St,%20Glasgow%20G1%204BA/@55.8568582,-4.257138,18z/_data=!3m1!4b1!4m5!3m4!1s0x4888469ecb49dc1f_0x243ec55597095f68!8m2!3d55.8568582!4d-4.2560748"
-    ) == (55.8568582, -4.257138)
+    ) == (55.8568582, -4.2560748)
 
     assert url_to_coords(
         "https://www.google.com/maps/place/Portsmouth%20PO1%203EE/@50.799315,-1.1083991,17z/_data=!3m1!4b1!4m5!3m4!1s0x48745d7f5c40b405_0xa073c4da0d1c686a!8m2!3d50.7993679!4d-1.1059256"
-    ) == (50.799315, -1.1083991)
+    ) == (50.7993679, -1.1059256)
 
     assert url_to_coords("https://www.google.com/maps/place/57.137275,-2.098053") == (
         57.137275,
@@ -126,3 +126,24 @@ def test_onclick():
     )
     extract_google_position(item, button)
     assert item == {"extras": {}, "lat": -26.105640858464167, "lon": 28.23227355940527}
+
+
+def test_place_data_without_camera():
+    assert url_to_coords("https://www.google.com/maps/place/Example/data=!8m2!3d50.828208!4d-0.1735183!16sExample") == (
+        50.828208,
+        -0.1735183,
+    )
+
+
+def test_place_data_encoded_and_integer_coordinates():
+    assert url_to_coords("https://www.google.co.uk/maps/place/Example/@1.5,2.5,17z/data=%213d-33%214d151") == (
+        -33.0,
+        151.0,
+    )
+
+
+def test_place_camera_fallback():
+    assert url_to_coords("https://www.google.com/maps/place/Example/@50.799315,-1.1083991,17z") == (
+        50.799315,
+        -1.1083991,
+    )

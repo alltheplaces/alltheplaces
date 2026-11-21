@@ -3,6 +3,7 @@ import re
 
 import scrapy
 
+from locations.google_url import url_to_coords
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import clean_address
@@ -89,17 +90,8 @@ class CAndASpider(scrapy.Spider):
 
             properties["image"] = "https://www.c-and-a.com/shop-img/ca-store/" + properties["ref"] + ".JPG"
 
-            link = (
-                store.xpath('./div[@class="addressBox"]/p[@class="addBoxLinks"]/a[@class="filLink"]/@href')
-                .get()
-                .split("/")
-            )
-            if len(link) > 6:
-                if link[6][0:1] == "@":
-                    coords = link[6][1:].split(",")
-
-                    properties["lat"] = coords[0]
-                    properties["lon"] = coords[1]
+            link = store.xpath('./div[@class="addressBox"]/p[@class="addBoxLinks"]/a[@class="filLink"]/@href').get()
+            properties["lat"], properties["lon"] = url_to_coords(link)
 
             yield Feature(**properties)
 
