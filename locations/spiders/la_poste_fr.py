@@ -1,15 +1,25 @@
+from collections import Counter, defaultdict
+from datetime import date
 from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
+from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.licenses import Licenses
 
 # https://www.data.gouv.fr/datasets/liste-des-bureaux-de-poste-agences-postales-et-relais-poste
 DATASET_URL = "https://data.laposte.fr/data-fair/api/v1/datasets/laposte-poincont2/lines"
 PAGE_SIZE = 10000
+
+# https://www.data.gouv.fr/datasets/67adf208fff16d427cc86a5e
+# One row per site and per day over the next three months, keyed on the same
+# identifier as the sites dataset. Unlike the sites dataset (Etalab 2.0), it is
+# published under the ODbL.
+CALENDAR_URL = "https://data.laposte.fr/data-fair/api/v1/datasets/tjwztt6h44ve52i7fln6rbxz/lines"
+CALENDAR_FIELDS = ["plage_horaire_1", "plage_horaire_2", "plage_horaire_3", "plage_horaire_4"]
 
 LA_POSTE = {"operator": "La Poste", "operator_wikidata": "Q373724"}
 
@@ -41,14 +51,56 @@ class LaPosteFRSpider(Spider):
     # indexed. La Poste's terms of service list the API as a delivery channel
     # for the data, and data.gouv.fr publishes this URL as the dataset's file.
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    dataset_attributes = Licenses.ETALAB2.value | {
+    # opening_hours comes from the ODbL calendar, whose share-alike clause then
+    # covers the whole output. Etalab 2.0 lets the sites dataset be relicensed
+    # under it.
+    dataset_attributes = Licenses.ODBL.value | {
         "source": "api",
         "attribution:name": "La Poste",
         "attribution:website": "https://data.laposte.fr/datasets/laposte-poincont2",
     }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # ref -> weekday -> Counter of that day's slots across the calendar
+        self.slots = defaultdict(lambda: defaultdict(Counter))
+
     async def start(self) -> AsyncIterator[Request]:
-        yield Request(url=f"{DATASET_URL}?size={PAGE_SIZE}")
+        # The whole three months are read so that each weekday's most frequent
+        # slots outvote bank holidays and school holiday closures, which shut
+        # many municipal agencies for weeks at a time.
+        yield Request(
+            url=f"{CALENDAR_URL}?size={PAGE_SIZE}&select=identifiant,date_calendrier,{','.join(CALENDAR_FIELDS)}",
+            callback=self.parse_calendar,
+        )
+
+    def parse_calendar(self, response: Response) -> Iterable[Request]:
+        payload = response.json()
+        for row in payload["results"]:
+            if not row.get("identifiant") or not row.get("date_calendrier"):
+                continue
+            weekday = DAYS[date.fromisoformat(row["date_calendrier"]).weekday()]
+            slots = tuple(row[field] for field in CALENDAR_FIELDS if row.get(field) and row[field] != "FERME")
+            self.slots[row["identifiant"]][weekday][slots] += 1
+
+        if next_page := payload.get("next"):
+            yield Request(url=next_page, callback=self.parse_calendar)
+        else:
+            yield Request(url=f"{DATASET_URL}?size={PAGE_SIZE}")
+
+    def opening_hours(self, ref: str) -> OpeningHours | None:
+        week = {day: counter.most_common(1)[0][0] for day, counter in self.slots.get(ref, {}).items()}
+        # A site closed most of the calendar is shut for works or for good,
+        # which says nothing about its usual hours.
+        if not any(week.values()):
+            return None
+        oh = OpeningHours()
+        for day, slots in week.items():
+            if not slots:
+                oh.set_closed(day)
+            for slot in slots:
+                oh.add_range(day, *slot.split("-"))
+        return oh
 
     def parse(self, response: Response) -> Iterable[Any]:
         payload = response.json()
@@ -74,6 +126,8 @@ class LaPosteFRSpider(Spider):
             item["lat"] = location["latitude"]
             item["lon"] = location["longitude"]
             # numero_de_telephone is always 3631, La Poste's national number.
+
+            item["opening_hours"] = self.opening_hours(item["ref"])
 
             item["extras"]["ref:INSEE"] = location.get("code_insee")
 
