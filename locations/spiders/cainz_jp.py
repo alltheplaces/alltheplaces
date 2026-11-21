@@ -46,7 +46,7 @@ class CainzJPSpider(CanlySpider):
                     if attribute := self.ATTRIBUTES.get(facility["label"]):
                         apply_yes_no(attribute, item, facility["checked"])
             elif content["componentName"] == "checkBoxComposite":
-                for offering in content["checkBoxIconTextWithUrl"]["items"]:
+                for offering in content["checkBoxComposite"]["items"]:
                     if not offering["checked"]:
                         continue
                     elif attribute := self.ATTRIBUTES.get(offering["text"]):
