@@ -1,11 +1,12 @@
 import html
 import json
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 from urllib.parse import urlencode
 
 from scrapy import Spider
-from scrapy.http import Request
+from scrapy.http import Request, Response
 
+from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.searchable_points import open_searchable_points
 from locations.user_agents import BROWSER_DEFAULT
@@ -55,7 +56,8 @@ class SherwinWilliamsSpider(Spider):
         "-78.00293",
         "-65.830078",
         "-155.610352",
-        "-153.28125" "-86.923828",
+        "-153.28125",
+        "-86.923828",
         "-65.126953",
         "-103.974609375",
         "-120.76171875",
@@ -84,6 +86,15 @@ class SherwinWilliamsSpider(Spider):
             (33.840679, -84.391333),
         ]
 
+        # search dense metros first so the first store-page requests are queued ahead of the ~5,600 centroid searches
+        for lat, lon in addtional_lat_lons:
+            params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
+            yield Request(
+                url=base_url + urlencode(params),
+                callback=self.parse,
+                meta={"store_type": "Sherwin-Williams"},
+            )
+
         # paint stores - search by 100 mile radius in US/CA
         with open_searchable_points("us_centroids_50mile_radius.csv") as points:
             next(points)
@@ -106,14 +117,6 @@ class SherwinWilliamsSpider(Spider):
                     callback=self.parse,
                     meta={"store_type": "Sherwin-Williams"},
                 )
-
-        for lat, lon in addtional_lat_lons:
-            params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
-            yield Request(
-                url=base_url + urlencode(params),
-                callback=self.parse,
-                meta={"store_type": "Sherwin-Williams"},
-            )
 
         # the other store types are much more sparse so we can search with a larger
         # radius before hitting the limit of stores returned
@@ -158,7 +161,21 @@ class SherwinWilliamsSpider(Spider):
                     "phone": store["phone"].strip(),
                     "lat": float(store["latitude"]),
                     "lon": float(store["longitude"]),
-                    "website": "https://www.sherwin-williams.com" + store["url"],
+                    "website": "https://www.sherwin-williams.com"
+                    + store["url"].removeprefix("/webapp/wcs/stores/servlet"),
                 }
 
-                yield Feature(**properties)
+                yield Request(
+                    url=properties["website"],
+                    cb_kwargs={"item": Feature(**properties)},
+                    callback=self.parse_store,
+                    priority=10,
+                )
+
+    def parse_store(self, response: Response, item: Feature, **kwargs: Any) -> Any:
+        if ld := response.xpath('//script[@class="cmp-storedetailhero-storeschema"]/text()').get():
+            ld_data = json.loads(ld)
+            item["email"] = ld_data.get("email")
+            item["opening_hours"] = OpeningHours()
+            item["opening_hours"].add_ranges_from_string(" ".join(ld_data.get("openingHours", [])))
+        yield item
