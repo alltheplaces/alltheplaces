@@ -280,7 +280,7 @@ class RosettaAPRSpider(Spider):
         match file_type:
             case "csv":
                 data_file_str = data_file_bytes.decode("utf-8")
-                sniffed_dialect = csv.Sniffer().sniff(data_file_str[:1024])
+                sniffed_dialect = csv.Sniffer().sniff(data_file_str.split("\n")[0])
                 reader = csv.DictReader(data_file_str.splitlines(), fieldnames=column_headings, dialect=sniffed_dialect)
                 for row in reader:
                     features.append(row)
