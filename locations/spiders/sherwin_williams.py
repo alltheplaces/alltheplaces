@@ -56,7 +56,8 @@ class SherwinWilliamsSpider(Spider):
         "-78.00293",
         "-65.830078",
         "-155.610352",
-        "-153.28125" "-86.923828",
+        "-153.28125",
+        "-86.923828",
         "-65.126953",
         "-103.974609375",
         "-120.76171875",
@@ -85,6 +86,15 @@ class SherwinWilliamsSpider(Spider):
             (33.840679, -84.391333),
         ]
 
+        # search dense metros first so the first store-page requests are queued ahead of the ~5,600 centroid searches
+        for lat, lon in addtional_lat_lons:
+            params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
+            yield Request(
+                url=base_url + urlencode(params),
+                callback=self.parse,
+                meta={"store_type": "Sherwin-Williams"},
+            )
+
         # paint stores - search by 100 mile radius in US/CA
         with open_searchable_points("us_centroids_50mile_radius.csv") as points:
             next(points)
@@ -107,14 +117,6 @@ class SherwinWilliamsSpider(Spider):
                     callback=self.parse,
                     meta={"store_type": "Sherwin-Williams"},
                 )
-
-        for lat, lon in addtional_lat_lons:
-            params.update({"latitude": lat, "longitude": lon, "storeType": "PaintStore"})
-            yield Request(
-                url=base_url + urlencode(params),
-                callback=self.parse,
-                meta={"store_type": "Sherwin-Williams"},
-            )
 
         # the other store types are much more sparse so we can search with a larger
         # radius before hitting the limit of stores returned
