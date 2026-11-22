@@ -58,11 +58,13 @@ class BulgarianPostsBGSpider(Spider):
                 if location[f"working_hours_{day_name.lower()}"]:
                     try:
                         day_hours = [h.strip() for h in location[f"working_hours_{day_name.lower()}"].split("-", 1)]
-                        if has_break and self.minutes(day_hours[0]) < self.minutes(break_start) < self.minutes(
+                        if has_break and self.minutes(day_hours[0]) <= self.minutes(break_start) < self.minutes(
                             break_end
-                        ) < self.minutes(day_hours[1]):
-                            oh.add_range(day_name, day_hours[0], break_start)
-                            oh.add_range(day_name, break_end, day_hours[1])
+                        ) <= self.minutes(day_hours[1]):
+                            if break_start != day_hours[0]:
+                                oh.add_range(day_name, day_hours[0], break_start)
+                            if break_end != day_hours[1]:
+                                oh.add_range(day_name, break_end, day_hours[1])
                         else:
                             oh.add_range(day_name, day_hours[0], day_hours[1])
                     except ValueError:
