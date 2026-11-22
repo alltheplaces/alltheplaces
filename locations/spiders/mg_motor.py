@@ -1,7 +1,7 @@
 import html
 import json
 import re
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Iterable
 
 from scrapy import Request, Spider
 from scrapy.http import Response
@@ -13,7 +13,6 @@ from locations.items import Feature
 # language with the same stores, so only one language is listed.
 EUROPE_MAP_PAGES = {
     "AL": "https://www.mgmotor.al/map",
-    "AT": "https://www.mgmotor.eu/de-AT/map",
     "BA": "https://www.mgmotor.ba/map",
     "BE": "https://www.mgmotor.be/fr/map",
     "BG": "https://www.mgmotor.bg/map",
@@ -25,8 +24,6 @@ EUROPE_MAP_PAGES = {
     "FI": "https://www.mgmotor.fi/map",
     "FR": "https://www.mgmotor.fr/map",
     "HR": "https://www.mgmotor.hr/map",
-    "HU": "https://www.mgmotor.hu/map",
-    "IE": "https://www.mg.ie/map",
     "IS": "https://www.mgmotor.is/map",
     "IT": "https://www.mgmotor.it/map",
     "LT": "https://www.mgmotor.lt/map",
@@ -34,13 +31,20 @@ EUROPE_MAP_PAGES = {
     "LV": "https://www.mgmotor.lv/map",
     "MK": "https://www.mgmotor.mk/map",
     "MT": "https://www.mgmotor.mt/map",
+    "PT": "https://www.mgmotor.pt/map",
+    "RS": "https://www.mgmotor.rs/map",
+    "SI": "https://www.mgmotor.si/map",
+}
+
+# These sites don't embed the store map component; they publish a JSON-LD ItemList instead.
+JSONLD_MAP_PAGES = {
+    "AT": "https://www.mgmotor.at/map",
+    "HU": "https://www.mgmotor.hu/map",
+    "IE": "https://www.mg.ie/map",
     "NL": "https://www.mgmotor.nl/map",
     "NO": "https://www.mgmotors.no/map",
     "PL": "https://www.mgmotor.pl/map",
-    "PT": "https://www.mgmotor.pt/map",
-    "RS": "https://www.mgmotor.rs/map",
-    "SE": "https://www.mgmotor.eu/sv-SE/map",
-    "SI": "https://www.mgmotor.si/map",
+    "SE": "https://www.mg.se/map",
 }
 
 
@@ -51,11 +55,11 @@ class MgMotorSpider(Spider):
     async def start(self) -> AsyncIterator[Request]:
         for country, url in EUROPE_MAP_PAGES.items():
             yield Request(url=url, callback=self.parse_europe, cb_kwargs={"country": country})
+        for country, url in JSONLD_MAP_PAGES.items():
+            yield Request(url=url, callback=self.parse_jsonld, cb_kwargs={"country": country})
 
     def parse_europe(self, response: Response, country: str) -> Any:
         stores = re.search(r'<brand-stores-map-component[^>]*?\s:stores="([^"]*)"', response.text)
-        if not stores:
-            return
         for store in json.loads(html.unescape(stores.group(1))):
             item = Feature()
             item["ref"] = store["id"]
@@ -72,6 +76,30 @@ class MgMotorSpider(Spider):
             item["email"] = store["email"]
             # Each site lists sales and servicing as separate entries.
             if store["specialStoreType"]["value"] == "serviceStore":
+                apply_category(Categories.SHOP_CAR_REPAIR, item)
+            else:
+                apply_category(Categories.SHOP_CAR, item)
+            yield item
+
+    def parse_jsonld(self, response: Response, country: str) -> Iterable[Feature]:
+        dealers = json.loads(
+            response.xpath('//script[@type="application/ld+json"][contains(., "ItemList")]/text()').get()
+        )
+        for entry in dealers["itemListElement"]:
+            dealer = entry["item"]
+            item = Feature()
+            item["ref"] = "{}_{}".format(dealer["name"], dealer["address"]["streetAddress"])
+            item["name"] = dealer["name"]
+            item["street_address"] = dealer["address"]["streetAddress"]
+            item["postcode"] = dealer["address"]["postalCode"]
+            item["city"] = dealer["address"]["addressLocality"]
+            item["country"] = country
+            item["lat"] = dealer["geo"]["latitude"]
+            item["lon"] = dealer["geo"]["longitude"]
+            item["phone"] = dealer["telephone"]
+            item["website"] = dealer.get("url")
+            # Service points are named "MG-servicepunt"; the page gives no other sales/service flag.
+            if "servicepunt" in dealer["name"].lower():
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             else:
                 apply_category(Categories.SHOP_CAR, item)
