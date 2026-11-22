@@ -167,6 +167,7 @@ class SherwinWilliamsSpider(Spider):
                     url=properties["website"],
                     cb_kwargs={"item": Feature(**properties)},
                     callback=self.parse_store,
+                    priority=10,
                 )
 
     def parse_store(self, response: Response, item: Feature, **kwargs: Any) -> Any:
