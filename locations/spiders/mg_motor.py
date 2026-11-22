@@ -4,7 +4,7 @@ import re
 from typing import Any, AsyncIterator
 
 from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.items import Feature
@@ -51,7 +51,6 @@ class MgMotorSpider(Spider):
     async def start(self) -> AsyncIterator[Request]:
         for country, url in EUROPE_MAP_PAGES.items():
             yield Request(url=url, callback=self.parse_europe, cb_kwargs={"country": country})
-        yield JsonRequest(url="https://www.mg.co.uk/api/all-dealers", callback=self.parse_gb)
 
     def parse_europe(self, response: Response, country: str) -> Any:
         stores = re.search(r'<brand-stores-map-component[^>]*?\s:stores="([^"]*)"', response.text)
@@ -61,8 +60,10 @@ class MgMotorSpider(Spider):
             item = Feature()
             item["ref"] = store["id"]
             item["name"] = store["title"]
-            item["lat"] = self.clean_coordinate(store["lat"])
-            item["lon"] = self.clean_coordinate(store["lng"])
+            # A few entries have a trailing comma or are written like "8.2758° W".
+            for field, key in (("lat", "lat"), ("lon", "lng")):
+                if m := re.fullmatch(r"\s*(-?\d+(?:\.\d+)?)\s*°?\s*([NSEW])?\s*,?\s*", store[key]):
+                    item[field] = -abs(float(m.group(1))) if m.group(2) in ("S", "W") else float(m.group(1))
             item["street_address"] = store["street"]
             item["postcode"] = store["zip"]
             item["city"] = store["city"]
@@ -70,46 +71,8 @@ class MgMotorSpider(Spider):
             item["phone"] = store["phone"]
             item["email"] = store["email"]
             # Each site lists sales and servicing as separate entries.
-            store_type = (store.get("specialStoreType") or {}).get("value")
-            if store_type == "serviceStore":
+            if store["specialStoreType"]["value"] == "serviceStore":
                 apply_category(Categories.SHOP_CAR_REPAIR, item)
             else:
                 apply_category(Categories.SHOP_CAR, item)
             yield item
-
-    @staticmethod
-    def clean_coordinate(value: str | None) -> float | None:
-        # A few entries have a trailing comma or are written like "8.2758° W".
-        if m := re.fullmatch(r"\s*(-?\d+(?:\.\d+)?)\s*°?\s*([NSEW])?\s*,?\s*", value or ""):
-            coordinate = float(m.group(1))
-            if m.group(2) in ("S", "W"):
-                coordinate = -abs(coordinate)
-            return coordinate
-        return None
-
-    def parse_gb(self, response: Response) -> Any:
-        for dealer in response.json():
-            item = Feature()
-            item["ref"] = dealer["mg_id"]
-            item["name"] = dealer["name"]
-            if m := re.match(r"^(-?\d+\.\d+)\s+(-?\d+\.\d+)$", dealer.get("latitude_longitude") or ""):
-                item["lat"], item["lon"] = m.groups()
-            # address2 holds the town and town holds the county.
-            item["street_address"] = dealer.get("address1")
-            item["city"] = dealer.get("address2")
-            item["postcode"] = dealer.get("postcode")
-            item["country"] = "GB"
-            item["website"] = dealer.get("website")
-
-            if dealer.get("dealer_type_sales") == "True":
-                sales_item = item.deepcopy()
-                sales_item["ref"] = "{}_Sales".format(item["ref"])
-                sales_item["phone"] = dealer.get("phoneNumber")
-                apply_category(Categories.SHOP_CAR, sales_item)
-                yield sales_item
-            if dealer.get("dealer_type_service") == "True":
-                service_item = item.deepcopy()
-                service_item["ref"] = "{}_Service".format(item["ref"])
-                service_item["phone"] = dealer.get("after_sales_phoneNumber") or dealer.get("phoneNumber")
-                apply_category(Categories.SHOP_CAR_REPAIR, service_item)
-                yield service_item
