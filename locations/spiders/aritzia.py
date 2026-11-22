@@ -31,6 +31,8 @@ class AritziaSpider(JSONBlobSpider, CamoufoxSpider):
     captcha_type = "cloudflare_turnstile"
     captcha_selector_indicating_success = '//link[@href="resource://content-accessible/plaintext.css"]'
     custom_settings = DEFAULT_CAMOUFOX_SETTINGS_FOR_CLOUDFLARE_TURNSTILE
+    # Cloudflare returns 403 to datacenter IPs (CI runners); a residential IP succeeds.
+    requires_proxy = True
     handle_httpstatus_list = [403]
 
     # These fields carry per-locale sub-dicts (e.g. "fr") that are needed
@@ -39,8 +41,6 @@ class AritziaSpider(JSONBlobSpider, CamoufoxSpider):
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         blob = response.xpath('//script[@id="mobify-data"]/text()').get()
-        if not blob:
-            return []
         return json.loads(blob)["__PRELOADED_STATE__"]["pageProps"]["results"]
 
     def pre_process_data(self, feature: dict) -> None:
