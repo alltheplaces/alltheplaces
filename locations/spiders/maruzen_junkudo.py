@@ -12,7 +12,6 @@ from locations.pipelines.address_clean_up import merge_address_lines
 BRANDS = {
     "丸善": "Q1906012",
     "ジュンク堂書店": "Q3190093",
-    "淳久堂書店": "Q3190093",
 }
 
 
