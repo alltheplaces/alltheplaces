@@ -19,7 +19,7 @@ PAGE_SIZE = 10000
 # identifier as the sites dataset. Unlike the sites dataset (Etalab 2.0), it is
 # published under the ODbL.
 CALENDAR_URL = "https://data.laposte.fr/data-fair/api/v1/datasets/tjwztt6h44ve52i7fln6rbxz/lines"
-CALENDAR_FIELDS = ["plage_horaire_1", "plage_horaire_2", "plage_horaire_3", "plage_horaire_4"]
+CALENDAR_FIELDS = ["plage_horaire_1", "plage_horaire_2", "plage_horaire_3"]
 
 LA_POSTE = {"operator": "La Poste", "operator_wikidata": "Q373724"}
 
