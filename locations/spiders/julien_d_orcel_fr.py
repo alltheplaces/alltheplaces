@@ -8,6 +8,7 @@ from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class JulienDOrcelFRSpider(JSONBlobSpider):
@@ -15,6 +16,7 @@ class JulienDOrcelFRSpider(JSONBlobSpider):
     item_attributes = {"brand": "Julien d'Orcel", "brand_wikidata": "Q62497463"}
     start_urls = ["https://www.juliendorcel.com/bijouterie"]
     name_is_branch = True
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
 
     def extract_json(self, response: TextResponse) -> list[dict]:
         return chompjs.parse_js_object(response.text.split("var stores = ", 1)[1])
