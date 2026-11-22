@@ -59,11 +59,12 @@ class LeCollectifDesLunetiersFRSpider(Spider):
             item["opening_hours"] = OpeningHours()
             for rule in store["hours"]["openingHours"]:
                 day = DAYS[(rule["num"] - 1) % 7]
-                times = [rule[period] for period in ["amBegin", "amEnd", "pmBegin", "pmEnd"] if rule.get(period)]
-                if not times:
+                sessions = [(rule.get("amBegin"), rule.get("amEnd")), (rule.get("pmBegin"), rule.get("pmEnd"))]
+                if not any(any(session) for session in sessions):
                     item["opening_hours"].set_closed(day)
-                for open_time, close_time in zip(times[::2], times[1::2]):
-                    item["opening_hours"].add_range(day, open_time, close_time)
+                for open_time, close_time in sessions:
+                    if open_time and close_time:
+                        item["opening_hours"].add_range(day, open_time, close_time)
 
             apply_category(Categories.SHOP_OPTICIAN, item)
             yield item
