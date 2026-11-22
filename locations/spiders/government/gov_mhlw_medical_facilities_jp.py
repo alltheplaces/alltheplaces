@@ -1,7 +1,6 @@
 import csv
 import io
 import re
-import sys
 import unicodedata
 import zipfile
 from typing import Any, Iterable
@@ -154,11 +153,6 @@ EMERGENCY = "09010"
 
 
 class GovMhlwMedicalFacilitiesJPSpider(Spider):
-    """
-    Medical facilities and pharmacies from the MHLW open data, released every 6 months.
-    Department hours are merged into one opening_hours per facility, without the emergency department.
-    """
-
     name = "gov_mhlw_medical_facilities_jp"
     start_urls = ["https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryou/newpage_43373.html"]
     allowed_domains = ["www.mhlw.go.jp"]
@@ -210,7 +204,7 @@ class GovMhlwMedicalFacilitiesJPSpider(Spider):
                 end = row[f"{day_ja}_診療終了時間"]
                 # Drop placeholder times such as 00:00-23:59 and 09:00-09:00.
                 if start and end and "06:00" <= start < end <= "23:00":
-                    day_hours.add((sys.intern(start), sys.intern(end)))
+                    day_hours.add((start, end))
         yield Request(facilities_url, callback=self.parse_zip, cb_kwargs=cb_kwargs)
 
     def parse_zip(self, response: Response, callback, departments: dict) -> Iterable[Feature]:
