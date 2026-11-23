@@ -1835,11 +1835,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/d5/7b/65f55513d3c769fd6
 
 [[package]]
 name = "pyshp"
-version = "3.1.8"
+version = "3.1.9"
 source = { registry = "https://pypi.python.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a4/7f/99d68c457a688bc1999019f55114125fb35c0074d61dc8f098f76d2f502a/pyshp-3.1.8.tar.gz", hash = "sha256:ec144fdbe5bae1b99c2ef741dc68228acf7c23a67338046ad3c6fc2c8b340e65", size = 2270337, upload-time = "2026-11-09T17:22:39.117Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/e5/1e72c0eca21dfd63a22dfd774931d28d1a7d02ca4b61e7530d54923054d2/pyshp-3.1.9.tar.gz", hash = "sha256:7a4ac6c0898f54d09a7f75c8494c05a2ed86964010f27a8a7df9c7ecb6738569", size = 2271763, upload-time = "2026-11-16T19:53:36.389Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f4/09/6de1e1dcde35d181ff529e605f9cf4f04ec0ce0f6b42ddd0e78844b2564b/pyshp-3.1.8-py3-none-any.whl", hash = "sha256:e0308cbcf70a425c0813365c87f676274da27cd86f2dc73a8ed28f173f62807e", size = 73988, upload-time = "2026-11-09T17:22:37.971Z" },
+    { url = "https://files.pythonhosted.org/packages/91/ae/7154308ae637e32530b93575fd815a210f805c79097b7e47a51b98c75bae/pyshp-3.1.9-py3-none-any.whl", hash = "sha256:e20febdaaef14d153f7eabfb8143edfcf61ca6d454f20ba214076dc994901db1", size = 75090, upload-time = "2026-11-16T19:53:34.993Z" },
 ]
 
 [[package]]
