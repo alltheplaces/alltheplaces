@@ -13,7 +13,6 @@ class IntersportGRSpider(PlaywrightSpider):
     name = "intersport_gr"
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
     start_urls = ["https://www.intersport.gr/el/etairia/katastimata/"]
-    requires_proxy = True
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
