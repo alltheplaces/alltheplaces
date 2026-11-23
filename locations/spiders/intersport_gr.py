@@ -1,19 +1,17 @@
 import json
 from typing import Any
 
+from scrapy import Spider
 from scrapy.http import Response
 
 from locations.linked_data_parser import LinkedDataParser
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
-from locations.user_agents import BROWSER_DEFAULT
 
 
-class IntersportGRSpider(PlaywrightSpider):
+class IntersportGRSpider(Spider):
     name = "intersport_gr"
     item_attributes = {"brand": "Intersport", "brand_wikidata": "Q666888"}
     start_urls = ["https://www.intersport.gr/el/etairia/katastimata/"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True  # Akamai Bot Protection
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for store in response.xpath('//*[@data-control="box"]'):
