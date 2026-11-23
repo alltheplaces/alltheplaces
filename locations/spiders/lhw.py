@@ -16,7 +16,6 @@ class LhwSpider(JSONBlobSpider):
     item_attributes = {"brand": "The Leading Hotels of the World", "brand_wikidata": "Q834396"}
     locations_key = ["d", "Hotels"]
     custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False}
-    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
         item.pop("street_address", None)
