@@ -128,6 +128,7 @@ class Categories(Enum):
     SHOP_BAG = {"shop": "bag"}
     SHOP_BAKERY = {"shop": "bakery"}
     SHOP_BATHROOM_FURNISHING = {"shop": "bathroom_furnishing"}
+    SHOP_BBQ = {"shop": "bbq"}
     SHOP_BEAUTY = {"shop": "beauty"}
     SHOP_BEAUTY_TATTOO_REMOVAL = {"shop": "beauty", "beauty": "tattoo_removal"}
     SHOP_BEAUTY_LASER_HAIR_REMOVAL = {"shop": "beauty", "beauty": "laser_hair_removal"}
