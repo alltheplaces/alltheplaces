@@ -1,5 +1,6 @@
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
+from scrapy import Request
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 from twisted.python.failure import Failure
@@ -9,19 +10,27 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class JerseyMikesUSSpider(Spider):
     name = "jersey_mikes_us"
     item_attributes = {"brand": "Jersey Mike's Subs", "brand_wikidata": "Q6184897"}
     start_urls = ["https://bapi.prd.jerseymikes.com/api/v0/stores/subdivision"]
+    custom_settings = {"ROBOTSTXT_OBEY": False, "AUTOTHROTTLE_ENABLED": True}
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    async def start(self) -> AsyncIterator[Request]:
+        yield Request(
+            url=self.start_urls[0],
+            headers={"User-Agent": BROWSER_DEFAULT},
+            callback=self.parse,
+        )
+
+    def parse(self, response: Response, **kwargs: Any) -> Iterator[Request]:
         for subdivision in response.json()["data"]["storeSubdivisionCounts"]:
-            yield JsonRequest(
-                url="https://bapi.prd.jerseymikes.com/api/v0/stores/bySubdivision?subdivisionCode={}&pageSize=1000&pageNumber=0".format(
-                    subdivision["subdivisionCode"]
-                ),
+            yield Request(
+                url=f"https://bapi.prd.jerseymikes.com/api/v0/stores/bySubdivision?subdivisionCode={subdivision['subdivisionCode']}&pageSize=1000&pageNumber=0",
+                headers={"User-Agent": BROWSER_DEFAULT},
                 callback=self.parse_locations,
             )
 
