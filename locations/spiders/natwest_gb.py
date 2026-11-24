@@ -10,7 +10,6 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
-
 from locations.spiders.lloyds_bank_gb import BANKING_HUB
 
 
