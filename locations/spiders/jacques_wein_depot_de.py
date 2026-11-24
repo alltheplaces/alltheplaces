@@ -43,36 +43,34 @@ class JacquesWeinDepotDESpider(Spider):
     def parse_auth_token(self, response):
         api_key = response.request.headers.get("x-api-key")
         auth_token = response.json()["token"]
-        headers = {
-            "Accept-Language": "de-DE",
-            "x-api-key": api_key,
-            "Authorization": f"Bearer {auth_token}",
-        }
         yield JsonRequest(
             url="https://commerce.api.jacques.de/depot/v1/locations",
-            headers=headers,
+            headers={
+                "Accept-Language": "de-DE",
+                "x-api-key": api_key,
+                "Authorization": f"Bearer {auth_token}",
+            },
             callback=self.parse_locations_list,
         )
 
     def parse_locations_list(self, response):
         api_key = response.request.headers.get("x-api-key")
         auth_header_value = response.request.headers.get("Authorization")
-        headers = {
-            "Accept-Language": "de-DE",
-            "x-api-key": api_key,
-            "Authorization": auth_header_value,
-        }
         for location in response.json():
-            location_id = location["identifier"]
             yield JsonRequest(
-                url=f"https://commerce.api.jacques.de/depot/v1/depot/{location_id}",
-                headers=headers,
+                url="https://commerce.api.jacques.de/depot/v1/depot/{}".format(location["identifier"]),
+                headers={
+                    "Accept-Language": "de-DE",
+                    "x-api-key": api_key,
+                    "Authorization": auth_header_value,
+                },
                 callback=self.parse_location,
             )
 
     def parse_location(self, response):
         location = response.json()
         item = DictParser.parse(location)
+        item["branch"] = item.pop("name")
         item["lat"] = location["location"]["coordinates"][0]
         item["lon"] = location["location"]["coordinates"][1]
         item["phone"] = location["address"].get("phone")
@@ -93,12 +91,10 @@ class JacquesWeinDepotDESpider(Spider):
                 # A period from 0000 to 0000 is a placeholder for no opening time.
                 if day_hours[period]["from"] == day_hours[period]["to"] == "0000":
                     continue
-                item["opening_hours"].add_range(
-                    day_name.title(), day_hours[period]["from"], day_hours[period]["to"], "%H%M"
-                )
+                item["opening_hours"].add_range(day_name, day_hours[period]["from"], day_hours[period]["to"], "%H%M")
                 day_is_open = True
             if not day_is_open:
-                item["opening_hours"].set_closed(day_name.title())
+                item["opening_hours"].set_closed(day_name)
 
         apply_category(Categories.SHOP_WINE, item)
 
