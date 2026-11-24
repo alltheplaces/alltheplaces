@@ -76,7 +76,7 @@ class JacquesWeinDepotDESpider(Spider):
         item["phone"] = location["address"].get("phone")
         item["email"] = location["address"].get("email")
         item["website"] = "https://www.jacques.de/weindepot/{}/{}".format(
-            item["ref"], unidecode(item["name"]).replace(" ", "-")
+            item["ref"], unidecode(item["branch"]).replace(" ", "-")
         )
 
         item["opening_hours"] = OpeningHours()
