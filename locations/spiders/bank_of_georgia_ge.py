@@ -20,6 +20,7 @@ ATM_CATEGORIES = {
 class BankOfGeorgiaGESpider(Spider):
     name = "bank_of_georgia_ge"
     item_attributes = {"brand": "საქართველოს ბანკი", "brand_wikidata": "Q2469733"}
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> Any:
         yield JsonRequest(url="https://bankofgeorgia.ge/api/locations/searchLocations", data={})
