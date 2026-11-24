@@ -41,11 +41,11 @@ class StandardCharteredBankSpider(scrapy.Spider):
                     item = DictParser.parse(location)
                     item["addr_full"] = clean_address(location.get("addressLines"))
                 if "branch" in location["types"]:
+                    item["branch"] = item.pop("name")
                     apply_category(Categories.BANK, item)
                     apply_yes_no(Extras.ATM, item, "atm" in location["types"])
                 else:
                     apply_category(Categories.ATM, item)
-                item["branch"] = item.pop("name")
                 if kwargs["country"] == "tw":
                     item.update(STANDARD_CHARTERED_TAIWAN)
                 apply_yes_no(Extras.CASH_IN, item, any(key in location["types"] for key in ["cdm", "crm"]))
