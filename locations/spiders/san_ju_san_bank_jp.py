@@ -25,6 +25,9 @@ class SanJuSanBankJPSpider(LocationCloudSpider):
 
         match source_feature["categories"][0]["code"]:
             case "01":
+                if (item.get("addr_full") or "").endswith("内）"):
+                    # Branch run from another branch's office, which is already emitted.
+                    return
                 apply_category(Categories.BANK, item)
                 item["extras"]["atm"] = "yes"
             case "02":
