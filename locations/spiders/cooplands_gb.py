@@ -39,8 +39,7 @@ class CooplandsGBSpider(Spider):
                         open_time, close_time = value.split("–")
                         opening_hours.add_days_range(days, open_time, close_time)
 
-            if opening_hours:
-                item["opening_hours"] = opening_hours
+            item["opening_hours"] = opening_hours
 
             apply_category(Categories.SHOP_BAKERY, item)
             yield item
