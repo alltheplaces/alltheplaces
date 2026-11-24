@@ -153,7 +153,6 @@ class StadtZuerichCHSpider(scrapy.Spider):
 
     def parse_after_school(self, p):
         name = p["name"]
-        amenity = "kindergarten" if "Kindergarten" in name else "school"
         oh = OpeningHours()
         for day in ["Mo", "Tu", "We", "Th", "Fr"]:
             if "Morgen" in name:
@@ -165,7 +164,7 @@ class StadtZuerichCHSpider(scrapy.Spider):
             if "Abend" in name:
                 oh.add_range(day, open_time="15:30", close_time="18:00")
         return {
-            "amenity": amenity,
+            "amenity": "childcare",
             "after_school": "yes",
             "name": name.split("(")[0].strip().removesuffix(" MoT"),
             "opening_hours": oh,
