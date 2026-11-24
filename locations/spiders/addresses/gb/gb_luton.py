@@ -1,6 +1,4 @@
-from collections.abc import Iterator
 
-from scrapy.http import Response
 
 from locations.spiders.addresses.gb.uprn_enhancer_spider import UprnEnhancerSpider
 
