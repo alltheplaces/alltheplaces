@@ -21,7 +21,12 @@ class McdonaldsVNSpider(PlaywrightSpider):
         for location in response.xpath('//*[contains(@class,"tbox-address-store")]'):
             item = Feature()
             item["ref"] = location.xpath("@id").get()
-            item["name"] = location.xpath('./p[@class="tname-store"]/text()').get()
+            item["branch"] = (
+                location.xpath('./p[@class="tname-store"]/text()')
+                .get("")
+                .removeprefix("McDonald's ")
+                .removeprefix("McDonald’s ")
+            )
             item["addr_full"] = location.xpath('./p[@class="ttitle"][contains(., "Address:")]/span/text()').get()
             item["phone"] = location.xpath('/p[@class="ttitle"][contains(., "Phone:")]/span/text()').get()
             item["lat"], item["lon"] = url_to_coords(location.xpath('.//a[@class="location-web"]/@href').get())
