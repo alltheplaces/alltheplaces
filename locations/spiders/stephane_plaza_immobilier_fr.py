@@ -4,12 +4,14 @@ from scrapy import Spider
 from scrapy.http import Request, Response, TextResponse
 
 from locations.dict_parser import DictParser
+from locations.user_agents import BROWSER_DEFAULT
 
 
 class StephanePlazaImmobilierFRSpider(Spider):
     name = "stephane_plaza_immobilier_fr"
     item_attributes = {"brand_wikidata": "Q97368097", "name": "Stéphane Plaza Immobilier"}
     allowed_domains = ["www.stephaneplazaimmobilier.com"]
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
     # The API answers 403 without a session cookie (set by /agences/), the AJAX header and the Fetch Metadata headers of a browser.
     headers = {
         "X-Requested-With": "XMLHttpRequest",
