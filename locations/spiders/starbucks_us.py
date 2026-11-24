@@ -2,6 +2,7 @@ import csv
 import json
 import math
 import random
+import re
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
@@ -387,6 +388,9 @@ class StarbucksUSSpider(Spider):
                 for prefix, brand in self.located_in.items():
                     if item["branch"].startswith(prefix):
                         set_located_in(brand, item)
+                        if prefix == "Target ":
+                            # "Target Gig Harbor 1205": the number is Target's store number.
+                            item["branch"] = re.sub(r"\s+\d+$", "", item["branch"])
                         break
 
             apply_category(Categories.COFFEE_SHOP, item)
