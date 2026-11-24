@@ -19,6 +19,7 @@ class KauflandSpider(Spider):
         "https://filiale.kaufland.de/.klstorefinder.json": "https://filiale.kaufland.de/service/filiale/{}.html",
     }
     start_urls = website_formats.keys()
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response, **kwargs):
         for location in response.json():
