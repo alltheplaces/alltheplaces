@@ -6,10 +6,12 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
+STANDARD_CHARTERED_TAIWAN = {"brand": "渣打國際商業銀行", "brand_wikidata": "Q62267023"}
+
 
 class StandardCharteredBankSpider(scrapy.Spider):
     name = "standard_chartered_bank"
-    item_attributes = {"brand": "Standard Chartered", "brand_wikidata": "Q548278", "name": "Standard Chartered"}
+    item_attributes = {"brand": "Standard Chartered", "brand_wikidata": "Q548278"}
     start_urls = ["https://www.sc.com/en/our-locations/"]
 
     def parse(self, response, **kwargs):
@@ -45,8 +47,7 @@ class StandardCharteredBankSpider(scrapy.Spider):
                     apply_category(Categories.ATM, item)
                 item["branch"] = item.pop("name")
                 if kwargs["country"] == "tw":
-                    item["brand"] = item["name"] = "渣打國際商業銀行"
-                    item["brand_wikidata"] = "Q62267023"
+                    item.update(STANDARD_CHARTERED_TAIWAN)
                 apply_yes_no(Extras.CASH_IN, item, any(key in location["types"] for key in ["cdm", "crm"]))
                 item["phone"] = None
                 item["ref"] = " - ".join([str(item["ref"]), kwargs["country"]])
