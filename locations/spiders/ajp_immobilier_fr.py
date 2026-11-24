@@ -20,6 +20,6 @@ class AjpImmobilierFRSpider(SitemapSpider, StructuredDataSpider):
         if item.get("facebook") == "https://www.facebook.com/ajpimmobilierfrance":
             item["facebook"] = None
         item["branch"] = item.pop("name").removeprefix("AJP Immobilier ")
-
+        item["postcode"] = str(item["postcode"])
         apply_category(Categories.OFFICE_ESTATE_AGENT, item)
         yield item
