@@ -8,7 +8,7 @@ from locations.storefinders.super_store_finder import SuperStoreFinderSpider
 
 class OggiSorvetesBRSpider(SuperStoreFinderSpider):
     name = "oggi_sorvetes_br"
-    item_attributes = {"brand": "Oggi Sorvetes", "brand_wikidata": "Q118946030", "name": "Oggi Sorvetes"}
+    item_attributes = {"brand": "Oggi Sorvetes", "brand_wikidata": "Q118946030"}
     allowed_domains = ["oggisorvetes.com.br"]
 
     def parse_item(self, item: Feature, location: Selector, **kwargs):
@@ -18,6 +18,6 @@ class OggiSorvetesBRSpider(SuperStoreFinderSpider):
         item["country"] = location.xpath("./country/text()").get()
 
         if phone := item.get("phone"):
-            item["phone"] = phone.replace("ou", ";")
+            item["phone"] = phone.replace("ou", "; ")
 
         yield item
