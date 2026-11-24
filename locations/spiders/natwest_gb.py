@@ -11,6 +11,8 @@ from locations.dict_parser import DictParser
 from locations.geo import postal_regions
 from locations.hours import OpeningHours
 
+from locations.spiders.lloyds_bank_gb import BANKING_HUB
+
 
 class NatwestGBSpider(Spider):
     name = "natwest_gb"
@@ -61,14 +63,14 @@ class NatwestGBSpider(Spider):
             )
 
             if location.get("entityType") == "location":
-                if item["name"].endswith("Banking Hub"):
-                    item["branch"] = item.pop("name").removesuffix("Banking Hub")
-                    item["name"] = "Banking Hub"
-                    apply_category(Categories.BANK, item)
+                if location.get("c_bankinghub") == "1":
+                    item["branch"] = item.pop("name").removesuffix(" Banking Hub")
+                    item.update(BANKING_HUB)
                 else:
-                    item["branch"] = item.pop("name").removeprefix("NatWest")
+                    item["branch"] = item.pop("name").removeprefix("NatWest ")
                     item["name"] = "NatWest"
-                    apply_category(Categories.BANK, item)
+
+                apply_category(Categories.BANK, item)
 
                 apply_yes_no(
                     Extras.ATM, item, location.get("c_externalATM") == "1" or location.get("c_internalATM") == "1"
