@@ -28,6 +28,8 @@ class StandardCharteredBankSpider(scrapy.Spider):
                 )
 
     def parse_details(self, response, **kwargs):
+        if not response.url.endswith(".json"):
+            return  # Countries without a locator (e.g. ug) redirect to their HTML home page
         if data := response.json()["locations"]:
             for location in data:
                 if "/bn/" in response.url:
