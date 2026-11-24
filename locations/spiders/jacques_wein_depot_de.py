@@ -1,3 +1,5 @@
+import re
+
 from scrapy import Request, Spider
 from scrapy.http import JsonRequest
 from unidecode import unidecode
@@ -14,8 +16,20 @@ class JacquesWeinDepotDESpider(Spider):
     start_urls = ["https://www.jacques.de/weindepots"]
 
     def parse(self, response):
-        main_js_url = "https://www.jacques.de/" + response.xpath('//script[contains(@src, "main.")]/@src').get()
-        yield Request(url=main_js_url, callback=self.parse_api_key)
+        main_js_url = response.urljoin(response.xpath('//script[starts-with(@src, "main")]/@src').get())
+        yield Request(url=main_js_url, callback=self.parse_main_js)
+
+    def parse_main_js(self, response):
+        if 'xApiKeyCommerce:"' in response.text:
+            yield from self.parse_api_key(response)
+            return
+        # The API key is usually defined in one of the chunks that main.js imports.
+        for chunk in sorted(set(re.findall(r'from"\./(chunk-\w+\.js)"', response.text))):
+            yield Request(url=response.urljoin(chunk), callback=self.parse_chunk_js)
+
+    def parse_chunk_js(self, response):
+        if 'xApiKeyCommerce:"' in response.text:
+            yield from self.parse_api_key(response)
 
     def parse_api_key(self, response):
         api_key = response.text.split('xApiKeyCommerce:"', 1)[1].split('"', 1)[0]
@@ -72,14 +86,19 @@ class JacquesWeinDepotDESpider(Spider):
             if not isinstance(day_hours, dict):
                 # Ignore validFrom and validTo fields that occasionally appear
                 continue
-            if "postMeridiem" in day_hours.keys():
+            day_is_open = False
+            for period in ("anteMeridiem", "postMeridiem"):
+                if period not in day_hours:
+                    continue
+                # A period from 0000 to 0000 is a placeholder for no opening time.
+                if day_hours[period]["from"] == day_hours[period]["to"] == "0000":
+                    continue
                 item["opening_hours"].add_range(
-                    day_name.title(), day_hours["postMeridiem"]["from"], day_hours["postMeridiem"]["to"], "%H%M"
+                    day_name.title(), day_hours[period]["from"], day_hours[period]["to"], "%H%M"
                 )
-            elif "anteMeridiem" in day_hours.keys():
-                item["opening_hours"].add_range(
-                    day_name.title(), day_hours["anteMeridiem"]["from"], day_hours["anteMeridiem"]["to"], "%H%M"
-                )
+                day_is_open = True
+            if not day_is_open:
+                item["opening_hours"].set_closed(day_name.title())
 
         apply_category(Categories.SHOP_WINE, item)
 
