@@ -9,7 +9,7 @@ from locations.pipelines.address_clean_up import clean_address
 
 class StandardCharteredBankSpider(scrapy.Spider):
     name = "standard_chartered_bank"
-    item_attributes = {"brand": "渣打國際商業銀行", "brand_wikidata": "Q62267023"}
+    item_attributes = {"brand": "Standard Chartered", "brand_wikidata": "Q548278", "name": "Standard Chartered"}
     start_urls = ["https://www.sc.com/en/our-locations/"]
 
     def parse(self, response, **kwargs):
@@ -41,7 +41,10 @@ class StandardCharteredBankSpider(scrapy.Spider):
                     apply_yes_no(Extras.ATM, item, "atm" in location["types"])
                 else:
                     apply_category(Categories.ATM, item)
-                item["branch"] = item.get("name")
+                item["branch"] = item.pop("name")
+                if kwargs["country"] == "tw":
+                    item["brand"] = item["name"] = "渣打國際商業銀行"
+                    item["brand_wikidata"] = "Q62267023"
                 apply_yes_no(Extras.CASH_IN, item, any(key in location["types"] for key in ["cdm", "crm"]))
                 item["phone"] = None
                 item["ref"] = " - ".join([str(item["ref"]), kwargs["country"]])
