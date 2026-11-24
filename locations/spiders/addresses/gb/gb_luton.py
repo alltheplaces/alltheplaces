@@ -1,5 +1,3 @@
-
-
 from locations.spiders.addresses.gb.uprn_enhancer_spider import UprnEnhancerSpider
 
 # https://www.whatdotheyknow.com/request/re_council_tax_band_data_2
