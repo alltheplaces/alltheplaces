@@ -230,6 +230,9 @@ class BurgerKingSpider(Spider):
             location.update(location.pop("physicalAddress"))
             item = DictParser.parse(location)
             item["branch"] = item.pop("name")
+            if country_code == "US":
+                # US names are the full address, which is already in addr_full.
+                item.pop("branch")
             item["country"] = country_code
             item["addr_full"] = clean_address(
                 [
