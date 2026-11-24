@@ -83,7 +83,12 @@ class NationalRegisterOfHistoricPlacesSpider(ArcGISFeatureServerSpider):
         else:
             item["country"] = "US"
             item["state"] = feature["State"]
-        item["website"] = "https://npgallery.nps.gov/AssetDetail/NRIS/{}".format(feature["NRIS_Refnum"])
+
+        # We don't emit "website" tags because in OpenStreetMap,
+        # that tag is the official website of the feature itself.
+        # https://github.com/alltheplaces/alltheplaces/issues/20746
+        website = "https://npgallery.nps.gov/AssetDetail/NRIS/{}".format(feature["NRIS_Refnum"])
+        item["extras"]["heritage:website"] = website
 
         # DictParser maps the source "Address" field onto addr_full, but it
         # only ever holds the street portion of an address, so move it to
