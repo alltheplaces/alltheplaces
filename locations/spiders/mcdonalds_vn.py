@@ -1,20 +1,21 @@
 from typing import Any
 
-from scrapy import Spider
 from scrapy.http import Response
 
 from locations.categories import Categories, apply_category
 from locations.google_url import url_to_coords
 from locations.items import Feature
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.spiders.mcdonalds import McdonaldsSpider
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class McdonaldsVNSpider(Spider):
+class McdonaldsVNSpider(PlaywrightSpider):
     name = "mcdonalds_vn"
     item_attributes = McdonaldsSpider.item_attributes
     start_urls = ["https://mcdonalds.vn/restaurants.html"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"USER_AGENT": BROWSER_DEFAULT}
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.xpath('//*[contains(@class,"tbox-address-store")]'):
