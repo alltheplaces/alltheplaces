@@ -28,7 +28,7 @@ class IciciBankINSpider(Spider):
             item = DictParser.parse(branch)
             item["street_address"] = item.pop("addr_full", None)
             item.pop("phone", None)
-            item["branch"] = branch.get("branchName")
+            item["branch"] = branch["branchName"].removeprefix("ICICI Bank Branch").lstrip(" -")
             item["name"] = None
             item["ref"] = branch.get("ifsc")
             item["postcode"] = branch.get("pincode")
