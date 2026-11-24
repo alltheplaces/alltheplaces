@@ -1,4 +1,5 @@
 import math
+import re
 from typing import Any, AsyncIterator, Iterable
 
 import pygeohash
@@ -111,7 +112,7 @@ class PacketaSpider(Spider):
             apply_category(Categories.PARCEL_LOCKER, item)
             item["addr_full"] = location["address"]["name"].removeprefix("Z-BOX ")
         else:
-            item["name"] = location["name"]
+            item["name"] = re.sub(r"\s*\(\s*Packeta Romania(?:\s+SRL)?\s*\)\s*$", "", location["name"])
             item["addr_full"] = location["address"]["name"]
             apply_category(Categories.GENERIC_POI, item)
             item["extras"]["post_office"] = "post_partner"
