@@ -574,8 +574,7 @@ class GbfsSpider(CSVFeedSpider):
             for cat in station_status_categories[station["station_id"]]:
                 apply_category(cat, item)
 
-        # If neither the vehicle type nor a brand preset were available, set a fallback category.
-        if "amenity" not in item["extras"] and not item.get("brand_wikidata"):
+        if "amenity" not in item["extras"]:
             apply_category(fallback_category, item)
 
         return item
