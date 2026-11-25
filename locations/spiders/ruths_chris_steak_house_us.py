@@ -17,7 +17,6 @@ class RuthsChrisSteakHouseUSSpider(Spider):
     item_attributes = {"brand": "Ruth's Chris Steak House", "brand_wikidata": "Q7382829", "country": "US"}
     allowed_domains = ["www.ruthschris.com"]
     start_urls = ["https://www.ruthschris.com/locations-sitemap.xml"]
-    requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Iterable[JsonRequest]:
         self.urls = {}
