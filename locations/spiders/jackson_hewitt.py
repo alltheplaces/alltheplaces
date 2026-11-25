@@ -17,4 +17,7 @@ class JacksonHewittSpider(scrapy.spiders.SitemapSpider):
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)
         item = LinkedDataParser.parse(response, "AccountingService")
+        if item is not None and response.css(".Core-walmart"):
+            item["located_in"] = "Walmart"
+            item["located_in_wikidata"] = "Q483551"
         yield item
