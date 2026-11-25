@@ -6,16 +6,14 @@ from locations.categories import Categories, apply_category
 from locations.hours import DAYS_FR, OpeningHours, sanitise_day
 from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
-from locations.playwright_spider import PlaywrightSpider
-from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 
 
-class MatchFRSpider(JSONBlobSpider, PlaywrightSpider):
+class MatchFRSpider(JSONBlobSpider):
     name = "match_fr"
     item_attributes = {"brand": "Match", "brand_wikidata": "Q513977"}
     start_urls = ["https://api-drive.drive.supermarchesmatch.fr/api/v2/sites/search?allsites=true"]
     locations_key = "data"
-    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS
+    requires_proxy = True
 
     def pre_process_data(self, feature):
         feature.update(feature.pop("site"))
