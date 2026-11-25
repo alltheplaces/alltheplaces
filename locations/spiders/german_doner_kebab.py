@@ -34,15 +34,11 @@ class GermanDonerKebabSpider(Spider):
         "name": "German Doner Kebab",
     }
     allowed_domains = ["gdk.com"]
-    # Roughly half of locations (mostly outside the UK) have no individual
-    # page and thus no stable identifier provided by the source.
+    custom_settings = {"ROBOTSTXT_OBEY": False}
     no_refs = True
 
     async def start(self) -> AsyncIterator[Request]:
         for country_code in COUNTRIES:
-            # "?cr=1" is required for the country-specific location list to
-            # be rendered server-side; without it the page loads without any
-            # locations present.
             yield Request(
                 url=f"https://gdk.com/{country_code}/gdk-locations?cr=1",
                 meta={"country_code": country_code},
