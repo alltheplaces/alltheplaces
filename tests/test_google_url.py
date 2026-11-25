@@ -143,3 +143,24 @@ def test_onclick():
     )
     extract_google_position(item, button)
     assert item == {"extras": {}, "lat": -26.105640858464167, "lon": 28.23227355940527}
+
+
+def test_place_data_without_camera():
+    assert url_to_coords("https://www.google.com/maps/place/Example/data=!8m2!3d50.828208!4d-0.1735183!16sExample") == (
+        50.828208,
+        -0.1735183,
+    )
+
+
+def test_place_data_encoded_and_integer_coordinates():
+    assert url_to_coords("https://www.google.co.uk/maps/place/Example/@1.5,2.5,17z/data=%213d-33%214d151") == (
+        -33.0,
+        151.0,
+    )
+
+
+def test_place_camera_fallback():
+    assert url_to_coords("https://www.google.com/maps/place/Example/@50.799315,-1.1083991,17z") == (
+        50.799315,
+        -1.1083991,
+    )
