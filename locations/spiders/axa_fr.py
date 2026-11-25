@@ -18,6 +18,11 @@ class AxaFRSpider(SitemapSpider, StructuredDataSpider):
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
 
     def post_process_item(self, item: Feature, response: Response, ld_data: dict, **kwargs: Any) -> Iterable[Feature]:
+        banner = response.xpath('normalize-space(//div[contains(@class, "p-store__info-banner")])').get("")
+        if "Épargne et Protection" in banner:
+            # "AXA Épargne et Protection" advisors have no office and meet
+            # customers at home, at work or by video.
+            return
         item["ref"] = response.url.rsplit("/", 1)[-1]
         item["branch"] = item.pop("name", None)
         apply_category(Categories.OFFICE_INSURANCE, item)
