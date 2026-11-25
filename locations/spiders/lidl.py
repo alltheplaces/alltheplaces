@@ -86,7 +86,8 @@ class LidlSpider(Spider):
             apply_yes_no(Extras.WHEELCHAIR, item, "wheelchair" in features)
 
             try:
-                item["opening_hours"] = self.parse_opening_hours(location["openingHours"])
+                if (hours := self.parse_opening_hours(location["openingHours"])) is not None:
+                    item["opening_hours"] = hours
             except Exception:
                 pass
 
@@ -97,13 +98,17 @@ class LidlSpider(Spider):
         if meta["offset"] + meta["limit"] < meta["total"]:
             yield self.make_request(meta["offset"] + meta["limit"], country)
 
-    def parse_opening_hours(self, rules: dict) -> OpeningHours:
+    def parse_opening_hours(self, rules: dict) -> OpeningHours | None:
         oh = OpeningHours()
+        regular_days = set()
+        exception_days = set()
         for rule in rules["items"]:
             day = DAYS[datetime.fromisoformat(rule["date"]).weekday()]
             if rule["reason"] in ["PERMANENT_CLOSING", "CLOSED"]:
+                regular_days.add(day)
                 oh.set_closed(day)
             elif rule["reason"] in ["REGULAR", "SUNDAY_REPEAT"]:
+                regular_days.add(day)
                 for time in rule["timeRanges"]:
                     oh.add_range(day, time["from"].split("T", 1)[1], time["to"].split("T", 1)[1], "%H:%M:%S")
             elif rule["reason"] in [
@@ -113,11 +118,11 @@ class LidlSpider(Spider):
                 "TEMPORARY_CLOSING",
                 "HOLIDAY",
             ]:
-                # One-off exceptions to the regular weekly schedule; skip this day
-                # rather than discarding the rest of the store's opening hours.
-                continue
+                exception_days.add(day)
             else:
                 self.logger.error("Unexpected opening hours reason: {}".format(rule["reason"]))
                 continue
 
-        return oh
+        # A missing weekday would read as a recurring closure; Sunday openings are the exception.
+        if exception_days - {"Su"} <= regular_days:
+            return oh
