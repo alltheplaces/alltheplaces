@@ -13,7 +13,7 @@ class CreditAgricoleSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Crédit Agricole", "brand_wikidata": "Q590952"}
     allowed_domains = ["credit-agricole.fr"]
     sitemap_urls = ["https://www.credit-agricole.fr/robots.txt"]
-    sitemap_rules = [(r"/particulier/agence/[-\w]+/([-\w]+)\.html$", "parse_sd")]
+    sitemap_rules = [(r"/plan/[^/]+/[^/]+/[^/]+$", "parse_sd")]
     wanted_types = ["FinancialService"]
     time_format = "%H:%M:%S"
 
