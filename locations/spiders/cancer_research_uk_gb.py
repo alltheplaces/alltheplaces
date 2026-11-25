@@ -1,8 +1,10 @@
 from typing import Any, AsyncIterator
 
+import scrapy
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
+from locations.google_url import extract_google_position
 from locations.items import Feature
 
 
@@ -12,29 +14,9 @@ class CancerResearchUkGBSpider(Spider):
 
     def make_request(self, page: int) -> JsonRequest:
         return JsonRequest(
-            url="https://xss-content.ent.eu-west-1.aws.found.io/api/as/v1/engines/shops/search.json",
-            data={
-                "query": "",
-                "result_fields": {
-                    "title": {"raw": {}},
-                    "url": {"raw": {}},
-                    "postcode": {"raw": {}},
-                    "shop_address": {"raw": {}},
-                    "shop_phone_number": {"raw": {}},
-                    "document_type": {"raw": {}},
-                    "content_type": {"raw": {}},
-                    "postcode_location": {"raw": {}},
-                },
-                "search_fields": {
-                    "postcode": {},
-                    "title": {},
-                    "shop_address": {},
-                    "shop_phone_number": {},
-                    "postcode_location": {},
-                },
-                "page": {"size": 100, "current": page},
-            },
-            headers={"Authorization": "Bearer search-yxrzepvos3f259zqovdykpmf"},
+            url="https://find.cancerresearchuk.org/api/search",
+            data={"state": {"current": page, "resultsPerPage": 100}, "searchKey": "shops"},
+            cb_kwargs={"current_page": page},
         )
 
     async def start(self) -> AsyncIterator[JsonRequest]:
@@ -50,8 +32,16 @@ class CancerResearchUkGBSpider(Spider):
             item["website"] = location["url"]["raw"]
             item["ref"] = location["id"]["raw"]
 
-            yield item
+            yield scrapy.Request(
+                url=item["website"],
+                callback=self.parse_lat_lon,
+                meta={"item": item},
+            )
 
-        page = response.json()["meta"]["page"]
-        if page["current"] <= page["total_pages"]:
-            yield self.make_request(page["current"] + 1)
+        if kwargs["current_page"] <= response.json()["totalPages"]:
+            yield self.make_request(kwargs["current_page"] + 1)
+
+    def parse_lat_lon(self, response: Any, **kwargs: Any) -> Any:
+        item = response.meta["item"]
+        extract_google_position(item, response)
+        yield item
