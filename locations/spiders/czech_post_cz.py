@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from scrapy import Spider
@@ -7,6 +8,12 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 
 CZECH_POST = {"operator": "Česká pošta, s.p.", "operator_wikidata": "Q341090"}
+PARTNER_BOX_BRANDS = {
+    "z-?box": {"brand": "Z-Box", "brand_wikidata": "Q121537464"},
+    "alzabox": {"brand": "AlzaBox", "brand_wikidata": "Q115254158"},
+    "ox point": {"brand": "OX Point", "brand_wikidata": "Q116894862"},
+    "penguin box": {"brand": "Penguin Box", "brand_wikidata": "Q120022128"},
+}
 
 
 class CzechPostCZSpider(Spider):
@@ -51,6 +58,11 @@ class CzechPostCZSpider(Spider):
                 apply_yes_no("post_office=post_partner", item, True)
             elif location["type"] == "post.type.external.partner-box":  # "balikovna_box"
                 apply_category(Categories.PARCEL_LOCKER, item)
+                apply_yes_no("post_office=post_partner", item, True)
+                for pattern, brand in PARTNER_BOX_BRANDS.items():
+                    if re.search(pattern, item["name"], re.IGNORECASE):
+                        item.update(brand)
+                        break
             else:
                 self.logger.error("Unexpected type: {}".format(location["type"]))
 
