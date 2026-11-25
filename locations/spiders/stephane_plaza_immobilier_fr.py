@@ -3,12 +3,13 @@ from typing import Any, AsyncIterator
 from scrapy import Spider
 from scrapy.http import Request, Response, TextResponse
 
+from locations.categories import Categories, apply_category
 from locations.dict_parser import DictParser
 
 
 class StephanePlazaImmobilierFRSpider(Spider):
     name = "stephane_plaza_immobilier_fr"
-    item_attributes = {"brand_wikidata": "Q97368097", "name": "Stéphane Plaza Immobilier"}
+    item_attributes = {"brand": "Stéphane Plaza Immobilier", "brand_wikidata": "Q97368097"}
     allowed_domains = ["www.stephaneplazaimmobilier.com"]
     requires_proxy = True
     # The API answers 403 without a session cookie (set by /agences/), the AJAX header and the Fetch Metadata headers of a browser.
@@ -36,4 +37,5 @@ class StephanePlazaImmobilierFRSpider(Spider):
             item["street_address"] = item.pop("addr_full", None)
             if (name := item.pop("name")) and name.lower().startswith("stéphane plaza immobilier "):
                 item["branch"] = name[len("Stéphane Plaza Immobilier ") :]
+            apply_category(Categories.OFFICE_ESTATE_AGENT, item)
             yield item
