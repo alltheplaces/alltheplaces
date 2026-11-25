@@ -16,6 +16,12 @@ from locations.user_agents import BROWSER_DEFAULT
 WGS84 = Geod(ellps="WGS84")
 
 DEUTSCHE_POST = {"brand": "Deutsche Post", "brand_wikidata": "Q157645"}
+DHL_PACKSTATION = {
+    "brand": "DHL Packstation",
+    "brand_wikidata": "Q1766703",
+    "operator": "DHL",
+    "operator_wikidata": "Q489815",
+}
 DHL_POSTSTATION = {"brand": "DHL Poststation", "brand_wikidata": "Q123120984"}
 
 
@@ -112,7 +118,9 @@ class DeutschePostDESpider(Spider):
         item["opening_hours"] = self.parse_hours(location["pfTimeinfos"])
 
         if cat := self.cats.get(location["locationType"]):
-            if location["locationType"] == "POSTSTATION":
+            if location["locationType"] == "PACKSTATION":
+                item.update(DHL_PACKSTATION)
+            elif location["locationType"] == "POSTSTATION":
                 item.update(DHL_POSTSTATION)
             else:
                 set_operator(DEUTSCHE_POST, item)
