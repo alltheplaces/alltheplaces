@@ -12,10 +12,10 @@ POWER = {"brand": "Power", "brand_wikidata": "Q98380874"}
 
 class GabrielsBESpider(Spider):
     name = "gabriels_be"
-    start_urls = ["https://www.gabriels.be/nl/tankstation-vinden"]
+    start_urls = ["https://www.gabriels.be/nl/vind-een-tankstation"]
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        for location in response.xpath('//div[@typeof="Place"]'):
+        for location in response.xpath('//*[@class="geolocation-location js-hide"]'):
             item = Feature()
             item["ref"] = location.xpath("@id").get()
             item["lat"] = location.xpath('.//meta[@property="latitude"]/@content').get()
