@@ -31,7 +31,7 @@ class TmobilePLSpider(Spider):
 
             if feature["status"] == "Decommercialized":
                 set_closed(item)
-            elif "Planned":
+            elif feature["status"] == "Planned":
                 set_temporarily_closed(item)
 
             apply_category(Categories.SHOP_MOBILE_PHONE, item)
