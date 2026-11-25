@@ -1,10 +1,14 @@
-import scrapy
+from typing import Iterable
 
-from locations.linked_data_parser import LinkedDataParser
-from locations.microdata_parser import MicrodataParser
+from scrapy.http import TextResponse
+from scrapy.spiders import SitemapSpider
+
+from locations.categories import Categories, apply_category
+from locations.items import Feature
+from locations.structured_data_spider import StructuredDataSpider
 
 
-class JacksonHewittSpider(scrapy.spiders.SitemapSpider):
+class JacksonHewittSpider(SitemapSpider, StructuredDataSpider):
     name = "jackson_hewitt"
     item_attributes = {"brand": "Jackson Hewitt", "brand_wikidata": "Q6117132"}
     allowed_domains = ["jacksonhewitt.com"]
@@ -13,8 +17,11 @@ class JacksonHewittSpider(scrapy.spiders.SitemapSpider):
         (r"/\d+$", "parse"),
     ]
     drop_attributes = {"image"}
+    wanted_types = ["AccountingService"]
 
-    def parse(self, response):
-        MicrodataParser.convert_to_json_ld(response)
-        item = LinkedDataParser.parse(response, "AccountingService")
+    def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
+        if response.css(".Core-walmart"):
+            item["located_in"] = "Walmart"
+            item["located_in_wikidata"] = "Q483551"
+        apply_category(Categories.OFFICE_TAX_ADVISOR, item)
         yield item

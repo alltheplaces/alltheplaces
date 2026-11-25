@@ -305,6 +305,7 @@ class Categories(Enum):
     OFFICE_ADMINISTRATIVE = {"office": "administrative"}
     OFFICE_SECURITY = {"office": "security"}
     OFFICE_SUPERVISED_INJECTION_SITE = {"office": "supervised_injection_site"}
+    OFFICE_TAX_ADVISOR = {"office": "tax_advisor"}
     OFFICE_TUTORING = {"office": "tutoring"}
 
     TOURISM_ARTWORK = {"tourism": "artwork"}
