@@ -123,6 +123,6 @@ class LidlSpider(Spider):
                 self.logger.error("Unexpected opening hours reason: {}".format(rule["reason"]))
                 continue
 
-        # A missing weekday would read as a recurring closure.
-        if exception_days <= regular_days:
+        # A missing weekday would read as a recurring closure; Sunday openings are the exception.
+        if exception_days - {"Su"} <= regular_days:
             return oh
