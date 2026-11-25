@@ -1,36 +1,27 @@
-import re
+import json
+from typing import Any, Iterable
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.http import TextResponse
+from scrapy.spiders import Spider
 
-from locations.categories import Categories, apply_category
-from locations.hours import DAYS, OpeningHours
-from locations.items import Feature
+from locations.categories import apply_category, Categories
+from locations.dict_parser import DictParser
 
 
-class CoffeebrandsSpider(CrawlSpider):
+class CoffeebrandsSpider(Spider):
     name = "coffeebrands"
     item_attributes = {"brand": "Coffeebrands", "brand_wikidata": "Q122956019"}
     start_urls = ["https://coffeebrands.gr/stores"]
-    rules = [
-        Rule(LinkExtractor(restrict_xpaths='//*[@class="w3-container"]'), callback="parse"),
-    ]
-    countries = {"germany": "DE", "saudi-arabia": "SA"}
-    no_refs = True
+    wanted_types = ["CafeOrCoffeeShop"]
 
-    def parse(self, response, **kwargs):
-        for store in response.xpath('//*[@class="linehover w3-text-cbcyan3"]'):
-            item = Feature()
-            item["street_address"] = store.xpath("./td[1]/text()").get()
-            location = response.url.split("/")[-1]
-            if location in self.countries:
-                item["country"] = self.countries.get(location)
-            else:
-                item["country"] = "GR"
-                item["city"] = location.title()
-            item["website"] = response.url
-            if timing := re.match(r"(\d+:\d+)\s*-\s*(\d+:\d+)", store.xpath("./td[2]/text()").get()):
-                item["opening_hours"] = OpeningHours()
-                item["opening_hours"].add_days_range(days=DAYS, open_time=timing.group(1), close_time=timing.group(2))
+    def parse(self, response: TextResponse, **kwargs: Any) -> Iterable[dict]:
+        for location in json.loads(response.xpath('//*[contains(text(),"latitude")]/text()').get()).get(
+            "itemListElement"
+        ):
+            location.update(location.pop("item"))
+            item = DictParser.parse(location)
+            item["ref"] = location.get("position")
+            item["branch"] = item.pop("name").removeprefix("Coffeebrands, ")
+            item["name"] = self.item_attributes["brand"]
             apply_category(Categories.COFFEE_SHOP, item)
             yield item
