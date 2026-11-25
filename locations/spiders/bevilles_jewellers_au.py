@@ -11,7 +11,7 @@ class BevillesJewellersAUSpider(StoremapperSpider):
         "brand": "Bevilles Jewellers",
         "brand_wikidata": "Q117837188",
     }
-    company_id = "6228"
+    company_id = "6228-PrY5oOMdoR6HaxUt"
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         item["name"] = item["name"].replace(" | ", " ")
