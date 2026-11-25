@@ -16,8 +16,8 @@ WGS84 = Geod(ellps="WGS84")
 ROYAL_MAIL = {"operator": "Royal Mail", "operator_wikidata": "Q638098"}
 POST_OFFICE = {"brand": "Post Office", "brand_wikidata": "Q1783168"}
 PARCELFORCE = {"operator": "Parcelforce Worldwide", "operator_wikidata": "Q15077740"}
-# Postboxes, parcel postboxes and parcel drop boxes
-POSTBOX_TYPES = {"RMG-PB", "RMG-PPB", "RMG-PDB"}
+# Postboxes, parcel postboxes, parcel drop boxes and digital (scan to post) drop boxes
+POSTBOX_TYPES = {"RMG-PB", "RMG-PPB", "RMG-PDB", "RMG-DDB"}
 ROYAL_MAIL_PREMISES = re.compile(r"delivery (office|centre)|mail centre|customer service point", re.IGNORECASE)
 LOCKER_BRANDS = {
     "RMG-LOK": {"brand": "Royal Mail", "brand_wikidata": "Q638098"},

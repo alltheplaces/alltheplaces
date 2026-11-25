@@ -40,8 +40,8 @@ class LeCrobagDESpider(Spider):
             item["lat"] = feature["geometry"]["coordinates"][1]
 
             description_elem = Selector(text=feature["properties"]["description"])
-            item["phone"] = description_elem.xpath('//a[contains(@href, "tel")]/text()').extract_first()
-            address_text = description_elem.xpath('//span[@class="locationaddress"]/text()').extract()
+            item["phone"] = description_elem.xpath('//a[contains(@href, "tel")]/text()').get()
+            address_text = description_elem.xpath('//span[@class="locationaddress"]/text()').getall()
             item["street_address"] = "".join(address_text[:-2]).strip()
             item["postcode"] = address_text[-2].strip().split("\xa0")[0]
             item["city"] = address_text[-2].strip().split("\xa0")[1].rstrip(",")

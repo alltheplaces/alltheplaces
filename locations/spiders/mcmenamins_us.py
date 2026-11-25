@@ -74,16 +74,16 @@ class McmenaminsUSSpider(scrapy.Spider):
 
         for path in shops:
             yield scrapy.Request(
-                response.urljoin(path.xpath('.//div/div[@class="tm-panel-titlebg"]/a/@href').extract_first()),
+                response.urljoin(path.xpath('.//div/div[@class="tm-panel-titlebg"]/a/@href').get()),
                 callback=self.parse_store,
                 meta={
-                    "ref": path.xpath(".//@id").extract_first(),
+                    "ref": path.xpath(".//@id").get(),
                 },
             )
 
     def parse_store(self, response):
         content = response.xpath('//div[@id="property_bar_address_no_button" or @id="property_bar_address"]')
-        info = content.xpath("(nobr|.)/a/@href").extract()
+        info = content.xpath("(nobr|.)/a/@href").getall()
 
         address_parts = re.match(r"^https?:\/\/maps.google.com\/\?q=(.*),([^,]*),\s+(.*),\s+(\d{5})$", info[0])
 
@@ -95,7 +95,7 @@ class McmenaminsUSSpider(scrapy.Spider):
             "state": address_parts.group(3).strip(),
             "postcode": address_parts.group(4).strip(),
             "phone": self.phone_normalize(info[1]),
-            "opening_hours": self.store_hours(response.xpath('//div[@id="MainContent_hoursText"]/p/text()').extract()),
+            "opening_hours": self.store_hours(response.xpath('//div[@id="MainContent_hoursText"]/p/text()').getall()),
         }
         extract_google_position(properties, response)
 

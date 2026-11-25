@@ -17,7 +17,7 @@ class PowercorAUSpider(RosettaAPRSpider):
             callback_function_name="parse_zone_substations",
         ),
         RosettaAPRDataFile(
-            url="https://content.rosettaanalytics.com.au/citipower_powercor_layers_serve_2025/CitiPower_Powercor_Distribution_Substations_July_2024.geojson",
+            url="https://content.rosettaanalytics.com.au/citipower_powercor_centroids_prod_20261026_serve/CitiPower_Powercor_Substations_September_2026_Centroids.geojson",
             file_type="geojson",
             encrypted=True,
             callback_function_name="parse_transformers",
@@ -97,7 +97,7 @@ class PowercorAUSpider(RosettaAPRSpider):
             }
             items.append(properties)
         next_data_file = RosettaAPRDataFile(
-            url="https://dapr.citipower.com.au/serve.php?file=./powercor_data/CitiPower_Powercor_Distribution_Substations_July_2024.csv",
+            url="https://dapr.powercor.com.au/serve.php?file=powercor_data/september_2026/CitiPower_Powercor_Substations_September_2026.csv",
             file_type="csv",
             encrypted=True,
             callback_function_name="parse_transformer_attribs",
@@ -116,6 +116,9 @@ class PowercorAUSpider(RosettaAPRSpider):
                         properties["extras"]["voltage:primary"] = voltage.replace("kV", "000").replace(" ", "")
                 if rating := features_dict[properties["ref"]]["INSTALLED_"]:
                     if rating != "unknown":
-                        properties["extras"]["rating"] = rating.replace(".0", "").replace(" ", "") + " kVA"
+                        try:
+                            properties["extras"]["rating"] = "{} kVA".format(round(float(rating)))
+                        except ValueError:
+                            pass
             items.append(Feature(**properties))
         return items

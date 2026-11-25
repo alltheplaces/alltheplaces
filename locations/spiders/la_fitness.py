@@ -24,7 +24,7 @@ class LaFitnessSpider(Spider):
     def parse_hours(self, elems: Selector) -> OpeningHours:
         opening_hours = OpeningHours()
 
-        hours = elems.xpath(".//text()").extract()
+        hours = elems.xpath(".//text()").getall()
 
         if not hours:
             return None
@@ -66,9 +66,9 @@ class LaFitnessSpider(Spider):
 
         properties.update(
             {
-                "phone": response.xpath('//span[contains(@id, "lblClubPhone")]/text()').extract_first(),
-                "street_address": response.xpath('//span[contains(@id, "lblClubAddress")]/text()').extract_first(),
-                "postcode": response.xpath('//span[contains(@id, "lblZipCode")]/text()').extract_first(),
+                "phone": response.xpath('//span[contains(@id, "lblClubPhone")]/text()').get(),
+                "street_address": response.xpath('//span[contains(@id, "lblClubAddress")]/text()').get(),
+                "postcode": response.xpath('//span[contains(@id, "lblZipCode")]/text()').get(),
                 "website": response.url,
                 "opening_hours": self.parse_hours(response.xpath('//div[@id="divClubHourPanel"]//tr')),
             }

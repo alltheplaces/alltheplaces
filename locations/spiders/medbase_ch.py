@@ -32,7 +32,7 @@ class MedbaseCHSpider(scrapy.Spider):
             yield feature
 
     def parse_address(self, tr, feature):
-        lines = tr.css("div.left").xpath("p/text()").extract()
+        lines = tr.css("div.left").xpath("p/text()").getall()
         lines = list(filter(None, [" ".join(x.split()) for x in lines]))
         feature["country"] = "CH"
         feature["street_address"] = lines[0]
@@ -94,5 +94,5 @@ class MedbaseCHSpider(scrapy.Spider):
         return result
 
     def parse_website(self, response, tr, feature):
-        if urls := tr.xpath("*/a/@href").extract():
+        if urls := tr.xpath("*/a/@href").getall():
             feature["website"] = response.urljoin(urls[0])

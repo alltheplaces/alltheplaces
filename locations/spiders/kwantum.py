@@ -1,6 +1,5 @@
-from urllib.parse import urlparse
-
 from scrapy import Spider
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_NL, OpeningHours, sanitise_day
@@ -12,7 +11,7 @@ class KwantumSpider(Spider):
     start_urls = ["https://www.kwantum.be/api/nl-BE/stores", "https://www.kwantum.nl/api/nl-NL/stores"]
 
     def parse(self, response, **kwargs):
-        base_domain = urlparse(response.url).netloc
+        base_domain = urlparse_cached(response).netloc
         for location in response.json():
             location["data"]["location"] = location.pop("position")
             location["data"]["ref"] = location.pop("id")

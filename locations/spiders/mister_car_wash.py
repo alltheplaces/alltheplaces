@@ -7,7 +7,7 @@ from locations.hours import OpeningHours
 class MisterCarWashSpider(scrapy.Spider):
     name = "mister_car_wash"
     item_attributes = {"brand": "Mister Car Wash", "brand_wikidata": "Q114185788"}
-    allowed_domains = ["mistercarwash.com/"]
+    allowed_domains = ["mistercarwash.com"]
     start_urls = [
         "https://mistercarwash.com/api/v1/locations/getbydistance?cLat=36.778261&cLng=-119.4179324&radius=10&cityName=California&stateName=&allServices=true"
     ]

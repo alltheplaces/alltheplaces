@@ -43,6 +43,8 @@ class ValoraSpider(JSONBlobSpider):
         if not item["street_address"]:
             return
         item["brand"], item["brand_wikidata"], category = self.brands.get(feature["format"], (None, None, None))
+        if item["brand"]:
+            item["name"] = item["brand"]
         if category:
             apply_category(category, item)
 

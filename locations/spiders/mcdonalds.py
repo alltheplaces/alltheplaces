@@ -20,7 +20,7 @@ class McdonaldsSpider(PlaywrightSpider):
         "brand_wikidata": "Q38076",
     }
     allowed_domains = ["www.mcdonalds.com"]
-    custom_settings = {"USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
+    custom_settings = {"USER_AGENT": BROWSER_DEFAULT, "ROBOTSTXT_OBEY": False} | DEFAULT_PLAYWRIGHT_SETTINGS
 
     ISEADGG_COUNTRIES = {"AU", "CA", "NZ"}
 

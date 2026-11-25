@@ -48,8 +48,8 @@ def url_to_coords(url: str) -> tuple[float | None, float | None]:  # noqa: C901
     if url.startswith("//"):
         url = f"https:{url}"
 
-    # Place coordinates take precedence over the map's camera centre.
-    if match := re.search(r"!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)(?:!|$)", url):
+    # A place's own pin; the "@lat,lon,zoom" that follows is only the map view center
+    if match := re.search(r"!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)", url):
         return float(match.group(1)), float(match.group(2))
 
     if match := re.search(r"@(-?\d+.\d+),\s?(-?\d+.\d+),[\d.]+[zm]", url):

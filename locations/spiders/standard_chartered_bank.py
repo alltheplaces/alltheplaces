@@ -6,10 +6,12 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 from locations.pipelines.address_clean_up import clean_address
 
+STANDARD_CHARTERED_TAIWAN = {"brand": "渣打國際商業銀行", "brand_wikidata": "Q62267023"}
+
 
 class StandardCharteredBankSpider(scrapy.Spider):
     name = "standard_chartered_bank"
-    item_attributes = {"brand": "渣打國際商業銀行", "brand_wikidata": "Q62267023"}
+    item_attributes = {"brand": "Standard Chartered", "brand_wikidata": "Q548278"}
     start_urls = ["https://www.sc.com/en/our-locations/"]
 
     def parse(self, response, **kwargs):
@@ -28,6 +30,8 @@ class StandardCharteredBankSpider(scrapy.Spider):
                 )
 
     def parse_details(self, response, **kwargs):
+        if not response.url.endswith(".json"):
+            return  # Countries without a locator (e.g. ug) redirect to their HTML home page
         if data := response.json()["locations"]:
             for location in data:
                 if "/bn/" in response.url:
@@ -37,11 +41,13 @@ class StandardCharteredBankSpider(scrapy.Spider):
                     item = DictParser.parse(location)
                     item["addr_full"] = clean_address(location.get("addressLines"))
                 if "branch" in location["types"]:
+                    item["branch"] = item.pop("name")
                     apply_category(Categories.BANK, item)
                     apply_yes_no(Extras.ATM, item, "atm" in location["types"])
                 else:
                     apply_category(Categories.ATM, item)
-                item["branch"] = item.get("name")
+                if kwargs["country"] == "tw":
+                    item.update(STANDARD_CHARTERED_TAIWAN)
                 apply_yes_no(Extras.CASH_IN, item, any(key in location["types"] for key in ["cdm", "crm"]))
                 item["phone"] = None
                 item["ref"] = " - ".join([str(item["ref"]), kwargs["country"]])

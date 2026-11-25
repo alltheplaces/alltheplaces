@@ -75,8 +75,7 @@ Ordnance Survey release a number of postcode datasets:
 ### Postcodes
 
 All is not lost, Office for National Statistics (ONS not Ordnance Survey)
-release [National Statistics UPRN Lookup](https://www.ons.gov.uk/methodology/geography/geographicalproducts/nationalstatisticsaddressproducts) (
-NSUL).
+release [National Statistics UPRN Lookup](https://www.ons.gov.uk/methodology/geography/geographicalproducts/nationalstatisticsaddressproducts) (NSUL).
 This IS Open Data, released under the [Open Government Licence](https://www.ons.gov.uk/methodology/geography/licences).
 This includes UPRNs and Postcodes (only postcodes available in Code-Point Open so no Northern Ireland).
 For these UPRNs we can assign postcodes or build polygons.
@@ -110,7 +109,9 @@ Owen and published. Others are helping.
 | Arun District Council                         | https://www.owenboswarva.com/blog/post-addr67.htm                                                                                     |
 | Barnet Council                                | https://www.owenboswarva.com/blog/post-addr23.htm                                                                                     |
 | Basildon Borough Council                      | https://www.owenboswarva.com/blog/post-addr76.htm                                                                                     |
+| Basingstoke and Deane Borough Council         | https://www.owenboswarva.com/blog/post-addr108.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_19                  |
 | Birmingham City Council                       | https://www.owenboswarva.com/blog/post-addr11.htm                                                                                     |
+| Blackburn with Darwen Borough Council         | https://www.owenboswarva.com/blog/post-addr92.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_3                                                                     |
 | Borough Council of King's Lynn & West Norfolk | https://www.owenboswarva.com/blog/post-addr66.htm                                                                                     |
 | Bradford Council                              | https://www.owenboswarva.com/blog/post-addr29.htm                                                                                     |
 | Brent Council                                 | https://www.owenboswarva.com/blog/post-addr49.htm                                                                                     |
@@ -123,6 +124,8 @@ Owen and published. Others are helping.
 | Camden Council                                | https://www.owenboswarva.com/blog/post-addr21.htm                                                                                     |
 | Cheshire East Council                         | https://www.owenboswarva.com/blog/post-addr28.htm                                                                                     |
 | Cheshire West and Chester Council             | https://www.owenboswarva.com/blog/post-addr69.htm                                                                                     |
+| Chichester District Council                   | https://www.owenboswarva.com/blog/post-addr100.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_11                                                                    |
+| Chorley Council                               | https://www.owenboswarva.com/blog/post-addr114.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_24                                                                    |
 | City of Doncaster Council                     | https://www.owenboswarva.com/blog/post-addr59.htm                                                                                     |
 | City of Wolverhampton Council                 | https://www.owenboswarva.com/blog/post-addr24.htm                                                                                     |
 | Cornwall Council                              | https://www.cornwall.gov.uk/council-tax/your-council-tax-bill/council-tax-data/ https://www.owenboswarva.com/blog/post-addr14.htm     |
@@ -130,23 +133,30 @@ Owen and published. Others are helping.
 | Dundee City Council                           | FoI request lodged (2025-10-29), never responded.                                                                                     |
 | Durham County Council                         | https://www.owenboswarva.com/blog/post-addr17.htm                                                                                     |
 | Ealing Council                                | https://www.owenboswarva.com/blog/post-addr39.htm                                                                                     |
+| East Hertfordshire District Council           | https://www.owenboswarva.com/blog/post-addr109.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_20                                                                    |
 | East Riding of Yorkshire Council              | https://www.owenboswarva.com/blog/post-addr78.htm                                                                                     |
 | East Suffolk Council                          | https://www.owenboswarva.com/blog/post-addr55.htm                                                                                     |
 | Edinburgh City                                | https://edinburgh.axlr8.uk/disclose/ FoI request 58303                                                                                |
 | Gateshead Council                             | https://www.owenboswarva.com/blog/post-addr58.htm                                                                                     |
 | Gedling Borough Council                       | https://www.owenboswarva.com/blog/post-addr85.htm                                                                                     |
 | Glasgow City Council                          | https://www.owenboswarva.com/blog/post-addr61.htm                                                                                     |
+| Gwynedd Council                               | https://www.owenboswarva.com/blog/post-addr111.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_23                                                                    |
 | Hackney Council                               | https://www.owenboswarva.com/blog/post-addr12.htm                                                                                     |
+| Halton Borough Council                        | https://www.owenboswarva.com/blog/post-addr119.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_30                                                                    |
 | Haringey Council                              | https://www.owenboswarva.com/blog/post-addr52.htm                                                                                     |
+| Herefordshire Council                         | https://www.owenboswarva.com/blog/post-addr97.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_8                                                                     |
 | High Peak Borough Council                     | https://www.owenboswarva.com/blog/post-addr72.htm                                                                                     |
+| Horsham District Council                      | https://www.owenboswarva.com/blog/post-addr93.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_4                                                                     |
 | Ipswich Borough Council                       | https://www.owenboswarva.com/blog/post-addr32.htm                                                                                     |
-| Isle of Wight Council                         | https://www.whatdotheyknow.com/request/current_list_of_assigned_council https://www.owenboswarva.com/blog/post-addr38.htm             |
+| Isle of Wight Council                         | https://www.whatdotheyknow.com/request/current_list_of_assigned_council https://www.whatdotheyknow.com/request/os_communications https://www.owenboswarva.com/blog/post-addr38.htm             |
 | Islington Council                             | https://www.owenboswarva.com/blog/post-addr15.htm                                                                                     |
+| Knowsley Council                              | https://www.owenboswarva.com/blog/post-addr103.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_13                                                                    |
 | Leeds City Council                            | https://datamillnorth.org/dataset/council-tax-bands-of-all-properties-in-leeds-em7lg https://www.owenboswarva.com/blog/post-addr9.htm |
 | Lewisham Council                              | https://www.owenboswarva.com/blog/post-addr48.htm                                                                                     |
 | Lichfield District Council                    | https://www.owenboswarva.com/blog/post-addr11.htm                                                                                     |
 | London Borough of Bexley                      | https://www.owenboswarva.com/blog/post-addr49.htm                                                                                     |
 | London Borough of Richmond upon Thames        | https://www.owenboswarva.com/blog/post-addr56.htm                                                                                     |
+| Luton Council                         | https://www.owenboswarva.com/blog/post-addr90.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_2                                                                     |
 | Manchester City Council                       | https://www.owenboswarva.com/blog/post-addr25.htm                                                                                     |
 | Mansfield District Council                    | https://www.owenboswarva.com/blog/post-addr53.htm                                                                                     |
 | Merton Council                                | https://www.owenboswarva.com/blog/post-addr54.htm                                                                                     |
@@ -162,6 +172,7 @@ Owen and published. Others are helping.
 | Norwich City Council                          | https://www.owenboswarva.com/blog/post-addr82.htm                                                                                     |
 | Peterborough City Council                     | https://www.owenboswarva.com/blog/post-addr68.htm                                                                                     |
 | Plymouth City Council                         | https://www.owenboswarva.com/blog/post-addr35.htm                                                                                     |
+| Reigate and Banstead Borough Council          | https://www.owenboswarva.com/blog/post-addr112.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_22                                                                    |
 | Rhondda Cynon Taf County Borough Council      | https://www.owenboswarva.com/blog/post-addr41.htm                                                                                     |
 | Rochdale Borough Council                      | https://www.owenboswarva.com/blog/post-addr65.htm                                                                                     |
 | Royal Borough of Greenwich                    | https://www.owenboswarva.com/blog/post-addr40.htm                                                                                     |
@@ -169,16 +180,21 @@ Owen and published. Others are helping.
 | Sheffield City Council                        | https://www.owenboswarva.com/blog/post-addr16.htm                                                                                     |
 | Somerset Council                              | https://www.owenboswarva.com/blog/post-addr42.htm                                                                                     |
 | South Norfolk District Council                | https://www.owenboswarva.com/blog/post-addr81.htm                                                                                     |
-| South Ribble Borough Council                  | https://www.owenboswarva.com/blog/post-addr117.htm                                                                                    |
+| South Ribble Borough Council                  | https://www.owenboswarva.com/blog/post-addr117.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_28                                                                                    |
 | Southampton City Council                      | https://www.owenboswarva.com/blog/post-addr64.htm                                                                                     |
+| Southend-on-Sea City Council                  | https://www.owenboswarva.com/blog/post-addr105.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_15                                                                    |
 | Southwark Council                             | https://www.owenboswarva.com/blog/post-addr33.htm                                                                                     |
 | Staffordshire Moorlands District Council      | https://www.owenboswarva.com/blog/post-addr74.htm                                                                                     |
 | Stockport Metropolitan Borough Council        | https://www.owenboswarva.com/blog/post-addr34.htm                                                                                     |
 | Stoke-on-Trent City Council                   | https://www.owenboswarva.com/blog/post-addr70.htm                                                                                     |
+| Stratford-on-Avon District Council            | https://www.owenboswarva.com/blog/post-addr101.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_12                                                                    |
 | Tameside Metropolitan Borough Council         | https://www.owenboswarva.com/blog/post-addr62.htm                                                                                     |
 | Tendring District Council                     | https://www.owenboswarva.com/blog/post-addr75.htm                                                                                     |
+| Test Valley Borough Council                   | https://www.owenboswarva.com/blog/post-addr96.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_7                                                                     |
 | Tewkesbury Borough Council                    | https://www.owenboswarva.com/blog/post-addr83.htm                                                                                     |
 | Wandsworth Council                            | https://www.owenboswarva.com/blog/post-addr57.htm                                                                                     |
+| Warwick District Council                      | https://www.owenboswarva.com/blog/post-addr94.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_5                                                                     |
+| Wealden District Council                      | https://www.owenboswarva.com/blog/post-addr115.htm https://www.whatdotheyknow.com/request/re_council_tax_band_data_26                                                                    |
 | West Northamptonshire Council                 | https://www.owenboswarva.com/blog/post-addr27.htm                                                                                     |
 | West Suffolk Council                          | https://www.owenboswarva.com/blog/post-addr63.htm                                                                                     |
 | Wigan Council                                 | https://www.owenboswarva.com/blog/post-addr30.htm                                                                                     |

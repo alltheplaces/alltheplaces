@@ -33,6 +33,7 @@ class OurAirportsSpider(CSVFeedSpider):
         item["extras"]["ele:ft"] = row["elevation_ft"]
         item["country"] = row["iso_country"]
         item["extras"]["iata"] = row["iata_code"]
+        item["extras"]["icao"] = row["icao_code"]
         item["website"] = row["home_link"]
         # item["extras"]["wikipedia"] = row["wikipedia_link"]
 

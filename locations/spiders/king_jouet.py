@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from scrapy.http import Request, TextResponse
 from scrapy.settings.default_settings import RETRY_HTTP_CODES
+from scrapy.utils.httpobj import urlparse_cached
 
 from locations.categories import Categories, apply_category
 from locations.hours import CLOSED_FR, DAYS, OpeningHours
@@ -93,7 +94,7 @@ class KingJouetSpider(JSONBlobSpider):
         else:
             # Drop the brand and store-format prefixes for regular King Jouet stores; "CITY 2" is a Brussels shopping centre, not the format.
             item["branch"] = re.sub(r"^(?:KING JOUET |CITY (?!\d)|BOUTIQUE )+", "", label, flags=re.I)
-        item["country"] = COUNTRIES[urlparse(response.url).netloc]
+        item["country"] = COUNTRIES[urlparse_cached(response).netloc]
 
         oh = OpeningHours()
         for day in store.get("openingHours") or []:

@@ -1,5 +1,5 @@
 from typing import Any, AsyncIterator, Iterable
-from urllib.parse import quote, urljoin
+from urllib.parse import quote
 
 from scrapy.http import JsonRequest, Response
 
@@ -40,9 +40,14 @@ class CostcoAUSpider(JSONBlobSpider):
         item["branch"] = feature["displayName"]
         item.pop("name", None)
         item["street_address"] = merge_address_lines(
-            [feature.get("line1"), feature.get("line2"), feature.get("line3"), feature.get("line4")]
+            [
+                feature.get("line1"),
+                feature.get("line2"),
+                feature.get("line3"),
+                feature.get("line4"),
+            ]
         )
-        item["website"] = urljoin(response.url, f"/store-finder/{quote(item['branch'])}")
+        item["website"] = response.urljoin(f"/store-finder/{quote(item['branch'])}")
 
         warehouse = item.deepcopy()
 
@@ -53,7 +58,7 @@ class CostcoAUSpider(JSONBlobSpider):
                 )
             except:
                 self.logger.error(
-                    f'Failed to parse opening hours: {feature["openingHours"].get("weekDayOpeningList", [])}'
+                    f"Failed to parse opening hours: {feature['openingHours'].get('weekDayOpeningList', [])}"
                 )
 
         apply_category(Categories.SHOP_WHOLESALE, warehouse)
@@ -75,7 +80,7 @@ class CostcoAUSpider(JSONBlobSpider):
                     )
                 except:
                     self.logger.error(
-                        f'Failed to parse opening hours: {feature["gasStationHours"].get("weekDayOpeningList", [])}'
+                        f"Failed to parse opening hours: {feature['gasStationHours'].get('weekDayOpeningList', [])}"
                     )
 
             if fuel_types := feature.get("gasTypes"):
@@ -90,7 +95,11 @@ class CostcoAUSpider(JSONBlobSpider):
                     "Premium 95" in fuel_types or "Blyfri" in fuel_types or "95無鉛" in fuel_types,
                 )
                 apply_yes_no(Fuel.OCTANE_96, fuel_station, "ハイオク" in fuel_types)
-                apply_yes_no(Fuel.OCTANE_98, fuel_station, "Premium 98" in fuel_types or "98無鉛" in fuel_types)
+                apply_yes_no(
+                    Fuel.OCTANE_98,
+                    fuel_station,
+                    "Premium 98" in fuel_types or "98無鉛" in fuel_types,
+                )
                 apply_yes_no(
                     Fuel.DIESEL,
                     fuel_station,

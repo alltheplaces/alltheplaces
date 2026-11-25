@@ -13,7 +13,7 @@ class NorthernCaliforniaBreweriesSpider(scrapy.Spider):
     start_urls = ("http://projects.sfchronicle.com/2017/brewery-map/",)
 
     def parse(self, response):
-        beer_data = response.xpath("//*[text()[contains(.,'beerData')]]").extract_first()
+        beer_data = response.xpath("//*[text()[contains(.,'beerData')]]").get()
         matches = re.search(r"var beerData = (\[(.*)\])", beer_data)
         json_data = matches.group(0).replace("var beerData = ", "")
         brewery_list = json.loads(json_data)

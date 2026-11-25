@@ -4,6 +4,7 @@ from urllib.parse import parse_qs, urlsplit
 import scrapy
 
 from locations.categories import Categories, apply_category
+from locations.google_url import extract_google_position
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
@@ -103,10 +104,16 @@ class DonQuijoteJPSpider(scrapy.Spider):
             country="JP",
             website=detail_url,
         )
-        # No non-Google coordinate source exists for these stores; yield
-        # without lat/lon rather than deriving them from a Google Maps link.
         self.apply_jp_hours(item, hours_text, closed_text)
         apply_category(Categories.SHOP_VARIETY_STORE, item)
+        yield scrapy.Request(
+            f"https://www.donki.com/store/map.php?shop_id={shop_id}",
+            callback=self.parse_jp_map,
+            cb_kwargs={"item": item},
+        )
+
+    def parse_jp_map(self, response, item):
+        extract_google_position(item, response)
         yield item
 
     @staticmethod

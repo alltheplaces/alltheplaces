@@ -43,7 +43,7 @@ class WendysSpider(SitemapSpider, StructuredDataSpider):
 
     @staticmethod
     def clean_hours(hours_div) -> OpeningHours:
-        days = hours_div.xpath(".//@data-days").extract_first()
+        days = hours_div.xpath(".//@data-days").get()
         days = json.loads(days)
 
         oh = OpeningHours()

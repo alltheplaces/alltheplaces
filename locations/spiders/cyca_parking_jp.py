@@ -27,6 +27,7 @@ class CycaParkingJPSpider(SitemapSpider):
     allowed_domains = ["charinavi72.jp"]
     sitemap_urls = ["https://www.charinavi72.jp/sitemap.xml"]
     sitemap_rules = [(r"/system/Parkings/detail/\d+$", "parse")]
+    requires_proxy = True
 
     def parse(self, response: Response):
         call = MAPSINITIALIZE_CALL.search(response.text)

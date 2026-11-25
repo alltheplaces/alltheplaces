@@ -13,6 +13,7 @@ class CuraleafUSSpider(scrapy.Spider):
     item_attributes = {"brand": "Curaleaf", "brand_wikidata": "Q85754829"}
     allowed_domains = ["curaleaf.com"]
     start_urls = ["https://curaleaf.com/api/dispensaries?limit=100&page=1"]
+    custom_settings = {"ROBOTSTXT_OBEY": False}
 
     def parse(self, response: Response, **kwargs) -> Iterable:
         data = response.json()

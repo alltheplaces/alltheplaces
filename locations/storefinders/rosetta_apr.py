@@ -152,6 +152,13 @@ class RosettaAPRSpider(Spider):
                 if self.key and self.iv:
                     break
         if not self.key or not self.iv:
+            # Newer portals keep the key and IV as plain string literals next to importAESKey().
+            js_blob = response.xpath('//script[contains(text(), "importAESKey")]/text()').get() or ""
+            keys = set(re.findall(r"'([0-9a-f]{64})'", js_blob))
+            ivs = set(re.findall(r"'([0-9a-f]{32})'", js_blob))
+            if len(keys) == 1 and len(ivs) == 1:
+                self.key, self.iv = keys.pop(), ivs.pop()
+        if not self.key or not self.iv:
             raise RuntimeError(
                 "Could not automatically locate required AES256-CBC key and IV values for decrypting data files."
             )
@@ -273,7 +280,7 @@ class RosettaAPRSpider(Spider):
         match file_type:
             case "csv":
                 data_file_str = data_file_bytes.decode("utf-8")
-                sniffed_dialect = csv.Sniffer().sniff(data_file_str[:1024])
+                sniffed_dialect = csv.Sniffer().sniff(data_file_str.split("\n")[0])
                 reader = csv.DictReader(data_file_str.splitlines(), fieldnames=column_headings, dialect=sniffed_dialect)
                 for row in reader:
                     features.append(row)
