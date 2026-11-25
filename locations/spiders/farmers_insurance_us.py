@@ -27,6 +27,11 @@ class FarmersInsuranceUSSpider(SitemapSpider):
             return
         data = json.loads(match.group(0))
         item = DictParser.parse(data)
+        # The name is "<agent> - <street address>", and the address is often
+        # shorter than streetAddress or a different one, so cut it off by shape.
+        # Wisconsin grid addresses start with a letter, like "N64w24678 Main St".
+        if name := item.get("name"):
+            item["name"] = re.sub(r"\s+-\s+[NSEW]?\d.*$", "", name, flags=re.IGNORECASE)
         item["ref"] = item["website"] = response.url
         try:
             oh = OpeningHours()
