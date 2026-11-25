@@ -4,6 +4,7 @@ import scrapy
 from scrapy.http import JsonRequest, Response
 from scrapy.spiders import Spider
 
+from locations.categories import Categories, apply_category
 from locations.google_url import extract_google_position
 from locations.items import Feature
 
@@ -32,6 +33,7 @@ class CancerResearchUkGBSpider(Spider):
             item["website"] = location["url"]["raw"]
             item["ref"] = location["id"]["raw"]
 
+            apply_category(Categories.SHOP_CHARITY, item)
             yield scrapy.Request(
                 url=item["website"],
                 callback=self.parse_lat_lon,
