@@ -5,7 +5,7 @@ from locations.json_blob_spider import JSONBlobSpider
 
 class ChipotleMiddleEastSpider(JSONBlobSpider):
     name = "chipotle_middle_east"
-    item_attributes = { "brand": "Chipotle", "brand_wikidata": "Q465751" }
+    item_attributes = {"brand": "Chipotle", "brand_wikidata": "Q465751"}
     start_urls = ["https://www.chipotleme.com/en/storefinderdata.json"]
     locations_key = "data"
     custom_settings = {"ROBOTSTXT_OBEY": False}
