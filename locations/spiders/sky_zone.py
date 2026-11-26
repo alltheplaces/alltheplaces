@@ -13,6 +13,7 @@ class SkyZoneSpider(WPStoreLocatorSpider):
     start_urls = [
         "https://skyzone.com/wp-admin/admin-ajax.php?action=store_search&autoload=1&lat=43.6541625&lng=-70.2802368"
     ]
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
