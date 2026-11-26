@@ -17,6 +17,6 @@ class OspreyGBSpider(Spider):
     def parse(self, response: Response, **kwargs: Any) -> Any:
         for location in response.json():
             item = DictParser.parse(location)
-            item["street_address"] = item.pop("addr_fukk")
+            item["street_address"] = item.pop("addr_full")
             apply_category(Categories.CHARGING_STATION, item)
             yield item
