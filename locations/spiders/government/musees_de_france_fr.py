@@ -68,7 +68,15 @@ class MuseesDeFranceFRSpider(CSVFeedSpider):
     }
 
     def parse_row(self, response: Response, row: dict[str, str]) -> Feature:
-        item = Feature(ref=row["Identifiant"], name=row["Nom_officiel"], postcode=row["Code_postal"], city=row["Ville"])
+        name = row["Nom_officiel"]
+        item = Feature(
+            ref=row["Identifiant"],
+            # a capital letter is missing at the start of the name
+            name=name[:1].upper() + name[1:],
+            postcode=row["Code_postal"],
+            city=row["Ville"],
+        )
+        item["extras"]["ref:FR:museofile"] = row["Identifiant"]
         if row["Adresse"]:
             item["street_address"] = row["Adresse"]
         if row["Coordonnees"]:
