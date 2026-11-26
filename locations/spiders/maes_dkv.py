@@ -1,3 +1,5 @@
+import re
+from copy import deepcopy
 from typing import Iterable
 from urllib.parse import urlencode
 
@@ -50,6 +52,23 @@ from locations.spiders.teboil_ru import TeboilRUSpider
 from locations.spiders.texaco_co import TEXACO_SHARED_ATTRIBUTES
 from locations.spiders.total_energies import TotalEnergiesSpider
 from locations.spiders.yx import PREEM, UNOX, YX
+
+# Words that DKV adds around the fuel brand to make up a station name, such as
+# "AVIA Station", "Station REPSOL" or "HOYER Dieselautomat".
+GENERIC_NAME_WORDS = {
+    "automat",
+    "automatenstation",
+    "di",
+    "diesel",
+    "dieselautomat",
+    "servizio",
+    "service",
+    "station",
+    "stazione",
+    "tankautomat",
+    "truck",
+    "truckstation",
+}
 
 
 def remove_key(d, key):
@@ -424,6 +443,7 @@ class MaesDkvSpider(scrapy.Spider):
 
             self.populate_basic_fields(item, station)
             self.apply_brand_info(item, station.get("petrol_label", ""))
+            self.clean_name(item, station.get("petrol_label") or "")
             apply_category(Categories.FUEL_STATION, item)
             self.apply_facilities(item, station)
 
@@ -456,10 +476,21 @@ class MaesDkvSpider(scrapy.Spider):
         if brand_info:
             # Skip if brand name is empty (generic/unbranded stations)
             if brand_info.get("brand"):
-                item.update(brand_info)
+                # Some mappings share an "extras" dict (Categories.FUEL_STATION.value),
+                # so copy it before tags are added to this item.
+                item.update(deepcopy(brand_info))
         else:
             # Log unmapped brand for analysis
             self.crawler.stats.inc_value(f"atp/{self.name}/unmapped_brand/{title}")
+
+    def clean_name(self, item: Feature, label: str):
+        """Replace names made of the fuel label and a generic word by the brand."""
+        name = item.get("name") or ""
+        if label:
+            name = re.sub(re.escape(label), " ", name, flags=re.IGNORECASE)
+        words = re.findall(r"\w+", name.lower())
+        if all(word in GENERIC_NAME_WORDS for word in words):
+            item["name"] = item.get("brand")
 
     def apply_facilities(self, item: Feature, station: dict):
         # DKV API uses car_washing_facility and shop_refreshments
