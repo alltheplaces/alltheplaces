@@ -17,7 +17,8 @@ class MarkgrafenGetraenkemarktDESpider(WPStoreLocatorSpider):
     days = DAYS_DE
 
     def post_process_item(self, item: Feature, response: Response, feature: dict) -> Iterable[Feature]:
-        item["email"] = item["website"] = None
+        item["email"] = None
+        item["website"] = "https://www.markgrafen.com/portfolio-items{}".format(item["website"])
         item["branch"] = item.pop("name")
         if item["phone"]:
             item["phone"] = item["phone"].replace("/", "")
