@@ -42,6 +42,9 @@ class VolksbankRaiffeisenbankDESpider(Spider):
             item["opening_hours"] = self.parse_hours(bank["opening_hours"])
             item["extras"]["services"] = bank["services"]
             item["operator"] = bank["institute"]["name"]
+            if item["operator"].startswith("Sparda-Bank"):
+                item["brand"] = "Sparda-Bank"
+                item["brand_wikidata"] = "Q2307136"
             if response.meta["category"] == "atm":
                 apply_category(Categories.ATM, item)
             else:
