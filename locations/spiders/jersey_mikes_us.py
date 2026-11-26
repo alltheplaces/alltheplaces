@@ -2,7 +2,6 @@ from typing import Any, AsyncIterator, Iterator
 
 from scrapy import Request
 from scrapy.http import JsonRequest, Response
-from scrapy.spiders import Spider
 from twisted.python.failure import Failure
 
 from locations.categories import Categories, apply_category
@@ -10,14 +9,16 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class JerseyMikesUSSpider(Spider):
+class JerseyMikesUSSpider(PlaywrightSpider):
     name = "jersey_mikes_us"
     item_attributes = {"brand": "Jersey Mike's Subs", "brand_wikidata": "Q6184897"}
     start_urls = ["https://bapi.prd.jerseymikes.com/api/v0/stores/subdivision"]
-    custom_settings = {"ROBOTSTXT_OBEY": False, "AUTOTHROTTLE_ENABLED": True}
+    custom_settings = DEFAULT_PLAYWRIGHT_SETTINGS | {"ROBOTSTXT_OBEY": False}
 
     async def start(self) -> AsyncIterator[Request]:
         yield Request(
