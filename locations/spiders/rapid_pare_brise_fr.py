@@ -13,7 +13,7 @@ class RapidPareBriseFRSpider(SitemapSpider, StructuredDataSpider):
     item_attributes = {"brand": "Rapid Pare-Brise", "brand_wikidata": "Q112064766"}
     sitemap_urls = ["https://www.rapidparebrise.fr/sitemap.xml"]
     sitemap_rules = [(r"^https://www\.rapidparebrise\.fr/.*-\d+$", "parse_sd")]
-    wanted_types = ["LocalBusiness"]
+    wanted_types = ["AutoRepair"]
     drop_attributes = {"image"}
 
     def post_process_item(self, item: Feature, response: TextResponse, ld_data: dict, **kwargs) -> Iterable[Feature]:
