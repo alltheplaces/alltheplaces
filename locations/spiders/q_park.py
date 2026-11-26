@@ -32,6 +32,7 @@ DEALS_KEYWORDS = [
 
 class QParkSpider(Spider):
     name = "q_park"
+    item_attributes = {"operator": "Q-Park", "operator_wikidata": "Q1127798"}
     custom_settings = {"ROBOTSTXT_OBEY": False, "USER_AGENT": BROWSER_DEFAULT}
 
     async def start(self) -> AsyncIterator[Request]:
@@ -119,7 +120,5 @@ class QParkSpider(Spider):
             self.crawler.stats.inc_value("q_park/failed_to_get_capacity")
 
         apply_category(Categories.PARKING, item)
-        item["operator"] = "Q-Park"
-        item["operator_wikidata"] = "Q1127798"
 
         yield item
