@@ -5,25 +5,40 @@ from scrapy.http import JsonRequest, Response
 
 from locations.dict_parser import DictParser
 
+POINT_LIMIT = 10000
+
 
 class AllegroOneBoxPLSpider(Spider):
     name = "allegro_one_box_pl"
     item_attributes = {"brand": "Allegro One Box", "brand_wikidata": "Q110738715"}
     custom_settings = {"ROBOTSTXT_OBEY": False}
 
-    async def start(self) -> AsyncIterator[Request]:
-        yield Request(
-            method="GET",
-            url="https://edge.allegro.pl/general-deliveries?nwLat=56.04770689192265&nwLon=2.5567803015399404&seLat=48.224919937057095&seLon=38.32826467653994&brandKeys=ALLEGRO_APM&deliveryMethods=0b257488-c85d-4507-b967-9b45ffbfa2e8&deliveryMethods=0aafb43c-e66a-46ec-9cc4-29bb39ebb483&sellerId=95826291&clusterThreshold=900000000",
+    def make_box_request(self, nw_lat: float, nw_lon: float, se_lat: float, se_lon: float) -> Request:
+        return Request(
+            url=f"https://edge.allegro.pl/general-deliveries?nwLat={nw_lat}&nwLon={nw_lon}&seLat={se_lat}&seLon={se_lon}&brandKeys=ALLEGRO_APM&deliveryMethods=0b257488-c85d-4507-b967-9b45ffbfa2e8&deliveryMethods=0aafb43c-e66a-46ec-9cc4-29bb39ebb483&sellerId=95826291&clusterThreshold=900000000",
             headers={"Accept": "application/vnd.allegro.public.v3+json"},
+            cb_kwargs={"box": (nw_lat, nw_lon, se_lat, se_lon)},
         )
 
-    def parse(self, response: Response, **kwargs):
-        data = response.json()
+    async def start(self) -> AsyncIterator[Request]:
+        yield self.make_box_request(56.04770689192265, 2.5567803015399404, 48.224919937057095, 38.32826467653994)
 
-        for box in data["points"]:
+    def parse(self, response: Response, box: tuple[float, float, float, float]):
+        points = response.json()["points"]
+
+        if len(points) >= POINT_LIMIT:
+            nw_lat, nw_lon, se_lat, se_lon = box
+            mid_lat = (nw_lat + se_lat) / 2
+            mid_lon = (nw_lon + se_lon) / 2
+            yield self.make_box_request(nw_lat, nw_lon, mid_lat, mid_lon)
+            yield self.make_box_request(nw_lat, mid_lon, mid_lat, se_lon)
+            yield self.make_box_request(mid_lat, nw_lon, se_lat, mid_lon)
+            yield self.make_box_request(mid_lat, mid_lon, se_lat, se_lon)
+            return
+
+        for box_point in points:
             yield JsonRequest(
-                url=f"https://edge.allegro.pl/general-deliveries/{box['id']}",
+                url=f"https://edge.allegro.pl/general-deliveries/{box_point['id']}",
                 headers={"Accept": "application/vnd.allegro.public.v6+json"},
                 callback=self.parse2,
             )
