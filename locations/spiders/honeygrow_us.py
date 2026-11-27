@@ -10,14 +10,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# Honeygrow uses a BentoBox store locator, which passes every location to a
-# storeLocatorConfig() call on the locator page as a JavaScript object literal.
-#
-# The hours in that object are only a static fallback. The site hydrates the
-# real hours from cdn.honeygrow.com/hours.json, keyed by the store number
-# each location's hours blob carries in its data-hg-store attribute, so the
-# hours are taken from that file instead.
-
 
 class HoneygrowUSSpider(Spider):
     name = "honeygrow_us"
@@ -38,16 +30,12 @@ class HoneygrowUSSpider(Spider):
 
         for location in locations:
             item = DictParser.parse(location)
+            item["branch"] = item.pop("name")
             item["ref"] = location["slug"]
-            item["branch"] = location["name"]
-            item["name"] = None
-            # DictParser also picks up the preformatted "address" string and
-            # the street on their own; street_address alone is enough.
-            item.pop("addr_full", None)
-            item["street"] = None
-            item["street_address"] = location["street"]
+            item["street_address"] = item.pop("street")
             item["phone"] = location["phone_number"]
             item["website"] = "https://www.honeygrow.com" + location["url"]
+            item["extras"]["ref:google:place_id"] = location["google_place_id"]
 
             item["opening_hours"] = self.parse_opening_hours(location, hours_by_store)
 
