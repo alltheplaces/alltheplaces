@@ -9,7 +9,7 @@ from locations.json_blob_spider import JSONBlobSpider
 from locations.pipelines.address_clean_up import merge_address_lines
 
 
-class NYXFRSpider(JSONBlobSpider):
+class NyxFRSpider(JSONBlobSpider):
     name = "nyx_fr"
     start_urls = [
         "https://www.nyxcosmetics.fr/on/demandware.store/"
