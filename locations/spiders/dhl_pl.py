@@ -68,11 +68,15 @@ class DhlPLSpider(Spider):
                 )
             elif brand_cat := PARTNERS.get(point["P_TYPE"]):
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = "DHL"
+                item["extras"]["post_office:brand:wikidata"] = "Q489815"
                 item.update(brand_cat[0])
                 apply_category(brand_cat[1], item)
                 yield item
             else:
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = "DHL"
+                item["extras"]["post_office:brand:wikidata"] = "Q489815"
                 apply_category(Categories.GENERIC_POI, item)
                 self.logger.error("Unexpected type: {}".format(point["P_TYPE"]))
                 yield item
