@@ -42,12 +42,6 @@ class LittleFreeLibrarySpider(Spider):
                 # "phone": library.get("Primary_Steward_s_Phone__c"),
                 # "email": library.get("Primary_Steward_s_Email__c"),
             }
-            if library.get("Library_Name__c"):
-                properties["name"] = library.get("Library_Name__c")
-            elif library.get("List_As_Name__c"):
-                properties["name"] = library.get("List_As_Name__c")
-            else:
-                properties["name"] = library.get("Name")
             if images := library.get("image_urls"):
                 properties["image"] = images[0]
 
