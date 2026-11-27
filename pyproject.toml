@@ -69,6 +69,7 @@ dev = [
     "pre-commit",
     "pylint",
     "pytest",
+    "scrapy-lint>=0.1.1",
     "ty",
 ]
 
@@ -77,3 +78,62 @@ incompatible-method-override = "ignore"
 # Scrapy declares `parse: CallbackT`, so every `def parse` on a Spider subclass trips these
 incompatible-attribute-override = "ignore"
 incompatible-mutable-override = "ignore"
+
+[tool.scrapy-lint]
+known-settings = [
+    "STATS_FILTER_LOCATED_IN_FAILED_MIN",
+    "LOGSTATS_FILE",
+]
+
+# This list is checked by ci/check_scrapy_lint_exemptions.py which will some day be obsolete...
+[tool.scrapy-lint.per-file-ignores]
+"locations/__init__.py" = ["SCP27"]
+"locations/commands/genspider.py" = ["SCP40"]
+"locations/exporters/geojson.py" = ["SCP32"]
+"locations/extensions/log_stats.py" = ["SCP40"]
+"locations/settings.py" = ["SCP10", "SCP17", "SCP27", "SCP34", "SCP37"]
+"locations/spiders/ace_hardware_us.py" = ["SCP46"]
+"locations/spiders/banque_michel_inchauspe_fr.py" = ["SCP27"]
+"locations/spiders/barburrito_ca.py" = ["SCP27"]
+"locations/spiders/bobs_discount_furniture_us.py" = ["SCP01"]
+"locations/spiders/caroll.py" = ["SCP46"]
+"locations/spiders/dpd_de.py" = ["SCP06"]
+"locations/spiders/extreme_pita_ca.py" = ["SCP03"]
+"locations/spiders/eyes_and_more.py" = ["SCP03"]
+"locations/spiders/feu_vert_fr.py" = ["SCP46"]
+"locations/spiders/feuillette_fr.py" = ["SCP46"]
+"locations/spiders/greyhound.py" = ["SCP03"]
+"locations/spiders/hyatt.py" = ["SCP46"]
+"locations/spiders/infrastructure/canton_basel_stadt_trees_ch.py" = ["SCP01"]
+"locations/spiders/infrastructure/fdsn_seismic_stations.py" = ["SCP04"]
+"locations/spiders/infrastructure/gulf_gb.py" = ["SCP27"]
+"locations/spiders/intermarche.py" = ["SCP46"]
+"locations/spiders/just_watches_in.py" = ["SCP03"]
+"locations/spiders/kamps_de.py" = ["SCP06"]
+"locations/spiders/king_jouet.py" = ["SCP46"]
+"locations/spiders/kookai_fr.py" = ["SCP05"]
+"locations/spiders/kutchenhaus_gb.py" = ["SCP06"]
+"locations/spiders/luminor_lt.py" = ["SCP27", "SCP40"]
+"locations/spiders/luminor_lv.py" = ["SCP27", "SCP40"]
+"locations/spiders/lunch_garden_be.py" = ["SCP03"]
+"locations/spiders/medstar_us.py" = ["SCP06"]
+"locations/spiders/naptan_gb.py" = ["SCP27"]
+"locations/spiders/norma_de.py" = ["SCP06"]
+"locations/spiders/omv.py" = ["SCP45"]
+"locations/spiders/opt_nc.py" = ["SCP27"]
+"locations/spiders/price_chopper_kc_us.py" = ["SCP03"]
+"locations/spiders/sephora_europe.py" = ["SCP46"]
+"locations/spiders/ugc_fr.py" = ["SCP03"]
+"locations/spiders/ups_freight_service_centers.py" = ["SCP06"]
+"locations/spiders/vkusvill_ru.py" = ["SCP03"]
+"locations/spiders/vlh_de.py" = ["SCP06"]
+"locations/spiders/vodacom_cd.py" = ["SCP27"]
+"locations/spiders/volkswagen.py" = ["SCP45"]
+"locations/spiders/walmart_us.py" = ["SCP46"]
+"locations/structured_data_spider.py" = ["SCP03"]
+
+# These are the exemptions to the exemptions; the spider BREAKS if "fixed" - must be listed above as well
+# (The assigned value doesn't matter.)
+[tool.scrapy-lint-exemptions]
+"locations/spiders/infrastructure/canton_basel_stadt_trees_ch.py" = {}
+"locations/spiders/bobs_discount_furniture_us.py" = true
