@@ -10,10 +10,11 @@ from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
+POSTEN = {"brand": "Posten", "brand_wikidata": "Q1815701"}
+
 
 class PostenNOSpider(Spider):
     name = "posten_no"
-    item_attributes = {"brand": "Posten", "brand_wikidata": "Q1815701"}
     # Red letter boxes are only included when asked for.
     start_urls = [
         "https://www.posten.no/en/map/_/service/no.posten.map/enonicUnits?country=NO&includeRedMailBoxes=true"
@@ -48,24 +49,31 @@ class PostenNOSpider(Spider):
                 break
 
             if attributes["enhetstype"] in (1, 21, 32):
+                item.update(POSTEN)
                 apply_category(Categories.POST_OFFICE, item)
                 item["extras"]["post_office"] = "bureau"
             elif attributes["enhetstype"] == 4:
                 apply_category(Categories.GENERIC_POI, item)
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = POSTEN["brand"]
+                item["extras"]["post_office:brand:wikidata"] = POSTEN["brand_wikidata"]
             elif attributes["enhetstype"] == 19:
                 apply_category(Categories.GENERIC_POI, item)
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = POSTEN["brand"]
+                item["extras"]["post_office:brand:wikidata"] = POSTEN["brand_wikidata"]
                 apply_yes_no("post_office:parcel_pickup", item, True)
             elif attributes["enhetstype"] == 37:
                 apply_category(Categories.PARCEL_LOCKER, item)
             elif attributes["enhetstype"] == 10:
+                item.update(POSTEN)
                 apply_category(Categories.POST_BOX, item)
                 if collection_times := self.parse_collection_times(attributes.get("deadlines") or []):
                     item["extras"]["collection_times"] = collection_times
             else:
                 item["extras"]["enhetstype"] = str(attributes["enhetstype"])
                 self.logger.error("Unexpected type: {}".format(attributes["enhetstype"]))
+
             yield item
 
     @staticmethod
