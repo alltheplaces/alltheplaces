@@ -2,6 +2,7 @@ import re
 
 from scrapy.spiders import SitemapSpider
 
+from locations.categories import Categories, apply_category
 from locations.hours import DAYS_JP, DAYS_WEEKDAY, OpeningHours, sanitise_day
 from locations.items import Feature
 
@@ -13,12 +14,15 @@ class MiraiyaShotenJPSpider(SitemapSpider):
 
     def parse(self, response):
         name = response.css("h4.midashi span::text").get()
-        # The operator also runs a few shops under other names (アシーネ and others).
-        if not name.startswith("未来屋書店"):
+        item = Feature()
+        # The operator also runs a few shops under other names (ミライア and others).
+        if name.startswith("アシーネ"):
+            item["brand"], item["brand_wikidata"] = "アシーネ", "Q11283275"
+            apply_category(Categories.SHOP_BOOKS, item)
+        elif not name.startswith("未来屋書店"):
             return
         info = response.css("#shop_detail_info td.first")
         postcode, address = info[0].css("::text").getall()[:2]
-        item = Feature()
         item["ref"] = item["website"] = response.url
         item["name"] = name
         item["postcode"] = postcode.strip().removeprefix("〒")
