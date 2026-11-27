@@ -47,6 +47,7 @@ class Categories(Enum):
     RAILWAY_SUBWAY_ENTRANCE = {"railway": "subway_entrance"}
 
     AMUSEMENT_ARCADE = {"leisure": "amusement_arcade"}
+    AMUSEMENT_ARCADE_LASER_TAG = {"leisure": "amusement_arcade", "sport": "laser_tag"}
     BOWLING = {"leisure": "bowling_alley"}
     GYM = {"leisure": "fitness_centre"}
     SAUNA = {"leisure": "sauna"}
