@@ -12,10 +12,11 @@ from locations.hours import OpeningHours, sanitise_day
 from locations.pipelines.address_clean_up import merge_address_lines
 from locations.settings import ITEM_PIPELINES
 
+FEDEX = {"brand": "FedEx", "brand_wikidata": "Q459477"}
+
 
 class FedexSpider(CrawlSpider):
     name = "fedex"
-    item_attributes = {"brand": "FedEx", "brand_wikidata": "Q459477"}
     CATEGORY_MAP = {
         "FedEx Air Freight Center": None,
         "FedEx Drop Box": Categories.POST_BOX,
@@ -90,7 +91,7 @@ class FedexSpider(CrawlSpider):
             item["name"] = item["name"].split("(Permit to Enter)")[0].strip().replace("Centre", "Center")
 
             if "FedEx Express" in item["name"]:  # e.g. FedEx Express FR, FedEx Express Poland
-                item["name"] = item["brand"] = "FedEx Express"
+                item["name"] = "FedEx Express"
 
             if location_page_name := location_info.get(
                 "c_pagesName"
@@ -98,11 +99,17 @@ class FedexSpider(CrawlSpider):
                 if "FedEx at " in location_page_name:
                     item["located_in"] = location_page_name.split("FedEx at ")[1]
 
-            if category := self.CATEGORY_MAP.get(item["name"]):
-                apply_category(category, item)
-            elif item["name"] in ["FedEx OnSite", "FedEx Authorized ShipCenter"]:
+            if item["name"] in ["FedEx OnSite", "FedEx Authorized ShipCenter"]:
                 apply_category(Categories.GENERIC_POI, item)
                 item.set_tag("post_office", "post_partner")
+                item.set_tag("post_office:brand", FEDEX["brand"])
+                item.set_tag("post_office:brand:wikidata", FEDEX["brand_wikidata"])
+            else:
+                item.update(FEDEX)
+                if item["name"] == "FedEx Express":
+                    item["brand"] = "FedEx Express"
+                if category := self.CATEGORY_MAP.get(item["name"]):
+                    apply_category(category, item)
 
             item["opening_hours"] = OpeningHours()
             for rule in location_info.get("hours", {}).get("normalHours", []):
