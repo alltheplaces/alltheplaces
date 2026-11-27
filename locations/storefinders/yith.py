@@ -31,7 +31,7 @@ class YithSpider(JSONBlobSpider):
             raise ValueError("Specify one domain name in the allowed_domains list attribute.")
             return
         yield Request(
-            f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=yith_sl_get_results&context=frontend&filters[radius][]=500"
+            f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=yith_sl_get_results&context=frontend&filters[radius][]=500"  # ty: ignore[not-subscriptable]
         )
 
     def extract_address(self, item: Feature, feature: dict) -> None:
@@ -51,7 +51,9 @@ class YithSpider(JSONBlobSpider):
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item.pop("name")
-        item["website"] = f"https://{self.allowed_domains[0]}/store-locator/{feature['slug']}/"
+        item["website"] = (
+            f"https://{self.allowed_domains[0]}/store-locator/{feature['slug']}/"  # ty: ignore[not-subscriptable]
+        )
 
         self.extract_address(item, feature)
         self.extract_phone(item, feature)

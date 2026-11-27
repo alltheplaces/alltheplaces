@@ -118,7 +118,7 @@ class AmazonLockerSpider(JSONBlobSpider):
                 regions = city_locations(country, 6799)
             for region in regions:
                 yield Request(
-                    f"https://{self.allowed_domains[0]}/location_selector/fetch_locations?longitude={region['longitude']}&latitude={region['latitude']}&clientId=amazon_us_add_to_addressbook_mkt_mobile&countryCode={country}&sortType=DISTANCE"
+                    f"https://{self.allowed_domains[0]}/location_selector/fetch_locations?longitude={region['longitude']}&latitude={region['latitude']}&clientId=amazon_us_add_to_addressbook_mkt_mobile&countryCode={country}&sortType=DISTANCE"  # ty: ignore[not-subscriptable]
                 )
 
     def parse(self, response: TextResponse) -> Iterable[Feature | Request]:

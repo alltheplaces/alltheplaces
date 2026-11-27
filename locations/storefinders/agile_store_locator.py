@@ -33,7 +33,7 @@ class AgileStoreLocatorSpider(Spider):
     async def start(self) -> AsyncIterator[JsonRequest]:
         if len(self.start_urls) == 0 and len(self.allowed_domains) == 1:
             yield JsonRequest(
-                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1"
+                url=f"https://{self.allowed_domains[0]}/wp-admin/admin-ajax.php?action=asl_load_stores&load_all=1"  # ty: ignore[not-subscriptable]
             )
         elif len(self.start_urls) == 1:
             yield JsonRequest(url=self.start_urls[0])
