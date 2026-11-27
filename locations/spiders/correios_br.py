@@ -26,10 +26,11 @@ PARTNER_TYPES = {
     "CEL": "CEL",  # small counters in remote towns and resorts, listed apart from the "AC" agencies
 }
 
+CORREIOS = {"operator": "Empresa Brasileira de Correios e Telégrafos", "operator_wikidata": "Q3375004"}
+
 
 class CorreiosBRSpider(Spider):
     name = "correios_br"
-    item_attributes = {"operator": "Empresa Brasileira de Correios e Telégrafos", "operator_wikidata": "Q3375004"}
     allowed_domains = ["buscaagencia.correios.com.br"]
     base = "https://buscaagencia.correios.com.br/app/carrega/"
     custom_settings = {"DOWNLOAD_TIMEOUT": 120}
@@ -86,9 +87,11 @@ class CorreiosBRSpider(Spider):
 
             unit_type = next((t for t in ["AC", *PARTNER_TYPES] if name.startswith(t + " ")), None)
             if unit_type == "AC":
+                item.update(CORREIOS)
                 item["branch"] = name.removeprefix("AC ")
                 apply_category(Categories.POST_OFFICE, item)
             elif name.startswith("LOCKER "):
+                item.update(CORREIOS)
                 item["name"] = name
                 apply_category(Categories.PARCEL_LOCKER, item)
             else:
@@ -98,6 +101,8 @@ class CorreiosBRSpider(Spider):
                     self.logger.warning("Unexpected unit type: %s (%s)", name, code)
                 item["name"] = name
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = CORREIOS["operator"]
+                item["extras"]["post_office:brand:wikidata"] = CORREIOS["operator_wikidata"]
                 item["extras"]["post_office:type"] = PARTNER_TYPES.get(unit_type, name.split()[0])
                 apply_category(Categories.GENERIC_POI, item)
             yield item
