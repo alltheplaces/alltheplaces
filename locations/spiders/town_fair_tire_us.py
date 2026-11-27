@@ -19,6 +19,5 @@ class TownFairTireUSSpider(CrawlSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         item["ref"] = response.url.removeprefix("https://www.townfairtire.com/store/tires/").removesuffix("/")
-        item["branch"] = item["city"]
         apply_category(Categories.SHOP_TYRES, item)
         yield item
