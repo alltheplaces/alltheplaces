@@ -9,4 +9,7 @@ class OhioCatUSSpider(WPStoreLocatorSpider):
     allowed_domains = [
         "ohiocat.com",
     ]
+    start_urls = [
+        "https://www.ohiocat.com/wp-admin/admin-ajax.php?action=store_search&lat=39.9625112&lng=-83.0032218&autoload=1"
+    ]
     days = DAYS_EN
