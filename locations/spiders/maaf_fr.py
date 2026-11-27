@@ -16,6 +16,13 @@ class MaafFRSpider(SitemapSpider, StructuredDataSpider):
     # Sitemap also lists region/department pages; this keeps only individual agency pages.
     sitemap_rules = [(r"/fr/assurance-([\w-]+)$", "parse")]
     custom_settings = {
+        # Anti-bot 403s the default bot UA and a bare "Accept-Language: en"; a browser UA plus a
+        # realistic Accept-Language gets through without a proxy.
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:160.0) Gecko/20100101 Firefox/160.0",
+        "DEFAULT_REQUEST_HEADERS": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "fr,fr-FR;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
         # Anti-bot occasionally serves a decoy 404; a retry almost always succeeds.
         "RETRY_HTTP_CODES": [404],
         "RETRY_TIMES": 5,
@@ -23,18 +30,8 @@ class MaafFRSpider(SitemapSpider, StructuredDataSpider):
         "DOWNLOAD_DELAY": 3,
     }
     # Kept low on purpose: if the page markup changes, every page fails the same way and a high
-    # retry count only burns Zyte credits until the run times out.
+    # retry count only wastes time until the run finishes.
     incomplete_render_retries = 2
-
-    def _parse_sitemap(self, response):
-        # requires_proxy alone isn't enough; needs Zyte's browserHtml to get past the anti-bot.
-        for request in super()._parse_sitemap(response):
-            request.meta["zyte_api"] = {
-                "browserHtml": True,
-                "geolocation": "FR",
-                "javascript": True,
-            }
-            yield request
 
     def retry_incomplete_render(self, response: TextResponse, reason: str) -> Request | None:
         if response.request is None:
@@ -57,8 +54,7 @@ class MaafFRSpider(SitemapSpider, StructuredDataSpider):
         return retry
 
     def parse(self, response: TextResponse, **kwargs):
-        # Zyte sometimes returns the page before the JSON-LD has loaded; retry instead of
-        # losing the location.
+        # Page occasionally arrives before the JSON-LD is present; retry instead of losing it.
         yielded = False
         for result in self.parse_sd(response):
             yielded = True
