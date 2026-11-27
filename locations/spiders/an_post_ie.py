@@ -55,6 +55,8 @@ class AnPostIESpider(Spider):
             elif location["Type"].upper() == "POSTPOINT":
                 apply_category(Categories.GENERIC_POI, item)
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = self.AN_POST["brand"]
+                item["extras"]["post_office:brand:wikidata"] = self.AN_POST["brand_wikidata"]
             else:
                 item["extras"]["type"] = location["Type"]
                 self.logger.error("Unexpected type: {}".format(location["Type"]))
