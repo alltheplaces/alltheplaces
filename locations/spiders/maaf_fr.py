@@ -30,8 +30,18 @@ class MaafFRSpider(SitemapSpider, StructuredDataSpider):
         "DOWNLOAD_DELAY": 3,
     }
     # Kept low on purpose: if the page markup changes, every page fails the same way and a high
-    # retry count only wastes time until the run finishes.
+    # retry count only burns Zyte credits until the run times out.
     incomplete_render_retries = 2
+
+    def _parse_sitemap(self, response):
+        # requires_proxy alone isn't enough; needs Zyte's browserHtml to get past the anti-bot.
+        for request in super()._parse_sitemap(response):
+            request.meta["zyte_api"] = {
+                "browserHtml": True,
+                "geolocation": "FR",
+                "javascript": True,
+            }
+            yield request
 
     def retry_incomplete_render(self, response: TextResponse, reason: str) -> Request | None:
         if response.request is None:
@@ -54,7 +64,8 @@ class MaafFRSpider(SitemapSpider, StructuredDataSpider):
         return retry
 
     def parse(self, response: TextResponse, **kwargs):
-        # Page occasionally arrives before the JSON-LD is present; retry instead of losing it.
+        # Zyte sometimes returns the page before the JSON-LD has loaded; retry instead of
+        # losing the location.
         yielded = False
         for result in self.parse_sd(response):
             yielded = True
