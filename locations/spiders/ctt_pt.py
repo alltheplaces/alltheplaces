@@ -11,6 +11,7 @@ from locations.items import Feature
 
 BASE_URL = "https://appserver2.ctt.pt/feapl_2/app/open/stationSearch/search.jspx"
 PAGE_SIZE = 5  # Fixed by the site; no page size parameter is honoured.
+CTT = {"operator": "CTT", "operator_wikidata": "Q1024518"}
 
 
 class CttPTSpider(Spider):
@@ -24,7 +25,6 @@ class CttPTSpider(Spider):
     """
 
     name = "ctt_pt"
-    item_attributes = {"operator": "CTT", "operator_wikidata": "Q1024518"}
     allowed_domains = ["appserver2.ctt.pt"]
     custom_settings = {"DOWNLOAD_TIMEOUT": 60}
     station_types = ["RECET", "EC,PC"]
@@ -107,6 +107,7 @@ class CttPTSpider(Spider):
             if collection_times:
                 item["extras"]["collection_times"] = "; ".join(collection_times)
 
+        item.update(CTT)
         apply_category(Categories.POST_BOX, item)
         yield item
 
@@ -129,6 +130,7 @@ class CttPTSpider(Spider):
         item["opening_hours"] = self.parse_hours(entry)
 
         if kind == "Loja CTT":
+            item.update(CTT)
             item["brand"], item["brand_wikidata"] = "CTT", "Q1024518"
             item["branch"] = name.removeprefix("Loja CTT").strip()
             item["name"] = "CTT"
@@ -137,6 +139,8 @@ class CttPTSpider(Spider):
             # Post office counters run by a partner business (shop, parish council, ...).
             item["name"] = name
             item["extras"]["post_office"] = "post_partner"
+            item["extras"]["post_office:brand"] = CTT["operator"]
+            item["extras"]["post_office:brand:wikidata"] = CTT["operator_wikidata"]
             apply_category(Categories.GENERIC_POI, item)
         else:
             self.crawler.stats.inc_value(f"atp/ctt_pt/unmapped_kind/{kind}")
