@@ -29,11 +29,6 @@ class ApplyNSICategoriesPipeline:
 
         brand_operator_qcode = item.get("brand_wikidata", item.get("operator_wikidata"))
         if not brand_operator_qcode:
-            # Failure to match due to missing brand_wikidata or
-            # operator_wikidata fields on the item. One or both of these
-            # fields must be supplied.
-            self.crawler.stats.inc_value("atp/nsi/match_failed")
-            self.crawler.stats.inc_value("atp/nsi/brand_or_operator_missing")
             return item
 
         if not get_category_tags(item) and item.get("brand_wikidata"):
@@ -198,7 +193,7 @@ class ApplyNSICategoriesPipeline:
         """
         if not nsi_entry.get("tags"):
             return False
-        if nsi_entry["tags"].get("operator:wikidata") and not nsi_entry["tags"].get("brand:wikidata"):
+        if nsi_entry["tags"].get("operator:wikidata"):
             return True
         return False
 
