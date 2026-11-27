@@ -16,6 +16,13 @@ class MaafFRSpider(SitemapSpider, StructuredDataSpider):
     # Sitemap also lists region/department pages; this keeps only individual agency pages.
     sitemap_rules = [(r"/fr/assurance-([\w-]+)$", "parse")]
     custom_settings = {
+        # Anti-bot 403s the default bot UA and a bare "Accept-Language: en"; a browser UA plus a
+        # realistic Accept-Language gets through without a proxy.
+        "USER_AGENT": "Mozilla/5.0 (X11; Linux x86_64; rv:160.0) Gecko/20100101 Firefox/160.0",
+        "DEFAULT_REQUEST_HEADERS": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "fr,fr-FR;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
         # Anti-bot occasionally serves a decoy 404; a retry almost always succeeds.
         "RETRY_HTTP_CODES": [404],
         "RETRY_TIMES": 5,
