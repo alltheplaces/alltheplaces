@@ -1,3 +1,4 @@
+import re
 from typing import Any, AsyncIterator
 
 from scrapy import Spider
@@ -43,6 +44,11 @@ class EasyPointTRSpider(Spider):
                 pass
 
             d = DictParser.parse(item)
+            d["name"] = re.sub(r"^\s*Easy Point( Esnaf)?\s*-\s*", "", d["name"], flags=re.IGNORECASE)
+            if d["name"].strip().lower() in ("test", "deneme"):
+                continue
+            if d["name"] == ".":
+                d["name"] = None
             d["opening_hours"] = parse_opening_hours(item["workingDays"])
             if d["phone"] or d["phone"] == "":
                 d["phone"] = item.get("userPhone")
@@ -51,8 +57,10 @@ class EasyPointTRSpider(Spider):
             d["state"] = item["city"]  # province/il in Turkish
             d["city"] = item["district"]  # district/ilçe in Turkish
             d["street_address"] = item["muhaberatAddress1"]
-            d["extras"]["addr:neighborhood"] = item["region"]  # mahalle in Turkish
-            d["extras"]["addr:desc"] = item["pointAddressDefinition"]
+            if item["region"] != "0":
+                d["extras"]["addr:neighborhood"] = item["region"]  # mahalle in Turkish
+            if item["pointAddressDefinition"] != "abc":
+                d["extras"]["addr:desc"] = item["pointAddressDefinition"]
 
             if bool(int(item["isBox"])):
                 d.update(EASY_POINT)
@@ -62,7 +70,8 @@ class EasyPointTRSpider(Spider):
             elif bool(int(item["isEsnaf"])):
                 apply_category(Categories.GENERIC_POI, d)
                 d["extras"]["post_office"] = "post_partner"
-                d["extras"]["post_office:service_provider"] = EASY_POINT["brand"]
+                d["extras"]["post_office:brand"] = EASY_POINT["brand"]
+                d["extras"]["post_office:brand:wikidata"] = EASY_POINT["brand_wikidata"]
                 d["extras"]["post_office:parcel_pickup"] = parse_parcel_from(item)
 
             elif bool(int(item["isMalKabul"])):
@@ -71,7 +80,8 @@ class EasyPointTRSpider(Spider):
             else:
                 apply_category(Categories.GENERIC_POI, d)
                 d["extras"]["post_office"] = "post_partner"
-                d["extras"]["post_office:service_provider"] = EASY_POINT["brand"]
+                d["extras"]["post_office:brand"] = EASY_POINT["brand"]
+                d["extras"]["post_office:brand:wikidata"] = EASY_POINT["brand_wikidata"]
                 d["extras"]["post_office:parcel_pickup"] = parse_parcel_from(item)
 
             d["extras"]["capacity:package"] = item["packageCapacity"]
