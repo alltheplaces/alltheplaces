@@ -8,6 +8,7 @@ from locations.categories import Categories, Extras, apply_category, apply_yes_n
 from locations.dict_parser import DictParser
 
 CZECH_POST = {"operator": "Česká pošta, s.p.", "operator_wikidata": "Q341090"}
+CZECH_POST_PARTNER = {"post_office:brand": "Česká pošta", "post_office:brand:wikidata": "Q341090"}
 PARTNER_BOX_BRANDS = {
     "z-?box": {"brand": "Z-Box", "brand_wikidata": "Q121537464"},
     "alzabox": {"brand": "AlzaBox", "brand_wikidata": "Q115254158"},
@@ -41,21 +42,23 @@ class CzechPostCZSpider(Spider):
                 apply_category(Categories.GENERIC_POI, item)
                 apply_yes_no("post_office=post_partner", item, True)
                 apply_yes_no(Extras.PARCEL_PICKUP, item, True)
+                item["extras"].update(CZECH_POST_PARTNER)
             elif location["type"] == "Depot":
                 item.update(CZECH_POST)
                 apply_category(Categories.POST_DEPOT, item)
             elif location["type"] == "Post office":
                 item.update(CZECH_POST)
                 apply_category(Categories.POST_OFFICE, item)
-            elif location["type"] == "Postal agency":  # 6 "vydejniMisto"
+            elif location["type"] in ("Postal agency", "Service point"):  # "vydejniMisto"
                 apply_category(Categories.GENERIC_POI, item)
                 apply_yes_no("post_office=post_partner", item, True)
-            elif location["type"] == "Service point":  # 43 "vydejniMisto"
-                apply_category(Categories.GENERIC_POI, item)
-                apply_yes_no("post_office=post_partner", item, True)
-            elif location["type"] == "Technical outlet":  # 252 "technickaProvozovna"
-                apply_category(Categories.GENERIC_POI, item)
-                apply_yes_no("post_office=post_partner", item, True)
+                item["extras"].update(CZECH_POST_PARTNER)
+            elif location["type"] == "Technical outlet":  # "technickaProvozovna"
+                # Česká pošta's own back offices, of which only the delivery offices and depots are mapped
+                if not re.search(r"dodejna|dist\. dod\.|^Depo |^provoz ", item["name"]):
+                    continue
+                item.update(CZECH_POST)
+                apply_category(Categories.POST_DEPOT, item)
             elif location["type"] == "post.type.external.partner-box":  # "balikovna_box"
                 apply_category(Categories.PARCEL_LOCKER, item)
                 apply_yes_no("post_office=post_partner", item, True)
