@@ -24,8 +24,7 @@ class BillMillerBarBQUSSpider(Spider):
         location = chompjs.parse_js_object(response.text.split('"locations":', 1)[1].split("};", 1)[0])[0]
 
         item = DictParser.parse(location)
-        item["ref"] = response.url.rstrip("/").rsplit("/", 1)[-1]
-        item["branch"] = location["store"].removeprefix("Bill Miller ")
+        item["ref"] = location["store"].removeprefix("Bill Miller #")
         item["name"] = None
         item["phone"] = response.css('a[href^="tel:"]::attr(href)').get()
         item["website"] = response.url
