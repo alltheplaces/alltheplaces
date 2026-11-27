@@ -49,18 +49,24 @@ class PostenNOSpider(Spider):
                 break
 
             if attributes["enhetstype"] in (1, 21, 32):
+                item.update(POSTEN)
                 apply_category(Categories.POST_OFFICE, item)
                 item["extras"]["post_office"] = "bureau"
             elif attributes["enhetstype"] == 4:
                 apply_category(Categories.GENERIC_POI, item)
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = POSTEN["brand"]
+                item["extras"]["post_office:brand:wikidata"] = POSTEN["brand_wikidata"]
             elif attributes["enhetstype"] == 19:
                 apply_category(Categories.GENERIC_POI, item)
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = POSTEN["brand"]
+                item["extras"]["post_office:brand:wikidata"] = POSTEN["brand_wikidata"]
                 apply_yes_no("post_office:parcel_pickup", item, True)
             elif attributes["enhetstype"] == 37:
                 apply_category(Categories.PARCEL_LOCKER, item)
             elif attributes["enhetstype"] == 10:
+                item.update(POSTEN)
                 apply_category(Categories.POST_BOX, item)
                 if collection_times := self.parse_collection_times(attributes.get("deadlines") or []):
                     item["extras"]["collection_times"] = collection_times
@@ -68,12 +74,6 @@ class PostenNOSpider(Spider):
                 item["extras"]["enhetstype"] = str(attributes["enhetstype"])
                 self.logger.error("Unexpected type: {}".format(attributes["enhetstype"]))
 
-            # Post partners are counters in someone else's shop, so Posten is only the postal brand.
-            if item["extras"].get("post_office") == "post_partner":
-                item["extras"]["post_office:brand"] = POSTEN["brand"]
-                item["extras"]["post_office:brand:wikidata"] = POSTEN["brand_wikidata"]
-            else:
-                item.update(POSTEN)
             yield item
 
     @staticmethod
