@@ -569,6 +569,16 @@ def test_country_filter_runs_independently_of_the_predicate():
     assert stat(spider, "responses_at_cap") == 1
 
 
+def test_target_store_number_is_dropped_from_the_branch():
+    stores = [make_store(i, ownership="LS") for i in range(3)]
+    stores[0]["store"]["name"] = "Target Gig Harbor 1205"
+    stores[1]["store"]["name"] = "Target Tacoma NORTH 341"
+    stores[2]["store"]["name"] = "Safeway 1205 Main St"
+    items, _, _ = run_parse(stores)
+    assert [item["branch"] for item in items] == ["Target Gig Harbor", "Target Tacoma NORTH", "Safeway 1205 Main St"]
+    assert [item["located_in"] for item in items] == ["Target", "Target", "Safeway"]
+
+
 # --------------------------------------------------------------------------
 # Instrumentation
 # --------------------------------------------------------------------------
