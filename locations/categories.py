@@ -785,6 +785,7 @@ class Extras(Enum):
     SANITARY_DUMP_STATION = "sanitary_dump_station"
     SCANNING = "service:scan"
     SELF_CHECKOUT = "self_checkout"
+    SELF_SERVICE = "self_service"
     SHOWERS = "shower"
     SMOKING = "smoking"
     SMOKING_AREA = "smoking=isolated"
