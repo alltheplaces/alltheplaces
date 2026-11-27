@@ -1,5 +1,7 @@
 from typing import Iterable
 
+from scrapy.http import TextResponse
+
 from locations.categories import (
     Access,
     Categories,
@@ -28,6 +30,34 @@ class BpSpider(GeoMeSpider):
         "ta_express": {"brand": "TA Express", "brand_wikidata": "Q7835892"},
         "thorntons": {"brand": "Thorntons", "brand_wikidata": "Q7796584"},
     }
+
+    _sites_seen: set = set()
+
+    def parse_locations(self, response: TextResponse) -> Iterable[Feature]:
+        # Some sites are listed twice, a few metres apart, with the same name and address.
+        # One entry carries the site details while the twin only lists accepted fuel cards.
+        # Keep one entry per site and merge the facilities and products of its twins into it.
+        sites = {}
+        for location in response.json()["locations"]:
+            if location.get("inactive") or not location.get("name") or not location.get("address"):
+                continue
+            key = (location["country_code"], location["name"], location["address"], location["postcode"])
+            sites.setdefault(key, []).append(location)
+        for key, twins in sites.items():
+            if key in self._sites_seen:
+                for location in twins:
+                    location["inactive"] = True
+                continue
+            self._sites_seen.add(key)
+            if len(twins) == 1:
+                continue
+            twins.sort(key=lambda location: (location.get("watchlist_id") is None, -len(location["facilities"])))
+            site = twins[0]
+            for twin in twins[1:]:
+                site["facilities"] = list(dict.fromkeys(site["facilities"] + twin["facilities"]))
+                site["products"] = list(dict.fromkeys(site["products"] + twin["products"]))
+                twin["inactive"] = True
+        yield from super().parse_locations(response)
 
     def parse_item(self, item: Feature, location: dict) -> Iterable[Feature]:
         if location.get("name", "").upper().startswith("ESSO"):
