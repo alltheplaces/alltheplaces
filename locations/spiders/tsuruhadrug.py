@@ -30,19 +30,31 @@ class TsuruhadrugSpider(YextAnswersSpider):
             if brand_key in item["name"]:
                 item.update(brands[brand_key])
 
-        item["branch"] = (
-            item.get("name")
-            .removeprefix("ツルハドラッグ")
-            .removeprefix("くすりの福太郎")
-            .removeprefix("杏林堂")
-            .removeprefix("ドラッグイレブン")
-            .removeprefix("ウォンツ")
-            .removeprefix("くすりのレデイ")
-            .removeprefix("B＆D調剤薬局")
-        )
+        name = item.pop("name")
+        branch = name
+        for prefix in [
+            "調剤薬局",
+            "薬局",
+            "ツルハドラッグ",
+            "ツルハ",
+            "くすりの福太郎",
+            "杏林堂",
+            "ドラッグイレブン",
+            "ウォンツ",
+            "ウェルネス",
+            "くすりのレデイ",
+            "レデイ",
+            "B＆D調剤薬局",
+            "調剤薬局",
+            "薬局",
+        ]:
+            branch = branch.removeprefix(prefix).strip()
+        item["branch"] = branch
 
-        item["name"] = None
-
-        apply_category(Categories.SHOP_CHEMIST, item)
+        if "調剤" in name or "薬局" in name:
+            apply_category(Categories.PHARMACY, item)
+            item["extras"]["dispensing"] = "yes"
+        else:
+            apply_category(Categories.SHOP_CHEMIST, item)
 
         yield item
