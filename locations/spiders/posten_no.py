@@ -10,10 +10,11 @@ from locations.categories import Categories, apply_category, apply_yes_no
 from locations.hours import DAYS, OpeningHours
 from locations.items import Feature
 
+POSTEN = {"brand": "Posten", "brand_wikidata": "Q1815701"}
+
 
 class PostenNOSpider(Spider):
     name = "posten_no"
-    item_attributes = {"brand": "Posten", "brand_wikidata": "Q1815701"}
     # Red letter boxes are only included when asked for.
     start_urls = [
         "https://www.posten.no/en/map/_/service/no.posten.map/enonicUnits?country=NO&includeRedMailBoxes=true"
@@ -66,6 +67,13 @@ class PostenNOSpider(Spider):
             else:
                 item["extras"]["enhetstype"] = str(attributes["enhetstype"])
                 self.logger.error("Unexpected type: {}".format(attributes["enhetstype"]))
+
+            # Post partners are counters in someone else's shop, so Posten is only the postal brand.
+            if item["extras"].get("post_office") == "post_partner":
+                item["extras"]["post_office:brand"] = POSTEN["brand"]
+                item["extras"]["post_office:brand:wikidata"] = POSTEN["brand_wikidata"]
+            else:
+                item.update(POSTEN)
             yield item
 
     @staticmethod
