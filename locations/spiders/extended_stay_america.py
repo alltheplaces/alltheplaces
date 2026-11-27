@@ -3,13 +3,14 @@ import re
 from typing import Any
 
 from scrapy.http import Response
-from scrapy.spiders import Spider
 
 from locations.dict_parser import DictParser
+from locations.playwright_spider import PlaywrightSpider
+from locations.settings import DEFAULT_PLAYWRIGHT_SETTINGS
 from locations.user_agents import BROWSER_DEFAULT
 
 
-class ExtendedStayAmericaSpider(Spider):
+class ExtendedStayAmericaSpider(PlaywrightSpider):
     name = "extended_stay_america"
     item_attributes = {
         "brand": "Extended Stay America",
@@ -17,7 +18,7 @@ class ExtendedStayAmericaSpider(Spider):
         "country": "US",
     }
     start_urls = ["https://www.extendedstayamerica.com/hotels"]
-    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT}
+    custom_settings = {"AUTOTHROTTLE_ENABLED": True, "USER_AGENT": BROWSER_DEFAULT} | DEFAULT_PLAYWRIGHT_SETTINGS
     requires_proxy = True
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
