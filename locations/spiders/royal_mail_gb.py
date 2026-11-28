@@ -18,6 +18,8 @@ POST_OFFICE = {"brand": "Post Office", "brand_wikidata": "Q1783168"}
 PARCELFORCE = {"operator": "Parcelforce Worldwide", "operator_wikidata": "Q15077740"}
 # Postboxes, parcel postboxes, parcel drop boxes and digital (scan to post) drop boxes
 POSTBOX_TYPES = {"RMG-PB", "RMG-PPB", "RMG-PDB", "RMG-DDB"}
+# Post Office "Drop + Collect" points are parcel counters inside other shops.
+DROP_AND_COLLECT = re.compile(r"drop \+ collect$", re.IGNORECASE)
 ROYAL_MAIL_PREMISES = re.compile(r"delivery (office|centre)|mail centre|customer service point", re.IGNORECASE)
 LOCKER_BRANDS = {
     "RMG-LOK": {"brand": "Royal Mail", "brand_wikidata": "Q638098"},
@@ -150,6 +152,11 @@ class RoyalMailGBSpider(Spider):
             item.update(LOCKER_BRANDS[location_type])
             item["extras"]["description"] = location["name"]
             apply_yes_no("indoor", item, "indoorLocker" in {facility["key"] for facility in location["facilities"]})
+        elif location_type == "POL-POL" and DROP_AND_COLLECT.search(location["name"]):
+            apply_category(Categories.GENERIC_POI, item)
+            item["extras"]["post_office"] = "post_partner"
+            item["extras"]["post_office:brand"] = POST_OFFICE["brand"]
+            item["extras"]["post_office:brand:wikidata"] = POST_OFFICE["brand_wikidata"]
         elif location_type == "POL-POL":
             apply_category(Categories.POST_OFFICE, item)
             item.update(POST_OFFICE)
