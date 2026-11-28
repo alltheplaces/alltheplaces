@@ -24,6 +24,7 @@ class NyxFRSpider(JSONBlobSpider):
     custom_settings = {
         "ROBOTSTXT_OBEY": False,
     }
+    requires_proxy = True
 
     def post_process_item(self, item: Feature, response: TextResponse, feature: dict) -> Iterable[Feature]:
         item["branch"] = item["branch"].removeprefix("NYX Professional Makeup ")
