@@ -15,11 +15,11 @@ POST_OFFICE_TYPES = {"GPO", "PO", "Kiosk", "PPL", "SC"}
 # Counters run by third parties: Pos Mini (franchised "mini post offices" operated by entrepreneurs) and authorised
 # agents (MyPospay ParcelHub, Collectco and other shops taking parcels and bill payments).
 PARTNER_TYPES = {"Mini", "Agent", None}
+POS_MALAYSIA = {"operator": "Pos Malaysia", "operator_wikidata": "Q6112623"}
 
 
 class PosMalaysiaMYSpider(Spider):
     name = "pos_malaysia_my"
-    item_attributes = {"operator": "Pos Malaysia", "operator_wikidata": "Q6112623"}
     allowed_domains = ["www-api.pos.com.my"]
     # The content API behind https://www.pos.com.my/pos-outlet-finder
     api = "https://www-api.pos.com.my/api/outlets?pagination[pageSize]=100&populate=*&pagination[page]="
@@ -57,11 +57,14 @@ class PosMalaysiaMYSpider(Spider):
             name = (attrs.get("outlet_name") or "").strip()
             if branch_type in POST_OFFICE_TYPES:
                 item["branch"] = name
+                item.update(POS_MALAYSIA)
                 apply_category(Categories.POST_OFFICE, item)
             else:
                 item["name"] = name
                 apply_category(Categories.GENERIC_POI, item)
                 item["extras"]["post_office"] = "post_partner"
+                item["extras"]["post_office:brand"] = "Pos Malaysia"
+                item["extras"]["post_office:brand:wikidata"] = "Q6112623"
             yield item
 
     @staticmethod
