@@ -20,6 +20,8 @@ class GeneraleOptiqueFRSpider(SitemapSpider, StructuredDataSpider):
 
     def post_process_item(self, item, response, ld_data, **kwargs):
         apply_category(Categories.SHOP_OPTICIAN, item)
+        # The linked data names the testing deployment as the page URL.
+        item["website"] = response.url
 
         data = response.xpath("//script[contains(@id, '__NEXT_DATA__')]/text()").get()
 
