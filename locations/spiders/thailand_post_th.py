@@ -77,7 +77,8 @@ class ThailandPostTHSpider(Spider):
             # "ร้านไปรษณีย์ไทย" (Thailand Post Shop): a Thailand Post-branded franchise run by a local business
             apply_category(Categories.GENERIC_POI, item)
             item["extras"]["post_office"] = "post_partner"
-            item["brand"], item["brand_wikidata"] = "ไปรษณีย์ไทย", "Q6676271"
+            item["extras"]["post_office:brand"] = "ไปรษณีย์ไทย"
+            item["extras"]["post_office:brand:wikidata"] = "Q6676271"
         else:
             item["operator"], item["operator_wikidata"] = "Thailand Post", "Q6676271"
             apply_category(Categories.POST_OFFICE, item)
